@@ -1,0 +1,26 @@
+name: CI Windows
+on: [push]
+
+jobs:
+  test:
+    name: CI Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Add conda directories to PATH
+      run: |
+        echo ::add-path::C:\Miniconda
+        echo ::add-path::C:\Miniconda\Scripts
+    - name: Print conda info
+      run: conda info -a
+    - name: Create conda environment
+      run: conda env create -f ./environment.yml
+    - name: Init bash
+      run: conda init powershell
+    - name: Run tests
+      run: |
+        conda activate weldx
+        pytest
