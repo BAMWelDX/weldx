@@ -22,7 +22,7 @@ install:
   - conda activate weldx
 
 script:
-  - pytest --cov-report term --cov=mypackage
+  - pytest --cov-report term --cov=weldx
 
 after_success:
   - codecov
