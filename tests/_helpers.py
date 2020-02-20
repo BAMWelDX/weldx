@@ -1,3 +1,5 @@
+"""Provides some utility functions for tests."""
+
 import weldx.transformations as tf
 import numpy as np
 
@@ -31,7 +33,7 @@ def rotated_coordinate_system(angle_x=np.pi / 3, angle_y=np.pi / 4,
 
 def are_all_columns_unique(matrix, decimals=3):
     """
-    Checks if all columns in a matrix are unique.
+    Check if all columns in a matrix are unique.
 
     :param matrix: Matrix
     :param decimals: Number of decimals that should be considered during
