@@ -6,7 +6,8 @@ test_patterns = [
 ]
 
 exclude_patterns = [
-  "docs/**"
+  "docs/**",
+  ".vulture_whitelist.py"
 ]
 
 [[analyzers]]
