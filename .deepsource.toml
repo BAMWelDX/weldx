@@ -1,0 +1,16 @@
+version = 1
+
+test_patterns = [
+  "tests/**",
+  "test_*.py"
+]
+
+exclude_patterns = [
+  "docs/**",
+  ".vulture_whitelist.py"
+]
+
+[[analyzers]]
+name = "python"
+enabled = true
+runtime_version = "3.x.x"

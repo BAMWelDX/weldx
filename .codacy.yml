@@ -1,0 +1,14 @@
+---
+engines:
+  bandit:
+    exclude_paths:
+      - tests/**
+
+  duplication:
+    enabled: true
+    exclude_paths:
+      - tests/**
+
+exclude_paths:
+  - 'docs/**'
+  - '.vulture_whitelist.py'

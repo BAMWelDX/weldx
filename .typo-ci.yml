@@ -1,0 +1,43 @@
+dictionaries:
+  - en
+  - en_GB
+
+excluded_files:
+  - ".*"
+  - "docs*"
+  - "environment.yml"
+  - "tools*"
+
+excluded_words:
+  - typoci
+  # python packages -----------------------------
+  - numpy
+  - scipy
+  - pytest
+  - matplotlib
+  # matplotlib ----------------------------------
+  - pyplot
+  - gca
+  - plt
+  # flake8 --------------------------------------
+  - noqa
+  # numpy ---------------------------------------
+  - linalg
+  - ndim
+  - dtype
+  - isclose
+  - ndarray
+  - hstack
+  - matmul
+  - arange
+  - det
+  - vstack
+  # jupyter notebooks ---------------------------
+  - jupyter
+  - nbformat
+  # iPython -------------------------------------
+  - ipynb
+  - ipywidgets
+  - ipython
+  # other ---------------------------------------
+  - linearization
