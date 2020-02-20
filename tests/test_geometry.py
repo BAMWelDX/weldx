@@ -183,7 +183,7 @@ def default_segment_rasterization_tests(segment, raster_width):
                             np.linalg.norm(data[:, 1] - data[:, 0]))
 
     # check that there are no duplicate points
-    assert helpers.are_all_points_unique(data)
+    assert helpers.are_all_columns_unique(data)
 
     # check that rasterization with too large raster width still works
     data_200 = segment.rasterize(200)
@@ -1086,7 +1086,7 @@ def test_shape_rasterization():
     data = shape.rasterize(raster_width)
 
     # no duplications
-    assert helpers.are_all_points_unique(data)
+    assert helpers.are_all_columns_unique(data)
 
     # check each data point
     num_data_points = data.shape[1]
@@ -1119,7 +1119,7 @@ def test_shape_rasterization():
     data = shape.rasterize(10)
 
     assert data.shape[1] == 4
-    assert helpers.are_all_points_unique(data)
+    assert helpers.are_all_columns_unique(data)
 
     # exceptions ------------------------------------------
     with pytest.raises(Exception):
@@ -1670,7 +1670,7 @@ def test_profile_rasterization():
     data = profile.rasterize(raster_width)
 
     # no duplications
-    assert helpers.are_all_points_unique(data)
+    assert helpers.are_all_columns_unique(data)
 
     # check raster data size
     expected_number_raster_points = int(round(3 / raster_width)) + 1
@@ -2022,7 +2022,7 @@ def test_trace_rasterization():
     data = trace.rasterize(0.1)
 
     # no duplications
-    assert helpers.are_all_points_unique(data)
+    assert helpers.are_all_columns_unique(data)
 
     raster_width_eff = trace.length / (data.shape[1] - 1)
     for i in range(data.shape[1]):
