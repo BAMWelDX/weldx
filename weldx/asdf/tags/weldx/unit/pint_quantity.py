@@ -14,6 +14,7 @@ from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 __all__ = ["PintQuantityType"]
 
+
 class PintQuantityType(WeldxAsdfType):
     """
     A simple implementation of serializing a pint quantity as asdf quantity.
@@ -34,6 +35,5 @@ class PintQuantityType(WeldxAsdfType):
     def from_tree(cls, tree, ctx):
         value = tagged_tree_to_custom_tree(tree["value"], ctx)
         unit = tagged_tree_to_custom_tree(tree["unit"], ctx)
-        quantity = Q_(value,unit)
+        quantity = Q_(value, unit)
         return quantity
-

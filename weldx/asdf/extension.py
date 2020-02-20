@@ -12,7 +12,6 @@ from asdf.util import filepath_to_url
 # could do this using __init__ files, except it causes pytest import errors in
 # the case that asdf is not installed.
 from .tags.weldx.unit.pint_quantity import *  # noqa: F401,F403
-from .tags.weldx.demo import *  # noqa: F401,F403
 
 from .types import _weldx_types, _weldx_asdf_types
 

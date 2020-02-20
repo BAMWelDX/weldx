@@ -16,7 +16,9 @@ def _asdf_dtype(py_type):
     return _DTYPE_DICT.loc[_DTYPE_DICT.py_type.isin([py_type])].asdf_type.iloc[0]
 
 
-_loader = jinja2.FileSystemLoader(searchpath=["./asdf/templates", "./weldx/asdf/templates"])
+_loader = jinja2.FileSystemLoader(
+    searchpath=["./asdf/templates", "./weldx/asdf/templates"]
+)
 _env = jinja2.Environment(loader=_loader)
 _env.globals.update(zip=zip)
 _env.globals.update(_asdf_dtype=_asdf_dtype)
@@ -78,9 +80,17 @@ def create_asdf_dataclass(
     property_order=None,
 ):
     """
-    Create default files for a simple python dataclass asdf implementation
-    """
+    Generates a ASDF schema file with corresponding python class for simple dataclasses.
 
+    :param asdf_name: full schema name including prefixes
+    :param asdf_version: schema version as string
+    :param class_name: name of the Python class to generate
+    :param properties: list of property names
+    :param property_types: list with Python dtypes for each property
+    :param required: list of parameters that are set to required
+    :param property_order: asdf schema property order
+    :return:
+    """
     asdf_file_path = Path(
         SCHEMA_PATH + f"/weldx.bam.de/weldx/{asdf_name}-{asdf_version}.yaml"
     ).resolve()
