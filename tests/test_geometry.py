@@ -26,7 +26,7 @@ def check_segments_identical(seg_a, seg_b):
     assert ut.matrix_is_close(seg_a.points, seg_b.points)
     if isinstance(seg_a, geo.ArcSegment):
         assert seg_a.arc_winding_ccw == seg_b.arc_winding_ccw
-        helpers.check_vectors_identical(seg_a.point_center, seg_b.point_center)
+        assert ut.vector_is_close(seg_a.point_center, seg_b.point_center)
 
 
 def check_shapes_identical(shp_a, shp_b):
@@ -166,8 +166,8 @@ def default_segment_rasterization_tests(segment, raster_width):
 
     # Check if first and last point of the data are identical to the segment
     # start and end
-    helpers.check_vectors_identical(data[:, 0], segment.point_start)
-    helpers.check_vectors_identical(data[:, -1], segment.point_end)
+    assert ut.vector_is_close(data[:, 0], segment.point_start)
+    assert ut.vector_is_close(data[:, -1], segment.point_end)
 
     for i in range(num_points - 1):
         point = data[:, i]
@@ -192,8 +192,8 @@ def default_segment_rasterization_tests(segment, raster_width):
     assert num_points_200 == 2
 
     # only 2 points must be segment start and end
-    helpers.check_vectors_identical(segment.point_start, data_200[:, 0])
-    helpers.check_vectors_identical(segment.point_end, data_200[:, 1])
+    assert ut.vector_is_close(segment.point_start, data_200[:, 0])
+    assert ut.vector_is_close(segment.point_end, data_200[:, 1])
 
     # exceptions ------------------------------------------
 
@@ -1069,7 +1069,7 @@ def test_shape_rasterization():
     Test rasterization function of the shape.
 
     The test uses three line segment of equal length, making it easy to
-    check the rasterized points. Every substep of the test is documented
+    check the rasterized points. Every step of the test is documented
     with comments.
 
     :return: ---

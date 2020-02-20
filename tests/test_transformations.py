@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 import random
 import math
-import tests._helpers as helper
 
 
 # helpers for tests -----------------------------------------------------------
@@ -64,7 +63,7 @@ def check_matrix_orthogonal(matrix):
     transposed = np.transpose(matrix)
 
     product = np.matmul(transposed, matrix)
-    helper.check_matrices_identical(product, np.identity(3))
+    assert ut.matrix_is_close(product, np.identity(3))
 
 
 def is_orientation_positive(cs_p):
@@ -507,18 +506,18 @@ def test_coordinate_system_addition_and_subtraction():
     # is associative
     cs_sum_0 = cs_2 + (cs_1 + cs_0)
     cs_sum_1 = (cs_2 + cs_1) + cs_0
-    helper.check_matrices_identical(cs_sum_0.basis, cs_sum_1.basis)
-    helper.check_vectors_identical(cs_sum_0.origin, cs_sum_1.origin)
+    assert ut.matrix_is_close(cs_sum_0.basis, cs_sum_1.basis)
+    assert ut.vector_is_close(cs_sum_0.origin, cs_sum_1.origin)
 
     expected_origin = np.array([-1, 9, 6])
     expected_orientation = np.array([[0, 0, 1], [0, 1, 0], [-1, 0, 0]])
 
-    helper.check_matrices_identical(cs_sum_0.basis, expected_orientation)
-    helper.check_vectors_identical(cs_sum_0.origin, expected_origin)
+    assert ut.matrix_is_close(cs_sum_0.basis, expected_orientation)
+    assert ut.vector_is_close(cs_sum_0.origin, expected_origin)
 
     # subtraction --------------------------------------------
 
     cs_diff_0 = cs_sum_0 - cs_0 - cs_1
 
-    helper.check_matrices_identical(cs_diff_0.basis, cs_2.basis)
-    helper.check_vectors_identical(cs_diff_0.origin, cs_2.origin)
+    assert ut.matrix_is_close(cs_diff_0.basis, cs_2.basis)
+    assert ut.vector_is_close(cs_diff_0.origin, cs_2.origin)
