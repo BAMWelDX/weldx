@@ -1866,11 +1866,11 @@ class CustomSegment():
         self.length = None
 
     @staticmethod
-    def local_coordinate_system(*args):
+    def local_coordinate_system(*_args):
         """
         Get the local coordinate system.
 
-        :param args: Unused parameters
+        :param _args: Unused parameters
         :return: Local coordinate system
         """
         return tf.LocalCoordinateSystem()
