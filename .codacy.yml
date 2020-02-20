@@ -11,3 +11,4 @@ engines:
 
 exclude_paths:
   - 'docs/**'
+  - '.vulture_whitelist.py'
