@@ -106,7 +106,11 @@ def create_asdf_dataclass(
     print(python_file_path)
 
     python_class_string = make_python_class_string(
-        asdf_name, class_name, asdf_version, properties, property_types
+        class_name=class_name,
+        asdf_name=asdf_name,
+        asdf_version=asdf_version,
+        properties=properties,
+        property_types=property_types
     )
     with open(str(python_file_path), "w") as file:
         file.write(python_class_string)
