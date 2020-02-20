@@ -10,20 +10,23 @@ dependencies:
   - scipy=1.3.2
   - xarray>=0.12.3
   - asdf=2.3
-  - flake8
-  - pytest
-  - pytest-cov
-  - codecov
-  - pydocstyle
   - sphinx
   - recommonmark
-  - matplotlib
-  - seaborn 
   - openpyxl
+  # Code quality
+  - codecov
+  - flake8
+  - pydocstyle
+  - pytest
+  - pytest-cov
+  - vulture
+  # Plotting
+  - graphviz
   - ipykernel
   - ipympl
-  - snakeviz
-  - graphviz
-  - python-graphviz
   - line_profiler
+  - matplotlib
   - memory_profiler
+  - python-graphviz
+  - seaborn
+  - snakeviz
