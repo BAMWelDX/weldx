@@ -1,0 +1,24 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/{{ asdf_name }}-{{ asdf_version }}"
+tag: "tag:weldx.bam.de:weldx/{{ asdf_name }}-{{ asdf_version }}"
+
+title: |
+  {{ schema_title }}
+type: object
+properties:
+{%- for prop, dtype in zip(properties,property_types) %}
+  {{ prop }}:
+    description: |
+      <DESCRIPTION>
+    type: {{ _asdf_dtype(dtype) }}
+{% endfor %}
+
+{% if required is not none -%}   
+required: [{{ ", ".join(required)}}]
+{%- endif %}
+{% if property_order is not none -%}   
+propertyOrder: [{{ ", ".join(property_order)}}]
+{%- endif %}
+additionalProperties: {{ additional_properties }}
