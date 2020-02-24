@@ -16,7 +16,7 @@ def rotation_matrix_x(angle):
     :param angle: Rotation angle
     :return: Rotation matrix
     """
-    return Rot.from_euler("x", angle).as_dcm()
+    return Rot.from_euler("x", angle).as_matrix()
 
 
 def rotation_matrix_y(angle):
@@ -26,7 +26,7 @@ def rotation_matrix_y(angle):
     :param angle: Rotation angle
     :return: Rotation matrix
     """
-    return Rot.from_euler("y", angle).as_dcm()
+    return Rot.from_euler("y", angle).as_matrix()
 
 
 def rotation_matrix_z(angle):
@@ -36,7 +36,7 @@ def rotation_matrix_z(angle):
     :param angle: Rotation angle
     :return: Rotation matrix
     """
-    return Rot.from_euler("z", angle).as_dcm()
+    return Rot.from_euler("z", angle).as_matrix()
 
 
 def normalize(vec):
