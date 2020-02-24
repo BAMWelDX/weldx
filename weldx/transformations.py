@@ -16,7 +16,7 @@ def rotation_matrix_x(angle):
     :param angle: Rotation angle
     :return: Rotation matrix
     """
-    return Rot.from_euler("x", angle).as_dcm()
+    return Rot.from_euler("x", angle).as_matrix()
 
 
 def rotation_matrix_y(angle):
@@ -26,7 +26,7 @@ def rotation_matrix_y(angle):
     :param angle: Rotation angle
     :return: Rotation matrix
     """
-    return Rot.from_euler("y", angle).as_dcm()
+    return Rot.from_euler("y", angle).as_matrix()
 
 
 def rotation_matrix_z(angle):
@@ -36,7 +36,7 @@ def rotation_matrix_z(angle):
     :param angle: Rotation angle
     :return: Rotation matrix
     """
-    return Rot.from_euler("z", angle).as_dcm()
+    return Rot.from_euler("z", angle).as_matrix()
 
 
 def normalize(vec):
@@ -75,9 +75,9 @@ def orientation_point_plane_containing_origin(point, p_a, p_b):
     :return: 1, -1 or 0 (see description)
     """
     if (
-        math.isclose(np.linalg.norm(p_a), 0)
-        or math.isclose(np.linalg.norm(p_b), 0)
-        or math.isclose(np.linalg.norm(p_b - p_a), 0)
+            math.isclose(np.linalg.norm(p_a), 0)
+            or math.isclose(np.linalg.norm(p_b), 0)
+            or math.isclose(np.linalg.norm(p_b - p_a), 0)
     ):
         raise Exception("One or more points describing the plane are identical.")
 
@@ -181,9 +181,9 @@ class LocalCoordinateSystem:
     """Defines a local cartesian coordinate system in 3d."""
 
     def __init__(
-        self,
-        basis=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
-        origin=np.array([0, 0, 0]),
+            self,
+            basis=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+            origin=np.array([0, 0, 0]),
     ):
         """
         Construct a cartesian coordinate system.
@@ -202,9 +202,9 @@ class LocalCoordinateSystem:
         basis[:, 2] = normalize(basis[:, 2])
 
         if not (
-            is_orthogonal(basis[:, 0], basis[:, 1])
-            and is_orthogonal(basis[:, 1], basis[:, 2])
-            and is_orthogonal(basis[:, 2], basis[:, 0])
+                is_orthogonal(basis[:, 0], basis[:, 1])
+                and is_orthogonal(basis[:, 1], basis[:, 2])
+                and is_orthogonal(basis[:, 2], basis[:, 0])
         ):
             raise Exception("Basis vectors must be orthogonal")
 
@@ -289,7 +289,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_xy_and_orientation(
-        cls, vec_x, vec_y, positive_orientation=True, origin=np.array([0, 0, 0])
+            cls, vec_x, vec_y, positive_orientation=True, origin=np.array([0, 0, 0])
     ):
         """
         Construct a coordinate system from 2 vectors and an orientation.
@@ -310,7 +310,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_yz_and_orientation(
-        cls, vec_y, vec_z, positive_orientation=True, origin=np.array([0, 0, 0])
+            cls, vec_y, vec_z, positive_orientation=True, origin=np.array([0, 0, 0])
     ):
         """
         Construct a coordinate system from 2 vectors and an orientation.
@@ -331,7 +331,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_xz_and_orientation(
-        cls, vec_x, vec_z, positive_orientation=True, origin=np.array([0, 0, 0])
+            cls, vec_x, vec_z, positive_orientation=True, origin=np.array([0, 0, 0])
     ):
         """
         Construct a coordinate system from 2 vectors and an orientation.
