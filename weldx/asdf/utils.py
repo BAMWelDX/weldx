@@ -6,15 +6,21 @@ from .extension import SCHEMA_PATH
 
 _DTYPE_DICT = pd.DataFrame(
     data={
-        "py_type": [None, str, float, int],
-        "asdf_type": ["<TYPE>", "string", "number", "integer"],
+        "py_type": ["str", "float", "int"],
+        "asdf_type": ["string", "number", "integer"],
     }
 )
 
 
 def _asdf_dtype(py_type):
-    return _DTYPE_DICT.loc[_DTYPE_DICT.py_type.isin([py_type])].asdf_type.iloc[0]
+    lookup = _DTYPE_DICT.py_type.isin([py_type])
+    if lookup.any():
+        return _DTYPE_DICT.loc[lookup].asdf_type.iloc[0]
+    else:
+        return f"<TODO ASDF_TYPE({py_type})>"
 
+
+_DEFAULT_ASDF_DESCRIPTION = "<TODO DESCRIPTION>"
 
 _loader = jinja2.FileSystemLoader(
     searchpath=["./asdf/templates", "./weldx/asdf/templates"]
@@ -28,12 +34,17 @@ def make_asdf_schema_string(
     asdf_name,
     asdf_version,
     properties,
+    description=None,
     property_types=None,
     required=None,
     property_order=None,
     additional_properties="false",
 ):
     """Generate default ASDF schema."""
+
+    if description is None:
+        description = [_DEFAULT_ASDF_DESCRIPTION] * len(properties)
+    description = [_DEFAULT_ASDF_DESCRIPTION if d == "" else d for d in description]
 
     template_file = "asdf_dataclass.yaml.jinja"
     template = _env.get_template(template_file)
@@ -42,6 +53,7 @@ def make_asdf_schema_string(
         asdf_name=asdf_name,
         asdf_version=asdf_version,
         properties=properties,
+        description=description,
         property_types=property_types,
         required=required,
         property_order=property_order,
@@ -76,6 +88,7 @@ def create_asdf_dataclass(
     class_name,
     properties,
     property_types=None,
+    description=None,
     required=None,
     property_order=None,
 ):
@@ -87,6 +100,7 @@ def create_asdf_dataclass(
     :param class_name: name of the Python class to generate
     :param properties: list of property names
     :param property_types: list with Python dtypes for each property
+    :param description: list of property descriptions
     :param required: list of parameters that are set to required
     :param property_order: asdf schema property order
     :return:
@@ -97,7 +111,13 @@ def create_asdf_dataclass(
     print(asdf_file_path)
 
     asdf_schema_string = make_asdf_schema_string(
-        asdf_name, asdf_version, properties, property_types, required, property_order
+        asdf_name=asdf_name,
+        asdf_version=asdf_version,
+        properties=properties,
+        description=description,
+        property_types=property_types,
+        required=required,
+        property_order=property_order,
     )
     with open(str(asdf_file_path), "w") as file:
         file.write(asdf_schema_string)

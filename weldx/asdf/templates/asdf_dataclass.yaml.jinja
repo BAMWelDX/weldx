@@ -8,10 +8,10 @@ title: |
   {{ schema_title }}
 type: object
 properties:
-{%- for prop, dtype in zip(properties,property_types) %}
+{%- for prop, dtype, desc in zip(properties,property_types,description) %}
   {{ prop }}:
     description: |
-      <DESCRIPTION>
+      {{ desc }}
     type: {{ _asdf_dtype(dtype) }}
 {% endfor %}
 
