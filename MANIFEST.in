@@ -1,1 +1,3 @@
 recursive-include weldx-standard *.yaml
+include versioneer.py
+include weldx/_version.py
