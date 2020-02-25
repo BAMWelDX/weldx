@@ -1,0 +1,38 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/design/connection-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/design/connection-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  <TODO DESCRIPTION>
+type: object
+properties:
+  joint_type:
+    description: |
+      A weld joint classification based the relative orientation of the members being joined. TODO ENUM
+    type: string
+
+  weld_type:
+    description: |
+      A region of coalescence of materials produced by heating or pressure, that joins two pieces of metal. TODO ENUM
+    type: string
+
+  joint_penetration:
+    description: |
+      joint_penetration
+    type: <TODO ASDF_TYPE(joint_penetration)>
+
+  weld_details:
+    description: |
+      weld_details
+    type: <TODO ASDF_TYPE(weld_details)>
+
+
+
+required: [joint_type, weld_type, joint_penetration, weld_details]
+propertyOrder: [joint_type, weld_type, joint_penetration, weld_details]
+flowStyle: block
+additionalProperties: false
