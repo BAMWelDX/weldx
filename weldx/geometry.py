@@ -10,6 +10,7 @@ import numpy as np
 
 # LineSegment -----------------------------------------------------------------
 
+
 class LineSegment:
     """Line segment."""
 
@@ -145,7 +146,7 @@ class LineSegment:
         num_raster_segments = np.round(self.length / raster_width)
 
         # normalized effective raster width
-        nerw = 1. / num_raster_segments
+        nerw = 1.0 / num_raster_segments
 
         multiplier = np.arange(0, 1 + 0.5 * nerw, nerw)
         weight_matrix = np.array([1 - multiplier, multiplier])
@@ -176,6 +177,7 @@ class LineSegment:
 
 
 # ArcSegment ------------------------------------------------------------------
+
 
 class ArcSegment:
     """Arc segment."""
@@ -225,7 +227,8 @@ class ArcSegment:
         angle_vecs = np.arccos(np.clip(dot_unit, -1, 1))
 
         sign_winding_points = tf.vector_points_to_left_of_vector(
-            unit_center_end, unit_center_start)
+            unit_center_end, unit_center_start
+        )
 
         if np.abs(sign_winding_points + self._sign_arc_winding) > 0:
             self._arc_angle = angle_vecs
@@ -258,14 +261,15 @@ class ArcSegment:
         radius_end_center = np.linalg.norm(point_end - point_center)
         radius_diff = radius_end_center - radius_start_center
 
-        if not math.isclose(radius_diff, 0, abs_tol=1E-9):
+        if not math.isclose(radius_diff, 0, abs_tol=1e-9):
             raise ValueError("Radius is not constant.")
         if math.isclose(self._arc_length, 0):
             raise Exception("Arc length is 0.")
 
     @classmethod
-    def construct_with_points(cls, point_start, point_end, point_center,
-                              arc_winding_ccw=True):
+    def construct_with_points(
+        cls, point_start, point_end, point_center, arc_winding_ccw=True
+    ):
         """
         Construct an arc segment with three points (start, end, center).
 
@@ -277,12 +281,19 @@ class ArcSegment:
         :return: Arc segment
         """
         points = np.transpose(
-            np.array([point_start, point_end, point_center], dtype=float))
+            np.array([point_start, point_end, point_center], dtype=float)
+        )
         return cls(points, arc_winding_ccw)
 
     @classmethod
-    def construct_with_radius(cls, point_start, point_end, radius,
-                              center_left_of_line=True, arc_winding_ccw=True):
+    def construct_with_radius(
+        cls,
+        point_start,
+        point_end,
+        radius,
+        center_left_of_line=True,
+        arc_winding_ccw=True,
+    ):
         """
         Construct an arc segment with a radius and the start and end points.
 
@@ -308,13 +319,15 @@ class ArcSegment:
         squared_radius = radius * radius
 
         normal_scaling = np.sqrt(
-            np.clip(squared_radius / squared_length - 0.25, 0, None))
+            np.clip(squared_radius / squared_length - 0.25, 0, None)
+        )
 
         vec_start_center = 0.5 * vec_start_end + vec_normal * normal_scaling
         point_center = point_start + vec_start_center
 
-        return cls.construct_with_points(point_start, point_end, point_center,
-                                         arc_winding_ccw)
+        return cls.construct_with_points(
+            point_start, point_end, point_center, arc_winding_ccw
+        )
 
     @classmethod
     def linear_interpolation(cls, segment_a, segment_b, weight):
@@ -343,7 +356,8 @@ class ArcSegment:
         """
         raise Exception(
             "Linear interpolation of an arc segment is not unique (see "
-            "docstring). You need to provide a custom interpolation.")
+            "docstring). You need to provide a custom interpolation."
+        )
 
     @property
     def arc_angle(self):
@@ -453,7 +467,7 @@ class ArcSegment:
         """
         point_start = self.point_start
         point_center = self.point_center
-        vec_center_start = (point_start - point_center)
+        vec_center_start = point_start - point_center
 
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
@@ -462,8 +476,7 @@ class ArcSegment:
         num_raster_segments = int(np.round(self._arc_length / raster_width))
         delta_angle = self._arc_angle / num_raster_segments
 
-        max_angle = self._sign_arc_winding * (self._arc_angle +
-                                              0.5 * delta_angle)
+        max_angle = self._sign_arc_winding * (self._arc_angle + 0.5 * delta_angle)
         angles = np.arange(0, max_angle, self._sign_arc_winding * delta_angle)
 
         rotation_matrices = tf.rotation_matrix_z(angles)[:, 0:2, 0:2]
@@ -497,6 +510,7 @@ class ArcSegment:
 
 # Shape class -----------------------------------------------------------------
 
+
 class Shape:
     """Defines a shape in 2 dimensions."""
 
@@ -522,8 +536,9 @@ class Shape:
         :return: ---
         """
         for i in range(len(segments) - 1):
-            if not ut.vector_is_close(segments[i].point_end,
-                                      segments[i + 1].point_start):
+            if not ut.vector_is_close(
+                segments[i].point_end, segments[i + 1].point_start
+            ):
                 raise Exception("Segments are not connected.")
 
     @classmethod
@@ -546,9 +561,11 @@ class Shape:
 
         segments_c = []
         for i in range(shape_a.num_segments):
-            segments_c += [interpolation_schemes[i](shape_a.segments[i],
-                                                    shape_b.segments[i],
-                                                    weight)]
+            segments_c += [
+                interpolation_schemes[i](
+                    shape_a.segments[i], shape_b.segments[i], weight
+                )
+            ]
         return cls(segments_c)
 
     @classmethod
@@ -616,8 +633,9 @@ class Shape:
         num_new_segments = len(points) - 1
         line_segments = []
         for i in range(num_new_segments):
-            line_segments += [LineSegment.construct_with_points(points[i],
-                                                                points[i + 1])]
+            line_segments += [
+                LineSegment.construct_with_points(points[i], points[i + 1])
+            ]
         self.add_segments(line_segments)
 
         return self
@@ -685,9 +703,10 @@ class Shape:
         vector = point_end - point_start
         length_vector = np.linalg.norm(vector)
 
-        line_distance_origin = np.abs(
-            point_start[1] * point_end[0] - point_start[0] * point_end[
-                1]) / length_vector
+        line_distance_origin = (
+            np.abs(point_start[1] * point_end[0] - point_start[0] * point_end[1])
+            / length_vector
+        )
 
         if tf.point_left_of_line([0, 0], point_start, point_end) > 0:
             normal = ut.to_float_array([vector[1], -vector[0]])
@@ -782,6 +801,7 @@ class Shape:
 
 # Profile class ---------------------------------------------------------------
 
+
 class Profile:
     """Defines a 2d profile."""
 
@@ -814,8 +834,7 @@ class Profile:
             shapes = [shapes]
 
         if not all(isinstance(shape, Shape) for shape in shapes):
-            raise TypeError(
-                "Only instances or lists of Shape objects are accepted.")
+            raise TypeError("Only instances or lists of Shape objects are accepted.")
 
         self._shapes += shapes
 
@@ -828,8 +847,7 @@ class Profile:
         """
         raster_data = np.empty([2, 0])
         for shape in self._shapes:
-            raster_data = np.hstack(
-                (raster_data, shape.rasterize(raster_width)))
+            raster_data = np.hstack((raster_data, shape.rasterize(raster_width)))
 
         return raster_data
 
@@ -844,6 +862,7 @@ class Profile:
 
 
 # Trace segment classes -------------------------------------------------------
+
 
 class LinearHorizontalTraceSegment:
     """Trace segment with a linear path and constant z-component."""
@@ -961,7 +980,8 @@ class RadialHorizontalTraceSegment:
         relative_position = np.clip(relative_position, 0, 1)
 
         basis = tf.rotation_matrix_z(
-            self._angle * relative_position * self._sign_winding)
+            self._angle * relative_position * self._sign_winding
+        )
         translation = np.array([0, -1, 0]) * self._radius * self._sign_winding
 
         origin = np.matmul(basis, translation) - translation
@@ -969,6 +989,7 @@ class RadialHorizontalTraceSegment:
 
 
 # Trace class -----------------------------------------------------------------
+
 
 class Trace:
     """Defines a 3d trace."""
@@ -983,7 +1004,8 @@ class Trace:
         if not isinstance(coordinate_system, tf.LocalCoordinateSystem):
             raise TypeError(
                 "'coordinate_system' must be of type "
-                "'transformations.LocalCoordinateSystem'")
+                "'transformations.LocalCoordinateSystem'"
+            )
 
         self._segments = ut.to_list(segments)
         self._create_lookups(coordinate_system)
@@ -1108,8 +1130,7 @@ class Trace:
             segment_location = location - self._total_length_lookup[idx]
             weight = segment_location / self._segment_length_lookup[idx]
 
-            local_segment_cs = self.segments[idx].local_coordinate_system(
-                weight)
+            local_segment_cs = self.segments[idx].local_coordinate_system(weight)
             segment_start_cs = self._coordinate_system_lookup[idx]
 
             local_cs = local_segment_cs + segment_start_cs
@@ -1122,6 +1143,7 @@ class Trace:
 
 
 # Linear profile interpolation class ------------------------------------------
+
 
 def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
     """
@@ -1139,14 +1161,15 @@ def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
 
     shapes_c = []
     for i in range(profile_a.num_shapes):
-        shapes_c += [Shape.linear_interpolation(profile_a.shapes[i],
-                                                profile_b.shapes[i],
-                                                weight)]
+        shapes_c += [
+            Shape.linear_interpolation(profile_a.shapes[i], profile_b.shapes[i], weight)
+        ]
 
     return Profile(shapes_c)
 
 
 # Varying profile class -------------------------------------------------------
+
 
 class VariableProfile:
     """Class to define a profile of variable shape."""
@@ -1168,18 +1191,16 @@ class VariableProfile:
             locations = [0] + locations
 
         if not len(profiles) == len(locations):
-            raise Exception(
-                "Invalid list of locations. See function description.")
+            raise Exception("Invalid list of locations. See function description.")
 
         if not len(interpolation_schemes) == len(profiles) - 1:
             raise Exception(
-                "Number of interpolations must be 1 less than number of "
-                "profiles.")
+                "Number of interpolations must be 1 less than number of " "profiles."
+            )
 
         for i in range(len(profiles) - 1):
             if locations[i] >= locations[i + 1]:
-                raise Exception(
-                    "Locations need to be sorted in ascending order.")
+                raise Exception("Locations need to be sorted in ascending order.")
 
         self._profiles = profiles
         self._locations = locations
@@ -1273,12 +1294,13 @@ class VariableProfile:
         segment_length = self._locations[idx + 1] - self._locations[idx]
         weight = (location - self._locations[idx]) / segment_length
 
-        return self._interpolation_schemes[idx](self._profiles[idx],
-                                                self._profiles[idx + 1],
-                                                weight)
+        return self._interpolation_schemes[idx](
+            self._profiles[idx], self._profiles[idx + 1], weight
+        )
 
 
 #  Geometry class -------------------------------------------------------------
+
 
 class Geometry:
     """Define the experimental geometry."""
@@ -1304,12 +1326,10 @@ class Geometry:
         :return: ---
         """
         if not isinstance(profile, (Profile, VariableProfile)):
-            raise TypeError(
-                "'profile' must be a 'Profile' or 'VariableProfile' class")
+            raise TypeError("'profile' must be a 'Profile' or 'VariableProfile' class")
 
         if not isinstance(trace, Trace):
-            raise TypeError(
-                "'trace' must be a 'Trace' class")
+            raise TypeError("'trace' must be a 'Trace' class")
 
     def _get_local_profile_data(self, trace_location, raster_width):
         """
@@ -1337,9 +1357,9 @@ class Geometry:
 
         num_raster_segments = int(np.round(self._trace.length / raster_width))
         raster_width_eff = self._trace.length / num_raster_segments
-        locations = np.arange(0,
-                              self._trace.length - raster_width_eff / 2,
-                              raster_width_eff)
+        locations = np.arange(
+            0, self._trace.length - raster_width_eff / 2, raster_width_eff
+        )
         return np.hstack([locations, self._trace.length])
 
     def _get_transformed_profile_data(self, profile_raster_data, location):
@@ -1368,8 +1388,7 @@ class Geometry:
         profile_data = profile.rasterize(raster_width)
         return np.insert(profile_data, 0, 0, axis=0)
 
-    def _rasterize_constant_profile(self, profile_raster_width,
-                                    trace_raster_width):
+    def _rasterize_constant_profile(self, profile_raster_width, trace_raster_width):
         """
         Rasterize the geometry with a constant profile.
 
@@ -1377,20 +1396,17 @@ class Geometry:
         :param trace_raster_width: Distance between two profiles
         :return: Raster data
         """
-        profile_data = self._profile_raster_data_3d(self._profile,
-                                                    profile_raster_width)
+        profile_data = self._profile_raster_data_3d(self._profile, profile_raster_width)
 
         locations = self._rasterize_trace(trace_raster_width)
         raster_data = np.empty([3, 0])
         for _, location in enumerate(locations):
-            local_data = self._get_transformed_profile_data(profile_data,
-                                                            location)
+            local_data = self._get_transformed_profile_data(profile_data, location)
             raster_data = np.hstack([raster_data, local_data])
 
         return raster_data
 
-    def _rasterize_variable_profile(self, profile_raster_width,
-                                    trace_raster_width):
+    def _rasterize_variable_profile(self, profile_raster_width, trace_raster_width):
         """
         Rasterize the geometry with a variable profile.
 
@@ -1401,11 +1417,9 @@ class Geometry:
         locations = self._rasterize_trace(trace_raster_width)
         raster_data = np.empty([3, 0])
         for _, location in enumerate(locations):
-            profile_data = self._get_local_profile_data(location,
-                                                        profile_raster_width)
+            profile_data = self._get_local_profile_data(location, profile_raster_width)
 
-            local_data = self._get_transformed_profile_data(profile_data,
-                                                            location)
+            local_data = self._get_transformed_profile_data(profile_data, location)
             raster_data = np.hstack([raster_data, local_data])
 
         return raster_data
@@ -1437,7 +1451,9 @@ class Geometry:
         :return: Raster data
         """
         if isinstance(self._profile, Profile):
-            return self._rasterize_constant_profile(profile_raster_width,
-                                                    trace_raster_width)
-        return self._rasterize_variable_profile(profile_raster_width,
-                                                trace_raster_width)
+            return self._rasterize_constant_profile(
+                profile_raster_width, trace_raster_width
+            )
+        return self._rasterize_variable_profile(
+            profile_raster_width, trace_raster_width
+        )

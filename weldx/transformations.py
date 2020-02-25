@@ -8,6 +8,7 @@ from scipy.spatial.transform import Rotation as Rot
 
 # functions -------------------------------------------------------------------
 
+
 def rotation_matrix_x(angle):
     """
     Create a rotation matrix that rotates around the x-axis.
@@ -15,7 +16,7 @@ def rotation_matrix_x(angle):
     :param angle: Rotation angle
     :return: Rotation matrix
     """
-    return Rot.from_euler("x", angle).as_dcm()
+    return Rot.from_euler("x", angle).as_matrix()
 
 
 def rotation_matrix_y(angle):
@@ -25,7 +26,7 @@ def rotation_matrix_y(angle):
     :param angle: Rotation angle
     :return: Rotation matrix
     """
-    return Rot.from_euler("y", angle).as_dcm()
+    return Rot.from_euler("y", angle).as_matrix()
 
 
 def rotation_matrix_z(angle):
@@ -35,7 +36,7 @@ def rotation_matrix_z(angle):
     :param angle: Rotation angle
     :return: Rotation matrix
     """
-    return Rot.from_euler("z", angle).as_dcm()
+    return Rot.from_euler("z", angle).as_matrix()
 
 
 def normalize(vec):
@@ -46,7 +47,7 @@ def normalize(vec):
     :return: Normalized vector
     """
     norm = np.linalg.norm(vec)
-    if norm == 0.:
+    if norm == 0.0:
         raise Exception("Vector length is 0.")
     return vec / norm
 
@@ -73,11 +74,12 @@ def orientation_point_plane_containing_origin(point, p_a, p_b):
     :param p_b: Third point of the triangle 'origin - A - B'.
     :return: 1, -1 or 0 (see description)
     """
-    if (math.isclose(np.linalg.norm(p_a), 0) or
-            math.isclose(np.linalg.norm(p_b), 0) or
-            math.isclose(np.linalg.norm(p_b - p_a), 0)):
-        raise Exception(
-            "One or more points describing the plane are identical.")
+    if (
+        math.isclose(np.linalg.norm(p_a), 0)
+        or math.isclose(np.linalg.norm(p_b), 0)
+        or math.isclose(np.linalg.norm(p_b - p_a), 0)
+    ):
+        raise Exception("One or more points describing the plane are identical.")
 
     return np.sign(np.linalg.det([p_a, p_b, point]))
 
@@ -105,11 +107,10 @@ def orientation_point_plane(point, p_a, p_b, p_c):
     vec_a_b = p_b - p_a
     vec_a_c = p_c - p_a
     vec_a_point = point - p_a
-    return orientation_point_plane_containing_origin(vec_a_point, vec_a_b,
-                                                     vec_a_c)
+    return orientation_point_plane_containing_origin(vec_a_point, vec_a_b, vec_a_c)
 
 
-def is_orthogonal(vec_u, vec_v, tolerance=1E-9):
+def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
     """
     Check if vectors are orthogonal.
 
@@ -118,8 +119,7 @@ def is_orthogonal(vec_u, vec_v, tolerance=1E-9):
     :param tolerance: Numerical tolerance
     :return: True or False
     """
-    if math.isclose(np.dot(vec_u, vec_u), 0) or math.isclose(
-            np.dot(vec_v, vec_v), 0):
+    if math.isclose(np.dot(vec_u, vec_u), 0) or math.isclose(np.dot(vec_v, vec_v), 0):
         raise Exception("One or both vectors have zero length.")
 
     return math.isclose(np.dot(vec_u, vec_v), 0, abs_tol=tolerance)
@@ -139,8 +139,7 @@ def point_left_of_line(point, line_start, line_end):
     """
     vec_line_start_end = line_end - line_start
     vec_line_start_point = point - line_start
-    return vector_points_to_left_of_vector(vec_line_start_point,
-                                           vec_line_start_end)
+    return vector_points_to_left_of_vector(vec_line_start_point, vec_line_start_end)
 
 
 def reflection_sign(matrix):
@@ -177,11 +176,15 @@ def vector_points_to_left_of_vector(vector, vector_reference):
 
 # cartesian coordinate system class -------------------------------------------
 
+
 class LocalCoordinateSystem:
     """Defines a local cartesian coordinate system in 3d."""
 
-    def __init__(self, basis=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
-                 origin=np.array([0, 0, 0])):
+    def __init__(
+        self,
+        basis=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+        origin=np.array([0, 0, 0]),
+    ):
         """
         Construct a cartesian coordinate system.
 
@@ -198,9 +201,11 @@ class LocalCoordinateSystem:
         basis[:, 1] = normalize(basis[:, 1])
         basis[:, 2] = normalize(basis[:, 2])
 
-        if not (is_orthogonal(basis[:, 0], basis[:, 1]) and
-                is_orthogonal(basis[:, 1], basis[:, 2]) and
-                is_orthogonal(basis[:, 2], basis[:, 0])):
+        if not (
+            is_orthogonal(basis[:, 0], basis[:, 1])
+            and is_orthogonal(basis[:, 1], basis[:, 2])
+            and is_orthogonal(basis[:, 2], basis[:, 0])
+        ):
             raise Exception("Basis vectors must be orthogonal")
 
         self._orientation = basis
@@ -258,8 +263,7 @@ class LocalCoordinateSystem:
         return LocalCoordinateSystem(basis, origin)
 
     @classmethod
-    def construct_from_orientation(cls, orientation,
-                                   origin=np.array([0, 0, 0])):
+    def construct_from_orientation(cls, orientation, origin=np.array([0, 0, 0])):
         """
         Construct a cartesian coordinate system from orientation matrix.
 
@@ -270,8 +274,7 @@ class LocalCoordinateSystem:
         return cls(orientation, origin=origin)
 
     @classmethod
-    def construct_from_xyz(cls, vec_x, vec_y, vec_z,
-                           origin=np.array([0, 0, 0])):
+    def construct_from_xyz(cls, vec_x, vec_y, vec_z, origin=np.array([0, 0, 0])):
         """
         Construct a cartesian coordinate system from 3 basis vectors.
 
@@ -285,9 +288,9 @@ class LocalCoordinateSystem:
         return cls(basis, origin=origin)
 
     @classmethod
-    def construct_from_xy_and_orientation(cls, vec_x, vec_y,
-                                          positive_orientation=True,
-                                          origin=np.array([0, 0, 0])):
+    def construct_from_xy_and_orientation(
+        cls, vec_x, vec_y, positive_orientation=True, origin=np.array([0, 0, 0])
+    ):
         """
         Construct a coordinate system from 2 vectors and an orientation.
 
@@ -298,17 +301,17 @@ class LocalCoordinateSystem:
         :param origin: Position of the origin
         :return: Cartesian coordinate system
         """
-        vec_z = cls._calculate_orthogonal_axis(vec_x,
-                                               vec_y) * cls._sign_orientation(
-            positive_orientation)
+        vec_z = cls._calculate_orthogonal_axis(vec_x, vec_y) * cls._sign_orientation(
+            positive_orientation
+        )
 
         basis = np.transpose([vec_x, vec_y, vec_z])
         return cls(basis, origin=origin)
 
     @classmethod
-    def construct_from_yz_and_orientation(cls, vec_y, vec_z,
-                                          positive_orientation=True,
-                                          origin=np.array([0, 0, 0])):
+    def construct_from_yz_and_orientation(
+        cls, vec_y, vec_z, positive_orientation=True, origin=np.array([0, 0, 0])
+    ):
         """
         Construct a coordinate system from 2 vectors and an orientation.
 
@@ -319,17 +322,17 @@ class LocalCoordinateSystem:
         :param origin: Position of the origin
         :return: Cartesian coordinate system
         """
-        vec_x = cls._calculate_orthogonal_axis(vec_y,
-                                               vec_z) * cls._sign_orientation(
-            positive_orientation)
+        vec_x = cls._calculate_orthogonal_axis(vec_y, vec_z) * cls._sign_orientation(
+            positive_orientation
+        )
 
         basis = np.transpose(np.array([vec_x, vec_y, vec_z]))
         return cls(basis, origin=origin)
 
     @classmethod
-    def construct_from_xz_and_orientation(cls, vec_x, vec_z,
-                                          positive_orientation=True,
-                                          origin=np.array([0, 0, 0])):
+    def construct_from_xz_and_orientation(
+        cls, vec_x, vec_z, positive_orientation=True, origin=np.array([0, 0, 0])
+    ):
         """
         Construct a coordinate system from 2 vectors and an orientation.
 
@@ -340,9 +343,9 @@ class LocalCoordinateSystem:
         :param origin: Position of the origin
         :return: Cartesian coordinate system
         """
-        vec_y = cls._calculate_orthogonal_axis(vec_z,
-                                               vec_x) * cls._sign_orientation(
-            positive_orientation)
+        vec_y = cls._calculate_orthogonal_axis(vec_z, vec_x) * cls._sign_orientation(
+            positive_orientation
+        )
 
         basis = np.transpose([vec_x, vec_y, vec_z])
         return cls(basis, origin=origin)

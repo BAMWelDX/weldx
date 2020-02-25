@@ -4,8 +4,9 @@ import weldx.transformations as tf
 import numpy as np
 
 
-def rotated_coordinate_system(angle_x=np.pi / 3, angle_y=np.pi / 4,
-                              angle_z=np.pi / 5, origin=np.array([0, 0, 0])):
+def rotated_coordinate_system(
+    angle_x=np.pi / 3, angle_y=np.pi / 4, angle_z=np.pi / 5, origin=np.array([0, 0, 0])
+):
     """
     Get a coordinate system with rotated basis.
 
@@ -41,5 +42,4 @@ def are_all_columns_unique(matrix, decimals=3):
     :return: True or False
     """
     unique = np.unique(np.round(matrix, decimals=decimals), axis=1)
-    return (unique.shape[0] == matrix.shape[0] and
-            unique.shape[1] == matrix.shape[1])
+    return unique.shape[0] == matrix.shape[0] and unique.shape[1] == matrix.shape[1]
