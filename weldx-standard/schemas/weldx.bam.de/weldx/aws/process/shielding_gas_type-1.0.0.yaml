@@ -15,7 +15,7 @@ properties:
       A single gas element.
     type: array
     items:
-      type: <TODO ASDF_TYPE(GasComponent)>
+      $ref: gas_component-1.0.0
 
   common_name:
     description: |

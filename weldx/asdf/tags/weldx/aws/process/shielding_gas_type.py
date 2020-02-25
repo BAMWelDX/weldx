@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List
 from asdf import yamlutil
 from weldx.asdf.types import WeldxType
+from .gas_component import GasComponent
 
 
 @dataclass
