@@ -17,7 +17,7 @@ class PintQuantityType(WeldxAsdfType):
     """
 
     name = "unit/quantity"
-    version = "1.1.0"
+    version = "1.0.0"
     types = [pint.Quantity]
 
     @classmethod

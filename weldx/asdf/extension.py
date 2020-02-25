@@ -16,7 +16,7 @@ from .tags.weldx.unit.pint_quantity import *  # noqa: F401,F403
 from .types import _weldx_types, _weldx_asdf_types
 
 
-__all__ = ["WeldxExtension", "WeldxAsdfExtension"]
+__all__ = ["WeldxExtension", "WeldxAsdfExtension", "SCHEMA_PATH"]
 
 
 WELDX_SCHEMA_URI_BASE = "http://weldx.bam.de/schemas/"

@@ -6,6 +6,8 @@ tag: "tag:weldx.bam.de:weldx/{{ asdf_name }}-{{ asdf_version }}"
 
 title: |
   {{ schema_title }}
+description: |
+  {{ schema_description }}
 type: object
 properties:
 {%- for prop, dtype, desc in zip(properties,property_types,description) %}

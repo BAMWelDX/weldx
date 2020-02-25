@@ -6,8 +6,8 @@ from .extension import SCHEMA_PATH
 
 _DTYPE_DICT = pd.DataFrame(
     data={
-        "py_type": ["str", "float", "int"],
-        "asdf_type": ["string", "number", "integer"],
+        "py_type": ["str", "float", "int", "bool", "pint.Quantity"],
+        "asdf_type": ["string", "number", "integer", "boolean", "unit/quantity-1.0.0"],
     }
 )
 
@@ -39,6 +39,8 @@ def make_asdf_schema_string(
     required=None,
     property_order=None,
     additional_properties="false",
+    schema_title=_DEFAULT_ASDF_DESCRIPTION,
+    schema_description=_DEFAULT_ASDF_DESCRIPTION,
 ):
     """Generate default ASDF schema."""
 
@@ -58,6 +60,8 @@ def make_asdf_schema_string(
         required=required,
         property_order=property_order,
         additional_properties=additional_properties,
+        schema_title=schema_title,
+        schema_description=schema_description,
     )  # this is where to put args to the template renderer
 
     return output_text
@@ -91,6 +95,8 @@ def create_asdf_dataclass(
     description=None,
     required=None,
     property_order=None,
+    schema_title=_DEFAULT_ASDF_DESCRIPTION,
+    schema_description=_DEFAULT_ASDF_DESCRIPTION,
 ):
     """
     Generates a ASDF schema file with corresponding python class for simple dataclasses.
@@ -103,6 +109,8 @@ def create_asdf_dataclass(
     :param description: list of property descriptions
     :param required: list of parameters that are set to required
     :param property_order: asdf schema property order
+    :param schema_title: asdf schema title
+    :param schema_description: asdf schema description
     :return:
     """
     asdf_file_path = Path(
@@ -118,7 +126,10 @@ def create_asdf_dataclass(
         property_types=property_types,
         required=required,
         property_order=property_order,
+        schema_title=schema_title,
+        schema_description=schema_description,
     )
+    asdf_file_path.parent.mkdir(parents=True, exist_ok=True)
     with open(str(asdf_file_path), "w") as file:
         file.write(asdf_schema_string)
 
@@ -132,6 +143,7 @@ def create_asdf_dataclass(
         properties=properties,
         property_types=property_types,
     )
+    python_file_path.parent.mkdir(parents=True, exist_ok=True)
     with open(str(python_file_path), "w") as file:
         file.write(python_class_string)
 

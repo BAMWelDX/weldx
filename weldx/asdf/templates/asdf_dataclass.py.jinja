@@ -14,7 +14,7 @@ class {{class_name}}Type(WeldxType):
 
     name = "{{ asdf_name }}"
     version = "{{ asdf_version }}"
-    types = [{{class_name}}]
+    types = [{{ class_name }}]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
@@ -25,5 +25,5 @@ class {{class_name}}Type(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        obj = TestClass(**tree)
+        obj = {{ class_name }}(**tree)
         return obj
