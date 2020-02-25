@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 from weldx.asdf.types import WeldxType
 
 
@@ -6,7 +7,7 @@ from weldx.asdf.types import WeldxType
 class {{class_name}}:
     """<CLASS DOCSTRING>"""
     {% for prop, dtype in zip(properties,property_types) -%}
-        {{ prop }}: {{ dtype}}
+        {{ prop }}: {{ dtype }}
     {% endfor %}
 
 class {{class_name}}Type(WeldxType):

@@ -14,13 +14,23 @@ properties:
   {{ prop }}:
     description: |
       {{ desc }}
+{%- if  str.startswith(dtype,"List[") %}
+    type: array
+    items:
+      type: {{ _asdf_dtype(dtype) }}
+{%- else %}
     type: {{ _asdf_dtype(dtype) }}
+{%- endif %}
 {% endfor %}
+
 
 {% if required is not none -%}   
 required: [{{ ", ".join(required)}}]
 {%- endif %}
 {% if property_order is not none -%}   
 propertyOrder: [{{ ", ".join(property_order)}}]
+{%- endif %}
+{% if flow_style is not none -%}
+flowStyle: {{ flow_style }}
 {%- endif %}
 additionalProperties: {{ additional_properties }}

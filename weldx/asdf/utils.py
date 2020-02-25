@@ -13,6 +13,8 @@ _DTYPE_DICT = pd.DataFrame(
 
 
 def _asdf_dtype(py_type):
+    if py_type.startswith("List["):
+        py_type = py_type[5:-1]
     lookup = _DTYPE_DICT.py_type.isin([py_type])
     if lookup.any():
         return _DTYPE_DICT.loc[lookup].asdf_type.iloc[0]
@@ -28,6 +30,7 @@ _loader = jinja2.FileSystemLoader(
 _env = jinja2.Environment(loader=_loader)
 _env.globals.update(zip=zip)
 _env.globals.update(_asdf_dtype=_asdf_dtype)
+_env.globals.update(str=str)
 
 
 def make_asdf_schema_string(
@@ -41,6 +44,7 @@ def make_asdf_schema_string(
     additional_properties="false",
     schema_title=_DEFAULT_ASDF_DESCRIPTION,
     schema_description=_DEFAULT_ASDF_DESCRIPTION,
+    flow_style="block",
 ):
     """Generate default ASDF schema."""
 
@@ -62,6 +66,7 @@ def make_asdf_schema_string(
         additional_properties=additional_properties,
         schema_title=schema_title,
         schema_description=schema_description,
+        flow_style=flow_style,
     )  # this is where to put args to the template renderer
 
     return output_text
