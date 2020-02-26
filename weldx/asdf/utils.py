@@ -6,13 +6,23 @@ from .extension import SCHEMA_PATH
 
 _DTYPE_DICT = pd.DataFrame(
     data={
-        "py_type": ["str", "float", "int", "bool", "pint.Quantity"],
+        "py_type": [
+            "str",
+            "float",
+            "int",
+            "bool",
+            "pint.Quantity",
+            "VGroove",
+            "UGroove",
+        ],
         "asdf_type": [
             "string",
             "number",
             "integer",
             "boolean",
-            '"tag:stsci.edu:asdf/unit/quantity-1.1.0"',
+            "tag:stsci.edu:asdf/unit/quantity-1.1.0",
+            "tag:weldx.bam.de:weldx/core/din_en_iso_9692-1_2013-1.0.0",
+            "tag:weldx.bam.de:weldx/core/din_en_iso_9692-1_2013-1.0.0",
         ],
     }
 )
@@ -28,7 +38,7 @@ def _asdf_dtype(py_type):
     lookup = _DTYPE_DICT.py_type.isin([py_type])
     if lookup.any():
         asdf_type = _DTYPE_DICT.loc[lookup].asdf_type.iloc[0]
-        if "tag:" in asdf_type:
+        if ("tag:" in asdf_type) or ("-" in asdf_type):
             prefix = "$ref: "
         return prefix + asdf_type
 

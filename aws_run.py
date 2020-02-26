@@ -39,13 +39,12 @@ v_groove = get_groove(
     groove_type="VGroove",
     **dict(t=Q_(8, "mm"), alpha=Q_(60, "deg"), c=Q_(4, "mm"), b=Q_(2, "mm")),
 )
-pprint.pprint(v_groove)
 
 joint_penetration = JointPenetration(
     complete_or_partial="complete", units="mm", root_penetration=1.0
 )
 weld_details = WeldDetails(
-    joint_design="V-Joint", weld_sizes=Q_(320, "mm"), number_of_passes=1
+    joint_design=v_groove, weld_sizes=Q_(320, "mm"), number_of_passes=1
 )
 connection = Connection(
     joint_type="Butt-Joint",
@@ -59,7 +58,7 @@ sub_assembly = [SubAssembly(workpiece=workpieces, connection=connection)]
 weldment = Weldment(sub_assembly)
 
 filename = "aws_demo.yaml"
-tree = dict(process=gas_for_procedure, weldment=weldment, groove=v_groove)
+tree = dict(process=gas_for_procedure, weldment=weldment)
 
 # Write the data to a new file
 with asdf.AsdfFile(
@@ -76,4 +75,3 @@ with asdf.open(
     data = af.tree
     pprint.pprint(data["process"].__dict__)
     pprint.pprint(data["weldment"].__dict__)
-    pprint.pprint(data["groove"].__dict__)
