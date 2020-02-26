@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List  # noqa: F401
 from asdf import yamlutil
 from weldx.asdf.types import WeldxType
 
@@ -11,12 +11,12 @@ class JointPenetration:
     complete_or_partial: str
     units: str
     root_penetration: float
-    groove_weld_size: float
-    incomplete_joint_penetration: float
-    weld_size: float
-    weld_size_E1: float
-    weld_size_E2: float
-    depth_of_fusion: float
+    groove_weld_size: float = None
+    incomplete_joint_penetration: float = None
+    weld_size: float = None
+    weld_size_E1: float = None
+    weld_size_E2: float = None
+    depth_of_fusion: float = None
 
 
 class JointPenetrationType(WeldxType):
@@ -30,7 +30,8 @@ class JointPenetrationType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        tree = dict(
+        # convert to tagged tree
+        tree_full = dict(
             complete_or_partial=yamlutil.custom_tree_to_tagged_tree(
                 node.complete_or_partial, ctx
             ),
@@ -51,6 +52,9 @@ class JointPenetrationType(WeldxType):
                 node.depth_of_fusion, ctx
             ),
         )
+
+        # drop None values
+        tree = {k: v for (k, v) in tree_full.items() if v is not None}
         return tree
 
     @classmethod

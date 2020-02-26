@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List  # noqa: F401
 from asdf import yamlutil
 from weldx.asdf.types import WeldxType
 
@@ -22,7 +22,13 @@ class WorkpieceType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        tree = dict(geometry=yamlutil.custom_tree_to_tagged_tree(node.geometry, ctx))
+        # convert to tagged tree
+        tree_full = dict(
+            geometry=yamlutil.custom_tree_to_tagged_tree(node.geometry, ctx)
+        )
+
+        # drop None values
+        tree = {k: v for (k, v) in tree_full.items() if v is not None}
         return tree
 
     @classmethod

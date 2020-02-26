@@ -73,12 +73,16 @@ def make_asdf_schema_string(
 
 
 def make_python_class_string(
-    class_name, asdf_name, asdf_version, properties, property_types
+    class_name, asdf_name, asdf_version, properties, property_types, required
 ):
     """Generate default python dataclass and ASDF Type."""
 
     template_file = "asdf_dataclass.py.jinja"
     template = _env.get_template(template_file)
+
+    lib_imports = set(
+        [dtype.split(".")[0] for dtype in property_types if len(dtype.split(".")) > 1]
+    )
 
     output_text = template.render(
         class_name=class_name,
@@ -86,6 +90,8 @@ def make_python_class_string(
         asdf_version=asdf_version,
         properties=properties,
         property_types=property_types,
+        required=required,
+        lib_imports=lib_imports,
     )
 
     return output_text
@@ -147,6 +153,7 @@ def create_asdf_dataclass(
         asdf_version=asdf_version,
         properties=properties,
         property_types=property_types,
+        required=required,
     )
     python_file_path.parent.mkdir(parents=True, exist_ok=True)
     with open(str(python_file_path), "w") as file:

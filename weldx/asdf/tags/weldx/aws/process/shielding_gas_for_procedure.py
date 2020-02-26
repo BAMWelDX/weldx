@@ -5,20 +5,22 @@ from weldx.asdf.types import WeldxType
 
 import pint
 
+from .shielding_gas_type import ShieldingGasType
+
 
 @dataclass
 class ShieldingGasForProcedure:
     """<CLASS DOCSTRING>"""
 
     use_torch_shielding_gas: bool
-    torch_shielding_gas: GAS_TYPE
+    torch_shielding_gas: ShieldingGasType
     torch_shielding_gas_flowrate: pint.Quantity
-    use_backing_gas: bool
-    backing_gas: GAS_TYPE
-    backing_gas_flowrate: pint.Quantity
-    use_trailing_gas: bool
-    trailing_shielding_gas: GAS_TYPE
-    trailing_shielding_gas_flowrate: pint.Quantity
+    use_backing_gas: bool = None
+    backing_gas: ShieldingGasType = None
+    backing_gas_flowrate: pint.Quantity = None
+    use_trailing_gas: bool = None
+    trailing_shielding_gas: ShieldingGasType = None
+    trailing_shielding_gas_flowrate: pint.Quantity = None
 
 
 class ShieldingGasForProcedureType(WeldxType):
@@ -32,7 +34,8 @@ class ShieldingGasForProcedureType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        tree = dict(
+        # convert to tagged tree
+        tree_full = dict(
             use_torch_shielding_gas=yamlutil.custom_tree_to_tagged_tree(
                 node.use_torch_shielding_gas, ctx
             ),
@@ -59,6 +62,9 @@ class ShieldingGasForProcedureType(WeldxType):
                 node.trailing_shielding_gas_flowrate, ctx
             ),
         )
+
+        # drop None values
+        tree = {k: v for (k, v) in tree_full.items() if v is not None}
         return tree
 
     @classmethod

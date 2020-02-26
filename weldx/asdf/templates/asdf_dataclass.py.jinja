@@ -3,12 +3,16 @@ from typing import List # noqa: F401
 from asdf import yamlutil
 from weldx.asdf.types import WeldxType
 
+{% for lib in lib_imports -%}
+import {{ lib }}
+{% endfor -%}
+
 
 @dataclass
 class {{class_name}}:
     """<CLASS DOCSTRING>"""
     {% for prop, dtype in zip(properties,property_types) -%}
-        {{ prop }}: {{ dtype }}
+        {{ prop }}: {{ dtype }}{%- if prop not in required %} = None{%- endif %}
     {% endfor %}
 
 class {{class_name}}Type(WeldxType):
@@ -22,11 +26,15 @@ class {{class_name}}Type(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        tree = dict(
+        # convert to tagged tree
+        tree_full = dict(
             {% for prop in properties -%}
             {{ prop }}=yamlutil.custom_tree_to_tagged_tree(node.{{ prop }}, ctx),
             {% endfor -%}
             )
+
+        # drop None values
+        tree = {k:v for (k,v) in tree_full.items() if v is not None}
         return tree
 
     @classmethod

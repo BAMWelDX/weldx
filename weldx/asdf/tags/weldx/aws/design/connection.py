@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List  # noqa: F401
 from asdf import yamlutil
 from weldx.asdf.types import WeldxType
 
@@ -25,7 +25,8 @@ class ConnectionType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        tree = dict(
+        # convert to tagged tree
+        tree_full = dict(
             joint_type=yamlutil.custom_tree_to_tagged_tree(node.joint_type, ctx),
             weld_type=yamlutil.custom_tree_to_tagged_tree(node.weld_type, ctx),
             joint_penetration=yamlutil.custom_tree_to_tagged_tree(
@@ -33,6 +34,9 @@ class ConnectionType(WeldxType):
             ),
             weld_details=yamlutil.custom_tree_to_tagged_tree(node.weld_details, ctx),
         )
+
+        # drop None values
+        tree = {k: v for (k, v) in tree_full.items() if v is not None}
         return tree
 
     @classmethod

@@ -18,7 +18,7 @@ properties:
   torch_shielding_gas:
     description: |
       Composition of shielding gas expelled from a nozzle in the welding torch.
-    type: <TODO ASDF_TYPE(GAS_TYPE)>
+    type: <TODO ASDF_TYPE(ShieldingGasType)>
 
   torch_shielding_gas_flowrate:
     description: |
@@ -33,7 +33,7 @@ properties:
   backing_gas:
     description: |
       Specification of the component gases of the mixture.
-    type: <TODO ASDF_TYPE(GAS_TYPE)>
+    type: <TODO ASDF_TYPE(ShieldingGasType)>
 
   backing_gas_flowrate:
     description: |
@@ -48,7 +48,7 @@ properties:
   trailing_shielding_gas:
     description: |
       Composition or identification of trailing gas.
-    type: <TODO ASDF_TYPE(GAS_TYPE)>
+    type: <TODO ASDF_TYPE(ShieldingGasType)>
 
   trailing_shielding_gas_flowrate:
     description: |
