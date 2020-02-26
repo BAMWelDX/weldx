@@ -1,0 +1,25 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/design/sub_assembly-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/design/sub_assembly-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  <TODO DESCRIPTION>
+type: object
+properties:
+  workpiece:
+    description: |
+      Two workpieces joined by a weld. Identifies simple weldments that can be joined to form a largermore complicated weldment.
+    type: array
+    items:
+      type: <TODO ASDF_TYPE(Workpiece)>
+
+
+
+required: [workpiece, connection]
+propertyOrder: [workpiece, connection]
+flowStyle: block
+additionalProperties: false

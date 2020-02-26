@@ -79,6 +79,20 @@ create_asdf_dataclass(
     description=["An assembly whose component parts are joined by welding"],
 )
 
+# design/sub_assembly -----------------------------------------------------------------
+create_asdf_dataclass(
+    asdf_name="aws/design/sub_assembly",
+    asdf_version="1.0.0",
+    class_name="SubAssembly",
+    properties=["workpiece", "connection"],
+    required=["workpiece", "connection"],
+    property_order=["workpiece", "connection"],
+    property_types=["List[Workpiece]", "Connection"],
+    description=[
+        "Two workpieces joined by a weld. Identifies simple weldments that can be joined to form a largermore complicated weldment."
+    ],
+)
+
 # design/workpiece -----------------------------------------------------------------
 create_asdf_dataclass(
     asdf_name="aws/design/workpiece",
@@ -105,7 +119,7 @@ create_asdf_dataclass(
     properties=["joint_type", "weld_type", "joint_penetration", "weld_details"],
     required=["joint_type", "weld_type", "joint_penetration", "weld_details"],
     property_order=["joint_type", "weld_type", "joint_penetration", "weld_details"],
-    property_types=["str", "str", "joint_penetration", "weld_details"],
+    property_types=["str", "str", "JointPenetration", "WeldDetails"],
     description=[
         "A weld joint classification based the relative orientation of the members being joined. TODO ENUM",
         "A region of coalescence of materials produced by heating or pressure, that joins two pieces of metal. TODO ENUM",
@@ -167,6 +181,22 @@ create_asdf_dataclass(
     ],
 )
 
+# design/weld_details -----------------------------------------------------------------
+create_asdf_dataclass(
+    asdf_name="aws/design/weld_details",
+    asdf_version="1.0.0",
+    class_name="WeldDetails",
+    schema_description="Information describing the joint and the geometric parameters of the designed weld.",
+    properties=["joint_design", "weld_sizes", "number_of_passes"],
+    required=["joint_design", "weld_sizes", "number_of_passes"],
+    property_order=["joint_design", "weld_sizes", "number_of_passes"],
+    property_types=["str", "float", "int"],
+    description=[
+        'AWS 3.0, p. 19 : "Detailed Description of mating configuration of two components, sufficient information for shop preparation of the components." TODO CLASS',
+        "Linear dimensions of cross sectional weld features. Sizes are of design and actual features. TODO CLASS",
+        "Number of times needed to deposit weld metal to complete the weld.",
+    ],
+)
 
 # design/base_metal -----------------------------------------------------------------
 create_asdf_dataclass(

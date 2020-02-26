@@ -3,6 +3,8 @@ from typing import List  # noqa: F401
 from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
 
+from .joint_penetration import JointPenetration
+
 __all__ = ["Connection", "ConnectionType"]
 
 
@@ -12,8 +14,8 @@ class Connection:
 
     joint_type: str
     weld_type: str
-    joint_penetration: joint_penetration
-    weld_details: weld_details
+    joint_penetration: JointPenetration
+    weld_details: WeldDetails
 
 
 class ConnectionType(WeldxType):
