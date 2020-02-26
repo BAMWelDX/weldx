@@ -32,7 +32,9 @@ gas_for_procedure = ShieldingGasForProcedure(
 joint_penetration = JointPenetration(
     complete_or_partial="complete", units="mm", root_penetration=1.0
 )
-weld_details = WeldDetails(joint_design="V-Joint", weld_sizes=320.0, number_of_passes=1)
+weld_details = WeldDetails(
+    joint_design="V-Joint", weld_sizes=Q_(320, "mm"), number_of_passes=1
+)
 connection = Connection(
     joint_type="Butt-Joint",
     weld_type="full",

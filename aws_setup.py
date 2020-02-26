@@ -190,7 +190,7 @@ create_asdf_dataclass(
     properties=["joint_design", "weld_sizes", "number_of_passes"],
     required=["joint_design", "weld_sizes", "number_of_passes"],
     property_order=["joint_design", "weld_sizes", "number_of_passes"],
-    property_types=["str", "float", "int"],
+    property_types=["str", "pint.Quantity", "int"],
     description=[
         'AWS 3.0, p. 19 : "Detailed Description of mating configuration of two components, sufficient information for shop preparation of the components." TODO CLASS',
         "Linear dimensions of cross sectional weld features. Sizes are of design and actual features. TODO CLASS",
