@@ -74,3 +74,4 @@ required: [joint_type, weld_type, joint_penetration, weld_details]
 propertyOrder: [joint_type, weld_type, joint_penetration, weld_details]
 flowStyle: block
 additionalProperties: false
+...

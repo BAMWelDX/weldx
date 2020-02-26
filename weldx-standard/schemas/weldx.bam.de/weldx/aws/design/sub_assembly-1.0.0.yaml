@@ -28,3 +28,4 @@ required: [workpiece, connection]
 propertyOrder: [workpiece, connection]
 flowStyle: block
 additionalProperties: false
+...

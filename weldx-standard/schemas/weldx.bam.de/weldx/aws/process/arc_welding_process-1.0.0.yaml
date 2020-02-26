@@ -21,3 +21,4 @@ required: [name]
 propertyOrder: [name]
 flowStyle: block
 additionalProperties: false
+...

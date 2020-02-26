@@ -59,3 +59,4 @@ required: [complete_or_partial, root_penetration]
 propertyOrder: [complete_or_partial, root_penetration, groove_weld_size, incomplete_joint_penetration, weld_size, weld_size_E1, weld_size_E2, depth_of_fusion]
 flowStyle: block
 additionalProperties: false
+...

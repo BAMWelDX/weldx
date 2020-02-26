@@ -23,3 +23,4 @@ required: [sub_assembly]
 propertyOrder: [sub_assembly]
 flowStyle: block
 additionalProperties: false
+...
