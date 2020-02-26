@@ -37,7 +37,7 @@ WELDX_URL_MAPPING = [
 class WeldxExtension(AsdfExtension):
     @property
     def types(self):
-        # Therer are no types yet!
+        # There are no types yet!
         return _weldx_types
 
     @property
