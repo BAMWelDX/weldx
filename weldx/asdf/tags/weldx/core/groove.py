@@ -6,6 +6,15 @@ from weldx import Q_
 from weldx.asdf.types import WeldxType
 
 
+def get_groove(groove_type, **kwargs):
+    """<DEF DOCSTRING>"""
+    if groove_type == "VGroove":
+        return VGroove(**kwargs)
+    if groove_type == "UGroove":
+        return UGroove(**kwargs)
+
+
+
 @dataclass
 class VGroove:
     """<CLASS DOCSTRING>"""
@@ -13,6 +22,7 @@ class VGroove:
     alpha: Q_
     c: Q_ = Q_(0, "mm")
     b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
 
 @dataclass
@@ -23,6 +33,7 @@ class UGroove:
     R: Q_
     c: Q_ = Q_(0, "mm")
     b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.8"])
 
 
 class GrooveType(WeldxType):
@@ -37,18 +48,33 @@ class GrooveType(WeldxType):
     @classmethod
     def to_tree(cls, node, ctx):
         if isinstance(node, VGroove):
-            components = node.__dict__
+            components = dict(
+                t=node.t,
+                alpha=node.alpha,
+                b=node.b,
+                c=node.c,
+            )
+            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
                 components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
                 type="SingleVGroove",
+                code_number=code_number,
             )
             return tree
 
         if isinstance(node, UGroove):
-            components = node.__dict__
+            components = dict(
+                t=node.t,
+                beta=node.beta,
+                R=node.R,
+                b=node.b,
+                c=node.c,
+            )
+            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
                 components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
-                type="SingleUGroove"
+                type="SingleUGroove",
+                code_number=code_number,
             )
             return tree
 
