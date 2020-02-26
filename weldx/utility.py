@@ -58,7 +58,7 @@ def to_list(var):
     return [var]
 
 
-def matrix_is_close(mat_a, mat_b, abs_tol=1E-9):
+def matrix_is_close(mat_a, mat_b, abs_tol=1e-9):
     """
     Check if a matrix is close or equal to another matrix.
 
@@ -79,7 +79,7 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1E-9):
     return True
 
 
-def vector_is_close(vec_a, vec_b, abs_tol=1E-9):
+def vector_is_close(vec_a, vec_b, abs_tol=1e-9):
     """
     Check if a vector is close or equal to another vector.
 

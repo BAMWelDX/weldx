@@ -1,11 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE
 # -*- coding: utf-8 -*-
 
-from dataclasses import dataclass
-
 import pint
-
-from asdf import yamlutil
 
 from weldx import Q_
 from weldx.asdf.types import WeldxAsdfType

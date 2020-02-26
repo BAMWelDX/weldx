@@ -110,7 +110,7 @@ def create_asdf_dataclass(
         asdf_name=asdf_name,
         asdf_version=asdf_version,
         properties=properties,
-        property_types=property_types
+        property_types=property_types,
     )
     with open(str(python_file_path), "w") as file:
         file.write(python_class_string)
