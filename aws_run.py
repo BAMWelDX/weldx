@@ -1,3 +1,5 @@
+"""Run the AWS Data Dictionary debug example."""
+
 import asdf
 import pprint
 

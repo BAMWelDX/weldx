@@ -1,6 +1,4 @@
-"""
-Example implementation of AWS "A Welding Data Dictionary"
-"""
+"""Generate example implementation of AWS "A Welding Data Dictionary."""
 
 from weldx.asdf.utils import create_asdf_dataclass
 

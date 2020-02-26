@@ -1,5 +1,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE
 # -*- coding: utf-8 -*-
+"""Python Library description and install setup."""
 
 from setuptools import setup, find_packages
 import versioneer
