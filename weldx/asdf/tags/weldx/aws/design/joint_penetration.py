@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
-from asdf import yamlutil
+from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
+
+__all__ = ["JointPenetration", "JointPenetrationType"]
 
 
 @dataclass
@@ -32,25 +34,19 @@ class JointPenetrationType(WeldxType):
     def to_tree(cls, node, ctx):
         # convert to tagged tree
         tree_full = dict(
-            complete_or_partial=yamlutil.custom_tree_to_tagged_tree(
+            complete_or_partial=custom_tree_to_tagged_tree(
                 node.complete_or_partial, ctx
             ),
-            units=yamlutil.custom_tree_to_tagged_tree(node.units, ctx),
-            root_penetration=yamlutil.custom_tree_to_tagged_tree(
-                node.root_penetration, ctx
-            ),
-            groove_weld_size=yamlutil.custom_tree_to_tagged_tree(
-                node.groove_weld_size, ctx
-            ),
-            incomplete_joint_penetration=yamlutil.custom_tree_to_tagged_tree(
+            units=custom_tree_to_tagged_tree(node.units, ctx),
+            root_penetration=custom_tree_to_tagged_tree(node.root_penetration, ctx),
+            groove_weld_size=custom_tree_to_tagged_tree(node.groove_weld_size, ctx),
+            incomplete_joint_penetration=custom_tree_to_tagged_tree(
                 node.incomplete_joint_penetration, ctx
             ),
-            weld_size=yamlutil.custom_tree_to_tagged_tree(node.weld_size, ctx),
-            weld_size_E1=yamlutil.custom_tree_to_tagged_tree(node.weld_size_E1, ctx),
-            weld_size_E2=yamlutil.custom_tree_to_tagged_tree(node.weld_size_E2, ctx),
-            depth_of_fusion=yamlutil.custom_tree_to_tagged_tree(
-                node.depth_of_fusion, ctx
-            ),
+            weld_size=custom_tree_to_tagged_tree(node.weld_size, ctx),
+            weld_size_E1=custom_tree_to_tagged_tree(node.weld_size_E1, ctx),
+            weld_size_E2=custom_tree_to_tagged_tree(node.weld_size_E2, ctx),
+            depth_of_fusion=custom_tree_to_tagged_tree(node.depth_of_fusion, ctx),
         )
 
         # drop None values

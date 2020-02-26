@@ -1,11 +1,14 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
-from asdf import yamlutil
+from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
 
 import pint
 
 from .shielding_gas_type import ShieldingGasType
+
+
+__all__ = ["ShieldingGasForProcedure", "ShieldingGasForProcedureType"]
 
 
 @dataclass
@@ -36,29 +39,25 @@ class ShieldingGasForProcedureType(WeldxType):
     def to_tree(cls, node, ctx):
         # convert to tagged tree
         tree_full = dict(
-            use_torch_shielding_gas=yamlutil.custom_tree_to_tagged_tree(
+            use_torch_shielding_gas=custom_tree_to_tagged_tree(
                 node.use_torch_shielding_gas, ctx
             ),
-            torch_shielding_gas=yamlutil.custom_tree_to_tagged_tree(
+            torch_shielding_gas=custom_tree_to_tagged_tree(
                 node.torch_shielding_gas, ctx
             ),
-            torch_shielding_gas_flowrate=yamlutil.custom_tree_to_tagged_tree(
+            torch_shielding_gas_flowrate=custom_tree_to_tagged_tree(
                 node.torch_shielding_gas_flowrate, ctx
             ),
-            use_backing_gas=yamlutil.custom_tree_to_tagged_tree(
-                node.use_backing_gas, ctx
-            ),
-            backing_gas=yamlutil.custom_tree_to_tagged_tree(node.backing_gas, ctx),
-            backing_gas_flowrate=yamlutil.custom_tree_to_tagged_tree(
+            use_backing_gas=custom_tree_to_tagged_tree(node.use_backing_gas, ctx),
+            backing_gas=custom_tree_to_tagged_tree(node.backing_gas, ctx),
+            backing_gas_flowrate=custom_tree_to_tagged_tree(
                 node.backing_gas_flowrate, ctx
             ),
-            use_trailing_gas=yamlutil.custom_tree_to_tagged_tree(
-                node.use_trailing_gas, ctx
-            ),
-            trailing_shielding_gas=yamlutil.custom_tree_to_tagged_tree(
+            use_trailing_gas=custom_tree_to_tagged_tree(node.use_trailing_gas, ctx),
+            trailing_shielding_gas=custom_tree_to_tagged_tree(
                 node.trailing_shielding_gas, ctx
             ),
-            trailing_shielding_gas_flowrate=yamlutil.custom_tree_to_tagged_tree(
+            trailing_shielding_gas_flowrate=custom_tree_to_tagged_tree(
                 node.trailing_shielding_gas_flowrate, ctx
             ),
         )

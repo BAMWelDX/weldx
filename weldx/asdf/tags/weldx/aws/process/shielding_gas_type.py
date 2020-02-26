@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
-from asdf import yamlutil
+from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
 from .gas_component import GasComponent
+
+__all__ = ["ShieldingGasType", "ShieldingGasTypeType"]
 
 
 @dataclass
@@ -27,9 +29,9 @@ class ShieldingGasTypeType(WeldxType):
     def to_tree(cls, node, ctx):
         # convert to tagged tree
         tree_full = dict(
-            gas_component=yamlutil.custom_tree_to_tagged_tree(node.gas_component, ctx),
-            common_name=yamlutil.custom_tree_to_tagged_tree(node.common_name, ctx),
-            designation=yamlutil.custom_tree_to_tagged_tree(node.designation, ctx),
+            gas_component=custom_tree_to_tagged_tree(node.gas_component, ctx),
+            common_name=custom_tree_to_tagged_tree(node.common_name, ctx),
+            designation=custom_tree_to_tagged_tree(node.designation, ctx),
         )
 
         # drop None values

@@ -7,6 +7,8 @@ from weldx.asdf.types import WeldxType
 import {{ lib }}
 {% endfor -%}
 
+__all__ = ["{{class_name}}","{{class_name}}Type"]
+
 
 @dataclass
 class {{class_name}}:

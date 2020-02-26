@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
-from asdf import yamlutil
+from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
+
+__all__ = ["Weldment", "WeldmentType"]
 
 
 @dataclass
@@ -24,7 +26,7 @@ class WeldmentType(WeldxType):
     def to_tree(cls, node, ctx):
         # convert to tagged tree
         tree_full = dict(
-            sub_assembly=yamlutil.custom_tree_to_tagged_tree(node.sub_assembly, ctx)
+            sub_assembly=custom_tree_to_tagged_tree(node.sub_assembly, ctx)
         )
 
         # drop None values

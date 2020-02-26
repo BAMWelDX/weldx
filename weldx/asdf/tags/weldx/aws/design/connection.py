@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
-from asdf import yamlutil
+from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
+
+__all__ = ["Connection", "ConnectionType"]
 
 
 @dataclass
@@ -27,12 +29,10 @@ class ConnectionType(WeldxType):
     def to_tree(cls, node, ctx):
         # convert to tagged tree
         tree_full = dict(
-            joint_type=yamlutil.custom_tree_to_tagged_tree(node.joint_type, ctx),
-            weld_type=yamlutil.custom_tree_to_tagged_tree(node.weld_type, ctx),
-            joint_penetration=yamlutil.custom_tree_to_tagged_tree(
-                node.joint_penetration, ctx
-            ),
-            weld_details=yamlutil.custom_tree_to_tagged_tree(node.weld_details, ctx),
+            joint_type=custom_tree_to_tagged_tree(node.joint_type, ctx),
+            weld_type=custom_tree_to_tagged_tree(node.weld_type, ctx),
+            joint_penetration=custom_tree_to_tagged_tree(node.joint_penetration, ctx),
+            weld_details=custom_tree_to_tagged_tree(node.weld_details, ctx),
         )
 
         # drop None values
