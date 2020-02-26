@@ -14,10 +14,10 @@ def get_groove(groove_type, **kwargs):
         return UGroove(**kwargs)
 
 
-
 @dataclass
 class VGroove:
     """<CLASS DOCSTRING>"""
+
     t: Q_
     alpha: Q_
     c: Q_ = Q_(0, "mm")
@@ -28,6 +28,7 @@ class VGroove:
 @dataclass
 class UGroove:
     """<CLASS DOCSTRING>"""
+
     t: Q_
     beta: Q_
     R: Q_
@@ -48,12 +49,7 @@ class GrooveType(WeldxType):
     @classmethod
     def to_tree(cls, node, ctx):
         if isinstance(node, VGroove):
-            components = dict(
-                t=node.t,
-                alpha=node.alpha,
-                b=node.b,
-                c=node.c,
-            )
+            components = dict(t=node.t, alpha=node.alpha, b=node.b, c=node.c)
             code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
                 components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
@@ -63,13 +59,7 @@ class GrooveType(WeldxType):
             return tree
 
         if isinstance(node, UGroove):
-            components = dict(
-                t=node.t,
-                beta=node.beta,
-                R=node.R,
-                b=node.b,
-                c=node.c,
-            )
+            components = dict(t=node.t, beta=node.beta, R=node.R, b=node.b, c=node.c)
             code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
                 components=yamlutil.custom_tree_to_tagged_tree(components, ctx),

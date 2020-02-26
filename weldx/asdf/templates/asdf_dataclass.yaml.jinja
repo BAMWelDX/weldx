@@ -17,9 +17,9 @@ properties:
 {%- if  str.startswith(dtype,"List[") %}
     type: array
     items:
-      type: {{ _asdf_dtype(dtype) }}
+      {{ _asdf_dtype(dtype) }}
 {%- else %}
-    type: {{ _asdf_dtype(dtype) }}
+    {{ _asdf_dtype(dtype) }}
 {%- endif %}
 {% endfor %}
 

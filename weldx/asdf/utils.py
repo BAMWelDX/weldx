@@ -19,13 +19,20 @@ _DTYPE_DICT = pd.DataFrame(
 
 
 def _asdf_dtype(py_type):
+    prefix = "type: "
+
+    # strip list
     if py_type.startswith("List["):
         py_type = py_type[5:-1]
+
     lookup = _DTYPE_DICT.py_type.isin([py_type])
     if lookup.any():
-        return _DTYPE_DICT.loc[lookup].asdf_type.iloc[0]
-    else:
-        return f"<TODO ASDF_TYPE({py_type})>"
+        asdf_type = _DTYPE_DICT.loc[lookup].asdf_type.iloc[0]
+        if "tag:" in asdf_type:
+            prefix = "$ref: "
+        return prefix + asdf_type
+
+    return f"{prefix}<TODO ASDF_TYPE({py_type})>"
 
 
 _DEFAULT_ASDF_DESCRIPTION = "<TODO DESCRIPTION>"
