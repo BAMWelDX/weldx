@@ -18,12 +18,12 @@ properties:
   torch_shielding_gas:
     description: |
       Composition of shielding gas expelled from a nozzle in the welding torch.
-    type: <TODO ASDF_TYPE(ShieldingGasType)>
+    $ref: shielding_gas_type-1.0.0
 
   torch_shielding_gas_flowrate:
     description: |
       Flow rate of shielding gas required or specified.
-    type: unit/quantity-1.0.0
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
 
   use_backing_gas:
     description: |
@@ -33,12 +33,12 @@ properties:
   backing_gas:
     description: |
       Specification of the component gases of the mixture.
-    type: <TODO ASDF_TYPE(ShieldingGasType)>
+    $ref: shielding_gas_type-1.0.0
 
   backing_gas_flowrate:
     description: |
       Flowrate of backing gas.
-    type: unit/quantity-1.0.0
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
 
   use_trailing_gas:
     description: |
@@ -48,12 +48,12 @@ properties:
   trailing_shielding_gas:
     description: |
       Composition or identification of trailing gas.
-    type: <TODO ASDF_TYPE(ShieldingGasType)>
+    $ref: shielding_gas_type-1.0.0
 
   trailing_shielding_gas_flowrate:
     description: |
       Flowrate of trailing gas during welding.
-    type: unit/quantity-1.0.0
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
 
 
 

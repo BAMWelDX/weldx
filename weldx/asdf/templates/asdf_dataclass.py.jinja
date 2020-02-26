@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List # noqa: F401
-from asdf import yamlutil
+from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
 
 {% for lib in lib_imports -%}
@@ -29,7 +29,7 @@ class {{class_name}}Type(WeldxType):
         # convert to tagged tree
         tree_full = dict(
             {% for prop in properties -%}
-            {{ prop }}=yamlutil.custom_tree_to_tagged_tree(node.{{ prop }}, ctx),
+            {{ prop }}=custom_tree_to_tagged_tree(node.{{ prop }}, ctx),
             {% endfor -%}
             )
 

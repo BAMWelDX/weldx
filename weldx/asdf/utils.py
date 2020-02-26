@@ -7,7 +7,13 @@ from .extension import SCHEMA_PATH
 _DTYPE_DICT = pd.DataFrame(
     data={
         "py_type": ["str", "float", "int", "bool", "pint.Quantity"],
-        "asdf_type": ["string", "number", "integer", "boolean", "unit/quantity-1.0.0"],
+        "asdf_type": [
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            '"tag:stsci.edu:asdf/unit/quantity-1.1.0"',
+        ],
     }
 )
 
