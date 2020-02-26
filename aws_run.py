@@ -18,19 +18,21 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
     ShieldingGasForProcedure,
 )
 
+# welding process -----------------------------------------------------------------
 gas_comp = [GasComponent("Argon", 82.0), GasComponent("Carbon Dioxide", 18.0)]
 gas_type = ShieldingGasType(gas_component=gas_comp, common_name="SG")
 
 gas_for_procedure = ShieldingGasForProcedure(
     use_torch_shielding_gas=True,
     torch_shielding_gas=gas_type,
-    torch_shielding_gas_flowrate=Q_(3, "l / min"),
+    torch_shielding_gas_flowrate=Q_(20, "l / min"),
 )
 
+# weld design process -----------------------------------------------------------------
 joint_penetration = JointPenetration(
     complete_or_partial="complete", units="mm", root_penetration=1.0
 )
-weld_details = WeldDetails()
+weld_details = WeldDetails(joint_design="V-Joint", weld_sizes=320.0, number_of_passes=1)
 connection = Connection(
     joint_type="Butt-Joint",
     weld_type="full",
@@ -42,8 +44,8 @@ sub_assembly = [SubAssembly(workpiece=workpieces, connection=connection)]
 
 weldment = Weldment(sub_assembly)
 
-filename = "aws_demo.asdf"
-tree = dict(entry=gas_for_procedure)
+filename = "aws_demo.yaml"
+tree = dict(process=gas_for_procedure, weldment=weldment)
 
 # Write the data to a new file
 with asdf.AsdfFile(
@@ -58,4 +60,5 @@ with asdf.open(
     filename, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
 ) as af:
     data = af.tree
-    pprint.pprint(data["entry"].__dict__)
+    pprint.pprint(data["process"].__dict__)
+    pprint.pprint(data["weldment"].__dict__)

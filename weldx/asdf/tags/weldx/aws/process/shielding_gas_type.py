@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List  # noqa: F401
 from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
+
 from .gas_component import GasComponent
 
 __all__ = ["ShieldingGasType", "ShieldingGasTypeType"]

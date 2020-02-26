@@ -4,6 +4,7 @@ from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
 
 from .joint_penetration import JointPenetration
+from .weld_details import WeldDetails
 
 __all__ = ["Connection", "ConnectionType"]
 

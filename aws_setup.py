@@ -72,11 +72,12 @@ create_asdf_dataclass(
     asdf_name="aws/design/weldment",
     asdf_version="1.0.0",
     class_name="Weldment",
+    schema_description="An assembly whose component parts are joined by welding",
     properties=["sub_assembly"],
     required=["sub_assembly"],
     property_order=["sub_assembly"],
-    property_types=["list"],
-    description=["An assembly whose component parts are joined by welding"],
+    property_types=["List[SubAssembly]"],
+    description=["A list of assemblies composing the weldment"],
 )
 
 # design/sub_assembly -----------------------------------------------------------------
@@ -84,12 +85,14 @@ create_asdf_dataclass(
     asdf_name="aws/design/sub_assembly",
     asdf_version="1.0.0",
     class_name="SubAssembly",
+    schema_description="Two workpieces joined by a weld. Identifies simple weldments that can be joined to form a largermore complicated weldment.",
     properties=["workpiece", "connection"],
     required=["workpiece", "connection"],
     property_order=["workpiece", "connection"],
     property_types=["List[Workpiece]", "Connection"],
     description=[
-        "Two workpieces joined by a weld. Identifies simple weldments that can be joined to form a largermore complicated weldment."
+        "Describes a piece of metal, its materials and geometries.",
+        "The joint formed by edge preparation of two workpieces and the weld that joins the workpieces together.",
     ],
 )
 
@@ -98,16 +101,12 @@ create_asdf_dataclass(
     asdf_name="aws/design/workpiece",
     asdf_version="1.0.0",
     class_name="Workpiece",
+    schema_description="""This element describes a piece of metal, its material, geometric properties and boundaries, including its edge shape for the welded joint. A workpiece can be a single piece of plate, or a previously assembled weldment. The scope of this data is beyond this welding data dictionary. This element represents an interface with CAD applications.""",
     properties=["geometry"],
     required=["geometry"],
     property_order=["geometry"],
     property_types=["str"],
-    description=[
-        """This element describes a piece of metal, its material, geometric properties and boundaries,
-        including its edge shape for the welded joint. A workpiece can be a single piece of plate, or a
-        previously assembled weldment. The scope of this data is beyond this welding data dictionary.
-        This element represents an interface with CAD applications."""
-    ],
+    description=["The workpiece geometry."],
 )
 
 
@@ -116,6 +115,7 @@ create_asdf_dataclass(
     asdf_name="aws/design/connection",
     asdf_version="1.0.0",
     class_name="Connection",
+    schema_description="The joint formed by edge preparation of two workpieces and the weld that joins the workpieces together.",
     properties=["joint_type", "weld_type", "joint_penetration", "weld_details"],
     required=["joint_type", "weld_type", "joint_penetration", "weld_details"],
     property_order=["joint_type", "weld_type", "joint_penetration", "weld_details"],
@@ -128,7 +128,7 @@ create_asdf_dataclass(
     ],
 )
 
-# design/joint_penetration -------------------------------------------------------------
+# design/joint_penetration ------------------------------------------------------------
 create_asdf_dataclass(
     asdf_name="aws/design/joint_penetration",
     asdf_version="1.0.0",
@@ -203,6 +203,7 @@ create_asdf_dataclass(
     asdf_name="aws/design/base_metal",
     asdf_version="1.0.0",
     class_name="BaseMetal",
+    schema_description="The material that is being joined using a weld.",
     properties=[
         "common_name",
         "m_number",
@@ -281,7 +282,7 @@ create_asdf_dataclass(
 
 # process -------------------------------------------------------------
 
-# process/arc_welding_process -------------------------------------------------------------
+# process/arc_welding_process --------------------------------------------------------
 create_asdf_dataclass(
     asdf_name="aws/process/arc_welding_process",
     asdf_version="1.0.0",
@@ -294,7 +295,7 @@ create_asdf_dataclass(
     description=["Process name and abbreviation . TODO ENUM"],
 )
 
-# process/shielding_gas_for_procedure -------------------------------------------------------------
+# process/shielding_gas_for_procedure -------------------------------------------
 create_asdf_dataclass(
     asdf_name="aws/process/shielding_gas_for_procedure",
     asdf_version="1.0.0",
@@ -367,7 +368,7 @@ create_asdf_dataclass(
     ],
 )
 
-# process/shielding_gas_type -------------------------------------------------------------
+# process/shielding_gas_type -------------------------------------------------
 create_asdf_dataclass(
     asdf_name="aws/process/shielding_gas_type",
     asdf_version="1.0.0",

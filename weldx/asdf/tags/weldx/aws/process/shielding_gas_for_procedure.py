@@ -7,7 +7,6 @@ import pint
 
 from .shielding_gas_type import ShieldingGasType
 
-
 __all__ = ["ShieldingGasForProcedure", "ShieldingGasForProcedureType"]
 
 

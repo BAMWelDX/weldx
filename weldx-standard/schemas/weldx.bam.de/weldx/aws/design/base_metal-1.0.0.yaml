@@ -7,7 +7,7 @@ tag: "tag:weldx.bam.de:weldx/aws/design/base_metal-1.0.0"
 title: |
   <TODO DESCRIPTION>
 description: |
-  <TODO DESCRIPTION>
+  None
 type: object
 properties:
   common_name:

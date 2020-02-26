@@ -3,6 +3,8 @@ from typing import List  # noqa: F401
 from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
 
+from .sub_assembly import SubAssembly
+
 __all__ = ["Weldment", "WeldmentType"]
 
 
@@ -10,7 +12,7 @@ __all__ = ["Weldment", "WeldmentType"]
 class Weldment:
     """<CLASS DOCSTRING>"""
 
-    sub_assembly: list
+    sub_assembly: List[SubAssembly]
 
 
 class WeldmentType(WeldxType):

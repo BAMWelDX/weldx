@@ -7,7 +7,7 @@ tag: "tag:weldx.bam.de:weldx/aws/design/connection-1.0.0"
 title: |
   <TODO DESCRIPTION>
 description: |
-  <TODO DESCRIPTION>
+  The joint formed by edge preparation of two workpieces and the weld that joins the workpieces together.
 type: object
 properties:
   joint_type:
@@ -23,12 +23,12 @@ properties:
   joint_penetration:
     description: |
       joint_penetration
-    type: <TODO ASDF_TYPE(joint_penetration)>
+    $ref: joint_penetration-1.0.0
 
   weld_details:
     description: |
       weld_details
-    type: <TODO ASDF_TYPE(weld_details)>
+    $ref: weld_details-1.0.0
 
 
 
