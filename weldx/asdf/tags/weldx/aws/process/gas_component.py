@@ -3,6 +3,8 @@ from typing import List  # noqa: F401
 from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
 
+import pint
+
 __all__ = ["GasComponent", "GasComponentType"]
 
 
@@ -11,7 +13,7 @@ class GasComponent:
     """<CLASS DOCSTRING>"""
 
     gas_chemical_name: str
-    gas_percentage: float
+    gas_percentage: pint.Quantity
 
 
 class GasComponentType(WeldxType):

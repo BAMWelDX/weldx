@@ -12,13 +12,19 @@ type: object
 properties:
   gas_chemical_name:
     description: |
-      Name of a single element or compound of gas. TODO ENUM
+      Name of a single element or compound of gas.
     type: string
+    enum:
+      - argon
+      - carbon dioxide
+      - helium
+      - hydrogen
+      - oxygen
 
   gas_percentage:
     description: |
       Percentage by weight this gas occupies of the total gas mixture.
-    type: number
+    $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
 
 
 

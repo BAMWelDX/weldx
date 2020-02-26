@@ -134,7 +134,6 @@ create_asdf_dataclass(
     schema_description="Various dimensions of penetration of the weld into the base materials",
     properties=[
         "complete_or_partial",
-        "units",
         "root_penetration",
         "groove_weld_size",
         "incomplete_joint_penetration",
@@ -146,7 +145,6 @@ create_asdf_dataclass(
     required=["complete_or_partial", "units", "root_penetration"],
     property_order=[
         "complete_or_partial",
-        "units",
         "root_penetration",
         "groove_weld_size",
         "incomplete_joint_penetration",
@@ -157,8 +155,7 @@ create_asdf_dataclass(
     ],
     property_types=[
         "str",
-        "str",
-        "float",
+        "pint.Quantity",
         "float",
         "float",
         "float",
@@ -168,7 +165,6 @@ create_asdf_dataclass(
     ],
     description=[
         "The weld design calls for partial or complete penetration. TODO ENUM",
-        "Selection of SI or U.S. Customary units for linear measurements. TODO ENUM",
         "The distance the weld metal extends into the root joint",
         "The joint penetration of a groove weld",
         'See AWS A3.0 definition, and Figure 26 - "Joint Penetration...", Figure 30 - Fusion Welds',
@@ -359,7 +355,7 @@ create_asdf_dataclass(
     properties=["gas_chemical_name", "gas_percentage"],
     required=["gas_chemical_name", "gas_percentage"],
     property_order=["gas_chemical_name", "gas_percentage"],
-    property_types=["str", "float"],
+    property_types=["str", "pint.Quantity"],
     description=[
         "Name of a single element or compound of gas. TODO ENUM",
         "Percentage by weight this gas occupies of the total gas mixture.",

@@ -25,7 +25,10 @@ from weldx.asdf.tags.weldx.core.groove import get_groove
 
 
 # welding process -----------------------------------------------------------------
-gas_comp = [GasComponent("Argon", 82.0), GasComponent("Carbon Dioxide", 18.0)]
+gas_comp = [
+    GasComponent("argon", Q_(82, "percent")),
+    GasComponent("carbon dioxide", Q_(18, "percent")),
+]
 gas_type = ShieldingGasType(gas_component=gas_comp, common_name="SG")
 
 gas_for_procedure = ShieldingGasForProcedure(
@@ -41,14 +44,14 @@ v_groove = get_groove(
 )
 
 joint_penetration = JointPenetration(
-    complete_or_partial="complete", units="mm", root_penetration=1.0
+    complete_or_partial="completePenetration", root_penetration=Q_(1.0, "mm")
 )
 weld_details = WeldDetails(
     joint_design=v_groove, weld_sizes=Q_(320, "mm"), number_of_passes=1
 )
 connection = Connection(
-    joint_type="Butt-Joint",
-    weld_type="full",
+    joint_type="butt_joint",
+    weld_type="singleVGroove",
     joint_penetration=joint_penetration,
     weld_details=weld_details,
 )

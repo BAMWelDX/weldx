@@ -23,7 +23,7 @@ properties:
   torch_shielding_gas_flowrate:
     description: |
       Flow rate of shielding gas required or specified.
-    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+    $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
 
   use_backing_gas:
     description: |
@@ -38,7 +38,7 @@ properties:
   backing_gas_flowrate:
     description: |
       Flowrate of backing gas.
-    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+    $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
 
   use_trailing_gas:
     description: |
@@ -53,7 +53,7 @@ properties:
   trailing_shielding_gas_flowrate:
     description: |
       Flowrate of trailing gas during welding.
-    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+    $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
 
 
 

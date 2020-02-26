@@ -3,6 +3,8 @@ from typing import List  # noqa: F401
 from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
 
+import pint
+
 __all__ = ["JointPenetration", "JointPenetrationType"]
 
 
@@ -11,8 +13,7 @@ class JointPenetration:
     """<CLASS DOCSTRING>"""
 
     complete_or_partial: str
-    units: str
-    root_penetration: float
+    root_penetration: pint.Quantity
     groove_weld_size: float = None
     incomplete_joint_penetration: float = None
     weld_size: float = None
@@ -37,7 +38,6 @@ class JointPenetrationType(WeldxType):
             complete_or_partial=custom_tree_to_tagged_tree(
                 node.complete_or_partial, ctx
             ),
-            units=custom_tree_to_tagged_tree(node.units, ctx),
             root_penetration=custom_tree_to_tagged_tree(node.root_penetration, ctx),
             groove_weld_size=custom_tree_to_tagged_tree(node.groove_weld_size, ctx),
             incomplete_joint_penetration=custom_tree_to_tagged_tree(

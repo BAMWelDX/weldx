@@ -23,8 +23,7 @@ properties:
 {%- endif %}
 {% endfor %}
 
-
-{% if required is not none -%}   
+{% if required is not none -%}
 required: [{{ ", ".join(required)}}]
 {%- endif %}
 {% if property_order is not none -%}   

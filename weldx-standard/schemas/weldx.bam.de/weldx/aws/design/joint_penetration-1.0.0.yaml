@@ -12,18 +12,16 @@ type: object
 properties:
   complete_or_partial:
     description: |
-      The weld design calls for partial or complete penetration. TODO ENUM
+      The weld design calls for partial or complete penetration.
     type: string
-
-  units:
-    description: |
-      Selection of SI or U.S. Customary units for linear measurements. TODO ENUM
-    type: string
+    enum:
+      - completePenetration
+      - partialPenetration
 
   root_penetration:
     description: |
       The distance the weld metal extends into the root joint
-    type: number
+    $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
 
   groove_weld_size:
     description: |
@@ -57,7 +55,7 @@ properties:
 
 
 
-required: [complete_or_partial, units, root_penetration]
-propertyOrder: [complete_or_partial, units, root_penetration, groove_weld_size, incomplete_joint_penetration, weld_size, weld_size_E1, weld_size_E2, depth_of_fusion]
+required: [complete_or_partial, root_penetration]
+propertyOrder: [complete_or_partial, root_penetration, groove_weld_size, incomplete_joint_penetration, weld_size, weld_size_E1, weld_size_E2, depth_of_fusion]
 flowStyle: block
 additionalProperties: false
