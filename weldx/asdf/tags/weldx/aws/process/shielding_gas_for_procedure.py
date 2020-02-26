@@ -1,7 +1,9 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List  # noqa: F401
 from asdf import yamlutil
 from weldx.asdf.types import WeldxType
+
+import pint
 
 
 @dataclass

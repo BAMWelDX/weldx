@@ -299,13 +299,13 @@ create_asdf_dataclass(
     ],
     property_types=[
         "bool",
-        "GAS_TYPE",
+        "ShieldingGasType",
         "pint.Quantity",
         "bool",
-        "GAS_TYPE",
+        "ShieldingGasType",
         "pint.Quantity",
         "bool",
-        "GAS_TYPE",
+        "ShieldingGasType",
         "pint.Quantity",
     ],
     description=[
