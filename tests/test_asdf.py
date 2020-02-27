@@ -1,5 +1,6 @@
 """Tests basic asdf implementations."""
 
+import os
 from io import BytesIO
 import asdf
 
@@ -25,7 +26,6 @@ from weldx.asdf.tags.weldx.core.groove import get_groove
 
 def test_aws_example():
     """Test validity of current AWS Data Dictionary standard implementation."""
-
     # welding process -----------------------------------------------------------------
     gas_comp = [
         GasComponent("argon", Q_(82, "percent")),
@@ -102,3 +102,53 @@ def test_aws_example():
         buff, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
     ) as af:
         data = af.tree
+
+
+def test_jinja_template():
+    """Test jinja template compilation with basic example."""
+    from weldx.asdf.utils import make_asdf_schema_string, create_asdf_dataclass
+
+    asdf_file_path, python_file_path = create_asdf_dataclass(
+        asdf_name="custom/testclass",
+        asdf_version="1.0.0",
+        class_name="TestClass",
+        properties=[
+            "prop1",
+            "prop2",
+            "prop3",
+            "prop4",
+            "list_prop",
+            "pint_prop",
+            "groove_prop",
+            "unkonwn_prop",
+        ],
+        required=["prop1", "prop2", "prop3"],
+        property_order=["prop1", "prop2", "prop3"],
+        property_types=[
+            "str",
+            "int",
+            "float",
+            "bool",
+            "List[str]",
+            "pint.Quantity",
+            "VGroove",
+            "unknown_type",
+        ],
+        description=[
+            "a string",
+            "",
+            "a float",
+            "a boolean value?",
+            "a list",
+            "a pint quantity",
+            "a groove shape",
+            "some not implemented property",
+        ],
+    )
+
+    os.remove(asdf_file_path)
+    os.remove(python_file_path)
+
+    asdf_schema_string = make_asdf_schema_string(
+        asdf_name="custom/testclass", asdf_version="1.0.0", properties=["prop"]
+    )

@@ -71,6 +71,9 @@ def make_asdf_schema_string(
 ):
     """Generate default ASDF schema."""
 
+    if property_types is None:
+        property_types = ["NO_TYPE"] * len(properties)
+
     if description is None:
         description = [_DEFAULT_ASDF_DESCRIPTION] * len(properties)
     description = [_DEFAULT_ASDF_DESCRIPTION if d == "" else d for d in description]
@@ -150,7 +153,6 @@ def create_asdf_dataclass(
     asdf_file_path = Path(
         SCHEMA_PATH + f"/weldx.bam.de/weldx/{asdf_name}-{asdf_version}.yaml"
     ).resolve()
-    print(asdf_file_path)
 
     asdf_schema_string = make_asdf_schema_string(
         asdf_name=asdf_name,
@@ -168,7 +170,6 @@ def create_asdf_dataclass(
         file.write(asdf_schema_string)
 
     python_file_path = Path(__file__ + f"/../tags/weldx/{asdf_name}.py").resolve()
-    print(python_file_path)
 
     python_class_string = make_python_class_string(
         class_name=class_name,
@@ -182,4 +183,4 @@ def create_asdf_dataclass(
     with open(str(python_file_path), "w") as file:
         file.write(python_class_string)
 
-    return None
+    return asdf_file_path, python_file_path
