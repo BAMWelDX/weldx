@@ -14,7 +14,6 @@ def get_groove(groove_type, **kwargs):
         return UGroove(**kwargs)
 
 
-
 @dataclass
 class VGroove:
     """<CLASS DOCSTRING>"""
