@@ -12,6 +12,8 @@ def get_groove(groove_type, **kwargs):
         return VGroove(**kwargs)
     if groove_type == "UGroove":
         return UGroove(**kwargs)
+    if groove_type == "IGroove":
+        return IGroove(**kwargs)
 
 
 @dataclass
@@ -35,12 +37,20 @@ class UGroove:
     code_number: List[str] = field(default_factory=lambda: ["1.8"])
 
 
+@dataclass
+class IGroove:
+    """<CLASS DOCSTRING>"""
+    t: Q_
+    b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2"])
+
+
 class GrooveType(WeldxType):
     """<ASDF TYPE DOCSTRING>"""
 
     name = "core/din_en_iso_9692-1_2013"
     version = "1.0.0"
-    types = [VGroove, UGroove]
+    types = [VGroove, UGroove, IGroove]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
@@ -77,6 +87,19 @@ class GrooveType(WeldxType):
             )
             return tree
 
+        if isinstance(node, IGroove):
+            components = dict(
+                t=node.t,
+                b=node.b,
+            )
+            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
+            tree = dict(
+                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                type="IGroove",
+                code_number=code_number,
+            )
+            return tree
+
     @classmethod
     def from_tree(cls, tree, ctx):
         if tree["type"] == "SingleVGroove":
@@ -85,4 +108,8 @@ class GrooveType(WeldxType):
 
         if tree["type"] == "SingleUGroove":
             obj = UGroove(**tree["components"])
+            return obj
+
+        if tree["type"] == "IGroove":
+            obj = IGroove(**tree["components"])
             return obj

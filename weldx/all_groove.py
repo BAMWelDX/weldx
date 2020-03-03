@@ -4,7 +4,7 @@ from weldx import Q_
 import numpy as np
 
 import weldx.geometry as geo
-from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove
+from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove
 
 
 def groove_to_profile(groove):
@@ -19,6 +19,9 @@ def groove_to_profile(groove):
 
     if isinstance(groove, UGroove):
         return singleUGrooveButtWeld(**groove.__dict__)
+
+    if isinstance(groove, IGroove):
+        return i_groove(**groove.__dict__)
 
 
 def singleVGrooveButtWeld(t, alpha, b, c, code_number=None, width_default=Q_(2, "mm")):
@@ -166,6 +169,34 @@ def singleUGrooveButtWeld(t, beta, R, b, c, code_number=None,
 
     return geo.Profile([shape, shape_r])
 
+
+def i_groove(t, b, code_number=None, width_default=Q_(5, "mm")):
+    """
+    Calculate a I Groove Butt Weld.
+
+    :param t: the workpiece thickness, as Pint unit
+    :param b: the root opening, as Pint unit
+    :param code_number: unused param
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
+    t = t.to("mm").magnitude
+    b = b.to("mm").magnitude
+    width = width_default.to("mm").magnitude
+
+    # x-values
+    x_value = [-width, 0, 0, -width]
+    # y-values
+    y_value = [0, 0, b, b]
+    segment_list = ["line", "line", "line"]
+
+    shape = _helperfunction(segment_list, [x_value, y_value])
+
+    shape = shape.translate([-b / 2, 0])
+    # y Achse als Spiegelachse
+    shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+    return geo.Profile([shape, shape_r])
 
 def _helperfunction(liste, array):
     """

@@ -17,6 +17,29 @@ examples:
   -TODO
 
 anyOf:
+  # I Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: IGroove
+      components:
+        type: object
+        properties:
+          t:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t, b]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
   # Single U Groove
   - type: object
     properties:

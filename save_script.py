@@ -10,7 +10,9 @@ v_groove = get_groove(groove_type="VGroove",
 u_groove = get_groove(groove_type="UGroove",
                       **dict(t=Q_(15, "mm"), beta=Q_(9, "deg"),
                              R=Q_(6, "mm"), c=Q_(3, "mm"), b=Q_(1, "mm")))
+i_groove = get_groove(groove_type="IGroove",
+                      **dict(t=Q_(4, 'mm'), b=Q_(4, 'mm')))
 
-target = asdf.AsdfFile(dict(test001=v_groove, test002=u_groove),
+target = asdf.AsdfFile(dict(test001=v_groove, test002=u_groove, test003=i_groove),
                        extensions=[WeldxAsdfExtension(), WeldxExtension()])
 target.write_to("testfile.yml", all_array_storage="inline")
