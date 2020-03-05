@@ -105,4 +105,43 @@ anyOf:
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
+
+  # U Groove with V Root
+  - type: object
+    properties:
+      type:
+        type: string
+        const: UVGroove
+      components:
+        type: object
+        properties:
+          t:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          alpha:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          R:
+            description: |
+              Bevel radius
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          h:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t, alpha, beta, R, b, h]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
 ...

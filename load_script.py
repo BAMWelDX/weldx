@@ -1,8 +1,10 @@
+"""Test Script. Use save_script.py before launching this script"""
+
 import asdf
 import matplotlib.pyplot as plt
 
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
-from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove
+from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove, UVGroove
 from weldx.all_groove import groove_to_profile
 
 
@@ -13,6 +15,8 @@ ax[0].axis("equal")
 ax[0].grid(True)
 ax[1].axis("equal")
 ax[1].grid(True)
+ax[2].axis("equal")
+ax[2].grid(True)
 
 if isinstance(opened["test001"], VGroove):
     print(opened["test001"])
@@ -34,7 +38,7 @@ if isinstance(opened["test002"], UGroove):
 else:
     print("false")
 
-if isinstance(opened["test003"], IGroove):
+if isinstance(opened["test003"], UVGroove):
     print(opened["test003"])
     profile03 = groove_to_profile(opened["test003"])
     profile03_data = profile03.rasterize(0.1)

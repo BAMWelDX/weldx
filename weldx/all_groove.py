@@ -4,7 +4,7 @@ from weldx import Q_
 import numpy as np
 
 import weldx.geometry as geo
-from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove
+from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove
 
 
 def groove_to_profile(groove):
@@ -15,16 +15,19 @@ def groove_to_profile(groove):
     :return: geo.Profile
     """
     if isinstance(groove, VGroove):
-        return singleVGrooveButtWeld(**groove.__dict__)
+        return single_vgroovebuttweld(**groove.__dict__)
 
     if isinstance(groove, UGroove):
-        return singleUGrooveButtWeld(**groove.__dict__)
+        return single_ugroovebuttweld(**groove.__dict__)
 
     if isinstance(groove, IGroove):
         return i_groove(**groove.__dict__)
 
+    if isinstance(groove, UVGroove):
+        return uv_groove(**groove.__dict__)
 
-def singleVGrooveButtWeld(t, alpha, b, c, code_number=None, width_default=Q_(2, "mm")):
+
+def single_vgroovebuttweld(t, alpha, b, c, code_number=None, width_default=Q_(2, "mm")):
     """
     Calculate a Single-V Groove Butt Weld.
 
@@ -87,8 +90,8 @@ def singleVGrooveButtWeld(t, alpha, b, c, code_number=None, width_default=Q_(2, 
     return geo.Profile([shape, shape_r])
 
 
-def singleUGrooveButtWeld(t, beta, R, b, c, code_number=None,
-                          width_default=Q_(3, "mm")):
+def single_ugroovebuttweld(t, beta, R, b, c, code_number=None,
+                           width_default=Q_(3, "mm")):
     """
     Calculate a Single-U Groove Butt Weld.
 
@@ -118,10 +121,10 @@ def singleUGrooveButtWeld(t, beta, R, b, c, code_number=None,
     s = np.tan(beta) * (t - (c + R - y))
 
     # Rand breite
-    edge = np.min([-x - s, 0])
-    if width <= -edge + 1:
+    edge = np.max([x + s, 0])
+    if width <= edge + 1:
         # zu Kleine Breite für die Naht wird angepasst
-        width = width - edge
+        width = width + edge
 
     # x-values
     x_value = []
@@ -170,9 +173,65 @@ def singleUGrooveButtWeld(t, beta, R, b, c, code_number=None,
     return geo.Profile([shape, shape_r])
 
 
+def uv_groove(t, alpha, beta, R, b, h, code_number=None, width_default=Q_(2, "mm")):
+    """
+    Calculate a U-Groove with V-Root.
+
+    :param t: the workpiece thickness, as Pint unit
+    :param alpha: the groove angle, as Pint unit
+    :param beta: the bevel angle, as Pint unit
+    :param R: radius, as Pint unit
+    :param b: the root opening, as Pint unit
+    :param h: the root face, as Pint unit
+    :param code_number: unused param
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
+    t = t.to("mm").magnitude
+    alpha = alpha.to("rad").magnitude
+    beta = beta.to("rad").magnitude
+    R = R.to("mm").magnitude
+    b = b.to("mm").magnitude
+    h = h.to("mm").magnitude
+    width = width_default.to("mm").magnitude
+
+    # calculations:
+    x_1 = np.tan(alpha/2) * h
+    # Kreismittelpunkt [0, y_m]
+    y_circle = np.sqrt(R**2 - x_1**2)
+    y_m = h + y_circle
+    # vom nächsten Punkt zum Kreismittelpunkt ist der Vektor (x,y)
+    x = R * np.cos(beta)
+    y = R * np.sin(beta)
+    x_arc = - x
+    y_arc = y_m - y
+    # x abschnit der oberen kante berechnen
+    x_end = x_arc - (t - y_arc) * np.tan(beta)
+
+    # Rand breite
+    edge = np.max([-x_end, 0])
+    if width <= edge + 1:
+        # zu Kleine Breite für die Naht wird angepasst
+        width = width + edge
+
+    # x-values
+    x_value = [-width, 0, -x_1, 0, x_arc, x_end, -width]
+    # y-values
+    y_value = [0, 0, h, y_m, y_arc, t, t]
+    segment_list = ["line", "line", "arc", "line", "line"]
+
+    shape = _helperfunction(segment_list, [x_value, y_value])
+
+    shape = shape.translate([-b / 2, 0])
+    # y Achse als Spiegelachse
+    shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+    return geo.Profile([shape, shape_r])
+
+
 def i_groove(t, b, code_number=None, width_default=Q_(5, "mm")):
     """
-    Calculate a I Groove Butt Weld.
+    Calculate a I-Groove Butt Weld.
 
     :param t: the workpiece thickness, as Pint unit
     :param b: the root opening, as Pint unit
@@ -187,7 +246,7 @@ def i_groove(t, b, code_number=None, width_default=Q_(5, "mm")):
     # x-values
     x_value = [-width, 0, 0, -width]
     # y-values
-    y_value = [0, 0, b, b]
+    y_value = [0, 0, t, t]
     segment_list = ["line", "line", "line"]
 
     shape = _helperfunction(segment_list, [x_value, y_value])
@@ -197,6 +256,7 @@ def i_groove(t, b, code_number=None, width_default=Q_(5, "mm")):
     shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
     return geo.Profile([shape, shape_r])
+
 
 def _helperfunction(liste, array):
     """
