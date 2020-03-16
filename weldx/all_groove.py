@@ -48,10 +48,10 @@ def single_vgroovebuttweld(t, alpha, b, c, code_number=None, width_default=Q_(2,
     # calculations:
     s = np.tan(alpha / 2) * (t - c)
 
-    # Rand breite
+    # Scaling
     edge = np.min([-s, 0])
     if width <= -edge + 1:
-        # zu Kleine Breite für die Naht wird angepasst
+        # adjustment of the width
         width = width - edge
 
     x_value = []
@@ -84,7 +84,7 @@ def single_vgroovebuttweld(t, alpha, b, c, code_number=None, width_default=Q_(2,
     shape = _helperfunction(segment_list, [x_value, y_value])
 
     shape = shape.translate([-b / 2, 0])
-    # y Achse als Spiegelachse
+    # y-axis is mirror axis
     shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
     return geo.Profile([shape, shape_r])
@@ -112,18 +112,18 @@ def single_ugroovebuttweld(t, beta, R, b, c, code_number=None,
     width = width_default.to("mm").magnitude
 
     # calculations:
-    # vom nächsten Punkt zum Kreismittelpunkt ist der Vektor (x,y)
+    # From next point to circle center is the vector (x,y)
     x = R * np.cos(beta)
     y = R * np.sin(beta)
-    # m = [0,c+R] Kreismittelpunkt
-    # => [-x,c+R-y] ist der nächste Punkt
+    # m = [0,c+R] circle center
+    # => [-x,c+R-y] is the next point
 
     s = np.tan(beta) * (t - (c + R - y))
 
-    # Rand breite
+    # Scaling
     edge = np.max([x + s, 0])
     if width <= edge + 1:
-        # zu Kleine Breite für die Naht wird angepasst
+        # adjustment of the width
         width = width + edge
 
     # x-values
@@ -145,7 +145,7 @@ def single_ugroovebuttweld(t, beta, R, b, c, code_number=None,
         y_value.append(c)
         segment_list.append("line")
 
-    # groove face arc kreismittelpunkt
+    # groove face arc (circle center)
     x_value.append(0)
     y_value.append(c + R)
 
@@ -167,7 +167,7 @@ def single_ugroovebuttweld(t, beta, R, b, c, code_number=None,
     shape = _helperfunction(segment_list, [x_value, y_value])
 
     shape = shape.translate([-b / 2, 0])
-    # y Achse als Spiegelachse
+    # y-axis as mirror axis
     shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
     return geo.Profile([shape, shape_r])
@@ -197,21 +197,21 @@ def uv_groove(t, alpha, beta, R, b, h, code_number=None, width_default=Q_(2, "mm
 
     # calculations:
     x_1 = np.tan(alpha/2) * h
-    # Kreismittelpunkt [0, y_m]
+    # Center of the circle [0, y_m]
     y_circle = np.sqrt(R**2 - x_1**2)
     y_m = h + y_circle
-    # vom nächsten Punkt zum Kreismittelpunkt ist der Vektor (x,y)
+    # From next point to circle center is the vector (x,y)
     x = R * np.cos(beta)
     y = R * np.sin(beta)
     x_arc = - x
     y_arc = y_m - y
-    # x abschnit der oberen kante berechnen
+    # X-section of the upper edge
     x_end = x_arc - (t - y_arc) * np.tan(beta)
 
-    # Rand breite
+    # Scaling
     edge = np.max([-x_end, 0])
     if width <= edge + 1:
-        # zu Kleine Breite für die Naht wird angepasst
+        # adjustment of the width
         width = width + edge
 
     # x-values
@@ -223,7 +223,7 @@ def uv_groove(t, alpha, beta, R, b, h, code_number=None, width_default=Q_(2, "mm
     shape = _helperfunction(segment_list, [x_value, y_value])
 
     shape = shape.translate([-b / 2, 0])
-    # y Achse als Spiegelachse
+    # y-axis as mirror axis
     shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
     return geo.Profile([shape, shape_r])
@@ -252,20 +252,20 @@ def i_groove(t, b, code_number=None, width_default=Q_(5, "mm")):
     shape = _helperfunction(segment_list, [x_value, y_value])
 
     shape = shape.translate([-b / 2, 0])
-    # y Achse als Spiegelachse
+    # y-axis as mirror axis
     shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
     return geo.Profile([shape, shape_r])
 
 
-def _helperfunction(liste, array):
+def _helperfunction(segment, array):
     """
     Calculate a shape from input.
-    Input liste der aufeinanderfolgenden Segmente als strings.
-    Input array der Punkte ich richtiger Reichenfolge. BSP:
-    array = [[x-werte], [y-werte]]
+    Input segment of successive segments as strings.
+    Input array of the points in the correct sequence. e.g.:
+    array = [[x-values], [y-values]]
 
-    :param liste: list of String, segment names ("line", "arc")
+    :param segment: list of String, segment names ("line", "arc")
     :param array: array of 2 array,
         first array are x-values
         second array are y-values
@@ -273,7 +273,7 @@ def _helperfunction(liste, array):
     """
     segment_list = []
     counter = 0
-    for elem in liste:
+    for elem in segment:
         if elem == "line":
             seg = geo.LineSegment(
                 [array[0][counter: counter + 2],
@@ -283,19 +283,19 @@ def _helperfunction(liste, array):
             counter += 1
         if elem == "arc":
             arr0 = [
-                # anfang
+                # begin
                 array[0][counter],
-                # ende
+                # end
                 array[0][counter + 2],
-                # mittelpunkt
+                # circle center
                 array[0][counter + 1],
             ]
             arr1 = [
-                # anfang
+                # begin
                 array[1][counter],
-                # ende
+                # end
                 array[1][counter + 2],
-                # mittelpunkt
+                # circle center
                 array[1][counter + 1],
             ]
             seg = geo.ArcSegment([arr0, arr1], False)

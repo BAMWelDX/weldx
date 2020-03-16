@@ -14,6 +14,7 @@ import copy
 
 # helpers ---------------------------------------------------------------------
 
+
 def check_segments_identical(seg_a, seg_b):
     """
     Check if 2 segments are identical within floating point tolerance.
@@ -72,8 +73,9 @@ def check_variable_profiles_identical(vp_a, vp_b):
     for i in range(vp_a.num_locations):
         assert math.isclose(vp_a.locations[i], vp_b.locations[i])
     for i in range(vp_a.num_interpolation_schemes):
-        assert isinstance(vp_a.interpolation_schemes[i],
-                          type(vp_b.interpolation_schemes[i]))
+        assert isinstance(
+            vp_a.interpolation_schemes[i], type(vp_b.interpolation_schemes[i])
+        )
 
 
 def check_trace_segments_identical(seg_a, seg_b):
@@ -107,7 +109,7 @@ def check_traces_identical(trc_a, trc_b):
         check_trace_segments_identical(trc_a.segments[i], trc_b.segments[i])
 
 
-def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1E-9):
+def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1e-9):
     """
     Check if 2 local coordinate systems are identical within a tolerance.
 
@@ -144,6 +146,7 @@ def get_default_profiles():
 
 # helper for segment tests ----------------------------------------------------
 
+
 def default_segment_rasterization_tests(segment, raster_width):
     """
     Perform some default checks for a passed segment's rasterization method.
@@ -179,8 +182,7 @@ def default_segment_rasterization_tests(segment, raster_width):
         assert np.abs(raster_width_eff - raster_width) < 0.1 * raster_width
 
         # effective raster width is constant (equidistant points)
-        assert math.isclose(raster_width_eff,
-                            np.linalg.norm(data[:, 1] - data[:, 0]))
+        assert math.isclose(raster_width_eff, np.linalg.norm(data[:, 1] - data[:, 0]))
 
     # check that there are no duplicate points
     assert helpers.are_all_columns_unique(data)
@@ -205,6 +207,7 @@ def default_segment_rasterization_tests(segment, raster_width):
 
 
 # test LineSegment ------------------------------------------------------------
+
 
 def test_line_segment_construction():
     """
@@ -268,10 +271,15 @@ def test_line_segment_rasterization():
         assert length_start_point < length_start_end
 
 
-def line_segment_transformation_test_case(point_start, point_end, exp_start,
-                                          exp_end, exp_length,
-                                          translation=None,
-                                          transformation=None):
+def line_segment_transformation_test_case(
+    point_start,
+    point_end,
+    exp_start,
+    exp_end,
+    exp_length,
+    translation=None,
+    transformation=None,
+):
     """
     Perform a single transformation test on a line segment.
 
@@ -324,46 +332,53 @@ def test_line_segment_transformations():
     """
     # translation -----------------------------------------
 
-    line_segment_transformation_test_case(point_start=[3, 3],
-                                          point_end=[4, 5],
-                                          translation=[-1, 4],
-                                          exp_start=[2, 7],
-                                          exp_end=[3, 9],
-                                          exp_length=np.sqrt(5))
+    line_segment_transformation_test_case(
+        point_start=[3, 3],
+        point_end=[4, 5],
+        translation=[-1, 4],
+        exp_start=[2, 7],
+        exp_end=[3, 9],
+        exp_length=np.sqrt(5),
+    )
 
     # 45 degree rotation ----------------------------------
-    s = np.sin(np.pi / 4.)
-    c = np.cos(np.pi / 4.)
+    s = np.sin(np.pi / 4.0)
+    c = np.cos(np.pi / 4.0)
     rotation_matrix = [[c, -s], [s, c]]
 
-    line_segment_transformation_test_case(point_start=[2, 2],
-                                          point_end=[3, 6],
-                                          transformation=rotation_matrix,
-                                          exp_start=[0, np.sqrt(8)],
-                                          exp_end=np.matmul(rotation_matrix,
-                                                            [3, 6]),
-                                          exp_length=np.sqrt(17))
+    line_segment_transformation_test_case(
+        point_start=[2, 2],
+        point_end=[3, 6],
+        transformation=rotation_matrix,
+        exp_start=[0, np.sqrt(8)],
+        exp_end=np.matmul(rotation_matrix, [3, 6]),
+        exp_length=np.sqrt(17),
+    )
 
     # reflection at 45 degree line ------------------------
     v = np.array([-1, 1], dtype=float)
     reflection_matrix = np.identity(2) - 2 / np.dot(v, v) * np.outer(v, v)
 
-    line_segment_transformation_test_case(point_start=[-1, 3],
-                                          point_end=[6, 1],
-                                          transformation=reflection_matrix,
-                                          exp_start=[3, -1],
-                                          exp_end=[1, 6],
-                                          exp_length=np.sqrt(53))
+    line_segment_transformation_test_case(
+        point_start=[-1, 3],
+        point_end=[6, 1],
+        transformation=reflection_matrix,
+        exp_start=[3, -1],
+        exp_end=[1, 6],
+        exp_length=np.sqrt(53),
+    )
 
     # scaling ---------------------------------------------
     scale_matrix = [[4, 0], [0, 0.5]]
 
-    line_segment_transformation_test_case(point_start=[-2, 2],
-                                          point_end=[1, 4],
-                                          transformation=scale_matrix,
-                                          exp_start=[-8, 1],
-                                          exp_end=[4, 2],
-                                          exp_length=np.sqrt(145))
+    line_segment_transformation_test_case(
+        point_start=[-2, 2],
+        point_end=[1, 4],
+        transformation=scale_matrix,
+        exp_start=[-8, 1],
+        exp_end=[4, 2],
+        exp_length=np.sqrt(145),
+    )
 
     # exceptions ------------------------------------------
 
@@ -390,9 +405,7 @@ def test_line_segment_interpolation():
 
     for i in range(5):
         weight = i / 4
-        segment_c = geo.LineSegment.linear_interpolation(segment_a,
-                                                         segment_b,
-                                                         weight)
+        segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, weight)
         exp_point_start = [1 + i, 3 - 2 * i]
         exp_point_end = [7 - 2 * i, -3 + 4 * i]
         assert ut.vector_is_close(segment_c.point_start, exp_point_start)
@@ -422,8 +435,17 @@ def test_line_segment_interpolation():
 
 # test ArcSegment ------------------------------------------------------------
 
-def check_arc_segment_values(segment, point_start, point_end, point_center,
-                             winding_ccw, radius, arc_angle, arc_length):
+
+def check_arc_segment_values(
+    segment,
+    point_start,
+    point_end,
+    point_center,
+    winding_ccw,
+    radius,
+    arc_angle,
+    arc_length,
+):
     """
     Check if the internal values are identical with the expected values.
 
@@ -447,9 +469,14 @@ def check_arc_segment_values(segment, point_start, point_end, point_center,
     assert math.isclose(segment.arc_length, arc_length)
 
 
-def arc_segment_rasterization_test(point_center, point_start, point_end,
-                                   raster_width, arc_winding_ccw,
-                                   is_point_location_valid_func):
+def arc_segment_rasterization_test(
+    point_center,
+    point_start,
+    point_end,
+    raster_width,
+    arc_winding_ccw,
+    is_point_location_valid_func,
+):
     """
     Test the arc segment's rasterize function.
 
@@ -472,10 +499,9 @@ def arc_segment_rasterization_test(point_center, point_start, point_end,
 
     radius_arc = np.linalg.norm(point_start - point_center)
 
-    arc_segment = geo.ArcSegment.construct_with_points(point_start,
-                                                       point_end,
-                                                       point_center,
-                                                       arc_winding_ccw)
+    arc_segment = geo.ArcSegment.construct_with_points(
+        point_start, point_end, point_center, arc_winding_ccw
+    )
 
     # Perform standard segment rasterization tests
     default_segment_rasterization_tests(arc_segment, raster_width)
@@ -488,11 +514,11 @@ def arc_segment_rasterization_test(point_center, point_start, point_end,
         point = data[:, i]
 
         # Check that winding is correct
-        assert (is_point_location_valid_func(point, point_center))
+        assert is_point_location_valid_func(point, point_center)
 
         # Check that points have the correct distance to the arcs center
         distance_center_point = np.linalg.norm(point - point_center)
-        assert math.isclose(distance_center_point, radius_arc, abs_tol=1E-6)
+        assert math.isclose(distance_center_point, radius_arc, abs_tol=1e-6)
 
 
 def test_arc_segment_constructor():
@@ -505,19 +531,27 @@ def test_arc_segment_constructor():
     segment_cw = geo.ArcSegment(points, False)
     segment_ccw = geo.ArcSegment(points, True)
 
-    check_arc_segment_values(segment=segment_cw, point_start=[3, 3],
-                             point_end=[6, 6], point_center=[6, 3],
-                             winding_ccw=False,
-                             radius=3,
-                             arc_angle=1 / 2 * np.pi,
-                             arc_length=3 / 2 * np.pi)
+    check_arc_segment_values(
+        segment=segment_cw,
+        point_start=[3, 3],
+        point_end=[6, 6],
+        point_center=[6, 3],
+        winding_ccw=False,
+        radius=3,
+        arc_angle=1 / 2 * np.pi,
+        arc_length=3 / 2 * np.pi,
+    )
 
-    check_arc_segment_values(segment=segment_ccw, point_start=[3, 3],
-                             point_end=[6, 6], point_center=[6, 3],
-                             winding_ccw=True,
-                             radius=3,
-                             arc_angle=3 / 2 * np.pi,
-                             arc_length=9 / 2 * np.pi)
+    check_arc_segment_values(
+        segment=segment_ccw,
+        point_start=[3, 3],
+        point_end=[6, 6],
+        point_center=[6, 3],
+        winding_ccw=True,
+        radius=3,
+        arc_angle=3 / 2 * np.pi,
+        arc_length=9 / 2 * np.pi,
+    )
 
     # check exceptions ------------------------------------
 
@@ -570,60 +604,122 @@ def test_arc_segment_factories():
     arc_length_small = np.pi * 1.5
     arc_length_large = np.pi * 4.5
 
-    segment_cw = geo.ArcSegment.construct_with_points(point_start, point_end,
-                                                      point_center_right,
-                                                      False)
-    segment_ccw = geo.ArcSegment.construct_with_points(point_start, point_end,
-                                                       point_center_right,
-                                                       True)
+    segment_cw = geo.ArcSegment.construct_with_points(
+        point_start, point_end, point_center_right, False
+    )
+    segment_ccw = geo.ArcSegment.construct_with_points(
+        point_start, point_end, point_center_right, True
+    )
 
-    check_arc_segment_values(segment_cw, point_start, point_end,
-                             point_center_right, False, radius, angle_small,
-                             arc_length_small)
-    check_arc_segment_values(segment_ccw, point_start, point_end,
-                             point_center_right, True, radius, angle_large,
-                             arc_length_large)
+    check_arc_segment_values(
+        segment_cw,
+        point_start,
+        point_end,
+        point_center_right,
+        False,
+        radius,
+        angle_small,
+        arc_length_small,
+    )
+    check_arc_segment_values(
+        segment_ccw,
+        point_start,
+        point_end,
+        point_center_right,
+        True,
+        radius,
+        angle_large,
+        arc_length_large,
+    )
 
     # construction with radius ----------------------
 
     # center left of line
-    segment_cw = geo.ArcSegment.construct_with_radius(point_start, point_end,
-                                                      radius, True, False)
-    segment_ccw = geo.ArcSegment.construct_with_radius(point_start, point_end,
-                                                       radius, True, True)
+    segment_cw = geo.ArcSegment.construct_with_radius(
+        point_start, point_end, radius, True, False
+    )
+    segment_ccw = geo.ArcSegment.construct_with_radius(
+        point_start, point_end, radius, True, True
+    )
 
-    check_arc_segment_values(segment_cw, point_start, point_end,
-                             point_center_left, False, radius, angle_large,
-                             arc_length_large)
-    check_arc_segment_values(segment_ccw, point_start, point_end,
-                             point_center_left, True, radius, angle_small,
-                             arc_length_small)
+    check_arc_segment_values(
+        segment_cw,
+        point_start,
+        point_end,
+        point_center_left,
+        False,
+        radius,
+        angle_large,
+        arc_length_large,
+    )
+    check_arc_segment_values(
+        segment_ccw,
+        point_start,
+        point_end,
+        point_center_left,
+        True,
+        radius,
+        angle_small,
+        arc_length_small,
+    )
 
     # center right of line
-    segment_cw = geo.ArcSegment.construct_with_radius(point_start, point_end,
-                                                      radius, False, False)
-    segment_ccw = geo.ArcSegment.construct_with_radius(point_start, point_end,
-                                                       radius, False, True)
+    segment_cw = geo.ArcSegment.construct_with_radius(
+        point_start, point_end, radius, False, False
+    )
+    segment_ccw = geo.ArcSegment.construct_with_radius(
+        point_start, point_end, radius, False, True
+    )
 
-    check_arc_segment_values(segment_cw, point_start, point_end,
-                             point_center_right, False, radius, angle_small,
-                             arc_length_small)
-    check_arc_segment_values(segment_ccw, point_start, point_end,
-                             point_center_right, True, radius, angle_large,
-                             arc_length_large)
+    check_arc_segment_values(
+        segment_cw,
+        point_start,
+        point_end,
+        point_center_right,
+        False,
+        radius,
+        angle_small,
+        arc_length_small,
+    )
+    check_arc_segment_values(
+        segment_ccw,
+        point_start,
+        point_end,
+        point_center_right,
+        True,
+        radius,
+        angle_large,
+        arc_length_large,
+    )
 
     # check that too small radii will be clipped to minimal radius
-    segment_cw = geo.ArcSegment.construct_with_radius(point_start, point_end,
-                                                      0.1, False, False)
-    segment_ccw = geo.ArcSegment.construct_with_radius(point_start, point_end,
-                                                       0.1, False, True)
+    segment_cw = geo.ArcSegment.construct_with_radius(
+        point_start, point_end, 0.1, False, False
+    )
+    segment_ccw = geo.ArcSegment.construct_with_radius(
+        point_start, point_end, 0.1, False, True
+    )
 
-    check_arc_segment_values(segment_cw, point_start, point_end, [4.5, 4.5],
-                             False, np.sqrt(18) / 2, np.pi,
-                             np.pi * np.sqrt(18) / 2)
-    check_arc_segment_values(segment_ccw, point_start, point_end, [4.5, 4.5],
-                             True, np.sqrt(18) / 2, np.pi,
-                             np.pi * np.sqrt(18) / 2)
+    check_arc_segment_values(
+        segment_cw,
+        point_start,
+        point_end,
+        [4.5, 4.5],
+        False,
+        np.sqrt(18) / 2,
+        np.pi,
+        np.pi * np.sqrt(18) / 2,
+    )
+    check_arc_segment_values(
+        segment_ccw,
+        point_start,
+        point_end,
+        [4.5, 4.5],
+        True,
+        np.sqrt(18) / 2,
+        np.pi,
+        np.pi * np.sqrt(18) / 2,
+    )
 
 
 def point_in_second_quadrant(p, c):
@@ -636,7 +732,7 @@ def point_in_second_quadrant(p, c):
     :param c: Center point of the circle
     :return: True or False
     """
-    return p[0] - 1E-9 <= c[0] and p[1] >= c[1] - 1E-9
+    return p[0] - 1e-9 <= c[0] and p[1] >= c[1] - 1e-9
 
 
 def point_not_in_second_quadrant(p, c):
@@ -649,7 +745,7 @@ def point_not_in_second_quadrant(p, c):
     :param c: Center point of the circle
     :return: True or False
     """
-    return not (p[0] + 1E-9 < c[0] and p[1] > c[1] + 1E-9)
+    return not (p[0] + 1e-9 < c[0] and p[1] > c[1] + 1e-9)
 
 
 def point_not_below_center(p, c):
@@ -660,7 +756,7 @@ def point_not_below_center(p, c):
     :param c: Center point of the circle
     :return: True or False
     """
-    return p[1] >= c[1] - 1E-9
+    return p[1] >= c[1] - 1e-9
 
 
 def point_not_above_center(p, c):
@@ -671,7 +767,7 @@ def point_not_above_center(p, c):
     :param c: Center point of the circle
     :return: True or False
     """
-    return p[1] - 1E-9 <= c[1]
+    return p[1] - 1e-9 <= c[1]
 
 
 def test_arc_segment_rasterization():
@@ -691,12 +787,22 @@ def test_arc_segment_rasterization():
     point_end = [3, 4]
     raster_width = 0.2
 
-    arc_segment_rasterization_test(point_center, point_start, point_end,
-                                   raster_width, False,
-                                   point_in_second_quadrant)
-    arc_segment_rasterization_test(point_center, point_start, point_end,
-                                   raster_width, True,
-                                   point_not_in_second_quadrant)
+    arc_segment_rasterization_test(
+        point_center,
+        point_start,
+        point_end,
+        raster_width,
+        False,
+        point_in_second_quadrant,
+    )
+    arc_segment_rasterization_test(
+        point_center,
+        point_start,
+        point_end,
+        raster_width,
+        True,
+        point_not_in_second_quadrant,
+    )
 
     # center left of line point_start -> point_end
     # --------------------------------------------
@@ -706,12 +812,22 @@ def test_arc_segment_rasterization():
     point_end = [-9, -7]
     raster_width = 0.1
 
-    arc_segment_rasterization_test(point_center, point_start, point_end,
-                                   raster_width, False,
-                                   point_not_in_second_quadrant)
-    arc_segment_rasterization_test(point_center, point_start, point_end,
-                                   raster_width, True,
-                                   point_in_second_quadrant)
+    arc_segment_rasterization_test(
+        point_center,
+        point_start,
+        point_end,
+        raster_width,
+        False,
+        point_not_in_second_quadrant,
+    )
+    arc_segment_rasterization_test(
+        point_center,
+        point_start,
+        point_end,
+        raster_width,
+        True,
+        point_in_second_quadrant,
+    )
 
     # center on line point_start -> point_end
     # ---------------------------------------
@@ -721,20 +837,32 @@ def test_arc_segment_rasterization():
     point_end = [4, 2]
     raster_width = 0.1
 
-    arc_segment_rasterization_test(point_center, point_start, point_end,
-                                   raster_width, False,
-                                   point_not_below_center)
-    arc_segment_rasterization_test(point_center, point_start, point_end,
-                                   raster_width, True,
-                                   point_not_above_center)
+    arc_segment_rasterization_test(
+        point_center,
+        point_start,
+        point_end,
+        raster_width,
+        False,
+        point_not_below_center,
+    )
+    arc_segment_rasterization_test(
+        point_center, point_start, point_end, raster_width, True, point_not_above_center
+    )
 
 
-def arc_segment_transformation_test_case(point_start, point_end, point_center,
-                                         exp_start, exp_end, exp_center,
-                                         exp_is_winding_changed, exp_radius,
-                                         exp_angle_ccw,
-                                         translation=None,
-                                         transformation=None):
+def arc_segment_transformation_test_case(
+    point_start,
+    point_end,
+    point_center,
+    exp_start,
+    exp_end,
+    exp_center,
+    exp_is_winding_changed,
+    exp_radius,
+    exp_angle_ccw,
+    translation=None,
+    transformation=None,
+):
     """
     Perform a single transformation test on an arc segment.
 
@@ -759,10 +887,12 @@ def arc_segment_transformation_test_case(point_start, point_end, point_center,
     if translation is not None:
         assert transformation is None, "No mixed test cases supported"
 
-    segment_cw = geo.ArcSegment.construct_with_points(point_start, point_end,
-                                                      point_center, False)
-    segment_ccw = geo.ArcSegment.construct_with_points(point_start, point_end,
-                                                       point_center, True)
+    segment_cw = geo.ArcSegment.construct_with_points(
+        point_start, point_end, point_center, False
+    )
+    segment_ccw = geo.ArcSegment.construct_with_points(
+        point_start, point_end, point_center, True
+    )
 
     # store some values
     radius_original = segment_cw.radius
@@ -779,24 +909,52 @@ def arc_segment_transformation_test_case(point_start, point_end, point_center,
         segment_ccw_trans = segment_ccw.transform(transformation)
 
     # original segments not modified
-    check_arc_segment_values(segment_cw, point_start, point_end, point_center,
-                             False, radius_original, arc_angle_cw_original,
-                             arc_length_cw_original)
-    check_arc_segment_values(segment_ccw, point_start, point_end, point_center,
-                             True, radius_original, arc_angle_ccw_original,
-                             arc_length_ccw_original)
+    check_arc_segment_values(
+        segment_cw,
+        point_start,
+        point_end,
+        point_center,
+        False,
+        radius_original,
+        arc_angle_cw_original,
+        arc_length_cw_original,
+    )
+    check_arc_segment_values(
+        segment_ccw,
+        point_start,
+        point_end,
+        point_center,
+        True,
+        radius_original,
+        arc_angle_ccw_original,
+        arc_length_ccw_original,
+    )
 
     # check new segment
     exp_angle_cw = 2 * np.pi - exp_angle_ccw
     exp_arc_length_cw = exp_angle_cw * exp_radius
     exp_arc_length_ccw = exp_angle_ccw * exp_radius
 
-    check_arc_segment_values(segment_cw_trans, exp_start, exp_end, exp_center,
-                             exp_is_winding_changed, exp_radius, exp_angle_cw,
-                             exp_arc_length_cw)
-    check_arc_segment_values(segment_ccw_trans, exp_start, exp_end, exp_center,
-                             not exp_is_winding_changed, exp_radius,
-                             exp_angle_ccw, exp_arc_length_ccw)
+    check_arc_segment_values(
+        segment_cw_trans,
+        exp_start,
+        exp_end,
+        exp_center,
+        exp_is_winding_changed,
+        exp_radius,
+        exp_angle_cw,
+        exp_arc_length_cw,
+    )
+    check_arc_segment_values(
+        segment_ccw_trans,
+        exp_start,
+        exp_end,
+        exp_center,
+        not exp_is_winding_changed,
+        exp_radius,
+        exp_angle_ccw,
+        exp_arc_length_ccw,
+    )
 
     # apply same transformation in place
     if translation is not None:
@@ -818,92 +976,99 @@ def test_arc_segment_transformations():
     """
     # translation -----------------------------------------
 
-    arc_segment_transformation_test_case(point_start=[3, 3],
-                                         point_end=[5, 5],
-                                         point_center=[5, 3],
-                                         exp_start=[2, 7],
-                                         exp_end=[4, 9],
-                                         exp_center=[4, 7],
-                                         exp_is_winding_changed=False,
-                                         exp_radius=2,
-                                         exp_angle_ccw=1.5 * np.pi,
-                                         translation=[-1, 4])
+    arc_segment_transformation_test_case(
+        point_start=[3, 3],
+        point_end=[5, 5],
+        point_center=[5, 3],
+        exp_start=[2, 7],
+        exp_end=[4, 9],
+        exp_center=[4, 7],
+        exp_is_winding_changed=False,
+        exp_radius=2,
+        exp_angle_ccw=1.5 * np.pi,
+        translation=[-1, 4],
+    )
 
     # 45 degree rotation ----------------------------------
-    s = np.sin(np.pi / 4.)
-    c = np.cos(np.pi / 4.)
+    s = np.sin(np.pi / 4.0)
+    c = np.cos(np.pi / 4.0)
     rotation_matrix = [[c, -s], [s, c]]
 
-    arc_segment_transformation_test_case(point_start=[3, 3],
-                                         point_end=[5, 5],
-                                         point_center=[5, 3],
-                                         exp_start=[0, np.sqrt(18)],
-                                         exp_end=[0, np.sqrt(50)],
-                                         exp_center=np.matmul(rotation_matrix,
-                                                              [5, 3]),
-                                         exp_is_winding_changed=False,
-                                         exp_radius=2,
-                                         exp_angle_ccw=1.5 * np.pi,
-                                         transformation=rotation_matrix)
+    arc_segment_transformation_test_case(
+        point_start=[3, 3],
+        point_end=[5, 5],
+        point_center=[5, 3],
+        exp_start=[0, np.sqrt(18)],
+        exp_end=[0, np.sqrt(50)],
+        exp_center=np.matmul(rotation_matrix, [5, 3]),
+        exp_is_winding_changed=False,
+        exp_radius=2,
+        exp_angle_ccw=1.5 * np.pi,
+        transformation=rotation_matrix,
+    )
 
     # reflection at 45 degree line ------------------------
     v = np.array([-1, 1], dtype=float)
     reflection_matrix = np.identity(2) - 2 / np.dot(v, v) * np.outer(v, v)
 
-    arc_segment_transformation_test_case(point_start=[3, 2],
-                                         point_end=[5, 4],
-                                         point_center=[5, 2],
-                                         exp_start=[2, 3],
-                                         exp_end=[4, 5],
-                                         exp_center=[2, 5],
-                                         exp_is_winding_changed=True,
-                                         exp_radius=2,
-                                         exp_angle_ccw=1.5 * np.pi,
-                                         transformation=reflection_matrix)
+    arc_segment_transformation_test_case(
+        point_start=[3, 2],
+        point_end=[5, 4],
+        point_center=[5, 2],
+        exp_start=[2, 3],
+        exp_end=[4, 5],
+        exp_center=[2, 5],
+        exp_is_winding_changed=True,
+        exp_radius=2,
+        exp_angle_ccw=1.5 * np.pi,
+        transformation=reflection_matrix,
+    )
 
     # scaling both coordinates equally --------------------
     scaling_matrix = [[4, 0], [0, 4]]
 
-    arc_segment_transformation_test_case(point_start=[3, 2],
-                                         point_end=[5, 4],
-                                         point_center=[5, 2],
-                                         exp_start=[12, 8],
-                                         exp_end=[20, 16],
-                                         exp_center=[20, 8],
-                                         exp_is_winding_changed=False,
-                                         exp_radius=8,
-                                         exp_angle_ccw=1.5 * np.pi,
-                                         transformation=scaling_matrix)
+    arc_segment_transformation_test_case(
+        point_start=[3, 2],
+        point_end=[5, 4],
+        point_center=[5, 2],
+        exp_start=[12, 8],
+        exp_end=[20, 16],
+        exp_center=[20, 8],
+        exp_is_winding_changed=False,
+        exp_radius=8,
+        exp_angle_ccw=1.5 * np.pi,
+        transformation=scaling_matrix,
+    )
 
     # non-uniform scaling which results in a valid arc ----
     scaling_matrix = [[0.25, 0], [0, 2]]
 
     exp_angle_ccw = 2 * np.pi - 2 * np.arcsin(3 / 5)
 
-    arc_segment_transformation_test_case(point_start=[8, 4],
-                                         point_end=[32, 4],
-                                         point_center=[20, 2],
-                                         exp_start=[2, 8],
-                                         exp_end=[8, 8],
-                                         exp_center=[5, 4],
-                                         exp_is_winding_changed=False,
-                                         exp_radius=5,
-                                         exp_angle_ccw=exp_angle_ccw,
-                                         transformation=scaling_matrix)
+    arc_segment_transformation_test_case(
+        point_start=[8, 4],
+        point_end=[32, 4],
+        point_center=[20, 2],
+        exp_start=[2, 8],
+        exp_end=[8, 8],
+        exp_center=[5, 4],
+        exp_is_winding_changed=False,
+        exp_radius=5,
+        exp_angle_ccw=exp_angle_ccw,
+        transformation=scaling_matrix,
+    )
 
     # exceptions ------------------------------------------
 
     # transformation distorts arc
-    segment = geo.ArcSegment.construct_with_points([3, 2], [5, 4], [5, 2],
-                                                   False)
+    segment = geo.ArcSegment.construct_with_points([3, 2], [5, 4], [5, 2], False)
     with pytest.raises(Exception):
         segment.transform(scaling_matrix)
     with pytest.raises(Exception):
         segment.apply_transformation(scaling_matrix)
 
     # transformation results in length = 0
-    segment = geo.ArcSegment.construct_with_points([3, 2], [5, 4], [5, 2],
-                                                   False)
+    segment = geo.ArcSegment.construct_with_points([3, 2], [5, 4], [5, 2], False)
     zero_matrix = np.zeros((2, 2))
     with pytest.raises(Exception):
         segment.transform(zero_matrix)
@@ -928,6 +1093,7 @@ def test_arc_segment_interpolation():
 
 
 # test Shape ------------------------------------------------------------------
+
 
 def test_shape_construction():
     """
@@ -1035,8 +1201,7 @@ def test_shape_line_segment_addition():
     assert shape_0.num_segments == 11
 
     for i in range(11):
-        expected_segment = geo.LineSegment.construct_with_points([i, 0],
-                                                                 [i + 1, 0])
+        expected_segment = geo.LineSegment.construct_with_points([i, 0], [i + 1, 0])
         check_segments_identical(shape_0.segments[i], expected_segment)
         if i < 2:
             check_segments_identical(shape_1.segments[i], expected_segment)
@@ -1074,10 +1239,7 @@ def test_shape_rasterization():
 
     :return: ---
     """
-    points = np.array([[0, 0],
-                       [0, 1],
-                       [1, 1],
-                       [1, 0]])
+    points = np.array([[0, 0], [0, 1], [1, 1], [1, 0]])
 
     shape = geo.Shape().add_line_segments(points)
 
@@ -1161,8 +1323,9 @@ def check_point_translation(point_trans, point_original):
     :param point_original: Original point
     :return:
     """
-    assert ut.vector_is_close(point_trans - default_translation_vector(),
-                              point_original)
+    assert ut.vector_is_close(
+        point_trans - default_translation_vector(), point_original
+    )
 
 
 def check_point_rotation_90_degree(point_trans, point_original):
@@ -1189,8 +1352,9 @@ def check_point_reflection_at_line_with_slope_1(point_trans, point_original):
     assert point_trans[1] == point_original[0]
 
 
-def shape_transformation_test_case(check_point_func, exp_winding_change,
-                                   translation=None, transformation=None):
+def shape_transformation_test_case(
+    check_point_func, exp_winding_change, translation=None, transformation=None
+):
     """
     Test a shape transformation.
 
@@ -1250,9 +1414,11 @@ def test_shape_transformation():
     :return: ---
     """
     # translation -----------------------------------------
-    shape_transformation_test_case(check_point_func=check_point_translation,
-                                   exp_winding_change=False,
-                                   translation=default_translation_vector())
+    shape_transformation_test_case(
+        check_point_func=check_point_translation,
+        exp_winding_change=False,
+        translation=default_translation_vector(),
+    )
 
     # transformation without reflection -------------------
     rotation_matrix = np.array([[0, 1], [-1, 0]])
@@ -1260,7 +1426,8 @@ def test_shape_transformation():
     shape_transformation_test_case(
         check_point_func=check_point_rotation_90_degree,
         exp_winding_change=False,
-        transformation=rotation_matrix)
+        transformation=rotation_matrix,
+    )
 
     # transformation with reflection ----------------------
     reflection_matrix = np.array([[0, 1], [1, 0]])
@@ -1268,12 +1435,13 @@ def test_shape_transformation():
     shape_transformation_test_case(
         check_point_func=check_point_reflection_at_line_with_slope_1,
         exp_winding_change=True,
-        transformation=reflection_matrix)
+        transformation=reflection_matrix,
+    )
 
 
-def check_reflected_point(point_original, point_reflected,
-                          reflection_axis_offset,
-                          reflection_axis_direction):
+def check_reflected_point(
+    point_original, point_reflected, reflection_axis_offset, reflection_axis_direction
+):
     """
     Check if a point is reflected correctly.
 
@@ -1292,7 +1460,7 @@ def check_reflected_point(point_original, point_reflected,
     shifted_mid_point = midpoint - reflection_axis_offset
 
     determinant = np.linalg.det([shifted_mid_point, reflection_axis_direction])
-    assert math.isclose(determinant, 0, abs_tol=1E-9)
+    assert math.isclose(determinant, 0, abs_tol=1e-9)
 
 
 def shape_reflection_test_case(normal, distance_to_origin):
@@ -1325,27 +1493,37 @@ def shape_reflection_test_case(normal, distance_to_origin):
     line_segment_ref = shape_reflected.segments[1]
 
     # check reflected points
-    check_reflected_point(arc_segment.point_start,
-                          arc_segment_ref.point_start,
-                          offset,
-                          direction_reflection_axis)
-    check_reflected_point(arc_segment.point_end,
-                          arc_segment_ref.point_end,
-                          offset,
-                          direction_reflection_axis)
-    check_reflected_point(arc_segment.point_center,
-                          arc_segment_ref.point_center,
-                          offset,
-                          direction_reflection_axis)
+    check_reflected_point(
+        arc_segment.point_start,
+        arc_segment_ref.point_start,
+        offset,
+        direction_reflection_axis,
+    )
+    check_reflected_point(
+        arc_segment.point_end,
+        arc_segment_ref.point_end,
+        offset,
+        direction_reflection_axis,
+    )
+    check_reflected_point(
+        arc_segment.point_center,
+        arc_segment_ref.point_center,
+        offset,
+        direction_reflection_axis,
+    )
 
-    check_reflected_point(line_segment.point_start,
-                          line_segment_ref.point_start,
-                          offset,
-                          direction_reflection_axis)
-    check_reflected_point(line_segment.point_end,
-                          line_segment_ref.point_end,
-                          offset,
-                          direction_reflection_axis)
+    check_reflected_point(
+        line_segment.point_start,
+        line_segment_ref.point_start,
+        offset,
+        direction_reflection_axis,
+    )
+    check_reflected_point(
+        line_segment.point_end,
+        line_segment_ref.point_end,
+        offset,
+        direction_reflection_axis,
+    )
 
     # apply same reflection in place
     shape.apply_reflection(normal, distance_to_origin)
@@ -1375,9 +1553,9 @@ def test_shape_reflection():
         shape.apply_reflection([0, 0])
 
 
-def check_point_reflected_across_line(point_original, point_reflected,
-                                      point_start,
-                                      point_end):
+def check_point_reflected_across_line(
+    point_original, point_reflected, point_start, point_end
+):
     """
     Check if a point is reflected correctly.
 
@@ -1398,7 +1576,7 @@ def check_point_reflected_across_line(point_original, point_reflected,
     vec_start_end = point_end - point_start
 
     determinant = np.linalg.det([vec_start_end, vec_start_mid])
-    assert math.isclose(determinant, 0, abs_tol=1E-9)
+    assert math.isclose(determinant, 0, abs_tol=1e-9)
 
 
 def shape_reflection_across_line_test_case(point_start, point_end):
@@ -1429,27 +1607,22 @@ def shape_reflection_across_line_test_case(point_start, point_end):
     line_segment_ref = shape_reflected.segments[1]
 
     # check reflected points
-    check_point_reflected_across_line(arc_segment.point_start,
-                                      arc_segment_ref.point_start,
-                                      point_start,
-                                      point_end)
-    check_point_reflected_across_line(arc_segment.point_end,
-                                      arc_segment_ref.point_end,
-                                      point_start,
-                                      point_end)
-    check_point_reflected_across_line(arc_segment.point_center,
-                                      arc_segment_ref.point_center,
-                                      point_start,
-                                      point_end)
+    check_point_reflected_across_line(
+        arc_segment.point_start, arc_segment_ref.point_start, point_start, point_end
+    )
+    check_point_reflected_across_line(
+        arc_segment.point_end, arc_segment_ref.point_end, point_start, point_end
+    )
+    check_point_reflected_across_line(
+        arc_segment.point_center, arc_segment_ref.point_center, point_start, point_end
+    )
 
-    check_point_reflected_across_line(line_segment.point_start,
-                                      line_segment_ref.point_start,
-                                      point_start,
-                                      point_end)
-    check_point_reflected_across_line(line_segment.point_end,
-                                      line_segment_ref.point_end,
-                                      point_start,
-                                      point_end)
+    check_point_reflected_across_line(
+        line_segment.point_start, line_segment_ref.point_start, point_start, point_end
+    )
+    check_point_reflected_across_line(
+        line_segment.point_end, line_segment_ref.point_end, point_start, point_end
+    )
 
     # apply same reflection in place
     shape.apply_reflection_across_line(point_start, point_end)
@@ -1507,14 +1680,15 @@ def test_shape_interpolation_general():
     shape_b = geo.Shape().add_line_segments([[-1, 4], [1, 1], [3, 4]])
 
     # define interpolation schemes
-    interpolations = [geo.LineSegment.linear_interpolation,
-                      segment_interpolation_nearest]
+    interpolations = [
+        geo.LineSegment.linear_interpolation,
+        segment_interpolation_nearest,
+    ]
 
     for i in range(6):
         # interpolate shapes
-        weight = i / 5.
-        shape_c = geo.Shape.interpolate(shape_a, shape_b, weight,
-                                        interpolations)
+        weight = i / 5.0
+        shape_c = geo.Shape.interpolate(shape_a, shape_b, weight, interpolations)
 
         # check result
         if weight > 0.5:
@@ -1522,9 +1696,7 @@ def test_shape_interpolation_general():
         else:
             last_point_exp = [3, -1]
 
-        points_exp = [[-1, -1 + 5 * weight],
-                      [1, 1],
-                      last_point_exp]
+        points_exp = [[-1, -1 + 5 * weight], [1, 1], last_point_exp]
         shape_c_exp = geo.Shape().add_line_segments(points_exp)
 
         check_shapes_identical(shape_c, shape_c_exp)
@@ -1566,13 +1738,15 @@ def test_shape_linear_interpolation():
 
     for i in range(5):
         # interpolate shapes
-        weight = i / 4.
+        weight = i / 4.0
         shape_c = geo.Shape.linear_interpolation(shape_a, shape_b, weight)
 
         # check result
-        points_exp = [[weight, weight],
-                      [1 + weight, 1 - 2 * weight],
-                      [2 + weight, 5 * weight]]
+        points_exp = [
+            [weight, weight],
+            [1 + weight, 1 - 2 * weight],
+            [2 + weight, 5 * weight],
+        ]
         shape_c_exp = geo.Shape().add_line_segments(points_exp)
 
         check_shapes_identical(shape_c, shape_c_exp)
@@ -1594,6 +1768,7 @@ def test_shape_linear_interpolation():
 
 
 # Test profile class ----------------------------------------------------------
+
 
 def test_profile_construction_and_shape_addition():
     """
@@ -1689,7 +1864,8 @@ def test_profile_rasterization():
 
 # Test trace segment classes --------------------------------------------------
 
-def check_trace_segment_length(segment, tolerance=1E-9):
+
+def check_trace_segment_length(segment, tolerance=1e-9):
     """
     Check if a trace segment returns the correct length.
 
@@ -1708,17 +1884,17 @@ def check_trace_segment_length(segment, tolerance=1E-9):
     length_numeric_prev = np.linalg.norm(lcs.origin)
 
     # calculate numerical length by linearization
-    num_segments = 2.
+    num_segments = 2.0
     num_iterations = 20
 
     # calculate numerical length with increasing number of segments until
     # the rate of change between 2 calculations is small enough
     for i in range(num_iterations):
         length_numeric = 0
-        increment = 1. / num_segments
+        increment = 1.0 / num_segments
 
         cs_0 = segment.local_coordinate_system(0)
-        for rel_pos in (np.arange(increment, 1. + increment / 2, increment)):
+        for rel_pos in np.arange(increment, 1.0 + increment / 2, increment):
             cs_1 = segment.local_coordinate_system(rel_pos)
             length_numeric += np.linalg.norm(cs_1.origin - cs_0.origin)
             cs_0 = copy.deepcopy(cs_1)
@@ -1730,8 +1906,9 @@ def check_trace_segment_length(segment, tolerance=1E-9):
 
         if math.isclose(relative_change, 1, abs_tol=tolerance / 10):
             break
-        assert i < num_iterations - 1, "Segment length could not be " \
-                                       "determined numerically"
+        assert i < num_iterations - 1, (
+            "Segment length could not be " "determined numerically"
+        )
 
     assert math.isclose(length_numeric, segment.length, abs_tol=tolerance)
 
@@ -1752,18 +1929,17 @@ def check_trace_segment_orientation(segment):
     lcs = segment.local_coordinate_system(0)
     assert ut.vector_is_close(lcs.basis[:, 0], np.array([1, 0, 0]))
 
-    delta = 1E-9
+    delta = 1e-9
     for rel_pos in np.arange(0.1, 1.01, 0.1):
         lcs = segment.local_coordinate_system(rel_pos)
         lcs_d = segment.local_coordinate_system(rel_pos - delta)
         trace_direction_approx = tf.normalize(lcs.origin - lcs_d.origin)
 
         # Check if the x-axis is aligned with the approximate trace direction
-        assert ut.vector_is_close(lcs.basis[:, 0], trace_direction_approx,
-                                  1E-6)
+        assert ut.vector_is_close(lcs.basis[:, 0], trace_direction_approx, 1e-6)
 
 
-def default_trace_segment_tests(segment, tolerance_length=1E-9):
+def default_trace_segment_tests(segment, tolerance_length=1e-9):
     """
     Perform some default tests on trace segment.
 
@@ -1822,8 +1998,8 @@ def test_radial_horizontal_trace_segment():
     segment_ccw = geo.RadialHorizontalTraceSegment(radius, angle, False)
 
     # default tests
-    default_trace_segment_tests(segment_cw, 1E-4)
-    default_trace_segment_tests(segment_ccw, 1E-4)
+    default_trace_segment_tests(segment_cw, 1e-4)
+    default_trace_segment_tests(segment_ccw, 1e-4)
 
     # getter tests
     assert math.isclose(segment_cw.angle, angle)
@@ -1858,7 +2034,8 @@ def test_radial_horizontal_trace_segment():
 
 # Test trace class ------------------------------------------------------------
 
-class CustomSegment():
+
+class CustomSegment:
     """Custom trace segment for tests."""
 
     def __init__(self):
@@ -1901,15 +2078,15 @@ def test_trace_construction():
 
     # test multi segment construction ---------------------
     trace = geo.Trace([radial_segment, linear_segment])
-    assert math.isclose(trace.length,
-                        linear_segment.length + radial_segment.length)
+    assert math.isclose(trace.length, linear_segment.length + radial_segment.length)
     assert trace.num_segments == 2
 
     check_trace_segments_identical(trace.segments[0], radial_segment)
     check_trace_segments_identical(trace.segments[1], linear_segment)
 
-    check_coordinate_systems_identical(trace.coordinate_system,
-                                       tf.LocalCoordinateSystem())
+    check_coordinate_systems_identical(
+        trace.coordinate_system, tf.LocalCoordinateSystem()
+    )
 
     # check invalid inputs --------------------------------
     with pytest.raises(TypeError):
@@ -1965,8 +2142,9 @@ def test_trace_local_coordinate_system():
         position = radial_segment.length + position_on_segment
 
         expected_origin = np.array([-position_on_segment, 2, 0])
-        cs_expected = tf.LocalCoordinateSystem(basis=expected_basis,
-                                               origin=expected_origin)
+        cs_expected = tf.LocalCoordinateSystem(
+            basis=expected_basis, origin=expected_origin
+        )
         cs_trace = trace.local_coordinate_system(position)
 
         check_coordinate_systems_identical(cs_trace, cs_expected)
@@ -1990,8 +2168,7 @@ def test_trace_local_coordinate_system():
         check_coordinate_systems_identical(cs_trace, cs_expected)
 
     # check second segment
-    expected_basis = np.matmul(basis,
-                               radial_segment.local_coordinate_system(1).basis)
+    expected_basis = np.matmul(basis, radial_segment.local_coordinate_system(1).basis)
     cs_start_seg2 = radial_segment.local_coordinate_system(1) + cs_base
     for i in range(11):
         weight = i / 10
@@ -2078,6 +2255,7 @@ def test_trace_rasterization():
 
 # Profile interpolation classes -----------------------------------------------
 
+
 def check_interpolated_profile_points(profile, c_0, c_1, c_2):
     """
     Check the points of an interpolated profile from the interpolation test.
@@ -2106,13 +2284,11 @@ def test_linear_profile_interpolation_sbs():
     [profile_a, profile_b] = get_default_profiles()
 
     for i in range(5):
-        weight = i / 4.
-        profile_c = geo.linear_profile_interpolation_sbs(profile_a, profile_b,
-                                                         weight)
-        check_interpolated_profile_points(profile_c,
-                                          [-i, 2 * i],
-                                          [8 - 2 * i, 16 - 2 * i],
-                                          [16, -4 * i])
+        weight = i / 4.0
+        profile_c = geo.linear_profile_interpolation_sbs(profile_a, profile_b, weight)
+        check_interpolated_profile_points(
+            profile_c, [-i, 2 * i], [8 - 2 * i, 16 - 2 * i], [16, -4 * i]
+        )
 
     # check weight clipped to valid range -----------------
     a_0 = profile_a.shapes[0].segments[0].point_start
@@ -2143,8 +2319,12 @@ def test_linear_profile_interpolation_sbs():
         geo.linear_profile_interpolation_sbs(profile_d, profile_b, 0.5)
 
     # number of segments differ
-    shape_b012 = geo.Shape([geo.LineSegment.construct_with_points(b_0, b_1),
-                            geo.LineSegment.construct_with_points(b_1, b_2)])
+    shape_b012 = geo.Shape(
+        [
+            geo.LineSegment.construct_with_points(b_0, b_1),
+            geo.LineSegment.construct_with_points(b_1, b_2),
+        ]
+    )
 
     profile_b2 = geo.Profile([shape_b01, shape_b012])
     with pytest.raises(Exception):
@@ -2153,8 +2333,8 @@ def test_linear_profile_interpolation_sbs():
 
 # test variable profile -------------------------------------------------------
 
-def check_variable_profile_state(variable_profile, profiles_exp,
-                                 locations_exp):
+
+def check_variable_profile_state(variable_profile, profiles_exp, locations_exp):
     """
     Check the state of a variable profile.
 
@@ -2184,41 +2364,29 @@ def test_variable_profile_construction():
     profile_a, profile_b = get_default_profiles()
 
     # construction with single location and interpolation
-    variable_profile = geo.VariableProfile([profile_a, profile_b],
-                                           1,
-                                           interpol)
-    check_variable_profile_state(variable_profile,
-                                 [profile_a, profile_b],
-                                 [0, 1])
+    variable_profile = geo.VariableProfile([profile_a, profile_b], 1, interpol)
+    check_variable_profile_state(variable_profile, [profile_a, profile_b], [0, 1])
 
-    variable_profile = geo.VariableProfile([profile_a, profile_b],
-                                           [1],
-                                           [interpol])
-    check_variable_profile_state(variable_profile,
-                                 [profile_a, profile_b],
-                                 [0, 1])
+    variable_profile = geo.VariableProfile([profile_a, profile_b], [1], [interpol])
+    check_variable_profile_state(variable_profile, [profile_a, profile_b], [0, 1])
 
     # construction with location list
-    variable_profile = geo.VariableProfile([profile_a, profile_b],
-                                           [0, 1],
-                                           interpol)
-    check_variable_profile_state(variable_profile,
-                                 [profile_a, profile_b],
-                                 [0, 1])
+    variable_profile = geo.VariableProfile([profile_a, profile_b], [0, 1], interpol)
+    check_variable_profile_state(variable_profile, [profile_a, profile_b], [0, 1])
 
-    variable_profile = geo.VariableProfile([profile_a, profile_b, profile_a],
-                                           [1, 2],
-                                           [interpol, interpol])
-    check_variable_profile_state(variable_profile,
-                                 [profile_a, profile_b, profile_a],
-                                 [0, 1, 2])
+    variable_profile = geo.VariableProfile(
+        [profile_a, profile_b, profile_a], [1, 2], [interpol, interpol]
+    )
+    check_variable_profile_state(
+        variable_profile, [profile_a, profile_b, profile_a], [0, 1, 2]
+    )
 
-    variable_profile = geo.VariableProfile([profile_a, profile_b, profile_a],
-                                           [0, 1, 2],
-                                           [interpol, interpol])
-    check_variable_profile_state(variable_profile,
-                                 [profile_a, profile_b, profile_a],
-                                 [0, 1, 2])
+    variable_profile = geo.VariableProfile(
+        [profile_a, profile_b, profile_a], [0, 1, 2], [interpol, interpol]
+    )
+    check_variable_profile_state(
+        variable_profile, [profile_a, profile_b, profile_a], [0, 1, 2]
+    )
 
     # exceptions ------------------------------------------
 
@@ -2228,24 +2396,25 @@ def test_variable_profile_construction():
 
     # number of locations is not correct
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b, profile_a], [1],
-                            [interpol, interpol])
+        geo.VariableProfile(
+            [profile_a, profile_b, profile_a], [1], [interpol, interpol]
+        )
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b], [0, 1, 2],
-                            interpol)
+        geo.VariableProfile([profile_a, profile_b], [0, 1, 2], interpol)
 
     # number of interpolations is not correct
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b, profile_a], [0, 1, 2],
-                            [interpol])
+        geo.VariableProfile([profile_a, profile_b, profile_a], [0, 1, 2], [interpol])
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b, profile_a], [0, 1, 2],
-                            [interpol, interpol, interpol])
+        geo.VariableProfile(
+            [profile_a, profile_b, profile_a], [0, 1, 2], [interpol, interpol, interpol]
+        )
 
     # locations not ordered
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b, profile_a], [0, 2, 1],
-                            [interpol, interpol])
+        geo.VariableProfile(
+            [profile_a, profile_b, profile_a], [0, 2, 1], [interpol, interpol]
+        )
 
 
 def test_variable_profile_local_profile():
@@ -2257,25 +2426,23 @@ def test_variable_profile_local_profile():
     interpol = geo.linear_profile_interpolation_sbs
 
     profile_a, profile_b = get_default_profiles()
-    variable_profile = geo.VariableProfile([profile_a, profile_b, profile_a],
-                                           [0, 1, 2],
-                                           [interpol, interpol])
+    variable_profile = geo.VariableProfile(
+        [profile_a, profile_b, profile_a], [0, 1, 2], [interpol, interpol]
+    )
 
     for i in range(5):
         # first segment
-        location = i / 4.
+        location = i / 4.0
         profile = variable_profile.local_profile(location)
-        check_interpolated_profile_points(profile,
-                                          [-i, 2 * i],
-                                          [8 - 2 * i, 16 - 2 * i],
-                                          [16, -4 * i])
+        check_interpolated_profile_points(
+            profile, [-i, 2 * i], [8 - 2 * i, 16 - 2 * i], [16, -4 * i]
+        )
         # second segment
         location += 1
         profile = variable_profile.local_profile(location)
-        check_interpolated_profile_points(profile,
-                                          [-4 + i, 8 - 2 * i],
-                                          [2 * i, 8 + 2 * i],
-                                          [16, -16 + 4 * i])
+        check_interpolated_profile_points(
+            profile, [-4 + i, 8 - 2 * i], [2 * i, 8 + 2 * i], [16, -16 + 4 * i]
+        )
 
     # check if values are clipped to valid range ----------
 
@@ -2288,6 +2455,7 @@ def test_variable_profile_local_profile():
 
 # test geometry class ---------------------------------------------------------
 
+
 def test_geometry_construction():
     """
     Test construction of he geometry class.
@@ -2295,10 +2463,9 @@ def test_geometry_construction():
     :return: ---
     """
     profile_a, profile_b = get_default_profiles()
-    variable_profile = \
-        geo.VariableProfile([profile_a, profile_b],
-                            [0, 1],
-                            geo.linear_profile_interpolation_sbs)
+    variable_profile = geo.VariableProfile(
+        [profile_a, profile_b], [0, 1], geo.linear_profile_interpolation_sbs
+    )
 
     radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
     linear_segment = geo.LinearHorizontalTraceSegment(1)
@@ -2380,9 +2547,11 @@ def test_geometry_rasterization_trace():
         # check first segment (line)
         if data[0, idx_0 + 2] <= 1:
             for j in range(6):
-                point_exp = [eff_raster_width * i,
-                             profile_points[0, j],
-                             profile_points[1, j]]
+                point_exp = [
+                    eff_raster_width * i,
+                    profile_points[0, j],
+                    profile_points[1, j],
+                ]
                 assert ut.vector_is_close(data[:, idx_0 + j], point_exp)
         # check second segment (arc)
         else:
@@ -2411,9 +2580,9 @@ def test_geometry_rasterization_trace():
                 exp_point_distance = arc_point_distance_on_trace * exp_radius
                 for j in np.arange(2, 6, 1):
                     point_distance = np.linalg.norm(
-                        data[:, idx_0 + j] - data[:, idx_0 + j - 6])
-                    assert math.isclose(exp_point_distance[j - 2],
-                                        point_distance)
+                        data[:, idx_0 + j] - data[:, idx_0 + j - 6]
+                    )
+                    assert math.isclose(exp_point_distance[j - 2], point_distance)
 
     # check if raster width is clipped to valid range -----
     data = geometry.rasterize(7, 1000)
@@ -2468,8 +2637,9 @@ def test_geometry_rasterization_profile_interpolation():
     profile_a = geo.Profile([shape_a012, shape_a234])
     profile_b = geo.Profile([shape_b012, shape_b234])
 
-    variable_profile = geo.VariableProfile([profile_a, profile_b, profile_a],
-                                           [0, 2, 6], [interpol, interpol])
+    variable_profile = geo.VariableProfile(
+        [profile_a, profile_b, profile_a], [0, 2, 6], [interpol, interpol]
+    )
 
     linear_segment_l1 = geo.LinearHorizontalTraceSegment(1)
     linear_segment_l2 = geo.LinearHorizontalTraceSegment(2)
@@ -2492,16 +2662,24 @@ def test_geometry_rasterization_profile_interpolation():
     for i in range(11):
         idx_0 = i * 6
         for j in range(6):
-            point_exp = np.array([i * 0.1,
-                                  profile_points[0, j] * (1 + i * 0.1),
-                                  profile_points[1, j] * (1 + i * 0.1)])
+            point_exp = np.array(
+                [
+                    i * 0.1,
+                    profile_points[0, j] * (1 + i * 0.1),
+                    profile_points[1, j] * (1 + i * 0.1),
+                ]
+            )
             assert ut.vector_is_close(data[:, idx_0 + j], point_exp)
 
     # check second profile interpolation
     for i in range(20):
         idx_0 = (30 - i) * 6
         for j in range(6):
-            point_exp = np.array([3 - i * 0.1,
-                                  profile_points[0, j] * (1 + i * 0.05),
-                                  profile_points[1, j] * (1 + i * 0.05)])
+            point_exp = np.array(
+                [
+                    3 - i * 0.1,
+                    profile_points[0, j] * (1 + i * 0.05),
+                    profile_points[1, j] * (1 + i * 0.05),
+                ]
+            )
             assert ut.vector_is_close(data[:, idx_0 + j], point_exp)

@@ -15,7 +15,7 @@ u_groove = get_groove(groove_type="UGroove",
 i_groove = get_groove(groove_type="IGroove",
                       **dict(t=Q_(4, 'mm'), b=Q_(4, 'mm')))
 uv_groove = get_groove(groove_type="UVGroove",
-                       **dict(t=Q_(12, "mm"), alpha=Q_(70, "deg"), beta=Q_(11, "deg"),
+                       **dict(t=Q_(12, "mm"), alpha=Q_(60, "deg"), beta=Q_(11, "deg"),
                               R=Q_(6, "mm"), h=Q_(4, "mm"), b=Q_(2, "mm")))
 
 target = asdf.AsdfFile(dict(

@@ -31,6 +31,17 @@ class VGroove:
 
 
 @dataclass
+class VVGroove:
+    """<CLASS DOCSTRING>"""
+    t: Q_
+    alpha: Q_
+    beta: Q_
+    c: Q_ = Q_(0, "mm")
+    b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.7"])
+
+
+@dataclass
 class UVGroove:
     """<CLASS DOCSTRING>"""
     t: Q_
@@ -58,7 +69,93 @@ class IGroove:
     """<CLASS DOCSTRING>"""
     t: Q_
     b: Q_ = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2"])
+    code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
+
+
+@dataclass
+class HVGroove:
+    """<CLASS DOCSTRING>"""
+    t: Q_
+    beta: Q_
+    c: Q_ = Q_(0, "mm")
+    b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
+
+
+@dataclass
+class HUGroove:
+    """<CLASS DOCSTRING>"""
+    t: Q_
+    beta: Q_
+    R: Q_
+    c: Q_ = Q_(0, "mm")
+    b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.11", "2.10"])
+
+
+# double Grooves
+@dataclass
+class DVGroove:
+    """<CLASS DOCSTRING>"""
+    t: Q_
+    alpha_1: Q_
+    alpha_2: Q_
+    c: Q_ = Q_(0, "mm")
+    b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
+
+
+@dataclass
+class DUGroove:
+    """<CLASS DOCSTRING>"""
+    t: Q_
+    beta_1: Q_
+    beta_2: Q_
+    # t-c/2
+    h: Q_
+    c: Q_ = Q_(3, "mm")
+    b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["2.7"])
+
+
+@dataclass
+class DHVGroove:
+    """<CLASS DOCSTRING>"""
+    t: Q_
+    beta_1: Q_
+    beta_2: Q_
+    h: Q_
+    c: Q_ = Q_(0, "mm")
+    b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
+
+
+@dataclass
+class DHUGroove:
+    """<CLASS DOCSTRING>"""
+    t: Q_
+    beta_1: Q_
+    beta_2: Q_
+    h: Q_
+    c: Q_ = Q_(0, "mm")
+    b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["2.11"])
+
+
+# Frontal Face - Groove
+@dataclass
+class FFGroove:
+    """<CLASS DOCSTRING>"""
+    t_1: Q_
+    t_2: Q_
+    alpha: Q_
+    h: Q_
+    e: Q_ = Q_(0, "mm")
+    b: Q_ = Q_(0, "mm")
+    code_number: List[str] = field(
+        default_factory=lambda:
+        ["2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"]
+    )
 
 
 class GrooveType(WeldxType):

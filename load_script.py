@@ -31,17 +31,17 @@ else:
 if isinstance(opened["test002"], UGroove):
     print(opened["test002"])
     profile02 = groove_to_profile(opened["test002"])
-    profile02_data = profile02.rasterize(0.2)
+    profile02_data = profile02.rasterize(0.3)
     ax[1].plot(profile02_data[0], profile02_data[1], ".")
     beta = opened["test002"].beta.to("deg").magnitude
     ax[1].set_title(f"single U Groove Butt Weld\n {beta}° groove angle")
 else:
     print("false")
 
-if isinstance(opened["test003"], UVGroove):
+if isinstance(opened["test003"], IGroove):
     print(opened["test003"])
     profile03 = groove_to_profile(opened["test003"])
-    profile03_data = profile03.rasterize(0.1)
+    profile03_data = profile03.rasterize(0.3)
     ax[2].plot(profile03_data[0], profile03_data[1], ".")
     ax[2].set_title(f"I Groove")
 else:
