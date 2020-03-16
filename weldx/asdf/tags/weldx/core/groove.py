@@ -10,16 +10,28 @@ from weldx import Q_
 from weldx.asdf.types import WeldxType
 
 
-def get_groove(groove_type, **kwargs):
+def get_groove(
+        groove_type,
+        workpiece_thickness=None,
+        root_gap=None,
+        root_face=None,
+        bevel_radius=None,
+        bevel_angle=None,
+        bevel_angle2=None,
+        groove_angle=None,
+):
     """<DEF DOCSTRING>"""
     if groove_type == "VGroove":
-        return VGroove(**kwargs)
+        return VGroove(t=workpiece_thickness, alpha=groove_angle,
+                       b=root_gap, c=root_face)
     if groove_type == "UGroove":
-        return UGroove(**kwargs)
+        return UGroove(t=workpiece_thickness, beta=bevel_angle,
+                       R=bevel_radius, b=root_gap, c=root_face)
     if groove_type == "IGroove":
-        return IGroove(**kwargs)
+        return IGroove(t=workpiece_thickness, b=root_gap)
     if groove_type == "UVGroove":
-        return UVGroove(**kwargs)
+        return UVGroove(t=workpiece_thickness, alpha=groove_angle, beta=bevel_angle,
+                        R=bevel_radius, b=root_gap, h=root_face)
 
 
 @dataclass
