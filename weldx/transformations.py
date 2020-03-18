@@ -3,6 +3,7 @@
 import weldx.utility as ut
 import numpy as np
 import math
+import networkx as nx
 from scipy.spatial.transform import Rotation as Rot
 
 
@@ -186,7 +187,7 @@ def vector_points_to_left_of_vector(vector, vector_reference):
     return int(np.sign(np.linalg.det([vector_reference, vector])))
 
 
-# cartesian coordinate system class -------------------------------------------
+# local coordinate system class --------------------------------------------------------
 
 
 class LocalCoordinateSystem:
@@ -433,3 +434,40 @@ class LocalCoordinateSystem:
         :return: Location of the coordinate system.
         """
         return self._location
+
+
+# coordinate system manager class ------------------------------------------------------
+
+
+class CoordinateSystemManager:
+    """Manages multiple coordinate systems and the transformations between them."""
+
+    def __init__(self, base_coordinate_system_name="base"):
+        self._graph = nx.DiGraph()
+        self._graph.add_node(base_coordinate_system_name)
+
+    def add_coordinate_system(self, name, parent_system_name, local_coordinate_system):
+        if parent_system_name not in self._graph.nodes:
+            raise Exception("Invalid parent system")
+        self._graph.add_node(name)
+        self._graph.add_edge(
+            parent_system_name, name, lcs=parent_system_name + " to " + name
+        )
+        self._graph.add_edge(
+            name, parent_system_name, lcs=name + " to " + parent_system_name
+        )
+
+    def get_transformation(self, from_cs, to_cs):
+        if from_cs not in self._graph.nodes:
+            raise Exception("Invalid source system")
+        if to_cs not in self._graph.nodes:
+            raise Exception("Invalid target system")
+
+        path = nx.shortest_path(self._graph, from_cs, to_cs)
+        # print([path[1:], path[:-1]])
+        for i in range(len(path) - 1):
+            print(self._graph.edges[path[i], path[i + 1]]["lcs"])
+
+    @property
+    def graph(self):
+        return self._graph
