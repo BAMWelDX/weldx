@@ -175,6 +175,22 @@ def test_coordinate_axis_rotation_matrices():
             assert math.isclose(res[i_2], exp_2)
 
 
+def test_scaling_matrix():
+    """
+    Test the scaling matrix.
+
+    Should be self explanatory.
+
+    :return: ---
+    """
+    mat_a = np.array([[1, 6, 2], [4, 10, 2], [3, 5, 2]], dtype=float)
+    scale_mat = tf.scale_matrix(2, 0.5, 4)
+    mat_b = np.matmul(scale_mat, mat_a)
+
+    mat_b_exp = mat_a = np.array([[2, 12, 4], [2, 5, 1], [12, 20, 8]], dtype=float)
+    assert ut.matrix_is_close(mat_b, mat_b_exp)
+
+
 def test_normalize():
     """
     Test the normalize function.
