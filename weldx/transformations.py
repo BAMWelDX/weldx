@@ -39,6 +39,18 @@ def rotation_matrix_z(angle):
     return Rot.from_euler("z", angle).as_matrix()
 
 
+def scale_matrix(scale_x, scale_y, scale_z):
+    """
+    Return a scaling matrix.
+
+    :param scale_x: Scaling factor in x direction
+    :param scale_y: Scaling factor in y direction
+    :param scale_z: Scaling factor in z direction
+    :return: Scaling matrix
+    """
+    return np.array([[scale_x, 0, 0], [0, scale_y, 0], [0, 0, scale_z]], dtype=float)
+
+
 def normalize(vec):
     """
     Normalize a vector.
