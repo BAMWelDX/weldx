@@ -485,7 +485,6 @@ class CoordinateSystemManager:
         lcs = self.graph.edges[path[0], path[1]]["lcs"]
         length_path = len(path) - 1
         if length_path > 1:
-            print("calculate transformation")
             for i in np.arange(1, length_path):
                 lcs = lcs + self.graph.edges[path[i], path[i + 1]]["lcs"]
             self._add_edges(path[0], path[-1], lcs, True)
