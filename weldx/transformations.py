@@ -458,33 +458,38 @@ class CoordinateSystemManager:
 
     def _add_edges(self, node_from, node_to, lcs, calculated):
         self._graph.add_edge(
-            node_from, node_to, lcs=node_from + " to " + node_to, calculated=calculated,
+            node_from, node_to, lcs=lcs, calculated=calculated,
         )
         self._graph.add_edge(
-            node_to, node_from, lcs=node_to + " to " + node_from, calculated=calculated,
+            node_to, node_from, lcs=lcs.invert(), calculated=calculated,
         )
 
     def add_coordinate_system(self, name, parent_system_name, local_coordinate_system):
+        if not isinstance(local_coordinate_system, LocalCoordinateSystem):
+            raise Exception(
+                "'local_coordinate_system' must be an instance of "
+                + "weldx.transformations.LocalCoordinateSystem"
+            )
         if parent_system_name not in self._graph.nodes:
             raise Exception("Invalid parent system")
         self._graph.add_node(name)
         self._add_edges(parent_system_name, name, local_coordinate_system, False)
 
-    def get_transformation(self, from_cs, to_cs):
-        if from_cs not in self.graph.nodes:
-            raise Exception("Invalid source system")
-        if to_cs not in self.graph.nodes:
-            raise Exception("Invalid target system")
+    def get_local_coordinate_system(self, cs_child, cs_parent):
+        if cs_child not in self.graph.nodes:
+            raise Exception("Invalid child system")
+        if cs_parent not in self.graph.nodes:
+            raise Exception("Invalid parent system")
 
-        path = nx.shortest_path(self.graph, from_cs, to_cs)
+        path = nx.shortest_path(self.graph, cs_child, cs_parent)
+        lcs = self.graph.edges[path[0], path[1]]["lcs"]
         length_path = len(path) - 1
-        if length_path == 1:
-            print("Already calculated")
-            print(self.graph.edges[path[0], path[1]]["lcs"])
-        else:
-            for i in range(length_path):
-                print(self.graph.edges[path[i], path[i + 1]]["lcs"])
-            self._add_edges(path[0], path[-1], "Noth'n", True)
+        if length_path > 1:
+            print("calculate transformation")
+            for i in np.arange(1, length_path):
+                lcs = lcs + self.graph.edges[path[i], path[i + 1]]["lcs"]
+            self._add_edges(path[0], path[-1], lcs, True)
+        return lcs
 
     @property
     def graph(self):
