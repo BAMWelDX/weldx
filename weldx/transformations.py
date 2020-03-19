@@ -435,6 +435,16 @@ class LocalCoordinateSystem:
         """
         return self._location
 
+    def invert(self):
+        """
+        Get a local coordinate system defining the parent in the child system.
+
+        :return: Inverted coordinate system.
+        """
+        basis = self.basis.transpose()
+        origin = np.matmul(basis, -self.origin)
+        return LocalCoordinateSystem(basis, origin)
+
 
 # coordinate system manager class ------------------------------------------------------
 
@@ -446,27 +456,35 @@ class CoordinateSystemManager:
         self._graph = nx.DiGraph()
         self._graph.add_node(base_coordinate_system_name)
 
+    def _add_edges(self, node_from, node_to, lcs, calculated):
+        self._graph.add_edge(
+            node_from, node_to, lcs=node_from + " to " + node_to, calculated=calculated,
+        )
+        self._graph.add_edge(
+            node_to, node_from, lcs=node_to + " to " + node_from, calculated=calculated,
+        )
+
     def add_coordinate_system(self, name, parent_system_name, local_coordinate_system):
         if parent_system_name not in self._graph.nodes:
             raise Exception("Invalid parent system")
         self._graph.add_node(name)
-        self._graph.add_edge(
-            parent_system_name, name, lcs=parent_system_name + " to " + name
-        )
-        self._graph.add_edge(
-            name, parent_system_name, lcs=name + " to " + parent_system_name
-        )
+        self._add_edges(parent_system_name, name, local_coordinate_system, False)
 
     def get_transformation(self, from_cs, to_cs):
-        if from_cs not in self._graph.nodes:
+        if from_cs not in self.graph.nodes:
             raise Exception("Invalid source system")
-        if to_cs not in self._graph.nodes:
+        if to_cs not in self.graph.nodes:
             raise Exception("Invalid target system")
 
-        path = nx.shortest_path(self._graph, from_cs, to_cs)
-        # print([path[1:], path[:-1]])
-        for i in range(len(path) - 1):
-            print(self._graph.edges[path[i], path[i + 1]]["lcs"])
+        path = nx.shortest_path(self.graph, from_cs, to_cs)
+        length_path = len(path) - 1
+        if length_path == 1:
+            print("Already calculated")
+            print(self.graph.edges[path[0], path[1]]["lcs"])
+        else:
+            for i in range(length_path):
+                print(self.graph.edges[path[i], path[i + 1]]["lcs"])
+            self._add_edges(path[0], path[-1], "Noth'n", True)
 
     @property
     def graph(self):

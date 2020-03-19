@@ -542,3 +542,31 @@ def test_coordinate_system_addition_and_subtraction():
 
     assert ut.matrix_is_close(cs_diff_0.basis, cs_2.basis)
     assert ut.vector_is_close(cs_diff_0.origin, cs_2.origin)
+
+
+def test_coordinate_system_invert():
+    """
+    Test the invert function.
+
+    The test creates a coordinate system, inverts it and checks the result against the
+    expected value. Afterwards, the resulting system is inverted again. This operation
+    must yield the original system.
+
+    :return: ---
+    """
+    lcs = tf.LocalCoordinateSystem
+    child_in_parent = lcs.construct_from_xy_and_orientation(
+        [1, 1, 0], [-1, 1, 0], origin=[2, 0, 2]
+    )
+    parent_in_child = child_in_parent.invert()
+
+    exp_basis = tf.rotation_matrix_z(-np.pi / 4)
+    exp_origin = [-np.sqrt(2), np.sqrt(2), -2]
+
+    assert ut.vector_is_close(parent_in_child.origin, exp_origin)
+    assert ut.matrix_is_close(parent_in_child.basis, exp_basis)
+
+    child_in_parent_2 = parent_in_child.invert()
+
+    assert ut.vector_is_close(child_in_parent.origin, child_in_parent_2.origin)
+    assert ut.matrix_is_close(child_in_parent.basis, child_in_parent_2.basis)
