@@ -4,6 +4,7 @@ import weldx.utility as ut
 import numpy as np
 import math
 from scipy.spatial.transform import Rotation as Rot
+from dataclasses import dataclass, asdict
 
 
 # functions -------------------------------------------------------------------
@@ -177,26 +178,30 @@ def vector_points_to_left_of_vector(vector, vector_reference):
 # cartesian coordinate system class -------------------------------------------
 
 
+@dataclass
 class LocalCoordinateSystem:
-    """Defines a local cartesian coordinate system in 3d."""
+    """Defines a local cartesian coordinate system in 3d.
 
-    def __init__(
-        self,
-        basis=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
-        origin=np.array([0, 0, 0]),
-    ):
-        """
-        Construct a cartesian coordinate system.
+    Construct a cartesian coordinate system.
 
-        :param basis: Matrix of 3 orthogonal column vectors which represent
-        the coordinate systems basis. Keep in mind, that the columns of the
-        corresponding orientation matrix is equal to the normalized basis
-        vectors. So each orthogonal transformation matrix can also be
-        provided as basis.
-        :param origin: Position of the origin
-        :return: Cartesian coordinate system
+    :param basis: Matrix of 3 orthogonal column vectors which represent
+    the coordinate systems basis. Keep in mind, that the columns of the
+    corresponding orientation matrix is equal to the normalized basis
+    vectors. So each orthogonal transformation matrix can also be
+    provided as basis.
+    :param origin: Position of the origin
+    :return: Cartesian coordinate system
+
+    """
+
+    basis: np.ndarray = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    origin: np.ndarray = np.array([0, 0, 0])
+
+    def __post_init__(self):
         """
-        basis = ut.to_float_array(basis)
+
+        """
+        basis = ut.to_float_array(self.basis)
         basis[:, 0] = normalize(basis[:, 0])
         basis[:, 1] = normalize(basis[:, 1])
         basis[:, 2] = normalize(basis[:, 2])
@@ -208,9 +213,9 @@ class LocalCoordinateSystem:
         ):
             raise Exception("Basis vectors must be orthogonal")
 
-        self._orientation = basis
+        self._orientation = self.basis
 
-        self._location = ut.to_float_array(origin)
+        self._location = ut.to_float_array(self.origin)
 
     def __add__(self, rhs_cs):
         """
@@ -350,6 +355,10 @@ class LocalCoordinateSystem:
         basis = np.transpose([vec_x, vec_y, vec_z])
         return cls(basis, origin=origin)
 
+    def to_dict(self):
+        """Return class properties as dictionary."""
+        return asdict(self)
+
     @staticmethod
     def _sign_orientation(positive_orientation):
         """
@@ -379,17 +388,6 @@ class LocalCoordinateSystem:
         return np.cross(a_0, a_1)
 
     @property
-    def basis(self):
-        """
-        Get the normalizes basis as matrix of 3 column vectors.
-
-        This function is identical to the 'orientation' function.
-
-        :return: Basis of the coordinate system
-        """
-        return self._orientation
-
-    @property
     def orientation(self):
         """
         Get the coordinate systems orientation matrix.
@@ -399,17 +397,6 @@ class LocalCoordinateSystem:
         :return: Orientation matrix
         """
         return self._orientation
-
-    @property
-    def origin(self):
-        """
-        Get the coordinate systems origin.
-
-        This function is identical to the 'location' function.
-
-        :return: Origin of the coordinate system
-        """
-        return self._location
 
     @property
     def location(self):
