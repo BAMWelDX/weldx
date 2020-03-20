@@ -509,7 +509,7 @@ class CoordinateSystemManager:
         if parent_system_name not in self._graph.nodes:
             raise Exception("Invalid parent system")
         self._graph.add_node(name)
-        self._add_edges(parent_system_name, name, local_coordinate_system, False)
+        self._add_edges(name, parent_system_name, local_coordinate_system, False)
 
     def get_local_coordinate_system(self, cs_child, cs_parent):
         if cs_child not in self.graph.nodes:
@@ -525,6 +525,12 @@ class CoordinateSystemManager:
                 lcs = lcs + self.graph.edges[path[i], path[i + 1]]["lcs"]
             self._add_edges(path[0], path[-1], lcs, True)
         return lcs
+
+    def transform_data(self, data, cs_from, cs_to):
+        lcs = self.get_local_coordinate_system(cs_from, cs_to)
+        rotation = lcs.orientation
+        translation = lcs.location[:, np.newaxis]
+        return np.matmul(rotation, data) + translation
 
     @property
     def graph(self):
