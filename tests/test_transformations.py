@@ -438,8 +438,11 @@ def test_coordinate_system_construction():
     lcs = tf.LocalCoordinateSystem
 
     # setup -----------------------------------------------
+    angle_x = np.pi / 3
+    angle_y = np.pi / 4
+    angle_z = np.pi / 5
     origin = [4, -2, 6]
-    basis_pos = rotated_positive_orthogonal_basis()
+    basis_pos = rotated_positive_orthogonal_basis(angle_x, angle_y, angle_z)
 
     x = basis_pos[:, 0]
     y = basis_pos[:, 1]
@@ -454,6 +457,12 @@ def test_coordinate_system_construction():
 
     check_coordinate_system(cs_basis_pos, basis_pos, origin, True)
     check_coordinate_system(cs_basis_neg, basis_neg, origin, False)
+
+    # construction with euler -----------------------------
+
+    angles = [angle_x, angle_y, angle_z]
+    cs_euler_pos = lcs.construct_from_euler("xyz", angles, False, origin)
+    check_coordinate_system(cs_euler_pos, basis_pos, origin, True)
 
     # construction with x,y,z-vectors ---------------------
 

@@ -276,13 +276,49 @@ class LocalCoordinateSystem:
         return LocalCoordinateSystem(basis, origin)
 
     @classmethod
+    def construct_from_euler(cls, sequence, angles, degrees=False, origin=None):
+        """
+        Construct a cartesian coordinate system from an euler sequence.
+
+        This function uses scipy.spatial.transform.Rotation.from_euler method to define
+        the coordinate systems orientation. Take a look at it's documentation, if some
+        information is missing here. The related parameter docs are a copy of the scipy
+        documentation.
+        :param sequence: Specifies sequence of axes for rotations. Up to 3 characters
+        belonging to the set {‘X’, ‘Y’, ‘Z’} for intrinsic rotations, or {‘x’, ‘y’, ‘z’}
+        for extrinsic rotations. Extrinsic and intrinsic rotations cannot be mixed in
+        one function call.
+        :param angles: Euler angles specified in radians (degrees is False) or degrees
+        (degrees is True). For a single character seq, angles can be:
+        - a single value
+        - array_like with shape (N,), where each angle[i] corresponds to a single
+          rotation
+        - array_like with shape (N, 1), where each angle[i, 0] corresponds to a single
+          rotation
+        For 2- and 3-character wide seq, angles can be:
+        - array_like with shape (W,) where W is the width of seq, which corresponds to a
+          single rotation with W axes
+        - array_like with shape (N, W) where each angle[i] corresponds to a sequence of
+          Euler angles describing a single rotation
+        :param degrees: If True, then the given angles are assumed to be in degrees.
+        Default is False.
+        :param origin: Position of the origin
+        :return: Local coordinate system
+        :return:
+        """
+        if origin is None:
+            origin = np.array([0, 0, 0])
+        orientation = Rot.from_euler(sequence, angles, degrees).as_matrix()
+        return cls(orientation, origin=origin)
+
+    @classmethod
     def construct_from_orientation(cls, orientation, origin=np.array([0, 0, 0])):
         """
         Construct a cartesian coordinate system from orientation matrix.
 
         :param orientation: Orthogonal transformation matrix
         :param origin: Position of the origin
-        :return: Cartesian coordinate system
+        :return: Local coordinate system
         """
         return cls(orientation, origin=origin)
 
