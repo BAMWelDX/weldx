@@ -141,19 +141,23 @@ def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
     return math.isclose(np.dot(vec_u, vec_v), 0, abs_tol=tolerance)
 
 
-def is_orthogonal_matrix(da, dims=["c", "v"]):
+def is_orthogonal_matrix(da, dims=None):
     """
     test if xarray matrix io orthogonal
 
-    :param da:
-    :param dims:
-    :return:
+    TODO: make more general
+
+    :param da: xarray.DataArray to test
+    :param dims: list of dimensions along which to test
+    :return: True if all matrixes are orthogonal
     """
+    if dims is None:
+        dims = ["c", "v"]
     ortho = np.allclose(
         xr.apply_ufunc(
             np.matmul,
             da,
-            da,  # ut.transpose_xarray_axis_data(da, *dims),
+            da,
             input_core_dims=[dims, reversed(dims)],
             output_core_dims=[dims],
         ),

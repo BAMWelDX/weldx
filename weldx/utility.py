@@ -115,10 +115,10 @@ def transpose_xarray_axis_data(da, dim1, dim2):
     """
     Transpose data along two dimensions in an xarray.DataArray.
 
-    :param da:
-    :param dim1:
-    :param dim2:
-    :return:
+    :param da: xarray.DataArray to transpose
+    :param dim1: name of the first dimension
+    :param dim2: name of the second dimension
+    :return: xarray.DataArray with transposed data at specified dimensions
     """
     dims = list(da.dims)
     i = dims.copy()
