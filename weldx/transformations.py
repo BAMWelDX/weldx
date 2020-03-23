@@ -60,9 +60,11 @@ def normalize(vec):
     :param vec: Vector
     :return: Normalized vector
     """
-    norm = np.linalg.norm(vec.T, axis=-1)
+    norm = np.linalg.norm(vec, axis=(-1))
     if not np.all(norm):
-        raise Exception("Vector length is 0.")
+        raise ValueError("Vector length is 0.")
+    if vec.ndim > 1:
+        return vec / norm[..., np.newaxis]
     return vec / norm
 
 
@@ -248,7 +250,10 @@ class LocalCoordinateSystem:
             origin = origin.astype(float)
 
         basis = xr.apply_ufunc(
-            normalize, basis, input_core_dims=[["v"]], output_core_dims=[["v"]]
+            normalize,
+            basis,
+            input_core_dims=[["c", "v"]],
+            output_core_dims=[["c", "v"]],
         )
 
         # vectorize test if orthogonal
@@ -258,7 +263,7 @@ class LocalCoordinateSystem:
         self._xarray = xr.Dataset({"basis": basis, "origin": origin})
 
     def __repr__(self):
-        return self._xarray.__repr__().replace(
+        return self.xarray.__repr__().replace(
             "<xarray.Dataset>", "<LocalCoordinateSystem>"
         )
 
@@ -285,8 +290,8 @@ class LocalCoordinateSystem:
         """
         basis = xr.apply_ufunc(
             np.matmul,
-            rhs_cs.basis,
-            self.basis,
+            rhs_cs.xarray.basis,
+            self.xarray.basis,
             input_core_dims=[["c", "v"], ["c", "v"]],
             output_core_dims=[["c", "v"]],
         )
@@ -294,8 +299,8 @@ class LocalCoordinateSystem:
         origin = (
             xr.apply_ufunc(
                 ut.mat_vec_mul,
-                rhs_cs.basis,
-                self.origin,
+                rhs_cs.xarray.basis,
+                self.xarray.origin,
                 input_core_dims=[["c", "v"], ["c"]],
                 output_core_dims=[["c"]],
             )
@@ -450,8 +455,6 @@ class LocalCoordinateSystem:
         )
 
         basis = np.transpose([vec_x, vec_y, vec_z])
-        print(basis)
-        print(origin)
         return cls(basis, origin=origin)
 
     @staticmethod
@@ -525,6 +528,15 @@ class LocalCoordinateSystem:
         :return: Location of the coordinate system.
         """
         return self._xarray.origin.data
+
+    @property
+    def xarray(self):
+        """
+        Get the xarray.Dataset of the LocalCoordinateSystem
+
+        :return: xarray.Dataset of the coordinate system
+        """
+        return self._xarray
 
     def invert(self):
         """
