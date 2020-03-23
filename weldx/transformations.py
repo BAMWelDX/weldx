@@ -332,9 +332,21 @@ class LocalCoordinateSystem:
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
-        transformation_matrix = rhs_cs.basis.transpose()
-        basis = np.matmul(transformation_matrix, self.basis)
-        origin = np.matmul(transformation_matrix, self.origin - rhs_cs.origin)
+        basis = xr.apply_ufunc(
+            np.matmul,
+            rhs_cs.xarray.basis,
+            self.xarray.basis,
+            input_core_dims=[["v", "c"], ["c", "v"]],  # transposed !
+            output_core_dims=[["c", "v"]],
+        )
+
+        origin = xr.apply_ufunc(
+            ut.mat_vec_mul,
+            rhs_cs.xarray.basis,
+            self.xarray.origin - rhs_cs.xarray.origin,
+            input_core_dims=[["v", "c"], ["c"]],  # transposed !
+            output_core_dims=[["c"]],
+        )
         return LocalCoordinateSystem(basis, origin)
 
     @classmethod
@@ -552,7 +564,7 @@ class LocalCoordinateSystem:
         ds = self._xarray.copy(deep=True)
 
         # transpose rotation matrix (TODO: find the correct "xarray-way" to do this..)
-        ds["basis"] = ut.transpose_xarray_axis_data(ds.basis, "c", "v")
+        ds["basis"] = ut.transpose_xarray_axis_data(ds.basis, dim1="c", dim2="v")
 
         ds["origin"] = xr.apply_ufunc(
             ut.mat_vec_mul,
