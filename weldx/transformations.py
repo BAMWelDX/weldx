@@ -60,10 +60,22 @@ def normalize(vec):
     :param vec: Vector
     :return: Normalized vector
     """
-    norm = np.linalg.norm(vec, axis=-1)
+    norm = np.linalg.norm(vec.T, axis=-1)
     if not np.all(norm):
         raise Exception("Vector length is 0.")
     return vec / norm
+
+
+def normalize_mat(a):
+    """
+
+    :param a: Matrix with vectors as columns.
+    :return: Metrix with normalized columns.
+    """
+    norm = np.linalg.norm(a, axis=-2)
+    if not np.all(norm):
+        raise Exception("Vector length is 0.")
+    return a / norm
 
 
 def orientation_point_plane_containing_origin(point, p_a, p_b):
@@ -151,7 +163,7 @@ def is_orthogonal_matrix(da, dims=["c", "v"]):
         xr.apply_ufunc(
             np.matmul,
             da,
-            da,
+            da,  # ut.transpose_xarray_axis_data(da, *dims),
             input_core_dims=[dims, reversed(dims)],
             output_core_dims=[dims],
         ),
@@ -248,10 +260,7 @@ class LocalCoordinateSystem:
             origin = origin.astype(float)
 
         basis = xr.apply_ufunc(
-            normalize,
-            basis,
-            input_core_dims=[["c", "v"]],
-            output_core_dims=[["c", "v"]],
+            normalize, basis, input_core_dims=[["v"]], output_core_dims=[["v"]]
         )
 
         # vectorize test if orthogonal
@@ -293,6 +302,7 @@ class LocalCoordinateSystem:
             input_core_dims=[["c", "v"], ["c", "v"]],
             output_core_dims=[["c", "v"]],
         )
+
         origin = (
             xr.apply_ufunc(
                 ut.mat_vec_mul,
@@ -535,15 +545,10 @@ class LocalCoordinateSystem:
         :return: Inverted coordinate system.
         """
 
-        ds = self._xarray
+        ds = self._xarray.copy(deep=True)
 
         # transpose rotation matrix (TODO: find the correct "xarray-way" to do this..)
-        ds["basis"] = xr.apply_ufunc(
-            lambda x: x,
-            ds.basis,
-            input_core_dims=[["c", "v"]],
-            output_core_dims=[["v", "c"]],
-        )
+        ds["basis"] = ut.transpose_xarray_axis_data(ds.basis, "c", "v")
 
         ds["origin"] = xr.apply_ufunc(
             ut.mat_vec_mul,

@@ -109,3 +109,21 @@ def mat_vec_mul(a, b):
     :return: Resulting vector [n, ]
     """
     return np.matmul(a, b[..., np.newaxis]).squeeze()
+
+
+def transpose_xarray_axis_data(da, dim1, dim2):
+    """
+    Transpose data along two dimensions in an xarray.DataArray.
+
+    :param da:
+    :param dim1:
+    :param dim2:
+    :return:
+    """
+    dims = list(da.dims)
+    i = dims.copy()
+    a, b = i.index(dim1), i.index(dim2)
+    i[b], i[a] = i[a], i[b]
+
+    da.data = da.transpose(*i).data
+    return da
