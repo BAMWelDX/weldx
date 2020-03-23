@@ -98,3 +98,14 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9):
             return False
 
     return True
+
+
+def mat_vec_mul(a, b):
+    """
+    Matrix x Vector multiplication using matmul with added dimension for correct broadcasting
+
+    :param a: Input Matrix [m, n]
+    :param b: Input Vector to be multiplied [n, ]
+    :return: Resulting vector [n, ]
+    """
+    return np.matmul(a, b[..., np.newaxis]).squeeze()

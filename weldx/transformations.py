@@ -2,6 +2,7 @@
 
 import weldx.utility as ut
 import numpy as np
+import xarray as xr
 import math
 import networkx as nx
 from scipy.spatial.transform import Rotation as Rot
@@ -59,8 +60,8 @@ def normalize(vec):
     :param vec: Vector
     :return: Normalized vector
     """
-    norm = np.linalg.norm(vec)
-    if norm == 0.0:
+    norm = np.linalg.norm(vec, axis=-1)
+    if not np.all(norm):
         raise Exception("Vector length is 0.")
     return vec / norm
 
@@ -138,6 +139,27 @@ def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
     return math.isclose(np.dot(vec_u, vec_v), 0, abs_tol=tolerance)
 
 
+def is_orthogonal_matrix(da, dims=["c", "v"]):
+    """
+    test if xarray matrix io orthogonal
+
+    :param da:
+    :param dims:
+    :return:
+    """
+    ortho = np.allclose(
+        xr.apply_ufunc(
+            np.matmul,
+            da,
+            da,
+            input_core_dims=[dims, reversed(dims)],
+            output_core_dims=[dims],
+        ),
+        np.eye(3),
+    )
+    return ortho
+
+
 def point_left_of_line(point, line_start, line_end):
     """
     Determine if a point lies left of a line.
@@ -209,21 +231,39 @@ class LocalCoordinateSystem:
         :param origin: Position of the origin
         :return: Cartesian coordinate system
         """
-        basis = ut.to_float_array(basis)
-        basis[:, 0] = normalize(basis[:, 0])
-        basis[:, 1] = normalize(basis[:, 1])
-        basis[:, 2] = normalize(basis[:, 2])
 
-        if not (
-            is_orthogonal(basis[:, 0], basis[:, 1])
-            and is_orthogonal(basis[:, 1], basis[:, 2])
-            and is_orthogonal(basis[:, 2], basis[:, 0])
-        ):
+        if not isinstance(basis, xr.DataArray):
+            basis = xr.DataArray(
+                data=basis,
+                dims=["c", "v"],
+                coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
+                name="basis",
+            )
+            basis = basis.astype(float)
+
+        if not isinstance(origin, xr.DataArray):
+            origin = xr.DataArray(
+                data=origin, dims=["c"], coords={"c": ["x", "y", "z"]}, name=origin
+            )
+            origin = origin.astype(float)
+
+        basis = xr.apply_ufunc(
+            normalize,
+            basis,
+            input_core_dims=[["c", "v"]],
+            output_core_dims=[["c", "v"]],
+        )
+
+        # vectorize test if orthogonal
+        if not is_orthogonal_matrix(basis, dims=["c", "v"]):
             raise Exception("Basis vectors must be orthogonal")
 
-        self._orientation = basis
+        self._xarray = xr.Dataset({"basis": basis, "origin": origin})
 
-        self._location = ut.to_float_array(origin)
+    def __repr__(self):
+        return self._xarray.__repr__().replace(
+            "<xarray.Dataset>", "<LocalCoordinateSystem>"
+        )
 
     def __add__(self, rhs_cs):
         """
@@ -246,8 +286,23 @@ class LocalCoordinateSystem:
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
-        basis = np.matmul(rhs_cs.basis, self.basis)
-        origin = np.matmul(rhs_cs.basis, self.origin) + rhs_cs.origin
+        basis = xr.apply_ufunc(
+            np.matmul,
+            rhs_cs.basis,
+            self.basis,
+            input_core_dims=[["c", "v"], ["c", "v"]],
+            output_core_dims=[["c", "v"]],
+        )
+        origin = (
+            xr.apply_ufunc(
+                ut.mat_vec_mul,
+                rhs_cs.basis,
+                self.origin,
+                input_core_dims=[["c", "v"], ["c"]],
+                output_core_dims=[["c"]],
+            )
+            + rhs_cs.origin
+        )
         return LocalCoordinateSystem(basis, origin)
 
     def __sub__(self, rhs_cs):
@@ -397,6 +452,8 @@ class LocalCoordinateSystem:
         )
 
         basis = np.transpose([vec_x, vec_y, vec_z])
+        print(basis)
+        print(origin)
         return cls(basis, origin=origin)
 
     @staticmethod
@@ -436,7 +493,7 @@ class LocalCoordinateSystem:
 
         :return: Basis of the coordinate system
         """
-        return self._orientation
+        return self._xarray.basis.data
 
     @property
     def orientation(self):
@@ -447,7 +504,7 @@ class LocalCoordinateSystem:
 
         :return: Orientation matrix
         """
-        return self._orientation
+        return self._xarray.basis.data
 
     @property
     def origin(self):
@@ -458,7 +515,7 @@ class LocalCoordinateSystem:
 
         :return: Origin of the coordinate system
         """
-        return self._location
+        return self._xarray.origin.data
 
     @property
     def location(self):
@@ -469,7 +526,7 @@ class LocalCoordinateSystem:
 
         :return: Location of the coordinate system.
         """
-        return self._location
+        return self._xarray.origin.data
 
     def invert(self):
         """
@@ -477,9 +534,30 @@ class LocalCoordinateSystem:
 
         :return: Inverted coordinate system.
         """
-        basis = self.basis.transpose()
-        origin = np.matmul(basis, -self.origin)
-        return LocalCoordinateSystem(basis, origin)
+
+        ds = self._xarray
+
+        # transpose rotation matrix (TODO: find the correct "xarray-way" to do this..)
+        ds["basis"] = xr.apply_ufunc(
+            lambda x: x,
+            ds.basis,
+            input_core_dims=[["c", "v"]],
+            output_core_dims=[["v", "c"]],
+        )
+
+        ds["origin"] = xr.apply_ufunc(
+            ut.mat_vec_mul,
+            ds.basis,
+            -ds.origin,
+            input_core_dims=[["c", "v"], ["c"]],
+            output_core_dims=[["c"]],
+        )
+
+        # basis = self.basis.transpose()
+        # origin = np.matmul(basis, -self.origin)
+        return LocalCoordinateSystem(
+            ds.basis.transpose(..., "c", "v").data, ds.origin.transpose(..., "c").data
+        )
 
 
 # coordinate system manager class ------------------------------------------------------
@@ -493,11 +571,9 @@ class CoordinateSystemManager:
         self._graph.add_node(base_coordinate_system_name)
 
     def _add_edges(self, node_from, node_to, lcs, calculated):
+        self._graph.add_edge(node_from, node_to, lcs=lcs, calculated=calculated)
         self._graph.add_edge(
-            node_from, node_to, lcs=lcs, calculated=calculated,
-        )
-        self._graph.add_edge(
-            node_to, node_from, lcs=lcs.invert(), calculated=calculated,
+            node_to, node_from, lcs=lcs.invert(), calculated=calculated
         )
 
     def add_coordinate_system(self, name, parent_system_name, local_coordinate_system):
