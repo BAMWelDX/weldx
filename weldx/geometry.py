@@ -6,6 +6,7 @@ import weldx.transformations as tf
 import copy
 import math
 import numpy as np
+import xarray as xr
 
 
 # LineSegment -----------------------------------------------------------------
@@ -1135,10 +1136,10 @@ class Trace:
 
             local_cs = local_segment_cs + segment_start_cs
 
-            data_point = local_cs.origin[:, np.newaxis]
+            data_point = local_cs.origin.data[:, np.newaxis]
             raster_data = np.hstack([raster_data, data_point])
 
-        last_point = self._coordinate_system_lookup[-1].origin[:, np.newaxis]
+        last_point = self._coordinate_system_lookup[-1].origin.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
 
@@ -1371,8 +1372,8 @@ class Geometry:
         :return: Transformed profile data
         """
         local_cs = self._trace.local_coordinate_system(location)
-        local_data = np.matmul(local_cs.basis, profile_raster_data)
-        return local_data + local_cs.origin[:, np.newaxis]
+        local_data = np.matmul(local_cs.basis.data, profile_raster_data)
+        return local_data + local_cs.origin.data[:, np.newaxis]
 
     @staticmethod
     def _profile_raster_data_3d(profile, raster_width):

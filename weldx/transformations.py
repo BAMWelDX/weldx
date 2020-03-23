@@ -294,8 +294,8 @@ class LocalCoordinateSystem:
         """
         basis = xr.apply_ufunc(
             np.matmul,
-            rhs_cs.xarray.basis,
-            self.xarray.basis,
+            rhs_cs.basis,
+            self.basis,
             input_core_dims=[["c", "v"], ["c", "v"]],
             output_core_dims=[["c", "v"]],
         )
@@ -303,8 +303,8 @@ class LocalCoordinateSystem:
         origin = (
             xr.apply_ufunc(
                 ut.mat_vec_mul,
-                rhs_cs.xarray.basis,
-                self.xarray.origin,
+                rhs_cs.basis,
+                self.origin,
                 input_core_dims=[["c", "v"], ["c"]],
                 output_core_dims=[["c"]],
             )
@@ -334,16 +334,16 @@ class LocalCoordinateSystem:
         """
         basis = xr.apply_ufunc(
             np.matmul,
-            rhs_cs.xarray.basis,
-            self.xarray.basis,
+            rhs_cs.basis,
+            self.basis,
             input_core_dims=[["v", "c"], ["c", "v"]],  # transposed !
             output_core_dims=[["c", "v"]],
         )
 
         origin = xr.apply_ufunc(
             ut.mat_vec_mul,
-            rhs_cs.xarray.basis,
-            self.xarray.origin - rhs_cs.xarray.origin,
+            rhs_cs.basis,
+            self.origin - rhs_cs.origin,
             input_core_dims=[["v", "c"], ["c"]],  # transposed !
             output_core_dims=[["c"]],
         )
@@ -510,7 +510,7 @@ class LocalCoordinateSystem:
 
         :return: Basis of the coordinate system
         """
-        return self._xarray.basis.data
+        return self._xarray.basis
 
     @property
     def orientation(self):
@@ -521,7 +521,7 @@ class LocalCoordinateSystem:
 
         :return: Orientation matrix
         """
-        return self._xarray.basis.data
+        return self._xarray.basis
 
     @property
     def origin(self):
@@ -532,7 +532,7 @@ class LocalCoordinateSystem:
 
         :return: Origin of the coordinate system
         """
-        return self._xarray.origin.data
+        return self._xarray.origin
 
     @property
     def location(self):
@@ -543,7 +543,7 @@ class LocalCoordinateSystem:
 
         :return: Location of the coordinate system.
         """
-        return self._xarray.origin.data
+        return self._xarray.origin
 
     @property
     def xarray(self):
@@ -561,7 +561,7 @@ class LocalCoordinateSystem:
         :return: Inverted coordinate system.
         """
 
-        ds = self._xarray.copy(deep=True)
+        ds = self._xarray.copy(deep=False)
 
         # transpose rotation matrix (TODO: find the correct "xarray-way" to do this..)
         ds["basis"] = ut.transpose_xarray_axis_data(ds.basis, dim1="c", dim2="v")
@@ -576,9 +576,7 @@ class LocalCoordinateSystem:
 
         # basis = self.basis.transpose()
         # origin = np.matmul(basis, -self.origin)
-        return LocalCoordinateSystem(
-            ds.basis.transpose(..., "c", "v").data, ds.origin.transpose(..., "c").data
-        )
+        return LocalCoordinateSystem(ds.basis, ds.origin)
 
 
 # coordinate system manager class ------------------------------------------------------

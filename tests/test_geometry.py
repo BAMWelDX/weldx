@@ -8,6 +8,7 @@ import tests._helpers as helpers
 
 import pytest
 import numpy as np
+import xarray as xr
 import math
 import copy
 
@@ -2168,7 +2169,9 @@ def test_trace_local_coordinate_system():
         check_coordinate_systems_identical(cs_trace, cs_expected)
 
     # check second segment
-    expected_basis = np.matmul(basis, radial_segment.local_coordinate_system(1).basis)
+    expected_basis = np.matmul(
+        basis, radial_segment.local_coordinate_system(1).basis.data
+    )
     cs_start_seg2 = radial_segment.local_coordinate_system(1) + cs_base
     for i in range(11):
         weight = i / 10
