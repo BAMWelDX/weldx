@@ -6,8 +6,6 @@ import weldx.transformations as tf
 import copy
 import math
 import numpy as np
-import xarray as xr
-
 
 # LineSegment -----------------------------------------------------------------
 

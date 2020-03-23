@@ -143,7 +143,7 @@ def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
 
 def is_orthogonal_matrix(da, dims=None):
     """
-    test if xarray matrix io orthogonal
+    Check if xarray matrix io orthogonal.
 
     TODO: make more general
 
@@ -237,7 +237,6 @@ class LocalCoordinateSystem:
         :param origin: Position of the origin
         :return: Cartesian coordinate system
         """
-
         if not isinstance(basis, xr.DataArray):
             basis = xr.DataArray(
                 data=basis,
@@ -267,6 +266,7 @@ class LocalCoordinateSystem:
         self._xarray = xr.Dataset({"basis": basis, "origin": origin})
 
     def __repr__(self):
+        """Give __repr_ output in xarray format."""
         return self.xarray.__repr__().replace(
             "<xarray.Dataset>", "<LocalCoordinateSystem>"
         )
@@ -548,7 +548,7 @@ class LocalCoordinateSystem:
     @property
     def xarray(self):
         """
-        Get the xarray.Dataset of the LocalCoordinateSystem
+        Get the xarray.Dataset of the LocalCoordinateSystem.
 
         :return: xarray.Dataset of the coordinate system
         """
@@ -560,7 +560,6 @@ class LocalCoordinateSystem:
 
         :return: Inverted coordinate system.
         """
-
         ds = self._xarray.copy(deep=False)
 
         # transpose rotation matrix (TODO: find the correct "xarray-way" to do this..)

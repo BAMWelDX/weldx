@@ -8,7 +8,6 @@ import tests._helpers as helpers
 
 import pytest
 import numpy as np
-import xarray as xr
 import math
 import copy
 
