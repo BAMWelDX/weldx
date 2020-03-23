@@ -66,18 +66,6 @@ def normalize(vec):
     return vec / norm
 
 
-def normalize_mat(a):
-    """
-
-    :param a: Matrix with vectors as columns.
-    :return: Metrix with normalized columns.
-    """
-    norm = np.linalg.norm(a, axis=-2)
-    if not np.all(norm):
-        raise Exception("Vector length is 0.")
-    return a / norm
-
-
 def orientation_point_plane_containing_origin(point, p_a, p_b):
     """
     Determine a points orientation relative to a plane containing the origin.
