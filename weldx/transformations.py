@@ -213,9 +213,9 @@ class LocalCoordinateSystem:
         ):
             raise Exception("Basis vectors must be orthogonal")
 
-        self._orientation = self.basis
+        # self._orientation = self.basis
 
-        self._location = ut.to_float_array(self.origin)
+        # self._location = ut.to_float_array(self.origin)
 
     def __add__(self, rhs_cs):
         """
@@ -396,7 +396,7 @@ class LocalCoordinateSystem:
 
         :return: Orientation matrix
         """
-        return self._orientation
+        return self.basis
 
     @property
     def location(self):
@@ -407,4 +407,4 @@ class LocalCoordinateSystem:
 
         :return: Location of the coordinate system.
         """
-        return self._location
+        return self.origin
