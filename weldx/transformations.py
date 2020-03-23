@@ -198,9 +198,7 @@ class LocalCoordinateSystem:
     origin: np.ndarray = np.array([0, 0, 0])
 
     def __post_init__(self):
-        """
-
-        """
+        """Normalize and check basis vectors."""
         basis = ut.to_float_array(self.basis)
         basis[:, 0] = normalize(basis[:, 0])
         basis[:, 1] = normalize(basis[:, 1])
