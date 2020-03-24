@@ -141,31 +141,6 @@ def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
     return math.isclose(np.dot(vec_u, vec_v), 0, abs_tol=tolerance)
 
 
-def is_orthogonal_matrix(da, dims=None):
-    """
-    Check if xarray matrix io orthogonal.
-
-    TODO: make more general
-
-    :param da: xarray.DataArray to test
-    :param dims: list of dimensions along which to test
-    :return: True if all matrixes are orthogonal
-    """
-    if dims is None:
-        dims = ["c", "v"]
-    ortho = np.allclose(
-        xr.apply_ufunc(
-            np.matmul,
-            da,
-            da,
-            input_core_dims=[dims, reversed(dims)],
-            output_core_dims=[dims],
-        ),
-        np.eye(3),
-    )
-    return ortho
-
-
 def point_left_of_line(point, line_start, line_end):
     """
     Determine if a point lies left of a line.
@@ -260,7 +235,7 @@ class LocalCoordinateSystem:
         )
 
         # vectorize test if orthogonal
-        if not is_orthogonal_matrix(basis, dims=["c", "v"]):
+        if not ut.xr_is_orthogonal_matrix(basis, dims=["c", "v"]):
             raise Exception("Basis vectors must be orthogonal")
 
         self._xarray = xr.Dataset({"basis": basis, "origin": origin})
@@ -292,22 +267,9 @@ class LocalCoordinateSystem:
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
-        basis = xr.apply_ufunc(
-            np.matmul,
-            rhs_cs.basis,
-            self.basis,
-            input_core_dims=[["c", "v"], ["c", "v"]],
-            output_core_dims=[["c", "v"]],
-        )
-
+        basis = ut.xr_matmul(rhs_cs.basis, self.basis, dims_a=["c", "v"])
         origin = (
-            xr.apply_ufunc(
-                ut.mat_vec_mul,
-                rhs_cs.basis,
-                self.origin,
-                input_core_dims=[["c", "v"], ["c"]],
-                output_core_dims=[["c"]],
-            )
+            ut.xr_matvecmul(rhs_cs.basis, self.origin, ["c", "v"], ["c"])
             + rhs_cs.origin
         )
         return LocalCoordinateSystem(basis, origin)
@@ -332,12 +294,12 @@ class LocalCoordinateSystem:
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
-        basis = xr.apply_ufunc(
-            np.matmul,
+        basis = ut.xr_matmul(
             rhs_cs.basis,
             self.basis,
-            input_core_dims=[["v", "c"], ["c", "v"]],  # transposed !
-            output_core_dims=[["c", "v"]],
+            dims_a=["v", "c"],  # transposed !
+            dims_b=["c", "v"],
+            dims_out=["c", "v"],
         )
 
         origin = xr.apply_ufunc(
@@ -510,7 +472,7 @@ class LocalCoordinateSystem:
 
         :return: Basis of the coordinate system
         """
-        return self._xarray.basis
+        return self._xarray.basis.transpose(..., "c", "v")
 
     @property
     def orientation(self):
@@ -521,7 +483,7 @@ class LocalCoordinateSystem:
 
         :return: Orientation matrix
         """
-        return self._xarray.basis
+        return self._xarray.basis.transpose(..., "c", "v")
 
     @property
     def origin(self):
@@ -532,7 +494,7 @@ class LocalCoordinateSystem:
 
         :return: Origin of the coordinate system
         """
-        return self._xarray.origin
+        return self._xarray.origin.transpose(..., "c")
 
     @property
     def location(self):
@@ -543,7 +505,7 @@ class LocalCoordinateSystem:
 
         :return: Location of the coordinate system.
         """
-        return self._xarray.origin
+        return self._xarray.origin.transpose(..., "c")
 
     @property
     def xarray(self):
