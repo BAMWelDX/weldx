@@ -622,8 +622,8 @@ class CoordinateSystemManager:
 
     def transform_data(self, data, cs_from, cs_to):
         lcs = self.get_local_coordinate_system(cs_from, cs_to)
-        rotation = lcs.orientation
-        translation = lcs.location[:, np.newaxis]
+        rotation = lcs.orientation.data
+        translation = lcs.location.data[:, np.newaxis]
         return np.matmul(rotation, data) + translation
 
     @property
