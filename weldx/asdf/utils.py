@@ -50,7 +50,7 @@ _DEFAULT_ASDF_DESCRIPTION = "<TODO DESCRIPTION>"
 _loader = jinja2.FileSystemLoader(
     searchpath=["./asdf/templates", "./weldx/asdf/templates"]
 )
-_env = jinja2.Environment(loader=_loader)
+_env = jinja2.Environment(loader=_loader, autoescape=True)
 _env.globals.update(zip=zip)
 _env.globals.update(_asdf_dtype=_asdf_dtype)
 _env.globals.update(str=str)
@@ -106,9 +106,9 @@ def make_python_class_string(
     template_file = "asdf_dataclass.py.jinja"
     template = _env.get_template(template_file)
 
-    lib_imports = set(
-        [dtype.split(".")[0] for dtype in property_types if len(dtype.split(".")) > 1]
-    )
+    lib_imports = {
+        dtype.split(".")[0] for dtype in property_types if len(dtype.split(".")) > 1
+    }
 
     output_text = template.render(
         class_name=class_name,

@@ -84,7 +84,6 @@ def test_aws_example():
 
     weldment = Weldment(sub_assembly)
 
-    filename = "aws_demo.yaml"
     tree = dict(process=gas_for_procedure, weldment=weldment)
 
     # Write the data to buffer
@@ -102,6 +101,7 @@ def test_aws_example():
         buff, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
     ) as af:
         data = af.tree
+    assert isinstance(data, dict)
 
 
 def test_jinja_template():
@@ -149,6 +149,6 @@ def test_jinja_template():
     os.remove(asdf_file_path)
     os.remove(python_file_path)
 
-    asdf_schema_string = make_asdf_schema_string(
+    make_asdf_schema_string(
         asdf_name="custom/testclass", asdf_version="1.0.0", properties=["prop"]
     )
