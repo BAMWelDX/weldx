@@ -231,7 +231,7 @@ def xr_interp_like(da1, da2, broadcast_missing=False, fillna=True):
     Provides some utility options for handling out of range values and broadcasting.
     :param da1: xarray object with data to interpolate
     :param da2: xarray object along which dimensions to interpolate
-    :param broadcast_missing: broadcast all missing dimensions from da2 onto da1
+    :param broadcast_missing: broadcast da1 along all additional dimensions of da2
     :param fillna: fill out of range NaN values (default = True)
     :return:
     """
@@ -246,3 +246,29 @@ def xr_interp_like(da1, da2, broadcast_missing=False, fillna=True):
         da = da.broadcast_like(da2)
 
     return da
+
+
+@xr.register_dataarray_accessor("weldx")
+class WeldxAccessor:
+    """
+    Custom accessor for extending DataArray functionality.
+
+    See http://xarray.pydata.org/en/stable/internals.html#extending-xarray for details.
+    """
+
+    def __init__(self, xarray_obj):
+        self._obj = xarray_obj
+
+    def interp_like(self, da, broadcast_missing=False, fillna=True):
+        """
+        Interpolate DataArray along dimensions of another DataArray.
+
+        Provides some utility options for handling out of range values and broadcasting.
+        :param da: xarray object along which dimensions to interpolate
+        :param broadcast_missing: broadcast self along all additional dimensions of da
+        :param fillna: fill out of range NaN values (default = True)
+        :return:
+        """
+        return xr_interp_like(
+            self._obj, da, broadcast_missing=broadcast_missing, fillna=fillna
+        )
