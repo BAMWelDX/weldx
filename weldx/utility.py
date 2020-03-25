@@ -224,7 +224,14 @@ def xr_fill_all(da, order="bf"):
     return da
 
 
-def xr_interp_like(da1, da2, broadcast_missing=False, fillna=True):
+def xr_interp_like(
+    da1: xr.DataArray,
+    da2: xr.DataArray,
+    broadcast_missing: bool = False,
+    fillna: bool = True,
+    method: str = "linear",
+    assume_sorted: bool = False,
+):
     """
     Interpolate DataArray along dimensions of another DataArray.
 
@@ -233,10 +240,12 @@ def xr_interp_like(da1, da2, broadcast_missing=False, fillna=True):
     :param da2: xarray object along which dimensions to interpolate
     :param broadcast_missing: broadcast da1 along all additional dimensions of da2
     :param fillna: fill out of range NaN values (default = True)
-    :return:
+    :param method: interpolation method to pass on to xarray.interp_like
+    :param assume_sorted: assume_sorted flag to pass on to xarray.interp_like
+    :return: interpolated DataArray
     """
     # default interp will not add dimensions and fill out of range indexes with NaN
-    da = da1.interp_like(da2)
+    da = da1.interp_like(da2, method=method, assume_sorted=assume_sorted)
 
     # fill out of range nan values for all dimensions
     if fillna:
@@ -259,16 +268,12 @@ class WeldxAccessor:
     def __init__(self, xarray_obj):
         self._obj = xarray_obj
 
-    def interp_like(self, da, broadcast_missing=False, fillna=True):
+    def interp_like(self, da, *args, **kwargs):
         """
         Interpolate DataArray along dimensions of another DataArray.
 
         Provides some utility options for handling out of range values and broadcasting.
-        :param da: xarray object along which dimensions to interpolate
-        :param broadcast_missing: broadcast self along all additional dimensions of da
-        :param fillna: fill out of range NaN values (default = True)
-        :return:
+        See xr_interp_like for docstring and details.
+        :return: interpolated DataArray
         """
-        return xr_interp_like(
-            self._obj, da, broadcast_missing=broadcast_missing, fillna=fillna
-        )
+        return xr_interp_like(self._obj, da, *args, **kwargs)
