@@ -150,7 +150,7 @@ def xr_matmul(a, b, dims_a, dims_b=None, dims_out=None, **apply_kwargs):
     """
     Calculate broadcasted np.matmul(a,b) for xarray objects.
 
-    Should work for any size and shape of quadratic matrixes contained in a DataArray.
+    Should work for any size and shape of quadratic matrices contained in a DataArray.
     Ordering, broadcasting of dimensions should be taken care of by xarray internally.
     :param a: xarray object containing the first matrix
     :param b: xarray object containing the second matrix
@@ -173,7 +173,7 @@ def xr_matmul(a, b, dims_a, dims_b=None, dims_out=None, **apply_kwargs):
         b,
         input_core_dims=[dims_a, dims_b],
         output_core_dims=[dims_out],
-        **apply_kwargs
+        **apply_kwargs,
     )
 
 
@@ -181,7 +181,7 @@ def xr_matmul_transpose(a, b, dims):
     """
     Calculate a * b.T for xarray.DataArray objects by applying np.matmul.
 
-    Should work for any size and shape of quadratic matrixes contained in a DataArray.
+    Should work for any size and shape of quadratic matrices contained in a DataArray.
     Ordering, broadcasting of dimensions should be taken care of by xarray internally.
     :param a: xarray object containing the first matrix
     :param b: xarray object containing the second matrix that will be transposed
@@ -199,7 +199,50 @@ def xr_is_orthogonal_matrix(da, dims):
 
     :param da: xarray.DataArray to test
     :param dims: list of dimensions along which to test
-    :return: True if all matrixes are orthogonal.
+    :return: True if all matrices are orthogonal.
     """
     eye = np.eye(len(da.coords[dims[0]]), len(da.coords[dims[1]]))
     return np.allclose(xr_matmul_transpose(da, da, dims), eye)
+
+
+def xr_fill_all(da, order="bf"):
+    """
+    Fill NaN values along all dimensions in xarray.DataArray.
+
+    :param da: xarray object to fill
+    :param order: order in which to apply bfill/ffill operation
+    :return: xarray object with NaN values filled in all dimensions
+    """
+    if order == "bf":
+        for dim in da.dims:
+            da = da.bfill(dim).ffill(dim)
+    elif order == "fb":
+        for dim in da.dims:
+            da = da.ffill(dim).bfill(dim)
+    else:
+        raise ValueError(f"Order {order} is not supported (use 'bf' or 'fb)")
+    return da
+
+
+def xr_interp_like(da1, da2, broadcast_missing=False, fillna=True):
+    """
+    Interpolate DataArray along dimensions of another DataArray.
+
+    Provides some utility options for handling out of range values and broadcasting.
+    :param da1: xarray object with data to interpolate
+    :param da2: xarray object along which dimensions to interpolate
+    :param broadcast_missing: broadcast all missing dimensions from da2 onto da1
+    :param fillna: fill out of range NaN values (default = True)
+    :return:
+    """
+    # default interp will not add dimensions and fill out of range indexes with NaN
+    da = da1.interp_like(da2)
+
+    # fill out of range nan values for all dimensions
+    if fillna:
+        da = xr_fill_all(da)
+
+    if broadcast_missing:
+        da = da.broadcast_like(da2)
+
+    return da

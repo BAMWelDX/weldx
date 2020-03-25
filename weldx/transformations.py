@@ -520,6 +520,7 @@ class LocalCoordinateSystem:
         """
         Get a local coordinate system defining the parent in the child system.
 
+        Inverse is defined as basis_new=basis.T, origin_new=basis.T*(-origin)
         :return: Inverted coordinate system.
         """
         ds = self._xarray.copy(deep=False)
@@ -535,8 +536,6 @@ class LocalCoordinateSystem:
             output_core_dims=[["c"]],
         )
 
-        # basis = self.basis.transpose()
-        # origin = np.matmul(basis, -self.origin)
         return LocalCoordinateSystem(ds.basis, ds.origin)
 
 
