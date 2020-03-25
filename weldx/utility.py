@@ -150,7 +150,7 @@ def xr_matmul(a, b, dims_a, dims_b=None, dims_out=None, **apply_kwargs):
     """
     Calculate broadcasted np.matmul(a,b) for xarray objects.
 
-    Should work for any size and shape of quadratic matrixes contained in a DataArray.
+    Should work for any size and shape of quadratic matrices contained in a DataArray.
     Ordering, broadcasting of dimensions should be taken care of by xarray internally.
     :param a: xarray object containing the first matrix
     :param b: xarray object containing the second matrix
@@ -181,7 +181,7 @@ def xr_matmul_transpose(a, b, dims):
     """
     Calculate a * b.T for xarray.DataArray objects by applying np.matmul.
 
-    Should work for any size and shape of quadratic matrixes contained in a DataArray.
+    Should work for any size and shape of quadratic matrices contained in a DataArray.
     Ordering, broadcasting of dimensions should be taken care of by xarray internally.
     :param a: xarray object containing the first matrix
     :param b: xarray object containing the second matrix that will be transposed
@@ -199,7 +199,7 @@ def xr_is_orthogonal_matrix(da, dims):
 
     :param da: xarray.DataArray to test
     :param dims: list of dimensions along which to test
-    :return: True if all matrixes are orthogonal.
+    :return: True if all matrices are orthogonal.
     """
     eye = np.eye(len(da.coords[dims[0]]), len(da.coords[dims[1]]))
     return np.allclose(xr_matmul_transpose(da, da, dims), eye)
