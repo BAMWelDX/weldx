@@ -40,7 +40,7 @@ else:
 
 if isinstance(opened["test003"], IGroove):
     print(opened["test003"])
-    profile03 = groove_to_profile(opened["test004"])
+    profile03 = groove_to_profile(opened["test003"])
     profile03_data = profile03.rasterize(0.3)
     ax[2].plot(profile03_data[0], profile03_data[1], ".")
     ax[2].set_title(f"I Groove")

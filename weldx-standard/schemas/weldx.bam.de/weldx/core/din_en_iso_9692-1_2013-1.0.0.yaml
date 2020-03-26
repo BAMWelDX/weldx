@@ -144,4 +144,300 @@ anyOf:
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
+
+  # VV Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: VVGroove
+      components:
+        type: object
+        properties:
+          t:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          alpha:
+            description: |
+              Groove angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          c:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t, alpha, beta, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # HV Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: HVGroove
+      components:
+        type: object
+        properties:
+          t:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          c:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t, beta, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # HU Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: HUGroove
+      components:
+        type: object
+        properties:
+          t:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          R:
+            description: |
+              Bevel radius
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          c:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t, beta, R, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # D(ouble)V Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: DoubleVGroove
+      components:
+        type: object
+        properties:
+          t:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          alpha_1:
+            description: |
+              Groove angle 1
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          alpha_2:
+            description: |
+              Groove angle 2
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          R:
+            description: |
+              Bevel radius
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          c:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t, alpha_1, alpha_2, R, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # D(ouble)U Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: DoubleUGroove
+      components:
+        type: object
+        properties:
+          t:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta_1:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta_2:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          h:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          c:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t, beta_1, beta_2, h, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # D(ouble)HV Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: DoubleHVGroove
+      components:
+        type: object
+        properties:
+          t:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta_1:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta_2:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          h:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          c:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t, beta_1, beta_2, h, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # D(ouble)HU Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: DoubleHUGroove
+      components:
+        type: object
+        properties:
+          t:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta_1:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          beta_2:
+            description: |
+              Bevel angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          R:
+            description: |
+              Bevel radius
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          h:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          c:
+            description: |
+              Root face
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t, beta_1, beta_2, R, h, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # F(rontal)F(ace) Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: FFGroove
+      components:
+        type: object
+        properties:
+          t_1:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          t_2:
+            description: |
+              Workpiece thickness
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          alpha:
+            description: |
+              Groove angle
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          b:
+            description: |
+              Root gap
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+          e:
+            description: |
+              Special depth
+            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+        required: [t_1, t_2, alpha, b, e]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
 ...
