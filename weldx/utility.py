@@ -112,6 +112,21 @@ def mat_vec_mul(a, b):
     return np.matmul(a, b[..., np.newaxis]).squeeze()
 
 
+def swap_list_items(arr, i1, i2):
+    """
+    Swap position of two items in a list.
+
+    :param arr: list in which to swap elements
+    :param i1: element 1 in list
+    :param i2: element 2 in list
+    :return: copy of list with swapped elements
+    """
+    i = list(arr).copy()
+    a, b = i.index(i1), i.index(i2)
+    i[b], i[a] = i[a], i[b]
+    return i
+
+
 def transpose_xarray_axis_data(da, dim1, dim2):
     """
     Transpose data along two dimensions in an xarray.DataArray.
@@ -121,13 +136,9 @@ def transpose_xarray_axis_data(da, dim1, dim2):
     :param dim2: name of the second dimension
     :return: xarray.DataArray with transposed data at specified dimensions
     """
-    dims = list(da.dims)
-    i = dims.copy()
-    a, b = i.index(dim1), i.index(dim2)
-    i[b], i[a] = i[a], i[b]
+    i = swap_list_items(da.dims, dim1, dim2)
 
-    da.data = da.transpose(*i).data
-    return da
+    return da.copy(data=da.transpose(*i).data)
 
 
 def xr_matvecmul(a, vec, dims_a, dims_v=None, **apply_kwargs):
@@ -224,19 +235,28 @@ def xr_fill_all(da, order="bf"):
     return da
 
 
-def xr_interp_like(da1, da2, broadcast_missing=False, fillna=True):
+def xr_interp_like(
+    da1: xr.DataArray,
+    da2: xr.DataArray,
+    broadcast_missing: bool = False,
+    fillna: bool = True,
+    method: str = "linear",
+    assume_sorted: bool = False,
+):
     """
     Interpolate DataArray along dimensions of another DataArray.
 
     Provides some utility options for handling out of range values and broadcasting.
     :param da1: xarray object with data to interpolate
     :param da2: xarray object along which dimensions to interpolate
-    :param broadcast_missing: broadcast all missing dimensions from da2 onto da1
+    :param broadcast_missing: broadcast da1 along all additional dimensions of da2
     :param fillna: fill out of range NaN values (default = True)
-    :return:
+    :param method: interpolation method to pass on to xarray.interp_like
+    :param assume_sorted: assume_sorted flag to pass on to xarray.interp_like
+    :return: interpolated DataArray
     """
     # default interp will not add dimensions and fill out of range indexes with NaN
-    da = da1.interp_like(da2)
+    da = da1.interp_like(da2, method=method, assume_sorted=assume_sorted)
 
     # fill out of range nan values for all dimensions
     if fillna:
@@ -246,3 +266,25 @@ def xr_interp_like(da1, da2, broadcast_missing=False, fillna=True):
         da = da.broadcast_like(da2)
 
     return da
+
+
+@xr.register_dataarray_accessor("weldx")
+class WeldxAccessor:
+    """
+    Custom accessor for extending DataArray functionality.
+
+    See http://xarray.pydata.org/en/stable/internals.html#extending-xarray for details.
+    """
+
+    def __init__(self, xarray_obj):
+        self._obj = xarray_obj
+
+    def interp_like(self, da, *args, **kwargs):
+        """
+        Interpolate DataArray along dimensions of another DataArray.
+
+        Provides some utility options for handling out of range values and broadcasting.
+        See xr_interp_like for docstring and details.
+        :return: interpolated DataArray
+        """
+        return xr_interp_like(self._obj, da, *args, **kwargs)
