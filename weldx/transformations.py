@@ -2,6 +2,7 @@
 
 import weldx.utility as ut
 import numpy as np
+import pandas as pd
 import xarray as xr
 import math
 import networkx as nx
@@ -197,7 +198,6 @@ class LocalCoordinateSystem:
     """Defines a local cartesian coordinate system in 3d."""
 
     # TODO: Add option to ctors to create time dependent lcs
-    # TODO: separate basis and origin
     def __init__(
         self,
         basis=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
@@ -517,8 +517,14 @@ class LocalCoordinateSystem:
 
         :return: DateTimeIndex-like time union
         """
-
-        # TODO: add interface
+        if ("time" in self._origin.coords) and ("time" in self._basis.coords):
+            t1 = pd.DatetimeIndex(self._origin.time.data)
+            t2 = pd.DatetimeIndex(self._basis.time.data)
+            return t1.union(t2)
+        elif "time" in self._origin.coords:
+            return pd.DatetimeIndex(self._origin.time.data)
+        elif "time" in self._basis.coords:
+            return pd.DatetimeIndex(self._basis.time.data)
         return None
 
     def invert(self):
@@ -528,7 +534,7 @@ class LocalCoordinateSystem:
         Inverse is defined as basis_new=basis.T, origin_new=basis.T*(-origin)
         :return: Inverted coordinate system.
         """
-        basis = ut.transpose_xarray_axis_data(self.basis, dim1="c", dim2="v")
+        basis = ut.xr_transpose_matrix_data(self.basis, dim1="c", dim2="v")
         origin = ut.xr_matmul(
             self.basis, -self.origin, dims_a=["c", "v"], dims_b=["c"], trans_a=True
         )

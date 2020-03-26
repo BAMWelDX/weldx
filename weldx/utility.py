@@ -2,7 +2,9 @@
 
 import math
 import numpy as np
+import pandas as pd
 import xarray as xr
+import weldx.transformations as tf
 
 
 def is_column_in_matrix(column, matrix):
@@ -127,7 +129,51 @@ def swap_list_items(arr, i1, i2):
     return i
 
 
-def transpose_xarray_axis_data(da, dim1, dim2):
+def as_xarray_dims(input):
+    """
+    Generate empty xarray object with coordinates for interpolation.
+
+    :param input: xarray object, pandas TimeIndex object or dict
+    :return: empty xarray object with coordinates generated from input
+    """
+    if isinstance(input, (xr.DataArray, xr.Dataset)):
+        return input
+    elif isinstance(input, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+        return xr.DataArray(data=None, dims=["time"], coords={"time": input})
+    elif isinstance(input, dict):
+        return xr.DataArray(data=None, dims=list(input.keys()), coords=input)
+    return None
+
+
+def get_time_union(list_of_objects):
+    """
+    Generate a merged union of pd.DatatimeIndex from list of inputs.
+
+    The functions tries to merge common inputs that are "time-like" or might have time
+    coordinates such as xarrray objects, tf.LocalCoordinateSystem and other time objects
+    :param list_of_objects: list of input objects to merge
+    :return: pd.DatetimeIndex with merge times
+    """
+
+    def _get_time(input):
+        if isinstance(input, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+            return input
+        elif isinstance(input, (xr.DataArray, xr.Dataset)):
+            return pd.DatetimeIndex(input.time.data)
+        elif isinstance(input, tf.LocalCoordinateSystem):
+            return input.time
+        else:
+            return pd.DatetimeIndex(input)
+
+    for idx, val in enumerate(list_of_objects):
+        if idx == 0:
+            times = _get_time(val)
+        else:
+            times = times.union(_get_time(val))
+    return times
+
+
+def xr_transpose_matrix_data(da, dim1, dim2):
     """
     Transpose data along two dimensions in an xarray.DataArray.
 
@@ -256,6 +302,9 @@ def xr_interp_like(
         da = da.broadcast_like(da2)
 
     return da
+
+
+# weldx xarray Accessors --------------------------------------------------------
 
 
 @xr.register_dataarray_accessor("weldx")
