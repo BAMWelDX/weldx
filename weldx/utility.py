@@ -112,6 +112,21 @@ def mat_vec_mul(a, b):
     return np.matmul(a, b[..., np.newaxis]).squeeze()
 
 
+def swap_list_items(arr, i1, i2):
+    """
+    Swap position of two items in a list.
+
+    :param arr: list in which to swap elements
+    :param i1: element 1 in list
+    :param i2: element 2 in list
+    :return: copy of list with swapped elements
+    """
+    i = list(arr).copy()
+    a, b = i.index(i1), i.index(i2)
+    i[b], i[a] = i[a], i[b]
+    return i
+
+
 def transpose_xarray_axis_data(da, dim1, dim2):
     """
     Transpose data along two dimensions in an xarray.DataArray.
@@ -121,13 +136,9 @@ def transpose_xarray_axis_data(da, dim1, dim2):
     :param dim2: name of the second dimension
     :return: xarray.DataArray with transposed data at specified dimensions
     """
-    dims = list(da.dims)
-    i = dims.copy()
-    a, b = i.index(dim1), i.index(dim2)
-    i[b], i[a] = i[a], i[b]
+    i = swap_list_items(da.dims, dim1, dim2)
 
-    da.data = da.transpose(*i).data
-    return da
+    return da.copy(data=da.transpose(*i).data)
 
 
 def xr_matvecmul(a, vec, dims_a, dims_v=None, **apply_kwargs):
