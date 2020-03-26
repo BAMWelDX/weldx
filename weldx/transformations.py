@@ -269,8 +269,7 @@ class LocalCoordinateSystem:
         """
         basis = ut.xr_matmul(rhs_cs.basis, self.basis, dims_a=["c", "v"])
         origin = (
-            ut.xr_matvecmul(rhs_cs.basis, self.origin, ["c", "v"], ["c"])
-            + rhs_cs.origin
+            ut.xr_matmul(rhs_cs.basis, self.origin, ["c", "v"], ["c"]) + rhs_cs.origin
         )
         return LocalCoordinateSystem(basis, origin)
 
@@ -295,19 +294,15 @@ class LocalCoordinateSystem:
         :return: Resulting coordinate system.
         """
         basis = ut.xr_matmul(
-            rhs_cs.basis,
-            self.basis,
-            dims_a=["v", "c"],  # transposed !
-            dims_b=["c", "v"],
-            dims_out=["c", "v"],
+            rhs_cs.basis, self.basis, dims_a=["c", "v"], trans_a=True  # transposed !
         )
 
-        origin = xr.apply_ufunc(
-            ut.mat_vec_mul,
+        origin = ut.xr_matmul(
             rhs_cs.basis,
             self.origin - rhs_cs.origin,
-            input_core_dims=[["v", "c"], ["c"]],  # transposed !
-            output_core_dims=[["c"]],
+            dims_a=["c", "v"],
+            dims_b=["c"],
+            trans_a=True,
         )
         return LocalCoordinateSystem(basis, origin)
 
@@ -523,20 +518,11 @@ class LocalCoordinateSystem:
         Inverse is defined as basis_new=basis.T, origin_new=basis.T*(-origin)
         :return: Inverted coordinate system.
         """
-        ds = self._xarray.copy(deep=False)
-
-        # transpose rotation matrix (TODO: find the correct "xarray-way" to do this..)
-        ds["basis"] = ut.transpose_xarray_axis_data(ds.basis, dim1="c", dim2="v")
-
-        ds["origin"] = xr.apply_ufunc(
-            ut.mat_vec_mul,
-            ds.basis,
-            -ds.origin,
-            input_core_dims=[["c", "v"], ["c"]],
-            output_core_dims=[["c"]],
+        basis = ut.transpose_xarray_axis_data(self.basis, dim1="c", dim2="v")
+        origin = ut.xr_matmul(
+            self.basis, -self.origin, dims_a=["c", "v"], dims_b=["c"], trans_a=True
         )
-
-        return LocalCoordinateSystem(ds.basis, ds.origin)
+        return LocalCoordinateSystem(basis, origin)
 
 
 # coordinate system manager class ------------------------------------------------------
