@@ -217,13 +217,12 @@ class LocalCoordinateSystem:
                 data=basis,
                 dims=["c", "v"],
                 coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
-                name="basis",
             )
             basis = basis.astype(float)
 
         if not isinstance(origin, xr.DataArray):
             origin = xr.DataArray(
-                data=origin, dims=["c"], coords={"c": ["x", "y", "z"]}, name=origin
+                data=origin, dims=["c"], coords={"c": ["x", "y", "z"]}
             )
             origin = origin.astype(float)
 
@@ -238,13 +237,16 @@ class LocalCoordinateSystem:
         if not ut.xr_is_orthogonal_matrix(basis, dims=["c", "v"]):
             raise Exception("Basis vectors must be orthogonal")
 
-        self._xarray = xr.Dataset({"basis": basis, "origin": origin})
+        origin.name = "origin"
+        basis.name = "basis"
+
+        self._origin = origin
+        self._basis = basis
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
-        return self.xarray.__repr__().replace(
-            "<xarray.Dataset>", "<LocalCoordinateSystem>"
-        )
+        repr_str = self.origin.__repr__() + "\n\n" + self.basis.__repr__()
+        return repr_str.replace("<xarray.DataArray", "<LocalCoordinateSystem")
 
     def __add__(self, rhs_cs):
         """
@@ -467,7 +469,7 @@ class LocalCoordinateSystem:
 
         :return: Basis of the coordinate system
         """
-        return self._xarray.basis.transpose(..., "c", "v")
+        return self._basis.transpose(..., "c", "v")
 
     @property
     def orientation(self):
@@ -478,7 +480,7 @@ class LocalCoordinateSystem:
 
         :return: Orientation matrix
         """
-        return self._xarray.basis.transpose(..., "c", "v")
+        return self._basis.transpose(..., "c", "v")
 
     @property
     def origin(self):
@@ -489,7 +491,7 @@ class LocalCoordinateSystem:
 
         :return: Origin of the coordinate system
         """
-        return self._xarray.origin.transpose(..., "c")
+        return self._origin.transpose(..., "c")
 
     @property
     def location(self):
@@ -500,16 +502,18 @@ class LocalCoordinateSystem:
 
         :return: Location of the coordinate system.
         """
-        return self._xarray.origin.transpose(..., "c")
+        return self._origin.transpose(..., "c")
 
     @property
-    def xarray(self):
+    def time(self):
         """
-        Get the xarray.Dataset of the LocalCoordinateSystem.
+        Get the time union of the local coordinate system (or None if system is static).
 
-        :return: xarray.Dataset of the coordinate system
+        :return: DateTimeIndex-like time union
         """
-        return self._xarray
+
+        # TODO: add interface
+        return None
 
     def invert(self):
         """
