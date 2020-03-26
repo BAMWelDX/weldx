@@ -141,24 +141,6 @@ def transpose_xarray_axis_data(da, dim1, dim2):
     return da.copy(data=da.transpose(*i).data)
 
 
-def xr_matvecmul(a, vec, dims_a, dims_v=None, **apply_kwargs):
-    """
-    Broadcast Matrix * Vector operations on xarray objects.
-
-    :param a: xarray object containing the matrix
-    :param vec: xarray object containing the vector
-    :param dims_a: dimension names spanning the matrix in a
-    :param dims_v: vector dimension of vec (if None, use dims_a[0])
-    :param: **apply_kwargs: parameters to pass on to xr.apply_ufunc
-    :return: broadcasted result of np.matmul(a,vec)
-    """
-    if dims_v is None:
-        dims_v = dims_a[0]
-    return xr.apply_ufunc(
-        mat_vec_mul, a, vec, input_core_dims=[dims_a, dims_v], output_core_dims=[dims_v]
-    )
-
-
 def xr_matmul(
     a,
     b,
