@@ -141,42 +141,46 @@ def transpose_xarray_axis_data(da, dim1, dim2):
     return da.copy(data=da.transpose(*i).data)
 
 
-def xr_matvecmul(a, vec, dims_a, dims_v=None, **apply_kwargs):
-    """
-    Broadcast Matrix * Vector operations on xarray objects.
-
-    :param a: xarray object containing the matrix
-    :param vec: xarray object containing the vector
-    :param dims_a: dimension names spanning the matrix in a
-    :param dims_v: vector dimension of vec (if None, use dims_a[0])
-    :param: **apply_kwargs: parameters to pass on to xr.apply_ufunc
-    :return: broadcasted result of np.matmul(a,vec)
-    """
-    return xr.apply_ufunc(
-        mat_vec_mul, a, vec, input_core_dims=[dims_a, dims_v], output_core_dims=[dims_v]
-    )
-
-
-def xr_matmul(a, b, dims_a, dims_b=None, dims_out=None, **apply_kwargs):
+def xr_matmul(
+    a,
+    b,
+    dims_a,
+    dims_b=None,
+    dims_out=None,
+    trans_a=False,
+    trans_b=False,
+    **apply_kwargs,
+):
     """
     Calculate broadcasted np.matmul(a,b) for xarray objects.
 
     Should work for any size and shape of quadratic matrices contained in a DataArray.
     Ordering, broadcasting of dimensions should be taken care of by xarray internally.
+    This can be used for both matrix * matrix and matrix * vector operations.
     :param a: xarray object containing the first matrix
     :param b: xarray object containing the second matrix
     :param dims_a: name and order of dimensions in the first object
     :param dims_b: name and order of dimensions in the second object
-                    (if None, use dims_a)
+    (if None, use dims_a)
     :param dims_out: name and order of dimensions in the resulting object
-                    (if None, use dims_a)
+    (if None, use dims_a unless dims_b has less items than dims_b)
+    :param trans_a: flag if matrix in a should be transposed
+    :param trans_b: flag if matrix in b should be transposed
     :param: **apply_kwargs: parameters to pass on to xr.apply_ufunc
     :return:
     """
     if dims_b is None:
         dims_b = dims_a
     if dims_out is None:
-        dims_out = dims_a
+        if len(dims_a) <= len(dims_b):
+            dims_out = dims_a
+        else:
+            dims_out = dims_b
+
+    if trans_a:
+        dims_a = reversed(dims_a)
+    if trans_b:
+        dims_b = reversed(dims_b)
 
     return xr.apply_ufunc(
         np.matmul,
@@ -186,20 +190,6 @@ def xr_matmul(a, b, dims_a, dims_b=None, dims_out=None, **apply_kwargs):
         output_core_dims=[dims_out],
         **apply_kwargs,
     )
-
-
-def xr_matmul_transpose(a, b, dims):
-    """
-    Calculate a * b.T for xarray.DataArray objects by applying np.matmul.
-
-    Should work for any size and shape of quadratic matrices contained in a DataArray.
-    Ordering, broadcasting of dimensions should be taken care of by xarray internally.
-    :param a: xarray object containing the first matrix
-    :param b: xarray object containing the second matrix that will be transposed
-    :param dims: dimensions in the non-transposed order. Must exist in both objects
-    :return:
-    """
-    return xr_matmul(a, b, dims_a=dims, dims_b=reversed(dims))
 
 
 def xr_is_orthogonal_matrix(da, dims):
@@ -213,7 +203,7 @@ def xr_is_orthogonal_matrix(da, dims):
     :return: True if all matrices are orthogonal.
     """
     eye = np.eye(len(da.coords[dims[0]]), len(da.coords[dims[1]]))
-    return np.allclose(xr_matmul_transpose(da, da, dims), eye)
+    return np.allclose(xr_matmul(da, da, dims, trans_b=True), eye)
 
 
 def xr_fill_all(da, order="bf"):
