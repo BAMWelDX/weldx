@@ -538,6 +538,13 @@ class LocalCoordinateSystem:
 
         return LocalCoordinateSystem(ds.basis, ds.origin)
 
+    def interp_like(self, rhs):
+        """
+
+        :param rhs: für lcs -> pd.DatetimeIndex? -> xarray?
+        :return:
+        """
+
 
 # coordinate system manager class ------------------------------------------------------
 
