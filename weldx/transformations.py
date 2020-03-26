@@ -196,6 +196,8 @@ def vector_points_to_left_of_vector(vector, vector_reference):
 class LocalCoordinateSystem:
     """Defines a local cartesian coordinate system in 3d."""
 
+    # TODO: Add option to ctors to create time dependent lcs
+    # TODO: separate basis and origin
     def __init__(
         self,
         basis=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
@@ -267,6 +269,8 @@ class LocalCoordinateSystem:
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
+        # TODO: use lhs time axis as reference (Convention) - CSM catches special case
+        # static lhs vs. time dependent rhs
         basis = ut.xr_matmul(rhs_cs.basis, self.basis, dims_a=["c", "v"])
         origin = (
             ut.xr_matvecmul(rhs_cs.basis, self.origin, ["c", "v"], ["c"])
@@ -294,6 +298,8 @@ class LocalCoordinateSystem:
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
+        # TODO: use lhs time axis as reference (Convention) - CSM catches special case
+        # static lhs vs. time dependent rhs
         basis = ut.xr_matmul(
             rhs_cs.basis,
             self.basis,
@@ -597,3 +603,20 @@ class CoordinateSystemManager:
     @property
     def graph(self):
         return self._graph
+
+    def interp_like(self, cmp, list_of_edges=None):
+        """
+
+        :param cmp: für lcs -> pd.DatetimeIndex? -> xarray?
+        :param list_of_edges: If not None, interpolation is only applied to specified
+        edges
+        :return: Copy of CSM with interpolated edges
+        """
+
+    def time_union(self, list_of_edges=None):
+        """
+
+        :param list_of_edges: :param list_of_edges: If not None, the union is only
+        calculated from the specified edges
+        :return:
+        """
