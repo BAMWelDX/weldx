@@ -315,12 +315,15 @@ def xr_interp_orientation_time(dsx, times_interp):
         return dsx.expand_dims({"time": times_interp})
 
     times_old = times_interp
-
-    times_interp = times_interp.union(pd.DatetimeIndex(dsx.time.data[0:]))
-
     times_ds = dsx.time.data
-    times_intersect = times_interp[times_interp >= times_ds[0]]
-    times_intersect = times_intersect[times_intersect <= times_ds[-1]]
+
+    times_interp = times_interp.union(
+        pd.DatetimeIndex(times_ds[0 :: len(times_ds) - 1])
+    )
+
+    times_intersect = times_interp[
+        (times_interp >= times_ds[0]) & (times_interp <= times_ds[-1])
+    ]
 
     rotations_key = Rot.from_matrix(dsx.data)
     times_key = dsx.time.astype(np.int64)
@@ -335,6 +338,9 @@ def xr_interp_orientation_time(dsx, times_interp):
         dsx_out.broadcast_like(as_xarray_dims(times_old)).bfill("time").ffill("time")
     )
     dsx_out = dsx_out.sel(time=times_old)
+    # dsx_out = dsx_out.weldx.interp_like(as_xarray_dims(times_interp)).sel(
+    #     time=times_old
+    # )
 
     return dsx_out
 
