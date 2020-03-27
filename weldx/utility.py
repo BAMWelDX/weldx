@@ -314,6 +314,10 @@ def xr_interp_orientation_time(dsx, times_interp):
     if "time" not in dsx.coords:
         return dsx.expand_dims({"time": times_interp})
 
+    times_old = times_interp
+
+    times_interp = times_interp.union(pd.DatetimeIndex(dsx.time.data[0:]))
+
     times_ds = dsx.time.data
     times_intersect = times_interp[times_interp >= times_ds[0]]
     times_intersect = times_intersect[times_intersect <= times_ds[-1]]
@@ -327,17 +331,10 @@ def xr_interp_orientation_time(dsx, times_interp):
         coords={"time": times_intersect, "c": ["x", "y", "z"], "v": [0, 1, 2]},
     )
 
-    # dsx_out.weldx.interp_like(as_xarray_dims(times_interp), method="nearest")
-
-    if times_interp[0] < times_ds[0]:
-        times_low = times_interp[times_interp < times_ds[0]]
-        dsx_low = dsx[0].drop("time").expand_dims({"time": times_low})
-        dsx_out = xr.concat([dsx_low, dsx_out], dim="time")
-
-    if times_interp[-1] > times_ds[-1]:
-        times_up = times_interp[times_interp > times_ds[-1]]
-        dsx_up = dsx[-1].drop("time").expand_dims({"time": times_up})
-        dsx_out = xr.concat([dsx_out, dsx_up], dim="time")
+    dsx_out = (
+        dsx_out.broadcast_like(as_xarray_dims(times_old)).bfill("time").ffill("time")
+    )
+    dsx_out = dsx_out.sel(time=times_old)
 
     return dsx_out
 
