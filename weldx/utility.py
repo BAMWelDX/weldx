@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import weldx.transformations as tf
+from scipy.spatial.transform import Slerp
+from scipy.spatial.transform import Rotation as Rot
 
 
 def is_column_in_matrix(column, matrix):
@@ -223,13 +225,17 @@ def xr_matmul(
         else:
             dims_out = dims_b
 
+    mul_func = np.matmul
+    if len(dims_a) > len(dims_b):
+        mul_func = mat_vec_mul
+
     if trans_a:
         dims_a = reversed(dims_a)
     if trans_b:
         dims_b = reversed(dims_b)
 
     return xr.apply_ufunc(
-        np.matmul,
+        mul_func,
         a,
         b,
         input_core_dims=[dims_a, dims_b],
@@ -302,6 +308,38 @@ def xr_interp_like(
         da = da.broadcast_like(da2)
 
     return da
+
+
+def xr_interp_orientation_time(dsx, times_interp):
+    if "time" not in dsx.coords:
+        return dsx.expand_dims({"time": times_interp})
+
+    times_ds = dsx.time.data
+    times_intersect = times_interp[times_interp >= times_ds[0]]
+    times_intersect = times_intersect[times_intersect <= times_ds[-1]]
+
+    rotations_key = Rot.from_matrix(dsx.data)
+    times_key = dsx.time.astype(np.int64)
+    rotations_interp = Slerp(times_key, rotations_key)(times_intersect.astype(np.int64))
+    dsx_out = xr.DataArray(
+        data=rotations_interp.as_matrix(),
+        dims=["time", "c", "v"],
+        coords={"time": times_intersect, "c": ["x", "y", "z"], "v": [0, 1, 2]},
+    )
+
+    # dsx_out.weldx.interp_like(as_xarray_dims(times_interp), method="nearest")
+
+    if times_interp[0] < times_ds[0]:
+        times_low = times_interp[times_interp < times_ds[0]]
+        dsx_low = dsx[0].drop("time").expand_dims({"time": times_low})
+        dsx_out = xr.concat([dsx_low, dsx_out], dim="time")
+
+    if times_interp[-1] > times_ds[-1]:
+        times_up = times_interp[times_interp > times_ds[-1]]
+        dsx_up = dsx[-1].drop("time").expand_dims({"time": times_up})
+        dsx_out = xr.concat([dsx_out, dsx_up], dim="time")
+
+    return dsx_out
 
 
 # weldx xarray Accessors --------------------------------------------------------
