@@ -16,7 +16,10 @@ requirements = [
 ]
 
 entry_points = {}
-entry_points["asdf_extensions"] = ["weldx = weldx.io.asdf.extension:WeldxExtension"]
+entry_points["asdf_extensions"] = [
+    "weldx = weldx.asdf.extension:WeldxExtension",
+    "weldx-asdf = weldx.asdf.extension:WeldxAsdfExtension",
+]
 
 setup(
     name="weldx",
