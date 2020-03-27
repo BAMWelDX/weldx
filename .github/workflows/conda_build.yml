@@ -1,0 +1,22 @@
+name: CI Linux
+on: [push]
+
+jobs:
+  test:
+    name: CI Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Include $CONDA in $PATH
+      run: echo ::add-path::$CONDA/bin
+    - name: Print conda info
+      run: conda info -a
+    - name: Create conda environment
+      run: conda env create -f ./environment.yml
+    - name: Run tests
+      run: |
+        source activate build_env
+        conda build .
