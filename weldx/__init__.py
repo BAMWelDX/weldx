@@ -5,9 +5,6 @@ from ._version import get_versions
 
 __all__ = ["geometry", "transformations", "utility", "asdf"]
 
-__version__ = get_versions()["version"]
-del get_versions
-
 # geometry packages
 import weldx.geometry
 import weldx.transformations
@@ -22,3 +19,6 @@ from .constants import WELDX_QUANTITY as Q_
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     Q_([])
+
+__version__ = get_versions()["version"]
+del get_versions
