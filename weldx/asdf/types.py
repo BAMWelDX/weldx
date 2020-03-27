@@ -10,8 +10,8 @@ _weldx_asdf_types = set()
 
 
 class WeldxTypeMeta(ExtensionTypeMeta):
-    def __new__(mcs, name, bases, attrs):
-        cls = super().__new__(mcs, name, bases, attrs)
+    def __new__(mcls, name, bases, attrs):
+        cls = super().__new__(mcls, name, bases, attrs)
 
         if cls.organization == "weldx.bam.de" and cls.standard == "weldx":
             _weldx_types.add(cls)

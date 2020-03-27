@@ -11,10 +11,10 @@ class BaseMetal:
     """<CLASS DOCSTRING>"""
 
     common_name: str
-    m_number: str = None
-    group_number: str = None
     product_form: str
     thickness: float
+    m_number: str = None
+    group_number: str = None
     diameter: float = None
     specification_number: str = None
     specification_version: str = None
