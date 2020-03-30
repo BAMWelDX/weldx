@@ -13,8 +13,8 @@ title: |
 description: |
   see title.
 
-examples:
-  -TODO
+# examples:
+#  -TODO
 
 anyOf:
   # Single U Groove
@@ -57,7 +57,7 @@ anyOf:
     properties:
       type:
         type: string
-        enum: SingleVGroove
+        const: SingleVGroove
       components:
         type: object
         properties:
