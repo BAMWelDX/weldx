@@ -324,22 +324,45 @@ def xr_interp_orientation_in_time(dsx, times):
 
     # extract intersecting times and add time range boundaries of the data set
     times_ds = dsx.time.data
-    times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
-    times_union = times.union(times_ds_limits)
-    times_intersect = times_union[
-        (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])
-    ]
+    if len(times_ds) > 1:
+        times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
+        times_union = times.union(times_ds_limits)
+        times_intersect = times_union[
+            (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])
+        ]
 
-    # interpolate rotations in the intersecting time range
-    rotations_key = Rot.from_matrix(dsx.data)
-    times_key = dsx.time.astype(np.int64)
-    rotations_interp = Slerp(times_key, rotations_key)(times_intersect.astype(np.int64))
-    dsx_out = xr_time_dependent_3d_matrix(rotations_interp.as_matrix(), times_intersect)
+        # interpolate rotations in the intersecting time range
+        rotations_key = Rot.from_matrix(dsx.data)
+        times_key = dsx.time.astype(np.int64)
+        rotations_interp = Slerp(times_key, rotations_key)(
+            times_intersect.astype(np.int64)
+        )
+        dsx_out = xr_time_dependent_3d_matrix(
+            rotations_interp.as_matrix(), times_intersect
+        )
+    else:
+        dsx_out = dsx
 
     # broadcast boundary values for all times outside the intersection range
     dsx_out = dsx_out.broadcast_like(as_xarray_dims(times)).bfill("time").ffill("time")
 
     # Remove inserted boundaries if necessary and return
+    return dsx_out.sel(time=times)
+
+
+def xr_interp_coodinates_in_time(dsx, times):
+    if "time" not in dsx.coords:
+        return dsx.expand_dims({"time": times})
+
+    times_ds = dsx.time.data
+    if len(times_ds) > 1:
+        times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
+        times_union = times.union(times_ds_limits)
+        dsx_out = dsx.interp({"time": times_union})
+    else:
+        dsx_out = dsx.broadcast_like(as_xarray_dims(times))
+    dsx_out = dsx_out.bfill("time").ffill("time")
+
     return dsx_out.sel(time=times)
 
 

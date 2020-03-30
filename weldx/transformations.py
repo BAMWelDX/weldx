@@ -242,7 +242,7 @@ class LocalCoordinateSystem:
                 time_origin = pd.DatetimeIndex(origin.time.data)
                 time_union = time_basis.union(time_origin)
                 basis = ut.xr_interp_orientation_in_time(basis, time_union)
-                origin = origin.interp({"time": time_union}).bfill("time").ffill("time")
+                origin = ut.xr_interp_coodinates_in_time(origin, time_union)
             else:
                 origin = origin.expand_dims({"time": time_basis})
         elif "time" in origin.coords:
@@ -545,6 +545,31 @@ class LocalCoordinateSystem:
         elif "time" in self._basis.coords:
             return pd.DatetimeIndex(self._basis.time.data)
         return None
+
+    def interp_time(self, times):
+        """
+        Interpolates the data in time.
+
+        :param times: Series of times.
+        :return: Coordinate system with interpolated data
+        """
+        basis = ut.xr_interp_orientation_in_time(self.basis, times)
+        origin = ut.xr_interp_coodinates_in_time(self.origin, times)
+
+        return LocalCoordinateSystem(basis, origin)
+
+    def interp_time_like(self, other):
+        """
+        Interpolates the data in time using another coordinate systems time axis.
+
+        :param other: Coordinate system that provides the reference time.
+        :return: Coordinate system with interpolated data
+        """
+        if "time" in other.coords:
+            times = pd.DatetimeIndex(other.time.data)
+            return self.interp_time(times)
+        else:
+            raise Exception("Reference coordinate system has no time component")
 
     def invert(self):
         """
