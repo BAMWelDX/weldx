@@ -310,39 +310,37 @@ def xr_interp_like(
     return da
 
 
-def xr_interp_orientation_time(dsx, times_interp):
-    if "time" not in dsx.coords:
-        return dsx.expand_dims({"time": times_interp})
-
-    times_old = times_interp
-    times_ds = dsx.time.data
-
-    times_interp = times_interp.union(
-        pd.DatetimeIndex(times_ds[0 :: len(times_ds) - 1])
+def xr_time_dependent_3d_matrix(data, times):
+    return xr.DataArray(
+        data=data,
+        dims=["time", "c", "v"],
+        coords={"time": times, "c": ["x", "y", "z"], "v": [0, 1, 2]},
     )
 
-    times_intersect = times_interp[
-        (times_interp >= times_ds[0]) & (times_interp <= times_ds[-1])
+
+def xr_interp_orientation_in_time(dsx, times):
+    if "time" not in dsx.coords:
+        return dsx.expand_dims({"time": times})
+
+    # extract intersecting times and add time range boundaries of the data set
+    times_ds = dsx.time.data
+    times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
+    times_union = times.union(times_ds_limits)
+    times_intersect = times_union[
+        (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])
     ]
 
+    # interpolate rotations in the intersecting time range
     rotations_key = Rot.from_matrix(dsx.data)
     times_key = dsx.time.astype(np.int64)
     rotations_interp = Slerp(times_key, rotations_key)(times_intersect.astype(np.int64))
-    dsx_out = xr.DataArray(
-        data=rotations_interp.as_matrix(),
-        dims=["time", "c", "v"],
-        coords={"time": times_intersect, "c": ["x", "y", "z"], "v": [0, 1, 2]},
-    )
+    dsx_out = xr_time_dependent_3d_matrix(rotations_interp.as_matrix(), times_intersect)
 
-    dsx_out = (
-        dsx_out.broadcast_like(as_xarray_dims(times_old)).bfill("time").ffill("time")
-    )
-    dsx_out = dsx_out.sel(time=times_old)
-    # dsx_out = dsx_out.weldx.interp_like(as_xarray_dims(times_interp)).sel(
-    #     time=times_old
-    # )
+    # broadcast boundary values for all times outside the intersection range
+    dsx_out = dsx_out.broadcast_like(as_xarray_dims(times)).bfill("time").ffill("time")
 
-    return dsx_out
+    # Remove inserted boundaries if necessary and return
+    return dsx_out.sel(time=times)
 
 
 # weldx xarray Accessors --------------------------------------------------------
