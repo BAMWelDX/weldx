@@ -72,6 +72,7 @@ def get_groove(
         return FFGroove(t_1=workpiece_thickness, t_2=workpiece_thickness2,
                         alpha=groove_angle, b=root_gap, e=special_depth)
 
+
 @dataclass
 class VGroove:
     """<CLASS DOCSTRING>"""

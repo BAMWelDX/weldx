@@ -27,6 +27,14 @@ def groove_to_profile(groove):
         return uv_groove(**groove.__dict__)
 
 
+def plot_groove(groove, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."):
+    """<DEF DOCSTRING>"""
+    profile = groove_to_profile(groove)
+    if title is None:
+        title = groove.__class__
+    profile.plot(title, raster_width, axis, grid, line_style)
+
+
 def single_vgroovebuttweld(t, alpha, b, c, code_number=None, width_default=Q_(2, "mm")):
     """
     Calculate a Single-V Groove Butt Weld.
