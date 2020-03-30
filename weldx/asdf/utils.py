@@ -2,7 +2,38 @@ from pathlib import Path
 import jinja2
 import pandas as pd
 
+from asdf.yamlutil import custom_tree_to_tagged_tree
+
 from .extension import SCHEMA_PATH
+
+
+def dict_to_tagged_tree(node, ctx):
+    """
+    Utility function simplify `to_tree` methods of  datacalss objects.
+
+    The function requires the node to be convertible to dictionary via __dict__. And can
+    therefor be applied to all classes creted using the @dataclass oeprator.
+    `custom_tree_to_tagged_tree` is called on all object properties and all None entries
+    are removed from the node dictionary. The result is "clean" dictionary in form of an
+    asdf tree.
+    A simple `to_tree()` function could be implemented as such:
+        ```python
+        def to_tree(cls, node, ctx):
+            tree = dict_to_tagged_tree(node, ctx)
+            return tree```
+    :param node: node to write to asdf-tree
+    :param ctx: bast ctx object to pass along in the `to_tree` function
+    :return: The node dictionary as tagged and with None entries removed.
+    """
+    tree = {
+        k: custom_tree_to_tagged_tree(v, ctx)
+        for (k, v) in node.__dict__.items()
+        if v is not None
+    }
+    return tree
+
+
+# jinja template functions ---------------------------------------
 
 _DTYPE_DICT = pd.DataFrame(
     data={
