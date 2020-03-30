@@ -235,6 +235,20 @@ class LocalCoordinateSystem:
             output_core_dims=[["c", "v"]],
         )
 
+        # unify time axis
+        if "time" in basis.coords:
+            time_basis = pd.DatetimeIndex(basis.time.data)
+            if "time" in origin.coords:
+                time_origin = pd.DatetimeIndex(origin.time.data)
+                time_union = time_basis.union(time_origin)
+                basis = ut.xr_interp_orientation_in_time(basis, time_union)
+                origin = origin.interp({"time": time_union}).bfill("time").ffill("time")
+            else:
+                origin = origin.expand_dims({"time": time_basis})
+        elif "time" in origin.coords:
+            time_origin = pd.DatetimeIndex(origin.time.data)
+            basis = basis.expand_dims({"time": time_origin})
+
         # vectorize test if orthogonal
         if not ut.xr_is_orthogonal_matrix(basis, dims=["c", "v"]):
             raise Exception("Basis vectors must be orthogonal")
@@ -275,7 +289,7 @@ class LocalCoordinateSystem:
         # static lhs vs. time dependent rhs
         if "time" in self.basis.coords:
             rhs_basis = ut.xr_interp_like(rhs_cs.basis, self.basis, True)
-        elif "time" not in rhs_cs.basis.coords:
+        elif "time" in rhs_cs.basis.coords:
             raise Exception("Can't combine time dependent rhs with static lhs")
 
         basis = ut.xr_matmul(rhs_cs.basis, self.basis, dims_a=["c", "v"])
