@@ -6,19 +6,31 @@ tag: "tag:weldx.bam.de:weldx/{{ asdf_name }}-{{ asdf_version }}"
 
 title: |
   {{ schema_title }}
+description: |
+  {{ schema_description }}
 type: object
 properties:
-{%- for prop, dtype in zip(properties,property_types) %}
+{%- for prop, dtype, desc in zip(properties,property_types,description) %}
   {{ prop }}:
     description: |
-      <DESCRIPTION>
-    type: {{ _asdf_dtype(dtype) }}
+      {{ desc }}
+{%- if  str.startswith(dtype,"List[") %}
+    type: array
+    items:
+      {{ _asdf_dtype(dtype) }}
+{%- else %}
+    {{ _asdf_dtype(dtype) }}
+{%- endif %}
 {% endfor %}
 
-{% if required is not none -%}   
+{% if required is not none -%}
 required: [{{ ", ".join(required)}}]
 {%- endif %}
 {% if property_order is not none -%}   
 propertyOrder: [{{ ", ".join(property_order)}}]
 {%- endif %}
+{% if flow_style is not none -%}
+flowStyle: {{ flow_style }}
+{%- endif %}
 additionalProperties: {{ additional_properties }}
+...

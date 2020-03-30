@@ -16,6 +16,7 @@ dependencies:
   - recommonmark
   - openpyxl
   # Code quality
+  - black
   - codecov
   - flake8
   - pydocstyle

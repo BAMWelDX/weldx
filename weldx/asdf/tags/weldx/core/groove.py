@@ -72,7 +72,6 @@ def get_groove(
         return FFGroove(t_1=workpiece_thickness, t_2=workpiece_thickness2,
                         alpha=groove_angle, b=root_gap, e=special_depth)
 
-
 @dataclass
 class VGroove:
     """<CLASS DOCSTRING>"""
@@ -225,12 +224,7 @@ class GrooveType(WeldxType):
     def to_tree(cls, node, ctx):
         """<CLASS METHOD DOCSTRING>"""
         if isinstance(node, VGroove):
-            components = dict(
-                t=node.t,
-                alpha=node.alpha,
-                b=node.b,
-                c=node.c,
-            )
+            components = dict(t=node.t, alpha=node.alpha, b=node.b, c=node.c)
             code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
                 components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
@@ -240,13 +234,7 @@ class GrooveType(WeldxType):
             return tree
 
         if isinstance(node, UGroove):
-            components = dict(
-                t=node.t,
-                beta=node.beta,
-                R=node.R,
-                b=node.b,
-                c=node.c,
-            )
+            components = dict(t=node.t, beta=node.beta, R=node.R, b=node.b, c=node.c)
             code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
                 components=yamlutil.custom_tree_to_tagged_tree(components, ctx),

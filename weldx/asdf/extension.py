@@ -11,19 +11,31 @@ from asdf.util import filepath_to_url
 # the extension class so that _weldx_asdf_types is populated correctly. We
 # could do this using __init__ files, except it causes pytest import errors in
 # the case that asdf is not installed.
+
 from .tags.weldx.unit.pint_quantity import *  # noqa: F401,F403
+
+# welding process -----------------------------------------------------------------
+from .tags.weldx.aws.process.gas_component import *  # noqa: F401,F403
+from .tags.weldx.aws.process.shielding_gas_type import *  # noqa: F401,F403
+from .tags.weldx.aws.process.shielding_gas_for_procedure import *  # noqa: F401,F403
+
+# weld design -----------------------------------------------------------------
+from .tags.weldx.aws.design.joint_penetration import *  # noqa: F401,F403
+from .tags.weldx.aws.design.weld_details import *  # noqa: F401,F403
+from .tags.weldx.aws.design.connection import *  # noqa: F401,F403
+from .tags.weldx.aws.design.workpiece import *  # noqa: F401,F403
+from .tags.weldx.aws.design.sub_assembly import *  # noqa: F401,F403
+from .tags.weldx.aws.design.weldment import *  # noqa: F401,F403
+from .tags.weldx.core.groove import *  # noqa: F401,F403
 
 from .types import _weldx_types, _weldx_asdf_types
 
-
-__all__ = ["WeldxExtension", "WeldxAsdfExtension"]
+__all__ = ["WeldxExtension", "WeldxAsdfExtension", "SCHEMA_PATH"]
 
 
 WELDX_SCHEMA_URI_BASE = "http://weldx.bam.de/schemas/"
-SCHEMA_PATH = str(Path(__file__).resolve().parents[2] / "weldx-standard" / "schemas")
-# SCHEMA_PATH = os.path.abspath(
-#     os.path.join(os.path.dirname(__file__), "data", "schemas")
-# )
+# SCHEMA_PATH = str(Path(__file__).resolve().parents[2] / "weldx-standard" / "schemas")
+SCHEMA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "schemas"))
 WELDX_URL_MAPPING = [
     (
         WELDX_SCHEMA_URI_BASE,

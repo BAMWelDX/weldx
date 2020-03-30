@@ -1,0 +1,36 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/process/shielding_gas_type-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/process/shielding_gas_type-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  Description of a gas or gas mixture used for shielding in arc welding.
+type: object
+properties:
+  gas_component:
+    description: |
+      A single gas element.
+    type: array
+    items:
+      $ref: gas_component-1.0.0
+
+  common_name:
+    description: |
+      Trade name for the gas mixture.
+    type: string
+
+  designation:
+    description: |
+      Specification according to AWS classification by chemical composition of the gas mixture.
+    type: string
+
+
+
+required: [gas_component, common_name]
+propertyOrder: [gas_component, common_name, designation]
+flowStyle: block
+additionalProperties: false
+...

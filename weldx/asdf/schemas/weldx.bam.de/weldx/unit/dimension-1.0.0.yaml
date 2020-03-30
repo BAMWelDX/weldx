@@ -64,3 +64,4 @@ properties:
 
 required: [name]
 additionalProperties: false
+...

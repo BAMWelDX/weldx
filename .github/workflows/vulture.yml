@@ -19,4 +19,4 @@ jobs:
     - name: Run vulture
       run: |
         source activate weldx
-        vulture .
+        vulture . --exclude weldx/asdf/,versioneer.py,weldx/_version.py,*__init__.py

@@ -1,12 +1,20 @@
 from dataclasses import dataclass
+from typing import List # noqa: F401
+from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
+
+{% for lib in lib_imports -%}
+import {{ lib }}
+{% endfor -%}
+
+__all__ = ["{{class_name}}","{{class_name}}Type"]
 
 
 @dataclass
 class {{class_name}}:
     """<CLASS DOCSTRING>"""
     {% for prop, dtype in zip(properties,property_types) -%}
-        {{ prop }}: {{ dtype.__name__ }}
+        {{ prop }}: {{ dtype }}{%- if prop not in required %} = None{%- endif %}
     {% endfor %}
 
 class {{class_name}}Type(WeldxType):
@@ -14,16 +22,24 @@ class {{class_name}}Type(WeldxType):
 
     name = "{{ asdf_name }}"
     version = "{{ asdf_version }}"
-    types = [{{class_name}}]
+    types = [{{ class_name }}]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
     @classmethod
     def to_tree(cls, node, ctx):
-        tree = node.__dict__
+        # convert to tagged tree
+        tree_full = dict(
+            {% for prop in properties -%}
+            {{ prop }}=custom_tree_to_tagged_tree(node.{{ prop }}, ctx),
+            {% endfor -%}
+            )
+
+        # drop None values
+        tree = {k:v for (k,v) in tree_full.items() if v is not None}
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        obj = TestClass(**tree)
+        obj = {{ class_name }}(**tree)
         return obj
