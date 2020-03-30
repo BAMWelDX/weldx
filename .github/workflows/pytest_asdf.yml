@@ -17,8 +17,10 @@ jobs:
     - name: Create conda environment
       run: conda env create -f ./environment.yml
     - name: Conda develop install of source package for ASDF Schema links
-      run: conda develop .
-    - name: Run tests
+      run: |
+        conda install conda-build -n weldx
+        conda develop .
+    - name: Run tests with added asdf schema file location
       run: |
         source activate weldx
         pytest weldx/asdf/schemas --tb=short
