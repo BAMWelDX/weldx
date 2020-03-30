@@ -4,7 +4,7 @@ from weldx import Q_
 import numpy as np
 
 import weldx.geometry as geo
-from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove
+from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove, VVGroove
 
 
 def groove_to_profile(groove):
@@ -26,6 +26,11 @@ def groove_to_profile(groove):
     if isinstance(groove, UVGroove):
         return uv_groove(**groove.__dict__)
 
+    if isinstance(groove, VVGroove):
+        return vv_groove(**groove.__dict__)
+
+    print(f"NOT YET IMPLEMENTED FOR CLASS: {groove.__class__}")
+
 
 def plot_groove(groove, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."):
     """<DEF DOCSTRING>"""
@@ -37,7 +42,7 @@ def plot_groove(groove, title=None, raster_width=0.1, axis="equal", grid=True, l
 
 def single_vgroovebuttweld(t, alpha, b, c, code_number=None, width_default=Q_(2, "mm")):
     """
-    Calculate a Single-V Groove Butt Weld.
+    Calculate a Single-V Groove.
 
     :param t: the workpiece thickness, as Pint unit
     :param alpha: the groove angle, as Pint unit
@@ -101,7 +106,7 @@ def single_vgroovebuttweld(t, alpha, b, c, code_number=None, width_default=Q_(2,
 def single_ugroovebuttweld(t, beta, R, b, c, code_number=None,
                            width_default=Q_(3, "mm")):
     """
-    Calculate a Single-U Groove Butt Weld.
+    Calculate a Single-U Groove.
 
     :param t: the workpiece thickness, as Pint unit
     :param beta: the bevel angle, as Pint unit
@@ -239,7 +244,7 @@ def uv_groove(t, alpha, beta, R, b, h, code_number=None, width_default=Q_(2, "mm
 
 def i_groove(t, b, code_number=None, width_default=Q_(5, "mm")):
     """
-    Calculate a I-Groove Butt Weld.
+    Calculate a I-Groove.
 
     :param t: the workpiece thickness, as Pint unit
     :param b: the root opening, as Pint unit
@@ -256,6 +261,61 @@ def i_groove(t, b, code_number=None, width_default=Q_(5, "mm")):
     # y-values
     y_value = [0, 0, t, t]
     segment_list = ["line", "line", "line"]
+
+    shape = _helperfunction(segment_list, [x_value, y_value])
+
+    shape = shape.translate([-b / 2, 0])
+    # y-axis as mirror axis
+    shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+    return geo.Profile([shape, shape_r])
+
+
+def vv_groove(t, alpha, beta, c, b, code_number, width_default=Q_(5, "mm")):
+    """
+    Calculate a VV-Groove.
+
+    :param t: the workpiece thickness, as Pint unit
+    :param alpha: the groove angle (lower)
+    :param beta: the bevel angle (upper)
+    :param c: the root face, as Pint unit
+    :param b: the root gap, as Pint unit
+    :param code_number: unused param
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
+    t = t.to("mm").magnitude
+    alpha = alpha.to("rad").magnitude
+    beta = beta.to("rad").magnitude
+    b = b.to("mm").magnitude
+    c = c.to("mm").magnitude
+    width = width_default.to("mm").magnitude
+
+    # Calculations
+    h = (t - c) / 2
+    s_1 = np.tan(alpha / 2) * h
+    s_2  = np.tan(beta) * h
+
+    # Scaling
+    edge = np.min([-(s_1 + s_2), 0])
+    if width <= -edge + 1:
+        # adjustment of the width
+        width = width - edge
+
+    # x-values
+    x_value = [-width, 0]
+    # y-values
+    y_value = [0, 0]
+    segment_list = ["line"]
+
+    if c != 0:
+        x_value.append(0)
+        y_value.append(c)
+        segment_list.append("line")
+
+    x_value += [-s_1, -s_1 - s_2, -width]
+    y_value += [h + c, t, t]
+    segment_list += ["line", "line", "line"]
 
     shape = _helperfunction(segment_list, [x_value, y_value])
 
