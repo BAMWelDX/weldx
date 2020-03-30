@@ -4,10 +4,10 @@ import pint
 from dataclasses import dataclass
 from dataclasses import field
 from typing import List
-from asdf import yamlutil
 
 from weldx import Q_
 from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
 
 
 def get_groove(
@@ -225,183 +225,86 @@ class GrooveType(WeldxType):
     def to_tree(cls, node, ctx):
         """<CLASS METHOD DOCSTRING>"""
         if isinstance(node, VGroove):
-            components = dict(t=node.t, alpha=node.alpha, b=node.b, c=node.c)
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="SingleVGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, UGroove):
-            components = dict(t=node.t, beta=node.beta, R=node.R, b=node.b, c=node.c)
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="SingleUGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, UVGroove):
-            components = dict(
-                t=node.t,
-                alpha=node.alpha,
-                beta=node.beta,
-                R=node.R,
-                b=node.b,
-                h=node.h,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="UVGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, IGroove):
-            components = dict(
-                t=node.t,
-                b=node.b,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="IGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, VVGroove):
-            components = dict(
-                t=node.t,
-                alpha=node.alpha,
-                beta=node.beta,
-                b=node.b,
-                c=node.c,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="VVGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, HVGroove):
-            components = dict(
-                t=node.t,
-                beta=node.beta,
-                b=node.b,
-                c=node.c,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="HVGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, HUGroove):
-            components = dict(
-                t=node.t,
-                beta=node.beta,
-                R=node.R,
-                b=node.b,
-                c=node.c,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="HUGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, DVGroove):
-            components = dict(
-                t=node.t,
-                alpha_1=node.alpha_1,
-                alpha_2=node.alpha_2,
-                b=node.b,
-                c=node.c,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="DoubleVGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, DUGroove):
-            components = dict(
-                t=node.t,
-                beta_1=node.beta_1,
-                beta_2=node.beta_2,
-                h=node.h,
-                b=node.b,
-                c=node.c,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="DoubleUGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, DHVGroove):
-            components = dict(
-                t=node.t,
-                beta_1=node.beta_1,
-                beta_2=node.beta_2,
-                h=node.h,
-                b=node.b,
-                c=node.c,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="DoubleHVGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, DHUGroove):
-            components = dict(
-                t=node.t,
-                beta_1=node.beta_1,
-                beta_2=node.beta_2,
-                R=node.R,
-                h=node.h,
-                b=node.b,
-                c=node.c,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="DoubleHUGroove",
-                code_number=code_number,
             )
             return tree
 
         if isinstance(node, FFGroove):
-            components = dict(
-                t_1=node.t_1,
-                t_2=node.t_2,
-                alpha=node.alpha,
-                b=node.b,
-                e=node.e,
-            )
-            code_number = yamlutil.custom_tree_to_tagged_tree(node.code_number, ctx)
             tree = dict(
-                components=yamlutil.custom_tree_to_tagged_tree(components, ctx),
+                components=dict_to_tagged_tree(node, ctx),
                 type="FrontalFaceGroove",
-                code_number=code_number,
             )
             return tree
 
