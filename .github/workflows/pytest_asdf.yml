@@ -22,5 +22,5 @@ jobs:
     - name: Run tests with added asdf schema file location
       run: |
         source activate weldx
-        conda develop .
+        python setup.py install --user
         pytest weldx/asdf/schemas --tb=short
