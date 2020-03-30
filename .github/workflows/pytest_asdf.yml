@@ -19,8 +19,8 @@ jobs:
     - name: Conda develop install of source package for ASDF Schema links
       run: |
         conda install conda-build -n weldx
-        conda develop .
     - name: Run tests with added asdf schema file location
       run: |
         source activate weldx
+        python setup.py install --user
         pytest weldx/asdf/schemas --tb=short

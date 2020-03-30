@@ -4,8 +4,7 @@ import pandas as pd
 
 from asdf.yamlutil import custom_tree_to_tagged_tree
 
-#from .extension import SCHEMA_PATH
-from weldx.asdf import SCHEMA_PATH
+from weldx.asdf.constants import SCHEMA_PATH
 
 
 def dict_to_tagged_tree(node, ctx):
