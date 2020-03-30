@@ -3,6 +3,8 @@ from typing import List  # noqa: F401
 from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
 
+import pint
+
 __all__ = ["BaseMetal", "BaseMetalType"]
 
 
@@ -12,7 +14,7 @@ class BaseMetal:
 
     common_name: str
     product_form: str
-    thickness: float
+    thickness: pint.Quantity
     m_number: str = None
     group_number: str = None
     diameter: float = None

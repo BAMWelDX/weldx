@@ -13,6 +13,7 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasTyp
 from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
     ShieldingGasForProcedure,
 )
+from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
 
 # weld design -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.aws.design.joint_penetration import JointPenetration
@@ -21,6 +22,7 @@ from weldx.asdf.tags.weldx.aws.design.connection import Connection
 from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
 from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
 from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
+from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
 from weldx.asdf.tags.weldx.core.groove import get_groove
 
 
@@ -36,6 +38,12 @@ gas_for_procedure = ShieldingGasForProcedure(
     torch_shielding_gas=gas_type,
     torch_shielding_gas_flowrate=Q_(20, "l / min"),
 )
+
+arc_welding_process = ArcWeldingProcess("GMAW")
+process = {
+    "arc_welding_process": arc_welding_process,
+    "shielding_gas": gas_for_procedure,
+}
 
 # weld design -----------------------------------------------------------------
 v_groove = get_groove(
@@ -60,8 +68,10 @@ sub_assembly = [SubAssembly(workpiece=workpieces, connection=connection)]
 
 weldment = Weldment(sub_assembly)
 
+base_metal = BaseMetal("steel", "plate", Q_(10.3, "mm"))
+
 filename = "aws_demo.yaml"
-tree = dict(process=gas_for_procedure, weldment=weldment)
+tree = dict(process=process, weldment=weldment, base_metal=base_metal)
 
 # Write the data to a new file
 with asdf.AsdfFile(
@@ -76,5 +86,6 @@ with asdf.open(
     filename, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
 ) as af:
     data = af.tree
-    pprint.pprint(data["process"].__dict__)
+    pprint.pprint(data["process"])
     pprint.pprint(data["weldment"].__dict__)
+    pprint.pprint(data["base_metal"].__dict__)
