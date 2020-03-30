@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 from asdf.extension import AsdfExtension, BuiltinExtension
-from asdf.util import filepath_to_url
+from weldx.asdf.constants import WELDX_SCHEMA_URI_BASE, WELDX_URL_MAPPING
 
 # Make sure that all tag implementations are imported by the time we create
 # the extension class so that _weldx_asdf_types is populated correctly. We
@@ -26,23 +26,12 @@ from .tags.weldx.aws.design.connection import *  # noqa: F401,F403
 from .tags.weldx.aws.design.workpiece import *  # noqa: F401,F403
 from .tags.weldx.aws.design.sub_assembly import *  # noqa: F401,F403
 from .tags.weldx.aws.design.weldment import *  # noqa: F401,F403
+from .tags.weldx.aws.design.base_metal import *  # noqa: F401,F403
 from .tags.weldx.core.groove import *  # noqa: F401,F403
 
 from .types import _weldx_types, _weldx_asdf_types
 
-__all__ = ["WeldxExtension", "WeldxAsdfExtension", "SCHEMA_PATH"]
-
-
-WELDX_SCHEMA_URI_BASE = "http://weldx.bam.de/schemas/"
-SCHEMA_PATH = str(Path(__file__).resolve().parents[0] / "schemas")
-# SCHEMA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "schemas"))
-WELDX_URL_MAPPING = [
-    (
-        WELDX_SCHEMA_URI_BASE,
-        filepath_to_url(os.path.join(SCHEMA_PATH, "weldx.bam.de"))
-        + "/{url_suffix}.yaml",
-    )
-]
+__all__ = ["WeldxExtension", "WeldxAsdfExtension"]
 
 
 # This extension is used to register custom types that have both tags and
