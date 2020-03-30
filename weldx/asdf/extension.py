@@ -34,8 +34,8 @@ __all__ = ["WeldxExtension", "WeldxAsdfExtension", "SCHEMA_PATH"]
 
 
 WELDX_SCHEMA_URI_BASE = "http://weldx.bam.de/schemas/"
-# SCHEMA_PATH = str(Path(__file__).resolve().parents[2] / "weldx-standard" / "schemas")
-SCHEMA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "schemas"))
+SCHEMA_PATH = str(Path(__file__).resolve().parents[0] / "schemas")
+# SCHEMA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "schemas"))
 WELDX_URL_MAPPING = [
     (
         WELDX_SCHEMA_URI_BASE,

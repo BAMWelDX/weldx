@@ -12,13 +12,47 @@ type: object
 properties:
   name:
     description: |
-      Process name and abbreviation . TODO ENUM
+      Long name of the welding process.
     type: string
+    enum:
+      - atomicHydrogenWelding
+      - bareMetalArcWelding
+      - carbonArcWelding
+      - carbonArcWeldingGas
+      - carbonArcWeldingShielded
+      - electrogasWelding
+      - electroSlagWelding
+      - gasMetalArcWelding
+      - gasTungstenArcWelding
+      - plasmaArcWelding
+      - shieldedMetalArcWelding
+      - studArcWelding
+      - submergedArcWelding
+      - submergedArcWeldingSeries
+  abbreviation:
+    description: |
+      Short form abbreviation.
+    type: string
+    enum:
+      - AHW
+      - BMAW
+      - CAW
+      - CAW-G
+      - CAW-S
+      - EGW
+      - ESW
+      - GMAW
+      - GTAW
+      - PAW
+      - SMAW
+      - SW
+      - SAW
+      - SAW-S
 
 
 
-required: [name]
-propertyOrder: [name]
+required: [name, abbreviation]
+propertyOrder: [name, abbreviation]
 flowStyle: block
 additionalProperties: false
 ...

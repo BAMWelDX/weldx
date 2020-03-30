@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
-from asdf.yamlutil import custom_tree_to_tagged_tree
+from asdf.yamlutil import custom_tree_to_tagged_tree  # noqa: F401
 from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
+
+import pint
 
 __all__ = ["BaseMetal", "BaseMetalType"]
 
@@ -12,7 +15,7 @@ class BaseMetal:
 
     common_name: str
     product_form: str
-    thickness: float
+    thickness: pint.Quantity
     m_number: str = None
     group_number: str = None
     diameter: float = None
@@ -39,40 +42,8 @@ class BaseMetalType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        # convert to tagged tree
-        tree_full = dict(
-            common_name=custom_tree_to_tagged_tree(node.common_name, ctx),
-            m_number=custom_tree_to_tagged_tree(node.m_number, ctx),
-            group_number=custom_tree_to_tagged_tree(node.group_number, ctx),
-            product_form=custom_tree_to_tagged_tree(node.product_form, ctx),
-            thickness=custom_tree_to_tagged_tree(node.thickness, ctx),
-            diameter=custom_tree_to_tagged_tree(node.diameter, ctx),
-            specification_number=custom_tree_to_tagged_tree(
-                node.specification_number, ctx
-            ),
-            specification_version=custom_tree_to_tagged_tree(
-                node.specification_version, ctx
-            ),
-            specification_organization=custom_tree_to_tagged_tree(
-                node.specification_organization, ctx
-            ),
-            UNS_number=custom_tree_to_tagged_tree(node.UNS_number, ctx),
-            CAS_number=custom_tree_to_tagged_tree(node.CAS_number, ctx),
-            heat_lot_identification=custom_tree_to_tagged_tree(
-                node.heat_lot_identification, ctx
-            ),
-            composition=custom_tree_to_tagged_tree(node.composition, ctx),
-            manufacturing_history=custom_tree_to_tagged_tree(
-                node.manufacturing_history, ctx
-            ),
-            service_history=custom_tree_to_tagged_tree(node.service_history, ctx),
-            applied_coating_specification=custom_tree_to_tagged_tree(
-                node.applied_coating_specification, ctx
-            ),
-        )
-
-        # drop None values
-        tree = {k: v for (k, v) in tree_full.items() if v is not None}
+        """convert to tagged tree and remove all None entries from node dictionary"""
+        tree = dict_to_tagged_tree(node, ctx)
         return tree
 
     @classmethod
