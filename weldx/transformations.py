@@ -288,7 +288,7 @@ class LocalCoordinateSystem:
         # TODO: use lhs time axis as reference (Convention) - CSM catches special case
         # static lhs vs. time dependent rhs
         if "time" in self.basis.coords:
-            rhs_basis = ut.xr_interp_like(rhs_cs.basis, self.basis, True)
+            rhs_cs = rhs_cs.interp_time_like(self)
         elif "time" in rhs_cs.basis.coords:
             raise Exception("Can't combine time dependent rhs with static lhs")
 
@@ -565,8 +565,8 @@ class LocalCoordinateSystem:
         :param other: Coordinate system that provides the reference time.
         :return: Coordinate system with interpolated data
         """
-        if "time" in other.coords:
-            times = pd.DatetimeIndex(other.time.data)
+        if "time" in other.basis.coords:
+            times = pd.DatetimeIndex(other.basis.time.data)
             return self.interp_time(times)
         else:
             raise Exception("Reference coordinate system has no time component")
