@@ -10,6 +10,9 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.7'
       - name: pip installs
         run: pip install pydocstyle
       - name: run pydocstyle
@@ -24,6 +27,9 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.7'
       - name: pip installs
         run: pip install flake8
       - name: run flake8
@@ -38,6 +44,9 @@ jobs:
         os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.7'
       - name: pip installs
         run: pip install flake8 pydocstyle flake8-docstrings
       - name: run flake8
