@@ -8,13 +8,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
+        py: [ '3.7', '3.8' ]
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.7'
+          python-version: ${{ matrix.python-version }}
       - name: pip installs
-        run: pip install pydocstyle
+        run: pip install pydocstyle==5.*
       - name: run pydocstyle
         run: |
           pydocstyle
@@ -25,13 +26,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
+        py: [ '3.7', '3.8' ]
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.7'
+          python-version: ${{ matrix.python-version }}
       - name: pip installs
-        run: pip install flake8
+        run: pip install flake8==3.7.*
       - name: run flake8
         run: |
           flake8
@@ -42,13 +44,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
+        py: [ '3.7', '3.8' ]
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.7'
+          python-version: ${{ matrix.python-version }}
       - name: pip installs
-        run: pip install flake8 pydocstyle flake8-docstrings
+        run: pip install flake8==3.7.* pydocstyle==5.* flake8-docstrings
       - name: run flake8
         run: |
           flake8
