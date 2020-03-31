@@ -1,9 +1,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE
 # -*- coding: utf-8 -*-
 
-import os
-from pathlib import Path
-
 from asdf.extension import AsdfExtension, BuiltinExtension
 from weldx.asdf.constants import WELDX_SCHEMA_URI_BASE, WELDX_URL_MAPPING
 
