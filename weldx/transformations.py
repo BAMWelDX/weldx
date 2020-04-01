@@ -318,20 +318,8 @@ class LocalCoordinateSystem:
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
-        # TODO: use lhs time axis as reference (Convention) - CSM catches special case
-        # static lhs vs. time dependent rhs
-        basis = ut.xr_matmul(
-            rhs_cs.basis, self.basis, dims_a=["c", "v"], trans_a=True  # transposed !
-        )
-
-        origin = ut.xr_matmul(
-            rhs_cs.basis,
-            self.origin - rhs_cs.origin,
-            dims_a=["c", "v"],
-            dims_b=["c"],
-            trans_a=True,
-        )
-        return LocalCoordinateSystem(basis, origin)
+        rhs_cs_inv = rhs_cs.invert()
+        return self + rhs_cs_inv
 
     @classmethod
     def construct_from_euler(cls, sequence, angles, degrees=False, origin=None):
