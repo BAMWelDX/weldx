@@ -598,9 +598,14 @@ class LocalCoordinateSystem:
 class CoordinateSystemManager:
     """Manages multiple coordinate systems and the transformations between them."""
 
-    def __init__(self, base_coordinate_system_name="base"):
-        self._graph = nx.DiGraph()
-        self._graph.add_node(base_coordinate_system_name)
+    def __init__(self, base_coordinate_system_name="base", graph=None):
+        if graph is None:
+            self._graph = nx.DiGraph()
+            self._graph.add_node(base_coordinate_system_name)
+        else:
+            if not isinstance(graph, nx.DiGraph):
+                raise Exception("Graph must be of type networkx.DiGraph.")
+            self._graph = graph
 
     def _add_edges(self, node_from, node_to, lcs, calculated):
         self._graph.add_edge(node_from, node_to, lcs=lcs, calculated=calculated)
@@ -631,7 +636,7 @@ class CoordinateSystemManager:
         if length_path > 1:
             for i in np.arange(1, length_path):
                 lcs = lcs + self.graph.edges[path[i], path[i + 1]]["lcs"]
-            self._add_edges(path[0], path[-1], lcs, True)
+            # self._add_edges(path[0], path[-1], lcs, True)
         return lcs
 
     def transform_data(self, data, cs_from, cs_to):
@@ -643,6 +648,18 @@ class CoordinateSystemManager:
     @property
     def graph(self):
         return self._graph
+
+    def interp_time(self, times):
+        """
+        Interpolates the data in time.
+
+        :param times: Series of times.
+        :return: Coordinate system manager with interpolated data
+        """
+        graph = self.graph.copy()
+        for edge in graph.edges:
+            graph.edges[edge]["lcs"] = graph.edges[edge]["lcs"].interp_time(times)
+        return CoordinateSystemManager(graph=graph)
 
     def interp_like(self, cmp, list_of_edges=None):
         """
@@ -660,3 +677,13 @@ class CoordinateSystemManager:
         calculated from the specified edges
         :return:
         """
+        edges = self.graph.edges
+        time_union = None
+        for edge in edges:
+            time_edge = edges[edge]["lcs"].time
+            if time_union is None:
+                time_union = time_edge
+            elif time_edge is not None:
+                time_union = time_union.union(time_edge)
+
+        return time_union
