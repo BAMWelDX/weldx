@@ -5,6 +5,7 @@ import numpy as np
 
 import weldx.geometry as geo
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove, VVGroove
+from weldx.asdf.tags.weldx.core.groove import HVGroove
 
 
 def groove_to_profile(groove):
@@ -28,6 +29,9 @@ def groove_to_profile(groove):
 
     if isinstance(groove, VVGroove):
         return vv_groove(**groove.__dict__)
+
+    if isinstance(groove, HVGroove):
+        return hv_groove(**groove.__dict__)
 
     print(f"NOT YET IMPLEMENTED FOR CLASS: {groove.__class__}")
 
@@ -324,6 +328,60 @@ def vv_groove(t, alpha, beta, c, b, code_number, width_default=Q_(5, "mm")):
     shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
     return geo.Profile([shape, shape_r])
+
+
+def hv_groove(t, beta, c, b, code_number, width_default=Q_(5, "mm")):
+    """
+        Calculate a HV-Groove.
+
+        :param t: the workpiece thickness, as Pint unit
+        :param beta: the bevel angle
+        :param c: the root face, as Pint unit
+        :param b: the root gap, as Pint unit
+        :param code_number: unused param
+        :param width_default: the width of the workpiece, as Pint unit
+        :return: geo.Profile
+        """
+    t = t.to("mm").magnitude
+    beta = beta.to("rad").magnitude
+    b = b.to("mm").magnitude
+    c = c.to("mm").magnitude
+    width = width_default.to("mm").magnitude
+
+    # Calculations
+    s = np.tan(beta) * (t - c)
+
+    # Scaling
+    edge = np.min([-s, 0])
+    if width <= -edge + 1:
+        # adjustment of the width
+        width = width - edge
+
+    x_value = [-width, 0]
+    y_value = [0, 0]
+    segment_list = ["line"]
+
+    if c != 0:
+        x_value.append(0)
+        y_value.append(c)
+        segment_list.append("line")
+
+    x_value += [-s, -width]
+    y_value += [t, t]
+    segment_list += ["line", "line"]
+
+    shape = _helperfunction(segment_list, [x_value, y_value])
+    shape = shape.translate([-b / 2, 0])
+    # y-axis as mirror axis
+    shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+    shape_h = geo.Shape()
+    shape_h.add_line_segments([[-width - (b / 2), 0],
+                               [-b /2, 0],
+                               [-b /2, t],
+                               [-width - (b / 2), t]])
+
+    return geo.Profile([shape_h, shape_r])
 
 
 def _helperfunction(segment, array):
