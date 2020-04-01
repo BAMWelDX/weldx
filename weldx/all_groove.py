@@ -5,7 +5,7 @@ import numpy as np
 
 import weldx.geometry as geo
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove, VVGroove
-from weldx.asdf.tags.weldx.core.groove import HVGroove
+from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove
 
 
 def groove_to_profile(groove):
@@ -32,6 +32,9 @@ def groove_to_profile(groove):
 
     if isinstance(groove, HVGroove):
         return hv_groove(**groove.__dict__)
+
+    if isinstance(groove, HUGroove):
+        return hu_groove(**groove.__dict__)
 
     print(f"NOT YET IMPLEMENTED FOR CLASS: {groove.__class__}")
 
@@ -114,7 +117,7 @@ def single_ugroovebuttweld(t, beta, R, b, c, code_number=None,
 
     :param t: the workpiece thickness, as Pint unit
     :param beta: the bevel angle, as Pint unit
-    :param R: radius, as Pint unit
+    :param R: the bevel radius, as Pint unit
     :param b: the root opening, as Pint unit
     :param c: the root face, as Pint unit
     :param code_number: unused param
@@ -197,7 +200,7 @@ def uv_groove(t, alpha, beta, R, b, h, code_number=None, width_default=Q_(2, "mm
     :param t: the workpiece thickness, as Pint unit
     :param alpha: the groove angle, as Pint unit
     :param beta: the bevel angle, as Pint unit
-    :param R: radius, as Pint unit
+    :param R: the bevel radius, as Pint unit
     :param b: the root opening, as Pint unit
     :param h: the root face, as Pint unit
     :param code_number: unused param
@@ -280,8 +283,8 @@ def vv_groove(t, alpha, beta, c, b, code_number, width_default=Q_(5, "mm")):
     Calculate a VV-Groove.
 
     :param t: the workpiece thickness, as Pint unit
-    :param alpha: the groove angle (lower)
-    :param beta: the bevel angle (upper)
+    :param alpha: the groove angle (lower), as Pint unit
+    :param beta: the bevel angle (upper), as Pint unit
     :param c: the root face, as Pint unit
     :param b: the root gap, as Pint unit
     :param code_number: unused param
@@ -332,16 +335,16 @@ def vv_groove(t, alpha, beta, c, b, code_number, width_default=Q_(5, "mm")):
 
 def hv_groove(t, beta, c, b, code_number, width_default=Q_(5, "mm")):
     """
-        Calculate a HV-Groove.
+    Calculate a HV-Groove.
 
-        :param t: the workpiece thickness, as Pint unit
-        :param beta: the bevel angle
-        :param c: the root face, as Pint unit
-        :param b: the root gap, as Pint unit
-        :param code_number: unused param
-        :param width_default: the width of the workpiece, as Pint unit
-        :return: geo.Profile
-        """
+    :param t: the workpiece thickness, as Pint unit
+    :param beta: the bevel angle, as Pint unit
+    :param c: the root face, as Pint unit
+    :param b: the root gap, as Pint unit
+    :param code_number: unused param
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
     t = t.to("mm").magnitude
     beta = beta.to("rad").magnitude
     b = b.to("mm").magnitude
@@ -379,6 +382,64 @@ def hv_groove(t, beta, c, b, code_number, width_default=Q_(5, "mm")):
     shape_h.add_line_segments([[-width - (b / 2), 0],
                                [-b /2, 0],
                                [-b /2, t],
+                               [-width - (b / 2), t]])
+
+    return geo.Profile([shape_h, shape_r])
+
+
+def hu_groove(t, beta, R, b, c, code_number, width_default=Q_(5, "mm")):
+    """
+    Calculate a HU-Groove.
+
+    :param t: the workpiece thickness, as Pint unit
+    :param beta: the bevel angle, as Pint unit
+    :param R: the bevel radius, as Pint unit
+    :param c: the root face, as Pint unit
+    :param b: the root gap, as Pint unit
+    :param code_number: unused param
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
+    t = t.to("mm").magnitude
+    beta = beta.to("rad").magnitude
+    R = R.to("mm").magnitude
+    b = b.to("mm").magnitude
+    c = c.to("mm").magnitude
+    width = width_default.to("mm").magnitude
+
+    # Calculations
+    x = R * np.cos(beta)
+    y = R * np.sin(beta)
+    s = np.tan(beta) * (t - (c + R - y))
+
+    # Scaling
+    edge = np.max([x + s, 0])
+    if width <= edge + 1:
+        # adjustment of the width
+        width = width + edge
+
+    x_value = [-width, 0]
+    y_value = [0, 0]
+    segment_list = ["line"]
+
+    if c != 0:
+        x_value.append(0)
+        y_value.append(c)
+        segment_list.append("line")
+
+    x_value += [0, -x, -x - s, -width]
+    y_value += [c + R, c + R - y, t, t]
+    segment_list += ["arc", "line", "line"]
+
+    shape = _helperfunction(segment_list, [x_value, y_value])
+    shape = shape.translate([-b / 2, 0])
+    # y-axis as mirror axis
+    shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+    shape_h = geo.Shape()
+    shape_h.add_line_segments([[-width - (b / 2), 0],
+                               [-b / 2, 0],
+                               [-b / 2, t],
                                [-width - (b / 2), t]])
 
     return geo.Profile([shape_h, shape_r])

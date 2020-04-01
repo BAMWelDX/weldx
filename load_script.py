@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove, UVGroove, VVGroove
-from weldx.asdf.tags.weldx.core.groove import HVGroove
+from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove
 from weldx.all_groove import plot_groove
 
 
@@ -47,5 +47,11 @@ else:
 if isinstance(opened["test006"], HVGroove):
     print(opened["test006"])
     plot_groove(opened["test006"])
+else:
+    print("false")
+
+if isinstance(opened["test007"], HUGroove):
+    print(opened["test007"])
+    plot_groove(opened["test007"])
 else:
     print("false")
