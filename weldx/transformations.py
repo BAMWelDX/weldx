@@ -220,10 +220,21 @@ class LocalCoordinateSystem:
                 origin = np.array([0, 0, 0])
 
             if not isinstance(basis, xr.DataArray):
-                basis = ut.xr_3d_matrix(basis, time)
+                if not isinstance(basis, np.ndarray):
+                    basis = np.array(basis)
+                time_basis = None
+                if basis.ndim == 3:
+                    time_basis = time
+
+                basis = ut.xr_3d_matrix(basis, time_basis)
 
             if not isinstance(origin, xr.DataArray):
-                origin = ut.xr_3d_vector(origin, time)
+                if not isinstance(origin, np.ndarray):
+                    origin = np.array(origin)
+                time_origin = None
+                if origin.ndim == 3:
+                    time_origin = time
+                origin = ut.xr_3d_vector(origin, time_origin)
 
             basis = xr.apply_ufunc(
                 normalize,

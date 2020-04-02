@@ -3,44 +3,13 @@
 import weldx.transformations as tf
 import weldx.utility as ut
 import numpy as np
+import pandas as pd
 import pytest
 import random
 import math
 
 
 # helpers for tests -----------------------------------------------------------
-
-
-def check_coordinate_system(
-    cs_p, basis_expected, origin_expected, positive_orientation_expected
-):
-    """
-    Check the values of a coordinate system.
-
-    :param cs_p: Coordinate system that should be checked
-    :param basis_expected: Expected basis
-    :param origin_expected: Expected origin
-    :param positive_orientation_expected: Expected orientation
-    :return: ---
-    """
-    # check orientation is as expected
-    assert is_orientation_positive(cs_p) == positive_orientation_expected
-
-    # check basis vectors are orthogonal
-    assert tf.is_orthogonal(cs_p.basis[0], cs_p.basis[1])
-    assert tf.is_orthogonal(cs_p.basis[1], cs_p.basis[2])
-    assert tf.is_orthogonal(cs_p.basis[2], cs_p.basis[0])
-
-    for i in range(3):
-        unit_vec = tf.normalize(basis_expected[:, i])
-
-        # check axis orientations match
-        assert np.abs(np.dot(cs_p.basis[:, i], unit_vec) - 1) < 1e-9
-        assert np.abs(np.dot(cs_p.orientation[:, i], unit_vec) - 1) < 1e-9
-
-        # check origin correct
-        assert np.abs(origin_expected[i] - cs_p.origin[i]) < 1e-9
-        assert np.abs(origin_expected[i] - cs_p.location[i]) < 1e-9
 
 
 def check_matrix_does_not_reflect(matrix):
@@ -425,7 +394,75 @@ def test_reflection_sign():
 # test cartesian coordinate system class --------------------------------------
 
 
-def test_coordinate_system_construction():
+def check_coordinate_system(
+    cs_p, basis_expected, origin_expected, positive_orientation_expected, time=None
+):
+    # TODO: add time dependency
+    """
+    Check the values of a coordinate system.
+
+    :param cs_p: Coordinate system that should be checked
+    :param basis_expected: Expected basis
+    :param origin_expected: Expected origin
+    :param positive_orientation_expected: Expected orientation
+    :param time: A pandas.DatetimeIndex object, if the coordinate system is expected to
+    be time dependent. None otherwise.
+    :return: ---
+    """
+    # check orientation is as expected
+    assert is_orientation_positive(cs_p) == positive_orientation_expected
+
+    # check basis vectors are orthogonal
+    assert tf.is_orthogonal(cs_p.basis[0], cs_p.basis[1])
+    assert tf.is_orthogonal(cs_p.basis[1], cs_p.basis[2])
+    assert tf.is_orthogonal(cs_p.basis[2], cs_p.basis[0])
+
+    for i in range(3):
+        unit_vec = tf.normalize(basis_expected[:, i])
+
+        # check axis orientations match
+        assert np.abs(np.dot(cs_p.basis[:, i], unit_vec) - 1) < 1e-9
+        assert np.abs(np.dot(cs_p.orientation[:, i], unit_vec) - 1) < 1e-9
+
+        # check origin correct
+        assert np.abs(origin_expected[i] - cs_p.origin[i]) < 1e-9
+        assert np.abs(origin_expected[i] - cs_p.location[i]) < 1e-9
+
+
+def test_coordinate_system_init():
+    """
+    Check the __init__ method with and without time dependency.
+
+    :return: ---
+    """
+
+    # numpy - no time dependency
+    orientation = tf.rotation_matrix_z(np.pi)
+    coordinates = [3, 7, 1]
+    lcs = tf.LocalCoordinateSystem(basis=orientation, origin=coordinates)
+
+    check_coordinate_system(lcs, orientation, coordinates, True)
+
+    # numpy - orientation time dependent
+    orientation = tf.rotation_matrix_z(np.pi * np.array([0, 0.25, 0.5]))
+    coordinates = [3, 7, 1]
+    time = pd.date_range("2042-01-01", periods=3, freq="D")
+    lcs = tf.LocalCoordinateSystem(basis=orientation, origin=coordinates, time=time)
+
+    # numpy - coordinates time dependent
+    # numpy - coordinates and orientation time dependent - only equal times
+    # xarray - no time dependency
+    # xarray - orientation time dependent
+    # xarray - coordinates time dependent
+    # xarray - coordinates and orientation time dependent - equal times
+    # xarray - coordinates and orientation time dependent - different times
+
+
+# TODO: remove
+test_coordinate_system_init()
+
+
+def test_coordinate_system_construction_depr():
     """
     Test construction of coordinate system class.
 
