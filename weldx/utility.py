@@ -310,12 +310,28 @@ def xr_interp_like(
     return da
 
 
-def xr_time_dependent_3d_matrix(data, times):
-    return xr.DataArray(
-        data=data,
-        dims=["time", "c", "v"],
-        coords={"time": times, "c": ["x", "y", "z"], "v": [0, 1, 2]},
-    )
+def xr_3d_vector(data, times=None):
+    if times is not None:
+        dsx = xr.DataArray(
+            data=data, dims=["time", "c"], coords={"time": times, "c": ["x", "y", "z"]}
+        )
+    else:
+        dsx = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
+    return dsx.astype(float)
+
+
+def xr_3d_matrix(data, times=None):
+    if times is not None:
+        dsx = xr.DataArray(
+            data=data,
+            dims=["time", "c", "v"],
+            coords={"time": times, "c": ["x", "y", "z"], "v": [0, 1, 2]},
+        )
+    else:
+        dsx = xr.DataArray(
+            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
+        )
+    return dsx.astype(float)
 
 
 def xr_interp_orientation_in_time(dsx, times):
@@ -337,9 +353,7 @@ def xr_interp_orientation_in_time(dsx, times):
         rotations_interp = Slerp(times_key, rotations_key)(
             times_intersect.astype(np.int64)
         )
-        dsx_out = xr_time_dependent_3d_matrix(
-            rotations_interp.as_matrix(), times_intersect
-        )
+        dsx_out = xr_3d_matrix(rotations_interp.as_matrix(), times_intersect)
     else:
         dsx_out = dsx
 

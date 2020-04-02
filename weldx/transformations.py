@@ -202,6 +202,8 @@ class LocalCoordinateSystem:
         self,
         basis=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
         origin=np.array([0, 0, 0]),
+        time=None,
+        construction_checks=True,
     ):
         """
         Construct a cartesian coordinate system.
@@ -214,44 +216,38 @@ class LocalCoordinateSystem:
         :param origin: Position of the origin
         :return: Cartesian coordinate system
         """
-        if not isinstance(basis, xr.DataArray):
-            basis = xr.DataArray(
-                data=basis,
-                dims=["c", "v"],
-                coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
+
+        if construction_checks:
+            if not isinstance(basis, xr.DataArray):
+                basis = ut.xr_3d_matrix(basis, time)
+
+            if not isinstance(origin, xr.DataArray):
+                origin = ut.xr_3d_vector(origin, time)
+
+            basis = xr.apply_ufunc(
+                normalize,
+                basis,
+                input_core_dims=[["c", "v"]],
+                output_core_dims=[["c", "v"]],
             )
-            basis = basis.astype(float)
 
-        if not isinstance(origin, xr.DataArray):
-            origin = xr.DataArray(
-                data=origin, dims=["c"], coords={"c": ["x", "y", "z"]}
-            )
-            origin = origin.astype(float)
-
-        basis = xr.apply_ufunc(
-            normalize,
-            basis,
-            input_core_dims=[["c", "v"]],
-            output_core_dims=[["c", "v"]],
-        )
-
-        # unify time axis
-        if "time" in basis.coords:
-            time_basis = pd.DatetimeIndex(basis.time.data)
-            if "time" in origin.coords:
+            # unify time axis
+            if "time" in basis.coords:
+                time_basis = pd.DatetimeIndex(basis.time.data)
+                if "time" in origin.coords:
+                    time_origin = pd.DatetimeIndex(origin.time.data)
+                    time_union = time_basis.union(time_origin)
+                    basis = ut.xr_interp_orientation_in_time(basis, time_union)
+                    origin = ut.xr_interp_coodinates_in_time(origin, time_union)
+                else:
+                    origin = origin.expand_dims({"time": time_basis})
+            elif "time" in origin.coords:
                 time_origin = pd.DatetimeIndex(origin.time.data)
-                time_union = time_basis.union(time_origin)
-                basis = ut.xr_interp_orientation_in_time(basis, time_union)
-                origin = ut.xr_interp_coodinates_in_time(origin, time_union)
-            else:
-                origin = origin.expand_dims({"time": time_basis})
-        elif "time" in origin.coords:
-            time_origin = pd.DatetimeIndex(origin.time.data)
-            basis = basis.expand_dims({"time": time_origin})
+                basis = basis.expand_dims({"time": time_origin})
 
-        # vectorize test if orthogonal
-        if not ut.xr_is_orthogonal_matrix(basis, dims=["c", "v"]):
-            raise Exception("Basis vectors must be orthogonal")
+            # vectorize test if orthogonal
+            if not ut.xr_is_orthogonal_matrix(basis, dims=["c", "v"]):
+                raise Exception("Basis vectors must be orthogonal")
 
         origin.name = "origin"
         basis.name = "basis"
@@ -285,8 +281,6 @@ class LocalCoordinateSystem:
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
-        # TODO: use lhs time axis as reference (Convention) - CSM catches special case
-        # static lhs vs. time dependent rhs
         if "time" in self.basis.coords:
             rhs_cs = rhs_cs.interp_time_like(self)
         elif "time" in rhs_cs.basis.coords:
