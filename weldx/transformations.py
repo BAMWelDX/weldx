@@ -199,11 +199,7 @@ class LocalCoordinateSystem:
 
     # TODO: Add option to ctors to create time dependent lcs
     def __init__(
-        self,
-        basis=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
-        origin=np.array([0, 0, 0]),
-        time=None,
-        construction_checks=True,
+        self, basis=None, origin=None, time=None, construction_checks=True,
     ):
         """
         Construct a cartesian coordinate system.
@@ -216,8 +212,13 @@ class LocalCoordinateSystem:
         :param origin: Position of the origin
         :return: Cartesian coordinate system
         """
-
         if construction_checks:
+            if basis is None:
+                basis = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+
+            if origin is None:
+                origin = np.array([0, 0, 0])
+
             if not isinstance(basis, xr.DataArray):
                 basis = ut.xr_3d_matrix(basis, time)
 
@@ -316,7 +317,9 @@ class LocalCoordinateSystem:
         return self + rhs_cs_inv
 
     @classmethod
-    def construct_from_euler(cls, sequence, angles, degrees=False, origin=None):
+    def construct_from_euler(
+        cls, sequence, angles, degrees=False, origin=None, time=None
+    ):
         """
         Construct a cartesian coordinate system from an euler sequence.
 
@@ -346,13 +349,11 @@ class LocalCoordinateSystem:
         :return: Local coordinate system
         :return:
         """
-        if origin is None:
-            origin = np.array([0, 0, 0])
         orientation = Rot.from_euler(sequence, angles, degrees).as_matrix()
-        return cls(orientation, origin=origin)
+        return cls(orientation, origin=origin, time=time)
 
     @classmethod
-    def construct_from_orientation(cls, orientation, origin=np.array([0, 0, 0])):
+    def construct_from_orientation(cls, orientation, origin=None, time=None):
         """
         Construct a cartesian coordinate system from orientation matrix.
 
@@ -360,10 +361,10 @@ class LocalCoordinateSystem:
         :param origin: Position of the origin
         :return: Local coordinate system
         """
-        return cls(orientation, origin=origin)
+        return cls(orientation, origin=origin, time=time)
 
     @classmethod
-    def construct_from_xyz(cls, vec_x, vec_y, vec_z, origin=np.array([0, 0, 0])):
+    def construct_from_xyz(cls, vec_x, vec_y, vec_z, origin=None, time=None):
         """
         Construct a cartesian coordinate system from 3 basis vectors.
 
@@ -374,11 +375,11 @@ class LocalCoordinateSystem:
         :return: Cartesian coordinate system
         """
         basis = np.transpose([vec_x, vec_y, vec_z])
-        return cls(basis, origin=origin)
+        return cls(basis, origin=origin, time=time)
 
     @classmethod
     def construct_from_xy_and_orientation(
-        cls, vec_x, vec_y, positive_orientation=True, origin=np.array([0, 0, 0])
+        cls, vec_x, vec_y, positive_orientation=True, origin=None, time=None
     ):
         """
         Construct a coordinate system from 2 vectors and an orientation.
@@ -395,11 +396,11 @@ class LocalCoordinateSystem:
         )
 
         basis = np.transpose([vec_x, vec_y, vec_z])
-        return cls(basis, origin=origin)
+        return cls(basis, origin=origin, time=time)
 
     @classmethod
     def construct_from_yz_and_orientation(
-        cls, vec_y, vec_z, positive_orientation=True, origin=np.array([0, 0, 0])
+        cls, vec_y, vec_z, positive_orientation=True, origin=None, time=None
     ):
         """
         Construct a coordinate system from 2 vectors and an orientation.
@@ -416,11 +417,11 @@ class LocalCoordinateSystem:
         )
 
         basis = np.transpose(np.array([vec_x, vec_y, vec_z]))
-        return cls(basis, origin=origin)
+        return cls(basis, origin=origin, time=time)
 
     @classmethod
     def construct_from_xz_and_orientation(
-        cls, vec_x, vec_z, positive_orientation=True, origin=np.array([0, 0, 0])
+        cls, vec_x, vec_z, positive_orientation=True, origin=None, time=None
     ):
         """
         Construct a coordinate system from 2 vectors and an orientation.
@@ -437,7 +438,7 @@ class LocalCoordinateSystem:
         )
 
         basis = np.transpose([vec_x, vec_y, vec_z])
-        return cls(basis, origin=origin)
+        return cls(basis, origin=origin, time=time)
 
     @staticmethod
     def _sign_orientation(positive_orientation):
