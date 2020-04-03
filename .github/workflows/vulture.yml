@@ -2,21 +2,20 @@ name: vulture
 on: [push]
 
 jobs:
-  test:
+  vulture:
     name: vulture
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04]
+        py: [ '3.7', '3.8' ]
     steps:
-    - uses: actions/checkout@v1
-    - name: Include $CONDA in $PATH
-      run: echo ::add-path::$CONDA/bin
-    - name: Print conda info
-      run: conda info -a
-    - name: Create conda environment
-      run: conda env create -f ./environment.yml
-    - name: Run vulture
-      run: |
-        source activate weldx
-        vulture .
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.py }}
+      - name: pip installs
+        run: pip install vulture==1.4
+      - name: run vulture
+        run: |
+          vulture
