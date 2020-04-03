@@ -869,7 +869,7 @@ class LinearHorizontalTraceSegment:
 
     def __init__(self, length):
         """
-        Construct linear horizzontal trace segment.
+        Construct linear horizontal trace segment.
 
         :param length: Length of the segment
         """
