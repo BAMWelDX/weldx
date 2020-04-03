@@ -1,4 +1,4 @@
-name: static_analysis
+name: flake8 + pydocstyle
 on: [push]
 
 jobs:
