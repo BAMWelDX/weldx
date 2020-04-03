@@ -1,4 +1,4 @@
-name: pydocstyle
+name: flake8 + pydocstyle
 on: [push]
 
 jobs:
@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04]
         py: [ '3.7', '3.8' ]
     steps:
       - uses: actions/checkout@v1
@@ -25,7 +25,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04]
         py: [ '3.7', '3.8' ]
     steps:
       - uses: actions/checkout@v1
@@ -38,12 +38,12 @@ jobs:
         run: |
           flake8
 
-  flake8-docstrings:
-    name: flake8-docstrings
+  vulture:
+    name: vulture
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04]
         py: [ '3.7', '3.8' ]
     steps:
       - uses: actions/checkout@v1
@@ -51,7 +51,7 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       - name: pip installs
-        run: pip install flake8==3.7.* pydocstyle==5.* flake8-docstrings
-      - name: run flake8
+        run: pip install vulture==1.4
+      - name: run vulture
         run: |
-          flake8
+          vulture . --exclude weldx/asdf/,versioneer.py,weldx/_version.py
