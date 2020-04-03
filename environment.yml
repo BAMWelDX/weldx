@@ -15,6 +15,7 @@ dependencies:
   - sphinx
   - recommonmark
   - openpyxl
+  - jinja2
   # Code quality
   - black
   - codecov
