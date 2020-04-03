@@ -1,9 +1,9 @@
-name: pytest ASDF
+name: pytest asdf
 on: [push]
 
 jobs:
   pytest:
-    name: Pytest ASDF Schemas
+    name: pytest asdf
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -23,4 +23,4 @@ jobs:
       run: |
         source activate weldx
         python setup.py install --user
-        pytest weldx/asdf/schemas --tb=short
+        pytest pytest --asdf-tests --ignore=tests/
