@@ -42,7 +42,7 @@ def get_groove(
 
     if groove_type == "VVGroove":
         return VVGroove(t=workpiece_thickness, alpha=groove_angle, beta=bevel_angle,
-                        b=root_gap, c=root_face)
+                        b=root_gap, c=root_face, h=root_face2)
 
     if groove_type == "HVGroove":
         return HVGroove(t=workpiece_thickness, beta=bevel_angle,
@@ -89,6 +89,7 @@ class VVGroove:
     t: pint.Quantity
     alpha: pint.Quantity
     beta: pint.Quantity
+    h: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.7"])

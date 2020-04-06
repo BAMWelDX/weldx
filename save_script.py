@@ -32,7 +32,8 @@ vv_groove = get_groove(groove_type="VVGroove",
                        groove_angle=Q_(70, "deg"),
                        bevel_angle=Q_(13, "deg"),
                        root_gap=Q_(3, "mm"),
-                       root_face=Q_(1, "mm"))
+                       root_face=Q_(1, "mm"),
+                       root_face2=Q_(5, "mm"))
 hv_groove = get_groove(groove_type="HVGroove",
                        workpiece_thickness=Q_(9, "mm"),
                        bevel_angle=Q_(55, "deg"),

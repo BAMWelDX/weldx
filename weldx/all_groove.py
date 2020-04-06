@@ -278,7 +278,7 @@ def i_groove(t, b, code_number=None, width_default=Q_(5, "mm")):
     return geo.Profile([shape, shape_r])
 
 
-def vv_groove(t, alpha, beta, c, b, code_number, width_default=Q_(5, "mm")):
+def vv_groove(t, alpha, beta, c, b, h, code_number, width_default=Q_(5, "mm")):
     """
     Calculate a VV-Groove.
 
@@ -296,12 +296,14 @@ def vv_groove(t, alpha, beta, c, b, code_number, width_default=Q_(5, "mm")):
     beta = beta.to("rad").magnitude
     b = b.to("mm").magnitude
     c = c.to("mm").magnitude
+    h = h.to("mm").magnitude
     width = width_default.to("mm").magnitude
 
     # Calculations
-    h = (t - c) / 2
-    s_1 = np.tan(alpha / 2) * h
-    s_2  = np.tan(beta) * h
+    h_lower = h - c
+    h_upper = t - h
+    s_1 = np.tan(alpha / 2) * h_lower
+    s_2  = np.tan(beta) * h_upper
 
     # Scaling
     edge = np.min([-(s_1 + s_2), 0])
