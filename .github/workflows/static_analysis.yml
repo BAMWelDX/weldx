@@ -1,0 +1,57 @@
+name: flake8 + pydocstyle
+on: [push]
+
+jobs:
+  pydocstyle:
+    name: pydocstyle
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+        py: [ '3.7', '3.8' ]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.py }}
+      - name: pip installs
+        run: pip install pydocstyle==5.*
+      - name: run pydocstyle
+        run: |
+          pydocstyle
+
+  flake8:
+    name: flake8
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+        py: [ '3.7', '3.8' ]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.py }}
+      - name: pip installs
+        run: pip install flake8==3.7.*
+      - name: run flake8
+        run: |
+          flake8
+
+  vulture:
+    name: vulture
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+        py: [ '3.7', '3.8' ]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.py }}
+      - name: pip installs
+        run: pip install vulture==1.4
+      - name: run vulture
+        run: |
+          vulture . --exclude weldx/asdf/,versioneer.py,weldx/_version.py

@@ -13,6 +13,7 @@ requirements = [
     "pint>=0.10.1",
     "asdf>=2.5",
     "bottleneck>=1.3",
+    "Jinja2>=2.11",
 ]
 
 entry_points = {}

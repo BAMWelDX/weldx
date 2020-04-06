@@ -17,7 +17,7 @@ class LineSegment:
 
     def __init__(self, points):
         """
-        Constructor.
+        Construct line segment.
 
         :param points: 2x2 matrix of points. The first column is the
         starting point and the second column the end point.
@@ -185,7 +185,7 @@ class ArcSegment:
 
     def __init__(self, points, arc_winding_ccw=True):
         """
-        Constructor.
+        Construct arc segment.
 
         :param points: 2x3 matrix of points. The first column is the
         starting point, the second column the end point and the last the
@@ -517,7 +517,7 @@ class Shape:
 
     def __init__(self, segments=None):
         """
-        Constructor.
+        Construct shape.
 
         :param segments: Single segment or list of segments
         """
@@ -890,7 +890,7 @@ class LinearHorizontalTraceSegment:
 
     def __init__(self, length):
         """
-        Constructor.
+        Construct linear horizontal trace segment.
 
         :param length: Length of the segment
         """
@@ -925,7 +925,7 @@ class RadialHorizontalTraceSegment:
 
     def __init__(self, radius, angle, clockwise=False):
         """
-        Constructor.
+        Construct radial horizontal trace segment.
 
         :param radius: Radius of the arc
         :param angle: Angle of the arc
@@ -1017,7 +1017,7 @@ class Trace:
 
     def __init__(self, segments, coordinate_system=tf.LocalCoordinateSystem()):
         """
-        Constructor.
+        Construct trace.
 
         :param segments: Single segment or list of segments
         :param coordinate_system: Coordinate system of the trace
@@ -1197,7 +1197,7 @@ class VariableProfile:
 
     def __init__(self, profiles, locations, interpolation_schemes):
         """
-        Constructor.
+        Construct variable profile.
 
         :param profiles: List of profiles.
         :param locations: Ascending list of profile locations. Since the
@@ -1328,7 +1328,7 @@ class Geometry:
 
     def __init__(self, profile, trace):
         """
-        Constructor.
+        Construct geometry.
 
         :param profile: Constant or variable profile.
         :param trace: Trace

@@ -14,6 +14,7 @@ excluded_words:
   - numpy
   - scipy
   - pytest
+  - pydocstyle
   - matplotlib
   # matplotlib ----------------------------------
   - pyplot
