@@ -24,7 +24,66 @@ def get_groove(
         groove_angle2=None,
         special_depth=None,
 ):
-    """<DEF DOCSTRING>"""
+    """
+    Create a Groove.
+
+    Groove Types:
+        "VGroove":
+        "UGroove"
+        "IGroove"
+        "UVGroove"
+        "VVGroove"
+        "HVGroove"
+        "HUGroove"
+        "DUGroove"
+        "DHVGroove"
+        "FrontalFaceGroove"
+
+    Example:
+        from weldx import Q_
+        from weldx.asdf.tags.weldx.core.groove import get_groove
+
+        get_groove(groove_type="VGroove",
+                      workpiece_thickness=Q_(9, "mm"),
+                      groove_angle=Q_(50, "deg"),
+                      root_face=Q_(4, "mm"),
+                      root_gap=Q_(2, "mm"))
+
+        get_groove(groove_type="UGroove",
+                      workpiece_thickness=Q_(15, "mm"),
+                      bevel_angle=Q_(9, "deg"),
+                      bevel_radius=Q_(6, "mm"),
+                      root_face=Q_(3, "mm"),
+                      root_gap=Q_(1, "mm"))
+
+    Groove attributes:
+        "VGroove":
+            t: workpiece thickness
+            alpha: groove angle
+            b: root gap
+            c: root face
+
+        "UGroove":
+            t: workpiece thickness
+            beta: bevel angle
+            R: bevel radius
+            b: root gap
+            c: root face
+
+    :param groove_type: String specifying the Groove type
+    :param workpiece_thickness: workpiece thickness
+    :param workpiece_thickness2: workpiece thickness if type needs 2 thicknesses
+    :param root_gap: root gap, gap between work pieces
+    :param root_face: root face, usually the lower part
+    :param root_face2: root face, usually the upper part
+    :param bevel_radius: bevel radius
+    :param bevel_angle: bevel angle, usually the upper angle
+    :param bevel_angle2: bevel angle, usually the lower angle
+    :param groove_angle: groove angle, usually the upper angle
+    :param groove_angle2: groove angle, usually the lower angle
+    :param special_depth: special depth used for 4.1.2 Frontal-Face-Groove
+    :return: an Groove from weldx.asdf.tags.weldx.core.groove
+    """
     if groove_type == "VGroove":
         return VGroove(t=workpiece_thickness, alpha=groove_angle,
                        b=root_gap, c=root_face)
