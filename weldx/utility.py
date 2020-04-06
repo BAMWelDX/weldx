@@ -297,6 +297,36 @@ def xr_interp_like(
     :param assume_sorted: assume_sorted flag to pass on to xarray.interp_like
     :return: interpolated DataArray
     """
+    interp_coords = da2.coords  # remember original interpolation coordinates
+
+    # make sure edge coordinate values of da1 are in new coordinate axis of da2
+    if assume_sorted:
+        # if all coordinates are sorted,we can use integer indexing for speedups
+        edge_dict = {
+            d: ([0, -1] if len(val) > 1 else [0])
+            for d, val in da1.coords.items()
+            if d in interp_coords
+        }
+        if len(edge_dict) > 0:
+            da2 = da2.combine_first(da1.isel(edge_dict))
+    else:
+        # select, combine with min/max values if coordinates not guaranteed to be sorted
+        edge_dict = {
+            d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min()])
+            for d, val in da1.coords.items()
+            if d in interp_coords
+        }
+        if len(edge_dict) > 0:
+            da2 = da2.combine_first(da1.sel(edge_dict))
+
+    # handle singular dimensions in da1
+    # TODO: should we handle coordinates or dimensions?
+    singular_dims = [d for d in da1.dims if len(da1[d]) == 1]
+    for dim in singular_dims:
+        if dim in da2.dims:
+            exclude_dims = [d for d in da2.dims if not d == dim]
+            da1 = xr_fill_all(da1.broadcast_like(da2, exclude=exclude_dims))
+
     # default interp will not add dimensions and fill out of range indexes with NaN
     da = da1.interp_like(da2, method=method, assume_sorted=assume_sorted)
 
@@ -306,8 +336,10 @@ def xr_interp_like(
 
     if broadcast_missing:
         da = da.broadcast_like(da2)
+    else:  # careful not to select coordinates that are only in da2
+        interp_coords = {d: v for d, v in interp_coords.items() if d in da1.coords}
 
-    return da
+    return da.sel(interp_coords)
 
 
 def xr_3d_vector(data, times=None):
@@ -329,7 +361,7 @@ def xr_3d_matrix(data, times=None):
         )
     else:
         dsx = xr.DataArray(
-            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
+            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]}
         )
     return dsx.astype(float)
 

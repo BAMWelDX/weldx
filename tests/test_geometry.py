@@ -1984,6 +1984,7 @@ def test_linear_horizontal_trace_segment():
         geo.LinearHorizontalTraceSegment(-4.61)
 
 
+@pytest.mark.slow
 def test_radial_horizontal_trace_segment():
     """
     Test the radial horizontal trace segment.
