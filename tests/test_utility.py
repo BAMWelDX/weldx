@@ -148,9 +148,19 @@ def test_xr_interp_like():
     assert test.a[-1] == da1.a.loc[9]
     assert np.all(test.loc[7:9] == da1.loc[4])
 
-    # single point broadcasting
+    # single point to array interpolation
     # important: da1.loc[5] for indexing would drop coordinates (unsure why)
     test = ut.xr_interp_like(da1.loc[5:5], da1)
+    assert np.all(test.a == da1.a)
+    assert np.all(test == da1.loc[5:5])
+
+    # single point to single point interpolation (different points)
+    test = ut.xr_interp_like(da1.loc[5:5], da1.loc[8:8])
+    assert np.all(test.a == da1.a)
+    assert np.all(test == da1.loc[5:5])
+
+    # single point to single point interpolation (matching points)
+    test = ut.xr_interp_like(da1.loc[5:5], da1.loc[5:5])
     assert np.all(test.a == da1.a)
     assert np.all(test == da1.loc[5:5])
 
@@ -169,6 +179,7 @@ def test_xr_interp_like():
         ut.xr_interp_like(da1, da2, broadcast_missing=True)
     )
 
+    # TODO: add tests
     # tests with time dtypes
     t = pd.timedelta_range(start="0s", end="10s", freq="1s")
     da3 = xr.DataArray(np.arange(0, 11, 1), dims=["t"], coords={"t": t})
