@@ -37,20 +37,17 @@ def check_matrix_orthogonal(matrix):
     assert ut.matrix_is_close(product, np.identity(3))
 
 
-def is_orientation_positive(cs_p):
+def is_orientation_positive(basis):
     """
-    Return `True` if the coordinate system has a positive orientation.
+    Return `True` if the coordinate system basis has a positive orientation.
 
     Otherwise, `False` is returned.
 
-    :param cs_p: Coordinate system that should be checked
+    :param basis: Coordinate system basis that should be checked
     :return: True / False
     """
     return (
-        tf.orientation_point_plane_containing_origin(
-            cs_p.basis[2], cs_p.basis[0], cs_p.basis[1]
-        )
-        > 0
+        tf.orientation_point_plane_containing_origin(basis[2], basis[0], basis[1]) > 0
     )
 
 
@@ -394,6 +391,33 @@ def test_reflection_sign():
 # test cartesian coordinate system class --------------------------------------
 
 
+def check_coordinate_system_time(lcs, expected_time):
+    basis_time = pd.DatetimeIndex(lcs.basis.time.data)
+    origin_time = pd.DatetimeIndex(lcs.origin.time.data)
+
+    # Same length
+    assert len(basis_time) == len(origin_time)
+    assert len(basis_time) == len(expected_time)
+
+    # Same values
+    assert len(basis_time) == len(basis_time.union(origin_time))
+    assert len(basis_time) == len(basis_time.union(expected_time))
+
+
+def check_coordinate_system_basis(basis, basis_expected, positive_orientation_expected):
+
+    assert is_orientation_positive(basis) == positive_orientation_expected
+
+    assert tf.is_orthogonal(basis[0], basis[1])
+    assert tf.is_orthogonal(basis[1], basis[2])
+    assert tf.is_orthogonal(basis[2], basis[0])
+
+    for i in range(3):
+        basis_expected[:, i] = tf.normalize(basis_expected[:, i])
+
+    assert ut.matrix_is_close(basis, basis_expected)
+
+
 def check_coordinate_system(
     cs_p, basis_expected, origin_expected, positive_orientation_expected, time=None
 ):
@@ -409,24 +433,54 @@ def check_coordinate_system(
     be time dependent. None otherwise.
     :return: ---
     """
-    # check orientation is as expected
-    assert is_orientation_positive(cs_p) == positive_orientation_expected
+    basis_expected = np.array(basis_expected)
+    origin_expected = np.array(origin_expected)
 
-    # check basis vectors are orthogonal
-    assert tf.is_orthogonal(cs_p.basis[0], cs_p.basis[1])
-    assert tf.is_orthogonal(cs_p.basis[1], cs_p.basis[2])
-    assert tf.is_orthogonal(cs_p.basis[2], cs_p.basis[0])
+    if time is None:
+        check_coordinate_system_basis(
+            cs_p.basis, basis_expected, positive_orientation_expected
+        )
+        check_coordinate_system_basis(
+            cs_p.orientation, basis_expected, positive_orientation_expected
+        )
 
-    for i in range(3):
-        unit_vec = tf.normalize(basis_expected[:, i])
+        assert ut.vector_is_close(cs_p.origin, origin_expected)
+        assert ut.vector_is_close(cs_p.location, origin_expected)
+    else:
+        assert basis_expected.ndim == 3 or origin_expected.ndim == 2
+        check_coordinate_system_time(cs_p, time)
 
-        # check axis orientations match
-        assert np.abs(np.dot(cs_p.basis[:, i], unit_vec) - 1) < 1e-9
-        assert np.abs(np.dot(cs_p.orientation[:, i], unit_vec) - 1) < 1e-9
+        if basis_expected.ndim == 3:
+            for i in range(len(time)):
+                check_coordinate_system_basis(
+                    cs_p.basis[i], basis_expected[i], positive_orientation_expected
+                )
+                check_coordinate_system_basis(
+                    cs_p.orientation[i],
+                    basis_expected[i],
+                    positive_orientation_expected,
+                )
+        else:
+            # TODO: Remove loop if static orientations are not broadcast to common
+            # timeline
+            for i in range(len(time)):
+                check_coordinate_system_basis(
+                    cs_p.basis[i], basis_expected, positive_orientation_expected
+                )
+                check_coordinate_system_basis(
+                    cs_p.orientation[i], basis_expected, positive_orientation_expected
+                )
 
-        # check origin correct
-        assert np.abs(origin_expected[i] - cs_p.origin[i]) < 1e-9
-        assert np.abs(origin_expected[i] - cs_p.location[i]) < 1e-9
+        if origin_expected.ndim == 2:
+            for i in range(len(time)):
+                assert ut.vector_is_close(cs_p.origin[i], origin_expected[i])
+                assert ut.vector_is_close(cs_p.location[i], origin_expected[i])
+        else:
+            # TODO: Remove loop if static orientations are not broadcast to common
+            # timeline
+            for i in range(len(time)):
+                assert ut.vector_is_close(cs_p.origin[i], origin_expected)
+                assert ut.vector_is_close(cs_p.location[i], origin_expected)
 
 
 def test_coordinate_system_init():
@@ -435,31 +489,115 @@ def test_coordinate_system_init():
 
     :return: ---
     """
+    # reference data
+    time_start_0 = "2042-01-01"
+    time_start_1 = "2042-01-02"
+    time_0 = pd.date_range(time_start_0, periods=3, freq="2D")
+    time_1 = pd.date_range(time_start_1, periods=3, freq="2D")
+
+    orientation_fix = tf.rotation_matrix_z(np.pi)
+    orientation_tdp = tf.rotation_matrix_z(np.pi * np.array([0, 0.25, 0.5]))
+    coordinates_fix = ut.to_float_array([3, 7, 1])
+    coordinates_tdp = ut.to_float_array([[3, 7, 1], [4, -2, 8], [-5, 3, -1]])
 
     # numpy - no time dependency
-    orientation = tf.rotation_matrix_z(np.pi)
-    coordinates = [3, 7, 1]
-    lcs = tf.LocalCoordinateSystem(basis=orientation, origin=coordinates)
+    lcs = tf.LocalCoordinateSystem(basis=orientation_fix, origin=coordinates_fix)
 
-    check_coordinate_system(lcs, orientation, coordinates, True)
+    check_coordinate_system(lcs, orientation_fix, coordinates_fix, True)
 
     # numpy - orientation time dependent
-    orientation = tf.rotation_matrix_z(np.pi * np.array([0, 0.25, 0.5]))
-    coordinates = [3, 7, 1]
-    time = pd.date_range("2042-01-01", periods=3, freq="D")
-    lcs = tf.LocalCoordinateSystem(basis=orientation, origin=coordinates, time=time)
+    lcs = tf.LocalCoordinateSystem(
+        basis=orientation_tdp, origin=coordinates_fix, time=time_0
+    )
+
+    check_coordinate_system(lcs, orientation_tdp, coordinates_fix, True, time_0)
 
     # numpy - coordinates time dependent
+    lcs = tf.LocalCoordinateSystem(
+        basis=orientation_fix, origin=coordinates_tdp, time=time_0
+    )
+
+    check_coordinate_system(lcs, orientation_fix, coordinates_tdp, True, time_0)
+
     # numpy - coordinates and orientation time dependent - only equal times
+    lcs = tf.LocalCoordinateSystem(
+        basis=orientation_tdp, origin=coordinates_tdp, time=time_0
+    )
+
+    check_coordinate_system(lcs, orientation_tdp, coordinates_tdp, True, time_0)
+
+    # xarray - reference data
+    xr_orientation_fix = ut.xr_3d_matrix(orientation_fix)
+    xr_coordinates_fix = ut.xr_3d_vector(coordinates_fix)
+    xr_orientation_tdp_0 = ut.xr_3d_matrix(orientation_tdp, time_0)
+    xr_coordinates_tdp_0 = ut.xr_3d_vector(coordinates_tdp, time_0)
+
     # xarray - no time dependency
+    lcs = tf.LocalCoordinateSystem(basis=xr_orientation_fix, origin=xr_coordinates_fix)
+
+    check_coordinate_system(lcs, orientation_fix, coordinates_fix, True)
+
     # xarray - orientation time dependent
+    lcs = tf.LocalCoordinateSystem(
+        basis=xr_orientation_tdp_0, origin=xr_coordinates_fix
+    )
+
+    check_coordinate_system(lcs, orientation_tdp, coordinates_fix, True, time_0)
+
     # xarray - coordinates time dependent
+    lcs = tf.LocalCoordinateSystem(
+        basis=xr_orientation_fix, origin=xr_coordinates_tdp_0
+    )
+
+    check_coordinate_system(lcs, orientation_fix, coordinates_tdp, True, time_0)
+
     # xarray - coordinates and orientation time dependent - equal times
+    lcs = tf.LocalCoordinateSystem(
+        basis=xr_orientation_tdp_0, origin=xr_coordinates_tdp_0
+    )
+
+    check_coordinate_system(lcs, orientation_tdp, coordinates_tdp, True, time_0)
+
     # xarray - coordinates and orientation time dependent - different times
+    xr_coordinates_tdp_1 = ut.xr_3d_vector(coordinates_tdp, time_1)
+
+    lcs = tf.LocalCoordinateSystem(
+        basis=xr_orientation_tdp_0, origin=xr_coordinates_tdp_1
+    )
+
+    time_exp = pd.date_range("2042-01-01", periods=6, freq="1D")
+    coordinates_exp = ut.to_float_array(
+        [
+            [3, 7, 1],
+            [3, 7, 1],
+            [3.5, 2.5, 4.5],
+            [4, -2, 8],
+            [-0.5, 0.5, 3.5],
+            [-5, 3, -1],
+        ]
+    )
+    orientation_exp = tf.rotation_matrix_z(
+        np.pi * np.array([0, 0.125, 0.25, 0.375, 0.5, 0.5])
+    )
+    check_coordinate_system(lcs, orientation_exp, coordinates_exp, True, time_exp)
+
+    # exceptions --------------------------------
+    # invalid inputs
+    with pytest.raises(Exception):
+        tf.LocalCoordinateSystem(basis="wrong", origin=coordinates_fix, time=time_0)
+    with pytest.raises(Exception):
+        tf.LocalCoordinateSystem(basis=orientation_fix, origin="wrong", time=time_0)
+    with pytest.raises(Exception):
+        tf.LocalCoordinateSystem(
+            basis=orientation_fix, origin=coordinates_fix, time="wrong"
+        )
+
+    # wrong xarray format
+    # TODO: implement
 
 
 # TODO: remove
-test_coordinate_system_init()
+# test_coordinate_system_init()
 
 
 def test_coordinate_system_construction_depr():
@@ -545,7 +683,7 @@ def test_coordinate_system_construction_depr():
         lcs([x, y, [0, 0, 1]])
 
 
-def test_coordinate_system_addition_and_subtraction():
+def test_coordinate_system_addition_and_subtraction_no_timedep():
     """
     Test the + and - operator of the coordinate system class.
 
@@ -590,7 +728,7 @@ def test_coordinate_system_addition_and_subtraction():
     assert ut.vector_is_close(cs_diff_0.origin, cs_2.origin)
 
 
-def test_coordinate_system_invert():
+def test_coordinate_system_invert_no_timedep():
     """
     Test the invert function.
 

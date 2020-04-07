@@ -219,6 +219,9 @@ class LocalCoordinateSystem:
             if origin is None:
                 origin = np.array([0, 0, 0])
 
+            if time is not None and not isinstance(time, pd.DatetimeIndex):
+                raise Exception("time must be an instance of pandas.DateTimeIndex")
+
             if not isinstance(basis, xr.DataArray):
                 if not isinstance(basis, np.ndarray):
                     basis = np.array(basis)
@@ -227,14 +230,20 @@ class LocalCoordinateSystem:
                     time_basis = time
 
                 basis = ut.xr_3d_matrix(basis, time_basis)
+            else:
+                # TODO: Test if xarray has correct format
+                pass
 
             if not isinstance(origin, xr.DataArray):
                 if not isinstance(origin, np.ndarray):
                     origin = np.array(origin)
                 time_origin = None
-                if origin.ndim == 3:
+                if origin.ndim == 2:
                     time_origin = time
                 origin = ut.xr_3d_vector(origin, time_origin)
+            else:
+                # TODO: Test if xarray has correct format
+                pass
 
             basis = xr.apply_ufunc(
                 normalize,
