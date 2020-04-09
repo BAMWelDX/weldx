@@ -917,3 +917,66 @@ def test_coordinate_system_invert():
     check_coordinate_system(
         lcs0_in_lcs1_2, lcs0_in_lcs1.basis, lcs0_in_lcs1.origin, True, time
     )
+
+
+def test_coordinate_system_interp_time():
+    """
+    Test the local coordinate systems interp_time function.
+
+    :return: ---
+    """
+    time_0 = pd.date_range("2042-01-10", periods=4, freq="4D")
+    orientation = tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi)
+    coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
+
+    lcs = tf.LocalCoordinateSystem(basis=orientation, origin=coordinates, time=time_0)
+
+    # broadcast left ----------------------------
+    time_interp = pd.date_range("2042-01-01", periods=2, freq="1D")
+
+    lcs_interp = lcs.interp_time(time_interp)
+    orientation_exp = tf.rotation_matrix_z(np.array([0, 0]) * np.pi)
+    coordinates_exp = np.array([[2, 8, 7], [2, 8, 7]])
+
+    check_coordinate_system(
+        lcs_interp, orientation_exp, coordinates_exp, True, time_interp
+    )
+
+    # broadcast right ---------------------------
+    time_interp = pd.date_range("2042-02-01", periods=2, freq="1D")
+
+    lcs_interp = lcs.interp_time(time_interp)
+    orientation_exp = tf.rotation_matrix_z(np.array([0.5, 0.5]) * np.pi)
+    coordinates_exp = np.array([[3, 1, 2], [3, 1, 2]])
+
+    check_coordinate_system(
+        lcs_interp, orientation_exp, coordinates_exp, True, time_interp
+    )
+
+    # pure interpolation ------------------------
+
+    time_interp = pd.date_range("2042-01-11", periods=4, freq="3D")
+
+    lcs_interp = lcs.interp_time(time_interp)
+    orientation_exp = tf.rotation_matrix_z(np.array([0.125, 0.5, 0.875, 0.75]) * np.pi)
+    coordinates_exp = np.array(
+        [[2.5, 8.25, 5.75], [4, 9, 2], [1, 3.75, 1.25], [1.5, 1.5, 1.5]]
+    )
+
+    check_coordinate_system(
+        lcs_interp, orientation_exp, coordinates_exp, True, time_interp
+    )
+
+    # mixed -------------------------------------
+
+    time_interp = pd.date_range("2042-01-06", periods=5, freq="6D")
+
+    lcs_interp = lcs.interp_time(time_interp)
+    orientation_exp = tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi)
+    coordinates_exp = np.array(
+        [[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]
+    )
+
+    check_coordinate_system(
+        lcs_interp, orientation_exp, coordinates_exp, True, time_interp
+    )
