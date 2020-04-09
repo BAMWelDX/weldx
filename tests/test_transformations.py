@@ -870,7 +870,7 @@ def test_coordinate_system_addition_and_subtraction():
         lcs_fix - lcs_tdp
 
 
-def test_coordinate_system_invert_no_timedep():
+def test_coordinate_system_invert():
     """
     Test the invert function.
 
@@ -880,19 +880,40 @@ def test_coordinate_system_invert_no_timedep():
 
     :return: ---
     """
-    lcs = tf.LocalCoordinateSystem
-    child_in_parent = lcs.construct_from_xy_and_orientation(
+    # fix ---------------------------------------
+    lcs0_in_lcs1 = tf.LocalCoordinateSystem.construct_from_xy_and_orientation(
         [1, 1, 0], [-1, 1, 0], origin=[2, 0, 2]
     )
-    parent_in_child = child_in_parent.invert()
+    lcs1_in_lcs0 = lcs0_in_lcs1.invert()
 
     exp_basis = tf.rotation_matrix_z(-np.pi / 4)
     exp_origin = [-np.sqrt(2), np.sqrt(2), -2]
 
-    assert ut.vector_is_close(parent_in_child.origin, exp_origin)
-    assert ut.matrix_is_close(parent_in_child.basis, exp_basis)
+    check_coordinate_system(lcs1_in_lcs0, exp_basis, exp_origin, True)
 
-    child_in_parent_2 = parent_in_child.invert()
+    lcs0_in_lcs1_2 = lcs1_in_lcs0.invert()
 
-    assert ut.vector_is_close(child_in_parent.origin, child_in_parent_2.origin)
-    assert ut.matrix_is_close(child_in_parent.basis, child_in_parent_2.basis)
+    check_coordinate_system(
+        lcs0_in_lcs1_2, lcs0_in_lcs1.basis, lcs0_in_lcs1.origin, True
+    )
+
+    # time dependent ----------------------------
+    time = pd.date_range("2042-01-01", periods=4, freq="1D")
+    orientation = tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi)
+    coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
+
+    lcs0_in_lcs1 = tf.LocalCoordinateSystem(
+        basis=orientation, origin=coordinates, time=time
+    )
+
+    lcs1_in_lcs0 = lcs0_in_lcs1.invert()
+    orientation_exp = tf.rotation_matrix_z(np.array([0, 1.5, 1, 1.5]) * np.pi)
+    coordinates_exp = np.array([[-2, -8, -7], [-9, 4, -2], [0, 2, -1], [-1, 3, -2]])
+
+    check_coordinate_system(lcs1_in_lcs0, orientation_exp, coordinates_exp, True, time)
+
+    lcs0_in_lcs1_2 = lcs1_in_lcs0.invert()
+
+    check_coordinate_system(
+        lcs0_in_lcs1_2, lcs0_in_lcs1.basis, lcs0_in_lcs1.origin, True, time
+    )
