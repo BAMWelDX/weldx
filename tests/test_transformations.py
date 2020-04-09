@@ -394,14 +394,17 @@ def test_reflection_sign():
 def check_coordinate_system_time(lcs, expected_time):
     basis_time = pd.DatetimeIndex(lcs.basis.time.data)
     origin_time = pd.DatetimeIndex(lcs.origin.time.data)
+    time_time = lcs.time
 
     # Same length
     assert len(basis_time) == len(origin_time)
     assert len(basis_time) == len(expected_time)
+    assert len(time_time) == len(expected_time)
 
     # Same values
     assert len(basis_time) == len(basis_time.union(origin_time))
     assert len(basis_time) == len(basis_time.union(expected_time))
+    assert len(time_time) == len(time_time.union(expected_time))
 
 
 def check_coordinate_system_basis(basis, basis_expected, positive_orientation_expected):
@@ -596,11 +599,7 @@ def test_coordinate_system_init():
     # TODO: implement
 
 
-# TODO: remove
-# test_coordinate_system_init()
-
-
-def test_coordinate_system_construction_depr():
+def test_coordinate_system_factories():
     """
     Test construction of coordinate system class.
 
@@ -869,10 +868,6 @@ def test_coordinate_system_addition_and_subtraction():
 
     with pytest.raises(Exception):
         lcs_fix - lcs_tdp
-
-
-# TODO: remove
-test_coordinate_system_addition_and_subtraction()
 
 
 def test_coordinate_system_invert_no_timedep():
