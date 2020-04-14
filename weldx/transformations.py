@@ -198,9 +198,7 @@ class LocalCoordinateSystem:
     """Defines a local cartesian coordinate system in 3d."""
 
     # TODO: Add option to ctors to create time dependent lcs
-    def __init__(
-        self, basis=None, origin=None, time=None, construction_checks=True,
-    ):
+    def __init__(self, basis=None, origin=None, time=None, construction_checks=True):
         """
         Construct a cartesian coordinate system.
 
@@ -275,11 +273,14 @@ class LocalCoordinateSystem:
 
         self._origin = origin
         self._basis = basis
+        self._dataset = xr.merge([origin, basis], join="exact")
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
-        repr_str = self.origin.__repr__() + "\n\n" + self.basis.__repr__()
-        return repr_str.replace("<xarray.DataArray", "<LocalCoordinateSystem")
+        #        repr_str = self.origin.__repr__() + "\n\n" + self.basis.__repr__()
+        return self._dataset.__repr__().replace(
+            "<xarray.Dataset", "<LocalCoordinateSystem"
+        )
 
     def __add__(self, rhs_cs):
         """
@@ -539,15 +540,15 @@ class LocalCoordinateSystem:
 
         :return: DateTimeIndex-like time union
         """
-        if ("time" in self._origin.coords) and ("time" in self._basis.coords):
-            t1 = pd.DatetimeIndex(self._origin.time.data)
-            t2 = pd.DatetimeIndex(self._basis.time.data)
-            return t1.union(t2)
-        elif "time" in self._origin.coords:
-            return pd.DatetimeIndex(self._origin.time.data)
-        elif "time" in self._basis.coords:
-            return pd.DatetimeIndex(self._basis.time.data)
+
+        if "time" in self._dataset.coords:
+            return pd.DatetimeIndex(self._dataset.time.data)
         return None
+
+    @property
+    def dataset(self):
+
+        return self._dataset
 
     def interp_time(self, times):
         """

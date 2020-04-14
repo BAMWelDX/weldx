@@ -280,7 +280,7 @@ def xr_fill_all(da, order="bf"):
 def xr_interp_like(
     da1: xr.DataArray,
     da2: xr.DataArray,
-    interp_coords=None,
+    interp_coords: bool = None,
     broadcast_missing: bool = False,
     fillna: bool = True,
     method: str = "linear",
@@ -299,13 +299,18 @@ def xr_interp_like(
     :param assume_sorted: assume_sorted flag to pass on to xarray.interp_like
     :return: interpolated DataArray
     """
-    sel_coords = da2.coords  # remember original interpolation coordinates
+    if isinstance(da2, (xr.DataArray, xr.Dataset)):
+        sel_coords = da2.coords  # remember original interpolation coordinates
 
     if interp_coords is not None:
-        raise NotImplementedError("Interface for interp_coords not yet implemented.")
-        # sel_coords = {k:v for k,v in sel_coords.items() if k in interp_coords}
+        # raise NotImplementedError("Interface for interp_coords not yet implemented.")
+        sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
 
-    # make sure edge coordinate values of da1 are in new coordinate axis of da2
+    # create a new (empty) temporary dataset to use for interpolation
+    # we need this if da2 is passed as an existing coordinate variable like origin.time
+    da_temp = xr.DataArray(dims=sel_coords.keys(), coords=sel_coords)
+
+    # make sure edge coordinate values of da1 are in new coordinate axis of da_temp
     if assume_sorted:
         # if all coordinates are sorted,we can use integer indexing for speedups
         edge_dict = {
@@ -314,39 +319,40 @@ def xr_interp_like(
             if d in sel_coords
         }
         if len(edge_dict) > 0:
-            da2 = da2.combine_first(da1.isel(edge_dict))
+            da_temp = da_temp.combine_first(da1.isel(edge_dict))
     else:
         # select, combine with min/max values if coordinates not guaranteed to be sorted
         # maybe switch to idxmin()/idxmax() once it avaiable
+        # TODO: handle non-numeric dtypes ! currently cannot work on unsorted str types
         edge_dict = {
-            d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min()])
+            d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min().data])
             for d, val in da1.coords.items()
             if d in sel_coords
         }
         if len(edge_dict) > 0:
-            da2 = da2.combine_first(da1.sel(edge_dict))
+            da_temp = da_temp.combine_first(da1.sel(edge_dict))
 
     # handle singular dimensions in da1
     # TODO: should we handle coordinates or dimensions?
     singular_dims = [d for d in da1.coords if len(da1[d]) == 1]
     for dim in singular_dims:
-        if dim in da2.coords:
-            if len(da2.coords[dim]) > 1:
-                exclude_dims = [d for d in da2.coords if not d == dim]
-                da1 = xr_fill_all(da1.broadcast_like(da2, exclude=exclude_dims))
+        if dim in da_temp.coords:
+            if len(da_temp.coords[dim]) > 1:
+                exclude_dims = [d for d in da_temp.coords if not d == dim]
+                da1 = xr_fill_all(da1.broadcast_like(da_temp, exclude=exclude_dims))
             else:
-                del da2.coords[dim]
+                del da_temp.coords[dim]
 
-    # default interp will not add dimensions and fill out of range indexes with NaN
-    da = da1.interp_like(da2, method=method, assume_sorted=assume_sorted)
+    # default interp_like will not add dimensions and fill out of range indexes with NaN
+    da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
     # fill out of range nan values for all dimensions
     if fillna:
         da = xr_fill_all(da)
 
     if broadcast_missing:
-        da = da.broadcast_like(da2)
-    else:  # careful not to select coordinates that are only in da2
+        da = da.broadcast_like(da_temp)
+    else:  # careful not to select coordinates that are only in da_temp
         sel_coords = {d: v for d, v in sel_coords.items() if d in da1.coords}
 
     return da.sel(sel_coords)
