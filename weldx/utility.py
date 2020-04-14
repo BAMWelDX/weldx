@@ -1,6 +1,7 @@
 """Contains package internal utility functions."""
 
 import math
+from typing import Union, Dict, Any
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -279,7 +280,7 @@ def xr_fill_all(da, order="bf"):
 
 def xr_interp_like(
     da1: xr.DataArray,
-    da2: xr.DataArray,
+    da2: Union[xr.DataArray, Dict[str, Any]],
     interp_coords: bool = None,
     broadcast_missing: bool = False,
     fillna: bool = True,
@@ -301,6 +302,8 @@ def xr_interp_like(
     """
     if isinstance(da2, (xr.DataArray, xr.Dataset)):
         sel_coords = da2.coords  # remember original interpolation coordinates
+    else:  # assume da2 to be dict-like
+        sel_coords = da2
 
     if interp_coords is not None:
         # raise NotImplementedError("Interface for interp_coords not yet implemented.")
@@ -413,19 +416,9 @@ def xr_interp_orientation_in_time(dsx, times):
 
 
 def xr_interp_coodinates_in_time(dsx, times):
-    if "time" not in dsx.coords:
-        return dsx.expand_dims({"time": times})
-
-    times_ds = dsx.time.data
-    if len(times_ds) > 1:
-        times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
-        times_union = times.union(times_ds_limits)
-        dsx_out = dsx.interp({"time": times_union})
-    else:
-        dsx_out = dsx.broadcast_like(as_xarray_dims(times))
-    dsx_out = dsx_out.bfill("time").ffill("time")
-
-    return dsx_out.sel(time=times)
+    return xr_interp_like(
+        dsx, {"time": times}, assume_sorted=True, broadcast_missing=True, fillna=True
+    )
 
 
 # weldx xarray Accessors --------------------------------------------------------

@@ -251,18 +251,13 @@ class LocalCoordinateSystem:
             )
 
             # unify time axis
-            if "time" in basis.coords:
-                time_basis = pd.DatetimeIndex(basis.time.data)
-                if "time" in origin.coords:
+            if ("time" in basis.coords) and ("time" in origin.coords):
+                if not np.all(basis.time.data == origin.time.data):
+                    time_basis = pd.DatetimeIndex(basis.time.data)
                     time_origin = pd.DatetimeIndex(origin.time.data)
                     time_union = time_basis.union(time_origin)
                     basis = ut.xr_interp_orientation_in_time(basis, time_union)
                     origin = ut.xr_interp_coodinates_in_time(origin, time_union)
-                else:
-                    origin = origin.expand_dims({"time": time_basis})
-            elif "time" in origin.coords:
-                time_origin = pd.DatetimeIndex(origin.time.data)
-                basis = basis.expand_dims({"time": time_origin})
 
             # vectorize test if orthogonal
             if not ut.xr_is_orthogonal_matrix(basis, dims=["c", "v"]):
@@ -275,9 +270,20 @@ class LocalCoordinateSystem:
         self._basis = basis
         self._dataset = xr.merge([origin, basis], join="exact")
 
+        # add time axis to all DataVariables
+        # TODO: remove code below to keep static elements without time dimension
+        if "time" in self._dataset.coords:
+            if "time" not in self._dataset.origin.coords:
+                self._dataset["origin"] = self._dataset.origin.expand_dims(
+                    {"time": self._dataset.time}
+                )
+            if "time" not in self._dataset.basis.coords:
+                self._dataset["basis"] = self._dataset.basis.expand_dims(
+                    {"time": self._dataset.time}
+                )
+
     def __repr__(self):
         """Give __repr_ output in xarray format."""
-        #        repr_str = self.origin.__repr__() + "\n\n" + self.basis.__repr__()
         return self._dataset.__repr__().replace(
             "<xarray.Dataset", "<LocalCoordinateSystem"
         )
