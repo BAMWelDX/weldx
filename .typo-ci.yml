@@ -11,6 +11,7 @@ excluded_files:
 excluded_words:
   - typoci
   # python packages -----------------------------
+  - asdf
   - numpy
   - scipy
   - pytest
