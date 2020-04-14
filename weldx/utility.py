@@ -286,7 +286,7 @@ def xr_interp_like(
     fillna: bool = True,
     method: str = "linear",
     assume_sorted: bool = False,
-):
+) -> xr.DataArray:
     """
     Interpolate DataArray along dimensions of another DataArray.
 
@@ -385,9 +385,13 @@ def xr_3d_matrix(data, times=None):
     return dsx.astype(float)
 
 
-def xr_interp_orientation_in_time(dsx, times):
+def xr_interp_orientation_in_time(
+    dsx: xr.DataArray, times: pd.DatetimeIndex
+) -> xr.DataArray:
     if "time" not in dsx.coords:
-        return dsx.expand_dims({"time": times})
+        return xr_interp_like(
+            dsx, {"time": times}, broadcast_missing=False, fillna=True
+        )
 
     # extract intersecting times and add time range boundaries of the data set
     times_ds = dsx.time.data
@@ -415,7 +419,9 @@ def xr_interp_orientation_in_time(dsx, times):
     return dsx_out.sel(time=times)
 
 
-def xr_interp_coodinates_in_time(dsx, times):
+def xr_interp_coodinates_in_time(
+    dsx: xr.DataArray, times: pd.DatetimeIndex
+) -> xr.DataArray:
     return xr_interp_like(
         dsx, {"time": times}, assume_sorted=True, broadcast_missing=True, fillna=True
     )

@@ -266,8 +266,6 @@ class LocalCoordinateSystem:
         origin.name = "origin"
         basis.name = "basis"
 
-        self._origin = origin
-        self._basis = basis
         self._dataset = xr.merge([origin, basis], join="exact")
 
         # add time axis to all DataVariables
@@ -504,7 +502,7 @@ class LocalCoordinateSystem:
 
         :return: Basis of the coordinate system
         """
-        return self._basis.transpose(..., "c", "v")
+        return self._dataset.basis.transpose(..., "c", "v")
 
     @property
     def orientation(self):
@@ -515,7 +513,7 @@ class LocalCoordinateSystem:
 
         :return: Orientation matrix
         """
-        return self._basis.transpose(..., "c", "v")
+        return self._dataset.basis.transpose(..., "c", "v")
 
     @property
     def origin(self):
@@ -526,7 +524,7 @@ class LocalCoordinateSystem:
 
         :return: Origin of the coordinate system
         """
-        return self._origin.transpose(..., "c")
+        return self._dataset.origin.transpose(..., "c")
 
     @property
     def location(self):
@@ -537,7 +535,7 @@ class LocalCoordinateSystem:
 
         :return: Location of the coordinate system.
         """
-        return self._origin.transpose(..., "c")
+        return self._dataset.origin.transpose(..., "c")
 
     @property
     def time(self):
