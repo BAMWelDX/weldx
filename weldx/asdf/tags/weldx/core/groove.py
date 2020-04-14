@@ -25,10 +25,11 @@ def get_groove(
         special_depth=None,
 ):
     """
-    Create a Groove.
+    Create a Groove from weldx.asdf.tags.weldx.core.groove.
 
+    Make a selection from the given groove types.
     Groove Types:
-        "VGroove":
+        "VGroove"
         "UGroove"
         "IGroove"
         "UVGroove"
@@ -38,6 +39,39 @@ def get_groove(
         "DUGroove"
         "DHVGroove"
         "FrontalFaceGroove"
+
+    Each groove type has a different set of attributes which are required. Only
+    required attributes are considered. All the required attributes for Grooves
+    are in Quantity values from pint and related units are accepted.
+    Required Groove attributes:
+        "VGroove":
+            t: workpiece thickness
+                - The workpiece thickness is a length Quantity, e.g.: "mm".
+                  It is assumed that both workpieces have the same thickness.
+            alpha: groove angle
+                - The groove angle is the whole angle of the V-Groove.
+                  It is a pint Quantity in degree or radian.
+            b: root gap
+                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+            c: root face
+                - The root face is the length of the Y-Groove which is not part of the V.
+                  It can be 0.
+
+        "UGroove":
+            t: workpiece thickness
+                - The workpiece thickness is a length Quantity, e.g.: "mm".
+                  It is assumed that both workpieces have the same thickness.
+            beta: bevel angle
+                - The bevel angle is the angle that emerges from the circle segment.
+                  Where 0 degree would be a parallel to the root face and 90 degree
+                  would be a parallel to the workpiece.
+            R: bevel radius
+                - The bevel radius defines the length of the radius of the U-segment.
+                  It is usually 6 millimeters.
+            b: root gap
+                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+            c: root face
+                - The root face is the height of the part below the U-segment.
 
     Example:
         from weldx import Q_
@@ -55,20 +89,6 @@ def get_groove(
                       bevel_radius=Q_(6, "mm"),
                       root_face=Q_(3, "mm"),
                       root_gap=Q_(1, "mm"))
-
-    Groove attributes:
-        "VGroove":
-            t: workpiece thickness
-            alpha: groove angle
-            b: root gap
-            c: root face
-
-        "UGroove":
-            t: workpiece thickness
-            beta: bevel angle
-            R: bevel radius
-            b: root gap
-            c: root face
 
     :param groove_type: String specifying the Groove type
     :param workpiece_thickness: workpiece thickness
