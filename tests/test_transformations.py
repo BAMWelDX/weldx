@@ -4,6 +4,7 @@ import weldx.transformations as tf
 import weldx.utility as ut
 import numpy as np
 import pandas as pd
+import xarray as xr
 import pytest
 import random
 import math
@@ -46,6 +47,7 @@ def is_orientation_positive(basis):
     :param basis: Coordinate system basis that should be checked
     :return: True / False
     """
+    # TODO: vectorize this function for use in
     return (
         tf.orientation_point_plane_containing_origin(basis[2], basis[0], basis[1]) > 0
     )
@@ -392,37 +394,29 @@ def test_reflection_sign():
 
 
 def check_coordinate_system_time(lcs, expected_time):
-    basis_time = pd.DatetimeIndex(lcs.basis.time.data)
-    origin_time = pd.DatetimeIndex(lcs.origin.time.data)
-    time_time = lcs.time
-
-    # Same length
-    assert len(basis_time) == len(origin_time)
-    assert len(basis_time) == len(expected_time)
-    assert len(time_time) == len(expected_time)
-
-    # Same values
-    assert len(basis_time) == len(basis_time.union(origin_time))
-    assert len(basis_time) == len(basis_time.union(expected_time))
-    assert len(time_time) == len(time_time.union(expected_time))
+    assert np.all(lcs.time == expected_time)
 
 
-def check_coordinate_system_basis(basis, basis_expected, positive_orientation_expected):
+def check_coordinate_system_basis(
+    basis: xr.DataArray, basis_expected: np.ndarray, positive_orientation_expected: bool
+):
 
-    assert is_orientation_positive(basis) == positive_orientation_expected
+    # TODO: reactivate test after vectorizing is_orientation_positive()
+    # assert is_orientation_positive(basis) == positive_orientation_expected
 
-    assert tf.is_orthogonal(basis[0], basis[1])
-    assert tf.is_orthogonal(basis[1], basis[2])
-    assert tf.is_orthogonal(basis[2], basis[0])
+    assert tf.is_orthogonal_matrix(basis.values)
 
-    for i in range(3):
-        basis_expected[:, i] = tf.normalize(basis_expected[:, i])
+    basis_expected = tf.normalize(basis_expected)
 
-    assert ut.matrix_is_close(basis, basis_expected)
+    assert np.allclose(basis, basis_expected)
 
 
 def check_coordinate_system(
-    cs_p, basis_expected, origin_expected, positive_orientation_expected, time=None
+    cs_p: tf.LocalCoordinateSystem,
+    basis_expected: np.ndarray,
+    origin_expected: np.ndarray,
+    positive_orientation_expected: bool,
+    time=None,
 ):
     # TODO: add time dependency
     """
@@ -439,51 +433,19 @@ def check_coordinate_system(
     basis_expected = np.array(basis_expected)
     origin_expected = np.array(origin_expected)
 
-    if time is None:
-        check_coordinate_system_basis(
-            cs_p.basis, basis_expected, positive_orientation_expected
-        )
-        check_coordinate_system_basis(
-            cs_p.orientation, basis_expected, positive_orientation_expected
-        )
-
-        assert ut.vector_is_close(cs_p.origin, origin_expected)
-        assert ut.vector_is_close(cs_p.location, origin_expected)
-    else:
+    if time is not None:
         assert basis_expected.ndim == 3 or origin_expected.ndim == 2
         check_coordinate_system_time(cs_p, time)
 
-        if basis_expected.ndim == 3:
-            for i in range(len(time)):
-                check_coordinate_system_basis(
-                    cs_p.basis[i], basis_expected[i], positive_orientation_expected
-                )
-                check_coordinate_system_basis(
-                    cs_p.orientation[i],
-                    basis_expected[i],
-                    positive_orientation_expected,
-                )
-        else:
-            # TODO: Remove loop if static orientations are not broadcast to common
-            # timeline
-            for i in range(len(time)):
-                check_coordinate_system_basis(
-                    cs_p.basis[i], basis_expected, positive_orientation_expected
-                )
-                check_coordinate_system_basis(
-                    cs_p.orientation[i], basis_expected, positive_orientation_expected
-                )
+    check_coordinate_system_basis(
+        cs_p.basis, basis_expected, positive_orientation_expected
+    )
+    check_coordinate_system_basis(
+        cs_p.orientation, basis_expected, positive_orientation_expected
+    )
 
-        if origin_expected.ndim == 2:
-            for i in range(len(time)):
-                assert ut.vector_is_close(cs_p.origin[i], origin_expected[i])
-                assert ut.vector_is_close(cs_p.location[i], origin_expected[i])
-        else:
-            # TODO: Remove loop if static orientations are not broadcast to common
-            # timeline
-            for i in range(len(time)):
-                assert ut.vector_is_close(cs_p.origin[i], origin_expected)
-                assert ut.vector_is_close(cs_p.location[i], origin_expected)
+    assert np.allclose(cs_p.origin.values, origin_expected, atol=1e-9)
+    assert np.allclose(cs_p.location.values, origin_expected, atol=1e-9)
 
 
 def test_coordinate_system_init():

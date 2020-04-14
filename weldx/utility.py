@@ -1,7 +1,7 @@
 """Contains package internal utility functions."""
 
 import math
-from typing import Union, Dict, Any
+from typing import Union, Dict, List, Any
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -245,7 +245,7 @@ def xr_matmul(
     )
 
 
-def xr_is_orthogonal_matrix(da, dims):
+def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]):
     """
     Check if  matrix along specific dimensions in a DataArray is orthogonal.
 

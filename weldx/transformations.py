@@ -1,5 +1,6 @@
 """Contains methods and classes for coordinate transformations."""
 
+from typing import Union
 import weldx.utility as ut
 import numpy as np
 import pandas as pd
@@ -142,6 +143,17 @@ def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
     return math.isclose(np.dot(vec_u, vec_v), 0, abs_tol=tolerance)
 
 
+def is_orthogonal_matrix(a: np.ndarray, atol=1e-9) -> bool:
+    """
+    Check if ndarray is orthogonal matrix in the last two dimensions.
+
+    :param a: Matrix to check
+    :param atol: atol to pass onto np.allclose
+    :return: True if last 2 dimensions of a are orthogonal
+    """
+    return np.allclose(np.matmul(a, a.swapaxes(-1, -2)), np.eye(a.shape[-1]), atol=atol)
+
+
 def point_left_of_line(point, line_start, line_end):
     """
     Determine if a point lies left of a line.
@@ -270,15 +282,15 @@ class LocalCoordinateSystem:
 
         # add time axis to all DataVariables
         # TODO: remove code below to keep static elements without time dimension
-        if "time" in self._dataset.coords:
-            if "time" not in self._dataset.origin.coords:
-                self._dataset["origin"] = self._dataset.origin.expand_dims(
-                    {"time": self._dataset.time}
-                )
-            if "time" not in self._dataset.basis.coords:
-                self._dataset["basis"] = self._dataset.basis.expand_dims(
-                    {"time": self._dataset.time}
-                )
+        # if "time" in self._dataset.coords:
+        #     if "time" not in self._dataset.origin.coords:
+        #         self._dataset["origin"] = self._dataset.origin.expand_dims(
+        #             {"time": self._dataset.time}
+        #         )
+        #     if "time" not in self._dataset.basis.coords:
+        #         self._dataset["basis"] = self._dataset.basis.expand_dims(
+        #             {"time": self._dataset.time}
+        #         )
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -286,7 +298,7 @@ class LocalCoordinateSystem:
             "<xarray.Dataset", "<LocalCoordinateSystem"
         )
 
-    def __add__(self, rhs_cs):
+    def __add__(self, rhs_cs) -> "LocalCoordinateSystem":
         """
         Add 2 coordinate systems.
 
@@ -318,7 +330,7 @@ class LocalCoordinateSystem:
         )
         return LocalCoordinateSystem(basis, origin)
 
-    def __sub__(self, rhs_cs):
+    def __sub__(self, rhs_cs) -> "LocalCoordinateSystem":
         """
         Subtract 2 coordinate systems.
 
@@ -344,7 +356,7 @@ class LocalCoordinateSystem:
     @classmethod
     def construct_from_euler(
         cls, sequence, angles, degrees=False, origin=None, time=None
-    ):
+    ) -> "LocalCoordinateSystem":
         """
         Construct a cartesian coordinate system from an euler sequence.
 
@@ -378,7 +390,9 @@ class LocalCoordinateSystem:
         return cls(orientation, origin=origin, time=time)
 
     @classmethod
-    def construct_from_orientation(cls, orientation, origin=None, time=None):
+    def construct_from_orientation(
+        cls, orientation, origin=None, time=None
+    ) -> "LocalCoordinateSystem":
         """
         Construct a cartesian coordinate system from orientation matrix.
 
@@ -389,7 +403,9 @@ class LocalCoordinateSystem:
         return cls(orientation, origin=origin, time=time)
 
     @classmethod
-    def construct_from_xyz(cls, vec_x, vec_y, vec_z, origin=None, time=None):
+    def construct_from_xyz(
+        cls, vec_x, vec_y, vec_z, origin=None, time=None
+    ) -> "LocalCoordinateSystem":
         """
         Construct a cartesian coordinate system from 3 basis vectors.
 
@@ -405,7 +421,7 @@ class LocalCoordinateSystem:
     @classmethod
     def construct_from_xy_and_orientation(
         cls, vec_x, vec_y, positive_orientation=True, origin=None, time=None
-    ):
+    ) -> "LocalCoordinateSystem":
         """
         Construct a coordinate system from 2 vectors and an orientation.
 
@@ -426,7 +442,7 @@ class LocalCoordinateSystem:
     @classmethod
     def construct_from_yz_and_orientation(
         cls, vec_y, vec_z, positive_orientation=True, origin=None, time=None
-    ):
+    ) -> "LocalCoordinateSystem":
         """
         Construct a coordinate system from 2 vectors and an orientation.
 
@@ -447,7 +463,7 @@ class LocalCoordinateSystem:
     @classmethod
     def construct_from_xz_and_orientation(
         cls, vec_x, vec_z, positive_orientation=True, origin=None, time=None
-    ):
+    ) -> "LocalCoordinateSystem":
         """
         Construct a coordinate system from 2 vectors and an orientation.
 
@@ -494,7 +510,7 @@ class LocalCoordinateSystem:
         return np.cross(a_0, a_1)
 
     @property
-    def basis(self):
+    def basis(self) -> xr.DataArray:
         """
         Get the normalizes basis as matrix of 3 column vectors.
 
@@ -505,7 +521,7 @@ class LocalCoordinateSystem:
         return self._dataset.basis.transpose(..., "c", "v")
 
     @property
-    def orientation(self):
+    def orientation(self) -> xr.DataArray:
         """
         Get the coordinate systems orientation matrix.
 
@@ -516,7 +532,7 @@ class LocalCoordinateSystem:
         return self._dataset.basis.transpose(..., "c", "v")
 
     @property
-    def origin(self):
+    def origin(self) -> xr.DataArray:
         """
         Get the coordinate systems origin.
 
@@ -527,7 +543,7 @@ class LocalCoordinateSystem:
         return self._dataset.origin.transpose(..., "c")
 
     @property
-    def location(self):
+    def location(self) -> xr.DataArray:
         """
         Get the coordinate systems location.
 
@@ -538,7 +554,7 @@ class LocalCoordinateSystem:
         return self._dataset.origin.transpose(..., "c")
 
     @property
-    def time(self):
+    def time(self) -> pd.DatetimeIndex:
         """
         Get the time union of the local coordinate system (or None if system is static).
 
@@ -550,11 +566,15 @@ class LocalCoordinateSystem:
         return None
 
     @property
-    def dataset(self):
+    def dataset(self) -> xr.Dataset:
+        """
+        Get the underlying xarray Dataset.
 
+        :return: xarray Dataset with origin and basis as DataVariables.
+        """
         return self._dataset
 
-    def interp_time(self, times):
+    def interp_time(self, times) -> "LocalCoordinateSystem":
         """
         Interpolates the data in time.
 
@@ -573,8 +593,8 @@ class LocalCoordinateSystem:
         :param other: Coordinate system that provides the reference time.
         :return: Coordinate system with interpolated data
         """
-        if "time" in other.basis.coords:
-            times = pd.DatetimeIndex(other.basis.time.data)
+        if other.time is not None:
+            times = other.time
             return self.interp_time(times)
         else:
             raise Exception("Reference coordinate system has no time component")
