@@ -423,7 +423,7 @@ def xr_interp_coodinates_in_time(
     dsx: xr.DataArray, times: pd.DatetimeIndex
 ) -> xr.DataArray:
     return xr_interp_like(
-        dsx, {"time": times}, assume_sorted=True, broadcast_missing=True, fillna=True
+        dsx, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
     )
 
 

@@ -210,7 +210,13 @@ class LocalCoordinateSystem:
     """Defines a local cartesian coordinate system in 3d."""
 
     # TODO: Add option to ctors to create time dependent lcs
-    def __init__(self, basis=None, origin=None, time=None, construction_checks=True):
+    def __init__(
+        self,
+        basis: Union[xr.DataArray, np.ndarray] = None,
+        origin: Union[xr.DataArray, np.ndarray] = None,
+        time: pd.DatetimeIndex = None,
+        construction_checks: bool = True,
+    ):
         """
         Construct a cartesian coordinate system.
 
@@ -280,18 +286,6 @@ class LocalCoordinateSystem:
 
         self._dataset = xr.merge([origin, basis], join="exact")
 
-        # add time axis to all DataVariables
-        # TODO: remove code below to keep static elements without time dimension
-        # if "time" in self._dataset.coords:
-        #     if "time" not in self._dataset.origin.coords:
-        #         self._dataset["origin"] = self._dataset.origin.expand_dims(
-        #             {"time": self._dataset.time}
-        #         )
-        #     if "time" not in self._dataset.basis.coords:
-        #         self._dataset["basis"] = self._dataset.basis.expand_dims(
-        #             {"time": self._dataset.time}
-        #         )
-
     def __repr__(self):
         """Give __repr_ output in xarray format."""
         return self._dataset.__repr__().replace(
@@ -319,9 +313,9 @@ class LocalCoordinateSystem:
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
-        if "time" in self.basis.coords:
+        if self.time is not None:
             rhs_cs = rhs_cs.interp_time_like(self)
-        elif "time" in rhs_cs.basis.coords:
+        elif rhs_cs.time is not None:
             raise Exception("Can't combine time dependent rhs with static lhs")
 
         basis = ut.xr_matmul(rhs_cs.basis, self.basis, dims_a=["c", "v"])
@@ -586,7 +580,7 @@ class LocalCoordinateSystem:
 
         return LocalCoordinateSystem(basis, origin)
 
-    def interp_time_like(self, other):
+    def interp_time_like(self, other) -> "LocalCoordinateSystem":
         """
         Interpolates the data in time using another coordinate systems time axis.
 
