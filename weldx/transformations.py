@@ -606,8 +606,7 @@ class CoordinateSystemManager:
             self._graph = nx.DiGraph()
             self._graph.add_node(base_coordinate_system_name)
         else:
-            if not isinstance(graph, nx.DiGraph):
-                raise Exception("Graph must be of type networkx.DiGraph.")
+            self._check_graph(graph)
             self._graph = graph
 
     def _add_edges(self, node_from, node_to, lcs, calculated):
@@ -615,6 +614,50 @@ class CoordinateSystemManager:
         self._graph.add_edge(
             node_to, node_from, lcs=lcs.invert(), calculated=calculated
         )
+
+    def _check_graph(self, graph):
+        if not isinstance(graph, nx.DiGraph):
+            raise Exception("Graph must be of type networkx.DiGraph.")
+        if graph.number_of_nodes() < 1:
+            raise Exception("Graph can not be empty.")
+        elif graph.number_of_nodes() > 1:
+            for node in graph.nodes:
+                num_pred = len(list(graph.predecessors(node)))
+                num_succ = len(list(graph.successors(node)))
+                num_neig = len(list(graph.neighbors(node)))
+                if num_neig == 0:
+                    raise Exception(
+                        "Graph node "
+                        + str(node)
+                        + "is not connected to any other node."
+                    )
+                if not (num_neig == num_succ and num_neig == num_pred):
+                    raise Exception(
+                        "Graph node "
+                        + str(node)
+                        + " contains edges that are not defined in both directions."
+                    )
+
+            for edge_nodes in list(graph.edges):
+                edge_data = graph[edge_nodes[0]][edge_nodes[1]]
+                if "lcs" not in edge_data:
+                    raise Exception(
+                        "Graph edge "
+                        + edge_nodes[0]
+                        + " -> "
+                        + edge_nodes[1]
+                        + " has no field 'lcs'"
+                    )
+                else:
+                    if not isinstance(edge_data["lcs"], LocalCoordinateSystem):
+                        raise Exception(
+                            "Graph edge "
+                            + edge_nodes[0]
+                            + " -> "
+                            + edge_nodes[1]
+                            + " is not an instance of"
+                            + "weldx.transformations.LocalCoordinateSystem"
+                        )
 
     def add_coordinate_system(self, name, parent_system_name, local_coordinate_system):
         if not isinstance(local_coordinate_system, LocalCoordinateSystem):
@@ -651,6 +694,16 @@ class CoordinateSystemManager:
     @property
     def graph(self):
         return self._graph
+
+    @property
+    def number_of_coordinate_systems(self):
+        return self._graph.number_of_nodes()
+
+    def neighbors(self, coordinate_system_name):
+        return list(self._graph.neighbors(coordinate_system_name))
+
+    def number_of_neighbors(self, coordinate_system_name):
+        return len(self.neighbors(coordinate_system_name))
 
     def interp_time(self, times):
         """
