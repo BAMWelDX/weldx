@@ -18,6 +18,7 @@ excluded_words:
   - pytest
   - pydocstyle
   - matplotlib
+  - networkx
   # matplotlib ----------------------------------
   - pyplot
   - gca
@@ -25,15 +26,16 @@ excluded_words:
   # flake8 --------------------------------------
   - noqa
   # numpy ---------------------------------------
-  - linalg
-  - ndim
-  - dtype
-  - isclose
-  - ndarray
-  - hstack
-  - matmul
   - arange
+  - allclose
   - det
+  - dtype
+  - hstack
+  - isclose
+  - linalg
+  - matmul
+  - ndarray
+  - ndim
   - vstack
   # jupyter notebooks ---------------------------
   - jupyter

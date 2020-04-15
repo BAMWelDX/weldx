@@ -9,6 +9,7 @@ import xarray as xr
 import pytest
 import random
 import math
+from typing import Union, List, Any
 
 
 # helpers for tests -----------------------------------------------------------
@@ -399,8 +400,8 @@ def check_coordinate_system_basis(
 
 def check_coordinate_system(
     cs_p: tf.LocalCoordinateSystem,
-    basis_expected: np.ndarray,
-    origin_expected: np.ndarray,
+    basis_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
+    origin_expected: Union[np.ndarray, List[Any], xr.DataArray],
     positive_orientation_expected: bool,
     time=None,
 ):
@@ -937,7 +938,7 @@ def test_coordinate_system_manager_init():
     :return: ---
     """
     # default construction ----------------------
-    csm = tf.CoordinateSystemManager(base_coordinate_system_name="root")
+    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
     assert csm.number_of_coordinate_systems == 1
     assert csm.number_of_neighbors("root") == 0
 
@@ -965,45 +966,112 @@ def test_coordinate_system_manager_init():
     assert csm.number_of_neighbors("child_1") == 1
 
     # Exceptions---------------------------------
-    # Nodes without connection
+    # Root system name is obsolete
+    with pytest.raises(Exception):
+        tf.CoordinateSystemManager(root_coordinate_system_name="some name", graph=graph)
+
+    # No root system name provided
+    with pytest.raises(Exception):
+        tf.CoordinateSystemManager()
+
+    # Nodes in graph without connection
     graph = nx.DiGraph()
     graph.add_node("parent")
     graph.add_node("child")
     with pytest.raises(Exception):
-        tf.CoordinateSystemManager(base_coordinate_system_name="root", graph=graph)
+        tf.CoordinateSystemManager(graph=graph)
 
-    # Only unidirectional connection
+    # Only unidirectional connection in graph
     graph.add_edge("parent", "child", lcs=tf.LocalCoordinateSystem())
     with pytest.raises(Exception):
-        tf.CoordinateSystemManager(base_coordinate_system_name="root", graph=graph)
+        tf.CoordinateSystemManager(graph=graph)
 
-    # Edge without attribute lcs
+    # Edge without attribute lcs in graph
     graph.add_edge("child", "parent")
     with pytest.raises(Exception):
-        tf.CoordinateSystemManager(base_coordinate_system_name="root", graph=graph)
+        tf.CoordinateSystemManager(graph=graph)
 
-    # Edge attribute lcs is not of type weldx.transformations.LocalCoordinateSystem
+    # Graph edge attribute lcs is not of type
+    # weldx.transformations.LocalCoordinateSystem
     graph = nx.DiGraph()
     graph.add_node("parent")
     graph.add_node("child")
     graph.add_edge("parent", "child", lcs=tf.LocalCoordinateSystem())
     graph.add_edge("child", "parent", lcs="wrong type")
     with pytest.raises(Exception):
-        tf.CoordinateSystemManager(base_coordinate_system_name="root", graph=graph)
+        tf.CoordinateSystemManager(graph=graph)
 
     # Empty graph
     with pytest.raises(Exception):
-        tf.CoordinateSystemManager(
-            base_coordinate_system_name="root", graph=nx.DiGraph()
-        )
+        tf.CoordinateSystemManager(graph=nx.DiGraph())
 
     # Passed graph has wrong type
     with pytest.raises(Exception):
-        tf.CoordinateSystemManager(
-            base_coordinate_system_name="root", graph=nx.MultiGraph()
-        )
+        tf.CoordinateSystemManager(graph=nx.MultiGraph())
     with pytest.raises(Exception):
-        tf.CoordinateSystemManager(base_coordinate_system_name="root", graph=0)
+        tf.CoordinateSystemManager(graph=0)
 
 
-test_coordinate_system_manager_init()
+def test_coordinate_system_manager_add_coordinate_system():
+    """
+    Test the add_coordinate_system function of the coordinate system manager.
+
+    Adds some coordinate systems to a CSM and checks if the the edges and nodes
+    are set as expected.
+
+    :return: ---
+    """
+    # define some coordinate systems
+    lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
+    lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
+    lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
+
+    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
+    assert csm.number_of_coordinate_systems == 1
+    assert csm.number_of_neighbors("root") == 0
+
+    csm.add_coordinate_system("lcs1", "root", lcs1_in_root)
+    assert csm.number_of_coordinate_systems == 2
+    assert csm.number_of_neighbors("root") == 1
+    assert csm.number_of_neighbors("lcs1") == 1
+    assert csm.is_neighbor_of("root", "lcs1")
+    assert csm.is_neighbor_of("lcs1", "root")
+
+    csm.add_coordinate_system("lcs2", "root", lcs2_in_root)
+    assert csm.number_of_coordinate_systems == 3
+    assert csm.number_of_neighbors("root") == 2
+    assert csm.number_of_neighbors("lcs1") == 1
+    assert csm.number_of_neighbors("lcs2") == 1
+    assert csm.is_neighbor_of("root", "lcs2")
+    assert csm.is_neighbor_of("lcs2", "root")
+    assert not csm.is_neighbor_of("lcs1", "lcs2")
+    assert not csm.is_neighbor_of("lcs2", "lcs1")
+
+    csm.add_coordinate_system("lcs3", "lcs2", lcs3_in_lcs2)
+    assert csm.number_of_coordinate_systems == 4
+    assert csm.number_of_neighbors("root") == 2
+    assert csm.number_of_neighbors("lcs1") == 1
+    assert csm.number_of_neighbors("lcs2") == 2
+    assert csm.number_of_neighbors("lcs3") == 1
+    assert not csm.is_neighbor_of("root", "lcs3")
+    assert not csm.is_neighbor_of("lcs3", "root")
+    assert not csm.is_neighbor_of("lcs1", "lcs3")
+    assert not csm.is_neighbor_of("lcs3", "lcs1")
+    assert csm.is_neighbor_of("lcs2", "lcs3")
+    assert csm.is_neighbor_of("lcs3", "lcs2")
+
+    # Exceptions---------------------------------
+    # Incorrect coordinate system type
+    with pytest.raises(Exception):
+        csm.add_coordinate_system("lcs4", "root", "wrong")
+
+    # Coordinate system already exists
+    with pytest.raises(Exception):
+        csm.add_coordinate_system("lcs3", "lcs2", lcs3_in_lcs2)
+
+    # Invalid parent system
+    with pytest.raises(Exception):
+        csm.add_coordinate_system("lcs4", "something", tf.LocalCoordinateSystem())
+
+
+test_coordinate_system_manager_add_coordinate_system()
