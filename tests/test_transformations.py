@@ -48,7 +48,7 @@ def is_orientation_positive(basis):
     :param basis: Coordinate system basis that should be checked
     :return: True / False
     """
-    # TODO: vectorize this function for use in
+    # TODO: vectorize this function for use in check_coordinate_system_basis
     return (
         tf.orientation_point_plane_containing_origin(basis[2], basis[0], basis[1]) > 0
     )
@@ -404,6 +404,8 @@ def check_coordinate_system_basis(
 
     # TODO: reactivate test after vectorizing is_orientation_positive()
     # assert is_orientation_positive(basis) == positive_orientation_expected
+    det = np.linalg.det(basis.sel(v=[2, 0, 1]))
+    assert np.all((det > 0) == positive_orientation_expected)
 
     assert tf.is_orthogonal_matrix(basis.values)
 
