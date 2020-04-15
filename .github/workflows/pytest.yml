@@ -1,0 +1,47 @@
+name: pytest
+on: [push]
+
+jobs:
+  pytest-linux:
+    name: pytest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04, ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Include $CONDA in $PATH
+      run: echo ::add-path::$CONDA/bin
+    - name: Print conda info
+      run: conda info -a
+    - name: Create conda environment
+      run: conda env create -f ./environment.yml
+    - name: Run tests
+      run: |
+        source activate weldx
+        pytest
+
+  pytest-win:
+    name: pytest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Add conda directories to PATH
+      run: |
+        echo ::add-path::C:\Miniconda
+        echo ::add-path::C:\Miniconda\Scripts
+    - name: Print conda info
+      run: conda info -a
+    - name: Create conda environment
+      run: conda env create -f ./environment.yml
+    - name: Init bash
+      run: conda init powershell
+    - name: Run tests
+      run: |
+        conda activate weldx
+        pytest

@@ -12,8 +12,11 @@ excluded_words:
   - typoci
   # python packages -----------------------------
   - numpy
+  - pandas
+  - xarray
   - scipy
   - pytest
+  - pydocstyle
   - matplotlib
   # matplotlib ----------------------------------
   - pyplot
@@ -41,3 +44,4 @@ excluded_words:
   - ipython
   # other ---------------------------------------
   - linearization
+  - coords

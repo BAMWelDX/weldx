@@ -1,6 +1,8 @@
 """Test the internal utility functions."""
 
 import numpy as np
+import pandas as pd
+import xarray as xr
 import weldx.utility as ut
 
 
@@ -100,3 +102,84 @@ def test_vector_is_close():
 
     # vectors have different size
     assert not ut.vector_is_close(vec_a, vec_a[0:2])
+
+
+def test_xr_interp_like():
+    """
+    Test behaviour of custom interpolation method for xarray Objects.
+
+    :return: ---
+    """
+    # basic interpolation behavior on a single coordinate
+    n_a = 10  # range of "a" coordinate in da1
+    s_a = 0.5  # default steps in "a" coordinate in da1
+    da1 = xr.DataArray(
+        np.arange(0, n_a + s_a, s_a),
+        dims=["a"],
+        coords={"a": np.arange(0, n_a + s_a, s_a)},
+    )
+
+    # interp from subset inside original data
+    test = ut.xr_interp_like(da1.loc[2:7:2], da1)
+    assert test.a[0] == da1.a[0]
+    assert test.a[-1] == da1.a[-1]
+    assert test[0] == da1.loc[2]
+    assert test[-1] == da1.loc[7]
+
+    # interp with overlap
+    test = ut.xr_interp_like(da1.loc[1:6], da1.loc[4:8])
+    assert test.a[0] == da1.a.loc[4]
+    assert test.a[-1] == da1.a.loc[8]
+    assert test[0] == da1.loc[4]
+    assert test[-1] == da1.loc[6]
+    assert np.all(test.loc[6:8] == da1.loc[6])
+
+    # overlap without fill (expecting nan values for out of range indexes)
+    test = ut.xr_interp_like(da1.loc[1:6], da1.loc[4:8], fillna=False)
+    assert test.a[0] == da1.a.loc[4]
+    assert test.a[-1] == da1.a.loc[8]
+    assert test[0] == da1.loc[4]
+    assert np.isnan(test[-1])
+    assert np.all(np.isnan(test.where(test.a > 6, drop=True)))
+
+    # outside interpolation without overlap
+    test = ut.xr_interp_like(da1.loc[2:4:2], da1.loc[7:9])
+    assert test.a[0] == da1.a.loc[7]
+    assert test.a[-1] == da1.a.loc[9]
+    assert np.all(test.loc[7:9] == da1.loc[4])
+
+    # single point to array interpolation
+    # important: da1.loc[5] for indexing would drop coordinates (unsure why)
+    test = ut.xr_interp_like(da1.loc[5:5], da1)
+    assert np.all(test.a == da1.a)
+    assert np.all(test == da1.loc[5:5])
+
+    # single point to single point interpolation (different points)
+    test = ut.xr_interp_like(da1.loc[5:5], da1.loc[8:8])
+    assert np.all(test.a == da1.a)
+    assert np.all(test == da1.loc[5:5])
+
+    # single point to single point interpolation (matching points)
+    test = ut.xr_interp_like(da1.loc[5:5], da1.loc[5:5])
+    assert np.all(test.a == da1.a)
+    assert np.all(test == da1.loc[5:5])
+
+    # TODO: complex tests with multiple dimensions
+    # basic interpolation behavior with different coordinates (broadcasting)
+    n_b = 7  # range of "b" coordinate in da2
+    s_b = 1  # default steps in "b" coordinate in da2
+    da2 = xr.DataArray(
+        np.arange(0, n_b + s_b, s_b) ** 2,
+        dims=["b"],
+        coords={"b": np.arange(0, n_b + s_b, s_b)},
+    )
+
+    assert da1.broadcast_equals(ut.xr_interp_like(da1, da2))
+    assert da1.broadcast_like(da2).broadcast_equals(
+        ut.xr_interp_like(da1, da2, broadcast_missing=True)
+    )
+
+    # TODO: add tests
+    # tests with time dtypes
+    t = pd.timedelta_range(start="0s", end="10s", freq="1s")
+    da3 = xr.DataArray(np.arange(0, 11, 1), dims=["t"], coords={"t": t})

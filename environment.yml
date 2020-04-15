@@ -20,8 +20,8 @@ dependencies:
   # Code quality
   - black
   - codecov
-  - flake8
-  - pydocstyle
+  - flake8=3.7
+  - pydocstyle=5
   - pytest
   - pytest-cov
   - vulture

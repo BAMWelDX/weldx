@@ -1,6 +1,7 @@
 """Contains package internal utility functions."""
 
 import math
+from typing import Union, Dict, List, Any
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -244,7 +245,7 @@ def xr_matmul(
     )
 
 
-def xr_is_orthogonal_matrix(da, dims):
+def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]):
     """
     Check if  matrix along specific dimensions in a DataArray is orthogonal.
 
@@ -279,35 +280,85 @@ def xr_fill_all(da, order="bf"):
 
 def xr_interp_like(
     da1: xr.DataArray,
-    da2: xr.DataArray,
+    da2: Union[xr.DataArray, Dict[str, Any]],
+    interp_coords: bool = None,
     broadcast_missing: bool = False,
     fillna: bool = True,
     method: str = "linear",
     assume_sorted: bool = False,
-):
+) -> xr.DataArray:
     """
     Interpolate DataArray along dimensions of another DataArray.
 
     Provides some utility options for handling out of range values and broadcasting.
     :param da1: xarray object with data to interpolate
-    :param da2: xarray object along which dimensions to interpolate
+    :param da2: xarray or dict-like object along which dimensions to interpolate
+    :param interp_coords: if not None, only interpolate along these coordinates of da2
     :param broadcast_missing: broadcast da1 along all additional dimensions of da2
     :param fillna: fill out of range NaN values (default = True)
     :param method: interpolation method to pass on to xarray.interp_like
     :param assume_sorted: assume_sorted flag to pass on to xarray.interp_like
     :return: interpolated DataArray
     """
-    # default interp will not add dimensions and fill out of range indexes with NaN
-    da = da1.interp_like(da2, method=method, assume_sorted=assume_sorted)
+    if isinstance(da2, (xr.DataArray, xr.Dataset)):
+        sel_coords = da2.coords  # remember original interpolation coordinates
+    else:  # assume da2 to be dict-like
+        sel_coords = da2
+
+    if interp_coords is not None:
+        # raise NotImplementedError("Interface for interp_coords not yet implemented.")
+        sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
+
+    # create a new (empty) temporary dataset to use for interpolation
+    # we need this if da2 is passed as an existing coordinate variable like origin.time
+    da_temp = xr.DataArray(dims=sel_coords.keys(), coords=sel_coords)
+
+    # make sure edge coordinate values of da1 are in new coordinate axis of da_temp
+    if assume_sorted:
+        # if all coordinates are sorted,we can use integer indexing for speedups
+        edge_dict = {
+            d: ([0, -1] if len(val) > 1 else [0])
+            for d, val in da1.coords.items()
+            if d in sel_coords
+        }
+        if len(edge_dict) > 0:
+            da_temp = da_temp.combine_first(da1.isel(edge_dict))
+    else:
+        # select, combine with min/max values if coordinates not guaranteed to be sorted
+        # maybe switch to idxmin()/idxmax() once it available
+        # TODO: handle non-numeric dtypes ! currently cannot work on unsorted str types
+        edge_dict = {
+            d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min().data])
+            for d, val in da1.coords.items()
+            if d in sel_coords
+        }
+        if len(edge_dict) > 0:
+            da_temp = da_temp.combine_first(da1.sel(edge_dict))
+
+    # handle singular dimensions in da1
+    # TODO: should we handle coordinates or dimensions?
+    singular_dims = [d for d in da1.coords if len(da1[d]) == 1]
+    for dim in singular_dims:
+        if dim in da_temp.coords:
+            if len(da_temp.coords[dim]) > 1:
+                exclude_dims = [d for d in da_temp.coords if not d == dim]
+                da1 = xr_fill_all(da1.broadcast_like(da_temp, exclude=exclude_dims))
+            else:
+                del da_temp.coords[dim]
+
+    # default interp_like will not add dimensions and fill out of range indexes with NaN
+    da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
     # fill out of range nan values for all dimensions
     if fillna:
         da = xr_fill_all(da)
 
     if broadcast_missing:
-        da = da.broadcast_like(da2)
+        da = da.broadcast_like(da_temp)
+    else:  # careful not to select coordinates that are only in da_temp
+        sel_coords = {d: v for d, v in sel_coords.items() if d in da1.coords}
 
-    return da
+    return da.sel(sel_coords)
 
 
 def xr_3d_vector(data, times=None):
@@ -329,14 +380,18 @@ def xr_3d_matrix(data, times=None):
         )
     else:
         dsx = xr.DataArray(
-            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
+            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]}
         )
     return dsx.astype(float)
 
 
-def xr_interp_orientation_in_time(dsx, times):
+def xr_interp_orientation_in_time(
+    dsx: xr.DataArray, times: pd.DatetimeIndex
+) -> xr.DataArray:
     if "time" not in dsx.coords:
-        return dsx.expand_dims({"time": times})
+        return xr_interp_like(
+            dsx, {"time": times}, broadcast_missing=False, fillna=True
+        )
 
     # extract intersecting times and add time range boundaries of the data set
     times_ds = dsx.time.data
@@ -364,20 +419,12 @@ def xr_interp_orientation_in_time(dsx, times):
     return dsx_out.sel(time=times)
 
 
-def xr_interp_coodinates_in_time(dsx, times):
-    if "time" not in dsx.coords:
-        return dsx.expand_dims({"time": times})
-
-    times_ds = dsx.time.data
-    if len(times_ds) > 1:
-        times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
-        times_union = times.union(times_ds_limits)
-        dsx_out = dsx.interp({"time": times_union})
-    else:
-        dsx_out = dsx.broadcast_like(as_xarray_dims(times))
-    dsx_out = dsx_out.bfill("time").ffill("time")
-
-    return dsx_out.sel(time=times)
+def xr_interp_coodinates_in_time(
+    dsx: xr.DataArray, times: pd.DatetimeIndex
+) -> xr.DataArray:
+    return xr_interp_like(
+        dsx, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
+    )
 
 
 # weldx xarray Accessors --------------------------------------------------------
