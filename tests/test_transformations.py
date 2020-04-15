@@ -39,21 +39,6 @@ def check_matrix_orthogonal(matrix):
     assert ut.matrix_is_close(product, np.identity(3))
 
 
-def is_orientation_positive(basis):
-    """
-    Return `True` if the coordinate system basis has a positive orientation.
-
-    Otherwise, `False` is returned.
-
-    :param basis: Coordinate system basis that should be checked
-    :return: True / False
-    """
-    # TODO: vectorize this function for use in check_coordinate_system_basis
-    return (
-        tf.orientation_point_plane_containing_origin(basis[2], basis[0], basis[1]) > 0
-    )
-
-
 def random_vector():
     """
     Get a random 3d vector.
@@ -401,9 +386,7 @@ def check_coordinate_system_time(lcs, expected_time):
 def check_coordinate_system_basis(
     basis: xr.DataArray, basis_expected: np.ndarray, positive_orientation_expected: bool
 ):
-
-    # TODO: reactivate test after vectorizing is_orientation_positive()
-    # assert is_orientation_positive(basis) == positive_orientation_expected
+    # test expected positive orientation
     det = np.linalg.det(basis.sel(v=[2, 0, 1]))
     assert np.all((det > 0) == positive_orientation_expected)
 

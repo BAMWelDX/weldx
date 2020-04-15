@@ -292,7 +292,7 @@ def xr_interp_like(
 
     Provides some utility options for handling out of range values and broadcasting.
     :param da1: xarray object with data to interpolate
-    :param da2: xarray object along which dimensions to interpolate
+    :param da2: xarray or dict-like object along which dimensions to interpolate
     :param interp_coords: if not None, only interpolate along these coordinates of da2
     :param broadcast_missing: broadcast da1 along all additional dimensions of da2
     :param fillna: fill out of range NaN values (default = True)
@@ -325,7 +325,7 @@ def xr_interp_like(
             da_temp = da_temp.combine_first(da1.isel(edge_dict))
     else:
         # select, combine with min/max values if coordinates not guaranteed to be sorted
-        # maybe switch to idxmin()/idxmax() once it avaiable
+        # maybe switch to idxmin()/idxmax() once it available
         # TODO: handle non-numeric dtypes ! currently cannot work on unsorted str types
         edge_dict = {
             d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min().data])
