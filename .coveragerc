@@ -1,4 +1,4 @@
 [report]
-show_missing = True
 omit =
     weldx/_version.py
+    weldx/scripts/*
