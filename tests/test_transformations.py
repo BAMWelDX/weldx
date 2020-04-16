@@ -1074,4 +1074,56 @@ def test_coordinate_system_manager_add_coordinate_system():
         csm.add_coordinate_system("lcs4", "something", tf.LocalCoordinateSystem())
 
 
-test_coordinate_system_manager_add_coordinate_system()
+def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependence():
+    """
+    Test the get_local_coordinate_system function.
+
+    :return:
+    """
+
+    # define some coordinate systems
+    lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
+    lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
+    lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_x(np.pi / 2), [1, -1, 3])
+
+    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
+    csm.add_coordinate_system("lcs1", "root", lcs1_in_root)
+    csm.add_coordinate_system("lcs2", "root", lcs2_in_root)
+    csm.add_coordinate_system("lcs3", "lcs2", lcs3_in_lcs2)
+
+    # check stored transformations
+    lcs1_in_root_returned = csm.get_local_coordinate_system("lcs1", "root")
+    check_coordinate_system(
+        lcs1_in_root_returned, lcs1_in_root.basis, lcs1_in_root.origin, True
+    )
+
+    lcs2_in_root_returned = csm.get_local_coordinate_system("lcs2", "root")
+    check_coordinate_system(
+        lcs2_in_root_returned, lcs2_in_root.basis, lcs2_in_root.origin, True
+    )
+
+    lcs3_in_lcs2_returned = csm.get_local_coordinate_system("lcs3", "lcs2")
+    check_coordinate_system(
+        lcs3_in_lcs2_returned, lcs3_in_lcs2.basis, lcs3_in_lcs2.origin, True
+    )
+
+    # check calculated transformations
+    lcs_3_in_root = csm.get_local_coordinate_system("lcs3", "root")
+    expected_basis = [[0, 1, 0], [0, 0, -1], [-1, 0, 0]]
+    expected_coordinates = [6, -4, 0]
+    check_coordinate_system(lcs_3_in_root, expected_basis, expected_coordinates, True)
+
+    root_in_lcs3 = csm.get_local_coordinate_system("root", "lcs3")
+    expected_basis = [[0, 0, -1], [1, 0, 0], [0, -1, 0]]
+    expected_coordinates = [0, -6, -4]
+    check_coordinate_system(root_in_lcs3, expected_basis, expected_coordinates, True)
+
+    lcs_3_in_lcs1 = csm.get_local_coordinate_system("lcs3", "lcs1")
+    expected_basis = [[0, 0, -1], [0, -1, 0], [-1, 0, 0]]
+    expected_coordinates = [-6, -5, -3]
+    check_coordinate_system(lcs_3_in_lcs1, expected_basis, expected_coordinates, True)
+
+    lcs_1_in_lcs3 = csm.get_local_coordinate_system("lcs1", "lcs3")
+    expected_basis = [[0, 0, -1], [0, -1, 0], [-1, 0, 0]]
+    expected_coordinates = [-3, -5, -6]
+    check_coordinate_system(lcs_1_in_lcs3, expected_basis, expected_coordinates, True)
