@@ -722,7 +722,7 @@ class CoordinateSystemManager:
     def add_coordinate_system(
         self,
         coordinate_system_name: Hashable,
-        parent_system_name: Hashable,
+        reference_system_name: Hashable,
         local_coordinate_system: LocalCoordinateSystem,
     ):
         """
@@ -730,7 +730,7 @@ class CoordinateSystemManager:
 
         :param coordinate_system_name: Name of the new coordinate system. This can be
         any hashable type, but it is recommended to use strings.
-        :param parent_system_name: Name of the parent system. This must have been
+        :param reference_system_name: Name of the parent system. This must have been
         already added.
         :param local_coordinate_system: An instance of
         weldx.transformations.LocalCoordinateSystem that describes how the new
@@ -742,8 +742,7 @@ class CoordinateSystemManager:
                 "'local_coordinate_system' must be an instance of "
                 + "weldx.transformations.LocalCoordinateSystem"
             )
-        if parent_system_name not in self._graph.nodes:
-            raise Exception("Invalid parent system")
+        self._check_coordinate_system_exists(reference_system_name)
         if coordinate_system_name in self._graph.nodes:
             raise Exception(
                 "There already exists a coordinate system with name "
@@ -752,16 +751,29 @@ class CoordinateSystemManager:
 
         self._graph.add_node(coordinate_system_name)
         self._add_edges(
-            coordinate_system_name, parent_system_name, local_coordinate_system, False
+            coordinate_system_name,
+            reference_system_name,
+            local_coordinate_system,
+            False,
         )
 
-    def get_local_coordinate_system(self, cs_child, cs_parent):
-        if cs_child not in self.graph.nodes:
-            raise Exception("Invalid child system")
-        if cs_parent not in self.graph.nodes:
-            raise Exception("Invalid parent system")
+    def get_local_coordinate_system(
+        self, coordinate_system_name: Hashable, reference_system_name: Hashable
+    ) -> LocalCoordinateSystem:
+        """
+        Get a coordinate system in relation to another reference system.
 
-        path = nx.shortest_path(self.graph, cs_child, cs_parent)
+        :param coordinate_system_name: Name of the coordinate system
+        :param reference_system_name: Name of the reference coordinate system
+        :return: Local coordinate system
+        """
+        # TODO: Add time component
+        self._check_coordinate_system_exists(coordinate_system_name)
+        self._check_coordinate_system_exists(reference_system_name)
+
+        path = nx.shortest_path(
+            self.graph, coordinate_system_name, reference_system_name
+        )
         lcs = self.graph.edges[path[0], path[1]]["lcs"]
         length_path = len(path) - 1
         if length_path > 1:
@@ -866,3 +878,6 @@ class CoordinateSystemManager:
                 time_union = time_union.union(time_edge)
 
         return time_union
+
+
+# TODO: Test accessors -> .graph, get_neighbors etc.

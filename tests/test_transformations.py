@@ -868,9 +868,35 @@ def test_coordinate_system_invert():
     )
 
 
-def test_coordinate_system_interp_time():
+def coordinate_system_time_interpolation_test_case(
+    lcs: tf.LocalCoordinateSystem,
+    time_interp: pd.DatetimeIndex,
+    orientation_exp: np.ndarray,
+    coordinates_exp: np.ndarray,
+):
     """
-    Test the local coordinate systems interp_time function.
+    Test the time interpolation methods of the LocalCoordinateSystem class.
+
+    :param lcs: Time dependent Local coordinate system
+    :param time_interp: Target times for interpolation
+    :param orientation_exp: Expected orientations
+    :param coordinates_exp: Expected coordinates
+    :return:
+    """
+    lcs_interp = lcs.interp_time(time_interp)
+    check_coordinate_system(
+        lcs_interp, orientation_exp, coordinates_exp, True, time_interp
+    )
+
+    lcs_interp_like = lcs.interp_time_like(lcs_interp)
+    check_coordinate_system(
+        lcs_interp_like, orientation_exp, coordinates_exp, True, time_interp
+    )
+
+
+def test_coordinate_system_time_interpolation():
+    """
+    Test the local coordinate systems interp_time and interp_like functions.
 
     :return: ---
     """
@@ -883,52 +909,51 @@ def test_coordinate_system_interp_time():
     # broadcast left ----------------------------
     time_interp = pd.date_range("2042-01-01", periods=2, freq="1D")
 
-    lcs_interp = lcs.interp_time(time_interp)
     orientation_exp = tf.rotation_matrix_z(np.array([0, 0]) * np.pi)
     coordinates_exp = np.array([[2, 8, 7], [2, 8, 7]])
 
-    check_coordinate_system(
-        lcs_interp, orientation_exp, coordinates_exp, True, time_interp
+    coordinate_system_time_interpolation_test_case(
+        lcs, time_interp, orientation_exp, coordinates_exp
     )
 
     # broadcast right ---------------------------
     time_interp = pd.date_range("2042-02-01", periods=2, freq="1D")
 
-    lcs_interp = lcs.interp_time(time_interp)
     orientation_exp = tf.rotation_matrix_z(np.array([0.5, 0.5]) * np.pi)
     coordinates_exp = np.array([[3, 1, 2], [3, 1, 2]])
 
-    check_coordinate_system(
-        lcs_interp, orientation_exp, coordinates_exp, True, time_interp
+    coordinate_system_time_interpolation_test_case(
+        lcs, time_interp, orientation_exp, coordinates_exp
     )
 
     # pure interpolation ------------------------
-
     time_interp = pd.date_range("2042-01-11", periods=4, freq="3D")
 
-    lcs_interp = lcs.interp_time(time_interp)
     orientation_exp = tf.rotation_matrix_z(np.array([0.125, 0.5, 0.875, 0.75]) * np.pi)
     coordinates_exp = np.array(
         [[2.5, 8.25, 5.75], [4, 9, 2], [1, 3.75, 1.25], [1.5, 1.5, 1.5]]
     )
 
-    check_coordinate_system(
-        lcs_interp, orientation_exp, coordinates_exp, True, time_interp
+    coordinate_system_time_interpolation_test_case(
+        lcs, time_interp, orientation_exp, coordinates_exp
     )
 
     # mixed -------------------------------------
-
     time_interp = pd.date_range("2042-01-06", periods=5, freq="6D")
 
-    lcs_interp = lcs.interp_time(time_interp)
     orientation_exp = tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi)
     coordinates_exp = np.array(
         [[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]
     )
 
-    check_coordinate_system(
-        lcs_interp, orientation_exp, coordinates_exp, True, time_interp
+    coordinate_system_time_interpolation_test_case(
+        lcs, time_interp, orientation_exp, coordinates_exp
     )
+
+    # exceptions --------------------------------
+    # no time component
+    with pytest.raises(Exception):
+        lcs.interp_time_like(tf.LocalCoordinateSystem())
 
 
 def test_coordinate_system_manager_init():
@@ -1078,7 +1103,9 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
     """
     Test the get_local_coordinate_system function.
 
-    :return:
+    This function also tests, if the internally performed transformations are correct.
+
+    :return: ---
     """
 
     # define some coordinate systems
