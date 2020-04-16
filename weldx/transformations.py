@@ -286,7 +286,7 @@ class LocalCoordinateSystem:
 
         self._dataset = xr.merge([origin, basis], join="exact")
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         """Give __repr_ output in xarray format."""
         return self._dataset.__repr__().replace(
             "<xarray.Dataset", "<LocalCoordinateSystem"
@@ -861,16 +861,19 @@ class CoordinateSystemManager:
         :return: Copy of CSM with interpolated edges
         """
 
-    def time_union(self, list_of_edges=None):
+    def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """
+        Get the time union of all or selected local coordinate systems.
 
-        :param list_of_edges: :param list_of_edges: If not None, the union is only
-        calculated from the specified edges
-        :return:
+       :param list_of_edges: If not None, the union is only calculated from the
+       specified edges
+        :return: Time union
         """
         edges = self.graph.edges
+        if list_of_edges is None:
+            list_of_edges = edges
         time_union = None
-        for edge in edges:
+        for edge in list_of_edges:
             time_edge = edges[edge]["lcs"].time
             if time_union is None:
                 time_union = time_edge

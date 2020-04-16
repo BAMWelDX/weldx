@@ -1154,3 +1154,61 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
     expected_basis = [[0, 0, -1], [0, -1, 0], [-1, 0, 0]]
     expected_coordinates = [-3, -5, -6]
     check_coordinate_system(lcs_1_in_lcs3, expected_basis, expected_coordinates, True)
+
+
+def test_coordinate_system_manager_time_union():
+    """
+    Test the coordinate system managers time union function.
+
+    :return: ---
+    """
+    orientation = tf.rotation_matrix_z([0, 1, 2])
+    coordinates = [[1, 6, 3], [8, 2, 6], [4, 4, 4]]
+    lcs_0 = tf.LocalCoordinateSystem(
+        basis=orientation,
+        origin=coordinates,
+        time=pd.date_range("2042-01-01", periods=3, freq="3D"),
+    )
+    lcs_1 = tf.LocalCoordinateSystem(
+        basis=orientation,
+        origin=coordinates,
+        time=pd.date_range("2042-01-01", periods=3, freq="4D"),
+    )
+    lcs_2 = tf.LocalCoordinateSystem(
+        basis=orientation,
+        origin=coordinates,
+        time=pd.date_range("2042-01-01", periods=3, freq="5D"),
+    )
+    lcs_3 = tf.LocalCoordinateSystem()
+
+    csm = tf.CoordinateSystemManager("root")
+    csm.add_coordinate_system("lcs_0", "root", lcs_0)
+    csm.add_coordinate_system("lcs_1", "lcs_0", lcs_1)
+    csm.add_coordinate_system("lcs_2", "root", lcs_2)
+    csm.add_coordinate_system("lcs_3", "lcs_2", lcs_3)
+
+    # full union --------------------------------
+    expected_times = pd.DatetimeIndex(
+        [
+            "2042-01-01",
+            "2042-01-04",
+            "2042-01-05",
+            "2042-01-06",
+            "2042-01-07",
+            "2042-01-09",
+            "2042-01-11",
+        ]
+    )
+
+    assert np.all(expected_times == csm.time_union())
+
+    # selected union ------------------------------
+    expected_times = pd.DatetimeIndex(
+        ["2042-01-01", "2042-01-04", "2042-01-05", "2042-01-07", "2042-01-09"]
+    )
+    list_of_edges = [("root", "lcs_0"), ("lcs_0", "lcs_1")]
+
+    assert np.all(expected_times == csm.time_union(list_of_edges=list_of_edges))
+
+
+test_coordinate_system_manager_time_union()
