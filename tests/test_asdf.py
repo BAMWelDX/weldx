@@ -172,8 +172,7 @@ def test_jinja_template():
 
 
 def test_time_classes():
-    """Test basic implementation and serialization of pandas time datatypes"""
-
+    """Test basic implementation and serialization of pandas time datatypes."""
     # Timedelta -------------------------------------------------------
     td = pd.Timedelta("5m3ns")
 
