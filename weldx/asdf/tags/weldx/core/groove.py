@@ -25,6 +25,7 @@ def get_groove(
         groove_angle=None,
         groove_angle2=None,
         special_depth=None,
+        code_number=None,
 ):
     """
     Create a Groove from weldx.asdf.tags.weldx.core.groove.
@@ -108,6 +109,7 @@ def get_groove(
     :param groove_angle: groove angle, usually the upper angle
     :param groove_angle2: groove angle, usually the lower angle
     :param special_depth: special depth used for 4.1.2 Frontal-Face-Groove
+    :param code_number: String, used to define the Frontal Face Groove
     :return: an Groove from weldx.asdf.tags.weldx.core.groove
     """
     if groove_type == "VGroove":
@@ -157,7 +159,7 @@ def get_groove(
 
     if groove_type == "FrontalFaceGroove":
         return FFGroove(t_1=workpiece_thickness, t_2=workpiece_thickness2,
-                        alpha=groove_angle, b=root_gap, e=special_depth)
+                        alpha=groove_angle, b=root_gap, e=special_depth, code_number=code_number)
 
 
 @dataclass
@@ -296,14 +298,12 @@ class DHUGroove:
 class FFGroove:
     """<CLASS DOCSTRING>"""
     t_1: pint.Quantity
-    t_2: pint.Quantity
-    alpha: pint.Quantity
+    t_2: pint.Quantity = None
+    alpha: pint.Quantity = None
+    # ["1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"]
+    code_number: str = None
     b: pint.Quantity = Q_(0, "mm")
     e: pint.Quantity = None
-    code_number: List[str] = field(
-        default_factory=lambda:
-        ["1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"]
-    )
 
 
 class GrooveType(WeldxType):

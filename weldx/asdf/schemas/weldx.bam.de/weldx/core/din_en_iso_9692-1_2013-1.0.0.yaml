@@ -366,7 +366,7 @@ anyOf:
           e:
             $ref: "#/definitions/special-depth"
 
-        required: [t_1, t_2, alpha, b, e]
+        required: [t_1]
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true

@@ -78,27 +78,58 @@ dhu_groove = get_groove(groove_type="DoubleHUGroove",
                         root_face2=Q_(15, "mm"),
                         root_face=Q_(2, "mm"),
                         root_gap=Q_(2, "mm"))
-ff_groove = get_groove(groove_type="FrontalFaceGroove",
-                       workpiece_thickness=Q_(2, "mm"),
-                       workpiece_thickness2=Q_(5, "mm"),
-                       groove_angle=Q_(80, "deg"),
-                       root_gap=Q_(0, "mm"),
-                       special_depth=Q_(4, "mm"))
+ff_groove0 = get_groove(groove_type="FrontalFaceGroove",
+                        workpiece_thickness=Q_(5, "mm"),
+                        code_number="1.12")
+ff_groove1 = get_groove(groove_type="FrontalFaceGroove",
+                        workpiece_thickness=Q_(2, "mm"),
+                        workpiece_thickness2=Q_(5, "mm"),
+                        groove_angle=Q_(80, "deg"),
+                        root_gap=Q_(1, "mm"),
+                        code_number="3.1.1")
+ff_groove2 = get_groove(groove_type="FrontalFaceGroove",
+                        workpiece_thickness=Q_(2, "mm"),
+                        workpiece_thickness2=Q_(5, "mm"),
+                        root_gap=Q_(1, "mm"),
+                        code_number="3.1.2")
+ff_groove3 = get_groove(groove_type="FrontalFaceGroove",
+                        workpiece_thickness=Q_(2, "mm"),
+                        workpiece_thickness2=Q_(5, "mm"),
+                        groove_angle=Q_(80, "deg"),
+                        root_gap=Q_(1, "mm"),
+                        code_number="3.1.3")
+ff_groove4 = get_groove(groove_type="FrontalFaceGroove",
+                        workpiece_thickness=Q_(2, "mm"),
+                        workpiece_thickness2=Q_(5, "mm"),
+                        groove_angle=Q_(80, "deg"),
+                        special_depth=Q_(4, "mm"),
+                        code_number="4.1.2")
+ff_groove5 = get_groove(groove_type="FrontalFaceGroove",
+                        workpiece_thickness=Q_(2, "mm"),
+                        workpiece_thickness2=Q_(5, "mm"),
+                        root_gap=Q_(1, "mm"),
+                        code_number="4.1.3")
 
-target = asdf.AsdfFile(dict(
-    test001=v_groove,
-    test002=u_groove,
-    test003=i_groove,
-    test004=uv_groove,
-    test005=vv_groove,
-    test006=hv_groove,
-    test007=hu_groove,
-    test008=dv_groove,
-    test009=du_groove,
-    test010=dhv_groove,
-    test011=dhu_groove,
-    test012=ff_groove,
-),
+target = asdf.AsdfFile(
+    dict(
+        test001=v_groove,
+        test002=u_groove,
+        test003=i_groove,
+        test004=uv_groove,
+        test005=vv_groove,
+        test006=hv_groove,
+        test007=hu_groove,
+        test008=dv_groove,
+        test009=du_groove,
+        test010=dhv_groove,
+        test011=dhu_groove,
+        test012=ff_groove0,
+        test013=ff_groove1,
+        test014=ff_groove2,
+        test015=ff_groove3,
+        test016=ff_groove4,
+        test017=ff_groove5,
+    ),
     extensions=[WeldxAsdfExtension(), WeldxExtension()]
 )
 target.write_to("testfile.yml", all_array_storage="inline")

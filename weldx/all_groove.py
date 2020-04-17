@@ -6,7 +6,7 @@ import numpy as np
 import weldx.geometry as geo
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove, VVGroove
 from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
-from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove
+from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove, FFGroove
 
 
 def groove_to_profile(groove):
@@ -48,6 +48,9 @@ def groove_to_profile(groove):
 
     if isinstance(groove, DHUGroove):
         return dhu_groove(**groove.__dict__)
+
+    if isinstance(groove, FFGroove):
+        return ff_groove(**groove.__dict__)
 
     print(f"NOT YET IMPLEMENTED FOR CLASS: {groove.__class__}")
 
@@ -658,6 +661,169 @@ def dhu_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_defaul
                                   [-width_default - (b / 2), t]])
 
     return geo.Profile([left_shape, right_shape])
+
+
+def ff_groove(t_1, t_2, alpha, b, e, code_number, width_default=Q_(5, "mm")):
+    """
+    Calculate a Frontal Face Groove
+
+    :param t_1: the workpiece thickness 1, as Pint unit
+    :param t_2: the workpiece thickness 2, as Pint unit
+    :param alpha: the groove angle, as Pint unit
+    :param b: the root gap, as Pint unit
+    :param e: the special depth, as Pint unit
+    :param code_number: defines the Groove
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
+    if code_number == "1.12" or code_number == "1.13" or code_number == "2.12":
+        t_1 = t_1.to("mm").magnitude
+        width_default = width_default.to("mm").magnitude
+        shape1 = geo.Shape()
+        shape1.add_line_segments([[0, 0],
+                                  [2 * width_default + t_1, 0],
+                                  [2 * width_default + t_1, t_1],
+                                  [0, t_1],
+                                  [0, 0]])
+        shape2 = geo.Shape()
+        shape2.add_line_segments([[width_default, 0],
+                                  [width_default + t_1, 0],
+                                  [width_default + t_1, -width_default],
+                                  [width_default, -width_default],
+                                  [width_default, 0]])
+        return geo.Profile([shape1, shape2])
+    elif code_number == "3.1.1":
+        t_1 = t_1.to("mm").magnitude
+        t_2 = t_2.to("mm").magnitude
+        alpha = alpha.to("rad").magnitude
+        b = b.to("mm").magnitude
+        width_default = width_default.to("mm").magnitude
+
+        if width_default < t_1 + 1:
+            width_default = t_1 + width_default
+
+        # x = t_1
+        # y = 0
+
+        x_1 = np.cos(alpha) * width_default
+        y_1 = np.sin(alpha) * width_default
+
+        x_2 = np.cos(alpha + np.pi / 2) * t_1
+        y_2 = np.sin(alpha + np.pi / 2) * t_1
+
+        x_3 = x_1 + x_2
+        y_3 = y_1 + y_2
+
+        shape1 = geo.Shape()
+        shape1.add_line_segments([[t_1 + x_1, y_1],
+                                  [t_1, 0],
+                                  [t_1 + x_2, y_2],
+                                  [t_1 + x_3, y_3]])
+        shape2 = geo.Shape()
+        shape2.add_line_segments([[width_default, -b],
+                                  [0, -b],
+                                  [0, -t_2 - b],
+                                  [width_default, -t_2 - b]])
+        return geo.Profile([shape1, shape2])
+    elif code_number == "3.1.2":
+        t_1 = t_1.to("mm").magnitude
+        t_2 = t_2.to("mm").magnitude
+        b = b.to("mm").magnitude
+        width_default = width_default.to("mm").magnitude
+        shape1 = geo.Shape()
+        shape1.add_line_segments([[0, 0],
+                                  [width_default, 0],
+                                  [width_default, t_1],
+                                  [0, t_1]])
+        shape2 = geo.Shape()
+        shape2.add_line_segments([[0, -b],
+                                  [2 * width_default, -b],
+                                  [2* width_default, -t_2 - b],
+                                  [0, -t_2 - b]])
+        return geo.Profile([shape1, shape2])
+    elif code_number == "3.1.3" or code_number == "4.1.1":
+        t_1 = t_1.to("mm").magnitude
+        t_2 = t_2.to("mm").magnitude
+        alpha = alpha.to("rad").magnitude
+        b = b.to("mm").magnitude
+        width_default = width_default.to("mm").magnitude
+
+        x = np.sin(alpha + np.pi/2) * b + b
+        y = np.cos(alpha + np.pi/2) * b
+
+        x_1 = np.sin(alpha) * t_2 + x
+        y_1 = np.cos(alpha) * t_2 + y
+
+        x_2 = np.sin(alpha + np.pi/2) * (b + width_default) + b
+        y_2 = np.cos(alpha + np.pi/2) * (b + width_default)
+
+        x_3 = x_1 + x_2 - x
+        y_3 = y_1 + y_2 - y
+
+        shape1 = geo.Shape()
+        shape1.add_line_segments([[-width_default, 0],
+                                  [0, 0],
+                                  [0, t_1],
+                                  [-width_default, t_1]])
+        shape2 = geo.Shape()
+        shape2.add_line_segments([[x_3, y_3],
+                                  [x_1, y_1],
+                                  [x, y],
+                                  [x_2, y_2]])
+        return geo.Profile([shape1, shape2])
+    elif code_number == "4.1.2":
+        t_1 = t_1.to("mm").magnitude
+        t_2 = t_2.to("mm").magnitude
+        alpha = alpha.to("rad").magnitude
+        e = e.to("mm").magnitude
+        width_default = width_default.to("mm").magnitude
+
+        # x = 0
+        # y = 0
+
+        x_1 = np.sin(alpha) * e
+        y_1 = np.cos(alpha) * e
+
+        x_2 = np.sin(alpha + np.pi) * (t_2 - e)
+        y_2 = np.cos(alpha + np.pi) * (t_2 - e)
+
+        x_3 = x_2 + np.sin(alpha + np.pi/2) * width_default
+        y_3 = y_2 + np.cos(alpha + np.pi/2) * width_default
+
+        x_4 = x_1 + np.sin(alpha + np.pi / 2) * width_default
+        y_4 = y_1 + np.cos(alpha + np.pi / 2) * width_default
+
+        shape1 = geo.Shape()
+        shape1.add_line_segments([[-width_default, 0],
+                                  [0, 0],
+                                  [0, t_1],
+                                  [-width_default, t_1]])
+        shape2 = geo.Shape()
+        shape2.add_line_segments([[x_4, y_4],
+                                  [x_1, y_1],
+                                  [x_2, y_2],
+                                  [x_3, y_3]])
+        return geo.Profile([shape1, shape2])
+    elif code_number == "4.1.3":
+        t_1 = t_1.to("mm").magnitude
+        t_2 = t_2.to("mm").magnitude
+        b = b.to("mm").magnitude
+        width_default = width_default.to("mm").magnitude
+        shape1 = geo.Shape()
+        shape1.add_line_segments([[0, width_default],
+                                  [0, 0],
+                                  [t_1, 0],
+                                  [t_1, width_default]])
+        shape2 = geo.Shape()
+        shape2.add_line_segments([[-width_default, -b],
+                                  [t_1 + width_default, -b],
+                                  [t_1 + width_default, -t_2 - b],
+                                  [-width_default, -t_2 - b],
+                                  [-width_default, -b]])
+        return geo.Profile([shape1, shape2])
+    else:
+        print("Wrong code_number. The Code Number has to be one of the following strings:")
+        print('"1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"')
 
 
 def _helperfunction(segment, array):

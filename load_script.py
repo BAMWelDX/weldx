@@ -5,7 +5,7 @@ import asdf
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove, UVGroove, VVGroove
 from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
-from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove
+from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove, FFGroove
 from weldx.all_groove import plot_groove
 
 
@@ -77,5 +77,41 @@ else:
 if isinstance(opened["test011"], DHUGroove):
     print(opened["test011"])
     plot_groove(opened["test011"])
+else:
+    print("false")
+
+if isinstance(opened["test012"], FFGroove):
+    print(opened["test012"])
+    plot_groove(opened["test012"])
+else:
+    print("false")
+
+if isinstance(opened["test013"], FFGroove):
+    print(opened["test013"])
+    plot_groove(opened["test013"])
+else:
+    print("false")
+
+if isinstance(opened["test014"], FFGroove):
+    print(opened["test014"])
+    plot_groove(opened["test014"])
+else:
+    print("false")
+
+if isinstance(opened["test015"], FFGroove):
+    print(opened["test015"])
+    plot_groove(opened["test015"])
+else:
+    print("false")
+
+if isinstance(opened["test016"], FFGroove):
+    print(opened["test016"])
+    plot_groove(opened["test016"])
+else:
+    print("false")
+
+if isinstance(opened["test017"], FFGroove):
+    print(opened["test017"])
+    plot_groove(opened["test017"])
 else:
     print("false")
