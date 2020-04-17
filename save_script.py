@@ -46,11 +46,13 @@ hu_groove = get_groove(groove_type="HUGroove",
                        root_gap=Q_(2, "mm"),
                        root_face=Q_(3, "mm"))
 dv_groove = get_groove(groove_type="DoubleVGroove",
-                       workpiece_thickness=Q_(15, "mm"),
+                       workpiece_thickness=Q_(19, "mm"),
                        groove_angle=Q_(40, "deg"),
                        groove_angle2=Q_(60, "deg"),
                        root_gap=Q_(2, "mm"),
-                       root_face=Q_(5, "mm"))
+                       root_face=Q_(5, "mm"),
+                       root_face2=Q_(7, "mm"),
+                       root_face3=Q_(7, "mm"))
 du_groove = get_groove(groove_type="DoubleUGroove",
                        workpiece_thickness=Q_(33, "mm"),
                        bevel_angle=Q_(8, "deg"),

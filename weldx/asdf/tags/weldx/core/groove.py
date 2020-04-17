@@ -17,6 +17,7 @@ def get_groove(
         root_gap=None,
         root_face=None,
         root_face2=None,
+        root_face3=None,
         bevel_radius=None,
         bevel_angle=None,
         bevel_angle2=None,
@@ -94,8 +95,11 @@ def get_groove(
     :param workpiece_thickness: workpiece thickness
     :param workpiece_thickness2: workpiece thickness if type needs 2 thicknesses
     :param root_gap: root gap, gap between work pieces
-    :param root_face: root face, usually the upper part
-    :param root_face2: root face, usually the lower part
+    :param root_face: root face, upper part when 2 root faces are needed, middle part
+                      when 3 are needed
+    :param root_face2: root face, the lower part when 2 root faces are needed. upper
+                       part when 3 are needed - used when min. 2 parts are needed
+    :param root_face3: root face, usually the lower part - used when 3 parts are needed
     :param bevel_radius: bevel radius
     :param bevel_angle: bevel angle, usually the upper angle
     :param bevel_angle2: bevel angle, usually the lower angle
@@ -133,7 +137,7 @@ def get_groove(
 
     if groove_type == "DoubleVGroove":
         return DVGroove(t=workpiece_thickness, alpha_1=groove_angle, alpha_2=groove_angle2,
-                        b=root_gap, c=root_face)
+                        b=root_gap, c=root_face, h1=root_face2, h2=root_face3)
 
     if groove_type == "DoubleUGroove":
         return DUGroove(t=workpiece_thickness, beta_1=bevel_angle, beta_2=bevel_angle2,
@@ -234,6 +238,8 @@ class DVGroove:
     alpha_1: pint.Quantity
     alpha_2: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
+    h1: pint.Quantity = None
+    h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
 

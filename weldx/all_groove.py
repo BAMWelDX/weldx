@@ -5,7 +5,7 @@ import numpy as np
 
 import weldx.geometry as geo
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove, VVGroove
-from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove
+from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove
 
 
 def groove_to_profile(groove):
@@ -35,6 +35,9 @@ def groove_to_profile(groove):
 
     if isinstance(groove, HUGroove):
         return hu_groove(**groove.__dict__)
+
+    if isinstance(groove, DVGroove):
+        return dv_groove(**groove.__dict__)
 
     print(f"NOT YET IMPLEMENTED FOR CLASS: {groove.__class__}")
 
@@ -303,7 +306,7 @@ def vv_groove(t, alpha, beta, c, b, h, code_number, width_default=Q_(5, "mm")):
     h_lower = h - c
     h_upper = t - h
     s_1 = np.tan(alpha / 2) * h_lower
-    s_2  = np.tan(beta) * h_upper
+    s_2 = np.tan(beta) * h_upper
 
     # Scaling
     edge = np.min([-(s_1 + s_2), 0])
@@ -445,6 +448,71 @@ def hu_groove(t, beta, R, b, c, code_number, width_default=Q_(5, "mm")):
                                [-width - (b / 2), t]])
 
     return geo.Profile([shape_h, shape_r])
+
+
+def dv_groove(t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")):
+    """
+    Calculate a Double V-Groove.
+
+    :param t: the workpiece thickness, as Pint unit
+    :param alpha_1: the bevel angle, as Pint unit
+    :param alpha_2: the bevel angle, as Pint unit
+    :param b: the root gap, as Pint unit
+    :param c: the root face, as Pint unit
+    :param h1: the root face, as Pint unit
+    :param h2: the root face, as Pint unit
+    :param code_number: unused param
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
+    t = t.to("mm").magnitude
+    alpha_1 = alpha_1.to("rad").magnitude
+    alpha_2 = alpha_2.to("rad").magnitude
+    b = b.to("mm").magnitude
+    c = c.to("mm").magnitude
+    if h1 is None and h2 is None:
+        h1 = (t-c)/2
+        h2 = (t-c)/2
+    elif h1 is not None and h2 is None:
+        h1 = h1.to("mm").magnitude
+        h2 = h1
+    elif h1 is None and h2 is not None:
+        h2 = h2.to("mm").magnitude
+        h1 = h2
+    else:
+        h1 = h1.to("mm").magnitude
+        h2 = h2.to("mm").magnitude
+    width = width_default.to("mm").magnitude
+
+    # Calculations
+    s_upper = np.tan(alpha_1) * h1
+    s_lower = np.tan(alpha_2) * h2
+
+    # Scaling
+    edge = np.min([-s_upper, -s_lower, 0])
+    if width <= -edge + 1:
+        # adjustment of the width
+        width = width - edge
+
+    x_value = [-width, -s_lower, 0]
+    y_value = [0, 0, h2]
+    segment_list = ["line", "line"]
+
+    if c != 0:
+        x_value.append(0)
+        y_value.append(h2+c)
+        segment_list.append("line")
+
+    x_value += [-s_upper, -width]
+    y_value += [t, t]
+    segment_list += ["line", "line"]
+
+    shape = _helperfunction(segment_list, [x_value, y_value])
+    shape = shape.translate([-b / 2, 0])
+    # y-axis as mirror axis
+    shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+    return geo.Profile([shape, shape_r])
 
 
 def _helperfunction(segment, array):

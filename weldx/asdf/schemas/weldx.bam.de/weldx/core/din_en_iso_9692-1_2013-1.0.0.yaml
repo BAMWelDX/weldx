@@ -241,6 +241,10 @@ anyOf:
             $ref: "#/definitions/root-gap"
           c:
             $ref: "#/definitions/root-face"
+          h1:
+            $ref: "#/definitions/root-face"
+          h2:
+            $ref: "#/definitions/root-face"
 
         required: [t, alpha_1, alpha_2, R, b, c]
     required: [type, components]
