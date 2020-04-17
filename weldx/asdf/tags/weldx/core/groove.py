@@ -78,24 +78,24 @@ def get_groove(
         from weldx.asdf.tags.weldx.core.groove import get_groove
 
         get_groove(groove_type="VGroove",
-                      workpiece_thickness=Quantity(9, "mm"),
-                      groove_angle=Quantity(50, "deg"),
-                      root_face=Quantity(4, "mm"),
-                      root_gap=Quantity(2, "mm"))
+                   workpiece_thickness=Quantity(9, "mm"),
+                   groove_angle=Quantity(50, "deg"),
+                   root_face=Quantity(4, "mm"),
+                   root_gap=Quantity(2, "mm"))
 
         get_groove(groove_type="UGroove",
-                      workpiece_thickness=Quantity(15, "mm"),
-                      bevel_angle=Quantity(9, "deg"),
-                      bevel_radius=Quantity(6, "mm"),
-                      root_face=Quantity(3, "mm"),
-                      root_gap=Quantity(1, "mm"))
+                   workpiece_thickness=Quantity(15, "mm"),
+                   bevel_angle=Quantity(9, "deg"),
+                   bevel_radius=Quantity(6, "mm"),
+                   root_face=Quantity(3, "mm"),
+                   root_gap=Quantity(1, "mm"))
 
     :param groove_type: String specifying the Groove type
     :param workpiece_thickness: workpiece thickness
     :param workpiece_thickness2: workpiece thickness if type needs 2 thicknesses
     :param root_gap: root gap, gap between work pieces
-    :param root_face: root face, usually the lower part
-    :param root_face2: root face, usually the upper part
+    :param root_face: root face, usually the upper part
+    :param root_face2: root face, usually the lower part
     :param bevel_radius: bevel radius
     :param bevel_angle: bevel angle, usually the upper angle
     :param bevel_angle2: bevel angle, usually the lower angle
