@@ -35,6 +35,10 @@ excluded_words:
   - arange
   - det
   - vstack
+  # pandas --------------------------------------
+  - isin
+  - isnan
+  - fillna
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat
