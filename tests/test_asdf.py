@@ -4,6 +4,7 @@ import pytest
 
 import os
 from io import BytesIO
+import numpy as np
 import pandas as pd
 import jsonschema
 import asdf
@@ -205,6 +206,7 @@ def test_time_classes():
         ts=ts,
         ts_tz=ts_tz,
         dti=dti,
+        dti_tz=dti_tz,
         dti_infer=dti_infer,
         dti_nofreq=dti_nofreq,
     )
@@ -224,7 +226,10 @@ def test_time_classes():
         buff, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
     ) as af:
         data = af.tree
+
     assert isinstance(data, dict)
+    for k, v in tree.items():
+        assert np.all(data[k] == v)
 
     with pytest.raises(jsonschema.exceptions.ValidationError):
         # cannot store large ints >52 bits inline in asdf
