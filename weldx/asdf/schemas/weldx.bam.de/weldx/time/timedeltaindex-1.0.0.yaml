@@ -10,7 +10,7 @@ type: object
 properties:
   values:
     description: |
-      Integer represenation of a pandas TimedeltaIndex in nanoseconds precision.
+      Integer representation of a pandas TimedeltaIndex in nanoseconds precision.
     $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
 
   start:

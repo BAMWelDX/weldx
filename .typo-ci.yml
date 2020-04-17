@@ -13,16 +13,22 @@ excluded_words:
   # python packages -----------------------------
   - asdf
   - numpy
+  - pandas
+  - xarray
   - scipy
   - pytest
   - pydocstyle
   - matplotlib
+  - versioneer
   # matplotlib ----------------------------------
   - pyplot
   - gca
   - plt
   # flake8 --------------------------------------
   - noqa
+  - addopts
+  # asdf ----------------------------------------
+  - yamlutil
   # numpy ---------------------------------------
   - linalg
   - ndim
@@ -34,6 +40,14 @@ excluded_words:
   - arange
   - det
   - vstack
+  - dtypes
+  # pandas --------------------------------------
+  - isin
+  - iloc
+  - timedelta
+  - timedeltaindex
+  - datetimeindex
+  - isoformat
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat
@@ -41,5 +55,13 @@ excluded_words:
   - ipynb
   - ipywidgets
   - ipython
+  # welding -------------------------------------
+  - weldment
+  # conda ---------------------------------------
+  - conda
+  - noarch
   # other ---------------------------------------
   - linearization
+  - ureg
+  - Cagtay
+  - Fabry

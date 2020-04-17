@@ -10,7 +10,7 @@ type: object
 properties:
   name:
     description: |
-      String represenation of the dimension.
+      String representation of the dimension.
       Names follow https://github.com/hgrecco/pint/blob/master/pint/default_en.txt
     type: string
     enum:

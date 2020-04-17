@@ -10,9 +10,9 @@ type: object
 properties:
   value:
     description: |
-      Integer represenation of the timedelta full ISO format.
+      Integer representation of the timedelta full ISO format.
     type: string
-    #pattern:
+    #pattern: TODO: correct ISO string pattern
 
 required: [value]
 propertyOrder: [value]
