@@ -606,13 +606,6 @@ class LocalCoordinateSystem:
         )
         return LocalCoordinateSystem(basis, origin)
 
-    def interp_like(self, rhs):
-        """
-
-        :param rhs: für lcs -> pd.DatetimeIndex? -> xarray?
-        :return:
-        """
-
 
 # coordinate system manager class ------------------------------------------------------
 
@@ -881,6 +874,3 @@ class CoordinateSystemManager:
                 time_union = time_union.union(time_edge)
 
         return time_union
-
-
-# TODO: Test accessors -> .graph, get_neighbors etc.

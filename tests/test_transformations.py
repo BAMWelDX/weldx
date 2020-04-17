@@ -1211,4 +1211,4 @@ def test_coordinate_system_manager_time_union():
     assert np.all(expected_times == csm.time_union(list_of_edges=list_of_edges))
 
 
-test_coordinate_system_manager_time_union()
+# TODO: Test accessors -> .graph, get_neighbors etc.
