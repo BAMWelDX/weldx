@@ -46,6 +46,9 @@ def groove_to_profile(groove):
     if isinstance(groove, DHVGroove):
         return dhv_groove(**groove.__dict__)
 
+    if isinstance(groove, DHUGroove):
+        return dhu_groove(**groove.__dict__)
+
     print(f"NOT YET IMPLEMENTED FOR CLASS: {groove.__class__}")
 
 
@@ -612,6 +615,38 @@ def dhv_groove(t, beta_1, beta_2, b, c, h1, h2, code_number, width_default=Q_(5,
     """
     dv_profile = dv_groove(t, beta_1, beta_2, b, c, h1, h2, code_number, width_default)
     right_shape = dv_profile.shapes[1]
+
+    t = t.to("mm").magnitude
+    b = b.to("mm").magnitude
+    width_default = width_default.to("mm").magnitude
+    left_shape = geo.Shape()
+    left_shape.add_line_segments([[-width_default - (b / 2), 0],
+                                  [-b / 2, 0],
+                                  [-b / 2, t],
+                                  [-width_default - (b / 2), t]])
+
+    return geo.Profile([left_shape, right_shape])
+
+
+def dhu_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")):
+    """
+    Calculate a Double U-Groove.
+
+    :param t: the workpiece thickness, as Pint unit
+    :param beta_1: the bevel angle (upper), as Pint unit
+    :param beta_2: the bevel angle (lower), as Pint unit
+    :param R: the bevel radius (upper), as Pint unit
+    :param R2: the bevel radius (lower), as Pint unit
+    :param b: the root gap, as Pint unit
+    :param c: the root face (middle), as Pint unit
+    :param h1: the root face (upper), as Pint unit
+    :param h2: the root face (lower), as Pint unit
+    :param code_number: unused param
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
+    du_profile = du_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default)
+    right_shape = du_profile.shapes[1]
 
     t = t.to("mm").magnitude
     b = b.to("mm").magnitude

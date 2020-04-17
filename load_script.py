@@ -5,7 +5,7 @@ import asdf
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove, UVGroove, VVGroove
 from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
-from weldx.asdf.tags.weldx.core.groove import DHVGroove
+from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove
 from weldx.all_groove import plot_groove
 
 
@@ -71,5 +71,11 @@ else:
 if isinstance(opened["test010"], DHVGroove):
     print(opened["test010"])
     plot_groove(opened["test010"])
+else:
+    print("false")
+
+if isinstance(opened["test011"], DHUGroove):
+    print(opened["test011"])
+    plot_groove(opened["test011"])
 else:
     print("false")

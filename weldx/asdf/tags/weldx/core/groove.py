@@ -152,7 +152,8 @@ def get_groove(
 
     if groove_type == "DoubleHUGroove":
         return DHUGroove(t=workpiece_thickness, beta_1=bevel_angle, beta_2=bevel_angle2,
-                         R=bevel_radius, h=root_face2, c=root_face, b=root_gap)
+                         R=bevel_radius, R2=bevel_radius2, b=root_gap, c=root_face,
+                         h1=root_face2, h2=root_face3)
 
     if groove_type == "FrontalFaceGroove":
         return FFGroove(t_1=workpiece_thickness, t_2=workpiece_thickness2,
@@ -282,8 +283,10 @@ class DHUGroove:
     beta_1: pint.Quantity
     beta_2: pint.Quantity
     R: pint.Quantity
-    h: pint.Quantity
+    R2: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
+    h1: pint.Quantity = None
+    h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.11"])
 
