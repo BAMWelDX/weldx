@@ -568,32 +568,38 @@ class LocalCoordinateSystem:
         """
         return self._dataset
 
-    def interp_time(self, times) -> "LocalCoordinateSystem":
+    def interp_time(self, time: pd.DatetimeIndex) -> "LocalCoordinateSystem":
         """
         Interpolates the data in time.
 
-        :param times: Series of times.
+        :param time: Series of times.
         :return: Coordinate system with interpolated data
         """
-        basis = ut.xr_interp_orientation_in_time(self.basis, times)
-        origin = ut.xr_interp_coodinates_in_time(self.origin, times)
+        if not isinstance(time, pd.DatetimeIndex):
+            raise Exception("Invalid parameter type.")
+        basis = ut.xr_interp_orientation_in_time(self.basis, time)
+        origin = ut.xr_interp_coodinates_in_time(self.origin, time)
 
         return LocalCoordinateSystem(basis, origin)
 
-    def interp_time_like(self, other) -> "LocalCoordinateSystem":
+    def interp_time_like(
+        self, refernce: "LocalCoordinateSystem"
+    ) -> "LocalCoordinateSystem":
         """
         Interpolates the data in time using another coordinate systems time axis.
 
-        :param other: Coordinate system that provides the reference time.
+        :param refernce: Coordinate system that provides the reference time.
         :return: Coordinate system with interpolated data
         """
-        if other.time is not None:
-            times = other.time
+        if not isinstance(refernce, LocalCoordinateSystem):
+            raise Exception("Invalid reference type")
+        if refernce.time is not None:
+            times = refernce.time
             return self.interp_time(times)
         else:
             raise Exception("Reference coordinate system has no time component")
 
-    def invert(self):
+    def invert(self) -> "LocalCoordinateSystem":
         """
         Get a local coordinate system defining the parent in the child system.
 
@@ -760,7 +766,9 @@ class CoordinateSystemManager:
         :param reference_system_name: Name of the reference coordinate system
         :return: Local coordinate system
         """
-        # TODO: Add time component
+        # TODO: Add time parameter
+        # TODO: Treat static separately
+        # TODO: What if coordinate system and reference are the same?
         self._check_coordinate_system_exists(coordinate_system_name)
         self._check_coordinate_system_exists(reference_system_name)
 
@@ -835,7 +843,7 @@ class CoordinateSystemManager:
 
     def interp_time(self, times):
         """
-        Interpolates the data in time.
+        Interpolates the coordinate systems in time and return a new instance.
 
         :param times: Series of times.
         :return: Coordinate system manager with interpolated data
@@ -845,14 +853,19 @@ class CoordinateSystemManager:
             graph.edges[edge]["lcs"] = graph.edges[edge]["lcs"].interp_time(times)
         return CoordinateSystemManager(graph=graph)
 
-    def interp_like(self, cmp, list_of_edges=None):
+    def interp_time_like(self, reference: LocalCoordinateSystem):
         """
+        Interpolates the coordinate systems in time and return a new instance.
 
-        :param cmp: für lcs -> pd.DatetimeIndex? -> xarray?
-        :param list_of_edges: If not None, interpolation is only applied to specified
-        edges
+        :param reference: Reference for the interpolation.
         :return: Copy of CSM with interpolated edges
         """
+        graph = self.graph.copy()
+        for edge in graph.edges:
+            graph.edges[edge]["lcs"] = graph.edges[edge]["lcs"].interp_time_like(
+                reference
+            )
+        return CoordinateSystemManager(graph=graph)
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """

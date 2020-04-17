@@ -951,6 +951,11 @@ def test_coordinate_system_time_interpolation():
     )
 
     # exceptions --------------------------------
+    # wrong parameter type
+    with pytest.raises(Exception):
+        lcs.interp_time("wrong")
+    with pytest.raises(Exception):
+        lcs.interp_time_like("wrong")
     # no time component
     with pytest.raises(Exception):
         lcs.interp_time_like(tf.LocalCoordinateSystem())
@@ -1210,5 +1215,147 @@ def test_coordinate_system_manager_time_union():
 
     assert np.all(expected_times == csm.time_union(list_of_edges=list_of_edges))
 
+
+def test_coordinate_system_manager_interp_time():
+    """
+    Test the coordinate system managers interp_time and interp_like functions.
+
+    :return: ---
+    """
+    # Setup -------------------------------------
+    angles = ut.to_float_array([0, np.pi / 2, np.pi])
+    orientation = tf.rotation_matrix_z(angles)
+    coordinates = ut.to_float_array([[5, 0, 0], [1, 0, 0], [1, 4, 4]])
+    lcs_0_in_root = tf.LocalCoordinateSystem(
+        basis=orientation,
+        origin=coordinates,
+        time=pd.date_range("2042-01-01", periods=3, freq="3D"),
+    )
+    lcs_1_in_lcs_0 = tf.LocalCoordinateSystem(
+        basis=orientation,
+        origin=coordinates,
+        time=pd.date_range("2042-01-01", periods=3, freq="4D"),
+    )
+    lcs_2_in_root = tf.LocalCoordinateSystem(
+        basis=orientation,
+        origin=coordinates,
+        time=pd.date_range("2042-01-01", periods=3, freq="5D"),
+    )
+    lcs_3_in_lcs_2 = tf.LocalCoordinateSystem(
+        basis=tf.rotation_matrix_y(1), origin=[4, 2, 0]
+    )
+
+    csm = tf.CoordinateSystemManager("root")
+    csm.add_coordinate_system("lcs_0", "root", lcs_0_in_root)
+    csm.add_coordinate_system("lcs_1", "lcs_0", lcs_1_in_lcs_0)
+    csm.add_coordinate_system("lcs_2", "root", lcs_2_in_root)
+    csm.add_coordinate_system("lcs_3", "lcs_2", lcs_3_in_lcs_2)
+
+    # interp_time -------------------------------
+    time_interp = pd.date_range("2042-01-01", periods=5, freq="2D")
+    csm_interp = csm.interp_time(time_interp)
+
+    assert np.all(csm_interp.time_union() == time_interp)
+
+    lcs_0_in_root_csm = csm_interp.get_local_coordinate_system("lcs_0", "root")
+    lcs_1_in_lcs_0_csm = csm_interp.get_local_coordinate_system("lcs_1", "lcs_0")
+    lcs_2_in_root_csm = csm_interp.get_local_coordinate_system("lcs_2", "root")
+    lcs_3_in_lcs_2_csm = csm_interp.get_local_coordinate_system("lcs_3", "lcs_2")
+
+    assert np.all(lcs_0_in_root_csm.time == time_interp)
+    assert np.all(lcs_1_in_lcs_0_csm.time == time_interp)
+    assert np.all(lcs_2_in_root_csm.time == time_interp)
+    assert lcs_3_in_lcs_2_csm.time is None
+
+    coordinates_exp = [
+        [5, 0, 0],
+        [7 / 3, 0, 0],
+        [1, 4 / 3, 4 / 3],
+        [1, 4, 4],
+        [1, 4, 4],
+    ]
+    orientation_exp = tf.rotation_matrix_z([0, np.pi / 3, 2 * np.pi / 3, np.pi, np.pi])
+    check_coordinate_system(lcs_0_in_root_csm, orientation_exp, coordinates_exp, True)
+
+    coordinates_exp = [
+        [5, 0, 0],
+        [3, 0, 0],
+        [1, 0, 0],
+        [1, 2, 2],
+        [1, 4, 4],
+    ]
+    orientation_exp = tf.rotation_matrix_z(
+        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4, np.pi]
+    )
+    check_coordinate_system(lcs_1_in_lcs_0_csm, orientation_exp, coordinates_exp, True)
+
+    coordinates_exp = [
+        [5, 0, 0],
+        [17 / 5, 0, 0],
+        [9 / 5, 0, 0],
+        [1, 4 / 5, 4 / 5],
+        [1, 12 / 5, 12 / 5],
+    ]
+    orientation_exp = tf.rotation_matrix_z(
+        [0, np.pi / 5, 2 * np.pi / 5, 3 * np.pi / 5, 4 * np.pi / 5]
+    )
+    check_coordinate_system(lcs_2_in_root_csm, orientation_exp, coordinates_exp, True)
+
+    check_coordinate_system(
+        lcs_3_in_lcs_2_csm, lcs_3_in_lcs_2.basis, lcs_3_in_lcs_2.origin, True
+    )
+
+    # interp_like -------------------------------
+
+    csm_interp_like = csm.interp_time_like(lcs_1_in_lcs_0)
+    assert np.all(csm_interp_like.time_union() == lcs_1_in_lcs_0.time)
+
+    lcs_0_in_root_csm = csm_interp_like.get_local_coordinate_system("lcs_0", "root")
+    lcs_1_in_lcs_0_csm = csm_interp_like.get_local_coordinate_system("lcs_1", "lcs_0")
+    lcs_2_in_root_csm = csm_interp_like.get_local_coordinate_system("lcs_2", "root")
+    lcs_3_in_lcs_2_csm = csm_interp_like.get_local_coordinate_system("lcs_3", "lcs_2")
+
+    assert np.all(lcs_0_in_root_csm.time == lcs_1_in_lcs_0.time)
+    assert np.all(lcs_1_in_lcs_0_csm.time == lcs_1_in_lcs_0.time)
+    assert np.all(lcs_2_in_root_csm.time == lcs_1_in_lcs_0.time)
+    assert lcs_3_in_lcs_2_csm.time is None
+
+    coordinates_exp = [
+        [5, 0, 0],
+        [1, 4 / 3, 4 / 3],
+        [1, 4, 4],
+    ]
+    orientation_exp = tf.rotation_matrix_z([0, 2 * np.pi / 3, np.pi])
+    check_coordinate_system(lcs_0_in_root_csm, orientation_exp, coordinates_exp, True)
+
+    check_coordinate_system(
+        lcs_1_in_lcs_0_csm, lcs_1_in_lcs_0.orientation, lcs_1_in_lcs_0.origin, True
+    )
+
+    coordinates_exp = [
+        [5, 0, 0],
+        [9 / 5, 0, 0],
+        [1, 12 / 5, 12 / 5],
+    ]
+    orientation_exp = tf.rotation_matrix_z([0, 2 * np.pi / 5, 4 * np.pi / 5])
+    check_coordinate_system(lcs_2_in_root_csm, orientation_exp, coordinates_exp, True)
+
+    check_coordinate_system(
+        lcs_3_in_lcs_2_csm, lcs_3_in_lcs_2.basis, lcs_3_in_lcs_2.origin, True
+    )
+
+    # exceptions --------------------------------
+    # invalid input type
+    with pytest.raises(Exception):
+        csm.interp_time("wrong")
+    with pytest.raises(Exception):
+        csm.interp_time_like("wrong")
+
+    # no time component
+    with pytest.raises(Exception):
+        csm.interp_time_like(lcs_3_in_lcs_2)
+
+
+test_coordinate_system_manager_interp_time()
 
 # TODO: Test accessors -> .graph, get_neighbors etc.
