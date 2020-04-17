@@ -804,19 +804,44 @@ def test_coordinate_system_addition_and_subtraction():
         lcs1_in_lcs_0, orientation_exp, coordinates_exp, True, time_1
     )
 
-    # exceptions --------------------------------
-    lcs_fix = tf.LocalCoordinateSystem(
-        basis=orientation_fix_0, origin=coordinates_fix_0
-    )
-    lcs_tdp = tf.LocalCoordinateSystem(
-        basis=orientation_tdp_0, origin=coordinates_tdp_0, time=time_0
-    )
-    # fixed lhs with time dependent rhs
-    with pytest.raises(Exception):
-        lcs_fix + lcs_tdp
+    # orientation of right cs time dependent -----
 
-    with pytest.raises(Exception):
-        lcs_fix - lcs_tdp
+    # TODO: remove lookups
+    # orientation_fix_0 = tf.rotation_matrix_z(np.pi * 0.5)
+    # orientation_fix_1 = tf.rotation_matrix_y(np.pi * 0.5)
+    # orientation_tdp_0 = tf.rotation_matrix_z(np.pi * np.array([0, 0.5, 1]))
+    # orientation_tdp_1 = tf.rotation_matrix_z(np.pi * np.array([1, 0, 0]))
+    # orientation_tdp_2 = tf.rotation_matrix_z(np.pi * np.array([0.75, 1.25, 0.75]))
+    # orientation_tdp_3 = tf.rotation_matrix_z(np.pi * np.array([1.5, 1.0, 0.75]))
+    # orientation_tdp_4 = tf.rotation_matrix_z(np.pi * np.array([1, 1.5, 1]))
+    # coordinates_fix_0 = ut.to_float_array([3, 7, 1])
+    # coordinates_fix_1 = ut.to_float_array([1, 4, 2])
+    # coordinates_tdp_0 = ut.to_float_array([[3, 7, 1], [4, -2, 8], [-5, 3, -1]])
+    # coordinates_tdp_1 = ut.to_float_array([[4, 2, 5], [3, -3, 2], [1, 7, -9]])
+
+    lcs0 = tf.LocalCoordinateSystem(basis=orientation_fix_0, origin=coordinates_fix_0)
+    lcs1 = tf.LocalCoordinateSystem(
+        basis=orientation_tdp_0, origin=coordinates_fix_1, time=time_0
+    )
+
+    lcs_add = lcs0 + lcs1
+    lcs_sub = lcs0 - lcs1
+
+    orientation_add_exp = tf.rotation_matrix_z(np.pi * np.array([0.5, 1, 1.5]))
+    coordinates_add_exp = [[4, 11, 3], [-6, 7, 3], [-2, -3, 3]]
+    orientation_sub_exp = tf.rotation_matrix_z(np.pi * np.array([0.5, 0, 1.5]))
+    coordinates_sub_exp = [[2, 3, -1], [3, -2, -1], [-2, -3, -1]]
+
+    check_coordinate_system(
+        lcs_add, orientation_add_exp, coordinates_add_exp, True, time_0
+    )
+    check_coordinate_system(
+        lcs_sub, orientation_sub_exp, coordinates_sub_exp, True, time_0
+    )
+
+
+# TODO: remove
+test_coordinate_system_addition_and_subtraction()
 
 
 def test_coordinate_system_invert():
@@ -1356,6 +1381,4 @@ def test_coordinate_system_manager_interp_time():
         csm.interp_time_like(lcs_3_in_lcs_2)
 
 
-test_coordinate_system_manager_interp_time()
-
-# TODO: Test accessors -> .graph, get_neighbors etc.
+# TODO: Test time dependent get_local_coordinate_system

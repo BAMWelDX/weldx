@@ -292,7 +292,7 @@ class LocalCoordinateSystem:
             "<xarray.Dataset", "<LocalCoordinateSystem"
         )
 
-    def __add__(self, rhs_cs) -> "LocalCoordinateSystem":
+    def __add__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
         """
         Add 2 coordinate systems.
 
@@ -310,13 +310,17 @@ class LocalCoordinateSystem:
         right-hand side coordinate system, R_l and T_l of the left-hand side
         coordinate system and R_n and T_n of the resulting coordinate system.
 
+        If the left-hand side system has a time component, the data of the right-hand
+        side system will be interpolated to the same times, before the previously shown
+        operations are performed per point in time. In case, that the left-hand side
+        system has no time component, but the right-hand side does, the resulting system
+        has the same time components as the right-hand side system.
+
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
         """
         if self.time is not None:
             rhs_cs = rhs_cs.interp_time_like(self)
-        elif rhs_cs.time is not None:
-            raise Exception("Can't combine time dependent rhs with static lhs")
 
         basis = ut.xr_matmul(rhs_cs.basis, self.basis, dims_a=["c", "v"])
         origin = (
@@ -324,7 +328,7 @@ class LocalCoordinateSystem:
         )
         return LocalCoordinateSystem(basis, origin)
 
-    def __sub__(self, rhs_cs) -> "LocalCoordinateSystem":
+    def __sub__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
         """
         Subtract 2 coordinate systems.
 
@@ -340,6 +344,12 @@ class LocalCoordinateSystem:
         R_r and T_r are rotation matrix and translation vector of the
         right-hand side coordinate system, R_l and T_l of the left-hand side
         coordinate system and R_n and T_n of the resulting coordinate system.
+
+        If the left-hand side system has a time component, the data of the right-hand
+        side system will be interpolated to the same times, before the previously shown
+        operations are performed per point in time. In case, that the left-hand side
+        system has no time component, but the right-hand side does, the resulting system
+        has the same time components as the right-hand side system.
 
         :param rhs_cs: Right-hand side coordinate system
         :return: Resulting coordinate system.
