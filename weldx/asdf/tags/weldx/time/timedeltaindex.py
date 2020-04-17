@@ -25,13 +25,18 @@ class TimedeltaIndexType(WeldxType):
     def to_tree(cls, node: pd.TimedeltaIndex, ctx):
         """Serialize timedelta to tree."""
         tree = {}
-        tree["values"] = custom_tree_to_tagged_tree(node.values.astype(np.int64), ctx)
+        if node.inferred_freq is not None:
+            tree["freq"] = custom_tree_to_tagged_tree(node.inferred_freq, ctx)
+        else:
+            tree["values"] = custom_tree_to_tagged_tree(
+                node.values.astype(np.int64), ctx
+            )
+
         tree["start"] = custom_tree_to_tagged_tree(node[0], ctx)
         tree["end"] = custom_tree_to_tagged_tree(node[-1], ctx)
         tree["min"] = custom_tree_to_tagged_tree(node.min(), ctx)
         tree["max"] = custom_tree_to_tagged_tree(node.max(), ctx)
-        if node.inferred_freq is not None:
-            tree["freq"] = node.inferred_freq
+
         return tree
 
     @classmethod
