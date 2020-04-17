@@ -16,6 +16,42 @@ description: |
 # examples:
 #  -TODO
 
+definitions:
+  workpiece-thickness:
+    description: |
+      Workpiece thickness
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  root-gap:
+    description: |
+      Root gap
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  groove-angle:
+    description: |
+      Groove angle
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  bevel-angle:
+    description: |
+      Bevel angle
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  bevel-radius:
+    description: |
+      Bevel radius
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  root-face:
+    description: |
+      Root face
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  special-depth:
+    description: |
+      Special depth
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
 anyOf:
   # I Groove
   - type: object
@@ -27,13 +63,9 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
 
         required: [t, b]
     required: [type, components]
@@ -50,25 +82,15 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            -$ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+            $ref: "#/definitions/workpiece-thickness"
           beta:
-            description: |
-              Bevel angle
-            -$ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+            $ref: "#/definitions/bevel-angle"
           R:
-            description: |
-              Bevel radius
-            -$ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+            $ref: "#/definitions/bevel-radius"
           b:
-            description: |
-              Root gap
-            -$ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+            $ref: "#/definitions/root-gap"
           c:
-            description: |
-              Root face
-            -$ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+            $ref: "#/definitions/root-face"
 
         required: [t, beta, R, b, c]
     required: [type, components]
@@ -85,21 +107,13 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            -$ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+            $ref: "#/definitions/workpiece-thickness"
           alpha:
-            description: |
-              Groove angle
-            -$ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+            $ref: "#/definitions/groove-angle"
           b:
-            description: |
-              Root gap
-            -$ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+            $ref: "#/definitions/root-gap"
           c:
-            description: |
-              Root face
-            -$ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+            $ref: "#/definitions/root-face"
 
         required: [t, alpha, b, c]
     required: [type, components]
@@ -116,29 +130,17 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           alpha:
-            description: |
-              Groove angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/groove-angle"
           beta:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           R:
-            description: |
-              Bevel radius
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-radius"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
           h:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
 
         required: [t, alpha, beta, R, b, h]
     required: [type, components]
@@ -155,25 +157,15 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           alpha:
-            description: |
-              Groove angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/groove-angle"
           beta:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
           c:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
 
         required: [t, alpha, beta, b, c]
     required: [type, components]
@@ -190,21 +182,13 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           beta:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
           c:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
 
         required: [t, beta, b, c]
     required: [type, components]
@@ -221,25 +205,15 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           beta:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           R:
-            description: |
-              Bevel radius
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-radius"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
           c:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
 
         required: [t, beta, R, b, c]
     required: [type, components]
@@ -256,29 +230,17 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           alpha_1:
-            description: |
-              Groove angle 1
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/groove-angle"
           alpha_2:
-            description: |
-              Groove angle 2
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/groove-angle"
           R:
-            description: |
-              Bevel radius
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-radius"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
           c:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
 
         required: [t, alpha_1, alpha_2, R, b, c]
     required: [type, components]
@@ -295,29 +257,17 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           beta_1:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           beta_2:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           h:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
           c:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
 
         required: [t, beta_1, beta_2, h, b, c]
     required: [type, components]
@@ -334,29 +284,17 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           beta_1:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           beta_2:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           h:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
           c:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
 
         required: [t, beta_1, beta_2, h, b, c]
     required: [type, components]
@@ -373,33 +311,19 @@ anyOf:
         type: object
         properties:
           t:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           beta_1:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           beta_2:
-            description: |
-              Bevel angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-angle"
           R:
-            description: |
-              Bevel radius
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/bevel-radius"
           h:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
           c:
-            description: |
-              Root face
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-face"
 
         required: [t, beta_1, beta_2, R, h, b, c]
     required: [type, components]
@@ -416,25 +340,15 @@ anyOf:
         type: object
         properties:
           t_1:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           t_2:
-            description: |
-              Workpiece thickness
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/workpiece-thickness"
           alpha:
-            description: |
-              Groove angle
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/groove-angle"
           b:
-            description: |
-              Root gap
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/root-gap"
           e:
-            description: |
-              Special depth
-            $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            $ref: "#/definitions/special-depth"
 
         required: [t_1, t_2, alpha, b, e]
     required: [type, components]
