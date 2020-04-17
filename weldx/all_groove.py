@@ -6,6 +6,7 @@ import numpy as np
 import weldx.geometry as geo
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove, VVGroove
 from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
+from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove
 
 
 def groove_to_profile(groove):
@@ -41,6 +42,9 @@ def groove_to_profile(groove):
 
     if isinstance(groove, DUGroove):
         return du_groove(**groove.__dict__)
+
+    if isinstance(groove, DHVGroove):
+        return dhv_groove(**groove.__dict__)
 
     print(f"NOT YET IMPLEMENTED FOR CLASS: {groove.__class__}")
 
@@ -488,8 +492,8 @@ def dv_groove(t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5
     width = width_default.to("mm").magnitude
 
     # Calculations
-    s_upper = np.tan(alpha_1) * h1
-    s_lower = np.tan(alpha_2) * h2
+    s_upper = np.tan(alpha_1/2) * h1
+    s_lower = np.tan(alpha_2/2) * h2
 
     # Scaling
     edge = np.min([-s_upper, -s_lower, 0])
@@ -520,7 +524,7 @@ def dv_groove(t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5
 
 def du_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")):
     """
-    Calculate a Double V-Groove.
+    Calculate a Double U-Groove.
 
     :param t: the workpiece thickness, as Pint unit
     :param beta_1: the bevel angle (upper), as Pint unit
@@ -528,9 +532,9 @@ def du_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default
     :param R: the bevel radius (upper), as Pint unit
     :param R2: the bevel radius (lower), as Pint unit
     :param b: the root gap, as Pint unit
-    :param c: the root face, as Pint unit
-    :param h1: the root face, as Pint unit
-    :param h2: the root face, as Pint unit
+    :param c: the root face (middle), as Pint unit
+    :param h1: the root face (upper), as Pint unit
+    :param h2: the root face (lower), as Pint unit
     :param code_number: unused param
     :param width_default: the width of the workpiece, as Pint unit
     :return: geo.Profile
@@ -589,6 +593,36 @@ def du_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default
     shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
     return geo.Profile([shape, shape_r])
+
+
+def dhv_groove(t, beta_1, beta_2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")):
+    """
+    Calculate a Double HV-Groove.
+
+    :param t: the workpiece thickness, as Pint unit
+    :param beta_1: the bevel angle (upper), as Pint unit
+    :param beta_2: the bevel angle (lower), as Pint unit
+    :param b: the root gap, as Pint unit
+    :param c: the root face (middle), as Pint unit
+    :param h1: the root face (upper), as Pint unit
+    :param h2: the root face (lower), as Pint unit
+    :param code_number: unused param
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
+    dv_profile = dv_groove(t, beta_1, beta_2, b, c, h1, h2, code_number, width_default)
+    right_shape = dv_profile.shapes[1]
+
+    t = t.to("mm").magnitude
+    b = b.to("mm").magnitude
+    width_default = width_default.to("mm").magnitude
+    left_shape = geo.Shape()
+    left_shape.add_line_segments([[-width_default - (b / 2), 0],
+                                  [-b / 2, 0],
+                                  [-b / 2, t],
+                                  [-width_default - (b / 2), t]])
+
+    return geo.Profile([left_shape, right_shape])
 
 
 def _helperfunction(segment, array):

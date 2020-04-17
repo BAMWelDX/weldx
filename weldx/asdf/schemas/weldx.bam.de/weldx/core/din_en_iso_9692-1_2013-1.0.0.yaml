@@ -299,14 +299,16 @@ anyOf:
             $ref: "#/definitions/bevel-angle"
           beta_2:
             $ref: "#/definitions/bevel-angle"
-          h:
+          h1:
+            $ref: "#/definitions/root-face"
+          h2:
             $ref: "#/definitions/root-face"
           b:
             $ref: "#/definitions/root-gap"
           c:
             $ref: "#/definitions/root-face"
 
-        required: [t, beta_1, beta_2, h, b, c]
+        required: [t, beta_1, beta_2, b, c]
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
