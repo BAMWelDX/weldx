@@ -5,7 +5,7 @@ import numpy as np
 
 import weldx.geometry as geo
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove, VVGroove
-from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove
+from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
 
 
 def groove_to_profile(groove):
@@ -38,6 +38,9 @@ def groove_to_profile(groove):
 
     if isinstance(groove, DVGroove):
         return dv_groove(**groove.__dict__)
+
+    if isinstance(groove, DUGroove):
+        return du_groove(**groove.__dict__)
 
     print(f"NOT YET IMPLEMENTED FOR CLASS: {groove.__class__}")
 
@@ -506,6 +509,79 @@ def dv_groove(t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5
     x_value += [-s_upper, -width]
     y_value += [t, t]
     segment_list += ["line", "line"]
+
+    shape = _helperfunction(segment_list, [x_value, y_value])
+    shape = shape.translate([-b / 2, 0])
+    # y-axis as mirror axis
+    shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+    return geo.Profile([shape, shape_r])
+
+
+def du_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")):
+    """
+    Calculate a Double V-Groove.
+
+    :param t: the workpiece thickness, as Pint unit
+    :param beta_1: the bevel angle (upper), as Pint unit
+    :param beta_2: the bevel angle (lower), as Pint unit
+    :param R: the bevel radius (upper), as Pint unit
+    :param R2: the bevel radius (lower), as Pint unit
+    :param b: the root gap, as Pint unit
+    :param c: the root face, as Pint unit
+    :param h1: the root face, as Pint unit
+    :param h2: the root face, as Pint unit
+    :param code_number: unused param
+    :param width_default: the width of the workpiece, as Pint unit
+    :return: geo.Profile
+    """
+    t = t.to("mm").magnitude
+    beta_1 = beta_1.to("rad").magnitude
+    beta_2 = beta_2.to("rad").magnitude
+    R = R.to("mm").magnitude
+    R2 = R2.to("mm").magnitude
+    b = b.to("mm").magnitude
+    c = c.to("mm").magnitude
+    if h1 is None and h2 is None:
+        h1 = (t-c)/2
+        h2 = (t-c)/2
+    elif h1 is not None and h2 is None:
+        h1 = h1.to("mm").magnitude
+        h2 = h1
+    elif h1 is None and h2 is not None:
+        h2 = h2.to("mm").magnitude
+        h1 = h2
+    else:
+        h1 = h1.to("mm").magnitude
+        h2 = h2.to("mm").magnitude
+    width = width_default.to("mm").magnitude
+
+    # Calculations
+    x_upper = R * np.cos(beta_1)
+    y_upper = R * np.sin(beta_1)
+    s_upper = np.tan(beta_1) * (h1 - (R - y_upper))
+    x_lower = R2 * np.cos(beta_2)
+    y_lower = R2 * np.sin(beta_2)
+    s_lower = np.tan(beta_2) * (h2 - (R2 - y_lower))
+
+    # Scaling
+    edge = np.max([x_upper + s_upper, x_lower + s_lower, 0])
+    if width <= edge + 1:
+        # adjustment of the width
+        width = width + edge
+
+    x_value = [-width, -(s_lower + x_lower), -x_lower, 0, 0]
+    y_value = [0, 0, h2 - (R2 - y_lower), h2 - R2, h2]
+    segment_list = ["line", "line", "arc"]
+
+    if c != 0:
+        x_value.append(0)
+        y_value.append(h1 + c)
+        segment_list.append("line")
+
+    x_value += [0, -x_upper, -(s_upper + x_upper), -width]
+    y_value += [h2 + c + R, t - (h1 - (R - y_upper)), t, t]
+    segment_list += ["arc", "line", "line"]
 
     shape = _helperfunction(segment_list, [x_value, y_value])
     shape = shape.translate([-b / 2, 0])
