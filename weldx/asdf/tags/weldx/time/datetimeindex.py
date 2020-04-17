@@ -14,7 +14,7 @@ __all__ = ["DatetimeIndexType"]
 
 class DatetimeIndexType(WeldxType):
     """
-    A simple implementation of serializing a single pandas Timedelta.
+    A simple implementation of serializing pandas DatetimeIndex.
     """
 
     name = "time/datetimeindex"
@@ -23,20 +23,24 @@ class DatetimeIndexType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: pd.DatetimeIndex, ctx):
-        """Serialize timedelta to tree."""
+        """Serialize DatetimeIndex to tree."""
         tree = {}
-        tree["values"] = custom_tree_to_tagged_tree(node.values.astype(np.int64), ctx)
+        if node.inferred_freq is not None:
+            tree["freq"] = custom_tree_to_tagged_tree(node.inferred_freq, ctx)
+        else:
+            tree["values"] = custom_tree_to_tagged_tree(
+                node.values.astype(np.int64), ctx
+            )
+
         tree["start"] = custom_tree_to_tagged_tree(node[0], ctx)
         tree["end"] = custom_tree_to_tagged_tree(node[-1], ctx)
         tree["min"] = custom_tree_to_tagged_tree(node.min(), ctx)
         tree["max"] = custom_tree_to_tagged_tree(node.max(), ctx)
-        if node.inferred_freq is not None:
-            tree["freq"] = node.inferred_freq
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Construct timedelta from tree."""
+        """Construct DatetimeIndex from tree."""
         if "freq" in tree:
             return pd.date_range(
                 start=tree["start"], end=tree["end"], freq=tree["freq"]
