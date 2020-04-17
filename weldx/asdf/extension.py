@@ -9,7 +9,14 @@ from weldx.asdf.constants import WELDX_SCHEMA_URI_BASE, WELDX_URL_MAPPING
 # could do this using __init__ files, except it causes pytest import errors in
 # the case that asdf is not installed.
 
+# unit -----------------------------------------------------------------
 from .tags.weldx.unit.pint_quantity import *  # noqa: F401,F403
+
+# time -----------------------------------------------------------------
+from .tags.weldx.time.timedelta import TimedeltaType  # noqa: F401,F403
+from .tags.weldx.time.timedeltaindex import TimedeltaIndexType  # noqa: F401,F403
+from .tags.weldx.time.timestamp import TimestampType  # noqa: F401,F403
+from .tags.weldx.time.datetimeindex import DatetimeIndexType  # noqa: F401,F403
 
 # welding process -----------------------------------------------------------------
 from .tags.weldx.aws.process.gas_component import *  # noqa: F401,F403

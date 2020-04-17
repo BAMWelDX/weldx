@@ -9,10 +9,10 @@ from weldx.asdf.constants import SCHEMA_PATH
 
 def dict_to_tagged_tree(node, ctx):
     """
-    Utility function simplify `to_tree` methods of  datacalss objects.
+    Utility function simplify `to_tree` methods of  dataclass objects.
 
     The function requires the node to be convertible to dictionary via __dict__. And can
-    therefor be applied to all classes creted using the @dataclass oeprator.
+    therefor be applied to all classes created using the @dataclass operator.
     `custom_tree_to_tagged_tree` is called on all object properties and all None entries
     are removed from the node dictionary. The result is "clean" dictionary in form of an
     asdf tree.
