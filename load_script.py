@@ -1,7 +1,6 @@
 """Test Script. Use save_script.py before launching this script"""
 
 import asdf
-import matplotlib.pyplot as plt
 
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
 from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove, UVGroove, VVGroove
