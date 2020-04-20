@@ -10,6 +10,8 @@ _weldx_asdf_types = set()
 
 
 class WeldxTypeMeta(ExtensionTypeMeta):
+    """Metaclass to populate _weldx_types and _weldx_asdf_types."""
+
     def __new__(mcls, name, bases, attrs):
         cls = super().__new__(mcls, name, bases, attrs)
 
