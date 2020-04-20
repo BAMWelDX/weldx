@@ -38,6 +38,24 @@ jobs:
         run: |
           flake8
 
+  isort:
+    name: isort
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+        py: [ '3.7', '3.8' ]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.py }}
+      - name: pip installs
+        run: pip install isort==4.3.*
+      - name: run isort
+        run: |
+          isort ./weldx --recursive --check-only
+
   vulture:
     name: vulture
     runs-on: ${{ matrix.os }}
