@@ -1404,4 +1404,55 @@ def test_coordinate_system_manager_interp_time():
         csm.interp_time_like(lcs_3_in_lcs_2)
 
 
+def test_coordinate_system_manager_transform_data():
+    """
+    Test the coordinate system managers transform_data function.
+
+    :return: ---
+    """
+    # define some coordinate systems
+    # TODO: test more unique rotations - not 90°
+    lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
+    lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
+    lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_x(np.pi / 2), [1, -1, 3])
+
+    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
+    csm.add_coordinate_system("lcs_1", "root", lcs1_in_root)
+    csm.add_coordinate_system("lcs_2", "root", lcs2_in_root)
+    csm.add_coordinate_system("lcs_3", "lcs_2", lcs3_in_lcs2)
+
+    data_list = [[1, 2, -1, 3], [-3, 4, 2, -4], [-1, -1, 3, 2]]
+    data_exp = np.array([[-5, -5, -9, -8], [-2, -9, -7, -1], [-4, -5, -2, -6]])
+
+    # input list
+    data_list_transformed = csm.transform_data(data_list, "lcs_3", "lcs_1")
+    assert ut.matrix_is_close(data_list_transformed, data_exp)
+
+    # input numpy array
+    data_np = np.array(data_list)
+    data_numpy_transformed = csm.transform_data(data_np, "lcs_3", "lcs_1")
+    assert ut.matrix_is_close(data_numpy_transformed, data_exp)
+
+    # input xarray
+    data_xr = xr.DataArray(data=data_np, dims=["c", "n"], coords={"c": ["x", "y", "z"]})
+    data_xr_transformed = csm.transform_data(data_xr, "lcs_3", "lcs_1")
+    assert ut.matrix_is_close(data_xr_transformed.data, data_exp)
+
+    # TODO: Test time dependency
+
+    # exceptions --------------------------------
+    # names not in csm
+    with pytest.raises(Exception):
+        csm.transform_data(data_xr, "not present", "lcs_1")
+    with pytest.raises(Exception):
+        csm.transform_data(data_xr, "lcs_3", "not present")
+
+    # data is not compatible
+    with pytest.raises(Exception):
+        csm.transform_data("wrong", "lcs_3", "lcs_1")
+
+
+# TODO:remove
+test_coordinate_system_manager_transform_data()
+
 # TODO: Test time dependent get_local_coordinate_system

@@ -793,11 +793,39 @@ class CoordinateSystemManager:
             # self._add_edges(path[0], path[-1], lcs, True)
         return lcs
 
-    def transform_data(self, data, cs_from, cs_to):
-        lcs = self.get_local_coordinate_system(cs_from, cs_to)
-        rotation = lcs.orientation.data
-        translation = lcs.location.data[:, np.newaxis]
-        return np.matmul(rotation, data) + translation
+    def transform_data(
+        self,
+        data: Union[xr.DataArray, np.ndarray, List],
+        source_coordinate_system_name: Hashable,
+        target_coordinate_system_name: Hashable,
+    ):
+        """
+        Transform spatial data from one coordinate system to another.
+
+        :param data:
+        :param source_coordinate_system_name: Name of the coordinate system the data is
+        defined in
+        :param target_coordinate_system_name: Name of the coordinate system the data
+        should be transformed to
+        :return: Transformed data
+        """
+        lcs = self.get_local_coordinate_system(
+            source_coordinate_system_name, target_coordinate_system_name
+        )
+        if isinstance(data, xr.DataArray):
+            mul = ut.xr_matmul(
+                lcs.orientation,
+                data,
+                dims_a=["c", "v"],
+                dims_b=["c", "n"],
+                dims_out=["c", "n"],
+            )
+            return mul + lcs.location
+        else:
+            data = ut.to_float_array(data)
+            rotation = lcs.orientation.data
+            translation = lcs.location.data[:, np.newaxis]
+            return np.matmul(rotation, data) + translation
 
     @property
     def graph(self) -> nx.DiGraph:
