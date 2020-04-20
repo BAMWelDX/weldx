@@ -301,6 +301,60 @@ class VVGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.7"])
 
+    def plot(
+        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+    ):
+        """Plot a 2D-Profile."""
+        profile = self.to_profile()
+        if title is None:
+            title = self.__class__
+        profile.plot(title, raster_width, axis, grid, line_style)
+
+    def to_profile(self, width_default=Q_(5, "mm")):
+        """Calculate a Profile."""
+        t = self.t.to("mm").magnitude
+        alpha = self.alpha.to("rad").magnitude
+        beta = self.beta.to("rad").magnitude
+        b = self.b.to("mm").magnitude
+        c = self.c.to("mm").magnitude
+        h = self.h.to("mm").magnitude
+        width = width_default.to("mm").magnitude
+
+        # Calculations
+        h_lower = h - c
+        h_upper = t - h
+        s_1 = np.tan(alpha / 2) * h_lower
+        s_2 = np.tan(beta) * h_upper
+
+        # Scaling
+        edge = np.min([-(s_1 + s_2), 0])
+        if width <= -edge + 1:
+            # adjustment of the width
+            width = width - edge
+
+        # x-values
+        x_value = [-width, 0]
+        # y-values
+        y_value = [0, 0]
+        segment_list = ["line"]
+
+        if c != 0:
+            x_value.append(0)
+            y_value.append(c)
+            segment_list.append("line")
+
+        x_value += [-s_1, -s_1 - s_2, -width]
+        y_value += [h + c, t, t]
+        segment_list += ["line", "line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r])
+
 
 @dataclass
 class UVGroove:

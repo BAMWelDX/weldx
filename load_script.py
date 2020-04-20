@@ -43,7 +43,7 @@ else:
 
 if isinstance(opened["test005"], VVGroove):
     print(opened["test005"])
-    plot_groove(opened["test005"])
+    opened["test005"].plot()
 else:
     print("false")
 
