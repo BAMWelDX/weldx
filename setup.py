@@ -14,7 +14,7 @@ requirements = [
     "asdf>=2.5",
     "bottleneck>=1.3",
     "Jinja2>=2.11",
-    "matplotlib>=3.2",
+    "matplotlib>=3",
 ]
 
 entry_points = {}

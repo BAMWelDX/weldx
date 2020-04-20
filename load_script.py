@@ -3,7 +3,13 @@
 import asdf
 
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
-from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove, UVGroove, VVGroove
+from weldx.asdf.tags.weldx.core.groove import (
+    VGroove,
+    UGroove,
+    IGroove,
+    UVGroove,
+    VVGroove,
+)
 from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
 from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove, FFGroove
 from weldx.all_groove import plot_groove

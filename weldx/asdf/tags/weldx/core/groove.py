@@ -378,6 +378,24 @@ class FFGroove:
     e: pint.Quantity = None
 
 
+_groove_type_to_name = {
+    VGroove: "SingleVGroove",
+    VVGroove: "VVGroove",
+    UVGroove: "UVGroove",
+    UGroove: "SingleUGroove",
+    IGroove: "IGroove",
+    HVGroove: "HVGroove",
+    HUGroove: "HUGroove",
+    DVGroove: "DoubleVGroove",
+    DUGroove: "DoubleUGroove",
+    DHVGroove: "DoubleHVGroove",
+    DHUGroove: "DoubleHUGroove",
+    FFGroove: "FrontalFaceGroove",
+}
+
+_groove_name_to_type = {v: k for k, v in _groove_type_to_name.items()}
+
+
 class GrooveType(WeldxType):
     """<ASDF TYPE DOCSTRING>"""
 
@@ -389,7 +407,6 @@ class GrooveType(WeldxType):
         UVGroove,
         UGroove,
         IGroove,
-        UVGroove,
         HVGroove,
         HUGroove,
         DVGroove,
@@ -404,107 +421,22 @@ class GrooveType(WeldxType):
     @classmethod
     def to_tree(cls, node, ctx):
         """<CLASS METHOD DOCSTRING>"""
-        if isinstance(node, VGroove):
-            tree = dict(components=dict_to_tagged_tree(node, ctx), type="SingleVGroove")
-            return tree
-
-        if isinstance(node, UGroove):
-            tree = dict(components=dict_to_tagged_tree(node, ctx), type="SingleUGroove")
-            return tree
-
-        if isinstance(node, UVGroove):
-            tree = dict(components=dict_to_tagged_tree(node, ctx), type="UVGroove")
-            return tree
-
-        if isinstance(node, IGroove):
-            tree = dict(components=dict_to_tagged_tree(node, ctx), type="IGroove")
-            return tree
-
-        if isinstance(node, VVGroove):
-            tree = dict(components=dict_to_tagged_tree(node, ctx), type="VVGroove")
-            return tree
-
-        if isinstance(node, HVGroove):
-            tree = dict(components=dict_to_tagged_tree(node, ctx), type="HVGroove")
-            return tree
-
-        if isinstance(node, HUGroove):
-            tree = dict(components=dict_to_tagged_tree(node, ctx), type="HUGroove")
-            return tree
-
-        if isinstance(node, DVGroove):
-            tree = dict(components=dict_to_tagged_tree(node, ctx), type="DoubleVGroove")
-            return tree
-
-        if isinstance(node, DUGroove):
-            tree = dict(components=dict_to_tagged_tree(node, ctx), type="DoubleUGroove")
-            return tree
-
-        if isinstance(node, DHVGroove):
+        if type(node) in _groove_type_to_name:
             tree = dict(
-                components=dict_to_tagged_tree(node, ctx), type="DoubleHVGroove"
+                components=dict_to_tagged_tree(node, ctx),
+                type=_groove_type_to_name[type(node)],
             )
             return tree
-
-        if isinstance(node, DHUGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx), type="DoubleHUGroove"
+        else:
+            raise ValueError(
+                f"Unknown groove type for object {node} with type {type(node)}"
             )
-            return tree
-
-        if isinstance(node, FFGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx), type="FrontalFaceGroove"
-            )
-            return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
         """<CLASS METHOD DOCSTRING>"""
-        if tree["type"] == "SingleVGroove":
-            obj = VGroove(**tree["components"])
+        if tree["type"] in _groove_name_to_type:
+            obj = _groove_name_to_type[tree["type"]](**tree["components"])
             return obj
-
-        if tree["type"] == "SingleUGroove":
-            obj = UGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "UVGroove":
-            obj = UVGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "IGroove":
-            obj = IGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "VVGroove":
-            obj = VVGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "HVGroove":
-            obj = HVGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "HUGroove":
-            obj = HUGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "DoubleVGroove":
-            obj = DVGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "DoubleUGroove":
-            obj = DUGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "DoubleHVGroove":
-            obj = DHVGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "DoubleHUGroove":
-            obj = DHUGroove(**tree["components"])
-            return obj
-
-        if tree["type"] == "FrontalFaceGroove":
-            obj = FFGroove(**tree["components"])
-            return obj
+        else:
+            raise ValueError(f"Unknown groove name {tree['type']}")
