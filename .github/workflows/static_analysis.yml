@@ -54,7 +54,7 @@ jobs:
         run: pip install git+https://github.com/timothycrosley/isort.git
       - name: run isort
         run: |
-          isort ./weldx --check-only
+          isort ./weldx --check-only --diff
 
   vulture:
     name: vulture
