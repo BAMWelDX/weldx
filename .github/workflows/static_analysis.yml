@@ -51,7 +51,7 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       - name: pip installs
-        run: pip install isort==4.3.*
+        run: pip install git+https://github.com/timothycrosley/isort.git
       - name: run isort
         run: |
           isort ./weldx --recursive --check-only
