@@ -4,8 +4,10 @@ import pint
 from dataclasses import dataclass
 from dataclasses import field
 from typing import List
+import numpy as np
 
 from weldx import Q_
+import weldx.geometry as geo
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import dict_to_tagged_tree
 
@@ -232,6 +234,60 @@ class VGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
+    def plot(
+        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+    ):
+        """Plot a 2D-Profile."""
+        profile = self.to_profile()
+        if title is None:
+            title = self.__class__
+        profile.plot(title, raster_width, axis, grid, line_style)
+
+    def to_profile(self, width_default=Q_(2, "mm")):
+        """Calculate a Profile."""
+        t = self.t.to("mm").magnitude
+        alpha = self.alpha.to("rad").magnitude
+        b = self.b.to("mm").magnitude
+        c = self.c.to("mm").magnitude
+        width = width_default.to("mm").magnitude
+
+        # Calculations:
+        s = np.tan(alpha / 2) * (t - c)
+
+        # Scaling
+        edge = np.min([-s, 0])
+        if width <= -edge + 1:
+            width = width - edge
+
+        # Bottom segment
+        x_value = [-width, 0]
+        y_value = [0, 0]
+        segment_list = ["line"]
+
+        # root face
+        if c != 0:
+            x_value.append(0)
+            y_value.append(c)
+            segment_list.append("line")
+
+        # groove face
+        x_value.append(-s)
+        y_value.append(t)
+        segment_list.append("line")
+
+        # Top segment
+        x_value.append(-width)
+        y_value.append(t)
+        segment_list.append("line")
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate([-b / 2, 0])
+        # y-axis is mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r])
+
 
 @dataclass
 class VVGroove:
@@ -376,6 +432,52 @@ class FFGroove:
     code_number: str = None
     b: pint.Quantity = Q_(0, "mm")
     e: pint.Quantity = None
+
+
+def _helperfunction(segment, array):
+    """
+    Calculate a shape from input.
+    Input segment of successive segments as strings.
+    Input array of the points in the correct sequence. e.g.:
+    array = [[x-values], [y-values]]
+
+    :param segment: list of String, segment names ("line", "arc")
+    :param array: array of 2 array,
+        first array are x-values
+        second array are y-values
+    :return: geo.Shape
+    """
+    segment_list = []
+    counter = 0
+    for elem in segment:
+        if elem == "line":
+            seg = geo.LineSegment(
+                [array[0][counter : counter + 2], array[1][counter : counter + 2]]
+            )
+            segment_list.append(seg)
+            counter += 1
+        if elem == "arc":
+            arr0 = [
+                # begin
+                array[0][counter],
+                # end
+                array[0][counter + 2],
+                # circle center
+                array[0][counter + 1],
+            ]
+            arr1 = [
+                # begin
+                array[1][counter],
+                # end
+                array[1][counter + 2],
+                # circle center
+                array[1][counter + 1],
+            ]
+            seg = geo.ArcSegment([arr0, arr1], False)
+            segment_list.append(seg)
+            counter += 2
+
+    return geo.Shape(segment_list)
 
 
 class GrooveType(WeldxType):

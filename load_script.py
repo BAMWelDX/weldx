@@ -3,7 +3,13 @@
 import asdf
 
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
-from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, IGroove, UVGroove, VVGroove
+from weldx.asdf.tags.weldx.core.groove import (
+    VGroove,
+    UGroove,
+    IGroove,
+    UVGroove,
+    VVGroove,
+)
 from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
 from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove, FFGroove
 from weldx.all_groove import plot_groove
@@ -13,22 +19,19 @@ opened = asdf.open("testfile.yml", extensions=[WeldxAsdfExtension(), WeldxExtens
 
 if isinstance(opened["test001"], VGroove):
     print(opened["test001"])
-    plot_groove(opened["test001"])
-    # title(f"single V Groove Butt Weld\n {alpha}° groove angle")
+    opened["test001"].plot()
 else:
     print("false")
 
 if isinstance(opened["test002"], UGroove):
     print(opened["test002"])
     plot_groove(opened["test002"])
-    # title(f"single U Groove Butt Weld\n {beta}° groove angle")
 else:
     print("false")
 
 if isinstance(opened["test003"], IGroove):
     print(opened["test003"])
     plot_groove(opened["test003"])
-    # title(f"I Groove")
 else:
     print("false")
 
