@@ -2,7 +2,6 @@
 
 from pint import UnitRegistry
 
-
 WELDX_UNIT_REGISTRY = UnitRegistry(
     preprocessors=[lambda string: string.replace("%", "percent")]  # allow use of %-sign
 )

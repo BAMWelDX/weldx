@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from asdf.util import filepath_to_url
 
 SCHEMA_PATH = str(Path(__file__).resolve().parents[0] / "schemas")

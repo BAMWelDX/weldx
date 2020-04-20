@@ -1,19 +1,19 @@
 import warnings
 
-# versioneer
-from ._version import get_versions
-
-__all__ = ["geometry", "transformations", "utility", "asdf", "Q_"]
-
-from .constants import WELDX_QUANTITY as Q_
+# asdf extensions and tags
+import weldx.asdf
 
 # geometry packages
 import weldx.geometry
 import weldx.transformations
 import weldx.utility
 
-# asdf extensions and tags
-import weldx.asdf
+# versioneer
+from ._version import get_versions
+from .constants import WELDX_QUANTITY as Q_
+
+__all__ = ["geometry", "transformations", "utility", "asdf", "Q_"]
+
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")

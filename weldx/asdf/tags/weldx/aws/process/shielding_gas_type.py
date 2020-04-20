@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List
+
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import dict_to_tagged_tree
 

@@ -1,12 +1,12 @@
 """Provides classes to define lines and surfaces."""
 
-import weldx.utility as ut
-import weldx.transformations as tf
-
 import copy
 import math
+
 import numpy as np
 
+import weldx.transformations as tf
+import weldx.utility as ut
 
 # LineSegment -----------------------------------------------------------------
 

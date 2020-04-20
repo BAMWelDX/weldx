@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import dict_to_tagged_tree
 
 import pint
+
+from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
 
 __all__ = ["WeldDetails", "WeldDetailsType"]
 

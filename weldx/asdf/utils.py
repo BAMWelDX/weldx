@@ -1,7 +1,7 @@
 from pathlib import Path
+
 import jinja2
 import pandas as pd
-
 from asdf.yamlutil import custom_tree_to_tagged_tree
 
 from weldx.asdf.constants import SCHEMA_PATH

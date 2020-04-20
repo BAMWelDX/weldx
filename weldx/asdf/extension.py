@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from asdf.extension import AsdfExtension, BuiltinExtension
+
 from weldx.asdf.constants import WELDX_SCHEMA_URI_BASE, WELDX_URL_MAPPING
 
-from .types import _weldx_types, _weldx_asdf_types
+from .types import _weldx_asdf_types, _weldx_types
 
 __all__ = ["WeldxExtension", "WeldxAsdfExtension"]
 

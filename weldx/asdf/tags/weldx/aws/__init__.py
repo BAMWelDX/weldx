@@ -1,2 +1,1 @@
-from . import design
-from . import process
+from . import design, process
