@@ -13,13 +13,13 @@ __all__ = ["{{class_name}}","{{class_name}}Type"]
 
 @dataclass
 class {{class_name}}:
-    """<CLASS DOCSTRING>"""
+    """<TODO CLASS DOCSTRING>"""
     {% for prop, dtype in zip(properties,property_types) -%}
         {{ prop }}: {{ dtype }}{%- if prop not in required %} = None{%- endif %}
     {% endfor %}
 
 class {{class_name}}Type(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
+    """<TODO ASDF TYPE DOCSTRING>"""
 
     name = "{{ asdf_name }}"
     version = "{{ asdf_version }}"
@@ -28,7 +28,7 @@ class {{class_name}}Type(WeldxType):
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node, ctx):
+    def to_tree(cls, node: {{ class_name }}, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
         tree = dict_to_tagged_tree(node, ctx)
         return tree

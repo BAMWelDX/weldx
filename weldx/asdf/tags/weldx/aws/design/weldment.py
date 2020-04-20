@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from typing import List  # noqa: F401
-from asdf.yamlutil import custom_tree_to_tagged_tree
+from typing import List
 from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
 
 from .sub_assembly import SubAssembly
 
@@ -25,14 +25,9 @@ class WeldmentType(WeldxType):
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node, ctx):
-        # convert to tagged tree
-        tree_full = dict(
-            sub_assembly=custom_tree_to_tagged_tree(node.sub_assembly, ctx)
-        )
-
-        # drop None values
-        tree = {k: v for (k, v) in tree_full.items() if v is not None}
+    def to_tree(cls, node: Weldment, ctx):
+        """convert to tagged tree and remove all None entries from node dictionary"""
+        tree = dict_to_tagged_tree(node, ctx)
         return tree
 
     @classmethod

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from typing import List  # noqa: F401
-from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
 
 from .joint_penetration import JointPenetration
 from .weld_details import WeldDetails
@@ -29,17 +28,9 @@ class ConnectionType(WeldxType):
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node, ctx):
-        # convert to tagged tree
-        tree_full = dict(
-            joint_type=custom_tree_to_tagged_tree(node.joint_type, ctx),
-            weld_type=custom_tree_to_tagged_tree(node.weld_type, ctx),
-            joint_penetration=custom_tree_to_tagged_tree(node.joint_penetration, ctx),
-            weld_details=custom_tree_to_tagged_tree(node.weld_details, ctx),
-        )
-
-        # drop None values
-        tree = {k: v for (k, v) in tree_full.items() if v is not None}
+    def to_tree(cls, node: Connection, ctx):
+        """convert to tagged tree and remove all None entries from node dictionary"""
+        tree = dict_to_tagged_tree(node, ctx)
         return tree
 
     @classmethod

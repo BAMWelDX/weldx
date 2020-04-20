@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from typing import List  # noqa: F401
-from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
 
 import pint
 
@@ -36,33 +35,8 @@ class ShieldingGasForProcedureType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        # convert to tagged tree
-        tree_full = dict(
-            use_torch_shielding_gas=custom_tree_to_tagged_tree(
-                node.use_torch_shielding_gas, ctx
-            ),
-            torch_shielding_gas=custom_tree_to_tagged_tree(
-                node.torch_shielding_gas, ctx
-            ),
-            torch_shielding_gas_flowrate=custom_tree_to_tagged_tree(
-                node.torch_shielding_gas_flowrate, ctx
-            ),
-            use_backing_gas=custom_tree_to_tagged_tree(node.use_backing_gas, ctx),
-            backing_gas=custom_tree_to_tagged_tree(node.backing_gas, ctx),
-            backing_gas_flowrate=custom_tree_to_tagged_tree(
-                node.backing_gas_flowrate, ctx
-            ),
-            use_trailing_gas=custom_tree_to_tagged_tree(node.use_trailing_gas, ctx),
-            trailing_shielding_gas=custom_tree_to_tagged_tree(
-                node.trailing_shielding_gas, ctx
-            ),
-            trailing_shielding_gas_flowrate=custom_tree_to_tagged_tree(
-                node.trailing_shielding_gas_flowrate, ctx
-            ),
-        )
-
-        # drop None values
-        tree = {k: v for (k, v) in tree_full.items() if v is not None}
+        """convert to tagged tree and remove all None entries from node dictionary"""
+        tree = dict_to_tagged_tree(node, ctx)
         return tree
 
     @classmethod

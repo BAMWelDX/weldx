@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from typing import List  # noqa: F401
-from asdf.yamlutil import custom_tree_to_tagged_tree
 from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
 
 import pint
 
@@ -32,25 +31,9 @@ class JointPenetrationType(WeldxType):
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node, ctx):
-        # convert to tagged tree
-        tree_full = dict(
-            complete_or_partial=custom_tree_to_tagged_tree(
-                node.complete_or_partial, ctx
-            ),
-            root_penetration=custom_tree_to_tagged_tree(node.root_penetration, ctx),
-            groove_weld_size=custom_tree_to_tagged_tree(node.groove_weld_size, ctx),
-            incomplete_joint_penetration=custom_tree_to_tagged_tree(
-                node.incomplete_joint_penetration, ctx
-            ),
-            weld_size=custom_tree_to_tagged_tree(node.weld_size, ctx),
-            weld_size_E1=custom_tree_to_tagged_tree(node.weld_size_E1, ctx),
-            weld_size_E2=custom_tree_to_tagged_tree(node.weld_size_E2, ctx),
-            depth_of_fusion=custom_tree_to_tagged_tree(node.depth_of_fusion, ctx),
-        )
-
-        # drop None values
-        tree = {k: v for (k, v) in tree_full.items() if v is not None}
+    def to_tree(cls, node: JointPenetration, ctx):
+        """convert to tagged tree and remove all None entries from node dictionary"""
+        tree = dict_to_tagged_tree(node, ctx)
         return tree
 
     @classmethod
