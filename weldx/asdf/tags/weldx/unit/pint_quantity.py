@@ -21,7 +21,7 @@ class PintQuantityType(WeldxAsdfType):
     types = [pint.Quantity]
 
     @classmethod
-    def to_tree(cls, node, ctx):
+    def to_tree(cls, node: pint.Quantity, ctx):
         tree = {}
         tree["value"] = custom_tree_to_tagged_tree(node.magnitude, ctx)
         tree["unit"] = custom_tree_to_tagged_tree(str(node.units), ctx)
