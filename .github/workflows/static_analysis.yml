@@ -53,9 +53,12 @@ jobs:
           python-version: ${{ matrix.py }}
       - name: pip installs
         run: pip install git+https://github.com/timothycrosley/isort.git
+      - name: show isort diff
+        run: |
+          isort ./weldx --diff
       - name: run isort
         run: |
-          isort ./weldx --check-only --diff
+          isort ./weldx --check-only
 
   vulture:
     name: vulture
