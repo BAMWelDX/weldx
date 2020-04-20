@@ -1,7 +1,6 @@
 # Licensed under a 3-clause BSD style license - see LICENSE
 # -*- coding: utf-8 -*-
 
-import pandas
 import pandas as pd
 
 from weldx.asdf.types import WeldxType
@@ -18,7 +17,7 @@ class TimestampType(WeldxType):
 
     name = "time/timestamp"
     version = "1.0.0"
-    types = [pandas.Timestamp]
+    types = [pd.Timestamp]
 
     @classmethod
     def to_tree(cls, node: pd.Timestamp, ctx):

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import pandas
 import pandas as pd
 
 from weldx.asdf.types import WeldxType
@@ -19,7 +18,7 @@ class DatetimeIndexType(WeldxType):
 
     name = "time/datetimeindex"
     version = "1.0.0"
-    types = [pandas.DatetimeIndex]
+    types = [pd.DatetimeIndex]
 
     @classmethod
     def to_tree(cls, node: pd.DatetimeIndex, ctx):
