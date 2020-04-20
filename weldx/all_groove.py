@@ -4,7 +4,13 @@ from weldx import Q_
 import numpy as np
 
 import weldx.geometry as geo
-from weldx.asdf.tags.weldx.core.groove import VGroove, UGroove, UVGroove, IGroove, VVGroove
+from weldx.asdf.tags.weldx.core.groove import (
+    VGroove,
+    UGroove,
+    UVGroove,
+    IGroove,
+    VVGroove,
+)
 from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
 from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove, FFGroove
 
@@ -55,7 +61,9 @@ def groove_to_profile(groove):
     print(f"NOT YET IMPLEMENTED FOR CLASS: {groove.__class__}")
 
 
-def plot_groove(groove, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."):
+def plot_groove(
+    groove, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+):
     """<DEF DOCSTRING>"""
     profile = groove_to_profile(groove)
     if title is None:
@@ -126,8 +134,9 @@ def single_vgroovebuttweld(t, alpha, b, c, code_number=None, width_default=Q_(2,
     return geo.Profile([shape, shape_r])
 
 
-def single_ugroovebuttweld(t, beta, R, b, c, code_number=None,
-                           width_default=Q_(3, "mm")):
+def single_ugroovebuttweld(
+    t, beta, R, b, c, code_number=None, width_default=Q_(3, "mm")
+):
     """
     Calculate a Single-U Groove.
 
@@ -232,14 +241,14 @@ def uv_groove(t, alpha, beta, R, b, h, code_number=None, width_default=Q_(2, "mm
     width = width_default.to("mm").magnitude
 
     # calculations:
-    x_1 = np.tan(alpha/2) * h
+    x_1 = np.tan(alpha / 2) * h
     # Center of the circle [0, y_m]
-    y_circle = np.sqrt(R**2 - x_1**2)
+    y_circle = np.sqrt(R ** 2 - x_1 ** 2)
     y_m = h + y_circle
     # From next point to circle center is the vector (x,y)
     x = R * np.cos(beta)
     y = R * np.sin(beta)
-    x_arc = - x
+    x_arc = -x
     y_arc = y_m - y
     # X-section of the upper edge
     x_end = x_arc - (t - y_arc) * np.tan(beta)
@@ -397,10 +406,9 @@ def hv_groove(t, beta, c, b, code_number, width_default=Q_(5, "mm")):
     shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
     shape_h = geo.Shape()
-    shape_h.add_line_segments([[-width - (b / 2), 0],
-                               [-b /2, 0],
-                               [-b /2, t],
-                               [-width - (b / 2), t]])
+    shape_h.add_line_segments(
+        [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
+    )
 
     return geo.Profile([shape_h, shape_r])
 
@@ -455,15 +463,16 @@ def hu_groove(t, beta, R, b, c, code_number, width_default=Q_(5, "mm")):
     shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
     shape_h = geo.Shape()
-    shape_h.add_line_segments([[-width - (b / 2), 0],
-                               [-b / 2, 0],
-                               [-b / 2, t],
-                               [-width - (b / 2), t]])
+    shape_h.add_line_segments(
+        [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
+    )
 
     return geo.Profile([shape_h, shape_r])
 
 
-def dv_groove(t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")):
+def dv_groove(
+    t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")
+):
     """
     Calculate a Double V-Groove.
 
@@ -484,8 +493,8 @@ def dv_groove(t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5
     b = b.to("mm").magnitude
     c = c.to("mm").magnitude
     if h1 is None and h2 is None:
-        h1 = (t-c)/2
-        h2 = (t-c)/2
+        h1 = (t - c) / 2
+        h2 = (t - c) / 2
     elif h1 is not None and h2 is None:
         h1 = h1.to("mm").magnitude
         h2 = h1
@@ -498,8 +507,8 @@ def dv_groove(t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5
     width = width_default.to("mm").magnitude
 
     # Calculations
-    s_upper = np.tan(alpha_1/2) * h1
-    s_lower = np.tan(alpha_2/2) * h2
+    s_upper = np.tan(alpha_1 / 2) * h1
+    s_lower = np.tan(alpha_2 / 2) * h2
 
     # Scaling
     edge = np.min([-s_upper, -s_lower, 0])
@@ -513,7 +522,7 @@ def dv_groove(t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5
 
     if c != 0:
         x_value.append(0)
-        y_value.append(h2+c)
+        y_value.append(h2 + c)
         segment_list.append("line")
 
     x_value += [-s_upper, -width]
@@ -528,7 +537,9 @@ def dv_groove(t, alpha_1, alpha_2, b, c, h1, h2, code_number, width_default=Q_(5
     return geo.Profile([shape, shape_r])
 
 
-def du_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")):
+def du_groove(
+    t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")
+):
     """
     Calculate a Double U-Groove.
 
@@ -553,8 +564,8 @@ def du_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default
     b = b.to("mm").magnitude
     c = c.to("mm").magnitude
     if h1 is None and h2 is None:
-        h1 = (t-c)/2
-        h2 = (t-c)/2
+        h1 = (t - c) / 2
+        h2 = (t - c) / 2
     elif h1 is not None and h2 is None:
         h1 = h1.to("mm").magnitude
         h2 = h1
@@ -623,15 +634,21 @@ def dhv_groove(t, beta_1, beta_2, b, c, h1, h2, code_number, width_default=Q_(5,
     b = b.to("mm").magnitude
     width_default = width_default.to("mm").magnitude
     left_shape = geo.Shape()
-    left_shape.add_line_segments([[-width_default - (b / 2), 0],
-                                  [-b / 2, 0],
-                                  [-b / 2, t],
-                                  [-width_default - (b / 2), t]])
+    left_shape.add_line_segments(
+        [
+            [-width_default - (b / 2), 0],
+            [-b / 2, 0],
+            [-b / 2, t],
+            [-width_default - (b / 2), t],
+        ]
+    )
 
     return geo.Profile([left_shape, right_shape])
 
 
-def dhu_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")):
+def dhu_groove(
+    t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default=Q_(5, "mm")
+):
     """
     Calculate a Double U-Groove.
 
@@ -648,17 +665,23 @@ def dhu_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_defaul
     :param width_default: the width of the workpiece, as Pint unit
     :return: geo.Profile
     """
-    du_profile = du_groove(t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default)
+    du_profile = du_groove(
+        t, beta_1, beta_2, R, R2, b, c, h1, h2, code_number, width_default
+    )
     right_shape = du_profile.shapes[1]
 
     t = t.to("mm").magnitude
     b = b.to("mm").magnitude
     width_default = width_default.to("mm").magnitude
     left_shape = geo.Shape()
-    left_shape.add_line_segments([[-width_default - (b / 2), 0],
-                                  [-b / 2, 0],
-                                  [-b / 2, t],
-                                  [-width_default - (b / 2), t]])
+    left_shape.add_line_segments(
+        [
+            [-width_default - (b / 2), 0],
+            [-b / 2, 0],
+            [-b / 2, t],
+            [-width_default - (b / 2), t],
+        ]
+    )
 
     return geo.Profile([left_shape, right_shape])
 
@@ -680,17 +703,25 @@ def ff_groove(t_1, t_2, alpha, b, e, code_number, width_default=Q_(5, "mm")):
         t_1 = t_1.to("mm").magnitude
         width_default = width_default.to("mm").magnitude
         shape1 = geo.Shape()
-        shape1.add_line_segments([[0, 0],
-                                  [2 * width_default + t_1, 0],
-                                  [2 * width_default + t_1, t_1],
-                                  [0, t_1],
-                                  [0, 0]])
+        shape1.add_line_segments(
+            [
+                [0, 0],
+                [2 * width_default + t_1, 0],
+                [2 * width_default + t_1, t_1],
+                [0, t_1],
+                [0, 0],
+            ]
+        )
         shape2 = geo.Shape()
-        shape2.add_line_segments([[width_default, 0],
-                                  [width_default + t_1, 0],
-                                  [width_default + t_1, -width_default],
-                                  [width_default, -width_default],
-                                  [width_default, 0]])
+        shape2.add_line_segments(
+            [
+                [width_default, 0],
+                [width_default + t_1, 0],
+                [width_default + t_1, -width_default],
+                [width_default, -width_default],
+                [width_default, 0],
+            ]
+        )
         return geo.Profile([shape1, shape2])
     elif code_number == "3.1.1":
         t_1 = t_1.to("mm").magnitude
@@ -715,15 +746,13 @@ def ff_groove(t_1, t_2, alpha, b, e, code_number, width_default=Q_(5, "mm")):
         y_3 = y_1 + y_2
 
         shape1 = geo.Shape()
-        shape1.add_line_segments([[t_1 + x_1, y_1],
-                                  [t_1, 0],
-                                  [t_1 + x_2, y_2],
-                                  [t_1 + x_3, y_3]])
+        shape1.add_line_segments(
+            [[t_1 + x_1, y_1], [t_1, 0], [t_1 + x_2, y_2], [t_1 + x_3, y_3]]
+        )
         shape2 = geo.Shape()
-        shape2.add_line_segments([[width_default, -b],
-                                  [0, -b],
-                                  [0, -t_2 - b],
-                                  [width_default, -t_2 - b]])
+        shape2.add_line_segments(
+            [[width_default, -b], [0, -b], [0, -t_2 - b], [width_default, -t_2 - b]]
+        )
         return geo.Profile([shape1, shape2])
     elif code_number == "3.1.2":
         t_1 = t_1.to("mm").magnitude
@@ -731,15 +760,18 @@ def ff_groove(t_1, t_2, alpha, b, e, code_number, width_default=Q_(5, "mm")):
         b = b.to("mm").magnitude
         width_default = width_default.to("mm").magnitude
         shape1 = geo.Shape()
-        shape1.add_line_segments([[0, 0],
-                                  [width_default, 0],
-                                  [width_default, t_1],
-                                  [0, t_1]])
+        shape1.add_line_segments(
+            [[0, 0], [width_default, 0], [width_default, t_1], [0, t_1]]
+        )
         shape2 = geo.Shape()
-        shape2.add_line_segments([[0, -b],
-                                  [2 * width_default, -b],
-                                  [2* width_default, -t_2 - b],
-                                  [0, -t_2 - b]])
+        shape2.add_line_segments(
+            [
+                [0, -b],
+                [2 * width_default, -b],
+                [2 * width_default, -t_2 - b],
+                [0, -t_2 - b],
+            ]
+        )
         return geo.Profile([shape1, shape2])
     elif code_number == "3.1.3" or code_number == "4.1.1":
         t_1 = t_1.to("mm").magnitude
@@ -748,28 +780,24 @@ def ff_groove(t_1, t_2, alpha, b, e, code_number, width_default=Q_(5, "mm")):
         b = b.to("mm").magnitude
         width_default = width_default.to("mm").magnitude
 
-        x = np.sin(alpha + np.pi/2) * b + b
-        y = np.cos(alpha + np.pi/2) * b
+        x = np.sin(alpha + np.pi / 2) * b + b
+        y = np.cos(alpha + np.pi / 2) * b
 
         x_1 = np.sin(alpha) * t_2 + x
         y_1 = np.cos(alpha) * t_2 + y
 
-        x_2 = np.sin(alpha + np.pi/2) * (b + width_default) + b
-        y_2 = np.cos(alpha + np.pi/2) * (b + width_default)
+        x_2 = np.sin(alpha + np.pi / 2) * (b + width_default) + b
+        y_2 = np.cos(alpha + np.pi / 2) * (b + width_default)
 
         x_3 = x_1 + x_2 - x
         y_3 = y_1 + y_2 - y
 
         shape1 = geo.Shape()
-        shape1.add_line_segments([[-width_default, 0],
-                                  [0, 0],
-                                  [0, t_1],
-                                  [-width_default, t_1]])
+        shape1.add_line_segments(
+            [[-width_default, 0], [0, 0], [0, t_1], [-width_default, t_1]]
+        )
         shape2 = geo.Shape()
-        shape2.add_line_segments([[x_3, y_3],
-                                  [x_1, y_1],
-                                  [x, y],
-                                  [x_2, y_2]])
+        shape2.add_line_segments([[x_3, y_3], [x_1, y_1], [x, y], [x_2, y_2]])
         return geo.Profile([shape1, shape2])
     elif code_number == "4.1.2":
         t_1 = t_1.to("mm").magnitude
@@ -787,22 +815,18 @@ def ff_groove(t_1, t_2, alpha, b, e, code_number, width_default=Q_(5, "mm")):
         x_2 = np.sin(alpha + np.pi) * (t_2 - e)
         y_2 = np.cos(alpha + np.pi) * (t_2 - e)
 
-        x_3 = x_2 + np.sin(alpha + np.pi/2) * width_default
-        y_3 = y_2 + np.cos(alpha + np.pi/2) * width_default
+        x_3 = x_2 + np.sin(alpha + np.pi / 2) * width_default
+        y_3 = y_2 + np.cos(alpha + np.pi / 2) * width_default
 
         x_4 = x_1 + np.sin(alpha + np.pi / 2) * width_default
         y_4 = y_1 + np.cos(alpha + np.pi / 2) * width_default
 
         shape1 = geo.Shape()
-        shape1.add_line_segments([[-width_default, 0],
-                                  [0, 0],
-                                  [0, t_1],
-                                  [-width_default, t_1]])
+        shape1.add_line_segments(
+            [[-width_default, 0], [0, 0], [0, t_1], [-width_default, t_1]]
+        )
         shape2 = geo.Shape()
-        shape2.add_line_segments([[x_4, y_4],
-                                  [x_1, y_1],
-                                  [x_2, y_2],
-                                  [x_3, y_3]])
+        shape2.add_line_segments([[x_4, y_4], [x_1, y_1], [x_2, y_2], [x_3, y_3]])
         return geo.Profile([shape1, shape2])
     elif code_number == "4.1.3":
         t_1 = t_1.to("mm").magnitude
@@ -810,20 +834,27 @@ def ff_groove(t_1, t_2, alpha, b, e, code_number, width_default=Q_(5, "mm")):
         b = b.to("mm").magnitude
         width_default = width_default.to("mm").magnitude
         shape1 = geo.Shape()
-        shape1.add_line_segments([[0, width_default],
-                                  [0, 0],
-                                  [t_1, 0],
-                                  [t_1, width_default]])
+        shape1.add_line_segments(
+            [[0, width_default], [0, 0], [t_1, 0], [t_1, width_default]]
+        )
         shape2 = geo.Shape()
-        shape2.add_line_segments([[-width_default, -b],
-                                  [t_1 + width_default, -b],
-                                  [t_1 + width_default, -t_2 - b],
-                                  [-width_default, -t_2 - b],
-                                  [-width_default, -b]])
+        shape2.add_line_segments(
+            [
+                [-width_default, -b],
+                [t_1 + width_default, -b],
+                [t_1 + width_default, -t_2 - b],
+                [-width_default, -t_2 - b],
+                [-width_default, -b],
+            ]
+        )
         return geo.Profile([shape1, shape2])
     else:
-        print("Wrong code_number. The Code Number has to be one of the following strings:")
-        print('"1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"')
+        print(
+            "Wrong code_number. The Code Number has to be one of the following strings:"
+        )
+        print(
+            '"1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
+        )
 
 
 def _helperfunction(segment, array):
@@ -844,8 +875,7 @@ def _helperfunction(segment, array):
     for elem in segment:
         if elem == "line":
             seg = geo.LineSegment(
-                [array[0][counter: counter + 2],
-                 array[1][counter: counter + 2]]
+                [array[0][counter : counter + 2], array[1][counter : counter + 2]]
             )
             segment_list.append(seg)
             counter += 1

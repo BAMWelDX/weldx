@@ -852,7 +852,9 @@ class Profile:
 
         return raster_data
 
-    def plot(self, title=None, raster_width=0.1, axis="equal", grid=True,  line_style="."):
+    def plot(
+        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+    ):
         """
         Plot the profile.
 

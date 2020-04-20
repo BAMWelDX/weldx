@@ -11,21 +11,21 @@ from weldx.asdf.utils import dict_to_tagged_tree
 
 
 def get_groove(
-        groove_type,
-        workpiece_thickness=None,
-        workpiece_thickness2=None,
-        root_gap=None,
-        root_face=None,
-        root_face2=None,
-        root_face3=None,
-        bevel_radius=None,
-        bevel_radius2=None,
-        bevel_angle=None,
-        bevel_angle2=None,
-        groove_angle=None,
-        groove_angle2=None,
-        special_depth=None,
-        code_number=None,
+    groove_type,
+    workpiece_thickness=None,
+    workpiece_thickness2=None,
+    root_gap=None,
+    root_face=None,
+    root_face2=None,
+    root_face3=None,
+    bevel_radius=None,
+    bevel_radius2=None,
+    bevel_angle=None,
+    bevel_angle2=None,
+    groove_angle=None,
+    groove_angle2=None,
+    special_depth=None,
+    code_number=None,
 ):
     """
     Create a Groove from weldx.asdf.tags.weldx.core.groove.
@@ -113,58 +113,119 @@ def get_groove(
     :return: an Groove from weldx.asdf.tags.weldx.core.groove
     """
     if groove_type == "VGroove":
-        return VGroove(t=workpiece_thickness, alpha=groove_angle,
-                       b=root_gap, c=root_face)
+        return VGroove(
+            t=workpiece_thickness, alpha=groove_angle, b=root_gap, c=root_face
+        )
 
     if groove_type == "UGroove":
-        return UGroove(t=workpiece_thickness, beta=bevel_angle,
-                       R=bevel_radius, b=root_gap, c=root_face)
+        return UGroove(
+            t=workpiece_thickness,
+            beta=bevel_angle,
+            R=bevel_radius,
+            b=root_gap,
+            c=root_face,
+        )
 
     if groove_type == "IGroove":
         return IGroove(t=workpiece_thickness, b=root_gap)
 
     if groove_type == "UVGroove":
-        return UVGroove(t=workpiece_thickness, alpha=groove_angle, beta=bevel_angle,
-                        R=bevel_radius, b=root_gap, h=root_face)
+        return UVGroove(
+            t=workpiece_thickness,
+            alpha=groove_angle,
+            beta=bevel_angle,
+            R=bevel_radius,
+            b=root_gap,
+            h=root_face,
+        )
 
     if groove_type == "VVGroove":
-        return VVGroove(t=workpiece_thickness, alpha=groove_angle, beta=bevel_angle,
-                        b=root_gap, c=root_face, h=root_face2)
+        return VVGroove(
+            t=workpiece_thickness,
+            alpha=groove_angle,
+            beta=bevel_angle,
+            b=root_gap,
+            c=root_face,
+            h=root_face2,
+        )
 
     if groove_type == "HVGroove":
-        return HVGroove(t=workpiece_thickness, beta=bevel_angle,
-                        b=root_gap, c=root_face)
+        return HVGroove(
+            t=workpiece_thickness, beta=bevel_angle, b=root_gap, c=root_face
+        )
 
     if groove_type == "HUGroove":
-        return HUGroove(t=workpiece_thickness, beta=bevel_angle,
-                       R=bevel_radius, b=root_gap, c=root_face)
+        return HUGroove(
+            t=workpiece_thickness,
+            beta=bevel_angle,
+            R=bevel_radius,
+            b=root_gap,
+            c=root_face,
+        )
 
     if groove_type == "DoubleVGroove":
-        return DVGroove(t=workpiece_thickness, alpha_1=groove_angle, alpha_2=groove_angle2,
-                        b=root_gap, c=root_face, h1=root_face2, h2=root_face3)
+        return DVGroove(
+            t=workpiece_thickness,
+            alpha_1=groove_angle,
+            alpha_2=groove_angle2,
+            b=root_gap,
+            c=root_face,
+            h1=root_face2,
+            h2=root_face3,
+        )
 
     if groove_type == "DoubleUGroove":
-        return DUGroove(t=workpiece_thickness, beta_1=bevel_angle, beta_2=bevel_angle2,
-                        R=bevel_radius, R2=bevel_radius2, b=root_gap, c=root_face,
-                        h1=root_face2, h2=root_face3)
+        return DUGroove(
+            t=workpiece_thickness,
+            beta_1=bevel_angle,
+            beta_2=bevel_angle2,
+            R=bevel_radius,
+            R2=bevel_radius2,
+            b=root_gap,
+            c=root_face,
+            h1=root_face2,
+            h2=root_face3,
+        )
 
     if groove_type == "DoubleHVGroove":
-        return DHVGroove(t=workpiece_thickness, beta_1=bevel_angle, beta_2=bevel_angle2,
-                         c=root_face, h1=root_face2, h2=root_face3, b=root_gap)
+        return DHVGroove(
+            t=workpiece_thickness,
+            beta_1=bevel_angle,
+            beta_2=bevel_angle2,
+            c=root_face,
+            h1=root_face2,
+            h2=root_face3,
+            b=root_gap,
+        )
 
     if groove_type == "DoubleHUGroove":
-        return DHUGroove(t=workpiece_thickness, beta_1=bevel_angle, beta_2=bevel_angle2,
-                         R=bevel_radius, R2=bevel_radius2, b=root_gap, c=root_face,
-                         h1=root_face2, h2=root_face3)
+        return DHUGroove(
+            t=workpiece_thickness,
+            beta_1=bevel_angle,
+            beta_2=bevel_angle2,
+            R=bevel_radius,
+            R2=bevel_radius2,
+            b=root_gap,
+            c=root_face,
+            h1=root_face2,
+            h2=root_face3,
+        )
 
     if groove_type == "FrontalFaceGroove":
-        return FFGroove(t_1=workpiece_thickness, t_2=workpiece_thickness2,
-                        alpha=groove_angle, b=root_gap, e=special_depth, code_number=code_number)
+        return FFGroove(
+            t_1=workpiece_thickness,
+            t_2=workpiece_thickness2,
+            alpha=groove_angle,
+            b=root_gap,
+            e=special_depth,
+            code_number=code_number,
+        )
 
 
 @dataclass
 class VGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     alpha: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
@@ -175,6 +236,7 @@ class VGroove:
 @dataclass
 class VVGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     alpha: pint.Quantity
     beta: pint.Quantity
@@ -187,6 +249,7 @@ class VVGroove:
 @dataclass
 class UVGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     alpha: pint.Quantity
     beta: pint.Quantity
@@ -199,6 +262,7 @@ class UVGroove:
 @dataclass
 class UGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     beta: pint.Quantity
     R: pint.Quantity
@@ -210,6 +274,7 @@ class UGroove:
 @dataclass
 class IGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
@@ -218,6 +283,7 @@ class IGroove:
 @dataclass
 class HVGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     beta: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
@@ -228,6 +294,7 @@ class HVGroove:
 @dataclass
 class HUGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     beta: pint.Quantity
     R: pint.Quantity
@@ -240,6 +307,7 @@ class HUGroove:
 @dataclass
 class DVGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     alpha_1: pint.Quantity
     alpha_2: pint.Quantity
@@ -253,6 +321,7 @@ class DVGroove:
 @dataclass
 class DUGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     beta_1: pint.Quantity
     beta_2: pint.Quantity
@@ -268,6 +337,7 @@ class DUGroove:
 @dataclass
 class DHVGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     beta_1: pint.Quantity
     beta_2: pint.Quantity
@@ -281,6 +351,7 @@ class DHVGroove:
 @dataclass
 class DHUGroove:
     """<CLASS DOCSTRING>"""
+
     t: pint.Quantity
     beta_1: pint.Quantity
     beta_2: pint.Quantity
@@ -297,6 +368,7 @@ class DHUGroove:
 @dataclass
 class FFGroove:
     """<CLASS DOCSTRING>"""
+
     t_1: pint.Quantity
     t_2: pint.Quantity = None
     alpha: pint.Quantity = None
@@ -311,8 +383,21 @@ class GrooveType(WeldxType):
 
     name = "core/din_en_iso_9692-1_2013"
     version = "1.0.0"
-    types = [VGroove, VVGroove, UVGroove, UGroove, IGroove, UVGroove, HVGroove,
-             HUGroove, DVGroove, DUGroove, DHVGroove, DHUGroove, FFGroove]
+    types = [
+        VGroove,
+        VVGroove,
+        UVGroove,
+        UGroove,
+        IGroove,
+        UVGroove,
+        HVGroove,
+        HUGroove,
+        DVGroove,
+        DUGroove,
+        DHVGroove,
+        DHUGroove,
+        FFGroove,
+    ]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
@@ -320,86 +405,56 @@ class GrooveType(WeldxType):
     def to_tree(cls, node, ctx):
         """<CLASS METHOD DOCSTRING>"""
         if isinstance(node, VGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="SingleVGroove",
-            )
+            tree = dict(components=dict_to_tagged_tree(node, ctx), type="SingleVGroove")
             return tree
 
         if isinstance(node, UGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="SingleUGroove",
-            )
+            tree = dict(components=dict_to_tagged_tree(node, ctx), type="SingleUGroove")
             return tree
 
         if isinstance(node, UVGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="UVGroove",
-            )
+            tree = dict(components=dict_to_tagged_tree(node, ctx), type="UVGroove")
             return tree
 
         if isinstance(node, IGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="IGroove",
-            )
+            tree = dict(components=dict_to_tagged_tree(node, ctx), type="IGroove")
             return tree
 
         if isinstance(node, VVGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="VVGroove",
-            )
+            tree = dict(components=dict_to_tagged_tree(node, ctx), type="VVGroove")
             return tree
 
         if isinstance(node, HVGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="HVGroove",
-            )
+            tree = dict(components=dict_to_tagged_tree(node, ctx), type="HVGroove")
             return tree
 
         if isinstance(node, HUGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="HUGroove",
-            )
+            tree = dict(components=dict_to_tagged_tree(node, ctx), type="HUGroove")
             return tree
 
         if isinstance(node, DVGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="DoubleVGroove",
-            )
+            tree = dict(components=dict_to_tagged_tree(node, ctx), type="DoubleVGroove")
             return tree
 
         if isinstance(node, DUGroove):
-            tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="DoubleUGroove",
-            )
+            tree = dict(components=dict_to_tagged_tree(node, ctx), type="DoubleUGroove")
             return tree
 
         if isinstance(node, DHVGroove):
             tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="DoubleHVGroove",
+                components=dict_to_tagged_tree(node, ctx), type="DoubleHVGroove"
             )
             return tree
 
         if isinstance(node, DHUGroove):
             tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="DoubleHUGroove",
+                components=dict_to_tagged_tree(node, ctx), type="DoubleHUGroove"
             )
             return tree
 
         if isinstance(node, FFGroove):
             tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type="FrontalFaceGroove",
+                components=dict_to_tagged_tree(node, ctx), type="FrontalFaceGroove"
             )
             return tree
 
