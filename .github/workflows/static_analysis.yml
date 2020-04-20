@@ -41,6 +41,7 @@ jobs:
   isort:
     name: isort
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     strategy:
       matrix:
         os: [ubuntu-18.04]
