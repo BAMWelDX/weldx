@@ -368,6 +368,58 @@ class UVGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.6"])
 
+    def plot(
+        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+    ):
+        """Plot a 2D-Profile."""
+        profile = self.to_profile()
+        if title is None:
+            title = self.__class__
+        profile.plot(title, raster_width, axis, grid, line_style)
+
+    def to_profile(self, width_default=Q_(2, "mm")):
+        """Calculate a Profile."""
+        t = self.t.to("mm").magnitude
+        alpha = self.alpha.to("rad").magnitude
+        beta = self.beta.to("rad").magnitude
+        R = self.R.to("mm").magnitude
+        b = self.b.to("mm").magnitude
+        h = self.h.to("mm").magnitude
+        width = width_default.to("mm").magnitude
+
+        # calculations:
+        x_1 = np.tan(alpha / 2) * h
+        # Center of the circle [0, y_m]
+        y_circle = np.sqrt(R ** 2 - x_1 ** 2)
+        y_m = h + y_circle
+        # From next point to circle center is the vector (x,y)
+        x = R * np.cos(beta)
+        y = R * np.sin(beta)
+        x_arc = -x
+        y_arc = y_m - y
+        # X-section of the upper edge
+        x_end = x_arc - (t - y_arc) * np.tan(beta)
+
+        # Scaling
+        edge = np.max([-x_end, 0])
+        if width <= edge + 1:
+            # adjustment of the width
+            width = width + edge
+
+        # x-values
+        x_value = [-width, 0, -x_1, 0, x_arc, x_end, -width]
+        # y-values
+        y_value = [0, 0, h, y_m, y_arc, t, t]
+        segment_list = ["line", "line", "arc", "line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r])
+
 
 @dataclass
 class UGroove:
@@ -379,6 +431,85 @@ class UGroove:
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.8"])
+
+    def plot(
+        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+    ):
+        """Plot a 2D-Profile."""
+        profile = self.to_profile()
+        if title is None:
+            title = self.__class__
+        profile.plot(title, raster_width, axis, grid, line_style)
+
+    def to_profile(self, width_default=Q_(3, "mm")):
+        """Calculate a Profile."""
+        t = self.t.to("mm").magnitude
+        beta = self.beta.to("rad").magnitude
+        R = self.R.to("mm").magnitude
+        b = self.b.to("mm").magnitude
+        c = self.c.to("mm").magnitude
+        width = width_default.to("mm").magnitude
+
+        # calculations:
+        # From next point to circle center is the vector (x,y)
+        x = R * np.cos(beta)
+        y = R * np.sin(beta)
+        # m = [0,c+R] circle center
+        # => [-x,c+R-y] is the next point
+
+        s = np.tan(beta) * (t - (c + R - y))
+
+        # Scaling
+        edge = np.max([x + s, 0])
+        if width <= edge + 1:
+            # adjustment of the width
+            width = width + edge
+
+        # x-values
+        x_value = []
+        # y-values
+        y_value = []
+        segment_list = []
+
+        # bottom segment
+        x_value.append(-width)
+        y_value.append(0)
+        x_value.append(0)
+        y_value.append(0)
+        segment_list.append("line")
+
+        # root face
+        if c != 0:
+            x_value.append(0)
+            y_value.append(c)
+            segment_list.append("line")
+
+        # groove face arc (circle center)
+        x_value.append(0)
+        y_value.append(c + R)
+
+        # groove face arc
+        x_value.append(-x)
+        y_value.append(c + R - y)
+        segment_list.append("arc")
+
+        # groove face line
+        x_value.append(-x - s)
+        y_value.append(t)
+        segment_list.append("line")
+
+        # top segment
+        x_value.append(-width)
+        y_value.append(t)
+        segment_list.append("line")
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r])
 
 
 @dataclass

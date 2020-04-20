@@ -25,7 +25,7 @@ else:
 
 if isinstance(opened["test002"], UGroove):
     print(opened["test002"])
-    plot_groove(opened["test002"])
+    opened["test002"].plot()
 else:
     print("false")
 
