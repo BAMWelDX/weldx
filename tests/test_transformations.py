@@ -1023,7 +1023,7 @@ def test_coordinate_system_manager_init():
     # Exceptions---------------------------------
     # Invalid root system name
     with pytest.raises(Exception):
-        tf.CoordinateSystemManager(None)
+        tf.CoordinateSystemManager({})
 
 
 def test_coordinate_system_manager_add_coordinate_system():

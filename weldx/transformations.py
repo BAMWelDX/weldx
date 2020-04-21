@@ -2,6 +2,7 @@
 
 from typing import Union, List, Hashable
 from copy import deepcopy
+import collections.abc as cl
 import weldx.utility as ut
 import numpy as np
 import pandas as pd
@@ -639,16 +640,23 @@ class CoordinateSystemManager:
         :param root_coordinate_system_name: Name of the root coordinate system. This can
         be any hashable type, but it is recommended to use strings.
         """
-        if root_coordinate_system_name is None:
-            raise Exception("The root coordinate system name must be specified.")
         self._graph = nx.DiGraph()
+        self._check_new_coordinate_system_name(root_coordinate_system_name)
         self._graph.add_node(root_coordinate_system_name)
 
-    def _add_edges(self, node_from, node_to, lcs, calculated):
-        self._graph.add_edge(node_from, node_to, lcs=lcs, calculated=calculated)
-        self._graph.add_edge(
-            node_to, node_from, lcs=lcs.invert(), calculated=calculated
-        )
+    def _add_edges(
+        self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
+    ):
+        """
+        Add an edge to the internal graph.
+
+        :param node_from: Start node of the edge
+        :param node_to: End node of the edge
+        :param lcs: Local coordinate system
+        :return: ---
+        """
+        self._graph.add_edge(node_from, node_to, lcs=lcs)
+        self._graph.add_edge(node_to, node_from, lcs=lcs.invert())
 
     def _check_coordinate_system_exists(self, coordinate_system_name: Hashable):
         """
@@ -658,10 +666,26 @@ class CoordinateSystemManager:
         checked.
         :return: ---
         """
-        if coordinate_system_name not in self._graph.nodes:
+        if not self.has_coordinate_system(coordinate_system_name):
             raise Exception(
                 "There is no coordinate system with name " + str(coordinate_system_name)
             )
+
+    def _check_new_coordinate_system_name(self, coordinate_system_name: Hashable):
+        """
+        Raise an exception if the new coordinate systems' name is invalid.
+
+        :param coordinate_system_name: Name of the new coordinate system, that should be
+        checked.
+        :return: ---
+        """
+        if self.has_coordinate_system(coordinate_system_name):
+            raise Exception(
+                "There already is a coordinate system with name "
+                + str(coordinate_system_name)
+            )
+        if not isinstance(coordinate_system_name, cl.Hashable):
+            raise Exception("The coordinate system name must be a hashable type.")
 
     def add_coordinate_system(
         self,
@@ -687,18 +711,11 @@ class CoordinateSystemManager:
                 + "weldx.transformations.LocalCoordinateSystem"
             )
         self._check_coordinate_system_exists(reference_system_name)
-        if coordinate_system_name in self._graph.nodes:
-            raise Exception(
-                "There already exists a coordinate system with name "
-                + str(coordinate_system_name)
-            )
+        self._check_new_coordinate_system_name(coordinate_system_name)
 
         self._graph.add_node(coordinate_system_name)
         self._add_edges(
-            coordinate_system_name,
-            reference_system_name,
-            local_coordinate_system,
-            False,
+            coordinate_system_name, reference_system_name, local_coordinate_system
         )
 
     def get_local_coordinate_system(
@@ -725,8 +742,17 @@ class CoordinateSystemManager:
         if length_path > 1:
             for i in np.arange(1, length_path):
                 lcs = lcs + self.graph.edges[path[i], path[i + 1]]["lcs"]
-            # self._add_edges(path[0], path[-1], lcs, True)
         return lcs
+
+    def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
+        """
+        Return 'True' if a coordinate system with specified name is part of the class.
+
+        :param coordinate_system_name: Name of the coordinate system, that should be
+        checked.
+        :return: 'True' or 'False'
+        """
+        return coordinate_system_name in self._graph.nodes
 
     def transform_data(
         self,
@@ -814,7 +840,7 @@ class CoordinateSystemManager:
 
         return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
 
-    def interp_time(self, time, in_place: bool = False):
+    def interp_time(self, time, in_place: bool = False) -> "CoordinateSystemManager":
         """
         Interpolates the coordinate systems in time.
 
@@ -834,7 +860,7 @@ class CoordinateSystemManager:
 
     def interp_time_like(
         self, reference: LocalCoordinateSystem, in_place: bool = False
-    ):
+    ) -> "CoordinateSystemManager":
         """
         Interpolates the coordinate systems in time.
 
