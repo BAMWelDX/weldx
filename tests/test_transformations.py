@@ -1020,74 +1020,10 @@ def test_coordinate_system_manager_init():
     assert csm.number_of_coordinate_systems == 1
     assert csm.number_of_neighbors("root") == 0
 
-    # construction with graph -------------------
-    # single node
-    graph = nx.DiGraph()
-    graph.add_node("parent")
-    csm = tf.CoordinateSystemManager(graph=graph)
-    assert csm.number_of_coordinate_systems == 1
-    assert csm.number_of_neighbors("parent") == 0
-
-    # multiple nodes
-    graph = nx.DiGraph()
-    graph.add_node("parent")
-    graph.add_node("child_0")
-    graph.add_node("child_1")
-    graph.add_edge("parent", "child_0", lcs=tf.LocalCoordinateSystem())
-    graph.add_edge("child_0", "parent", lcs=tf.LocalCoordinateSystem())
-    graph.add_edge("parent", "child_1", lcs=tf.LocalCoordinateSystem())
-    graph.add_edge("child_1", "parent", lcs=tf.LocalCoordinateSystem())
-    csm = tf.CoordinateSystemManager(graph=graph)
-    assert csm.number_of_coordinate_systems == 3
-    assert csm.number_of_neighbors("parent") == 2
-    assert csm.number_of_neighbors("child_0") == 1
-    assert csm.number_of_neighbors("child_1") == 1
-
     # Exceptions---------------------------------
-    # Root system name is obsolete
+    # Invalid root system name
     with pytest.raises(Exception):
-        tf.CoordinateSystemManager(root_coordinate_system_name="some name", graph=graph)
-
-    # No root system name provided
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager()
-
-    # Nodes in graph without connection
-    graph = nx.DiGraph()
-    graph.add_node("parent")
-    graph.add_node("child")
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager(graph=graph)
-
-    # Only unidirectional connection in graph
-    graph.add_edge("parent", "child", lcs=tf.LocalCoordinateSystem())
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager(graph=graph)
-
-    # Edge without attribute lcs in graph
-    graph.add_edge("child", "parent")
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager(graph=graph)
-
-    # Graph edge attribute lcs is not of type
-    # weldx.transformations.LocalCoordinateSystem
-    graph = nx.DiGraph()
-    graph.add_node("parent")
-    graph.add_node("child")
-    graph.add_edge("parent", "child", lcs=tf.LocalCoordinateSystem())
-    graph.add_edge("child", "parent", lcs="wrong type")
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager(graph=graph)
-
-    # Empty graph
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager(graph=nx.DiGraph())
-
-    # Passed graph has wrong type
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager(graph=nx.MultiGraph())
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager(graph=0)
+        tf.CoordinateSystemManager(None)
 
 
 def test_coordinate_system_manager_add_coordinate_system():

@@ -631,90 +631,24 @@ class CoordinateSystemManager:
     """Manages multiple coordinate systems and the transformations between them."""
 
     def __init__(
-        self, root_coordinate_system_name: Hashable = None, graph: nx.DiGraph = None,
+        self, root_coordinate_system_name: Hashable,
     ):
         """
         Construct a coordinate system manager.
 
         :param root_coordinate_system_name: Name of the root coordinate system. This can
-        be any hashable type, but it is recommended to use strings. If a graph is
-        provided, this parameter has no meaning and must be set to 'None'.
-        :param graph: (Optional) A networkx.DiGraph. The graph is required to have a
-        certain structure. If it is not compatible, an corresponding Exception is raised
+        be any hashable type, but it is recommended to use strings.
         """
-        if graph is None:
-            if root_coordinate_system_name is None:
-                raise Exception("The root coordinate system name must be specified.")
-            self._graph = nx.DiGraph()
-            self._graph.add_node(root_coordinate_system_name)
-        else:
-            if root_coordinate_system_name is not None:
-                raise Exception(
-                    "The specified root coordinate system has no effect if a graph is"
-                    + " provided."
-                )
-            self._check_graph(graph)
-            self._graph = graph
+        if root_coordinate_system_name is None:
+            raise Exception("The root coordinate system name must be specified.")
+        self._graph = nx.DiGraph()
+        self._graph.add_node(root_coordinate_system_name)
 
     def _add_edges(self, node_from, node_to, lcs, calculated):
         self._graph.add_edge(node_from, node_to, lcs=lcs, calculated=calculated)
         self._graph.add_edge(
             node_to, node_from, lcs=lcs.invert(), calculated=calculated
         )
-
-    @staticmethod
-    def _check_graph(graph: nx.DiGraph):
-        """
-        Check if a graph's structure is valid for internal usage.
-
-        :param graph: Graph that should be checked
-        :return: ---
-        """
-        if not isinstance(graph, nx.DiGraph):
-            raise Exception("Graph must be of type networkx.DiGraph.")
-        if graph.number_of_nodes() < 1:
-            raise Exception("Graph can not be empty.")
-        elif graph.number_of_nodes() > 1:
-            for node in graph.nodes:
-                num_predecessors = len(list(graph.predecessors(node)))
-                num_successors = len(list(graph.successors(node)))
-                num_neighbors = len(list(graph.neighbors(node)))
-                if num_neighbors == 0:
-                    raise Exception(
-                        "Graph node "
-                        + str(node)
-                        + "is not connected to any other node."
-                    )
-                if not (
-                    num_neighbors == num_successors
-                    and num_neighbors == num_predecessors
-                ):
-                    raise Exception(
-                        "Graph node "
-                        + str(node)
-                        + " contains edges that are not defined in both directions."
-                    )
-
-            for edge_nodes in list(graph.edges):
-                edge_data = graph[edge_nodes[0]][edge_nodes[1]]
-                if "lcs" not in edge_data:
-                    raise Exception(
-                        "Graph edge "
-                        + edge_nodes[0]
-                        + " -> "
-                        + edge_nodes[1]
-                        + " has no field 'lcs'"
-                    )
-                else:
-                    if not isinstance(edge_data["lcs"], LocalCoordinateSystem):
-                        raise Exception(
-                            "Graph edge "
-                            + edge_nodes[0]
-                            + " -> "
-                            + edge_nodes[1]
-                            + " is not an instance of"
-                            + "weldx.transformations.LocalCoordinateSystem"
-                        )
 
     def _check_coordinate_system_exists(self, coordinate_system_name: Hashable):
         """
