@@ -1,6 +1,7 @@
 """Contains methods and classes for coordinate transformations."""
 
 from typing import Union, List, Hashable
+from dataclasses import dataclass
 from copy import deepcopy
 import collections.abc as cl
 import weldx.utility as ut
@@ -631,6 +632,11 @@ class LocalCoordinateSystem:
 class CoordinateSystemManager:
     """Manages multiple coordinate systems and the transformations between them."""
 
+    @dataclass
+    class CoordinateSystemData:
+        coordinate_system_name: Hashable
+        data: xr.DataArray
+
     def __init__(
         self, root_coordinate_system_name: Hashable,
     ):
@@ -641,8 +647,12 @@ class CoordinateSystemManager:
         be any hashable type, but it is recommended to use strings.
         """
         self._graph = nx.DiGraph()
-        self._check_new_coordinate_system_name(root_coordinate_system_name)
-        self._graph.add_node(root_coordinate_system_name)
+        self._data = dict()
+        self._add_coordinate_system_node(root_coordinate_system_name)
+
+    def _add_coordinate_system_node(self, coordinate_system_name):
+        self._check_new_coordinate_system_name(coordinate_system_name)
+        self._graph.add_node(coordinate_system_name, data=[])
 
     def _add_edges(
         self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
@@ -679,13 +689,13 @@ class CoordinateSystemManager:
         checked.
         :return: ---
         """
+        if not isinstance(coordinate_system_name, cl.Hashable):
+            raise Exception("The coordinate system name must be a hashable type.")
         if self.has_coordinate_system(coordinate_system_name):
             raise Exception(
                 "There already is a coordinate system with name "
                 + str(coordinate_system_name)
             )
-        if not isinstance(coordinate_system_name, cl.Hashable):
-            raise Exception("The coordinate system name must be a hashable type.")
 
     def add_coordinate_system(
         self,
@@ -711,12 +721,36 @@ class CoordinateSystemManager:
                 + "weldx.transformations.LocalCoordinateSystem"
             )
         self._check_coordinate_system_exists(reference_system_name)
-        self._check_new_coordinate_system_name(coordinate_system_name)
 
-        self._graph.add_node(coordinate_system_name)
+        self._add_coordinate_system_node(coordinate_system_name)
         self._add_edges(
             coordinate_system_name, reference_system_name, local_coordinate_system
         )
+
+    def assign_data(
+        self, data: xr.DataArray, data_name: Hashable, coordinate_system_name: Hashable
+    ):
+        """
+        Assign spatial data to a coordinate system.
+
+        :param data: Spatial data
+        :param data_name: Name of the data. Can be any hashable type, but strings are
+        recommended.
+        :param coordinate_system_name: Name of the coordinate system the data should be
+        assigned to.
+        :return: ---
+        """
+        # TODO: How to handle time dependent data? some things to think about:
+        # - times of coordinate system and data are not equal
+        # - which time is taken as reference? (probably the one of the data)
+        # - what happens during cal of time interpolation functions with data? Also
+        #   interpolated or not?
+        if not isinstance(data_name, cl.Hashable):
+            raise Exception("The data name must be a hashable type.")
+        self._check_coordinate_system_exists(coordinate_system_name)
+
+        self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
+        self._graph.nodes[coordinate_system_name]["data"].append(data_name)
 
     def get_local_coordinate_system(
         self, coordinate_system_name: Hashable, reference_system_name: Hashable
@@ -753,6 +787,39 @@ class CoordinateSystemManager:
         :return: 'True' or 'False'
         """
         return coordinate_system_name in self._graph.nodes
+
+    def has_data(self, coordinate_system_name: Hashable, data_name: Hashable) -> bool:
+        """
+        Return 'True' if the desired coordinate system owns the specified data.
+
+        :param coordinate_system_name: Name of the coordinate system
+        :param data_name: Name of the data
+        :return: 'True' or 'False'
+        """
+        return data_name in self._graph.nodes[coordinate_system_name]["data"]
+
+    def get_data(self, data_name, target_coordinate_system_name=None):
+        """
+        Get the specified data, optionally transformed into any coordinate system.
+
+        :param data_name: Name of the data
+        :param target_coordinate_system_name: Name of the target coordinate system. If
+        it is not None or not identical to the owning coordinate system name, the data
+        will be transformed to the desired system.
+        :return: (Transformed) data
+        """
+        data_struct = self._data[data_name]
+        if (
+            target_coordinate_system_name is None
+            or target_coordinate_system_name == data_struct.coordinate_system_name
+        ):
+            return data_struct.data
+        else:
+            return self.transform_data(
+                data_struct.data,
+                data_struct.coordinate_system_name,
+                target_coordinate_system_name,
+            )
 
     def transform_data(
         self,

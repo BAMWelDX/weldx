@@ -1389,6 +1389,42 @@ def test_coordinate_system_manager_transform_data():
 
 
 # TODO:remove
-test_coordinate_system_manager_transform_data()
+def test_coordinate_system_manager_data_assignment_and_retrieval():
+    """
+    Test the coordinate system managers assign_data and get_data functions.
+
+    :return: ---
+    """
+    lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
+    lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
+    lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_x(np.pi / 2), [1, -1, 3])
+
+    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
+    csm.add_coordinate_system("lcs_1", "root", lcs1_in_root)
+    csm.add_coordinate_system("lcs_2", "root", lcs2_in_root)
+    csm.add_coordinate_system("lcs_3", "lcs_2", lcs3_in_lcs2)
+
+    data_xr = xr.DataArray(
+        data=[[1, 2, -1, 3], [-3, 4, 2, -4], [-1, -1, 3, 2]],
+        dims=["c", "n"],
+        coords={"c": ["x", "y", "z"]},
+    )
+
+    data_xr_exp = xr.DataArray(
+        data=[[-5, -5, -9, -8], [-2, -9, -7, -1], [-4, -5, -2, -6]],
+        dims=["c", "n"],
+        coords={"c": ["x", "y", "z"]},
+    )
+
+    assert csm.has_data("lcs_3", "my data") is False
+    csm.assign_data(data_xr, "my data", "lcs_3")
+    assert csm.has_data("lcs_3", "my data") is True
+
+    assert csm.get_data("my data").equals(data_xr)
+    assert csm.get_data("my data", "lcs_3").equals(data_xr)
+    assert csm.get_data("my data", "lcs_1").equals(data_xr_exp)
+
+
+test_coordinate_system_manager_data_assignment_and_retrieval()
 
 # TODO: Test time dependent get_local_coordinate_system
