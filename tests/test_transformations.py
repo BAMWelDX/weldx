@@ -1388,13 +1388,13 @@ def test_coordinate_system_manager_transform_data():
         csm.transform_data("wrong", "lcs_3", "lcs_1")
 
 
-# TODO:remove
 def test_coordinate_system_manager_data_assignment_and_retrieval():
     """
     Test the coordinate system managers assign_data and get_data functions.
 
     :return: ---
     """
+    # test setup
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
     lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
     lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_x(np.pi / 2), [1, -1, 3])
@@ -1416,6 +1416,7 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
         coords={"c": ["x", "y", "z"]},
     )
 
+    # actual test
     assert csm.has_data("lcs_3", "my data") is False
     csm.assign_data(data_xr, "my data", "lcs_3")
     assert csm.has_data("lcs_3", "my data") is True
@@ -1424,7 +1425,28 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
     assert csm.get_data("my data", "lcs_3").equals(data_xr)
     assert csm.get_data("my data", "lcs_1").equals(data_xr_exp)
 
+    # exceptions --------------------------------
+    # assignment - invalid data name
+    with pytest.raises(Exception):
+        csm.assign_data(data_xr, {"wrong"}, "root")
+    # assignment - coordinate system does not exist
+    with pytest.raises(Exception):
+        csm.assign_data(data_xr, "some data", "not there")
+    # TODO: Unsupported data type ---> no spatial component
 
+    # has_data - coordinate system does not exist
+    with pytest.raises(Exception):
+        csm.has_data("wrong", "not there")
+
+    # get_data - data does not exist
+    with pytest.raises(Exception):
+        csm.get_data("not there", "root")
+    # get_data - coordinate system does not exist
+    with pytest.raises(Exception):
+        csm.get_data("my data", "not there")
+
+
+# TODO: remove
 test_coordinate_system_manager_data_assignment_and_retrieval()
 
 # TODO: Test time dependent get_local_coordinate_system
