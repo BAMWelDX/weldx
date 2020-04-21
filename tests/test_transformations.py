@@ -1261,13 +1261,7 @@ def test_coordinate_system_manager_interp_time():
     orientation_exp = tf.rotation_matrix_z([0, np.pi / 3, 2 * np.pi / 3, np.pi, np.pi])
     check_coordinate_system(lcs_0_in_root_csm, orientation_exp, coordinates_exp, True)
 
-    coordinates_exp = [
-        [5, 0, 0],
-        [3, 0, 0],
-        [1, 0, 0],
-        [1, 2, 2],
-        [1, 4, 4],
-    ]
+    coordinates_exp = [[5, 0, 0], [3, 0, 0], [1, 0, 0], [1, 2, 2], [1, 4, 4]]
     orientation_exp = tf.rotation_matrix_z(
         [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4, np.pi]
     )
@@ -1304,11 +1298,7 @@ def test_coordinate_system_manager_interp_time():
     assert np.all(lcs_2_in_root_csm.time == lcs_1_in_lcs_0.time)
     assert lcs_3_in_lcs_2_csm.time is None
 
-    coordinates_exp = [
-        [5, 0, 0],
-        [1, 4 / 3, 4 / 3],
-        [1, 4, 4],
-    ]
+    coordinates_exp = [[5, 0, 0], [1, 4 / 3, 4 / 3], [1, 4, 4]]
     orientation_exp = tf.rotation_matrix_z([0, 2 * np.pi / 3, np.pi])
     check_coordinate_system(lcs_0_in_root_csm, orientation_exp, coordinates_exp, True)
 
@@ -1316,11 +1306,7 @@ def test_coordinate_system_manager_interp_time():
         lcs_1_in_lcs_0_csm, lcs_1_in_lcs_0.orientation, lcs_1_in_lcs_0.origin, True
     )
 
-    coordinates_exp = [
-        [5, 0, 0],
-        [9 / 5, 0, 0],
-        [1, 12 / 5, 12 / 5],
-    ]
+    coordinates_exp = [[5, 0, 0], [9 / 5, 0, 0], [1, 12 / 5, 12 / 5]]
     orientation_exp = tf.rotation_matrix_z([0, 2 * np.pi / 5, 4 * np.pi / 5])
     check_coordinate_system(lcs_2_in_root_csm, orientation_exp, coordinates_exp, True)
 

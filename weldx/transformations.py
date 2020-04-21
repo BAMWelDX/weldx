@@ -1,17 +1,18 @@
 """Contains methods and classes for coordinate transformations."""
 
-from typing import Union, List, Hashable
-from dataclasses import dataclass
-from copy import deepcopy
 import collections.abc as cl
-import weldx.utility as ut
+import math
+from copy import deepcopy
+from dataclasses import dataclass
+from typing import Hashable, List, Union
+
+import networkx as nx
 import numpy as np
 import pandas as pd
 import xarray as xr
-import math
-import networkx as nx
 from scipy.spatial.transform import Rotation as Rot
 
+import weldx.utility as ut
 
 # functions -------------------------------------------------------------------
 
@@ -637,9 +638,7 @@ class CoordinateSystemManager:
         coordinate_system_name: Hashable
         data: xr.DataArray
 
-    def __init__(
-        self, root_coordinate_system_name: Hashable,
-    ):
+    def __init__(self, root_coordinate_system_name: Hashable):
         """
         Construct a coordinate system manager.
 
