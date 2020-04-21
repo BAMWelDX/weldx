@@ -1,6 +1,7 @@
 """Contains methods and classes for coordinate transformations."""
 
 from typing import Union, List, Hashable
+from copy import deepcopy
 import weldx.utility as ut
 import numpy as np
 import pandas as pd
@@ -879,31 +880,43 @@ class CoordinateSystemManager:
 
         return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
 
-    def interp_time(self, times):
+    def interp_time(self, time, in_place: bool = False):
         """
-        Interpolates the coordinate systems in time and return a new instance.
+        Interpolates the coordinate systems in time.
 
-        :param times: Series of times.
+        :param time: Time data.
+        :param in_place: If 'True' the interpolation is performed in place, otherwise a
+        new instance is returned.
         :return: Coordinate system manager with interpolated data
         """
-        graph = self.graph.copy()
-        for edge in graph.edges:
-            graph.edges[edge]["lcs"] = graph.edges[edge]["lcs"].interp_time(times)
-        return CoordinateSystemManager(graph=graph)
+        if in_place:
+            for edge in self._graph.edges:
+                self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
+                    "lcs"
+                ].interp_time(time)
+            return self
+        else:
+            return deepcopy(self).interp_time(time, True)
 
-    def interp_time_like(self, reference: LocalCoordinateSystem):
+    def interp_time_like(
+        self, reference: LocalCoordinateSystem, in_place: bool = False
+    ):
         """
-        Interpolates the coordinate systems in time and return a new instance.
+        Interpolates the coordinate systems in time.
 
         :param reference: Reference for the interpolation.
+        :param in_place: If 'True' the interpolation is performed in place, otherwise a
+        new instance is returned.
         :return: Copy of CSM with interpolated edges
         """
-        graph = self.graph.copy()
-        for edge in graph.edges:
-            graph.edges[edge]["lcs"] = graph.edges[edge]["lcs"].interp_time_like(
-                reference
-            )
-        return CoordinateSystemManager(graph=graph)
+        if in_place:
+            for edge in self._graph.edges:
+                self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
+                    "lcs"
+                ].interp_time_like(reference)
+            return self
+        else:
+            return deepcopy(self).interp_time_like(reference, True)
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """
