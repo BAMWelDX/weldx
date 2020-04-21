@@ -1423,7 +1423,10 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
 
     assert csm.get_data("my data").equals(data_xr)
     assert csm.get_data("my data", "lcs_3").equals(data_xr)
-    assert csm.get_data("my data", "lcs_1").equals(data_xr_exp)
+
+    transformed_data = csm.get_data("my data", "lcs_1")
+    assert ut.matrix_is_close(transformed_data.data, data_xr_exp.data)
+    # TODO: Also check coords and dims
 
     # exceptions --------------------------------
     # assignment - invalid data name
