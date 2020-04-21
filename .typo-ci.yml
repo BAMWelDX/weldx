@@ -37,6 +37,10 @@ excluded_words:
   - ndarray
   - ndim
   - vstack
+  # pandas --------------------------------------
+  - isin
+  - isnan
+  - fillna
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat

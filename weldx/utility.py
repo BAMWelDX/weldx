@@ -281,7 +281,7 @@ def xr_fill_all(da, order="bf"):
 def xr_interp_like(
     da1: xr.DataArray,
     da2: Union[xr.DataArray, Dict[str, Any]],
-    interp_coords: bool = None,
+    interp_coords: List[str] = None,
     broadcast_missing: bool = False,
     fillna: bool = True,
     method: str = "linear",
