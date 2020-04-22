@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
-from asdf.yamlutil import custom_tree_to_tagged_tree  # noqa: F401
-from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import dict_to_tagged_tree
 
 import pint
+from asdf.yamlutil import custom_tree_to_tagged_tree  # noqa: F401
+
+from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
 
 __all__ = ["BaseMetal", "BaseMetalType"]
 

@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import pandas
 import pandas as pd
+from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 from weldx.asdf.types import WeldxType
-
-from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 __all__ = ["TimedeltaIndexType"]
 
@@ -19,7 +17,7 @@ class TimedeltaIndexType(WeldxType):
 
     name = "time/timedeltaindex"
     version = "1.0.0"
-    types = [pandas.TimedeltaIndex]
+    types = [pd.TimedeltaIndex]
 
     @classmethod
     def to_tree(cls, node: pd.TimedeltaIndex, ctx):

@@ -1,12 +1,10 @@
 # Licensed under a 3-clause BSD style license - see LICENSE
 # -*- coding: utf-8 -*-
 
-import pandas
 import pandas as pd
+from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 from weldx.asdf.types import WeldxType
-
-from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 __all__ = ["TimestampType"]
 
@@ -18,7 +16,7 @@ class TimestampType(WeldxType):
 
     name = "time/timestamp"
     version = "1.0.0"
-    types = [pandas.Timestamp]
+    types = [pd.Timestamp]
 
     @classmethod
     def to_tree(cls, node: pd.Timestamp, ctx):

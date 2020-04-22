@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import pint
-
-from weldx import Q_
-from weldx.asdf.types import WeldxAsdfType
-
 from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
+
+from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.asdf.types import WeldxAsdfType
 
 __all__ = ["PintQuantityType"]
 

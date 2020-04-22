@@ -1,13 +1,13 @@
 """<DOCSTRING>"""
 
-import pint
-import numpy as np
-from dataclasses import dataclass
-from dataclasses import field
+from dataclasses import dataclass, field
 from typing import List
 
+import numpy as np
+import pint
+
 import weldx.geometry as geo
-from weldx import Q_
+from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import dict_to_tagged_tree
 

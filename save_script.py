@@ -2,7 +2,7 @@
 
 import asdf
 
-from weldx import Q_
+from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
 from weldx.asdf.tags.weldx.core.groove import get_groove
 

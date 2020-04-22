@@ -3,20 +3,20 @@
 import numpy as np
 
 import weldx.geometry as geo
-from weldx import Q_
+from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.tags.weldx.core.groove import (
-    VGroove,
+    DHUGroove,
+    DHVGroove,
+    DUGroove,
+    DVGroove,
+    FFGroove,
+    HUGroove,
+    HVGroove,
+    IGroove,
     UGroove,
     UVGroove,
-    IGroove,
+    VGroove,
     VVGroove,
-    HVGroove,
-    HUGroove,
-    DVGroove,
-    DUGroove,
-    DHVGroove,
-    DHUGroove,
-    FFGroove,
 )
 
 

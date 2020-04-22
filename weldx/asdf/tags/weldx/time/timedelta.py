@@ -1,12 +1,10 @@
 # Licensed under a 3-clause BSD style license - see LICENSE
 # -*- coding: utf-8 -*-
 
-import pandas
 import pandas as pd
+from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 from weldx.asdf.types import WeldxType
-
-from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 __all__ = ["TimedeltaType"]
 
@@ -18,7 +16,7 @@ class TimedeltaType(WeldxType):
 
     name = "time/timedelta"
     version = "1.0.0"
-    types = [pandas.Timedelta]
+    types = [pd.Timedelta]
 
     @classmethod
     def to_tree(cls, node: pd.Timedelta, ctx):

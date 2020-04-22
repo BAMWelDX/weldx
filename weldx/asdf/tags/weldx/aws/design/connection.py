@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
+
 from asdf.yamlutil import custom_tree_to_tagged_tree
+
 from weldx.asdf.types import WeldxType
 
 from .joint_penetration import JointPenetration
