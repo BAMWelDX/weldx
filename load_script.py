@@ -31,7 +31,7 @@ else:
 
 if isinstance(opened["test003"], IGroove):
     print(opened["test003"])
-    plot_groove(opened["test003"])
+    opened["test003"].plot()
 else:
     print("false")
 

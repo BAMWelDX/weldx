@@ -520,6 +520,35 @@ class IGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
 
+    def plot(
+        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+    ):
+        """Plot a 2D-Profile."""
+        profile = self.to_profile()
+        if title is None:
+            title = self.__class__
+        profile.plot(title, raster_width, axis, grid, line_style)
+
+    def to_profile(self, width_default=Q_(5, "mm")):
+        """Calculate a Profile."""
+        t = self.t.to("mm").magnitude
+        b = self.b.to("mm").magnitude
+        width = width_default.to("mm").magnitude
+
+        # x-values
+        x_value = [-width, 0, 0, -width]
+        # y-values
+        y_value = [0, 0, t, t]
+        segment_list = ["line", "line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r])
+
 
 @dataclass
 class HVGroove:
