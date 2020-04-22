@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from typing import List  # noqa: F401
-
-from asdf.yamlutil import custom_tree_to_tagged_tree
+from typing import List
 
 from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
 
 from .gas_component import GasComponent
 
@@ -30,15 +29,8 @@ class ShieldingGasTypeType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        # convert to tagged tree
-        tree_full = dict(
-            gas_component=custom_tree_to_tagged_tree(node.gas_component, ctx),
-            common_name=custom_tree_to_tagged_tree(node.common_name, ctx),
-            designation=custom_tree_to_tagged_tree(node.designation, ctx),
-        )
-
-        # drop None values
-        tree = {k: v for (k, v) in tree_full.items() if v is not None}
+        """convert to tagged tree and remove all None entries from node dictionary"""
+        tree = dict_to_tagged_tree(node, ctx)
         return tree
 
     @classmethod

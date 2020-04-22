@@ -1,8 +1,6 @@
 from dataclasses import dataclass
-from typing import List  # noqa: F401
 
 import pint
-from asdf.yamlutil import custom_tree_to_tagged_tree  # noqa: F401
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import dict_to_tagged_tree
@@ -42,7 +40,7 @@ class BaseMetalType(WeldxType):
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node, ctx):
+    def to_tree(cls, node: BaseMetal, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
         tree = dict_to_tagged_tree(node, ctx)
         return tree

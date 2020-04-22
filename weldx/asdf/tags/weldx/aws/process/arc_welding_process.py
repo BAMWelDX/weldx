@@ -1,9 +1,7 @@
 from dataclasses import dataclass
-from typing import List  # noqa: F401
-
-from asdf.yamlutil import custom_tree_to_tagged_tree
 
 from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
 
 __all__ = ["ArcWeldingProcess", "ArcWeldingProcessType"]
 
@@ -73,14 +71,8 @@ class ArcWeldingProcessType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        # convert to tagged tree
-        tree_full = dict(
-            name=custom_tree_to_tagged_tree(node.name, ctx),
-            abbreviation=custom_tree_to_tagged_tree(node.abbreviation, ctx),
-        )
-
-        # drop None values
-        tree = {k: v for (k, v) in tree_full.items() if v is not None}
+        """convert to tagged tree and remove all None entries from node dictionary"""
+        tree = dict_to_tagged_tree(node, ctx)
         return tree
 
     @classmethod

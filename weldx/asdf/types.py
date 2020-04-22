@@ -3,13 +3,15 @@
 
 from asdf.types import CustomType, ExtensionTypeMeta
 
-__all__ = ["WeldxType", "WeldxAsdfType"]
+__all__ = ["WeldxType", "WeldxAsdfType", "_weldx_types", "_weldx_asdf_types"]
 
 _weldx_types = set()
 _weldx_asdf_types = set()
 
 
 class WeldxTypeMeta(ExtensionTypeMeta):
+    """Metaclass to populate _weldx_types and _weldx_asdf_types."""
+
     def __new__(mcls, name, bases, attrs):
         cls = super().__new__(mcls, name, bases, attrs)
 

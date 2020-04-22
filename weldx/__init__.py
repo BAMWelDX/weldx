@@ -1,5 +1,7 @@
 import warnings
 
+__all__ = ["geometry", "transformations", "utility", "asdf", "Q_"]
+
 # asdf extensions and tags
 import weldx.asdf
 
@@ -11,8 +13,6 @@ from weldx.constants import WELDX_QUANTITY as Q_
 
 # versioneer
 from ._version import get_versions
-
-__all__ = ["geometry", "transformations", "utility", "asdf", "Q_"]
 
 
 with warnings.catch_warnings():

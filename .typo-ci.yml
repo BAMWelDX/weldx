@@ -20,6 +20,7 @@ excluded_words:
   - pydocstyle
   - matplotlib
   - versioneer
+  - isort
   # matplotlib ----------------------------------
   - pyplot
   - gca

@@ -12,7 +12,7 @@ __all__ = ["TimedeltaIndexType"]
 
 class TimedeltaIndexType(WeldxType):
     """
-    A simple implementation of serializing a single pandas Timedelta.
+    A simple implementation of serializing pandas TimedeltaIndex.
     """
 
     name = "time/timedeltaindex"
@@ -21,7 +21,7 @@ class TimedeltaIndexType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: pd.TimedeltaIndex, ctx):
-        """Serialize timedelta to tree."""
+        """Serialize TimedeltaIndex to tree."""
         tree = {}
         if node.inferred_freq is not None:
             tree["freq"] = custom_tree_to_tagged_tree(node.inferred_freq, ctx)
@@ -39,7 +39,7 @@ class TimedeltaIndexType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Construct timedelta from tree."""
+        """Construct TimedeltaIndex from tree."""
         if "freq" in tree:
             return pd.timedelta_range(
                 start=tree["start"], end=tree["end"], freq=tree["freq"]
