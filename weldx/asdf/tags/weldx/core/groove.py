@@ -768,6 +768,72 @@ class DUGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.7"])
 
+    def plot(
+        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+    ):
+        """Plot a 2D-Profile."""
+        profile = self.to_profile()
+        if title is None:
+            title = self.__class__
+        profile.plot(title, raster_width, axis, grid, line_style)
+
+    def to_profile(self, width_default=Q_(5, "mm")):
+        """Calculate a Profile."""
+        t = self.t.to("mm").magnitude
+        beta_1 = self.beta_1.to("rad").magnitude
+        beta_2 = self.beta_2.to("rad").magnitude
+        R = self.R.to("mm").magnitude
+        R2 = self.R2.to("mm").magnitude
+        b = self.b.to("mm").magnitude
+        c = self.c.to("mm").magnitude
+        if self.h1 is None and self.h2 is None:
+            h1 = (t - c) / 2
+            h2 = (t - c) / 2
+        elif self.h1 is not None and self.h2 is None:
+            h1 = self.h1.to("mm").magnitude
+            h2 = h1
+        elif self.h1 is None and self.h2 is not None:
+            h2 = self.h2.to("mm").magnitude
+            h1 = h2
+        else:
+            h1 = self.h1.to("mm").magnitude
+            h2 = self.h2.to("mm").magnitude
+        width = width_default.to("mm").magnitude
+
+        # Calculations
+        x_upper = R * np.cos(beta_1)
+        y_upper = R * np.sin(beta_1)
+        s_upper = np.tan(beta_1) * (h1 - (R - y_upper))
+        x_lower = R2 * np.cos(beta_2)
+        y_lower = R2 * np.sin(beta_2)
+        s_lower = np.tan(beta_2) * (h2 - (R2 - y_lower))
+
+        # Scaling
+        edge = np.max([x_upper + s_upper, x_lower + s_lower, 0])
+        if width <= edge + 1:
+            # adjustment of the width
+            width = width + edge
+
+        x_value = [-width, -(s_lower + x_lower), -x_lower, 0, 0]
+        y_value = [0, 0, h2 - (R2 - y_lower), h2 - R2, h2]
+        segment_list = ["line", "line", "arc"]
+
+        if c != 0:
+            x_value.append(0)
+            y_value.append(h1 + c)
+            segment_list.append("line")
+
+        x_value += [0, -x_upper, -(s_upper + x_upper), -width]
+        y_value += [h2 + c + R, t - (h1 - (R - y_upper)), t, t]
+        segment_list += ["arc", "line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r])
+
 
 @dataclass
 class DHVGroove:
