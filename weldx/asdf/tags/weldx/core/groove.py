@@ -903,6 +903,46 @@ class DHUGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.11"])
 
+    def plot(
+        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+    ):
+        """Plot a 2D-Profile."""
+        profile = self.to_profile()
+        if title is None:
+            title = self.__class__
+        profile.plot(title, raster_width, axis, grid, line_style)
+
+    def to_profile(self, width_default=Q_(5, "mm")):
+        """Calculate a Profile."""
+        du_profile = DUGroove(
+            self.t,
+            self.beta_1,
+            self.beta_2,
+            self.R,
+            self.R2,
+            self.c,
+            self.h1,
+            self.h2,
+            self.b,
+            self.code_number,
+        ).to_profile(width_default)
+        right_shape = du_profile.shapes[1]
+
+        t = self.t.to("mm").magnitude
+        b = self.b.to("mm").magnitude
+        width_default = width_default.to("mm").magnitude
+        left_shape = geo.Shape()
+        left_shape.add_line_segments(
+            [
+                [-width_default - (b / 2), 0],
+                [-b / 2, 0],
+                [-b / 2, t],
+                [-width_default - (b / 2), t],
+            ]
+        )
+
+        return geo.Profile([left_shape, right_shape])
+
 
 # Frontal Face - Groove
 @dataclass
