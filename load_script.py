@@ -37,7 +37,7 @@ else:
 
 if isinstance(opened["test004"], UVGroove):
     print(opened["test004"])
-    plot_groove(opened["test004"])
+    opened["test004"].plot()
 else:
     print("false")
 
@@ -55,7 +55,7 @@ else:
 
 if isinstance(opened["test007"], HUGroove):
     print(opened["test007"])
-    plot_groove(opened["test007"])
+    opened["test007"].plot()
 else:
     print("false")
 
