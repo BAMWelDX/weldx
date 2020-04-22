@@ -1122,10 +1122,8 @@ class FFGroove:
             )
             return geo.Profile([shape1, shape2])
         else:
-            print(
-                "Wrong code_number. The Code Number has to be one of the following strings:"
-            )
-            print(
+            raise ValueError(
+                "Wrong code_number. The Code Number has to be one of the following strings: "
                 '"1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
             )
 
