@@ -9,9 +9,14 @@ from weldx.asdf.tags.weldx.core.groove import (
     IGroove,
     UVGroove,
     VVGroove,
+    HVGroove,
+    HUGroove,
+    DVGroove,
+    DUGroove,
+    DHVGroove,
+    DHUGroove,
+    FFGroove,
 )
-from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
-from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove, FFGroove
 
 
 opened = asdf.open("testfile.yml", extensions=[WeldxAsdfExtension(), WeldxExtension()])

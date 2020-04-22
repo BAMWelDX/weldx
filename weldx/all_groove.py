@@ -1,18 +1,23 @@
 """provides the calculation of all Groove-Types."""
 
-from weldx import Q_
 import numpy as np
 
 import weldx.geometry as geo
+from weldx import Q_
 from weldx.asdf.tags.weldx.core.groove import (
     VGroove,
     UGroove,
     UVGroove,
     IGroove,
     VVGroove,
+    HVGroove,
+    HUGroove,
+    DVGroove,
+    DUGroove,
+    DHVGroove,
+    DHUGroove,
+    FFGroove,
 )
-from weldx.asdf.tags.weldx.core.groove import HVGroove, HUGroove, DVGroove, DUGroove
-from weldx.asdf.tags.weldx.core.groove import DHVGroove, DHUGroove, FFGroove
 
 
 def groove_to_profile(groove):

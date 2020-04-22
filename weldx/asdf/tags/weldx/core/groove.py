@@ -1,13 +1,13 @@
 """<DOCSTRING>"""
 
 import pint
+import numpy as np
 from dataclasses import dataclass
 from dataclasses import field
 from typing import List
-import numpy as np
 
-from weldx import Q_
 import weldx.geometry as geo
+from weldx import Q_
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import dict_to_tagged_tree
 
@@ -119,7 +119,7 @@ def get_groove(
             t=workpiece_thickness, alpha=groove_angle, b=root_gap, c=root_face
         )
 
-    if groove_type == "UGroove":
+    elif groove_type == "UGroove":
         return UGroove(
             t=workpiece_thickness,
             beta=bevel_angle,
@@ -128,10 +128,10 @@ def get_groove(
             c=root_face,
         )
 
-    if groove_type == "IGroove":
+    elif groove_type == "IGroove":
         return IGroove(t=workpiece_thickness, b=root_gap)
 
-    if groove_type == "UVGroove":
+    elif groove_type == "UVGroove":
         return UVGroove(
             t=workpiece_thickness,
             alpha=groove_angle,
@@ -141,7 +141,7 @@ def get_groove(
             h=root_face,
         )
 
-    if groove_type == "VVGroove":
+    elif groove_type == "VVGroove":
         return VVGroove(
             t=workpiece_thickness,
             alpha=groove_angle,
@@ -151,12 +151,12 @@ def get_groove(
             h=root_face2,
         )
 
-    if groove_type == "HVGroove":
+    elif groove_type == "HVGroove":
         return HVGroove(
             t=workpiece_thickness, beta=bevel_angle, b=root_gap, c=root_face
         )
 
-    if groove_type == "HUGroove":
+    elif groove_type == "HUGroove":
         return HUGroove(
             t=workpiece_thickness,
             beta=bevel_angle,
@@ -165,7 +165,7 @@ def get_groove(
             c=root_face,
         )
 
-    if groove_type == "DoubleVGroove":
+    elif groove_type == "DoubleVGroove":
         return DVGroove(
             t=workpiece_thickness,
             alpha_1=groove_angle,
@@ -176,7 +176,7 @@ def get_groove(
             h2=root_face3,
         )
 
-    if groove_type == "DoubleUGroove":
+    elif groove_type == "DoubleUGroove":
         return DUGroove(
             t=workpiece_thickness,
             beta_1=bevel_angle,
@@ -189,7 +189,7 @@ def get_groove(
             h2=root_face3,
         )
 
-    if groove_type == "DoubleHVGroove":
+    elif groove_type == "DoubleHVGroove":
         return DHVGroove(
             t=workpiece_thickness,
             beta_1=bevel_angle,
@@ -200,7 +200,7 @@ def get_groove(
             b=root_gap,
         )
 
-    if groove_type == "DoubleHUGroove":
+    elif groove_type == "DoubleHUGroove":
         return DHUGroove(
             t=workpiece_thickness,
             beta_1=bevel_angle,
@@ -213,7 +213,7 @@ def get_groove(
             h2=root_face3,
         )
 
-    if groove_type == "FrontalFaceGroove":
+    elif groove_type == "FrontalFaceGroove":
         return FFGroove(
             t_1=workpiece_thickness,
             t_2=workpiece_thickness2,
@@ -223,10 +223,22 @@ def get_groove(
             code_number=code_number,
         )
 
+    else:
+        raise ValueError(f"{groove_type} is not a groove type or not yet implemented.")
+
 
 @dataclass
 class VGroove:
-    """<CLASS DOCSTRING>"""
+    """
+    A Single-V Groove.
+
+    Attributes:
+        t (pint.Quantity): The workpiece thickness.
+        alpha (pint.Quantity): The groove angle.
+        c (pint.Quantity): The root face.
+        b (pint.Quantity): The root opening.
+        code_number (pint.Quantity): The code number of the Norm.
+    """
 
     t: pint.Quantity
     alpha: pint.Quantity
