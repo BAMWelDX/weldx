@@ -227,8 +227,43 @@ def get_groove(
         raise ValueError(f"{groove_type} is not a groove type or not yet implemented.")
 
 
+class BaseGroove:
+    """Generic base class for all groove types."""
+
+    def parameters(self):
+        """Return all not None Parameters."""
+        return {k: v for k, v in self.__dict__.items() if isinstance(v, pint.Quantity)}
+
+    def param_strings(self):
+        """Generate string representation of parameters."""
+        return [f"{k}={v:~}" for k, v in self.parameters().items()]
+
+    def plot(
+        self,
+        title=None,
+        raster_width=0.1,
+        show_params=True,
+        axis="equal",
+        grid=True,
+        line_style=".",
+    ):
+        """Plot a 2D-Profile."""
+        profile = self.to_profile()
+        if title is None:
+            title = _groove_type_to_name[self.__class__]
+
+        if show_params:
+            title = title + "\n" + ", ".join(self.param_strings())
+
+        profile.plot(title, raster_width, axis, grid, line_style)
+
+    def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
+        """Implements profile generation."""
+        raise NotImplementedError(f"to_profile() must be defined in subclass.")
+
+
 @dataclass
-class VGroove:
+class VGroove(BaseGroove):
     """
     A Single-V Groove.
 
@@ -246,16 +281,7 @@ class VGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(2, "mm")):
+    def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         alpha = self.alpha.to("rad").magnitude
@@ -302,7 +328,7 @@ class VGroove:
 
 
 @dataclass
-class VVGroove:
+class VVGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
@@ -313,16 +339,7 @@ class VVGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.7"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(5, "mm")):
+    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         alpha = self.alpha.to("rad").magnitude
@@ -369,7 +386,7 @@ class VVGroove:
 
 
 @dataclass
-class UVGroove:
+class UVGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
@@ -380,16 +397,7 @@ class UVGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.6"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(2, "mm")):
+    def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         alpha = self.alpha.to("rad").magnitude
@@ -434,7 +442,7 @@ class UVGroove:
 
 
 @dataclass
-class UGroove:
+class UGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
@@ -444,16 +452,7 @@ class UGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.8"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(3, "mm")):
+    def to_profile(self, width_default=Q_(3, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         beta = self.beta.to("rad").magnitude
@@ -525,23 +524,14 @@ class UGroove:
 
 
 @dataclass
-class IGroove:
+class IGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(5, "mm")):
+    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         b = self.b.to("mm").magnitude
@@ -563,7 +553,7 @@ class IGroove:
 
 
 @dataclass
-class HVGroove:
+class HVGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
@@ -572,16 +562,7 @@ class HVGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(5, "mm")):
+    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         beta = self.beta.to("rad").magnitude
@@ -625,7 +606,7 @@ class HVGroove:
 
 
 @dataclass
-class HUGroove:
+class HUGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
@@ -635,16 +616,7 @@ class HUGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.11", "2.10"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(5, "mm")):
+    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         beta = self.beta.to("rad").magnitude
@@ -692,7 +664,7 @@ class HUGroove:
 
 # double Grooves
 @dataclass
-class DVGroove:
+class DVGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
@@ -704,16 +676,7 @@ class DVGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(5, "mm")):
+    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         alpha_1 = self.alpha_1.to("rad").magnitude
@@ -766,7 +729,7 @@ class DVGroove:
 
 
 @dataclass
-class DUGroove:
+class DUGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
@@ -779,15 +742,6 @@ class DUGroove:
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.7"])
-
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
 
     def to_profile(self, width_default=Q_(5, "mm")):
         """Calculate a Profile."""
@@ -848,7 +802,7 @@ class DUGroove:
 
 
 @dataclass
-class DHVGroove:
+class DHVGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
@@ -860,16 +814,7 @@ class DHVGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(5, "mm")):
+    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         dv_groove = DVGroove(
             self.t,
@@ -901,7 +846,7 @@ class DHVGroove:
 
 
 @dataclass
-class DHUGroove:
+class DHUGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t: pint.Quantity
@@ -915,16 +860,7 @@ class DHUGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.11"])
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(5, "mm")):
+    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         du_profile = DUGroove(
             self.t,
@@ -958,7 +894,7 @@ class DHUGroove:
 
 # Frontal Face - Groove
 @dataclass
-class FFGroove:
+class FFGroove(BaseGroove):
     """<CLASS DOCSTRING>"""
 
     t_1: pint.Quantity
@@ -969,16 +905,7 @@ class FFGroove:
     b: pint.Quantity = Q_(0, "mm")
     e: pint.Quantity = None
 
-    def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
-    ):
-        """Plot a 2D-Profile."""
-        profile = self.to_profile()
-        if title is None:
-            title = self.__class__
-        profile.plot(title, raster_width, axis, grid, line_style)
-
-    def to_profile(self, width_default=Q_(5, "mm")):
+    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         if (
             self.code_number == "1.12"
