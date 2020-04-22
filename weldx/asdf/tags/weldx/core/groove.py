@@ -692,6 +692,66 @@ class DVGroove:
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
 
+    def plot(
+        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+    ):
+        """Plot a 2D-Profile."""
+        profile = self.to_profile()
+        if title is None:
+            title = self.__class__
+        profile.plot(title, raster_width, axis, grid, line_style)
+
+    def to_profile(self, width_default=Q_(5, "mm")):
+        """Calculate a Profile."""
+        t = self.t.to("mm").magnitude
+        alpha_1 = self.alpha_1.to("rad").magnitude
+        alpha_2 = self.alpha_2.to("rad").magnitude
+        b = self.b.to("mm").magnitude
+        c = self.c.to("mm").magnitude
+        if self.h1 is None and self.h2 is None:
+            h1 = (t - c) / 2
+            h2 = (t - c) / 2
+        elif self.h1 is not None and self.h2 is None:
+            h1 = self.h1.to("mm").magnitude
+            h2 = h1
+        elif self.h1 is None and self.h2 is not None:
+            h2 = self.h2.to("mm").magnitude
+            h1 = h2
+        else:
+            h1 = self.h1.to("mm").magnitude
+            h2 = self.h2.to("mm").magnitude
+        width = width_default.to("mm").magnitude
+
+        # Calculations
+        s_upper = np.tan(alpha_1 / 2) * h1
+        s_lower = np.tan(alpha_2 / 2) * h2
+
+        # Scaling
+        edge = np.min([-s_upper, -s_lower, 0])
+        if width <= -edge + 1:
+            # adjustment of the width
+            width = width - edge
+
+        x_value = [-width, -s_lower, 0]
+        y_value = [0, 0, h2]
+        segment_list = ["line", "line"]
+
+        if c != 0:
+            x_value.append(0)
+            y_value.append(h2 + c)
+            segment_list.append("line")
+
+        x_value += [-s_upper, -width]
+        y_value += [t, t]
+        segment_list += ["line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r])
+
 
 @dataclass
 class DUGroove:

@@ -61,7 +61,7 @@ else:
 
 if isinstance(opened["test008"], DVGroove):
     print(opened["test008"])
-    plot_groove(opened["test008"])
+    opened["test008"].plot()
 else:
     print("false")
 
