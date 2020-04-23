@@ -134,24 +134,6 @@ def swap_list_items(arr, i1, i2):
     return i
 
 
-def as_xarray_dims(input):
-    """
-    Generate empty xarray object with coordinates for interpolation.
-
-    :param input: xarray object, pandas TimeIndex object or dict
-    :return: empty xarray object with coordinates generated from input
-    """
-    # TODO: Reevaluate this branch. Does not return an "empty" object as stated in the
-    #  docstring
-    # if isinstance(input, (xr.DataArray, xr.Dataset)):
-    #    return input
-    if isinstance(input, (pd.DatetimeIndex, pd.TimedeltaIndex)):
-        return xr.DataArray(data=None, dims=["time"], coords={"time": input})
-    elif isinstance(input, dict):
-        return xr.DataArray(data=None, dims=list(input.keys()), coords=input)
-    return None  # TODO: Wouldn't an exception be more appropriate?
-
-
 def get_time_union(list_of_objects):
     """
     Generate a merged union of pd.DatetimeIndex from list of inputs.
@@ -414,9 +396,7 @@ def xr_interp_orientation_in_time(
     :return: Interpolated data
     """
     if "time" not in dsx.coords:
-        return xr_interp_like(
-            dsx, {"time": times}, broadcast_missing=False, fillna=True
-        )
+        return dsx
 
     # extract intersecting times and add time range boundaries of the data set
     times_ds = dsx.time.data
@@ -437,11 +417,10 @@ def xr_interp_orientation_in_time(
     else:
         dsx_out = dsx
 
-    # broadcast boundary values for all times outside the intersection range
-    dsx_out = dsx_out.broadcast_like(as_xarray_dims(times)).bfill("time").ffill("time")
+    # use interp_like to select original time values and correctly fill time dimension
+    dsx_out = xr_interp_like(dsx_out, {"time": times}, fillna=True)
 
-    # Remove inserted boundaries if necessary and return
-    return dsx_out.sel(time=times)
+    return dsx_out
 
 
 def xr_interp_coodinates_in_time(

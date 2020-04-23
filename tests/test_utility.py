@@ -257,30 +257,3 @@ def test_xr_interp_like():
         {"t": pd.timedelta_range(start="3s", end="7s", freq="125ms", closed="left")},
     )
     assert np.all(test == np.arange(3, 7, 0.125))
-
-
-def test_as_xarray_dims():
-    """
-    Test the as_xarray_dims function.
-
-    :return: ---
-    """
-    time = pd.date_range("2042-01-01", periods=3, freq="2D")
-    time_dsx = ut.as_xarray_dims(time)
-
-    assert time_dsx.dims == tuple(["time"])
-    assert time_dsx.coords.dims == tuple(["time"])
-    assert np.all(pd.DatetimeIndex(time_dsx.coords["time"].data) == time)
-    assert np.all(time_dsx.data == [None, None, None])
-
-    dict_dsx = ut.as_xarray_dims({"a": [1, 2], "b": ["u", "v", "w"]})
-    assert dict_dsx.dims == tuple(["a", "b"])
-    assert dict_dsx.coords.dims == tuple(["a", "b"])
-    assert np.all(dict_dsx.coords["a"].data == [1, 2])
-    assert np.all(dict_dsx.coords["b"].data == ["u", "v", "w"])
-    assert np.all(time_dsx.data == [[None, None, None], [None, None, None]])
-
-    assert ut.as_xarray_dims("no") is None
-
-
-test_as_xarray_dims()
