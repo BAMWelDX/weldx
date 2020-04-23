@@ -568,7 +568,6 @@ class LocalCoordinateSystem:
 
         :return: DateTimeIndex-like time union
         """
-
         if "time" in self._dataset.coords:
             return pd.DatetimeIndex(self._dataset.time.data)
         return None
@@ -635,6 +634,8 @@ class CoordinateSystemManager:
 
     @dataclass
     class CoordinateSystemData:
+        """Class that stores data and the coordinate system, the data is assigned to."""
+
         coordinate_system_name: Hashable
         data: xr.DataArray
 
@@ -948,8 +949,8 @@ class CoordinateSystemManager:
         """
         Get the time union of all or selected local coordinate systems.
 
-       :param list_of_edges: If not None, the union is only calculated from the
-       specified edges
+        :param list_of_edges: If not None, the union is only calculated from the
+        specified edges
         :return: Time union
         """
         edges = self.graph.edges

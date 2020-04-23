@@ -161,7 +161,7 @@ def get_time_union(list_of_objects):
     :param list_of_objects: list of input objects to merge
     :return: pd.DatetimeIndex with merge times
     """
-
+    # TODO: make non-nested function
     def _get_time(input):
         if isinstance(input, (pd.DatetimeIndex, pd.TimedeltaIndex)):
             return input
@@ -365,7 +365,14 @@ def xr_interp_like(
     return da.sel(sel_coords)
 
 
-def xr_3d_vector(data, times=None):
+def xr_3d_vector(data, times=None) -> xr.DataArray:
+    """
+    Create an xarray 3d vector with correctly named dimensions and coordinates.
+
+    :param data: Data
+    :param times: Optional time data
+    :return: xarray.DataArray
+    """
     if times is not None:
         dsx = xr.DataArray(
             data=data, dims=["time", "c"], coords={"time": times, "c": ["x", "y", "z"]}
@@ -376,6 +383,13 @@ def xr_3d_vector(data, times=None):
 
 
 def xr_3d_matrix(data, times=None):
+    """
+    Create an xarray 3d matrix with correctly named dimensions and coordinates.
+
+    :param data: Data
+    :param times: Optional time data
+    :return: xarray.DataArray
+    """
     if times is not None:
         dsx = xr.DataArray(
             data=data,
@@ -392,6 +406,13 @@ def xr_3d_matrix(data, times=None):
 def xr_interp_orientation_in_time(
     dsx: xr.DataArray, times: pd.DatetimeIndex
 ) -> xr.DataArray:
+    """
+    Interpolate an xarray DataArray that represents orientation data in time.
+
+    :param dsx: xarray.DataArray
+    :param times: Time data
+    :return: Interpolated data
+    """
     if "time" not in dsx.coords:
         return xr_interp_like(
             dsx, {"time": times}, broadcast_missing=False, fillna=True
@@ -426,6 +447,13 @@ def xr_interp_orientation_in_time(
 def xr_interp_coodinates_in_time(
     dsx: xr.DataArray, times: pd.DatetimeIndex
 ) -> xr.DataArray:
+    """
+    Interpolate an xarray DataArray that represents 3d coordinates in time.
+
+    :param dsx: xarray.DataArray
+    :param times: Time data
+    :return: Interpolated data
+    """
     return xr_interp_like(
         dsx, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
     )
@@ -443,6 +471,11 @@ class WeldxAccessor:
     """
 
     def __init__(self, xarray_obj):
+        """
+        Construct a WeldX xarray object.
+
+        :param xarray_obj: xarray object
+        """
         self._obj = xarray_obj
 
     def interp_like(self, da, *args, **kwargs):

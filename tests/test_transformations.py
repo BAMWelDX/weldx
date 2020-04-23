@@ -380,13 +380,29 @@ def test_reflection_sign():
 # test cartesian coordinate system class --------------------------------------
 
 
-def check_coordinate_system_time(lcs, expected_time):
+def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
+    """
+    Check if the time component of a LocalCoordinateSystem is as expected.
+
+    :param lcs:Local coordinate system class
+    :param expected_time: Expected time
+    :return: ---
+    """
     assert np.all(lcs.time == expected_time)
 
 
 def check_coordinate_system_basis(
     basis: xr.DataArray, basis_expected: np.ndarray, positive_orientation_expected: bool
 ):
+    """
+    Check if the basis of a local coordinate system is as expected.
+
+    :param basis: Basis
+    :param basis_expected: Expected basis
+    :param positive_orientation_expected: True, if the orientation is expected to be
+    positive. False otherwise.
+    :return: ---
+    """
     # test expected positive orientation
     det = np.linalg.det(basis.sel(v=[2, 0, 1]))
     assert np.all((det > 0) == positive_orientation_expected)
@@ -1096,7 +1112,6 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
 
     :return: ---
     """
-
     # define some coordinate systems
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
     lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
