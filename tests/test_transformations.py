@@ -3,7 +3,6 @@
 import weldx.transformations as tf
 import weldx.utility as ut
 import numpy as np
-import networkx as nx
 import pandas as pd
 import xarray as xr
 import pytest
@@ -762,13 +761,13 @@ def test_coordinate_system_addition_and_subtraction():
     )
 
     # both fully time dependent, different times - addition only
-    """ 
-    INFO: The subtraction can not be tested as in the previous tests by subtracting the 
-    added coordinate system and comparing the result to the initial one. The problem is, 
-    that the necessary interpolated values depend on the reference coordinate system, 
-    the interpolation is performed in. Since the reference systems differ between the 
-    addition and the subsequent subtraction, the result can not be compared to the 
-    initial coordinate system. 
+    """
+    INFO: The subtraction can not be tested as in the previous tests by subtracting the
+    added coordinate system and comparing the result to the initial one. The problem is,
+    that the necessary interpolated values depend on the reference coordinate system,
+    the interpolation is performed in. Since the reference systems differ between the
+    addition and the subsequent subtraction, the result can not be compared to the
+    initial coordinate system.
     """
 
     lcs0_in_base = tf.LocalCoordinateSystem(
