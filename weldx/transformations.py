@@ -830,7 +830,9 @@ class CoordinateSystemManager:
         """
         Transform spatial data from one coordinate system to another.
 
-        :param data:
+        :param data: Pointcloud input as array-like with cartesian x,y,z-data stored in
+        the last dimension. When using xarray objects, the vector dimension is expected
+        to be named "c" and have coordinates "x","y","z"
         :param source_coordinate_system_name: Name of the coordinate system the data is
         defined in
         :param target_coordinate_system_name: Name of the coordinate system the data
@@ -842,18 +844,14 @@ class CoordinateSystemManager:
         )
         if isinstance(data, xr.DataArray):
             mul = ut.xr_matmul(
-                lcs.orientation,
-                data,
-                dims_a=["c", "v"],
-                dims_b=["c", "n"],
-                dims_out=["c", "n"],
+                lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
             )
             return mul + lcs.location
         else:
             data = ut.to_float_array(data)
             rotation = lcs.orientation.data
-            translation = lcs.location.data[:, np.newaxis]
-            return np.matmul(rotation, data) + translation
+            translation = lcs.location.data
+            return ut.mat_vec_mul(rotation, data) + translation
 
     @property
     def graph(self) -> nx.DiGraph:

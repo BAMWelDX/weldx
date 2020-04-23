@@ -1357,8 +1357,8 @@ def test_coordinate_system_manager_transform_data():
     csm.add_coordinate_system("lcs_2", "root", lcs2_in_root)
     csm.add_coordinate_system("lcs_3", "lcs_2", lcs3_in_lcs2)
 
-    data_list = [[1, 2, -1, 3], [-3, 4, 2, -4], [-1, -1, 3, 2]]
-    data_exp = np.array([[-5, -5, -9, -8], [-2, -9, -7, -1], [-4, -5, -2, -6]])
+    data_list = [[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]]
+    data_exp = np.array([[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]])
 
     # input list
     data_list_transformed = csm.transform_data(data_list, "lcs_3", "lcs_1")
@@ -1369,8 +1369,12 @@ def test_coordinate_system_manager_transform_data():
     data_numpy_transformed = csm.transform_data(data_np, "lcs_3", "lcs_1")
     assert ut.matrix_is_close(data_numpy_transformed, data_exp)
 
+    # input single numpy vector
+    data_numpy_transformed = csm.transform_data(data_np[0, :], "lcs_3", "lcs_1")
+    assert ut.vector_is_close(data_numpy_transformed, data_exp[0, :])
+
     # input xarray
-    data_xr = xr.DataArray(data=data_np, dims=["c", "n"], coords={"c": ["x", "y", "z"]})
+    data_xr = xr.DataArray(data=data_np, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
     data_xr_transformed = csm.transform_data(data_xr, "lcs_3", "lcs_1")
     assert ut.matrix_is_close(data_xr_transformed.data, data_exp)
 
@@ -1405,14 +1409,14 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
     csm.add_coordinate_system("lcs_3", "lcs_2", lcs3_in_lcs2)
 
     data_xr = xr.DataArray(
-        data=[[1, 2, -1, 3], [-3, 4, 2, -4], [-1, -1, 3, 2]],
-        dims=["c", "n"],
+        data=[[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
+        dims=["n", "c"],
         coords={"c": ["x", "y", "z"]},
     )
 
     data_xr_exp = xr.DataArray(
-        data=[[-5, -5, -9, -8], [-2, -9, -7, -1], [-4, -5, -2, -6]],
-        dims=["c", "n"],
+        data=[[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
+        dims=["n", "c"],
         coords={"c": ["x", "y", "z"]},
     )
 
