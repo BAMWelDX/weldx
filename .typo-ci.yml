@@ -36,6 +36,7 @@ excluded_words:
   - matmul
   - ndarray
   - ndim
+  - newaxis
   - vstack
   # pandas --------------------------------------
   - isin

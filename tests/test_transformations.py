@@ -1435,7 +1435,4 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
         csm.get_data("my data", "not there")
 
 
-# TODO: remove
-test_coordinate_system_manager_data_assignment_and_retrieval()
-
 # TODO: Test time dependent get_local_coordinate_system

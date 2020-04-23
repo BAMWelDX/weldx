@@ -141,21 +141,23 @@ def as_xarray_dims(input):
     :param input: xarray object, pandas TimeIndex object or dict
     :return: empty xarray object with coordinates generated from input
     """
-    if isinstance(input, (xr.DataArray, xr.Dataset)):
-        return input
-    elif isinstance(input, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+    # TODO: Reevaluate this branch. Does not return an "empty" object as stated in the
+    #  docstring
+    # if isinstance(input, (xr.DataArray, xr.Dataset)):
+    #    return input
+    if isinstance(input, (pd.DatetimeIndex, pd.TimedeltaIndex)):
         return xr.DataArray(data=None, dims=["time"], coords={"time": input})
     elif isinstance(input, dict):
         return xr.DataArray(data=None, dims=list(input.keys()), coords=input)
-    return None
+    return None  # TODO: Wouldn't an exception be more appropriate?
 
 
 def get_time_union(list_of_objects):
     """
-    Generate a merged union of pd.DatatimeIndex from list of inputs.
+    Generate a merged union of pd.DatetimeIndex from list of inputs.
 
     The functions tries to merge common inputs that are "time-like" or might have time
-    coordinates such as xarrray objects, tf.LocalCoordinateSystem and other time objects
+    coordinates such as xarray objects, tf.LocalCoordinateSystem and other time objects
     :param list_of_objects: list of input objects to merge
     :return: pd.DatetimeIndex with merge times
     """
