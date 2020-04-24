@@ -419,7 +419,7 @@ def xr_interp_orientation_in_time(
         )
         dsx_out = xr_3d_matrix(rotations_interp.as_matrix(), times_intersect)
     else:
-        # TODO: this case ist not really well defined, maybe avoid?
+        # TODO: this case is not really well defined, maybe avoid?
         dsx_out = dsx
 
     # use interp_like to select original time values and correctly fill time dimension
