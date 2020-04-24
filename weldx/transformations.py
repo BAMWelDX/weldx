@@ -229,6 +229,8 @@ class LocalCoordinateSystem:
         vectors. So each orthogonal transformation matrix can also be
         provided as basis.
         :param origin: Position of the origin
+        :param time: Time data for time dependent coordinate systems
+        :param construction_checks: If 'True', the validity of the data will be verified
         :return: Cartesian coordinate system
         """
         if construction_checks:
@@ -371,7 +373,7 @@ class LocalCoordinateSystem:
         cls, sequence, angles, degrees=False, origin=None, time=None
     ) -> "LocalCoordinateSystem":
         """
-        Construct a cartesian coordinate system from an euler sequence.
+        Construct a local coordinate system from an euler sequence.
 
         This function uses scipy.spatial.transform.Rotation.from_euler method to define
         the coordinate systems orientation. Take a look at it's documentation, if some
@@ -396,6 +398,7 @@ class LocalCoordinateSystem:
         :param degrees: If True, then the given angles are assumed to be in degrees.
         Default is False.
         :param origin: Position of the origin
+        :param time: Time data for time dependent coordinate systems
         :return: Local coordinate system
         :return:
         """
@@ -407,10 +410,11 @@ class LocalCoordinateSystem:
         cls, orientation, origin=None, time=None
     ) -> "LocalCoordinateSystem":
         """
-        Construct a cartesian coordinate system from orientation matrix.
+        Construct a local coordinate system from orientation matrix.
 
         :param orientation: Orthogonal transformation matrix
         :param origin: Position of the origin
+        :param time: Time data for time dependent coordinate systems
         :return: Local coordinate system
         """
         return cls(orientation, origin=origin, time=time)
@@ -420,13 +424,14 @@ class LocalCoordinateSystem:
         cls, vec_x, vec_y, vec_z, origin=None, time=None
     ) -> "LocalCoordinateSystem":
         """
-        Construct a cartesian coordinate system from 3 basis vectors.
+        Construct a local coordinate system from 3 basis vectors.
 
         :param vec_x: Vector defining the x-axis
         :param vec_y: Vector defining the y-axis
         :param vec_z: Vector defining the z-axis
         :param origin: Position of the origin
-        :return: Cartesian coordinate system
+        :param time: Time data for time dependent coordinate systems
+        :return: Local coordinate system
         """
         basis = np.transpose([vec_x, vec_y, vec_z])
         return cls(basis, origin=origin, time=time)
@@ -443,7 +448,8 @@ class LocalCoordinateSystem:
         :param positive_orientation: Set to True if the orientation should
         be positive and to False if not
         :param origin: Position of the origin
-        :return: Cartesian coordinate system
+        :param time: Time data for time dependent coordinate systems
+        :return: Local coordinate system
         """
         vec_z = cls._calculate_orthogonal_axis(vec_x, vec_y) * cls._sign_orientation(
             positive_orientation
@@ -464,7 +470,8 @@ class LocalCoordinateSystem:
         :param positive_orientation: Set to True if the orientation should
         be positive and to False if not
         :param origin: Position of the origin
-        :return: Cartesian coordinate system
+        :param time: Time data for time dependent coordinate systems
+        :return: Local coordinate system
         """
         vec_x = cls._calculate_orthogonal_axis(vec_y, vec_z) * cls._sign_orientation(
             positive_orientation
@@ -485,7 +492,8 @@ class LocalCoordinateSystem:
         :param positive_orientation: Set to True if the orientation should
         be positive and to False if not
         :param origin: Position of the origin
-        :return: Cartesian coordinate system
+        :param time: Time data for time dependent coordinate systems
+        :return: Local coordinate system
         """
         vec_y = cls._calculate_orthogonal_axis(vec_z, vec_x) * cls._sign_orientation(
             positive_orientation
@@ -567,7 +575,7 @@ class LocalCoordinateSystem:
         return self.dataset.origin
 
     @property
-    def time(self) -> pd.DatetimeIndex:
+    def time(self) -> Union[pd.DatetimeIndex, None]:
         """
         Get the time union of the local coordinate system (or None if system is static).
 
