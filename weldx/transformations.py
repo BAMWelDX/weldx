@@ -101,7 +101,7 @@ def orientation_point_plane_containing_origin(point, p_a, p_b):
         or math.isclose(np.linalg.norm(p_b), 0)
         or math.isclose(np.linalg.norm(p_b - p_a), 0)
     ):
-        raise Exception("One or more points describing the plane are identical.")
+        raise ValueError("One or more points describing the plane are identical.")
 
     return np.sign(np.linalg.det([p_a, p_b, point]))
 
@@ -142,7 +142,7 @@ def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
     :return: True or False
     """
     if math.isclose(np.dot(vec_u, vec_u), 0) or math.isclose(np.dot(vec_v, vec_v), 0):
-        raise Exception("One or both vectors have zero length.")
+        raise ValueError("One or both vectors have zero length.")
 
     return math.isclose(np.dot(vec_u, vec_v), 0, abs_tol=tolerance)
 
@@ -187,7 +187,7 @@ def reflection_sign(matrix):
     sign = int(np.sign(np.linalg.det(matrix)))
 
     if sign == 0:
-        raise Exception("Invalid transformation")
+        raise ValueError("Invalid transformation")
 
     return sign
 
@@ -240,7 +240,7 @@ class LocalCoordinateSystem:
                 origin = np.array([0, 0, 0])
 
             if time is not None and not isinstance(time, pd.DatetimeIndex):
-                raise Exception("time must be an instance of pandas.DateTimeIndex")
+                raise TypeError("time must be an instance of pandas.DateTimeIndex")
 
             if not isinstance(basis, xr.DataArray):
                 if not isinstance(basis, np.ndarray):
@@ -283,7 +283,7 @@ class LocalCoordinateSystem:
 
             # vectorize test if orthogonal
             if not ut.xr_is_orthogonal_matrix(basis, dims=["c", "v"]):
-                raise Exception("Basis vectors must be orthogonal")
+                raise ValueError("Basis vectors must be orthogonal")
 
         origin.name = "origin"
         basis.name = "basis"
@@ -589,7 +589,7 @@ class LocalCoordinateSystem:
         :return: Coordinate system with interpolated data
         """
         if not isinstance(time, pd.DatetimeIndex):
-            raise Exception("Invalid parameter type.")
+            raise TypeError("Invalid parameter type.")
         basis = ut.xr_interp_orientation_in_time(self.basis, time)
         origin = ut.xr_interp_coodinates_in_time(self.origin, time)
 
@@ -605,12 +605,12 @@ class LocalCoordinateSystem:
         :return: Coordinate system with interpolated data
         """
         if not isinstance(refernce, LocalCoordinateSystem):
-            raise Exception("Invalid reference type")
+            raise TypeError("Invalid reference type")
         if refernce.time is not None:
             times = refernce.time
             return self.interp_time(times)
         else:
-            raise Exception("Reference coordinate system has no time component")
+            raise ValueError("Reference coordinate system has no time component")
 
     def invert(self) -> "LocalCoordinateSystem":
         """
@@ -677,7 +677,7 @@ class CoordinateSystemManager:
         :return: ---
         """
         if not self.has_coordinate_system(coordinate_system_name):
-            raise Exception(
+            raise ValueError(
                 "There is no coordinate system with name " + str(coordinate_system_name)
             )
 
@@ -690,9 +690,9 @@ class CoordinateSystemManager:
         :return: ---
         """
         if not isinstance(coordinate_system_name, cl.Hashable):
-            raise Exception("The coordinate system name must be a hashable type.")
+            raise TypeError("The coordinate system name must be a hashable type.")
         if self.has_coordinate_system(coordinate_system_name):
-            raise Exception(
+            raise ValueError(
                 "There already is a coordinate system with name "
                 + str(coordinate_system_name)
             )
@@ -716,7 +716,7 @@ class CoordinateSystemManager:
         :return: ---
         """
         if not isinstance(local_coordinate_system, LocalCoordinateSystem):
-            raise Exception(
+            raise TypeError(
                 "'local_coordinate_system' must be an instance of "
                 + "weldx.transformations.LocalCoordinateSystem"
             )
@@ -746,7 +746,7 @@ class CoordinateSystemManager:
         # - what happens during cal of time interpolation functions with data? Also
         #   interpolated or not?
         if not isinstance(data_name, cl.Hashable):
-            raise Exception("The data name must be a hashable type.")
+            raise TypeError("The data name must be a hashable type.")
         self._check_coordinate_system_exists(coordinate_system_name)
 
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)

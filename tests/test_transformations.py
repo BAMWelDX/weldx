@@ -1382,9 +1382,9 @@ def test_coordinate_system_manager_transform_data():
 
     # exceptions --------------------------------
     # names not in csm
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         csm.transform_data(data_xr, "not present", "lcs_1")
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         csm.transform_data(data_xr, "lcs_3", "not present")
 
     # data is not compatible
@@ -1434,10 +1434,10 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
 
     # exceptions --------------------------------
     # assignment - invalid data name
-    with pytest.raises(Exception):
+    with pytest.raises(TypeError):
         csm.assign_data(data_xr, {"wrong"}, "root")
     # assignment - coordinate system does not exist
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         csm.assign_data(data_xr, "some data", "not there")
     # TODO: Unsupported data type ---> no spatial component
 

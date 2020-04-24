@@ -292,7 +292,6 @@ def xr_interp_like(
         sel_coords = da2
 
     if interp_coords is not None:
-        # raise NotImplementedError("Interface for interp_coords not yet implemented.")
         sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
 
     # create a new (empty) temporary dataset to use for interpolation
