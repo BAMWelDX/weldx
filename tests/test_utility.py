@@ -250,7 +250,7 @@ def test_xr_interp_like():
         test.transpose(..., "a", "b") == a_new[..., np.newaxis] @ b_new[np.newaxis, ...]
     )
 
-    # tests with time dtypes
+    # tests with time data types
     # TODO: add more complex test examples
     t = pd.timedelta_range(start="10s", end="0s", freq="-1s", closed="left")
     da_t = xr.DataArray(np.arange(10, 0, -1), dims=["t"], coords={"t": t})

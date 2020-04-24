@@ -40,9 +40,13 @@ excluded_words:
   - newaxis
   - vstack
   # pandas / xarray -----------------------------
+  - bfill
+  - idxmax
+  - idxmin
   - isel
   - isin
   - isnan
+  - ffill
   - fillna
   - sel
   # jupyter notebooks ---------------------------
@@ -52,10 +56,15 @@ excluded_words:
   - ipynb
   - ipywidgets
   - ipython
+  # scipy ---------------------------------------
+  - Slerp
   # other ---------------------------------------
   - addopts
   - csm
   - coords
+  - dsx
+  - dtypes
+  - interp
   - isort
   - linearization
   - xyz
