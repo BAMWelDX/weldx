@@ -761,7 +761,7 @@ def test_coordinate_system_addition_and_subtraction():
     )
 
     # both fully time dependent, different times - addition only
-    """ INFO: 
+    """ INFO:
     The subtraction can not be tested as in the previous tests by subtracting the
     added coordinate system and comparing the result to the initial one. The problem is,
     that the necessary interpolated values depend on the reference coordinate system,
