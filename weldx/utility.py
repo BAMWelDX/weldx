@@ -154,6 +154,7 @@ def get_time_union(list_of_objects):
 
         return pd.DatetimeIndex(input_object)
 
+    times = None
     for idx, val in enumerate(list_of_objects):
         if idx == 0:
             times = _get_time(val)
