@@ -155,6 +155,8 @@ def test_xr_interp_like():
     test = ut.xr_interp_like(da_a.loc[2:2], da_a)
     assert np.all(test.a == da_a.a)
     assert np.all(test == da_a.loc[2:2])
+    with pytest.raises(ValueError):
+        ut.xr_interp_like(da_a.loc[2:2], da_a, fillna=False)
 
     # single point to single point interpolation (different points)
     test = ut.xr_interp_like(da_a.loc[2:2], da_a.loc[3:3])
