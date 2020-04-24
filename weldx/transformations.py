@@ -288,7 +288,7 @@ class LocalCoordinateSystem:
 
         self._dataset = xr.merge([origin, basis], join="exact")
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self):
         """Give __repr_ output in xarray format."""
         return self._dataset.__repr__().replace(
             "<xarray.Dataset", "<LocalCoordinateSystem"
@@ -524,7 +524,7 @@ class LocalCoordinateSystem:
 
         :return: Basis of the coordinate system
         """
-        return self._dataset.basis.transpose(..., "c", "v")
+        return self.dataset.basis
 
     @property
     def orientation(self) -> xr.DataArray:
@@ -535,7 +535,7 @@ class LocalCoordinateSystem:
 
         :return: Orientation matrix
         """
-        return self._dataset.basis.transpose(..., "c", "v")
+        return self.dataset.basis
 
     @property
     def origin(self) -> xr.DataArray:
@@ -546,7 +546,7 @@ class LocalCoordinateSystem:
 
         :return: Origin of the coordinate system
         """
-        return self._dataset.origin.transpose(..., "c")
+        return self.dataset.origin
 
     @property
     def location(self) -> xr.DataArray:
@@ -557,7 +557,7 @@ class LocalCoordinateSystem:
 
         :return: Location of the coordinate system.
         """
-        return self._dataset.origin.transpose(..., "c")
+        return self.dataset.origin
 
     @property
     def time(self) -> pd.DatetimeIndex:
@@ -573,11 +573,11 @@ class LocalCoordinateSystem:
     @property
     def dataset(self) -> xr.Dataset:
         """
-        Get the underlying xarray Dataset.
+        Get the underlying xarray.Dataset with ordered dimensions.
 
         :return: xarray Dataset with origin and basis as DataVariables.
         """
-        return self._dataset
+        return self._dataset.transpose(..., "c", "v")
 
     def interp_time(
         self, time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"]
