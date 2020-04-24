@@ -646,7 +646,7 @@ class CoordinateSystemManager:
         be any hashable type, but it is recommended to use strings.
         """
         self._graph = nx.DiGraph()
-        self._data = dict()
+        self._data = {}
         self._add_coordinate_system_node(root_coordinate_system_name)
 
     def _add_coordinate_system_node(self, coordinate_system_name):
