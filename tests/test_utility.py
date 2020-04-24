@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import weldx.utility as ut
+import weldx.transformations as tf
 
 
 def test_is_column_in_matrix():
@@ -257,3 +258,41 @@ def test_xr_interp_like():
         {"t": pd.timedelta_range(start="3s", end="7s", freq="125ms", closed="left")},
     )
     assert np.all(test == np.arange(3, 7, 0.125))
+
+
+def test_get_time_union():
+    """Test input types for get_time_union function."""
+    t1 = pd.Timestamp("1970")
+    t2 = pd.Timestamp("2020")
+    dsx = tf.LocalCoordinateSystem().dataset.expand_dims({"time": [t1, t2]})
+    cs = tf.LocalCoordinateSystem(basis=dsx.basis, origin=dsx.origin)
+    res = ut.get_time_union([cs.time, dsx, cs, [0]])
+    assert np.all(res == pd.DatetimeIndex([t1, t2]))
+
+
+def test_xf_fill_all():
+    """Test filling along all dimensions."""
+    da1 = xr.DataArray(
+        np.eye(2), dims=["a", "b"], coords={"a": np.arange(2), "b": np.arange(2)}
+    )
+    da2 = xr.DataArray(
+        dims=["a", "b"], coords={"a": np.arange(-1, 3, 0.5), "b": np.arange(-1, 3, 0.5)}
+    )
+    da3 = da1.broadcast_like(da2)
+
+    da4 = ut.xr_fill_all(da3, order="fb")
+    assert not np.any(np.isnan(da4))
+    assert np.all(da4[0:4, 0:4] == np.ones((4, 4)))
+    assert np.all(da4[0:4, 4:8] == np.zeros((4, 4)))
+    assert np.all(da4[4:8, 0:4] == np.zeros((4, 4)))
+    assert np.all(da4[4:8, 4:8] == np.ones((4, 4)))
+
+    da4 = ut.xr_fill_all(da3, order="bf")
+    assert not np.any(np.isnan(da4))
+    assert np.all(da4[0:3, 0:3] == np.ones((3, 3)))
+    assert np.all(da4[0:3, 3:8] == np.zeros((3, 5)))
+    assert np.all(da4[3:8, 0:3] == np.zeros((5, 3)))
+    assert np.all(da4[3:8, 3:8] == np.ones((5, 5)))
+
+    with pytest.raises(ValueError):
+        ut.xr_fill_all(da3, order="wrong")

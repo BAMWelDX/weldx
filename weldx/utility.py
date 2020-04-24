@@ -422,7 +422,7 @@ def xr_interp_orientation_in_time(
     return dsx_out
 
 
-def xr_interp_coodinates_in_time(
+def xr_interp_coordinates_in_time(
     dsx: xr.DataArray, times: pd.DatetimeIndex
 ) -> xr.DataArray:
     """
@@ -441,7 +441,7 @@ def xr_interp_coodinates_in_time(
 
 
 @xr.register_dataarray_accessor("weldx")
-class WeldxAccessor:
+class WeldxAccessor:  # pragma: no cover
     """
     Custom accessor for extending DataArray functionality.
 

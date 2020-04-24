@@ -277,7 +277,7 @@ class LocalCoordinateSystem:
                 if not np.all(basis.time.data == origin.time.data):
                     time_union = ut.get_time_union([basis.time, origin.time])
                     basis = ut.xr_interp_orientation_in_time(basis, time_union)
-                    origin = ut.xr_interp_coodinates_in_time(origin, time_union)
+                    origin = ut.xr_interp_coordinates_in_time(origin, time_union)
 
             # vectorize test if orthogonal
             if not ut.xr_is_orthogonal_matrix(basis, dims=["c", "v"]):
@@ -600,7 +600,7 @@ class LocalCoordinateSystem:
             )
             raise err
         basis = ut.xr_interp_orientation_in_time(self.basis, time)
-        origin = ut.xr_interp_coodinates_in_time(self.origin, time)
+        origin = ut.xr_interp_coordinates_in_time(self.origin, time)
 
         return LocalCoordinateSystem(basis, origin)
 
