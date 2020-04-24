@@ -56,7 +56,7 @@ def scale_matrix(scale_x, scale_y, scale_z):
     :param scale_z: Scaling factor in z direction
     :return: Scaling matrix
     """
-    return np.array([[scale_x, 0, 0], [0, scale_y, 0], [0, 0, scale_z]], dtype=float)
+    return np.diag([scale_x, scale_y, scale_z]).astype(float)
 
 
 def normalize(vec):
@@ -213,7 +213,6 @@ def vector_points_to_left_of_vector(vector, vector_reference):
 class LocalCoordinateSystem:
     """Defines a local cartesian coordinate system in 3d."""
 
-    # TODO: Add option to ctors to create time dependent lcs
     def __init__(
         self,
         basis: Union[xr.DataArray, np.ndarray, List[List]] = None,
