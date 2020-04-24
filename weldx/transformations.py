@@ -275,9 +275,7 @@ class LocalCoordinateSystem:
             # unify time axis
             if ("time" in basis.coords) and ("time" in origin.coords):
                 if not np.all(basis.time.data == origin.time.data):
-                    time_basis = pd.DatetimeIndex(basis.time.data)
-                    time_origin = pd.DatetimeIndex(origin.time.data)
-                    time_union = time_basis.union(time_origin)
+                    time_union = ut.get_time_union([basis.time, origin.time])
                     basis = ut.xr_interp_orientation_in_time(basis, time_union)
                     origin = ut.xr_interp_coodinates_in_time(origin, time_union)
 
@@ -581,33 +579,41 @@ class LocalCoordinateSystem:
         """
         return self._dataset
 
-    def interp_time(self, time: pd.DatetimeIndex) -> "LocalCoordinateSystem":
+    def interp_time(
+        self, time: Union[pd.DatetimeIndex, List[pd.Timestamp]]
+    ) -> "LocalCoordinateSystem":
         """
         Interpolates the data in time.
 
         :param time: Series of times.
         :return: Coordinate system with interpolated data
         """
-        if not isinstance(time, pd.DatetimeIndex):
-            raise TypeError("Invalid parameter type.")
+        try:
+            time = pd.DatetimeIndex(time)
+        except Exception as err:
+            print(
+                "Unable to convert input argument to pd.DatetimeIndex. "
+                + "If passing single values convert to list first (like [pd.Timestamp])"
+            )
+            raise err
         basis = ut.xr_interp_orientation_in_time(self.basis, time)
         origin = ut.xr_interp_coodinates_in_time(self.origin, time)
 
         return LocalCoordinateSystem(basis, origin)
 
     def interp_time_like(
-        self, refernce: "LocalCoordinateSystem"
+        self, reference: "LocalCoordinateSystem"
     ) -> "LocalCoordinateSystem":
         """
         Interpolates the data in time using another coordinate systems time axis.
 
-        :param refernce: Coordinate system that provides the reference time.
+        :param reference: Coordinate system that provides the reference time.
         :return: Coordinate system with interpolated data
         """
-        if not isinstance(refernce, LocalCoordinateSystem):
+        if not isinstance(reference, LocalCoordinateSystem):
             raise TypeError("Invalid reference type")
-        if refernce.time is not None:
-            times = refernce.time
+        if reference.time is not None:
+            times = reference.time
             return self.interp_time(times)
         else:
             raise ValueError("Reference coordinate system has no time component")
