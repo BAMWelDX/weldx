@@ -813,12 +813,12 @@ class CoordinateSystemManager:
             or target_coordinate_system_name == data_struct.coordinate_system_name
         ):
             return data_struct.data
-        else:
-            return self.transform_data(
-                data_struct.data,
-                data_struct.coordinate_system_name,
-                target_coordinate_system_name,
-            )
+
+        return self.transform_data(
+            data_struct.data,
+            data_struct.coordinate_system_name,
+            target_coordinate_system_name,
+        )
 
     def transform_data(
         self,
@@ -829,7 +829,7 @@ class CoordinateSystemManager:
         """
         Transform spatial data from one coordinate system to another.
 
-        :param data: Pointcloud input as array-like with cartesian x,y,z-data stored in
+        :param data: Point cloud input as array-like with cartesian x,y,z-data stored in
         the last dimension. When using xarray objects, the vector dimension is expected
         to be named "c" and have coordinates "x","y","z"
         :param source_coordinate_system_name: Name of the coordinate system the data is
@@ -846,11 +846,11 @@ class CoordinateSystemManager:
                 lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
             )
             return mul + lcs.location
-        else:
-            data = ut.to_float_array(data)
-            rotation = lcs.orientation.data
-            translation = lcs.location.data
-            return ut.mat_vec_mul(rotation, data) + translation
+
+        data = ut.to_float_array(data)
+        rotation = lcs.orientation.data
+        translation = lcs.location.data
+        return ut.mat_vec_mul(rotation, data) + translation
 
     @property
     def graph(self) -> nx.DiGraph:
@@ -923,8 +923,8 @@ class CoordinateSystemManager:
                     "lcs"
                 ].interp_time(time)
             return self
-        else:
-            return deepcopy(self).interp_time(time, inplace=True)
+
+        return deepcopy(self).interp_time(time, inplace=True)
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """

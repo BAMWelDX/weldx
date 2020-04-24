@@ -147,12 +147,12 @@ def get_time_union(list_of_objects):
     def _get_time(input):
         if isinstance(input, (pd.DatetimeIndex, pd.TimedeltaIndex)):
             return input
-        elif isinstance(input, (xr.DataArray, xr.Dataset)):
+        if isinstance(input, (xr.DataArray, xr.Dataset)):
             return pd.DatetimeIndex(input.time.data)
-        elif isinstance(input, tf.LocalCoordinateSystem):
+        if isinstance(input, tf.LocalCoordinateSystem):
             return input.time
-        else:
-            return pd.DatetimeIndex(input)
+
+        return pd.DatetimeIndex(input)
 
     for idx, val in enumerate(list_of_objects):
         if idx == 0:
