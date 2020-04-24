@@ -239,8 +239,16 @@ class LocalCoordinateSystem:
             if origin is None:
                 origin = np.array([0, 0, 0])
 
-            if time is not None and not isinstance(time, pd.DatetimeIndex):
-                raise TypeError("time must be an instance of pandas.DateTimeIndex")
+            if time is not None:
+                try:
+                    time = pd.DatetimeIndex(time)
+                except Exception as err:
+                    print(
+                        "Unable to convert input argument to pd.DatetimeIndex. "
+                        + "If passing single values convert to list first (like ["
+                        "pd.Timestamp])"
+                    )
+                    raise err
 
             if not isinstance(basis, xr.DataArray):
                 if not isinstance(basis, np.ndarray):
