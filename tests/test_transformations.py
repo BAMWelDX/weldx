@@ -873,13 +873,16 @@ def test_coordinate_system_addition_and_subtraction():
     coordinates_add_exp = [[6, 14, 2], [-3, 1, 9], [-8, -4, 0]]
     orientation_sub_exp = tf.rotation_matrix_z(np.pi * np.array([0.5, 0, 1.5]))
     coordinates_sub_exp = [[0, 0, 0], [9, 1, -7], [-8, -4, 2]]
-    print(lcs_sub.origin)
     check_coordinate_system(
         lcs_add, orientation_add_exp, coordinates_add_exp, True, time_0
     )
     check_coordinate_system(
         lcs_sub, orientation_sub_exp, coordinates_sub_exp, True, time_0
     )
+
+    # test xr_interp_orientation_in_time for single time point interpolation
+    basis = ut.xr_interp_orientation_in_time(lcs1.basis.isel({"time": [1]}), time_0)
+    assert np.allclose(basis, orientation_tdp_0[1, :, :])
 
 
 def test_coordinate_system_invert():

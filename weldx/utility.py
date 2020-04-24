@@ -326,7 +326,12 @@ def xr_interp_like(
     for dim in singular_dims:
         if dim in da_temp.coords:
             if len(da_temp.coords[dim]) > 1:
+                if not fillna:
+                    raise ValueError(
+                        "Cannot use fillna=False with single point interpolation"
+                    )
                 exclude_dims = [d for d in da_temp.coords if not d == dim]
+                # TODO: this always fills the dimension (inconsistent with fillna=False)
                 da1 = xr_fill_all(da1.broadcast_like(da_temp, exclude=exclude_dims))
             else:
                 del da_temp.coords[dim]
@@ -414,12 +419,13 @@ def xr_interp_orientation_in_time(
         )
         dsx_out = xr_3d_matrix(rotations_interp.as_matrix(), times_intersect)
     else:
+        # TODO: this case ist not really well defined, maybe avoid?
         dsx_out = dsx
 
     # use interp_like to select original time values and correctly fill time dimension
     dsx_out = xr_interp_like(dsx_out, {"time": times}, fillna=True)
 
-    return dsx_out
+    return dsx_out.transpose(..., "c", "v")
 
 
 def xr_interp_coordinates_in_time(
