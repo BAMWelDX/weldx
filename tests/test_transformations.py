@@ -880,10 +880,6 @@ def test_coordinate_system_addition_and_subtraction():
         lcs_sub, orientation_sub_exp, coordinates_sub_exp, True, time_0
     )
 
-    # test xr_interp_orientation_in_time for single time point interpolation
-    basis = ut.xr_interp_orientation_in_time(lcs1.basis.isel({"time": [1]}), time_0)
-    assert np.allclose(basis, orientation_tdp_0[1, :, :])
-
 
 def test_coordinate_system_invert():
     """
@@ -1016,6 +1012,10 @@ def test_coordinate_system_time_interpolation():
     coordinate_system_time_interpolation_test_case(
         lcs, time_interp, orientation_exp, coordinates_exp
     )
+
+    # test xr_interp_orientation_in_time for single time point interpolation
+    basis = ut.xr_interp_orientation_in_time(lcs.basis.isel({"time": [1]}), time_0)
+    assert np.allclose(basis, orientation[1, :, :])
 
     # exceptions --------------------------------
     # wrong parameter type
