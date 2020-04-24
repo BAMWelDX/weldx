@@ -28,6 +28,7 @@ excluded_words:
   # numpy ---------------------------------------
   - arange
   - allclose
+  - atol
   - det
   - dtype
   - hstack
@@ -38,10 +39,12 @@ excluded_words:
   - ndim
   - newaxis
   - vstack
-  # pandas --------------------------------------
+  # pandas / xarray -----------------------------
+  - isel
   - isin
   - isnan
   - fillna
+  - sel
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat
@@ -50,5 +53,9 @@ excluded_words:
   - ipywidgets
   - ipython
   # other ---------------------------------------
-  - linearization
+  - addopts
+  - csm
   - coords
+  - isort
+  - linearization
+  - xyz
