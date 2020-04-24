@@ -144,15 +144,15 @@ def get_time_union(list_of_objects):
     :return: pd.DatetimeIndex with merge times
     """
     # TODO: make non-nested function
-    def _get_time(input):
-        if isinstance(input, (pd.DatetimeIndex, pd.TimedeltaIndex)):
-            return input
-        if isinstance(input, (xr.DataArray, xr.Dataset)):
-            return pd.DatetimeIndex(input.time.data)
-        if isinstance(input, tf.LocalCoordinateSystem):
-            return input.time
+    def _get_time(input_object):
+        if isinstance(input_object, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+            return input_object
+        if isinstance(input_object, (xr.DataArray, xr.Dataset)):
+            return pd.DatetimeIndex(input_object.time.data)
+        if isinstance(input_object, tf.LocalCoordinateSystem):
+            return input_object.time
 
-        return pd.DatetimeIndex(input)
+        return pd.DatetimeIndex(input_object)
 
     for idx, val in enumerate(list_of_objects):
         if idx == 0:
