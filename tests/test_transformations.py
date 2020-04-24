@@ -951,7 +951,8 @@ def coordinate_system_time_interpolation_test_case(
         lcs_interp, orientation_exp, coordinates_exp, True, time_interp
     )
 
-    lcs_interp_like = lcs.interp_time_like(lcs_interp)
+    # test lcs input syntax
+    lcs_interp_like = lcs.interp_time(lcs_interp)
     check_coordinate_system(
         lcs_interp_like, orientation_exp, coordinates_exp, True, time_interp
     )
@@ -1017,11 +1018,9 @@ def test_coordinate_system_time_interpolation():
     # wrong parameter type
     with pytest.raises(Exception):
         lcs.interp_time("wrong")
-    with pytest.raises(Exception):
-        lcs.interp_time_like("wrong")
     # no time component
-    with pytest.raises(Exception):
-        lcs.interp_time_like(tf.LocalCoordinateSystem())
+    with pytest.raises(TypeError):
+        lcs.interp_time(tf.LocalCoordinateSystem())
 
 
 def test_coordinate_system_manager_init():
@@ -1296,48 +1295,6 @@ def test_coordinate_system_manager_interp_time():
     check_coordinate_system(
         lcs_3_in_lcs_2_csm, lcs_3_in_lcs_2.basis, lcs_3_in_lcs_2.origin, True
     )
-
-    # interp_like -------------------------------
-
-    csm_interp_like = csm.interp_time_like(lcs_1_in_lcs_0)
-    assert np.all(csm_interp_like.time_union() == lcs_1_in_lcs_0.time)
-
-    lcs_0_in_root_csm = csm_interp_like.get_local_coordinate_system("lcs_0", "root")
-    lcs_1_in_lcs_0_csm = csm_interp_like.get_local_coordinate_system("lcs_1", "lcs_0")
-    lcs_2_in_root_csm = csm_interp_like.get_local_coordinate_system("lcs_2", "root")
-    lcs_3_in_lcs_2_csm = csm_interp_like.get_local_coordinate_system("lcs_3", "lcs_2")
-
-    assert np.all(lcs_0_in_root_csm.time == lcs_1_in_lcs_0.time)
-    assert np.all(lcs_1_in_lcs_0_csm.time == lcs_1_in_lcs_0.time)
-    assert np.all(lcs_2_in_root_csm.time == lcs_1_in_lcs_0.time)
-    assert lcs_3_in_lcs_2_csm.time is None
-
-    coordinates_exp = [[5, 0, 0], [1, 4 / 3, 4 / 3], [1, 4, 4]]
-    orientation_exp = tf.rotation_matrix_z([0, 2 * np.pi / 3, np.pi])
-    check_coordinate_system(lcs_0_in_root_csm, orientation_exp, coordinates_exp, True)
-
-    check_coordinate_system(
-        lcs_1_in_lcs_0_csm, lcs_1_in_lcs_0.orientation, lcs_1_in_lcs_0.origin, True
-    )
-
-    coordinates_exp = [[5, 0, 0], [9 / 5, 0, 0], [1, 12 / 5, 12 / 5]]
-    orientation_exp = tf.rotation_matrix_z([0, 2 * np.pi / 5, 4 * np.pi / 5])
-    check_coordinate_system(lcs_2_in_root_csm, orientation_exp, coordinates_exp, True)
-
-    check_coordinate_system(
-        lcs_3_in_lcs_2_csm, lcs_3_in_lcs_2.basis, lcs_3_in_lcs_2.origin, True
-    )
-
-    # exceptions --------------------------------
-    # invalid input type
-    with pytest.raises(Exception):
-        csm.interp_time("wrong")
-    with pytest.raises(Exception):
-        csm.interp_time_like("wrong")
-
-    # no time component
-    with pytest.raises(Exception):
-        csm.interp_time_like(lcs_3_in_lcs_2)
 
 
 def test_coordinate_system_manager_transform_data():

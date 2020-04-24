@@ -322,7 +322,7 @@ class LocalCoordinateSystem:
         :return: Resulting coordinate system.
         """
         if self.time is not None:
-            rhs_cs = rhs_cs.interp_time_like(self)
+            rhs_cs = rhs_cs.interp_time(self.time)
 
         basis = ut.xr_matmul(rhs_cs.basis, self.basis, dims_a=["c", "v"])
         origin = (
@@ -580,7 +580,7 @@ class LocalCoordinateSystem:
         return self._dataset
 
     def interp_time(
-        self, time: Union[pd.DatetimeIndex, List[pd.Timestamp]]
+        self, time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"]
     ) -> "LocalCoordinateSystem":
         """
         Interpolates the data in time.
@@ -588,6 +588,9 @@ class LocalCoordinateSystem:
         :param time: Series of times.
         :return: Coordinate system with interpolated data
         """
+        if isinstance(time, LocalCoordinateSystem):
+            time = time.time
+
         try:
             time = pd.DatetimeIndex(time)
         except Exception as err:
@@ -600,23 +603,6 @@ class LocalCoordinateSystem:
         origin = ut.xr_interp_coodinates_in_time(self.origin, time)
 
         return LocalCoordinateSystem(basis, origin)
-
-    def interp_time_like(
-        self, reference: "LocalCoordinateSystem"
-    ) -> "LocalCoordinateSystem":
-        """
-        Interpolates the data in time using another coordinate systems time axis.
-
-        :param reference: Coordinate system that provides the reference time.
-        :return: Coordinate system with interpolated data
-        """
-        if not isinstance(reference, LocalCoordinateSystem):
-            raise TypeError("Invalid reference type")
-        if reference.time is not None:
-            times = reference.time
-            return self.interp_time(times)
-        else:
-            raise ValueError("Reference coordinate system has no time component")
 
     def invert(self) -> "LocalCoordinateSystem":
         """
@@ -911,43 +897,27 @@ class CoordinateSystemManager:
 
         return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
 
-    def interp_time(self, time, in_place: bool = False) -> "CoordinateSystemManager":
+    def interp_time(
+        self,
+        time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
+        inplace: bool = False,
+    ) -> "CoordinateSystemManager":
         """
         Interpolates the coordinate systems in time.
 
         :param time: Time data.
-        :param in_place: If 'True' the interpolation is performed in place, otherwise a
+        :param inplace: If 'True' the interpolation is performed in place, otherwise a
         new instance is returned.
         :return: Coordinate system manager with interpolated data
         """
-        if in_place:
+        if inplace:
             for edge in self._graph.edges:
                 self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
                     "lcs"
                 ].interp_time(time)
             return self
         else:
-            return deepcopy(self).interp_time(time, True)
-
-    def interp_time_like(
-        self, reference: LocalCoordinateSystem, in_place: bool = False
-    ) -> "CoordinateSystemManager":
-        """
-        Interpolates the coordinate systems in time.
-
-        :param reference: Reference for the interpolation.
-        :param in_place: If 'True' the interpolation is performed in place, otherwise a
-        new instance is returned.
-        :return: Copy of CSM with interpolated edges
-        """
-        if in_place:
-            for edge in self._graph.edges:
-                self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
-                    "lcs"
-                ].interp_time_like(reference)
-            return self
-        else:
-            return deepcopy(self).interp_time_like(reference, True)
+            return deepcopy(self).interp_time(time, inplace=True)
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """
