@@ -15,6 +15,8 @@ dependencies:
   - sphinx
   - recommonmark
   - openpyxl
+  # graph packages
+  - networkx
   # Code quality
   - black
   - codecov
@@ -24,12 +26,12 @@ dependencies:
   - pytest-cov
   - vulture
   # Plotting
-  - graphviz
+  #- graphviz
   - ipykernel
   - ipympl
   - line_profiler
   - matplotlib
   - memory_profiler
-  - python-graphviz
+  #- python-graphviz
   - seaborn
   - snakeviz

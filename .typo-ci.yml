@@ -12,10 +12,13 @@ excluded_words:
   - typoci
   # python packages -----------------------------
   - numpy
+  - pandas
+  - xarray
   - scipy
   - pytest
   - pydocstyle
   - matplotlib
+  - networkx
   # matplotlib ----------------------------------
   - pyplot
   - gca
@@ -23,16 +26,29 @@ excluded_words:
   # flake8 --------------------------------------
   - noqa
   # numpy ---------------------------------------
-  - linalg
-  - ndim
-  - dtype
-  - isclose
-  - ndarray
-  - hstack
-  - matmul
   - arange
+  - allclose
+  - atol
   - det
+  - dtype
+  - hstack
+  - isclose
+  - linalg
+  - matmul
+  - ndarray
+  - ndim
+  - newaxis
   - vstack
+  # pandas / xarray -----------------------------
+  - bfill
+  - idxmax
+  - idxmin
+  - isel
+  - isin
+  - isnan
+  - ffill
+  - fillna
+  - sel
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat
@@ -40,5 +56,15 @@ excluded_words:
   - ipynb
   - ipywidgets
   - ipython
+  # scipy ---------------------------------------
+  - Slerp
   # other ---------------------------------------
+  - addopts
+  - csm
+  - coords
+  - dsx
+  - dtypes
+  - interp
+  - isort
   - linearization
+  - xyz
