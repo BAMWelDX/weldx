@@ -902,7 +902,7 @@ class FFGroove(BaseGroove):
     alpha: pint.Quantity = None
     # ["1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"]
     code_number: str = None
-    b: pint.Quantity = Q_(0, "mm")
+    b: pint.Quantity = None
     e: pint.Quantity = None
 
     def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
