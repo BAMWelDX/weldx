@@ -14,7 +14,7 @@ requirements = [
     "asdf>=2.5",
     "bottleneck>=1.3",
     "Jinja2>=2.11",
-    "networkx>=2"
+    "networkx>=2",
 ]
 
 entry_points = {}
