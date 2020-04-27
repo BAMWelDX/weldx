@@ -267,7 +267,7 @@ def test_get_time_union():
     t1 = pd.Timestamp("1970")
     t2 = pd.Timestamp("2020")
     dsx = tf.LocalCoordinateSystem().dataset.expand_dims({"time": [t1, t2]})
-    cs = tf.LocalCoordinateSystem(basis=dsx.basis, origin=dsx.origin)
+    cs = tf.LocalCoordinateSystem(orientation=dsx.orientation, origin=dsx.origin)
     res = ut.get_time_union([cs.time, dsx, cs, [0]])
     assert np.all(res == pd.DatetimeIndex([t1, t2]))
 

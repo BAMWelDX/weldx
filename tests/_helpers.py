@@ -8,7 +8,7 @@ def rotated_coordinate_system(
     angle_x=np.pi / 3, angle_y=np.pi / 4, angle_z=np.pi / 5, origin=np.array([0, 0, 0])
 ):
     """
-    Get a coordinate system with rotated basis.
+    Get a coordinate system with rotated orientation.
 
     The transformation order is x-y-z
 
@@ -16,9 +16,9 @@ def rotated_coordinate_system(
     :param angle_y: Rotation angle around the y axis
     :param angle_z: Rotation angle around the z axis
     :param origin: Origin of the coordinate system
-    :return: Coordinate system with rotated basis
+    :return: Coordinate system with rotated orientation
     """
-    basis = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
     # rotate axes to produce a more general test case
     r_x = tf.rotation_matrix_x(angle_x)
@@ -27,9 +27,9 @@ def rotated_coordinate_system(
 
     r_tot = np.matmul(r_z, np.matmul(r_y, r_x))
 
-    rotated_basis = np.matmul(r_tot, basis)
+    rotated_orientation = np.matmul(r_tot, orientation)
 
-    return tf.LocalCoordinateSystem(rotated_basis, np.array(origin))
+    return tf.LocalCoordinateSystem(rotated_orientation, np.array(origin))
 
 
 def are_all_columns_unique(matrix, decimals=3):

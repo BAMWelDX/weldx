@@ -1927,7 +1927,7 @@ def check_trace_segment_orientation(segment):
     """
     # The initial orientation of a segment must be [1, 0, 0]
     lcs = segment.local_coordinate_system(0)
-    assert ut.vector_is_close(lcs.basis[:, 0], np.array([1, 0, 0]))
+    assert ut.vector_is_close(lcs.orientation[:, 0], np.array([1, 0, 0]))
 
     delta = 1e-9
     for rel_pos in np.arange(0.1, 1.01, 0.1):
@@ -1936,7 +1936,7 @@ def check_trace_segment_orientation(segment):
         trace_direction_approx = tf.normalize(lcs.origin - lcs_d.origin)
 
         # Check if the x-axis is aligned with the approximate trace direction
-        assert ut.vector_is_close(lcs.basis[:, 0], trace_direction_approx, 1e-6)
+        assert ut.vector_is_close(lcs.orientation[:, 0], trace_direction_approx, 1e-6)
 
 
 def default_trace_segment_tests(segment, tolerance_length=1e-9):
@@ -2136,7 +2136,7 @@ def test_trace_local_coordinate_system():
         check_coordinate_systems_identical(cs_trace, cs_segment)
 
     # check second segment (linear)
-    expected_basis = radial_segment.local_coordinate_system(1).basis
+    expected_orientation = radial_segment.local_coordinate_system(1).orientation
     for i in range(11):
         weight = i / 10
         position_on_segment = linear_segment.length * weight
@@ -2144,16 +2144,16 @@ def test_trace_local_coordinate_system():
 
         expected_origin = np.array([-position_on_segment, 2, 0])
         cs_expected = tf.LocalCoordinateSystem(
-            basis=expected_basis, origin=expected_origin
+            orientation=expected_orientation, origin=expected_origin
         )
         cs_trace = trace.local_coordinate_system(position)
 
         check_coordinate_systems_identical(cs_trace, cs_expected)
 
     # check with arbitrary coordinate system --------------
-    basis = tf.rotation_matrix_x(np.pi / 2)
+    orientation = tf.rotation_matrix_x(np.pi / 2)
     origin = np.array([-3, 2.5, 5])
-    cs_base = tf.LocalCoordinateSystem(basis, origin)
+    cs_base = tf.LocalCoordinateSystem(orientation, origin)
 
     trace = geo.Trace([radial_segment, linear_segment], cs_base)
 
@@ -2169,8 +2169,8 @@ def test_trace_local_coordinate_system():
         check_coordinate_systems_identical(cs_trace, cs_expected)
 
     # check second segment
-    expected_basis = np.matmul(
-        basis, radial_segment.local_coordinate_system(1).basis.data
+    expected_orientation = np.matmul(
+        orientation, radial_segment.local_coordinate_system(1).orientation.data
     )
     cs_start_seg2 = radial_segment.local_coordinate_system(1) + cs_base
     for i in range(11):
@@ -2218,9 +2218,9 @@ def test_trace_rasterization():
             assert ut.vector_is_close([x, y, 0], data[:, i])
 
     # check with arbitrary coordinate system --------------
-    basis = tf.rotation_matrix_y(np.pi / 2)
+    orientation = tf.rotation_matrix_y(np.pi / 2)
     origin = np.array([-3, 2.5, 5])
-    cs_base = tf.LocalCoordinateSystem(basis, origin)
+    cs_base = tf.LocalCoordinateSystem(orientation, origin)
 
     trace = geo.Trace([linear_segment, radial_segment], cs_base)
     data = trace.rasterize(0.1)

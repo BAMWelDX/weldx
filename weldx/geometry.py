@@ -979,13 +979,13 @@ class RadialHorizontalTraceSegment:
         """
         relative_position = np.clip(relative_position, 0, 1)
 
-        basis = tf.rotation_matrix_z(
+        orientation = tf.rotation_matrix_z(
             self._angle * relative_position * self._sign_winding
         )
         translation = np.array([0, -1, 0]) * self._radius * self._sign_winding
 
-        origin = np.matmul(basis, translation) - translation
-        return tf.LocalCoordinateSystem(basis, origin)
+        origin = np.matmul(orientation, translation) - translation
+        return tf.LocalCoordinateSystem(orientation, origin)
 
 
 # Trace class -----------------------------------------------------------------
@@ -1371,7 +1371,7 @@ class Geometry:
         :return: Transformed profile data
         """
         local_cs = self._trace.local_coordinate_system(location)
-        local_data = np.matmul(local_cs.basis.data, profile_raster_data)
+        local_data = np.matmul(local_cs.orientation.data, profile_raster_data)
         return local_data + local_cs.origin.data[:, np.newaxis]
 
     @staticmethod
