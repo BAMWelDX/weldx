@@ -444,11 +444,7 @@ def check_coordinate_system(
     check_coordinate_system_orientation(
         cs_p.orientation, orientation_expected, positive_orientation_expected
     )
-    check_coordinate_system_orientation(
-        cs_p.orientation, orientation_expected, positive_orientation_expected
-    )
 
-    assert np.allclose(cs_p.coordinates.values, coordinates_expected, atol=1e-9)
     assert np.allclose(cs_p.coordinates.values, coordinates_expected, atol=1e-9)
 
 
