@@ -7,13 +7,14 @@ import versioneer
 
 requirements = [
     "numpy>=0.18",
-    "pandas>=0.25",
+    "pandas>=1.0",
     "xarray>=0.15",
-    "scipy>=1.3",
-    "pint>=0.10.1",
+    "scipy>=1.4",
+    "pint>=0.11",
     "asdf>=2.5",
     "bottleneck>=1.3",
     "Jinja2>=2.11",
+    "networkx>=2",
     "matplotlib>=3",
 ]
 
