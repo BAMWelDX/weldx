@@ -59,10 +59,11 @@ def get_groove(
                 - The groove angle is the whole angle of the V-Groove.
                   It is a pint Quantity in degree or radian.
             b: root gap
-                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+                - The root gap is the distance of the 2 workpieces.
+                  It can be 0 or None.
             c: root face
-                - The root face is the length of the Y-Groove which is not part of the V.
-                  It can be 0.
+                - The root face is the length of the Y-Groove which is not
+                  part of the V. It can be 0.
 
         "UGroove":
             t: workpiece thickness
@@ -76,7 +77,8 @@ def get_groove(
                 - The bevel radius defines the length of the radius of the U-segment.
                   It is usually 6 millimeters.
             b: root gap
-                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+                - The root gap is the distance of the 2 workpieces.
+                  It can be 0 or None.
             c: root face
                 - The root face is the height of the part below the U-segment.
 
@@ -85,7 +87,8 @@ def get_groove(
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
             b: root gap
-                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+                - The root gap is the distance of the 2 workpieces.
+                  It can be 0 or None.
 
         "UVGroove":
             t: workpiece thickness
@@ -102,7 +105,8 @@ def get_groove(
                 - The bevel radius defines the length of the radius of the U-segment.
                   It is usually 6 millimeters.
             b: root gap
-                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+                - The root gap is the distance of the 2 workpieces.
+                  It can be 0 or None.
             h: root face
                 - The root face is the height of the V-segment.
 
@@ -117,7 +121,8 @@ def get_groove(
                 - The bevel angle is the angle of the upper V-Groove part.
                   It is a pint Quantity in degree or radian.
             b: root gap
-                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+                - The root gap is the distance of the 2 workpieces.
+                  It can be 0 or None.
             c: root face
                 - The root face is the height of the part below the lower V-segment.
                   It can be 0 or None.
@@ -130,7 +135,8 @@ def get_groove(
                 - The bevel angle is the angle of the V-Groove part.
                   It is a pint Quantity in degree or radian.
             b: root gap
-                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+                - The root gap is the distance of the 2 workpieces.
+                  It can be 0 or None.
             c: root face
                 - The root face is the height of the part below the V-segment.
 
@@ -146,7 +152,8 @@ def get_groove(
                 - The bevel radius defines the length of the radius of the U-segment.
                   It is usually 6 millimeters.
             b: root gap
-                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+                - The root gap is the distance of the 2 workpieces.
+                  It can be 0 or None.
             c: root face
                 - The root face is the height of the part below the U-segment.
 
@@ -161,13 +168,16 @@ def get_groove(
                 - The groove angle is the whole angle of the lower V-Groove part.
                   It is a pint Quantity in degree or radian.
             b: root gap
-                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+                - The root gap is the distance of the 2 workpieces.
+                  It can be 0 or None.
             c: root face
                 - The root face is the height of the part between the V-segments.
             h1: root face 2
-                - The root face is the height of the upper V-segment. Only c is needed.
+                - The root face is the height of the upper V-segment.
+                  Only c is needed.
             h2: root face 3
-                - The root face is the height of the lower V-segment. Only c is needed.
+                - The root face is the height of the lower V-segment.
+                  Only c is needed.
 
         "DoubleUGroove":
             t: workpiece thickness
@@ -182,27 +192,32 @@ def get_groove(
                   Where 0 degree would be a parallel to the root face and 90 degree
                   would be a parallel to the workpiece. The lower U-segment.
             R: bevel radius
-                - The bevel radius defines the length of the radius of the upper U-segment.
-                  It is usually 6 millimeters.
+                - The bevel radius defines the length of the radius of the
+                  upper U-segment. It is usually 6 millimeters.
             R2: bevel radius 2
-                - The bevel radius defines the length of the radius of the lower U-segment.
-                  It is usually 6 millimeters.
+                - The bevel radius defines the length of the radius of the
+                  lower U-segment. It is usually 6 millimeters.
             b: root gap
-                - The root gap is the distance of the 2 workpieces. It can be 0 or None.
+                - The root gap is the distance of the 2 workpieces.
+                  It can be 0 or None.
             c: root face
                 - The root face is the height of the part between the U-segments.
             h1: root face 2
-                - The root face is the height of the upper U-segment. Only c is needed.
+                - The root face is the height of the upper U-segment.
+                  Only c is needed.
             h2: root face 3
-                - The root face is the height of the lower U-segment. Only c is needed.
+                - The root face is the height of the lower U-segment.
+                  Only c is needed.
 
         "DoubleHVGroove":
             This is a special case of the DoubleVGroove. The values of the angles are
             interpreted here as bevel angel. So you have only half of the size.
-            Accordingly the inputs beta1(bevel angle) and beta2(bevel angle 2) are used.
+            Accordingly the inputs beta1 (bevel angle) and beta2 (bevel angle 2)
+            are used.
 
         "DoubleHUGroove":
-            This is a special case of the DoubleUGroove. The parameters remain the same.
+            This is a special case of the DoubleUGroove.
+            The parameters remain the same.
 
         "FrontalFaceGroove":
             These grooves are identified by their code number. These correspond to the
@@ -1184,8 +1199,10 @@ class FFGroove(BaseGroove):
             return geo.Profile([shape1, shape2])
         else:
             raise ValueError(
-                "Wrong code_number. The Code Number has to be one of the following strings: "
-                '"1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
+                "Wrong code_number. The Code Number has to be"
+                " one of the following strings: "
+                '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
+                ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
             )
 
 

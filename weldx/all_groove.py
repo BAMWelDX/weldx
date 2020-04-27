@@ -855,16 +855,19 @@ def ff_groove(t_1, t_2, alpha, b, e, code_number, width_default=Q_(5, "mm")):
         return geo.Profile([shape1, shape2])
     else:
         print(
-            "Wrong code_number. The Code Number has to be one of the following strings:"
+            "Wrong code_number. The Code Number has"
+            " to be one of the following strings:"
         )
         print(
-            '"1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
+            '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
+            ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
         )
 
 
 def _helperfunction(segment, array):
     """
     Calculate a shape from input.
+
     Input segment of successive segments as strings.
     Input array of the points in the correct sequence. e.g.:
     array = [[x-values], [y-values]]

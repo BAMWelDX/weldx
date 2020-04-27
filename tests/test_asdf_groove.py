@@ -1,6 +1,4 @@
-"""Test all asdf groove implementations."""
-
-# import pytest
+"""Test all ASDF groove implementations."""
 
 from io import BytesIO
 import asdf
@@ -26,8 +24,8 @@ from weldx.asdf.tags.weldx.core.groove import (
 
 
 def test_asdf_groove():
-    """"
-    Test ASDF functionality for all groves.
+    """
+    Test ASDF functionality for all grooves.
     """
     v_groove = get_groove(
         groove_type="VGroove",
