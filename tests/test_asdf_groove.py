@@ -5,6 +5,7 @@
 from io import BytesIO
 import asdf
 
+from weldx.geometry import Profile
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
 from weldx.asdf.tags.weldx.core.groove import (
@@ -235,3 +236,22 @@ def test_asdf_groove():
     assert ff_groove4.__dict__ == data["test016"].__dict__, ERRMSG02 + f"{FFGroove}"
     assert isinstance(data["test017"], FFGroove), ERRMSG01 + f"{FFGroove}"
     assert ff_groove5.__dict__ == data["test017"].__dict__, ERRMSG02 + f"{FFGroove}"
+
+    # test to_profile
+    assert isinstance(data["test001"].to_profile(), Profile)
+    assert isinstance(data["test002"].to_profile(), Profile)
+    assert isinstance(data["test003"].to_profile(), Profile)
+    assert isinstance(data["test004"].to_profile(), Profile)
+    assert isinstance(data["test005"].to_profile(), Profile)
+    assert isinstance(data["test006"].to_profile(), Profile)
+    assert isinstance(data["test007"].to_profile(), Profile)
+    assert isinstance(data["test008"].to_profile(), Profile)
+    assert isinstance(data["test009"].to_profile(), Profile)
+    assert isinstance(data["test010"].to_profile(), Profile)
+    assert isinstance(data["test011"].to_profile(), Profile)
+    assert isinstance(data["test012"].to_profile(), Profile)
+    assert isinstance(data["test013"].to_profile(), Profile)
+    assert isinstance(data["test014"].to_profile(), Profile)
+    assert isinstance(data["test015"].to_profile(), Profile)
+    assert isinstance(data["test016"].to_profile(), Profile)
+    assert isinstance(data["test017"].to_profile(), Profile)
