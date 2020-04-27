@@ -7,6 +7,8 @@ excluded_files:
   - "docs*"
   - "environment.yml"
   - "tools*"
+  - "versioneer.py"
+  - "weldx/_version.py"
 
 excluded_words:
   - typoci
