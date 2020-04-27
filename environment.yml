@@ -6,10 +6,10 @@ channels:
 dependencies:
   - python=3.7
   - numpy>=1.18
-  - pandas>=0.25
-  - scipy
-  - xarray
-  - pint
+  - pandas>=1.0
+  - scipy>=1.4
+  - xarray>=0.15
+  - pint>=0.11
   - bottleneck
   - asdf=2.5.1
   - sphinx
