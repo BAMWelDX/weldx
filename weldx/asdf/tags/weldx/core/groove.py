@@ -266,13 +266,6 @@ class BaseGroove:
 class VGroove(BaseGroove):
     """
     A Single-V Groove.
-
-    Attributes:
-        t (pint.Quantity): The workpiece thickness.
-        alpha (pint.Quantity): The groove angle.
-        c (pint.Quantity): The root face.
-        b (pint.Quantity): The root opening.
-        code_number (pint.Quantity): The code number of the Norm.
     """
 
     t: pint.Quantity
@@ -329,7 +322,7 @@ class VGroove(BaseGroove):
 
 @dataclass
 class VVGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """A VV-Groove."""
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -387,7 +380,7 @@ class VVGroove(BaseGroove):
 
 @dataclass
 class UVGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """An UV-Groove."""
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -443,7 +436,7 @@ class UVGroove(BaseGroove):
 
 @dataclass
 class UGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """An U-Groove."""
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -525,7 +518,7 @@ class UGroove(BaseGroove):
 
 @dataclass
 class IGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """An I-Groove."""
 
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
@@ -554,7 +547,7 @@ class IGroove(BaseGroove):
 
 @dataclass
 class HVGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """A HV-Groove."""
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -607,7 +600,7 @@ class HVGroove(BaseGroove):
 
 @dataclass
 class HUGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """A HU-Groove."""
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -665,7 +658,7 @@ class HUGroove(BaseGroove):
 # double Grooves
 @dataclass
 class DVGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """A DV-Groove."""
 
     t: pint.Quantity
     alpha_1: pint.Quantity
@@ -730,7 +723,7 @@ class DVGroove(BaseGroove):
 
 @dataclass
 class DUGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """A DU-Groove"""
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -803,7 +796,7 @@ class DUGroove(BaseGroove):
 
 @dataclass
 class DHVGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """A DHV-Groove."""
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -847,7 +840,7 @@ class DHVGroove(BaseGroove):
 
 @dataclass
 class DHUGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """A DHU-Groove."""
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -895,7 +888,7 @@ class DHUGroove(BaseGroove):
 # Frontal Face - Groove
 @dataclass
 class FFGroove(BaseGroove):
-    """<CLASS DOCSTRING>"""
+    """A Frontal Face Groove."""
 
     t_1: pint.Quantity
     t_2: pint.Quantity = None
@@ -1018,9 +1011,6 @@ class FFGroove(BaseGroove):
             e = self.e.to("mm").magnitude
             width_default = width_default.to("mm").magnitude
 
-            # x = 0
-            # y = 0
-
             x_1 = np.sin(alpha) * e
             y_1 = np.cos(alpha) * e
 
@@ -1132,7 +1122,7 @@ _groove_name_to_type = {v: k for k, v in _groove_type_to_name.items()}
 
 
 class GrooveType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
+    """ASDF Groove type."""
 
     name = "core/din_en_iso_9692-1_2013"
     version = "1.0.0"
@@ -1155,7 +1145,7 @@ class GrooveType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        """<CLASS METHOD DOCSTRING>"""
+        """Convert to tagged tree and remove all None entries from node dictionary."""
         if type(node) in _groove_type_to_name:
             tree = dict(
                 components=dict_to_tagged_tree(node, ctx),
@@ -1169,7 +1159,7 @@ class GrooveType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """<CLASS METHOD DOCSTRING>"""
+        """Convert from tagged tree to a groove."""
         if tree["type"] in _groove_name_to_type:
             obj = _groove_name_to_type[tree["type"]](**tree["components"])
             return obj

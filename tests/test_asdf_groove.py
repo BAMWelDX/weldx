@@ -27,7 +27,7 @@ from weldx.asdf.tags.weldx.core.groove import (
 
 def test_asdf_groove():
     """"
-    Test ASDF functionallity for all groves.
+    Test ASDF functionality for all groves.
     """
     v_groove = get_groove(
         groove_type="VGroove",
