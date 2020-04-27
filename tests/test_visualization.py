@@ -23,9 +23,6 @@ def test_plot_coordinate_system():
 
     # exceptions ------------------------------------------
 
-    # invalid color
-    with pytest.raises(Exception):
-        vs.plot_coordinate_system(cs, ax, color="color")
     # label without color
     with pytest.raises(Exception):
         vs.plot_coordinate_system(cs, ax, label="label")

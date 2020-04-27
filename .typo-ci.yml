@@ -21,6 +21,7 @@ excluded_words:
   - matplotlib
   - versioneer
   - isort
+  - networkx
   # matplotlib ----------------------------------
   - pyplot
   - gca
@@ -31,20 +32,32 @@ excluded_words:
   # asdf ----------------------------------------
   - yamlutil
   # numpy ---------------------------------------
-  - linalg
-  - ndim
-  - dtype
-  - isclose
-  - ndarray
-  - hstack
-  - matmul
   - arange
+  - allclose
+  - atol
   - det
+  - dtype
+  - hstack
+  - isclose
+  - linalg
+  - matmul
+  - ndarray
+  - ndim
+  - newaxis
   - vstack
-  - dtypes
-  # pandas --------------------------------------
-  - isin
+  # pandas / xarray -----------------------------
+  - bfill
+  - ffill
+  - idxmax
+  - idxmin
+  - isel
   - iloc
+  - isin
+  - isnan
+  - ffill
+  - fillna
+  - sel
+  - dtypes
   - timedelta
   - timedeltaindex
   - datetimeindex
@@ -56,13 +69,23 @@ excluded_words:
   - ipynb
   - ipywidgets
   - ipython
+  # scipy ---------------------------------------
+  - Slerp
   # welding -------------------------------------
   - weldment
   # conda ---------------------------------------
   - conda
   - noarch
   # other ---------------------------------------
+  - addopts
+  - csm
+  - coords
+  - dsx
+  - dtypes
+  - interp
+  - isort
   - linearization
   - ureg
   - Cagtay
   - Fabry
+  - xyz

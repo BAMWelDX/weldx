@@ -264,7 +264,7 @@ class ArcSegment:
         if not math.isclose(radius_diff, 0, abs_tol=1e-9):
             raise ValueError("Radius is not constant.")
         if math.isclose(self._arc_length, 0):
-            raise Exception("Arc length is 0.")
+            raise ValueError("Arc length is 0.")
 
     @classmethod
     def construct_with_points(
@@ -354,7 +354,7 @@ class ArcSegment:
         segment a and 1 is segment b
         :return: Interpolated segment
         """
-        raise Exception(
+        raise NotImplementedError(
             "Linear interpolation of an arc segment is not unique (see "
             "docstring). You need to provide a custom interpolation."
         )
@@ -539,7 +539,7 @@ class Shape:
             if not ut.vector_is_close(
                 segments[i].point_end, segments[i + 1].point_start
             ):
-                raise Exception("Segments are not connected.")
+                raise ValueError("Segments are not connected.")
 
     @classmethod
     def interpolate(cls, shape_a, shape_b, weight, interpolation_schemes):
@@ -555,7 +555,7 @@ class Shape:
         :return: Interpolated shape
         """
         if not shape_a.num_segments == shape_b.num_segments:
-            raise Exception("Number of segments differ.")
+            raise ValueError("Number of segments differ.")
 
         weight = np.clip(weight, 0, 1)
 
@@ -620,15 +620,15 @@ class Shape:
         if dimension == 1:
             points = points[np.newaxis, :]
         elif not dimension == 2:
-            raise Exception("Invalid input parameter")
+            raise ValueError("Invalid input parameter")
 
         if not points.shape[1] == 2:
-            raise Exception("Invalid point format")
+            raise ValueError("Invalid point format")
 
         if len(self.segments) > 0:
             points = np.vstack((self.segments[-1].point_end, points))
         elif points.shape[0] <= 1:
-            raise Exception("Insufficient number of points provided.")
+            raise ValueError("Insufficient number of points provided.")
 
         num_new_segments = len(points) - 1
         line_segments = []
@@ -674,7 +674,7 @@ class Shape:
         """
         normal = ut.to_float_array(reflection_normal)
         if ut.vector_is_close(normal, ut.to_float_array([0, 0])):
-            raise Exception("Normal has no length.")
+            raise ValueError("Normal has no length.")
 
         dot_product = np.dot(normal, normal)
         outer_product = np.outer(normal, normal)
@@ -698,7 +698,7 @@ class Shape:
         point_end = ut.to_float_array(point_end)
 
         if ut.vector_is_close(point_start, point_end):
-            raise Exception("Line start and end point are identical.")
+            raise ValueError("Line start and end point are identical.")
 
         vector = point_end - point_start
         length_vector = np.linalg.norm(vector)
@@ -895,8 +895,8 @@ class LinearHorizontalTraceSegment:
         """
         relative_position = np.clip(relative_position, 0, 1)
 
-        origin = np.array([1, 0, 0]) * relative_position * self._length
-        return tf.LocalCoordinateSystem(origin=origin)
+        coordinates = np.array([1, 0, 0]) * relative_position * self._length
+        return tf.LocalCoordinateSystem(coordinates=coordinates)
 
 
 class RadialHorizontalTraceSegment:
@@ -979,13 +979,13 @@ class RadialHorizontalTraceSegment:
         """
         relative_position = np.clip(relative_position, 0, 1)
 
-        basis = tf.rotation_matrix_z(
+        orientation = tf.rotation_matrix_z(
             self._angle * relative_position * self._sign_winding
         )
         translation = np.array([0, -1, 0]) * self._radius * self._sign_winding
 
-        origin = np.matmul(basis, translation) - translation
-        return tf.LocalCoordinateSystem(basis, origin)
+        coordinates = np.matmul(orientation, translation) - translation
+        return tf.LocalCoordinateSystem(orientation, coordinates)
 
 
 # Trace class -----------------------------------------------------------------
@@ -1011,7 +1011,7 @@ class Trace:
         self._create_lookups(coordinate_system)
 
         if self.length <= 0:
-            raise Exception("Trace has no length.")
+            raise ValueError("Trace has no length.")
 
     def _create_lookups(self, coordinate_system_start):
         """
@@ -1135,10 +1135,10 @@ class Trace:
 
             local_cs = local_segment_cs + segment_start_cs
 
-            data_point = local_cs.origin[:, np.newaxis]
+            data_point = local_cs.coordinates.data[:, np.newaxis]
             raster_data = np.hstack([raster_data, data_point])
 
-        last_point = self._coordinate_system_lookup[-1].origin[:, np.newaxis]
+        last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
 
@@ -1157,7 +1157,7 @@ def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
     """
     weight = np.clip(weight, 0, 1)
     if not len(profile_a.shapes) == len(profile_b.shapes):
-        raise Exception("Number of profile shapes do not match.")
+        raise ValueError("Number of profile shapes do not match.")
 
     shapes_c = []
     for i in range(profile_a.num_shapes):
@@ -1191,16 +1191,16 @@ class VariableProfile:
             locations = [0] + locations
 
         if not len(profiles) == len(locations):
-            raise Exception("Invalid list of locations. See function description.")
+            raise ValueError("Invalid list of locations. See function description.")
 
         if not len(interpolation_schemes) == len(profiles) - 1:
-            raise Exception(
+            raise ValueError(
                 "Number of interpolations must be 1 less than number of " "profiles."
             )
 
         for i in range(len(profiles) - 1):
             if locations[i] >= locations[i + 1]:
-                raise Exception("Locations need to be sorted in ascending order.")
+                raise ValueError("Locations need to be sorted in ascending order.")
 
         self._profiles = profiles
         self._locations = locations
@@ -1371,8 +1371,8 @@ class Geometry:
         :return: Transformed profile data
         """
         local_cs = self._trace.local_coordinate_system(location)
-        local_data = np.matmul(local_cs.basis, profile_raster_data)
-        return local_data + local_cs.origin[:, np.newaxis]
+        local_data = np.matmul(local_cs.orientation.data, profile_raster_data)
+        return local_data + local_cs.coordinates.data[:, np.newaxis]
 
     @staticmethod
     def _profile_raster_data_3d(profile, raster_width):
