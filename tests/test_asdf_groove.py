@@ -24,9 +24,7 @@ from weldx.asdf.tags.weldx.core.groove import (
 
 
 def test_asdf_groove():
-    """
-    Test ASDF functionality for all grooves.
-    """
+    """Test ASDF functionality for all grooves."""
     v_groove = get_groove(
         groove_type="VGroove",
         workpiece_thickness=Q_(9, "mm"),
@@ -197,59 +195,34 @@ def test_asdf_groove():
     ) as af:
         data = af.tree
 
-    ERRMSG01 = "This is not a "
-    ERRMSG02 = "Wrong dict content in "
+    _key_to_type = dict(
+        test001=VGroove,
+        test002=UGroove,
+        test003=IGroove,
+        test004=UVGroove,
+        test005=VVGroove,
+        test006=HVGroove,
+        test007=HUGroove,
+        test008=DVGroove,
+        test009=DUGroove,
+        test010=DHVGroove,
+        test011=DHUGroove,
+        test012=FFGroove,
+        test013=FFGroove,
+        test014=FFGroove,
+        test015=FFGroove,
+        test016=FFGroove,
+        test017=FFGroove,
+    )
 
-    assert isinstance(data["test001"], VGroove), ERRMSG01 + f"{VGroove}"
-    assert v_groove.__dict__ == data["test001"].__dict__, ERRMSG02 + f"{VGroove}"
-    assert isinstance(data["test002"], UGroove), ERRMSG01 + f"{UGroove}"
-    assert u_groove.__dict__ == data["test002"].__dict__, ERRMSG02 + f"{UGroove}"
-    assert isinstance(data["test003"], IGroove), ERRMSG01 + f"{IGroove}"
-    assert i_groove.__dict__ == data["test003"].__dict__, ERRMSG02 + f"{IGroove}"
-    assert isinstance(data["test004"], UVGroove), ERRMSG01 + f"{UVGroove}"
-    assert uv_groove.__dict__ == data["test004"].__dict__, ERRMSG02 + f"{UVGroove}"
-    assert isinstance(data["test005"], VVGroove), ERRMSG01 + f"{VVGroove}"
-    assert vv_groove.__dict__ == data["test005"].__dict__, ERRMSG02 + f"{VVGroove}"
-    assert isinstance(data["test006"], HVGroove), ERRMSG01 + f"{HVGroove}"
-    assert hv_groove.__dict__ == data["test006"].__dict__, ERRMSG02 + f"{HVGroove}"
-    assert isinstance(data["test007"], HUGroove), ERRMSG01 + f"{HUGroove}"
-    assert hu_groove.__dict__ == data["test007"].__dict__, ERRMSG02 + f"{HUGroove}"
-    assert isinstance(data["test008"], DVGroove), ERRMSG01 + f"{DVGroove}"
-    assert dv_groove.__dict__ == data["test008"].__dict__, ERRMSG02 + f"{DVGroove}"
-    assert isinstance(data["test009"], DUGroove), ERRMSG01 + f"{DUGroove}"
-    assert du_groove.__dict__ == data["test009"].__dict__, ERRMSG02 + f"{DUGroove}"
-    assert isinstance(data["test010"], DHVGroove), ERRMSG01 + f"{DHVGroove}"
-    assert dhv_groove.__dict__ == data["test010"].__dict__, ERRMSG02 + f"{DHVGroove}"
-    assert isinstance(data["test011"], DHUGroove), ERRMSG01 + f"{DHUGroove}"
-    assert dhu_groove.__dict__ == data["test011"].__dict__, ERRMSG02 + f"{DHUGroove}"
-    assert isinstance(data["test012"], FFGroove), ERRMSG01 + f"{FFGroove}"
-    assert ff_groove0.__dict__ == data["test012"].__dict__, ERRMSG02 + f"{FFGroove}"
-    assert isinstance(data["test013"], FFGroove), ERRMSG01 + f"{FFGroove}"
-    assert ff_groove1.__dict__ == data["test013"].__dict__, ERRMSG02 + f"{FFGroove}"
-    assert isinstance(data["test014"], FFGroove), ERRMSG01 + f"{FFGroove}"
-    assert ff_groove2.__dict__ == data["test014"].__dict__, ERRMSG02 + f"{FFGroove}"
-    assert isinstance(data["test015"], FFGroove), ERRMSG01 + f"{FFGroove}"
-    assert ff_groove3.__dict__ == data["test015"].__dict__, ERRMSG02 + f"{FFGroove}"
-    assert isinstance(data["test016"], FFGroove), ERRMSG01 + f"{FFGroove}"
-    assert ff_groove4.__dict__ == data["test016"].__dict__, ERRMSG02 + f"{FFGroove}"
-    assert isinstance(data["test017"], FFGroove), ERRMSG01 + f"{FFGroove}"
-    assert ff_groove5.__dict__ == data["test017"].__dict__, ERRMSG02 + f"{FFGroove}"
-
-    # test to_profile
-    assert isinstance(data["test001"].to_profile(), Profile)
-    assert isinstance(data["test002"].to_profile(), Profile)
-    assert isinstance(data["test003"].to_profile(), Profile)
-    assert isinstance(data["test004"].to_profile(), Profile)
-    assert isinstance(data["test005"].to_profile(), Profile)
-    assert isinstance(data["test006"].to_profile(), Profile)
-    assert isinstance(data["test007"].to_profile(), Profile)
-    assert isinstance(data["test008"].to_profile(), Profile)
-    assert isinstance(data["test009"].to_profile(), Profile)
-    assert isinstance(data["test010"].to_profile(), Profile)
-    assert isinstance(data["test011"].to_profile(), Profile)
-    assert isinstance(data["test012"].to_profile(), Profile)
-    assert isinstance(data["test013"].to_profile(), Profile)
-    assert isinstance(data["test014"].to_profile(), Profile)
-    assert isinstance(data["test015"].to_profile(), Profile)
-    assert isinstance(data["test016"].to_profile(), Profile)
-    assert isinstance(data["test017"].to_profile(), Profile)
+    for k, v in tree.items():
+        # test class
+        assert isinstance(
+            data[k], _key_to_type[k]
+        ), f"Item {k} did not match expected type {_key_to_type[k]}"
+        # test content equality using dataclass built-in functions
+        assert v == data[k], f"Could not correctly reconstruct groove of type {type(v)}"
+        # test to_profile
+        assert isinstance(
+            v.to_profile(), Profile
+        ), f"Error calling plot function of {type(v)} "

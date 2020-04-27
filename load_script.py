@@ -1,4 +1,4 @@
-"""Test Script. Use save_script.py before launching this script"""
+"""Debug asdf save of groove implementation (run after save_script.py)."""
 
 import asdf
 

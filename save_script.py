@@ -1,4 +1,4 @@
-"""Test script"""
+"""Debug asdf save of groove implementation."""
 
 import asdf
 
