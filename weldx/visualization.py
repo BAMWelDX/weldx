@@ -15,7 +15,7 @@ def plot_coordinate_system(coordinate_system, axes, color=None, label=None):
     was specified.
     :return: ---
     """
-    p_0 = coordinate_system.origin
+    p_0 = coordinate_system.coordinates
     p_x = p_0 + coordinate_system.orientation[:, 0]
     p_y = p_0 + coordinate_system.orientation[:, 1]
     p_z = p_0 + coordinate_system.orientation[:, 2]

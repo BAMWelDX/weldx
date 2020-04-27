@@ -216,7 +216,7 @@ class LocalCoordinateSystem:
     def __init__(
         self,
         orientation: Union[xr.DataArray, np.ndarray, List[List]] = None,
-        origin: Union[xr.DataArray, np.ndarray, List] = None,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
         construction_checks: bool = True,
     ):
@@ -228,7 +228,7 @@ class LocalCoordinateSystem:
         corresponding orientation matrix is equal to the normalized orientation
         vectors. So each orthogonal transformation matrix can also be
         provided as orientation.
-        :param origin: Position of the origin
+        :param coordinates: Coordinates of the origin
         :param time: Time data for time dependent coordinate systems
         :param construction_checks: If 'True', the validity of the data will be verified
         :return: Cartesian coordinate system
@@ -237,8 +237,8 @@ class LocalCoordinateSystem:
             if orientation is None:
                 orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
-            if origin is None:
-                origin = np.array([0, 0, 0])
+            if coordinates is None:
+                coordinates = np.array([0, 0, 0])
 
             if time is not None:
                 try:
@@ -263,13 +263,13 @@ class LocalCoordinateSystem:
                 # TODO: Test if xarray has correct format
                 pass
 
-            if not isinstance(origin, xr.DataArray):
-                if not isinstance(origin, np.ndarray):
-                    origin = np.array(origin)
-                time_origin = None
-                if origin.ndim == 2:
-                    time_origin = time
-                origin = ut.xr_3d_vector(origin, time_origin)
+            if not isinstance(coordinates, xr.DataArray):
+                if not isinstance(coordinates, np.ndarray):
+                    coordinates = np.array(coordinates)
+                time_coordinates = None
+                if coordinates.ndim == 2:
+                    time_coordinates = time
+                coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
             else:
                 # TODO: Test if xarray has correct format
                 pass
@@ -282,22 +282,24 @@ class LocalCoordinateSystem:
             )
 
             # unify time axis
-            if ("time" in orientation.coords) and ("time" in origin.coords):
-                if not np.all(orientation.time.data == origin.time.data):
-                    time_union = ut.get_time_union([orientation.time, origin.time])
+            if ("time" in orientation.coords) and ("time" in coordinates.coords):
+                if not np.all(orientation.time.data == coordinates.time.data):
+                    time_union = ut.get_time_union([orientation.time, coordinates.time])
                     orientation = ut.xr_interp_orientation_in_time(
                         orientation, time_union
                     )
-                    origin = ut.xr_interp_coordinates_in_time(origin, time_union)
+                    coordinates = ut.xr_interp_coordinates_in_time(
+                        coordinates, time_union
+                    )
 
             # vectorize test if orthogonal
             if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
                 raise ValueError("Orientation vectors must be orthogonal")
 
-        origin.name = "origin"
+        coordinates.name = "coordinates"
         orientation.name = "orientation"
 
-        self._dataset = xr.merge([origin, orientation], join="exact")
+        self._dataset = xr.merge([coordinates, orientation], join="exact")
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -338,11 +340,11 @@ class LocalCoordinateSystem:
         orientation = ut.xr_matmul(
             rhs_cs.orientation, self.orientation, dims_a=["c", "v"]
         )
-        origin = (
-            ut.xr_matmul(rhs_cs.orientation, self.origin, ["c", "v"], ["c"])
-            + rhs_cs.origin
+        coordinates = (
+            ut.xr_matmul(rhs_cs.orientation, self.coordinates, ["c", "v"], ["c"])
+            + rhs_cs.coordinates
         )
-        return LocalCoordinateSystem(orientation, origin)
+        return LocalCoordinateSystem(orientation, coordinates)
 
     def __sub__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
         """
@@ -375,7 +377,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_euler(
-        cls, sequence, angles, degrees=False, origin=None, time=None
+        cls, sequence, angles, degrees=False, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """
         Construct a local coordinate system from an euler sequence.
@@ -402,31 +404,31 @@ class LocalCoordinateSystem:
           Euler angles describing a single rotation
         :param degrees: If True, then the given angles are assumed to be in degrees.
         Default is False.
-        :param origin: Position of the origin
+        :param coordinates: Coordinates of the origin
         :param time: Time data for time dependent coordinate systems
         :return: Local coordinate system
         :return:
         """
         orientation = Rot.from_euler(sequence, angles, degrees).as_matrix()
-        return cls(orientation, origin=origin, time=time)
+        return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
     def construct_from_orientation(
-        cls, orientation, origin=None, time=None
+        cls, orientation, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """
         Construct a local coordinate system from orientation matrix.
 
         :param orientation: Orthogonal transformation matrix
-        :param origin: Position of the origin
+        :param coordinates: Coordinates of the origin
         :param time: Time data for time dependent coordinate systems
         :return: Local coordinate system
         """
-        return cls(orientation, origin=origin, time=time)
+        return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
     def construct_from_xyz(
-        cls, vec_x, vec_y, vec_z, origin=None, time=None
+        cls, vec_x, vec_y, vec_z, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """
         Construct a local coordinate system from 3 vectors defining the orientation.
@@ -434,16 +436,16 @@ class LocalCoordinateSystem:
         :param vec_x: Vector defining the x-axis
         :param vec_y: Vector defining the y-axis
         :param vec_z: Vector defining the z-axis
-        :param origin: Position of the origin
+        :param coordinates: Coordinates of the origin
         :param time: Time data for time dependent coordinate systems
         :return: Local coordinate system
         """
         orientation = np.transpose([vec_x, vec_y, vec_z])
-        return cls(orientation, origin=origin, time=time)
+        return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
     def construct_from_xy_and_orientation(
-        cls, vec_x, vec_y, positive_orientation=True, origin=None, time=None
+        cls, vec_x, vec_y, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """
         Construct a coordinate system from 2 vectors and an orientation.
@@ -452,7 +454,7 @@ class LocalCoordinateSystem:
         :param vec_y: Vector defining the y-axis
         :param positive_orientation: Set to True if the orientation should
         be positive and to False if not
-        :param origin: Position of the origin
+        :param coordinates: Coordinates of the origin
         :param time: Time data for time dependent coordinate systems
         :return: Local coordinate system
         """
@@ -461,11 +463,11 @@ class LocalCoordinateSystem:
         )
 
         orientation = np.transpose([vec_x, vec_y, vec_z])
-        return cls(orientation, origin=origin, time=time)
+        return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
     def construct_from_yz_and_orientation(
-        cls, vec_y, vec_z, positive_orientation=True, origin=None, time=None
+        cls, vec_y, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """
         Construct a coordinate system from 2 vectors and an orientation.
@@ -474,7 +476,7 @@ class LocalCoordinateSystem:
         :param vec_z: Vector defining the z-axis
         :param positive_orientation: Set to True if the orientation should
         be positive and to False if not
-        :param origin: Position of the origin
+        :param coordinates: Coordinates of the origin
         :param time: Time data for time dependent coordinate systems
         :return: Local coordinate system
         """
@@ -483,11 +485,11 @@ class LocalCoordinateSystem:
         )
 
         orientation = np.transpose(np.array([vec_x, vec_y, vec_z]))
-        return cls(orientation, origin=origin, time=time)
+        return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
     def construct_from_xz_and_orientation(
-        cls, vec_x, vec_z, positive_orientation=True, origin=None, time=None
+        cls, vec_x, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """
         Construct a coordinate system from 2 vectors and an orientation.
@@ -496,7 +498,7 @@ class LocalCoordinateSystem:
         :param vec_z: Vector defining the z-axis
         :param positive_orientation: Set to True if the orientation should
         be positive and to False if not
-        :param origin: Position of the origin
+        :param coordinates: Coordinates of the origin
         :param time: Time data for time dependent coordinate systems
         :return: Local coordinate system
         """
@@ -505,7 +507,7 @@ class LocalCoordinateSystem:
         )
 
         orientation = np.transpose([vec_x, vec_y, vec_z])
-        return cls(orientation, origin=origin, time=time)
+        return cls(orientation, coordinates=coordinates, time=time)
 
     @staticmethod
     def _sign_orientation(positive_orientation):
@@ -545,26 +547,13 @@ class LocalCoordinateSystem:
         return self.dataset.orientation
 
     @property
-    def origin(self) -> xr.DataArray:
+    def coordinates(self) -> xr.DataArray:
         """
-        Get the coordinate systems origin.
+        Get the coordinate systems coordinates.
 
-        This function is identical to the 'location' function.
-
-        :return: Origin of the coordinate system
+        :return: Coordinates of the coordinate system
         """
-        return self.dataset.origin
-
-    @property
-    def location(self) -> xr.DataArray:
-        """
-        Get the coordinate systems location.
-
-        This function is identical to the 'origin' function.
-
-        :return: Location of the coordinate system.
-        """
-        return self.dataset.origin
+        return self.dataset.coordinates
 
     @property
     def time(self) -> Union[pd.DatetimeIndex, None]:
@@ -582,7 +571,7 @@ class LocalCoordinateSystem:
         """
         Get the underlying xarray.Dataset with ordered dimensions.
 
-        :return: xarray Dataset with origin and orientation as DataVariables.
+        :return: xarray Dataset with coordinates and orientation as DataVariables.
         """
         return self._dataset.transpose(..., "c", "v")
 
@@ -607,27 +596,27 @@ class LocalCoordinateSystem:
             )
             raise err
         orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
-        origin = ut.xr_interp_coordinates_in_time(self.origin, time)
+        coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
-        return LocalCoordinateSystem(orientation, origin)
+        return LocalCoordinateSystem(orientation, coordinates)
 
     def invert(self) -> "LocalCoordinateSystem":
         """
         Get a local coordinate system defining the parent in the child system.
 
         Inverse is defined as orientation_new=orientation.T,
-        origin_new=orientation.T*(-origin)
+        coordinates_new=orientation.T*(-coordinates)
         :return: Inverted coordinate system.
         """
         orientation = ut.xr_transpose_matrix_data(self.orientation, dim1="c", dim2="v")
-        origin = ut.xr_matmul(
+        coordinates = ut.xr_matmul(
             self.orientation,
-            -self.origin,
+            -self.coordinates,
             dims_a=["c", "v"],
             dims_b=["c"],
             trans_a=True,
         )
-        return LocalCoordinateSystem(orientation, origin)
+        return LocalCoordinateSystem(orientation, coordinates)
 
 
 # coordinate system manager class ------------------------------------------------------
@@ -850,11 +839,11 @@ class CoordinateSystemManager:
             mul = ut.xr_matmul(
                 lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
             )
-            return mul + lcs.location
+            return mul + lcs.coordinates
 
         data = ut.to_float_array(data)
         rotation = lcs.orientation.data
-        translation = lcs.location.data
+        translation = lcs.coordinates.data
         return ut.mat_vec_mul(rotation, data) + translation
 
     @property

@@ -895,8 +895,8 @@ class LinearHorizontalTraceSegment:
         """
         relative_position = np.clip(relative_position, 0, 1)
 
-        origin = np.array([1, 0, 0]) * relative_position * self._length
-        return tf.LocalCoordinateSystem(origin=origin)
+        coordinates = np.array([1, 0, 0]) * relative_position * self._length
+        return tf.LocalCoordinateSystem(coordinates=coordinates)
 
 
 class RadialHorizontalTraceSegment:
@@ -984,8 +984,8 @@ class RadialHorizontalTraceSegment:
         )
         translation = np.array([0, -1, 0]) * self._radius * self._sign_winding
 
-        origin = np.matmul(orientation, translation) - translation
-        return tf.LocalCoordinateSystem(orientation, origin)
+        coordinates = np.matmul(orientation, translation) - translation
+        return tf.LocalCoordinateSystem(orientation, coordinates)
 
 
 # Trace class -----------------------------------------------------------------
@@ -1135,10 +1135,10 @@ class Trace:
 
             local_cs = local_segment_cs + segment_start_cs
 
-            data_point = local_cs.origin.data[:, np.newaxis]
+            data_point = local_cs.coordinates.data[:, np.newaxis]
             raster_data = np.hstack([raster_data, data_point])
 
-        last_point = self._coordinate_system_lookup[-1].origin.data[:, np.newaxis]
+        last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
 
@@ -1372,7 +1372,7 @@ class Geometry:
         """
         local_cs = self._trace.local_coordinate_system(location)
         local_data = np.matmul(local_cs.orientation.data, profile_raster_data)
-        return local_data + local_cs.origin.data[:, np.newaxis]
+        return local_data + local_cs.coordinates.data[:, np.newaxis]
 
     @staticmethod
     def _profile_raster_data_3d(profile, raster_width):

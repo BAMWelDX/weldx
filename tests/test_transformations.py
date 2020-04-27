@@ -418,7 +418,7 @@ def check_coordinate_system_orientation(
 def check_coordinate_system(
     cs_p: tf.LocalCoordinateSystem,
     orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
-    origin_expected: Union[np.ndarray, List[Any], xr.DataArray],
+    coordinates_expected: Union[np.ndarray, List[Any], xr.DataArray],
     positive_orientation_expected: bool,
     time=None,
 ):
@@ -428,17 +428,17 @@ def check_coordinate_system(
 
     :param cs_p: Coordinate system that should be checked
     :param orientation_expected: Expected orientation
-    :param origin_expected: Expected origin
+    :param coordinates_expected: Expected coordinates
     :param positive_orientation_expected: Expected orientation
     :param time: A pandas.DatetimeIndex object, if the coordinate system is expected to
     be time dependent. None otherwise.
     :return: ---
     """
     orientation_expected = np.array(orientation_expected)
-    origin_expected = np.array(origin_expected)
+    coordinates_expected = np.array(coordinates_expected)
 
     if time is not None:
-        assert orientation_expected.ndim == 3 or origin_expected.ndim == 2
+        assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
         check_coordinate_system_time(cs_p, time)
 
     check_coordinate_system_orientation(
@@ -448,8 +448,8 @@ def check_coordinate_system(
         cs_p.orientation, orientation_expected, positive_orientation_expected
     )
 
-    assert np.allclose(cs_p.origin.values, origin_expected, atol=1e-9)
-    assert np.allclose(cs_p.location.values, origin_expected, atol=1e-9)
+    assert np.allclose(cs_p.coordinates.values, coordinates_expected, atol=1e-9)
+    assert np.allclose(cs_p.coordinates.values, coordinates_expected, atol=1e-9)
 
 
 def test_coordinate_system_init():
@@ -470,27 +470,29 @@ def test_coordinate_system_init():
     coordinates_tdp = ut.to_float_array([[3, 7, 1], [4, -2, 8], [-5, 3, -1]])
 
     # numpy - no time dependency
-    lcs = tf.LocalCoordinateSystem(orientation=orientation_fix, origin=coordinates_fix)
+    lcs = tf.LocalCoordinateSystem(
+        orientation=orientation_fix, coordinates=coordinates_fix
+    )
 
     check_coordinate_system(lcs, orientation_fix, coordinates_fix, True)
 
     # numpy - orientation time dependent
     lcs = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp, origin=coordinates_fix, time=time_0
+        orientation=orientation_tdp, coordinates=coordinates_fix, time=time_0
     )
 
     check_coordinate_system(lcs, orientation_tdp, coordinates_fix, True, time_0)
 
     # numpy - coordinates time dependent
     lcs = tf.LocalCoordinateSystem(
-        orientation=orientation_fix, origin=coordinates_tdp, time=time_0
+        orientation=orientation_fix, coordinates=coordinates_tdp, time=time_0
     )
 
     check_coordinate_system(lcs, orientation_fix, coordinates_tdp, True, time_0)
 
     # numpy - coordinates and orientation time dependent - only equal times
     lcs = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp, origin=coordinates_tdp, time=time_0
+        orientation=orientation_tdp, coordinates=coordinates_tdp, time=time_0
     )
 
     check_coordinate_system(lcs, orientation_tdp, coordinates_tdp, True, time_0)
@@ -503,28 +505,28 @@ def test_coordinate_system_init():
 
     # xarray - no time dependency
     lcs = tf.LocalCoordinateSystem(
-        orientation=xr_orientation_fix, origin=xr_coordinates_fix
+        orientation=xr_orientation_fix, coordinates=xr_coordinates_fix
     )
 
     check_coordinate_system(lcs, orientation_fix, coordinates_fix, True)
 
     # xarray - orientation time dependent
     lcs = tf.LocalCoordinateSystem(
-        orientation=xr_orientation_tdp_0, origin=xr_coordinates_fix
+        orientation=xr_orientation_tdp_0, coordinates=xr_coordinates_fix
     )
 
     check_coordinate_system(lcs, orientation_tdp, coordinates_fix, True, time_0)
 
     # xarray - coordinates time dependent
     lcs = tf.LocalCoordinateSystem(
-        orientation=xr_orientation_fix, origin=xr_coordinates_tdp_0
+        orientation=xr_orientation_fix, coordinates=xr_coordinates_tdp_0
     )
 
     check_coordinate_system(lcs, orientation_fix, coordinates_tdp, True, time_0)
 
     # xarray - coordinates and orientation time dependent - equal times
     lcs = tf.LocalCoordinateSystem(
-        orientation=xr_orientation_tdp_0, origin=xr_coordinates_tdp_0
+        orientation=xr_orientation_tdp_0, coordinates=xr_coordinates_tdp_0
     )
 
     check_coordinate_system(lcs, orientation_tdp, coordinates_tdp, True, time_0)
@@ -533,7 +535,7 @@ def test_coordinate_system_init():
     xr_coordinates_tdp_1 = ut.xr_3d_vector(coordinates_tdp, time_1)
 
     lcs = tf.LocalCoordinateSystem(
-        orientation=xr_orientation_tdp_0, origin=xr_coordinates_tdp_1
+        orientation=xr_orientation_tdp_0, coordinates=xr_coordinates_tdp_1
     )
 
     time_exp = pd.date_range("2042-01-01", periods=6, freq="1D")
@@ -556,15 +558,15 @@ def test_coordinate_system_init():
     # invalid inputs
     with pytest.raises(Exception):
         tf.LocalCoordinateSystem(
-            orientation="wrong", origin=coordinates_fix, time=time_0
+            orientation="wrong", coordinates=coordinates_fix, time=time_0
         )
     with pytest.raises(Exception):
         tf.LocalCoordinateSystem(
-            orientation=orientation_fix, origin="wrong", time=time_0
+            orientation=orientation_fix, coordinates="wrong", time=time_0
         )
     with pytest.raises(Exception):
         tf.LocalCoordinateSystem(
-            orientation=orientation_fix, origin=coordinates_fix, time="wrong"
+            orientation=orientation_fix, coordinates=coordinates_fix, time="wrong"
         )
 
     # wrong xarray format
@@ -588,7 +590,7 @@ def test_coordinate_system_factories():
     angle_x = np.pi / 3
     angle_y = np.pi / 4
     angle_z = np.pi / 5
-    origin = [4, -2, 6]
+    coordinates = [4, -2, 6]
     orientation_pos = rotated_positive_orthogonal_orientation(angle_x, angle_y, angle_z)
 
     x = orientation_pos[:, 0]
@@ -599,53 +601,53 @@ def test_coordinate_system_factories():
 
     # construction with orientation -----------------------
 
-    cs_orientation_pos = lcs.construct_from_orientation(orientation_pos, origin)
-    cs_orientation_neg = lcs.construct_from_orientation(orientation_neg, origin)
+    cs_orientation_pos = lcs.construct_from_orientation(orientation_pos, coordinates)
+    cs_orientation_neg = lcs.construct_from_orientation(orientation_neg, coordinates)
 
-    check_coordinate_system(cs_orientation_pos, orientation_pos, origin, True)
-    check_coordinate_system(cs_orientation_neg, orientation_neg, origin, False)
+    check_coordinate_system(cs_orientation_pos, orientation_pos, coordinates, True)
+    check_coordinate_system(cs_orientation_neg, orientation_neg, coordinates, False)
 
     # construction with euler -----------------------------
 
     angles = [angle_x, angle_y, angle_z]
-    cs_euler_pos = lcs.construct_from_euler("xyz", angles, False, origin)
-    check_coordinate_system(cs_euler_pos, orientation_pos, origin, True)
+    cs_euler_pos = lcs.construct_from_euler("xyz", angles, False, coordinates)
+    check_coordinate_system(cs_euler_pos, orientation_pos, coordinates, True)
 
     # construction with x,y,z-vectors ---------------------
 
-    cs_xyz_pos = lcs.construct_from_xyz(x, y, z, origin)
-    cs_xyz_neg = lcs.construct_from_xyz(x, y, -z, origin)
+    cs_xyz_pos = lcs.construct_from_xyz(x, y, z, coordinates)
+    cs_xyz_neg = lcs.construct_from_xyz(x, y, -z, coordinates)
 
-    check_coordinate_system(cs_xyz_pos, orientation_pos, origin, True)
-    check_coordinate_system(cs_xyz_neg, orientation_neg, origin, False)
+    check_coordinate_system(cs_xyz_pos, orientation_pos, coordinates, True)
+    check_coordinate_system(cs_xyz_neg, orientation_neg, coordinates, False)
 
     # construction with x,y-vectors and orientation -------
-    cs_xyo_pos = lcs.construct_from_xy_and_orientation(x, y, True, origin)
-    cs_xyo_neg = lcs.construct_from_xy_and_orientation(x, y, False, origin)
+    cs_xyo_pos = lcs.construct_from_xy_and_orientation(x, y, True, coordinates)
+    cs_xyo_neg = lcs.construct_from_xy_and_orientation(x, y, False, coordinates)
 
-    check_coordinate_system(cs_xyo_pos, orientation_pos, origin, True)
-    check_coordinate_system(cs_xyo_neg, orientation_neg, origin, False)
+    check_coordinate_system(cs_xyo_pos, orientation_pos, coordinates, True)
+    check_coordinate_system(cs_xyo_neg, orientation_neg, coordinates, False)
 
     # construction with y,z-vectors and orientation -------
-    cs_yzo_pos = lcs.construct_from_yz_and_orientation(y, z, True, origin)
-    cs_yzo_neg = lcs.construct_from_yz_and_orientation(y, -z, False, origin)
+    cs_yzo_pos = lcs.construct_from_yz_and_orientation(y, z, True, coordinates)
+    cs_yzo_neg = lcs.construct_from_yz_and_orientation(y, -z, False, coordinates)
 
-    check_coordinate_system(cs_yzo_pos, orientation_pos, origin, True)
-    check_coordinate_system(cs_yzo_neg, orientation_neg, origin, False)
+    check_coordinate_system(cs_yzo_pos, orientation_pos, coordinates, True)
+    check_coordinate_system(cs_yzo_neg, orientation_neg, coordinates, False)
 
     # construction with x,z-vectors and orientation -------
-    cs_xzo_pos = lcs.construct_from_xz_and_orientation(x, z, True, origin)
-    cs_xzo_neg = lcs.construct_from_xz_and_orientation(x, -z, False, origin)
+    cs_xzo_pos = lcs.construct_from_xz_and_orientation(x, z, True, coordinates)
+    cs_xzo_neg = lcs.construct_from_xz_and_orientation(x, -z, False, coordinates)
 
-    check_coordinate_system(cs_xzo_pos, orientation_pos, origin, True)
-    check_coordinate_system(cs_xzo_neg, orientation_neg, origin, False)
+    check_coordinate_system(cs_xzo_pos, orientation_pos, coordinates, True)
+    check_coordinate_system(cs_xzo_neg, orientation_neg, coordinates, False)
 
     # test integers as inputs -----------------------------
     x_i = [1, 1, 0]
     y_i = [-1, 1, 0]
     z_i = [0, 0, 1]
 
-    lcs.construct_from_xyz(x_i, y_i, z_i, origin)
+    lcs.construct_from_xyz(x_i, y_i, z_i, coordinates)
     lcs.construct_from_xy_and_orientation(x_i, y_i)
     lcs.construct_from_yz_and_orientation(y_i, z_i)
     lcs.construct_from_xz_and_orientation(z_i, x_i)
@@ -685,10 +687,10 @@ def test_coordinate_system_addition_and_subtraction():
 
     # No time dependency ------------------------
     lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, origin=coordinates_fix_0
+        orientation=orientation_fix_0, coordinates=coordinates_fix_0
     )
     lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_1, origin=coordinates_fix_1
+        orientation=orientation_fix_1, coordinates=coordinates_fix_1
     )
 
     lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
@@ -699,15 +701,15 @@ def test_coordinate_system_addition_and_subtraction():
 
     check_coordinate_system(lcs1_in_base, orientation_exp, coordinates_exp, True)
     check_coordinate_system(
-        lcs1_in_lcs_0_calc, lcs1_in_lcs_0.orientation, lcs1_in_lcs_0.origin, True
+        lcs1_in_lcs_0_calc, lcs1_in_lcs_0.orientation, lcs1_in_lcs_0.coordinates, True
     )
 
     # orientation of left cs time dependent -----
     lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, origin=coordinates_fix_0
+        orientation=orientation_fix_0, coordinates=coordinates_fix_0
     )
     lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_0, origin=coordinates_fix_1, time=time_0
+        orientation=orientation_tdp_0, coordinates=coordinates_fix_1, time=time_0
     )
 
     lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
@@ -722,17 +724,17 @@ def test_coordinate_system_addition_and_subtraction():
     check_coordinate_system(
         lcs1_in_lcs_0_calc,
         lcs1_in_lcs_0.orientation,
-        lcs1_in_lcs_0.origin,
+        lcs1_in_lcs_0.coordinates,
         True,
         time_0,
     )
 
     # coordinates of left cs time dependent -----
     lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, origin=coordinates_fix_0
+        orientation=orientation_fix_0, coordinates=coordinates_fix_0
     )
     lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_1, origin=coordinates_tdp_0, time=time_0
+        orientation=orientation_fix_1, coordinates=coordinates_tdp_0, time=time_0
     )
 
     lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
@@ -750,17 +752,17 @@ def test_coordinate_system_addition_and_subtraction():
     check_coordinate_system(
         lcs1_in_lcs_0_calc,
         lcs1_in_lcs_0.orientation,
-        lcs1_in_lcs_0.origin,
+        lcs1_in_lcs_0.coordinates,
         True,
         time_0,
     )
 
     # both fully time dependent, equal times ----
     lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_0, origin=coordinates_tdp_0, time=time_0
+        orientation=orientation_tdp_0, coordinates=coordinates_tdp_0, time=time_0
     )
     lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_1, origin=coordinates_tdp_1, time=time_0
+        orientation=orientation_tdp_1, coordinates=coordinates_tdp_1, time=time_0
     )
 
     lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
@@ -775,7 +777,7 @@ def test_coordinate_system_addition_and_subtraction():
     check_coordinate_system(
         lcs1_in_lcs_0_calc,
         lcs1_in_lcs_0.orientation,
-        lcs1_in_lcs_0.origin,
+        lcs1_in_lcs_0.coordinates,
         True,
         time_0,
     )
@@ -790,10 +792,10 @@ def test_coordinate_system_addition_and_subtraction():
     # compared to the initial coordinate system.
 
     lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_2, origin=coordinates_tdp_0, time=time_0
+        orientation=orientation_tdp_2, coordinates=coordinates_tdp_0, time=time_0
     )
     lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_3, origin=coordinates_tdp_1, time=time_1
+        orientation=orientation_tdp_3, coordinates=coordinates_tdp_1, time=time_1
     )
 
     lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
@@ -815,10 +817,10 @@ def test_coordinate_system_addition_and_subtraction():
 
     # both fully time dependent, different times - subtraction only
     lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_4, origin=coordinates_tdp_0, time=time_0
+        orientation=orientation_tdp_4, coordinates=coordinates_tdp_0, time=time_0
     )
     lcs1_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_3, origin=coordinates_tdp_1, time=time_1
+        orientation=orientation_tdp_3, coordinates=coordinates_tdp_1, time=time_1
     )
 
     lcs1_in_lcs_0 = lcs1_in_base - lcs0_in_base
@@ -840,10 +842,10 @@ def test_coordinate_system_addition_and_subtraction():
 
     # orientation of right cs time dependent -----
     lcs0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, origin=coordinates_fix_0
+        orientation=orientation_fix_0, coordinates=coordinates_fix_0
     )
     lcs1 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_0, origin=coordinates_fix_1, time=time_0
+        orientation=orientation_tdp_0, coordinates=coordinates_fix_1, time=time_0
     )
 
     lcs_add = lcs0 + lcs1
@@ -863,10 +865,10 @@ def test_coordinate_system_addition_and_subtraction():
 
     # coordinates of right cs time dependent ----
     lcs0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, origin=coordinates_fix_0
+        orientation=orientation_fix_0, coordinates=coordinates_fix_0
     )
     lcs1 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, origin=coordinates_tdp_0, time=time_0
+        orientation=orientation_fix_0, coordinates=coordinates_tdp_0, time=time_0
     )
 
     lcs_add = lcs0 + lcs1
@@ -885,10 +887,10 @@ def test_coordinate_system_addition_and_subtraction():
 
     # right cs with full time dependency --------
     lcs0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, origin=coordinates_fix_0
+        orientation=orientation_fix_0, coordinates=coordinates_fix_0
     )
     lcs1 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_0, origin=coordinates_tdp_0, time=time_0
+        orientation=orientation_tdp_0, coordinates=coordinates_tdp_0, time=time_0
     )
 
     lcs_add = lcs0 + lcs1
@@ -918,19 +920,19 @@ def test_coordinate_system_invert():
     """
     # fix ---------------------------------------
     lcs0_in_lcs1 = tf.LocalCoordinateSystem.construct_from_xy_and_orientation(
-        [1, 1, 0], [-1, 1, 0], origin=[2, 0, 2]
+        [1, 1, 0], [-1, 1, 0], coordinates=[2, 0, 2]
     )
     lcs1_in_lcs0 = lcs0_in_lcs1.invert()
 
     exp_orientation = tf.rotation_matrix_z(-np.pi / 4)
-    exp_origin = [-np.sqrt(2), np.sqrt(2), -2]
+    exp_coordinates = [-np.sqrt(2), np.sqrt(2), -2]
 
-    check_coordinate_system(lcs1_in_lcs0, exp_orientation, exp_origin, True)
+    check_coordinate_system(lcs1_in_lcs0, exp_orientation, exp_coordinates, True)
 
     lcs0_in_lcs1_2 = lcs1_in_lcs0.invert()
 
     check_coordinate_system(
-        lcs0_in_lcs1_2, lcs0_in_lcs1.orientation, lcs0_in_lcs1.origin, True
+        lcs0_in_lcs1_2, lcs0_in_lcs1.orientation, lcs0_in_lcs1.coordinates, True
     )
 
     # time dependent ----------------------------
@@ -939,7 +941,7 @@ def test_coordinate_system_invert():
     coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
 
     lcs0_in_lcs1 = tf.LocalCoordinateSystem(
-        orientation=orientation, origin=coordinates, time=time
+        orientation=orientation, coordinates=coordinates, time=time
     )
 
     lcs1_in_lcs0 = lcs0_in_lcs1.invert()
@@ -951,7 +953,7 @@ def test_coordinate_system_invert():
     lcs0_in_lcs1_2 = lcs1_in_lcs0.invert()
 
     check_coordinate_system(
-        lcs0_in_lcs1_2, lcs0_in_lcs1.orientation, lcs0_in_lcs1.origin, True, time
+        lcs0_in_lcs1_2, lcs0_in_lcs1.orientation, lcs0_in_lcs1.coordinates, True, time
     )
 
 
@@ -993,7 +995,7 @@ def test_coordinate_system_time_interpolation():
     coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
 
     lcs = tf.LocalCoordinateSystem(
-        orientation=orientation, origin=coordinates, time=time_0
+        orientation=orientation, coordinates=coordinates, time=time_0
     )
 
     # broadcast left ----------------------------
@@ -1155,17 +1157,17 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
     # check stored transformations
     lcs1_in_root_returned = csm.get_local_coordinate_system("lcs1", "root")
     check_coordinate_system(
-        lcs1_in_root_returned, lcs1_in_root.orientation, lcs1_in_root.origin, True
+        lcs1_in_root_returned, lcs1_in_root.orientation, lcs1_in_root.coordinates, True
     )
 
     lcs2_in_root_returned = csm.get_local_coordinate_system("lcs2", "root")
     check_coordinate_system(
-        lcs2_in_root_returned, lcs2_in_root.orientation, lcs2_in_root.origin, True
+        lcs2_in_root_returned, lcs2_in_root.orientation, lcs2_in_root.coordinates, True
     )
 
     lcs3_in_lcs2_returned = csm.get_local_coordinate_system("lcs3", "lcs2")
     check_coordinate_system(
-        lcs3_in_lcs2_returned, lcs3_in_lcs2.orientation, lcs3_in_lcs2.origin, True
+        lcs3_in_lcs2_returned, lcs3_in_lcs2.orientation, lcs3_in_lcs2.coordinates, True
     )
 
     # check calculated transformations
@@ -1208,17 +1210,17 @@ def test_coordinate_system_manager_time_union():
     coordinates = [[1, 6, 3], [8, 2, 6], [4, 4, 4]]
     lcs_0 = tf.LocalCoordinateSystem(
         orientation=orientation,
-        origin=coordinates,
+        coordinates=coordinates,
         time=pd.date_range("2042-01-01", periods=3, freq="3D"),
     )
     lcs_1 = tf.LocalCoordinateSystem(
         orientation=orientation,
-        origin=coordinates,
+        coordinates=coordinates,
         time=pd.date_range("2042-01-01", periods=3, freq="4D"),
     )
     lcs_2 = tf.LocalCoordinateSystem(
         orientation=orientation,
-        origin=coordinates,
+        coordinates=coordinates,
         time=pd.date_range("2042-01-01", periods=3, freq="5D"),
     )
     lcs_3 = tf.LocalCoordinateSystem()
@@ -1265,21 +1267,21 @@ def test_coordinate_system_manager_interp_time():
     coordinates = ut.to_float_array([[5, 0, 0], [1, 0, 0], [1, 4, 4]])
     lcs_0_in_root = tf.LocalCoordinateSystem(
         orientation=orientation,
-        origin=coordinates,
+        coordinates=coordinates,
         time=pd.date_range("2042-01-01", periods=3, freq="3D"),
     )
     lcs_1_in_lcs_0 = tf.LocalCoordinateSystem(
         orientation=orientation,
-        origin=coordinates,
+        coordinates=coordinates,
         time=pd.date_range("2042-01-01", periods=3, freq="4D"),
     )
     lcs_2_in_root = tf.LocalCoordinateSystem(
         orientation=orientation,
-        origin=coordinates,
+        coordinates=coordinates,
         time=pd.date_range("2042-01-01", periods=3, freq="5D"),
     )
     lcs_3_in_lcs_2 = tf.LocalCoordinateSystem(
-        orientation=tf.rotation_matrix_y(1), origin=[4, 2, 0]
+        orientation=tf.rotation_matrix_y(1), coordinates=[4, 2, 0]
     )
 
     csm = tf.CoordinateSystemManager("root")
@@ -1333,7 +1335,7 @@ def test_coordinate_system_manager_interp_time():
     check_coordinate_system(lcs_2_in_root_csm, orientation_exp, coordinates_exp, True)
 
     check_coordinate_system(
-        lcs_3_in_lcs_2_csm, lcs_3_in_lcs_2.orientation, lcs_3_in_lcs_2.origin, True
+        lcs_3_in_lcs_2_csm, lcs_3_in_lcs_2.orientation, lcs_3_in_lcs_2.coordinates, True
     )
 
 

@@ -5,7 +5,10 @@ import numpy as np
 
 
 def rotated_coordinate_system(
-    angle_x=np.pi / 3, angle_y=np.pi / 4, angle_z=np.pi / 5, origin=np.array([0, 0, 0])
+    angle_x=np.pi / 3,
+    angle_y=np.pi / 4,
+    angle_z=np.pi / 5,
+    coordinates=np.array([0, 0, 0]),
 ):
     """
     Get a coordinate system with rotated orientation.
@@ -15,7 +18,7 @@ def rotated_coordinate_system(
     :param angle_x: Rotation angle around the x axis
     :param angle_y: Rotation angle around the y axis
     :param angle_z: Rotation angle around the z axis
-    :param origin: Origin of the coordinate system
+    :param coordinates: Coordinates of the coordinate system
     :return: Coordinate system with rotated orientation
     """
     orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
@@ -29,7 +32,7 @@ def rotated_coordinate_system(
 
     rotated_orientation = np.matmul(r_tot, orientation)
 
-    return tf.LocalCoordinateSystem(rotated_orientation, np.array(origin))
+    return tf.LocalCoordinateSystem(rotated_orientation, np.array(coordinates))
 
 
 def are_all_columns_unique(matrix, decimals=3):

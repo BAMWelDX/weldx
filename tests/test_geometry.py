@@ -119,7 +119,7 @@ def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1e-9):
     :return: ---
     """
     assert ut.matrix_is_close(lcs_a.orientation, lcs_b.orientation, abs_tol)
-    assert ut.vector_is_close(lcs_a.location, lcs_b.location, abs_tol)
+    assert ut.vector_is_close(lcs_a.coordinates, lcs_b.coordinates, abs_tol)
 
 
 def get_default_profiles():
@@ -1881,7 +1881,7 @@ def check_trace_segment_length(segment, tolerance=1e-9):
     :return: ---
     """
     lcs = segment.local_coordinate_system(1)
-    length_numeric_prev = np.linalg.norm(lcs.origin)
+    length_numeric_prev = np.linalg.norm(lcs.coordinates)
 
     # calculate numerical length by linearization
     num_segments = 2.0
@@ -1896,7 +1896,7 @@ def check_trace_segment_length(segment, tolerance=1e-9):
         cs_0 = segment.local_coordinate_system(0)
         for rel_pos in np.arange(increment, 1.0 + increment / 2, increment):
             cs_1 = segment.local_coordinate_system(rel_pos)
-            length_numeric += np.linalg.norm(cs_1.origin - cs_0.origin)
+            length_numeric += np.linalg.norm(cs_1.coordinates - cs_0.coordinates)
             cs_0 = copy.deepcopy(cs_1)
 
         relative_change = length_numeric / length_numeric_prev
@@ -1933,7 +1933,7 @@ def check_trace_segment_orientation(segment):
     for rel_pos in np.arange(0.1, 1.01, 0.1):
         lcs = segment.local_coordinate_system(rel_pos)
         lcs_d = segment.local_coordinate_system(rel_pos - delta)
-        trace_direction_approx = tf.normalize(lcs.origin - lcs_d.origin)
+        trace_direction_approx = tf.normalize(lcs.coordinates - lcs_d.coordinates)
 
         # Check if the x-axis is aligned with the approximate trace direction
         assert ut.vector_is_close(lcs.orientation[:, 0], trace_direction_approx, 1e-6)
@@ -1952,8 +1952,8 @@ def default_trace_segment_tests(segment, tolerance_length=1e-9):
     # test that function actually returns a coordinate system class
     assert isinstance(lcs, tf.LocalCoordinateSystem)
 
-    # check that origin for weight 0 is at [0, 0, 0]
-    assert ut.vector_is_close(lcs.origin, [0, 0, 0])
+    # check that coordinates for weight 0 are at [0, 0, 0]
+    assert ut.vector_is_close(lcs.coordinates, [0, 0, 0])
 
     # length and orientation tests
     check_trace_segment_length(segment, tolerance_length)
@@ -2019,8 +2019,8 @@ def test_radial_horizontal_trace_segment():
         lcs_cw = segment_cw.local_coordinate_system(weight)
         lcs_ccw = segment_ccw.local_coordinate_system(weight)
 
-        assert ut.vector_is_close(lcs_cw.origin, [x_exp, -y_exp, 0])
-        assert ut.vector_is_close(lcs_ccw.origin, [x_exp, y_exp, 0])
+        assert ut.vector_is_close(lcs_cw.coordinates, [x_exp, -y_exp, 0])
+        assert ut.vector_is_close(lcs_ccw.coordinates, [x_exp, y_exp, 0])
 
     # invalid inputs
     with pytest.raises(ValueError):
@@ -2062,8 +2062,8 @@ def test_trace_construction():
     """
     linear_segment = geo.LinearHorizontalTraceSegment(1)
     radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
-    cs_origin = np.array([2, 3, -2])
-    cs_initial = helpers.rotated_coordinate_system(origin=cs_origin)
+    cs_coordinates = np.array([2, 3, -2])
+    cs_initial = helpers.rotated_coordinate_system(coordinates=cs_coordinates)
 
     # test single segment construction --------------------
     trace = geo.Trace(linear_segment, cs_initial)
@@ -2142,9 +2142,9 @@ def test_trace_local_coordinate_system():
         position_on_segment = linear_segment.length * weight
         position = radial_segment.length + position_on_segment
 
-        expected_origin = np.array([-position_on_segment, 2, 0])
+        expected_coordinates = np.array([-position_on_segment, 2, 0])
         cs_expected = tf.LocalCoordinateSystem(
-            orientation=expected_orientation, origin=expected_origin
+            orientation=expected_orientation, coordinates=expected_coordinates
         )
         cs_trace = trace.local_coordinate_system(position)
 
@@ -2152,8 +2152,8 @@ def test_trace_local_coordinate_system():
 
     # check with arbitrary coordinate system --------------
     orientation = tf.rotation_matrix_x(np.pi / 2)
-    origin = np.array([-3, 2.5, 5])
-    cs_base = tf.LocalCoordinateSystem(orientation, origin)
+    coordinates = np.array([-3, 2.5, 5])
+    cs_base = tf.LocalCoordinateSystem(orientation, coordinates)
 
     trace = geo.Trace([radial_segment, linear_segment], cs_base)
 
@@ -2177,9 +2177,9 @@ def test_trace_local_coordinate_system():
         weight = i / 10
         position_on_segment = linear_segment.length * weight
         position = radial_segment.length + position_on_segment
-        lcs_origin = [position_on_segment, 0, 0]
+        lcs_coordinates = [position_on_segment, 0, 0]
 
-        cs_exp = tf.LocalCoordinateSystem(origin=lcs_origin) + cs_start_seg2
+        cs_exp = tf.LocalCoordinateSystem(coordinates=lcs_coordinates) + cs_start_seg2
         cs_trace = trace.local_coordinate_system(position)
 
         check_coordinate_systems_identical(cs_trace, cs_exp)
@@ -2219,8 +2219,8 @@ def test_trace_rasterization():
 
     # check with arbitrary coordinate system --------------
     orientation = tf.rotation_matrix_y(np.pi / 2)
-    origin = np.array([-3, 2.5, 5])
-    cs_base = tf.LocalCoordinateSystem(orientation, origin)
+    coordinates = np.array([-3, 2.5, 5])
+    cs_base = tf.LocalCoordinateSystem(orientation, coordinates)
 
     trace = geo.Trace([linear_segment, radial_segment], cs_base)
     data = trace.rasterize(0.1)
@@ -2230,15 +2230,15 @@ def test_trace_rasterization():
     for i in range(data.shape[1]):
         trace_location = i * raster_width_eff
         if trace_location <= 1:
-            x = origin[0]
-            y = origin[1]
-            z = origin[2] - trace_location
+            x = coordinates[0]
+            y = coordinates[1]
+            z = coordinates[2] - trace_location
         else:
             arc_length = trace_location - 1
             angle = arc_length  # radius 1 -> arc_length = arc_angle * radius
-            x = origin[0]
-            y = origin[1] + 1 - np.cos(angle)
-            z = origin[2] - 1 - np.sin(angle)
+            x = coordinates[0]
+            y = coordinates[1] + 1 - np.cos(angle)
+            z = coordinates[2] - 1 - np.sin(angle)
 
         assert ut.vector_is_close([x, y, z], data[:, i])
 
