@@ -2,12 +2,14 @@
 
 from io import BytesIO
 import asdf
+import pytest
 
 from weldx.geometry import Profile
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
 from weldx.asdf.tags.weldx.core.groove import (
     get_groove,
+    BaseGroove,
     VGroove,
     UGroove,
     IGroove,
@@ -84,6 +86,23 @@ def test_asdf_groove():
         root_gap=Q_(2, "mm"),
         root_face=Q_(5, "mm"),
         root_face2=Q_(7, "mm"),
+        root_face3=Q_(7, "mm"),
+    )
+    dv_groove2 = get_groove(
+        groove_type="DoubleVGroove",
+        workpiece_thickness=Q_(19, "mm"),
+        groove_angle=Q_(40, "deg"),
+        groove_angle2=Q_(60, "deg"),
+        root_gap=Q_(2, "mm"),
+        root_face=Q_(5, "mm"),
+    )
+    dv_groove3 = get_groove(
+        groove_type="DoubleVGroove",
+        workpiece_thickness=Q_(19, "mm"),
+        groove_angle=Q_(40, "deg"),
+        groove_angle2=Q_(60, "deg"),
+        root_gap=Q_(2, "mm"),
+        root_face=Q_(5, "mm"),
         root_face3=Q_(7, "mm"),
     )
     du_groove = get_groove(
@@ -170,6 +189,8 @@ def test_asdf_groove():
         test006=hv_groove,
         test007=hu_groove,
         test008=dv_groove,
+        dv_groove2=dv_groove2,
+        dv_groove3=dv_groove3,
         test009=du_groove,
         test010=dhv_groove,
         test011=dhu_groove,
@@ -204,6 +225,8 @@ def test_asdf_groove():
         test006=HVGroove,
         test007=HUGroove,
         test008=DVGroove,
+        dv_groove2=DVGroove,
+        dv_groove3=DVGroove,
         test009=DUGroove,
         test010=DHVGroove,
         test011=DHUGroove,
@@ -226,3 +249,22 @@ def test_asdf_groove():
         assert isinstance(
             v.to_profile(), Profile
         ), f"Error calling plot function of {type(v)} "
+
+    # test parameter string generation
+    assert set(v_groove.param_strings()) == {
+        "alpha=50 deg",
+        "b=2 mm",
+        "c=4 mm",
+        "t=9 mm",
+    }
+
+    # test exceptions
+    with pytest.raises(ValueError):
+        v_groove = get_groove(
+            groove_type="WrongGrooveString",
+            workpiece_thickness=Q_(9, "mm"),
+            groove_angle=Q_(50, "deg"),
+        )
+
+    with pytest.raises(NotImplementedError):
+        BaseGroove().to_profile()

@@ -393,7 +393,7 @@ class BaseGroove:
         axis="equal",
         grid=True,
         line_style=".",
-    ):
+    ):  # pragma : no cover
         """Plot a 2D-Profile."""
         profile = self.to_profile()
         if title is None:
@@ -404,7 +404,7 @@ class BaseGroove:
 
         profile.plot(title, raster_width, axis, grid, line_style)
 
-    def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
+    def to_profile(self) -> geo.Profile:
         """Implements profile generation."""
         raise NotImplementedError(f"to_profile() must be defined in subclass.")
 
