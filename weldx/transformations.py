@@ -59,19 +59,17 @@ def scale_matrix(scale_x, scale_y, scale_z):
     return np.diag([scale_x, scale_y, scale_z]).astype(float)
 
 
-def normalize(vec):
+def normalize(a):
     """
-    Normalize a vector.
+    Normalize (l2 norm) an ndarray along the last dimension.
 
-    :param vec: Vector
-    :return: Normalized vector
+    :param a: data in ndarray
+    :return: Normalized ndarray
     """
-    norm = np.linalg.norm(vec, axis=(-1))
+    norm = np.linalg.norm(a, axis=(-1), keepdims=True)
     if not np.all(norm):
-        raise ValueError("Vector length is 0.")
-    if vec.ndim > 1:
-        return vec / norm[..., np.newaxis]
-    return vec / norm
+        raise ValueError("Length 0 encountered during normalization.")
+    return a / norm
 
 
 def orientation_point_plane_containing_origin(point, p_a, p_b):
@@ -277,8 +275,8 @@ class LocalCoordinateSystem:
             orientation = xr.apply_ufunc(
                 normalize,
                 orientation,
-                input_core_dims=[["c", "v"]],
-                output_core_dims=[["c", "v"]],
+                input_core_dims=[["c"]],
+                output_core_dims=[["c"]],
             )
 
             # unify time axis
