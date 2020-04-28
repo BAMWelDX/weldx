@@ -214,63 +214,44 @@ def _create_test_grooves():
         code_number="4.1.3",
     )
 
-    tree = dict(
-        v_groove=v_groove,
-        u_groove=u_groove,
-        i_groove=i_groove,
-        uv_groove=uv_groove,
-        vv_groove=vv_groove,
-        hv_groove=hv_groove,
-        hu_groove=hu_groove,
-        dv_groove=dv_groove,
-        dv_groove2=dv_groove2,
-        dv_groove3=dv_groove3,
-        du_groove=du_groove,
-        du_groove2=du_groove2,
-        du_groove3=du_groove3,
-        du_groove4=du_groove4,
-        dhv_groove=dhv_groove,
-        dhu_groove=dhu_groove,
-        ff_groove0=ff_groove0,
-        ff_groove1=ff_groove1,
-        ff_groove2=ff_groove2,
-        ff_groove3=ff_groove3,
-        ff_groove4=ff_groove4,
-        ff_groove5=ff_groove5,
+    test_data = dict(
+        v_groove=(v_groove, VGroove),
+        u_groove=(u_groove, UGroove),
+        i_groove=(i_groove, IGroove),
+        uv_groove=(uv_groove, UVGroove),
+        vv_groove=(vv_groove, VVGroove),
+        hv_groove=(hv_groove, HVGroove),
+        hu_groove=(hu_groove, HUGroove),
+        dv_groove=(dv_groove, DVGroove),
+        dv_groove2=(dv_groove2, DVGroove),
+        dv_groove3=(dv_groove3, DVGroove),
+        du_groove=(du_groove, DUGroove),
+        du_groove2=(du_groove2, DUGroove),
+        du_groove3=(du_groove3, DUGroove),
+        du_groove4=(du_groove4, DUGroove),
+        dhv_groove=(dhv_groove, DHVGroove),
+        dhu_groove=(dhu_groove, DHUGroove),
+        ff_groove0=(ff_groove0, FFGroove),
+        ff_groove1=(ff_groove1, FFGroove),
+        ff_groove2=(ff_groove2, FFGroove),
+        ff_groove3=(ff_groove3, FFGroove),
+        ff_groove4=(ff_groove4, FFGroove),
+        ff_groove5=(ff_groove5, FFGroove),
     )
 
-    return tree
+    return test_data
 
 
-_expected_dtypes = dict(
-    v_groove=VGroove,
-    u_groove=UGroove,
-    i_groove=IGroove,
-    uv_groove=UVGroove,
-    vv_groove=VVGroove,
-    hv_groove=HVGroove,
-    hu_groove=HUGroove,
-    dv_groove=DVGroove,
-    dv_groove2=DVGroove,
-    dv_groove3=DVGroove,
-    du_groove=DUGroove,
-    du_groove2=DUGroove,
-    du_groove3=DUGroove,
-    du_groove4=DUGroove,
-    dhv_groove=DHVGroove,
-    dhu_groove=DHUGroove,
-    ff_groove0=FFGroove,
-    ff_groove1=FFGroove,
-    ff_groove2=FFGroove,
-    ff_groove3=FFGroove,
-    ff_groove4=FFGroove,
-    ff_groove5=FFGroove,
+test_params = _create_test_grooves()
+
+
+@pytest.mark.parametrize(
+    "groove, expected_dtype", test_params.values(), ids=test_params.keys()
 )
-
-
-def test_asdf_groove():
+def test_asdf_groove(groove: BaseGroove, expected_dtype):
     """Test ASDF functionality for all grooves."""
-    tree = _create_test_grooves()
+    k = "groove"
+    tree = {k: groove}
 
     with asdf.AsdfFile(
         tree,
@@ -285,18 +266,17 @@ def test_asdf_groove():
         buff, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
     ) as af:
         data = af.tree
-
-    for k, v in tree.items():
-        # test class
         assert isinstance(
-            data[k], _expected_dtypes[k]
-        ), f"Item {k} did not match expected type {_expected_dtypes[k]}"
+            data[k], expected_dtype
+        ), f"Did not match expected type {expected_dtype} on item {data[k]}"
         # test content equality using dataclass built-in functions
-        assert v == data[k], f"Could not correctly reconstruct groove of type {type(v)}"
+        assert (
+            groove == data[k]
+        ), f"Could not correctly reconstruct groove of type {type(groove)}"
         # test to_profile
         assert isinstance(
-            v.to_profile(), Profile
-        ), f"Error calling plot function of {type(v)} "
+            groove.to_profile(), Profile
+        ), f"Error calling plot function of {type(groove)} "
 
 
 def test_asdf_groove_exceptions():
