@@ -8,6 +8,7 @@ import xarray as xr
 import pytest
 import random
 import math
+from copy import deepcopy
 from typing import Union, List, Any
 
 
@@ -550,6 +551,34 @@ def test_coordinate_system_init():
     )
     check_coordinate_system(lcs, orientation_exp, coordinates_exp, True, time_exp)
 
+    # matrix normalization ----------------------
+
+    # no time dependency
+    orientation_exp = tf.rotation_matrix_z(np.pi / 3)
+    orientation_fix_2 = deepcopy(orientation_exp)
+    orientation_fix_2[:, 0] *= 10
+    orientation_fix_2[:, 1] *= 3
+    orientation_fix_2[:, 2] *= 4
+
+    lcs = tf.LocalCoordinateSystem(
+        orientation=orientation_fix_2, coordinates=coordinates_fix
+    )
+
+    check_coordinate_system(lcs, orientation_exp, coordinates_fix, True)
+
+    # time dependent
+    orientation_exp = tf.rotation_matrix_z(np.pi / 3 * ut.to_float_array([1, 2, 4]))
+    orientation_tdp_2 = deepcopy(orientation_exp)
+    orientation_tdp_2[:, :, 0] *= 10
+    orientation_tdp_2[:, :, 1] *= 3
+    orientation_tdp_2[:, :, 2] *= 4
+
+    lcs = tf.LocalCoordinateSystem(
+        orientation=orientation_tdp_2, coordinates=coordinates_fix, time=time_0
+    )
+
+    check_coordinate_system(lcs, orientation_exp, coordinates_fix, True, time_0)
+
     # exceptions --------------------------------
     # invalid inputs
     with pytest.raises(Exception):
@@ -567,6 +596,9 @@ def test_coordinate_system_init():
 
     # wrong xarray format
     # TODO: implement
+
+
+test_coordinate_system_init()
 
 
 def test_coordinate_system_factories():
