@@ -13,7 +13,7 @@ properties:
   joint_design:
     description: |
       AWS 3.0, p. 19 : "Detailed Description of mating configuration of two components, sufficient information for shop preparation of the components." TODO CLASS
-    $ref: ../../core/din_en_iso_9692-1_2013-1.0.0
+    $ref: ../../core/iso_groove-1.0.0
 
   weld_sizes:
     description: |

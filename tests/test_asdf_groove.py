@@ -7,7 +7,7 @@ import pytest
 from weldx.geometry import Profile
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
-from weldx.asdf.tags.weldx.core.groove import (
+from weldx.asdf.tags.weldx.core.iso_groove import (
     get_groove,
     BaseGroove,
     VGroove,

@@ -23,7 +23,7 @@ from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
 from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
 from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
 from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
-from weldx.asdf.tags.weldx.core.groove import get_groove
+from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 
 
 # welding process -----------------------------------------------------------------

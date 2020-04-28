@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/core/din_en_iso_9692-1_2013-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/din_en_iso_9692-1_2013-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/core/iso_groove-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/iso_groove-1.0.0"
 
 title: |
   Welding and allied processes -

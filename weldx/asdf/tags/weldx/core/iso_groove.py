@@ -1273,7 +1273,7 @@ _groove_name_to_type = {v: k for k, v in _groove_type_to_name.items()}
 class GrooveType(WeldxType):
     """ASDF Groove type."""
 
-    name = "core/din_en_iso_9692-1_2013"
+    name = "core/iso_groove"
     version = "1.0.0"
     types = [
         VGroove,
