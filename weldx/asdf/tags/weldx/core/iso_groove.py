@@ -385,7 +385,7 @@ class BaseGroove:
         """Generate string representation of parameters."""
         return [f"{k}={v:~}" for k, v in self.parameters().items()]
 
-    def plot(  # pragma : no cover
+    def plot(
         self,
         title=None,
         raster_width=0.1,
@@ -393,7 +393,7 @@ class BaseGroove:
         axis="equal",
         grid=True,
         line_style=".",
-    ):  # pragma : no cover
+    ):
         """Plot a 2D-Profile."""
         profile = self.to_profile()
         if title is None:
