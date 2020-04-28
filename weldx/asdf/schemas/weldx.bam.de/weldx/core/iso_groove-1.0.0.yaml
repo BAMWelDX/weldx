@@ -12,9 +12,10 @@ title: |
 
 description: |
   see title.
+#  -TODO: add description and rework title
 
 # examples:
-#  -TODO
+#  -TODO: add examples
 
 definitions:
   workpiece-thickness:
@@ -220,7 +221,7 @@ anyOf:
     propertyOrder: [type, components]
     additionalProperties: true
 
-  # D(ouble)V Groove
+  # Double V Groove
   - type: object
     properties:
       type:
@@ -251,7 +252,7 @@ anyOf:
     propertyOrder: [type, components]
     additionalProperties: true
 
-  # D(ouble)U Groove
+  # Double U Groove
   - type: object
     properties:
       type:
@@ -284,7 +285,7 @@ anyOf:
     propertyOrder: [type, components]
     additionalProperties: true
 
-  # D(ouble)HV Groove
+  # Double HV Groove
   - type: object
     properties:
       type:
@@ -313,7 +314,7 @@ anyOf:
     propertyOrder: [type, components]
     additionalProperties: true
 
-  # D(ouble)HU Groove
+  # Double HU Groove
   - type: object
     properties:
       type:
@@ -346,7 +347,7 @@ anyOf:
     propertyOrder: [type, components]
     additionalProperties: true
 
-  # F(rontal)F(ace) Groove
+  # FrontalFace Groove
   - type: object
     properties:
       type:
