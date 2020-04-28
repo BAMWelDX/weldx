@@ -25,8 +25,8 @@ from weldx.asdf.tags.weldx.core.groove import (
 )
 
 
-def test_asdf_groove():
-    """Test ASDF functionality for all grooves."""
+def _create_test_grooves():
+    """Create dictionary with examples for all groove variations."""
     v_groove = get_groove(
         groove_type="VGroove",
         workpiece_thickness=Q_(9, "mm"),
@@ -105,6 +105,7 @@ def test_asdf_groove():
         root_face=Q_(5, "mm"),
         root_face3=Q_(7, "mm"),
     )
+    # DU grooves
     du_groove = get_groove(
         groove_type="DoubleUGroove",
         workpiece_thickness=Q_(33, "mm"),
@@ -114,6 +115,39 @@ def test_asdf_groove():
         bevel_radius2=Q_(6, "mm"),
         root_face=Q_(3, "mm"),
         root_face2=Q_(15, "mm"),
+        root_gap=Q_(2, "mm"),
+    )
+    du_groove2 = get_groove(
+        groove_type="DoubleUGroove",
+        workpiece_thickness=Q_(33, "mm"),
+        bevel_angle=Q_(8, "deg"),
+        bevel_angle2=Q_(12, "deg"),
+        bevel_radius=Q_(6, "mm"),
+        bevel_radius2=Q_(6, "mm"),
+        root_face=Q_(3, "mm"),
+        root_gap=Q_(2, "mm"),
+    )
+    du_groove3 = get_groove(
+        groove_type="DoubleUGroove",
+        workpiece_thickness=Q_(33, "mm"),
+        bevel_angle=Q_(8, "deg"),
+        bevel_angle2=Q_(12, "deg"),
+        bevel_radius=Q_(6, "mm"),
+        bevel_radius2=Q_(6, "mm"),
+        root_face=Q_(3, "mm"),
+        root_face2=Q_(15, "mm"),
+        root_face3=Q_(15, "mm"),
+        root_gap=Q_(2, "mm"),
+    )
+    du_groove4 = get_groove(
+        groove_type="DoubleUGroove",
+        workpiece_thickness=Q_(33, "mm"),
+        bevel_angle=Q_(8, "deg"),
+        bevel_angle2=Q_(12, "deg"),
+        bevel_radius=Q_(6, "mm"),
+        bevel_radius2=Q_(6, "mm"),
+        root_face=Q_(3, "mm"),
+        root_face3=Q_(15, "mm"),
         root_gap=Q_(2, "mm"),
     )
     dhv_groove = get_groove(
@@ -181,26 +215,62 @@ def test_asdf_groove():
     )
 
     tree = dict(
-        test001=v_groove,
-        test002=u_groove,
-        test003=i_groove,
-        test004=uv_groove,
-        test005=vv_groove,
-        test006=hv_groove,
-        test007=hu_groove,
-        test008=dv_groove,
+        v_groove=v_groove,
+        u_groove=u_groove,
+        i_groove=i_groove,
+        uv_groove=uv_groove,
+        vv_groove=vv_groove,
+        hv_groove=hv_groove,
+        hu_groove=hu_groove,
+        dv_groove=dv_groove,
         dv_groove2=dv_groove2,
         dv_groove3=dv_groove3,
-        test009=du_groove,
-        test010=dhv_groove,
-        test011=dhu_groove,
-        test012=ff_groove0,
-        test013=ff_groove1,
-        test014=ff_groove2,
-        test015=ff_groove3,
-        test016=ff_groove4,
-        test017=ff_groove5,
+        du_groove=du_groove,
+        du_groove2=du_groove2,
+        du_groove3=du_groove3,
+        du_groove4=du_groove4,
+        dhv_groove=dhv_groove,
+        dhu_groove=dhu_groove,
+        ff_groove0=ff_groove0,
+        ff_groove1=ff_groove1,
+        ff_groove2=ff_groove2,
+        ff_groove3=ff_groove3,
+        ff_groove4=ff_groove4,
+        ff_groove5=ff_groove5,
     )
+
+    return tree
+
+
+_expected_dtypes = dict(
+    v_groove=VGroove,
+    u_groove=UGroove,
+    i_groove=IGroove,
+    uv_groove=UVGroove,
+    vv_groove=VVGroove,
+    hv_groove=HVGroove,
+    hu_groove=HUGroove,
+    dv_groove=DVGroove,
+    dv_groove2=DVGroove,
+    dv_groove3=DVGroove,
+    du_groove=DUGroove,
+    du_groove2=DUGroove,
+    du_groove3=DUGroove,
+    du_groove4=DUGroove,
+    dhv_groove=DHVGroove,
+    dhu_groove=DHUGroove,
+    ff_groove0=FFGroove,
+    ff_groove1=FFGroove,
+    ff_groove2=FFGroove,
+    ff_groove3=FFGroove,
+    ff_groove4=FFGroove,
+    ff_groove5=FFGroove,
+)
+
+
+def test_asdf_groove():
+    """Test ASDF functionality for all grooves."""
+    tree = _create_test_grooves()
 
     with asdf.AsdfFile(
         tree,
@@ -216,33 +286,11 @@ def test_asdf_groove():
     ) as af:
         data = af.tree
 
-    _key_to_type = dict(
-        test001=VGroove,
-        test002=UGroove,
-        test003=IGroove,
-        test004=UVGroove,
-        test005=VVGroove,
-        test006=HVGroove,
-        test007=HUGroove,
-        test008=DVGroove,
-        dv_groove2=DVGroove,
-        dv_groove3=DVGroove,
-        test009=DUGroove,
-        test010=DHVGroove,
-        test011=DHUGroove,
-        test012=FFGroove,
-        test013=FFGroove,
-        test014=FFGroove,
-        test015=FFGroove,
-        test016=FFGroove,
-        test017=FFGroove,
-    )
-
     for k, v in tree.items():
         # test class
         assert isinstance(
-            data[k], _key_to_type[k]
-        ), f"Item {k} did not match expected type {_key_to_type[k]}"
+            data[k], _expected_dtypes[k]
+        ), f"Item {k} did not match expected type {_expected_dtypes[k]}"
         # test content equality using dataclass built-in functions
         assert v == data[k], f"Could not correctly reconstruct groove of type {type(v)}"
         # test to_profile
@@ -250,7 +298,18 @@ def test_asdf_groove():
             v.to_profile(), Profile
         ), f"Error calling plot function of {type(v)} "
 
+
+def test_asdf_groove_exceptions():
+    """Test special cases and exceptions of groove classes."""
     # test parameter string generation
+    v_groove = get_groove(
+        groove_type="VGroove",
+        workpiece_thickness=Q_(9, "mm"),
+        groove_angle=Q_(50, "deg"),
+        root_face=Q_(4, "mm"),
+        root_gap=Q_(2, "mm"),
+    )
+
     assert set(v_groove.param_strings()) == {
         "alpha=50 deg",
         "b=2 mm",
@@ -260,7 +319,7 @@ def test_asdf_groove():
 
     # test exceptions
     with pytest.raises(ValueError):
-        v_groove = get_groove(
+        get_groove(
             groove_type="WrongGrooveString",
             workpiece_thickness=Q_(9, "mm"),
             groove_angle=Q_(50, "deg"),
@@ -268,3 +327,13 @@ def test_asdf_groove():
 
     with pytest.raises(NotImplementedError):
         BaseGroove().to_profile()
+
+    with pytest.raises(ValueError):
+        get_groove(
+            groove_type="FrontalFaceGroove",
+            workpiece_thickness=Q_(2, "mm"),
+            workpiece_thickness2=Q_(5, "mm"),
+            groove_angle=Q_(80, "deg"),
+            root_gap=Q_(1, "mm"),
+            code_number="6.1.1",
+        ).to_profile()

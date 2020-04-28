@@ -385,7 +385,7 @@ class BaseGroove:
         """Generate string representation of parameters."""
         return [f"{k}={v:~}" for k, v in self.parameters().items()]
 
-    def plot(
+    def plot(  # pragma : no cover
         self,
         title=None,
         raster_width=0.1,
@@ -1301,7 +1301,7 @@ class GrooveType(WeldxType):
                 type=_groove_type_to_name[type(node)],
             )
             return tree
-        else:
+        else:  # pragma : no cover
             raise ValueError(
                 f"Unknown groove type for object {node} with type {type(node)}"
             )
@@ -1312,5 +1312,5 @@ class GrooveType(WeldxType):
         if tree["type"] in _groove_name_to_type:
             obj = _groove_name_to_type[tree["type"]](**tree["components"])
             return obj
-        else:
+        else:  # pragma : no cover
             raise ValueError(f"Unknown groove name {tree['type']}")
