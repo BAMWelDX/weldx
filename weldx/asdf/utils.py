@@ -52,8 +52,8 @@ _DTYPE_DICT = pd.DataFrame(
             "integer",
             "boolean",
             "tag:stsci.edu:asdf/unit/quantity-1.1.0",
-            "tag:weldx.bam.de:weldx/core/din_en_iso_9692-1_2013-1.0.0",
-            "tag:weldx.bam.de:weldx/core/din_en_iso_9692-1_2013-1.0.0",
+            "tag:weldx.bam.de:weldx/core/iso_groove-1.0.0",
+            "tag:weldx.bam.de:weldx/core/iso_groove-1.0.0",
         ],
     }
 )

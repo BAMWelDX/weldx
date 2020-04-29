@@ -28,7 +28,7 @@ from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
 from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
 from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
 from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
-from weldx.asdf.tags.weldx.core.groove import get_groove
+from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 
 
 def test_aws_example():
@@ -58,17 +58,18 @@ def test_aws_example():
     # weld design -----------------------------------------------------------------
     v_groove = get_groove(
         groove_type="VGroove",
-        **dict(t=Q_(8, "mm"), alpha=Q_(60, "deg"), c=Q_(4, "mm"), b=Q_(2, "mm")),
+        workpiece_thickness=Q_(9, "mm"),
+        groove_angle=Q_(50, "deg"),
+        root_face=Q_(4, "mm"),
+        root_gap=Q_(2, "mm"),
     )
     u_groove = get_groove(
         groove_type="UGroove",
-        **dict(
-            t=Q_(15, "mm"),
-            beta=Q_(9, "deg"),
-            R=Q_(6, "mm"),
-            c=Q_(3, "mm"),
-            b=Q_(1, "mm"),
-        ),
+        workpiece_thickness=Q_(15, "mm"),
+        bevel_angle=Q_(9, "deg"),
+        bevel_radius=Q_(6, "mm"),
+        root_face=Q_(3, "mm"),
+        root_gap=Q_(1, "mm"),
     )
 
     joint_penetration = JointPenetration(

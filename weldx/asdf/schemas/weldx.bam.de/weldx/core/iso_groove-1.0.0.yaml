@@ -1,0 +1,374 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/iso_groove-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/iso_groove-1.0.0"
+
+title: |
+  Welding and allied processes -
+  Types of joint preparation -
+  Part1: Manual metal-arc welding, gas-shielded metal-arc welding, gas welding, TIG
+  welding and beam welding of steels (ISO 9692-1:2013)
+
+description: |
+  see title.
+#  -TODO: add description and rework title
+
+# examples:
+#  -TODO: add examples
+
+definitions:
+  workpiece-thickness:
+    description: |
+      Workpiece thickness
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  root-gap:
+    description: |
+      Root gap
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  groove-angle:
+    description: |
+      Groove angle
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  bevel-angle:
+    description: |
+      Bevel angle
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  bevel-radius:
+    description: |
+      Bevel radius
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  root-face:
+    description: |
+      Root face
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+  special-depth:
+    description: |
+      Special depth
+    $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+
+anyOf:
+  # I Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: IGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          b:
+            $ref: "#/definitions/root-gap"
+
+        required: [t, b]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # Single U Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: SingleUGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          beta:
+            $ref: "#/definitions/bevel-angle"
+          R:
+            $ref: "#/definitions/bevel-radius"
+          b:
+            $ref: "#/definitions/root-gap"
+          c:
+            $ref: "#/definitions/root-face"
+
+        required: [t, beta, R, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # Single V Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: SingleVGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          alpha:
+            $ref: "#/definitions/groove-angle"
+          b:
+            $ref: "#/definitions/root-gap"
+          c:
+            $ref: "#/definitions/root-face"
+
+        required: [t, alpha, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # U Groove with V Root
+  - type: object
+    properties:
+      type:
+        type: string
+        const: UVGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          alpha:
+            $ref: "#/definitions/groove-angle"
+          beta:
+            $ref: "#/definitions/bevel-angle"
+          R:
+            $ref: "#/definitions/bevel-radius"
+          b:
+            $ref: "#/definitions/root-gap"
+          h:
+            $ref: "#/definitions/root-face"
+
+        required: [t, alpha, beta, R, b, h]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # VV Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: VVGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          alpha:
+            $ref: "#/definitions/groove-angle"
+          beta:
+            $ref: "#/definitions/bevel-angle"
+          b:
+            $ref: "#/definitions/root-gap"
+          c:
+            $ref: "#/definitions/root-face"
+
+        required: [t, alpha, beta, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # HV Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: HVGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          beta:
+            $ref: "#/definitions/bevel-angle"
+          b:
+            $ref: "#/definitions/root-gap"
+          c:
+            $ref: "#/definitions/root-face"
+
+        required: [t, beta, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # HU Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: HUGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          beta:
+            $ref: "#/definitions/bevel-angle"
+          R:
+            $ref: "#/definitions/bevel-radius"
+          b:
+            $ref: "#/definitions/root-gap"
+          c:
+            $ref: "#/definitions/root-face"
+
+        required: [t, beta, R, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # Double V Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: DoubleVGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          alpha_1:
+            $ref: "#/definitions/groove-angle"
+          alpha_2:
+            $ref: "#/definitions/groove-angle"
+          R:
+            $ref: "#/definitions/bevel-radius"
+          b:
+            $ref: "#/definitions/root-gap"
+          c:
+            $ref: "#/definitions/root-face"
+          h1:
+            $ref: "#/definitions/root-face"
+          h2:
+            $ref: "#/definitions/root-face"
+
+        required: [t, alpha_1, alpha_2, R, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # Double U Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: DoubleUGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          beta_1:
+            $ref: "#/definitions/bevel-angle"
+          beta_2:
+            $ref: "#/definitions/bevel-angle"
+          R:
+            $ref: "#/definitions/bevel-radius"
+          R2:
+            $ref: "#/definitions/bevel-radius"
+          b:
+            $ref: "#/definitions/root-gap"
+          c:
+            $ref: "#/definitions/root-face"
+          h1:
+            $ref: "#/definitions/root-face"
+          h2:
+            $ref: "#/definitions/root-face"
+
+        required: [t, beta_1, beta_2, R, R2, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # Double HV Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: DoubleHVGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          beta_1:
+            $ref: "#/definitions/bevel-angle"
+          beta_2:
+            $ref: "#/definitions/bevel-angle"
+          h1:
+            $ref: "#/definitions/root-face"
+          h2:
+            $ref: "#/definitions/root-face"
+          b:
+            $ref: "#/definitions/root-gap"
+          c:
+            $ref: "#/definitions/root-face"
+
+        required: [t, beta_1, beta_2, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # Double HU Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: DoubleHUGroove
+      components:
+        type: object
+        properties:
+          t:
+            $ref: "#/definitions/workpiece-thickness"
+          beta_1:
+            $ref: "#/definitions/bevel-angle"
+          beta_2:
+            $ref: "#/definitions/bevel-angle"
+          R:
+            $ref: "#/definitions/bevel-radius"
+          R2:
+            $ref: "#/definitions/bevel-radius"
+          b:
+            $ref: "#/definitions/root-gap"
+          c:
+            $ref: "#/definitions/root-face"
+          h1:
+            $ref: "#/definitions/root-face"
+          h2:
+            $ref: "#/definitions/root-face"
+
+        required: [t, beta_1, beta_2, R, R2, b, c]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+
+  # FrontalFace Groove
+  - type: object
+    properties:
+      type:
+        type: string
+        const: FFGroove
+      components:
+        type: object
+        properties:
+          t_1:
+            $ref: "#/definitions/workpiece-thickness"
+          t_2:
+            $ref: "#/definitions/workpiece-thickness"
+          alpha:
+            $ref: "#/definitions/groove-angle"
+          b:
+            $ref: "#/definitions/root-gap"
+          e:
+            $ref: "#/definitions/special-depth"
+
+        required: [t_1]
+    required: [type, components]
+    propertyOrder: [type, components]
+    additionalProperties: true
+...

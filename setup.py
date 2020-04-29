@@ -15,6 +15,7 @@ requirements = [
     "bottleneck>=1.3",
     "Jinja2>=2.11",
     "networkx>=2",
+    "matplotlib>=3",
 ]
 
 entry_points = {}
