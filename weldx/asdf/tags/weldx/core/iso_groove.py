@@ -126,6 +126,9 @@ def get_groove(
             c: root face
                 - The root face is the height of the part below the lower V-segment.
                   It can be 0 or None.
+            h: root face 2
+                - This root face is the height of the part of the lower V-segment
+                  and the root face c.
 
         "HVGroove":
             t: workpiece thickness
@@ -413,6 +416,14 @@ class BaseGroove:
 class VGroove(BaseGroove):
     """
     A Single-V Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param alpha: groove angle
+    :param b: root gap
+    :param c: root face
+    :param code_number: Numbers of the standard
     """
 
     t: pint.Quantity
@@ -469,7 +480,19 @@ class VGroove(BaseGroove):
 
 @dataclass
 class VVGroove(BaseGroove):
-    """A VV-Groove."""
+    """
+    A VV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param alpha: groove angle
+    :param beta: bevel angle
+    :param b: root gap
+    :param c: root face
+    :param h: root face 2
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -527,7 +550,19 @@ class VVGroove(BaseGroove):
 
 @dataclass
 class UVGroove(BaseGroove):
-    """An UV-Groove."""
+    """
+    An UV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param alpha: groove angle
+    :param beta: bevel angle
+    :param R: bevel radius
+    :param b: root gap
+    :param h: root face
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -583,7 +618,18 @@ class UVGroove(BaseGroove):
 
 @dataclass
 class UGroove(BaseGroove):
-    """An U-Groove."""
+    """
+    An U-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param beta: bevel angle
+    :param R: bevel radius
+    :param b: root gap
+    :param c: root face
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -665,7 +711,15 @@ class UGroove(BaseGroove):
 
 @dataclass
 class IGroove(BaseGroove):
-    """An I-Groove."""
+    """
+    An I-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param b: root gap
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
@@ -694,7 +748,17 @@ class IGroove(BaseGroove):
 
 @dataclass
 class HVGroove(BaseGroove):
-    """A HV-Groove."""
+    """
+    A HV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param beta: bevel angle
+    :param b: root gap
+    :param c: root face
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -747,7 +811,18 @@ class HVGroove(BaseGroove):
 
 @dataclass
 class HUGroove(BaseGroove):
-    """A HU-Groove."""
+    """
+    A HU-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param beta: bevel angle
+    :param R: bevel radius
+    :param b: root gap
+    :param c: root face
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -805,7 +880,20 @@ class HUGroove(BaseGroove):
 # double Grooves
 @dataclass
 class DVGroove(BaseGroove):
-    """A DV-Groove."""
+    """
+    A DV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param alpha_1: groove angle (upper)
+    :param alpha_2: groove angle (lower)
+    :param b: root gap
+    :param c: root face (middle)
+    :param h1: root face (upper)
+    :param h2: root face (lower)
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     alpha_1: pint.Quantity
@@ -870,7 +958,22 @@ class DVGroove(BaseGroove):
 
 @dataclass
 class DUGroove(BaseGroove):
-    """A DU-Groove"""
+    """
+    A DU-Groove
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param beta_1: bevel angle (upper)
+    :param beta_2: bevel angle (lower)
+    :param R: bevel radius (upper)
+    :param R2: bevel radius (lower)
+    :param b: root gap
+    :param c: root face (middle)
+    :param h1: root face (upper)
+    :param h2: root face (lower)
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -943,7 +1046,20 @@ class DUGroove(BaseGroove):
 
 @dataclass
 class DHVGroove(BaseGroove):
-    """A DHV-Groove."""
+    """
+    A DHV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param beta_1: bevel angle (upper)
+    :param beta_2: bevel angle (lower)
+    :param b: root gap
+    :param c: root face (middle)
+    :param h1: root face (upper)
+    :param h2: root face (lower)
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -987,7 +1103,22 @@ class DHVGroove(BaseGroove):
 
 @dataclass
 class DHUGroove(BaseGroove):
-    """A DHU-Groove."""
+    """
+    A DHU-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t: workpiece thickness
+    :param beta_1: bevel angle (upper)
+    :param beta_2: bevel angle (lower)
+    :param R: bevel radius (upper)
+    :param R2: bevel radius (lower)
+    :param b: root gap
+    :param c: root face (middle)
+    :param h1: root face (upper)
+    :param h2: root face (lower)
+    :param code_number: Numbers of the standard
+    """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1035,7 +1166,18 @@ class DHUGroove(BaseGroove):
 # Frontal Face - Groove
 @dataclass
 class FFGroove(BaseGroove):
-    """A Frontal Face Groove."""
+    """
+    A Frontal Face Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    :param t_1: workpiece thickness
+    :param t_2: workpiece thickness, if second thickness is needed
+    :param alpha: groove angle
+    :param b: root gap
+    :param e: special depth
+    :param code_number: Numbers of the standard
+    """
 
     t_1: pint.Quantity
     t_2: pint.Quantity = None
