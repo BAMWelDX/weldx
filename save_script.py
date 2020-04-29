@@ -103,8 +103,8 @@ ff_groove0 = get_groove(
 )
 ff_groove1 = get_groove(
     groove_type="FrontalFaceGroove",
-    workpiece_thickness=Q_(2, "mm"),
-    workpiece_thickness2=Q_(5, "mm"),
+    workpiece_thickness=Q_(5, "mm"),
+    workpiece_thickness2=Q_(7, "mm"),
     groove_angle=Q_(80, "deg"),
     root_gap=Q_(1, "mm"),
     code_number="3.1.1",
