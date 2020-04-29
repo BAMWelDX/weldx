@@ -853,7 +853,13 @@ class Profile:
         return raster_data
 
     def plot(
-        self, title=None, raster_width=0.1, axis="equal", grid=True, line_style="."
+        self,
+        title=None,
+        raster_width=0.1,
+        axis="equal",
+        grid=True,
+        line_style=".",
+        ax=None,
     ):
         """
         Plot the profile.
@@ -866,13 +872,12 @@ class Profile:
         :return: Display a figure
         """
         raster_data = self.rasterize(raster_width)
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        if ax is None:  # pragma: no cover
+            fig, ax = plt.subplots()
         ax.grid(grid)
         ax.axis(axis)
         ax.set_title(title)
         ax.plot(raster_data[0], raster_data[1], line_style)
-        plt.show()
 
     @property
     def shapes(self):

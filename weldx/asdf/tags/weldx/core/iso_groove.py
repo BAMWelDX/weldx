@@ -396,6 +396,7 @@ class BaseGroove:
         axis="equal",
         grid=True,
         line_style=".",
+        ax=None,
     ):
         """Plot a 2D-Profile."""
         profile = self.to_profile()
@@ -405,7 +406,7 @@ class BaseGroove:
         if show_params:
             title = title + "\n" + ", ".join(self.param_strings())
 
-        profile.plot(title, raster_width, axis, grid, line_style)
+        profile.plot(title, raster_width, axis, grid, line_style, ax=ax)
 
     def to_profile(self) -> geo.Profile:
         """Implements profile generation."""
