@@ -873,7 +873,7 @@ class Profile:
         """
         raster_data = self.rasterize(raster_width)
         if ax is None:  # pragma: no cover
-            fig, ax = plt.subplots()
+            _, ax = plt.subplots()
         ax.grid(grid)
         ax.axis(axis)
         ax.set_title(title)
