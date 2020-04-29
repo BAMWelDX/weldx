@@ -1,4 +1,4 @@
-"""Debug asdf save of groove implementation (run after save_script.py)."""
+"""Debug asdf save of groove implementation (run after groove_save_script.py)."""
 
 import asdf
 
