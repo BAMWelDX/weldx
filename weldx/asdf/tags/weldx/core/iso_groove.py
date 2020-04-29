@@ -1443,7 +1443,7 @@ class GrooveType(WeldxType):
                 type=_groove_type_to_name[type(node)],
             )
             return tree
-        else:  # pragma : no cover
+        else:  # pragma: no cover
             raise ValueError(
                 f"Unknown groove type for object {node} with type {type(node)}"
             )
@@ -1454,5 +1454,5 @@ class GrooveType(WeldxType):
         if tree["type"] in _groove_name_to_type:
             obj = _groove_name_to_type[tree["type"]](**tree["components"])
             return obj
-        else:  # pragma : no cover
+        else:  # pragma: no cover
             raise ValueError(f"Unknown groove name {tree['type']}")
