@@ -2,6 +2,7 @@
 
 from io import BytesIO
 import asdf
+from unittest.mock import patch
 import pytest
 
 from weldx.geometry import Profile
@@ -317,3 +318,16 @@ def test_asdf_groove_exceptions():
             root_gap=Q_(1, "mm"),
             code_number="6.1.1",
         ).to_profile()
+
+
+@patch("matplotlib.pyplot.show")
+def test_plot(mock_show):
+    """"""
+    v_groove = get_groove(
+        groove_type="VGroove",
+        workpiece_thickness=Q_(9, "mm"),
+        groove_angle=Q_(50, "deg"),
+        root_face=Q_(4, "mm"),
+        root_gap=Q_(2, "mm"),
+    )
+    v_groove.plot()
