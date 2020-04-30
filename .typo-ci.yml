@@ -7,10 +7,13 @@ excluded_files:
   - "docs*"
   - "environment.yml"
   - "tools*"
+  - "versioneer.py"
+  - "weldx/_version.py"
 
 excluded_words:
   - typoci
   # python packages -----------------------------
+  - asdf
   - numpy
   - pandas
   - xarray
@@ -18,6 +21,8 @@ excluded_words:
   - pytest
   - pydocstyle
   - matplotlib
+  - versioneer
+  - isort
   - networkx
   # matplotlib ----------------------------------
   - pyplot
@@ -25,6 +30,9 @@ excluded_words:
   - plt
   # flake8 --------------------------------------
   - noqa
+  - addopts
+  # asdf ----------------------------------------
+  - yamlutil
   # numpy ---------------------------------------
   - arange
   - allclose
@@ -41,14 +49,21 @@ excluded_words:
   - vstack
   # pandas / xarray -----------------------------
   - bfill
+  - ffill
   - idxmax
   - idxmin
   - isel
+  - iloc
   - isin
   - isnan
   - ffill
   - fillna
   - sel
+  - dtypes
+  - timedelta
+  - timedeltaindex
+  - datetimeindex
+  - isoformat
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat
@@ -58,6 +73,11 @@ excluded_words:
   - ipython
   # scipy ---------------------------------------
   - Slerp
+  # welding -------------------------------------
+  - weldment
+  # conda ---------------------------------------
+  - conda
+  - noarch
   # other ---------------------------------------
   - addopts
   - csm
@@ -67,4 +87,7 @@ excluded_words:
   - interp
   - isort
   - linearization
+  - ureg
+  - Cagtay
+  - Fabry
   - xyz

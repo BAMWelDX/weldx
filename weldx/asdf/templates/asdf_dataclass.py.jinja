@@ -1,0 +1,41 @@
+from dataclasses import dataclass
+from typing import List # noqa: F401
+
+from asdf.yamlutil import custom_tree_to_tagged_tree # noqa: F401
+
+from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import dict_to_tagged_tree
+
+{% for lib in lib_imports -%}
+import {{ lib }}
+{% endfor -%}
+
+__all__ = ["{{class_name}}","{{class_name}}Type"]
+
+
+@dataclass
+class {{class_name}}:
+    """<TODO CLASS DOCSTRING>"""
+    {% for prop, dtype in zip(properties,property_types) -%}
+        {{ prop }}: {{ dtype }}{%- if prop not in required %} = None{%- endif %}
+    {% endfor %}
+
+class {{class_name}}Type(WeldxType):
+    """<TODO ASDF TYPE DOCSTRING>"""
+
+    name = "{{ asdf_name }}"
+    version = "{{ asdf_version }}"
+    types = [{{ class_name }}]
+    requires = ["weldx"]
+    handle_dynamic_subclasses = True
+
+    @classmethod
+    def to_tree(cls, node: {{ class_name }}, ctx):
+        """convert to tagged tree and remove all None entries from node dictionary"""
+        tree = dict_to_tagged_tree(node, ctx)
+        return tree
+
+    @classmethod
+    def from_tree(cls, tree, ctx):
+        obj = {{ class_name }}(**tree)
+        return obj

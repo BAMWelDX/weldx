@@ -1,0 +1,24 @@
+name: conda build
+on: [push]
+
+jobs:
+  test:
+    name: conda build (local)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Include $CONDA in $PATH
+      run: echo ::add-path::$CONDA/bin
+    - name: Add conda-forge & print conda info
+      run: |
+        conda config --append channels conda-forge
+        conda info -a
+    - name: Create conda build environment
+      run: conda env create -f ./conda.recipe/build_env.yml
+    - name: Build from local conda recipe
+      run: |
+        source activate build_env
+        conda build .

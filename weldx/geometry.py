@@ -3,6 +3,7 @@
 import copy
 import math
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 import weldx.transformations as tf
@@ -850,6 +851,33 @@ class Profile:
             raster_data = np.hstack((raster_data, shape.rasterize(raster_width)))
 
         return raster_data
+
+    def plot(
+        self,
+        title=None,
+        raster_width=0.1,
+        axis="equal",
+        grid=True,
+        line_style=".",
+        ax=None,
+    ):
+        """
+        Plot the profile.
+
+        :param: title: Title of the figure
+        :param: raster_width: raster width
+        :param: axis: axis setting of matplotlib.pyplot
+        :param: grid: grid setting of matplotlib.pyplot
+        :param: line_style: line style setting of matplotlib.pyplot
+        :return: Display a figure
+        """
+        raster_data = self.rasterize(raster_width)
+        if ax is None:  # pragma: no cover
+            _, ax = plt.subplots()
+        ax.grid(grid)
+        ax.axis(axis)
+        ax.set_title(title)
+        ax.plot(raster_data[0], raster_data[1], line_style)
 
     @property
     def shapes(self):
