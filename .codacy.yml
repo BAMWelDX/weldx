@@ -14,3 +14,4 @@ exclude_paths:
   - '.vulture_whitelist.py'
   - 'versioneer.py'
   - 'weldx/_version.py'
+  - 'scripts/**'

@@ -408,7 +408,7 @@ class BaseGroove:
 
         profile.plot(title, raster_width, axis, grid, line_style, ax=ax)
 
-    def to_profile(self) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Implements profile generation."""
         raise NotImplementedError(f"to_profile() must be defined in subclass.")
 
@@ -573,7 +573,7 @@ class UVGroove(BaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.6"])
 
-    def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = Q_(2, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         alpha = self.alpha.to("rad").magnitude
@@ -639,7 +639,7 @@ class UGroove(BaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.8"])
 
-    def to_profile(self, width_default=Q_(3, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = Q_(3, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         beta = self.beta.to("rad").magnitude
@@ -726,7 +726,7 @@ class IGroove(BaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
 
-    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         b = self.b.to("mm").magnitude
@@ -767,7 +767,7 @@ class HVGroove(BaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
 
-    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         beta = self.beta.to("rad").magnitude
@@ -832,7 +832,7 @@ class HUGroove(BaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.11", "2.10"])
 
-    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         beta = self.beta.to("rad").magnitude
@@ -905,7 +905,7 @@ class DVGroove(BaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
 
-    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         alpha_1 = self.alpha_1.to("rad").magnitude
@@ -987,7 +987,7 @@ class DUGroove(BaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.7"])
 
-    def to_profile(self, width_default=Q_(5, "mm")):
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         t = self.t.to("mm").magnitude
         beta_1 = self.beta_1.to("rad").magnitude
@@ -1071,7 +1071,7 @@ class DHVGroove(BaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
 
-    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         dv_groove = DVGroove(
             self.t,
@@ -1132,7 +1132,7 @@ class DHUGroove(BaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.11"])
 
-    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         du_profile = DUGroove(
             self.t,
@@ -1188,7 +1188,7 @@ class FFGroove(BaseGroove):
     b: pint.Quantity = None
     e: pint.Quantity = None
 
-    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
         if (
             self.code_number == "1.12"
@@ -1438,7 +1438,7 @@ class GrooveType(WeldxType):
     @classmethod
     def to_tree(cls, node, ctx):
         """Convert to tagged tree and remove all None entries from node dictionary."""
-        if type(node) in _groove_type_to_name:
+        if isinstance(node, tuple(_groove_type_to_name.keys())):
             tree = dict(
                 components=dict_to_tagged_tree(node, ctx),
                 type=_groove_type_to_name[type(node)],
