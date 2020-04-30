@@ -3,7 +3,7 @@
 import numpy as np
 
 
-def plot_coordinate_system(coordinate_system, axes, color=None, label=None):
+def plot_coordinate_system(coordinate_system, axes, color=None, label=None, time_idx = None):
     """
     Plot a coordinate system in a matplotlib 3d plot.
 
@@ -13,12 +13,24 @@ def plot_coordinate_system(coordinate_system, axes, color=None, label=None):
     will be marked with this color.
     :param label: Name that appears in the legend. Only viable if a color
     was specified.
+    :param time_idx: Selects time dependent data by index if the coordinate system has a time
+    dependency.
     :return: ---
     """
-    p_0 = coordinate_system.coordinates
-    p_x = p_0 + coordinate_system.orientation[:, 0]
-    p_y = p_0 + coordinate_system.orientation[:, 1]
-    p_z = p_0 + coordinate_system.orientation[:, 2]
+    if coordinate_system.time is not None and time_idx is None:
+        time_idx = 0
+    
+    p_0 = coordinate_system.coordinates.data    
+    if len(p_0.shape) == 2:
+        p_0 = p_0[time_idx]
+    
+    orientation = coordinate_system.orientation.data
+    if len(orientation.shape) == 3:
+        orientation = orientation[time_idx]
+        
+    p_x = p_0 + orientation[:, 0]
+    p_y = p_0 + orientation[:, 1]
+    p_z = p_0 + orientation[:, 2]
 
     axes.plot([p_0[0], p_x[0]], [p_0[1], p_x[1]], [p_0[2], p_x[2]], "r")
     axes.plot([p_0[0], p_y[0]], [p_0[1], p_y[1]], [p_0[2], p_y[2]], "g")
