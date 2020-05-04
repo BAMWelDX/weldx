@@ -4,10 +4,9 @@ on:
   push:
     branches:
       - master
-      - conda_build_upload
   # Trigger the workflow on all pull request
   pull_request:
-  # Trigger the workflow on all release created events
+  # Trigger the workflow on all release created events (this could redirect to main conda channel)
   release:
     types:
       - created
