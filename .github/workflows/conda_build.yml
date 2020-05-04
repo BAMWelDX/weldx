@@ -37,5 +37,6 @@ jobs:
       env: # set access token from GitHub secrets
         anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
       run: |
+        source activate build_env
         package_dir=$(conda build . --output)
         anaconda -t $anaconda_token upload --user BAMwelding --label dev $package_dir
