@@ -1,5 +1,15 @@
 name: conda build
-on: [push]
+on:
+  # Trigger the workflow on push events on master
+  push:
+    branches:
+      - master
+  # Trigger the workflow on all pull request
+  pull_request:
+  # Trigger the workflow on all release created events (this could redirect to main conda channel)
+  release:
+    types:
+      - created
 
 jobs:
   test:
@@ -22,3 +32,10 @@ jobs:
       run: |
         source activate build_env
         conda build .
+    - name: upload package to dev label on Anaconda Cloud
+      env: # set access token from GitHub secrets
+        anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
+      run: |
+        source activate build_env
+        package_dir=$(conda build . --output)
+        anaconda -t $anaconda_token upload --user BAMwelding --label dev $package_dir
