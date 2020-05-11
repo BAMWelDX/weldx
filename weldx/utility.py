@@ -338,10 +338,6 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
         xarray.DataArray to test
     dims :
         list of dimensions along which to test
-    da: xr.DataArray :
-
-    dims: List[str] :
-
 
     Returns
     -------

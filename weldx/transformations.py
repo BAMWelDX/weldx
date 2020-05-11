@@ -219,8 +219,6 @@ def is_orthogonal_matrix(a: np.ndarray, atol=1e-9) -> bool:
         Matrix to check
     atol :
         atol to pass onto np.allclose (Default value = 1e-9)
-    a: np.ndarray :
-
 
     Returns
     -------
@@ -796,12 +794,6 @@ class LocalCoordinateSystem:
         ----------
         time :
             Series of times.
-        time: Union[pd.DatetimeIndex :
-
-        List[pd.Timestamp] :
-
-        "LocalCoordinateSystem"] :
-
 
         Returns
         -------
@@ -922,8 +914,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system, that should be
-            checked.
+            Name of the new coordinate system, that should be checked.
 
        """
         if not isinstance(coordinate_system_name, cl.Hashable):
@@ -1249,7 +1240,7 @@ class CoordinateSystemManager:
         list_of_edges :
             If not None, the union is only calculated from the
             specified edges (Default value = None)
-             
+
         Returns
         -------
         type
