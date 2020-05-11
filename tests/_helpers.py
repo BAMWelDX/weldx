@@ -23,10 +23,7 @@ def rotated_coordinate_system(
     angle_z :
         Rotation angle around the z axis (Default value = np.pi / 5)
     coordinates :
-        Coordinates of the coordinate system (Default value = np.array([0)
-    0 :
-
-    0]) :
+        Coordinates of the coordinate system (Default value = np.array([0, 0, 0]))
 
 
     Returns

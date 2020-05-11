@@ -99,9 +99,7 @@ def test_vector_is_close():
 
 
 def test_xr_interp_like():
-    """Test behaviour of custom interpolation method for xarray Objects.
-
-   """
+    """Test behaviour of custom interpolation method for xarray Objects."""
     # basic interpolation behavior on a single coordinate
     n_a = 5  # range of "a" coordinate in da_a
     s_a = 0.5  # default steps in "a" coordinate in da_a

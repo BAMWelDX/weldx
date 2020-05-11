@@ -95,7 +95,10 @@ class LineSegment:
     def length(self):
         """Get the segment length.
 
-        :return: Segment length
+        Returns
+        -------
+        float
+            Segment length
 
         """
         return self._length
@@ -104,7 +107,10 @@ class LineSegment:
     def point_end(self):
         """Get the end point of the segment.
 
-        :return: End point
+        Returns
+        -------
+        np.ndarray
+            End point
 
         """
         return self._points[:, 1]
@@ -113,7 +119,10 @@ class LineSegment:
     def point_start(self):
         """Get the starting point of the segment.
 
-        :return: Starting point
+        Returns
+        -------
+        np.ndarray
+            Starting point
 
         """
         return self._points[:, 0]
@@ -125,7 +134,10 @@ class LineSegment:
         The first column represents the starting point and the second one
         the end point.
 
-        :return: 2x2 matrix containing the segments points
+        Returns
+        -------
+        np.ndarray
+            2x2 matrix containing the segments points
 
         """
         return self._points
@@ -433,7 +445,10 @@ class ArcSegment:
     def arc_angle(self):
         """Get the arc angle.
 
-        :return: Arc angle
+        Returns
+        -------
+        float
+            Arc angle
 
         """
         return self._arc_angle
@@ -442,7 +457,10 @@ class ArcSegment:
     def arc_length(self):
         """Get the arc length.
 
-        :return: Arc length
+        Returns
+        -------
+        float
+            Arc length
 
         """
         return self._arc_length
@@ -451,7 +469,10 @@ class ArcSegment:
     def arc_winding_ccw(self):
         """Get True if the winding order is counter-clockwise. False if clockwise.
 
-        :return: True or False
+        Returns
+        -------
+        bool
+            True or False
 
         """
         return self._sign_arc_winding > 0
@@ -460,7 +481,10 @@ class ArcSegment:
     def point_center(self):
         """Get the center point of the segment.
 
-        :return: Center point
+        Returns
+        -------
+        np.ndarray
+            Center point
 
         """
         return self._points[:, 2]
@@ -469,7 +493,10 @@ class ArcSegment:
     def point_end(self):
         """Get the end point of the segment.
 
-        :return: End point
+        Returns
+        -------
+        np.ndarray
+            End point
 
         """
         return self._points[:, 1]
@@ -478,7 +505,10 @@ class ArcSegment:
     def point_start(self):
         """Get the starting point of the segment.
 
-        :return: Starting point
+        Returns
+        -------
+        np.ndarray
+            Starting point
 
         """
         return self._points[:, 0]
@@ -490,7 +520,10 @@ class ArcSegment:
         The first column represents the starting point, the second one the
         end and the third one the center.
 
-        :return: 2x3 matrix containing the segments points
+        Returns
+        -------
+        np.ndarray
+            2x3 matrix containing the segments points
 
         """
         return self._points
@@ -499,7 +532,10 @@ class ArcSegment:
     def radius(self):
         """Get the radius.
 
-        :return: Radius
+        Returns
+        -------
+        float
+            Radius
 
         """
         return self._radius
@@ -715,7 +751,10 @@ class Shape:
     def num_segments(self):
         """Get the number of segments of the shape.
 
-        :return: number of segments
+        Returns
+        -------
+        int
+            number of segments
 
         """
         return len(self._segments)
@@ -724,7 +763,10 @@ class Shape:
     def segments(self):
         """Get the shape's segments.
 
-        :return: List of segments
+        Returns
+        -------
+        list
+            List of segments
 
         """
         return self._segments
@@ -925,7 +967,11 @@ class Shape:
             Line of reflection's start point
         point_end :
             Line of reflection's end point
-            :return
+
+        Returns
+        -------
+        Shape
+
 
        """
         new_shape = copy.deepcopy(self)
@@ -942,7 +988,7 @@ class Shape:
 
         Returns
         -------
-        type
+        Shape
             Transformed copy
 
         """
@@ -960,7 +1006,7 @@ class Shape:
 
         Returns
         -------
-        type
+        Shape
             Transformed copy
 
         """
@@ -995,7 +1041,10 @@ class Profile:
     def num_shapes(self):
         """Get the number of shapes of the profile.
 
-        :return: Number of shapes
+        Returns
+        -------
+        int
+            Number of shapes
 
         """
         return len(self._shapes)
@@ -1081,7 +1130,10 @@ class Profile:
     def shapes(self):
         """Get the profiles shapes.
 
-        :return: Shapes
+        Returns
+        -------
+        list
+            Shapes
 
         """
         return self._shapes
@@ -1114,7 +1166,10 @@ class LinearHorizontalTraceSegment:
     def length(self):
         """Get the length of the segment.
 
-        :return: Length of the segment
+        Returns
+        -------
+        float
+            Length of the segment
 
         """
         return self._length
@@ -1194,7 +1249,10 @@ class RadialHorizontalTraceSegment:
     def angle(self):
         """Get the angle of the segment.
 
-        :return: Angle of the segment
+        Returns
+        -------
+        float
+            Angle of the segment
 
         """
         return self._angle
@@ -1203,7 +1261,10 @@ class RadialHorizontalTraceSegment:
     def length(self):
         """Get the length of the segment.
 
-        :return: Length of the segment
+        Returns
+        -------
+        float
+            Length of the segment
 
         """
         return self._length
@@ -1212,7 +1273,10 @@ class RadialHorizontalTraceSegment:
     def radius(self):
         """Get the radius of the segment.
 
-        :return: Radius of the segment
+        Returns
+        -------
+        float
+            Radius of the segment
 
         """
         return self._radius
@@ -1221,7 +1285,10 @@ class RadialHorizontalTraceSegment:
     def is_clockwise(self):
         """Get True, if the segments winding is clockwise, False otherwise.
 
-        :return: True or False
+        Returns
+        -------
+        bool
+            True or False
 
         """
         return self._sign_winding < 0
@@ -1337,7 +1404,10 @@ class Trace:
     def coordinate_system(self):
         """Get the trace's coordinate system.
 
-        :return: Coordinate system of the trace
+        Returns
+        -------
+        weldx.transformations.LocalCoordinateSystem
+            Coordinate system of the trace
 
         """
         return self._coordinate_system_lookup[0]
@@ -1346,7 +1416,10 @@ class Trace:
     def length(self):
         """Get the length of the trace.
 
-        :return: Length of the trace.
+        Returns
+        -------
+        float
+            Length of the trace.
 
         """
         return self._total_length_lookup[-1]
@@ -1355,7 +1428,10 @@ class Trace:
     def segments(self):
         """Get the trace's segments.
 
-        :return: Segments of the trace
+        Returns
+        -------
+        list
+            Segments of the trace
 
         """
         return self._segments
@@ -1364,7 +1440,10 @@ class Trace:
     def num_segments(self):
         """Get the number of segments.
 
-        :return: Number of segments
+        Returns
+        -------
+        int
+            Number of segments
 
         """
         return len(self._segments)
@@ -1379,7 +1458,7 @@ class Trace:
 
         Returns
         -------
-        type
+        weldx.transformations.LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -1830,7 +1909,9 @@ class Geometry:
     def profile(self):
         """Get the geometry's profile.
 
-        :return: Profile
+        Returns
+        -------
+        Profile
 
         """
         return self._profile
@@ -1839,7 +1920,9 @@ class Geometry:
     def trace(self):
         """Get the geometry's trace.
 
-        :return: Trace
+        Returns
+        -------
+        Trace
 
         """
         return self._trace

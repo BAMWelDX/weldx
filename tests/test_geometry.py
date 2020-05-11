@@ -147,7 +147,10 @@ def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1e-9):
 def get_default_profiles():
     """Get 2 profiles.
 
-    :return: List containing 2 profiles
+    Returns
+    -------
+    list
+        List containing 2 profiles
 
    """
     a_0 = [0, 0]
@@ -235,9 +238,7 @@ def default_segment_rasterization_tests(segment, raster_width):
 
 
 def test_line_segment_construction():
-    """Test constructor and factories.
-
-   """
+    """Test constructor and factories."""
     # class constructor -----------------------------------
     segment = geo.LineSegment([[3, 5], [3, 4]])
     assert math.isclose(segment.length, np.sqrt(5))
@@ -264,8 +265,6 @@ def test_line_segment_rasterization():
     This test checks, if every rasterized point lies on the line that
     connects the start and the end of the segment. It also checks that those
     points lie between the segments start and end point.
-
-    :return:
 
    """
     raster_width = 0.1
@@ -565,9 +564,7 @@ def arc_segment_rasterization_test(
 
 
 def test_arc_segment_constructor():
-    """Test the arc segment constructor and factories.
-
-   """
+    """Test the arc segment constructor and factories."""
     points = [[3, 6, 6], [3, 6, 3]]
     segment_cw = geo.ArcSegment(points, False)
     segment_ccw = geo.ArcSegment(points, True)
@@ -1050,9 +1047,7 @@ def arc_segment_transformation_test_case(
 
 
 def test_arc_segment_transformations():
-    """Test the arc segments transformation functions.
-
-   """
+    """Test the arc segments transformation functions."""
     # translation -----------------------------------------
 
     arc_segment_transformation_test_case(
@@ -1366,7 +1361,10 @@ def test_shape_rasterization():
 def default_test_shape():
     """Get a default shape for tests.
 
-    :return: Default shape for tests
+    Returns
+    -------
+    Shape
+        Default shape for tests
 
    """
     # create shape
@@ -1621,9 +1619,7 @@ def shape_reflection_test_case(normal, distance_to_origin):
 
 
 def test_shape_reflection():
-    """Test multiple reflections.
-
-   """
+    """Test multiple reflections."""
     shape_reflection_test_case([2, 1], np.linalg.norm([2, 1]))
     shape_reflection_test_case([0, 1], 5)
     shape_reflection_test_case([1, 0], 3)
@@ -1726,9 +1722,7 @@ def shape_reflection_across_line_test_case(point_start, point_end):
 
 
 def test_shape_reflection_across_line():
-    """Test multiple reflections.
-
-   """
+    """Test multiple reflections."""
     shape_reflection_across_line_test_case([0, 0], [0, 1])
     shape_reflection_across_line_test_case([0, 0], [1, 0])
     shape_reflection_across_line_test_case([-3, 2.5], [31.53, -23.44])
@@ -2163,9 +2157,7 @@ class CustomSegment:
 
 
 def test_trace_construction():
-    """Test the trace's construction.
-
-   """
+    """Test the trace's construction."""
     linear_segment = geo.LinearHorizontalTraceSegment(1)
     radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
     cs_coordinates = np.array([2, 3, -2])
@@ -2466,9 +2458,7 @@ def check_variable_profile_state(variable_profile, profiles_exp, locations_exp):
 
 
 def test_variable_profile_construction():
-    """Test construction of variable profiles.
-
-   """
+    """Test construction of variable profiles."""
     interpol = geo.linear_profile_interpolation_sbs
 
     profile_a, profile_b = get_default_profiles()
@@ -2528,9 +2518,7 @@ def test_variable_profile_construction():
 
 
 def test_variable_profile_local_profile():
-    """Test if the local profiles of a variable profile are calculated correctly.
-
-   """
+    """Test if the local profiles of a variable profile are calculated correctly."""
     interpol = geo.linear_profile_interpolation_sbs
 
     profile_a, profile_b = get_default_profiles()
@@ -2565,9 +2553,7 @@ def test_variable_profile_local_profile():
 
 
 def test_geometry_construction():
-    """Test construction of he geometry class.
-
-   """
+    """Test construction of he geometry class."""
     profile_a, profile_b = get_default_profiles()
     variable_profile = geo.VariableProfile(
         [profile_a, profile_b], [0, 1], geo.linear_profile_interpolation_sbs
@@ -2717,11 +2703,7 @@ def test_geometry_rasterization_trace():
 
 
 def test_geometry_rasterization_profile_interpolation():
-    """Check if the rasterized geometry interpolates profiles correctly.
-
-    :return:
-
-   """
+    """Check if the rasterized geometry interpolates profiles correctly."""
     interpol = geo.linear_profile_interpolation_sbs
 
     a0 = [1, 0]

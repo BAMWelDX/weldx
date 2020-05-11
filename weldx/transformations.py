@@ -27,7 +27,7 @@ def rotation_matrix_x(angle):
 
     Returns
     -------
-    type
+    np.ndarray
         Rotation matrix
 
     """
@@ -44,14 +44,14 @@ def rotation_matrix_y(angle):
 
     Returns
     -------
-    type
+    numpy.ndarray
         Rotation matrix
 
     """
     return Rot.from_euler("y", angle).as_matrix()
 
 
-def rotation_matrix_z(angle):
+def rotation_matrix_z(angle) -> np.ndarray:
     """Create a rotation matrix that rotates around the z-axis.
 
     Parameters
@@ -61,14 +61,14 @@ def rotation_matrix_z(angle):
 
     Returns
     -------
-    type
+    np.ndarray
         Rotation matrix
 
     """
     return Rot.from_euler("z", angle).as_matrix()
 
 
-def scale_matrix(scale_x, scale_y, scale_z):
+def scale_matrix(scale_x, scale_y, scale_z) -> np.ndarray:
     """Return a scaling matrix.
 
     Parameters
@@ -82,7 +82,7 @@ def scale_matrix(scale_x, scale_y, scale_z):
 
     Returns
     -------
-    type
+    np.ndarray
         Scaling matrix
 
     """
@@ -99,7 +99,7 @@ def normalize(a):
 
     Returns
     -------
-    type
+    np.ndarray
         Normalized ndarray
 
     """
@@ -136,7 +136,7 @@ def orientation_point_plane_containing_origin(point, p_a, p_b):
 
     Returns
     -------
-    type
+    int
         1, -1 or 0 (see description)
 
     """
@@ -176,7 +176,7 @@ def orientation_point_plane(point, p_a, p_b, p_c):
 
     Returns
     -------
-    type
+    int
         1, -1 or 0 (see description)
 
     """
@@ -200,7 +200,7 @@ def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
@@ -224,7 +224,7 @@ def is_orthogonal_matrix(a: np.ndarray, atol=1e-9) -> bool:
 
     Returns
     -------
-    type
+    bool
         True if last 2 dimensions of a are orthogonal
 
     """
@@ -248,7 +248,7 @@ def point_left_of_line(point, line_start, line_end):
 
     Returns
     -------
-    type
+    int
         1,-1 or 0 (see description)
 
     """
@@ -269,7 +269,7 @@ def reflection_sign(matrix):
 
     Returns
     -------
-    type
+    int
         1 or -1 (see description)
 
     """
@@ -297,7 +297,7 @@ def vector_points_to_left_of_vector(vector, vector_reference):
 
     Returns
     -------
-    type
+    int
         1,-1 or 0 (see description)
 
     """
@@ -537,7 +537,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        type
+        LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -561,7 +561,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        type
+        LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -588,7 +588,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        type
+        LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -617,7 +617,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        type
+        LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -650,7 +650,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        type
+        LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -683,7 +683,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        type
+        LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -706,7 +706,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        type
+        int
             1 if the coordinate system has positive orientation,
             -1 otherwise
 
@@ -731,7 +731,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        type
+        np.ndarray
             Orthogonal axis
 
         """
@@ -741,7 +741,10 @@ class LocalCoordinateSystem:
     def orientation(self) -> xr.DataArray:
         """Get the coordinate systems orientation matrix.
 
-        :return: Orientation matrix
+        Returns
+        -------
+        xr.DataArray
+            Orientation matrix
 
         """
         return self.dataset.orientation
@@ -750,7 +753,10 @@ class LocalCoordinateSystem:
     def coordinates(self) -> xr.DataArray:
         """Get the coordinate systems coordinates.
 
-        :return: Coordinates of the coordinate system
+        Returns
+        -------
+        xr.DataArray
+            Coordinates of the coordinate system
 
         """
         return self.dataset.coordinates
@@ -759,7 +765,10 @@ class LocalCoordinateSystem:
     def time(self) -> Union[pd.DatetimeIndex, None]:
         """Get the time union of the local coordinate system (None if system is static).
 
-        :return: DateTimeIndex-like time union
+        Returns
+        -------
+        pd.DatetimeIndex
+            DateTimeIndex-like time union
 
         """
         if "time" in self._dataset.coords:
@@ -770,7 +779,10 @@ class LocalCoordinateSystem:
     def dataset(self) -> xr.Dataset:
         """Get the underlying xarray.Dataset with ordered dimensions.
 
-        :return: xarray Dataset with coordinates and orientation as DataVariables.
+        Returns
+        -------
+        xr.Dataset
+            xarray Dataset with coordinates and orientation as DataVariables.
 
         """
         return self._dataset.transpose(..., "c", "v")
@@ -818,7 +830,11 @@ class LocalCoordinateSystem:
 
         Inverse is defined as orientation_new=orientation.T,
         coordinates_new=orientation.T*(-coordinates)
-        :return: Inverted coordinate system.
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Inverted coordinate system.
 
         """
         orientation = ut.xr_transpose_matrix_data(self.orientation, dim1="c", dim2="v")
@@ -1168,7 +1184,9 @@ class CoordinateSystemManager:
     def graph(self) -> nx.DiGraph:
         """Get the internal graph.
 
-        :return: networkx.DiGraph
+        Returns
+        -------
+        networkx.DiGraph
 
         """
         return self._graph
@@ -1177,7 +1195,10 @@ class CoordinateSystemManager:
     def number_of_coordinate_systems(self) -> int:
         """Get the number of coordinate systems inside the coordinate system manager.
 
-        :return: Number of coordinate systems
+        Returns
+        -------
+        int
+            Number of coordinate systems
 
         """
         return self._graph.number_of_nodes()

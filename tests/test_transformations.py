@@ -47,7 +47,10 @@ def check_matrix_orthogonal(matrix):
 def random_vector():
     """Get a random 3d vector.
 
-    :return: Random 3d vector.
+    Returns
+    -------
+    np.ndarray
+        Random 3d vector.
 
    """
     return (
@@ -60,7 +63,10 @@ def random_vector():
 def random_non_unit_vector():
     """Get a random 3d vector that is not of unit length.
 
-    :return: Random 3d vector.
+    Returns
+    -------
+    np.ndarray
+        Random 3d vector.
 
    """
     vec = random_vector()
@@ -85,6 +91,10 @@ def rotated_positive_orthogonal_orientation(
         Rotation angle around the y-axis (Default value = np.pi / 4)
     angle_z :
         Rotation angle around the z-axis (Default value = np.pi / 5)
+
+    Returns
+    -------
+    np.ndarray
 
    """
     # rotate axes to produce a more general test case
@@ -431,13 +441,20 @@ def check_coordinate_system(
 ):
     """Check the values of a coordinate system.
 
-    :param cs_p: Coordinate system that should be checked
-    :param orientation_expected: Expected orientation
-    :param coordinates_expected: Expected coordinates
-    :param positive_orientation_expected: Expected orientation
-    :param time: A pandas.DatetimeIndex object, if the coordinate system is expected to
-    be time dependent. None otherwise.
-    :return: ---
+    Parameters
+    ----------
+    cs_p :
+        Coordinate system that should be checked
+    orientation_expected :
+        Expected orientation
+    coordinates_expected :
+        Expected coordinates
+    positive_orientation_expected :
+        Expected orientation
+    time :
+        A pandas.DatetimeIndex object, if the coordinate system is expected to
+        be time dependent. None otherwise.
+
     """
     orientation_expected = np.array(orientation_expected)
     coordinates_expected = np.array(coordinates_expected)
@@ -454,11 +471,7 @@ def check_coordinate_system(
 
 
 def test_coordinate_system_init():
-    """Check the __init__ method with and without time dependency.
-
-    :return: ---
-
-   """
+    """Check the __init__ method with and without time dependency."""
     # reference data
     time_start_0 = "2042-01-01"
     time_start_1 = "2042-01-02"
@@ -611,8 +624,6 @@ def test_coordinate_system_factories():
     Create multiple coordinate systems with all provided methods and check
     if they are constructed correctly.
 
-    :return: ---
-
    """
     # TODO: Time dependency
     # alias name for class - name is too long :)
@@ -695,8 +706,6 @@ def test_coordinate_system_addition_and_subtraction():
     Creates some coordinate systems and uses the operators on them. Results
     are compared to expected values. The naming pattern 'X_in_Y' is used for the
     coordinate systems to keep track of the supposed operation results.
-
-    :return: ---
 
    """
     # reference data ----------------------------
@@ -947,7 +956,7 @@ def test_coordinate_system_invert():
     expected value. Afterwards, the resulting system is inverted again. This operation
     must yield the original system.
 
-    :return: ---
+
 
    """
     # fix ---------------------------------------
@@ -1030,11 +1039,7 @@ def coordinate_system_time_interpolation_test_case(
 
 
 def test_coordinate_system_time_interpolation():
-    """Test the local coordinate systems interp_time and interp_like functions.
-
-    :return: ---
-
-   """
+    """Test the local coordinate systems interp_time and interp_like functions."""
     time_0 = pd.date_range("2042-01-10", periods=4, freq="4D")
     orientation = tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi)
     coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
@@ -1103,11 +1108,7 @@ def test_coordinate_system_time_interpolation():
 
 
 def test_coordinate_system_manager_init():
-    """Test the init method of the coordinate system manager.
-
-    :return: ---
-
-   """
+    """Test the init method of the coordinate system manager."""
     # default construction ----------------------
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
     assert csm.number_of_coordinate_systems == 1
@@ -1124,8 +1125,6 @@ def test_coordinate_system_manager_add_coordinate_system():
 
     Adds some coordinate systems to a CSM and checks if the the edges and nodes
     are set as expected.
-
-    :return: ---
 
    """
     # define some coordinate systems
@@ -1186,8 +1185,6 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
 
     This function also tests, if the internally performed transformations are correct.
 
-    :return: ---
-
    """
     # define some coordinate systems
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
@@ -1246,11 +1243,7 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
 
 
 def test_coordinate_system_manager_time_union():
-    """Test the coordinate system managers time union function.
-
-    :return: ---
-
-   """
+    """Test the coordinate system managers time union function."""
     orientation = tf.rotation_matrix_z([0, 1, 2])
     coordinates = [[1, 6, 3], [8, 2, 6], [4, 4, 4]]
     lcs_0 = tf.LocalCoordinateSystem(
@@ -1301,11 +1294,7 @@ def test_coordinate_system_manager_time_union():
 
 
 def test_coordinate_system_manager_interp_time():
-    """Test the coordinate system managers interp_time and interp_like functions.
-
-    :return: ---
-
-   """
+    """Test the coordinate system managers interp_time and interp_like functions."""
     # Setup -------------------------------------
     angles = ut.to_float_array([0, np.pi / 2, np.pi])
     orientation = tf.rotation_matrix_z(angles)
@@ -1385,11 +1374,7 @@ def test_coordinate_system_manager_interp_time():
 
 
 def test_coordinate_system_manager_transform_data():
-    """Test the coordinate system managers transform_data function.
-
-    :return: ---
-
-   """
+    """Test the coordinate system managers transform_data function."""
     # define some coordinate systems
     # TODO: test more unique rotations - not 90°
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
@@ -1437,11 +1422,7 @@ def test_coordinate_system_manager_transform_data():
 
 
 def test_coordinate_system_manager_data_assignment_and_retrieval():
-    """Test the coordinate system managers assign_data and get_data functions.
-
-    :return: ---
-
-   """
+    """Test the coordinate system managers assign_data and get_data functions."""
     # test setup
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
     lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
