@@ -757,7 +757,7 @@ class LocalCoordinateSystem:
 
     @property
     def time(self) -> Union[pd.DatetimeIndex, None]:
-        """Get the time union of the local coordinate system (or None if system is static).
+        """Get the time union of the local coordinate system (None if system is static).
 
         :return: DateTimeIndex-like time union
 

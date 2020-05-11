@@ -155,7 +155,7 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
 
 
 def mat_vec_mul(a, b) -> np.ndarray:
-    """Matrix x Vector multiplication using matmul with newaxis for correct broadcasting.
+    """Matrix, Vector multiplication using matmul with newaxis for correct broadcasting.
 
     Parameters
     ----------
