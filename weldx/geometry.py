@@ -855,7 +855,7 @@ class Profile:
     def plot(
         self,
         title=None,
-        label=[None, None],
+        label=None,
         raster_width=0.1,
         axis="equal",
         grid=True,
@@ -877,9 +877,10 @@ class Profile:
             _, ax = plt.subplots()
         ax.grid(grid)
         ax.axis(axis)
-        ax.set_title(title)
-        ax.set_xlabel(label[0])
-        ax.set_ylabel(label[1])
+        ax.set_title(title, loc="center", wrap=True)
+        if label is not None:
+            ax.set_xlabel(label[0])
+            ax.set_ylabel(label[1])
         ax.plot(raster_data[0], raster_data[1], line_style)
 
     @property

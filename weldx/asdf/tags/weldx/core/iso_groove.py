@@ -391,7 +391,7 @@ class BaseGroove:
     def plot(
         self,
         title=None,
-        axis_label=["mm", "mm"],
+        axis_label=["x in mm", "y in mm"],
         raster_width=0.1,
         show_params=True,
         axis="equal",
