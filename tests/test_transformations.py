@@ -439,6 +439,7 @@ def check_coordinate_system_orientation(
     assert np.allclose(orientation, orientation_expected)
 
 
+# TODO: add time dependency
 def check_coordinate_system(
     cs_p: tf.LocalCoordinateSystem,
     orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
@@ -446,9 +447,7 @@ def check_coordinate_system(
     positive_orientation_expected: bool,
     time=None,
 ):
-    # TODO: add time dependency
-    """
-    Check the values of a coordinate system.
+    """Check the values of a coordinate system.
 
     :param cs_p: Coordinate system that should be checked
     :param orientation_expected: Expected orientation

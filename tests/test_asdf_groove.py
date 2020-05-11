@@ -254,9 +254,11 @@ def test_asdf_groove(groove: BaseGroove, expected_dtype):
 
     Parameters
     ----------
-    groove: BaseGroove :
+    groove:
+       Groove instance to be tested.
 
-    expected_dtype :
+    expected_dtype:
+       Expected type of the groove to be tested.
 
    """
     k = "groove"
