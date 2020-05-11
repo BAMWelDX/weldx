@@ -813,8 +813,7 @@ class Profile:
         :param: shapes: Instance or list of geo.Shape class(es)
         """
         self._shapes = []
-        self.attrs = None
-        self.attrs["units"] = unit
+        self.attrs = dict(units=unit)
         self.add_shapes(shapes)
 
     @property
