@@ -11,6 +11,8 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import dict_to_tagged_tree
 
+_DEFAULT_LEN_UNIT = "mm"
+
 
 def get_groove(
     groove_type,
@@ -435,11 +437,11 @@ class VGroove(BaseGroove):
 
     def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
         """Calculate a Profile."""
-        t = self.t.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
-        b = self.b.to("mm").magnitude
-        c = self.c.to("mm").magnitude
-        width = width_default.to("mm").magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations:
         s = np.tan(alpha / 2) * (t - c)
@@ -476,7 +478,7 @@ class VGroove(BaseGroove):
         # y-axis is mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r], unit="mm")
+        return geo.Profile([shape, shape_r], unit=_DEFAULT_LEN_UNIT)
 
 
 @dataclass
@@ -505,13 +507,13 @@ class VVGroove(BaseGroove):
 
     def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
-        t = self.t.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
-        b = self.b.to("mm").magnitude
-        c = self.c.to("mm").magnitude
-        h = self.h.to("mm").magnitude
-        width = width_default.to("mm").magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        h = self.h.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
         h_lower = h - c
@@ -546,7 +548,7 @@ class VVGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r], unit="mm")
+        return geo.Profile([shape, shape_r], unit=_DEFAULT_LEN_UNIT)
 
 
 @dataclass
@@ -575,13 +577,13 @@ class UVGroove(BaseGroove):
 
     def to_profile(self, width_default: pint.Quantity = Q_(2, "mm")) -> geo.Profile:
         """Calculate a Profile."""
-        t = self.t.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
-        R = self.R.to("mm").magnitude
-        b = self.b.to("mm").magnitude
-        h = self.h.to("mm").magnitude
-        width = width_default.to("mm").magnitude
+        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        h = self.h.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # calculations:
         x_1 = np.tan(alpha / 2) * h
@@ -614,7 +616,7 @@ class UVGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r], unit="mm")
+        return geo.Profile([shape, shape_r], unit=_DEFAULT_LEN_UNIT)
 
 
 @dataclass
@@ -641,12 +643,12 @@ class UGroove(BaseGroove):
 
     def to_profile(self, width_default: pint.Quantity = Q_(3, "mm")) -> geo.Profile:
         """Calculate a Profile."""
-        t = self.t.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
-        R = self.R.to("mm").magnitude
-        b = self.b.to("mm").magnitude
-        c = self.c.to("mm").magnitude
-        width = width_default.to("mm").magnitude
+        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # calculations:
         # From next point to circle center is the vector (x,y)
@@ -707,7 +709,7 @@ class UGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r], unit="mm")
+        return geo.Profile([shape, shape_r], unit=_DEFAULT_LEN_UNIT)
 
 
 @dataclass
@@ -728,9 +730,9 @@ class IGroove(BaseGroove):
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
-        t = self.t.to("mm").magnitude
-        b = self.b.to("mm").magnitude
-        width = width_default.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # x-values
         x_value = [-width, 0, 0, -width]
@@ -744,7 +746,7 @@ class IGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r], unit="mm")
+        return geo.Profile([shape, shape_r], unit=_DEFAULT_LEN_UNIT)
 
 
 @dataclass
@@ -769,11 +771,11 @@ class HVGroove(BaseGroove):
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
-        t = self.t.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
-        b = self.b.to("mm").magnitude
-        c = self.c.to("mm").magnitude
-        width = width_default.to("mm").magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
         s = np.tan(beta) * (t - c)
@@ -807,7 +809,7 @@ class HVGroove(BaseGroove):
             [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
         )
 
-        return geo.Profile([shape_h, shape_r], unit="mm")
+        return geo.Profile([shape_h, shape_r], unit=_DEFAULT_LEN_UNIT)
 
 
 @dataclass
@@ -834,12 +836,12 @@ class HUGroove(BaseGroove):
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
-        t = self.t.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
-        R = self.R.to("mm").magnitude
-        b = self.b.to("mm").magnitude
-        c = self.c.to("mm").magnitude
-        width = width_default.to("mm").magnitude
+        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
         x = R * np.cos(beta)
@@ -875,7 +877,7 @@ class HUGroove(BaseGroove):
             [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
         )
 
-        return geo.Profile([shape_h, shape_r], unit="mm")
+        return geo.Profile([shape_h, shape_r], unit=_DEFAULT_LEN_UNIT)
 
 
 # double Grooves
@@ -907,24 +909,24 @@ class DVGroove(BaseGroove):
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
-        t = self.t.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha_1 = self.alpha_1.to("rad").magnitude
         alpha_2 = self.alpha_2.to("rad").magnitude
-        b = self.b.to("mm").magnitude
-        c = self.c.to("mm").magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
         if self.h1 is None and self.h2 is None:
             h1 = (t - c) / 2
             h2 = (t - c) / 2
         elif self.h1 is not None and self.h2 is None:
-            h1 = self.h1.to("mm").magnitude
+            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
             h2 = h1
         elif self.h1 is None and self.h2 is not None:
-            h2 = self.h2.to("mm").magnitude
+            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
             h1 = h2
         else:
-            h1 = self.h1.to("mm").magnitude
-            h2 = self.h2.to("mm").magnitude
-        width = width_default.to("mm").magnitude
+            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
+            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
         s_upper = np.tan(alpha_1 / 2) * h1
@@ -954,7 +956,7 @@ class DVGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r], unit="mm")
+        return geo.Profile([shape, shape_r], unit=_DEFAULT_LEN_UNIT)
 
 
 @dataclass
@@ -989,26 +991,26 @@ class DUGroove(BaseGroove):
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile."""
-        t = self.t.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta_1 = self.beta_1.to("rad").magnitude
         beta_2 = self.beta_2.to("rad").magnitude
-        R = self.R.to("mm").magnitude
-        R2 = self.R2.to("mm").magnitude
-        b = self.b.to("mm").magnitude
-        c = self.c.to("mm").magnitude
+        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
+        R2 = self.R2.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
         if self.h1 is None and self.h2 is None:
             h1 = (t - c) / 2
             h2 = (t - c) / 2
         elif self.h1 is not None and self.h2 is None:
-            h1 = self.h1.to("mm").magnitude
+            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
             h2 = h1
         elif self.h1 is None and self.h2 is not None:
-            h2 = self.h2.to("mm").magnitude
+            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
             h1 = h2
         else:
-            h1 = self.h1.to("mm").magnitude
-            h2 = self.h2.to("mm").magnitude
-        width = width_default.to("mm").magnitude
+            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
+            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
         x_upper = R * np.cos(beta_1)
@@ -1042,7 +1044,7 @@ class DUGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r], unit="mm")
+        return geo.Profile([shape, shape_r], unit=_DEFAULT_LEN_UNIT)
 
 
 @dataclass
@@ -1086,9 +1088,9 @@ class DHVGroove(BaseGroove):
         dv_profile = dv_groove.to_profile(width_default)
         right_shape = dv_profile.shapes[1]
 
-        t = self.t.to("mm").magnitude
-        b = self.b.to("mm").magnitude
-        width_default = width_default.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
         left_shape = geo.Shape()
         left_shape.add_line_segments(
             [
@@ -1099,7 +1101,7 @@ class DHVGroove(BaseGroove):
             ]
         )
 
-        return geo.Profile([left_shape, right_shape], unit="mm")
+        return geo.Profile([left_shape, right_shape], unit=_DEFAULT_LEN_UNIT)
 
 
 @dataclass
@@ -1148,9 +1150,9 @@ class DHUGroove(BaseGroove):
         ).to_profile(width_default)
         right_shape = du_profile.shapes[1]
 
-        t = self.t.to("mm").magnitude
-        b = self.b.to("mm").magnitude
-        width_default = width_default.to("mm").magnitude
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
         left_shape = geo.Shape()
         left_shape.add_line_segments(
             [
@@ -1161,7 +1163,7 @@ class DHUGroove(BaseGroove):
             ]
         )
 
-        return geo.Profile([left_shape, right_shape], unit="mm")
+        return geo.Profile([left_shape, right_shape], unit=_DEFAULT_LEN_UNIT)
 
 
 # Frontal Face - Groove
@@ -1195,8 +1197,8 @@ class FFGroove(BaseGroove):
             or self.code_number == "1.13"
             or self.code_number == "2.12"
         ):
-            t_1 = self.t_1.to("mm").magnitude
-            width_default = width_default.to("mm").magnitude
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
             shape1 = geo.Shape()
             shape1.add_line_segments(
                 [
@@ -1217,13 +1219,13 @@ class FFGroove(BaseGroove):
                     [width_default, 0],
                 ]
             )
-            return geo.Profile([shape1, shape2], unit="mm")
+            return geo.Profile([shape1, shape2], unit=_DEFAULT_LEN_UNIT)
         elif self.code_number == "3.1.1":
-            t_1 = self.t_1.to("mm").magnitude
-            t_2 = self.t_2.to("mm").magnitude
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
             alpha = self.alpha.to("rad").magnitude
-            b = self.b.to("mm").magnitude
-            width_default = width_default.to("mm").magnitude
+            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
             if width_default < t_1 + 1:
                 width_default = t_1 + width_default
@@ -1248,12 +1250,12 @@ class FFGroove(BaseGroove):
             shape2.add_line_segments(
                 [[width_default, -b], [0, -b], [0, -t_2 - b], [width_default, -t_2 - b]]
             )
-            return geo.Profile([shape1, shape2], unit="mm")
+            return geo.Profile([shape1, shape2], unit=_DEFAULT_LEN_UNIT)
         elif self.code_number == "3.1.2":
-            t_1 = self.t_1.to("mm").magnitude
-            t_2 = self.t_2.to("mm").magnitude
-            b = self.b.to("mm").magnitude
-            width_default = width_default.to("mm").magnitude
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
+            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
             shape1 = geo.Shape()
             shape1.add_line_segments(
                 [[0, 0], [width_default, 0], [width_default, t_1], [0, t_1]]
@@ -1267,13 +1269,13 @@ class FFGroove(BaseGroove):
                     [0, -t_2 - b],
                 ]
             )
-            return geo.Profile([shape1, shape2], unit="mm")
+            return geo.Profile([shape1, shape2], unit=_DEFAULT_LEN_UNIT)
         elif self.code_number == "3.1.3" or self.code_number == "4.1.1":
-            t_1 = self.t_1.to("mm").magnitude
-            t_2 = self.t_2.to("mm").magnitude
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
             alpha = self.alpha.to("rad").magnitude
-            b = self.b.to("mm").magnitude
-            width_default = width_default.to("mm").magnitude
+            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
             x = np.sin(alpha + np.pi / 2) * b + b
             y = np.cos(alpha + np.pi / 2) * b
@@ -1293,13 +1295,13 @@ class FFGroove(BaseGroove):
             )
             shape2 = geo.Shape()
             shape2.add_line_segments([[x_3, y_3], [x_1, y_1], [x, y], [x_2, y_2]])
-            return geo.Profile([shape1, shape2], unit="mm")
+            return geo.Profile([shape1, shape2], unit=_DEFAULT_LEN_UNIT)
         elif self.code_number == "4.1.2":
-            t_1 = self.t_1.to("mm").magnitude
-            t_2 = self.t_2.to("mm").magnitude
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
             alpha = self.alpha.to("rad").magnitude
-            e = self.e.to("mm").magnitude
-            width_default = width_default.to("mm").magnitude
+            e = self.e.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
             x_1 = np.sin(alpha) * e
             y_1 = np.cos(alpha) * e
@@ -1319,12 +1321,12 @@ class FFGroove(BaseGroove):
             )
             shape2 = geo.Shape()
             shape2.add_line_segments([[x_4, y_4], [x_1, y_1], [x_2, y_2], [x_3, y_3]])
-            return geo.Profile([shape1, shape2], unit="mm")
+            return geo.Profile([shape1, shape2], unit=_DEFAULT_LEN_UNIT)
         elif self.code_number == "4.1.3":
-            t_1 = self.t_1.to("mm").magnitude
-            t_2 = self.t_2.to("mm").magnitude
-            b = self.b.to("mm").magnitude
-            width_default = width_default.to("mm").magnitude
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
+            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
             shape1 = geo.Shape()
             shape1.add_line_segments(
                 [[0, width_default], [0, 0], [t_1, 0], [t_1, width_default]]
@@ -1339,7 +1341,7 @@ class FFGroove(BaseGroove):
                     [-width_default, -b],
                 ]
             )
-            return geo.Profile([shape1, shape2], unit="mm")
+            return geo.Profile([shape1, shape2], unit=_DEFAULT_LEN_UNIT)
         else:
             raise ValueError(
                 "Wrong code_number. The Code Number has to be"
