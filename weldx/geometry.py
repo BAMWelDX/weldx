@@ -855,6 +855,7 @@ class Profile:
     def plot(
         self,
         title=None,
+        label=[None, None],
         raster_width=0.1,
         axis="equal",
         grid=True,
@@ -877,6 +878,8 @@ class Profile:
         ax.grid(grid)
         ax.axis(axis)
         ax.set_title(title)
+        ax.set_xlabel(label[0])
+        ax.set_ylabel(label[1])
         ax.plot(raster_data[0], raster_data[1], line_style)
 
     @property
