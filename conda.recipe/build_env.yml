@@ -6,3 +6,4 @@ dependencies:
   - setuptools
   - conda-build
   - conda-verify
+  - anaconda-client
