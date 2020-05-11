@@ -476,7 +476,7 @@ class VGroove(BaseGroove):
         # y-axis is mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r])
+        return geo.Profile([shape, shape_r], unit="millimeters")
 
 
 @dataclass
@@ -546,7 +546,7 @@ class VVGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r])
+        return geo.Profile([shape, shape_r], unit="millimeters")
 
 
 @dataclass
@@ -614,7 +614,7 @@ class UVGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r])
+        return geo.Profile([shape, shape_r], unit="millimeters")
 
 
 @dataclass
@@ -707,7 +707,7 @@ class UGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r])
+        return geo.Profile([shape, shape_r], unit="millimeters")
 
 
 @dataclass
@@ -744,7 +744,7 @@ class IGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r])
+        return geo.Profile([shape, shape_r], unit="millimeters")
 
 
 @dataclass
@@ -807,7 +807,7 @@ class HVGroove(BaseGroove):
             [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
         )
 
-        return geo.Profile([shape_h, shape_r])
+        return geo.Profile([shape_h, shape_r], unit="millimeters")
 
 
 @dataclass
@@ -875,7 +875,7 @@ class HUGroove(BaseGroove):
             [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
         )
 
-        return geo.Profile([shape_h, shape_r])
+        return geo.Profile([shape_h, shape_r], unit="millimeters")
 
 
 # double Grooves
@@ -954,7 +954,7 @@ class DVGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r])
+        return geo.Profile([shape, shape_r], unit="millimeters")
 
 
 @dataclass
@@ -1042,7 +1042,7 @@ class DUGroove(BaseGroove):
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
-        return geo.Profile([shape, shape_r])
+        return geo.Profile([shape, shape_r], unit="millimeters")
 
 
 @dataclass
@@ -1099,7 +1099,7 @@ class DHVGroove(BaseGroove):
             ]
         )
 
-        return geo.Profile([left_shape, right_shape])
+        return geo.Profile([left_shape, right_shape], unit="millimeters")
 
 
 @dataclass
@@ -1161,7 +1161,7 @@ class DHUGroove(BaseGroove):
             ]
         )
 
-        return geo.Profile([left_shape, right_shape])
+        return geo.Profile([left_shape, right_shape], unit="millimeters")
 
 
 # Frontal Face - Groove
@@ -1217,7 +1217,7 @@ class FFGroove(BaseGroove):
                     [width_default, 0],
                 ]
             )
-            return geo.Profile([shape1, shape2])
+            return geo.Profile([shape1, shape2], unit="millimeters")
         elif self.code_number == "3.1.1":
             t_1 = self.t_1.to("mm").magnitude
             t_2 = self.t_2.to("mm").magnitude
@@ -1248,7 +1248,7 @@ class FFGroove(BaseGroove):
             shape2.add_line_segments(
                 [[width_default, -b], [0, -b], [0, -t_2 - b], [width_default, -t_2 - b]]
             )
-            return geo.Profile([shape1, shape2])
+            return geo.Profile([shape1, shape2], unit="millimeters")
         elif self.code_number == "3.1.2":
             t_1 = self.t_1.to("mm").magnitude
             t_2 = self.t_2.to("mm").magnitude
@@ -1267,7 +1267,7 @@ class FFGroove(BaseGroove):
                     [0, -t_2 - b],
                 ]
             )
-            return geo.Profile([shape1, shape2])
+            return geo.Profile([shape1, shape2], unit="millimeters")
         elif self.code_number == "3.1.3" or self.code_number == "4.1.1":
             t_1 = self.t_1.to("mm").magnitude
             t_2 = self.t_2.to("mm").magnitude
@@ -1293,7 +1293,7 @@ class FFGroove(BaseGroove):
             )
             shape2 = geo.Shape()
             shape2.add_line_segments([[x_3, y_3], [x_1, y_1], [x, y], [x_2, y_2]])
-            return geo.Profile([shape1, shape2])
+            return geo.Profile([shape1, shape2], unit="millimeters")
         elif self.code_number == "4.1.2":
             t_1 = self.t_1.to("mm").magnitude
             t_2 = self.t_2.to("mm").magnitude
@@ -1319,7 +1319,7 @@ class FFGroove(BaseGroove):
             )
             shape2 = geo.Shape()
             shape2.add_line_segments([[x_4, y_4], [x_1, y_1], [x_2, y_2], [x_3, y_3]])
-            return geo.Profile([shape1, shape2])
+            return geo.Profile([shape1, shape2], unit="millimeters")
         elif self.code_number == "4.1.3":
             t_1 = self.t_1.to("mm").magnitude
             t_2 = self.t_2.to("mm").magnitude
@@ -1339,7 +1339,7 @@ class FFGroove(BaseGroove):
                     [-width_default, -b],
                 ]
             )
-            return geo.Profile([shape1, shape2])
+            return geo.Profile([shape1, shape2], unit="millimeters")
         else:
             raise ValueError(
                 "Wrong code_number. The Code Number has to be"

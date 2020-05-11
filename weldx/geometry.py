@@ -806,13 +806,15 @@ class Shape:
 class Profile:
     """Defines a 2d profile."""
 
-    def __init__(self, shapes):
+    def __init__(self, shapes, unit=None):
         """
         Construct profile class.
 
         :param: shapes: Instance or list of geo.Shape class(es)
         """
         self._shapes = []
+        self.attrs = None
+        self.attrs["units"] = unit
         self.add_shapes(shapes)
 
     @property
