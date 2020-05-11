@@ -896,12 +896,6 @@ class CoordinateSystemManager:
             End node of the edge
         lcs :
             Local coordinate system
-        node_from: Hashable :
-
-        node_to: Hashable :
-
-        lcs: LocalCoordinateSystem :
-
 
        """
         self._graph.add_edge(node_from, node_to, lcs=lcs)
@@ -915,8 +909,6 @@ class CoordinateSystemManager:
         coordinate_system_name :
             Name of the coordinate system, that should be
             checked.
-        coordinate_system_name: Hashable :
-
 
        """
         if not self.has_coordinate_system(coordinate_system_name):
@@ -932,8 +924,6 @@ class CoordinateSystemManager:
         coordinate_system_name :
             Name of the new coordinate system, that should be
             checked.
-        coordinate_system_name: Hashable :
-
 
        """
         if not isinstance(coordinate_system_name, cl.Hashable):
@@ -964,12 +954,6 @@ class CoordinateSystemManager:
             An instance of
             weldx.transformations.LocalCoordinateSystem that describes how the new
             coordinate system is oriented in its parent system.
-        coordinate_system_name: Hashable :
-
-        reference_system_name: Hashable :
-
-        local_coordinate_system: LocalCoordinateSystem :
-
 
        """
         if not isinstance(local_coordinate_system, LocalCoordinateSystem):
@@ -999,12 +983,6 @@ class CoordinateSystemManager:
         coordinate_system_name :
             Name of the coordinate system the data should be
             assigned to.
-        data: xr.DataArray :
-
-        data_name: Hashable :
-
-        coordinate_system_name: Hashable :
-
 
        """
         # TODO: How to handle time dependent data? some things to think about:
@@ -1030,10 +1008,6 @@ class CoordinateSystemManager:
             Name of the coordinate system
         reference_system_name :
             Name of the reference coordinate system
-        coordinate_system_name: Hashable :
-
-        reference_system_name: Hashable :
-
 
         Returns
         -------
@@ -1063,15 +1037,12 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the coordinate system, that should be
-            checked.
-        coordinate_system_name: Hashable :
-
+            Name of the coordinate system, that should be checked.
 
         Returns
         -------
-        type
-            True' or 'False'
+        bool
+            'True' or 'False'
 
         """
         return coordinate_system_name in self._graph.nodes
@@ -1085,15 +1056,11 @@ class CoordinateSystemManager:
             Name of the coordinate system
         data_name :
             Name of the data
-        coordinate_system_name: Hashable :
-
-        data_name: Hashable :
-
 
         Returns
         -------
-        type
-            True' or 'False'
+        bool
+            'True' or 'False'
 
         """
         return data_name in self._graph.nodes[coordinate_system_name]["data"]
@@ -1106,9 +1073,9 @@ class CoordinateSystemManager:
         data_name :
             Name of the data
         target_coordinate_system_name :
-            Name of the target coordinate system. If
-            it is not None or not identical to the owning coordinate system name,
-            the data will be transformed to the desired system. (Default value = None)
+            Name of the target coordinate system. If it is not None or not identical to
+            the owning coordinate system name, the data will be transformed to the
+            desired system. (Default value = None)
 
         Returns
         -------
@@ -1149,16 +1116,6 @@ class CoordinateSystemManager:
         target_coordinate_system_name :
             Name of the coordinate system the data
             should be transformed to
-        data: Union[xr.DataArray :
-
-        np.ndarray :
-
-        List] :
-
-        source_coordinate_system_name: Hashable :
-
-        target_coordinate_system_name: Hashable :
-
 
         Returns
         -------
@@ -1210,8 +1167,6 @@ class CoordinateSystemManager:
         ----------
         coordinate_system_name :
             Name of the coordinate system
-        coordinate_system_name: Hashable :
-
 
         Returns
         -------
@@ -1249,10 +1204,6 @@ class CoordinateSystemManager:
             Name of the first coordinate system
         coordinate_system_name_1 :
             Name of the second coordinate system
-        coordinate_system_name_0: Hashable :
-
-        coordinate_system_name_1: Hashable :
-
 
        """
         self._check_coordinate_system_exists(coordinate_system_name_0)
@@ -1273,15 +1224,7 @@ class CoordinateSystemManager:
             Time data.
         inplace :
             If 'True' the interpolation is performed in place, otherwise a
-            new instance is returned.
-        time: Union[pd.DatetimeIndex :
-
-        List[pd.Timestamp] :
-
-        "LocalCoordinateSystem"] :
-
-        inplace: bool :
-             (Default value = False)
+            new instance is returned. (Default value = False)
 
         Returns
         -------
@@ -1305,10 +1248,8 @@ class CoordinateSystemManager:
         ----------
         list_of_edges :
             If not None, the union is only calculated from the
-            specified edges
-        list_of_edges: List :
-             (Default value = None)
-
+            specified edges (Default value = None)
+             
         Returns
         -------
         type

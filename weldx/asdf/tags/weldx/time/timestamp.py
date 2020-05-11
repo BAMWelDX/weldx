@@ -18,16 +18,7 @@ class TimestampType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: pd.Timestamp, ctx):
-        """Serialize timestamp to tree.
-
-        Parameters
-        ----------
-        node: pd.Timestamp :
-
-        ctx :
-
-
-       """
+        """Serialize timestamp to tree."""
         tree = {}
         tree["value"] = custom_tree_to_tagged_tree(node.isoformat(), ctx)
         return tree

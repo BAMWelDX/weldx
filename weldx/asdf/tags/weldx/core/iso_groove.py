@@ -1707,16 +1707,7 @@ class GrooveType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        """Convert to tagged tree and remove all None entries from node dictionary.
-
-        Parameters
-        ----------
-        node :
-
-        ctx :
-
-
-       """
+        """Convert to tagged tree and remove all None entries from node dictionary."""
         if isinstance(node, tuple(_groove_type_to_name.keys())):
             tree = dict(
                 components=dict_to_tagged_tree(node, ctx),

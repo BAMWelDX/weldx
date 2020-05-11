@@ -18,16 +18,7 @@ class TimedeltaType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: pd.Timedelta, ctx):
-        """Serialize timedelta to tree.
-
-        Parameters
-        ----------
-        node: pd.Timedelta :
-
-        ctx :
-
-
-       """
+        """Serialize timedelta to tree."""
         tree = {}
         tree["value"] = custom_tree_to_tagged_tree(node.isoformat(), ctx)
         return tree

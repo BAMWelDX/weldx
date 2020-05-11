@@ -19,16 +19,7 @@ class DatetimeIndexType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: pd.DatetimeIndex, ctx):
-        """Serialize DatetimeIndex to tree.
-
-        Parameters
-        ----------
-        node: pd.DatetimeIndex :
-
-        ctx :
-
-
-       """
+        """Serialize DatetimeIndex to tree."""
         tree = {}
         if node.inferred_freq is not None:
             tree["freq"] = custom_tree_to_tagged_tree(node.inferred_freq, ctx)
