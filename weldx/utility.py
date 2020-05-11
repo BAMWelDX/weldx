@@ -33,7 +33,7 @@ def is_column_in_matrix(column, matrix):
 
 def is_row_in_matrix(row, matrix):
     """Check if a row (1d array) can be found inside of a matrix.
-    
+
     source: https://codereview.stackexchange.com/questions/193835
 
     Parameters
@@ -72,7 +72,7 @@ def to_float_array(container):
 
 def to_list(var):
     """Store the passed variable into a list and return it.
-    
+
     If the variable is already a list, it is returned without modification.
     If 'None' is passed, the function returns an empty list.
 
@@ -199,7 +199,7 @@ def swap_list_items(arr, i1, i2):
 
 def get_time_union(list_of_objects):
     """Generate a merged union of pd.DatetimeIndex from list of inputs.
-    
+
     The functions tries to merge common inputs that are "time-like" or might have time
     coordinates such as xarray objects, tf.LocalCoordinateSystem and other time objects
 
@@ -268,7 +268,7 @@ def xr_matmul(
     **apply_kwargs,
 ):
     """Calculate broadcasted np.matmul(a,b) for xarray objects.
-    
+
     Should work for any size and shape of quadratic matrices contained in a DataArray.
     Ordering, broadcasting of dimensions should be taken care of by xarray internally.
     This can be used for both matrix * matrix and matrix * vector operations.
@@ -292,7 +292,7 @@ def xr_matmul(
     trans_b :
         flag if matrix in b should be transposed (Default value = False)
     **apply_kwargs :
-        
+
 
     Returns
     -------
@@ -327,7 +327,7 @@ def xr_matmul(
 
 def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]):
     """Check if  matrix along specific dimensions in a DataArray is orthogonal.
-    
+
     TODO: make more general
 
     Parameters
@@ -337,9 +337,9 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]):
     dims :
         list of dimensions along which to test
     da: xr.DataArray :
-        
+
     dims: List[str] :
-        
+
 
     Returns
     -------
@@ -388,7 +388,7 @@ def xr_interp_like(
     assume_sorted: bool = False,
 ) -> xr.DataArray:
     """Interpolate DataArray along dimensions of another DataArray.
-    
+
     Provides some utility options for handling out of range values and broadcasting.
 
     Parameters
@@ -408,13 +408,13 @@ def xr_interp_like(
     assume_sorted :
         assume_sorted flag to pass on to xarray.interp_like
     da1: xr.DataArray :
-        
+
     da2: Union[xr.DataArray :
-        
+
     Dict[str :
-        
+
     Any]] :
-        
+
     interp_coords: List[str] :
          (Default value = None)
     broadcast_missing: bool :
@@ -563,9 +563,9 @@ def xr_interp_orientation_in_time(
     times :
         Time data
     dsx: xr.DataArray :
-        
+
     times: pd.DatetimeIndex :
-        
+
 
     Returns
     -------
@@ -614,9 +614,9 @@ def xr_interp_coordinates_in_time(
     times :
         Time data
     dsx: xr.DataArray :
-        
+
     times: pd.DatetimeIndex :
-        
+
 
     Returns
     -------
@@ -635,7 +635,7 @@ def xr_interp_coordinates_in_time(
 @xr.register_dataarray_accessor("weldx")
 class WeldxAccessor:  # pragma: no cover
     """Custom accessor for extending DataArray functionality.
-    
+
     See http://xarray.pydata.org/en/stable/internals.html#extending-xarray for details.
 
     Parameters
@@ -656,7 +656,7 @@ class WeldxAccessor:  # pragma: no cover
 
     def interp_like(self, da, *args, **kwargs):
         """Interpolate DataArray along dimensions of another DataArray.
-        
+
         Provides some utility options for handling out of range values and broadcasting.
         See xr_interp_like for docstring and details.
         :return: interpolated DataArray
@@ -664,11 +664,11 @@ class WeldxAccessor:  # pragma: no cover
         Parameters
         ----------
         da :
-            
+
         *args :
-            
+
         **kwargs :
-            
+
 
         Returns
         -------

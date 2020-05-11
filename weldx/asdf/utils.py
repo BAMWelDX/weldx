@@ -9,7 +9,7 @@ from weldx.asdf.constants import SCHEMA_PATH
 
 def dict_to_tagged_tree(node, ctx):
     """Utility function simplify `to_tree` methods of  dataclass objects.
-    
+
     The function requires the node to be convertible to dictionary via __dict__. And can
     therefor be applied to all classes created using the @dataclass operator.
     `custom_tree_to_tagged_tree` is called on all object properties and all None entries
@@ -114,11 +114,11 @@ def make_asdf_schema_string(
     Parameters
     ----------
     asdf_name :
-        
+
     asdf_version :
-        
+
     properties :
-        
+
     description :
          (Default value = None)
     property_types :
@@ -176,17 +176,17 @@ def make_python_class_string(
     Parameters
     ----------
     class_name :
-        
+
     asdf_name :
-        
+
     asdf_version :
-        
+
     properties :
-        
+
     property_types :
-        
+
     required :
-        
+
 
     Returns
     -------

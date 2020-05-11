@@ -111,17 +111,17 @@ def normalize(a):
 
 def orientation_point_plane_containing_origin(point, p_a, p_b):
     """Determine a points orientation relative to a plane containing the origin.
-    
+
     The side is defined by the winding order of the triangle 'origin - A -
     B'. When looking at it from the left-hand side, the ordering is clockwise
     and counter-clockwise when looking from the right-hand side.
-    
+
     The function returns 1 if the point lies left of the plane, -1 if it is
     on the right and 0 if it lies on the plane.
-    
+
     Note, that this function is not appropriate to check if a point lies on
     a plane since it has no tolerance to compensate for numerical errors.
-    
+
     Additional note: The points A and B can also been considered as two
     vectors spanning the plane.
 
@@ -152,14 +152,14 @@ def orientation_point_plane_containing_origin(point, p_a, p_b):
 
 def orientation_point_plane(point, p_a, p_b, p_c):
     """Determine a points orientation relative to an arbitrary plane.
-    
+
     The side is defined by the winding order of the triangle 'A - B - C'.
     When looking at it from the left-hand side, the ordering is clockwise
     and counter-clockwise when looking from the right-hand side.
-    
+
     The function returns 1 if the point lies left of the plane, -1 if it is
     on the right and 0 if it lies on the plane.
-    
+
     Note, that this function is not appropriate to check if a point lies on
     a plane since it has no tolerance to compensate for numerical errors.
 
@@ -220,7 +220,7 @@ def is_orthogonal_matrix(a: np.ndarray, atol=1e-9) -> bool:
     atol :
         atol to pass onto np.allclose (Default value = 1e-9)
     a: np.ndarray :
-        
+
 
     Returns
     -------
@@ -233,7 +233,7 @@ def is_orthogonal_matrix(a: np.ndarray, atol=1e-9) -> bool:
 
 def point_left_of_line(point, line_start, line_end):
     """Determine if a point lies left of a line.
-    
+
     Returns 1 if the point is left of the line and -1 if it is to the right.
     If the point is located on the line, this function returns 0.
 
@@ -259,7 +259,7 @@ def point_left_of_line(point, line_start, line_end):
 
 def reflection_sign(matrix):
     """Get a sign indicating if the transformation is a reflection.
-    
+
     Returns -1 if the transformation contains a reflection and 1 if not.
 
     Parameters
@@ -283,7 +283,7 @@ def reflection_sign(matrix):
 
 def vector_points_to_left_of_vector(vector, vector_reference):
     """Determine if a vector points to the left of another vector.
-    
+
     Returns 1 if the vector points to the left of the reference vector and
     -1 if it points to the right. In case both vectors point into the same
     or the opposite directions, this function returns 0.
@@ -477,7 +477,7 @@ class LocalCoordinateSystem:
         cls, sequence, angles, degrees=False, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
-        
+
         This function uses scipy.spatial.transform.Rotation.from_euler method to define
         the coordinate systems orientation. Take a look at it's documentation, if some
         information is missing here. The related parameter docs are a copy of the scipy
@@ -694,7 +694,7 @@ class LocalCoordinateSystem:
     @staticmethod
     def _calculate_orthogonal_axis(a_0, a_1):
         """Calculate an axis which is orthogonal to two other axes.
-        
+
         The calculated axis has a positive orientation towards the other 2
         axes.
 
@@ -716,7 +716,7 @@ class LocalCoordinateSystem:
     @property
     def orientation(self) -> xr.DataArray:
         """Get the coordinate systems orientation matrix.
-        
+
         :return: Orientation matrix
 
         Parameters
@@ -731,7 +731,7 @@ class LocalCoordinateSystem:
     @property
     def coordinates(self) -> xr.DataArray:
         """Get the coordinate systems coordinates.
-        
+
         :return: Coordinates of the coordinate system
 
         Parameters
@@ -746,7 +746,7 @@ class LocalCoordinateSystem:
     @property
     def time(self) -> Union[pd.DatetimeIndex, None]:
         """Get the time union of the local coordinate system (or None if system is static).
-        
+
         :return: DateTimeIndex-like time union
 
         Parameters
@@ -763,7 +763,7 @@ class LocalCoordinateSystem:
     @property
     def dataset(self) -> xr.Dataset:
         """Get the underlying xarray.Dataset with ordered dimensions.
-        
+
         :return: xarray Dataset with coordinates and orientation as DataVariables.
 
         Parameters
@@ -785,11 +785,11 @@ class LocalCoordinateSystem:
         time :
             Series of times.
         time: Union[pd.DatetimeIndex :
-            
+
         List[pd.Timestamp] :
-            
+
         "LocalCoordinateSystem"] :
-            
+
 
         Returns
         -------
@@ -815,7 +815,7 @@ class LocalCoordinateSystem:
 
     def invert(self) -> "LocalCoordinateSystem":
         """Get a local coordinate system defining the parent in the child system.
-        
+
         Inverse is defined as orientation_new=orientation.T,
         coordinates_new=orientation.T*(-coordinates)
         :return: Inverted coordinate system.
@@ -880,11 +880,11 @@ class CoordinateSystemManager:
         lcs :
             Local coordinate system
         node_from: Hashable :
-            
+
         node_to: Hashable :
-            
+
         lcs: LocalCoordinateSystem :
-            
+
 
         Returns
         -------
@@ -902,7 +902,7 @@ class CoordinateSystemManager:
             Name of the coordinate system, that should be
             checked.
         coordinate_system_name: Hashable :
-            
+
 
         Returns
         -------
@@ -922,7 +922,7 @@ class CoordinateSystemManager:
             Name of the new coordinate system, that should be
             checked.
         coordinate_system_name: Hashable :
-            
+
 
         Returns
         -------
@@ -957,11 +957,11 @@ class CoordinateSystemManager:
             weldx.transformations.LocalCoordinateSystem that describes how the new
             coordinate system is oriented in its parent system.
         coordinate_system_name: Hashable :
-            
+
         reference_system_name: Hashable :
-            
+
         local_coordinate_system: LocalCoordinateSystem :
-            
+
 
         Returns
         -------
@@ -995,11 +995,11 @@ class CoordinateSystemManager:
             Name of the coordinate system the data should be
             assigned to.
         data: xr.DataArray :
-            
+
         data_name: Hashable :
-            
+
         coordinate_system_name: Hashable :
-            
+
 
         Returns
         -------
@@ -1029,9 +1029,9 @@ class CoordinateSystemManager:
         reference_system_name :
             Name of the reference coordinate system
         coordinate_system_name: Hashable :
-            
+
         reference_system_name: Hashable :
-            
+
 
         Returns
         -------
@@ -1064,7 +1064,7 @@ class CoordinateSystemManager:
             Name of the coordinate system, that should be
             checked.
         coordinate_system_name: Hashable :
-            
+
 
         Returns
         -------
@@ -1084,9 +1084,9 @@ class CoordinateSystemManager:
         data_name :
             Name of the data
         coordinate_system_name: Hashable :
-            
+
         data_name: Hashable :
-            
+
 
         Returns
         -------
@@ -1148,15 +1148,15 @@ class CoordinateSystemManager:
             Name of the coordinate system the data
             should be transformed to
         data: Union[xr.DataArray :
-            
+
         np.ndarray :
-            
+
         List] :
-            
+
         source_coordinate_system_name: Hashable :
-            
+
         target_coordinate_system_name: Hashable :
-            
+
 
         Returns
         -------
@@ -1181,7 +1181,7 @@ class CoordinateSystemManager:
     @property
     def graph(self) -> nx.DiGraph:
         """Get the internal graph.
-        
+
         :return: networkx.DiGraph
 
         Parameters
@@ -1196,7 +1196,7 @@ class CoordinateSystemManager:
     @property
     def number_of_coordinate_systems(self) -> int:
         """Get the number of coordinate systems inside the coordinate system manager.
-        
+
         :return: Number of coordinate systems
 
         Parameters
@@ -1216,7 +1216,7 @@ class CoordinateSystemManager:
         coordinate_system_name :
             Name of the coordinate system
         coordinate_system_name: Hashable :
-            
+
 
         Returns
         -------
@@ -1255,9 +1255,9 @@ class CoordinateSystemManager:
         coordinate_system_name_1 :
             Name of the second coordinate system
         coordinate_system_name_0: Hashable :
-            
+
         coordinate_system_name_1: Hashable :
-            
+
 
         Returns
         -------
@@ -1283,11 +1283,11 @@ class CoordinateSystemManager:
             If 'True' the interpolation is performed in place, otherwise a
             new instance is returned.
         time: Union[pd.DatetimeIndex :
-            
+
         List[pd.Timestamp] :
-            
+
         "LocalCoordinateSystem"] :
-            
+
         inplace: bool :
              (Default value = False)
 

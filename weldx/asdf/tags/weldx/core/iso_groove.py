@@ -30,7 +30,7 @@ def get_groove(
     code_number=None,
 ):
     """Create a Groove from weldx.asdf.tags.weldx.core.groove.
-    
+
     Make a selection from the given groove types.
     Groove Types:
         "VGroove"
@@ -45,7 +45,7 @@ def get_groove(
         "DoubleHVGroove"
         "DoubleHUGroove"
         "FrontalFaceGroove"
-    
+
     Each groove type has a different set of attributes which are required. Only
     required attributes are considered. All the required attributes for Grooves
     are in Quantity values from pint and related units are accepted.
@@ -63,7 +63,7 @@ def get_groove(
             c: root face
                 - The root face is the length of the Y-Groove which is not
                   part of the V. It can be 0.
-    
+
         "UGroove":
             t: workpiece thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -80,7 +80,7 @@ def get_groove(
                   It can be 0 or None.
             c: root face
                 - The root face is the height of the part below the U-segment.
-    
+
         "IGroove":
             t: workpiece thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -88,7 +88,7 @@ def get_groove(
             b: root gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
-    
+
         "UVGroove":
             t: workpiece thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -108,7 +108,7 @@ def get_groove(
                   It can be 0 or None.
             h: root face
                 - The root face is the height of the V-segment.
-    
+
         "VVGroove":
             t: workpiece thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -128,7 +128,7 @@ def get_groove(
             h: root face 2
                 - This root face is the height of the part of the lower V-segment
                   and the root face c.
-    
+
         "HVGroove":
             t: workpiece thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -141,7 +141,7 @@ def get_groove(
                   It can be 0 or None.
             c: root face
                 - The root face is the height of the part below the V-segment.
-    
+
         "HUGroove":
             t: workpiece thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -158,7 +158,7 @@ def get_groove(
                   It can be 0 or None.
             c: root face
                 - The root face is the height of the part below the U-segment.
-    
+
         "DoubleVGroove":
             t: workpiece thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -180,7 +180,7 @@ def get_groove(
             h2: root face 3
                 - The root face is the height of the lower V-segment.
                   Only c is needed.
-    
+
         "DoubleUGroove":
             t: workpiece thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
@@ -210,33 +210,33 @@ def get_groove(
             h2: root face 3
                 - The root face is the height of the lower U-segment.
                   Only c is needed.
-    
+
         "DoubleHVGroove":
             This is a special case of the DoubleVGroove. The values of the angles are
             interpreted here as bevel angel. So you have only half of the size.
             Accordingly the inputs beta1 (bevel angle) and beta2 (bevel angle 2)
             are used.
-    
+
         "DoubleHUGroove":
             This is a special case of the DoubleUGroove.
             The parameters remain the same.
-    
+
         "FrontalFaceGroove":
             These grooves are identified by their code number. These correspond to the
             key figure numbers from the standard. For more information, see the
             documentation.
-    
-    
+
+
     Example:
         from weldx import Q_ as Quantity
         from weldx.asdf.tags.weldx.core.groove import get_groove
-    
+
         get_groove(groove_type="VGroove",
                    workpiece_thickness=Quantity(9, "mm"),
                    groove_angle=Quantity(50, "deg"),
                    root_face=Quantity(4, "mm"),
                    root_gap=Quantity(2, "mm"))
-    
+
         get_groove(groove_type="UGroove",
                    workpiece_thickness=Quantity(15, "mm"),
                    bevel_angle=Quantity(9, "deg"),
@@ -469,7 +469,7 @@ class BaseGroove:
 @dataclass
 class VGroove(BaseGroove):
     """A Single-V Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -504,7 +504,7 @@ class VGroove(BaseGroove):
         width_default :
              (Default value = Q_(2)
         "mm") :
-            
+
 
         Returns
         -------
@@ -557,7 +557,7 @@ class VGroove(BaseGroove):
 @dataclass
 class VVGroove(BaseGroove):
     """A VV-Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -598,7 +598,7 @@ class VVGroove(BaseGroove):
         width_default :
              (Default value = Q_(5)
         "mm") :
-            
+
 
         Returns
         -------
@@ -651,7 +651,7 @@ class VVGroove(BaseGroove):
 @dataclass
 class UVGroove(BaseGroove):
     """An UV-Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -692,7 +692,7 @@ class UVGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(2)
         "mm") :
-            
+
 
         Returns
         -------
@@ -743,7 +743,7 @@ class UVGroove(BaseGroove):
 @dataclass
 class UGroove(BaseGroove):
     """An U-Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -781,7 +781,7 @@ class UGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(3)
         "mm") :
-            
+
 
         Returns
         -------
@@ -859,7 +859,7 @@ class UGroove(BaseGroove):
 @dataclass
 class IGroove(BaseGroove):
     """An I-Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -888,7 +888,7 @@ class IGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(5)
         "mm") :
-            
+
 
         Returns
         -------
@@ -916,7 +916,7 @@ class IGroove(BaseGroove):
 @dataclass
 class HVGroove(BaseGroove):
     """A HV-Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -951,7 +951,7 @@ class HVGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(5)
         "mm") :
-            
+
 
         Returns
         -------
@@ -1001,7 +1001,7 @@ class HVGroove(BaseGroove):
 @dataclass
 class HUGroove(BaseGroove):
     """A HU-Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -1039,7 +1039,7 @@ class HUGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(5)
         "mm") :
-            
+
 
         Returns
         -------
@@ -1093,7 +1093,7 @@ class HUGroove(BaseGroove):
 @dataclass
 class DVGroove(BaseGroove):
     """A DV-Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -1137,7 +1137,7 @@ class DVGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(5)
         "mm") :
-            
+
 
         Returns
         -------
@@ -1196,7 +1196,7 @@ class DVGroove(BaseGroove):
 @dataclass
 class DUGroove(BaseGroove):
     """A DU-Groove
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -1246,7 +1246,7 @@ class DUGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(5)
         "mm") :
-            
+
 
         Returns
         -------
@@ -1311,7 +1311,7 @@ class DUGroove(BaseGroove):
 @dataclass
 class DHVGroove(BaseGroove):
     """A DHV-Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -1355,7 +1355,7 @@ class DHVGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(5)
         "mm") :
-            
+
 
         Returns
         -------
@@ -1393,7 +1393,7 @@ class DHVGroove(BaseGroove):
 @dataclass
 class DHUGroove(BaseGroove):
     """A DHU-Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -1443,7 +1443,7 @@ class DHUGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(5)
         "mm") :
-            
+
 
         Returns
         -------
@@ -1483,7 +1483,7 @@ class DHUGroove(BaseGroove):
 @dataclass
 class FFGroove(BaseGroove):
     """A Frontal Face Groove.
-    
+
     For a detailed description of the execution look in get_groove.
 
     Parameters
@@ -1522,7 +1522,7 @@ class FFGroove(BaseGroove):
         width_default: pint.Quantity :
              (Default value = Q_(5)
         "mm") :
-            
+
 
         Returns
         -------
@@ -1788,9 +1788,9 @@ class GrooveType(WeldxType):
         Parameters
         ----------
         node :
-            
+
         ctx :
-            
+
 
         Returns
         -------
@@ -1814,9 +1814,9 @@ class GrooveType(WeldxType):
         Parameters
         ----------
         tree :
-            
+
         ctx :
-            
+
 
         Returns
         -------

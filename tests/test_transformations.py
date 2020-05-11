@@ -32,7 +32,7 @@ def check_matrix_does_not_reflect(matrix):
 
 def check_matrix_orthogonal(matrix):
     """Check if a matrix is orthogonal.
-    
+
     Condition: A^-1 = A^T.
 
     Parameters
@@ -52,7 +52,7 @@ def check_matrix_orthogonal(matrix):
 
 def random_vector():
     """Get a random 3d vector.
-    
+
     :return: Random 3d vector.
 
     Parameters
@@ -71,7 +71,7 @@ def random_vector():
 
 def random_non_unit_vector():
     """Get a random 3d vector that is not of unit length.
-    
+
     :return: Random 3d vector.
 
     Parameters
@@ -91,7 +91,7 @@ def rotated_positive_orthogonal_orientation(
     angle_x=np.pi / 3, angle_y=np.pi / 4, angle_z=np.pi / 5
 ):
     """Get a rotated orthogonal base.
-    
+
     If X,Y,Z are the rotation matrices of the passed angles, the resulting
     base is Z * Y * X.
 
@@ -122,12 +122,12 @@ def rotated_positive_orthogonal_orientation(
 
 def test_coordinate_axis_rotation_matrices():
     """Test the rotation matrices that rotate around one coordinate axis.
-    
+
     This test creates the rotation matrices using 10 degree steps and
     multiplies them with a given vector. The result is compared to the
     expected values, which are determined using the sine and cosine.
     Additionally, some matrix properties are checked.
-    
+
     :return: ---
 
     Parameters
@@ -167,9 +167,9 @@ def test_coordinate_axis_rotation_matrices():
 
 def test_scaling_matrix():
     """Test the scaling matrix.
-    
+
     Should be self explanatory.
-    
+
     :return: ---
 
     Parameters
@@ -189,10 +189,10 @@ def test_scaling_matrix():
 
 def test_normalize():
     """Test the normalize function.
-    
+
     This test creates some random vectors and normalizes them. Afterwards
     the results are checked.
-    
+
     :return: ---
 
     Parameters
@@ -226,7 +226,7 @@ def test_normalize():
 
 def test_orientation_point_plane_containing_origin():
     """Test the orientation_point_plane_containing_origin function.
-    
+
     This test takes the first two vectors of an orthogonal orientation matrix to
     describe the plane which contains the origin. Afterwards, several
     factors are multiplied with the normal vector of the plane (third column
@@ -234,7 +234,7 @@ def test_orientation_point_plane_containing_origin():
     origin, the sign returned by the orientation function must be equal to
     the sign of the factor (0 is a special case and tested at the end).
     Additionally some exceptions and special cases are tested.
-    
+
     :return: ---
 
     Parameters
@@ -269,7 +269,7 @@ def test_orientation_point_plane_containing_origin():
 
 def test_orientation_point_plane():
     """Test the test_orientation_point_plane function.
-    
+
     This test takes the first two vectors of an orthogonal orientation matrix and
     adds an offset to them to describe the plane. Afterwards, several points
     are calculated by multiplying the normal vector of the plane (third
@@ -278,7 +278,7 @@ def test_orientation_point_plane():
     must be equal to the factors sign (0 is a special case and tested at the
     end).
     Additionally some exceptions and special cases are tested.
-    
+
     :return: ---
 
     Parameters
@@ -317,10 +317,10 @@ def test_orientation_point_plane():
 
 def test_is_orthogonal():
     """Test the is_orthogonal function.
-    
+
     This test creates some vectors and checks if the function returns the
     correct results.
-    
+
     :return: ---
 
     Parameters
@@ -363,9 +363,9 @@ def test_is_orthogonal():
 
 def test_vector_points_to_left_of_vector():
     """Test vector_points_to_left_of_vector function.
-    
+
     Tests multiple vector combinations with known result.
-    
+
     :return: ---
 
     Parameters
@@ -395,9 +395,9 @@ def test_vector_points_to_left_of_vector():
 
 def test_point_left_of_line():
     """Test the point_left_of_line function.
-    
+
     Tests multiple test cases with known results.
-    
+
     :return: ---
 
     Parameters
@@ -422,9 +422,9 @@ def test_point_left_of_line():
 
 def test_reflection_sign():
     """Test the reflection_sign function.
-    
+
     Tests multiple test cases with known results.
-    
+
     :return: ---
 
     Parameters
@@ -473,7 +473,7 @@ def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
     expected_time :
         Expected time
     lcs: tf.LocalCoordinateSystem :
-        
+
 
     Returns
     -------
@@ -499,11 +499,11 @@ def check_coordinate_system_orientation(
         True, if the orientation is expected to be
         positive. False otherwise.
     orientation: xr.DataArray :
-        
+
     orientation_expected: np.ndarray :
-        
+
     positive_orientation_expected: bool :
-        
+
 
     Returns
     -------
@@ -555,7 +555,7 @@ def check_coordinate_system(
 
 def test_coordinate_system_init():
     """Check the __init__ method with and without time dependency.
-    
+
     :return: ---
 
     Parameters
@@ -713,10 +713,10 @@ test_coordinate_system_init()
 
 def test_coordinate_system_factories():
     """Test construction of coordinate system class.
-    
+
     Create multiple coordinate systems with all provided methods and check
     if they are constructed correctly.
-    
+
     :return: ---
 
     Parameters
@@ -803,11 +803,11 @@ def test_coordinate_system_factories():
 
 def test_coordinate_system_addition_and_subtraction():
     """Test the + and - operator of the coordinate system class.
-    
+
     Creates some coordinate systems and uses the operators on them. Results
     are compared to expected values. The naming pattern 'X_in_Y' is used for the
     coordinate systems to keep track of the supposed operation results.
-    
+
     :return: ---
 
     Parameters
@@ -1060,11 +1060,11 @@ def test_coordinate_system_addition_and_subtraction():
 
 def test_coordinate_system_invert():
     """Test the invert function.
-    
+
     The test creates a coordinate system, inverts it and checks the result against the
     expected value. Afterwards, the resulting system is inverted again. This operation
     must yield the original system.
-    
+
     :return: ---
 
     Parameters
@@ -1132,13 +1132,13 @@ def coordinate_system_time_interpolation_test_case(
     coordinates_exp :
         Expected coordinates
     lcs: tf.LocalCoordinateSystem :
-        
+
     time_interp: pd.DatetimeIndex :
-        
+
     orientation_exp: np.ndarray :
-        
+
     coordinates_exp: np.ndarray :
-        
+
 
     Returns
     -------
@@ -1158,7 +1158,7 @@ def coordinate_system_time_interpolation_test_case(
 
 def test_coordinate_system_time_interpolation():
     """Test the local coordinate systems interp_time and interp_like functions.
-    
+
     :return: ---
 
     Parameters
@@ -1237,7 +1237,7 @@ def test_coordinate_system_time_interpolation():
 
 def test_coordinate_system_manager_init():
     """Test the init method of the coordinate system manager.
-    
+
     :return: ---
 
     Parameters
@@ -1260,10 +1260,10 @@ def test_coordinate_system_manager_init():
 
 def test_coordinate_system_manager_add_coordinate_system():
     """Test the add_coordinate_system function of the coordinate system manager.
-    
+
     Adds some coordinate systems to a CSM and checks if the the edges and nodes
     are set as expected.
-    
+
     :return: ---
 
     Parameters
@@ -1328,9 +1328,9 @@ def test_coordinate_system_manager_add_coordinate_system():
 
 def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependence():
     """Test the get_local_coordinate_system function.
-    
+
     This function also tests, if the internally performed transformations are correct.
-    
+
     :return: ---
 
     Parameters
@@ -1398,7 +1398,7 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
 
 def test_coordinate_system_manager_time_union():
     """Test the coordinate system managers time union function.
-    
+
     :return: ---
 
     Parameters
@@ -1459,7 +1459,7 @@ def test_coordinate_system_manager_time_union():
 
 def test_coordinate_system_manager_interp_time():
     """Test the coordinate system managers interp_time and interp_like functions.
-    
+
     :return: ---
 
     Parameters
@@ -1549,7 +1549,7 @@ def test_coordinate_system_manager_interp_time():
 
 def test_coordinate_system_manager_transform_data():
     """Test the coordinate system managers transform_data function.
-    
+
     :return: ---
 
     Parameters
@@ -1607,7 +1607,7 @@ def test_coordinate_system_manager_transform_data():
 
 def test_coordinate_system_manager_data_assignment_and_retrieval():
     """Test the coordinate system managers assign_data and get_data functions.
-    
+
     :return: ---
 
     Parameters

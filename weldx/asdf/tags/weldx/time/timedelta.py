@@ -23,9 +23,9 @@ class TimedeltaType(WeldxType):
         Parameters
         ----------
         node: pd.Timedelta :
-            
+
         ctx :
-            
+
 
         Returns
         -------
@@ -42,9 +42,9 @@ class TimedeltaType(WeldxType):
         Parameters
         ----------
         tree :
-            
+
         ctx :
-            
+
 
         Returns
         -------

@@ -24,9 +24,9 @@ class TimedeltaIndexType(WeldxType):
         Parameters
         ----------
         node: pd.TimedeltaIndex :
-            
+
         ctx :
-            
+
 
         Returns
         -------
@@ -54,9 +54,9 @@ class TimedeltaIndexType(WeldxType):
         Parameters
         ----------
         tree :
-            
+
         ctx :
-            
+
 
         Returns
         -------

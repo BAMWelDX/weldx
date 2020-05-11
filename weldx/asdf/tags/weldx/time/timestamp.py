@@ -23,9 +23,9 @@ class TimestampType(WeldxType):
         Parameters
         ----------
         node: pd.Timestamp :
-            
+
         ctx :
-            
+
 
         Returns
         -------
@@ -42,9 +42,9 @@ class TimestampType(WeldxType):
         Parameters
         ----------
         tree :
-            
+
         ctx :
-            
+
 
         Returns
         -------

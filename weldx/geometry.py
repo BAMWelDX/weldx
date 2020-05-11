@@ -33,7 +33,7 @@ class LineSegment:
 
     def _calculate_length(self):
         """Calculate the segment length from its points.
-        
+
         :return: ---
 
         Parameters
@@ -97,7 +97,7 @@ class LineSegment:
     @property
     def length(self):
         """Get the segment length.
-        
+
         :return: Segment length
 
         Parameters
@@ -112,7 +112,7 @@ class LineSegment:
     @property
     def point_end(self):
         """Get the end point of the segment.
-        
+
         :return: End point
 
         Parameters
@@ -127,7 +127,7 @@ class LineSegment:
     @property
     def point_start(self):
         """Get the starting point of the segment.
-        
+
         :return: Starting point
 
         Parameters
@@ -142,10 +142,10 @@ class LineSegment:
     @property
     def points(self):
         """Get the segments points in form of a 2x2 matrix.
-        
+
         The first column represents the starting point and the second one
         the end point.
-        
+
         :return: 2x2 matrix containing the segments points
 
         Parameters
@@ -188,7 +188,7 @@ class LineSegment:
 
     def rasterize(self, raster_width):
         """Create an array of points that describe the segments contour.
-        
+
         The effective raster width may vary from the specified one,
         since the algorithm enforces constant distances between two
         raster points.
@@ -290,7 +290,7 @@ class ArcSegment:
 
     def _calculate_arc_angle(self):
         """Calculate the arc angle.
-        
+
         :return: ---
 
         Parameters
@@ -322,7 +322,7 @@ class ArcSegment:
 
     def _calculate_arc_parameters(self):
         """Calculate radius, arc length and arc angle from the segments points.
-        
+
         :return: ---
 
         Parameters
@@ -340,7 +340,7 @@ class ArcSegment:
 
     def _check_valid(self):
         """Check if the segments data is valid.
-        
+
         :return: ---
 
         Parameters
@@ -450,7 +450,7 @@ class ArcSegment:
     @classmethod
     def linear_interpolation(cls, segment_a, segment_b, weight):
         """Interpolate two arc segments linearly.
-        
+
         This function is not implemented, since linear interpolation of an
         arc segment is not unique. The 'Shape' class requires succeeding
         segments to be connected through a common point. Therefore two
@@ -489,7 +489,7 @@ class ArcSegment:
     @property
     def arc_angle(self):
         """Get the arc angle.
-        
+
         :return: Arc angle
 
         Parameters
@@ -504,7 +504,7 @@ class ArcSegment:
     @property
     def arc_length(self):
         """Get the arc length.
-        
+
         :return: Arc length
 
         Parameters
@@ -519,7 +519,7 @@ class ArcSegment:
     @property
     def arc_winding_ccw(self):
         """Get True if the winding order is counter-clockwise. False if clockwise.
-        
+
         :return: True or False
 
         Parameters
@@ -534,7 +534,7 @@ class ArcSegment:
     @property
     def point_center(self):
         """Get the center point of the segment.
-        
+
         :return: Center point
 
         Parameters
@@ -549,7 +549,7 @@ class ArcSegment:
     @property
     def point_end(self):
         """Get the end point of the segment.
-        
+
         :return: End point
 
         Parameters
@@ -564,7 +564,7 @@ class ArcSegment:
     @property
     def point_start(self):
         """Get the starting point of the segment.
-        
+
         :return: Starting point
 
         Parameters
@@ -579,10 +579,10 @@ class ArcSegment:
     @property
     def points(self):
         """Get the segments points in form of a 2x3 matrix.
-        
+
         The first column represents the starting point, the second one the
         end and the third one the center.
-        
+
         :return: 2x3 matrix containing the segments points
 
         Parameters
@@ -597,7 +597,7 @@ class ArcSegment:
     @property
     def radius(self):
         """Get the radius.
-        
+
         :return: Radius
 
         Parameters
@@ -641,7 +641,7 @@ class ArcSegment:
 
     def rasterize(self, raster_width):
         """Create an array of points that describe the segments contour.
-        
+
         The effective raster width may vary from the specified one,
         since the algorithm enforces constant distances between two
         raster points.
@@ -733,7 +733,7 @@ class Shape:
     @staticmethod
     def _check_segments_connected(segments):
         """Check if all segments are connected to each other.
-        
+
         The start point of a segment must be identical to the end point of
         the previous segment.
 
@@ -792,7 +792,7 @@ class Shape:
     @classmethod
     def linear_interpolation(cls, shape_a, shape_b, weight):
         """Interpolate 2 shapes linearly.
-        
+
         Each segment is interpolated individually, using the corresponding
         linear segment interpolation.
 
@@ -821,7 +821,7 @@ class Shape:
     @property
     def num_segments(self):
         """Get the number of segments of the shape.
-        
+
         :return: number of segments
 
         Parameters
@@ -836,7 +836,7 @@ class Shape:
     @property
     def segments(self):
         """Get the shape's segments.
-        
+
         :return: List of segments
 
         Parameters
@@ -850,7 +850,7 @@ class Shape:
 
     def add_line_segments(self, points):
         """Add line segments to the shape.
-        
+
         The line segments are constructed from the provided points.
 
         Parameters
@@ -1003,7 +1003,7 @@ class Shape:
 
     def rasterize(self, raster_width):
         """Create an array of points that describe the shapes contour.
-        
+
         The effective raster width may vary from the specified one,
         since the algorithm enforces constant distances between two
         raster points inside of each segment.
@@ -1127,7 +1127,7 @@ class Profile:
     @property
     def num_shapes(self):
         """Get the number of shapes of the profile.
-        
+
         :return: Number of shapes
 
         Parameters
@@ -1165,7 +1165,7 @@ class Profile:
         Parameters
         ----------
         raster_width :
-            
+
 
         Returns
         -------
@@ -1222,7 +1222,7 @@ class Profile:
     @property
     def shapes(self):
         """Get the profiles shapes.
-        
+
         :return: Shapes
 
         Parameters
@@ -1254,7 +1254,7 @@ class LinearHorizontalTraceSegment:
     @property
     def length(self):
         """Get the length of the segment.
-        
+
         :return: Length of the segment
 
         Parameters
@@ -1332,7 +1332,7 @@ class RadialHorizontalTraceSegment:
     @property
     def angle(self):
         """Get the angle of the segment.
-        
+
         :return: Angle of the segment
 
         Parameters
@@ -1347,7 +1347,7 @@ class RadialHorizontalTraceSegment:
     @property
     def length(self):
         """Get the length of the segment.
-        
+
         :return: Length of the segment
 
         Parameters
@@ -1362,7 +1362,7 @@ class RadialHorizontalTraceSegment:
     @property
     def radius(self):
         """Get the radius of the segment.
-        
+
         :return: Radius of the segment
 
         Parameters
@@ -1377,7 +1377,7 @@ class RadialHorizontalTraceSegment:
     @property
     def is_clockwise(self):
         """Get True, if the segments winding is clockwise, False otherwise.
-        
+
         :return: True or False
 
         Parameters
@@ -1494,7 +1494,7 @@ class Trace:
     @property
     def coordinate_system(self):
         """Get the trace's coordinate system.
-        
+
         :return: Coordinate system of the trace
 
         Parameters
@@ -1509,7 +1509,7 @@ class Trace:
     @property
     def length(self):
         """Get the length of the trace.
-        
+
         :return: Length of the trace.
 
         Parameters
@@ -1524,7 +1524,7 @@ class Trace:
     @property
     def segments(self):
         """Get the trace's segments.
-        
+
         :return: Segments of the trace
 
         Parameters
@@ -1539,7 +1539,7 @@ class Trace:
     @property
     def num_segments(self):
         """Get the number of segments.
-        
+
         :return: Number of segments
 
         Parameters
@@ -1578,13 +1578,13 @@ class Trace:
 
     def rasterize(self, raster_width):
         """Rasterize the trace.
-        
+
         :return: Raster data
 
         Parameters
         ----------
         raster_width :
-            
+
 
         Returns
         -------
@@ -1714,7 +1714,7 @@ class VariableProfile:
     @property
     def interpolation_schemes(self):
         """Get the interpolation schemes.
-        
+
         :return: List of interpolation schemes
 
         Parameters
@@ -1729,7 +1729,7 @@ class VariableProfile:
     @property
     def locations(self):
         """Get the locations.
-        
+
         :return: List of locations
 
         Parameters
@@ -1744,7 +1744,7 @@ class VariableProfile:
     @property
     def max_location(self):
         """Get the maximum location.
-        
+
         :return: Maximum location
 
         Parameters
@@ -1759,7 +1759,7 @@ class VariableProfile:
     @property
     def num_interpolation_schemes(self):
         """Get the number of interpolation schemes.
-        
+
         :return: Number of interpolation schemes
 
         Parameters
@@ -1774,7 +1774,7 @@ class VariableProfile:
     @property
     def num_locations(self):
         """Get the number of profile locations.
-        
+
         :return: Number of profile locations
 
         Parameters
@@ -1789,7 +1789,7 @@ class VariableProfile:
     @property
     def num_profiles(self):
         """Get the number of profiles.
-        
+
         :return: Number of profiles
 
         Parameters
@@ -1804,7 +1804,7 @@ class VariableProfile:
     @property
     def profiles(self):
         """Get the profiles.
-        
+
         :return: List of profiles
 
         Parameters
@@ -1946,7 +1946,7 @@ class Geometry:
     @staticmethod
     def _profile_raster_data_3d(profile, raster_width):
         """Get the rasterized profile in 3d.
-        
+
         The profile is located in the x-z-plane.
 
         Parameters
@@ -2020,7 +2020,7 @@ class Geometry:
     @property
     def profile(self):
         """Get the geometry's profile.
-        
+
         :return: Profile
 
         Parameters
@@ -2035,7 +2035,7 @@ class Geometry:
     @property
     def trace(self):
         """Get the geometry's trace.
-        
+
         :return: Trace
 
         Parameters
