@@ -258,11 +258,7 @@ def test_asdf_groove(groove: BaseGroove, expected_dtype):
 
     expected_dtype :
 
-
-    Returns
-    -------
-
-    """
+   """
     k = "groove"
     tree = {k: groove}
 

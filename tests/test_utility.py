@@ -15,13 +15,7 @@ def test_is_column_in_matrix():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     c_0 = [1, 5, 2]
     c_1 = [3, 2, 2]
     c_2 = [1, 6, 1]
@@ -45,13 +39,7 @@ def test_is_row_in_matrix():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     c_0 = [1, 5, 2]
     c_1 = [3, 2, 2]
     c_2 = [1, 6, 1]
@@ -75,13 +63,7 @@ def test_matrix_is_close():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     mat_a = np.array([[0, 1, 2], [3, 4, 5]])
     mat_b = np.array([[3, 5, 1], [7, 1, 9]])
 
@@ -106,13 +88,7 @@ def test_vector_is_close():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     vec_a = np.array([0, 1, 2])
     vec_b = np.array([3, 5, 1])
 
@@ -135,13 +111,7 @@ def test_xr_interp_like():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # basic interpolation behavior on a single coordinate
     n_a = 5  # range of "a" coordinate in da_a
     s_a = 0.5  # default steps in "a" coordinate in da_a

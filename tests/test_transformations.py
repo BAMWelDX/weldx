@@ -23,10 +23,7 @@ def check_matrix_does_not_reflect(matrix):
     matrix :
         Matrix that should be checked
 
-    Returns
-    -------
-
-    """
+   """
     assert np.linalg.det(matrix) >= 0
 
 
@@ -40,10 +37,7 @@ def check_matrix_orthogonal(matrix):
     matrix :
         Matrix that should be checked
 
-    Returns
-    -------
-
-    """
+   """
     transposed = np.transpose(matrix)
 
     product = np.matmul(transposed, matrix)
@@ -55,13 +49,7 @@ def random_vector():
 
     :return: Random 3d vector.
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     return (
         np.array([random.random(), random.random(), random.random()])
         * 10
@@ -74,13 +62,7 @@ def random_non_unit_vector():
 
     :return: Random 3d vector.
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     vec = random_vector()
     while math.isclose(np.linalg.norm(vec), 1) or math.isclose(np.linalg.norm(vec), 0):
         vec = random_vector()
@@ -104,10 +86,7 @@ def rotated_positive_orthogonal_orientation(
     angle_z :
         Rotation angle around the z-axis (Default value = np.pi / 5)
 
-    Returns
-    -------
-
-    """
+   """
     # rotate axes to produce a more general test case
     r_x = tf.rotation_matrix_x(angle_x)
     r_y = tf.rotation_matrix_y(angle_y)
@@ -130,13 +109,7 @@ def test_coordinate_axis_rotation_matrices():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     matrix_funcs = [tf.rotation_matrix_x, tf.rotation_matrix_y, tf.rotation_matrix_z]
     vec = np.array([1, 1, 1])
 
@@ -172,13 +145,7 @@ def test_scaling_matrix():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     mat_a = np.array([[1, 6, 2], [4, 10, 2], [3, 5, 2]], dtype=float)
     scale_mat = tf.scale_matrix(2, 0.5, 4)
     mat_b = np.matmul(scale_mat, mat_a)
@@ -195,13 +162,7 @@ def test_normalize():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     for _ in range(20):
         vec = random_non_unit_vector()
 
@@ -237,13 +198,7 @@ def test_orientation_point_plane_containing_origin():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     [a, b, n] = rotated_positive_orthogonal_orientation()
     a *= 2.3
     b /= 1.5
@@ -281,13 +236,7 @@ def test_orientation_point_plane():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     [b, c, n] = rotated_positive_orthogonal_orientation()
     a = ut.to_float_array([3.2, -2.1, 5.4])
     b = b * 6.5 + a
@@ -323,13 +272,7 @@ def test_is_orthogonal():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     orientation = rotated_positive_orthogonal_orientation()
     x = orientation[:, 0]
     y = orientation[:, 1]
@@ -368,13 +311,7 @@ def test_vector_points_to_left_of_vector():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     assert tf.vector_points_to_left_of_vector([-0.1, 1], [0, 1]) > 0
     assert tf.vector_points_to_left_of_vector([-0.1, -1], [0, 1]) > 0
     assert tf.vector_points_to_left_of_vector([3, 5], [1, 0]) > 0
@@ -400,13 +337,7 @@ def test_point_left_of_line():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     line_start = np.array([2, 3])
     line_end = np.array([5, 6])
     assert tf.point_left_of_line([-8, 10], line_start, line_end) > 0
@@ -427,13 +358,7 @@ def test_reflection_sign():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     assert tf.reflection_sign([[-1, 0], [0, 1]]) == -1
     assert tf.reflection_sign([[1, 0], [0, -1]]) == -1
     assert tf.reflection_sign([[0, 1], [1, 0]]) == -1
@@ -475,10 +400,7 @@ def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
     lcs: tf.LocalCoordinateSystem :
 
 
-    Returns
-    -------
-
-    """
+   """
     assert np.all(lcs.time == expected_time)
 
 
@@ -505,10 +427,7 @@ def check_coordinate_system_orientation(
     positive_orientation_expected: bool :
 
 
-    Returns
-    -------
-
-    """
+   """
     # test expected positive orientation
     det = np.linalg.det(orientation.sel(v=[2, 0, 1]))
     assert np.all((det > 0) == positive_orientation_expected)
@@ -558,13 +477,7 @@ def test_coordinate_system_init():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # reference data
     time_start_0 = "2042-01-01"
     time_start_1 = "2042-01-02"
@@ -719,13 +632,7 @@ def test_coordinate_system_factories():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # TODO: Time dependency
     # alias name for class - name is too long :)
     lcs = tf.LocalCoordinateSystem
@@ -810,13 +717,7 @@ def test_coordinate_system_addition_and_subtraction():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # reference data ----------------------------
     time_start_0 = "2042-01-01"
     time_start_1 = "2042-01-02"
@@ -1067,13 +968,7 @@ def test_coordinate_system_invert():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # fix ---------------------------------------
     lcs0_in_lcs1 = tf.LocalCoordinateSystem.construct_from_xy_and_orientation(
         [1, 1, 0], [-1, 1, 0], coordinates=[2, 0, 2]
@@ -1140,10 +1035,7 @@ def coordinate_system_time_interpolation_test_case(
     coordinates_exp: np.ndarray :
 
 
-    Returns
-    -------
-
-    """
+   """
     lcs_interp = lcs.interp_time(time_interp)
     check_coordinate_system(
         lcs_interp, orientation_exp, coordinates_exp, True, time_interp
@@ -1161,13 +1053,7 @@ def test_coordinate_system_time_interpolation():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     time_0 = pd.date_range("2042-01-10", periods=4, freq="4D")
     orientation = tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi)
     coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
@@ -1240,13 +1126,7 @@ def test_coordinate_system_manager_init():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # default construction ----------------------
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
     assert csm.number_of_coordinate_systems == 1
@@ -1266,13 +1146,7 @@ def test_coordinate_system_manager_add_coordinate_system():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # define some coordinate systems
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
     lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
@@ -1333,13 +1207,7 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # define some coordinate systems
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
     lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
@@ -1401,13 +1269,7 @@ def test_coordinate_system_manager_time_union():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     orientation = tf.rotation_matrix_z([0, 1, 2])
     coordinates = [[1, 6, 3], [8, 2, 6], [4, 4, 4]]
     lcs_0 = tf.LocalCoordinateSystem(
@@ -1462,13 +1324,7 @@ def test_coordinate_system_manager_interp_time():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # Setup -------------------------------------
     angles = ut.to_float_array([0, np.pi / 2, np.pi])
     orientation = tf.rotation_matrix_z(angles)
@@ -1552,13 +1408,7 @@ def test_coordinate_system_manager_transform_data():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # define some coordinate systems
     # TODO: test more unique rotations - not 90°
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
@@ -1610,13 +1460,7 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
 
     :return: ---
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
-    """
+   """
     # test setup
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
     lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
