@@ -107,8 +107,6 @@ def test_coordinate_axis_rotation_matrices():
     expected values, which are determined using the sine and cosine.
     Additionally, some matrix properties are checked.
 
-    :return: ---
-
    """
     matrix_funcs = [tf.rotation_matrix_x, tf.rotation_matrix_y, tf.rotation_matrix_z]
     vec = np.array([1, 1, 1])
@@ -143,8 +141,6 @@ def test_scaling_matrix():
 
     Should be self explanatory.
 
-    :return: ---
-
    """
     mat_a = np.array([[1, 6, 2], [4, 10, 2], [3, 5, 2]], dtype=float)
     scale_mat = tf.scale_matrix(2, 0.5, 4)
@@ -159,8 +155,6 @@ def test_normalize():
 
     This test creates some random vectors and normalizes them. Afterwards
     the results are checked.
-
-    :return: ---
 
    """
     for _ in range(20):
@@ -195,8 +189,6 @@ def test_orientation_point_plane_containing_origin():
     origin, the sign returned by the orientation function must be equal to
     the sign of the factor (0 is a special case and tested at the end).
     Additionally some exceptions and special cases are tested.
-
-    :return: ---
 
    """
     [a, b, n] = rotated_positive_orthogonal_orientation()
@@ -234,8 +226,6 @@ def test_orientation_point_plane():
     end).
     Additionally some exceptions and special cases are tested.
 
-    :return: ---
-
    """
     [b, c, n] = rotated_positive_orthogonal_orientation()
     a = ut.to_float_array([3.2, -2.1, 5.4])
@@ -269,8 +259,6 @@ def test_is_orthogonal():
 
     This test creates some vectors and checks if the function returns the
     correct results.
-
-    :return: ---
 
    """
     orientation = rotated_positive_orthogonal_orientation()
@@ -309,8 +297,6 @@ def test_vector_points_to_left_of_vector():
 
     Tests multiple vector combinations with known result.
 
-    :return: ---
-
    """
     assert tf.vector_points_to_left_of_vector([-0.1, 1], [0, 1]) > 0
     assert tf.vector_points_to_left_of_vector([-0.1, -1], [0, 1]) > 0
@@ -335,8 +321,6 @@ def test_point_left_of_line():
 
     Tests multiple test cases with known results.
 
-    :return: ---
-
    """
     line_start = np.array([2, 3])
     line_end = np.array([5, 6])
@@ -355,8 +339,6 @@ def test_reflection_sign():
     """Test the reflection_sign function.
 
     Tests multiple test cases with known results.
-
-    :return: ---
 
    """
     assert tf.reflection_sign([[-1, 0], [0, 1]]) == -1

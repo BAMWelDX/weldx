@@ -237,8 +237,6 @@ def default_segment_rasterization_tests(segment, raster_width):
 def test_line_segment_construction():
     """Test constructor and factories.
 
-    :return: ---
-
    """
     # class constructor -----------------------------------
     segment = geo.LineSegment([[3, 5], [3, 4]])
@@ -360,8 +358,6 @@ def test_line_segment_transformations():
 
     This test tests all relevant transformations and exceptions.
 
-    :return: ---
-
    """
     # translation -----------------------------------------
 
@@ -429,8 +425,6 @@ def test_line_segment_interpolation():
 
     Two segments are created and interpolated using different weights. The
     result is compared to the expected values.
-
-    :return: ---
 
    """
     segment_a = geo.LineSegment.construct_with_points([1, 3], [7, -3])
@@ -573,8 +567,6 @@ def arc_segment_rasterization_test(
 def test_arc_segment_constructor():
     """Test the arc segment constructor and factories.
 
-    :return: ---
-
    """
     points = [[3, 6, 6], [3, 6, 3]]
     segment_cw = geo.ArcSegment(points, False)
@@ -636,8 +628,6 @@ def test_arc_segment_factories():
 
     Creates arc segments using the factory functions and checks if they are
     constructed as expected.
-
-    :return: ---
 
    """
     # construction with center point ----------------------
@@ -857,8 +847,6 @@ def test_arc_segment_rasterization():
     Creates some simple arc segments (semi-circle and quadrant) and test the
     rasterization results.
 
-    :return: ---
-
    """
     # center right of line point_start -> point_end
     # ---------------------------------------------
@@ -1064,8 +1052,6 @@ def arc_segment_transformation_test_case(
 def test_arc_segment_transformations():
     """Test the arc segments transformation functions.
 
-    :return: ---
-
    """
     # translation -----------------------------------------
 
@@ -1174,8 +1160,6 @@ def test_arc_segment_interpolation():
 
     Since it is not implemented, check if an exception is raised.
 
-    :return: ---
-
    """
     segment_a = geo.ArcSegment.construct_with_points([0, 0], [1, 1], [1, 0])
     segment_b = geo.ArcSegment.construct_with_points([0, 0], [2, 2], [0, 2])
@@ -1192,8 +1176,6 @@ def test_shape_construction():
     """Test the constructor of the shape.
 
     Constructs some shapes in various ways and checks the results.
-
-    :return: ---
 
    """
     line_segment = geo.LineSegment.construct_with_points([1, 1], [1, 2])
@@ -1224,8 +1206,6 @@ def test_shape_segment_addition():
     """Test the add_segments function of the shape.
 
     Test should be self explanatory.
-
-    :return: ---
 
    """
     # Create shape and add segments
@@ -1263,8 +1243,6 @@ def test_shape_line_segment_addition():
     """Test the shape's add_line_segments function.
 
     Test should be self explanatory.
-
-    :return: ---
 
    """
     shape_0 = geo.Shape()
@@ -1328,8 +1306,6 @@ def test_shape_rasterization():
     The test uses three line segment of equal length, making it easy to
     check the rasterized points. Every step of the test is documented
     with comments.
-
-    :return: ---
 
    """
     points = np.array([[0, 0], [0, 1], [1, 1], [1, 0]])
@@ -1517,8 +1493,6 @@ def test_shape_transformation():
 
     Dedicated reflection functions are tested separately.
 
-    :return: ---
-
    """
     # translation -----------------------------------------
     shape_transformation_test_case(
@@ -1649,8 +1623,6 @@ def shape_reflection_test_case(normal, distance_to_origin):
 def test_shape_reflection():
     """Test multiple reflections.
 
-    :return: ---
-
    """
     shape_reflection_test_case([2, 1], np.linalg.norm([2, 1]))
     shape_reflection_test_case([0, 1], 5)
@@ -1756,8 +1728,6 @@ def shape_reflection_across_line_test_case(point_start, point_end):
 def test_shape_reflection_across_line():
     """Test multiple reflections.
 
-    :return: ---
-
    """
     shape_reflection_across_line_test_case([0, 0], [0, 1])
     shape_reflection_across_line_test_case([0, 0], [1, 0])
@@ -1804,8 +1774,6 @@ def test_shape_interpolation_general():
     Creates 2 shapes, each containing 2 segments. Different segment
     interpolations are used. Afterwards, the shapes are interpolated using
     different weights and the results are compared to the expected values.
-
-    :return: ---
 
    """
     # create shapes
@@ -1862,8 +1830,6 @@ def test_shape_linear_interpolation():
     interpolated using different weights and the results are compared to the
     expected values.
 
-    :return: ---
-
    """
     # create shapes
     shape_a = geo.Shape().add_line_segments([[0, 0], [1, 1], [2, 0]])
@@ -1907,8 +1873,6 @@ def test_profile_construction_and_shape_addition():
     """Test profile construction and addition of shapes.
 
     Test details are explained by comments.
-
-    :return: ---
 
    """
     arc_segment = geo.ArcSegment.construct_with_radius([-2, -2], [-1, -1], 1)
@@ -1960,8 +1924,6 @@ def test_profile_rasterization():
     gaps between each shape are identical to the raster width and they are
     added in ascending order to the profile. Therefore, all raster points
     are equidistant and can be checked easily.
-
-    :return: ---
 
    """
     raster_width = 0.1
@@ -2106,8 +2068,6 @@ def test_linear_horizontal_trace_segment():
 
     Each sub test is documented by comments.
 
-    :return: ---
-
    """
     length = 7.13
     segment = geo.LinearHorizontalTraceSegment(length)
@@ -2130,8 +2090,6 @@ def test_radial_horizontal_trace_segment():
     """Test the radial horizontal trace segment.
 
     Each sub test is documented by comments.
-
-    :return: ---
 
    """
     radius = 4.74
@@ -2207,8 +2165,6 @@ class CustomSegment:
 def test_trace_construction():
     """Test the trace's construction.
 
-    :return: ---
-
    """
     linear_segment = geo.LinearHorizontalTraceSegment(1)
     radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
@@ -2266,8 +2222,6 @@ def test_trace_local_coordinate_system():
 
     The tested trace starts with a semicircle of radius 1 turning to the left
     and continues with a straight line of length 1.
-
-    :return: ---
 
    """
     radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
@@ -2340,8 +2294,6 @@ def test_trace_rasterization():
 
     The tested trace starts with a line segment of length 1 and continues
     with a radial segment of radius 1 and counter clockwise winding.
-
-    :return: ---
 
    """
     radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
@@ -2436,8 +2388,6 @@ def test_linear_profile_interpolation_sbs():
     Uses the default profiles which consist of two shapes. Each shape
     contains just a single line segment.
 
-    :return: ---
-
    """
     [profile_a, profile_b] = get_default_profiles()
 
@@ -2518,8 +2468,6 @@ def check_variable_profile_state(variable_profile, profiles_exp, locations_exp):
 def test_variable_profile_construction():
     """Test construction of variable profiles.
 
-    :return: ---
-
    """
     interpol = geo.linear_profile_interpolation_sbs
 
@@ -2582,8 +2530,6 @@ def test_variable_profile_construction():
 def test_variable_profile_local_profile():
     """Test if the local profiles of a variable profile are calculated correctly.
 
-    :return: ---
-
    """
     interpol = geo.linear_profile_interpolation_sbs
 
@@ -2620,8 +2566,6 @@ def test_variable_profile_local_profile():
 
 def test_geometry_construction():
     """Test construction of he geometry class.
-
-    :return: ---
 
    """
     profile_a, profile_b = get_default_profiles()
