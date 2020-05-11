@@ -255,9 +255,9 @@ def test_asdf_groove(groove: BaseGroove, expected_dtype):
     Parameters
     ----------
     groove: BaseGroove :
-        
+
     expected_dtype :
-        
+
 
     Returns
     -------

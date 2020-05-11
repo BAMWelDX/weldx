@@ -487,22 +487,22 @@ class LocalCoordinateSystem:
         ----------
         sequence :
             Specifies sequence of axes for rotations. Up to 3 characters
-            belonging to the set {‘X’, ‘Y’, ‘Z’} for intrinsic rotations, or {‘x’, ‘y’, ‘z’}
-            for extrinsic rotations. Extrinsic and intrinsic rotations cannot be mixed in
-            one function call.
+            belonging to the set {‘X’, ‘Y’, ‘Z’} for intrinsic rotations,
+            or {‘x’, ‘y’, ‘z’} for extrinsic rotations.
+            Extrinsic and intrinsic rotations cannot be mixed in one function call.
         angles :
             Euler angles specified in radians (degrees is False) or degrees
             (degrees is True). For a single character seq, angles can be:
             - a single value
             - array_like with shape (N,), where each angle[i] corresponds to a single
             rotation
-            - array_like with shape (N, 1), where each angle[i, 0] corresponds to a single
-            rotation
+            - array_like with shape (N, 1), where each angle[i, 0] corresponds to a
+            single rotation
             For 2- and 3-character wide seq, angles can be:
-            - array_like with shape (W,) where W is the width of seq, which corresponds to a
-            single rotation with W axes
-            - array_like with shape (N, W) where each angle[i] corresponds to a sequence of
-            Euler angles describing a single rotation
+            - array_like with shape (W,) where W is the width of seq, which corresponds
+            to a single rotation with W axes
+            - array_like with shape (N, W) where each angle[i] corresponds to a sequence
+            of Euler angles describing a single rotation
         degrees :
             If True, then the given angles are assumed to be in degrees.
             Default is False.
@@ -1056,7 +1056,7 @@ class CoordinateSystemManager:
         return lcs
 
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
-        """Return 'True' if a coordinate system with specified name is part of the class.
+        """Return 'True' if a coordinate system with specified name already exists.
 
         Parameters
         ----------
@@ -1105,8 +1105,8 @@ class CoordinateSystemManager:
             Name of the data
         target_coordinate_system_name :
             Name of the target coordinate system. If
-            it is not None or not identical to the owning coordinate system name, the data
-            will be transformed to the desired system. (Default value = None)
+            it is not None or not identical to the owning coordinate system name,
+            the data will be transformed to the desired system. (Default value = None)
 
         Returns
         -------
@@ -1139,8 +1139,8 @@ class CoordinateSystemManager:
         ----------
         data :
             Point cloud input as array-like with cartesian x,y,z-data stored in
-            the last dimension. When using xarray objects, the vector dimension is expected
-            to be named "c" and have coordinates "x","y","z"
+            the last dimension. When using xarray objects, the vector dimension is
+            expected to be named "c" and have coordinates "x","y","z"
         source_coordinate_system_name :
             Name of the coordinate system the data is
             defined in

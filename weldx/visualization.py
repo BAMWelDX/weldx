@@ -39,7 +39,7 @@ def plot_coordinate_system(coordinate_system, axes, color=None, label=None):
 
 def set_axes_equal(axes):
     """Adjust axis in a 3d plot to be equally scaled.
-    
+
     Source code taken from the stackoverflow answer of 'karlo' in the
     following question:
     https://stackoverflow.com/questions/13685386/matplotlib-equal-unit

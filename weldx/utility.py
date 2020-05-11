@@ -286,7 +286,8 @@ def xr_matmul(
         (if None, use dims_a) (Default value = None)
     dims_out :
         name and order of dimensions in the resulting object
-        (if None, use dims_a unless dims_b has less items than dims_b) (Default value = None)
+        (if None, use dims_a unless dims_b has less items than dims_b)
+        (Default value = None)
     trans_a :
         flag if matrix in a should be transposed (Default value = False)
     trans_b :

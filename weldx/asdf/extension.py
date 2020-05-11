@@ -11,7 +11,7 @@ __all__ = ["WeldxExtension", "WeldxAsdfExtension"]
 
 
 class WeldxExtension(AsdfExtension):
-    """Extension class to register types that have both tags and schemas defined by weldx."""
+    """Extension class registering types with both tags and schemas defined by weldx."""
 
     @property
     def types(self):
