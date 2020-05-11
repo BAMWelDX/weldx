@@ -32,9 +32,9 @@ class WeldmentType(WeldxType):
         Parameters
         ----------
         node: Weldment :
-            
+
         ctx :
-            
+
 
         Returns
         -------

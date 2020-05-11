@@ -34,9 +34,9 @@ class ShieldingGasTypeType(WeldxType):
         Parameters
         ----------
         node :
-            
+
         ctx :
-            
+
 
         Returns
         -------

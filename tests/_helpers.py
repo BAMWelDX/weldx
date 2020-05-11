@@ -11,7 +11,7 @@ def rotated_coordinate_system(
     coordinates=np.array([0, 0, 0]),
 ):
     """Get a coordinate system with rotated orientation.
-    
+
     The transformation order is x-y-z
 
     Parameters
@@ -25,9 +25,9 @@ def rotated_coordinate_system(
     coordinates :
         Coordinates of the coordinate system (Default value = np.array([0)
     0 :
-        
+
     0]) :
-        
+
 
     Returns
     -------

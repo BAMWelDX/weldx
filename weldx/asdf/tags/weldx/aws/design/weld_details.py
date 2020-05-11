@@ -33,9 +33,9 @@ class WeldDetailsType(WeldxType):
         Parameters
         ----------
         node: WeldDetails :
-            
+
         ctx :
-            
+
 
         Returns
         -------

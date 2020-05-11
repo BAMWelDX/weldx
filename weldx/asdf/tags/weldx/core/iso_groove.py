@@ -259,9 +259,11 @@ def get_groove(
         when 3 are needed (Default value = None)
     root_face2 :
         root face, the lower part when 2 root faces are needed. upper
-        part when 3 are needed - used when min. 2 parts are needed (Default value = None)
+        part when 3 are needed - used when min. 2 parts are needed
+        (Default value = None)
     root_face3 :
-        root face, usually the lower part - used when 3 parts are needed (Default value = None)
+        root face, usually the lower part - used when 3 parts are needed
+        (Default value = None)
     bevel_radius :
         bevel radius (Default value = None)
     bevel_radius2 :

@@ -76,9 +76,9 @@ class ArcWeldingProcessType(WeldxType):
         Parameters
         ----------
         node :
-            
+
         ctx :
-            
+
 
         Returns
         -------

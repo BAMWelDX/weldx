@@ -167,7 +167,7 @@ def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1e-9):
 
 def get_default_profiles():
     """Get 2 profiles.
-    
+
     :return: List containing 2 profiles
 
     Parameters
@@ -198,7 +198,7 @@ def get_default_profiles():
 
 def default_segment_rasterization_tests(segment, raster_width):
     """Perform some default checks for a passed segment's rasterization method.
-    
+
     The segment is rasterized and tested afterwards. The purpose of every
     test is explained by a comment in the code.
 
@@ -266,7 +266,7 @@ def default_segment_rasterization_tests(segment, raster_width):
 
 def test_line_segment_construction():
     """Test constructor and factories.
-    
+
     :return: ---
 
     Parameters
@@ -298,11 +298,11 @@ def test_line_segment_construction():
 
 def test_line_segment_rasterization():
     """Test line segment rasterization.
-    
+
     This test checks, if every rasterized point lies on the line that
     connects the start and the end of the segment. It also checks that those
     points lie between the segments start and end point.
-    
+
     :return:
 
     Parameters
@@ -348,7 +348,7 @@ def line_segment_transformation_test_case(
     transformation=None,
 ):
     """Perform a single transformation test on a line segment.
-    
+
     The test applies a transformation and compares the result to the
     expected values.
 
@@ -402,9 +402,9 @@ def line_segment_transformation_test_case(
 
 def test_line_segment_transformations():
     """Test line segment transformations.
-    
+
     This test tests all relevant transformations and exceptions.
-    
+
     :return: ---
 
     Parameters
@@ -477,10 +477,10 @@ def test_line_segment_transformations():
 
 def test_line_segment_interpolation():
     """Test the line segments linear interpolation function.
-    
+
     Two segments are created and interpolated using different weights. The
     result is compared to the expected values.
-    
+
     :return: ---
 
     Parameters
@@ -580,7 +580,7 @@ def arc_segment_rasterization_test(
     is_point_location_valid_func,
 ):
     """Test the arc segment's rasterize function.
-    
+
     Performs the default segment rasterization test and some additional ones
     specific to the arc segment.
 
@@ -635,7 +635,7 @@ def arc_segment_rasterization_test(
 
 def test_arc_segment_constructor():
     """Test the arc segment constructor and factories.
-    
+
     :return: ---
 
     Parameters
@@ -702,10 +702,10 @@ def test_arc_segment_constructor():
 
 def test_arc_segment_factories():
     """Test the arc segment's factory functions.
-    
+
     Creates arc segments using the factory functions and checks if they are
     constructed as expected.
-    
+
     :return: ---
 
     Parameters
@@ -848,7 +848,7 @@ def test_arc_segment_factories():
 
 def point_in_second_quadrant(p, c):
     """Return True if a point is inside a circle's second quadrant.
-    
+
     A point that lies directly on the boundary is considered as being inside.
 
     Parameters
@@ -869,7 +869,7 @@ def point_in_second_quadrant(p, c):
 
 def point_not_in_second_quadrant(p, c):
     """Return True if a point is not inside a circle's second quadrant.
-    
+
     A point that lies directly on the boundary is considered as being outside.
 
     Parameters
@@ -928,10 +928,10 @@ def point_not_above_center(p, c):
 
 def test_arc_segment_rasterization():
     """Test the arc segment's rasterize function.
-    
+
     Creates some simple arc segments (semi-circle and quadrant) and test the
     rasterization results.
-    
+
     :return: ---
 
     Parameters
@@ -1026,7 +1026,7 @@ def arc_segment_transformation_test_case(
     transformation=None,
 ):
     """Perform a single transformation test on an arc segment.
-    
+
     The test applies a transformation and compares the result to the
     expected values.
 
@@ -1147,7 +1147,7 @@ def arc_segment_transformation_test_case(
 
 def test_arc_segment_transformations():
     """Test the arc segments transformation functions.
-    
+
     :return: ---
 
     Parameters
@@ -1261,9 +1261,9 @@ def test_arc_segment_transformations():
 
 def test_arc_segment_interpolation():
     """Test the arc segment interpolation.
-    
+
     Since it is not implemented, check if an exception is raised.
-    
+
     :return: ---
 
     Parameters
@@ -1286,9 +1286,9 @@ def test_arc_segment_interpolation():
 
 def test_shape_construction():
     """Test the constructor of the shape.
-    
+
     Constructs some shapes in various ways and checks the results.
-    
+
     :return: ---
 
     Parameters
@@ -1324,9 +1324,9 @@ def test_shape_construction():
 
 def test_shape_segment_addition():
     """Test the add_segments function of the shape.
-    
+
     Test should be self explanatory.
-    
+
     :return: ---
 
     Parameters
@@ -1369,9 +1369,9 @@ def test_shape_segment_addition():
 
 def test_shape_line_segment_addition():
     """Test the shape's add_line_segments function.
-    
+
     Test should be self explanatory.
-    
+
     :return: ---
 
     Parameters
@@ -1438,11 +1438,11 @@ def test_shape_line_segment_addition():
 
 def test_shape_rasterization():
     """Test rasterization function of the shape.
-    
+
     The test uses three line segment of equal length, making it easy to
     check the rasterized points. Every step of the test is documented
     with comments.
-    
+
     :return: ---
 
     Parameters
@@ -1509,7 +1509,7 @@ def test_shape_rasterization():
 
 def default_test_shape():
     """Get a default shape for tests.
-    
+
     :return: Default shape for tests
 
     Parameters
@@ -1527,7 +1527,7 @@ def default_test_shape():
 
 def default_translation_vector():
     """Get a default translation for transformation tests.
-    
+
     :return: Translation vector
 
     Parameters
@@ -1658,9 +1658,9 @@ def shape_transformation_test_case(
 
 def test_shape_transformation():
     """Test the shapes transformation functions.
-    
+
     Dedicated reflection functions are tested separately.
-    
+
     :return: ---
 
     Parameters
@@ -1700,7 +1700,7 @@ def check_reflected_point(
     point_original, point_reflected, reflection_axis_offset, reflection_axis_direction
 ):
     """Check if a point is reflected correctly.
-    
+
     The function determines if the midpoint of the line
     point->reflected_point lies on the reflection axis. The reflection axis
     is specified by a normal and an offset.
@@ -1731,7 +1731,7 @@ def check_reflected_point(
 
 def shape_reflection_test_case(normal, distance_to_origin):
     """Test the shape's reflection functions.
-    
+
     Only the functions that use a normal and a distance to the origin to
     specify the reflection axis are tested by this test.
 
@@ -1804,7 +1804,7 @@ def shape_reflection_test_case(normal, distance_to_origin):
 
 def test_shape_reflection():
     """Test multiple reflections.
-    
+
     :return: ---
 
     Parameters
@@ -1835,7 +1835,7 @@ def check_point_reflected_across_line(
     point_original, point_reflected, point_start, point_end
 ):
     """Check if a point is reflected correctly.
-    
+
     The function determines if the midpoint of the line
     point->reflected_point lies on the reflection axis. The reflection axis
     is specified by 2 points.
@@ -1867,7 +1867,7 @@ def check_point_reflected_across_line(
 
 def shape_reflection_across_line_test_case(point_start, point_end):
     """Test the shape's reflection functions.
-    
+
     Only the functions that use 2 points to specify the reflection axis are
     tested by this test.
 
@@ -1923,7 +1923,7 @@ def shape_reflection_across_line_test_case(point_start, point_end):
 
 def test_shape_reflection_across_line():
     """Test multiple reflections.
-    
+
     :return: ---
 
     Parameters
@@ -1974,11 +1974,11 @@ def segment_interpolation_nearest(segment_a, segment_b, weight):
 
 def test_shape_interpolation_general():
     """Test the shapes interpolation function.
-    
+
     Creates 2 shapes, each containing 2 segments. Different segment
     interpolations are used. Afterwards, the shapes are interpolated using
     different weights and the results are compared to the expected values.
-    
+
     :return: ---
 
     Parameters
@@ -2037,11 +2037,11 @@ def test_shape_interpolation_general():
 
 def test_shape_linear_interpolation():
     """Test the shapes linear interpolation function.
-    
+
     Creates 2 shapes, each containing 2 segments. Afterwards, the shapes are
     interpolated using different weights and the results are compared to the
     expected values.
-    
+
     :return: ---
 
     Parameters
@@ -2091,9 +2091,9 @@ def test_shape_linear_interpolation():
 
 def test_profile_construction_and_shape_addition():
     """Test profile construction and addition of shapes.
-    
+
     Test details are explained by comments.
-    
+
     :return: ---
 
     Parameters
@@ -2147,12 +2147,12 @@ def test_profile_construction_and_shape_addition():
 
 def test_profile_rasterization():
     """Test the profile's rasterize function.
-    
+
     The test creates a profile where all its shapes lie on the y axis. The
     gaps between each shape are identical to the raster width and they are
     added in ascending order to the profile. Therefore, all raster points
     are equidistant and can be checked easily.
-    
+
     :return: ---
 
     Parameters
@@ -2198,7 +2198,7 @@ def test_profile_rasterization():
 
 def check_trace_segment_length(segment, tolerance=1e-9):
     """Check if a trace segment returns the correct length.
-    
+
     The check calculates the segment length numerically and compares it to
     the length returned by the segment.
     The numerical algorithm calculates the distances between several points
@@ -2252,7 +2252,7 @@ def check_trace_segment_length(segment, tolerance=1e-9):
 
 def check_trace_segment_orientation(segment):
     """Test if the segment's local coordinate system is always oriented correctly.
-    
+
     The orientation of the trace is determined numerically. A small delta is
     applied to the tested location to approximate the local direction of the
     trace. The result is compared to the local coordinate systems x-axis,
@@ -2310,9 +2310,9 @@ def default_trace_segment_tests(segment, tolerance_length=1e-9):
 
 def test_linear_horizontal_trace_segment():
     """Test the linear horizontal trace segment.
-    
+
     Each sub test is documented by comments.
-    
+
     :return: ---
 
     Parameters
@@ -2341,9 +2341,9 @@ def test_linear_horizontal_trace_segment():
 @pytest.mark.slow
 def test_radial_horizontal_trace_segment():
     """Test the radial horizontal trace segment.
-    
+
     Each sub test is documented by comments.
-    
+
     :return: ---
 
     Parameters
@@ -2412,7 +2412,7 @@ class CustomSegment:
         _args :
             Unused parameters
         *_args :
-            
+
 
         Returns
         -------
@@ -2425,7 +2425,7 @@ class CustomSegment:
 
 def test_trace_construction():
     """Test the trace's construction.
-    
+
     :return: ---
 
     Parameters
@@ -2488,10 +2488,10 @@ def test_trace_construction():
 
 def test_trace_local_coordinate_system():
     """Test the trace's local coordinate system function.
-    
+
     The tested trace starts with a semicircle of radius 1 turning to the left
     and continues with a straight line of length 1.
-    
+
     :return: ---
 
     Parameters
@@ -2568,10 +2568,10 @@ def test_trace_local_coordinate_system():
 
 def test_trace_rasterization():
     """Test the trace's rasterize function.
-    
+
     The tested trace starts with a line segment of length 1 and continues
     with a radial segment of radius 1 and counter clockwise winding.
-    
+
     :return: ---
 
     Parameters
@@ -2672,10 +2672,10 @@ def check_interpolated_profile_points(profile, c_0, c_1, c_2):
 
 def test_linear_profile_interpolation_sbs():
     """Test linear profile interpolation.
-    
+
     Uses the default profiles which consist of two shapes. Each shape
     contains just a single line segment.
-    
+
     :return: ---
 
     Parameters
@@ -2766,7 +2766,7 @@ def check_variable_profile_state(variable_profile, profiles_exp, locations_exp):
 
 def test_variable_profile_construction():
     """Test construction of variable profiles.
-    
+
     :return: ---
 
     Parameters
@@ -2836,7 +2836,7 @@ def test_variable_profile_construction():
 
 def test_variable_profile_local_profile():
     """Test if the local profiles of a variable profile are calculated correctly.
-    
+
     :return: ---
 
     Parameters
@@ -2881,7 +2881,7 @@ def test_variable_profile_local_profile():
 
 def test_geometry_construction():
     """Test construction of he geometry class.
-    
+
     :return: ---
 
     Parameters
@@ -2927,11 +2927,11 @@ def test_geometry_construction():
 
 def test_geometry_rasterization_trace():
     """Test if the rasterized geometry data follows the trace.
-    
+
     The utilized trace starts with a line segment of length 1 and continues
     with a radial segment of radius 1 and counter clockwise winding. Each
     individual step is documented by comments.
-    
+
     :return:
 
     Parameters
@@ -3047,7 +3047,7 @@ def test_geometry_rasterization_trace():
 
 def test_geometry_rasterization_profile_interpolation():
     """Check if the rasterized geometry interpolates profiles correctly.
-    
+
     :return:
 
     Parameters

@@ -41,9 +41,9 @@ class ShieldingGasForProcedureType(WeldxType):
         Parameters
         ----------
         node :
-            
+
         ctx :
-            
+
 
         Returns
         -------

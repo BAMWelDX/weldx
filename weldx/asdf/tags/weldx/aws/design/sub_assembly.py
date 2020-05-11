@@ -34,9 +34,9 @@ class SubAssemblyType(WeldxType):
         Parameters
         ----------
         node: SubAssembly :
-            
+
         ctx :
-            
+
 
         Returns
         -------

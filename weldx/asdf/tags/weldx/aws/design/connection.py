@@ -35,9 +35,9 @@ class ConnectionType(WeldxType):
         Parameters
         ----------
         node: Connection :
-            
+
         ctx :
-            
+
 
         Returns
         -------

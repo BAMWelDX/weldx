@@ -29,9 +29,9 @@ class WorkpieceType(WeldxType):
         Parameters
         ----------
         node: Workpiece :
-            
+
         ctx :
-            
+
 
         Returns
         -------

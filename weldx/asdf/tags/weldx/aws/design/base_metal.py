@@ -46,9 +46,9 @@ class BaseMetalType(WeldxType):
         Parameters
         ----------
         node: BaseMetal :
-            
+
         ctx :
-            
+
 
         Returns
         -------

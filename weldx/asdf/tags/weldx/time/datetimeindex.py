@@ -24,9 +24,9 @@ class DatetimeIndexType(WeldxType):
         Parameters
         ----------
         node: pd.DatetimeIndex :
-            
+
         ctx :
-            
+
 
         Returns
         -------
@@ -53,9 +53,9 @@ class DatetimeIndexType(WeldxType):
         Parameters
         ----------
         tree :
-            
+
         ctx :
-            
+
 
         Returns
         -------

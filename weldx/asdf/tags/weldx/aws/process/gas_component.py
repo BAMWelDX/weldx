@@ -32,9 +32,9 @@ class GasComponentType(WeldxType):
         Parameters
         ----------
         node :
-            
+
         ctx :
-            
+
 
         Returns
         -------

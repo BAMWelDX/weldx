@@ -10,9 +10,9 @@ import weldx.transformations as tf
 
 def test_is_column_in_matrix():
     """Test the is_column_in_matrix function.
-    
+
     Test should be self explanatory.
-    
+
     :return: ---
 
     Parameters
@@ -40,9 +40,9 @@ def test_is_column_in_matrix():
 
 def test_is_row_in_matrix():
     """Test the is_row_in_matrix function.
-    
+
     Test should be self explanatory.
-    
+
     :return: ---
 
     Parameters
@@ -70,9 +70,9 @@ def test_is_row_in_matrix():
 
 def test_matrix_is_close():
     """Test the matrix_is_close function.
-    
+
     Test should be self explanatory.
-    
+
     :return: ---
 
     Parameters
@@ -101,9 +101,9 @@ def test_matrix_is_close():
 
 def test_vector_is_close():
     """Test the vector_is_close function.
-    
+
     Test should be self explanatory.
-    
+
     :return: ---
 
     Parameters
@@ -132,7 +132,7 @@ def test_vector_is_close():
 
 def test_xr_interp_like():
     """Test behaviour of custom interpolation method for xarray Objects.
-    
+
     :return: ---
 
     Parameters

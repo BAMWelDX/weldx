@@ -38,9 +38,9 @@ class JointPenetrationType(WeldxType):
         Parameters
         ----------
         node: JointPenetration :
-            
+
         ctx :
-            
+
 
         Returns
         -------
