@@ -12,7 +12,7 @@ from scipy.spatial.transform import Slerp
 import weldx.transformations as tf
 
 
-def is_column_in_matrix(column, matrix):
+def is_column_in_matrix(column, matrix) -> bool:
     """Check if a column (1d array) can be found inside of a matrix.
 
     Parameters
@@ -24,14 +24,14 @@ def is_column_in_matrix(column, matrix):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
     return is_row_in_matrix(column, np.transpose(matrix))
 
 
-def is_row_in_matrix(row, matrix):
+def is_row_in_matrix(row, matrix) -> bool:
     """Check if a row (1d array) can be found inside of a matrix.
 
     source: https://codereview.stackexchange.com/questions/193835
@@ -45,7 +45,7 @@ def is_row_in_matrix(row, matrix):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
@@ -55,7 +55,7 @@ def is_row_in_matrix(row, matrix):
     return (matrix == row).all(axis=1).any()
 
 
-def to_float_array(container):
+def to_float_array(container) -> np.ndarray:
     """Cast the passed container to a numpy array of floats.
 
     Parameters
@@ -65,12 +65,12 @@ def to_float_array(container):
 
     Returns
     -------
-
+    numpy.ndarray
     """
     return np.array(container, dtype=float)
 
 
-def to_list(var):
+def to_list(var) -> list:
     """Store the passed variable into a list and return it.
 
     If the variable is already a list, it is returned without modification.
@@ -83,8 +83,7 @@ def to_list(var):
 
     Returns
     -------
-    type
-        List
+    list
 
     """
     if isinstance(var, list):
@@ -94,7 +93,7 @@ def to_list(var):
     return [var]
 
 
-def matrix_is_close(mat_a, mat_b, abs_tol=1e-9):
+def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
     """Check if a matrix is close or equal to another matrix.
 
     Parameters
@@ -108,7 +107,7 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
@@ -124,7 +123,7 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9):
     return True
 
 
-def vector_is_close(vec_a, vec_b, abs_tol=1e-9):
+def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
     """Check if a vector is close or equal to another vector.
 
     Parameters
@@ -138,7 +137,7 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
@@ -154,7 +153,7 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9):
     return True
 
 
-def mat_vec_mul(a, b):
+def mat_vec_mul(a, b) -> np.ndarray:
     """Matrix x Vector multiplication using matmul with newaxis for correct broadcasting.
 
     Parameters
@@ -166,14 +165,14 @@ def mat_vec_mul(a, b):
 
     Returns
     -------
-    type
+    numpy.ndarray
         Resulting vector [n, ]
 
     """
     return np.matmul(a, b[..., np.newaxis]).squeeze()
 
 
-def swap_list_items(arr, i1, i2):
+def swap_list_items(arr, i1, i2) -> list:
     """Swap position of two items in a list.
 
     Parameters
@@ -187,7 +186,7 @@ def swap_list_items(arr, i1, i2):
 
     Returns
     -------
-    type
+    list
         copy of list with swapped elements
 
     """
@@ -210,7 +209,7 @@ def get_time_union(list_of_objects):
 
     Returns
     -------
-    type
+    pandas.DatetimeIndex
         pd.DatetimeIndex with merge times
 
     """
@@ -234,7 +233,7 @@ def get_time_union(list_of_objects):
     return times
 
 
-def xr_transpose_matrix_data(da, dim1, dim2):
+def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
     """Transpose data along two dimensions in an xarray.DataArray.
 
     Parameters
@@ -248,7 +247,7 @@ def xr_transpose_matrix_data(da, dim1, dim2):
 
     Returns
     -------
-    type
+    xarray.DataArray
         xarray.DataArray with transposed data at specified dimensions
 
     """
@@ -266,7 +265,7 @@ def xr_matmul(
     trans_a=False,
     trans_b=False,
     **apply_kwargs,
-):
+) -> xr.DataArray:
     """Calculate broadcasted np.matmul(a,b) for xarray objects.
 
     Should work for any size and shape of quadratic matrices contained in a DataArray.
@@ -297,6 +296,7 @@ def xr_matmul(
 
     Returns
     -------
+    xarray.DataArray
 
     """
     if dims_b is None:
@@ -326,7 +326,7 @@ def xr_matmul(
     )
 
 
-def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]):
+def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
     """Check if  matrix along specific dimensions in a DataArray is orthogonal.
 
     TODO: make more general
@@ -344,7 +344,7 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]):
 
     Returns
     -------
-    type
+    bool
         True if all matrices are orthogonal.
 
     """
@@ -352,7 +352,7 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]):
     return np.allclose(xr_matmul(da, da, dims, trans_b=True), eye)
 
 
-def xr_fill_all(da, order="bf"):
+def xr_fill_all(da, order="bf") -> xr.DataArray:
     """Fill NaN values along all dimensions in xarray.DataArray.
 
     Parameters
@@ -364,7 +364,7 @@ def xr_fill_all(da, order="bf"):
 
     Returns
     -------
-    type
+    xarray.DataArray
         xarray object with NaN values filled in all dimensions
 
     """
@@ -400,36 +400,23 @@ def xr_interp_like(
         xarray or dict-like object along which dimensions to interpolate
     interp_coords :
         if not None, only interpolate along these coordinates of da2
+        (Default value = None)
     broadcast_missing :
         broadcast da1 along all additional dimensions of da2
+        (Default value = False)
     fillna :
-        fill out of range NaN values (default = True)
+        fill out of range NaN values
+        (Default value = True)
     method :
         interpolation method to pass on to xarray.interp_like
+        (Default value = "linear")
     assume_sorted :
         assume_sorted flag to pass on to xarray.interp_like
-    da1: xr.DataArray :
-
-    da2: Union[xr.DataArray :
-
-    Dict[str :
-
-    Any]] :
-
-    interp_coords: List[str] :
-         (Default value = None)
-    broadcast_missing: bool :
-         (Default value = False)
-    fillna: bool :
-         (Default value = True)
-    method: str :
-         (Default value = "linear")
-    assume_sorted: bool :
-         (Default value = False)
+        (Default value = False)
 
     Returns
     -------
-    type
+    xarray.DataArray
         interpolated DataArray
 
     """
@@ -510,8 +497,7 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
 
     Returns
     -------
-    type
-        xarray.DataArray
+    xarray.DataArray
 
     """
     if times is not None:
@@ -523,7 +509,7 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
     return dsx.astype(float)
 
 
-def xr_3d_matrix(data, times=None):
+def xr_3d_matrix(data, times=None) -> xr.DataArray:
     """Create an xarray 3d matrix with correctly named dimensions and coordinates.
 
     Parameters
@@ -535,8 +521,7 @@ def xr_3d_matrix(data, times=None):
 
     Returns
     -------
-    type
-        xarray.DataArray
+    xarray.DataArray
 
     """
     if times is not None:
@@ -560,17 +545,13 @@ def xr_interp_orientation_in_time(
     Parameters
     ----------
     dsx :
-        xarray.DataArray
+        xarray.DataArray containing the orientation as matrix
     times :
         Time data
-    dsx: xr.DataArray :
-
-    times: pd.DatetimeIndex :
-
 
     Returns
     -------
-    type
+    xarray.DataArray
         Interpolated data
 
     """
@@ -614,14 +595,10 @@ def xr_interp_coordinates_in_time(
         xarray.DataArray
     times :
         Time data
-    dsx: xr.DataArray :
-
-    times: pd.DatetimeIndex :
-
 
     Returns
     -------
-    type
+    xarray.DataArray
         Interpolated data
 
     """
@@ -638,21 +615,10 @@ class WeldxAccessor:  # pragma: no cover
     """Custom accessor for extending DataArray functionality.
 
     See http://xarray.pydata.org/en/stable/internals.html#extending-xarray for details.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
-
     """
 
     def __init__(self, xarray_obj):
-        """
-        Construct a WeldX xarray object.
-
-        :param xarray_obj: xarray object
-        """
+        """Construct a WeldX xarray object."""
         self._obj = xarray_obj
 
     def interp_like(self, da, *args, **kwargs):
@@ -660,19 +626,10 @@ class WeldxAccessor:  # pragma: no cover
 
         Provides some utility options for handling out of range values and broadcasting.
         See xr_interp_like for docstring and details.
-        :return: interpolated DataArray
-
-        Parameters
-        ----------
-        da :
-
-        *args :
-
-        **kwargs :
-
 
         Returns
         -------
-
+        xarray.DataArray
+            interpolated DataArray
         """
         return xr_interp_like(self._obj, da, *args, **kwargs)
