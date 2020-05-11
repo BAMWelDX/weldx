@@ -338,6 +338,7 @@ class LocalCoordinateSystem:
         -------
         LocalCoordinateSystem
             Cartesian coordinate system
+
         """
         if construction_checks:
             if orientation is None:
@@ -490,6 +491,7 @@ class LocalCoordinateSystem:
         -------
         LocalCoordinateSystem
             Resulting coordinate system.
+
         """
         rhs_cs_inv = rhs_cs.invert()
         return self + rhs_cs_inv

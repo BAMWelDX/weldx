@@ -26,6 +26,7 @@ class LineSegment:
 
         Returns
         -------
+        LineSegment
 
         """
         points = ut.to_float_array(points)
@@ -240,6 +241,7 @@ class ArcSegment:
 
         Returns
         -------
+        ArcSegment
 
         """
         points = ut.to_float_array(points)
@@ -614,6 +616,11 @@ class Shape:
         ----------
         segments :
             Single segment or list of segments
+
+        Returns
+        -------
+        Shape
+
         """
         segments = ut.to_list(segments)
         self._check_segments_connected(segments)
@@ -631,10 +638,7 @@ class Shape:
         segments :
             List of segments
 
-        Returns
-        -------
-
-       """
+        """
         for i in range(len(segments) - 1):
             if not ut.vector_is_close(
                 segments[i].point_end, segments[i + 1].point_start
@@ -981,6 +985,7 @@ class Profile:
 
         Returns
         -------
+        Profile
 
         """
         self._shapes = []
@@ -1098,6 +1103,7 @@ class LinearHorizontalTraceSegment:
 
         Returns
         -------
+        LinearHorizontalTraceSegment
 
         """
         if length <= 0:
@@ -1123,7 +1129,7 @@ class LinearHorizontalTraceSegment:
 
         Returns
         -------
-        type
+        weldx.transformations.LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -1150,6 +1156,7 @@ class RadialHorizontalTraceSegment:
 
         Returns
         -------
+        RadialHorizontalTraceSegment
 
         """
         if radius <= 0:
@@ -1262,6 +1269,7 @@ class Trace:
 
         Returns
         -------
+        Trace
 
         """
         if not isinstance(coordinate_system, tf.LocalCoordinateSystem):
@@ -1487,6 +1495,7 @@ class VariableProfile:
 
         Returns
         -------
+        VariableProfile
 
         """
         locations = ut.to_list(locations)
@@ -1534,7 +1543,10 @@ class VariableProfile:
     def interpolation_schemes(self):
         """Get the interpolation schemes.
 
-        :return: List of interpolation schemes
+        Returns
+        -------
+        list
+            List of interpolation schemes
 
         """
         return self._interpolation_schemes
@@ -1543,7 +1555,10 @@ class VariableProfile:
     def locations(self):
         """Get the locations.
 
-        :return: List of locations
+        Returns
+        -------
+        list
+            List of locations
 
         """
         return self._locations
@@ -1552,7 +1567,10 @@ class VariableProfile:
     def max_location(self):
         """Get the maximum location.
 
-        :return: Maximum location
+        Returns
+        -------
+        float
+            Maximum location
 
         """
         return self._locations[-1]
@@ -1561,7 +1579,10 @@ class VariableProfile:
     def num_interpolation_schemes(self):
         """Get the number of interpolation schemes.
 
-        :return: Number of interpolation schemes
+        Returns
+        -------
+        int
+            Number of interpolation schemes
 
         """
         return len(self._interpolation_schemes)
@@ -1570,7 +1591,10 @@ class VariableProfile:
     def num_locations(self):
         """Get the number of profile locations.
 
-        :return: Number of profile locations
+        Returns
+        -------
+        int
+            Number of profile locations
 
         """
         return len(self._locations)
@@ -1579,7 +1603,10 @@ class VariableProfile:
     def num_profiles(self):
         """Get the number of profiles.
 
-        :return: Number of profiles
+        Returns
+        -------
+        int
+            Number of profiles
 
         """
         return len(self._profiles)
@@ -1588,7 +1615,10 @@ class VariableProfile:
     def profiles(self):
         """Get the profiles.
 
-        :return: List of profiles
+        Returns
+        -------
+        list
+            List of profiles
 
         """
         return self._profiles
@@ -1636,6 +1666,7 @@ class Geometry:
 
         Returns
         -------
+        Geometry
 
         """
         self._check_inputs(profile, trace)
