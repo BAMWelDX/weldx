@@ -71,7 +71,19 @@ class ArcWeldingProcessType(WeldxType):
 
     @classmethod
     def to_tree(cls, node, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
+        """convert to tagged tree and remove all None entries from node dictionary
+
+        Parameters
+        ----------
+        node :
+            
+        ctx :
+            
+
+        Returns
+        -------
+
+        """
         tree = dict_to_tagged_tree(node, ctx)
         return tree
 

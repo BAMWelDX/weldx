@@ -4,16 +4,24 @@ import numpy as np
 
 
 def plot_coordinate_system(coordinate_system, axes, color=None, label=None):
-    """
-    Plot a coordinate system in a matplotlib 3d plot.
+    """Plot a coordinate system in a matplotlib 3d plot.
 
-    :param coordinate_system: Coordinate system
-    :param axes: Matplotlib axes object (output from plt.gca())
-    :param color: Valid matplotlib color selection. The origin of the coordinate system
-    will be marked with this color.
-    :param label: Name that appears in the legend. Only viable if a color
-    was specified.
-    :return: ---
+    Parameters
+    ----------
+    coordinate_system :
+        Coordinate system
+    axes :
+        Matplotlib axes object (output from plt.gca())
+    color :
+        Valid matplotlib color selection. The origin of the coordinate system
+        will be marked with this color. (Default value = None)
+    label :
+        Name that appears in the legend. Only viable if a color
+        was specified. (Default value = None)
+
+    Returns
+    -------
+
     """
     p_0 = coordinate_system.coordinates
     p_x = p_0 + coordinate_system.orientation[:, 0]
@@ -30,15 +38,21 @@ def plot_coordinate_system(coordinate_system, axes, color=None, label=None):
 
 
 def set_axes_equal(axes):
-    """
-    Adjust axis in a 3d plot to be equally scaled.
-
+    """Adjust axis in a 3d plot to be equally scaled.
+    
     Source code taken from the stackoverflow answer of 'karlo' in the
     following question:
     https://stackoverflow.com/questions/13685386/matplotlib-equal-unit
     -length-with-equal-aspect-ratio-z-axis-is-not-equal-to
 
-    :param axes: Matplotlib axes object (output from plt.gca())
+    Parameters
+    ----------
+    axes :
+        Matplotlib axes object (output from plt.gca())
+
+    Returns
+    -------
+
     """
     x_limits = axes.get_xlim3d()
     y_limits = axes.get_ylim3d()

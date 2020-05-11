@@ -10,9 +10,7 @@ __all__ = ["TimedeltaType"]
 
 
 class TimedeltaType(WeldxType):
-    """
-    A simple implementation of serializing a single pandas Timedelta.
-    """
+    """A simple implementation of serializing a single pandas Timedelta."""
 
     name = "time/timedelta"
     version = "1.0.0"
@@ -20,13 +18,37 @@ class TimedeltaType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: pd.Timedelta, ctx):
-        """Serialize timedelta to tree."""
+        """Serialize timedelta to tree.
+
+        Parameters
+        ----------
+        node: pd.Timedelta :
+            
+        ctx :
+            
+
+        Returns
+        -------
+
+        """
         tree = {}
         tree["value"] = custom_tree_to_tagged_tree(node.isoformat(), ctx)
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Construct timedelta from tree."""
+        """Construct timedelta from tree.
+
+        Parameters
+        ----------
+        tree :
+            
+        ctx :
+            
+
+        Returns
+        -------
+
+        """
         value = tagged_tree_to_custom_tree(tree["value"], ctx)
         return pd.Timedelta(value)

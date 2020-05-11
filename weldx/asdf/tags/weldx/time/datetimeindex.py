@@ -11,9 +11,7 @@ __all__ = ["DatetimeIndexType"]
 
 
 class DatetimeIndexType(WeldxType):
-    """
-    A simple implementation of serializing pandas DatetimeIndex.
-    """
+    """A simple implementation of serializing pandas DatetimeIndex."""
 
     name = "time/datetimeindex"
     version = "1.0.0"
@@ -21,7 +19,19 @@ class DatetimeIndexType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: pd.DatetimeIndex, ctx):
-        """Serialize DatetimeIndex to tree."""
+        """Serialize DatetimeIndex to tree.
+
+        Parameters
+        ----------
+        node: pd.DatetimeIndex :
+            
+        ctx :
+            
+
+        Returns
+        -------
+
+        """
         tree = {}
         if node.inferred_freq is not None:
             tree["freq"] = custom_tree_to_tagged_tree(node.inferred_freq, ctx)
@@ -38,7 +48,19 @@ class DatetimeIndexType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Construct DatetimeIndex from tree."""
+        """Construct DatetimeIndex from tree.
+
+        Parameters
+        ----------
+        tree :
+            
+        ctx :
+            
+
+        Returns
+        -------
+
+        """
         if "freq" in tree:
             return pd.date_range(
                 start=tree["start"], end=tree["end"], freq=tree["freq"]

@@ -10,9 +10,7 @@ __all__ = ["TimestampType"]
 
 
 class TimestampType(WeldxType):
-    """
-    A simple implementation of serializing a single pandas Timestamp.
-    """
+    """A simple implementation of serializing a single pandas Timestamp."""
 
     name = "time/timestamp"
     version = "1.0.0"
@@ -20,13 +18,37 @@ class TimestampType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: pd.Timestamp, ctx):
-        """Serialize timestamp to tree."""
+        """Serialize timestamp to tree.
+
+        Parameters
+        ----------
+        node: pd.Timestamp :
+            
+        ctx :
+            
+
+        Returns
+        -------
+
+        """
         tree = {}
         tree["value"] = custom_tree_to_tagged_tree(node.isoformat(), ctx)
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Construct timestamp from tree."""
+        """Construct timestamp from tree.
+
+        Parameters
+        ----------
+        tree :
+            
+        ctx :
+            
+
+        Returns
+        -------
+
+        """
         value = tagged_tree_to_custom_tree(tree["value"], ctx)
         return pd.Timestamp(value)
