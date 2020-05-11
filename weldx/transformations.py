@@ -319,15 +319,25 @@ class LocalCoordinateSystem:
     ):
         """Construct a cartesian coordinate system.
 
-        :param orientation: Matrix of 3 orthogonal column vectors which represent
-        the coordinate systems orientation. Keep in mind, that the columns of the
-        corresponding orientation matrix is equal to the normalized orientation
-        vectors. So each orthogonal transformation matrix can also be
-        provided as orientation.
-        :param coordinates: Coordinates of the origin
-        :param time: Time data for time dependent coordinate systems
-        :param construction_checks: If 'True', the validity of the data will be verified
-        :return: Cartesian coordinate system
+        Parameters
+        ----------
+        orientation :
+            Matrix of 3 orthogonal column vectors which represent
+            the coordinate systems orientation. Keep in mind, that the columns of the
+            corresponding orientation matrix is equal to the normalized orientation
+            vectors. So each orthogonal transformation matrix can also be
+            provided as orientation.
+        coordinates :
+            Coordinates of the origin
+        time :
+            Time data for time dependent coordinate systems
+        construction_checks :
+            If 'True', the validity of the data will be verified
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Cartesian coordinate system
         """
         if construction_checks:
             if orientation is None:
@@ -426,8 +436,16 @@ class LocalCoordinateSystem:
         system has no time component, but the right-hand side does, the resulting system
         has the same time components as the right-hand side system.
 
-        :param rhs_cs: Right-hand side coordinate system
-        :return: Resulting coordinate system.
+        Parameters
+        ----------
+        rhs_cs :
+            Right-hand side coordinate system
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Resulting coordinate system.
+
         """
         if self.time is not None:
             rhs_cs = rhs_cs.interp_time(self.time)
@@ -463,8 +481,15 @@ class LocalCoordinateSystem:
         system has no time component, but the right-hand side does, the resulting system
         has the same time components as the right-hand side system.
 
-        :param rhs_cs: Right-hand side coordinate system
-        :return: Resulting coordinate system.
+        Parameters
+        ----------
+        rhs_cs :
+            Right-hand side coordinate system
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Resulting coordinate system.
         """
         rhs_cs_inv = rhs_cs.invert()
         return self + rhs_cs_inv
@@ -821,8 +846,16 @@ class CoordinateSystemManager:
     def __init__(self, root_coordinate_system_name: Hashable):
         """Construct a coordinate system manager.
 
-        :param root_coordinate_system_name: Name of the root coordinate system. This can
-        be any hashable type, but it is recommended to use strings.
+        Parameters
+        ----------
+        root_coordinate_system_name :
+            Name of the root coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+
+        Returns
+        -------
+        CoordinateSystemManager
+
         """
         self._graph = nx.DiGraph()
         self._data = {}

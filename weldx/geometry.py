@@ -18,8 +18,15 @@ class LineSegment:
     def __init__(self, points):
         """Construct line segment.
 
-        :param points: 2x2 matrix of points. The first column is the
-        starting point and the second column the end point.
+        Parameters
+        ----------
+        points :
+            2x2 matrix of points. The first column is the
+            starting point and the second column the end point.
+
+        Returns
+        -------
+
         """
         points = ut.to_float_array(points)
         if not len(points.shape) == 2:
@@ -223,11 +230,17 @@ class ArcSegment:
     def __init__(self, points, arc_winding_ccw=True):
         """Construct arc segment.
 
-        :param points: 2x3 matrix of points. The first column is the
-        starting point, the second column the end point and the last the
-        center point.
-        :param: arc_winding_ccw: Specifies if the arcs winding order is
-        counter-clockwise
+        Parameters
+        ----------
+        points :
+            2x3 matrix of points. The first column is the starting point,
+            the second column the end point and the last the center point.
+        arc_winding_ccw :
+            Specifies if the arcs winding order is counter-clockwise
+
+        Returns
+        -------
+
         """
         points = ut.to_float_array(points)
         if not len(points.shape) == 2:
@@ -597,7 +610,10 @@ class Shape:
     def __init__(self, segments=None):
         """Construct shape.
 
-        :param segments: Single segment or list of segments
+        Parameters
+        ----------
+        segments :
+            Single segment or list of segments
         """
         segments = ut.to_list(segments)
         self._check_segments_connected(segments)
@@ -614,6 +630,9 @@ class Shape:
         ----------
         segments :
             List of segments
+
+        Returns
+        -------
 
        """
         for i in range(len(segments) - 1):
@@ -955,7 +974,14 @@ class Profile:
     def __init__(self, shapes):
         """Construct profile class.
 
-        :param: shapes: Instance or list of geo.Shape class(es)
+        Parameters
+        ----------
+        shapes :
+            Instance or list of geo.Shape class(es)
+
+        Returns
+        -------
+
         """
         self._shapes = []
         self.add_shapes(shapes)
@@ -1065,7 +1091,14 @@ class LinearHorizontalTraceSegment:
     def __init__(self, length):
         """Construct linear horizontal trace segment.
 
-        :param length: Length of the segment
+        Parameters
+        ----------
+        length :
+            Length of the segment
+
+        Returns
+        -------
+
         """
         if length <= 0:
             raise ValueError("'length' must have a positive value.")
@@ -1106,10 +1139,18 @@ class RadialHorizontalTraceSegment:
     def __init__(self, radius, angle, clockwise=False):
         """Construct radial horizontal trace segment.
 
-        :param radius: Radius of the arc
-        :param angle: Angle of the arc
-        :param clockwise: If True, the rotation is clockwise. Otherwise it
-        is counter-clockwise.
+        Parameters
+        ----------
+        radius :
+            Radius of the arc
+        angle :
+            Angle of the arc
+        clockwise :
+            If True, the rotation is clockwise. Otherwise it is counter-clockwise.
+
+        Returns
+        -------
+
         """
         if radius <= 0:
             raise ValueError("'radius' must have a positive value.")
@@ -1136,7 +1177,7 @@ class RadialHorizontalTraceSegment:
 
         Returns
         -------
-        type
+        float
             Arc length
 
         """
@@ -1212,8 +1253,16 @@ class Trace:
     def __init__(self, segments, coordinate_system=tf.LocalCoordinateSystem()):
         """Construct trace.
 
-        :param segments: Single segment or list of segments
-        :param coordinate_system: Coordinate system of the trace
+        Parameters
+        ----------
+        segments :
+            Single segment or list of segments
+        coordinate_system :
+            Coordinate system of the trace
+
+        Returns
+        -------
+
         """
         if not isinstance(coordinate_system, tf.LocalCoordinateSystem):
             raise TypeError(
@@ -1425,11 +1474,20 @@ class VariableProfile:
     def __init__(self, profiles, locations, interpolation_schemes):
         """Construct variable profile.
 
-        :param profiles: List of profiles.
-        :param locations: Ascending list of profile locations. Since the
-        first location needs to be 0, it can be omitted.
-        :param interpolation_schemes: List of interpolation schemes to
-        define the interpolation between two locations.
+        Parameters
+        ----------
+        profiles :
+            List of profiles.
+        locations :
+            Ascending list of profile locations. Since the first location needs to be 0,
+             it can be omitted.
+        interpolation_schemes :
+            List of interpolation schemes to define the interpolation between
+            two locations.
+
+        Returns
+        -------
+
         """
         locations = ut.to_list(locations)
         interpolation_schemes = ut.to_list(interpolation_schemes)
@@ -1569,8 +1627,16 @@ class Geometry:
     def __init__(self, profile, trace):
         """Construct geometry.
 
-        :param profile: Constant or variable profile.
-        :param trace: Trace
+        Parameters
+        ----------
+        profile :
+            Constant or variable profile.
+        trace :
+            Trace
+
+        Returns
+        -------
+
         """
         self._check_inputs(profile, trace)
         self._profile = profile
