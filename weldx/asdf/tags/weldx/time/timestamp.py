@@ -27,10 +27,7 @@ class TimestampType(WeldxType):
         ctx :
 
 
-        Returns
-        -------
-
-        """
+       """
         tree = {}
         tree["value"] = custom_tree_to_tagged_tree(node.isoformat(), ctx)
         return tree
@@ -46,9 +43,6 @@ class TimestampType(WeldxType):
         ctx :
 
 
-        Returns
-        -------
-
-        """
+       """
         value = tagged_tree_to_custom_tree(tree["value"], ctx)
         return pd.Timestamp(value)

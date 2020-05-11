@@ -136,10 +136,7 @@ def make_asdf_schema_string(
     flow_style :
          (Default value = "block")
 
-    Returns
-    -------
-
-    """
+   """
 
     if property_types is None:
         property_types = ["NO_TYPE"] * len(properties)
@@ -188,10 +185,7 @@ def make_python_class_string(
     required :
 
 
-    Returns
-    -------
-
-    """
+   """
 
     template_file = "asdf_dataclass.py.jinja"
     template = _env.get_template(template_file)
@@ -250,10 +244,7 @@ def create_asdf_dataclass(
     schema_description :
         asdf schema description (Default value = _DEFAULT_ASDF_DESCRIPTION)
 
-    Returns
-    -------
-
-    """
+   """
     asdf_file_path = Path(
         SCHEMA_PATH + f"/weldx.bam.de/weldx/{asdf_name}-{asdf_version}.yaml"
     ).resolve()

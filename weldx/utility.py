@@ -66,6 +66,7 @@ def to_float_array(container) -> np.ndarray:
     Returns
     -------
     numpy.ndarray
+
     """
     return np.array(container, dtype=float)
 
@@ -631,5 +632,6 @@ class WeldxAccessor:  # pragma: no cover
         -------
         xarray.DataArray
             interpolated DataArray
+
         """
         return xr_interp_like(self._obj, da, *args, **kwargs)

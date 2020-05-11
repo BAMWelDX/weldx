@@ -440,10 +440,7 @@ class BaseGroove:
         ax :
              (Default value = None)
 
-        Returns
-        -------
-
-        """
+       """
         profile = self.to_profile()
         if title is None:
             title = _groove_type_to_name[self.__class__]
@@ -461,10 +458,7 @@ class BaseGroove:
         width_default: pint.Quantity :
              (Default value = None)
 
-        Returns
-        -------
-
-        """
+       """
         raise NotImplementedError(f"to_profile() must be defined in subclass.")
 
 
@@ -487,10 +481,7 @@ class VGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -508,10 +499,7 @@ class VGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         t = self.t.to("mm").magnitude
         alpha = self.alpha.to("rad").magnitude
         b = self.b.to("mm").magnitude
@@ -579,10 +567,7 @@ class VVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -602,10 +587,7 @@ class VVGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         t = self.t.to("mm").magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
@@ -673,10 +655,7 @@ class UVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -696,10 +675,7 @@ class UVGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         t = self.t.to("mm").magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
@@ -763,10 +739,7 @@ class UGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -785,10 +758,7 @@ class UGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         t = self.t.to("mm").magnitude
         beta = self.beta.to("rad").magnitude
         R = self.R.to("mm").magnitude
@@ -873,10 +843,7 @@ class IGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
@@ -892,10 +859,7 @@ class IGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         t = self.t.to("mm").magnitude
         b = self.b.to("mm").magnitude
         width = width_default.to("mm").magnitude
@@ -934,10 +898,7 @@ class HVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -955,10 +916,7 @@ class HVGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         t = self.t.to("mm").magnitude
         beta = self.beta.to("rad").magnitude
         b = self.b.to("mm").magnitude
@@ -1021,10 +979,7 @@ class HUGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -1043,10 +998,7 @@ class HUGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         t = self.t.to("mm").magnitude
         beta = self.beta.to("rad").magnitude
         R = self.R.to("mm").magnitude
@@ -1117,10 +1069,7 @@ class DVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     alpha_1: pint.Quantity
@@ -1141,10 +1090,7 @@ class DVGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         t = self.t.to("mm").magnitude
         alpha_1 = self.alpha_1.to("rad").magnitude
         alpha_2 = self.alpha_2.to("rad").magnitude
@@ -1224,10 +1170,7 @@ class DUGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1250,10 +1193,7 @@ class DUGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         t = self.t.to("mm").magnitude
         beta_1 = self.beta_1.to("rad").magnitude
         beta_2 = self.beta_2.to("rad").magnitude
@@ -1335,10 +1275,7 @@ class DHVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1359,10 +1296,7 @@ class DHVGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         dv_groove = DVGroove(
             self.t,
             self.beta_1 * 2,
@@ -1421,10 +1355,7 @@ class DHUGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1447,10 +1378,7 @@ class DHUGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         du_profile = DUGroove(
             self.t,
             self.beta_1,
@@ -1503,10 +1431,7 @@ class FFGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-    Returns
-    -------
-
-    """
+   """
 
     t_1: pint.Quantity
     t_2: pint.Quantity = None
@@ -1526,10 +1451,7 @@ class FFGroove(BaseGroove):
         "mm") :
 
 
-        Returns
-        -------
-
-        """
+       """
         if (
             self.code_number == "1.12"
             or self.code_number == "1.13"
@@ -1794,10 +1716,7 @@ class GrooveType(WeldxType):
         ctx :
 
 
-        Returns
-        -------
-
-        """
+       """
         if isinstance(node, tuple(_groove_type_to_name.keys())):
             tree = dict(
                 components=dict_to_tagged_tree(node, ctx),
@@ -1820,10 +1739,7 @@ class GrooveType(WeldxType):
         ctx :
 
 
-        Returns
-        -------
-
-        """
+       """
         if tree["type"] in _groove_name_to_type:
             obj = _groove_name_to_type[tree["type"]](**tree["components"])
             return obj

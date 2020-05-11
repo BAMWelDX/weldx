@@ -28,10 +28,7 @@ class TimedeltaIndexType(WeldxType):
         ctx :
 
 
-        Returns
-        -------
-
-        """
+       """
         tree = {}
         if node.inferred_freq is not None:
             tree["freq"] = custom_tree_to_tagged_tree(node.inferred_freq, ctx)
@@ -58,10 +55,7 @@ class TimedeltaIndexType(WeldxType):
         ctx :
 
 
-        Returns
-        -------
-
-        """
+       """
         if "freq" in tree:
             return pd.timedelta_range(
                 start=tree["start"], end=tree["end"], freq=tree["freq"]

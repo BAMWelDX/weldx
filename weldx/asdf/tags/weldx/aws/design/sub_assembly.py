@@ -38,10 +38,7 @@ class SubAssemblyType(WeldxType):
         ctx :
 
 
-        Returns
-        -------
-
-        """
+       """
         tree = dict_to_tagged_tree(node, ctx)
         return tree
 

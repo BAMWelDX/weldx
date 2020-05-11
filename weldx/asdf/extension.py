@@ -31,12 +31,6 @@ class WeldxAsdfExtension(BuiltinExtension):
     """This extension is used to register custom tag types that have schemas defined
     by ASDF, but have tag implementations defined in the weldx package
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
     """
 
     @property

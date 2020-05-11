@@ -317,8 +317,7 @@ class LocalCoordinateSystem:
         time: pd.DatetimeIndex = None,
         construction_checks: bool = True,
     ):
-        """
-        Construct a cartesian coordinate system.
+        """Construct a cartesian coordinate system.
 
         :param orientation: Matrix of 3 orthogonal column vectors which represent
         the coordinate systems orientation. Keep in mind, that the columns of the
@@ -405,8 +404,7 @@ class LocalCoordinateSystem:
         )
 
     def __add__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
-        """
-        Add 2 coordinate systems.
+        """Add 2 coordinate systems.
 
         Generates a new coordinate system by treating the left-hand side
         coordinate system as being defined in the right hand-side coordinate
@@ -444,8 +442,7 @@ class LocalCoordinateSystem:
         return LocalCoordinateSystem(orientation, coordinates)
 
     def __sub__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
-        """
-        Subtract 2 coordinate systems.
+        """Subtract 2 coordinate systems.
 
         Generates a new coordinate system from two local coordinate systems
         with the same reference coordinate system. The resulting system is
@@ -719,12 +716,6 @@ class LocalCoordinateSystem:
 
         :return: Orientation matrix
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
         """
         return self.dataset.orientation
 
@@ -734,12 +725,6 @@ class LocalCoordinateSystem:
 
         :return: Coordinates of the coordinate system
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
         """
         return self.dataset.coordinates
 
@@ -748,12 +733,6 @@ class LocalCoordinateSystem:
         """Get the time union of the local coordinate system (or None if system is static).
 
         :return: DateTimeIndex-like time union
-
-        Parameters
-        ----------
-
-        Returns
-        -------
 
         """
         if "time" in self._dataset.coords:
@@ -765,12 +744,6 @@ class LocalCoordinateSystem:
         """Get the underlying xarray.Dataset with ordered dimensions.
 
         :return: xarray Dataset with coordinates and orientation as DataVariables.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
 
         """
         return self._dataset.transpose(..., "c", "v")
@@ -820,12 +793,6 @@ class LocalCoordinateSystem:
         coordinates_new=orientation.T*(-coordinates)
         :return: Inverted coordinate system.
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
         """
         orientation = ut.xr_transpose_matrix_data(self.orientation, dim1="c", dim2="v")
         coordinates = ut.xr_matmul(
@@ -852,8 +819,7 @@ class CoordinateSystemManager:
         data: xr.DataArray
 
     def __init__(self, root_coordinate_system_name: Hashable):
-        """
-        Construct a coordinate system manager.
+        """Construct a coordinate system manager.
 
         :param root_coordinate_system_name: Name of the root coordinate system. This can
         be any hashable type, but it is recommended to use strings.
@@ -886,10 +852,7 @@ class CoordinateSystemManager:
         lcs: LocalCoordinateSystem :
 
 
-        Returns
-        -------
-
-        """
+       """
         self._graph.add_edge(node_from, node_to, lcs=lcs)
         self._graph.add_edge(node_to, node_from, lcs=lcs.invert())
 
@@ -904,10 +867,7 @@ class CoordinateSystemManager:
         coordinate_system_name: Hashable :
 
 
-        Returns
-        -------
-
-        """
+       """
         if not self.has_coordinate_system(coordinate_system_name):
             raise ValueError(
                 "There is no coordinate system with name " + str(coordinate_system_name)
@@ -924,10 +884,7 @@ class CoordinateSystemManager:
         coordinate_system_name: Hashable :
 
 
-        Returns
-        -------
-
-        """
+       """
         if not isinstance(coordinate_system_name, cl.Hashable):
             raise TypeError("The coordinate system name must be a hashable type.")
         if self.has_coordinate_system(coordinate_system_name):
@@ -963,10 +920,7 @@ class CoordinateSystemManager:
         local_coordinate_system: LocalCoordinateSystem :
 
 
-        Returns
-        -------
-
-        """
+       """
         if not isinstance(local_coordinate_system, LocalCoordinateSystem):
             raise TypeError(
                 "'local_coordinate_system' must be an instance of "
@@ -1001,10 +955,7 @@ class CoordinateSystemManager:
         coordinate_system_name: Hashable :
 
 
-        Returns
-        -------
-
-        """
+       """
         # TODO: How to handle time dependent data? some things to think about:
         # - times of coordinate system and data are not equal
         # - which time is taken as reference? (probably the one of the data)
@@ -1184,12 +1135,6 @@ class CoordinateSystemManager:
 
         :return: networkx.DiGraph
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
         """
         return self._graph
 
@@ -1198,12 +1143,6 @@ class CoordinateSystemManager:
         """Get the number of coordinate systems inside the coordinate system manager.
 
         :return: Number of coordinate systems
-
-        Parameters
-        ----------
-
-        Returns
-        -------
 
         """
         return self._graph.number_of_nodes()
@@ -1259,10 +1198,7 @@ class CoordinateSystemManager:
         coordinate_system_name_1: Hashable :
 
 
-        Returns
-        -------
-
-        """
+       """
         self._check_coordinate_system_exists(coordinate_system_name_0)
         self._check_coordinate_system_exists(coordinate_system_name_1)
 

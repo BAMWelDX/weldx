@@ -28,10 +28,7 @@ class DatetimeIndexType(WeldxType):
         ctx :
 
 
-        Returns
-        -------
-
-        """
+       """
         tree = {}
         if node.inferred_freq is not None:
             tree["freq"] = custom_tree_to_tagged_tree(node.inferred_freq, ctx)
@@ -57,10 +54,7 @@ class DatetimeIndexType(WeldxType):
         ctx :
 
 
-        Returns
-        -------
-
-        """
+       """
         if "freq" in tree:
             return pd.date_range(
                 start=tree["start"], end=tree["end"], freq=tree["freq"]

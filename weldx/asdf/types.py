@@ -27,12 +27,6 @@ class WeldxType(CustomType, metaclass=WeldxTypeMeta):
     """This class represents types that have schemas and tags that are defined
     within weldx.
 
-    Parameters
-    ----------
-
-    Returns
-    -------
-
     """
 
     organization = "weldx.bam.de"
@@ -42,12 +36,6 @@ class WeldxType(CustomType, metaclass=WeldxTypeMeta):
 class WeldxAsdfType(CustomType, metaclass=WeldxTypeMeta):
     """This class represents types that have schemas that are defined in the ASDF
     standard, but have tags that are implemented within weldx.
-
-    Parameters
-    ----------
-
-    Returns
-    -------
 
     """
 
