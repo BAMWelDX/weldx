@@ -304,7 +304,7 @@ def test_asdf_groove_exceptions():
     }
 
     # test custom groove axis labels
-    fig, ax = plt.subplots()
+    fig, _ = plt.subplots()
     v_groove.plot(axis_label=["x", "y"])
     plt.close(fig)
 
