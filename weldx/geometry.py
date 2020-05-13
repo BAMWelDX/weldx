@@ -888,7 +888,6 @@ class Profile:
             ax.set_xlabel("y in " + self.attrs["units"])
             ax.set_ylabel("z in " + self.attrs["units"])
         ax.plot(raster_data[0], raster_data[1], line_style)
-        ax.invert_xaxis()
 
     @property
     def shapes(self):
