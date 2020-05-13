@@ -37,16 +37,7 @@ class TimedeltaIndexType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Construct TimedeltaIndex from tree.
-
-        Parameters
-        ----------
-        tree :
-
-        ctx :
-
-
-       """
+        """Construct TimedeltaIndex from tree."""
         if "freq" in tree:
             return pd.timedelta_range(
                 start=tree["start"], end=tree["end"], freq=tree["freq"]

@@ -25,15 +25,6 @@ class TimedeltaType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Construct timedelta from tree.
-
-        Parameters
-        ----------
-        tree :
-
-        ctx :
-
-
-       """
+        """Construct timedelta from tree."""
         value = tagged_tree_to_custom_tree(tree["value"], ctx)
         return pd.Timedelta(value)

@@ -36,16 +36,7 @@ class DatetimeIndexType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Construct DatetimeIndex from tree.
-
-        Parameters
-        ----------
-        tree :
-
-        ctx :
-
-
-       """
+        """Construct DatetimeIndex from tree."""
         if "freq" in tree:
             return pd.date_range(
                 start=tree["start"], end=tree["end"], freq=tree["freq"]

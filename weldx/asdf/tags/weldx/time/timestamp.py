@@ -25,15 +25,6 @@ class TimestampType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Construct timestamp from tree.
-
-        Parameters
-        ----------
-        tree :
-
-        ctx :
-
-
-       """
+        """Construct timestamp from tree."""
         value = tagged_tree_to_custom_tree(tree["value"], ctx)
         return pd.Timestamp(value)

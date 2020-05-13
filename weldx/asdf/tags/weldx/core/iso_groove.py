@@ -1721,16 +1721,7 @@ class GrooveType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Convert from tagged tree to a groove.
-
-        Parameters
-        ----------
-        tree :
-
-        ctx :
-
-
-       """
+        """Convert from tagged tree to a groove."""
         if tree["type"] in _groove_name_to_type:
             obj = _groove_name_to_type[tree["type"]](**tree["components"])
             return obj
