@@ -31,6 +31,11 @@ class LineSegment:
         self._points = points
         self._calculate_length()
 
+    def __repr__(self):
+        p1 = np.array2string(self.points[:, 0], precision=2, separator=",")
+        p2 = np.array2string(self.points[:, 1], precision=2, separator=",")
+        return f"Line: {p1} -> {p2}"
+
     def _calculate_length(self):
         """
         Calculate the segment length from its points.
@@ -209,6 +214,10 @@ class ArcSegment:
         self._arc_length = None
         self._radius = None
         self._calculate_arc_parameters()
+
+    def __repr__(self):
+        vals = np.array([self._radius, self._arc_angle / np.pi * 180, self._arc_length])
+        return f"Arc : {np.array2string(vals, precision=2, separator=',')}"
 
     def _calculate_arc_angle(self):
         """
@@ -525,6 +534,10 @@ class Shape:
         self._check_segments_connected(segments)
         self._segments = segments
 
+    def __repr__(self):
+        shape_str = "\n".join([repr(s) for s in self.segments])
+        return f"{shape_str}"
+
     @staticmethod
     def _check_segments_connected(segments):
         """
@@ -817,6 +830,13 @@ class Profile:
         if units is not None:
             self.attrs["units"] = units
         self.add_shapes(shapes)
+
+    def __repr__(self):
+        repr_str = f"Profile with {len(self.shapes)} shapes\n"
+        repr_str = repr_str + "\n\n".join(
+            [f"Shape {i}:\n{s}" for i, s in enumerate(self.shapes)]
+        )
+        return repr_str
 
     @property
     def num_shapes(self):
