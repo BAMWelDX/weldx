@@ -878,6 +878,9 @@ class Profile:
         ax.grid(grid)
         ax.axis(axis)
         ax.set_title(title)
+        if self.attrs["units"] is not None:
+            ax.set_xlabel("y direction in " + self.attrs["units"])
+            ax.set_ylabel("z direction in " + self.attrs["units"])
         ax.plot(raster_data[0], raster_data[1], line_style)
 
     @property
