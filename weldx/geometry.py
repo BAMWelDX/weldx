@@ -806,13 +806,16 @@ class Shape:
 class Profile:
     """Defines a 2d profile."""
 
-    def __init__(self, shapes):
+    def __init__(self, shapes, units=None):
         """
         Construct profile class.
 
         :param: shapes: Instance or list of geo.Shape class(es)
         """
         self._shapes = []
+        self.attrs = {}
+        if units is not None:
+            self.attrs["units"] = units
         self.add_shapes(shapes)
 
     @property
@@ -855,6 +858,7 @@ class Profile:
     def plot(
         self,
         title=None,
+        label=None,
         raster_width=0.1,
         axis="equal",
         grid=True,
@@ -876,7 +880,13 @@ class Profile:
             _, ax = plt.subplots()
         ax.grid(grid)
         ax.axis(axis)
-        ax.set_title(title)
+        ax.set_title(title, loc="center", wrap=True)
+        if label is not None:
+            ax.set_xlabel(label[0])
+            ax.set_ylabel(label[1])
+        elif "units" in self.attrs:
+            ax.set_xlabel("y in " + self.attrs["units"])
+            ax.set_ylabel("z in " + self.attrs["units"])
         ax.plot(raster_data[0], raster_data[1], line_style)
 
     @property
