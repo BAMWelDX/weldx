@@ -455,8 +455,8 @@ class BaseGroove:
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = None)
+        width_default:
+             pint.Quantity (Default value = None)
 
        """
         raise NotImplementedError(f"to_profile() must be defined in subclass.")
@@ -495,8 +495,7 @@ class VGroove(BaseGroove):
         Parameters
         ----------
         width_default :
-             (Default value = Q_(2)
-        "mm") :
+             pint.Quantity (Default value = Q_(2, "mm"))
 
 
        """
@@ -583,8 +582,7 @@ class VVGroove(BaseGroove):
         Parameters
         ----------
         width_default :
-             (Default value = Q_(5)
-        "mm") :
+             pint.Quantity (Default value = Q_(5, "mm"))
 
 
        """
@@ -670,9 +668,8 @@ class UVGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(2)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(2, "mm"))
 
 
        """
@@ -753,9 +750,8 @@ class UGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(3)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(3, "mm"))
 
 
        """
@@ -854,9 +850,8 @@ class IGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(5)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
 
 
        """
@@ -911,9 +906,8 @@ class HVGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(5)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
 
 
        """
@@ -993,9 +987,8 @@ class HUGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(5)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
 
 
        """
@@ -1085,9 +1078,8 @@ class DVGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(5)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
 
 
        """
@@ -1188,9 +1180,8 @@ class DUGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(5)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
 
 
        """
@@ -1291,9 +1282,8 @@ class DHVGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(5)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
 
 
        """
@@ -1373,9 +1363,8 @@ class DHUGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(5)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
 
 
        """
@@ -1446,9 +1435,8 @@ class FFGroove(BaseGroove):
 
         Parameters
         ----------
-        width_default: pint.Quantity :
-             (Default value = Q_(5)
-        "mm") :
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
 
 
        """
