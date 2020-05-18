@@ -32,6 +32,7 @@ class LineSegment:
         self._calculate_length()
 
     def __repr__(self):
+        """Output simple string representation of a LineSegment."""
         p1 = np.array2string(self.points[:, 0], precision=2, separator=",")
         p2 = np.array2string(self.points[:, 1], precision=2, separator=",")
         return f"Line: {p1} -> {p2}"
@@ -216,8 +217,11 @@ class ArcSegment:
         self._calculate_arc_parameters()
 
     def __repr__(self):
-        vals = np.array([self._radius, self._arc_angle / np.pi * 180, self._arc_length])
-        return f"Arc : {np.array2string(vals, precision=2, separator=',')}"
+        """Output simple string representation of an ArcSegment."""
+        values = np.array(
+            [self._radius, self._arc_angle / np.pi * 180, self._arc_length]
+        )
+        return f"Arc : {np.array2string(values, precision=2, separator=',')}"
 
     def _calculate_arc_angle(self):
         """
@@ -535,7 +539,8 @@ class Shape:
         self._segments = segments
 
     def __repr__(self):
-        shape_str = "\n".join([repr(s) for s in self.segments])
+        """Output simple string representation of a Shape (Listing Segments)."""
+        shape_str = "\n".join(repr(s) for s in self.segments)
         return f"{shape_str}"
 
     @staticmethod
@@ -756,8 +761,8 @@ class Shape:
             raise ValueError("'raster_width' must be > 0")
 
         raster_data = []
-        for seg in self.segments:
-            raster_data.append(seg.rasterize(raster_width)[:, :-1])
+        for segment in self.segments:
+            raster_data.append(segment.rasterize(raster_width)[:, :-1])
         raster_data = np.hstack(raster_data)
 
         last_point = self.segments[-1].point_end[:, np.newaxis]
@@ -832,9 +837,10 @@ class Profile:
         self.add_shapes(shapes)
 
     def __repr__(self):
+        """Output simple string representation of a Profile for users."""
         repr_str = f"Profile with {len(self.shapes)} shapes\n"
         repr_str = repr_str + "\n\n".join(
-            [f"Shape {i}:\n{s}" for i, s in enumerate(self.shapes)]
+            f"Shape {i}:\n{s}" for i, s in enumerate(self.shapes)
         )
         return repr_str
 
@@ -897,7 +903,6 @@ class Profile:
         :param: line_style: line style setting of matplotlib.pyplot
         :return: Display a figure
         """
-
         raster_data = self.rasterize(raster_width, insert_sep=True)
         if ax is None:  # pragma: no cover
             _, ax = plt.subplots()
