@@ -1,0 +1,40 @@
+# Licensed under a 3-clause BSD style license - see LICENSE
+# -*- coding: utf-8 -*-
+
+from asdf.extension import AsdfExtension, BuiltinExtension
+
+from weldx.asdf.constants import WELDX_SCHEMA_URI_BASE, WELDX_URL_MAPPING
+
+from .types import _weldx_asdf_types, _weldx_types
+
+__all__ = ["WeldxExtension", "WeldxAsdfExtension"]
+
+
+class WeldxExtension(AsdfExtension):
+    """
+    Extension class to register types that have both tags and schemas defined by weldx.
+    """
+
+    @property
+    def types(self):
+        # There are no types yet!
+        return _weldx_types
+
+    @property
+    def tag_mapping(self):
+        return [("tag:weldx.bam.de:weldx", WELDX_SCHEMA_URI_BASE + "weldx{tag_suffix}")]
+
+    @property
+    def url_mapping(self):
+        return WELDX_URL_MAPPING
+
+
+class WeldxAsdfExtension(BuiltinExtension):
+    """
+    This extension is used to register custom tag types that have schemas defined
+    by ASDF, but have tag implementations defined in the weldx package
+    """
+
+    @property
+    def types(self):
+        return _weldx_asdf_types

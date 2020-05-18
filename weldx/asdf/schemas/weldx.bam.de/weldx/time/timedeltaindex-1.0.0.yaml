@@ -1,0 +1,82 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/time/timedeltaindex-1.0.0"
+tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
+
+title: |
+  Represents an array of timedeltas following pandas.TimedeltaIndex.
+
+definitions:
+  values:
+    description: |
+      Integer representation of a pandas TimedeltaIndex in nanoseconds precision.
+    $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
+
+  start:
+    description: |
+      Timedelta of the first value.
+    $ref: timedelta-1.0.0
+
+  end:
+    description: |
+      Timedelta of the last value.
+    $ref: timedelta-1.0.0
+
+  freq:
+    description: |
+      Optional string to describe the frequency in pandas offset style.
+      See https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases .
+    type: string
+    # TODO: match pattern for pandas string? Maybe in pandas code?
+
+  min:
+    description: |
+      Minimum timedelta in the index.
+    $ref: timedelta-1.0.0
+
+  max:
+    description: |
+      Maximum timedelta in the index.
+    $ref: timedelta-1.0.0
+
+anyOf:
+  - type: object
+    properties:
+      values:
+        $ref: "#/definitions/values"
+      start:
+        $ref: "#/definitions/start"
+      end:
+        $ref: "#/definitions/end"
+      freq:
+        $ref: "#/definitions/freq"
+      min:
+        $ref: "#/definitions/min"
+      max:
+        $ref: "#/definitions/max"
+
+    required: [values]
+    propertyOrder: [values, start, end, freq, min, max]
+    additionalProperties: false
+
+  - type: object
+    properties:
+      start:
+        $ref: "#/definitions/start"
+      end:
+        $ref: "#/definitions/end"
+      freq:
+        $ref: "#/definitions/freq"
+      min:
+        $ref: "#/definitions/min"
+      max:
+        $ref: "#/definitions/max"
+
+    required: [start, end, freq]
+    propertyOrder: [start, end, freq, min, max]
+    additionalProperties: false
+
+...
+
+

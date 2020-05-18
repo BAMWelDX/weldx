@@ -1,0 +1,41 @@
+name: conda build
+on:
+  # Trigger the workflow on push events on master
+  push:
+    branches:
+      - master
+  # Trigger the workflow on all pull request
+  pull_request:
+  # Trigger the workflow on all release created events (this could redirect to main conda channel)
+  release:
+    types:
+      - created
+
+jobs:
+  test:
+    name: conda build (local)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Include $CONDA in $PATH
+      run: echo ::add-path::$CONDA/bin
+    - name: Add conda-forge & print conda info
+      run: |
+        conda config --append channels conda-forge
+        conda info -a
+    - name: Create conda build environment
+      run: conda env create -f ./conda.recipe/build_env.yml
+    - name: Build from local conda recipe
+      run: |
+        source activate build_env
+        conda build .
+    - name: upload package to dev label on Anaconda Cloud
+      env: # set access token from GitHub secrets
+        anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
+      run: |
+        source activate build_env
+        package_dir=$(conda build . --output)
+        anaconda -t $anaconda_token upload --user BAMwelding --label dev $package_dir
