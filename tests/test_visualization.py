@@ -9,23 +9,35 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 # pylint: enable=W0611
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import pytest
 
 
 def test_plot_coordinate_system():
     """This test just executes all possible code paths."""
-    cs = tf.LocalCoordinateSystem()
+    lcs_constant = tf.LocalCoordinateSystem()
+
+    time = pd.DatetimeIndex(["2016-01-10", "2016-01-11"])
+    orientation_tdp = [
+        [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+        [[0, 1, 0], [-1, 0, 0], [0, 0, 1]],
+    ]
+    coordinates_tdp = [[0, 0, 0], [0, 0, 1]]
+    lcs_tdp = tf.LocalCoordinateSystem(
+        orientation=orientation_tdp, coordinates=coordinates_tdp, time=time
+    )
     fig = plt.figure()
     ax = fig.gca(projection="3d")
 
-    vs.plot_coordinate_system(cs, ax, "g")
-    vs.plot_coordinate_system(cs, ax, "r", "test")
+    vs.plot_coordinate_system(lcs_constant, ax, "g")
+    vs.plot_coordinate_system(lcs_tdp, ax, "r", "2016-01-10")
+    vs.plot_coordinate_system(lcs_tdp, ax, "r", "2016-01-11", time_idx=1)
 
     # exceptions ------------------------------------------
 
     # label without color
     with pytest.raises(Exception):
-        vs.plot_coordinate_system(cs, ax, label="label")
+        vs.plot_coordinate_system(lcs_constant, ax, label="label")
 
 
 def test_set_axes_equal():
