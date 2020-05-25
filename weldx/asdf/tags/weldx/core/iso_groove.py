@@ -468,7 +468,7 @@ class BaseGroove:
              optional width to extend each side of the profile (Default value = None)
 
        """
-        raise NotImplementedError(f"to_profile() must be defined in subclass.")
+        raise NotImplementedError("to_profile() must be defined in subclass.")
 
 
 @dataclass
