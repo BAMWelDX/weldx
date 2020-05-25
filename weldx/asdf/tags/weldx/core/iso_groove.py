@@ -390,15 +390,19 @@ class BaseGroove:
         """Generate string representation of parameters."""
         return [f"{k}={v:~}" for k, v in self.parameters().items()]
 
+    def _ipython_display_(self):
+        """Display the Groove as plot in notebooks."""
+        self.plot()
+
     def plot(
         self,
         title=None,
         axis_label=None,
-        raster_width=0.1,
+        raster_width=0.5,
         show_params=True,
         axis="equal",
         grid=True,
-        line_style=".",
+        line_style=".-",
         ax=None,
     ):
         """Plot a 2D-Profile."""
@@ -413,7 +417,7 @@ class BaseGroove:
 
     def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Implements profile generation."""
-        raise NotImplementedError(f"to_profile() must be defined in subclass.")
+        raise NotImplementedError("to_profile() must be defined in subclass.")
 
 
 @dataclass

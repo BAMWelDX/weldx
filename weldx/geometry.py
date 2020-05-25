@@ -31,6 +31,12 @@ class LineSegment:
         self._points = points
         self._calculate_length()
 
+    def __repr__(self):
+        """Output simple string representation of a LineSegment."""
+        p1 = np.array2string(self.points[:, 0], precision=2, separator=",")
+        p2 = np.array2string(self.points[:, 1], precision=2, separator=",")
+        return f"Line: {p1} -> {p2}"
+
     def _calculate_length(self):
         """
         Calculate the segment length from its points.
@@ -142,7 +148,7 @@ class LineSegment:
         """
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
-        raster_width = np.clip(np.abs(raster_width), None, self.length)
+        raster_width = np.min([raster_width, self.length])
 
         num_raster_segments = np.round(self.length / raster_width)
 
@@ -209,6 +215,13 @@ class ArcSegment:
         self._arc_length = None
         self._radius = None
         self._calculate_arc_parameters()
+
+    def __repr__(self):
+        """Output simple string representation of an ArcSegment."""
+        values = np.array(
+            [self._radius, self._arc_angle / np.pi * 180, self._arc_length]
+        )
+        return f"Arc : {np.array2string(values, precision=2, separator=',')}"
 
     def _calculate_arc_angle(self):
         """
@@ -525,6 +538,11 @@ class Shape:
         self._check_segments_connected(segments)
         self._segments = segments
 
+    def __repr__(self):
+        """Output simple string representation of a Shape (Listing Segments)."""
+        shape_str = "\n".join(repr(s) for s in self.segments)
+        return f"{shape_str}"
+
     @staticmethod
     def _check_segments_connected(segments):
         """
@@ -742,10 +760,10 @@ class Shape:
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
 
-        raster_data = np.empty([2, 0])
-        for i in range(self.num_segments):
-            segment_data = self.segments[i].rasterize(raster_width)
-            raster_data = np.hstack((raster_data, segment_data[:, :-1]))
+        raster_data = []
+        for segment in self.segments:
+            raster_data.append(segment.rasterize(raster_width)[:, :-1])
+        raster_data = np.hstack(raster_data)
 
         last_point = self.segments[-1].point_end[:, np.newaxis]
         if not ut.vector_is_close(last_point, self.segments[0].point_start):
@@ -818,6 +836,14 @@ class Profile:
             self.attrs["units"] = units
         self.add_shapes(shapes)
 
+    def __repr__(self):
+        """Output simple string representation of a Profile for users."""
+        repr_str = f"Profile with {len(self.shapes)} shapes\n"
+        repr_str = repr_str + "\n\n".join(
+            f"Shape {i}:\n{s}" for i, s in enumerate(self.shapes)
+        )
+        return repr_str
+
     @property
     def num_shapes(self):
         """
@@ -842,27 +868,29 @@ class Profile:
 
         self._shapes += shapes
 
-    def rasterize(self, raster_width):
+    def rasterize(self, raster_width, insert_sep=False):
         """
         Rasterize the profile.
 
         :param: raster_width: Raster width
+        :param: insert_sep: insert NaN values between profiles (useful for plotting)
         :return: Raster data
         """
-        raster_data = np.empty([2, 0])
+        raster_data = []
         for shape in self._shapes:
-            raster_data = np.hstack((raster_data, shape.rasterize(raster_width)))
-
-        return raster_data
+            raster_data.append(shape.rasterize(raster_width))
+            if insert_sep:
+                raster_data.append(np.full((2, 1), np.nan))
+        return np.hstack(raster_data)
 
     def plot(
         self,
         title=None,
         label=None,
-        raster_width=0.1,
+        raster_width=0.5,
         axis="equal",
         grid=True,
-        line_style=".",
+        line_style=".-",
         ax=None,
     ):
         """
@@ -875,7 +903,7 @@ class Profile:
         :param: line_style: line style setting of matplotlib.pyplot
         :return: Display a figure
         """
-        raster_data = self.rasterize(raster_width)
+        raster_data = self.rasterize(raster_width, insert_sep=True)
         if ax is None:  # pragma: no cover
             _, ax = plt.subplots()
         ax.grid(grid)
