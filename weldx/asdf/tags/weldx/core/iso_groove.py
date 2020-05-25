@@ -413,15 +413,19 @@ class BaseGroove:
         """Generate string representation of parameters."""
         return [f"{k}={v:~}" for k, v in self.parameters().items()]
 
+    def _ipython_display_(self):
+        """Display the Groove as plot in notebooks."""
+        self.plot()
+
     def plot(
         self,
         title=None,
         axis_label=None,
-        raster_width=0.1,
+        raster_width=0.5,
         show_params=True,
         axis="equal",
         grid=True,
-        line_style=".",
+        line_style=".-",
         ax=None,
     ):
         """Plot a 2D-Profile.
@@ -430,6 +434,8 @@ class BaseGroove:
         ----------
         title :
              (Default value = None)
+        axis_label :
+            label string to pass onto matplotlib (Default value = None)
         raster_width :
              (Default value = 0.1)
         show_params :
@@ -458,8 +464,8 @@ class BaseGroove:
 
         Parameters
         ----------
-        width_default:
-             pint.Quantity (Default value = None)
+        width_default :
+             optional width to extend each side of the profile (Default value = None)
 
        """
         raise NotImplementedError(f"to_profile() must be defined in subclass.")
