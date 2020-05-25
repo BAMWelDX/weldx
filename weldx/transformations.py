@@ -938,3 +938,9 @@ class CoordinateSystemManager:
                 time_union = time_union.union(time_edge)
 
         return time_union
+
+    def __repr__(self):
+        return "CoordinateSystemManager('graph': %r, 'data': %r)" % (
+            self._graph,
+            self._data,
+        )
