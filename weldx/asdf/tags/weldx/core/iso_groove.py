@@ -417,7 +417,7 @@ class BaseGroove:
 
     def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Implements profile generation."""
-        raise NotImplementedError(f"to_profile() must be defined in subclass.")
+        raise NotImplementedError("to_profile() must be defined in subclass.")
 
 
 @dataclass
