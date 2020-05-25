@@ -51,7 +51,7 @@ class LineSegment:
             raise ValueError("Segment length is 0.")
 
     @classmethod
-    def construct_with_points(cls, point_start, point_end):
+    def construct_with_points(cls, point_start, point_end) -> "LineSegment":
         """Construct a line segment with two points.
 
         Parameters
@@ -63,7 +63,7 @@ class LineSegment:
 
         Returns
         -------
-        type
+        LineSegment
             Line segment
 
         """
@@ -171,7 +171,7 @@ class LineSegment:
        """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
-    def rasterize(self, raster_width):
+    def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the segments contour.
 
         The effective raster width may vary from the specified one,
@@ -577,7 +577,7 @@ class ArcSegment:
        """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
-    def rasterize(self, raster_width):
+    def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the segments contour.
 
         The effective raster width may vary from the specified one,
@@ -927,7 +927,7 @@ class Shape:
         for i in range(self.num_segments):
             self._segments[i].apply_translation(vector)
 
-    def rasterize(self, raster_width):
+    def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the shapes contour.
 
         The effective raster width may vary from the specified one,
@@ -1829,7 +1829,7 @@ class Geometry:
         profile = self._profile.local_profile(profile_location)
         return self._profile_raster_data_3d(profile, raster_width)
 
-    def _rasterize_trace(self, raster_width):
+    def _rasterize_trace(self, raster_width) -> np.ndarray:
         """Rasterize the trace.
 
         Parameters

@@ -3,6 +3,7 @@
 import weldx.geometry as geo
 import weldx.transformations as tf
 import weldx.utility as ut
+from typing import List, Union
 
 import tests._helpers as helpers
 
@@ -25,7 +26,7 @@ def check_segments_identical(seg_a, seg_b):
     seg_b :
         Second segment
 
-   """
+    """
     assert isinstance(seg_a, type(seg_b))
     assert ut.matrix_is_close(seg_a.points, seg_b.points)
     if isinstance(seg_a, geo.ArcSegment):
@@ -43,7 +44,7 @@ def check_shapes_identical(shp_a, shp_b):
     shp_b :
         Second profile
 
-   """
+    """
     assert shp_a.num_segments == shp_b.num_segments
     for i in range(shp_a.num_segments):
         check_segments_identical(shp_a.segments[i], shp_b.segments[i])
@@ -59,7 +60,7 @@ def check_profiles_identical(pro_a, pro_b):
     pro_b :
         Second profile
 
-   """
+    """
     assert pro_a.num_shapes == pro_b.num_shapes
     for i in range(pro_a.num_shapes):
         check_shapes_identical(pro_a.shapes[i], pro_b.shapes[i])
@@ -75,7 +76,7 @@ def check_variable_profiles_identical(vp_a, vp_b):
     vp_b :
         Second variable profile
 
-   """
+    """
     assert vp_a.num_profiles == vp_b.num_profiles
     assert vp_a.num_locations == vp_b.num_locations
     assert vp_a.num_interpolation_schemes == vp_b.num_interpolation_schemes
@@ -100,7 +101,7 @@ def check_trace_segments_identical(seg_a, seg_b):
     seg_b :
         Second segment
 
-   """
+    """
     assert isinstance(seg_a, type(seg_b))
     if isinstance(seg_a, geo.LinearHorizontalTraceSegment):
         assert seg_a.length == seg_b.length
@@ -117,11 +118,11 @@ def check_traces_identical(trc_a, trc_b):
     Parameters
     ----------
     trc_a :
-        First segment
+        First trace
     trc_b :
-        Second segment
+        Second trace
 
-   """
+    """
     assert trc_a.num_segments == trc_b.num_segments
     for i in range(trc_a.num_segments):
         check_trace_segments_identical(trc_a.segments[i], trc_b.segments[i])
@@ -139,12 +140,12 @@ def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1e-9):
     abs_tol :
         Absolute tolerance (Default value = 1e-9)
 
-   """
+    """
     assert ut.matrix_is_close(lcs_a.orientation, lcs_b.orientation, abs_tol)
     assert ut.vector_is_close(lcs_a.coordinates, lcs_b.coordinates, abs_tol)
 
 
-def get_default_profiles():
+def get_default_profiles() -> List:
     """Get 2 profiles.
 
     Returns
@@ -152,7 +153,7 @@ def get_default_profiles():
     list
         List containing 2 profiles
 
-   """
+    """
     a_0 = [0, 0]
     a_1 = [8, 16]
     a_2 = [16, 0]
@@ -172,7 +173,9 @@ def get_default_profiles():
 # helper for segment tests ----------------------------------------------------
 
 
-def default_segment_rasterization_tests(segment, raster_width):
+def default_segment_rasterization_tests(
+    segment: Union[geo.ArcSegment, geo.LineSegment], raster_width
+):
     """Perform some default checks for a passed segment's rasterization method.
 
     The segment is rasterized and tested afterwards. The purpose of every
@@ -185,7 +188,7 @@ def default_segment_rasterization_tests(segment, raster_width):
     raster_width :
         Raster width
 
-   """
+    """
     data = segment.rasterize(raster_width)
 
     # check dimensions are correct
@@ -266,7 +269,7 @@ def test_line_segment_rasterization():
     connects the start and the end of the segment. It also checks that those
     points lie between the segments start and end point.
 
-   """
+    """
     raster_width = 0.1
 
     point_start = np.array([3, 3])
@@ -324,7 +327,7 @@ def line_segment_transformation_test_case(
     transformation :
         Transformation that should be applied (optional) (Default value = None)
 
-   """
+    """
     if translation is not None:
         assert transformation is None, "No mixed test cases supported"
 
@@ -357,7 +360,7 @@ def test_line_segment_transformations():
 
     This test tests all relevant transformations and exceptions.
 
-   """
+    """
     # translation -----------------------------------------
 
     line_segment_transformation_test_case(
@@ -425,7 +428,7 @@ def test_line_segment_interpolation():
     Two segments are created and interpolated using different weights. The
     result is compared to the expected values.
 
-   """
+    """
     segment_a = geo.LineSegment.construct_with_points([1, 3], [7, -3])
     segment_b = geo.LineSegment.construct_with_points([5, -5], [-1, 13])
 
@@ -493,7 +496,7 @@ def check_arc_segment_values(
     arc_length :
         Expected length
 
-   """
+    """
     assert ut.vector_is_close(segment.point_start, point_start)
     assert ut.vector_is_close(segment.point_end, point_end)
     assert ut.vector_is_close(segment.point_center, point_center)
@@ -534,7 +537,7 @@ def arc_segment_rasterization_test(
         specifies whether a point is valid or not. Interface: (point,
         point_center_arc) -> bool
 
-   """
+    """
     point_center = np.array(point_center)
     point_start = np.array(point_start)
     point_end = np.array(point_end)
@@ -626,7 +629,7 @@ def test_arc_segment_factories():
     Creates arc segments using the factory functions and checks if they are
     constructed as expected.
 
-   """
+    """
     # construction with center point ----------------------
     point_start = [3, 3]
     point_end = [6, 6]
@@ -844,7 +847,7 @@ def test_arc_segment_rasterization():
     Creates some simple arc segments (semi-circle and quadrant) and test the
     rasterization results.
 
-   """
+    """
     # center right of line point_start -> point_end
     # ---------------------------------------------
 
@@ -961,7 +964,7 @@ def arc_segment_transformation_test_case(
     transformation :
         Transformation that should be applied (optional) (Default value = None)
 
-   """
+    """
     if translation is not None:
         assert transformation is None, "No mixed test cases supported"
 
@@ -1155,7 +1158,7 @@ def test_arc_segment_interpolation():
 
     Since it is not implemented, check if an exception is raised.
 
-   """
+    """
     segment_a = geo.ArcSegment.construct_with_points([0, 0], [1, 1], [1, 0])
     segment_b = geo.ArcSegment.construct_with_points([0, 0], [2, 2], [0, 2])
 
@@ -1172,7 +1175,7 @@ def test_shape_construction():
 
     Constructs some shapes in various ways and checks the results.
 
-   """
+    """
     line_segment = geo.LineSegment.construct_with_points([1, 1], [1, 2])
     arc_segment = geo.ArcSegment.construct_with_points([0, 0], [1, 1], [0, 1])
 
@@ -1202,7 +1205,7 @@ def test_shape_segment_addition():
 
     Test should be self explanatory.
 
-   """
+    """
     # Create shape and add segments
     line_segment = geo.LineSegment.construct_with_points([1, 1], [0, 0])
     arc_segment = geo.ArcSegment.construct_with_points([0, 0], [1, 1], [0, 1])
@@ -1239,7 +1242,7 @@ def test_shape_line_segment_addition():
 
     Test should be self explanatory.
 
-   """
+    """
     shape_0 = geo.Shape()
     shape_0.add_line_segments([[0, 0], [1, 0]])
     assert shape_0.num_segments == 1
@@ -1302,7 +1305,7 @@ def test_shape_rasterization():
     check the rasterized points. Every step of the test is documented
     with comments.
 
-   """
+    """
     points = np.array([[0, 0], [0, 1], [1, 1], [1, 0]])
 
     shape = geo.Shape().add_line_segments(points)
@@ -1366,7 +1369,7 @@ def default_test_shape():
     Shape
         Default shape for tests
 
-   """
+    """
     # create shape
     arc_segment = geo.ArcSegment.construct_with_points([3, 4], [5, 0], [6, 3])
     line_segment = geo.LineSegment.construct_with_points([5, 0], [11, 3])
@@ -1378,7 +1381,7 @@ def default_translation_vector():
 
     :return: Translation vector
 
-   """
+    """
     return ut.to_float_array([3, 4])
 
 
@@ -1392,7 +1395,7 @@ def check_point_translation(point_trans, point_original):
     point_original :
         Original point
 
-   """
+    """
     assert ut.vector_is_close(
         point_trans - default_translation_vector(), point_original
     )
@@ -1408,7 +1411,7 @@ def check_point_rotation_90_degree(point_trans, point_original):
     point_original :
         Original point
 
-   """
+    """
     assert point_trans[0] == point_original[1]
     assert point_trans[1] == -point_original[0]
 
@@ -1423,7 +1426,7 @@ def check_point_reflection_at_line_with_slope_1(point_trans, point_original):
     point_original :
         Original point
 
-   """
+    """
     assert point_trans[0] == point_original[1]
     assert point_trans[1] == point_original[0]
 
@@ -1446,7 +1449,7 @@ def shape_transformation_test_case(
     transformation :
         Transformation matrix (optional) (Default value = None)
 
-   """
+    """
     if translation is not None:
         assert transformation is None, "No mixed test cases supported"
 
@@ -1491,7 +1494,7 @@ def test_shape_transformation():
 
     Dedicated reflection functions are tested separately.
 
-   """
+    """
     # translation -----------------------------------------
     shape_transformation_test_case(
         check_point_func=check_point_translation,
@@ -1539,7 +1542,7 @@ def check_reflected_point(
     reflection_axis_direction :
         Direction vector of the reflection axis.
 
-   """
+    """
     vec_original_reflected = point_reflected - point_original
     midpoint = point_original + 0.5 * vec_original_reflected
     shifted_mid_point = midpoint - reflection_axis_offset
@@ -1561,7 +1564,7 @@ def shape_reflection_test_case(normal, distance_to_origin):
     distance_to_origin :
         Distance to the origin of the reflection axis.
 
-   """
+    """
     direction_reflection_axis = np.array([normal[1], -normal[0]])
     normal_length = np.linalg.norm(normal)
     unit_normal = np.array(normal) / normal_length
@@ -1657,7 +1660,7 @@ def check_point_reflected_across_line(
     point_end :
         Second point of the reflection axis
 
-   """
+    """
     vec_original_reflected = point_reflected - point_original
     mid_point = point_original + 0.5 * vec_original_reflected
 
@@ -1681,7 +1684,7 @@ def shape_reflection_across_line_test_case(point_start, point_end):
     point_end :
         Second point of the reflection axis
 
-   """
+    """
     point_start = np.array(point_start, float)
     point_end = np.array(point_end, float)
 
@@ -1769,7 +1772,7 @@ def test_shape_interpolation_general():
     interpolations are used. Afterwards, the shapes are interpolated using
     different weights and the results are compared to the expected values.
 
-   """
+    """
     # create shapes
     shape_a = geo.Shape().add_line_segments([[-1, -1], [1, 1], [3, -1]])
     shape_b = geo.Shape().add_line_segments([[-1, 4], [1, 1], [3, 4]])
@@ -1824,7 +1827,7 @@ def test_shape_linear_interpolation():
     interpolated using different weights and the results are compared to the
     expected values.
 
-   """
+    """
     # create shapes
     shape_a = geo.Shape().add_line_segments([[0, 0], [1, 1], [2, 0]])
     shape_b = geo.Shape().add_line_segments([[1, 1], [2, -1], [3, 5]])
@@ -1868,7 +1871,7 @@ def test_profile_construction_and_shape_addition():
 
     Test details are explained by comments.
 
-   """
+    """
     arc_segment = geo.ArcSegment.construct_with_radius([-2, -2], [-1, -1], 1)
     shape = geo.Shape(arc_segment)
     shape.add_line_segments([[0, 0], [1, 0], [2, -1], [0, -1]])
@@ -1919,7 +1922,7 @@ def test_profile_rasterization():
     added in ascending order to the profile. Therefore, all raster points
     are equidistant and can be checked easily.
 
-   """
+    """
     raster_width = 0.1
 
     # create shapes
@@ -1971,7 +1974,7 @@ def check_trace_segment_length(segment, tolerance=1e-9):
     tolerance :
         Numerical tolerance (Default value = 1e-9)
 
-   """
+    """
     lcs = segment.local_coordinate_system(1)
     length_numeric_prev = np.linalg.norm(lcs.coordinates)
 
@@ -2018,7 +2021,7 @@ def check_trace_segment_orientation(segment):
     segment :
         Trace segment (any type)
 
-   """
+    """
     # The initial orientation of a segment must be [1, 0, 0]
     lcs = segment.local_coordinate_system(0)
     assert ut.vector_is_close(lcs.orientation[:, 0], np.array([1, 0, 0]))
@@ -2043,7 +2046,7 @@ def default_trace_segment_tests(segment, tolerance_length=1e-9):
     tolerance_length :
         Tolerance for the length test (Default value = 1e-9)
 
-   """
+    """
     lcs = segment.local_coordinate_system(0)
 
     # test that function actually returns a coordinate system class
@@ -2062,7 +2065,7 @@ def test_linear_horizontal_trace_segment():
 
     Each sub test is documented by comments.
 
-   """
+    """
     length = 7.13
     segment = geo.LinearHorizontalTraceSegment(length)
 
@@ -2085,7 +2088,7 @@ def test_radial_horizontal_trace_segment():
 
     Each sub test is documented by comments.
 
-   """
+    """
     radius = 4.74
     angle = np.pi / 1.23
     segment_cw = geo.RadialHorizontalTraceSegment(radius, angle, True)
@@ -2215,7 +2218,7 @@ def test_trace_local_coordinate_system():
     The tested trace starts with a semicircle of radius 1 turning to the left
     and continues with a straight line of length 1.
 
-   """
+    """
     radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
     linear_segment = geo.LinearHorizontalTraceSegment(1)
 
@@ -2287,7 +2290,7 @@ def test_trace_rasterization():
     The tested trace starts with a line segment of length 1 and continues
     with a radial segment of radius 1 and counter clockwise winding.
 
-   """
+    """
     radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
     linear_segment = geo.LinearHorizontalTraceSegment(1)
 
@@ -2367,7 +2370,7 @@ def check_interpolated_profile_points(profile, c_0, c_1, c_2):
     c_2 :
         Third expected point
 
-   """
+    """
     assert ut.vector_is_close(profile.shapes[0].segments[0].point_start, c_0)
     assert ut.vector_is_close(profile.shapes[0].segments[0].point_end, c_1)
     assert ut.vector_is_close(profile.shapes[1].segments[0].point_start, c_1)
@@ -2380,7 +2383,7 @@ def test_linear_profile_interpolation_sbs():
     Uses the default profiles which consist of two shapes. Each shape
     contains just a single line segment.
 
-   """
+    """
     [profile_a, profile_b] = get_default_profiles()
 
     for i in range(5):
@@ -2446,7 +2449,7 @@ def check_variable_profile_state(variable_profile, profiles_exp, locations_exp):
     locations_exp :
         Expected stored locations
 
-   """
+    """
     num_profiles = len(locations_exp)
     assert variable_profile.num_interpolation_schemes == num_profiles - 1
     assert variable_profile.num_locations == num_profiles
@@ -2597,7 +2600,7 @@ def test_geometry_rasterization_trace():
 
     :return:
 
-   """
+    """
     a0 = [1, 0]
     a1 = [1, 1]
     a2 = [0, 1]

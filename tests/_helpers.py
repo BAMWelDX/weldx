@@ -9,7 +9,7 @@ def rotated_coordinate_system(
     angle_y=np.pi / 4,
     angle_z=np.pi / 5,
     coordinates=np.array([0, 0, 0]),
-):
+) -> tf.LocalCoordinateSystem:
     """Get a coordinate system with rotated orientation.
 
     The transformation order is x-y-z
@@ -28,7 +28,7 @@ def rotated_coordinate_system(
 
     Returns
     -------
-    type
+    weldx.transformations.LocalCoordinateSystem
         Coordinate system with rotated orientation
 
     """
@@ -59,7 +59,7 @@ def are_all_columns_unique(matrix, decimals=3):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
