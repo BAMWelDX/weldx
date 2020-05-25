@@ -176,6 +176,9 @@ class LineSegment:
         new_segment.apply_translation(vector)
         return new_segment
 
+    def __repr__(self):
+        return "LineSegment('points'=%r, 'length'=%r)" % (self._points, self._length,)
+
 
 # ArcSegment ------------------------------------------------------------------
 
@@ -508,6 +511,18 @@ class ArcSegment:
         new_segment.apply_translation(vector)
         return new_segment
 
+    def __repr__(self):
+        return (
+            "ArcSegment('points': %r, 'arc_angle': %r, 'radius': %r, 'sign_arc_winding': %r, 'arc_length': %r)"
+            % (
+                self._points,
+                self._arc_angle,
+                self._radius,
+                self._sign_arc_winding,
+                self._arc_length,
+            )
+        )
+
 
 # Shape class -----------------------------------------------------------------
 
@@ -799,6 +814,9 @@ class Shape:
         new_shape.apply_translation(vector)
         return new_shape
 
+    def __repr__(self):
+        return "Shape('segments': %r)" % (self._segments)
+
 
 # Profile class ---------------------------------------------------------------
 
@@ -888,6 +906,9 @@ class Profile:
         """
         return self._shapes
 
+    def __repr__(self):
+        return "Profile('shapes': %r)" % self._shapes
+
 
 # Trace segment classes -------------------------------------------------------
 
@@ -925,6 +946,9 @@ class LinearHorizontalTraceSegment:
 
         coordinates = np.array([1, 0, 0]) * relative_position * self._length
         return tf.LocalCoordinateSystem(coordinates=coordinates)
+
+    def __repr__(self):
+        return "LinearHorizontalTraceSegment('length': %r)" % self._length
 
 
 class RadialHorizontalTraceSegment:
@@ -1014,6 +1038,12 @@ class RadialHorizontalTraceSegment:
 
         coordinates = np.matmul(orientation, translation) - translation
         return tf.LocalCoordinateSystem(orientation, coordinates)
+
+    def __repr__(self):
+        return (
+            "RadialHorizontalTraceSegment('radius': %r, 'angle': %r, 'length': %r, 'sign_winding': %r)"
+            % (self._radius, self._angle, self._length, self._sign_winding)
+        )
 
 
 # Trace class -----------------------------------------------------------------
@@ -1168,6 +1198,18 @@ class Trace:
 
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
+
+    def __repr__(self):
+        return (
+            "Trace('segments': %r, 'coordinate_system_lookup': %r, "
+            "'total_length_lookup': %r, 'segment_length_lookup': %r)"
+            % (
+                self._segments,
+                self._coordinate_system_lookup,
+                self._total_length_lookup,
+                self._segment_length_lookup,
+            )
+        )
 
 
 # Linear profile interpolation class ------------------------------------------
@@ -1324,6 +1366,12 @@ class VariableProfile:
 
         return self._interpolation_schemes[idx](
             self._profiles[idx], self._profiles[idx + 1], weight
+        )
+
+    def __repr__(self):
+        return (
+            "VariableProfile('profiles': %r, 'locations' %r, 'interpolation_schemes' %r)"
+            % (self._profiles, self._locations, self._interpolation_schemes)
         )
 
 
@@ -1485,3 +1533,6 @@ class Geometry:
         return self._rasterize_variable_profile(
             profile_raster_width, trace_raster_width
         )
+
+    def __repr__(self):
+        return "Geometry('profile': %r, 'trace': %r)" % (self._profile, self._trace)
