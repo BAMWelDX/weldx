@@ -12,30 +12,51 @@ on:
       - created
 
 jobs:
-  test:
+  build:
     name: conda build (local)
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-18.04]
     steps:
-    - uses: actions/checkout@v1
-    - name: Include $CONDA in $PATH
-      run: echo ::add-path::$CONDA/bin
-    - name: Add conda-forge & print conda info
-      run: |
-        conda config --append channels conda-forge
-        conda info -a
-    - name: Create conda build environment
-      run: conda env create -f ./conda.recipe/build_env.yml
-    - name: Build from local conda recipe
-      run: |
-        source activate build_env
-        conda build .
-    - name: upload package to dev label on Anaconda Cloud
-      env: # set access token from GitHub secrets
-        anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
-      run: |
-        source activate build_env
-        package_dir=$(conda build . --output)
-        anaconda -t $anaconda_token upload --user BAMwelding --label dev $package_dir
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache conda
+        uses: actions/cache@v1
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./conda.recipe/build_env.yml') }}
+
+      - name: Setup Conda Environment
+        uses: goanpeca/setup-miniconda@v1
+        with:
+          miniconda-version: "latest"
+          auto-update-conda: false
+          environment-file: ./conda.recipe/build_env.yml
+          activate-environment: build_env
+          auto-activate-base: false
+          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+
+      - name: conda info
+        shell: bash -l {0}
+        run: conda info
+
+      - name: conda list
+        shell: bash -l {0}
+        run: conda list
+
+      - name: Build from local conda recipe
+        shell: bash -l {0}
+        run: conda build .
+
+      - name: upload package to dev label on Anaconda Cloud
+        shell: bash -l {0}
+        env: # set access token from GitHub secrets
+          anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
+        run: |
+          package_dir=$(conda build . --output)
+          anaconda -t $anaconda_token upload --user BAMwelding --label dev $package_dir
