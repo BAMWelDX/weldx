@@ -61,3 +61,8 @@ jobs:
         run: |
           package_dir=$(conda build . --output)
           anaconda -t $anaconda_token upload --user BAMwelding --label dev $package_dir
+
+      - uses: actions/upload-artifact@v2
+        if: success()
+        with:
+          path: ${{ package_dir }}
