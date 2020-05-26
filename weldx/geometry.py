@@ -86,7 +86,7 @@ class LineSegment:
 
         Returns
         -------
-        type
+        LineSegment
             Interpolated segment
 
         """
@@ -137,8 +137,7 @@ class LineSegment:
     def points(self):
         """Get the segments points in form of a 2x2 matrix.
 
-        The first column represents the starting point and the second one
-        the end point.
+        The first column represents the starting point and the second one the end point.
 
         Returns
         -------
@@ -185,7 +184,7 @@ class LineSegment:
 
         Returns
         -------
-        type
+        np.ndarray
             Array of contour points
 
         """
@@ -213,7 +212,7 @@ class LineSegment:
 
         Returns
         -------
-        type
+        LineSegment
             Transformed copy
 
         """
@@ -231,7 +230,7 @@ class LineSegment:
 
         Returns
         -------
-        type
+        LineSegment
             Transformed copy
 
         """
@@ -351,7 +350,7 @@ class ArcSegment:
 
         Returns
         -------
-        type
+        ArcSegment
             Arc segment
 
         """
@@ -388,7 +387,7 @@ class ArcSegment:
 
         Returns
         -------
-        type
+        ArcSegment
             Arc segment
 
         """
@@ -445,7 +444,7 @@ class ArcSegment:
 
         Returns
         -------
-        type
+        ArcSegment
             Interpolated segment
 
         """
@@ -591,7 +590,7 @@ class ArcSegment:
 
         Returns
         -------
-        type
+        np.ndarray
             Array of contour points
 
         """
@@ -625,7 +624,7 @@ class ArcSegment:
 
         Returns
         -------
-        type
+        ArcSegment
             Transformed copy
 
         """
@@ -643,7 +642,7 @@ class ArcSegment:
 
         Returns
         -------
-        type
+        ArcSegment
             Transformed copy
 
         """
@@ -659,7 +658,7 @@ class Shape:
     """Defines a shape in 2 dimensions."""
 
     def __init__(self, segments=None):
-        """Construct shape.
+        """Construct a shape.
 
         Parameters
         ----------
@@ -676,7 +675,7 @@ class Shape:
         self._segments = segments
 
     def __repr__(self):
-        """Output simple string representation of a Shape (Listing Segments)."""
+        """Output simple string representation of a Shape (listing segments)."""
         shape_str = "\n".join(repr(s) for s in self.segments)
         return f"{shape_str}"
 
@@ -718,7 +717,7 @@ class Shape:
 
         Returns
         -------
-        type
+        Shape
             Interpolated shape
 
         """
@@ -755,7 +754,7 @@ class Shape:
 
         Returns
         -------
-        type
+        Shape
             Interpolated shape
 
         """
@@ -801,7 +800,7 @@ class Shape:
 
         Returns
         -------
-        type
+        Shape
             self
 
         """
@@ -865,8 +864,7 @@ class Shape:
         reflection_normal :
             Normal of the line of reflection
         distance_to_origin :
-            Distance of the line of reflection to the
-            origin (Default value = 0)
+            Distance of the line of reflection to the origin (Default value = 0)
 
         """
         normal = ut.to_float_array(reflection_normal)
@@ -941,8 +939,8 @@ class Shape:
 
         Returns
         -------
-        type
-            Array of contour points (3d)
+        np.ndarray
+            Array of contour points (2d)
 
         """
         if self.num_segments == 0:
@@ -971,6 +969,10 @@ class Shape:
             Distance of the line of reflection to the
             origin (Default value = 0)
 
+        Returns
+        -------
+        Shape
+
         """
         new_shape = copy.deepcopy(self)
         new_shape.apply_reflection(reflection_normal, distance_to_origin)
@@ -989,7 +991,6 @@ class Shape:
         Returns
         -------
         Shape
-
 
         """
         new_shape = copy.deepcopy(self)
@@ -1135,24 +1136,19 @@ class Profile:
         Parameters
         ----------
         title :
-             (Default value = None)
+            Matplotlib plot title. (Default value = None)
         label :
-            Matplotlib plots label. (Default value = None)
+            Matplotlib plot label. (Default value = None)
         raster_width :
-             (Default value = 0.1)
+            Distance between Points to plot (Default value = 0.5)
         axis :
-             (Default value = "equal")
+            Matplotlib axis setting. (Default value = "equal")
         grid :
-             (Default value = True)
+            Matplotlib grid setting. (Default value = True)
         line_style :
-             (Default value = ".")
+            Matplotlib line style. (Default value = ".-")
         ax :
-             (Default value = None)
-
-        Returns
-        -------
-        type
-            Display a figure
+            Axis to plot to. (Default value = None)
 
         """
         raster_data = self.rasterize(raster_width, insert_sep=True)
@@ -1295,7 +1291,7 @@ class RadialHorizontalTraceSegment:
         Returns
         -------
         float
-            Angle of the segment
+            Angle of the segment (rad)
 
         """
         return self._angle
@@ -1346,7 +1342,7 @@ class RadialHorizontalTraceSegment:
 
         Returns
         -------
-        type
+        weldx.transformations.LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -1433,7 +1429,7 @@ class Trace:
 
         Returns
         -------
-        type
+        int
             Segment index
 
         """
@@ -1526,7 +1522,7 @@ class Trace:
 
         Returns
         -------
-        numpy.ndarray
+        np.ndarray
             Raster data
 
 
@@ -1578,7 +1574,7 @@ def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
 
     Returns
     -------
-    type
+    Profile
         Interpolated profile
 
     """
@@ -1652,7 +1648,7 @@ class VariableProfile:
 
         Returns
         -------
-        type
+        int
             Segment index
 
         """
@@ -1755,7 +1751,7 @@ class VariableProfile:
 
         Returns
         -------
-        type
+        Profile
             Local profile.
 
         """
@@ -1839,7 +1835,7 @@ class Geometry:
 
         Returns
         -------
-        type
+        np.ndarray
             Raster data
 
         """
@@ -1866,7 +1862,7 @@ class Geometry:
 
         Returns
         -------
-        type
+        np.ndarray
             Transformed profile data
 
         """
@@ -1889,7 +1885,7 @@ class Geometry:
 
         Returns
         -------
-        type
+        np.ndarray
             Rasterized profile in 3d
 
         """
@@ -1908,7 +1904,7 @@ class Geometry:
 
         Returns
         -------
-        type
+        np.ndarray
             Raster data
 
         """
@@ -1934,7 +1930,7 @@ class Geometry:
 
         Returns
         -------
-        type
+        np.ndarray
             Raster data
 
         """
@@ -1982,7 +1978,7 @@ class Geometry:
 
         Returns
         -------
-        type
+        np.ndarray
             Raster data
 
         """
