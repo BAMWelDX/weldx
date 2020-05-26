@@ -31,8 +31,7 @@ def get_groove(
     special_depth=None,
     code_number=None,
 ):
-    """
-    Create a Groove from weldx.asdf.tags.weldx.core.groove.
+    """Create a Groove from weldx.asdf.tags.weldx.core.groove.
 
     Make a selection from the given groove types.
     Groove Types:
@@ -247,24 +246,48 @@ def get_groove(
                    root_face=Quantity(3, "mm"),
                    root_gap=Quantity(1, "mm"))
 
-    :param groove_type: String specifying the Groove type
-    :param workpiece_thickness: workpiece thickness
-    :param workpiece_thickness2: workpiece thickness if type needs 2 thicknesses
-    :param root_gap: root gap, gap between work pieces
-    :param root_face: root face, upper part when 2 root faces are needed, middle part
-                      when 3 are needed
-    :param root_face2: root face, the lower part when 2 root faces are needed. upper
-                       part when 3 are needed - used when min. 2 parts are needed
-    :param root_face3: root face, usually the lower part - used when 3 parts are needed
-    :param bevel_radius: bevel radius
-    :param bevel_radius2: bevel radius - lower radius for DU-Groove
-    :param bevel_angle: bevel angle, usually the upper angle
-    :param bevel_angle2: bevel angle, usually the lower angle
-    :param groove_angle: groove angle, usually the upper angle
-    :param groove_angle2: groove angle, usually the lower angle
-    :param special_depth: special depth used for 4.1.2 Frontal-Face-Groove
-    :param code_number: String, used to define the Frontal Face Groove
-    :return: an Groove from weldx.asdf.tags.weldx.core.groove
+    Parameters
+    ----------
+    groove_type :
+        String specifying the Groove type
+    workpiece_thickness :
+        workpiece thickness (Default value = None)
+    workpiece_thickness2 :
+        workpiece thickness if type needs 2 thicknesses (Default value = None)
+    root_gap :
+        root gap, gap between work pieces (Default value = None)
+    root_face :
+        root face, upper part when 2 root faces are needed, middle part
+        when 3 are needed (Default value = None)
+    root_face2 :
+        root face, the lower part when 2 root faces are needed. upper
+        part when 3 are needed - used when min. 2 parts are needed
+        (Default value = None)
+    root_face3 :
+        root face, usually the lower part - used when 3 parts are needed
+        (Default value = None)
+    bevel_radius :
+        bevel radius (Default value = None)
+    bevel_radius2 :
+        bevel radius - lower radius for DU-Groove (Default value = None)
+    bevel_angle :
+        bevel angle, usually the upper angle (Default value = None)
+    bevel_angle2 :
+        bevel angle, usually the lower angle (Default value = None)
+    groove_angle :
+        groove angle, usually the upper angle (Default value = None)
+    groove_angle2 :
+        groove angle, usually the lower angle (Default value = None)
+    special_depth :
+        special depth used for 4.1.2 Frontal-Face-Groove (Default value = None)
+    code_number :
+        String, used to define the Frontal Face Groove (Default value = None)
+
+    Returns
+    -------
+    type
+        an Groove from weldx.asdf.tags.weldx.core.groove
+
     """
     if groove_type == "VGroove":
         return VGroove(
@@ -383,7 +406,7 @@ class BaseGroove:
     """Generic base class for all groove types."""
 
     def parameters(self):
-        """Return all not None Parameters."""
+        """ """
         return {k: v for k, v in self.__dict__.items() if isinstance(v, pint.Quantity)}
 
     def param_strings(self):
@@ -405,7 +428,28 @@ class BaseGroove:
         line_style=".-",
         ax=None,
     ):
-        """Plot a 2D-Profile."""
+        """Plot a 2D-Profile.
+
+        Parameters
+        ----------
+        title :
+             (Default value = None)
+        axis_label :
+            label string to pass onto matplotlib (Default value = None)
+        raster_width :
+             (Default value = 0.1)
+        show_params :
+             (Default value = True)
+        axis :
+             (Default value = "equal")
+        grid :
+             (Default value = True)
+        line_style :
+             (Default value = ".")
+        ax :
+             (Default value = None)
+
+       """
         profile = self.to_profile()
         if title is None:
             title = _groove_type_to_name[self.__class__]
@@ -416,23 +460,37 @@ class BaseGroove:
         profile.plot(title, axis_label, raster_width, axis, grid, line_style, ax=ax)
 
     def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
-        """Implements profile generation."""
+        """Implements profile generation.
+
+        Parameters
+        ----------
+        width_default :
+             optional width to extend each side of the profile (Default value = None)
+
+       """
         raise NotImplementedError("to_profile() must be defined in subclass.")
 
 
 @dataclass
 class VGroove(BaseGroove):
-    """
-    A Single-V Groove.
+    """A Single-V Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param alpha: groove angle
-    :param b: root gap
-    :param c: root face
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    alpha :
+        groove angle
+    b :
+        root gap
+    c :
+        root face
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -441,7 +499,15 @@ class VGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
     def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(2, "mm"))
+
+
+       """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
         b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
@@ -488,19 +554,28 @@ class VGroove(BaseGroove):
 
 @dataclass
 class VVGroove(BaseGroove):
-    """
-    A VV-Groove.
+    """A VV-Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param alpha: groove angle
-    :param beta: bevel angle
-    :param b: root gap
-    :param c: root face
-    :param h: root face 2
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    alpha :
+        groove angle
+    beta :
+        bevel angle
+    b :
+        root gap
+    c :
+        root face
+    h :
+        root face 2
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -511,7 +586,15 @@ class VVGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.7"])
 
     def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+       """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
@@ -558,19 +641,28 @@ class VVGroove(BaseGroove):
 
 @dataclass
 class UVGroove(BaseGroove):
-    """
-    An UV-Groove.
+    """An UV-Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param alpha: groove angle
-    :param beta: bevel angle
-    :param R: bevel radius
-    :param b: root gap
-    :param h: root face
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    alpha :
+        groove angle
+    beta :
+        bevel angle
+    R :
+        bevel radius
+    b :
+        root gap
+    h :
+        root face
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -581,7 +673,15 @@ class UVGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.6"])
 
     def to_profile(self, width_default: pint.Quantity = Q_(2, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(2, "mm"))
+
+
+       """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
@@ -626,18 +726,26 @@ class UVGroove(BaseGroove):
 
 @dataclass
 class UGroove(BaseGroove):
-    """
-    An U-Groove.
+    """An U-Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param beta: bevel angle
-    :param R: bevel radius
-    :param b: root gap
-    :param c: root face
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta :
+        bevel angle
+    R :
+        bevel radius
+    b :
+        root gap
+    c :
+        root face
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -647,7 +755,15 @@ class UGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.8"])
 
     def to_profile(self, width_default: pint.Quantity = Q_(3, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(3, "mm"))
+
+
+       """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
         R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
@@ -719,22 +835,35 @@ class UGroove(BaseGroove):
 
 @dataclass
 class IGroove(BaseGroove):
-    """
-    An I-Groove.
+    """An I-Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param b: root gap
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    b :
+        root gap
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+       """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
         width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
@@ -756,17 +885,24 @@ class IGroove(BaseGroove):
 
 @dataclass
 class HVGroove(BaseGroove):
-    """
-    A HV-Groove.
+    """A HV-Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param beta: bevel angle
-    :param b: root gap
-    :param c: root face
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta :
+        bevel angle
+    b :
+        root gap
+    c :
+        root face
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -775,7 +911,15 @@ class HVGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+       """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
         b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
@@ -819,18 +963,26 @@ class HVGroove(BaseGroove):
 
 @dataclass
 class HUGroove(BaseGroove):
-    """
-    A HU-Groove.
+    """A HU-Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param beta: bevel angle
-    :param R: bevel radius
-    :param b: root gap
-    :param c: root face
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta :
+        bevel angle
+    R :
+        bevel radius
+    b :
+        root gap
+    c :
+        root face
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -840,7 +992,15 @@ class HUGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.11", "2.10"])
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+       """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
         R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
@@ -888,20 +1048,30 @@ class HUGroove(BaseGroove):
 # double Grooves
 @dataclass
 class DVGroove(BaseGroove):
-    """
-    A DV-Groove.
+    """A DV-Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param alpha_1: groove angle (upper)
-    :param alpha_2: groove angle (lower)
-    :param b: root gap
-    :param c: root face (middle)
-    :param h1: root face (upper)
-    :param h2: root face (lower)
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    alpha_1 :
+        groove angle (upper)
+    alpha_2 :
+        groove angle (lower)
+    b :
+        root gap
+    c :
+        root face (middle)
+    h1 :
+        root face (upper)
+    h2 :
+        root face (lower)
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     alpha_1: pint.Quantity
@@ -913,7 +1083,15 @@ class DVGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+       """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha_1 = self.alpha_1.to("rad").magnitude
         alpha_2 = self.alpha_2.to("rad").magnitude
@@ -966,22 +1144,34 @@ class DVGroove(BaseGroove):
 
 @dataclass
 class DUGroove(BaseGroove):
-    """
-    A DU-Groove
+    """A DU-Groove
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param beta_1: bevel angle (upper)
-    :param beta_2: bevel angle (lower)
-    :param R: bevel radius (upper)
-    :param R2: bevel radius (lower)
-    :param b: root gap
-    :param c: root face (middle)
-    :param h1: root face (upper)
-    :param h2: root face (lower)
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta_1 :
+        bevel angle (upper)
+    beta_2 :
+        bevel angle (lower)
+    R :
+        bevel radius (upper)
+    R2 :
+        bevel radius (lower)
+    b :
+        root gap
+    c :
+        root face (middle)
+    h1 :
+        root face (upper)
+    h2 :
+        root face (lower)
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -995,7 +1185,15 @@ class DUGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["2.7"])
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+       """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta_1 = self.beta_1.to("rad").magnitude
         beta_2 = self.beta_2.to("rad").magnitude
@@ -1054,20 +1252,30 @@ class DUGroove(BaseGroove):
 
 @dataclass
 class DHVGroove(BaseGroove):
-    """
-    A DHV-Groove.
+    """A DHV-Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param beta_1: bevel angle (upper)
-    :param beta_2: bevel angle (lower)
-    :param b: root gap
-    :param c: root face (middle)
-    :param h1: root face (upper)
-    :param h2: root face (lower)
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta_1 :
+        bevel angle (upper)
+    beta_2 :
+        bevel angle (lower)
+    b :
+        root gap
+    c :
+        root face (middle)
+    h1 :
+        root face (upper)
+    h2 :
+        root face (lower)
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1079,7 +1287,15 @@ class DHVGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+       """
         dv_groove = DVGroove(
             self.t,
             self.beta_1 * 2,
@@ -1111,22 +1327,34 @@ class DHVGroove(BaseGroove):
 
 @dataclass
 class DHUGroove(BaseGroove):
-    """
-    A DHU-Groove.
+    """A DHU-Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t: workpiece thickness
-    :param beta_1: bevel angle (upper)
-    :param beta_2: bevel angle (lower)
-    :param R: bevel radius (upper)
-    :param R2: bevel radius (lower)
-    :param b: root gap
-    :param c: root face (middle)
-    :param h1: root face (upper)
-    :param h2: root face (lower)
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta_1 :
+        bevel angle (upper)
+    beta_2 :
+        bevel angle (lower)
+    R :
+        bevel radius (upper)
+    R2 :
+        bevel radius (lower)
+    b :
+        root gap
+    c :
+        root face (middle)
+    h1 :
+        root face (upper)
+    h2 :
+        root face (lower)
+    code_number :
+        Numbers of the standard
+
+   """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1140,7 +1368,15 @@ class DHUGroove(BaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["2.11"])
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+       """
         du_profile = DUGroove(
             self.t,
             self.beta_1,
@@ -1174,18 +1410,26 @@ class DHUGroove(BaseGroove):
 # Frontal Face - Groove
 @dataclass
 class FFGroove(BaseGroove):
-    """
-    A Frontal Face Groove.
+    """A Frontal Face Groove.
 
     For a detailed description of the execution look in get_groove.
 
-    :param t_1: workpiece thickness
-    :param t_2: workpiece thickness, if second thickness is needed
-    :param alpha: groove angle
-    :param b: root gap
-    :param e: special depth
-    :param code_number: Numbers of the standard
-    """
+    Parameters
+    ----------
+    t_1 :
+        workpiece thickness
+    t_2 :
+        workpiece thickness, if second thickness is needed
+    alpha :
+        groove angle
+    b :
+        root gap
+    e :
+        special depth
+    code_number :
+        Numbers of the standard
+
+   """
 
     t_1: pint.Quantity
     t_2: pint.Quantity = None
@@ -1196,7 +1440,15 @@ class FFGroove(BaseGroove):
     e: pint.Quantity = None
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
-        """Calculate a Profile."""
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+       """
         if (
             self.code_number == "1.12"
             or self.code_number == "1.13"
@@ -1357,17 +1609,25 @@ class FFGroove(BaseGroove):
 
 
 def _helperfunction(segment, array):
-    """
-    Calculate a shape from input.
+    """Calculate a shape from input.
     Input segment of successive segments as strings.
     Input array of the points in the correct sequence. e.g.:
     array = [[x-values], [y-values]]
 
-    :param segment: list of String, segment names ("line", "arc")
-    :param array: array of 2 array,
+    Parameters
+    ----------
+    segment :
+        list of String, segment names ("line", "arc")
+    array :
+        array of 2 array,
         first array are x-values
         second array are y-values
-    :return: geo.Shape
+
+    Returns
+    -------
+    type
+        geo.Shape
+
     """
     segment_list = []
     counter = 0

@@ -11,9 +11,7 @@ __all__ = ["DatetimeIndexType"]
 
 
 class DatetimeIndexType(WeldxType):
-    """
-    A simple implementation of serializing pandas DatetimeIndex.
-    """
+    """A simple implementation of serializing pandas DatetimeIndex."""
 
     name = "time/datetimeindex"
     version = "1.0.0"
