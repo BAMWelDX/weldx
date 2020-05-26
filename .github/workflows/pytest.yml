@@ -25,7 +25,6 @@ jobs:
       - name: Setup Conda Environment
         uses: goanpeca/setup-miniconda@v1
         with:
-          miniconda-version: "latest"
           auto-update-conda: false
           environment-file: environment.yml
           activate-environment: weldx
