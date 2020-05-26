@@ -2,28 +2,6 @@ name: pytest asdf
 on: [push]
 
 jobs:
-#  pytest:
-#    name: pytest asdf
-#    runs-on: ${{ matrix.os }}
-#    strategy:
-#      matrix:
-#        os: [ubuntu-18.04]
-#    steps:
-#    - uses: actions/checkout@v1
-#    - name: Include $CONDA in $PATH
-#      run: echo ::add-path::$CONDA/bin
-#    - name: Print conda info
-#      run: conda info -a
-#    - name: Create conda environment
-#      run: conda env create -f ./environment.yml
-#    - name: Conda develop install of source package for ASDF Schema links
-#      run: |
-#        conda install conda-build -n weldx
-#    - name: Run tests with added asdf schema file location
-#      run: |
-#        source activate weldx
-#        python setup.py install --user
-#        pytest --asdf-tests --ignore=tests/
   pytest:
     name: pytest asdf
     runs-on: ${{ matrix.os }}
