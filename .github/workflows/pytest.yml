@@ -3,12 +3,12 @@ on: [push]
 
 jobs:
   pytest:
-    name: ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}-latest
+    name: pytest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, macos, windows]
+        os: [ubuntu-18.04, ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -40,25 +40,25 @@ jobs:
       - name: codecov.io
         uses: codecov/codecov-action@v1
 
-  pytest-linux:
-    name: pytest
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-18.04, ubuntu-latest]
-    steps:
-    - uses: actions/checkout@v1
-    - name: Include $CONDA in $PATH
-      run: echo ::add-path::$CONDA/bin
-    - name: Print conda info
-      run: conda info -a
-    - name: Create conda environment
-      run: conda env create -f ./environment.yml
-    - name: Run tests
-      run: |
-        source activate weldx
-        pytest
+#  pytest-linux:
+#    name: pytest
+#    runs-on: ${{ matrix.os }}
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        os: [ubuntu-18.04, ubuntu-latest]
+#    steps:
+#    - uses: actions/checkout@v1
+#    - name: Include $CONDA in $PATH
+#      run: echo ::add-path::$CONDA/bin
+#    - name: Print conda info
+#      run: conda info -a
+#    - name: Create conda environment
+#      run: conda env create -f ./environment.yml
+#    - name: Run tests
+#      run: |
+#        source activate weldx
+#        pytest
 
 #  pytest-win:
 #    name: pytest

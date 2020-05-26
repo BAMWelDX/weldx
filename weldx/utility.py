@@ -444,6 +444,27 @@ def xr_interp_coordinates_in_time(
     )
 
 
+def codecov_check(a, b):
+    """Create uncovered function for codecov.
+
+    Parameters
+    ----------
+    a :
+        number 1
+    b :
+        number 2
+
+    Returns
+    -------
+        float
+
+    """
+    c = a+b
+    print(f"{a}+{b}={c}")
+
+    return c
+
+
 # weldx xarray Accessors --------------------------------------------------------
 
 
