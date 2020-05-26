@@ -13,7 +13,7 @@ def test_is_column_in_matrix():
 
     Test should be self explanatory.
 
-   """
+    """
     c_0 = [1, 5, 2]
     c_1 = [3, 2, 2]
     c_2 = [1, 6, 1]
@@ -35,7 +35,7 @@ def test_is_row_in_matrix():
 
     Test should be self explanatory.
 
-   """
+    """
     c_0 = [1, 5, 2]
     c_1 = [3, 2, 2]
     c_2 = [1, 6, 1]
@@ -57,7 +57,7 @@ def test_matrix_is_close():
 
     Test should be self explanatory.
 
-   """
+    """
     mat_a = np.array([[0, 1, 2], [3, 4, 5]])
     mat_b = np.array([[3, 5, 1], [7, 1, 9]])
 
@@ -80,7 +80,7 @@ def test_vector_is_close():
 
     Test should be self explanatory.
 
-   """
+    """
     vec_a = np.array([0, 1, 2])
     vec_b = np.array([3, 5, 1])
 

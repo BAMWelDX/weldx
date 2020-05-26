@@ -889,7 +889,7 @@ class CoordinateSystemManager:
         lcs :
             Local coordinate system
 
-       """
+        """
         self._graph.add_edge(node_from, node_to, lcs=lcs)
         self._graph.add_edge(node_to, node_from, lcs=lcs.invert())
 
@@ -902,7 +902,7 @@ class CoordinateSystemManager:
             Name of the coordinate system, that should be
             checked.
 
-       """
+        """
         if not self.has_coordinate_system(coordinate_system_name):
             raise ValueError(
                 "There is no coordinate system with name " + str(coordinate_system_name)
@@ -916,7 +916,7 @@ class CoordinateSystemManager:
         coordinate_system_name :
             Name of the new coordinate system, that should be checked.
 
-       """
+        """
         if not isinstance(coordinate_system_name, cl.Hashable):
             raise TypeError("The coordinate system name must be a hashable type.")
         if self.has_coordinate_system(coordinate_system_name):
@@ -946,7 +946,7 @@ class CoordinateSystemManager:
             weldx.transformations.LocalCoordinateSystem that describes how the new
             coordinate system is oriented in its parent system.
 
-       """
+        """
         if not isinstance(local_coordinate_system, LocalCoordinateSystem):
             raise TypeError(
                 "'local_coordinate_system' must be an instance of "
@@ -975,7 +975,7 @@ class CoordinateSystemManager:
             Name of the coordinate system the data should be
             assigned to.
 
-       """
+        """
         # TODO: How to handle time dependent data? some things to think about:
         # - times of coordinate system and data are not equal
         # - which time is taken as reference? (probably the one of the data)
@@ -1196,7 +1196,7 @@ class CoordinateSystemManager:
         coordinate_system_name_1 :
             Name of the second coordinate system
 
-       """
+        """
         self._check_coordinate_system_exists(coordinate_system_name_0)
         self._check_coordinate_system_exists(coordinate_system_name_1)
 

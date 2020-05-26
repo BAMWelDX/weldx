@@ -23,7 +23,7 @@ def check_matrix_does_not_reflect(matrix):
     matrix :
         Matrix that should be checked
 
-   """
+    """
     assert np.linalg.det(matrix) >= 0
 
 
@@ -37,7 +37,7 @@ def check_matrix_orthogonal(matrix):
     matrix :
         Matrix that should be checked
 
-   """
+    """
     transposed = np.transpose(matrix)
 
     product = np.matmul(transposed, matrix)
@@ -52,7 +52,7 @@ def random_vector():
     np.ndarray
         Random 3d vector.
 
-   """
+    """
     return (
         np.array([random.random(), random.random(), random.random()])
         * 10
@@ -68,7 +68,7 @@ def random_non_unit_vector():
     np.ndarray
         Random 3d vector.
 
-   """
+    """
     vec = random_vector()
     while math.isclose(np.linalg.norm(vec), 1) or math.isclose(np.linalg.norm(vec), 0):
         vec = random_vector()
@@ -96,7 +96,7 @@ def rotated_positive_orthogonal_orientation(
     -------
     np.ndarray
 
-   """
+    """
     # rotate axes to produce a more general test case
     r_x = tf.rotation_matrix_x(angle_x)
     r_y = tf.rotation_matrix_y(angle_y)
@@ -117,7 +117,7 @@ def test_coordinate_axis_rotation_matrices():
     expected values, which are determined using the sine and cosine.
     Additionally, some matrix properties are checked.
 
-   """
+    """
     matrix_funcs = [tf.rotation_matrix_x, tf.rotation_matrix_y, tf.rotation_matrix_z]
     vec = np.array([1, 1, 1])
 
@@ -151,7 +151,7 @@ def test_scaling_matrix():
 
     Should be self explanatory.
 
-   """
+    """
     mat_a = np.array([[1, 6, 2], [4, 10, 2], [3, 5, 2]], dtype=float)
     scale_mat = tf.scale_matrix(2, 0.5, 4)
     mat_b = np.matmul(scale_mat, mat_a)
@@ -166,7 +166,7 @@ def test_normalize():
     This test creates some random vectors and normalizes them. Afterwards
     the results are checked.
 
-   """
+    """
     for _ in range(20):
         vec = random_non_unit_vector()
 
@@ -200,7 +200,7 @@ def test_orientation_point_plane_containing_origin():
     the sign of the factor (0 is a special case and tested at the end).
     Additionally some exceptions and special cases are tested.
 
-   """
+    """
     [a, b, n] = rotated_positive_orthogonal_orientation()
     a *= 2.3
     b /= 1.5
@@ -236,7 +236,7 @@ def test_orientation_point_plane():
     end).
     Additionally some exceptions and special cases are tested.
 
-   """
+    """
     [b, c, n] = rotated_positive_orthogonal_orientation()
     a = ut.to_float_array([3.2, -2.1, 5.4])
     b = b * 6.5 + a
@@ -270,7 +270,7 @@ def test_is_orthogonal():
     This test creates some vectors and checks if the function returns the
     correct results.
 
-   """
+    """
     orientation = rotated_positive_orthogonal_orientation()
     x = orientation[:, 0]
     y = orientation[:, 1]
@@ -307,7 +307,7 @@ def test_vector_points_to_left_of_vector():
 
     Tests multiple vector combinations with known result.
 
-   """
+    """
     assert tf.vector_points_to_left_of_vector([-0.1, 1], [0, 1]) > 0
     assert tf.vector_points_to_left_of_vector([-0.1, -1], [0, 1]) > 0
     assert tf.vector_points_to_left_of_vector([3, 5], [1, 0]) > 0
@@ -331,7 +331,7 @@ def test_point_left_of_line():
 
     Tests multiple test cases with known results.
 
-   """
+    """
     line_start = np.array([2, 3])
     line_end = np.array([5, 6])
     assert tf.point_left_of_line([-8, 10], line_start, line_end) > 0
@@ -350,7 +350,7 @@ def test_reflection_sign():
 
     Tests multiple test cases with known results.
 
-   """
+    """
     assert tf.reflection_sign([[-1, 0], [0, 1]]) == -1
     assert tf.reflection_sign([[1, 0], [0, -1]]) == -1
     assert tf.reflection_sign([[0, 1], [1, 0]]) == -1
@@ -392,7 +392,7 @@ def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
     lcs: tf.LocalCoordinateSystem :
 
 
-   """
+    """
     assert np.all(lcs.time == expected_time)
 
 
@@ -419,7 +419,7 @@ def check_coordinate_system_orientation(
     positive_orientation_expected: bool :
 
 
-   """
+    """
     # test expected positive orientation
     det = np.linalg.det(orientation.sel(v=[2, 0, 1]))
     assert np.all((det > 0) == positive_orientation_expected)
@@ -624,7 +624,7 @@ def test_coordinate_system_factories():
     Create multiple coordinate systems with all provided methods and check
     if they are constructed correctly.
 
-   """
+    """
     # TODO: Time dependency
     # alias name for class - name is too long :)
     lcs = tf.LocalCoordinateSystem
@@ -707,7 +707,7 @@ def test_coordinate_system_addition_and_subtraction():
     are compared to expected values. The naming pattern 'X_in_Y' is used for the
     coordinate systems to keep track of the supposed operation results.
 
-   """
+    """
     # reference data ----------------------------
     time_start_0 = "2042-01-01"
     time_start_1 = "2042-01-02"
@@ -958,7 +958,7 @@ def test_coordinate_system_invert():
 
 
 
-   """
+    """
     # fix ---------------------------------------
     lcs0_in_lcs1 = tf.LocalCoordinateSystem.construct_from_xy_and_orientation(
         [1, 1, 0], [-1, 1, 0], coordinates=[2, 0, 2]
@@ -1025,7 +1025,7 @@ def coordinate_system_time_interpolation_test_case(
     coordinates_exp: np.ndarray :
 
 
-   """
+    """
     lcs_interp = lcs.interp_time(time_interp)
     check_coordinate_system(
         lcs_interp, orientation_exp, coordinates_exp, True, time_interp
@@ -1126,7 +1126,7 @@ def test_coordinate_system_manager_add_coordinate_system():
     Adds some coordinate systems to a CSM and checks if the the edges and nodes
     are set as expected.
 
-   """
+    """
     # define some coordinate systems
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
     lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
@@ -1185,7 +1185,7 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
 
     This function also tests, if the internally performed transformations are correct.
 
-   """
+    """
     # define some coordinate systems
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
     lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])

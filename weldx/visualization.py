@@ -19,7 +19,7 @@ def plot_coordinate_system(coordinate_system, axes, color=None, label=None):
         Name that appears in the legend. Only viable if a color
         was specified. (Default value = None)
 
-   """
+    """
     p_0 = coordinate_system.coordinates
     p_x = p_0 + coordinate_system.orientation[:, 0]
     p_y = p_0 + coordinate_system.orientation[:, 1]
@@ -47,7 +47,7 @@ def set_axes_equal(axes):
     axes :
         Matplotlib axes object (output from plt.gca())
 
-   """
+    """
     x_limits = axes.get_xlim3d()
     y_limits = axes.get_ylim3d()
     z_limits = axes.get_zlim3d()

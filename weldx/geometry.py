@@ -156,7 +156,7 @@ class LineSegment:
         matrix :
             Transformation matrix
 
-       """
+        """
         self._points = np.matmul(matrix, self._points)
         self._calculate_length()
 
@@ -168,7 +168,7 @@ class LineSegment:
         vector :
             Translation vector
 
-       """
+        """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
     def rasterize(self, raster_width) -> np.ndarray:
@@ -561,7 +561,7 @@ class ArcSegment:
         matrix :
             Transformation matrix
 
-       """
+        """
         self._points = np.matmul(matrix, self._points)
         self._sign_arc_winding *= tf.reflection_sign(matrix)
         self._calculate_arc_parameters()
@@ -574,7 +574,7 @@ class ArcSegment:
         vector :
             Translation vector
 
-       """
+        """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
     def rasterize(self, raster_width) -> np.ndarray:
@@ -838,7 +838,7 @@ class Shape:
         segments :
             Single segment or list of segments
 
-       """
+        """
         segments = ut.to_list(segments)
         if self.num_segments > 0:
             self._check_segments_connected([self.segments[-1], segments[0]])
@@ -853,7 +853,7 @@ class Shape:
         transformation_matrix :
             Transformation matrix
 
-       """
+        """
         for i in range(self.num_segments):
             self._segments[i].apply_transformation(transformation_matrix)
 
@@ -868,7 +868,7 @@ class Shape:
             Distance of the line of reflection to the
             origin (Default value = 0)
 
-       """
+        """
         normal = ut.to_float_array(reflection_normal)
         if ut.vector_is_close(normal, ut.to_float_array([0, 0])):
             raise ValueError("Normal has no length.")
@@ -893,7 +893,7 @@ class Shape:
         point_end :
             Line of reflection's end point
 
-       """
+        """
         point_start = ut.to_float_array(point_start)
         point_end = ut.to_float_array(point_end)
 
@@ -923,7 +923,7 @@ class Shape:
         vector :
             Translation vector
 
-       """
+        """
         for i in range(self.num_segments):
             self._segments[i].apply_translation(vector)
 
@@ -971,7 +971,7 @@ class Shape:
             Distance of the line of reflection to the
             origin (Default value = 0)
 
-       """
+        """
         new_shape = copy.deepcopy(self)
         new_shape.apply_reflection(reflection_normal, distance_to_origin)
         return new_shape
@@ -991,7 +991,7 @@ class Shape:
         Shape
 
 
-       """
+        """
         new_shape = copy.deepcopy(self)
         new_shape.apply_reflection_across_line(point_start, point_end)
         return new_shape
@@ -1088,7 +1088,7 @@ class Profile:
         shapes :
             Instance or list of geo.Shape class(es)
 
-       """
+        """
         if not isinstance(shapes, list):
             shapes = [shapes]
 
@@ -1403,7 +1403,7 @@ class Trace:
             Coordinate system at the start of
             the trace.
 
-       """
+        """
         self._coordinate_system_lookup = [coordinate_system_start]
         self._total_length_lookup = [0]
         self._segment_length_lookup = []
@@ -1530,7 +1530,7 @@ class Trace:
             Raster data
 
 
-       """
+        """
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
 
@@ -1806,7 +1806,7 @@ class Geometry:
         trace :
             Trace
 
-       """
+        """
         if not isinstance(profile, (Profile, VariableProfile)):
             raise TypeError("'profile' must be a 'Profile' or 'VariableProfile' class")
 
@@ -1823,7 +1823,7 @@ class Geometry:
         raster_width :
             Raster width
 
-       """
+        """
         relative_location = trace_location / self._trace.length
         profile_location = relative_location * self._profile.max_location
         profile = self._profile.local_profile(profile_location)

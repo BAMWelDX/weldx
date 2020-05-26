@@ -260,7 +260,7 @@ def test_asdf_groove(groove: BaseGroove, expected_dtype):
     expected_dtype:
        Expected type of the groove to be tested.
 
-   """
+    """
     k = "groove"
     tree = {k: groove}
 
