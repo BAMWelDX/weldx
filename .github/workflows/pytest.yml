@@ -13,6 +13,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Cache conda
+        uses: actions/cache@v1
+        env:
+          # Increase this value to reset cache if etc/example-environment.yml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
+
       - name: Setup Conda Environment
         uses: goanpeca/setup-miniconda@v1
         with:
@@ -22,6 +31,7 @@ jobs:
           environment-file: environment.yml
           activate-environment: weldx
           auto-activate-base: false
+          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
 
       - name: conda info
         shell: bash -l {0}
@@ -39,47 +49,3 @@ jobs:
 
       - name: codecov.io
         uses: codecov/codecov-action@v1
-
-#  pytest-linux:
-#    name: pytest
-#    runs-on: ${{ matrix.os }}
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        os: [ubuntu-18.04, ubuntu-latest]
-#    steps:
-#    - uses: actions/checkout@v1
-#    - name: Include $CONDA in $PATH
-#      run: echo ::add-path::$CONDA/bin
-#    - name: Print conda info
-#      run: conda info -a
-#    - name: Create conda environment
-#      run: conda env create -f ./environment.yml
-#    - name: Run tests
-#      run: |
-#        source activate weldx
-#        pytest
-
-#  pytest-win:
-#    name: pytest
-#    runs-on: ${{ matrix.os }}
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        os: [windows-latest]
-#    steps:
-#    - uses: actions/checkout@v1
-#    - name: Add conda directories to PATH
-#      run: |
-#        echo ::add-path::C:\Miniconda
-#        echo ::add-path::C:\Miniconda\Scripts
-#    - name: Print conda info
-#      run: conda info -a
-#    - name: Create conda environment
-#      run: conda env create -f ./environment.yml
-#    - name: Init bash
-#      run: conda init powershell
-#    - name: Run tests
-#      run: |
-#        conda activate weldx
-#        pytest

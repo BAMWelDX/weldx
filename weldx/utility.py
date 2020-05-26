@@ -459,7 +459,7 @@ def codecov_check(a, b):
         float
 
     """
-    c = a+b
+    c = a + b
     print(f"{a}+{b}={c}")
 
     return c
