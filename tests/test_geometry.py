@@ -494,7 +494,7 @@ def check_arc_segment_values(
     arc_angle :
         Expected arc angle
     arc_length :
-        Expected length
+        Expected arc length
 
     """
     assert ut.vector_is_close(segment.point_start, point_start)
@@ -567,7 +567,7 @@ def arc_segment_rasterization_test(
 
 
 def test_arc_segment_constructor():
-    """Test the arc segment constructor and factories."""
+    """Test the arc segment constructor."""
     points = [[3, 6, 6], [3, 6, 3]]
     segment_cw = geo.ArcSegment(points, False)
     segment_ccw = geo.ArcSegment(points, True)
@@ -775,7 +775,7 @@ def point_in_second_quadrant(p, c):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
@@ -796,7 +796,7 @@ def point_not_in_second_quadrant(p, c):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
@@ -815,7 +815,7 @@ def point_not_below_center(p, c):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
@@ -834,7 +834,7 @@ def point_not_above_center(p, c):
 
     Returns
     -------
-    type
+    bool
         True or False
 
     """
@@ -1366,7 +1366,7 @@ def default_test_shape():
 
     Returns
     -------
-    Shape
+    weldx.geometry.Shape
         Default shape for tests
 
     """
@@ -1379,7 +1379,10 @@ def default_test_shape():
 def default_translation_vector():
     """Get a default translation for transformation tests.
 
-    :return: Translation vector
+    Returns
+    -------
+    numpy.ndarray
+        Translation vector
 
     """
     return ut.to_float_array([3, 4])
@@ -1756,7 +1759,7 @@ def segment_interpolation_nearest(segment_a, segment_b, weight):
 
     Returns
     -------
-    type
+    weldx.geometry.LineSegment
         Nearest segment
 
     """
@@ -2147,12 +2150,10 @@ class CustomSegment:
         ----------
         _args :
             Unused parameters
-        *_args :
-
 
         Returns
         -------
-        type
+        weldx.transformations.LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -2268,9 +2269,6 @@ def test_trace_local_coordinate_system():
         check_coordinate_systems_identical(cs_trace, cs_expected)
 
     # check second segment
-    expected_orientation = np.matmul(
-        orientation, radial_segment.local_coordinate_system(1).orientation.data
-    )
     cs_start_seg2 = radial_segment.local_coordinate_system(1) + cs_base
     for i in range(11):
         weight = i / 10
@@ -2556,7 +2554,7 @@ def test_variable_profile_local_profile():
 
 
 def test_geometry_construction():
-    """Test construction of he geometry class."""
+    """Test construction of the geometry class."""
     profile_a, profile_b = get_default_profiles()
     variable_profile = geo.VariableProfile(
         [profile_a, profile_b], [0, 1], geo.linear_profile_interpolation_sbs
@@ -2597,8 +2595,6 @@ def test_geometry_rasterization_trace():
     The utilized trace starts with a line segment of length 1 and continues
     with a radial segment of radius 1 and counter clockwise winding. Each
     individual step is documented by comments.
-
-    :return:
 
     """
     a0 = [1, 0]
