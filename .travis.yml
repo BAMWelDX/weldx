@@ -23,6 +23,3 @@ install:
 
 script:
   - pytest --cov-report term --cov=weldx
-
-after_success:
-  - codecov
