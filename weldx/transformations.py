@@ -1056,7 +1056,9 @@ class CoordinateSystemManager:
         """
         return data_name in self._graph.nodes[coordinate_system_name]["data"]
 
-    def get_data(self, data_name, target_coordinate_system_name=None):
+    def get_data(
+        self, data_name, target_coordinate_system_name=None
+    ) -> Union[np.ndarray, xr.DataArray]:
         """Get the specified data, optionally transformed into any coordinate system.
 
         Parameters
