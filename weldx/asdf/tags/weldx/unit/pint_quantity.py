@@ -11,9 +11,7 @@ __all__ = ["PintQuantityType"]
 
 
 class PintQuantityType(WeldxAsdfType):
-    """
-    A simple implementation of serializing a pint quantity as asdf quantity.
-    """
+    """A simple implementation of serializing a pint quantity as asdf quantity."""
 
     name = "unit/quantity"
     version = "1.1.0"

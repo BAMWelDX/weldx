@@ -10,9 +10,7 @@ __all__ = ["TimestampType"]
 
 
 class TimestampType(WeldxType):
-    """
-    A simple implementation of serializing a single pandas Timestamp.
-    """
+    """A simple implementation of serializing a single pandas Timestamp."""
 
     name = "time/timestamp"
     version = "1.0.0"

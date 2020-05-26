@@ -11,9 +11,7 @@ __all__ = ["TimedeltaIndexType"]
 
 
 class TimedeltaIndexType(WeldxType):
-    """
-    A simple implementation of serializing pandas TimedeltaIndex.
-    """
+    """A simple implementation of serializing pandas TimedeltaIndex."""
 
     name = "time/timedeltaindex"
     version = "1.0.0"

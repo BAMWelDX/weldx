@@ -13,7 +13,7 @@ import pytest
 
 
 def test_plot_coordinate_system():
-    """This test just executes all possible code paths."""
+    """Test executing all possible code paths."""
     cs = tf.LocalCoordinateSystem()
     fig = plt.figure()
     ax = fig.gca(projection="3d")
@@ -29,7 +29,7 @@ def test_plot_coordinate_system():
 
 
 def test_set_axes_equal():
-    """This test just executes all possible code paths."""
+    """Test executing all possible code paths."""
     fig = plt.figure()
     ax = fig.gca(projection="3d")
     vs.set_axes_equal(ax)
