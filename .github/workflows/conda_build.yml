@@ -54,15 +54,18 @@ jobs:
         shell: bash -l {0}
         run: conda build .
 
+      - name: set package file env
+        run: echo ::set-env name=PACKAGE_DIR::$(conda build . --output)
+
       - name: upload package to dev label on Anaconda Cloud
+        if: startsWith(github.ref, 'refs/tags/')
         shell: bash -l {0}
         env: # set access token from GitHub secrets
           anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
         run: |
-          package_dir=$(conda build . --output)
           anaconda -t $anaconda_token upload --user BAMwelding --label dev $package_dir
 
       - uses: actions/upload-artifact@v2
         if: success()
         with:
-          path: ${{ package_dir }}
+          path: ${{ env.package_dir }}
