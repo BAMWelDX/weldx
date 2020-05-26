@@ -9,12 +9,10 @@ import weldx.transformations as tf
 
 
 def test_is_column_in_matrix():
-    """
-    Test the is_column_in_matrix function.
+    """Test the is_column_in_matrix function.
 
     Test should be self explanatory.
 
-    :return: ---
     """
     c_0 = [1, 5, 2]
     c_1 = [3, 2, 2]
@@ -33,12 +31,10 @@ def test_is_column_in_matrix():
 
 
 def test_is_row_in_matrix():
-    """
-    Test the is_row_in_matrix function.
+    """Test the is_row_in_matrix function.
 
     Test should be self explanatory.
 
-    :return: ---
     """
     c_0 = [1, 5, 2]
     c_1 = [3, 2, 2]
@@ -57,12 +53,10 @@ def test_is_row_in_matrix():
 
 
 def test_matrix_is_close():
-    """
-    Test the matrix_is_close function.
+    """Test the matrix_is_close function.
 
     Test should be self explanatory.
 
-    :return: ---
     """
     mat_a = np.array([[0, 1, 2], [3, 4, 5]])
     mat_b = np.array([[3, 5, 1], [7, 1, 9]])
@@ -82,12 +76,10 @@ def test_matrix_is_close():
 
 
 def test_vector_is_close():
-    """
-    Test the vector_is_close function.
+    """Test the vector_is_close function.
 
     Test should be self explanatory.
 
-    :return: ---
     """
     vec_a = np.array([0, 1, 2])
     vec_b = np.array([3, 5, 1])
@@ -107,11 +99,7 @@ def test_vector_is_close():
 
 
 def test_xr_interp_like():
-    """
-    Test behaviour of custom interpolation method for xarray Objects.
-
-    :return: ---
-    """
+    """Test behaviour of custom interpolation method for xarray Objects."""
     # basic interpolation behavior on a single coordinate
     n_a = 5  # range of "a" coordinate in da_a
     s_a = 0.5  # default steps in "a" coordinate in da_a
