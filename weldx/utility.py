@@ -65,7 +65,7 @@ def to_float_array(container) -> np.ndarray:
 
     Returns
     -------
-    numpy.ndarray
+    np.ndarray
 
     """
     return np.array(container, dtype=float)
@@ -166,7 +166,7 @@ def mat_vec_mul(a, b) -> np.ndarray:
 
     Returns
     -------
-    numpy.ndarray
+    np.ndarray
         Resulting vector [n, ]
 
     """
@@ -210,8 +210,8 @@ def get_time_union(list_of_objects):
 
     Returns
     -------
-    pandas.DatetimeIndex
-        pd.DatetimeIndex with merge times
+    pd.DatetimeIndex
+        pandas DatetimeIndex with merged times
 
     """
     # TODO: make non-nested function
@@ -235,12 +235,12 @@ def get_time_union(list_of_objects):
 
 
 def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
-    """Transpose data along two dimensions in an xarray.DataArray.
+    """Transpose data along two dimensions in an xarray DataArray.
 
     Parameters
     ----------
     da :
-        xarray.DataArray to transpose
+        xarray DataArray to transpose
     dim1 :
         name of the first dimension
     dim2 :
@@ -248,8 +248,8 @@ def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
 
     Returns
     -------
-    xarray.DataArray
-        xarray.DataArray with transposed data at specified dimensions
+    xr.DataArray
+        xarray DataArray with transposed data at specified dimensions
 
     """
     i = swap_list_items(da.dims, dim1, dim2)
@@ -293,11 +293,12 @@ def xr_matmul(
     trans_b :
         flag if matrix in b should be transposed (Default value = False)
     **apply_kwargs :
+        additional kwargs passed on to ur.apply_ufunc
 
 
     Returns
     -------
-    xarray.DataArray
+    xr.DataArray
 
     """
     if dims_b is None:
@@ -335,7 +336,7 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
     Parameters
     ----------
     da :
-        xarray.DataArray to test
+        xarray DataArray to test
     dims :
         list of dimensions along which to test
 
@@ -350,7 +351,7 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
 
 
 def xr_fill_all(da, order="bf") -> xr.DataArray:
-    """Fill NaN values along all dimensions in xarray.DataArray.
+    """Fill NaN values along all dimensions in xarray DataArray.
 
     Parameters
     ----------
@@ -361,7 +362,7 @@ def xr_fill_all(da, order="bf") -> xr.DataArray:
 
     Returns
     -------
-    xarray.DataArray
+    xr.DataArray
         xarray object with NaN values filled in all dimensions
 
     """
@@ -413,7 +414,7 @@ def xr_interp_like(
 
     Returns
     -------
-    xarray.DataArray
+    xr.DataArray
         interpolated DataArray
 
     """
@@ -494,7 +495,7 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
 
     Returns
     -------
-    xarray.DataArray
+    xr.DataArray
 
     """
     if times is not None:
@@ -518,7 +519,7 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
 
     Returns
     -------
-    xarray.DataArray
+    xr.DataArray
 
     """
     if times is not None:
@@ -542,13 +543,13 @@ def xr_interp_orientation_in_time(
     Parameters
     ----------
     dsx :
-        xarray.DataArray containing the orientation as matrix
+        xarray DataArray containing the orientation as matrix
     times :
         Time data
 
     Returns
     -------
-    xarray.DataArray
+    xr.DataArray
         Interpolated data
 
     """
@@ -589,13 +590,13 @@ def xr_interp_coordinates_in_time(
     Parameters
     ----------
     dsx :
-        xarray.DataArray
+        xarray DataArray
     times :
         Time data
 
     Returns
     -------
-    xarray.DataArray
+    xr.DataArray
         Interpolated data
 
     """
@@ -626,7 +627,7 @@ class WeldxAccessor:  # pragma: no cover
 
         Returns
         -------
-        xarray.DataArray
+        xr.DataArray
             interpolated DataArray
 
         """
