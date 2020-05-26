@@ -75,13 +75,13 @@ def random_non_unit_vector():
     return vec
 
 
-def rotated_positive_orthogonal_orientation(
+def rotated_positive_orthogonal_basis(
     angle_x=np.pi / 3, angle_y=np.pi / 4, angle_z=np.pi / 5
 ):
-    """Get a rotated orthogonal base.
+    """Get a rotated orthogonal basis.
 
     If X,Y,Z are the rotation matrices of the passed angles, the resulting
-    base is Z * Y * X.
+    basis is Z * Y * X.
 
     Parameters
     ----------
@@ -95,6 +95,7 @@ def rotated_positive_orthogonal_orientation(
     Returns
     -------
     np.ndarray
+        Rotated orthogonal basis
 
     """
     # rotate axes to produce a more general test case
@@ -163,7 +164,7 @@ def test_scaling_matrix():
 def test_normalize():
     """Test the normalize function.
 
-    This test creates some random vectors and normalizes them. Afterwards
+    This test creates some random vectors and normalizes them. Afterwards,
     the results are checked.
 
     """
@@ -201,7 +202,7 @@ def test_orientation_point_plane_containing_origin():
     Additionally some exceptions and special cases are tested.
 
     """
-    [a, b, n] = rotated_positive_orthogonal_orientation()
+    [a, b, n] = rotated_positive_orthogonal_basis()
     a *= 2.3
     b /= 1.5
 
@@ -234,10 +235,10 @@ def test_orientation_point_plane():
     the same offset as the plane. The result of the orientation function
     must be equal to the factors sign (0 is a special case and tested at the
     end).
-    Additionally some exceptions and special cases are tested.
+    Additionally, some exceptions and special cases are tested.
 
     """
-    [b, c, n] = rotated_positive_orthogonal_orientation()
+    [b, c, n] = rotated_positive_orthogonal_basis()
     a = ut.to_float_array([3.2, -2.1, 5.4])
     b = b * 6.5 + a
     c = c * 0.3 + a
@@ -271,7 +272,7 @@ def test_is_orthogonal():
     correct results.
 
     """
-    orientation = rotated_positive_orthogonal_orientation()
+    orientation = rotated_positive_orthogonal_basis()
     x = orientation[:, 0]
     y = orientation[:, 1]
     z = orientation[:, 2]
@@ -389,8 +390,6 @@ def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
         Local coordinate system class
     expected_time :
         Expected time
-    lcs: tf.LocalCoordinateSystem :
-
 
     """
     assert np.all(lcs.time == expected_time)
@@ -412,12 +411,6 @@ def check_coordinate_system_orientation(
     positive_orientation_expected :
         True, if the orientation is expected to be
         positive. False otherwise.
-    orientation: xr.DataArray :
-
-    orientation_expected: np.ndarray :
-
-    positive_orientation_expected: bool :
-
 
     """
     # test expected positive orientation
@@ -634,7 +627,7 @@ def test_coordinate_system_factories():
     angle_y = np.pi / 4
     angle_z = np.pi / 5
     coordinates = [4, -2, 6]
-    orientation_pos = rotated_positive_orthogonal_orientation(angle_x, angle_y, angle_z)
+    orientation_pos = rotated_positive_orthogonal_basis(angle_x, angle_y, angle_z)
 
     x = orientation_pos[:, 0]
     y = orientation_pos[:, 1]
@@ -956,8 +949,6 @@ def test_coordinate_system_invert():
     expected value. Afterwards, the resulting system is inverted again. This operation
     must yield the original system.
 
-
-
     """
     # fix ---------------------------------------
     lcs0_in_lcs1 = tf.LocalCoordinateSystem.construct_from_xy_and_orientation(
@@ -1016,14 +1007,6 @@ def coordinate_system_time_interpolation_test_case(
         Expected orientations
     coordinates_exp :
         Expected coordinates
-    lcs: tf.LocalCoordinateSystem :
-
-    time_interp: pd.DatetimeIndex :
-
-    orientation_exp: np.ndarray :
-
-    coordinates_exp: np.ndarray :
-
 
     """
     lcs_interp = lcs.interp_time(time_interp)
