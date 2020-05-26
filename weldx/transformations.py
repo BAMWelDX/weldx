@@ -44,7 +44,7 @@ def rotation_matrix_y(angle):
 
     Returns
     -------
-    numpy.ndarray
+    np.ndarray
         Rotation matrix
 
     """
@@ -797,7 +797,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        type
+        LocalCoordinateSystem
             Coordinate system with interpolated data
 
         """
@@ -1002,7 +1002,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        type
+        LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -1070,8 +1070,8 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        type
-            Transformed) data
+        np.ndarray
+            Transformed data
 
         """
         data_struct = self._data[data_name]
@@ -1110,7 +1110,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        type
+        np.ndarray
             Transformed data
 
         """
@@ -1161,7 +1161,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        type
+        list
             List of neighbors
 
         """
@@ -1178,7 +1178,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        type
+        int
             Number of neighbors
 
         """
@@ -1219,7 +1219,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        type
+        CoordinateSystemManager
             Coordinate system manager with interpolated data
 
         """
@@ -1243,7 +1243,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        type
+        pd.DatetimeIndex
             Time union
 
         """
