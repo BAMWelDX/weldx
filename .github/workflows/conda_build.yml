@@ -34,13 +34,12 @@ jobs:
       - name: Setup Conda Environment
         uses: goanpeca/setup-miniconda@v1
         with:
-          auto-update-conda: false
+          auto-update-conda: true
           environment-file: ./conda.recipe/build_env.yml
           activate-environment: build_env
           channels: defaults,conda-forge
           auto-activate-base: false
           use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
-          notify_outdated_conda: false
 
       - name: conda info
         shell: bash -l {0}
@@ -55,6 +54,7 @@ jobs:
         run: conda build .
 
       - name: set package file env
+        shell: bash -l {0}
         run: echo ::set-env name=PACKAGE_DIR::$(conda build . --output)
 
       - name: upload package to dev label on Anaconda Cloud
