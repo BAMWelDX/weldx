@@ -39,6 +39,10 @@ class LineSegment:
         self._calculate_length()
 
     def __repr__(self):
+        """Output representation of a LineSegment."""
+        return "LineSegment('points'=%r, 'length'=%r)" % (self._points, self._length,)
+
+    def __str__(self):
         """Output simple string representation of a LineSegment."""
         p1 = np.array2string(self.points[:, 0], precision=2, separator=",")
         p2 = np.array2string(self.points[:, 1], precision=2, separator=",")
@@ -238,9 +242,6 @@ class LineSegment:
         new_segment.apply_translation(vector)
         return new_segment
 
-    def __repr__(self):
-        return "LineSegment('points'=%r, 'length'=%r)" % (self._points, self._length,)
-
 
 # ArcSegment ------------------------------------------------------------------
 
@@ -282,6 +283,19 @@ class ArcSegment:
         self._calculate_arc_parameters()
 
     def __repr__(self):
+        """Output representation of an ArcSegment."""
+        return (
+            "ArcSegment('points': %r, 'arc_angle': %r, 'radius': %r, 'sign_arc_winding': %r, 'arc_length': %r)"
+            % (
+                self._points,
+                self._arc_angle,
+                self._radius,
+                self._sign_arc_winding,
+                self._arc_length,
+            )
+        )
+
+    def __str__(self):
         """Output simple string representation of an ArcSegment."""
         values = np.array(
             [self._radius, self._arc_angle / np.pi * 180, self._arc_length]
@@ -653,18 +667,6 @@ class ArcSegment:
         new_segment.apply_translation(vector)
         return new_segment
 
-    def __repr__(self):
-        return (
-            "ArcSegment('points': %r, 'arc_angle': %r, 'radius': %r, 'sign_arc_winding': %r, 'arc_length': %r)"
-            % (
-                self._points,
-                self._arc_angle,
-                self._radius,
-                self._sign_arc_winding,
-                self._arc_length,
-            )
-        )
-
 
 # Shape class -----------------------------------------------------------------
 
@@ -690,6 +692,10 @@ class Shape:
         self._segments = segments
 
     def __repr__(self):
+        """Output representation of a Shape."""
+        return "Shape('segments': %r)" % (self._segments)
+
+    def __str__(self):
         """Output simple string representation of a Shape (listing segments)."""
         shape_str = "\n".join(repr(s) for s in self.segments)
         return f"{shape_str}"
@@ -1048,9 +1054,6 @@ class Shape:
         new_shape.apply_translation(vector)
         return new_shape
 
-    def __repr__(self):
-        return "Shape('segments': %r)" % (self._segments)
-
 
 # Profile class ---------------------------------------------------------------
 
@@ -1080,6 +1083,10 @@ class Profile:
         self.add_shapes(shapes)
 
     def __repr__(self):
+        """Output representation of a Profile."""
+        return "Profile('shapes': %r)" % self._shapes
+
+    def __str__(self):
         """Output simple string representation of a Profile for users."""
         repr_str = f"Profile with {len(self.shapes)} shapes\n"
         repr_str = repr_str + "\n\n".join(
@@ -1195,9 +1202,6 @@ class Profile:
         """
         return self._shapes
 
-    def __repr__(self):
-        return "Profile('shapes': %r)" % self._shapes
-
 
 # Trace segment classes -------------------------------------------------------
 
@@ -1221,6 +1225,10 @@ class LinearHorizontalTraceSegment:
         if length <= 0:
             raise ValueError("'length' must have a positive value.")
         self._length = float(length)
+
+    def __repr__(self):
+        """Output representation of a LinearHorizontalTraceSegment."""
+        return "LinearHorizontalTraceSegment('length': %r)" % self._length
 
     @property
     def length(self):
@@ -1252,9 +1260,6 @@ class LinearHorizontalTraceSegment:
 
         coordinates = np.array([1, 0, 0]) * relative_position * self._length
         return tf.LocalCoordinateSystem(coordinates=coordinates)
-
-    def __repr__(self):
-        return "LinearHorizontalTraceSegment('length': %r)" % self._length
 
 
 class RadialHorizontalTraceSegment:
@@ -1288,6 +1293,13 @@ class RadialHorizontalTraceSegment:
             self._sign_winding = -1
         else:
             self._sign_winding = 1
+
+    def __repr__(self):
+        """Output representation of a RadialHorizontalTraceSegment."""
+        return (
+            "RadialHorizontalTraceSegment('radius': %r, 'angle': %r, 'length': %r, 'sign_winding': %r)"
+            % (self._radius, self._angle, self._length, self._sign_winding)
+        )
 
     @staticmethod
     def _arc_length(radius, angle):
@@ -1380,12 +1392,6 @@ class RadialHorizontalTraceSegment:
         coordinates = np.matmul(orientation, translation) - translation
         return tf.LocalCoordinateSystem(orientation, coordinates)
 
-    def __repr__(self):
-        return (
-            "RadialHorizontalTraceSegment('radius': %r, 'angle': %r, 'length': %r, 'sign_winding': %r)"
-            % (self._radius, self._angle, self._length, self._sign_winding)
-        )
-
 
 # Trace class -----------------------------------------------------------------
 
@@ -1419,6 +1425,19 @@ class Trace:
 
         if self.length <= 0:
             raise ValueError("Trace has no length.")
+
+    def __repr__(self):
+        """Output representation of a Trace."""
+        return (
+            "Trace('segments': %r, 'coordinate_system_lookup': %r, "
+            "'total_length_lookup': %r, 'segment_length_lookup': %r)"
+            % (
+                self._segments,
+                self._coordinate_system_lookup,
+                self._total_length_lookup,
+                self._segment_length_lookup,
+            )
+        )
 
     def _create_lookups(self, coordinate_system_start):
         """Create lookup tables.
@@ -1585,18 +1604,6 @@ class Trace:
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
-    def __repr__(self):
-        return (
-            "Trace('segments': %r, 'coordinate_system_lookup': %r, "
-            "'total_length_lookup': %r, 'segment_length_lookup': %r)"
-            % (
-                self._segments,
-                self._coordinate_system_lookup,
-                self._total_length_lookup,
-                self._segment_length_lookup,
-            )
-        )
-
 
 # Linear profile interpolation class ------------------------------------------
 
@@ -1679,6 +1686,13 @@ class VariableProfile:
         self._profiles = profiles
         self._locations = locations
         self._interpolation_schemes = interpolation_schemes
+
+    def __repr__(self):
+        """Output representation of a VariableProfile."""
+        return (
+            "VariableProfile('profiles': %r, 'locations' %r, 'interpolation_schemes' %r)"
+            % (self._profiles, self._locations, self._interpolation_schemes)
+        )
 
     def _segment_index(self, location):
         """Get the index of the segment at a certain location.
@@ -1807,12 +1821,6 @@ class VariableProfile:
             self._profiles[idx], self._profiles[idx + 1], weight
         )
 
-    def __repr__(self):
-        return (
-            "VariableProfile('profiles': %r, 'locations' %r, 'interpolation_schemes' %r)"
-            % (self._profiles, self._locations, self._interpolation_schemes)
-        )
-
 
 #  Geometry class -------------------------------------------------------------
 
@@ -1838,6 +1846,10 @@ class Geometry:
         self._check_inputs(profile, trace)
         self._profile = profile
         self._trace = trace
+
+    def __repr__(self):
+        """Output representation of a Geometry class."""
+        return "Geometry('profile': %r, 'trace': %r)" % (self._profile, self._trace)
 
     @staticmethod
     def _check_inputs(profile, trace):
@@ -2037,6 +2049,3 @@ class Geometry:
         return self._rasterize_variable_profile(
             profile_raster_width, trace_raster_width
         )
-
-    def __repr__(self):
-        return "Geometry('profile': %r, 'trace': %r)" % (self._profile, self._trace)

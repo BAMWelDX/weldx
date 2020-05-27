@@ -871,6 +871,13 @@ class CoordinateSystemManager:
         self._data = {}
         self._add_coordinate_system_node(root_coordinate_system_name)
 
+    def __repr__(self):
+        """Output representation of a CoordinateSystemManager class."""
+        return "CoordinateSystemManager('graph': %r, 'data': %r)" % (
+            self._graph,
+            self._data,
+        )
+
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
         self._graph.add_node(coordinate_system_name, data=[])
@@ -1261,9 +1268,3 @@ class CoordinateSystemManager:
                 time_union = time_union.union(time_edge)
 
         return time_union
-
-    def __repr__(self):
-        return "CoordinateSystemManager('graph': %r, 'data': %r)" % (
-            self._graph,
-            self._data,
-        )
