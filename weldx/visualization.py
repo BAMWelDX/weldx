@@ -3,7 +3,6 @@
 import numpy as np
 
 
-
 def plot_coordinate_system(
     coordinate_system, axes, color=None, label=None, time_idx=None
 ):
@@ -24,6 +23,7 @@ def plot_coordinate_system(
     time_idx :
         Selects time dependent data by index if the coordinate system has
         a time dependency.
+
     """
     if coordinate_system.time is not None and time_idx is None:
         time_idx = 0
