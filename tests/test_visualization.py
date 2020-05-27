@@ -14,7 +14,7 @@ import pytest
 
 
 def test_plot_coordinate_system():
-    """This test just executes all possible code paths."""
+    """Test executing all possible code paths."""
     lcs_constant = tf.LocalCoordinateSystem()
 
     time = pd.DatetimeIndex(["2016-01-10", "2016-01-11"])
@@ -26,6 +26,7 @@ def test_plot_coordinate_system():
     lcs_tdp = tf.LocalCoordinateSystem(
         orientation=orientation_tdp, coordinates=coordinates_tdp, time=time
     )
+
     fig = plt.figure()
     ax = fig.gca(projection="3d")
 
@@ -41,7 +42,7 @@ def test_plot_coordinate_system():
 
 
 def test_set_axes_equal():
-    """This test just executes all possible code paths."""
+    """Test executing all possible code paths."""
     fig = plt.figure()
     ax = fig.gca(projection="3d")
     vs.set_axes_equal(ax)

@@ -12,26 +12,42 @@ from scipy.spatial.transform import Slerp
 import weldx.transformations as tf
 
 
-def is_column_in_matrix(column, matrix):
-    """
-    Check if a column (1d array) can be found inside of a matrix.
+def is_column_in_matrix(column, matrix) -> bool:
+    """Check if a column (1d array) can be found inside of a matrix.
 
-    :param column: Column that should be checked
-    :param matrix: Matrix
-    :return: True or False
+    Parameters
+    ----------
+    column :
+        Column that should be checked
+    matrix :
+        Matrix
+
+    Returns
+    -------
+    bool
+        True or False
+
     """
     return is_row_in_matrix(column, np.transpose(matrix))
 
 
-def is_row_in_matrix(row, matrix):
-    """
-    Check if a row (1d array) can be found inside of a matrix.
+def is_row_in_matrix(row, matrix) -> bool:
+    """Check if a row (1d array) can be found inside of a matrix.
 
     source: https://codereview.stackexchange.com/questions/193835
 
-    :param row: Row that should be checked
-    :param matrix: Matrix
-    :return: True or False
+    Parameters
+    ----------
+    row :
+        Row that should be checked
+    matrix :
+        Matrix
+
+    Returns
+    -------
+    bool
+        True or False
+
     """
     if not matrix.shape[1] == np.array(row).size:
         return False
@@ -39,25 +55,37 @@ def is_row_in_matrix(row, matrix):
     return (matrix == row).all(axis=1).any()
 
 
-def to_float_array(container):
-    """
-    Cast the passed container to a numpy array of floats.
+def to_float_array(container) -> np.ndarray:
+    """Cast the passed container to a numpy array of floats.
 
-    :param container: Container which can be cast to a numpy array
-    :return:
+    Parameters
+    ----------
+    container :
+        Container which can be cast to a numpy array
+
+    Returns
+    -------
+    np.ndarray
+
     """
     return np.array(container, dtype=float)
 
 
-def to_list(var):
-    """
-    Store the passed variable into a list and return it.
+def to_list(var) -> list:
+    """Store the passed variable into a list and return it.
 
     If the variable is already a list, it is returned without modification.
     If 'None' is passed, the function returns an empty list.
 
-    :param var: Arbitrary variable
-    :return: List
+    Parameters
+    ----------
+    var :
+        Arbitrary variable
+
+    Returns
+    -------
+    list
+
     """
     if isinstance(var, list):
         return var
@@ -66,14 +94,23 @@ def to_list(var):
     return [var]
 
 
-def matrix_is_close(mat_a, mat_b, abs_tol=1e-9):
-    """
-    Check if a matrix is close or equal to another matrix.
+def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
+    """Check if a matrix is close or equal to another matrix.
 
-    :param mat_a: First matrix
-    :param mat_b: Second matrix
-    :param abs_tol: Absolute tolerance
-    :return: True or False
+    Parameters
+    ----------
+    mat_a :
+        First matrix
+    mat_b :
+        Second matrix
+    abs_tol :
+        Absolute tolerance (Default value = 1e-9)
+
+    Returns
+    -------
+    bool
+        True or False
+
     """
     mat_a = to_float_array(mat_a)
     mat_b = to_float_array(mat_b)
@@ -87,14 +124,23 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9):
     return True
 
 
-def vector_is_close(vec_a, vec_b, abs_tol=1e-9):
-    """
-    Check if a vector is close or equal to another vector.
+def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
+    """Check if a vector is close or equal to another vector.
 
-    :param vec_a: First vector
-    :param vec_b: Second vector
-    :param abs_tol: Absolute tolerance
-    :return: True or False
+    Parameters
+    ----------
+    vec_a :
+        First vector
+    vec_b :
+        Second vector
+    abs_tol :
+        Absolute tolerance (Default value = 1e-9)
+
+    Returns
+    -------
+    bool
+        True or False
+
     """
     vec_a = to_float_array(vec_a)
     vec_b = to_float_array(vec_b)
@@ -108,25 +154,42 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9):
     return True
 
 
-def mat_vec_mul(a, b):
-    """
-    Matrix x Vector multiplication using matmul with newaxis for correct broadcasting.
+def mat_vec_mul(a, b) -> np.ndarray:
+    """Matrix, Vector multiplication using matmul with newaxis for correct broadcasting.
 
-    :param a: Input Matrix [m, n]
-    :param b: Input Vector to be multiplied [n, ]
-    :return: Resulting vector [n, ]
+    Parameters
+    ----------
+    a :
+        Input Matrix [m, n]
+    b :
+        Input Vector to be multiplied [n, ]
+
+    Returns
+    -------
+    np.ndarray
+        Resulting vector [n, ]
+
     """
     return np.matmul(a, b[..., np.newaxis]).squeeze()
 
 
-def swap_list_items(arr, i1, i2):
-    """
-    Swap position of two items in a list.
+def swap_list_items(arr, i1, i2) -> list:
+    """Swap position of two items in a list.
 
-    :param arr: list in which to swap elements
-    :param i1: element 1 in list
-    :param i2: element 2 in list
-    :return: copy of list with swapped elements
+    Parameters
+    ----------
+    arr :
+        list in which to swap elements
+    i1 :
+        element 1 in list
+    i2 :
+        element 2 in list
+
+    Returns
+    -------
+    list
+        copy of list with swapped elements
+
     """
     i = list(arr).copy()
     a, b = i.index(i1), i.index(i2)
@@ -135,13 +198,21 @@ def swap_list_items(arr, i1, i2):
 
 
 def get_time_union(list_of_objects):
-    """
-    Generate a merged union of pd.DatetimeIndex from list of inputs.
+    """Generate a merged union of pd.DatetimeIndex from list of inputs.
 
     The functions tries to merge common inputs that are "time-like" or might have time
     coordinates such as xarray objects, tf.LocalCoordinateSystem and other time objects
-    :param list_of_objects: list of input objects to merge
-    :return: pd.DatetimeIndex with merge times
+
+    Parameters
+    ----------
+    list_of_objects :
+        list of input objects to merge
+
+    Returns
+    -------
+    pd.DatetimeIndex
+        pandas DatetimeIndex with merged times
+
     """
     # TODO: make non-nested function
     def _get_time(input_object):
@@ -163,14 +234,23 @@ def get_time_union(list_of_objects):
     return times
 
 
-def xr_transpose_matrix_data(da, dim1, dim2):
-    """
-    Transpose data along two dimensions in an xarray.DataArray.
+def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
+    """Transpose data along two dimensions in an xarray DataArray.
 
-    :param da: xarray.DataArray to transpose
-    :param dim1: name of the first dimension
-    :param dim2: name of the second dimension
-    :return: xarray.DataArray with transposed data at specified dimensions
+    Parameters
+    ----------
+    da :
+        xarray DataArray to transpose
+    dim1 :
+        name of the first dimension
+    dim2 :
+        name of the second dimension
+
+    Returns
+    -------
+    xr.DataArray
+        xarray DataArray with transposed data at specified dimensions
+
     """
     i = swap_list_items(da.dims, dim1, dim2)
 
@@ -186,24 +266,40 @@ def xr_matmul(
     trans_a=False,
     trans_b=False,
     **apply_kwargs,
-):
-    """
-    Calculate broadcasted np.matmul(a,b) for xarray objects.
+) -> xr.DataArray:
+    """Calculate broadcasted np.matmul(a,b) for xarray objects.
 
     Should work for any size and shape of quadratic matrices contained in a DataArray.
     Ordering, broadcasting of dimensions should be taken care of by xarray internally.
     This can be used for both matrix * matrix and matrix * vector operations.
-    :param a: xarray object containing the first matrix
-    :param b: xarray object containing the second matrix
-    :param dims_a: name and order of dimensions in the first object
-    :param dims_b: name and order of dimensions in the second object
-    (if None, use dims_a)
-    :param dims_out: name and order of dimensions in the resulting object
-    (if None, use dims_a unless dims_b has less items than dims_b)
-    :param trans_a: flag if matrix in a should be transposed
-    :param trans_b: flag if matrix in b should be transposed
-    :param: **apply_kwargs: parameters to pass on to xr.apply_ufunc
-    :return:
+
+    Parameters
+    ----------
+    a :
+        xarray object containing the first matrix
+    b :
+        xarray object containing the second matrix
+    dims_a :
+        name and order of dimensions in the first object
+    dims_b :
+        name and order of dimensions in the second object
+        (if None, use dims_a) (Default value = None)
+    dims_out :
+        name and order of dimensions in the resulting object
+        (if None, use dims_a unless dims_b has less items than dims_b)
+        (Default value = None)
+    trans_a :
+        flag if matrix in a should be transposed (Default value = False)
+    trans_b :
+        flag if matrix in b should be transposed (Default value = False)
+    **apply_kwargs :
+        additional kwargs passed on to ur.apply_ufunc
+
+
+    Returns
+    -------
+    xr.DataArray
+
     """
     if dims_b is None:
         dims_b = dims_a
@@ -232,27 +328,43 @@ def xr_matmul(
     )
 
 
-def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]):
-    """
-    Check if  matrix along specific dimensions in a DataArray is orthogonal.
+def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
+    """Check if  matrix along specific dimensions in a DataArray is orthogonal.
 
     TODO: make more general
 
-    :param da: xarray.DataArray to test
-    :param dims: list of dimensions along which to test
-    :return: True if all matrices are orthogonal.
+    Parameters
+    ----------
+    da :
+        xarray DataArray to test
+    dims :
+        list of dimensions along which to test
+
+    Returns
+    -------
+    bool
+        True if all matrices are orthogonal.
+
     """
     eye = np.eye(len(da.coords[dims[0]]), len(da.coords[dims[1]]))
     return np.allclose(xr_matmul(da, da, dims, trans_b=True), eye)
 
 
-def xr_fill_all(da, order="bf"):
-    """
-    Fill NaN values along all dimensions in xarray.DataArray.
+def xr_fill_all(da, order="bf") -> xr.DataArray:
+    """Fill NaN values along all dimensions in xarray DataArray.
 
-    :param da: xarray object to fill
-    :param order: order in which to apply bfill/ffill operation
-    :return: xarray object with NaN values filled in all dimensions
+    Parameters
+    ----------
+    da :
+        xarray object to fill
+    order :
+        order in which to apply bfill/ffill operation (Default value = "bf")
+
+    Returns
+    -------
+    xr.DataArray
+        xarray object with NaN values filled in all dimensions
+
     """
     if order == "bf":
         for dim in da.dims:
@@ -274,18 +386,37 @@ def xr_interp_like(
     method: str = "linear",
     assume_sorted: bool = False,
 ) -> xr.DataArray:
-    """
-    Interpolate DataArray along dimensions of another DataArray.
+    """Interpolate DataArray along dimensions of another DataArray.
 
     Provides some utility options for handling out of range values and broadcasting.
-    :param da1: xarray object with data to interpolate
-    :param da2: xarray or dict-like object along which dimensions to interpolate
-    :param interp_coords: if not None, only interpolate along these coordinates of da2
-    :param broadcast_missing: broadcast da1 along all additional dimensions of da2
-    :param fillna: fill out of range NaN values (default = True)
-    :param method: interpolation method to pass on to xarray.interp_like
-    :param assume_sorted: assume_sorted flag to pass on to xarray.interp_like
-    :return: interpolated DataArray
+
+    Parameters
+    ----------
+    da1 :
+        xarray object with data to interpolate
+    da2 :
+        xarray or dict-like object along which dimensions to interpolate
+    interp_coords :
+        if not None, only interpolate along these coordinates of da2
+        (Default value = None)
+    broadcast_missing :
+        broadcast da1 along all additional dimensions of da2
+        (Default value = False)
+    fillna :
+        fill out of range NaN values
+        (Default value = True)
+    method :
+        interpolation method to pass on to xarray.interp_like
+        (Default value = "linear")
+    assume_sorted :
+        assume_sorted flag to pass on to xarray.interp_like
+        (Default value = False)
+
+    Returns
+    -------
+    xr.DataArray
+        interpolated DataArray
+
     """
     if isinstance(da2, (xr.DataArray, xr.Dataset)):
         sel_coords = da2.coords  # remember original interpolation coordinates
@@ -353,12 +484,19 @@ def xr_interp_like(
 
 
 def xr_3d_vector(data, times=None) -> xr.DataArray:
-    """
-    Create an xarray 3d vector with correctly named dimensions and coordinates.
+    """Create an xarray 3d vector with correctly named dimensions and coordinates.
 
-    :param data: Data
-    :param times: Optional time data
-    :return: xarray.DataArray
+    Parameters
+    ----------
+    data :
+        Data
+    times :
+        Optional time data (Default value = None)
+
+    Returns
+    -------
+    xr.DataArray
+
     """
     if times is not None:
         dsx = xr.DataArray(
@@ -369,13 +507,20 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
     return dsx.astype(float)
 
 
-def xr_3d_matrix(data, times=None):
-    """
-    Create an xarray 3d matrix with correctly named dimensions and coordinates.
+def xr_3d_matrix(data, times=None) -> xr.DataArray:
+    """Create an xarray 3d matrix with correctly named dimensions and coordinates.
 
-    :param data: Data
-    :param times: Optional time data
-    :return: xarray.DataArray
+    Parameters
+    ----------
+    data :
+        Data
+    times :
+        Optional time data (Default value = None)
+
+    Returns
+    -------
+    xr.DataArray
+
     """
     if times is not None:
         dsx = xr.DataArray(
@@ -393,12 +538,20 @@ def xr_3d_matrix(data, times=None):
 def xr_interp_orientation_in_time(
     dsx: xr.DataArray, times: pd.DatetimeIndex
 ) -> xr.DataArray:
-    """
-    Interpolate an xarray DataArray that represents orientation data in time.
+    """Interpolate an xarray DataArray that represents orientation data in time.
 
-    :param dsx: xarray.DataArray
-    :param times: Time data
-    :return: Interpolated data
+    Parameters
+    ----------
+    dsx :
+        xarray DataArray containing the orientation as matrix
+    times :
+        Time data
+
+    Returns
+    -------
+    xr.DataArray
+        Interpolated data
+
     """
     if "time" not in dsx.coords:
         return dsx
@@ -432,12 +585,20 @@ def xr_interp_orientation_in_time(
 def xr_interp_coordinates_in_time(
     dsx: xr.DataArray, times: pd.DatetimeIndex
 ) -> xr.DataArray:
-    """
-    Interpolate an xarray DataArray that represents 3d coordinates in time.
+    """Interpolate an xarray DataArray that represents 3d coordinates in time.
 
-    :param dsx: xarray.DataArray
-    :param times: Time data
-    :return: Interpolated data
+    Parameters
+    ----------
+    dsx :
+        xarray DataArray
+    times :
+        Time data
+
+    Returns
+    -------
+    xr.DataArray
+        Interpolated data
+
     """
     return xr_interp_like(
         dsx, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
@@ -449,26 +610,25 @@ def xr_interp_coordinates_in_time(
 
 @xr.register_dataarray_accessor("weldx")
 class WeldxAccessor:  # pragma: no cover
-    """
-    Custom accessor for extending DataArray functionality.
+    """Custom accessor for extending DataArray functionality.
 
     See http://xarray.pydata.org/en/stable/internals.html#extending-xarray for details.
     """
 
     def __init__(self, xarray_obj):
-        """
-        Construct a WeldX xarray object.
-
-        :param xarray_obj: xarray object
-        """
+        """Construct a WeldX xarray object."""
         self._obj = xarray_obj
 
     def interp_like(self, da, *args, **kwargs):
-        """
-        Interpolate DataArray along dimensions of another DataArray.
+        """Interpolate DataArray along dimensions of another DataArray.
 
         Provides some utility options for handling out of range values and broadcasting.
         See xr_interp_like for docstring and details.
-        :return: interpolated DataArray
+
+        Returns
+        -------
+        xr.DataArray
+            interpolated DataArray
+
         """
         return xr_interp_like(self._obj, da, *args, **kwargs)

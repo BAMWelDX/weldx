@@ -10,9 +10,7 @@ __all__ = ["TimedeltaType"]
 
 
 class TimedeltaType(WeldxType):
-    """
-    A simple implementation of serializing a single pandas Timedelta.
-    """
+    """A simple implementation of serializing a single pandas Timedelta."""
 
     name = "time/timedelta"
     version = "1.0.0"

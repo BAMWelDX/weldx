@@ -8,8 +8,7 @@ from weldx.asdf.constants import SCHEMA_PATH
 
 
 def dict_to_tagged_tree(node, ctx):
-    """
-    Utility function simplify `to_tree` methods of  dataclass objects.
+    """Utility function simplify `to_tree` methods of  dataclass objects.
 
     The function requires the node to be convertible to dictionary via __dict__. And can
     therefor be applied to all classes created using the @dataclass operator.
@@ -21,9 +20,19 @@ def dict_to_tagged_tree(node, ctx):
         def to_tree(cls, node, ctx):
             tree = dict_to_tagged_tree(node, ctx)
             return tree```
-    :param node: node to write to asdf-tree
-    :param ctx: bast ctx object to pass along in the `to_tree` function
-    :return: The node dictionary as tagged and with None entries removed.
+
+    Parameters
+    ----------
+    node :
+        node to write to asdf-tree
+    ctx :
+        bast ctx object to pass along in the `to_tree` function
+
+    Returns
+    -------
+    type
+        The node dictionary as tagged and with None entries removed.
+
     """
     tree = {
         k: custom_tree_to_tagged_tree(v, ctx)
@@ -100,7 +109,34 @@ def make_asdf_schema_string(
     schema_description=_DEFAULT_ASDF_DESCRIPTION,
     flow_style="block",
 ):
-    """Generate default ASDF schema."""
+    """Generate default ASDF schema.
+
+    Parameters
+    ----------
+    asdf_name :
+
+    asdf_version :
+
+    properties :
+
+    description :
+         (Default value = None)
+    property_types :
+         (Default value = None)
+    required :
+         (Default value = None)
+    property_order :
+         (Default value = None)
+    additional_properties :
+         (Default value = "false")
+    schema_title :
+         (Default value = _DEFAULT_ASDF_DESCRIPTION)
+    schema_description :
+         (Default value = _DEFAULT_ASDF_DESCRIPTION)
+    flow_style :
+         (Default value = "block")
+
+   """
 
     if property_types is None:
         property_types = ["NO_TYPE"] * len(properties)
@@ -132,7 +168,24 @@ def make_asdf_schema_string(
 def make_python_class_string(
     class_name, asdf_name, asdf_version, properties, property_types, required
 ):
-    """Generate default python dataclass and ASDF Type."""
+    """Generate default python dataclass and ASDF Type.
+
+    Parameters
+    ----------
+    class_name :
+
+    asdf_name :
+
+    asdf_version :
+
+    properties :
+
+    property_types :
+
+    required :
+
+
+   """
 
     template_file = "asdf_dataclass.py.jinja"
     template = _env.get_template(template_file)
@@ -166,21 +219,32 @@ def create_asdf_dataclass(
     schema_title=_DEFAULT_ASDF_DESCRIPTION,
     schema_description=_DEFAULT_ASDF_DESCRIPTION,
 ):
-    """
-    Generates a ASDF schema file with corresponding python class for simple dataclasses.
+    """Generates a ASDF schema file with corresponding python class for simple dataclasses.
 
-    :param asdf_name: full schema name including prefixes
-    :param asdf_version: schema version as string
-    :param class_name: name of the Python class to generate
-    :param properties: list of property names
-    :param property_types: list with Python dtypes for each property
-    :param description: list of property descriptions
-    :param required: list of parameters that are set to required
-    :param property_order: asdf schema property order
-    :param schema_title: asdf schema title
-    :param schema_description: asdf schema description
-    :return:
-    """
+    Parameters
+    ----------
+    asdf_name :
+        full schema name including prefixes
+    asdf_version :
+        schema version as string
+    class_name :
+        name of the Python class to generate
+    properties :
+        list of property names
+    property_types :
+        list with Python dtypes for each property (Default value = None)
+    description :
+        list of property descriptions (Default value = None)
+    required :
+        list of parameters that are set to required (Default value = None)
+    property_order :
+        asdf schema property order (Default value = None)
+    schema_title :
+        asdf schema title (Default value = _DEFAULT_ASDF_DESCRIPTION)
+    schema_description :
+        asdf schema description (Default value = _DEFAULT_ASDF_DESCRIPTION)
+
+   """
     asdf_file_path = Path(
         SCHEMA_PATH + f"/weldx.bam.de/weldx/{asdf_name}-{asdf_version}.yaml"
     ).resolve()
