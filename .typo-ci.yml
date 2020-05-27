@@ -13,7 +13,7 @@ excluded_files:
 excluded_words:
   - typoci
   # weldx ---------------------------------------
-  - LocalCoodinateSystem
+  - LocalCoordinateSystem
   # python packages -----------------------------
   - asdf
   - numpy
