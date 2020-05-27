@@ -18,53 +18,90 @@ import weldx.utility as ut
 
 
 def rotation_matrix_x(angle):
-    """
-    Create a rotation matrix that rotates around the x-axis.
+    """Create a rotation matrix that rotates around the x-axis.
 
-    :param angle: Rotation angle
-    :return: Rotation matrix
+    Parameters
+    ----------
+    angle :
+        Rotation angle
+
+    Returns
+    -------
+    np.ndarray
+        Rotation matrix
+
     """
     return Rot.from_euler("x", angle).as_matrix()
 
 
 def rotation_matrix_y(angle):
-    """
-    Create a rotation matrix that rotates around the y-axis.
+    """Create a rotation matrix that rotates around the y-axis.
 
-    :param angle: Rotation angle
-    :return: Rotation matrix
+    Parameters
+    ----------
+    angle :
+        Rotation angle
+
+    Returns
+    -------
+    np.ndarray
+        Rotation matrix
+
     """
     return Rot.from_euler("y", angle).as_matrix()
 
 
-def rotation_matrix_z(angle):
-    """
-    Create a rotation matrix that rotates around the z-axis.
+def rotation_matrix_z(angle) -> np.ndarray:
+    """Create a rotation matrix that rotates around the z-axis.
 
-    :param angle: Rotation angle
-    :return: Rotation matrix
+    Parameters
+    ----------
+    angle :
+        Rotation angle
+
+    Returns
+    -------
+    np.ndarray
+        Rotation matrix
+
     """
     return Rot.from_euler("z", angle).as_matrix()
 
 
-def scale_matrix(scale_x, scale_y, scale_z):
-    """
-    Return a scaling matrix.
+def scale_matrix(scale_x, scale_y, scale_z) -> np.ndarray:
+    """Return a scaling matrix.
 
-    :param scale_x: Scaling factor in x direction
-    :param scale_y: Scaling factor in y direction
-    :param scale_z: Scaling factor in z direction
-    :return: Scaling matrix
+    Parameters
+    ----------
+    scale_x :
+        Scaling factor in x direction
+    scale_y :
+        Scaling factor in y direction
+    scale_z :
+        Scaling factor in z direction
+
+    Returns
+    -------
+    np.ndarray
+        Scaling matrix
+
     """
     return np.diag([scale_x, scale_y, scale_z]).astype(float)
 
 
 def normalize(a):
-    """
-    Normalize (l2 norm) an ndarray along the last dimension.
+    """Normalize (l2 norm) an ndarray along the last dimension.
 
-    :param a: data in ndarray
-    :return: Normalized ndarray
+    Parameters
+    ----------
+    a :
+        data in ndarray
+
+    Returns
+    -------
+    np.ndarray
+        Normalized ndarray
+
     """
     norm = np.linalg.norm(a, axis=(-1), keepdims=True)
     if not np.all(norm):
@@ -73,8 +110,7 @@ def normalize(a):
 
 
 def orientation_point_plane_containing_origin(point, p_a, p_b):
-    """
-    Determine a points orientation relative to a plane containing the origin.
+    """Determine a points orientation relative to a plane containing the origin.
 
     The side is defined by the winding order of the triangle 'origin - A -
     B'. When looking at it from the left-hand side, the ordering is clockwise
@@ -89,10 +125,20 @@ def orientation_point_plane_containing_origin(point, p_a, p_b):
     Additional note: The points A and B can also been considered as two
     vectors spanning the plane.
 
-    :param point: Point
-    :param p_a: Second point of the triangle 'origin - A - B'.
-    :param p_b: Third point of the triangle 'origin - A - B'.
-    :return: 1, -1 or 0 (see description)
+    Parameters
+    ----------
+    point :
+        Point
+    p_a :
+        Second point of the triangle 'origin - A - B'.
+    p_b :
+        Third point of the triangle 'origin - A - B'.
+
+    Returns
+    -------
+    int
+        1, -1 or 0 (see description)
+
     """
     if (
         math.isclose(np.linalg.norm(p_a), 0)
@@ -105,8 +151,7 @@ def orientation_point_plane_containing_origin(point, p_a, p_b):
 
 
 def orientation_point_plane(point, p_a, p_b, p_c):
-    """
-    Determine a points orientation relative to an arbitrary plane.
+    """Determine a points orientation relative to an arbitrary plane.
 
     The side is defined by the winding order of the triangle 'A - B - C'.
     When looking at it from the left-hand side, the ordering is clockwise
@@ -118,11 +163,22 @@ def orientation_point_plane(point, p_a, p_b, p_c):
     Note, that this function is not appropriate to check if a point lies on
     a plane since it has no tolerance to compensate for numerical errors.
 
-    :param point: Point
-    :param p_a: First point of the triangle 'A - B - C'.
-    :param p_b: Second point of the triangle 'A - B - C'.
-    :param p_c: Third point of the triangle 'A - B - C'.
-    :return: 1, -1 or 0 (see description)
+    Parameters
+    ----------
+    point :
+        Point
+    p_a :
+        First point of the triangle 'A - B - C'.
+    p_b :
+        Second point of the triangle 'A - B - C'.
+    p_c :
+        Third point of the triangle 'A - B - C'.
+
+    Returns
+    -------
+    int
+        1, -1 or 0 (see description)
+
     """
     vec_a_b = p_b - p_a
     vec_a_c = p_c - p_a
@@ -131,13 +187,22 @@ def orientation_point_plane(point, p_a, p_b, p_c):
 
 
 def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
-    """
-    Check if vectors are orthogonal.
+    """Check if vectors are orthogonal.
 
-    :param vec_u: First vector
-    :param vec_v: Second vector
-    :param tolerance: Numerical tolerance
-    :return: True or False
+    Parameters
+    ----------
+    vec_u :
+        First vector
+    vec_v :
+        Second vector
+    tolerance :
+        Numerical tolerance (Default value = 1e-9)
+
+    Returns
+    -------
+    bool
+        True or False
+
     """
     if math.isclose(np.dot(vec_u, vec_u), 0) or math.isclose(np.dot(vec_v, vec_v), 0):
         raise ValueError("One or both vectors have zero length.")
@@ -146,27 +211,44 @@ def is_orthogonal(vec_u, vec_v, tolerance=1e-9):
 
 
 def is_orthogonal_matrix(a: np.ndarray, atol=1e-9) -> bool:
-    """
-    Check if ndarray is orthogonal matrix in the last two dimensions.
+    """Check if ndarray is orthogonal matrix in the last two dimensions.
 
-    :param a: Matrix to check
-    :param atol: atol to pass onto np.allclose
-    :return: True if last 2 dimensions of a are orthogonal
+    Parameters
+    ----------
+    a :
+        Matrix to check
+    atol :
+        atol to pass onto np.allclose (Default value = 1e-9)
+
+    Returns
+    -------
+    bool
+        True if last 2 dimensions of a are orthogonal
+
     """
     return np.allclose(np.matmul(a, a.swapaxes(-1, -2)), np.eye(a.shape[-1]), atol=atol)
 
 
 def point_left_of_line(point, line_start, line_end):
-    """
-    Determine if a point lies left of a line.
+    """Determine if a point lies left of a line.
 
     Returns 1 if the point is left of the line and -1 if it is to the right.
     If the point is located on the line, this function returns 0.
 
-    :param point: Point
-    :param line_start: Starting point of the line
-    :param line_end: End point of the line
-    :return: 1,-1 or 0 (see description)
+    Parameters
+    ----------
+    point :
+        Point
+    line_start :
+        Starting point of the line
+    line_end :
+        End point of the line
+
+    Returns
+    -------
+    int
+        1,-1 or 0 (see description)
+
     """
     vec_line_start_end = line_end - line_start
     vec_line_start_point = point - line_start
@@ -174,13 +256,20 @@ def point_left_of_line(point, line_start, line_end):
 
 
 def reflection_sign(matrix):
-    """
-    Get a sign indicating if the transformation is a reflection.
+    """Get a sign indicating if the transformation is a reflection.
 
     Returns -1 if the transformation contains a reflection and 1 if not.
 
-    :param matrix: Transformation matrix
-    :return: 1 or -1 (see description)
+    Parameters
+    ----------
+    matrix :
+        Transformation matrix
+
+    Returns
+    -------
+    int
+        1 or -1 (see description)
+
     """
     sign = int(np.sign(np.linalg.det(matrix)))
 
@@ -191,16 +280,24 @@ def reflection_sign(matrix):
 
 
 def vector_points_to_left_of_vector(vector, vector_reference):
-    """
-    Determine if a vector points to the left of another vector.
+    """Determine if a vector points to the left of another vector.
 
     Returns 1 if the vector points to the left of the reference vector and
     -1 if it points to the right. In case both vectors point into the same
     or the opposite directions, this function returns 0.
 
-    :param vector: Vector
-    :param vector_reference: Reference vector
-    :return: 1,-1 or 0 (see description)
+    Parameters
+    ----------
+    vector :
+        Vector
+    vector_reference :
+        Reference vector
+
+    Returns
+    -------
+    int
+        1,-1 or 0 (see description)
+
     """
     return int(np.sign(np.linalg.det([vector_reference, vector])))
 
@@ -218,18 +315,28 @@ class LocalCoordinateSystem:
         time: pd.DatetimeIndex = None,
         construction_checks: bool = True,
     ):
-        """
-        Construct a cartesian coordinate system.
+        """Construct a cartesian coordinate system.
 
-        :param orientation: Matrix of 3 orthogonal column vectors which represent
-        the coordinate systems orientation. Keep in mind, that the columns of the
-        corresponding orientation matrix is equal to the normalized orientation
-        vectors. So each orthogonal transformation matrix can also be
-        provided as orientation.
-        :param coordinates: Coordinates of the origin
-        :param time: Time data for time dependent coordinate systems
-        :param construction_checks: If 'True', the validity of the data will be verified
-        :return: Cartesian coordinate system
+        Parameters
+        ----------
+        orientation :
+            Matrix of 3 orthogonal column vectors which represent
+            the coordinate systems orientation. Keep in mind, that the columns of the
+            corresponding orientation matrix is equal to the normalized orientation
+            vectors. So each orthogonal transformation matrix can also be
+            provided as orientation.
+        coordinates :
+            Coordinates of the origin
+        time :
+            Time data for time dependent coordinate systems
+        construction_checks :
+            If 'True', the validity of the data will be verified
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Cartesian coordinate system
+
         """
         if construction_checks:
             if orientation is None:
@@ -306,8 +413,7 @@ class LocalCoordinateSystem:
         )
 
     def __add__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
-        """
-        Add 2 coordinate systems.
+        """Add 2 coordinate systems.
 
         Generates a new coordinate system by treating the left-hand side
         coordinate system as being defined in the right hand-side coordinate
@@ -329,8 +435,16 @@ class LocalCoordinateSystem:
         system has no time component, but the right-hand side does, the resulting system
         has the same time components as the right-hand side system.
 
-        :param rhs_cs: Right-hand side coordinate system
-        :return: Resulting coordinate system.
+        Parameters
+        ----------
+        rhs_cs :
+            Right-hand side coordinate system
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Resulting coordinate system.
+
         """
         if self.time is not None:
             rhs_cs = rhs_cs.interp_time(self.time)
@@ -345,8 +459,7 @@ class LocalCoordinateSystem:
         return LocalCoordinateSystem(orientation, coordinates)
 
     def __sub__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
-        """
-        Subtract 2 coordinate systems.
+        """Subtract 2 coordinate systems.
 
         Generates a new coordinate system from two local coordinate systems
         with the same reference coordinate system. The resulting system is
@@ -367,8 +480,16 @@ class LocalCoordinateSystem:
         system has no time component, but the right-hand side does, the resulting system
         has the same time components as the right-hand side system.
 
-        :param rhs_cs: Right-hand side coordinate system
-        :return: Resulting coordinate system.
+        Parameters
+        ----------
+        rhs_cs :
+            Right-hand side coordinate system
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Resulting coordinate system.
+
         """
         rhs_cs_inv = rhs_cs.invert()
         return self + rhs_cs_inv
@@ -377,35 +498,46 @@ class LocalCoordinateSystem:
     def construct_from_euler(
         cls, sequence, angles, degrees=False, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
-        """
-        Construct a local coordinate system from an euler sequence.
+        """Construct a local coordinate system from an euler sequence.
 
         This function uses scipy.spatial.transform.Rotation.from_euler method to define
         the coordinate systems orientation. Take a look at it's documentation, if some
         information is missing here. The related parameter docs are a copy of the scipy
         documentation.
-        :param sequence: Specifies sequence of axes for rotations. Up to 3 characters
-        belonging to the set {‘X’, ‘Y’, ‘Z’} for intrinsic rotations, or {‘x’, ‘y’, ‘z’}
-        for extrinsic rotations. Extrinsic and intrinsic rotations cannot be mixed in
-        one function call.
-        :param angles: Euler angles specified in radians (degrees is False) or degrees
-        (degrees is True). For a single character seq, angles can be:
-        - a single value
-        - array_like with shape (N,), where each angle[i] corresponds to a single
-          rotation
-        - array_like with shape (N, 1), where each angle[i, 0] corresponds to a single
-          rotation
-        For 2- and 3-character wide seq, angles can be:
-        - array_like with shape (W,) where W is the width of seq, which corresponds to a
-          single rotation with W axes
-        - array_like with shape (N, W) where each angle[i] corresponds to a sequence of
-          Euler angles describing a single rotation
-        :param degrees: If True, then the given angles are assumed to be in degrees.
-        Default is False.
-        :param coordinates: Coordinates of the origin
-        :param time: Time data for time dependent coordinate systems
-        :return: Local coordinate system
-        :return:
+
+        Parameters
+        ----------
+        sequence :
+            Specifies sequence of axes for rotations. Up to 3 characters
+            belonging to the set {‘X’, ‘Y’, ‘Z’} for intrinsic rotations,
+            or {‘x’, ‘y’, ‘z’} for extrinsic rotations.
+            Extrinsic and intrinsic rotations cannot be mixed in one function call.
+        angles :
+            Euler angles specified in radians (degrees is False) or degrees
+            (degrees is True). For a single character seq, angles can be:
+            - a single value
+            - array_like with shape (N,), where each angle[i] corresponds to a single
+            rotation
+            - array_like with shape (N, 1), where each angle[i, 0] corresponds to a
+            single rotation
+            For 2- and 3-character wide seq, angles can be:
+            - array_like with shape (W,) where W is the width of seq, which corresponds
+            to a single rotation with W axes
+            - array_like with shape (N, W) where each angle[i] corresponds to a sequence
+            of Euler angles describing a single rotation
+        degrees :
+            If True, then the given angles are assumed to be in degrees.
+            Default is False.
+        coordinates :
+            Coordinates of the origin (Default value = None)
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Local coordinate system
+
         """
         orientation = Rot.from_euler(sequence, angles, degrees).as_matrix()
         return cls(orientation, coordinates=coordinates, time=time)
@@ -414,13 +546,22 @@ class LocalCoordinateSystem:
     def construct_from_orientation(
         cls, orientation, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
-        """
-        Construct a local coordinate system from orientation matrix.
+        """Construct a local coordinate system from orientation matrix.
 
-        :param orientation: Orthogonal transformation matrix
-        :param coordinates: Coordinates of the origin
-        :param time: Time data for time dependent coordinate systems
-        :return: Local coordinate system
+        Parameters
+        ----------
+        orientation :
+            Orthogonal transformation matrix
+        coordinates :
+            Coordinates of the origin (Default value = None)
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Local coordinate system
+
         """
         return cls(orientation, coordinates=coordinates, time=time)
 
@@ -428,15 +569,26 @@ class LocalCoordinateSystem:
     def construct_from_xyz(
         cls, vec_x, vec_y, vec_z, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
-        """
-        Construct a local coordinate system from 3 vectors defining the orientation.
+        """Construct a local coordinate system from 3 vectors defining the orientation.
 
-        :param vec_x: Vector defining the x-axis
-        :param vec_y: Vector defining the y-axis
-        :param vec_z: Vector defining the z-axis
-        :param coordinates: Coordinates of the origin
-        :param time: Time data for time dependent coordinate systems
-        :return: Local coordinate system
+        Parameters
+        ----------
+        vec_x :
+            Vector defining the x-axis
+        vec_y :
+            Vector defining the y-axis
+        vec_z :
+            Vector defining the z-axis
+        coordinates :
+            Coordinates of the origin (Default value = None)
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Local coordinate system
+
         """
         orientation = np.transpose([vec_x, vec_y, vec_z])
         return cls(orientation, coordinates=coordinates, time=time)
@@ -445,16 +597,27 @@ class LocalCoordinateSystem:
     def construct_from_xy_and_orientation(
         cls, vec_x, vec_y, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
-        """
-        Construct a coordinate system from 2 vectors and an orientation.
+        """Construct a coordinate system from 2 vectors and an orientation.
 
-        :param vec_x: Vector defining the x-axis
-        :param vec_y: Vector defining the y-axis
-        :param positive_orientation: Set to True if the orientation should
-        be positive and to False if not
-        :param coordinates: Coordinates of the origin
-        :param time: Time data for time dependent coordinate systems
-        :return: Local coordinate system
+        Parameters
+        ----------
+        vec_x :
+            Vector defining the x-axis
+        vec_y :
+            Vector defining the y-axis
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not (Default value = True)
+        coordinates :
+            Coordinates of the origin (Default value = None)
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Local coordinate system
+
         """
         vec_z = cls._calculate_orthogonal_axis(vec_x, vec_y) * cls._sign_orientation(
             positive_orientation
@@ -467,16 +630,27 @@ class LocalCoordinateSystem:
     def construct_from_yz_and_orientation(
         cls, vec_y, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
-        """
-        Construct a coordinate system from 2 vectors and an orientation.
+        """Construct a coordinate system from 2 vectors and an orientation.
 
-        :param vec_y: Vector defining the y-axis
-        :param vec_z: Vector defining the z-axis
-        :param positive_orientation: Set to True if the orientation should
-        be positive and to False if not
-        :param coordinates: Coordinates of the origin
-        :param time: Time data for time dependent coordinate systems
-        :return: Local coordinate system
+        Parameters
+        ----------
+        vec_y :
+            Vector defining the y-axis
+        vec_z :
+            Vector defining the z-axis
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not (Default value = True)
+        coordinates :
+            Coordinates of the origin (Default value = None)
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Local coordinate system
+
         """
         vec_x = cls._calculate_orthogonal_axis(vec_y, vec_z) * cls._sign_orientation(
             positive_orientation
@@ -489,16 +663,27 @@ class LocalCoordinateSystem:
     def construct_from_xz_and_orientation(
         cls, vec_x, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
-        """
-        Construct a coordinate system from 2 vectors and an orientation.
+        """Construct a coordinate system from 2 vectors and an orientation.
 
-        :param vec_x: Vector defining the x-axis
-        :param vec_z: Vector defining the z-axis
-        :param positive_orientation: Set to True if the orientation should
-        be positive and to False if not
-        :param coordinates: Coordinates of the origin
-        :param time: Time data for time dependent coordinate systems
-        :return: Local coordinate system
+        Parameters
+        ----------
+        vec_x :
+            Vector defining the x-axis
+        vec_z :
+            Vector defining the z-axis
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not (Default value = True)
+        coordinates :
+            Coordinates of the origin (Default value = None)
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Local coordinate system
+
         """
         vec_y = cls._calculate_orthogonal_axis(vec_z, vec_x) * cls._sign_orientation(
             positive_orientation
@@ -509,13 +694,20 @@ class LocalCoordinateSystem:
 
     @staticmethod
     def _sign_orientation(positive_orientation):
-        """
-        Get -1 or 1 depending on the coordinate systems orientation.
+        """Get -1 or 1 depending on the coordinate systems orientation.
 
-        :param positive_orientation: Set to True if the orientation should
-        be positive and to False if not
-        :return: 1 if the coordinate system has positive orientation,
-        -1 otherwise
+        Parameters
+        ----------
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not
+
+        Returns
+        -------
+        int
+            1 if the coordinate system has positive orientation,
+            -1 otherwise
+
         """
         if positive_orientation:
             return 1
@@ -523,42 +715,59 @@ class LocalCoordinateSystem:
 
     @staticmethod
     def _calculate_orthogonal_axis(a_0, a_1):
-        """
-        Calculate an axis which is orthogonal to two other axes.
+        """Calculate an axis which is orthogonal to two other axes.
 
         The calculated axis has a positive orientation towards the other 2
         axes.
 
-        :param a_0: First axis
-        :param a_1: Second axis
-        :return: Orthogonal axis
+        Parameters
+        ----------
+        a_0 :
+            First axis
+        a_1 :
+            Second axis
+
+        Returns
+        -------
+        np.ndarray
+            Orthogonal axis
+
         """
         return np.cross(a_0, a_1)
 
     @property
     def orientation(self) -> xr.DataArray:
-        """
-        Get the coordinate systems orientation matrix.
+        """Get the coordinate systems orientation matrix.
 
-        :return: Orientation matrix
+        Returns
+        -------
+        xr.DataArray
+            Orientation matrix
+
         """
         return self.dataset.orientation
 
     @property
     def coordinates(self) -> xr.DataArray:
-        """
-        Get the coordinate systems coordinates.
+        """Get the coordinate systems coordinates.
 
-        :return: Coordinates of the coordinate system
+        Returns
+        -------
+        xr.DataArray
+            Coordinates of the coordinate system
+
         """
         return self.dataset.coordinates
 
     @property
     def time(self) -> Union[pd.DatetimeIndex, None]:
-        """
-        Get the time union of the local coordinate system (or None if system is static).
+        """Get the time union of the local coordinate system (None if system is static).
 
-        :return: DateTimeIndex-like time union
+        Returns
+        -------
+        pd.DatetimeIndex
+            DateTimeIndex-like time union
+
         """
         if "time" in self._dataset.coords:
             return pd.DatetimeIndex(self._dataset.time.data)
@@ -566,21 +775,31 @@ class LocalCoordinateSystem:
 
     @property
     def dataset(self) -> xr.Dataset:
-        """
-        Get the underlying xarray.Dataset with ordered dimensions.
+        """Get the underlying xarray.Dataset with ordered dimensions.
 
-        :return: xarray Dataset with coordinates and orientation as DataVariables.
+        Returns
+        -------
+        xr.Dataset
+            xarray Dataset with coordinates and orientation as DataVariables.
+
         """
         return self._dataset.transpose(..., "c", "v")
 
     def interp_time(
         self, time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"]
     ) -> "LocalCoordinateSystem":
-        """
-        Interpolates the data in time.
+        """Interpolates the data in time.
 
-        :param time: Series of times.
-        :return: Coordinate system with interpolated data
+        Parameters
+        ----------
+        time :
+            Series of times.
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Coordinate system with interpolated data
+
         """
         if isinstance(time, LocalCoordinateSystem):
             time = time.time
@@ -599,12 +818,16 @@ class LocalCoordinateSystem:
         return LocalCoordinateSystem(orientation, coordinates)
 
     def invert(self) -> "LocalCoordinateSystem":
-        """
-        Get a local coordinate system defining the parent in the child system.
+        """Get a local coordinate system defining the parent in the child system.
 
         Inverse is defined as orientation_new=orientation.T,
         coordinates_new=orientation.T*(-coordinates)
-        :return: Inverted coordinate system.
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Inverted coordinate system.
+
         """
         orientation = ut.xr_transpose_matrix_data(self.orientation, dim1="c", dim2="v")
         coordinates = ut.xr_matmul(
@@ -631,11 +854,18 @@ class CoordinateSystemManager:
         data: xr.DataArray
 
     def __init__(self, root_coordinate_system_name: Hashable):
-        """
-        Construct a coordinate system manager.
+        """Construct a coordinate system manager.
 
-        :param root_coordinate_system_name: Name of the root coordinate system. This can
-        be any hashable type, but it is recommended to use strings.
+        Parameters
+        ----------
+        root_coordinate_system_name :
+            Name of the root coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+
+        Returns
+        -------
+        CoordinateSystemManager
+
         """
         self._graph = nx.DiGraph()
         self._data = {}
@@ -648,24 +878,30 @@ class CoordinateSystemManager:
     def _add_edges(
         self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
     ):
-        """
-        Add an edge to the internal graph.
+        """Add an edge to the internal graph.
 
-        :param node_from: Start node of the edge
-        :param node_to: End node of the edge
-        :param lcs: Local coordinate system
-        :return: ---
+        Parameters
+        ----------
+        node_from :
+            Start node of the edge
+        node_to :
+            End node of the edge
+        lcs :
+            Local coordinate system
+
         """
         self._graph.add_edge(node_from, node_to, lcs=lcs)
         self._graph.add_edge(node_to, node_from, lcs=lcs.invert())
 
     def _check_coordinate_system_exists(self, coordinate_system_name: Hashable):
-        """
-        Raise an exception if the specified coordinate system does not exist.
+        """Raise an exception if the specified coordinate system does not exist.
 
-        :param coordinate_system_name: Name of the coordinate system, that should be
-        checked.
-        :return: ---
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system, that should be
+            checked.
+
         """
         if not self.has_coordinate_system(coordinate_system_name):
             raise ValueError(
@@ -673,12 +909,13 @@ class CoordinateSystemManager:
             )
 
     def _check_new_coordinate_system_name(self, coordinate_system_name: Hashable):
-        """
-        Raise an exception if the new coordinate systems' name is invalid.
+        """Raise an exception if the new coordinate systems' name is invalid.
 
-        :param coordinate_system_name: Name of the new coordinate system, that should be
-        checked.
-        :return: ---
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system, that should be checked.
+
         """
         if not isinstance(coordinate_system_name, cl.Hashable):
             raise TypeError("The coordinate system name must be a hashable type.")
@@ -694,17 +931,21 @@ class CoordinateSystemManager:
         reference_system_name: Hashable,
         local_coordinate_system: LocalCoordinateSystem,
     ):
-        """
-        Add a coordinate system to the coordinate system manager.
+        """Add a coordinate system to the coordinate system manager.
 
-        :param coordinate_system_name: Name of the new coordinate system. This can be
-        any hashable type, but it is recommended to use strings.
-        :param reference_system_name: Name of the parent system. This must have been
-        already added.
-        :param local_coordinate_system: An instance of
-        weldx.transformations.LocalCoordinateSystem that describes how the new
-        coordinate system is oriented in its parent system.
-        :return: ---
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be
+            any hashable type, but it is recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been
+            already added.
+        local_coordinate_system :
+            An instance of
+            weldx.transformations.LocalCoordinateSystem that describes how the new
+            coordinate system is oriented in its parent system.
+
         """
         if not isinstance(local_coordinate_system, LocalCoordinateSystem):
             raise TypeError(
@@ -721,15 +962,19 @@ class CoordinateSystemManager:
     def assign_data(
         self, data: xr.DataArray, data_name: Hashable, coordinate_system_name: Hashable
     ):
-        """
-        Assign spatial data to a coordinate system.
+        """Assign spatial data to a coordinate system.
 
-        :param data: Spatial data
-        :param data_name: Name of the data. Can be any hashable type, but strings are
-        recommended.
-        :param coordinate_system_name: Name of the coordinate system the data should be
-        assigned to.
-        :return: ---
+        Parameters
+        ----------
+        data :
+            Spatial data
+        data_name :
+            Name of the data. Can be any hashable type, but strings are
+            recommended.
+        coordinate_system_name :
+            Name of the coordinate system the data should be
+            assigned to.
+
         """
         # TODO: How to handle time dependent data? some things to think about:
         # - times of coordinate system and data are not equal
@@ -746,12 +991,20 @@ class CoordinateSystemManager:
     def get_local_coordinate_system(
         self, coordinate_system_name: Hashable, reference_system_name: Hashable
     ) -> LocalCoordinateSystem:
-        """
-        Get a coordinate system in relation to another reference system.
+        """Get a coordinate system in relation to another reference system.
 
-        :param coordinate_system_name: Name of the coordinate system
-        :param reference_system_name: Name of the reference coordinate system
-        :return: Local coordinate system
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+        reference_system_name :
+            Name of the reference coordinate system
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            Local coordinate system
+
         """
         # TODO: Add time parameter
         # TODO: Treat static separately
@@ -770,34 +1023,58 @@ class CoordinateSystemManager:
         return lcs
 
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
-        """
-        Return 'True' if a coordinate system with specified name is part of the class.
+        """Return 'True' if a coordinate system with specified name already exists.
 
-        :param coordinate_system_name: Name of the coordinate system, that should be
-        checked.
-        :return: 'True' or 'False'
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system, that should be checked.
+
+        Returns
+        -------
+        bool
+            'True' or 'False'
+
         """
         return coordinate_system_name in self._graph.nodes
 
     def has_data(self, coordinate_system_name: Hashable, data_name: Hashable) -> bool:
-        """
-        Return 'True' if the desired coordinate system owns the specified data.
+        """Return 'True' if the desired coordinate system owns the specified data.
 
-        :param coordinate_system_name: Name of the coordinate system
-        :param data_name: Name of the data
-        :return: 'True' or 'False'
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+        data_name :
+            Name of the data
+
+        Returns
+        -------
+        bool
+            'True' or 'False'
+
         """
         return data_name in self._graph.nodes[coordinate_system_name]["data"]
 
-    def get_data(self, data_name, target_coordinate_system_name=None):
-        """
-        Get the specified data, optionally transformed into any coordinate system.
+    def get_data(
+        self, data_name, target_coordinate_system_name=None
+    ) -> Union[np.ndarray, xr.DataArray]:
+        """Get the specified data, optionally transformed into any coordinate system.
 
-        :param data_name: Name of the data
-        :param target_coordinate_system_name: Name of the target coordinate system. If
-        it is not None or not identical to the owning coordinate system name, the data
-        will be transformed to the desired system.
-        :return: (Transformed) data
+        Parameters
+        ----------
+        data_name :
+            Name of the data
+        target_coordinate_system_name :
+            Name of the target coordinate system. If it is not None or not identical to
+            the owning coordinate system name, the data will be transformed to the
+            desired system. (Default value = None)
+
+        Returns
+        -------
+        np.ndarray
+            Transformed data
+
         """
         data_struct = self._data[data_name]
         if (
@@ -818,17 +1095,26 @@ class CoordinateSystemManager:
         source_coordinate_system_name: Hashable,
         target_coordinate_system_name: Hashable,
     ):
-        """
-        Transform spatial data from one coordinate system to another.
+        """Transform spatial data from one coordinate system to another.
 
-        :param data: Point cloud input as array-like with cartesian x,y,z-data stored in
-        the last dimension. When using xarray objects, the vector dimension is expected
-        to be named "c" and have coordinates "x","y","z"
-        :param source_coordinate_system_name: Name of the coordinate system the data is
-        defined in
-        :param target_coordinate_system_name: Name of the coordinate system the data
-        should be transformed to
-        :return: Transformed data
+        Parameters
+        ----------
+        data :
+            Point cloud input as array-like with cartesian x,y,z-data stored in
+            the last dimension. When using xarray objects, the vector dimension is
+            expected to be named "c" and have coordinates "x","y","z"
+        source_coordinate_system_name :
+            Name of the coordinate system the data is
+            defined in
+        target_coordinate_system_name :
+            Name of the coordinate system the data
+            should be transformed to
+
+        Returns
+        -------
+        np.ndarray
+            Transformed data
+
         """
         lcs = self.get_local_coordinate_system(
             source_coordinate_system_name, target_coordinate_system_name
@@ -846,50 +1132,72 @@ class CoordinateSystemManager:
 
     @property
     def graph(self) -> nx.DiGraph:
-        """
-        Get the internal graph.
+        """Get the internal graph.
 
-        :return: networkx.DiGraph
+        Returns
+        -------
+        networkx.DiGraph
+
         """
         return self._graph
 
     @property
     def number_of_coordinate_systems(self) -> int:
-        """
-        Get the number of coordinate systems inside the coordinate system manager.
+        """Get the number of coordinate systems inside the coordinate system manager.
 
-        :return: Number of coordinate systems
+        Returns
+        -------
+        int
+            Number of coordinate systems
+
         """
         return self._graph.number_of_nodes()
 
     def neighbors(self, coordinate_system_name: Hashable) -> List:
-        """
-        Get a list of neighbors of a certain coordinate system.
+        """Get a list of neighbors of a certain coordinate system.
 
-        :param coordinate_system_name: Name of the coordinate system
-        :return: List of neighbors
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+
+        Returns
+        -------
+        list
+            List of neighbors
+
         """
         self._check_coordinate_system_exists(coordinate_system_name)
         return list(self._graph.neighbors(coordinate_system_name))
 
     def number_of_neighbors(self, coordinate_system_name) -> int:
-        """
-        Get the number of neighbors  of a certain coordinate system.
+        """Get the number of neighbors  of a certain coordinate system.
 
-        :param coordinate_system_name: Name of the coordinate system
-        :return: Number of neighbors
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+
+        Returns
+        -------
+        int
+            Number of neighbors
+
         """
         return len(self.neighbors(coordinate_system_name))
 
     def is_neighbor_of(
         self, coordinate_system_name_0: Hashable, coordinate_system_name_1: Hashable
     ) -> bool:
-        """
-        Get a boolean result, specifying if 2 coordinate systems are neighbors.
+        """Get a boolean result, specifying if 2 coordinate systems are neighbors.
 
-        :param coordinate_system_name_0: Name of the first coordinate system
-        :param coordinate_system_name_1: Name of the second coordinate system
-        :return:
+        Parameters
+        ----------
+        coordinate_system_name_0 :
+            Name of the first coordinate system
+        coordinate_system_name_1 :
+            Name of the second coordinate system
+
         """
         self._check_coordinate_system_exists(coordinate_system_name_0)
         self._check_coordinate_system_exists(coordinate_system_name_1)
@@ -901,13 +1209,21 @@ class CoordinateSystemManager:
         time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
         inplace: bool = False,
     ) -> "CoordinateSystemManager":
-        """
-        Interpolates the coordinate systems in time.
+        """Interpolates the coordinate systems in time.
 
-        :param time: Time data.
-        :param inplace: If 'True' the interpolation is performed in place, otherwise a
-        new instance is returned.
-        :return: Coordinate system manager with interpolated data
+        Parameters
+        ----------
+        time :
+            Time data.
+        inplace :
+            If 'True' the interpolation is performed in place, otherwise a
+            new instance is returned. (Default value = False)
+
+        Returns
+        -------
+        CoordinateSystemManager
+            Coordinate system manager with interpolated data
+
         """
         if inplace:
             for edge in self._graph.edges:
@@ -919,12 +1235,19 @@ class CoordinateSystemManager:
         return deepcopy(self).interp_time(time, inplace=True)
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
-        """
-        Get the time union of all or selected local coordinate systems.
+        """Get the time union of all or selected local coordinate systems.
 
-        :param list_of_edges: If not None, the union is only calculated from the
-        specified edges
-        :return: Time union
+        Parameters
+        ----------
+        list_of_edges :
+            If not None, the union is only calculated from the
+            specified edges (Default value = None)
+
+        Returns
+        -------
+        pd.DatetimeIndex
+            Time union
+
         """
         edges = self.graph.edges
         if list_of_edges is None:

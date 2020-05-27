@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 """Python Library description and install setup."""
 
-from setuptools import setup, find_packages
 import versioneer
+from setuptools import setup, find_packages
 
 requirements = [
     "numpy>=0.18",
