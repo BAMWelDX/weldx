@@ -3,7 +3,6 @@
 
 import numpy as np
 import pandas as pd
-from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 from weldx.asdf.types import WeldxType
 
@@ -22,16 +21,14 @@ class TimedeltaIndexType(WeldxType):
         """Serialize TimedeltaIndex to tree."""
         tree = {}
         if node.inferred_freq is not None:
-            tree["freq"] = custom_tree_to_tagged_tree(node.inferred_freq, ctx)
+            tree["freq"] = node.inferred_freq
         else:
-            tree["values"] = custom_tree_to_tagged_tree(
-                node.values.astype(np.int64), ctx
-            )
+            tree["values"] = node.values.astype(np.int64)
 
-        tree["start"] = custom_tree_to_tagged_tree(node[0], ctx)
-        tree["end"] = custom_tree_to_tagged_tree(node[-1], ctx)
-        tree["min"] = custom_tree_to_tagged_tree(node.min(), ctx)
-        tree["max"] = custom_tree_to_tagged_tree(node.max(), ctx)
+        tree["start"] = node[0]
+        tree["end"] = node[-1]
+        tree["min"] = node.min()
+        tree["max"] = node.max()
 
         return tree
 
@@ -42,5 +39,5 @@ class TimedeltaIndexType(WeldxType):
             return pd.timedelta_range(
                 start=tree["start"], end=tree["end"], freq=tree["freq"]
             )
-        values = tagged_tree_to_custom_tree(tree["values"], ctx)
+        values = tree["values"]
         return pd.TimedeltaIndex(values)

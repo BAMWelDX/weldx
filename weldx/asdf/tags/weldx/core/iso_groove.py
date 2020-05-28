@@ -1707,7 +1707,7 @@ class GrooveType(WeldxType):
         """Convert to tagged tree and remove all None entries from node dictionary."""
         if isinstance(node, tuple(_groove_type_to_name.keys())):
             tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
+                components=dict_to_tagged_tree(node),
                 type=_groove_type_to_name[type(node)],
             )
             return tree

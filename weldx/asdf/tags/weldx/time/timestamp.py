@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 from weldx.asdf.types import WeldxType
 
@@ -20,11 +19,11 @@ class TimestampType(WeldxType):
     def to_tree(cls, node: pd.Timestamp, ctx):
         """Serialize timestamp to tree."""
         tree = {}
-        tree["value"] = custom_tree_to_tagged_tree(node.isoformat(), ctx)
+        tree["value"] = node.isoformat()
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
         """Construct timestamp from tree."""
-        value = tagged_tree_to_custom_tree(tree["value"], ctx)
+        value = tree["value"]
         return pd.Timestamp(value)
