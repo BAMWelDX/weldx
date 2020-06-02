@@ -1,0 +1,23 @@
+#ASDF 1.0.0
+#ASDF_STANDARD 1.5.0
+%YAML 1.1
+%TAG ! tag:stsci.edu:asdf/
+--- !core/asdf-1.1.0
+asdf_library: !core/software-1.0.0 {author: Space Telescope Science Institute, homepage: 'http://github.com/spacetelescope/asdf',
+  name: asdf, version: 2.6.0}
+history:
+  extensions:
+  - !core/extension_metadata-1.0.0
+    extension_class: asdf.extension.BuiltinExtension
+    software: !core/software-1.0.0 {name: asdf, version: 2.6.0}
+  - !core/extension_metadata-1.0.0
+    extension_class: weldx.asdf.extension.WeldxExtension
+    software: !core/software-1.0.0 {name: '', version: ''}
+  - !core/extension_metadata-1.0.0
+    extension_class: weldx.asdf.extension.WeldxAsdfExtension
+    software: !core/software-1.0.0 {name: '', version: ''}
+obj: !<tag:weldx.bam.de:weldx/debug/unit_val_testclass-1.0.0>
+  length_prop: !unit/quantity-1.1.0 {unit: inch, value: 1}
+  velocity_prop: !unit/quantity-1.1.0 {unit: kilometer / second, value: 2}
+  current_prop: !unit/quantity-1.1.0 {unit: milliampere, value: 3}
+...
