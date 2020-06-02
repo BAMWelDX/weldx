@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import pint
 
 from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import dict_to_tagged_tree
+from weldx.asdf.utils import drop_none_attr
 
 from .shielding_gas_type import ShieldingGasType
 
@@ -37,7 +37,7 @@ class ShieldingGasForProcedureType(WeldxType):
     @classmethod
     def to_tree(cls, node, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = dict_to_tagged_tree(node, ctx)
+        tree = drop_none_attr(node)
         return tree
 
     @classmethod

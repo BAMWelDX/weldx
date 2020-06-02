@@ -2,43 +2,34 @@ from pathlib import Path
 
 import jinja2
 import pandas as pd
-from asdf.yamlutil import custom_tree_to_tagged_tree
 
 from weldx.asdf.constants import SCHEMA_PATH
 
 
-def dict_to_tagged_tree(node, ctx):
+def drop_none_attr(node):
     """Utility function simplify `to_tree` methods of  dataclass objects.
 
     The function requires the node to be convertible to dictionary via __dict__. And can
     therefor be applied to all classes created using the @dataclass operator.
-    `custom_tree_to_tagged_tree` is called on all object properties and all None entries
-    are removed from the node dictionary. The result is "clean" dictionary in form of an
-    asdf tree.
+    The result is "clean" dictionary with all None entries removed.
     A simple `to_tree()` function could be implemented as such:
         ```python
         def to_tree(cls, node, ctx):
-            tree = dict_to_tagged_tree(node, ctx)
+            tree = drop_none_attr(node)
             return tree```
 
     Parameters
     ----------
     node :
         node to write to asdf-tree
-    ctx :
-        bast ctx object to pass along in the `to_tree` function
 
     Returns
     -------
-    type
-        The node dictionary as tagged and with None entries removed.
+    dict
+        The node dictionary with None entries removed.
 
     """
-    tree = {
-        k: custom_tree_to_tagged_tree(v, ctx)
-        for (k, v) in node.__dict__.items()
-        if v is not None
-    }
+    tree = {k: v for (k, v) in node.__dict__.items() if v is not None}
     return tree
 
 

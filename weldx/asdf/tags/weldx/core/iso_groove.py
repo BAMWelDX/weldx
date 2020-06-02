@@ -9,7 +9,7 @@ import pint
 import weldx.geometry as geo
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import dict_to_tagged_tree
+from weldx.asdf.utils import drop_none_attr
 
 _DEFAULT_LEN_UNIT = "mm"
 
@@ -1707,8 +1707,7 @@ class GrooveType(WeldxType):
         """Convert to tagged tree and remove all None entries from node dictionary."""
         if isinstance(node, tuple(_groove_type_to_name.keys())):
             tree = dict(
-                components=dict_to_tagged_tree(node, ctx),
-                type=_groove_type_to_name[type(node)],
+                components=drop_none_attr(node), type=_groove_type_to_name[type(node)],
             )
             return tree
         else:  # pragma: no cover
