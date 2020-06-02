@@ -34,7 +34,7 @@ def plot_coordinate_system(
         else:
             dsx = coordinate_system.dataset.sel(time=pd.DatetimeIndex([time_idx])).isel(
                 time=0
-            )  # allowing "datetimelike" inputs
+            )
     else:
         dsx = coordinate_system.dataset
 
