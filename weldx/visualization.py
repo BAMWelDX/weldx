@@ -1,6 +1,7 @@
 """Contains some functions to help with visualization."""
 
 import numpy as np
+import pandas as pd
 
 
 def plot_coordinate_system(
@@ -25,17 +26,21 @@ def plot_coordinate_system(
         a time dependency.
 
     """
-    if coordinate_system.time is not None and time_idx is None:
-        time_idx = 0
+    if "time" in coordinate_system.dataset.coords:
+        if time_idx is None:
+            time_idx = 0
+        if isinstance(time_idx, int):
+            dsx = coordinate_system.dataset.isel(time=time_idx)
+        else:
+            dsx = coordinate_system.dataset.sel(time=pd.DatetimeIndex([time_idx])).isel(
+                time=0
+            )  # allowing "datetimelike" inputs
+    else:
+        dsx = coordinate_system.dataset
 
-    p_0 = coordinate_system.coordinates.data
-    if len(p_0.shape) == 2:
-        p_0 = p_0[time_idx]
+    p_0 = dsx.coordinates
 
-    orientation = coordinate_system.orientation.data
-    if len(orientation.shape) == 3:
-        orientation = orientation[time_idx]
-
+    orientation = dsx.orientation
     p_x = p_0 + orientation[:, 0]
     p_y = p_0 + orientation[:, 1]
     p_z = p_0 + orientation[:, 2]
