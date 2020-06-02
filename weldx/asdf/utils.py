@@ -6,16 +6,16 @@ import pandas as pd
 from weldx.asdf.constants import SCHEMA_PATH
 
 
-def dict_to_tagged_tree(node):
+def drop_none_attr(node):
     """Utility function simplify `to_tree` methods of  dataclass objects.
 
     The function requires the node to be convertible to dictionary via __dict__. And can
     therefor be applied to all classes created using the @dataclass operator.
-    The result is "clean" dictionary in form of an asdf tree.
+    The result is "clean" dictionary with all None entries removed.
     A simple `to_tree()` function could be implemented as such:
         ```python
         def to_tree(cls, node, ctx):
-            tree = dict_to_tagged_tree(node)
+            tree = drop_none_attr(node)
             return tree```
 
     Parameters
@@ -29,11 +29,7 @@ def dict_to_tagged_tree(node):
         The node dictionary with None entries removed.
 
     """
-    tree = {
-        k: v
-        for (k, v) in node.__dict__.items()
-        if v is not None
-    }
+    tree = {k: v for (k, v) in node.__dict__.items() if v is not None}
     return tree
 
 
