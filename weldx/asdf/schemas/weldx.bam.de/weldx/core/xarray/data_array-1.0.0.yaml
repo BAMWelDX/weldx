@@ -1,0 +1,33 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/xarray/data_array-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/xarray/data_array-1.0.0"
+
+title: |
+  Schema to serialize an xarray.DataArray
+description: |
+  TODO: DESCRIPTION
+type: object
+properties:
+  dims:
+    description: |
+      Data dimensions
+    type: array
+    items:
+      type: string
+  data:
+    $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
+  coords:
+    type: object
+  attrs:
+    type: object
+  name:
+    type: string
+
+
+required: [dims, data, coords]
+
+flowStyle: block
+additionalProperties: false
+...
