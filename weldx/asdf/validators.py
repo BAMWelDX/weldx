@@ -1,5 +1,6 @@
+from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
+
 from asdf import ValidationError
-from typing import Any, OrderedDict, Mapping, Iterator, Callable
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
@@ -10,11 +11,12 @@ def _walk_validator(
     validator_dict: OrderedDict,
     validator_function: Callable[[Mapping, Any, str], Iterator[ValidationError]],
     position="",
-):
+) -> Iterator[ValidationError]:
     """Walk instance and validation dict entries in parallel and apply a validator func.
 
     This function can be used to recursively walk both the instance dictionary and the
-    custom validation dictionary in parallel and
+    custom validation dictionary in parallel. Once a leaf dictionary entry is reached,
+    the validation function is applied to the selected items.
 
     Parameters
     ----------
@@ -44,7 +46,9 @@ def _walk_validator(
             yield from validator_function(instance[key], item, position + "/" + key)
 
 
-def _unit_validator(instance: OrderedDict, expected_dimensionality: str, position: str):
+def _unit_validator(
+    instance: Mapping, expected_dimensionality: str, position: str
+) -> Iterator[ValidationError]:
     """Validate the 'unit' key of the instance against the given string.
 
     Parameters
@@ -70,8 +74,10 @@ def _unit_validator(instance: OrderedDict, expected_dimensionality: str, positio
         )
 
 
-def _shape_validator(instance: OrderedDict, expected_shape: str, position: str):
-    """Validate the 'shape' key of the instance against the given string.
+def _shape_validator(
+    instance: Mapping, expected_shape: List[int], position: str
+) -> Iterator[ValidationError]:
+    """Validate the 'shape' key of the instance against the given list of ints.
 
     Parameters
     ----------
@@ -88,15 +94,17 @@ def _shape_validator(instance: OrderedDict, expected_shape: str, position: str):
 
     """
     shape = instance["shape"]
-    valid = shape == expected_shape
+    valid = shape == expected_shape  # TODO: custom shape validator with "any" syntax
     if not valid:
         yield ValidationError(
-            f"Error validating unit dimension for property '{position}'\n"
-            f"expected unit of dimension '{expected_shape}' but got unit '{shape}'"
+            f"Error validating shape for property '{position}'\n"
+            f"expected shape '{expected_shape}' but got '{shape}'"
         )
 
 
-def validate_unit_dimension(validator, wx_unit, instance, schema):
+def validate_unit_dimension(
+    validator, wx_unit, instance, schema
+) -> Iterator[ValidationError]:
     """Custom validator for checking dimensions for objects with 'unit' property.
 
     ASDF documentation:
@@ -123,7 +131,30 @@ def validate_unit_dimension(validator, wx_unit, instance, schema):
     )
 
 
-def validate_array_shape(validator, wx_shape, instance, schema):
+def validate_array_shape(
+    validator, wx_shape, instance, schema
+) -> Iterator[ValidationError]:
+    """Custom validator for checking dimensions for objects with 'shape' property.
+
+    ASDF documentation:
+    https://asdf.readthedocs.io/en/2.6.0/asdf/extensions.html#adding-custom-validators
+
+    Parameters
+    ----------
+    validator:
+        A jsonschema.Validator instance.
+    wx_shape:
+        Dict with property keys and array dimensions as list to validate.
+    instance:
+        Tree serialization (with default dtypes) of the instance
+    schema:
+        Dict representing the full ASDF schema.
+
+    Yields
+    ------
+    asdf.ValidationError
+
+    """
     yield from _walk_validator(
         instance=instance, validator_dict=wx_shape, validator_function=_shape_validator,
     )
