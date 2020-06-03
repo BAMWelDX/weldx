@@ -24,8 +24,9 @@ from weldx.asdf.tags.weldx.debug.unit_val_testclass import UnitValTestClass
 Q1 = Q_(1, "inch")
 Q2 = Q_(2, "km / s")
 Q3 = Q_(3, "mA")
+nested_prop = dict(q1=Q_(1, "m"), q2=Q_(2, "m^3"))
 
-test = UnitValTestClass(Q1, Q2, Q3)
+test = UnitValTestClass(Q1, Q2, Q3, nested_prop)
 
 filename = "asdf_unit_validator.yaml"
 tree = {"obj": test}
@@ -43,4 +44,4 @@ with asdf.open(
     filename, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
 ) as af:
     data = af.tree
-    print(data["obj"])
+    # print(data["obj"])

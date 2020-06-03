@@ -23,13 +23,27 @@ properties:
       a current
     $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
 
+  nested_prop:
+    description: |
+      a current
+    type: object
+    properties:
+      q1:
+        $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+      q2:
+        $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+
+
 
 required: [length_prop, velocity_prop, current_prop]
 propertyOrder: [length_prop, velocity_prop, current_prop]
 flowStyle: block
-additionalProperties: false
+additionalProperties: true
 wx_unit:
   length_prop: "m"
   velocity_prop: "m / s"
   current_prop: "A"
+  nested_prop:
+    q1: "m"
+    q2: "liter"
 ...

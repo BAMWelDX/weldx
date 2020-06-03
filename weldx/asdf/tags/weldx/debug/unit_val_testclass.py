@@ -18,6 +18,7 @@ class UnitValTestClass:
     length_prop: pint.Quantity
     velocity_prop: pint.Quantity
     current_prop: pint.Quantity
+    nested_prop: dict
 
 
 class UnitValTestClassType(WeldxType):
