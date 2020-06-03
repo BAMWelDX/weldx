@@ -873,9 +873,8 @@ class CoordinateSystemManager:
 
     def __repr__(self):
         """Output representation of a CoordinateSystemManager class."""
-        return "CoordinateSystemManager('graph': %r, 'data': %r)" % (
-            self._graph,
-            self._data,
+        return (
+            f"CoordinateSystemManager('graph': {self._graph!r}, 'data': {self._data!r})"
         )
 
     def _add_coordinate_system_node(self, coordinate_system_name):

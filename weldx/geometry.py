@@ -40,7 +40,7 @@ class LineSegment:
 
     def __repr__(self):
         """Output representation of a LineSegment."""
-        return "LineSegment('points'=%r, 'length'=%r)" % (self._points, self._length,)
+        return f"LineSegment('points'={self._points!r}, 'length'={self._length!r})"
 
     def __str__(self):
         """Output simple string representation of a LineSegment."""
@@ -285,14 +285,9 @@ class ArcSegment:
     def __repr__(self):
         """Output representation of an ArcSegment."""
         return (
-            "ArcSegment('points': %r, 'arc_angle': %r, 'radius': %r, 'sign_arc_winding': %r, 'arc_length': %r)"
-            % (
-                self._points,
-                self._arc_angle,
-                self._radius,
-                self._sign_arc_winding,
-                self._arc_length,
-            )
+            f"ArcSegment('points': {self._points!r}, 'arc_angle': {self._arc_angle!r}, "
+            f"'radius': {self._radius!r}, 'sign_arc_winding': {self._sign_arc_winding!r}, "
+            f"'arc_length': {self._arc_length!r})"
         )
 
     def __str__(self):
@@ -693,7 +688,7 @@ class Shape:
 
     def __repr__(self):
         """Output representation of a Shape."""
-        return "Shape('segments': %r)" % (self._segments)
+        return f"Shape('segments': {self.segments!r})"
 
     def __str__(self):
         """Output simple string representation of a Shape (listing segments)."""
@@ -1084,7 +1079,7 @@ class Profile:
 
     def __repr__(self):
         """Output representation of a Profile."""
-        return "Profile('shapes': %r)" % self._shapes
+        return f"Profile('shapes': {self._shapes!r})"
 
     def __str__(self):
         """Output simple string representation of a Profile for users."""
@@ -1228,7 +1223,7 @@ class LinearHorizontalTraceSegment:
 
     def __repr__(self):
         """Output representation of a LinearHorizontalTraceSegment."""
-        return "LinearHorizontalTraceSegment('length': %r)" % self._length
+        return f"LinearHorizontalTraceSegment('length': {self.length!r})"
 
     @property
     def length(self):
@@ -1297,8 +1292,8 @@ class RadialHorizontalTraceSegment:
     def __repr__(self):
         """Output representation of a RadialHorizontalTraceSegment."""
         return (
-            "RadialHorizontalTraceSegment('radius': %r, 'angle': %r, 'length': %r, 'sign_winding': %r)"
-            % (self._radius, self._angle, self._length, self._sign_winding)
+            f"RadialHorizontalTraceSegment('radius': {self._radius!r}, 'angle': {self._angle!r}, "
+            f"'length': {self._length!r}, 'sign_winding': {self._sign_winding!r})"
         )
 
     @staticmethod
@@ -1429,14 +1424,10 @@ class Trace:
     def __repr__(self):
         """Output representation of a Trace."""
         return (
-            "Trace('segments': %r, 'coordinate_system_lookup': %r, "
-            "'total_length_lookup': %r, 'segment_length_lookup': %r)"
-            % (
-                self._segments,
-                self._coordinate_system_lookup,
-                self._total_length_lookup,
-                self._segment_length_lookup,
-            )
+            f"Trace('segments': {self._segments!r}, "
+            f"'coordinate_system_lookup': {self._coordinate_system_lookup!r}, "
+            f"'total_length_lookup': {self._total_length_lookup!r}, "
+            f"'segment_length_lookup': {self._segment_length_lookup!r})"
         )
 
     def _create_lookups(self, coordinate_system_start):
@@ -1690,8 +1681,9 @@ class VariableProfile:
     def __repr__(self):
         """Output representation of a VariableProfile."""
         return (
-            "VariableProfile('profiles': %r, 'locations' %r, 'interpolation_schemes' %r)"
-            % (self._profiles, self._locations, self._interpolation_schemes)
+            f"VariableProfile('profiles': {self._profiles!r}, "
+            f"'locations' {self._locations!r}, "
+            f"'interpolation_schemes' {self._interpolation_schemes!r})"
         )
 
     def _segment_index(self, location):
@@ -1849,7 +1841,7 @@ class Geometry:
 
     def __repr__(self):
         """Output representation of a Geometry class."""
-        return "Geometry('profile': %r, 'trace': %r)" % (self._profile, self._trace)
+        return f"Geometry('profile': {self._profile!r}, 'trace': {self._trace!r})"
 
     @staticmethod
     def _check_inputs(profile, trace):
