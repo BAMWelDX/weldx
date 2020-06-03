@@ -43,7 +43,8 @@ def _walk_validator(
                 position=position + "/" + key,
             )
         else:
-            yield from validator_function(instance[key], item, position + "/" + key)
+            if key in instance:
+                yield from validator_function(instance[key], item, position + "/" + key)
 
 
 def _unit_validator(
@@ -69,8 +70,8 @@ def _unit_validator(
     valid = Q_(unit).check(UREG.get_dimensionality(expected_dimensionality))
     if not valid:
         yield ValidationError(
-            f"Error validating unit dimension for property '{position}'\n"
-            f"expected unit of dimension '{expected_dimensionality}' but got unit '{unit}'"
+            f"Error validating unit dimension for property '{position}'. "
+            f"Expected unit of dimension '{expected_dimensionality}' but got unit '{unit}'"
         )
 
 
@@ -97,8 +98,8 @@ def _shape_validator(
     valid = shape == expected_shape  # TODO: custom shape validator with "any" syntax
     if not valid:
         yield ValidationError(
-            f"Error validating shape for property '{position}'\n"
-            f"expected shape '{expected_shape}' but got '{shape}'"
+            f"Error validating shape for property '{position}'. "
+            f"Expected shape '{expected_shape}' but got '{shape}'"
         )
 
 
