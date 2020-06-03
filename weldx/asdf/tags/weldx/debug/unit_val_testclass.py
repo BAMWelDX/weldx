@@ -3,7 +3,7 @@ from typing import List  # noqa: F401
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
-from weldx.asdf.validators import validate_unit_dimension
+from weldx.asdf.validators import validate_unit_dimension, validate_array_shape
 
 
 import pint
@@ -42,4 +42,7 @@ class UnitValTestClassType(WeldxType):
         return obj
 
 
-UnitValTestClassType.validators = {"wx_unit": validate_unit_dimension}
+UnitValTestClassType.validators = {
+    "wx_unit": validate_unit_dimension,
+    "wx_shape": validate_array_shape,
+}

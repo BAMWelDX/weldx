@@ -44,14 +44,14 @@ def _walk_validator(
             yield from validator_function(instance[key], item, position + "/" + key)
 
 
-def _unit_validator(instance: OrderedDict, expected_dimension: str, position: str):
+def _unit_validator(instance: OrderedDict, expected_dimensionality: str, position: str):
     """Validate the 'unit' key of the instance against the given string.
 
     Parameters
     ----------
     instance:
         Tree serialization with 'unit' key to validate.
-    expected_dimension:
+    expected_dimensionality:
         String representation of the unit dimensionality to test against.
     position:
         Current position in nested structure for debugging
@@ -62,11 +62,37 @@ def _unit_validator(instance: OrderedDict, expected_dimension: str, position: st
 
     """
     unit = instance["unit"]
-    valid = Q_(unit).check(UREG.get_dimensionality(expected_dimension))
+    valid = Q_(unit).check(UREG.get_dimensionality(expected_dimensionality))
     if not valid:
         yield ValidationError(
             f"Error validating unit dimension for property '{position}'\n"
-            f"expected unit of dimension '{expected_dimension}' but got unit '{unit}'"
+            f"expected unit of dimension '{expected_dimensionality}' but got unit '{unit}'"
+        )
+
+
+def _shape_validator(instance: OrderedDict, expected_shape: str, position: str):
+    """Validate the 'shape' key of the instance against the given string.
+
+    Parameters
+    ----------
+    instance:
+        Tree serialization with 'shape' key to validate.
+    expected_shape:
+        String representation of the unit dimensionality to test against.
+    position:
+        Current position in nested structure for debugging
+
+    Yields
+    ------
+    asdf.ValidationError
+
+    """
+    shape = instance["shape"]
+    valid = shape == expected_shape
+    if not valid:
+        yield ValidationError(
+            f"Error validating unit dimension for property '{position}'\n"
+            f"expected unit of dimension '{expected_shape}' but got unit '{shape}'"
         )
 
 
@@ -94,4 +120,10 @@ def validate_unit_dimension(validator, wx_unit, instance, schema):
     """
     yield from _walk_validator(
         instance=instance, validator_dict=wx_unit, validator_function=_unit_validator
+    )
+
+
+def validate_array_shape(validator, wx_shape, instance, schema):
+    yield from _walk_validator(
+        instance=instance, validator_dict=wx_shape, validator_function=_shape_validator,
     )

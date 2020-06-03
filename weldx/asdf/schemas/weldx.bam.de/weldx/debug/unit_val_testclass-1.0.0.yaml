@@ -46,4 +46,7 @@ wx_unit:
   nested_prop:
     q1: "m"
     q2: "liter"
+wx_shape:
+  current_prop:
+    value: [2,2]
 ...

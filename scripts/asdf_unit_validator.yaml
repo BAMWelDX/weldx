@@ -8,18 +8,25 @@ asdf_library: !core/software-1.0.0 {author: Space Telescope Science Institute, h
 history:
   extensions:
   - !core/extension_metadata-1.0.0
-    extension_class: asdf.extension.BuiltinExtension
-    software: !core/software-1.0.0 {name: asdf, version: 2.6.0}
+    extension_class: weldx.asdf.extension.WeldxExtension
+    software: !core/software-1.0.0 {name: '', version: ''}
   - !core/extension_metadata-1.0.0
     extension_class: weldx.asdf.extension.WeldxAsdfExtension
     software: !core/software-1.0.0 {name: '', version: ''}
   - !core/extension_metadata-1.0.0
-    extension_class: weldx.asdf.extension.WeldxExtension
-    software: !core/software-1.0.0 {name: '', version: ''}
+    extension_class: asdf.extension.BuiltinExtension
+    software: !core/software-1.0.0 {name: asdf, version: 2.6.0}
 obj: !<tag:weldx.bam.de:weldx/debug/unit_val_testclass-1.0.0>
   length_prop: !unit/quantity-1.1.0 {unit: inch, value: 1}
   velocity_prop: !unit/quantity-1.1.0 {unit: kilometer / second, value: 2}
-  current_prop: !unit/quantity-1.1.0 {unit: milliampere, value: 3}
+  current_prop: !unit/quantity-1.1.0
+    unit: milliampere
+    value: !core/ndarray-1.0.0
+      data:
+      - [1.0, 0.0]
+      - [0.0, 1.0]
+      datatype: float64
+      shape: [2, 2]
   nested_prop:
     q1: !unit/quantity-1.1.0 {unit: meter, value: 1}
     q2: !unit/quantity-1.1.0 {unit: meter ** 3, value: 2}
