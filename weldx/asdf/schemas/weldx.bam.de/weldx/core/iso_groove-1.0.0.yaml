@@ -371,7 +371,6 @@ anyOf:
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
-
 wx_unit:
   components:
     t: "m"
@@ -385,5 +384,4 @@ wx_unit:
     R2: "m"
     b: "m"
     c: "m"
-
 ...

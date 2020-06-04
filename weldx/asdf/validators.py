@@ -1,5 +1,6 @@
 from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 
+import dpath
 from asdf import ValidationError
 
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -34,17 +35,19 @@ def _walk_validator(
     asdf.ValidationError
 
     """
-    for key, item in validator_dict.items():
-        if isinstance(item, Mapping):
-            yield from _walk_validator(
-                instance[key],
-                validator_dict[key],
-                validator_function,
-                position=position + "/" + key,
-            )
-        else:
-            if key in instance:
+    if isinstance(validator_dict, dict):
+        for key, item in validator_dict.items():
+            if isinstance(item, Mapping):
+                yield from _walk_validator(
+                    instance[key],
+                    validator_dict[key],
+                    validator_function,
+                    position=position + "/" + key,
+                )
+            else:
                 yield from validator_function(instance[key], item, position + "/" + key)
+    else:
+        yield from validator_function(instance, validator_dict, position)
 
 
 def _unit_validator(
@@ -104,7 +107,7 @@ def _shape_validator(
 
 
 def validate_unit_dimension(
-    validator, wx_unit, instance, schema
+    validator, wx_unit_validate, instance, schema
 ) -> Iterator[ValidationError]:
     """Custom validator for checking dimensions for objects with 'unit' property.
 
@@ -115,8 +118,8 @@ def validate_unit_dimension(
     ----------
     validator:
         A jsonschema.Validator instance.
-    wx_unit:
-        Dict with property keys and unit dimensions to validate.
+    wx_unit_validate:
+        Enable unit validation for this schema.
     instance:
         Tree serialization (with default dtypes) of the instance
     schema:
@@ -127,9 +130,26 @@ def validate_unit_dimension(
     asdf.ValidationError
 
     """
-    yield from _walk_validator(
-        instance=instance, validator_dict=wx_unit, validator_function=_unit_validator
-    )
+    if wx_unit_validate:
+        schema_key_list = [
+            k for k in dpath.util.search(schema, "**/wx_unit", yielded=True)
+        ]
+        schema_key_list = [
+            (s[0].replace("properties/", "").split("/"), s[1]) for s in schema_key_list
+        ]
+        for s in schema_key_list:
+            if len(s[0]) > 1:
+                position = "/".join(s[0][:-1])
+                instance_dict = dpath.util.get(instance, s[0][:-1])
+            else:
+                position = ""
+                instance_dict = instance
+            yield from _walk_validator(
+                instance=instance_dict,
+                validator_dict=s[1],
+                validator_function=_unit_validator,
+                position=position,
+            )
 
 
 def validate_array_shape(

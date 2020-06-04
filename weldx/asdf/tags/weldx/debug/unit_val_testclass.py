@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
 
+import pint
+
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
-from weldx.asdf.validators import validate_unit_dimension, validate_array_shape
-
-
-import pint
+from weldx.asdf.validators import validate_array_shape, validate_unit_dimension
 
 __all__ = ["UnitValTestClass", "UnitValTestClassType"]
 
@@ -43,6 +42,6 @@ class UnitValTestClassType(WeldxType):
 
 
 UnitValTestClassType.validators = {
-    "wx_unit": validate_unit_dimension,
     "wx_shape": validate_array_shape,
+    "wx_unit_validate": validate_unit_dimension,
 }

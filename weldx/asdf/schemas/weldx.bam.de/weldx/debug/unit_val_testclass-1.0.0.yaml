@@ -12,17 +12,19 @@ properties:
     description: |
       a simple length quantity
     $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+    wx_unit: m
 
   velocity_prop:
     description: |
       a simple velocity quantity
     $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+    wx_unit: "m/s"
 
   current_prop:
     description: |
       a current quantity of shape [2,2]
     $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
-    val_unit: "current"
+    wx_unit: "A"
 
   nested_prop:
     description: |
@@ -35,6 +37,9 @@ properties:
       q2:
         description: a volume
         $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+        wx_unit: "liter"
+    wx_unit:
+      q1: "m"
 
 
 
@@ -42,14 +47,15 @@ required: [length_prop, velocity_prop, current_prop]
 propertyOrder: [length_prop, velocity_prop, current_prop]
 flowStyle: block
 additionalProperties: true
+wx_unit_validate: true
 wx_unit:
   length_prop: "m"
   velocity_prop: "m / s"
-  current_prop: "A"
+  current_prop: A
   nested_prop:
     q1: "m"
     q2: "liter"
-wx_shape:
-  current_prop:
-    value: [2,2]
+#wx_shape:
+#  current_prop:
+#    value: [2,2]
 ...
