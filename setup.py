@@ -3,7 +3,7 @@
 """Python Library description and install setup."""
 
 import versioneer
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 requirements = [
     "numpy>=0.18",
@@ -15,6 +15,7 @@ requirements = [
     "bottleneck>=1.3",
     "Jinja2>=2.11",
     "networkx>=2",
+    "dpath=1.4",
     "matplotlib>=3",
 ]
 

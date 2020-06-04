@@ -22,6 +22,7 @@ properties:
     description: |
       a current quantity of shape [2,2]
     $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+    val_unit: "current"
 
   nested_prop:
     description: |
