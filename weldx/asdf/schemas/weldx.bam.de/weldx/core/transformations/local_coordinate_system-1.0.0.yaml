@@ -1,0 +1,23 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/local_coordinate_system-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
+
+title: |
+  Schema to serialize a weldx.transformations.LocalCoordinateSystem
+description: |
+  TODO: DESCRIPTION
+type: object
+properties:
+  orientation:
+    $ref: tag:weldx.bam.de:weldx/core/xarray/data_array-1.0.0
+  coordinates:
+    $ref: tag:weldx.bam.de:weldx/core/xarray/data_array-1.0.0
+
+
+required: [orientation, coordinates]
+
+flowStyle: block
+additionalProperties: false
+...
