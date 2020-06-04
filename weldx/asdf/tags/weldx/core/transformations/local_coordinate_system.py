@@ -1,15 +1,17 @@
 from weldx.transformations import LocalCoordinateSystem
 from weldx.asdf.types import WeldxType
+from weldx.asdf.validators import validate_array_shape
 
 
-class XarrayDataArrayASDF(WeldxType):
-    """Serialization class for xarray.DataArray"""
+class LocalCoordinateSystemASDF(WeldxType):
+    """Serialization class for weldx.transformations.LocalCoordinateSystem"""
 
     name = "core/transformations/local_coordinate_system"
     version = "1.0.0"
     types = [LocalCoordinateSystem]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
+    validators = {"wx_shape": validate_array_shape}
 
     @classmethod
     def to_tree(cls, node: LocalCoordinateSystem, ctx):
