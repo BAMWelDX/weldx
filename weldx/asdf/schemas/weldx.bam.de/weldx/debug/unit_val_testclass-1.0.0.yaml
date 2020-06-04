@@ -54,7 +54,7 @@ wx_unit:
   current_prop: A
   nested_prop:
     q1: "m"
-    q2: "liter"
+    q2: "m*mm*cm"
 #wx_shape:
 #  current_prop:
 #    value: [2,2]

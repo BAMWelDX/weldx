@@ -11,7 +11,7 @@ def _walk_validator(
     instance: OrderedDict,
     validator_dict: OrderedDict,
     validator_function: Callable[[Mapping, Any, str], Iterator[ValidationError]],
-    position="",
+    position=None,
 ) -> Iterator[ValidationError]:
     """Walk instance and validation dict entries in parallel and apply a validator func.
 
@@ -35,6 +35,8 @@ def _walk_validator(
     asdf.ValidationError
 
     """
+    if position is None:
+        position = []
     if isinstance(validator_dict, dict):
         for key, item in validator_dict.items():
             if isinstance(item, Mapping):
@@ -42,16 +44,16 @@ def _walk_validator(
                     instance[key],
                     validator_dict[key],
                     validator_function,
-                    position=position + "/" + key,
+                    position=position + [key],
                 )
             else:
-                yield from validator_function(instance[key], item, position + "/" + key)
+                yield from validator_function(instance[key], item, position + [key])
     else:
         yield from validator_function(instance, validator_dict, position)
 
 
 def _unit_validator(
-    instance: Mapping, expected_dimensionality: str, position: str
+    instance: Mapping, expected_dimensionality: str, position: List[str]
 ) -> Iterator[ValidationError]:
     """Validate the 'unit' key of the instance against the given string.
 
@@ -79,7 +81,7 @@ def _unit_validator(
 
 
 def _shape_validator(
-    instance: Mapping, expected_shape: List[int], position: str
+    instance: Mapping, expected_shape: List[int], position: List[str]
 ) -> Iterator[ValidationError]:
     """Validate the 'shape' key of the instance against the given list of ints.
 
@@ -139,10 +141,10 @@ def validate_unit_dimension(
         ]
         for s in schema_key_list:
             if len(s[0]) > 1:
-                position = "/".join(s[0][:-1])
+                position = s[0][:-1]
                 instance_dict = dpath.util.get(instance, s[0][:-1])
             else:
-                position = ""
+                position = []
                 instance_dict = instance
             yield from _walk_validator(
                 instance=instance_dict,
