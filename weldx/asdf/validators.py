@@ -142,6 +142,10 @@ def validate_unit_dimension(
     asdf.ValidationError
 
     """
+    validator_function = _unit_validator
+    keyword_glob = "**/wx_unit"
+    allow_missing_keys = False
+
     if isinstance(wx_unit_validate, str):
         if wx_unit_validate == "allow_missing":
             allow_missing_keys = True
@@ -155,26 +159,9 @@ def validate_unit_dimension(
         allow_missing_keys = False
 
     if enable:
-        schema_key_list = [
-            k for k in dpath.util.search(schema, "**/wx_unit", yielded=True)
-        ]
-        schema_key_list = [
-            (s[0].replace("properties/", "").split("/"), s[1]) for s in schema_key_list
-        ]
-        for s in schema_key_list:
-            if len(s[0]) > 1:
-                position = s[0][:-1]
-                instance_dict = dpath.util.get(instance, s[0][:-1])
-            else:
-                position = []
-                instance_dict = instance
-            yield from _walk_validator(
-                instance=instance_dict,
-                validator_dict=s[1],
-                validator_function=_unit_validator,
-                position=position,
-                allow_missing_keys=allow_missing_keys,
-            )
+        yield from _run_validation(
+            instance, schema, validator_function, keyword_glob, allow_missing_keys
+        )
 
 
 def validate_array_shape(
@@ -201,24 +188,40 @@ def validate_array_shape(
     asdf.ValidationError
 
     """
-    if wx_shape_validate:
-        schema_key_list = [
-            k for k in dpath.util.search(schema, "**/wx_shape", yielded=True)
-        ]
-        schema_key_list = [
-            (s[0].replace("properties/", "").split("/"), s[1]) for s in schema_key_list
-        ]
-        for s in schema_key_list:
-            if len(s[0]) > 1:
-                position = s[0][:-1]
-                instance_dict = dpath.util.get(instance, s[0][:-1])
-            else:
-                position = []
-                instance_dict = instance
-            yield from _walk_validator(
-                instance=instance_dict,
-                validator_dict=s[1],
-                validator_function=_shape_validator,
-                position=position,
-                allow_missing_keys=False,
-            )
+    validator_function = _shape_validator
+    keyword_glob = "**/wx_shape"
+    allow_missing_keys = False
+
+    if isinstance(wx_shape_validate, bool):
+        enable = wx_shape_validate
+    else:
+        raise ValueError("validator Option 'wx_shape_validate' must be true/false")
+
+    if enable:
+        yield from _run_validation(
+            instance, schema, validator_function, keyword_glob, allow_missing_keys
+        )
+
+
+def _run_validation(
+    instance, schema, validator_function, keyword_glob, allow_missing_keys
+):
+    """Gather keywords from schema and run validation along tree instance."""
+    schema_key_list = [k for k in dpath.util.search(schema, keyword_glob, yielded=True)]
+    schema_key_list = [
+        (s[0].replace("properties/", "").split("/"), s[1]) for s in schema_key_list
+    ]
+    for s in schema_key_list:
+        if len(s[0]) > 1:
+            position = s[0][:-1]
+            instance_dict = dpath.util.get(instance, s[0][:-1])
+        else:
+            position = []
+            instance_dict = instance
+        yield from _walk_validator(
+            instance=instance_dict,
+            validator_dict=s[1],
+            validator_function=validator_function,
+            position=position,
+            allow_missing_keys=allow_missing_keys,
+        )
