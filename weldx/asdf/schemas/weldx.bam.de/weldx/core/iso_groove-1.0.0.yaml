@@ -115,6 +115,8 @@ anyOf:
             $ref: "#/definitions/root-gap"
           c:
             $ref: "#/definitions/root-face"
+#            wx_unit_validate: true
+#            wx_unit: "m"
 
         required: [t, alpha, b, c]
     required: [type, components]
@@ -371,6 +373,7 @@ anyOf:
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
+wx_unit_validate: allow_missing
 wx_unit:
   components:
     t: "m"

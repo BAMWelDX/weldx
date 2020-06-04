@@ -12,6 +12,7 @@ def _walk_validator(
     validator_dict: OrderedDict,
     validator_function: Callable[[Mapping, Any, str], Iterator[ValidationError]],
     position=None,
+    allow_missing_keys: bool = False,
 ) -> Iterator[ValidationError]:
     """Walk instance and validation dict entries in parallel and apply a validator func.
 
@@ -29,6 +30,8 @@ def _walk_validator(
         Custom python validator function to apply along the (nested) dictionary
     position:
         String representation of the current nested schema position
+    allow_missing_keys:
+        If True will skip validation if the requested key to validate does not exist.
 
     Yields
     ------
@@ -45,9 +48,16 @@ def _walk_validator(
                     validator_dict[key],
                     validator_function,
                     position=position + [key],
+                    allow_missing_keys=allow_missing_keys,
                 )
             else:
-                yield from validator_function(instance[key], item, position + [key])
+                if key in instance:
+                    yield from validator_function(instance[key], item, position + [key])
+                elif allow_missing_keys:
+                    pass
+                else:
+                    instance[key]  # just to throw the error
+
     else:
         yield from validator_function(instance, validator_dict, position)
 
@@ -132,7 +142,19 @@ def validate_unit_dimension(
     asdf.ValidationError
 
     """
-    if wx_unit_validate:
+    if isinstance(wx_unit_validate, str):
+        if wx_unit_validate == "allow_missing":
+            allow_missing_keys = True
+            enable = True
+        else:
+            raise ValueError(
+                f"Unknown Validator setting for validator {validate_unit_dimension}"
+            )
+    else:
+        enable = wx_unit_validate
+        allow_missing_keys = False
+
+    if enable:
         schema_key_list = [
             k for k in dpath.util.search(schema, "**/wx_unit", yielded=True)
         ]
@@ -151,6 +173,7 @@ def validate_unit_dimension(
                 validator_dict=s[1],
                 validator_function=_unit_validator,
                 position=position,
+                allow_missing_keys=allow_missing_keys,
             )
 
 
@@ -197,4 +220,5 @@ def validate_array_shape(
                 validator_dict=s[1],
                 validator_function=_shape_validator,
                 position=position,
+                allow_missing_keys=False,
             )
