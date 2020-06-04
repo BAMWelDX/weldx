@@ -16,7 +16,7 @@ history:
   - !core/extension_metadata-1.0.0
     extension_class: weldx.asdf.extension.WeldxExtension
     software: !core/software-1.0.0 {name: '', version: ''}
-obj: !<tag:weldx.bam.de:weldx/debug/unit_val_testclass-1.0.0>
+obj: !<tag:weldx.bam.de:weldx/debug/validator_testclass-1.0.0>
   length_prop: !unit/quantity-1.1.0 {unit: inch, value: 1}
   velocity_prop: !unit/quantity-1.1.0 {unit: kilometer / second, value: 2}
   current_prop: !unit/quantity-1.1.0
