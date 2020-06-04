@@ -371,4 +371,19 @@ anyOf:
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
+
+wx_unit:
+  components:
+    t: "m"
+    t_1: "m"
+    t_2: "m"
+    alpha: "degree"
+    beta: "degree"
+    beta_1: "degree"
+    beta_2: "degree"
+    R: "m"
+    R2: "m"
+    b: "m"
+    c: "m"
+
 ...
