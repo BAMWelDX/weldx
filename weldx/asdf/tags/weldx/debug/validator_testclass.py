@@ -42,6 +42,6 @@ class ValidatorTestClassType(WeldxType):
 
 
 ValidatorTestClassType.validators = {
-    "wx_shape": validate_array_shape,
+    "wx_shape_validate": validate_array_shape,
     "wx_unit_validate": validate_unit_dimension,
 }
