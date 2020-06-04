@@ -1,33 +1,21 @@
-# from weldx.asdf.utils import create_asdf_dataclass
-#
-# create_asdf_dataclass(
-#     asdf_name="debug/testclass",
-#     asdf_version="1.0.0",
-#     class_name="TestClass",
-#     properties=["prop1", "prop2", "prop3",],
-#     required=["prop1", "prop2", "prop3"],
-#     property_order=["prop1", "prop2", "prop3"],
-#     property_types=["pint.Quantity", "pint.Quantity", "pint.Quantity",],
-#     description=["a length", "a time", "a current"],
-# )
+from io import BytesIO
 
 import asdf
 import numpy as np
 
 import weldx
-
+from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.asdf.tags.weldx.core.iso_groove import get_groove
+from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-
-from weldx.asdf.tags.weldx.debug.unit_val_testclass import UnitValTestClass
 
 Q1 = Q_(1, "inch")
 Q2 = Q_(2, "km / s")
 Q3 = Q_(np.eye(2, 2), "mA")
-nested_prop = dict(q1=Q_(1, "m"), q2=Q_(2, "m^3"))
+nested_prop = dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3"))
 
-test = UnitValTestClass(Q1, Q2, Q3, nested_prop)
+test = ValidatorTestClass(Q1, Q2, Q3, nested_prop)
 
 filename = "asdf_unit_validator.yaml"
 tree = {"obj": test}
@@ -46,3 +34,21 @@ with asdf.open(
 ) as af:
     data = af.tree
     # print(data["obj"])
+
+groove = get_groove(
+    groove_type="VGroove",
+    workpiece_thickness=Q_(9, "mm"),
+    groove_angle=Q_(50, "deg"),
+    root_face=Q_(4, "mm"),
+    root_gap=Q_(2, "mm"),
+)
+
+# Write the data to buffer
+with asdf.AsdfFile(
+    {"groove": groove},
+    extensions=[WeldxExtension(), WeldxAsdfExtension()],
+    ignore_version_mismatch=False,
+) as ff:
+    buff = BytesIO()
+    ff.write_to(buff)
+    buff.seek(0)

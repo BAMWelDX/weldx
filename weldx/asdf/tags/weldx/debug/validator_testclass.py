@@ -1,18 +1,17 @@
 from dataclasses import dataclass
 from typing import List  # noqa: F401
 
-from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import drop_none_attr
-from weldx.asdf.validators import validate_unit_dimension, validate_array_shape
-
-
 import pint
 
-__all__ = ["UnitValTestClass", "UnitValTestClassType"]
+from weldx.asdf.types import WeldxType
+from weldx.asdf.utils import drop_none_attr
+from weldx.asdf.validators import validate_array_shape, validate_unit_dimension
+
+__all__ = ["ValidatorTestClass", "ValidatorTestClassType"]
 
 
 @dataclass
-class UnitValTestClass:
+class ValidatorTestClass:
     """<TODO CLASS DOCSTRING>"""
 
     length_prop: pint.Quantity
@@ -21,28 +20,28 @@ class UnitValTestClass:
     nested_prop: dict
 
 
-class UnitValTestClassType(WeldxType):
+class ValidatorTestClassType(WeldxType):
     """<TODO ASDF TYPE DOCSTRING>"""
 
-    name = "debug/unit_val_testclass"
+    name = "debug/validator_testclass"
     version = "1.0.0"
-    types = [UnitValTestClass]
+    types = [ValidatorTestClass]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node: UnitValTestClass, ctx):
+    def to_tree(cls, node: ValidatorTestClass, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
         tree = drop_none_attr(node)
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        obj = UnitValTestClass(**tree)
+        obj = ValidatorTestClass(**tree)
         return obj
 
 
-UnitValTestClassType.validators = {
-    "wx_unit": validate_unit_dimension,
-    "wx_shape": validate_array_shape,
+ValidatorTestClassType.validators = {
+    "wx_shape_validate": validate_array_shape,
+    "wx_unit_validate": validate_unit_dimension,
 }

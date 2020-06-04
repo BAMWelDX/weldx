@@ -16,6 +16,7 @@ dependencies:
   - recommonmark
   - openpyxl
   - jinja2
+  - dpath=1.4
   # graph packages
   - networkx
   # Code quality

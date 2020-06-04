@@ -1727,6 +1727,6 @@ class GrooveType(WeldxType):
 
 
 GrooveType.validators = {
-    "wx_unit": validate_unit_dimension,
+    "wx_unit_validate": validate_unit_dimension,
     #    "wx_shape": validate_array_shape,
 }
