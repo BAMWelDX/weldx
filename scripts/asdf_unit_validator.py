@@ -23,7 +23,7 @@ from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 Q1 = Q_(1, "inch")
 Q2 = Q_(2, "km / s")
 Q3 = Q_(np.eye(2, 2), "mA")
-nested_prop = dict(q1=Q_(1, "m"), q2=Q_(2, "m^3"))
+nested_prop = dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3"))
 
 test = UnitValTestClass(Q1, Q2, Q3, nested_prop)
 

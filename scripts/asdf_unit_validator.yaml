@@ -28,6 +28,14 @@ obj: !<tag:weldx.bam.de:weldx/debug/unit_val_testclass-1.0.0>
       datatype: float64
       shape: [2, 2]
   nested_prop:
-    q1: !unit/quantity-1.1.0 {unit: meter, value: 1}
+    q1: !unit/quantity-1.1.0
+      unit: meter
+      value: !core/ndarray-1.0.0
+        data:
+        - [1.0, 0.0, 0.0]
+        - [0.0, 1.0, 0.0]
+        - [0.0, 0.0, 1.0]
+        datatype: float64
+        shape: [3, 3]
     q2: !unit/quantity-1.1.0 {unit: meter ** 3, value: 2}
 ...

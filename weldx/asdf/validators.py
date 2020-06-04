@@ -155,7 +155,7 @@ def validate_unit_dimension(
 
 
 def validate_array_shape(
-    validator, wx_shape, instance, schema
+    validator, wx_shape_validate, instance, schema
 ) -> Iterator[ValidationError]:
     """Custom validator for checking dimensions for objects with 'shape' property.
 
@@ -166,8 +166,8 @@ def validate_array_shape(
     ----------
     validator:
         A jsonschema.Validator instance.
-    wx_shape:
-        Dict with property keys and array dimensions as list to validate.
+    wx_shape_validate:
+        Enable shape validation for this schema..
     instance:
         Tree serialization (with default dtypes) of the instance
     schema:
@@ -178,6 +178,23 @@ def validate_array_shape(
     asdf.ValidationError
 
     """
-    yield from _walk_validator(
-        instance=instance, validator_dict=wx_shape, validator_function=_shape_validator,
-    )
+    if wx_shape_validate:
+        schema_key_list = [
+            k for k in dpath.util.search(schema, "**/wx_shape", yielded=True)
+        ]
+        schema_key_list = [
+            (s[0].replace("properties/", "").split("/"), s[1]) for s in schema_key_list
+        ]
+        for s in schema_key_list:
+            if len(s[0]) > 1:
+                position = s[0][:-1]
+                instance_dict = dpath.util.get(instance, s[0][:-1])
+            else:
+                position = []
+                instance_dict = instance
+            yield from _walk_validator(
+                instance=instance_dict,
+                validator_dict=s[1],
+                validator_function=_shape_validator,
+                position=position,
+            )

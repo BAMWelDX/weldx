@@ -32,8 +32,10 @@ properties:
     type: object
     properties:
       q1:
-        description: a length
+        description: a nested length of shape [3,3]
         $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+        wx_shape:
+          value: [3,3]
       q2:
         description: a volume
         $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
@@ -55,7 +57,8 @@ wx_unit:
   nested_prop:
     q1: "m"
     q2: "m*mm*cm"
-#wx_shape:
-#  current_prop:
-#    value: [2,2]
+wx_shape_validate: true
+wx_shape:
+  current_prop:
+    value: [2,2]
 ...
