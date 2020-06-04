@@ -18,6 +18,7 @@ required: [orientation, coordinates]
 flowStyle: block
 additionalProperties: false
 
+wx_shape_validate: true
 wx_shape:
   orientation:
     data: [3, 3]

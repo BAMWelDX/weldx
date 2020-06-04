@@ -11,7 +11,7 @@ class LocalCoordinateSystemASDF(WeldxType):
     types = [LocalCoordinateSystem]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-    validators = {"wx_shape": validate_array_shape}
+    validators = {"wx_shape_validate": validate_array_shape}
 
     @classmethod
     def to_tree(cls, node: LocalCoordinateSystem, ctx):
