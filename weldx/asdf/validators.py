@@ -89,7 +89,8 @@ def _unit_validator(
     if not valid:
         yield ValidationError(
             f"Error validating unit dimension for property '{position}'. "
-            f"Expected unit of dimension '{expected_dimensionality}' but got unit '{unit}'"
+            f"Expected unit of dimension '{expected_dimensionality}' "
+            f"but got unit '{unit}'"
         )
 
 
@@ -194,6 +195,8 @@ def wx_shape_validator(
 def _run_validation(
     instance, schema, validator_function, keyword_glob, allow_missing_keys
 ):
+    import dpath
+
     """Gather keywords from schema and run validation along tree instance from root."""
     schema_key_list = [k for k in dpath.util.search(schema, keyword_glob, yielded=True)]
     schema_key_list = [

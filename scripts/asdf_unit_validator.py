@@ -3,12 +3,10 @@ from io import BytesIO
 import asdf
 import numpy as np
 
-import weldx
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 Q1 = Q_(1, "inch")
 Q2 = Q_(2, "km / s")
