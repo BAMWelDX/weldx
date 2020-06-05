@@ -7,7 +7,6 @@ import numpy as np
 import pint
 
 import weldx.geometry as geo
-from weldx.asdf.tags.weldx.debug.anyof_class import debug_validator
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_unit_validator
@@ -1729,5 +1728,4 @@ class GrooveType(WeldxType):
 
 GrooveType.validators = {
     "wx_unit": wx_unit_validator,
-    "debug_validator": debug_validator,
 }

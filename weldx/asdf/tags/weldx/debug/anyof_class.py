@@ -10,7 +10,6 @@ __all__ = ["AnyOfClass", "AnyOfClassType"]
 
 @dataclass
 class AnyOfClass:
-    name: str
     data: dict
 
 
@@ -22,22 +21,10 @@ class AnyOfClassType(WeldxType):
     @classmethod
     def to_tree(cls, node: AnyOfClass, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = drop_none_attr(node)
-        return tree
+        # tree = drop_none_attr(node)
+        return node.data
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        obj = AnyOfClass(**tree)
+        obj = AnyOfClass(tree)
         return obj
-
-
-def debug_validator(validator, debug_validator, instance, schema):
-    """Yield Validation error if true."""
-    if debug_validator:
-        print(f"triggered validation on schema {schema['properties']}")
-        # yield ValidationError(f"triggered validation on {instance}")
-
-
-AnyOfClassType.validators = {
-    "debug_validator": debug_validator,
-}

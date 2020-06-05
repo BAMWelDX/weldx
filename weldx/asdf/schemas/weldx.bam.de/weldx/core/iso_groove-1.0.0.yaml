@@ -67,19 +67,24 @@ anyOf:
             $ref: "#/definitions/workpiece-thickness"
           b:
             $ref: "#/definitions/root-gap"
-
+          code_number:
+            type: array
         required: [t, b]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          b: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
-    debug_validator: true
 
   # Single U Groove
   - type: object
     properties:
       type:
         type: string
-        const: SingleUGroove
+        enum:
+          - SingleUGroove
       components:
         type: object
         properties:
@@ -93,12 +98,19 @@ anyOf:
             $ref: "#/definitions/root-gap"
           c:
             $ref: "#/definitions/root-face"
-
+          code_number:
+            type: array
         required: [t, beta, R, b, c]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          beta: "degree"
+          R: "m"
+          b: "m"
+          c: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
-    debug_validator: true
 
   # Single V Groove
   - type: object
@@ -117,12 +129,18 @@ anyOf:
             $ref: "#/definitions/root-gap"
           c:
             $ref: "#/definitions/root-face"
-
+          code_number:
+            type: array
         required: [t, alpha, b, c]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          alpha: "degree"
+          b: "m"
+          c: "m"
     required: [type, components]
     propertyOrder: [type, components]
-    additionalProperties: true
-    debug_validator: true
+    additionalProperties: false
 
   # U Groove with V Root
   - type: object
@@ -145,12 +163,20 @@ anyOf:
             $ref: "#/definitions/root-gap"
           h:
             $ref: "#/definitions/root-face"
-
+          code_number:
+            type: array
         required: [t, alpha, beta, R, b, h]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          alpha: "degree"
+          beta: "degree"
+          R: "m"
+          b: "m"
+          h: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
-    debug_validator: true
 
   # VV Groove
   - type: object
@@ -171,8 +197,18 @@ anyOf:
             $ref: "#/definitions/root-gap"
           c:
             $ref: "#/definitions/root-face"
-
-        required: [t, alpha, beta, b, c]
+          h:
+            $ref: "#/definitions/root-face"
+          code_number:
+            type: array
+        required: [t, alpha, beta, b, c, h]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          alpha: "degree"
+          beta: "degree"
+          b: "m"
+          c: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
@@ -194,8 +230,15 @@ anyOf:
             $ref: "#/definitions/root-gap"
           c:
             $ref: "#/definitions/root-face"
-
+          code_number:
+            type: array
         required: [t, beta, b, c]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          beta: "degree"
+          b: "m"
+          c: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
@@ -219,8 +262,16 @@ anyOf:
             $ref: "#/definitions/root-gap"
           c:
             $ref: "#/definitions/root-face"
-
+          code_number:
+            type: array
         required: [t, beta, R, b, c]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          beta: "degree"
+          R: "m"
+          b: "m"
+          c: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
@@ -240,8 +291,6 @@ anyOf:
             $ref: "#/definitions/groove-angle"
           alpha_2:
             $ref: "#/definitions/groove-angle"
-          R:
-            $ref: "#/definitions/bevel-radius"
           b:
             $ref: "#/definitions/root-gap"
           c:
@@ -250,8 +299,18 @@ anyOf:
             $ref: "#/definitions/root-face"
           h2:
             $ref: "#/definitions/root-face"
-
-        required: [t, alpha_1, alpha_2, R, b, c]
+          code_number:
+            type: array
+        required: [t, alpha_1, alpha_2, b, c]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          alpha_1: "degree"
+          alpha_2: "degree"
+          b: "m"
+          c: "m"
+          h1: "m"
+          h2: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
@@ -283,8 +342,20 @@ anyOf:
             $ref: "#/definitions/root-face"
           h2:
             $ref: "#/definitions/root-face"
-
+          code_number:
+            type: array
         required: [t, beta_1, beta_2, R, R2, b, c]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          beta_1: "degree"
+          beta_2: "degree"
+          R: "m"
+          R2: "m"
+          b: "m"
+          c: "m"
+          h1: "m"
+          h2: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
@@ -312,8 +383,18 @@ anyOf:
             $ref: "#/definitions/root-gap"
           c:
             $ref: "#/definitions/root-face"
-
+          code_number:
+            type: array
         required: [t, beta_1, beta_2, b, c]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          beta_1: "degree"
+          beta_2: "degree"
+          b: "m"
+          c: "m"
+          h1: "m"
+          h2: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
@@ -345,8 +426,20 @@ anyOf:
             $ref: "#/definitions/root-face"
           h2:
             $ref: "#/definitions/root-face"
-
+          code_number:
+            type: array
         required: [t, beta_1, beta_2, R, R2, b, c]
+        additionalProperties: false
+        wx_unit:
+          t: "m"
+          beta_1: "degree"
+          beta_2: "degree"
+          R: "m"
+          R2: "m"
+          b: "m"
+          c: "m"
+          h1: "m"
+          h2: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
@@ -370,22 +463,17 @@ anyOf:
             $ref: "#/definitions/root-gap"
           e:
             $ref: "#/definitions/special-depth"
-
+          code_number:
+            type: string
         required: [t_1]
+        additionalProperties: false
+        wx_unit:
+          t_1: "m"
+          t_2: "m"
+          alpha: "degree"
+          b: "m"
+          e: "m"
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
-#wx_unit:
-#  components:
-#    t: "m"
-#    t_1: "m"
-#    t_2: "m"
-#    alpha: "degree"
-#    beta: "degree"
-#    beta_1: "degree"
-#    beta_2: "degree"
-#    R: "m"
-#    R2: "m"
-#    b: "m"
-#    c: "m"
 ...

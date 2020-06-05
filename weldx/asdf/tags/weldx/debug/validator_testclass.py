@@ -5,7 +5,7 @@ import pint
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
-from weldx.asdf.validators import wx_shape_validator, wx_unit_validator
+from weldx.asdf.validators import debug_validator, wx_shape_validator, wx_unit_validator
 
 __all__ = ["ValidatorTestClass", "ValidatorTestClassType"]
 
@@ -45,4 +45,5 @@ class ValidatorTestClassType(WeldxType):
 ValidatorTestClassType.validators = {
     "wx_shape": wx_shape_validator,
     "wx_unit": wx_unit_validator,
+    "debug_validator": debug_validator,
 }

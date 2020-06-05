@@ -56,7 +56,9 @@ def _walk_validator(
                 elif allow_missing_keys:
                     pass
                 else:
-                    instance[key]  # just to throw the error
+                    pass
+                    # TODO: if a property is not required the key might be missing
+                    # yield ValidationError(f"Missing key {key}")
 
     else:
         yield from validator_function(instance, validator_dict, position)
@@ -231,3 +233,9 @@ def _run_validation(
     #     yield from _run_validation(
     #         instance, schema, validator_function, keyword_glob, allow_missing_keys
     #     )
+
+
+def debug_validator(validator, debug_validator, instance, schema):
+    """Enable simple breakpoint for validation."""
+    if debug_validator:
+        print(f"triggered validation on schema {schema['properties']}")
