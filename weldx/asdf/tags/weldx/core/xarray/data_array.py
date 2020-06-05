@@ -1,3 +1,6 @@
+import numpy as np
+import pandas as pd
+from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from xarray import DataArray
 
 from weldx.asdf.types import WeldxType
@@ -22,7 +25,10 @@ class XarrayDataArrayASDF(WeldxType):
         del tree["dtype"]
         del tree["shape"]
         for coord in node.coords:
-            tree["coords"][coord]["data"] = node.coords[coord].data
+            data = node.coords[coord].data
+            if isinstance(data, np.ndarray) and is_datetime(data):
+                data = pd.DatetimeIndex(data)
+            tree["coords"][coord]["data"] = data
             del tree["coords"][coord]["dtype"]
             del tree["coords"][coord]["shape"]
 

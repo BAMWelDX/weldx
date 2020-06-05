@@ -1,7 +1,8 @@
 """Tests asdf implementations of core module."""
 
-import numpy as np
 import asdf
+import numpy as np
+import pandas as pd
 import xarray as xr
 
 import weldx.transformations as tf
@@ -15,7 +16,11 @@ def get_xarray_example_data_array():
     """Get an xarray.DataArray for test purposes."""
     data = np.array([[0, 1], [2, 3]])
 
-    dax = xr.DataArray(data=data, dims=["d1", "d2"], coords={"d1": np.array([-1, 1])})
+    d1 = np.array([-1, 1])
+    d2 = pd.DatetimeIndex(["2020-05-01", "2020-05-03"])
+    coords = {"d1": d1, "d2": d2}
+
+    dax = xr.DataArray(data=data, dims=["d1", "d2"], coords=coords)
     return dax
 
 
@@ -25,6 +30,10 @@ def test_xarray_data_array_save():
     tree = {"dax": dax}
     with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
         f.write_to("xarray.asdf")
+
+
+# TODO: remove
+test_xarray_data_array_save()
 
 
 def test_xarray_data_array_load():
@@ -63,10 +72,6 @@ def test_local_coordinate_system_save():
         f.write_to("local_coordinate_system.asdf")
 
 
-# TODO: remove
-test_local_coordinate_system_save()
-
-
 def test_local_coordinate_system_load():
     """Test if an xarray.DataArray can be restored from an asdf file."""
     f = asdf.open(
@@ -77,7 +82,3 @@ def test_local_coordinate_system_load():
     lcs_static_exp = get_local_coordinate_system(False, False)
 
     assert are_local_coordinate_systems_equal(lcs_static_file, lcs_static_exp)
-
-
-# TODO: remove
-test_local_coordinate_system_load()
