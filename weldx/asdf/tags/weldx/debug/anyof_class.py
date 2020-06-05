@@ -1,9 +1,6 @@
 from dataclasses import dataclass
 
-from asdf import ValidationError
-
 from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import drop_none_attr
 
 __all__ = ["AnyOfClass", "AnyOfClassType"]
 
