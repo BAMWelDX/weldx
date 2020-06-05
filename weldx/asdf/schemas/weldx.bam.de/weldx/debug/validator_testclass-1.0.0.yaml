@@ -10,22 +10,19 @@ type: object
 properties:
   length_prop:
     description: |
-      a simple length quantity
+      a simple length quantity with unit validator
     $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
-    wx_unit: m
-
+    wx_unit: "s * liter" # this does not trigger a validator on wx_unit! (because of $ref resolving?)
 
   velocity_prop:
     description: |
       a simple velocity quantity
     $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
-    wx_unit: "m/s"
 
   current_prop:
     description: |
       a current quantity of shape [2,2]
     $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
-    wx_unit: "A"
 
   nested_prop:
     description: |
@@ -38,7 +35,6 @@ properties:
       q2:
         description: a volume
         $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
-        wx_unit: "liter" # this does not trigger a validator on wx_unit! (because of $ref resolving?)
     wx_unit:
       q1: "m"
     wx_shape:
@@ -64,7 +60,6 @@ wx_unit:
   velocity_prop: "m / s"
   current_prop: A
   nested_prop:
-    q1: "m"
     q2: "m*mm*cm"
 wx_shape:
   current_prop:
