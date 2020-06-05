@@ -15,7 +15,9 @@ Q2 = Q_(2, "km / s")
 Q3 = Q_(np.eye(2, 2), "mA")
 nested_prop = dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3"))
 
-test = ValidatorTestClass(Q1, Q2, Q3, nested_prop)
+test = ValidatorTestClass(
+    Q1, Q2, Q3, nested_prop, simple_prop={"value": float(3), "unit": "m"}
+)
 
 filename = "asdf_unit_validator.yaml"
 tree = {"obj": test}

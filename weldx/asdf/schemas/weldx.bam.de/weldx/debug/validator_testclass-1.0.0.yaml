@@ -14,6 +14,7 @@ properties:
     $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
     wx_unit: m
 
+
   velocity_prop:
     description: |
       a simple velocity quantity
@@ -34,22 +35,30 @@ properties:
       q1:
         description: a nested length of shape [3,3]
         $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
-        wx_shape:
-          value: [3,3]
       q2:
         description: a volume
         $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
-        wx_unit: "liter"
+        wx_unit: "liter" # this does not trigger a validator on wx_unit! (because of $ref resolving?)
     wx_unit:
       q1: "m"
+    wx_shape:
+      q1:
+        value: [3,3]
 
-
+  simple_prop:
+    description: simple property without any references ref
+    type: object
+    properties:
+      value:
+        type: number
+      unit:
+        type: string
+    wx_unit: "m"
 
 required: [length_prop, velocity_prop, current_prop]
 propertyOrder: [length_prop, velocity_prop, current_prop]
 flowStyle: block
 additionalProperties: true
-wx_unit_validate: true
 wx_unit:
   length_prop: "m"
   velocity_prop: "m / s"
@@ -57,7 +66,6 @@ wx_unit:
   nested_prop:
     q1: "m"
     q2: "m*mm*cm"
-wx_shape_validate: true
 wx_shape:
   current_prop:
     value: [2,2]

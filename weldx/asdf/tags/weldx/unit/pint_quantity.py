@@ -3,8 +3,8 @@
 
 import pint
 
-from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.types import WeldxAsdfType
+from weldx.constants import WELDX_QUANTITY as Q_
 
 __all__ = ["PintQuantityType"]
 

@@ -81,6 +81,9 @@ def _unit_validator(
     asdf.ValidationError
 
     """
+    if not position:
+        position = instance
+
     unit = instance["unit"]
     valid = Q_(unit).check(UREG.get_dimensionality(expected_dimensionality))
     if not valid:
@@ -109,6 +112,9 @@ def _shape_validator(
     asdf.ValidationError
 
     """
+    if not position:
+        position = instance
+
     shape = instance["shape"]
     valid = shape == expected_shape  # TODO: custom shape validator with "any" syntax
     if not valid:
@@ -118,8 +124,8 @@ def _shape_validator(
         )
 
 
-def validate_unit_dimension(
-    validator, wx_unit_validate, instance, schema
+def wx_unit_validator(
+    validator, wx_unit, instance, schema
 ) -> Iterator[ValidationError]:
     """Custom validator for checking dimensions for objects with 'unit' property.
 
@@ -130,7 +136,7 @@ def validate_unit_dimension(
     ----------
     validator:
         A jsonschema.Validator instance.
-    wx_unit_validate:
+    wx_unit:
         Enable unit validation for this schema.
     instance:
         Tree serialization (with default dtypes) of the instance
@@ -142,30 +148,17 @@ def validate_unit_dimension(
     asdf.ValidationError
 
     """
-    validator_function = _unit_validator
-    keyword_glob = "**/wx_unit"
-    allow_missing_keys = False
-
-    if isinstance(wx_unit_validate, str):
-        if wx_unit_validate == "allow_missing":
-            allow_missing_keys = True
-            enable = True
-        else:
-            raise ValueError(
-                f"Unknown Validator setting for validator {validate_unit_dimension}"
-            )
-    else:
-        enable = wx_unit_validate
-        allow_missing_keys = False
-
-    if enable:
-        yield from _run_validation(
-            instance, schema, validator_function, keyword_glob, allow_missing_keys
-        )
+    yield from _walk_validator(
+        instance=instance,
+        validator_dict=wx_unit,
+        validator_function=_unit_validator,
+        position=[],
+        allow_missing_keys=False,
+    )
 
 
-def validate_array_shape(
-    validator, wx_shape_validate, instance, schema
+def wx_shape_validator(
+    validator, wx_shape, instance, schema
 ) -> Iterator[ValidationError]:
     """Custom validator for checking dimensions for objects with 'shape' property.
 
@@ -176,7 +169,7 @@ def validate_array_shape(
     ----------
     validator:
         A jsonschema.Validator instance.
-    wx_shape_validate:
+    wx_shape:
         Enable shape validation for this schema..
     instance:
         Tree serialization (with default dtypes) of the instance
@@ -188,25 +181,20 @@ def validate_array_shape(
     asdf.ValidationError
 
     """
-    validator_function = _shape_validator
-    keyword_glob = "**/wx_shape"
-    allow_missing_keys = False
 
-    if isinstance(wx_shape_validate, bool):
-        enable = wx_shape_validate
-    else:
-        raise ValueError("validator Option 'wx_shape_validate' must be true/false")
-
-    if enable:
-        yield from _run_validation(
-            instance, schema, validator_function, keyword_glob, allow_missing_keys
-        )
+    yield from _walk_validator(
+        instance=instance,
+        validator_dict=wx_shape,
+        validator_function=_shape_validator,
+        position=[],
+        allow_missing_keys=False,
+    )
 
 
 def _run_validation(
     instance, schema, validator_function, keyword_glob, allow_missing_keys
 ):
-    """Gather keywords from schema and run validation along tree instance."""
+    """Gather keywords from schema and run validation along tree instance from root."""
     schema_key_list = [k for k in dpath.util.search(schema, keyword_glob, yielded=True)]
     schema_key_list = [
         (s[0].replace("properties/", "").split("/"), s[1]) for s in schema_key_list
@@ -225,3 +213,18 @@ def _run_validation(
             position=position,
             allow_missing_keys=allow_missing_keys,
         )
+
+    # old example implementation:
+    # validator_function = _shape_validator
+    # keyword_glob = "**/wx_shape"
+    # allow_missing_keys = False
+    #
+    # if isinstance(wx_shape_validate, bool):
+    #     enable = wx_shape_validate
+    # else:
+    #     raise ValueError("validator Option 'wx_shape_validate' must be true/false")
+    #
+    # if enable:
+    #     yield from _run_validation(
+    #         instance, schema, validator_function, keyword_glob, allow_missing_keys
+    #     )
