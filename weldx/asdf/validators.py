@@ -1,6 +1,6 @@
 from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 
-import dpath
+# import dpath
 from asdf import ValidationError
 
 from weldx.constants import WELDX_QUANTITY as Q_
