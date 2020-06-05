@@ -72,6 +72,7 @@ anyOf:
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
+    debug_validator: true
 
   # Single U Groove
   - type: object
@@ -97,6 +98,7 @@ anyOf:
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
+    debug_validator: true
 
   # Single V Groove
   - type: object
@@ -120,6 +122,7 @@ anyOf:
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
+    debug_validator: true
 
   # U Groove with V Root
   - type: object
@@ -147,6 +150,7 @@ anyOf:
     required: [type, components]
     propertyOrder: [type, components]
     additionalProperties: true
+    debug_validator: true
 
   # VV Groove
   - type: object

@@ -1,0 +1,37 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/debug/anyof_class-1.0.0"
+tag: "tag:weldx.bam.de:weldx/debug/anyof_class-1.0.0"
+
+title: |
+  test validators for complex types using anyOf structures
+type: object
+properties:
+  name:
+    type: string
+
+  data:
+    anyOf:
+      - type: object
+        properties:
+          value:
+            type: number
+        required: [value]
+        additionalProperties: false
+        debug_validator: true
+
+      - type: object
+        properties:
+          file:
+            type: string
+          meta:
+            type: string
+        required: [file, meta]
+        additionalProperties: false
+        debug_validator: true
+
+required: [name, data]
+propertyOrder: [name, data]
+additionalProperties: false
+...
