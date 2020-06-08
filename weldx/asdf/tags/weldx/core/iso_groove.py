@@ -9,7 +9,7 @@ import pint
 import weldx.geometry as geo
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
-from weldx.asdf.validators import validate_unit_dimension
+from weldx.asdf.validators import wx_unit_validator
 from weldx.constants import WELDX_QUANTITY as Q_
 
 _DEFAULT_LEN_UNIT = "mm"
@@ -1727,6 +1727,5 @@ class GrooveType(WeldxType):
 
 
 GrooveType.validators = {
-    "wx_unit_validate": validate_unit_dimension,
-    #    "wx_shape": validate_array_shape,
+    "wx_unit": wx_unit_validator,
 }

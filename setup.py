@@ -15,7 +15,6 @@ requirements = [
     "bottleneck>=1.3",
     "Jinja2>=2.11",
     "networkx>=2",
-    "dpath=1.4",
     "matplotlib>=3",
 ]
 

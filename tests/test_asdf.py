@@ -1,34 +1,58 @@
 """Tests basic asdf implementations."""
 
-import pytest
-
 import os
 from io import BytesIO
+
+import asdf
+import jsonschema
 import numpy as np
 import pandas as pd
-import jsonschema
-import asdf
+import pytest
 
-from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
+from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+
+# weld design -----------------------------------------------------------------
+from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
+from weldx.asdf.tags.weldx.aws.design.connection import Connection
+from weldx.asdf.tags.weldx.aws.design.joint_penetration import JointPenetration
+from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
+from weldx.asdf.tags.weldx.aws.design.weld_details import WeldDetails
+from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
+from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
 
 # welding process -----------------------------------------------------------------
+from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
 from weldx.asdf.tags.weldx.aws.process.gas_component import GasComponent
-from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
 from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
     ShieldingGasForProcedure,
 )
-from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
+from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
 
-# weld design -----------------------------------------------------------------
-from weldx.asdf.tags.weldx.aws.design.joint_penetration import JointPenetration
-from weldx.asdf.tags.weldx.aws.design.weld_details import WeldDetails
-from weldx.asdf.tags.weldx.aws.design.connection import Connection
-from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
-from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
-from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
-from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
+# iso groove -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
+
+# validators -----------------------------------------------------------------
+from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
+from weldx.constants import WELDX_QUANTITY as Q_
+
+
+def _write_read_buffer(tree):
+    # Write the data to buffer
+    with asdf.AsdfFile(
+        tree,
+        extensions=[WeldxExtension(), WeldxAsdfExtension()],
+        ignore_version_mismatch=False,
+    ) as ff:
+        buff = BytesIO()
+        ff.write_to(buff, all_array_storage="inline")
+        buff.seek(0)
+
+    # read back data from ASDF file contents in buffer
+    with asdf.open(
+        buff, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
+    ) as af:
+        data = af.tree
+    return data
 
 
 def test_aws_example():
@@ -242,3 +266,103 @@ def test_time_classes():
             buff = BytesIO()
             ff.write_to(buff, all_array_storage="inline")
             buff.seek(0)
+
+
+def test_validators():
+    """Test custom ASDF validators."""
+    test = ValidatorTestClass(
+        length_prop=Q_(1, "inch"),
+        velocity_prop=Q_(2, "km / s"),
+        current_prop=Q_(np.eye(2, 2), "mA"),
+        nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+        simple_prop={"value": float(3), "unit": "m"},
+    )
+
+    tree = {"root_node": test}
+
+    data = _write_read_buffer(tree)
+    test_read = data["root_node"]
+    assert isinstance(data, dict)
+    assert test_read.length_prop == test.length_prop
+    assert test_read.velocity_prop == test.velocity_prop
+    assert np.all(test_read.current_prop == test.current_prop)
+    assert np.all(test_read.nested_prop["q1"] == test.nested_prop["q1"])
+    assert test_read.nested_prop["q2"] == test.nested_prop["q2"]
+    assert test_read.simple_prop == test.simple_prop
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = ValidatorTestClass(
+            length_prop=Q_(1, "s"),  # wrong unit
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 2), "mA"),
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = ValidatorTestClass(
+            length_prop=Q_(1, "s"),
+            velocity_prop=Q_(2, "liter"),  # wrong unit
+            current_prop=Q_(np.eye(2, 2), "mA"),
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = ValidatorTestClass(
+            length_prop=Q_(1, "inch"),
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 2), "V"),  # wrong unit
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = ValidatorTestClass(
+            length_prop=Q_(1, "m"),
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 2), "mA"),
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "V")),  # wrong unit
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = ValidatorTestClass(
+            length_prop=Q_(1, "m"),
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 2), "mA"),
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+            simple_prop={"value": float(3), "unit": "s"},  # wrong unit
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = ValidatorTestClass(
+            length_prop=Q_(1, "m"),
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 4), "mA"),  # wrong shape
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = ValidatorTestClass(
+            length_prop=Q_(1, "m"),
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 2), "mA"),
+            nested_prop=dict(q1=Q_(np.eye(5, 3), "m"), q2=Q_(2, "m^3")),  # wrong shape
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
