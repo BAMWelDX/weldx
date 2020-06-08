@@ -286,7 +286,8 @@ class ArcSegment:
         """Output representation of an ArcSegment."""
         return (
             f"ArcSegment('points': {self._points!r}, 'arc_angle': {self._arc_angle!r}, "
-            f"'radius': {self._radius!r}, 'sign_arc_winding': {self._sign_arc_winding!r}, "
+            f"'radius': {self._radius!r}, "
+            f"'sign_arc_winding': {self._sign_arc_winding!r}, "
             f"'arc_length': {self._arc_length!r})"
         )
 
@@ -1292,8 +1293,10 @@ class RadialHorizontalTraceSegment:
     def __repr__(self):
         """Output representation of a RadialHorizontalTraceSegment."""
         return (
-            f"RadialHorizontalTraceSegment('radius': {self._radius!r}, 'angle': {self._angle!r}, "
-            f"'length': {self._length!r}, 'sign_winding': {self._sign_winding!r})"
+            f"RadialHorizontalTraceSegment('radius': {self._radius!r}, "
+            f"'angle': {self._angle!r}, "
+            f"'length': {self._length!r}, "
+            f"'sign_winding': {self._sign_winding!r})"
         )
 
     @staticmethod
