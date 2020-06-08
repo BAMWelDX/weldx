@@ -1,0 +1,22 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/debug/const_class-1.0.0"
+tag: "tag:weldx.bam.de:weldx/debug/const_class-1.0.0"
+
+title: |
+  title
+type: object
+properties:
+  name:
+    type: string
+    const: the right name
+
+  value:
+    type: number
+
+required: [name, value]
+propertyOrder: [name, value]
+flowStyle: block
+additionalProperties: false
+...

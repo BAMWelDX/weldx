@@ -7,7 +7,21 @@ from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 from weldx.asdf.tags.weldx.debug.anyof_class import AnyOfClass
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
+from weldx.asdf.utils import create_asdf_dataclass
 from weldx.constants import WELDX_QUANTITY as Q_
+
+#
+# # ---- const
+# create_asdf_dataclass(
+#     asdf_name="debug/const_class",
+#     asdf_version="1.0.0",
+#     class_name="ConstClass",
+#     schema_description="An assembly whose component parts are joined by welding",
+#     properties=["name", "value"],
+#     required=["name", "value"],
+#     property_order=["name", "value"],
+#     property_types=["str", "float"],
+# )
 
 # ---- DEBUG
 obj_a = AnyOfClass({"value": 1})
