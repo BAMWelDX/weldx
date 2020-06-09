@@ -25,15 +25,11 @@ def get_xarray_example_data_array():
 
 
 def test_xarray_data_array_save():
-    """Test if an xarray.DataArray can be writen to an asdf file."""
+    """Test if an xarray.DataArray can be written to an asdf file."""
     dax = get_xarray_example_data_array()
     tree = {"dax": dax}
     with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
         f.write_to("xarray.asdf")
-
-
-# TODO: remove
-test_xarray_data_array_save()
 
 
 def test_xarray_data_array_load():
@@ -43,6 +39,61 @@ def test_xarray_data_array_load():
     dax_exp = get_xarray_example_data_array()
     assert dax_exp.equals(dax_file)
 
+
+# xarray.DataArray ---------------------------------------------------------------------
+
+
+def get_xarray_example_dataset():
+    """Get an xarray.Dataset for test purposes."""
+
+    temp = [
+        [[15.0, 16.0, 17.0], [18.0, 19.0, 20.0]],
+        [[21.0, 22.0, 23.0], [24.0, 25.0, 26.0]],
+    ]
+    precip = [[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], [[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]]]
+    lon = [[-99.83, -99.32], [-99.79, -99.23]]
+    lat = [[42.25, 42.21], [42.63, 42.59]]
+
+    dsx = xr.Dataset(
+        {
+            "temperature": (["x", "y", "time"], temp),
+            "precipitation": (["x", "y", "time"], precip),
+        },
+        coords={
+            "lon": (["x", "y"], lon),
+            "lat": (["x", "y"], lat),
+            "time": [1, 2, 3]  # pd.date_range("2014-09-06", periods=3),
+            # "reference_time": pd.Timestamp("2014-09-05"),
+        },
+    )
+
+    return dsx
+
+
+def test_xarray_dataset_save():
+    """Test if an xarray.DataSet can be written to an asdf file."""
+    dsx = get_xarray_example_dataset()
+    tree = {"dsx": dsx}
+    with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
+        f.write_to("xr_dataset.asdf")
+
+
+# TODO: remove
+test_xarray_dataset_save()
+
+
+def test_xarray_dataset_load():
+    """Test if an xarray.Dataset can be restored from an asdf file."""
+    f = asdf.open(
+        "xr_dataset.asdf", extensions=[WeldxExtension(), WeldxAsdfExtension()]
+    )
+    dsx_file = f.tree["dsx"]
+    dsx_exp = get_xarray_example_dataset()
+    assert dsx_exp.equals(dsx_file)
+
+
+# TODO: remove
+test_xarray_dataset_load()
 
 # weldx.transformations.LocalCoordinateSystem ------------------------------------------
 

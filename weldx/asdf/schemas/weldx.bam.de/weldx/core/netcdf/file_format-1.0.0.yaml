@@ -1,0 +1,24 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/netcdf/file_format-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/netcdf/file_format-1.0.0"
+
+title: |
+  Schema that describes a NetCDF file format conform data structure
+description: |
+  TODO: DESCRIPTION
+type: object
+properties:
+  dimensions:
+    type: array
+    items:
+      $ref: "tag:weldx.bam.de:weldx/core/netcdf/dimension-1.0.0"
+
+
+
+required: []
+
+flowStyle: block
+additionalProperties: true
+...

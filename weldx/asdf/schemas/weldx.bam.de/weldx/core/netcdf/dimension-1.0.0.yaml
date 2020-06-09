@@ -1,0 +1,23 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/netcdf/dimension-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/netcdf/dimension-1.0.0"
+
+title: |
+  Schema that describes a NetCDF dimension
+description: |
+  TODO: DESCRIPTION
+type: object
+properties:
+  name:
+    type: string
+  length:
+    type: integer
+
+
+required: [name, length]
+propertyOrder: [name, length]
+flowStyle: block
+additionalProperties: false
+...

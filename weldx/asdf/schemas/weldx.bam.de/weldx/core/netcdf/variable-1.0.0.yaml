@@ -1,0 +1,25 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/netcdf/variable-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/netcdf/variable-1.0.0"
+
+title: |
+  Schema that describes a NetCDF variable
+description: |
+  TODO: DESCRIPTION
+type: object
+properties:
+  name:
+    type: string
+  shape:
+    type: array
+  data:
+    $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
+
+
+required: [name, shape, data]
+propertyOrder: [name, shape, data]
+flowStyle: block
+additionalProperties: false
+...
