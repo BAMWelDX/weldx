@@ -61,9 +61,9 @@ class NetCDFDimensionTypeASDF(WeldxType):
 
 
 class NetCDFVariable:
-    def __init__(self, name, shape, data: np.ndarray):
+    def __init__(self, name, dimensions, data: np.ndarray):
         self.name = name
-        self.shape = shape
+        self.dimensions = dimensions
         self.data = data
 
 
@@ -87,7 +87,12 @@ class NetCDFVariableTypeASDF(WeldxType):
         """Convert an xarray.Dataset to a tagged tree"""
         dtype = node.data.dtype.name
         data = cls.convert_time_dtypes(data=node.data)
-        tree = {"name": node.name, "shape": node.shape, "dtype": dtype, "data": data}
+        tree = {
+            "name": node.name,
+            "dimensions": node.dimensions,
+            "dtype": dtype,
+            "data": data,
+        }
 
         return tree
 
@@ -96,4 +101,4 @@ class NetCDFVariableTypeASDF(WeldxType):
         """Convert a tagged tree to an xarray.Dataset"""
         dtype = np.dtype(tree["dtype"])
         data = np.array(tree["data"]).astype(dtype)
-        return NetCDFVariable(tree["name"], tree["shape"], data)
+        return NetCDFVariable(tree["name"], tree["dimensions"], data)

@@ -17,6 +17,7 @@ class XarrayDatasetASDF(WeldxType):
     def to_tree(cls, node: Dataset, ctx):
         """Convert an xarray.Dataset to a tagged tree"""
         attributes = []
+        coordinates = []
         dimensions = []
         variables = []
 
@@ -26,15 +27,12 @@ class XarrayDatasetASDF(WeldxType):
         for name, data in node.data_vars.items():
             variables.append(netcdf.NetCDFVariable(name, data.dims, data.data))
 
-        coordinates = []
         for name, data in node.coords.items():
-            variables.append(netcdf.NetCDFVariable(name, data.dims, data.data))
-            coordinates.append(name)
-
-        attributes.append(netcdf.NetCDFAttribute("coordinates", coordinates))
+            coordinates.append(netcdf.NetCDFVariable(name, data.dims, data.data))
 
         tree = {
             "attributes": attributes,
+            "coordinates": coordinates,
             "dimensions": dimensions,
             "variables": variables,
         }
@@ -49,17 +47,13 @@ class XarrayDatasetASDF(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """Convert a tagged tree to an xarray.Dataset"""
-        coordinate_names = None
-        for attribute in tree["attributes"]:
-            if attribute.name == "coordinates":
-                coordinate_names = attribute.data
-
         data_vars = {}
-        coords = {}
+
         for variable in tree["variables"]:
-            if variable.name in coordinate_names:
-                coords[variable.name] = (variable.shape, variable.data)
-            else:
-                data_vars[variable.name] = (variable.shape, variable.data)
+            data_vars[variable.name] = (variable.dimensions, variable.data)
+
+        coords = {}
+        for coordinate in tree["coordinates"]:
+            coords[coordinate.name] = (coordinate.dimensions, coordinate.data)
 
         return Dataset(data_vars=data_vars, coords=coords)

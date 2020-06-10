@@ -12,7 +12,7 @@ type: object
 properties:
   name:
     type: string
-  shape:
+  dimensions:
     type: array
   dtype:
     type: string
@@ -20,8 +20,8 @@ properties:
     $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
 
 
-required: [name, shape, dtype, data]
-propertyOrder: [name, shape, dtype, data]
+required: [name, dimensions, dtype, data]
+propertyOrder: [name, dimensions, dtype, data]
 flowStyle: block
 additionalProperties: false
 ...
