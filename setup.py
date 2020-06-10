@@ -3,7 +3,7 @@
 """Python Library description and install setup."""
 
 import versioneer
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 requirements = [
     "numpy>=0.18",
