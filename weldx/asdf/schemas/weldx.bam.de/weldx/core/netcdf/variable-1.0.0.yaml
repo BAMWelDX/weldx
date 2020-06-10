@@ -14,12 +14,14 @@ properties:
     type: string
   shape:
     type: array
+  dtype:
+    type: string
   data:
     $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
 
 
-required: [name, shape, data]
-propertyOrder: [name, shape, data]
+required: [name, shape, dtype, data]
+propertyOrder: [name, shape, dtype, data]
 flowStyle: block
 additionalProperties: false
 ...

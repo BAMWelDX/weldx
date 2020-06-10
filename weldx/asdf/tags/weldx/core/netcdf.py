@@ -1,4 +1,5 @@
 import numpy as np
+from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from weldx.asdf.types import WeldxType
 
@@ -60,7 +61,7 @@ class NetCDFDimensionTypeASDF(WeldxType):
 
 
 class NetCDFVariable:
-    def __init__(self, name, shape, data):
+    def __init__(self, name, shape, data: np.ndarray):
         self.name = name
         self.shape = shape
         self.data = data
@@ -75,14 +76,24 @@ class NetCDFVariableTypeASDF(WeldxType):
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
+    @staticmethod
+    def convert_time_dtypes(data: np.ndarray):
+        if is_datetime(data.dtype):
+            return data.astype(np.int64)
+        return data
+
     @classmethod
     def to_tree(cls, node: NetCDFVariable, ctx):
         """Convert an xarray.Dataset to a tagged tree"""
-        tree = {"name": node.name, "shape": node.shape, "data": node.data}
+        dtype = node.data.dtype.name
+        data = cls.convert_time_dtypes(data=node.data)
+        tree = {"name": node.name, "shape": node.shape, "dtype": dtype, "data": data}
 
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
         """Convert a tagged tree to an xarray.Dataset"""
-        return NetCDFVariable(tree["name"], tree["shape"], np.array(tree["data"]))
+        dtype = np.dtype(tree["dtype"])
+        data = np.array(tree["data"]).astype(dtype)
+        return NetCDFVariable(tree["name"], tree["shape"], data)
