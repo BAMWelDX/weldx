@@ -10,24 +10,26 @@ description: |
   TODO: DESCRIPTION
 type: object
 properties:
-  dims:
-    description: |
-      Data dimensions
+  attributes:
     type: array
     items:
-      type: string
-  data:
-    $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
-  coords:
-    type: object
-  attrs:
-    type: object
-  name:
-    type: string
+      $ref: "tag:weldx.bam.de:weldx/core/netcdf/attribute-1.0.0"
+  #dimensions:
+  #  type: array
+  #  items:
+  #    $ref: "tag:weldx.bam.de:weldx/core/netcdf/dimension-1.0.0"
+  coordinates:
+    type: array
+    items:
+      $ref: "tag:weldx.bam.de:weldx/core/netcdf/variable-1.0.0"
+  variables:
+      $ref: "tag:weldx.bam.de:weldx/core/netcdf/variable-1.0.0"
+
+required: [attributes, coordinates, variables]
+propertyOrder: [attributes, coordinates, variables]
 
 
-required: [dims, data, coords]
 
 flowStyle: block
-additionalProperties: false
+additionalProperties: true
 ...

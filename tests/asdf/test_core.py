@@ -37,7 +37,13 @@ def test_xarray_data_array_load():
     f = asdf.open("xarray.asdf", extensions=[WeldxExtension(), WeldxAsdfExtension()])
     dax_file = f.tree["dax"]
     dax_exp = get_xarray_example_data_array()
-    # assert dax_exp.equals(dax_file)
+    assert dax_exp.identical(dax_file)
+
+
+# TODO: remove
+test_xarray_data_array_save()
+# TODO: remove
+test_xarray_data_array_load()
 
 
 # xarray.DataArray ---------------------------------------------------------------------
@@ -63,7 +69,7 @@ def get_xarray_example_dataset():
             "lon": (["x", "y"], lon),
             "lat": (["x", "y"], lat),
             "time": pd.date_range("2014-09-06", periods=3),
-            # "reference_time": pd.Timestamp("2014-09-05"),
+            "reference_time": pd.Timestamp("2014-09-05"),
         },
     )
 
@@ -78,10 +84,6 @@ def test_xarray_dataset_save():
         f.write_to("xr_dataset.asdf")
 
 
-# TODO: remove
-test_xarray_dataset_save()
-
-
 def test_xarray_dataset_load():
     """Test if an xarray.Dataset can be restored from an asdf file."""
     f = asdf.open(
@@ -91,9 +93,6 @@ def test_xarray_dataset_load():
     dsx_exp = get_xarray_example_dataset()
     assert dsx_exp.identical(dsx_file)
 
-
-# TODO: remove
-test_xarray_dataset_load()
 
 # weldx.transformations.LocalCoordinateSystem ------------------------------------------
 
