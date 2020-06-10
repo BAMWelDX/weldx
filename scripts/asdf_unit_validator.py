@@ -6,6 +6,7 @@ import numpy as np
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 from weldx.asdf.tags.weldx.debug.anyof_class import AnyOfClass
+from weldx.asdf.tags.weldx.debug.oneOf_class import OneOfClass
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
 from weldx.asdf.utils import create_asdf_dataclass
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -29,6 +30,26 @@ obj_b = AnyOfClass({"file": "filename.txt", "meta": "csv"})
 
 filename = "anyof_class.asdf"
 tree = {"obj_a": obj_a, "obj_b": obj_b}
+
+# Write the data to a new file
+with asdf.AsdfFile(
+    tree,
+    extensions=[WeldxExtension(), WeldxAsdfExtension()],
+    ignore_version_mismatch=False,
+) as ff:
+    ff.write_to(filename, all_array_storage="inline")
+
+# read back data from ASDF file
+with asdf.open(
+    filename, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
+) as af:
+    data = af.tree
+    # print(data["obj"])
+
+# ---- oneOf
+
+filename = "oneOf_class.asdf"
+tree = {"obj_a": OneOfClass({"value": 1})}
 
 # Write the data to a new file
 with asdf.AsdfFile(
