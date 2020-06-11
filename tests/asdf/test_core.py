@@ -40,12 +40,6 @@ def test_xarray_data_array_load():
     assert dax_exp.identical(dax_file)
 
 
-# TODO: remove
-test_xarray_data_array_save()
-# TODO: remove
-test_xarray_data_array_load()
-
-
 # xarray.DataArray ---------------------------------------------------------------------
 
 
@@ -84,6 +78,10 @@ def test_xarray_dataset_save():
         f.write_to("xr_dataset.asdf")
 
 
+# TODO: remove
+# test_xarray_dataset_save()
+
+
 def test_xarray_dataset_load():
     """Test if an xarray.Dataset can be restored from an asdf file."""
     f = asdf.open(
@@ -93,6 +91,9 @@ def test_xarray_dataset_load():
     dsx_exp = get_xarray_example_dataset()
     assert dsx_exp.identical(dsx_file)
 
+
+# TODO: remove
+# test_xarray_dataset_load()
 
 # weldx.transformations.LocalCoordinateSystem ------------------------------------------
 
@@ -109,17 +110,23 @@ def get_local_coordinate_system(time_dep_orientation, time_dep_coordinates):
 def are_local_coordinate_systems_equal(
     lcs_0: tf.LocalCoordinateSystem, lcs_1: tf.LocalCoordinateSystem
 ):
-    return lcs_0.orientation.equals(lcs_1.orientation) and lcs_0.coordinates.equals(
-        lcs_1.coordinates
-    )
+    return lcs_0.orientation.identical(
+        lcs_1.orientation
+    ) and lcs_0.coordinates.identical(lcs_1.coordinates)
 
 
 def test_local_coordinate_system_save():
     """Test if a LocalCoordinateSystem can be writen to an asdf file."""
     lcs_static = get_local_coordinate_system(False, False)
     tree = {"lcs_static": lcs_static}
-    with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
+    with asdf.AsdfFile(
+        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
+    ) as f:
         f.write_to("local_coordinate_system.asdf")
+
+
+# TODO: remove
+# test_local_coordinate_system_save()
 
 
 def test_local_coordinate_system_load():
@@ -132,3 +139,7 @@ def test_local_coordinate_system_load():
     lcs_static_exp = get_local_coordinate_system(False, False)
 
     assert are_local_coordinate_systems_equal(lcs_static_file, lcs_static_exp)
+
+
+# TODO: remove
+# test_local_coordinate_system_load()

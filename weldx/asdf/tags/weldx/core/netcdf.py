@@ -85,7 +85,7 @@ class NetCDFVariableTypeASDF(WeldxType):
     @classmethod
     def to_tree(cls, node: NetCDFVariable, ctx):
         """Convert an xarray.Dataset to a tagged tree"""
-        dtype = node.data.dtype.name
+        dtype = node.data.dtype.str
         data = cls.convert_time_dtypes(data=node.data)
         tree = {
             "name": node.name,

@@ -11,17 +11,18 @@ class LocalCoordinateSystemASDF(WeldxType):
     types = [LocalCoordinateSystem]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-    validators = {"wx_shape_validate": wx_shape_validator}
+    validators = {}
 
     @classmethod
     def to_tree(cls, node: LocalCoordinateSystem, ctx):
         """Convert a LocalCoordinateSystem to a tagged tree"""
-        tree = {"orientation": node.orientation, "coordinates": node.coordinates}
+        tree = {"dataset": node.dataset}
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
         """Convert a tagged tree to a LocalCoordinateSystem"""
+        dataset = tree["dataset"]
         return LocalCoordinateSystem(
-            orientation=tree["orientation"], coordinates=tree["coordinates"]
+            orientation=dataset.orientation.data, coordinates=dataset.coordinates.data
         )

@@ -10,18 +10,17 @@ description: |
   TODO: DESCRIPTION
 type: object
 properties:
-  orientation:
-    $ref: tag:weldx.bam.de:weldx/core/xarray/data_array-1.0.0
-  coordinates:
-    $ref: tag:weldx.bam.de:weldx/core/xarray/data_array-1.0.0
-required: [orientation, coordinates]
+  dataset:
+    $ref: tag:weldx.bam.de:weldx/core/netcdf/file_format-1.0.0
+
+required: [dataset]
 flowStyle: block
 additionalProperties: false
 
-wx_shape_validate: true
-wx_shape:
-  orientation:
-    data: [3, 3]
-  coordinates:
-    data: [3]
+#wx_shape_validate: true
+#wx_shape:
+#  orientation:
+#    data: [3, 3]
+#  coordinates:
+#    data: [3]
 ...

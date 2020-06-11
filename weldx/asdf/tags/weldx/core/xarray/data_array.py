@@ -22,11 +22,7 @@ class XarrayDataArrayASDF(WeldxType):
 
         attributes = []
         coordinates = []
-        # dimensions = []
         variables = netcdf.NetCDFVariable("data", node.dims, node.data)
-
-        # for i in range(len(node.shape)):
-        #    dimensions.append(netcdf.NetCDFDimension(node.dims[i], node.shape[i]))
 
         for name, data in node.coords.items():
             coordinates.append(netcdf.NetCDFVariable(name, data.dims, data.data))
@@ -34,7 +30,6 @@ class XarrayDataArrayASDF(WeldxType):
         tree = {
             "attributes": attributes,
             "coordinates": coordinates,
-            #   "dimensions": dimensions,
             "variables": variables,
         }
 
