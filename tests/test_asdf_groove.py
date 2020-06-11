@@ -250,7 +250,17 @@ test_params = _create_test_grooves()
     "groove, expected_dtype", test_params.values(), ids=test_params.keys()
 )
 def test_asdf_groove(groove: BaseGroove, expected_dtype):
-    """Test ASDF functionality for all grooves."""
+    """Test ASDF functionality for all grooves.
+
+    Parameters
+    ----------
+    groove:
+       Groove instance to be tested.
+
+    expected_dtype:
+       Expected type of the groove to be tested.
+
+    """
     k = "groove"
     tree = {k: groove}
 

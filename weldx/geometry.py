@@ -16,11 +16,18 @@ class LineSegment:
     """Line segment."""
 
     def __init__(self, points):
-        """
-        Construct line segment.
+        """Construct line segment.
 
-        :param points: 2x2 matrix of points. The first column is the
-        starting point and the second column the end point.
+        Parameters
+        ----------
+        points :
+            2x2 matrix of points. The first column is the
+            starting point and the second column the end point.
+
+        Returns
+        -------
+        LineSegment
+
         """
         points = ut.to_float_array(points)
         if not len(points.shape) == 2:
@@ -31,38 +38,57 @@ class LineSegment:
         self._points = points
         self._calculate_length()
 
-    def _calculate_length(self):
-        """
-        Calculate the segment length from its points.
+    def __repr__(self):
+        """Output simple string representation of a LineSegment."""
+        p1 = np.array2string(self.points[:, 0], precision=2, separator=",")
+        p2 = np.array2string(self.points[:, 1], precision=2, separator=",")
+        return f"Line: {p1} -> {p2}"
 
-        :return: ---
-        """
+    def _calculate_length(self):
+        """Calculate the segment length from its points."""
         self._length = np.linalg.norm(self._points[:, 1] - self._points[:, 0])
         if math.isclose(self._length, 0):
             raise ValueError("Segment length is 0.")
 
     @classmethod
-    def construct_with_points(cls, point_start, point_end):
-        """
-        Construct a line segment with two points.
+    def construct_with_points(cls, point_start, point_end) -> "LineSegment":
+        """Construct a line segment with two points.
 
-        :param point_start: Starting point of the segment
-        :param point_end: End point of the segment
-        :return: Line segment
+        Parameters
+        ----------
+        point_start :
+            Starting point of the segment
+        point_end :
+            End point of the segment
+
+        Returns
+        -------
+        LineSegment
+            Line segment
+
         """
         points = np.transpose(np.array([point_start, point_end], dtype=float))
         return cls(points)
 
     @classmethod
     def linear_interpolation(cls, segment_a, segment_b, weight):
-        """
-        Interpolate two line segments linearly.
+        """Interpolate two line segments linearly.
 
-        :param segment_a: First segment
-        :param segment_b: Second segment
-        :param weight: Weighting factor in the range [0 .. 1] where 0 is
-        segment a and 1 is segment b
-        :return: Interpolated segment
+        Parameters
+        ----------
+        segment_a :
+            First segment
+        segment_b :
+            Second segment
+        weight :
+            Weighting factor in the range [0 .. 1] where 0 is
+            segment a and 1 is segment b
+
+        Returns
+        -------
+        LineSegment
+            Interpolated segment
+
         """
         if not isinstance(segment_a, cls) or not isinstance(segment_b, cls):
             raise TypeError("Parameters a and b must both be line segments.")
@@ -73,76 +99,98 @@ class LineSegment:
 
     @property
     def length(self):
-        """
-        Get the segment length.
+        """Get the segment length.
 
-        :return: Segment length
+        Returns
+        -------
+        float
+            Segment length
+
         """
         return self._length
 
     @property
     def point_end(self):
-        """
-        Get the end point of the segment.
+        """Get the end point of the segment.
 
-        :return: End point
+        Returns
+        -------
+        np.ndarray
+            End point
+
         """
         return self._points[:, 1]
 
     @property
     def point_start(self):
-        """
-        Get the starting point of the segment.
+        """Get the starting point of the segment.
 
-        :return: Starting point
+        Returns
+        -------
+        np.ndarray
+            Starting point
+
         """
         return self._points[:, 0]
 
     @property
     def points(self):
-        """
-        Get the segments points in form of a 2x2 matrix.
+        """Get the segments points in form of a 2x2 matrix.
 
-        The first column represents the starting point and the second one
-        the end point.
+        The first column represents the starting point and the second one the end point.
 
-        :return: 2x2 matrix containing the segments points
+        Returns
+        -------
+        np.ndarray
+            2x2 matrix containing the segments points
+
         """
         return self._points
 
     def apply_transformation(self, matrix):
-        """
-        Apply a transformation matrix to the segment.
+        """Apply a transformation matrix to the segment.
 
-        :param matrix: Transformation matrix
-        :return: ---
+        Parameters
+        ----------
+        matrix :
+            Transformation matrix
+
         """
         self._points = np.matmul(matrix, self._points)
         self._calculate_length()
 
     def apply_translation(self, vector):
-        """
-        Apply a translation to the segment.
+        """Apply a translation to the segment.
 
-        :param vector: Translation vector
-        :return: ---
+        Parameters
+        ----------
+        vector :
+            Translation vector
+
         """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
-    def rasterize(self, raster_width):
-        """
-        Create an array of points that describe the segments contour.
+    def rasterize(self, raster_width) -> np.ndarray:
+        """Create an array of points that describe the segments contour.
 
         The effective raster width may vary from the specified one,
         since the algorithm enforces constant distances between two
         raster points.
 
-        :param raster_width: The desired distance between two raster points
-        :return: Array of contour points
+        Parameters
+        ----------
+        raster_width :
+            The desired distance between two raster points
+
+        Returns
+        -------
+        np.ndarray
+            Array of contour points
+
         """
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
-        raster_width = np.clip(np.abs(raster_width), None, self.length)
+        raster_width = np.min([raster_width, self.length])
 
         num_raster_segments = np.round(self.length / raster_width)
 
@@ -155,22 +203,36 @@ class LineSegment:
         return np.matmul(self._points, weight_matrix)
 
     def transform(self, matrix):
-        """
-        Get a transformed copy of the segment.
+        """Get a transformed copy of the segment.
 
-        :param matrix: Transformation matrix
-        :return: Transformed copy
+        Parameters
+        ----------
+        matrix :
+            Transformation matrix
+
+        Returns
+        -------
+        LineSegment
+            Transformed copy
+
         """
         new_segment = copy.deepcopy(self)
         new_segment.apply_transformation(matrix)
         return new_segment
 
     def translate(self, vector):
-        """
-        Get a translated copy of the segment.
+        """Get a translated copy of the segment.
 
-        :param vector: Translation vector
-        :return: Transformed copy
+        Parameters
+        ----------
+        vector :
+            Translation vector
+
+        Returns
+        -------
+        LineSegment
+            Transformed copy
+
         """
         new_segment = copy.deepcopy(self)
         new_segment.apply_translation(vector)
@@ -184,14 +246,20 @@ class ArcSegment:
     """Arc segment."""
 
     def __init__(self, points, arc_winding_ccw=True):
-        """
-        Construct arc segment.
+        """Construct arc segment.
 
-        :param points: 2x3 matrix of points. The first column is the
-        starting point, the second column the end point and the last the
-        center point.
-        :param: arc_winding_ccw: Specifies if the arcs winding order is
-        counter-clockwise
+        Parameters
+        ----------
+        points :
+            2x3 matrix of points. The first column is the starting point,
+            the second column the end point and the last the center point.
+        arc_winding_ccw :
+            Specifies if the arcs winding order is counter-clockwise
+
+        Returns
+        -------
+        ArcSegment
+
         """
         points = ut.to_float_array(points)
         if not len(points.shape) == 2:
@@ -210,12 +278,15 @@ class ArcSegment:
         self._radius = None
         self._calculate_arc_parameters()
 
-    def _calculate_arc_angle(self):
-        """
-        Calculate the arc angle.
+    def __repr__(self):
+        """Output simple string representation of an ArcSegment."""
+        values = np.array(
+            [self._radius, self._arc_angle / np.pi * 180, self._arc_length]
+        )
+        return f"Arc : {np.array2string(values, precision=2, separator=',')}"
 
-        :return: ---
-        """
+    def _calculate_arc_angle(self):
+        """Calculate the arc angle."""
         point_start = self.point_start
         point_end = self.point_end
         point_center = self.point_center
@@ -237,11 +308,7 @@ class ArcSegment:
             self._arc_angle = 2 * np.pi - angle_vecs
 
     def _calculate_arc_parameters(self):
-        """
-        Calculate radius, arc length and arc angle from the segments points.
-
-        :return: ---
-        """
+        """Calculate radius, arc length and arc angle from the segments points."""
         self._radius = np.linalg.norm(self._points[:, 0] - self._points[:, 2])
         self._calculate_arc_angle()
         self._arc_length = self._arc_angle * self._radius
@@ -249,11 +316,7 @@ class ArcSegment:
         self._check_valid()
 
     def _check_valid(self):
-        """
-        Check if the segments data is valid.
-
-        :return: ---
-        """
+        """Check if the segments data is valid."""
         point_start = self.point_start
         point_end = self.point_end
         point_center = self.point_center
@@ -271,15 +334,25 @@ class ArcSegment:
     def construct_with_points(
         cls, point_start, point_end, point_center, arc_winding_ccw=True
     ):
-        """
-        Construct an arc segment with three points (start, end, center).
+        """Construct an arc segment with three points (start, end, center).
 
-        :param point_start: Starting point of the segment
-        :param point_end: End point of the segment
-        :param point_center: Center point of the arc
-        :param arc_winding_ccw: Specifies if the arcs winding order is
-        counter-clockwise
-        :return: Arc segment
+        Parameters
+        ----------
+        point_start :
+            Starting point of the segment
+        point_end :
+            End point of the segment
+        point_center :
+            Center point of the arc
+        arc_winding_ccw :
+            Specifies if the arcs winding order is
+            counter-clockwise (Default value = True)
+
+        Returns
+        -------
+        ArcSegment
+            Arc segment
+
         """
         points = np.transpose(
             np.array([point_start, point_end, point_center], dtype=float)
@@ -295,17 +368,28 @@ class ArcSegment:
         center_left_of_line=True,
         arc_winding_ccw=True,
     ):
-        """
-        Construct an arc segment with a radius and the start and end points.
+        """Construct an arc segment with a radius and the start and end points.
 
-        :param point_start: Starting point of the segment
-        :param point_end: End point of the segment
-        :param radius: Radius
-        :param center_left_of_line: Specifies if the center point is located
-        to the left of the vector point_start -> point_end
-        :param arc_winding_ccw: Specifies if the arcs winding order is
-        counter-clockwise
-        :return: Arc segment
+        Parameters
+        ----------
+        point_start :
+            Starting point of the segment
+        point_end :
+            End point of the segment
+        radius :
+            Radius
+        center_left_of_line :
+            Specifies if the center point is located
+            to the left of the vector point_start -> point_end (Default value = True)
+        arc_winding_ccw :
+            Specifies if the arcs winding order is
+            counter-clockwise (Default value = True)
+
+        Returns
+        -------
+        ArcSegment
+            Arc segment
+
         """
         point_start = ut.to_float_array(point_start)
         point_end = ut.to_float_array(point_end)
@@ -332,8 +416,7 @@ class ArcSegment:
 
     @classmethod
     def linear_interpolation(cls, segment_a, segment_b, weight):
-        """
-        Interpolate two arc segments linearly.
+        """Interpolate two arc segments linearly.
 
         This function is not implemented, since linear interpolation of an
         arc segment is not unique. The 'Shape' class requires succeeding
@@ -349,11 +432,21 @@ class ArcSegment:
         is the same in both interpolated segments. To ensure the desired
         interpolation behavior, you have to provide a custom interpolation.
 
-        :param segment_a: First segment
-        :param segment_b: Second segment
-        :param weight: Weighting factor in the range [0 .. 1] where 0 is
-        segment a and 1 is segment b
-        :return: Interpolated segment
+        Parameters
+        ----------
+        segment_a :
+            First segment
+        segment_b :
+            Second segment
+        weight :
+            Weighting factor in the range [0 .. 1] where 0 is
+            segment a and 1 is segment b
+
+        Returns
+        -------
+        ArcSegment
+            Interpolated segment
+
         """
         raise NotImplementedError(
             "Linear interpolation of an arc segment is not unique (see "
@@ -362,109 +455,144 @@ class ArcSegment:
 
     @property
     def arc_angle(self):
-        """
-        Get the arc angle.
+        """Get the arc angle.
 
-        :return: Arc angle
+        Returns
+        -------
+        float
+            Arc angle
+
         """
         return self._arc_angle
 
     @property
     def arc_length(self):
-        """
-        Get the arc length.
+        """Get the arc length.
 
-        :return: Arc length
+        Returns
+        -------
+        float
+            Arc length
+
         """
         return self._arc_length
 
     @property
     def arc_winding_ccw(self):
-        """
-        Get True if the winding order is counter-clockwise. False if clockwise.
+        """Get True if the winding order is counter-clockwise. False if clockwise.
 
-        :return: True or False
+        Returns
+        -------
+        bool
+            True or False
+
         """
         return self._sign_arc_winding > 0
 
     @property
     def point_center(self):
-        """
-        Get the center point of the segment.
+        """Get the center point of the segment.
 
-        :return: Center point
+        Returns
+        -------
+        np.ndarray
+            Center point
+
         """
         return self._points[:, 2]
 
     @property
     def point_end(self):
-        """
-        Get the end point of the segment.
+        """Get the end point of the segment.
 
-        :return: End point
+        Returns
+        -------
+        np.ndarray
+            End point
+
         """
         return self._points[:, 1]
 
     @property
     def point_start(self):
-        """
-        Get the starting point of the segment.
+        """Get the starting point of the segment.
 
-        :return: Starting point
+        Returns
+        -------
+        np.ndarray
+            Starting point
+
         """
         return self._points[:, 0]
 
     @property
     def points(self):
-        """
-        Get the segments points in form of a 2x3 matrix.
+        """Get the segments points in form of a 2x3 matrix.
 
         The first column represents the starting point, the second one the
         end and the third one the center.
 
-        :return: 2x3 matrix containing the segments points
+        Returns
+        -------
+        np.ndarray
+            2x3 matrix containing the segments points
+
         """
         return self._points
 
     @property
     def radius(self):
-        """
-        Get the radius.
+        """Get the radius.
 
-        :return: Radius
+        Returns
+        -------
+        float
+            Radius
+
         """
         return self._radius
 
     def apply_transformation(self, matrix):
-        """
-        Apply a transformation to the segment.
+        """Apply a transformation to the segment.
 
-        :param matrix: Transformation matrix
-        :return: ---
+        Parameters
+        ----------
+        matrix :
+            Transformation matrix
+
         """
         self._points = np.matmul(matrix, self._points)
         self._sign_arc_winding *= tf.reflection_sign(matrix)
         self._calculate_arc_parameters()
 
     def apply_translation(self, vector):
-        """
-        Apply a translation to the segment.
+        """Apply a translation to the segment.
 
-        :param vector: Translation vector
-        :return: ---
+        Parameters
+        ----------
+        vector :
+            Translation vector
+
         """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
-    def rasterize(self, raster_width):
-        """
-        Create an array of points that describe the segments contour.
+    def rasterize(self, raster_width) -> np.ndarray:
+        """Create an array of points that describe the segments contour.
 
         The effective raster width may vary from the specified one,
         since the algorithm enforces constant distances between two
         raster points.
 
-        :param raster_width: The desired distance between two raster points
-        :return: Array of contour points
+        Parameters
+        ----------
+        raster_width :
+            The desired distance between two raster points
+
+        Returns
+        -------
+        np.ndarray
+            Array of contour points
+
         """
         point_start = self.point_start
         point_center = self.point_center
@@ -487,22 +615,36 @@ class ArcSegment:
         return data.transpose()
 
     def transform(self, matrix):
-        """
-        Get a transformed copy of the segment.
+        """Get a transformed copy of the segment.
 
-        :param matrix: Transformation matrix
-        :return: Transformed copy
+        Parameters
+        ----------
+        matrix :
+            Transformation matrix
+
+        Returns
+        -------
+        ArcSegment
+            Transformed copy
+
         """
         new_segment = copy.deepcopy(self)
         new_segment.apply_transformation(matrix)
         return new_segment
 
     def translate(self, vector):
-        """
-        Get a translated copy of the segment.
+        """Get a translated copy of the segment.
 
-        :param vector: Translation vector
-        :return: Transformed copy
+        Parameters
+        ----------
+        vector :
+            Translation vector
+
+        Returns
+        -------
+        ArcSegment
+            Transformed copy
+
         """
         new_segment = copy.deepcopy(self)
         new_segment.apply_translation(vector)
@@ -516,25 +658,39 @@ class Shape:
     """Defines a shape in 2 dimensions."""
 
     def __init__(self, segments=None):
-        """
-        Construct shape.
+        """Construct a shape.
 
-        :param segments: Single segment or list of segments
+        Parameters
+        ----------
+        segments :
+            Single segment or list of segments
+
+        Returns
+        -------
+        Shape
+
         """
         segments = ut.to_list(segments)
         self._check_segments_connected(segments)
         self._segments = segments
 
+    def __repr__(self):
+        """Output simple string representation of a Shape (listing segments)."""
+        shape_str = "\n".join(repr(s) for s in self.segments)
+        return f"{shape_str}"
+
     @staticmethod
     def _check_segments_connected(segments):
-        """
-        Check if all segments are connected to each other.
+        """Check if all segments are connected to each other.
 
         The start point of a segment must be identical to the end point of
         the previous segment.
 
-        :param segments: List of segments
-        :return: ---
+        Parameters
+        ----------
+        segments :
+            List of segments
+
         """
         for i in range(len(segments) - 1):
             if not ut.vector_is_close(
@@ -544,16 +700,26 @@ class Shape:
 
     @classmethod
     def interpolate(cls, shape_a, shape_b, weight, interpolation_schemes):
-        """
-        Interpolate 2 shapes.
+        """Interpolate 2 shapes.
 
-        :param shape_a: First shape
-        :param shape_b: Second shape
-        :param weight: Weighting factor in the range [0 .. 1] where 0 is
-        shape a and 1 is shape b
-        :param interpolation_schemes: List of interpolation schemes for each
-        segment of the shape.
-        :return: Interpolated shape
+        Parameters
+        ----------
+        shape_a :
+            First shape
+        shape_b :
+            Second shape
+        weight :
+            Weighting factor in the range [0 .. 1] where 0 is
+            shape a and 1 is shape b
+        interpolation_schemes :
+            List of interpolation schemes for each
+            segment of the shape.
+
+        Returns
+        -------
+        Shape
+            Interpolated shape
+
         """
         if not shape_a.num_segments == shape_b.num_segments:
             raise ValueError("Number of segments differ.")
@@ -571,17 +737,26 @@ class Shape:
 
     @classmethod
     def linear_interpolation(cls, shape_a, shape_b, weight):
-        """
-        Interpolate 2 shapes linearly.
+        """Interpolate 2 shapes linearly.
 
         Each segment is interpolated individually, using the corresponding
         linear segment interpolation.
 
-        :param shape_a: First shape
-        :param shape_b: Second shape
-        :param weight: Weighting factor in the range [0 .. 1] where 0 is
-        shape a and 1 is shape b
-        :return: Interpolated shape
+        Parameters
+        ----------
+        shape_a :
+            First shape
+        shape_b :
+            Second shape
+        weight :
+            Weighting factor in the range [0 .. 1] where 0 is
+            shape a and 1 is shape b
+
+        Returns
+        -------
+        Shape
+            Interpolated shape
+
         """
         interpolation_schemes = []
         for i in range(shape_a.num_segments):
@@ -591,30 +766,43 @@ class Shape:
 
     @property
     def num_segments(self):
-        """
-        Get the number of segments of the shape.
+        """Get the number of segments of the shape.
 
-        :return: number of segments
+        Returns
+        -------
+        int
+            number of segments
+
         """
         return len(self._segments)
 
     @property
     def segments(self):
-        """
-        Get the shape's segments.
+        """Get the shape's segments.
 
-        :return: List of segments
+        Returns
+        -------
+        list
+            List of segments
+
         """
         return self._segments
 
     def add_line_segments(self, points):
-        """
-        Add line segments to the shape.
+        """Add line segments to the shape.
 
         The line segments are constructed from the provided points.
 
-        :param points:  List of points / Matrix Nx2 matrix
-        :return: self
+        Parameters
+        ----------
+        points :
+            List of points / Matrix Nx2 matrix
+
+        Returns
+        -------
+        Shape
+            self
+
         """
         points = ut.to_float_array(points)
         dimension = len(points.shape)
@@ -642,11 +830,13 @@ class Shape:
         return self
 
     def add_segments(self, segments):
-        """
-        Add segments to the shape.
+        """Add segments to the shape.
 
-        :param segments: Single segment or list of segments
-        :return: ---
+        Parameters
+        ----------
+        segments :
+            Single segment or list of segments
+
         """
         segments = ut.to_list(segments)
         if self.num_segments > 0:
@@ -655,23 +845,27 @@ class Shape:
         self._segments += segments
 
     def apply_transformation(self, transformation_matrix):
-        """
-        Apply a transformation to the shape.
+        """Apply a transformation to the shape.
 
-        :param transformation_matrix: Transformation matrix
-        :return: ---
+        Parameters
+        ----------
+        transformation_matrix :
+            Transformation matrix
+
         """
         for i in range(self.num_segments):
             self._segments[i].apply_transformation(transformation_matrix)
 
     def apply_reflection(self, reflection_normal, distance_to_origin=0):
-        """
-        Apply a reflection at the given axis to the shape.
+        """Apply a reflection at the given axis to the shape.
 
-        :param reflection_normal: Normal of the line of reflection
-        :param distance_to_origin: Distance of the line of reflection to the
-        origin
-        :return: ---
+        Parameters
+        ----------
+        reflection_normal :
+            Normal of the line of reflection
+        distance_to_origin :
+            Distance of the line of reflection to the origin (Default value = 0)
+
         """
         normal = ut.to_float_array(reflection_normal)
         if ut.vector_is_close(normal, ut.to_float_array([0, 0])):
@@ -688,12 +882,15 @@ class Shape:
         self.apply_translation(offset)
 
     def apply_reflection_across_line(self, point_start, point_end):
-        """
-        Apply a reflection across a line.
+        """Apply a reflection across a line.
 
-        :param point_start: Line of reflection's start point
-        :param point_end: Line of reflection's end point
-        :return: ---
+        Parameters
+        ----------
+        point_start :
+            Line of reflection's start point
+        point_end :
+            Line of reflection's end point
+
         """
         point_start = ut.to_float_array(point_start)
         point_end = ut.to_float_array(point_end)
@@ -717,35 +914,44 @@ class Shape:
         self.apply_reflection(normal, line_distance_origin)
 
     def apply_translation(self, vector):
-        """
-        Apply a translation to the shape.
+        """Apply a translation to the shape.
 
-        :param vector: Translation vector
-        :return: ---
+        Parameters
+        ----------
+        vector :
+            Translation vector
+
         """
         for i in range(self.num_segments):
             self._segments[i].apply_translation(vector)
 
-    def rasterize(self, raster_width):
-        """
-        Create an array of points that describe the shapes contour.
+    def rasterize(self, raster_width) -> np.ndarray:
+        """Create an array of points that describe the shapes contour.
 
         The effective raster width may vary from the specified one,
         since the algorithm enforces constant distances between two
         raster points inside of each segment.
 
-        :param raster_width: The desired distance between two raster points
-        :return: Array of contour points (3d)
+        Parameters
+        ----------
+        raster_width :
+            The desired distance between two raster points
+
+        Returns
+        -------
+        np.ndarray
+            Array of contour points (2d)
+
         """
         if self.num_segments == 0:
             raise Exception("Can't rasterize empty shape.")
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
 
-        raster_data = np.empty([2, 0])
-        for i in range(self.num_segments):
-            segment_data = self.segments[i].rasterize(raster_width)
-            raster_data = np.hstack((raster_data, segment_data[:, :-1]))
+        raster_data = []
+        for segment in self.segments:
+            raster_data.append(segment.rasterize(raster_width)[:, :-1])
+        raster_data = np.hstack(raster_data)
 
         last_point = self.segments[-1].point_end[:, np.newaxis]
         if not ut.vector_is_close(last_point, self.segments[0].point_start):
@@ -753,47 +959,75 @@ class Shape:
         return raster_data
 
     def reflect(self, reflection_normal, distance_to_origin=0):
-        """
-        Get a reflected copy of the shape.
+        """Get a reflected copy of the shape.
 
-        :param reflection_normal: Normal of the line of reflection
-        :param distance_to_origin: Distance of the line of reflection to the
-        origin
-        :return: ---
+        Parameters
+        ----------
+        reflection_normal :
+            Normal of the line of reflection
+        distance_to_origin :
+            Distance of the line of reflection to the
+            origin (Default value = 0)
+
+        Returns
+        -------
+        Shape
+
         """
         new_shape = copy.deepcopy(self)
         new_shape.apply_reflection(reflection_normal, distance_to_origin)
         return new_shape
 
     def reflect_across_line(self, point_start, point_end):
-        """
-        Get a reflected copy across a line.
+        """Get a reflected copy across a line.
 
-        :param point_start: Line of reflection's start point
-        :param point_end: Line of reflection's end point
-        :return
+        Parameters
+        ----------
+        point_start :
+            Line of reflection's start point
+        point_end :
+            Line of reflection's end point
+
+        Returns
+        -------
+        Shape
+
         """
         new_shape = copy.deepcopy(self)
         new_shape.apply_reflection_across_line(point_start, point_end)
         return new_shape
 
     def transform(self, matrix):
-        """
-        Get a transformed copy of the shape.
+        """Get a transformed copy of the shape.
 
-        :param matrix: Transformation matrix
-        :return: Transformed copy
+        Parameters
+        ----------
+        matrix :
+            Transformation matrix
+
+        Returns
+        -------
+        Shape
+            Transformed copy
+
         """
         new_shape = copy.deepcopy(self)
         new_shape.apply_transformation(matrix)
         return new_shape
 
     def translate(self, vector):
-        """
-        Get a translated copy of the shape.
+        """Get a translated copy of the shape.
 
-        :param vector: Translation vector
-        :return: Transformed copy
+        Parameters
+        ----------
+        vector :
+            Translation vector
+
+        Returns
+        -------
+        Shape
+            Transformed copy
+
         """
         new_shape = copy.deepcopy(self)
         new_shape.apply_translation(vector)
@@ -807,10 +1041,19 @@ class Profile:
     """Defines a 2d profile."""
 
     def __init__(self, shapes, units=None):
-        """
-        Construct profile class.
+        """Construct profile class.
 
-        :param: shapes: Instance or list of geo.Shape class(es)
+        Parameters
+        ----------
+        shapes :
+            Instance or list of geo.Shape class(es)
+        units :
+            Associated units.
+
+        Returns
+        -------
+        Profile
+
         """
         self._shapes = []
         self.attrs = {}
@@ -818,21 +1061,34 @@ class Profile:
             self.attrs["units"] = units
         self.add_shapes(shapes)
 
+    def __repr__(self):
+        """Output simple string representation of a Profile for users."""
+        repr_str = f"Profile with {len(self.shapes)} shapes\n"
+        repr_str = repr_str + "\n\n".join(
+            f"Shape {i}:\n{s}" for i, s in enumerate(self.shapes)
+        )
+        return repr_str
+
     @property
     def num_shapes(self):
-        """
-        Get the number of shapes of the profile.
+        """Get the number of shapes of the profile.
 
-        :return: Number of shapes
+        Returns
+        -------
+        int
+            Number of shapes
+
         """
         return len(self._shapes)
 
     def add_shapes(self, shapes):
-        """
-        Add shapes to the profile.
+        """Add shapes to the profile.
 
-        :param shapes: Instance or list of geo.Shape class(es)
-        :return: ---
+        Parameters
+        ----------
+        shapes :
+            Instance or list of geo.Shape class(es)
+
         """
         if not isinstance(shapes, list):
             shapes = [shapes]
@@ -842,40 +1098,60 @@ class Profile:
 
         self._shapes += shapes
 
-    def rasterize(self, raster_width):
-        """
-        Rasterize the profile.
+    def rasterize(self, raster_width, insert_sep=False):
+        """Rasterize the profile.
 
-        :param: raster_width: Raster width
-        :return: Raster data
+        Parameters
+        ----------
+        raster_width :
+            Distance between points for rasterization.
+        insert_sep :
+            insert NaN values between profiles (useful for plotting)
+
+        Returns
+        -------
+        np.ndarray
+            Raster data
+
         """
-        raster_data = np.empty([2, 0])
+        raster_data = []
         for shape in self._shapes:
-            raster_data = np.hstack((raster_data, shape.rasterize(raster_width)))
-
-        return raster_data
+            raster_data.append(shape.rasterize(raster_width))
+            if insert_sep:
+                raster_data.append(np.full((2, 1), np.nan))
+        return np.hstack(raster_data)
 
     def plot(
         self,
         title=None,
         label=None,
-        raster_width=0.1,
+        raster_width=0.5,
         axis="equal",
         grid=True,
-        line_style=".",
+        line_style=".-",
         ax=None,
     ):
-        """
-        Plot the profile.
+        """Plot the profile.
 
-        :param: title: Title of the figure
-        :param: raster_width: raster width
-        :param: axis: axis setting of matplotlib.pyplot
-        :param: grid: grid setting of matplotlib.pyplot
-        :param: line_style: line style setting of matplotlib.pyplot
-        :return: Display a figure
+        Parameters
+        ----------
+        title :
+            Matplotlib plot title. (Default value = None)
+        label :
+            Matplotlib plot label. (Default value = None)
+        raster_width :
+            Distance between Points to plot (Default value = 0.5)
+        axis :
+            Matplotlib axis setting. (Default value = "equal")
+        grid :
+            Matplotlib grid setting. (Default value = True)
+        line_style :
+            Matplotlib line style. (Default value = ".-")
+        ax :
+            Axis to plot to. (Default value = None)
+
         """
-        raster_data = self.rasterize(raster_width)
+        raster_data = self.rasterize(raster_width, insert_sep=True)
         if ax is None:  # pragma: no cover
             _, ax = plt.subplots()
         ax.grid(grid)
@@ -891,10 +1167,13 @@ class Profile:
 
     @property
     def shapes(self):
-        """
-        Get the profiles shapes.
+        """Get the profiles shapes.
 
-        :return: Shapes
+        Returns
+        -------
+        list
+            Shapes
+
         """
         return self._shapes
 
@@ -906,10 +1185,17 @@ class LinearHorizontalTraceSegment:
     """Trace segment with a linear path and constant z-component."""
 
     def __init__(self, length):
-        """
-        Construct linear horizontal trace segment.
+        """Construct linear horizontal trace segment.
 
-        :param length: Length of the segment
+        Parameters
+        ----------
+        length :
+            Length of the segment
+
+        Returns
+        -------
+        LinearHorizontalTraceSegment
+
         """
         if length <= 0:
             raise ValueError("'length' must have a positive value.")
@@ -917,19 +1203,29 @@ class LinearHorizontalTraceSegment:
 
     @property
     def length(self):
-        """
-        Get the length of the segment.
+        """Get the length of the segment.
 
-        :return: Length of the segment
+        Returns
+        -------
+        float
+            Length of the segment
+
         """
         return self._length
 
     def local_coordinate_system(self, relative_position):
-        """
-        Calculate a local coordinate system along the trace segment.
+        """Calculate a local coordinate system along the trace segment.
 
-        :param relative_position: Relative position on the trace [0 .. 1]
-        :return: Local coordinate system
+        Parameters
+        ----------
+        relative_position :
+            Relative position on the trace [0 .. 1]
+
+        Returns
+        -------
+        weldx.transformations.LocalCoordinateSystem
+            Local coordinate system
+
         """
         relative_position = np.clip(relative_position, 0, 1)
 
@@ -941,13 +1237,21 @@ class RadialHorizontalTraceSegment:
     """Trace segment describing an arc with constant z-component."""
 
     def __init__(self, radius, angle, clockwise=False):
-        """
-        Construct radial horizontal trace segment.
+        """Construct radial horizontal trace segment.
 
-        :param radius: Radius of the arc
-        :param angle: Angle of the arc
-        :param clockwise: If True, the rotation is clockwise. Otherwise it
-        is counter-clockwise.
+        Parameters
+        ----------
+        radius :
+            Radius of the arc
+        angle :
+            Angle of the arc
+        clockwise :
+            If True, the rotation is clockwise. Otherwise it is counter-clockwise.
+
+        Returns
+        -------
+        RadialHorizontalTraceSegment
+
         """
         if radius <= 0:
             raise ValueError("'radius' must have a positive value.")
@@ -963,57 +1267,84 @@ class RadialHorizontalTraceSegment:
 
     @staticmethod
     def _arc_length(radius, angle):
-        """
-        Calculate the arc length.
+        """Calculate the arc length.
 
-        :param radius: Radius
-        :param angle: Angle (rad)
-        :return: Arc length
+        Parameters
+        ----------
+        radius :
+            Radius
+        angle :
+            Angle (rad)
+
+        Returns
+        -------
+        float
+            Arc length
+
         """
         return angle * radius
 
     @property
     def angle(self):
-        """
-        Get the angle of the segment.
+        """Get the angle of the segment.
 
-        :return: Angle of the segment
+        Returns
+        -------
+        float
+            Angle of the segment (rad)
+
         """
         return self._angle
 
     @property
     def length(self):
-        """
-        Get the length of the segment.
+        """Get the length of the segment.
 
-        :return: Length of the segment
+        Returns
+        -------
+        float
+            Length of the segment
+
         """
         return self._length
 
     @property
     def radius(self):
-        """
-        Get the radius of the segment.
+        """Get the radius of the segment.
 
-        :return: Radius of the segment
+        Returns
+        -------
+        float
+            Radius of the segment
+
         """
         return self._radius
 
     @property
     def is_clockwise(self):
-        """
-        Get True, if the segments winding is clockwise, False otherwise.
+        """Get True, if the segments winding is clockwise, False otherwise.
 
-        :return: True or False
+        Returns
+        -------
+        bool
+            True or False
+
         """
         return self._sign_winding < 0
 
     def local_coordinate_system(self, relative_position):
-        """
-        Calculate a local coordinate system along the trace segment.
+        """Calculate a local coordinate system along the trace segment.
 
-        :param relative_position: Relative position on the trace [0 .. 1]
-        :return: Local coordinate system
+        Parameters
+        ----------
+        relative_position :
+            Relative position on the trace [0 .. 1]
+
+        Returns
+        -------
+        weldx.transformations.LocalCoordinateSystem
+            Local coordinate system
+
         """
         relative_position = np.clip(relative_position, 0, 1)
 
@@ -1033,11 +1364,19 @@ class Trace:
     """Defines a 3d trace."""
 
     def __init__(self, segments, coordinate_system=tf.LocalCoordinateSystem()):
-        """
-        Construct trace.
+        """Construct trace.
 
-        :param segments: Single segment or list of segments
-        :param coordinate_system: Coordinate system of the trace
+        Parameters
+        ----------
+        segments :
+            Single segment or list of segments
+        coordinate_system :
+            Coordinate system of the trace
+
+        Returns
+        -------
+        Trace
+
         """
         if not isinstance(coordinate_system, tf.LocalCoordinateSystem):
             raise TypeError(
@@ -1052,12 +1391,14 @@ class Trace:
             raise ValueError("Trace has no length.")
 
     def _create_lookups(self, coordinate_system_start):
-        """
-        Create lookup tables.
+        """Create lookup tables.
 
-        :param coordinate_system_start: Coordinate system at the start of
-        the trace.
-        :return: ---
+        Parameters
+        ----------
+        coordinate_system_start :
+            Coordinate system at the start of
+            the trace.
+
         """
         self._coordinate_system_lookup = [coordinate_system_start]
         self._total_length_lookup = [0]
@@ -1079,11 +1420,18 @@ class Trace:
             self._total_length_lookup += [total_length]
 
     def _get_segment_index(self, position):
-        """
-        Get the segment index for a certain position.
+        """Get the segment index for a certain position.
 
-        :param position: Position
-        :return: Segment index
+        Parameters
+        ----------
+        position :
+            Position
+
+        Returns
+        -------
+        int
+            Segment index
+
         """
         position = np.clip(position, 0, self.length)
         for i in range(len(self._total_length_lookup) - 2):
@@ -1093,46 +1441,65 @@ class Trace:
 
     @property
     def coordinate_system(self):
-        """
-        Get the trace's coordinate system.
+        """Get the trace's coordinate system.
 
-        :return: Coordinate system of the trace
+        Returns
+        -------
+        weldx.transformations.LocalCoordinateSystem
+            Coordinate system of the trace
+
         """
         return self._coordinate_system_lookup[0]
 
     @property
     def length(self):
-        """
-        Get the length of the trace.
+        """Get the length of the trace.
 
-        :return: Length of the trace.
+        Returns
+        -------
+        float
+            Length of the trace.
+
         """
         return self._total_length_lookup[-1]
 
     @property
     def segments(self):
-        """
-        Get the trace's segments.
+        """Get the trace's segments.
 
-        :return: Segments of the trace
+        Returns
+        -------
+        list
+            Segments of the trace
+
         """
         return self._segments
 
     @property
     def num_segments(self):
-        """
-        Get the number of segments.
+        """Get the number of segments.
 
-        :return: Number of segments
+        Returns
+        -------
+        int
+            Number of segments
+
         """
         return len(self._segments)
 
     def local_coordinate_system(self, position):
-        """
-        Get the local coordinate system at a specific position on the trace.
+        """Get the local coordinate system at a specific position on the trace.
 
-        :param position: Position
-        :return: Local coordinate system
+        Parameters
+        ----------
+        position :
+            Position
+
+        Returns
+        -------
+        weldx.transformations.LocalCoordinateSystem
+            Local coordinate system
+
         """
         idx = self._get_segment_index(position)
 
@@ -1146,10 +1513,19 @@ class Trace:
         return local_segment_cs + segment_start_cs
 
     def rasterize(self, raster_width):
-        """
-        Rasterize the trace.
+        """Rasterize the trace.
 
-        :return: Raster data
+        Parameters
+        ----------
+        raster_width :
+           Distance between points for rasterization.
+
+        Returns
+        -------
+        np.ndarray
+            Raster data
+
+
         """
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
@@ -1184,14 +1560,23 @@ class Trace:
 
 
 def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
-    """
-    Interpolate 2 profiles linearly, segment by segment.
+    """Interpolate 2 profiles linearly, segment by segment.
 
-    :param profile_a: First profile
-    :param profile_b: Second profile
-    :param weight: Weighting factor [0 .. 1]. If 0, the profile is identical
-    to 'a' and if 1, it is identical to b.
-    :return: Interpolated profile
+    Parameters
+    ----------
+    profile_a :
+        First profile
+    profile_b :
+        Second profile
+    weight :
+        Weighting factor [0 .. 1]. If 0, the profile is identical
+        to 'a' and if 1, it is identical to b.
+
+    Returns
+    -------
+    Profile
+        Interpolated profile
+
     """
     weight = np.clip(weight, 0, 1)
     if not len(profile_a.shapes) == len(profile_b.shapes):
@@ -1213,14 +1598,23 @@ class VariableProfile:
     """Class to define a profile of variable shape."""
 
     def __init__(self, profiles, locations, interpolation_schemes):
-        """
-        Construct variable profile.
+        """Construct variable profile.
 
-        :param profiles: List of profiles.
-        :param locations: Ascending list of profile locations. Since the
-        first location needs to be 0, it can be omitted.
-        :param interpolation_schemes: List of interpolation schemes to
-        define the interpolation between two locations.
+        Parameters
+        ----------
+        profiles :
+            List of profiles.
+        locations :
+            Ascending list of profile locations. Since the first location needs to be 0,
+             it can be omitted.
+        interpolation_schemes :
+            List of interpolation schemes to define the interpolation between
+            two locations.
+
+        Returns
+        -------
+        VariableProfile
+
         """
         locations = ut.to_list(locations)
         interpolation_schemes = ut.to_list(interpolation_schemes)
@@ -1245,11 +1639,18 @@ class VariableProfile:
         self._interpolation_schemes = interpolation_schemes
 
     def _segment_index(self, location):
-        """
-        Get the index of the segment at a certain location.
+        """Get the index of the segment at a certain location.
 
-        :param location: Location
-        :return: Segment index
+        Parameters
+        ----------
+        location :
+            Location
+
+        Returns
+        -------
+        int
+            Segment index
+
         """
         idx = 0
         while location > self._locations[idx + 1]:
@@ -1258,73 +1659,101 @@ class VariableProfile:
 
     @property
     def interpolation_schemes(self):
-        """
-        Get the interpolation schemes.
+        """Get the interpolation schemes.
 
-        :return: List of interpolation schemes
+        Returns
+        -------
+        list
+            List of interpolation schemes
+
         """
         return self._interpolation_schemes
 
     @property
     def locations(self):
-        """
-        Get the locations.
+        """Get the locations.
 
-        :return: List of locations
+        Returns
+        -------
+        list
+            List of locations
+
         """
         return self._locations
 
     @property
     def max_location(self):
-        """
-        Get the maximum location.
+        """Get the maximum location.
 
-        :return: Maximum location
+        Returns
+        -------
+        float
+            Maximum location
+
         """
         return self._locations[-1]
 
     @property
     def num_interpolation_schemes(self):
-        """
-        Get the number of interpolation schemes.
+        """Get the number of interpolation schemes.
 
-        :return: Number of interpolation schemes
+        Returns
+        -------
+        int
+            Number of interpolation schemes
+
         """
         return len(self._interpolation_schemes)
 
     @property
     def num_locations(self):
-        """
-        Get the number of profile locations.
+        """Get the number of profile locations.
 
-        :return: Number of profile locations
+        Returns
+        -------
+        int
+            Number of profile locations
+
         """
         return len(self._locations)
 
     @property
     def num_profiles(self):
-        """
-        Get the number of profiles.
+        """Get the number of profiles.
 
-        :return: Number of profiles
+        Returns
+        -------
+        int
+            Number of profiles
+
         """
         return len(self._profiles)
 
     @property
     def profiles(self):
-        """
-        Get the profiles.
+        """Get the profiles.
 
-        :return: List of profiles
+        Returns
+        -------
+        list
+            List of profiles
+
         """
         return self._profiles
 
     def local_profile(self, location):
-        """
-        Get the profile at the specified location.
+        """Get the profile at the specified location.
 
-        :param location: Location
-        :return: Local profile.
+        Parameters
+        ----------
+        location :
+            Location
+
+        Returns
+        -------
+        Profile
+            Local profile.
+
         """
         location = np.clip(location, 0, self.max_location)
 
@@ -1344,11 +1773,19 @@ class Geometry:
     """Define the experimental geometry."""
 
     def __init__(self, profile, trace):
-        """
-        Construct geometry.
+        """Construct geometry.
 
-        :param profile: Constant or variable profile.
-        :param trace: Trace
+        Parameters
+        ----------
+        profile :
+            Constant or variable profile.
+        trace :
+            Trace
+
+        Returns
+        -------
+        Geometry
+
         """
         self._check_inputs(profile, trace)
         self._profile = profile
@@ -1356,12 +1793,15 @@ class Geometry:
 
     @staticmethod
     def _check_inputs(profile, trace):
-        """
-        Check the inputs to the constructor.
+        """Check the inputs to the constructor.
 
-        :param profile: Constant or variable profile.
-        :param trace: Trace
-        :return: ---
+        Parameters
+        ----------
+        profile :
+            Constant or variable profile.
+        trace :
+            Trace
+
         """
         if not isinstance(profile, (Profile, VariableProfile)):
             raise TypeError("'profile' must be a 'Profile' or 'VariableProfile' class")
@@ -1370,24 +1810,34 @@ class Geometry:
             raise TypeError("'trace' must be a 'Trace' class")
 
     def _get_local_profile_data(self, trace_location, raster_width):
-        """
-        Get a rasterized profile at a certain location on the trace.
+        """Get a rasterized profile at a certain location on the trace.
 
-        :param trace_location: Location on the trace
-        :param raster_width: Raster width
-        :return:
+        Parameters
+        ----------
+        trace_location :
+            Location on the trace
+        raster_width :
+            Raster width
+
         """
         relative_location = trace_location / self._trace.length
         profile_location = relative_location * self._profile.max_location
         profile = self._profile.local_profile(profile_location)
         return self._profile_raster_data_3d(profile, raster_width)
 
-    def _rasterize_trace(self, raster_width):
-        """
-        Rasterize the trace.
+    def _rasterize_trace(self, raster_width) -> np.ndarray:
+        """Rasterize the trace.
 
-        :param raster_width: Raster width
-        :return: Raster data
+        Parameters
+        ----------
+        raster_width :
+            Raster width
+
+        Returns
+        -------
+        np.ndarray
+            Raster data
+
         """
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
@@ -1401,12 +1851,20 @@ class Geometry:
         return np.hstack([locations, self._trace.length])
 
     def _get_transformed_profile_data(self, profile_raster_data, location):
-        """
-        Transform a profiles data to a specified location on the trace.
+        """Transform a profiles data to a specified location on the trace.
 
-        :param profile_raster_data: Rasterized profile
-        :param location: Location on the trace
-        :return: Transformed profile data
+        Parameters
+        ----------
+        profile_raster_data :
+            Rasterized profile
+        location :
+            Location on the trace
+
+        Returns
+        -------
+        np.ndarray
+            Transformed profile data
+
         """
         local_cs = self._trace.local_coordinate_system(location)
         local_data = np.matmul(local_cs.orientation.data, profile_raster_data)
@@ -1414,25 +1872,41 @@ class Geometry:
 
     @staticmethod
     def _profile_raster_data_3d(profile, raster_width):
-        """
-        Get the rasterized profile in 3d.
+        """Get the rasterized profile in 3d.
 
         The profile is located in the x-z-plane.
 
-        :param profile: Profile
-        :param raster_width: Raster width
-        :return: Rasterized profile in 3d
+        Parameters
+        ----------
+        profile :
+            Profile
+        raster_width :
+            Raster width
+
+        Returns
+        -------
+        np.ndarray
+            Rasterized profile in 3d
+
         """
         profile_data = profile.rasterize(raster_width)
         return np.insert(profile_data, 0, 0, axis=0)
 
     def _rasterize_constant_profile(self, profile_raster_width, trace_raster_width):
-        """
-        Rasterize the geometry with a constant profile.
+        """Rasterize the geometry with a constant profile.
 
-        :param profile_raster_width: Raster width of the profiles
-        :param trace_raster_width: Distance between two profiles
-        :return: Raster data
+        Parameters
+        ----------
+        profile_raster_width :
+            Raster width of the profiles
+        trace_raster_width :
+            Distance between two profiles
+
+        Returns
+        -------
+        np.ndarray
+            Raster data
+
         """
         profile_data = self._profile_raster_data_3d(self._profile, profile_raster_width)
 
@@ -1445,12 +1919,20 @@ class Geometry:
         return raster_data
 
     def _rasterize_variable_profile(self, profile_raster_width, trace_raster_width):
-        """
-        Rasterize the geometry with a variable profile.
+        """Rasterize the geometry with a variable profile.
 
-        :param profile_raster_width: Raster width of the profiles
-        :param trace_raster_width: Distance between two profiles
-        :return: Raster data
+        Parameters
+        ----------
+        profile_raster_width :
+            Raster width of the profiles
+        trace_raster_width :
+            Distance between two profiles
+
+        Returns
+        -------
+        np.ndarray
+            Raster data
+
         """
         locations = self._rasterize_trace(trace_raster_width)
         raster_data = np.empty([3, 0])
@@ -1464,29 +1946,41 @@ class Geometry:
 
     @property
     def profile(self):
-        """
-        Get the geometry's profile.
+        """Get the geometry's profile.
 
-        :return: Profile
+        Returns
+        -------
+        Profile
+
         """
         return self._profile
 
     @property
     def trace(self):
-        """
-        Get the geometry's trace.
+        """Get the geometry's trace.
 
-        :return: Trace
+        Returns
+        -------
+        Trace
+
         """
         return self._trace
 
     def rasterize(self, profile_raster_width, trace_raster_width):
-        """
-        Rasterize the geometry.
+        """Rasterize the geometry.
 
-        :param profile_raster_width: Raster width of the profiles
-        :param trace_raster_width: Distance between two profiles
-        :return: Raster data
+        Parameters
+        ----------
+        profile_raster_width :
+            Raster width of the profiles
+        trace_raster_width :
+            Distance between two profiles
+
+        Returns
+        -------
+        np.ndarray
+            Raster data
+
         """
         if isinstance(self._profile, Profile):
             return self._rasterize_constant_profile(

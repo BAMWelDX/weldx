@@ -1,35 +1,46 @@
 """Contains some functions to help with visualization."""
 
 import numpy as np
+import pandas as pd
 
 
 def plot_coordinate_system(
     coordinate_system, axes, color=None, label=None, time_idx=None
 ):
+    """Plot a coordinate system in a matplotlib 3d plot.
+
+    Parameters
+    ----------
+    coordinate_system :
+        Coordinate system
+    axes :
+        Matplotlib axes object (output from plt.gca())
+    color :
+        Valid matplotlib color selection. The origin of the coordinate system
+        will be marked with this color. (Default value = None)
+    label :
+        Name that appears in the legend. Only viable if a color
+        was specified. (Default value = None)
+    time_idx :
+        Selects time dependent data by index if the coordinate system has
+        a time dependency.
+
     """
-    Plot a coordinate system in a matplotlib 3d plot.
+    if "time" in coordinate_system.dataset.coords:
+        if time_idx is None:
+            time_idx = 0
+        if isinstance(time_idx, int):
+            dsx = coordinate_system.dataset.isel(time=time_idx)
+        else:
+            dsx = coordinate_system.dataset.sel(time=pd.DatetimeIndex([time_idx])).isel(
+                time=0
+            )
+    else:
+        dsx = coordinate_system.dataset
 
-    :param coordinate_system: Coordinate system
-    :param axes: Matplotlib axes object (output from plt.gca())
-    :param color: Valid matplotlib color selection. The origin of the coordinate system
-    will be marked with this color.
-    :param label: Name that appears in the legend. Only viable if a color
-    was specified.
-    :param time_idx: Selects time dependent data by index if the coordinate system has
-    a time dependency.
-    :return: ---
-    """
-    if coordinate_system.time is not None and time_idx is None:
-        time_idx = 0
+    p_0 = dsx.coordinates
 
-    p_0 = coordinate_system.coordinates.data
-    if len(p_0.shape) == 2:
-        p_0 = p_0[time_idx]
-
-    orientation = coordinate_system.orientation.data
-    if len(orientation.shape) == 3:
-        orientation = orientation[time_idx]
-
+    orientation = dsx.orientation
     p_x = p_0 + orientation[:, 0]
     p_y = p_0 + orientation[:, 1]
     p_z = p_0 + orientation[:, 2]
@@ -44,15 +55,18 @@ def plot_coordinate_system(
 
 
 def set_axes_equal(axes):
-    """
-    Adjust axis in a 3d plot to be equally scaled.
+    """Adjust axis in a 3d plot to be equally scaled.
 
     Source code taken from the stackoverflow answer of 'karlo' in the
     following question:
     https://stackoverflow.com/questions/13685386/matplotlib-equal-unit
     -length-with-equal-aspect-ratio-z-axis-is-not-equal-to
 
-    :param axes: Matplotlib axes object (output from plt.gca())
+    Parameters
+    ----------
+    axes :
+        Matplotlib axes object (output from plt.gca())
+
     """
     x_limits = axes.get_xlim3d()
     y_limits = axes.get_ylim3d()

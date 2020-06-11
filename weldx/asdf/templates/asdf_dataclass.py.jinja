@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 from typing import List # noqa: F401
 
-from asdf.yamlutil import custom_tree_to_tagged_tree # noqa: F401
-
 from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import dict_to_tagged_tree
+from weldx.asdf.utils import drop_none_attr
 
 {% for lib in lib_imports -%}
 import {{ lib }}
@@ -32,7 +30,7 @@ class {{class_name}}Type(WeldxType):
     @classmethod
     def to_tree(cls, node: {{ class_name }}, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = dict_to_tagged_tree(node, ctx)
+        tree = drop_none_attr(node)
         return tree
 
     @classmethod
