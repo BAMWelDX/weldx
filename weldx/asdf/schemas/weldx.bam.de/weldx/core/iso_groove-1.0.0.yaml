@@ -59,7 +59,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: IGroove
+        enum: [IGroove]
       components:
         type: object
         properties:
@@ -83,8 +83,7 @@ anyOf:
     properties:
       type:
         type: string
-        enum:
-          - SingleUGroove
+        enum: [SingleUGroove]
       components:
         type: object
         properties:
@@ -117,7 +116,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: SingleVGroove
+        enum: [SingleVGroove]
       components:
         type: object
         properties:
@@ -147,7 +146,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: UVGroove
+        enum: [UVGroove]
       components:
         type: object
         properties:
@@ -183,7 +182,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: VVGroove
+        enum: [VVGroove]
       components:
         type: object
         properties:
@@ -218,7 +217,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: HVGroove
+        enum: [HVGroove]
       components:
         type: object
         properties:
@@ -248,7 +247,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: HUGroove
+        enum: [HUGroove]
       components:
         type: object
         properties:
@@ -281,7 +280,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: DoubleVGroove
+        enum: [DoubleVGroove]
       components:
         type: object
         properties:
@@ -320,7 +319,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: DoubleUGroove
+        enum: [DoubleUGroove]
       components:
         type: object
         properties:
@@ -365,7 +364,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: DoubleHVGroove
+        enum: [DoubleHVGroove]
       components:
         type: object
         properties:
@@ -404,7 +403,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: DoubleHUGroove
+        enum: [DoubleHUGroove]
       components:
         type: object
         properties:
@@ -449,7 +448,7 @@ anyOf:
     properties:
       type:
         type: string
-        const: FFGroove
+        enum: [FrontalFaceGroove]
       components:
         type: object
         properties:

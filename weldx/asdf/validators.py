@@ -1,6 +1,5 @@
 from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 
-# import dpath
 from asdf import ValidationError
 
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -99,7 +98,7 @@ def _unit_validator(
 def _shape_validator(
     instance: Mapping, expected_shape: List[int], position: List[str]
 ) -> Iterator[ValidationError]:
-    """Validate the 'shape' key of the instance against the given list of ints.
+    """Validate the 'shape' key of the instance against the given list of integers.
 
     Parameters
     ----------
@@ -238,4 +237,4 @@ def _run_validation(
 def debug_validator(validator, debug_validator, instance, schema):
     """Enable simple breakpoint for validation."""
     if debug_validator:
-        print(f"triggered validation on schema {schema['properties']}")
+        print(f"triggered validation on schema {schema} against instance {instance}")
