@@ -1,13 +1,13 @@
 from xarray import Dataset
 
 from weldx.asdf.types import WeldxType
-import weldx.asdf.tags.weldx.core.netcdf as netcdf
+import weldx.asdf.tags.weldx.core.common_types as ct
 
 
 class XarrayDatasetASDF(WeldxType):
     """Serialization class for xarray.Dataset"""
 
-    name = "core/netcdf/file_format"
+    name = "core/dataset"
     version = "1.0.0"
     types = [Dataset]
     requires = ["weldx"]
@@ -22,13 +22,13 @@ class XarrayDatasetASDF(WeldxType):
         variables = []
 
         for name, length in dict(node.dims).items():
-            dimensions.append(netcdf.NetCDFDimension(name, length))
+            dimensions.append(ct.Dimension(name, length))
 
         for name, data in node.data_vars.items():
-            variables.append(netcdf.NetCDFVariable(name, data.dims, data.data))
+            variables.append(ct.Variable(name, data.dims, data.data))
 
         for name, data in node.coords.items():
-            coordinates.append(netcdf.NetCDFVariable(name, data.dims, data.data))
+            coordinates.append(ct.Variable(name, data.dims, data.data))
 
         tree = {
             "attributes": attributes,

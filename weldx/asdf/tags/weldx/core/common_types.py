@@ -4,23 +4,23 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from weldx.asdf.types import WeldxType
 
 
-class NetCDFAttribute:
+class Attribute:
     def __init__(self, name, data):
         self.name = name
         self.data = data
 
 
-class NetCDFAttributeTypeASDF(WeldxType):
-    """Serialization class for a NetCDFAttribute"""
+class AttributeTypeASDF(WeldxType):
+    """Serialization class for a Attribute"""
 
-    name = "core/netcdf/attribute"
+    name = "core/attribute"
     version = "1.0.0"
-    types = [NetCDFAttribute]
+    types = [Attribute]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node: NetCDFAttribute, ctx):
+    def to_tree(cls, node: Attribute, ctx):
         """Convert an xarray.Dataset to a tagged tree"""
         tree = {"name": node.name, "data": node.data}
 
@@ -29,26 +29,26 @@ class NetCDFAttributeTypeASDF(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """Convert a tagged tree to an xarray.Dataset"""
-        return NetCDFAttribute(tree["name"], tree["data"])
+        return Attribute(tree["name"], tree["data"])
 
 
-class NetCDFDimension:
+class Dimension:
     def __init__(self, name, length):
         self.name = name
         self.length = length
 
 
-class NetCDFDimensionTypeASDF(WeldxType):
-    """Serialization class for a NetCDFDimension"""
+class DimensionTypeASDF(WeldxType):
+    """Serialization class for a Dimension"""
 
-    name = "core/netcdf/dimension"
+    name = "core/dimension"
     version = "1.0.0"
-    types = [NetCDFDimension]
+    types = [Dimension]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node: NetCDFDimension, ctx):
+    def to_tree(cls, node: Dimension, ctx):
         """Convert an xarray.Dataset to a tagged tree"""
         tree = {"name": node.name, "length": node.length}
 
@@ -57,22 +57,22 @@ class NetCDFDimensionTypeASDF(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """Convert a tagged tree to an xarray.Dataset"""
-        return NetCDFDimension(tree["name"], tree["length"])
+        return Dimension(tree["name"], tree["length"])
 
 
-class NetCDFVariable:
+class Variable:
     def __init__(self, name, dimensions, data: np.ndarray):
         self.name = name
         self.dimensions = dimensions
         self.data = data
 
 
-class NetCDFVariableTypeASDF(WeldxType):
-    """Serialization class for a NetCDFVariable"""
+class VariableTypeASDF(WeldxType):
+    """Serialization class for a Variable"""
 
-    name = "core/netcdf/variable"
+    name = "core/variable"
     version = "1.0.0"
-    types = [NetCDFVariable]
+    types = [Variable]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
@@ -83,7 +83,7 @@ class NetCDFVariableTypeASDF(WeldxType):
         return data
 
     @classmethod
-    def to_tree(cls, node: NetCDFVariable, ctx):
+    def to_tree(cls, node: Variable, ctx):
         """Convert an xarray.Dataset to a tagged tree"""
         dtype = node.data.dtype.str
         data = cls.convert_time_dtypes(data=node.data)
@@ -101,4 +101,4 @@ class NetCDFVariableTypeASDF(WeldxType):
         """Convert a tagged tree to an xarray.Dataset"""
         dtype = np.dtype(tree["dtype"])
         data = np.array(tree["data"]).astype(dtype)
-        return NetCDFVariable(tree["name"], tree["dimensions"], data)
+        return Variable(tree["name"], tree["dimensions"], data)

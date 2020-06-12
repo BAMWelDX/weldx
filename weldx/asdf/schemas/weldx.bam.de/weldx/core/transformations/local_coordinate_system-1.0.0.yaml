@@ -11,7 +11,7 @@ description: |
 type: object
 properties:
   dataset:
-    $ref: tag:weldx.bam.de:weldx/core/netcdf/file_format-1.0.0
+    $ref: tag:weldx.bam.de:weldx/core/dataset-1.0.0
 
 required: [dataset]
 flowStyle: block

@@ -1,0 +1,31 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/data_array-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/data_array-1.0.0"
+
+title: |
+  Schema to serialize a data_array
+description: |
+  TODO: DESCRIPTION
+type: object
+properties:
+  attributes:
+    type: array
+    items:
+      $ref: "tag:weldx.bam.de:weldx/core/attribute-1.0.0"
+  coordinates:
+    type: array
+    items:
+      $ref: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
+  variables:
+      $ref: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
+
+required: [attributes, coordinates, variables]
+propertyOrder: [attributes, coordinates, variables]
+
+
+
+flowStyle: block
+additionalProperties: false
+...
