@@ -4,12 +4,15 @@ import asdf
 import numpy as np
 import pandas as pd
 import xarray as xr
+from io import BytesIO
 
 import weldx.transformations as tf
 from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
 
 
 # xarray.DataArray ---------------------------------------------------------------------
+
+buffer_data_array = BytesIO()
 
 
 def get_xarray_example_data_array():
@@ -29,18 +32,24 @@ def test_xarray_data_array_save():
     dax = get_xarray_example_data_array()
     tree = {"dax": dax}
     with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
-        f.write_to("xarray.asdf")
+        f.write_to(buffer_data_array)
+        buffer_data_array.seek(0)
 
 
 def test_xarray_data_array_load():
     """Test if an xarray.DataArray can be restored from an asdf file."""
-    f = asdf.open("xarray.asdf", extensions=[WeldxExtension(), WeldxAsdfExtension()])
+    f = asdf.open(
+        buffer_data_array, extensions=[WeldxExtension(), WeldxAsdfExtension()]
+    )
     dax_file = f.tree["dax"]
     dax_exp = get_xarray_example_data_array()
     assert dax_exp.identical(dax_file)
 
 
 # xarray.DataArray ---------------------------------------------------------------------
+
+
+buffer_dataset = BytesIO()
 
 
 def get_xarray_example_dataset():
@@ -75,7 +84,8 @@ def test_xarray_dataset_save():
     dsx = get_xarray_example_dataset()
     tree = {"dsx": dsx}
     with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
-        f.write_to("xr_dataset.asdf")
+        f.write_to(buffer_dataset)
+        buffer_dataset.seek(0)
 
 
 # TODO: remove
@@ -84,9 +94,7 @@ def test_xarray_dataset_save():
 
 def test_xarray_dataset_load():
     """Test if an xarray.Dataset can be restored from an asdf file."""
-    f = asdf.open(
-        "xr_dataset.asdf", extensions=[WeldxExtension(), WeldxAsdfExtension()]
-    )
+    f = asdf.open(buffer_dataset, extensions=[WeldxExtension(), WeldxAsdfExtension()])
     dsx_file = f.tree["dsx"]
     dsx_exp = get_xarray_example_dataset()
     assert dsx_exp.identical(dsx_file)
@@ -96,6 +104,8 @@ def test_xarray_dataset_load():
 # test_xarray_dataset_load()
 
 # weldx.transformations.LocalCoordinateSystem ------------------------------------------
+
+buffer_lcs = BytesIO()
 
 
 def get_local_coordinate_system(time_dep_orientation, time_dep_coordinates):
@@ -122,7 +132,8 @@ def test_local_coordinate_system_save():
     with asdf.AsdfFile(
         tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
     ) as f:
-        f.write_to("local_coordinate_system.asdf")
+        f.write_to(buffer_lcs)
+        buffer_lcs.seek(0)
 
 
 # TODO: remove
@@ -131,10 +142,7 @@ def test_local_coordinate_system_save():
 
 def test_local_coordinate_system_load():
     """Test if an xarray.DataArray can be restored from an asdf file."""
-    f = asdf.open(
-        "local_coordinate_system.asdf",
-        extensions=[WeldxExtension(), WeldxAsdfExtension()],
-    )
+    f = asdf.open(buffer_lcs, extensions=[WeldxExtension(), WeldxAsdfExtension()],)
     lcs_static_file = f.tree["lcs_static"]
     lcs_static_exp = get_local_coordinate_system(False, False)
 
