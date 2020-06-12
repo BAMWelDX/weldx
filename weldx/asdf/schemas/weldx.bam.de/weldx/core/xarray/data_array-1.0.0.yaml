@@ -31,5 +31,5 @@ propertyOrder: [attributes, coordinates, variables]
 
 
 flowStyle: block
-additionalProperties: true
+additionalProperties: false
 ...

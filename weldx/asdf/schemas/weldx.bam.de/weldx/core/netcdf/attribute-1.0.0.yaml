@@ -20,5 +20,5 @@ required: [name, data]
 propertyOrder: [name, data]
 
 flowStyle: block
-additionalProperties: true
+additionalProperties: false
 ...
