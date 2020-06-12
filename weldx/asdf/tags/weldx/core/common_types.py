@@ -1,7 +1,9 @@
 import numpy as np
+import pint
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from weldx.asdf.types import WeldxType
+from weldx.constants import WELDX_QUANTITY as Q_
 
 
 class Attribute:
@@ -100,5 +102,12 @@ class VariableTypeASDF(WeldxType):
     def from_tree(cls, tree, ctx):
         """Convert a tagged tree to an xarray.Dataset"""
         dtype = np.dtype(tree["dtype"])
-        data = np.array(tree["data"]).astype(dtype)
+        try:  # numpy like?
+            data = tree["data"].astype(dtype)
+        except Exception as e:
+            if isinstance(tree["data"], pint.Quantity):
+                data = Q_(tree["data"].magnitude.astype(dtype), tree["data"].units)
+            else:
+                raise e
+
         return Variable(tree["name"], tree["dimensions"], data)

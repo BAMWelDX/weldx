@@ -6,8 +6,8 @@ import pandas as pd
 import xarray as xr
 
 import weldx.transformations as tf
-from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
-
+from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.constants import WELDX_QUANTITY as Q_
 
 # xarray.DataArray ---------------------------------------------------------------------
 
@@ -46,10 +46,12 @@ def test_xarray_data_array_load():
 def get_xarray_example_dataset():
     """Get an xarray.Dataset for test purposes."""
 
-    temp = [
+    temp_data = [
         [[15.0, 16.0, 17.0], [18.0, 19.0, 20.0]],
         [[21.0, 22.0, 23.0], [24.0, 25.0, 26.0]],
     ]
+
+    temp = Q_(temp_data, "°C")
     precip = [[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], [[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]]]
     lon = [[-99.83, -99.32], [-99.79, -99.23]]
     lat = [[42.25, 42.21], [42.63, 42.59]]

@@ -17,7 +17,9 @@ properties:
   dtype:
     type: string
   data:
-    $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    anyOf:
+      - $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
+      - $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
 
 
 required: [name, dimensions, dtype, data]
