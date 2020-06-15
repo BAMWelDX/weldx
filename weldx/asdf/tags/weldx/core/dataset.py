@@ -16,7 +16,7 @@ class XarrayDatasetASDF(WeldxType):
     @classmethod
     def to_tree(cls, node: Dataset, ctx):
         """Convert an xarray.Dataset to a tagged tree"""
-        attributes = {}
+        attributes = node.attrs
         coordinates = []
         dimensions = []
         variables = []
@@ -56,4 +56,8 @@ class XarrayDatasetASDF(WeldxType):
         for coordinate in tree["coordinates"]:
             coords[coordinate.name] = (coordinate.dimensions, coordinate.data)
 
-        return Dataset(data_vars=data_vars, coords=coords)
+        obj = Dataset(data_vars=data_vars, coords=coords)
+
+        obj.attrs = tree["attributes"]
+
+        return obj

@@ -24,6 +24,9 @@ def get_xarray_example_data_array():
     coords = {"d1": d1, "d2": d2}
 
     dax = xr.DataArray(data=data, dims=["d1", "d2"], coords=coords)
+
+    dax.attrs = {"answer": 42}
+
     return dax
 
 
@@ -75,7 +78,7 @@ def get_xarray_example_dataset():
             "reference_time": pd.Timestamp("2014-09-05"),
         },
     )
-
+    dsx.attrs = {"temperature": "Celsius"}
     return dsx
 
 
