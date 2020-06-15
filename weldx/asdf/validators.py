@@ -95,6 +95,67 @@ def _unit_validator(
         )
 
 
+def _compare(string, exp_string):
+    """Compare two strings
+
+    Parameters
+    ----------
+    string:
+        String to compare with
+    exp_string:
+        String with the expected dimension
+    """
+    if exp_string == ":":
+        pass
+    else:
+        assert string == exp_string, "Dimension mismatch"
+
+
+def _custom_shape_validator(shape, expected_shape):
+    """Validate shapes with different syntax.
+
+    Parameters
+    ----------
+    shape:
+        String
+    expected_shape:
+        String representation of the unit dimensionality to test against.
+    """
+
+    # check if expected shape has right format
+
+    # check that after one optional assign all following dimensions are optional
+    # eg: "1, (1), (:), (3)" is fine, "1, (1), (:), 3" is not
+    # and "(2), ..." should not be allowed too
+    validator = 0
+    for x in expected_shape.split(","):
+        if validator == 1:
+            assert "(" in x, "Optional  dimensions in the expected " \
+                             "shape should only stand at the end."
+        elif validator == 2:
+            assert False, 'After "..." should not be another dimension'
+        elif "(" in x:
+            validator = 1
+        # after "..." should not be another dimension
+        elif "..." in x:
+            validator = 2
+
+    shape_array = shape.split(",")
+    for i, exp in enumerate(expected_shape.split(",")):
+        # if "..." is found all the following dimensions are accepted
+        if "..." in exp:
+            # jump out of the for loop - finished
+            break
+        # if there is a parenthesis found it is an optional dimension
+        elif "(" in exp:
+            # if the shape has the optional value
+            if i < len(shape_array):
+                comparable = exp[exp.index("(") + 1:exp.rindex(")")]
+                _compare(shape_array[i], comparable)
+        else:
+            _compare(shape_array[i], exp)
+
+
 def _shape_validator(
     instance: Mapping, expected_shape: List[int], position: List[str]
 ) -> Iterator[ValidationError]:
