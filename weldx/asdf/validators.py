@@ -106,7 +106,17 @@ def _compare(string, exp_string):
         String with the expected dimension
     """
     if exp_string == ":":
-        pass
+        ranges = exp_string.split(":")
+        if ranges[0] == "" and ranges[1] == "":
+            pass
+        else:
+            if ranges[0] != []:
+                assert int(ranges[0]) <= int(string), "Dimension mismatch."
+            if ranges[1] != []:
+                assert int(ranges[1]) >= int(string), "Dimension mismatch."
+            if ranges[0] != [] and ranges[1] != []:
+                assert int(ranges[0]) <= int(ranges[1]), \
+                    "Dimension mismatch in expected_shape."
     else:
         assert string == exp_string, "Dimension mismatch"
 
