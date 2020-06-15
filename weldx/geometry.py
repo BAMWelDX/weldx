@@ -693,7 +693,7 @@ class Shape:
 
     def __str__(self):
         """Output simple string representation of a Shape (listing segments)."""
-        shape_str = "\n".join(repr(s) for s in self.segments)
+        shape_str = "\n".join(str(s) for s in self.segments)
         return f"{shape_str}"
 
     @staticmethod
@@ -1084,11 +1084,15 @@ class Profile:
 
     def __str__(self):
         """Output simple string representation of a Profile for users."""
-        repr_str = f"Profile with {len(self.shapes)} shapes\n"
+        repr_str = f"Profile with {len(self.shapes)} shape(s)\n"
         repr_str = repr_str + "\n\n".join(
-            f"Shape {i}:\n{s}" for i, s in enumerate(self.shapes)
+            f"Shape {i}:\n{s!s}" for i, s in enumerate(self.shapes)
         )
         return repr_str
+
+    def _ipython_display_(self):
+        """Use __str__ output in notebooks."""
+        print(str(self))
 
     @property
     def num_shapes(self):
