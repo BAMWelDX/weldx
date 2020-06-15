@@ -138,16 +138,18 @@ def _custom_shape_validator(shape, expected_shape):
     # eg: "1, (1), (:), (3)" is fine, "1, (1), (:), 3" is not
     # and "(2), ..." should not be allowed too
     validator = 0
-    for x in expected_shape.split(","):
+    for exp in expected_shape.split(","):
         if validator == 1:
-            assert "(" in x, "Optional  dimensions in the expected " \
+            assert "(" in exp, "Optional  dimensions in the expected " \
                              "shape should only stand at the end."
         elif validator == 2:
             assert False, 'After "..." should not be another dimension'
-        elif "(" in x:
+        elif "(" in exp:
             validator = 1
         # after "..." should not be another dimension
-        elif "..." in x:
+        elif "..." in exp:
+            assert "..." == exp, f'"..." should not have additional propterties:' \
+                                 f' {exp} was found.'
             validator = 2
 
     shape_array = shape.split(",")
