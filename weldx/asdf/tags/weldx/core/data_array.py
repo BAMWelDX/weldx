@@ -22,15 +22,15 @@ class XarrayDataArrayASDF(WeldxType):
 
         attributes = {}
         coordinates = []
-        variables = ct.Variable("data", node.dims, node.data)
+        data = ct.Variable("data", node.dims, node.data)
 
-        for name, data in node.coords.items():
-            coordinates.append(ct.Variable(name, data.dims, data.data))
+        for name, coord_data in node.coords.items():
+            coordinates.append(ct.Variable(name, coord_data.dims, coord_data.data))
 
         tree = {
             "attributes": attributes,
             "coordinates": coordinates,
-            "variables": variables,
+            "data": data,
         }
 
         return tree
@@ -38,8 +38,8 @@ class XarrayDataArrayASDF(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """Convert a tagged tree to an xarray.DataArray"""
-        data = tree["variables"].data
-        dims = tree["variables"].dimensions
+        data = tree["data"].data
+        dims = tree["data"].dimensions
         coords = {}
         for coordinate in tree["coordinates"]:
             coords[coordinate.name] = (coordinate.dimensions, coordinate.data)
