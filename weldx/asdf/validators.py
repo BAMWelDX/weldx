@@ -133,10 +133,13 @@ def _custom_shape_validator(shape, expected_shape):
     """
 
     # check if expected shape has right format
+    #TODO: change asserts to return true/false
+    #TODO: ":" breaks during parsing -> use "~" or other sign
 
     # check that after one optional assign all following dimensions are optional
     # eg: "1, (1), (:), (3)" is fine, "1, (1), (:), 3" is not
     # and "(2), ..." should not be allowed too
+    # TODO: ValueError for not passing expected_shape
     shape = shape.replace(" ", "")
     validator = 0
     for exp in expected_shape.split(","):
