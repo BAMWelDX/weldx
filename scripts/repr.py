@@ -36,16 +36,16 @@ print(LCS.__repr__())
 print()
 
 # does not show anything - Coordinate system missing?
-trace = geo.Trace([linesegment, arcsegment], LCS)
-print(trace.__repr__())
+# trace = geo.Trace([linesegment, arcsegment], LCS)
+# print(trace.__repr__())
 print()
 
 # Geometry - trace is empty -> no repr?
-geometry = geo.Geometry(profile, trace)
-print(geometry.__repr__())
+# geometry = geo.Geometry(profile, trace)
+# print(geometry.__repr__())
 print()
 
 # CSM - need to lookup how to initialize this in the tutorial...
-CSM = tf.CoordinateSystemManager()
-print(CSM.__repr__())
+# CSM = tf.CoordinateSystemManager()
+# print(CSM.__repr__())
 print()
