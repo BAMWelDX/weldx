@@ -105,20 +105,20 @@ def _compare(string, exp_string):
     exp_string:
         String with the expected dimension
     """
-    if exp_string == ":":
+    if ":" in exp_string:
         ranges = exp_string.split(":")
         if ranges[0] == "" and ranges[1] == "":
             pass
         else:
-            if ranges[0] != []:
+            if ranges[0] != "":
                 assert int(ranges[0]) <= int(string), "Dimension mismatch."
-            if ranges[1] != []:
+            if ranges[1] != "":
                 assert int(ranges[1]) >= int(string), "Dimension mismatch."
-            if ranges[0] != [] and ranges[1] != []:
+            if ranges[0] != "" and ranges[1] != "":
                 assert int(ranges[0]) <= int(ranges[1]), \
                     "Dimension mismatch in expected_shape."
     else:
-        assert string == exp_string, "Dimension mismatch"
+        assert int(string) == int(exp_string), "Dimension mismatch"
 
 
 def _custom_shape_validator(shape, expected_shape):
@@ -137,6 +137,7 @@ def _custom_shape_validator(shape, expected_shape):
     # check that after one optional assign all following dimensions are optional
     # eg: "1, (1), (:), (3)" is fine, "1, (1), (:), 3" is not
     # and "(2), ..." should not be allowed too
+    shape = shape.replace(" ", "")
     validator = 0
     for exp in expected_shape.split(","):
         if validator == 1:
