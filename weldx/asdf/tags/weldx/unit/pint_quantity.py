@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import pint
-from asdf.yamlutil import custom_tree_to_tagged_tree, tagged_tree_to_custom_tree
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.types import WeldxAsdfType
@@ -20,13 +19,13 @@ class PintQuantityType(WeldxAsdfType):
     @classmethod
     def to_tree(cls, node: pint.Quantity, ctx):
         tree = {}
-        tree["value"] = custom_tree_to_tagged_tree(node.magnitude, ctx)
-        tree["unit"] = custom_tree_to_tagged_tree(str(node.units), ctx)
+        tree["value"] = node.magnitude
+        tree["unit"] = str(node.units)
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        value = tagged_tree_to_custom_tree(tree["value"], ctx)
-        unit = tagged_tree_to_custom_tree(tree["unit"], ctx)
+        value = tree["value"]
+        unit = tree["unit"]
         quantity = Q_(value, unit)
         return quantity

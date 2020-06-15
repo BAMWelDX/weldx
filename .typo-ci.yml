@@ -12,6 +12,8 @@ excluded_files:
 
 excluded_words:
   - typoci
+  # weldx ---------------------------------------
+  - LocalCoordinateSystem
   # python packages -----------------------------
   - asdf
   - numpy
@@ -78,6 +80,8 @@ excluded_words:
   # conda ---------------------------------------
   - conda
   - noarch
+  # markdown / latex ----------------------------
+  - cdot
   # other ---------------------------------------
   - addopts
   - csm

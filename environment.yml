@@ -11,7 +11,7 @@ dependencies:
   - xarray>=0.15
   - pint>=0.11
   - bottleneck
-  - asdf=2.5.1
+  - asdf=2.6
   - sphinx
   - recommonmark
   - openpyxl

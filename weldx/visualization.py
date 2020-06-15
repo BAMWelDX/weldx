@@ -1,9 +1,12 @@
 """Contains some functions to help with visualization."""
 
 import numpy as np
+import pandas as pd
 
 
-def plot_coordinate_system(coordinate_system, axes, color=None, label=None):
+def plot_coordinate_system(
+    coordinate_system, axes, color=None, label=None, time_idx=None
+):
     """Plot a coordinate system in a matplotlib 3d plot.
 
     Parameters
@@ -18,12 +21,29 @@ def plot_coordinate_system(coordinate_system, axes, color=None, label=None):
     label :
         Name that appears in the legend. Only viable if a color
         was specified. (Default value = None)
+    time_idx :
+        Selects time dependent data by index if the coordinate system has
+        a time dependency.
 
     """
-    p_0 = coordinate_system.coordinates
-    p_x = p_0 + coordinate_system.orientation[:, 0]
-    p_y = p_0 + coordinate_system.orientation[:, 1]
-    p_z = p_0 + coordinate_system.orientation[:, 2]
+    if "time" in coordinate_system.dataset.coords:
+        if time_idx is None:
+            time_idx = 0
+        if isinstance(time_idx, int):
+            dsx = coordinate_system.dataset.isel(time=time_idx)
+        else:
+            dsx = coordinate_system.dataset.sel(time=pd.DatetimeIndex([time_idx])).isel(
+                time=0
+            )
+    else:
+        dsx = coordinate_system.dataset
+
+    p_0 = dsx.coordinates
+
+    orientation = dsx.orientation
+    p_x = p_0 + orientation[:, 0]
+    p_y = p_0 + orientation[:, 1]
+    p_z = p_0 + orientation[:, 2]
 
     axes.plot([p_0[0], p_x[0]], [p_0[1], p_x[1]], [p_0[2], p_x[2]], "r")
     axes.plot([p_0[0], p_y[0]], [p_0[1], p_y[1]], [p_0[2], p_y[2]], "g")
