@@ -20,7 +20,7 @@ class XarrayDataArrayASDF(WeldxType):
     def to_tree(cls, node: DataArray, ctx):
         """Convert an xarray.DataArray to a tagged tree"""
 
-        attributes = []
+        attributes = {}
         coordinates = []
         variables = ct.Variable("data", node.dims, node.data)
 

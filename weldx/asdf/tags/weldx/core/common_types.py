@@ -4,34 +4,6 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from weldx.asdf.types import WeldxType
 
 
-class Attribute:
-    def __init__(self, name, data):
-        self.name = name
-        self.data = data
-
-
-class AttributeTypeASDF(WeldxType):
-    """Serialization class for a Attribute"""
-
-    name = "core/attribute"
-    version = "1.0.0"
-    types = [Attribute]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node: Attribute, ctx):
-        """Convert an xarray.Dataset to a tagged tree"""
-        tree = {"name": node.name, "data": node.data}
-
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """Convert a tagged tree to an xarray.Dataset"""
-        return Attribute(tree["name"], tree["data"])
-
-
 class Dimension:
     def __init__(self, name, length):
         self.name = name
