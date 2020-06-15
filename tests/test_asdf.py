@@ -33,6 +33,7 @@ from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 
 # validators -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
+from weldx.asdf.validators import _custom_shape_validator as val
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
@@ -366,3 +367,41 @@ def test_validators():
         )
         tree = {"root_node": test}
         data = _write_read_buffer(tree)
+
+
+def test_shape_validator_syntax():
+    """Test handling of custom shape validation syntax in Python."""
+
+    # correct evaluation
+    assert val([3], [3])
+    assert val([2, 4, 5], [2, 4, 5])
+    assert val([1, 2, 3], ["..."])
+    assert val([1, 2], [1, 2, "..."])
+    assert val([1, 2, 3], [1, 2, None])
+    assert val([1], [1, "..."])
+    assert val([1, 2, 3], [1, "..."])
+    assert val([1, 2], [1, 2, "(3)"])
+    assert val([1, 2, 3], [1, "1~3", 3])
+    assert val([1, 2, 3], [1, "1~", 3])
+    assert val([1, 2, 3], [1, ":3", 3])
+
+    # shape mismatch
+    assert not val([2, 2, 3], [1, "..."])
+    assert not val([1], [1, 2])
+    assert not val([1, 2], [1])
+    assert not val([1, 2], [3, 2])
+    assert not val([1], [1, "~"])
+    assert not val([1, 2, 3], [1, 2, "(4)"])
+    assert not val([1, 2], [1, "4~8"])
+
+    # syntax errors, these should throw a ValueError
+    with pytest.raises(ValueError):
+        val([1, 2], [1, "~", "(...)"])  # value error?
+    with pytest.raises(ValueError):
+        val([1, 2], [1, "(2)", 3])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, "...", 2])  # should this be allowed? syntax/value error?
+    with pytest.raises(ValueError):
+        val([1, 2], [(1), "..."])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, "4~1"])
