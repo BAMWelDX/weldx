@@ -1,17 +1,8 @@
-from dataclasses import dataclass
-from typing import List  # noqa: F401
-
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
+from weldx.measurement import GenericEquipment
 
 __all__ = ["GenericEquipment", "GenericEquipmentType"]
-
-
-@dataclass
-class GenericEquipment:
-    """<TODO CLASS DOCSTRING>"""
-
-    data: str
 
 
 class GenericEquipmentType(WeldxType):

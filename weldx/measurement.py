@@ -1,7 +1,43 @@
 """Contains measurement related classes and functions."""
 
-from weldx.asdf.tags.weldx.equipment.generic_equipment import GenericEquipment
-from weldx.asdf.tags.weldx.equipment.sensor import Sensor
-from weldx.asdf.tags.weldx.measurement.data import Data
-from weldx.asdf.tags.weldx.measurement.data_processor import DataProcessor
-from weldx.asdf.tags.weldx.measurement.error import Error
+from dataclasses import dataclass
+from typing import List  # noqa: F401
+
+
+# measurement --------------------------------------------------------------------------
+
+
+@dataclass
+class Data:
+    """<TODO CLASS DOCSTRING>"""
+
+    data: str
+
+
+@dataclass
+class DataProcessor:
+    """<TODO CLASS DOCSTRING>"""
+
+    data: str
+
+
+@dataclass
+class Error:
+    """<TODO CLASS DOCSTRING>"""
+
+    data: str
+
+
+# equipment ----------------------------------------------------------------------------
+@dataclass
+class GenericEquipment:
+    """<TODO CLASS DOCSTRING>"""
+
+    data: str
+
+
+@dataclass
+class Sensor:
+    """<TODO CLASS DOCSTRING>"""
+
+    data: str

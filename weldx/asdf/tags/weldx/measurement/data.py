@@ -1,17 +1,9 @@
-from dataclasses import dataclass
-from typing import List  # noqa: F401
+from weldx.measurement import Data
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 
 __all__ = ["Data", "DataType"]
-
-
-@dataclass
-class Data:
-    """<TODO CLASS DOCSTRING>"""
-
-    data: str
 
 
 class DataType(WeldxType):
