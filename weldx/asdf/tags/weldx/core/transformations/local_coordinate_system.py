@@ -1,6 +1,5 @@
 from weldx.transformations import LocalCoordinateSystem
 from weldx.asdf.types import WeldxType
-from weldx.asdf.validators import wx_shape_validator
 
 
 class LocalCoordinateSystemASDF(WeldxType):
