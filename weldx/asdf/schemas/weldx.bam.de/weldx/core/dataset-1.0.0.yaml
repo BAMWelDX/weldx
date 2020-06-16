@@ -7,13 +7,13 @@ tag: "tag:weldx.bam.de:weldx/core/dataset-1.0.0"
 title: |
   Schema that describes a dataset
 description: |
-  A dataset is a structure that gathers multiple data with common dimensions. The corresponding Python data strucuture
+  A dataset is a structure that gathers multiple data with common dimensions. The corresponding Python data structure
   is the xarray.Dataset which is inspired by the NetCDF file format
   (See: https://www.unidata.ucar.edu/software/netcdf/docs/netcdf_data_model.html).
 type: object
 properties:
   attributes:
-    describtion: |
+    description: |
       An arbitrary structure containing meta data.
     type: object
   dimensions:

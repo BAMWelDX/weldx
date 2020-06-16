@@ -16,7 +16,15 @@ buffer_data_array = BytesIO()
 
 
 def get_xarray_example_data_array():
-    """Get an xarray.DataArray for test purposes."""
+    """
+    Get an xarray.DataArray for test purposes.
+
+    Returns
+    -------
+    xarray.DataArray
+        DataArray for test purposes
+
+    """
     data = np.array([[0, 1], [2, 3]])
 
     time_labels = ["2020-05-01", "2020-05-03"]
@@ -57,20 +65,29 @@ buffer_dataset = BytesIO()
 
 
 def get_xarray_example_dataset():
-    """Get an xarray.Dataset for test purposes."""
+    """
+    Get an xarray.Dataset for test purposes.
+
+    Returns
+    -------
+        Dataset for test purposes
+    """
 
     temp = [
         [[15.0, 16.0, 17.0], [18.0, 19.0, 20.0]],
         [[21.0, 22.0, 23.0], [24.0, 25.0, 26.0]],
     ]
-    precip = [[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]], [[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]]]
+    precipitation = [
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
+        [[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]],
+    ]
     lon = [[-99.83, -99.32], [-99.79, -99.23]]
     lat = [[42.25, 42.21], [42.63, 42.59]]
 
     dsx = xr.Dataset(
         {
             "temperature": (["x", "y", "time"], temp),
-            "precipitation": (["x", "y", "time"], precip),
+            "precipitation": (["x", "y", "time"], precipitation),
         },
         coords={
             "lon": (["x", "y"], lon),
@@ -93,10 +110,6 @@ def test_xarray_dataset_save():
         buffer_dataset.seek(0)
 
 
-# TODO: remove
-# test_xarray_dataset_save()
-
-
 def test_xarray_dataset_load():
     """Test if an xarray.Dataset can be restored from an asdf file."""
     f = asdf.open(buffer_dataset, extensions=[WeldxExtension(), WeldxAsdfExtension()])
@@ -105,15 +118,28 @@ def test_xarray_dataset_load():
     assert dsx_exp.identical(dsx_file)
 
 
-# TODO: remove
-# test_xarray_dataset_load()
-
 # weldx.transformations.LocalCoordinateSystem ------------------------------------------
 
 buffer_lcs = BytesIO()
 
 
-def get_local_coordinate_system(time_dep_orientation, time_dep_coordinates):
+def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates: bool):
+    """
+    Get a local coordinate system.
+
+    Parameters
+    ----------
+    time_dep_orientation :
+        If True, the coordinate system has a time dependent orientation.
+    time_dep_coordinates :
+        If True, the coordinate system has a time dependent coordinates.
+
+    Returns
+    -------
+    weldx.transformations.LocalCoordinateSystem:
+        A local coordinate system
+
+    """
     coords = [2, 5, 1]
     orientation = tf.rotation_matrix_z(np.pi / 3)
 
@@ -125,13 +151,28 @@ def get_local_coordinate_system(time_dep_orientation, time_dep_coordinates):
 def are_local_coordinate_systems_equal(
     lcs_0: tf.LocalCoordinateSystem, lcs_1: tf.LocalCoordinateSystem
 ):
+    """
+    Check if 2 local coordinate systems are identical
+
+    Parameters
+    ----------
+    lcs_0 :
+        First local coordinate system
+    lcs_1 :
+        Second local coordinate system
+
+    Returns
+    -------
+    bool:
+        True if both systems are identical, False otherwise
+    """
     return lcs_0.orientation.identical(
         lcs_1.orientation
     ) and lcs_0.coordinates.identical(lcs_1.coordinates)
 
 
 def test_local_coordinate_system_save():
-    """Test if a LocalCoordinateSystem can be writen to an asdf file."""
+    """Test if a LocalCoordinateSystem can be written to an asdf file."""
     lcs_static = get_local_coordinate_system(False, False)
     tree = {"lcs_static": lcs_static}
     with asdf.AsdfFile(
@@ -141,10 +182,6 @@ def test_local_coordinate_system_save():
         buffer_lcs.seek(0)
 
 
-# TODO: remove
-# test_local_coordinate_system_save()
-
-
 def test_local_coordinate_system_load():
     """Test if an xarray.DataArray can be restored from an asdf file."""
     f = asdf.open(buffer_lcs, extensions=[WeldxExtension(), WeldxAsdfExtension()],)
@@ -152,7 +189,3 @@ def test_local_coordinate_system_load():
     lcs_static_exp = get_local_coordinate_system(False, False)
 
     assert are_local_coordinate_systems_equal(lcs_static_file, lcs_static_exp)
-
-
-# TODO: remove
-# test_local_coordinate_system_load()

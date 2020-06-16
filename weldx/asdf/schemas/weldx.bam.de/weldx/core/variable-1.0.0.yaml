@@ -12,7 +12,7 @@ description: |
 type: object
 properties:
   name:
-    decription: |
+    description: |
       The variables name.
     type: string
   dimensions:
@@ -21,7 +21,7 @@ properties:
     type: array
   dtype:
     description: |
-      The arrays fundamental data type defined by a code of 3 characters (adapted from NumPy). For durther information
+      The arrays fundamental data type defined by a code of 3 characters (adapted from NumPy). For further information
       see: https://numpy.org/doc/stable/reference/arrays.interface.html#arrays-interface
     type: string
   data:
