@@ -64,7 +64,7 @@ class XarrayDatasetASDF(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """
-        Converts basic types representing YAML trees into custom types.
+        Converts basic types representing YAML trees into an 'xarray.Dataset'.
 
         Parameters
         ----------
