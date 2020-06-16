@@ -19,9 +19,10 @@ def get_xarray_example_data_array():
     """Get an xarray.DataArray for test purposes."""
     data = np.array([[0, 1], [2, 3]])
 
+    time_labels = ["2020-05-01", "2020-05-03"]
     d1 = np.array([-1, 1])
-    d2 = pd.DatetimeIndex(["2020-05-01", "2020-05-03"])
-    coords = {"d1": d1, "d2": d2}
+    d2 = pd.DatetimeIndex(time_labels)
+    coords = {"d1": d1, "d2": d2, "time_labels": (["d2"], time_labels)}
 
     dax = xr.DataArray(data=data, dims=["d1", "d2"], coords=coords)
 
@@ -75,6 +76,7 @@ def get_xarray_example_dataset():
             "lon": (["x", "y"], lon),
             "lat": (["x", "y"], lat),
             "time": pd.date_range("2014-09-06", periods=3),
+            "time_labels": (["time"], ["2014-09-06", "2014-09-09", "2014-09-12"]),
             "reference_time": pd.Timestamp("2014-09-05"),
         },
     )
