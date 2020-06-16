@@ -1,10 +1,11 @@
 """Tests asdf implementations of core module."""
 
+from io import BytesIO
+
 import asdf
 import numpy as np
 import pandas as pd
 import xarray as xr
-from io import BytesIO
 
 import weldx.transformations as tf
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension

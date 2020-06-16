@@ -1,8 +1,9 @@
-import numpy as np
 from dataclasses import dataclass
+from typing import List
+
+import numpy as np
 import pint
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
-from typing import List
 
 from weldx.asdf.types import WeldxType
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -134,14 +135,23 @@ class VariableTypeASDF(WeldxType):
             serialized.
 
         """
+
+        if isinstance(node.data, pint.Quantity):
+            unit = str(node.data.units)
+            data = node.data.magnitude
+        else:
+            unit = None
+            data = node.data
         dtype = node.data.dtype.str
-        data = cls.convert_time_dtypes(data=node.data)
+        data = cls.convert_time_dtypes(data=data)
         tree = {
             "name": node.name,
             "dimensions": node.dimensions,
             "dtype": dtype,
             "data": data,
         }
+        if unit:
+            tree["unit"] = unit
 
         return tree
 
@@ -165,12 +175,9 @@ class VariableTypeASDF(WeldxType):
 
         """
         dtype = np.dtype(tree["dtype"])
-        try:  # numpy like?
+        if "unit" in tree:  # convert to pint.Quantity
+            data = Q_(tree["data"].astype(dtype), tree["unit"])
+        else:
             data = tree["data"].astype(dtype)
-        except Exception as e:
-            if isinstance(tree["data"], pint.Quantity):
-                data = Q_(tree["data"].magnitude.astype(dtype), tree["data"].units)
-            else:
-                raise e
 
         return Variable(tree["name"], tree["dimensions"], data)
