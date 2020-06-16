@@ -5,12 +5,14 @@ id: "http://weldx.bam.de/schemas/weldx/core/transformations/local_coordinate_sys
 tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
 
 title: |
-  Schema to serialize a weldx.transformations.LocalCoordinateSystem
+  Schema that describes a local coordinate system
 description: |
-  TODO: DESCRIPTION
+  A local coordinate system is described by time-dependent coordinates and orientations towards a reference system.
 type: object
 properties:
   dataset:
+    description: |
+      A dataset containing the data of the local coordinate system.
     $ref: tag:weldx.bam.de:weldx/core/dataset-1.0.0
 
 required: [dataset]
