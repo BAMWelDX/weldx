@@ -28,10 +28,13 @@ properties:
     description: |
       An n-dimensional array that contains the data.
     $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
-
+  unit:
+    description: |
+      Optional field describing the unit of the data as valid string representation.
+    type: string
 
 required: [name, dimensions, dtype, data]
-propertyOrder: [name, dimensions, dtype, data]
+propertyOrder: [name, dimensions, dtype, unit, data]
 flowStyle: block
 additionalProperties: false
 ...
