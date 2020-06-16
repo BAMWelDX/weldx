@@ -10,11 +10,15 @@ description: |
   TODO
 type: object
 properties:
-  data:
+  name:
     type: string
+  output_unit:
+    type: string
+  error:
+    $ref: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
 
 required: []
-propertyOrder: []
+propertyOrder: [name, output_unit, error]
 
 
 

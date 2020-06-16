@@ -10,13 +10,17 @@ description: |
   &lt;TODO DESCRIPTION&gt;
 type: object
 properties:
-  data:
-    description: |
-      &lt;TODO DESCRIPTION&gt;
+  name:
     type: string
+  input_unit:
+    type: string
+  output_unit:
+    type: string
+  error:
+    $ref: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
 
-
-required: [data]
+propertyOrder: [name, input_unit, output_unit, error]
+required: [name, input_unit, output_unit, error]
 
 flowStyle: block
 additionalProperties: false

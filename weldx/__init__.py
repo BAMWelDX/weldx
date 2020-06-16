@@ -1,6 +1,6 @@
 import warnings
 
-__all__ = ["geometry", "transformations", "utility", "asdf", "Q_"]
+__all__ = ["geometry", "measurement", "transformations", "utility", "asdf", "Q_"]
 
 # asdf extensions and tags
 import weldx.asdf

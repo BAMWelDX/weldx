@@ -10,13 +10,13 @@ description: |
   &lt;TODO DESCRIPTION&gt;
 type: object
 properties:
-  data:
+  deviation:
     description: |
-      &lt;TODO DESCRIPTION&gt;
-    type: string
+      &lt;TODO DESCRIPTIONs&gt;
+    type: number
 
 
-required: [data]
+required: [deviation]
 
 flowStyle: block
 additionalProperties: false

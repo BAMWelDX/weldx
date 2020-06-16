@@ -5,6 +5,11 @@ from typing import List  # noqa: F401
 
 
 # measurement --------------------------------------------------------------------------
+@dataclass
+class Error:
+    """<TODO CLASS DOCSTRING>"""
+
+    deviation: float
 
 
 @dataclass
@@ -18,14 +23,27 @@ class Data:
 class DataProcessor:
     """<TODO CLASS DOCSTRING>"""
 
-    data: str
+    name: str
+    input_unit: str
+    output_unit: str
+    error: Error
 
 
 @dataclass
-class Error:
+class Source:
     """<TODO CLASS DOCSTRING>"""
 
-    data: str
+    name: str
+    output_unit: str
+    error: Error
+
+
+@dataclass
+class MeasurementChain:
+    """<TODO CLASS DOCSTRING>"""
+
+    source: Source
+    data_processors: List
 
 
 # equipment ----------------------------------------------------------------------------
