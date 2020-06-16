@@ -1,1 +1,1 @@
-from . import aws, core, time, unit, debug
+from . import aws, core, debug, equipment, measurement, time, unit
