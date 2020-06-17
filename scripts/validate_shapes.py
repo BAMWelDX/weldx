@@ -57,7 +57,8 @@ assert val([1, 2], [1, "4~8"]) == False
 
 # expected values are wrong
 try:
-    val([1, 2], [1, ":", "(...)"])
+    # val([1, 2], [1, ":", "(...)"])
+    val([1, 2], [1, "~", "(...)"])
 except ValueError as err:
     print(err)
     print()
@@ -89,7 +90,8 @@ except ValueError as err:
 
 try:
     # "x:y" => (x <= y)
-    val([1, 2], [1, "4:1"])
+    # val([1, 2], [1, "4:1"])
+    val([1, 2], [1, "4~1"])
 except ValueError as err:
     print(err)
     print()
