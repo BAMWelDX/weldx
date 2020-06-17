@@ -96,7 +96,10 @@ def _unit_validator(
 
 
 def _compare(string, exp_string):
-    """Compare two strings
+    """Compare helper of two strings for _custom_shape_validator.
+
+
+    Return a boolean.
 
     Parameters
     ----------
@@ -104,21 +107,25 @@ def _compare(string, exp_string):
         String to compare with
     exp_string:
         String with the expected dimension
+
+    Returns
+    -------
+    bool
+        True or False
     """
     if ":" in exp_string:
         ranges = exp_string.split(":")
         if ranges[0] == "" and ranges[1] == "":
-            pass
+            return True
         else:
             if ranges[0] != "":
-                assert int(ranges[0]) <= int(string), "Dimension mismatch."
+                return int(ranges[0]) <= int(string)
             if ranges[1] != "":
-                assert int(ranges[1]) >= int(string), "Dimension mismatch."
+                return int(ranges[1]) >= int(string)
             if ranges[0] != "" and ranges[1] != "":
-                assert int(ranges[0]) <= int(ranges[1]), \
-                    "Dimension mismatch in expected_shape."
+                return int(ranges[0]) <= int(ranges[1])
     else:
-        assert int(string) == int(exp_string), "Dimension mismatch"
+        return int(string) == int(exp_string)
 
 
 def _custom_shape_validator(shape, expected_shape):
@@ -130,46 +137,64 @@ def _custom_shape_validator(shape, expected_shape):
         String
     expected_shape:
         String representation of the unit dimensionality to test against.
+
+    Returs
+    ------
+    bool :
+        True if shape matches the expected shape.
+        False if shape does not match the expected shape.
     """
 
     # check if expected shape has right format
-    #TODO: change asserts to return true/false
-    #TODO: ":" breaks during parsing -> use "~" or other sign
+    # TODO: ":" breaks during parsing -> use "~" or other sign
 
     # check that after one optional assign all following dimensions are optional
     # eg: "1, (1), (:), (3)" is fine, "1, (1), (:), 3" is not
     # and "(2), ..." should not be allowed too
-    # TODO: ValueError for not passing expected_shape
     shape = shape.replace(" ", "")
     validator = 0
     for exp in expected_shape.split(","):
         if validator == 1:
-            assert "(" in exp, "Optional  dimensions in the expected " \
-                             "shape should only stand at the end."
+            if "(" not in exp:
+                raise ValueError(
+                    "Optional  dimensions in the expected "
+                    "shape should only stand at the end."
+                )
         elif validator == 2:
-            assert False, 'After "..." should not be another dimension'
+            raise ValueError('After "..." should not be another dimension')
         elif "(" in exp:
             validator = 1
         # after "..." should not be another dimension
         elif "..." in exp:
-            assert "..." == exp, f'"..." should not have additional propterties:' \
-                                 f' {exp} was found.'
+            if "..." != exp:
+                raise ValueError(
+                    f'"..." should not have additional propterties:'
+                    f" {exp} was found."
+                )
             validator = 2
 
     shape_array = shape.split(",")
     for i, exp in enumerate(expected_shape.split(",")):
         # if "..." is found all the following dimensions are accepted
         if "..." in exp:
-            # jump out of the for loop - finished
-            break
+            return True
         # if there is a parenthesis found it is an optional dimension
         elif "(" in exp:
             # if the shape has the optional value
             if i < len(shape_array):
-                comparable = exp[exp.index("(") + 1:exp.rindex(")")]
-                _compare(shape_array[i], comparable)
+                comparable = exp[exp.index("(") + 1 : exp.rindex(")")]
+                if not _compare(shape_array[i], comparable):
+                    return False
         else:
-            _compare(shape_array[i], exp)
+            if i >= len(shape_array):
+                return False
+            if not _compare(shape_array[i], exp):
+                return False
+
+    if len(shape_array) > len(expected_shape.split(",")):
+        return False
+
+    return True
 
 
 def _shape_validator(

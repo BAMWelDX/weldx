@@ -3,116 +3,88 @@
 from weldx.asdf.validators import _custom_shape_validator as val
 
 # should be working
-val("3", "3")
+assert val("3", "3") == True
 
-val("2,4,5", "2,4,5")
+assert val("2,4,5", "2,4,5") == True
 
-val("2, 4, 5", "2,4,5")
+assert val("2, 4, 5", "2,4,5") == True
 
-val("1,2,3", "...")
+assert val("1,2,3", "...") == True
 
-val("1,2", "1,2,...")
+assert val("1,2", "1,2,...") == True
 
-val("1,2,3", "1,2,:")
+assert val("1,2,3", "1,2,:") == True
 
-val("1,2,3", "1,2,(:)")
+assert val("1,2,3", "1,2,(:)") == True
 
-val("1,2", "1,2,(:)")
+assert val("1,2", "1,2,(:)") == True
 
-val("1", "1,...")
+assert val("1", "1,...") == True
 
-val("1,2", "1,2,(3)")
+assert val("1,2", "1,2,(3)") == True
 
-val("1,2,3", "1,2,3")
+assert val("1,2,3", "1,2,3") == True
 
-val("1,2,3", "1,1:3,3")
+assert val("1,2,3", "1,1:3,3") == True
 
-val("1,2,3", "1,1:,3")
+assert val("1,2,3", "1,1:,3") == True
 
-val("1,2,3", "1,:3,3")
+assert val("1,2,3", "1,:3,3") == True
 
-val("1,2,3", "1,...")
+assert val("1,2,3", "1,...") == True
 
 
 # values are wrong
-try:
-    val("2,2,3", "1,...")
-except AssertionError as err:
-    print(err)
-    print()
+assert val("2,2,3", "1,...") == False
 
-try:
-    val("1", "1,2")
-except IndexError as err:
-    print(err)
-    print()
+assert val("1", "1,2") == False
 
-try:
-    val("1,2", "1")
-except AssertionError as err:
-    print(err)
-    print()
+assert val("1,2", "1") == False
 
-try:
-    val("1,2", "3,2")
-except AssertionError as err:
-    print(err)
-    print()
+assert val("1,2", "3,2") == False
 
-try:
-    val("1", "1,:")
-except IndexError as err:
-    print(err)
-    print()
+assert val("1", "1,:") == False
 
-try:
-    val("1,2,3", "1,2,(4)")
-except AssertionError as err:
-    print(err)
-    print()
+assert val("1,2,3", "1,2,(4)") == False
 
-try:
-    val("1,2", "1,4:8")
-except AssertionError as err:
-    print(err)
-    print()
+assert val("1,2", "1,4:8") == False
 
 # expected values are wrong
 try:
     val("1,2", "1,:,(...)")
-except AssertionError as err:
+except ValueError as err:
     print(err)
     print()
 
 try:
     val("1,2", "1,(2),3")
-except AssertionError as err:
+except ValueError as err:
     print(err)
     print()
 
 try:
     val("1,2", "1,...,2")
-except AssertionError as err:
+except ValueError as err:
     print(err)
     print()
 
 try:
     # seems to be unintuitive
     val("1,2", "(1),...")
-except AssertionError as err:
+except ValueError as err:
     print(err)
     print()
 
 try:
     val("1,2", "1,...2")
-except AssertionError as err:
+except ValueError as err:
     print(err)
     print()
 
 try:
     # "x:y" => (x <= y)
     val("1,2", "1,4:1")
-except AssertionError as err:
+except ValueError as err:
     print(err)
     print()
 
