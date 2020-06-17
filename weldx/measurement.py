@@ -24,7 +24,9 @@ class DataProcessor:
     """<TODO CLASS DOCSTRING>"""
 
     name: str
+    input_signal_type: str
     input_unit: str
+    output_signal_type: str
     output_unit: str
     error: Error
 
@@ -34,6 +36,7 @@ class Source:
     """<TODO CLASS DOCSTRING>"""
 
     name: str
+    output_signal_type: str
     output_unit: str
     error: Error
 
@@ -42,6 +45,7 @@ class Source:
 class MeasurementChain:
     """<TODO CLASS DOCSTRING>"""
 
+    name: str
     source: Source
     data_processors: List
 

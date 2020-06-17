@@ -12,7 +12,11 @@ type: object
 properties:
   name:
     type: string
+  input_signal_type:
+    type: string
   input_unit:
+    type: string
+  output_signal_type:
     type: string
   output_unit:
     type: string
@@ -20,7 +24,7 @@ properties:
     $ref: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
 
 propertyOrder: [name, input_unit, output_unit, error]
-required: [name, input_unit, output_unit, error]
+required: [name, input_unit, output_unit]
 
 flowStyle: block
 additionalProperties: false
