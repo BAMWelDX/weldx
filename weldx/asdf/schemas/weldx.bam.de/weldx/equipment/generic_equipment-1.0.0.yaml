@@ -10,13 +10,19 @@ description: |
   &lt;TODO DESCRIPTION&gt;
 type: object
 properties:
-  data:
-    description: |
-      &lt;TODO DESCRIPTION&gt;
+  name:
     type: string
+  sources:
+    type: array
+    items:
+      $ref: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
+  data_transformations:
+    type: array
+    items:
+      $ref: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
 
-
-required: [data]
+propertyOrder: [name, sources, data_transformations]
+required: [name]
 
 flowStyle: block
 additionalProperties: false

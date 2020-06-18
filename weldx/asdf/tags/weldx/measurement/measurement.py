@@ -1,28 +1,27 @@
+from weldx.measurement import Measurement
+
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
-from weldx.measurement import GenericEquipment
 
-__all__ = ["GenericEquipment", "GenericEquipmentType"]
+__all__ = ["Measurement", "MeasurementType"]
 
 
-class GenericEquipmentType(WeldxType):
+class MeasurementType(WeldxType):
     """<TODO ASDF TYPE DOCSTRING>"""
 
-    name = "equipment/generic_equipment"
+    name = "measurement/measurement"
     version = "1.0.0"
-    types = [GenericEquipment]
+    types = [Measurement]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node: GenericEquipment, ctx):
+    def to_tree(cls, node: Measurement, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
         tree = drop_none_attr(node)
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        if "sources" not in tree:
-            tree["sources"] = None
-        obj = GenericEquipment(**tree)
+        obj = Measurement(**tree)
         return obj

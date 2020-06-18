@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/measurement/data_processor-1.0.0"
-tag: "tag:weldx.bam.de:weldx/measurement/data_processor-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/measurement/data_transformation-1.0.0"
+tag: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
 
 title: |
   &lt;TODO DESCRIPTION&gt;

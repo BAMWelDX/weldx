@@ -31,7 +31,7 @@ class Signal:
 
 
 @dataclass
-class DataProcessor:
+class DataTransformation:
     """<TODO CLASS DOCSTRING>"""
 
     name: str
@@ -58,12 +58,23 @@ class MeasurementChain:
     data_processors: List
 
 
+@dataclass
+class Measurement:
+    """<TODO CLASS DOCSTRING>"""
+
+    name: str
+    data: Data
+    measurement_chain: MeasurementChain
+
+
 # equipment ----------------------------------------------------------------------------
 @dataclass
 class GenericEquipment:
     """<TODO CLASS DOCSTRING>"""
 
-    data: str
+    name: str
+    sources: List
+    data_transformations: List
 
 
 @dataclass
