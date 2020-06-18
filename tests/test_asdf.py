@@ -10,7 +10,6 @@ import pandas as pd
 import pytest
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-
 # weld design -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
 from weldx.asdf.tags.weldx.aws.design.connection import Connection
@@ -19,7 +18,6 @@ from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
 from weldx.asdf.tags.weldx.aws.design.weld_details import WeldDetails
 from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
 from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
-
 # welding process -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
 from weldx.asdf.tags.weldx.aws.process.gas_component import GasComponent
@@ -27,10 +25,8 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
     ShieldingGasForProcedure,
 )
 from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
-
 # iso groove -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
-
 # validators -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
 from weldx.asdf.validators import _custom_shape_validator as val
@@ -377,21 +373,28 @@ def test_shape_validator_syntax():
     assert val([2, 4, 5], [2, 4, 5])
     assert val([1, 2, 3], ["..."])
     assert val([1, 2], [1, 2, "..."])
+    assert val([1, 2], ["...", 1, 2])
     assert val([1, 2, 3], [1, 2, None])
+    assert val([1, 2, 3], [None, 2, 3])
     assert val([1], [1, "..."])
-    assert val([1, 2, 3], [1, "..."])
+    assert val([1, 2, 3, 4, 5], [1, "..."])
+    assert val([1, 2, 3, 4, 5], ["...", 4, 5])
     assert val([1, 2], [1, 2, "(3)"])
+    assert val([2, 3], ["(1)", 2, 3])
     assert val([1, 2, 3], [1, "1~3", 3])
     assert val([1, 2, 3], [1, "1~", 3])
-    assert val([1, 2, 3], [1, ":3", 3])
+    assert val([1, 2, 3], [1, "~3", 3])
 
     # shape mismatch
     assert not val([2, 2, 3], [1, "..."])
+    assert not val([2, 2, 3], ["...", 1])
     assert not val([1], [1, 2])
     assert not val([1, 2], [1])
     assert not val([1, 2], [3, 2])
     assert not val([1], [1, "~"])
+    assert not val([1], ["~", 1])
     assert not val([1, 2, 3], [1, 2, "(4)"])
+    assert not val([1, 2, 3], ["(2)", 2, 3])
     assert not val([1, 2], [1, "4~8"])
 
     # syntax errors, these should throw a ValueError
@@ -405,3 +408,5 @@ def test_shape_validator_syntax():
         val([1, 2], [(1), "..."])
     with pytest.raises(ValueError):
         val([1, 2], [1, "4~1"])
+    with pytest.raises(ValueError):  # no negative shape numbers allowed in syntax
+        val([-1, -2], [-1, -2])
