@@ -12,15 +12,13 @@ type: object
 properties:
   name:
     type: string
-  output_signal_type:
-    type: string
-  output_unit:
-    type: string
+  output_signal:
+    $ref: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
   error:
     $ref: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
 
-required: [name, output_signal_type, output_unit]
-propertyOrder: [name, output_signal_type, output_unit, error]
+required: [name, output_signal]
+propertyOrder: [name, output_signal, error]
 
 
 

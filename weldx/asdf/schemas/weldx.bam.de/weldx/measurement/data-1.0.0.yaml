@@ -10,12 +10,12 @@ description: |
   &lt;TODO DESCRIPTION&gt;
 type: object
 properties:
-  data:
-    description: |
-      &lt;TODO DESCRIPTION&gt;
+  name:
     type: string
+  data:
+    $ref: "tag:weldx.bam.de:weldx/core/data_array-1.0.0"
 
-
+propertyOrder: [name, data]
 required: [data]
 
 flowStyle: block

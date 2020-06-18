@@ -12,7 +12,7 @@ type: object
 properties:
   name:
     type: string
-  source:
+  data_source:
     $ref: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
   data_processors:
     type: array
@@ -20,9 +20,8 @@ properties:
       $ref: "tag:weldx.bam.de:weldx/measurement/data_processor-1.0.0"
 
 
-
-required: [name, source]
-propertyOrder: [name, source, data_processors]
+propertyOrder: [name, data_source, data_processors]
+required: [name, data_source]
 
 
 
