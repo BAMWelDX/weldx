@@ -1,7 +1,8 @@
 import asdf
 import xarray as xr
-
+import sympy
 import weldx.measurement as msm
+from weldx.asdf.tags.weldx.core.mathematical_expression import MathematicalExpression
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
@@ -87,10 +88,19 @@ def test_generic_save():
     sources = [src_01]
     processors = [dp_01, dp_02]
 
+    [a, x, b] = sympy.symbols("a x b")
+    expr_01 = MathematicalExpression(a * x + b)
+    expr_01.set_parameter("a", 2)
+    expr_01.set_parameter("b", 3)
+    print(expr_01.parameters)
+    print(expr_01.get_variable_names())
+    print(expr_01.evaluate(x=3))
+
     tree = {
         "equipment": equipment,
         "data": measurement_data,
         "measurements": measurements,
+        "expression": expr_01,
         # "measurement_chains": measurement_chains,
         # "data_sources": sources,
         # "data_processors": processors,
@@ -113,6 +123,7 @@ def test_generic_load():
     # print(processors[0])
     # print(sources[0])
     # print(measurement_chains[0])
+    print(f.tree["expression"].expression)
 
 
 # TODO: remove
