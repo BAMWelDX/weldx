@@ -234,6 +234,10 @@ def _another_validator(dict_test, dict_expected):
     if dict_test.keys() != dict_expected.keys():
         return False
 
+    #TODO: Does not test if the expected shapes are usefull!
+    #      Also check if the indices in the expected shape are not negative.
+    #TODO: does not accept "~"
+
     dict_values = {}
     for item in dict_expected:
         # turn around the list if "..." or "(" are at the beginning

@@ -115,4 +115,12 @@ dict_test = {"a": [1, 2, 3, 4, 5, 6], "b": [1, 2, 3], "c": [3, 3, 3]}
 dict_expected = {"a": [1, "n", "..."], "b": [1, "n", "m"], "c": ["m", 3, 3]}
 assert an_val(dict_test, dict_expected) is True
 
+dict_test = {"a": [1, 2, 3], "b": [1, 2, 3], "c": [3, 3, 3]}
+dict_expected = {"a": [1, "n", 3], "b": [1, "n", "(m)"], "c": ["m", 3, "(:)"]}
+assert an_val(dict_test, dict_expected) is True
+
+dict_test = {"a": [1, 2, 3], "b": [1, 2], "c": [3, 3]}
+dict_expected = {"a": [1, "n", 3], "b": [1, "n", "(m)"], "c": ["m", 3, "(:)"]}
+assert an_val(dict_test, dict_expected) is True
+
 print("EOF success")
