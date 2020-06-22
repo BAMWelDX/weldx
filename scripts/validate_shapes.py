@@ -36,6 +36,10 @@ assert val([1, 2, 3], [1, "~3", 3]) == True
 
 assert val([1, 2, 3], [1, "..."]) == True
 
+assert val([1, 2, 3], ["...", 3]) == True
+assert val([1, 2, 3], ["(1)", 2, 3]) == True
+assert val([1, 2, 3], ["(1)", "(2)", 3]) == True
+
 
 # values are wrong
 assert val([2, 2, 3], [1, "..."]) == False

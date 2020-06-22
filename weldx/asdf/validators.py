@@ -159,6 +159,14 @@ def _custom_shape_validator(shape, expected_shape):
         x.replace("~", ":") if isinstance(x, str) else ":" if x is None else x
         for x in expected_shape
     ]
+
+    # if expected shape begins with "..." or "(" string reverse expected shape and shape
+    shape_length = len(shape)
+    exp_shape_length = len(expected_shape)
+    if str(expected_shape[0]) == "..." or "(" in str(expected_shape[0]):
+        expected_shape = list(reversed(expected_shape))
+        shape = list(reversed(shape))
+
     validator = 0
     for exp in expected_shape:
         if validator == 1:
@@ -187,7 +195,7 @@ def _custom_shape_validator(shape, expected_shape):
         # if there is a parenthesis found it is an optional dimension
         elif "(" in str(exp):
             # if the shape has the optional value
-            if i < len(shape):
+            if i < shape_length:
                 if isinstance(exp, str):
                     comparable = exp[exp.index("(") + 1 : exp.rindex(")")]
                 else:
@@ -195,12 +203,12 @@ def _custom_shape_validator(shape, expected_shape):
                 if not _compare(shape[i], comparable):
                     return False
         else:
-            if i >= len(shape):
+            if i >= shape_length:
                 return False
             if not _compare(shape[i], str(exp)):
                 return False
 
-    if len(shape) > len(expected_shape):
+    if shape_length > exp_shape_length:
         return False
 
     return True
