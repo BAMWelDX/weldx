@@ -214,6 +214,44 @@ def _custom_shape_validator(shape, expected_shape):
     return True
 
 
+def _another_validator(dict_test, dict_expected):
+    """Validate the shape of the dictionary of two
+
+    Parameters
+    ----------
+    dict_test:
+        dictionary to test against
+    dict_expected:
+        dictionary with the expected values
+
+    returns
+    -------
+    Boolean
+        True or False
+    """
+    dict_values = {}
+    for item in dict_expected:
+        for i, value in enumerate(dict_expected[item]):
+            # all alphanumeric strings are OK - only numeric strings are not
+            # eg: "n", "n1", "n1234", "myasdfstring1337"
+            if str(value).isalnum() and not str(value).isnumeric():
+                # if value is already saved in dict_values
+                if value in dict_values:
+                    # compare
+                    if dict_test[item][i] != dict_values[value]:
+                        # error found
+                        return False
+                else:
+                    # add to dict_values
+                    dict_values[value] = dict_test[item][i]
+            else:
+                # compare int to int
+                if dict_test[item][i] != value:
+                    return False
+
+    return True
+
+
 def _shape_validator(
     instance: Mapping, expected_shape: List[int], position: List[str]
 ) -> Iterator[ValidationError]:
