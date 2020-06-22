@@ -197,7 +197,7 @@ def _custom_shape_validator(shape, expected_shape):
             # if the shape has the optional value
             if i < shape_length:
                 if isinstance(exp, str):
-                    comparable = exp[exp.index("(") + 1 : exp.rindex(")")]
+                    comparable = exp[exp.index("(") + 1: exp.rindex(")")]
                 else:
                     comparable = str(exp)
                 if not _compare(shape[i], comparable):
@@ -229,25 +229,54 @@ def _another_validator(dict_test, dict_expected):
     Boolean
         True or False
     """
+
+    # keys have to match
+    if dict_test.keys() != dict_expected.keys():
+        return False
+
     dict_values = {}
     for item in dict_expected:
-        for i, value in enumerate(dict_expected[item]):
+        # turn around the list if "..." or "(" are at the beginning
+        if "(" in str(dict_expected[item][0]) or "..." in str(dict_expected[item][0]):
+            dict_expected[item] = list(reversed(dict_expected[item]))
+            dict_test[item] = list(reversed(dict_test[item]))
+        # for loop
+        for i, exp in enumerate(dict_expected[item]):
+            # if "..." is found all the following dimensions are accepted
+            if "..." in str(exp):
+                return True
+
+            elif "(" in str(exp):
+                if i < len(dict_test[item]):
+                    comparable = exp[exp.index("(") + 1: exp.rindex(")")]
+                    if comparable.isalnum() and not comparable.isnumeric():
+                        if comparable in dict_values:
+                            if dict_test[item][i] != dict_values[comparable]:
+                                return False
+                        else:
+                            dict_values[comparable] = dict_test[item][i]
+                    elif not _compare(dict_test[item][i], comparable):
+                        return False
+
             # all alphanumeric strings are OK - only numeric strings are not
             # eg: "n", "n1", "n1234", "myasdfstring1337"
-            if str(value).isalnum() and not str(value).isnumeric():
+            elif str(exp).isalnum() and not str(exp).isnumeric():
                 # if value is already saved in dict_values
-                if value in dict_values:
+                if exp in dict_values:
                     # compare
-                    if dict_test[item][i] != dict_values[value]:
+                    if dict_test[item][i] != dict_values[exp]:
                         # error found
                         return False
                 else:
                     # add to dict_values
-                    dict_values[value] = dict_test[item][i]
+                    dict_values[exp] = dict_test[item][i]
             else:
-                # compare int to int
-                if dict_test[item][i] != value:
+                if i >= len(dict_test[item]) or\
+                        not _compare(dict_test[item][i], str(exp)):
                     return False
+
+        if len(dict_test[item]) > len(dict_expected[item]):
+            return False
 
     return True
 
