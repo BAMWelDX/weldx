@@ -1,8 +1,9 @@
 """Contains measurement related classes and functions."""
 
-import xarray as xr
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Union  # noqa: F401
+
+import xarray as xr
 
 
 # measurement --------------------------------------------------------------------------
@@ -38,6 +39,8 @@ class DataTransformation:
     input_signal: Signal
     output_signal: Signal
     error: Error
+    func: str = None
+    meta: str = None
 
 
 @dataclass
@@ -55,7 +58,7 @@ class MeasurementChain:
 
     name: str
     data_source: Source
-    data_processors: List
+    data_processors: List = field(default_factory=lambda: [])
 
 
 @dataclass
@@ -73,8 +76,8 @@ class GenericEquipment:
     """<TODO CLASS DOCSTRING>"""
 
     name: str
-    sources: List
-    data_transformations: List
+    sources: List = field(default_factory=lambda: [])
+    data_transformations: List = field(default_factory=lambda: [])
 
 
 @dataclass

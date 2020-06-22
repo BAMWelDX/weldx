@@ -23,5 +23,5 @@ propertyOrder: [name, input_signal, output_signal, error]
 required: [name, input_signal, output_signal]
 
 flowStyle: block
-additionalProperties: false
+additionalProperties: true
 ...
