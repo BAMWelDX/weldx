@@ -12,9 +12,11 @@ type: object
 properties:
   expression:
     type: string
+  parameters:
+    type: object
 
 required: [expression]
-propertyOrder: [expression]
+propertyOrder: [expression, parameters]
 flowStyle: block
 additionalProperties: false
 ...

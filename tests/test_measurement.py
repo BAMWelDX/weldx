@@ -123,7 +123,12 @@ def test_generic_load():
     # print(processors[0])
     # print(sources[0])
     # print(measurement_chains[0])
+    data = f.tree["data"]
+    expr = f.tree["expression"]
     print(f.tree["expression"].expression)
+    res = expr.evaluate(x=data[0].data)
+
+    print(res)
 
 
 # TODO: remove
