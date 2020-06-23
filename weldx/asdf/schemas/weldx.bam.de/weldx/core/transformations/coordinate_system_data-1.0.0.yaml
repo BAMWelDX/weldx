@@ -1,0 +1,31 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/coordinate_system_data-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_data-1.0.0"
+
+title: |
+  TODO
+description: |
+  TODO
+type: object
+properties:
+  name:
+    type: string
+  reference_system:
+    type: string
+  data:
+    $ref: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
+
+propertyOrder: [name, reference_system, data]
+required: [name, reference_system, data]
+flowStyle: block
+additionalProperties: false
+
+#wx_shape_validate: true
+#wx_shape:
+#  orientation:
+#    data: [3, 3]
+#  coordinates:
+#    data: [3]
+...
