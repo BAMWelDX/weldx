@@ -1,12 +1,12 @@
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from weldx.asdf.types import WeldxType
 from weldx.transformations import CoordinateSystemManager, LocalCoordinateSystem
 
 
 @dataclass
 class CoordinateSystemData:
-    """<TODO CLASS DOCSTRING>"""
+    """Stores data of a coordinate system inside an coordinate system hierarchy."""
 
     name: str
     reference_system: str
@@ -14,7 +14,7 @@ class CoordinateSystemData:
 
 
 class CoordinateSystemDataASDF(WeldxType):
-    """Serialization class for weldx.transformations.CoordinateSystemData"""
+    """Serialization class for CoordinateSystemData"""
 
     name = "core/transformations/coordinate_system_data"
     version = "1.0.0"
@@ -109,8 +109,6 @@ class LocalCoordinateSystemASDF(WeldxType):
             if not graph.edges[edge]["defined"]:
                 remove_edges.append(edge)
         graph.remove_edges_from(remove_edges)
-
-        graph_edges = [*graph.edges]
 
         # find root coordinate system
         root_system_name = None

@@ -7,12 +7,18 @@ tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.
 title: |
   Schema that describes a local coordinate system hierarchy
 description: |
-  TODO
+  It stores information how the different coordinate systems are arranged towards each other. The basic data structure
+  is a tree.
 type: object
 properties:
   root_system_name:
+    description: |
+      Name of the root coordinate system
     type: string
   coordinate_systems:
+    description: |
+      An array of all the coordinate systems' data. This includes their name, parent system and how they are arranged
+      towards their parent system.
     type: array
     items:
       $ref: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_data-1.0.0"
@@ -21,6 +27,5 @@ propertyOrder: [root_system_name, coordinate_systems]
 required: [root_system_name, coordinate_systems]
 flowStyle: block
 additionalProperties: false
-
 
 ...

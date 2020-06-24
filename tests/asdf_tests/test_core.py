@@ -201,6 +201,21 @@ buffer_csm = BytesIO()
 def are_coordinate_system_managers_equal(
         csm_0: tf.CoordinateSystemManager, csm_1: tf.CoordinateSystemManager
 ):
+    """
+    Test if two CoordinateSystemManager instances are equal.
+
+    Parameters
+    ----------
+    csm_0:
+        First CoordinateSystemManager instance.
+    csm_1:
+        Second CoordinateSystemManager instance.
+
+    Returns
+    -------
+    bool:
+        True if both coordinate system managers are identical, False otherwise
+    """
     graph_0 = csm_0.graph
     graph_1 = csm_1.graph
 
@@ -230,6 +245,7 @@ def are_coordinate_system_managers_equal(
 
 
 def get_example_coordinate_system_manager():
+    """Get a consistent CoordinateSystemManager instance for test purposes."""
     csm = tf.CoordinateSystemManager("root")
     csm.add_coordinate_system("lcs_01", "root",
                               tf.LocalCoordinateSystem(coordinates=[1, 2, 3]))
@@ -245,24 +261,20 @@ def get_example_coordinate_system_manager():
 
 
 def test_coordinate_system_manager_save():
+    """Test if a CoordinateSystemManager can be written to an asdf file."""
     csm = get_example_coordinate_system_manager()
     tree = {"cs_hierarchy": csm}
     with asdf.AsdfFile(
             tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
     ) as f:
-        f.write_to("test.yaml")
-        # buffer_csm.seek(0)
-
-
-test_coordinate_system_manager_save()
+        f.write_to(buffer_csm)
+        buffer_csm.seek(0)
 
 
 def test_coordinate_system_manager_load():
-    f = asdf.open("test.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()])
+    """Test if a CoordinateSystemManager can be read from an asdf file."""
+    f = asdf.open(buffer_csm, extensions=[WeldxExtension(), WeldxAsdfExtension()])
     csm_exp = get_example_coordinate_system_manager()
     csm_file = f.tree["cs_hierarchy"]
 
     assert are_coordinate_system_managers_equal(csm_exp, csm_file)
-
-
-test_coordinate_system_manager_load()
