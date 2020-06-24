@@ -17,7 +17,10 @@ properties:
   velocity_prop:
     description: |
       a simple velocity quantity
-    $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+    allOf:
+      - $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+      - type: object
+        wx_unit: "m/s"
 
   current_prop:
     description: |
