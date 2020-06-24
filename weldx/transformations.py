@@ -14,6 +14,7 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 
+
 # functions -------------------------------------------------------------------
 
 
@@ -141,9 +142,9 @@ def orientation_point_plane_containing_origin(point, p_a, p_b):
 
     """
     if (
-        math.isclose(np.linalg.norm(p_a), 0)
-        or math.isclose(np.linalg.norm(p_b), 0)
-        or math.isclose(np.linalg.norm(p_b - p_a), 0)
+            math.isclose(np.linalg.norm(p_a), 0)
+            or math.isclose(np.linalg.norm(p_b), 0)
+            or math.isclose(np.linalg.norm(p_b - p_a), 0)
     ):
         raise ValueError("One or more points describing the plane are identical.")
 
@@ -309,11 +310,11 @@ class LocalCoordinateSystem:
     """Defines a local cartesian coordinate system in 3d."""
 
     def __init__(
-        self,
-        orientation: Union[xr.DataArray, np.ndarray, List[List]] = None,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
-        time: pd.DatetimeIndex = None,
-        construction_checks: bool = True,
+            self,
+            orientation: Union[xr.DataArray, np.ndarray, List[List]] = None,
+            coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+            time: pd.DatetimeIndex = None,
+            construction_checks: bool = True,
     ):
         """Construct a cartesian coordinate system.
 
@@ -352,7 +353,7 @@ class LocalCoordinateSystem:
                     print(
                         "Unable to convert input argument to pd.DatetimeIndex. "
                         + "If passing single values convert to list first (like ["
-                        "pd.Timestamp])"
+                          "pd.Timestamp])"
                     )
                     raise err
 
@@ -453,8 +454,8 @@ class LocalCoordinateSystem:
             rhs_cs.orientation, self.orientation, dims_a=["c", "v"]
         )
         coordinates = (
-            ut.xr_matmul(rhs_cs.orientation, self.coordinates, ["c", "v"], ["c"])
-            + rhs_cs.coordinates
+                ut.xr_matmul(rhs_cs.orientation, self.coordinates, ["c", "v"], ["c"])
+                + rhs_cs.coordinates
         )
         return LocalCoordinateSystem(orientation, coordinates)
 
@@ -496,7 +497,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_euler(
-        cls, sequence, angles, degrees=False, coordinates=None, time=None
+            cls, sequence, angles, degrees=False, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
 
@@ -544,7 +545,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_orientation(
-        cls, orientation, coordinates=None, time=None
+            cls, orientation, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from orientation matrix.
 
@@ -567,7 +568,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_xyz(
-        cls, vec_x, vec_y, vec_z, coordinates=None, time=None
+            cls, vec_x, vec_y, vec_z, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from 3 vectors defining the orientation.
 
@@ -595,7 +596,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_xy_and_orientation(
-        cls, vec_x, vec_y, positive_orientation=True, coordinates=None, time=None
+            cls, vec_x, vec_y, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -628,7 +629,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_yz_and_orientation(
-        cls, vec_y, vec_z, positive_orientation=True, coordinates=None, time=None
+            cls, vec_y, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -661,7 +662,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def construct_from_xz_and_orientation(
-        cls, vec_x, vec_z, positive_orientation=True, coordinates=None, time=None
+            cls, vec_x, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -786,7 +787,8 @@ class LocalCoordinateSystem:
         return self._dataset.transpose(..., "c", "v")
 
     def interp_time(
-        self, time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"]
+            self,
+            time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"]
     ) -> "LocalCoordinateSystem":
         """Interpolates the data in time.
 
@@ -876,7 +878,7 @@ class CoordinateSystemManager:
         self._graph.add_node(coordinate_system_name, data=[])
 
     def _add_edges(
-        self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
+            self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
     ):
         """Add an edge to the internal graph.
 
@@ -890,8 +892,8 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-        self._graph.add_edge(node_from, node_to, lcs=lcs)
-        self._graph.add_edge(node_to, node_from, lcs=lcs.invert())
+        self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
+        self._graph.add_edge(node_to, node_from, lcs=lcs.invert(), defined=False)
 
     def _check_coordinate_system_exists(self, coordinate_system_name: Hashable):
         """Raise an exception if the specified coordinate system does not exist.
@@ -926,10 +928,10 @@ class CoordinateSystemManager:
             )
 
     def add_coordinate_system(
-        self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
-        local_coordinate_system: LocalCoordinateSystem,
+            self,
+            coordinate_system_name: Hashable,
+            reference_system_name: Hashable,
+            local_coordinate_system: LocalCoordinateSystem,
     ):
         """Add a coordinate system to the coordinate system manager.
 
@@ -960,7 +962,8 @@ class CoordinateSystemManager:
         )
 
     def assign_data(
-        self, data: xr.DataArray, data_name: Hashable, coordinate_system_name: Hashable
+            self, data: xr.DataArray, data_name: Hashable,
+            coordinate_system_name: Hashable
     ):
         """Assign spatial data to a coordinate system.
 
@@ -989,7 +992,7 @@ class CoordinateSystemManager:
         self._graph.nodes[coordinate_system_name]["data"].append(data_name)
 
     def get_local_coordinate_system(
-        self, coordinate_system_name: Hashable, reference_system_name: Hashable
+            self, coordinate_system_name: Hashable, reference_system_name: Hashable
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
 
@@ -1057,7 +1060,7 @@ class CoordinateSystemManager:
         return data_name in self._graph.nodes[coordinate_system_name]["data"]
 
     def get_data(
-        self, data_name, target_coordinate_system_name=None
+            self, data_name, target_coordinate_system_name=None
     ) -> Union[np.ndarray, xr.DataArray]:
         """Get the specified data, optionally transformed into any coordinate system.
 
@@ -1078,8 +1081,8 @@ class CoordinateSystemManager:
         """
         data_struct = self._data[data_name]
         if (
-            target_coordinate_system_name is None
-            or target_coordinate_system_name == data_struct.coordinate_system_name
+                target_coordinate_system_name is None
+                or target_coordinate_system_name == data_struct.coordinate_system_name
         ):
             return data_struct.data
 
@@ -1090,10 +1093,10 @@ class CoordinateSystemManager:
         )
 
     def transform_data(
-        self,
-        data: Union[xr.DataArray, np.ndarray, List],
-        source_coordinate_system_name: Hashable,
-        target_coordinate_system_name: Hashable,
+            self,
+            data: Union[xr.DataArray, np.ndarray, List],
+            source_coordinate_system_name: Hashable,
+            target_coordinate_system_name: Hashable,
     ):
         """Transform spatial data from one coordinate system to another.
 
@@ -1187,7 +1190,7 @@ class CoordinateSystemManager:
         return len(self.neighbors(coordinate_system_name))
 
     def is_neighbor_of(
-        self, coordinate_system_name_0: Hashable, coordinate_system_name_1: Hashable
+            self, coordinate_system_name_0: Hashable, coordinate_system_name_1: Hashable
     ) -> bool:
         """Get a boolean result, specifying if 2 coordinate systems are neighbors.
 
@@ -1205,9 +1208,9 @@ class CoordinateSystemManager:
         return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
 
     def interp_time(
-        self,
-        time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
-        inplace: bool = False,
+            self,
+            time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
+            inplace: bool = False,
     ) -> "CoordinateSystemManager":
         """Interpolates the coordinate systems in time.
 

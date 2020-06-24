@@ -10,6 +10,7 @@
 - add NetCDF inspired common types (`Dimension`,`Variable`) with corresponding
  asdf serialization classes
 - add asdf serialization classes and schemas for `xarray.DataArray`, 
-`xarray.Dataset` and `weldx.transformations.LocalCoordinateSystem`.
-- add test for `xarray.DataArray`, `xarray.Dataset` and 
-`weldx.transformations.LocalCoordinateSystem` serialization.
+`xarray.Dataset`, `weldx.transformations.LocalCoordinateSystem` and
+`weldx.transformations.CoordinateSystemManager`.
+- add test for `xarray.DataArray`, `xarray.Dataset`, `weldx.transformations.LocalCoordinateSystem` and
+`weldx.transformations.CoordinateSystemManager` serialization.
