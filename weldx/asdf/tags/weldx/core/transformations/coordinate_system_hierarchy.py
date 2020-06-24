@@ -5,33 +5,33 @@ from weldx.transformations import CoordinateSystemManager, LocalCoordinateSystem
 
 
 @dataclass
-class CoordinateSystemData:
-    """Stores data of a coordinate system inside an coordinate system hierarchy."""
+class CoordinateTransformation:
+    """Stores data of a coordinate transformation."""
 
     name: str
     reference_system: str
-    data: LocalCoordinateSystem
+    transformation: LocalCoordinateSystem
 
 
-class CoordinateSystemDataASDF(WeldxType):
-    """Serialization class for CoordinateSystemData"""
+class CoordinateTransformationASDF(WeldxType):
+    """Serialization class for CoordinateTransformation"""
 
-    name = "core/transformations/coordinate_system_data"
+    name = "core/transformations/coordinate_transformation"
     version = "1.0.0"
-    types = [CoordinateSystemData]
+    types = [CoordinateTransformation]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
     validators = {}
 
     @classmethod
-    def to_tree(cls, node: CoordinateSystemData, ctx):
+    def to_tree(cls, node: CoordinateTransformation, ctx):
         """
-        Convert a 'CoordinateSystemData' instance into YAML representations.
+        Convert a 'CoordinateTransformation' instance into YAML representations.
 
         Parameters
         ----------
         node :
-            Instance of the 'CoordinateSystemData' type to be serialized.
+            Instance of the 'CoordinateTransformation' type to be serialized.
 
         ctx :
             An instance of the 'AsdfFile' object that is being written out.
@@ -39,18 +39,18 @@ class CoordinateSystemDataASDF(WeldxType):
         Returns
         -------
             A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
-            'complex') representing the properties of the 'CoordinateSystemData'
+            'complex') representing the properties of the 'CoordinateTransformation'
             type to be serialized.
 
         """
         tree = {"name": node.name, "reference_system": node.reference_system,
-                "data": node.data}
+                "transformation": node.transformation}
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
         """
-        Converts basic types representing YAML trees into a 'CoordinateSystemData'.
+        Converts basic types representing YAML trees into a 'CoordinateTransformation'.
 
         Parameters
         ----------
@@ -62,13 +62,13 @@ class CoordinateSystemDataASDF(WeldxType):
 
         Returns
         -------
-        CoordinateSystemData :
-            An instance of the 'CoordinateSystemData' type.
+        CoordinateTransformation :
+            An instance of the 'CoordinateTransformation' type.
 
         """
-        return CoordinateSystemData(name=tree["name"],
-                                    reference_system=tree["reference_system"],
-                                    data=tree["data"])
+        return CoordinateTransformation(name=tree["name"],
+                                        reference_system=tree["reference_system"],
+                                        transformation=tree["transformation"])
 
 
 class LocalCoordinateSystemASDF(WeldxType):
@@ -120,11 +120,11 @@ class LocalCoordinateSystemASDF(WeldxType):
         coordinate_system_data = []
 
         for name, reference_system in graph.edges:
-            cs_data = CoordinateSystemData(name, reference_system,
-                                           node.get_local_coordinate_system(
-                                               name,
-                                               reference_system))
-            coordinate_system_data.append(cs_data)
+            transformation = CoordinateTransformation(name, reference_system,
+                                                      node.get_local_coordinate_system(
+                                                          name,
+                                                          reference_system))
+            coordinate_system_data.append(transformation)
 
         tree = {"root_system_name": root_system_name,
                 "coordinate_systems": coordinate_system_data}
@@ -162,7 +162,7 @@ class LocalCoordinateSystemASDF(WeldxType):
                     if csm.has_coordinate_system(cs_data.reference_system):
                         csm.add_coordinate_system(cs_data.name,
                                                   cs_data.reference_system,
-                                                  cs_data.data)
+                                                  cs_data.transformation)
                     else:
                         all_systems_included = False
         return csm

@@ -1,11 +1,11 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/core/transformations/coordinate_system_data-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_data-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/coordinate_transformation-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
 
 title: |
-  Schema that describes a coordinate system inside of an coordinate system hierarchy
+  Schema that describes the transformation between 2 coordinate systems.
 description: |
   TODO
 type: object
@@ -18,13 +18,13 @@ properties:
     description: |
       Name of the parent system
     type: string
-  data:
+  transformation:
     description: |
       Data that describes the orientation and position of the coordinate system towards its parent system.
     $ref: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
 
-propertyOrder: [name, reference_system, data]
-required: [name, reference_system, data]
+propertyOrder: [name, reference_system, transformation]
+required: [name, reference_system, transformation]
 flowStyle: block
 additionalProperties: false
 
