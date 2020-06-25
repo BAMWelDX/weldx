@@ -142,7 +142,7 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
         A local coordinate system
 
     """
-    coords = [2, 5, 1]
+    coords = Q_(np.asarray([2., 5., 1.]), "mm")
     orientation = tf.rotation_matrix_z(np.pi / 3)
 
     if not time_dep_orientation and not time_dep_coordinates:

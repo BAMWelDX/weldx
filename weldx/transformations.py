@@ -13,6 +13,7 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
+from weldx.constants import WELDX_QUANTITY as Q_
 
 
 # functions -------------------------------------------------------------------
@@ -370,7 +371,7 @@ class LocalCoordinateSystem:
                 pass
 
             if not isinstance(coordinates, xr.DataArray):
-                if not isinstance(coordinates, np.ndarray):
+                if not isinstance(coordinates, (np.ndarray, Q_)):
                     coordinates = np.array(coordinates)
                 time_coordinates = None
                 if coordinates.ndim == 2:
