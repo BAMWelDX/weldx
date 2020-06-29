@@ -336,10 +336,14 @@ def _another_validator(dict_test, dict_expected):
             _validate_expected_list(dict_expected[item])
 
             # Compare the Lists in the dictionaries
+            stopper = 0
             for i, exp in enumerate(dict_expected[item]):
-                # if "..." is found all the following dimensions are accepted
-                if "..." in str(exp):
+                # when "..." was found all the following dimensions are accepted
+                if stopper:
                     continue
+                # if "..." is found all the following dimensions are accepted
+                elif "..." in str(exp):
+                    stopper = 1
 
                 elif "(" in str(exp):
                     if i < len(dict_test[item]):
@@ -370,7 +374,7 @@ def _another_validator(dict_test, dict_expected):
                             not _compare(dict_test[item][i], str(exp)):
                         return False
 
-            if len(dict_test[item]) > len(dict_expected[item]):
+            if (len(dict_test[item]) > len(dict_expected[item])) and not stopper:
                 return False
         else:
             # go one level deeper in the dictionary
