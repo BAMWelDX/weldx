@@ -108,6 +108,10 @@ dict_expected = {"a": [1, "n", 3], "b": [1, "n", "m"], "c": ["m", 3, 3]}
 assert an_val(dict_test, dict_expected)
 
 dict_test = {"a": [1, 2, 3], "b": [1, 2, 3], "c": [3, 3, 3]}
+dict_expected = {"a": [1, 2, 3], "b": [1, 2, 3], "c": [3, 3, 3]}
+assert an_val(dict_test, dict_expected) == {}
+
+dict_test = {"a": [1, 2, 3], "b": [1, 2, 3], "c": [3, 3, 3]}
 dict_expected = {"a": [1, "n", "..."], "b": ["...", "n", "m"], "c": ["m", 3, "(3)"]}
 assert an_val(dict_test, dict_expected)
 
@@ -134,10 +138,22 @@ dict_test = {
 }
 dict_expected = {
     "a": {"a1": [1, "n", 3], "a2": {"a21": ["m", 2, 1], "a22": ["n", 2, "n"]}},
-    "b": {"b1": [1, 2, "m"], "b2": [1, 1, 1]},
+    "b": {"b1": [1, "~", "m"], "b2": [1, 1, 1]},
     "c": ["m", 3, 3],
 }
 assert an_val(dict_test, dict_expected)
+
+dict_test = {  # here is a 4 -------------v
+    "a": {"a1": [1, 2, 3], "a2": {"a21": [4, 2, 1], "a22": [2, 2, 2]}},
+    "b": {"b1": [1, 2, 3], "b2": [1, 1, 1]},
+    "c": [3, 3, 3],
+}
+dict_expected = {
+    "a": {"a1": [1, "n", 3], "a2": {"a21": ["m", 2, 1], "a22": ["n", 2, "n"]}},
+    "b": {"b1": [1, 2, "m"], "b2": [1, 1, 1]},
+    "c": ["m", 3, 3],
+}
+assert an_val(dict_test, dict_expected) is False
 
 try:
     dict_test = {"a": [1, 2, 3]}

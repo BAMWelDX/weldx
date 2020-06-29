@@ -103,7 +103,7 @@ def _compare(_int, exp_string):
 
     Parameters
     ----------
-    shape:
+    _int:
         Integer
     exp_string:
         String with the expected dimension
@@ -147,7 +147,7 @@ def _custom_shape_validator(shape, expected_shape):
     expected_shape:
         String representation of the unit dimensionality to test against.
 
-    Returs
+    Returns
     ------
     bool :
         True if shape matches the expected shape.
@@ -259,6 +259,19 @@ def _prepare_list(_list, list_expected):
 
 
 def _validate_expected_list(list_expected):
+    """Validate an expected List and raises exceptions.
+
+
+    params
+    ------
+    list_expected:
+        Expected List to validate against
+
+    raises
+    ------
+    ValueError:
+        ValueError will be raised if an rule violation is found
+    """
     validator = 0
     for exp in list_expected:
         if validator == 1:
@@ -335,7 +348,7 @@ def _another_validator(dict_test, dict_expected):
             # Validate the expected List
             _validate_expected_list(dict_expected[item])
 
-            # Compare the Lists in the dictionaries
+            # Compare List with expected List
             stopper = 0
             for i, exp in enumerate(dict_expected[item]):
                 # when "..." was found all the following dimensions are accepted
