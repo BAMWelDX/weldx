@@ -368,6 +368,8 @@ def test_validators():
 def test_shape_validator_syntax():
     """Test handling of custom shape validation syntax in Python."""
 
+    pass  # TODO: rewrite for new shape validator
+
     # correct evaluation
     assert val([3], [3])
     assert val([2, 4, 5], [2, 4, 5])
