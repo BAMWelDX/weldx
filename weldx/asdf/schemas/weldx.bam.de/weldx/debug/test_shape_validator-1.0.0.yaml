@@ -1,0 +1,51 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/debug/test_shape_validator-1.0.0"
+tag: "tag:weldx.bam.de:weldx/debug/test_shape_validator-1.0.0"
+
+title: |
+  simple demonstration and test schema for wx_shape validator syntax
+type: object
+properties:
+  prop1:
+    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    wx_shape: [1,2,3]
+
+  prop2:
+    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    wx_shape: [3,2,1]
+
+  prop3:
+    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    wx_shape: [2,4,6,8,10]
+
+  prop4:
+    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    wx_shape: [1,3,5,7,9]
+
+  nested_prop:
+    type: object
+    properties:
+      p1:
+        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+        wx_shape: [10,8,6,4,2]
+      p2:
+        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+        wx_shape: [9,7,5,3,1]
+
+
+
+required: [prop1,prop2,prop3,prop4,nested_prop]
+propertyOrder: [prop1,prop2,prop3,prop4,nested_prop]
+flowStyle: block
+additionalProperties: true
+wx_shape:
+  prop1: [1,2,3]
+  prop2: [3,2,1]
+  prop3: [2,4,6,8,10]
+  prop4: [1,3,5,7,9]
+  nested_prop:
+    p1: [10,8,6,4,2]
+    p2: [9,7,5,3,1]
+...

@@ -114,9 +114,7 @@ def _compare(_int, exp_string):
         True or False
     """
     if _int < 0:
-        raise ValueError(
-            "Negative dimension found"
-        )
+        raise ValueError("Negative dimension found")
     if ":" in exp_string:
         ranges = exp_string.split(":")
         if ranges[0] == "" and ranges[1] == "":
@@ -206,7 +204,7 @@ def _custom_shape_validator(shape, expected_shape):
             # if the shape has the optional value
             if i < shape_length:
                 if isinstance(exp, str):
-                    comparable = exp[exp.index("(") + 1: exp.rindex(")")]
+                    comparable = exp[exp.index("(") + 1 : exp.rindex(")")]
                 else:
                     comparable = str(exp)
                 if not _compare(shape[i], comparable):
@@ -240,14 +238,12 @@ def _prepare_list(_list, list_expected):
         prepared List with expected values
     """
     # remove blank spaces in dict_test
-    _list = [
-            x.replace(" ", "") if isinstance(x, str) else x for x in _list
-        ]
+    _list = [x.replace(" ", "") if isinstance(x, str) else x for x in _list]
     # accept "~" additionally as input of ":". And remove blank spaces.
     list_expected = [
-            x.replace(" ", "").replace("~", ":")
-            if isinstance(x, str) else x for x in list_expected
-        ]
+        x.replace(" ", "").replace("~", ":") if isinstance(x, str) else x
+        for x in list_expected
+    ]
     # turn around the list if "..." or "(" are at the beginning.
     # because the validation is made from begin -> end.
     # like this we validate the array from end -> begin.
@@ -285,8 +281,7 @@ def _validate_expected_list(list_expected):
         elif "..." in str(exp):
             if "..." != exp:
                 raise ValueError(
-                    f'"..." should not have additional properties:'
-                    f' {exp} was found.'
+                    f'"..." should not have additional properties:' f" {exp} was found."
                 )
             validator = 2
         elif "(" in str(exp):
@@ -343,7 +338,8 @@ def _another_validator(dict_test, dict_expected):
         if isinstance(dict_expected[item], list):
             # Prepare the Lists
             dict_test[item], dict_expected[item] = _prepare_list(
-                dict_test[item], dict_expected[item])
+                dict_test[item], dict_expected[item]
+            )
 
             # Validate the expected List
             _validate_expected_list(dict_expected[item])
@@ -360,7 +356,7 @@ def _another_validator(dict_test, dict_expected):
 
                 elif "(" in str(exp):
                     if i < len(dict_test[item]):
-                        comparable = exp[exp.index("(") + 1: exp.rindex(")")]
+                        comparable = exp[exp.index("(") + 1 : exp.rindex(")")]
                         if comparable.isalnum() and not comparable.isnumeric():
                             if comparable in dict_values:
                                 if dict_test[item][i] != dict_values[comparable]:
@@ -383,8 +379,9 @@ def _another_validator(dict_test, dict_expected):
                         # add to dict_values
                         dict_values[exp] = dict_test[item][i]
                 else:
-                    if i >= len(dict_test[item]) or\
-                            not _compare(dict_test[item][i], str(exp)):
+                    if i >= len(dict_test[item]) or not _compare(
+                        dict_test[item][i], str(exp)
+                    ):
                         return False
 
             if (len(dict_test[item]) > len(dict_expected[item])) and not stopper:
