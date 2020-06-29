@@ -405,7 +405,7 @@ def test_shape_validator_syntax():
     with pytest.raises(ValueError):
         val([1, 2], [1, "...", 2])  # should this be allowed? syntax/value error?
     with pytest.raises(ValueError):
-        val([1, 2], [(1), "..."])
+        val([1, 2], ["(1)", "..."])
     with pytest.raises(ValueError):
         val([1, 2], [1, "4~1"])
     with pytest.raises(ValueError):  # no negative shape numbers allowed in syntax

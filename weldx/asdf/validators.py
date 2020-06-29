@@ -113,17 +113,26 @@ def _compare(_int, exp_string):
     bool
         True or False
     """
+    if _int < 0:
+        raise ValueError(
+            "Negative dimension found"
+        )
     if ":" in exp_string:
         ranges = exp_string.split(":")
         if ranges[0] == "" and ranges[1] == "":
             return True
         else:
-            if ranges[0] != "":
-                return int(ranges[0]) <= _int
-            if ranges[1] != "":
-                return int(ranges[1]) >= _int
             if ranges[0] != "" and ranges[1] != "":
-                return int(ranges[0]) <= int(ranges[1])
+                if int(ranges[0]) <= int(ranges[1]):
+                    pass
+                else:
+                    raise ValueError(
+                        f"The range should not be descending in {exp_string}"
+                    )
+            if ranges[0] != "":
+                return 0 <= int(ranges[0]) <= _int
+            if ranges[1] != "":
+                return int(ranges[1]) >= _int > 0
     else:
         return _int == int(exp_string)
 
@@ -177,8 +186,6 @@ def _custom_shape_validator(shape, expected_shape):
                 )
         elif validator == 2:
             raise ValueError('After "..." should not be another dimension')
-        elif "(" in str(exp):
-            validator = 1
         # after "..." should not be another dimension
         elif "..." in str(exp):
             if "..." != exp:
@@ -187,6 +194,8 @@ def _custom_shape_validator(shape, expected_shape):
                     f" {exp} was found."
                 )
             validator = 2
+        elif "(" in str(exp):
+            validator = 1
 
     for i, exp in enumerate(expected_shape):
         # if "..." is found all the following dimensions are accepted
@@ -214,8 +223,82 @@ def _custom_shape_validator(shape, expected_shape):
     return True
 
 
+def _prepare_list(_list, list_expected):
+    """Prepare a List and an expected List for validation.
+
+    parameters
+    ----------
+    _list:
+        List with values
+    list_expected:
+        List with expected values
+    returns
+    -------
+    _list:
+        prepared List
+    list_expected:
+        prepared List with expected values
+    """
+    # remove blank spaces in dict_test
+    _list = [
+            x.replace(" ", "") if isinstance(x, str) else x for x in _list
+        ]
+    # accept "~" additionally as input of ":". And remove blank spaces.
+    list_expected = [
+            x.replace(" ", "").replace("~", ":")
+            if isinstance(x, str) else x for x in list_expected
+        ]
+    # turn around the list if "..." or "(" are at the beginning.
+    # because the validation is made from begin -> end.
+    # like this we validate the array from end -> begin.
+    if "(" in str(list_expected[0]) or "..." in str(list_expected[0]):
+        list_expected = list(reversed(list_expected))
+        _list = list(reversed(_list))
+
+    return _list, list_expected
+
+
+def _validate_expected_list(list_expected):
+    validator = 0
+    for exp in list_expected:
+        if validator == 1:
+            if "(" not in str(exp):
+                raise ValueError(
+                    "Optional dimensions in the expected "
+                    "shape should only stand at the end/beginning."
+                )
+        elif validator == 2:
+            raise ValueError('After "..." should not be another dimension.')
+        elif "..." in str(exp):
+            if "..." != exp:
+                raise ValueError(
+                    f'"..." should not have additional properties:'
+                    f' {exp} was found.'
+                )
+            validator = 2
+        elif "(" in str(exp):
+            validator = 1
+
+
 def _another_validator(dict_test, dict_expected):
-    """Validate the shape of the dictionary of two
+    """Validate dimensions which are stored in two dictionaries dict_test and
+    dict_expected.
+
+    Syntax for the dict_expected:
+    -----------------------------
+    Items with arrays with each value having the following Syntax:
+    1)  3 : an integer indicates a fix dimension for the same item in dict_test
+    2)  "~", ":" or None : this string indicates a single dimension of arbitrary length.
+    3)  "..." : this string indicates an arbitrary number of dimensions of arbitrary
+            length. Can be optional.
+    4)  "2~4" : this string indicates a single dimension of length 2, 3 or 4. This
+            has to be ascending or you can give an unlimited interval limit like this
+            "2~" which would indicate a single dimension of length greater then 1.
+    5)  "n" : this indicates a single dimension fixed to a letter. Any letter or
+            combination of letters should work The letter will be compared to the same
+            letter in all the arrays in the dict_expected.
+    6)  (x) : parenthesis indicates that the dict_test does not need to have this
+            dimension. This can NOT be combined with 3) or the None from 2).
 
     Parameters
     ----------
@@ -224,65 +307,84 @@ def _another_validator(dict_test, dict_expected):
     dict_expected:
         dictionary with the expected values
 
+    raises
+    ------
+    ValueError:
+        when dict_expected does violate against the Syntax rules
+
     returns
     -------
-    Boolean
-        True or False
+    False
+        when any dimension mismatch occurs
+    dict_values
+        Dictionary - keys: variable names in the validation schemes. values: values of
+        the validation schemes.
     """
 
     # keys have to match
     if dict_test.keys() != dict_expected.keys():
         return False
 
-    #TODO: Does not test if the expected shapes are usefull!
-    #      Also check if the indices in the expected shape are not negative.
-    #TODO: does not accept "~"
-
     dict_values = {}
     for item in dict_expected:
-        # turn around the list if "..." or "(" are at the beginning
-        if "(" in str(dict_expected[item][0]) or "..." in str(dict_expected[item][0]):
-            dict_expected[item] = list(reversed(dict_expected[item]))
-            dict_test[item] = list(reversed(dict_test[item]))
-        # for loop
-        for i, exp in enumerate(dict_expected[item]):
-            # if "..." is found all the following dimensions are accepted
-            if "..." in str(exp):
-                return True
+        if isinstance(dict_expected[item], list):
+            # Prepare the Lists
+            dict_test[item], dict_expected[item] = _prepare_list(
+                dict_test[item], dict_expected[item])
 
-            elif "(" in str(exp):
-                if i < len(dict_test[item]):
-                    comparable = exp[exp.index("(") + 1: exp.rindex(")")]
-                    if comparable.isalnum() and not comparable.isnumeric():
-                        if comparable in dict_values:
-                            if dict_test[item][i] != dict_values[comparable]:
-                                return False
-                        else:
-                            dict_values[comparable] = dict_test[item][i]
-                    elif not _compare(dict_test[item][i], comparable):
+            # Validate the expected List
+            _validate_expected_list(dict_expected[item])
+
+            # Compare the Lists in the dictionaries
+            for i, exp in enumerate(dict_expected[item]):
+                # if "..." is found all the following dimensions are accepted
+                if "..." in str(exp):
+                    continue
+
+                elif "(" in str(exp):
+                    if i < len(dict_test[item]):
+                        comparable = exp[exp.index("(") + 1: exp.rindex(")")]
+                        if comparable.isalnum() and not comparable.isnumeric():
+                            if comparable in dict_values:
+                                if dict_test[item][i] != dict_values[comparable]:
+                                    return False
+                            else:
+                                dict_values[comparable] = dict_test[item][i]
+                        elif not _compare(dict_test[item][i], comparable):
+                            return False
+
+                # all alphanumeric strings are OK - only numeric strings are not
+                # eg: "n", "n1", "n1234", "myasdfstring1337"
+                elif str(exp).isalnum() and not str(exp).isnumeric():
+                    # if value is already saved in dict_values
+                    if exp in dict_values:
+                        # compare
+                        if dict_test[item][i] != dict_values[exp]:
+                            # error found
+                            return False
+                    else:
+                        # add to dict_values
+                        dict_values[exp] = dict_test[item][i]
+                else:
+                    if i >= len(dict_test[item]) or\
+                            not _compare(dict_test[item][i], str(exp)):
                         return False
 
-            # all alphanumeric strings are OK - only numeric strings are not
-            # eg: "n", "n1", "n1234", "myasdfstring1337"
-            elif str(exp).isalnum() and not str(exp).isnumeric():
-                # if value is already saved in dict_values
-                if exp in dict_values:
-                    # compare
-                    if dict_test[item][i] != dict_values[exp]:
-                        # error found
+            if len(dict_test[item]) > len(dict_expected[item]):
+                return False
+        else:
+            # go one level deeper in the dictionary
+            _dict_values = _another_validator(dict_test[item], dict_expected[item])
+            if _dict_values is False:
+                return False
+            for key in _dict_values:
+                if key in dict_values:
+                    if dict_values[key] != _dict_values[key]:
                         return False
                 else:
-                    # add to dict_values
-                    dict_values[exp] = dict_test[item][i]
-            else:
-                if i >= len(dict_test[item]) or\
-                        not _compare(dict_test[item][i], str(exp)):
-                    return False
+                    dict_values[key] = _dict_values[key]
 
-        if len(dict_test[item]) > len(dict_expected[item]):
-            return False
-
-    return True
+    return dict_values
 
 
 def _shape_validator(
