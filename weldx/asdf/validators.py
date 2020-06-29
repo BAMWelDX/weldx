@@ -135,92 +135,6 @@ def _compare(_int, exp_string):
         return _int == int(exp_string)
 
 
-def _custom_shape_validator(shape, expected_shape):
-    """Validate shapes with different syntax.
-
-    Parameters
-    ----------
-    shape:
-        String
-    expected_shape:
-        String representation of the unit dimensionality to test against.
-
-    Returns
-    ------
-    bool :
-        True if shape matches the expected shape.
-        False if shape does not match the expected shape.
-    """
-
-    # check if expected shape has right format
-
-    # check that after one optional assign all following dimensions are optional
-    # eg: "1, (1), (:), (3)" is fine, "1, (1), (:), 3" is not
-    # and "(2), ..." should not be allowed too
-    # replace blankspaces in strings
-    expected_shape = [
-        x.replace(" ", "") if isinstance(x, str) else x for x in expected_shape
-    ]
-    # replace None for ":" and all ~ to : in strings
-    expected_shape = [
-        x.replace("~", ":") if isinstance(x, str) else ":" if x is None else x
-        for x in expected_shape
-    ]
-
-    # if expected shape begins with "..." or "(" string reverse expected shape and shape
-    shape_length = len(shape)
-    exp_shape_length = len(expected_shape)
-    if str(expected_shape[0]) == "..." or "(" in str(expected_shape[0]):
-        expected_shape = list(reversed(expected_shape))
-        shape = list(reversed(shape))
-
-    validator = 0
-    for exp in expected_shape:
-        if validator == 1:
-            if "(" not in str(exp):
-                raise ValueError(
-                    "Optional  dimensions in the expected "
-                    "shape should only stand at the end."
-                )
-        elif validator == 2:
-            raise ValueError('After "..." should not be another dimension')
-        # after "..." should not be another dimension
-        elif "..." in str(exp):
-            if "..." != exp:
-                raise ValueError(
-                    f'"..." should not have additional propterties:'
-                    f" {exp} was found."
-                )
-            validator = 2
-        elif "(" in str(exp):
-            validator = 1
-
-    for i, exp in enumerate(expected_shape):
-        # if "..." is found all the following dimensions are accepted
-        if "..." in str(exp):
-            return True
-        # if there is a parenthesis found it is an optional dimension
-        elif "(" in str(exp):
-            # if the shape has the optional value
-            if i < shape_length:
-                if isinstance(exp, str):
-                    comparable = exp[exp.index("(") + 1 : exp.rindex(")")]
-                else:
-                    comparable = str(exp)
-                if not _compare(shape[i], comparable):
-                    return False
-        else:
-            if i >= shape_length:
-                return False
-            if not _compare(shape[i], str(exp)):
-                return False
-
-    if shape_length > exp_shape_length:
-        return False
-
-    return True
-
-
 def _prepare_list(_list, list_expected):
     """Prepare a List and an expected List for validation.
 
@@ -288,7 +202,69 @@ def _validate_expected_list(list_expected):
             validator = 1
 
 
-def _another_validator(dict_test, dict_expected):
+def _compare_lists(_list, list_expected):
+    """Compare two lists.
+
+    params
+    ------
+    _list:
+        List of Integer
+    list_expected:
+        List build by the rules in _custom_shape_validator
+    returns
+    -------
+    False:
+        when a dimension mismatch occurs
+    dict_values:
+        when no dimension mismatch occurs. Can be empty {}. Dictionary - keys: variable
+        names in the validation schemes. values: values of the validation schemes.
+    """
+    dict_values = dict()
+    # Compare List with expected List
+    stopper = 0
+    for i, exp in enumerate(list_expected):
+        # when "..." was found all the following dimensions are accepted
+        if stopper:
+            continue
+        # if "..." is found all the following dimensions are accepted
+        elif "..." in str(exp):
+            stopper = 1
+
+        elif "(" in str(exp):
+            if i < len(_list):
+                comparable = exp[exp.index("(") + 1 : exp.rindex(")")]
+                if comparable.isalnum() and not comparable.isnumeric():
+                    if comparable in dict_values:
+                        if _list[i] != dict_values[comparable]:
+                            return False
+                    else:
+                        dict_values[comparable] = _list[i]
+                elif not _compare(_list[i], comparable):
+                    return False
+
+        # all alphanumeric strings are OK - only numeric strings are not
+        # eg: "n", "n1", "n1234", "myasdfstring1337"
+        elif str(exp).isalnum() and not str(exp).isnumeric():
+            # if value is already saved in dict_values
+            if exp in dict_values:
+                # compare
+                if _list[i] != dict_values[exp]:
+                    # error found
+                    return False
+            else:
+                # add to dict_values
+                dict_values[exp] = _list[i]
+        else:
+            if i >= len(_list) or not _compare(_list[i], str(exp)):
+                return False
+
+    if (len(_list) > len(list_expected)) and not stopper:
+        return False
+
+    return dict_values
+
+
+def _custom_shape_validator(dict_test, dict_expected):
     """Validate dimensions which are stored in two dictionaries dict_test and
     dict_expected.
 
@@ -345,50 +321,7 @@ def _another_validator(dict_test, dict_expected):
             _validate_expected_list(dict_expected[item])
 
             # Compare List with expected List
-            stopper = 0
-            for i, exp in enumerate(dict_expected[item]):
-                # when "..." was found all the following dimensions are accepted
-                if stopper:
-                    continue
-                # if "..." is found all the following dimensions are accepted
-                elif "..." in str(exp):
-                    stopper = 1
-
-                elif "(" in str(exp):
-                    if i < len(dict_test[item]):
-                        comparable = exp[exp.index("(") + 1 : exp.rindex(")")]
-                        if comparable.isalnum() and not comparable.isnumeric():
-                            if comparable in dict_values:
-                                if dict_test[item][i] != dict_values[comparable]:
-                                    return False
-                            else:
-                                dict_values[comparable] = dict_test[item][i]
-                        elif not _compare(dict_test[item][i], comparable):
-                            return False
-
-                # all alphanumeric strings are OK - only numeric strings are not
-                # eg: "n", "n1", "n1234", "myasdfstring1337"
-                elif str(exp).isalnum() and not str(exp).isnumeric():
-                    # if value is already saved in dict_values
-                    if exp in dict_values:
-                        # compare
-                        if dict_test[item][i] != dict_values[exp]:
-                            # error found
-                            return False
-                    else:
-                        # add to dict_values
-                        dict_values[exp] = dict_test[item][i]
-                else:
-                    if i >= len(dict_test[item]) or not _compare(
-                        dict_test[item][i], str(exp)
-                    ):
-                        return False
-
-            if (len(dict_test[item]) > len(dict_expected[item])) and not stopper:
-                return False
-        else:
-            # go one level deeper in the dictionary
-            _dict_values = _another_validator(dict_test[item], dict_expected[item])
+            _dict_values = _compare_lists(dict_test[item], dict_expected[item])
             if _dict_values is False:
                 return False
             for key in _dict_values:
@@ -397,6 +330,23 @@ def _another_validator(dict_test, dict_expected):
                         return False
                 else:
                     dict_values[key] = _dict_values[key]
+
+        elif isinstance(dict_expected[item], dict):
+            # go one level deeper in the dictionary
+            _dict_values = _custom_shape_validator(dict_test[item], dict_expected[item])
+            if _dict_values is False:
+                return False
+            for key in _dict_values:
+                if key in dict_values:
+                    if dict_values[key] != _dict_values[key]:
+                        return False
+                else:
+                    dict_values[key] = _dict_values[key]
+        else:
+            raise ValueError(
+                f"Found an incorrect object: {type(dict_expected[item])}. "
+                "Should be a dict or list."
+            )
 
     return dict_values
 
