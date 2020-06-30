@@ -306,22 +306,43 @@ def _custom_shape_validator(dict_test, dict_expected):
     """
 
     # keys have to match
-    if dict_test.keys() != dict_expected.keys():
-        return False
+    # if dict_test.keys() != dict_expected.keys():
+    #     return False
 
     dict_values = {}
+    # catch single shape definitions
+    if isinstance(dict_expected, list):
+        if "shape" not in dict_test:
+            return ValidationError(f"Could not find shape key in instance {dict_test}.")
+        list_test, list_expected = _prepare_list(dict_test["shape"], dict_expected)
+        # Validate the expected List
+        _validate_expected_list(list_expected)
+
+        # Compare List with expected List
+        _dict_values = _compare_lists(list_test, list_expected)
+        if _dict_values is False:
+            return False
+        for key in _dict_values:
+            if key in dict_values:
+                if dict_values[key] != _dict_values[key]:
+                    return False
+            else:
+                dict_values[key] = _dict_values[key]
+        return dict_values
+
     for item in dict_expected:
         if isinstance(dict_expected[item], list):
             # Prepare the Lists
-            dict_test[item], dict_expected[item] = _prepare_list(
-                dict_test[item], dict_expected[item]
+
+            list_test, list_expected = _prepare_list(
+                dict_test[item]["shape"], dict_expected[item]
             )
 
             # Validate the expected List
-            _validate_expected_list(dict_expected[item])
+            _validate_expected_list(list_expected)
 
             # Compare List with expected List
-            _dict_values = _compare_lists(dict_test[item], dict_expected[item])
+            _dict_values = _compare_lists(list_test, list_expected)
             if _dict_values is False:
                 return False
             for key in _dict_values:
@@ -440,13 +461,22 @@ def wx_shape_validator(
 
     """
 
-    yield from _walk_validator(
-        instance=instance,
-        validator_dict=wx_shape,
-        validator_function=_shape_validator,
-        position=[],
-        allow_missing_keys=False,
-    )
+    dim_dict = _custom_shape_validator(instance, wx_shape)
+
+    if isinstance(dim_dict, dict):
+        return None
+    else:
+        yield ValidationError(
+            f"Error validating shape {wx_shape}.\nOn instance {instance}"
+        )
+
+    # yield from _walk_validator(
+    #     instance=instance,
+    #     validator_dict=wx_shape,
+    #     validator_function=_shape_validator,
+    #     position=[],
+    #     allow_missing_keys=False,
+    # )
 
 
 def _run_validation(
