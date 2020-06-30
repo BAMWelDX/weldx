@@ -414,7 +414,7 @@ def test_shape_validator_syntax():
     assert val([1, 2, 3], [1, "1~3", 3])
     assert val([1, 2, 3], [1, "1~", 3])
     assert val([1, 2, 3], [1, "~3", 3])
-    assert val([1, 2, 3], [1, "(n)", "..."])
+    # assert val([1, 2, 3], [1, "(n)", "..."])  # should this be allowed?
 
     # shape mismatch
     assert not val([2, 2, 3], [1, "..."])

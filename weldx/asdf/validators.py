@@ -329,30 +329,8 @@ def _custom_shape_validator(dict_test, dict_expected):
             else:
                 dict_values[key] = _dict_values[key]
         return dict_values
-
-    for item in dict_expected:
-        if isinstance(dict_expected[item], list):
-            # Prepare the Lists
-
-            list_test, list_expected = _prepare_list(
-                dict_test[item]["shape"], dict_expected[item]
-            )
-
-            # Validate the expected List
-            _validate_expected_list(list_expected)
-
-            # Compare List with expected List
-            _dict_values = _compare_lists(list_test, list_expected)
-            if _dict_values is False:
-                return False
-            for key in _dict_values:
-                if key in dict_values:
-                    if dict_values[key] != _dict_values[key]:
-                        return False
-                else:
-                    dict_values[key] = _dict_values[key]
-
-        elif isinstance(dict_expected[item], dict):
+    elif isinstance(dict_expected, dict):
+        for item in dict_expected:
             # go one level deeper in the dictionary
             _dict_values = _custom_shape_validator(dict_test[item], dict_expected[item])
             if _dict_values is False:
@@ -363,11 +341,11 @@ def _custom_shape_validator(dict_test, dict_expected):
                         return False
                 else:
                     dict_values[key] = _dict_values[key]
-        else:
-            raise ValueError(
-                f"Found an incorrect object: {type(dict_expected[item])}. "
-                "Should be a dict or list."
-            )
+    else:
+        raise ValueError(
+            f"Found an incorrect object: {type(dict_expected)}. "
+            "Should be a dict or list."
+        )
 
     return dict_values
 
