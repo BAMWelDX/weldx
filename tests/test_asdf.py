@@ -34,7 +34,7 @@ from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 # validators -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
-from weldx.asdf.validators import _custom_shape_validator as val
+from weldx.asdf.validators import _custom_shape_validator
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
@@ -387,13 +387,16 @@ def test_shape_validators():
     # TODO: add value assertion
 
 
-test_shape_validators()
-
-
 def test_shape_validator_syntax():
     """Test handling of custom shape validation syntax in Python."""
 
-    pass  # TODO: rewrite for new shape validator
+    def val(list_test, list_expected):
+        """Wrapper to add shape key to lists."""
+        res = _custom_shape_validator({"shape": list_test}, list_expected)
+        if isinstance(res, dict):
+            return True
+        else:
+            return False
 
     # correct evaluation
     assert val([3], [3])
@@ -411,6 +414,7 @@ def test_shape_validator_syntax():
     assert val([1, 2, 3], [1, "1~3", 3])
     assert val([1, 2, 3], [1, "1~", 3])
     assert val([1, 2, 3], [1, "~3", 3])
+    assert val([1, 2, 3], [1, "(n)", "..."])
 
     # shape mismatch
     assert not val([2, 2, 3], [1, "..."])
