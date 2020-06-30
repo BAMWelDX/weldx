@@ -1034,7 +1034,9 @@ class CoordinateSystemManager:
         length_path = len(path) - 1
         if length_path > 1:
             for i in np.arange(1, length_path):
-                lcs = lcs + self.graph.edges[path[i], path[i + 1]]["lcs"]
+                lcs = lcs + self.graph.edges[path[i], path[i + 1]]["lcs"].interp_time(
+                    time_union
+                )
         return lcs
 
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
