@@ -1223,11 +1223,10 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
 
 
 def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
-    """
-    
-    Returns
-    -------
+    """Test the get_local_coordinate_system function with time dependent systems.
 
+    The point of this test is to assure that necessary time interpolations do not cause
+    wrong results when transforming to the desired reference coordinate system.
     """
     lcs_0_time = pd.date_range("2020-01-01", periods=12 * 4 + 1, freq="6H")
     lcs_0_coordinates = np.zeros([len(lcs_0_time), 3])
@@ -1249,17 +1248,21 @@ def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
         coordinates=lcs_2_coordinates, orientation=lcs_2_orientation, time=lcs_2_time
     )
 
+    lcs_3_in_lcs1 = tf.LocalCoordinateSystem(coordinates=[0, 1, 0])
+
     csm = tf.CoordinateSystemManager("root")
     csm.add_coordinate_system("lcs_0", "root", lcs_0_in_root)
     csm.add_coordinate_system("lcs_1", "lcs_0", lcs_1_in_lcs0)
     csm.add_coordinate_system("lcs_2", "lcs_1", lcs_2_in_lcs1)
+    csm.add_coordinate_system("lcs_3", "lcs_1", lcs_3_in_lcs1)
 
-    time_union = csm.time_union()
     lcs_1_in_root = csm.get_local_coordinate_system("lcs_1", "root")
     lcs_2_in_root = csm.get_local_coordinate_system("lcs_2", "root")
+    lcs_3_in_root = csm.get_local_coordinate_system("lcs_3", "root")
 
     assert np.all(lcs_0_time == lcs_1_in_root.time)
     assert np.all(lcs_0_time == lcs_2_in_root.time)
+    assert np.all(lcs_0_time == lcs_3_in_root.time)
 
     num_times = len(lcs_0_time)
     for i in range(num_times):
@@ -1273,6 +1276,7 @@ def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
 
         assert ut.matrix_is_close(lcs_1_in_root.orientation[i], lcs_1_orientation_exp)
         assert ut.matrix_is_close(lcs_2_in_root.orientation[i], lcs_2_orientation_exp)
+        assert ut.matrix_is_close(lcs_3_in_root.orientation[i], lcs_1_orientation_exp)
 
         # check coordinates
         c = np.cos(angle)
@@ -1282,9 +1286,11 @@ def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
 
         lcs_1_coordinates_exp = [pos_x, 0, 0]
         lcs_2_coordinates_exp = [rot_p_x + pos_x, rot_p_y, 0]
+        lcs_3_coordinates_exp = [-rot_p_y + pos_x, rot_p_x, 0]
 
         assert ut.vector_is_close(lcs_1_in_root.coordinates[i], lcs_1_coordinates_exp)
         assert ut.vector_is_close(lcs_2_in_root.coordinates[i], lcs_2_coordinates_exp)
+        assert ut.vector_is_close(lcs_3_in_root.coordinates[i], lcs_3_coordinates_exp)
 
 
 # TODO: Remove
@@ -1528,3 +1534,5 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
 
 
 # TODO: Test time dependent get_local_coordinate_system
+
+test_coordinate_system_manager_get_local_coordinate_system_time_dependent()
