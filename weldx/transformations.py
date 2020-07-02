@@ -1044,15 +1044,15 @@ class CoordinateSystemManager:
 
         time_union = self.time_union(path_edges)
 
-        lcs = self.graph.edges[path[0], path[1]]["lcs"]
+        lcs = self.graph.edges[path_edges[0]]["lcs"]
+
         if time_union is not None:
             lcs = lcs.interp_time(time_union)
-
-        for edge in path_edges[1:]:
-            lcs_rhs = self.graph.edges[edge[0], edge[1]]["lcs"]
-            if time_union is not None:
-                lcs_rhs = lcs_rhs.interp_time(time_union)
-            lcs = lcs + lcs_rhs
+            for edge in path_edges[1:]:
+                lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time_union)
+        else:
+            for edge in path_edges[1:]:
+                lcs = lcs + self.graph.edges[edge]["lcs"]
 
         return lcs
 
