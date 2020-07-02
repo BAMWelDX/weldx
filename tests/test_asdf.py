@@ -411,6 +411,9 @@ def test_shape_validator_syntax():
     assert val([1, 2, 3, 4, 5], ["...", 4, 5])
     assert val([1, 2], [1, 2, "(3)"])
     assert val([2, 3], ["(1)", 2, 3])
+    assert val([1, 2, 3], ["(1)", 2, 3])
+    assert val([2, 3], ["(1~3)", 2, 3])
+    assert val([2, 2, 3], ["(1~3)", 2, 3])
     assert val([1, 2, 3], [1, "1~3", 3])
     assert val([1, 2, 3], [1, "1~", 3])
     assert val([1, 2, 3], [1, "~3", 3])
@@ -427,6 +430,9 @@ def test_shape_validator_syntax():
     assert not val([1, 2, 3], [1, 2, "(4)"])
     assert not val([1, 2, 3], ["(2)", 2, 3])
     assert not val([1, 2], [1, "4~8"])
+    assert not val([1, 9], [1, "4~8"])
+    assert not val([1, 2], [1, "(4~8)"])
+    assert not val([1, 9], [1, "(4~8)"])
 
     # syntax errors, these should throw a ValueError
     with pytest.raises(ValueError):

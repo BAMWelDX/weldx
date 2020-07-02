@@ -1,5 +1,6 @@
 from copy import deepcopy
 from dataclasses import dataclass
+
 from weldx.asdf.types import WeldxType
 from weldx.transformations import CoordinateSystemManager, LocalCoordinateSystem
 
