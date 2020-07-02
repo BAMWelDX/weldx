@@ -10,7 +10,6 @@ import pandas as pd
 import pytest
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-
 # weld design -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
 from weldx.asdf.tags.weldx.aws.design.connection import Connection
@@ -19,7 +18,6 @@ from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
 from weldx.asdf.tags.weldx.aws.design.weld_details import WeldDetails
 from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
 from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
-
 # welding process -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
 from weldx.asdf.tags.weldx.aws.process.gas_component import GasComponent
@@ -27,10 +25,8 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
     ShieldingGasForProcedure,
 )
 from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
-
 # iso groove -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
-
 # validators -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
@@ -447,3 +443,6 @@ def test_shape_validator_syntax():
         val([1, 2], [1, "4~1"])
     with pytest.raises(ValueError):  # no negative shape numbers allowed in syntax
         val([-1, -2], [-1, -2])
+
+
+test_shape_validator_syntax()
