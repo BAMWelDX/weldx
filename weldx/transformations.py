@@ -1021,9 +1021,7 @@ class CoordinateSystemManager:
         path = nx.shortest_path(
             self.graph, coordinate_system_name, reference_system_name
         )
-        path_edges = []
-        for i in range(len(path) - 1):
-            path_edges.append((path[i], path[i + 1]))
+        path_edges = [edge for edge in zip(path[:-1], path[1:])]
 
         time_union = self.time_union(path_edges)
 
@@ -1031,13 +1029,12 @@ class CoordinateSystemManager:
         if time_union is not None:
             lcs = lcs.interp_time(time_union)
 
-        length_path = len(path) - 1
-        if length_path > 1:
-            for i in np.arange(1, length_path):
-                lcs_rhs = self.graph.edges[path[i], path[i + 1]]["lcs"]
-                if time_union is not None:
-                    lcs_rhs = lcs_rhs.interp_time(time_union)
-                lcs = lcs + lcs_rhs
+        for edge in path_edges[1:]:
+            lcs_rhs = self.graph.edges[edge[0], edge[1]]["lcs"]
+            if time_union is not None:
+                lcs_rhs = lcs_rhs.interp_time(time_union)
+            lcs = lcs + lcs_rhs
+
         return lcs
 
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
