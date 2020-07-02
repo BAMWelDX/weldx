@@ -293,48 +293,38 @@ def _custom_shape_validator(dict_test, dict_expected):
         Dictionary - keys: variable names in the validation schemes. values: values of
         the validation schemes.
     """
-
     # keys have to match
     # if dict_test.keys() != dict_expected.keys():
     #     return False
 
-    dict_values = {}
     # catch single shape definitions
     if isinstance(dict_expected, list):
         if "shape" not in dict_test:
             return ValidationError(f"Could not find shape key in instance {dict_test}.")
         list_test, list_expected = _prepare_list(dict_test["shape"], dict_expected)
-        # Validate the expected List
-        _validate_expected_list(list_expected)
 
-        # Compare List with expected List
+        _validate_expected_list(list_expected)
         _dict_values = _compare_lists(list_test, list_expected)
-        if _dict_values is False:
-            return False
-        for key in _dict_values:
-            if key in dict_values:
-                if dict_values[key] != _dict_values[key]:
-                    return False
-            else:
-                dict_values[key] = _dict_values[key]
-        return dict_values
+
     elif isinstance(dict_expected, dict):
         for item in dict_expected:
             # go one level deeper in the dictionary
             _dict_values = _custom_shape_validator(dict_test[item], dict_expected[item])
-            if _dict_values is False:
-                return False
-            for key in _dict_values:
-                if key in dict_values:
-                    if dict_values[key] != _dict_values[key]:
-                        return False
-                else:
-                    dict_values[key] = _dict_values[key]
     else:
         raise ValueError(
             f"Found an incorrect object: {type(dict_expected)}. "
             "Should be a dict or list."
         )
+
+    if _dict_values is False:
+        return False
+
+    dict_values = {}
+    for key in _dict_values:
+        if key not in dict_values:
+            dict_values[key] = _dict_values[key]
+        elif dict_values[key] != _dict_values[key]:
+            return False
 
     return dict_values
 
