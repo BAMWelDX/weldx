@@ -181,15 +181,14 @@ def _validate_expected_list(list_expected):
     """
     validator = 0
     for exp in list_expected:
-        if validator == 1:
-            if "(" not in str(exp):
-                raise ValueError(
-                    "Optional dimensions in the expected "
-                    "shape should only stand at the end/beginning."
-                )
-        elif validator == 2:
+        if validator == 1 and "(" not in str(exp):
+            raise ValueError(
+                "Optional dimensions in the expected "
+                "shape should only stand at the end/beginning."
+            )
+        if validator == 2:
             raise ValueError('After "..." should not be another dimension.')
-        elif "..." in str(exp):
+        if "..." in str(exp) and "..." != exp:
             if "..." != exp:
                 raise ValueError(
                     f'"..." should not have additional properties:' f" {exp} was found."
