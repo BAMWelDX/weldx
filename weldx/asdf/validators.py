@@ -1,3 +1,4 @@
+import re
 from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 
 from asdf import ValidationError
@@ -216,45 +217,37 @@ def _compare_lists(_list, list_expected):
         names in the validation schemes. values: values of the validation schemes.
     """
     dict_values = dict()
-    # Compare List with expected List
-    stopper = 0
-    for i, exp in enumerate(list_expected):
-        # when "..." was found all the following dimensions are accepted
-        if stopper:
-            continue
-        # if "..." is found all the following dimensions are accepted
-        elif "..." in str(exp):
-            stopper = 1
 
-        elif "(" in str(exp):
+    has_variable_dim_num = False
+    for i, exp in enumerate(list_expected):
+
+        if "..." in str(exp):
+            has_variable_dim_num = True
+            break  # all the following dimensions are accepted
+
+        if "(" in str(exp):
             if i < len(_list):
-                comparable = exp[exp.index("(") + 1 : exp.rindex(")")]
+                comparable = re.search(r"\((.*)\)", exp).group(1)
                 if comparable.isalnum() and not comparable.isnumeric():
-                    if comparable in dict_values:
-                        if _list[i] != dict_values[comparable]:
-                            return False
-                    else:
+                    if comparable not in dict_values:
                         dict_values[comparable] = _list[i]
+                    elif _list[i] != dict_values[comparable]:
+                        return False
                 elif not _compare(_list[i], comparable):
                     return False
 
         # all alphanumeric strings are OK - only numeric strings are not
         # eg: "n", "n1", "n1234", "myasdfstring1337"
         elif str(exp).isalnum() and not str(exp).isnumeric():
-            # if value is already saved in dict_values
-            if exp in dict_values:
-                # compare
-                if _list[i] != dict_values[exp]:
-                    # error found
-                    return False
-            else:
-                # add to dict_values
+            if exp not in dict_values:
                 dict_values[exp] = _list[i]
-        else:
-            if i >= len(_list) or not _compare(_list[i], str(exp)):
+            elif _list[i] != dict_values[exp]:
                 return False
 
-    if (len(_list) > len(list_expected)) and not stopper:
+        elif i >= len(_list) or not _compare(_list[i], str(exp)):
+            return False
+
+    if (len(_list) > len(list_expected)) and not has_variable_dim_num:
         return False
 
     return dict_values
