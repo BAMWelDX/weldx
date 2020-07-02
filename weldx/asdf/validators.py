@@ -227,18 +227,13 @@ def _compare_lists(_list, list_expected):
 
         if "(" in str(exp):
             if i < len(_list):
-                comparable = re.search(r"\((.*)\)", exp).group(1)
-                if comparable.isalnum() and not comparable.isnumeric():
-                    if comparable not in dict_values:
-                        dict_values[comparable] = _list[i]
-                    elif _list[i] != dict_values[comparable]:
-                        return False
-                elif not _compare(_list[i], comparable):
-                    return False
+                exp = re.search(r"\((.*)\)", exp).group(1)
+            else:
+                continue
 
         # all alphanumeric strings are OK - only numeric strings are not
         # eg: "n", "n1", "n1234", "myasdfstring1337"
-        elif str(exp).isalnum() and not str(exp).isnumeric():
+        if str(exp).isalnum() and not str(exp).isnumeric():
             if exp not in dict_values:
                 dict_values[exp] = _list[i]
             elif _list[i] != dict_values[exp]:
