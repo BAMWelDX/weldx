@@ -188,7 +188,7 @@ def _validate_expected_list(list_expected):
             )
         if validator == 2:
             raise ValueError('After "..." should not be another dimension.')
-        if "..." in str(exp) and "..." != exp:
+        if "..." in str(exp):
             if "..." != exp:
                 raise ValueError(
                     f'"..." should not have additional properties:' f" {exp} was found."
