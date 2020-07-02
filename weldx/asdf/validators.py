@@ -115,24 +115,19 @@ def _compare(_int, exp_string):
     """
     if _int < 0:
         raise ValueError("Negative dimension found")
+
     if ":" in exp_string:
         ranges = exp_string.split(":")
-        if ranges[0] == "" and ranges[1] == "":
-            return True
-        else:
-            if ranges[0] != "" and ranges[1] != "":
-                if int(ranges[0]) <= int(ranges[1]):
-                    pass
-                else:
-                    raise ValueError(
-                        f"The range should not be descending in {exp_string}"
-                    )
-            if ranges[0] != "" and ranges[1] == "":
-                return 0 <= int(ranges[0]) <= _int
-            if ranges[0] == "" and ranges[1] != "":
-                return int(ranges[1]) >= _int > 0
-            if ranges[0] != "" and ranges[1] != "":
-                return int(ranges[0]) <= _int <= int(ranges[1])
+
+        if ranges[0] == "":
+            ranges[0] = 0
+        if ranges[1] == "":
+            ranges[1] = _int
+
+        if int(ranges[0]) > int(ranges[1]):
+            raise ValueError(f"The range should not be descending in {exp_string}")
+        return int(ranges[0]) <= _int <= int(ranges[1])
+
     else:
         return _int == int(exp_string)
 
