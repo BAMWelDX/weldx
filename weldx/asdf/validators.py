@@ -196,6 +196,13 @@ def _validate_expected_list(list_expected):
                 )
             validator = 2
         elif "(" in str(exp):
+            val = re.search(r"\((.*)\)", exp)
+            if val is None or len(val.group(1)) + 2 != len(exp):
+                raise ValueError(
+                    f'Invalid optional dimension format. Correct format is "(_)", but '
+                    f" {exp} was found."
+                )
+
             validator = 1
 
 
