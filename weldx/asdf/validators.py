@@ -166,9 +166,28 @@ def _prepare_list(_list, list_expected):
     return _list, list_expected
 
 
+def _is_range_format_valid(format_string: str):
+    """
+    Return 'True' if a string represents a valid range definition and 'False' otherwise.
+
+    Parameters
+    ----------
+    format_string:
+        String that should be checked.
+
+    Returns
+    -------
+    bool:
+        'True' if the passed string is a valid range definition, 'False' otherwise
+    """
+    if ":" in format_string:
+        format_string = format_string.replace(":", "")
+        return format_string.isalnum() or format_string == ""
+    return format_string.isalnum()
+
+
 def _validate_expected_list(list_expected):
     """Validate an expected List and raises exceptions.
-
 
     params
     ------
@@ -197,13 +216,22 @@ def _validate_expected_list(list_expected):
             validator = 2
         elif "(" in str(exp):
             val = re.search(r"\((.*)\)", exp)
-            if val is None or len(val.group(1)) + 2 != len(exp):
+            if (
+                val is None
+                or len(val.group(1)) + 2 != len(exp)
+                or not _is_range_format_valid(val.group(1))
+            ):
                 raise ValueError(
                     f'Invalid optional dimension format. Correct format is "(_)", but '
                     f" {exp} was found."
                 )
 
             validator = 1
+        elif not _is_range_format_valid(str(exp)):
+            raise ValueError(
+                f"{exp} is an invalid range format."
+                f"Consult the documentation for a list of all valid options"
+            )
 
 
 def _compare_lists(_list, list_expected):
