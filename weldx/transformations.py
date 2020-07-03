@@ -310,7 +310,7 @@ class LocalCoordinateSystem:
 
     def __init__(
         self,
-        orientation: Union[xr.DataArray, np.ndarray, List[List]] = None,
+        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
         construction_checks: bool = True,
@@ -325,6 +325,7 @@ class LocalCoordinateSystem:
             corresponding orientation matrix is equal to the normalized orientation
             vectors. So each orthogonal transformation matrix can also be
             provided as orientation.
+            Passing a scipy.spatial.transform.Rotation object is also supported.
         coordinates :
             Coordinates of the origin
         time :
@@ -338,6 +339,9 @@ class LocalCoordinateSystem:
             Cartesian coordinate system
 
         """
+        if isinstance(orientation, Rot):
+            orientation = orientation.as_matrix()
+
         if construction_checks:
             if orientation is None:
                 orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
@@ -538,7 +542,7 @@ class LocalCoordinateSystem:
             Local coordinate system
 
         """
-        orientation = Rot.from_euler(sequence, angles, degrees).as_matrix()
+        orientation = Rot.from_euler(sequence, angles, degrees)
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
