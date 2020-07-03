@@ -66,6 +66,9 @@ excluded_words:
   - timedeltaindex
   - datetimeindex
   - isoformat
+  # pytest --------------------------------------
+  - conftest
+  - addoption
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat

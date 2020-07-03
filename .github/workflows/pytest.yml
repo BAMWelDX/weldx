@@ -42,7 +42,7 @@ jobs:
       - name: pytest
         shell: bash -l {0}
         run: |
-          pytest
+          pytest --runslow
           coverage xml
 
       - name: codecov.io
