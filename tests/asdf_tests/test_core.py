@@ -151,7 +151,7 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
 
 
 def are_local_coordinate_systems_equal(
-        lcs_0: tf.LocalCoordinateSystem, lcs_1: tf.LocalCoordinateSystem
+    lcs_0: tf.LocalCoordinateSystem, lcs_1: tf.LocalCoordinateSystem
 ):
     """
     Check if 2 local coordinate systems are identical
@@ -178,7 +178,7 @@ def test_local_coordinate_system_save():
     lcs_static = get_local_coordinate_system(False, False)
     tree = {"lcs_static": lcs_static}
     with asdf.AsdfFile(
-            tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
+        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
     ) as f:
         f.write_to(buffer_lcs)
         buffer_lcs.seek(0)
@@ -186,7 +186,7 @@ def test_local_coordinate_system_save():
 
 def test_local_coordinate_system_load():
     """Test if an xarray.DataArray can be restored from an asdf file."""
-    f = asdf.open(buffer_lcs, extensions=[WeldxExtension(), WeldxAsdfExtension()], )
+    f = asdf.open(buffer_lcs, extensions=[WeldxExtension(), WeldxAsdfExtension()],)
     lcs_static_file = f.tree["lcs_static"]
     lcs_static_exp = get_local_coordinate_system(False, False)
 
@@ -199,7 +199,7 @@ buffer_csm = BytesIO()
 
 
 def are_coordinate_system_managers_equal(
-        csm_0: tf.CoordinateSystemManager, csm_1: tf.CoordinateSystemManager
+    csm_0: tf.CoordinateSystemManager, csm_1: tf.CoordinateSystemManager
 ):
     """
     Test if two CoordinateSystemManager instances are equal.
@@ -247,16 +247,23 @@ def are_coordinate_system_managers_equal(
 def get_example_coordinate_system_manager():
     """Get a consistent CoordinateSystemManager instance for test purposes."""
     csm = tf.CoordinateSystemManager("root")
-    csm.add_coordinate_system("lcs_01", "root",
-                              tf.LocalCoordinateSystem(coordinates=[1, 2, 3]))
-    csm.add_coordinate_system("lcs_02", "root",
-                              tf.LocalCoordinateSystem(
-                                  orientation=tf.rotation_matrix_z(np.pi / 3),
-                                  coordinates=[4, -7, 8]))
-    csm.add_coordinate_system("lcs_03", "lcs_02",
-                              tf.LocalCoordinateSystem(
-                                  orientation=tf.rotation_matrix_y(np.pi / 11),
-                                  coordinates=[4, -7, 8]))
+    csm.add_coordinate_system(
+        "lcs_01", "root", tf.LocalCoordinateSystem(coordinates=[1, 2, 3])
+    )
+    csm.add_coordinate_system(
+        "lcs_02",
+        "root",
+        tf.LocalCoordinateSystem(
+            orientation=tf.rotation_matrix_z(np.pi / 3), coordinates=[4, -7, 8]
+        ),
+    )
+    csm.add_coordinate_system(
+        "lcs_03",
+        "lcs_02",
+        tf.LocalCoordinateSystem(
+            orientation=tf.rotation_matrix_y(np.pi / 11), coordinates=[4, -7, 8]
+        ),
+    )
     return csm
 
 
@@ -265,7 +272,7 @@ def test_coordinate_system_manager_save():
     csm = get_example_coordinate_system_manager()
     tree = {"cs_hierarchy": csm}
     with asdf.AsdfFile(
-            tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
+        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
     ) as f:
         f.write_to(buffer_csm)
         buffer_csm.seek(0)

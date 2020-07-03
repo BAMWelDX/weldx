@@ -43,8 +43,11 @@ class CoordinateTransformationASDF(WeldxType):
             type to be serialized.
 
         """
-        tree = {"name": node.name, "reference_system": node.reference_system,
-                "transformation": node.transformation}
+        tree = {
+            "name": node.name,
+            "reference_system": node.reference_system,
+            "transformation": node.transformation,
+        }
         return tree
 
     @classmethod
@@ -66,9 +69,11 @@ class CoordinateTransformationASDF(WeldxType):
             An instance of the 'CoordinateTransformation' type.
 
         """
-        return CoordinateTransformation(name=tree["name"],
-                                        reference_system=tree["reference_system"],
-                                        transformation=tree["transformation"])
+        return CoordinateTransformation(
+            name=tree["name"],
+            reference_system=tree["reference_system"],
+            transformation=tree["transformation"],
+        )
 
 
 class LocalCoordinateSystemASDF(WeldxType):
@@ -120,14 +125,17 @@ class LocalCoordinateSystemASDF(WeldxType):
         coordinate_system_data = []
 
         for name, reference_system in graph.edges:
-            transformation = CoordinateTransformation(name, reference_system,
-                                                      node.get_local_coordinate_system(
-                                                          name,
-                                                          reference_system))
+            transformation = CoordinateTransformation(
+                name,
+                reference_system,
+                node.get_local_coordinate_system(name, reference_system),
+            )
             coordinate_system_data.append(transformation)
 
-        tree = {"root_system_name": root_system_name,
-                "coordinate_systems": coordinate_system_data}
+        tree = {
+            "root_system_name": root_system_name,
+            "coordinate_systems": coordinate_system_data,
+        }
         return tree
 
     @classmethod
@@ -150,7 +158,8 @@ class LocalCoordinateSystemASDF(WeldxType):
 
         """
         csm = CoordinateSystemManager(
-            root_coordinate_system_name=tree["root_system_name"])
+            root_coordinate_system_name=tree["root_system_name"]
+        )
 
         coordinate_systems = tree["coordinate_systems"]
 
@@ -160,9 +169,11 @@ class LocalCoordinateSystemASDF(WeldxType):
             for cs_data in coordinate_systems:
                 if not csm.has_coordinate_system(cs_data.name):
                     if csm.has_coordinate_system(cs_data.reference_system):
-                        csm.add_coordinate_system(cs_data.name,
-                                                  cs_data.reference_system,
-                                                  cs_data.transformation)
+                        csm.add_coordinate_system(
+                            cs_data.name,
+                            cs_data.reference_system,
+                            cs_data.transformation,
+                        )
                     else:
                         all_systems_included = False
         return csm
