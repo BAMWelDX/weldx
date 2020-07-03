@@ -446,8 +446,7 @@ class LocalCoordinateSystem:
             Resulting coordinate system.
 
         """
-        if self.time is not None:
-            rhs_cs = rhs_cs.interp_time(self.time)
+        rhs_cs = rhs_cs.interp_time(self.time)
 
         orientation = ut.xr_matmul(
             rhs_cs.orientation, self.orientation, dims_a=["c", "v"]
@@ -786,7 +785,10 @@ class LocalCoordinateSystem:
         return self._dataset.transpose(..., "c", "v")
 
     def interp_time(
-        self, time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"]
+        self,
+        time: Union[
+            pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem", None
+        ],
     ) -> "LocalCoordinateSystem":
         """Interpolates the data in time.
 
@@ -794,6 +796,7 @@ class LocalCoordinateSystem:
         ----------
         time :
             Series of times.
+            If passing "None" no interpolation will be performed.
 
         Returns
         -------
@@ -801,6 +804,9 @@ class LocalCoordinateSystem:
             Coordinate system with interpolated data
 
         """
+        if time is None:
+            return self
+
         if isinstance(time, LocalCoordinateSystem):
             time = time.time
 
@@ -1046,13 +1052,9 @@ class CoordinateSystemManager:
 
         lcs = self.graph.edges[path_edges[0]]["lcs"]
 
-        if time_union is not None:
-            lcs = lcs.interp_time(time_union)
-            for edge in path_edges[1:]:
-                lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time_union)
-        else:
-            for edge in path_edges[1:]:
-                lcs = lcs + self.graph.edges[edge]["lcs"]
+        lcs = lcs.interp_time(time_union)
+        for edge in path_edges[1:]:
+            lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time_union)
 
         return lcs
 
