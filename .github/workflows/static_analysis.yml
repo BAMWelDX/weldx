@@ -79,4 +79,4 @@ jobs:
         run: pip install vulture==1.4
       - name: run vulture
         run: |
-          vulture . --exclude weldx/asdf/,versioneer.py,weldx/_version.py
+          vulture . --exclude weldx/asdf/,versioneer.py,weldx/_version.py,tests/conftest.py
