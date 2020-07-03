@@ -11,6 +11,7 @@ exclude_patterns = [
   "versioneer.py",
   "weldx/_version.py",
   "weldx/asdf/**"
+  "scripts/validate_shapes.py"
 ]
 
 [[analyzers]]
