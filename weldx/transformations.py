@@ -446,8 +446,7 @@ class LocalCoordinateSystem:
             Resulting coordinate system.
 
         """
-        if self.time is not None:
-            rhs_cs = rhs_cs.interp_time(self.time)
+        rhs_cs = rhs_cs.interp_time(self.time)
 
         orientation = ut.xr_matmul(
             rhs_cs.orientation, self.orientation, dims_a=["c", "v"]
@@ -786,7 +785,10 @@ class LocalCoordinateSystem:
         return self._dataset.transpose(..., "c", "v")
 
     def interp_time(
-        self, time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"]
+        self,
+        time: Union[
+            pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem", None
+        ],
     ) -> "LocalCoordinateSystem":
         """Interpolates the data in time.
 
@@ -794,6 +796,7 @@ class LocalCoordinateSystem:
         ----------
         time :
             Series of times.
+            If passing "None" no interpolation will be performed.
 
         Returns
         -------
@@ -801,6 +804,9 @@ class LocalCoordinateSystem:
             Coordinate system with interpolated data
 
         """
+        if time is None:
+            return self
+
         if isinstance(time, LocalCoordinateSystem):
             time = time.time
 
@@ -999,6 +1005,25 @@ class CoordinateSystemManager:
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
 
+        If any coordinate system that is involved in the coordinate transformation has
+        a time dependency, the union of all coordinate systems' timestamps is
+        determined. Subsequently, all coordinate systems are interpolated in time to
+        match the time union before they are used in the transformation. The purpose is
+        to prevent interpolation errors when rotations are involved. In result, the
+        returned 'LocalCoordinateSystem' timestamps equals the time union of all
+        coordinate systems that were used during the transformation.
+
+        Without the preceding time union interpolation, multiple subsequent
+        transformations can cause changes in the rotation direction and transform
+        circular movements into linear ones. The reason for this is that each individual
+        transformation using the 'LocalCoordinateSystem's + operator generates a new
+        ''set of keyframes'' for the next transformation. Those ''keyframes'' do not
+        preserve the rotational trajectory of a coordinate system attached to a rotating
+        parent system. Additionally, the rotation angle between two keyframes after a
+        transformation might exceed 180°. Since the employed SLERP method always uses
+        the smaller rotation angle, subsequent interpolations will cause a change of the
+        rotation order.
+
         Parameters
         ----------
         coordinate_system_name :
@@ -1021,11 +1046,16 @@ class CoordinateSystemManager:
         path = nx.shortest_path(
             self.graph, coordinate_system_name, reference_system_name
         )
-        lcs = self.graph.edges[path[0], path[1]]["lcs"]
-        length_path = len(path) - 1
-        if length_path > 1:
-            for i in np.arange(1, length_path):
-                lcs = lcs + self.graph.edges[path[i], path[i + 1]]["lcs"]
+        path_edges = [edge for edge in zip(path[:-1], path[1:])]
+
+        time_union = self.time_union(path_edges)
+
+        lcs = self.graph.edges[path_edges[0]]["lcs"]
+
+        lcs = lcs.interp_time(time_union)
+        for edge in path_edges[1:]:
+            lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time_union)
+
         return lcs
 
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
