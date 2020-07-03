@@ -12,7 +12,7 @@ __all__ = ["ShapeValidatorTestClass", "ShapeValidatorTestClassType"]
 
 @dataclass
 class ShapeValidatorTestClass:
-    """<TODO CLASS DOCSTRING>"""
+    """Helper class to test the shape validator"""
 
     prop1: np.ndarray
     prop2: np.ndarray
@@ -22,7 +22,7 @@ class ShapeValidatorTestClass:
 
 
 class ShapeValidatorTestClassType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Helper class to test the shape validator"""
 
     name = "debug/test_shape_validator"
     version = "1.0.0"
