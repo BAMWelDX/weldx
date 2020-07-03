@@ -1,14 +1,10 @@
 from dataclasses import dataclass
-# pylint: disable=W0611
-from typing import List  # noqa: F401
 
 import numpy as np
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_shape_validator
-
-# pylint: enable=W0611
 
 __all__ = ["ShapeValidatorTestClass", "ShapeValidatorTestClassType"]
 
