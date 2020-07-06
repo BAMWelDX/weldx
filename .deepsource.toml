@@ -10,7 +10,8 @@ exclude_patterns = [
   ".vulture_whitelist.py",
   "versioneer.py",
   "weldx/_version.py",
-  "weldx/asdf/**"
+  "weldx/asdf/**",
+  "scripts/validate_shapes.py"
 ]
 
 [[analyzers]]

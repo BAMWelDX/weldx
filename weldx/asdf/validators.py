@@ -1,3 +1,4 @@
+import re
 from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 
 from asdf import ValidationError
@@ -95,6 +96,269 @@ def _unit_validator(
         )
 
 
+def _compare(_int, exp_string):
+    """Compare helper of two strings for _custom_shape_validator.
+
+
+    Return a boolean.
+
+    Parameters
+    ----------
+    _int:
+        Integer
+    exp_string:
+        String with the expected dimension
+
+    Returns
+    -------
+    bool
+        True or False
+    """
+    if _int < 0:
+        raise ValueError("Negative dimension found")
+
+    if ":" in exp_string:
+        ranges = exp_string.split(":")
+
+        if ranges[0] == "":
+            ranges[0] = 0
+        if ranges[1] == "":
+            ranges[1] = _int
+
+        if int(ranges[0]) > int(ranges[1]):
+            raise ValueError(f"The range should not be descending in {exp_string}")
+        return int(ranges[0]) <= _int <= int(ranges[1])
+
+    else:
+        return _int == int(exp_string)
+
+
+def _prepare_list(_list, list_expected):
+    """Prepare a List and an expected List for validation.
+
+    parameters
+    ----------
+    _list:
+        List with values
+    list_expected:
+        List with expected values
+    returns
+    -------
+    _list:
+        prepared List
+    list_expected:
+        prepared List with expected values
+    """
+    # remove blank spaces in dict_test
+    _list = [x.replace(" ", "") if isinstance(x, str) else x for x in _list]
+    # accept "~" additionally as input of ":". And remove blank spaces.
+    list_expected = [
+        x.replace(" ", "").replace("~", ":") if isinstance(x, str) else x
+        for x in list_expected
+    ]
+    # turn around the list if "..." or "(" are at the beginning.
+    # because the validation is made from begin -> end.
+    # like this we validate the array from end -> begin.
+    if "(" in str(list_expected[0]) or "..." in str(list_expected[0]):
+        list_expected = list(reversed(list_expected))
+        _list = list(reversed(_list))
+
+    return _list, list_expected
+
+
+def _is_range_format_valid(format_string: str):
+    """
+    Return 'True' if a string represents a valid range definition and 'False' otherwise.
+
+    Parameters
+    ----------
+    format_string:
+        String that should be checked.
+
+    Returns
+    -------
+    bool:
+        'True' if the passed string is a valid range definition, 'False' otherwise
+    """
+    if ":" in format_string:
+        format_string = format_string.replace(":", "")
+        return format_string.isalnum() or format_string == ""
+    return format_string.isalnum()
+
+
+def _validate_expected_list(list_expected):
+    """Validate an expected List and raises exceptions.
+
+    params
+    ------
+    list_expected:
+        Expected List to validate against
+
+    raises
+    ------
+    ValueError:
+        ValueError will be raised if an rule violation is found
+    """
+    validator = 0
+    for exp in list_expected:
+        if validator == 1 and "(" not in str(exp):
+            raise ValueError(
+                "Optional dimensions in the expected "
+                "shape should only stand at the end/beginning."
+            )
+        if validator == 2:
+            raise ValueError('After "..." should not be another dimension.')
+        if "..." in str(exp):
+            if "..." != exp:
+                raise ValueError(
+                    f'"..." should not have additional properties:' f" {exp} was found."
+                )
+            validator = 2
+        elif "(" in str(exp):
+            val = re.search(r"\((.*)\)", exp)
+            if (
+                val is None
+                or len(val.group(1)) + 2 != len(exp)
+                or not _is_range_format_valid(val.group(1))
+            ):
+                raise ValueError(
+                    f'Invalid optional dimension format. Correct format is "(_)", but '
+                    f" {exp} was found."
+                )
+
+            validator = 1
+        elif not _is_range_format_valid(str(exp)):
+            raise ValueError(
+                f"{exp} is an invalid range format."
+                f"Consult the documentation for a list of all valid options"
+            )
+
+
+def _compare_lists(_list, list_expected):
+    """Compare two lists.
+
+    params
+    ------
+    _list:
+        List of Integer
+    list_expected:
+        List build by the rules in _custom_shape_validator
+    returns
+    -------
+    False:
+        when a dimension mismatch occurs
+    dict_values:
+        when no dimension mismatch occurs. Can be empty {}. Dictionary - keys: variable
+        names in the validation schemes. values: values of the validation schemes.
+    """
+    dict_values = dict()
+
+    has_variable_dim_num = False
+    for i, exp in enumerate(list_expected):
+
+        if "..." in str(exp):
+            has_variable_dim_num = True
+            break  # all the following dimensions are accepted
+
+        if "(" in str(exp):
+            if i < len(_list):
+                exp = re.search(r"\((.*)\)", exp).group(1)
+            else:
+                continue
+
+        # all alphanumeric strings are OK - only numeric strings are not
+        # eg: "n", "n1", "n1234", "myasdfstring1337"
+        if str(exp).isalnum() and not str(exp).isnumeric():
+            if exp not in dict_values:
+                dict_values[exp] = _list[i]
+            elif _list[i] != dict_values[exp]:
+                return False
+
+        elif i >= len(_list) or not _compare(_list[i], str(exp)):
+            return False
+
+    if (len(_list) > len(list_expected)) and not has_variable_dim_num:
+        return False
+
+    return dict_values
+
+
+def _custom_shape_validator(dict_test, dict_expected):
+    """Validate dimensions which are stored in two dictionaries dict_test and
+    dict_expected.
+
+    Syntax for the dict_expected:
+    -----------------------------
+    Items with arrays with each value having the following Syntax:
+    1)  3 : an integer indicates a fix dimension for the same item in dict_test
+    2)  "~", ":" or None : this string indicates a single dimension of arbitrary length.
+    3)  "..." : this string indicates an arbitrary number of dimensions of arbitrary
+            length. Can be optional.
+    4)  "2~4" : this string indicates a single dimension of length 2, 3 or 4. This
+            has to be ascending or you can give an unlimited interval limit like this
+            "2~" which would indicate a single dimension of length greater then 1.
+    5)  "n" : this indicates a single dimension fixed to a letter. Any letter or
+            combination of letters should work The letter will be compared to the same
+            letter in all the arrays in the dict_expected.
+    6)  (x) : parenthesis indicates that the dict_test does not need to have this
+            dimension. This can NOT be combined with 3) or the None from 2).
+
+    Parameters
+    ----------
+    dict_test:
+        dictionary to test against
+    dict_expected:
+        dictionary with the expected values
+
+    raises
+    ------
+    ValueError:
+        when dict_expected does violate against the Syntax rules
+
+    returns
+    -------
+    False
+        when any dimension mismatch occurs
+    dict_values
+        Dictionary - keys: variable names in the validation schemes. values: values of
+        the validation schemes.
+    """
+    # keys have to match
+    # if dict_test.keys() != dict_expected.keys():
+    #     return False
+
+    # catch single shape definitions
+    if isinstance(dict_expected, list):
+        if "shape" not in dict_test:
+            return ValidationError(f"Could not find shape key in instance {dict_test}.")
+        list_test, list_expected = _prepare_list(dict_test["shape"], dict_expected)
+
+        _validate_expected_list(list_expected)
+        _dict_values = _compare_lists(list_test, list_expected)
+
+    elif isinstance(dict_expected, dict):
+        for item in dict_expected:
+            # go one level deeper in the dictionary
+            _dict_values = _custom_shape_validator(dict_test[item], dict_expected[item])
+    else:
+        raise ValueError(
+            f"Found an incorrect object: {type(dict_expected)}. "
+            "Should be a dict or list."
+        )
+
+    if _dict_values is False:
+        return False
+
+    dict_values = {}
+    for key in _dict_values:
+        if key not in dict_values:
+            dict_values[key] = _dict_values[key]
+        elif dict_values[key] != _dict_values[key]:
+            return False
+
+    return dict_values
+
+
 def _shape_validator(
     instance: Mapping, expected_shape: List[int], position: List[str]
 ) -> Iterator[ValidationError]:
@@ -184,13 +448,22 @@ def wx_shape_validator(
 
     """
 
-    yield from _walk_validator(
-        instance=instance,
-        validator_dict=wx_shape,
-        validator_function=_shape_validator,
-        position=[],
-        allow_missing_keys=False,
-    )
+    dim_dict = _custom_shape_validator(instance, wx_shape)
+
+    if isinstance(dim_dict, dict):
+        return None
+    else:
+        yield ValidationError(
+            f"Error validating shape {wx_shape}.\nOn instance {instance}"
+        )
+
+    # yield from _walk_validator(
+    #     instance=instance,
+    #     validator_dict=wx_shape,
+    #     validator_function=_shape_validator,
+    #     position=[],
+    #     allow_missing_keys=False,
+    # )
 
 
 def _run_validation(

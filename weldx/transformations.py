@@ -14,7 +14,6 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 
-
 # functions -------------------------------------------------------------------
 
 

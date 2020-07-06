@@ -32,7 +32,9 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasTyp
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 
 # validators -----------------------------------------------------------------
+from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
+from weldx.asdf.validators import _custom_shape_validator
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
@@ -366,3 +368,106 @@ def test_validators():
         )
         tree = {"root_node": test}
         data = _write_read_buffer(tree)
+
+
+def test_shape_validators():
+    """Test custom ASDF shape validators."""
+    test = ShapeValidatorTestClass(
+        prop1=np.ones((1, 2, 3)),
+        prop2=np.ones((3, 2, 1)),
+        prop3=np.ones((2, 4, 6, 8, 10)),
+        prop4=np.ones((1, 3, 5, 7, 9)),
+        nested_prop={"p1": np.ones((10, 8, 6, 4, 2)), "p2": np.ones((9, 7, 5, 3, 1))},
+    )
+
+    tree = {"root_node": test}
+
+    _write_read_buffer(tree)
+    # test_read = data["root_node"]
+    # TODO: add value assertion
+
+
+def test_shape_validator_syntax():
+    """Test handling of custom shape validation syntax in Python."""
+
+    def val(list_test, list_expected):
+        """Add shape key to lists."""
+        res = _custom_shape_validator({"shape": list_test}, list_expected)
+        if isinstance(res, dict):
+            return True
+        return False
+
+    # correct evaluation
+    assert val([3], [3])
+    assert val([2, 4, 5], [2, 4, 5])
+    assert val([1, 2, 3], ["..."])
+    assert val([1, 2], [1, 2, "..."])
+    assert val([1, 2], ["...", 1, 2])
+    assert val([1, 2, 3], [1, 2, None])
+    assert val([1, 2, 3], [None, 2, 3])
+    assert val([1], [1, "..."])
+    assert val([1, 2, 3, 4, 5], [1, "..."])
+    assert val([1, 2, 3, 4, 5], ["...", 4, 5])
+    assert val([1, 2], [1, 2, "(3)"])
+    assert val([2, 3], ["(1)", 2, 3])
+    assert val([1, 2, 3], ["(1)", 2, 3])
+    assert val([2, 3], ["(1~3)", 2, 3])
+    assert val([2, 2, 3], ["(1~3)", 2, 3])
+    assert val([1, 2, 3], [1, "1~3", 3])
+    assert val([1, 2, 3], [1, "1~", 3])
+    assert val([1, 2, 3], [1, "~3", 3])
+    assert val([1, 2, 3], [1, "~", 3])
+    assert val([1, 200, 3], [1, "~", 3])
+    assert val([1, 2, 3], [1, 2, "(~)"])
+    assert val([1, 2, 300], [1, 2, "(~)"])
+    # assert val([1, 2, 3], [1, "(n)", "..."])  # should this be allowed?
+
+    # shape mismatch
+    assert not val([2, 2, 3], [1, "..."])
+    assert not val([2, 2, 3], ["...", 1])
+    assert not val([1], [1, 2])
+    assert not val([1, 2], [1])
+    assert not val([1, 2], [3, 2])
+    assert not val([1], [1, "~"])
+    assert not val([1], ["~", 1])
+    assert not val([1, 2, 3], [1, 2, "(4)"])
+    assert not val([1, 2, 3], ["(2)", 2, 3])
+    assert not val([1, 2], [1, "4~8"])
+    assert not val([1, 9], [1, "4~8"])
+    assert not val([1, 2], [1, "(4~8)"])
+    assert not val([1, 9], [1, "(4~8)"])
+
+    # syntax errors, these should throw a ValueError
+    with pytest.raises(ValueError):
+        val([1, 2], [1, "~", "(...)"])  # value error?
+    with pytest.raises(ValueError):
+        val([1, 2], [1, "(2)", 3])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, 2, "((3))"])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, 2, "3)"])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, 2, "*3"])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, 2, "(3"])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, 2, "(3)3"])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, 2, "2(3)"])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, "...", 2])  # should this be allowed? syntax/value error?
+    with pytest.raises(ValueError):
+        val([1, 2], ["(1)", "..."])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, "4~1"])
+    # no negative shape numbers allowed in syntax
+    with pytest.raises(ValueError):
+        val([-1, -2], [-1, -2])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, 2, "(-3)"])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, 2, "(-3~-1)"])
+    with pytest.raises(ValueError):
+        val([1, 2], [1, 2, "(-3~1)"])
+    with pytest.raises(ValueError):
+        val([1, 2, 1], ["(-3~1)", 2, 1])
