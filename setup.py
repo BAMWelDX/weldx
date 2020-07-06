@@ -2,8 +2,15 @@
 # -*- coding: utf-8 -*-
 """Python Library description and install setup."""
 
+from os import path
+
 import versioneer
 from setuptools import find_packages, setup
+
+# add README.md as long description
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
+    long_description = f.read()
 
 requirements = [
     "numpy>=0.18",
@@ -32,13 +39,15 @@ setup(
     author="Cagtay Fabry",
     author_email="Cagtay.Fabry@bam.de",
     packages=find_packages(),
-    url="www.bam.de/weldx",
+    url="https://www.bam.de/weldx",
     license="BSD License",
     description="Python API for the WelDX file format and standard",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     classifiers=[
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3 :: Only"
-        "Programming Language :: Python :: 3.7"
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Development Status :: 2 - Pre-Alpha",

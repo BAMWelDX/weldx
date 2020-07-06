@@ -45,6 +45,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-18.04]
         py: [ '3.7', '3.8' ]
@@ -54,13 +55,13 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       - name: pip installs
-        run: pip install git+https://github.com/timothycrosley/isort.git
+        run: pip install isort==4.3.21
       - name: show isort diff
         run: |
-          isort ./weldx --diff
+          isort ./weldx/*.py --diff
       - name: run isort
         run: |
-          isort ./weldx --check-only
+          isort ./weldx/*.py -c
 
   vulture:
     name: vulture
@@ -79,4 +80,4 @@ jobs:
         run: pip install vulture==1.4
       - name: run vulture
         run: |
-          vulture . --exclude weldx/asdf/,versioneer.py,weldx/_version.py
+          vulture . --exclude weldx/asdf/,versioneer.py,weldx/_version.py,tests/conftest.py

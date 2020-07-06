@@ -1,7 +1,6 @@
-from weldx.measurement import Sensor
-
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
+from weldx.measurement import Sensor
 
 __all__ = ["Sensor", "SensorType"]
 

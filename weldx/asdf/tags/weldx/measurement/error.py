@@ -1,7 +1,6 @@
-from weldx.measurement import Error
-
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
+from weldx.measurement import Error
 
 __all__ = ["Error", "ErrorType"]
 

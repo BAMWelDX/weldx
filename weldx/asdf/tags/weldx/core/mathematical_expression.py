@@ -1,7 +1,7 @@
+import sympy
+
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
-
-import sympy
 
 __all__ = ["MathematicalExpression", "MathematicalExpressionType"]
 
