@@ -33,6 +33,15 @@ class LocalCoordinateSystemASDF(WeldxType):
 
         """
         tree = {"dataset": node.dataset}
+        # example code to manipulate inline array storage
+        if "time" not in node.coordinates.coords:
+            ctx.set_array_storage(node.coordinates.data, "inline")
+        if "time" not in node.orientation.coords:
+            ctx.set_array_storage(node.orientation.data, "inline")
+        ctx.set_array_storage(node.dataset.coords["c"].data, "inline")  # not working
+        ctx.set_array_storage(
+            node.orientation.coords["v"].data, "inline"
+        )  # not working
         return tree
 
     @classmethod
