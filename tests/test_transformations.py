@@ -430,7 +430,7 @@ def check_coordinate_system(
     cs_p: tf.LocalCoordinateSystem,
     orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
     coordinates_expected: Union[np.ndarray, List[Any], xr.DataArray],
-    positive_orientation_expected: bool,
+    positive_orientation_expected: bool = True,
     time=None,
 ):
     """Check the values of a coordinate system.
@@ -609,14 +609,13 @@ def test_coordinate_system_init():
     # TODO: implement
 
 
-def test_coordinate_system_factories():
-    """Test construction of coordinate system class.
+def test_coordinate_system_factories_no_time_dependency():
+    """Test construction of coordinate system class without time dependencies.
 
     Create multiple coordinate systems with all provided methods and check
     if they are constructed correctly.
 
     """
-    # TODO: Time dependency
     # alias name for class - name is too long :)
     lcs = tf.LocalCoordinateSystem
 
@@ -689,6 +688,55 @@ def test_coordinate_system_factories():
     # check exceptions ------------------------------------
     with pytest.raises(Exception):
         lcs([x, y, [0, 0, 1]])
+
+
+def test_coordinate_system_factories_time_dependent():
+    """Test construction of coordinate system class with time dependencies.
+
+    Create multiple coordinate systems with all provided methods and check
+    if they are constructed correctly.
+
+    """
+    # alias name for class - name is too long :)
+    lcs = tf.LocalCoordinateSystem
+
+    angles_x = np.array([0.5, 1, 2, 2.5]) * np.pi / 2
+    angles_y = np.array([1.5, 0, 1, 0.5]) * np.pi / 2
+
+    rot_mat_x = tf.rotation_matrix_x(angles_x)
+    rot_mat_y = tf.rotation_matrix_y(angles_y)
+
+    time = lcs_0_time = pd.date_range("2020-01-01", periods=4, freq="6H")
+    orientations = np.matmul(rot_mat_x, rot_mat_y)
+    coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
+
+    # construction with orientation -----------------------
+
+    cs_orientation_oc = lcs.construct_from_orientation(orientations, coords, time)
+    check_coordinate_system(cs_orientation_oc, orientations, coords, time=time)
+
+    cs_orientation_c = lcs.construct_from_orientation(orientations[0], coords, time)
+    check_coordinate_system(cs_orientation_c, orientations[0], coords, time=time)
+
+    cs_orientation_o = lcs.construct_from_orientation(orientations, coords[0], time)
+    check_coordinate_system(cs_orientation_o, orientations, coords[0], time=time)
+
+    # construction with euler -----------------------------
+
+    angles = np.array([[*angles_y], [*angles_x]]).transpose()
+
+    cs_euler_oc = lcs.construct_from_euler("yx", angles, False, coords, time)
+    check_coordinate_system(cs_euler_oc, orientations, coords, time=time)
+
+    cs_euler_c = lcs.construct_from_euler("yx", angles[0], False, coords, time)
+    check_coordinate_system(cs_euler_c, orientations[0], coords, time=time)
+
+    cs_euler_o = lcs.construct_from_euler("yx", angles, False, coords[0], time)
+    check_coordinate_system(cs_euler_o, orientations, coords[0], time=time)
+
+
+# TODO: remove
+test_coordinate_system_factories_time_dependent()
 
 
 def test_coordinate_system_addition_and_subtraction():
@@ -1617,7 +1665,5 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
     with pytest.raises(Exception):
         csm.get_data("my data", "not there")
 
-
-# TODO: Test time dependent get_local_coordinate_system
 
 test_coordinate_system_manager_get_local_coordinate_system_time_dependent()
