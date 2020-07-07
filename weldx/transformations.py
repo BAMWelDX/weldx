@@ -906,8 +906,9 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-        self._graph.add_edge(node_from, node_to, lcs=lcs)
-        self._graph.add_edge(node_to, node_from, lcs=lcs.invert())
+
+        self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
+        self._graph.add_edge(node_to, node_from, lcs=lcs.invert(), defined=False)
 
     def _check_coordinate_system_exists(self, coordinate_system_name: Hashable):
         """Raise an exception if the specified coordinate system does not exist.
@@ -1008,7 +1009,7 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
-        time: Union[pd.DatetimeIndex, str, None] = None,
+        time_interp_like: Union[pd.DatetimeIndex, List, str, None] = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
 
@@ -1049,7 +1050,7 @@ class CoordinateSystemManager:
             Name of the coordinate system
         reference_system_name :
             Name of the reference coordinate system
-        time:
+        time_interp_like:
             Either a pandas.DatetimeIndex that specifies the target timestamps of the
             returned system, the name of another coordinate system that provides the
             timestamps or 'None'. If 'None' is chosen, the time union of all involved
@@ -1072,15 +1073,52 @@ class CoordinateSystemManager:
         )
         path_edges = [edge for edge in zip(path[:-1], path[1:])]
 
-        time_union = self.time_union(path_edges)
+        if time_interp_like is None:
+            time = self.time_union(path_edges)
+
+        elif isinstance(time_interp_like, str):
+            parent_name = self.get_parent_system_name(coordinate_system_name)
+            if parent_name is None:
+                raise ValueError("The root system has no time dependency.")
+
+            time = self.get_local_coordinate_system(time_interp_like, parent_name).time
+            if time is None:
+                raise ValueError(
+                    f'The system "{time_interp_like}" is not time dependent'
+                )
+
+        else:
+            time = pd.DatetimeIndex(time_interp_like)
 
         lcs = self.graph.edges[path_edges[0]]["lcs"]
 
-        lcs = lcs.interp_time(time_union)
+        lcs = lcs.interp_time(time)
         for edge in path_edges[1:]:
-            lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time_union)
+            lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time)
 
         return lcs
+
+    def get_parent_system_name(self, coordinate_system_name):
+        """ Get the name of a coordinate systems parent system.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+
+        Returns
+        -------
+        str
+            Name of the parent system
+        None
+            If the coordinate system has no parent (root system)
+
+        """
+        neighbors = self._graph.neighbors(coordinate_system_name)
+        for neighbor in neighbors:
+            if self._graph.edges[(coordinate_system_name, neighbor)]["defined"]:
+                return neighbor
+        return None
 
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
         """Return 'True' if a coordinate system with specified name already exists.

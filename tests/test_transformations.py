@@ -1293,9 +1293,7 @@ def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
         assert ut.vector_is_close(lcs_2_in_root.coordinates[i], lcs_2_coordinates_exp)
         assert ut.vector_is_close(lcs_3_in_root.coordinates[i], lcs_3_coordinates_exp)
 
-
-# TODO: Remove
-test_coordinate_system_manager_get_local_coordinate_system_time_dependent()
+    print(csm.get_parent_system_name("root"))
 
 
 def test_coordinate_system_manager_time_union():
