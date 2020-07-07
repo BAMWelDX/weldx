@@ -1062,11 +1062,11 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-        # TODO: Add time parameter
-        # TODO: Treat static separately
-        # TODO: What if coordinate system and reference are the same?
         self._check_coordinate_system_exists(coordinate_system_name)
         self._check_coordinate_system_exists(reference_system_name)
+
+        if coordinate_system_name == reference_system_name:
+            return LocalCoordinateSystem()
 
         path = nx.shortest_path(
             self.graph, coordinate_system_name, reference_system_name
@@ -1077,7 +1077,7 @@ class CoordinateSystemManager:
             time = self.time_union(path_edges)
 
         elif isinstance(time_interp_like, str):
-            parent_name = self.get_parent_system_name(coordinate_system_name)
+            parent_name = self.get_parent_system_name(time_interp_like)
             if parent_name is None:
                 raise ValueError("The root system has no time dependency.")
 
@@ -1090,9 +1090,7 @@ class CoordinateSystemManager:
         else:
             time = pd.DatetimeIndex(time_interp_like)
 
-        lcs = self.graph.edges[path_edges[0]]["lcs"]
-
-        lcs = lcs.interp_time(time)
+        lcs = self.graph.edges[path_edges[0]]["lcs"].interp_time(time)
         for edge in path_edges[1:]:
             lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time)
 
@@ -1114,6 +1112,8 @@ class CoordinateSystemManager:
             If the coordinate system has no parent (root system)
 
         """
+        self._check_coordinate_system_exists(coordinate_system_name)
+
         neighbors = self._graph.neighbors(coordinate_system_name)
         for neighbor in neighbors:
             if self._graph.edges[(coordinate_system_name, neighbor)]["defined"]:

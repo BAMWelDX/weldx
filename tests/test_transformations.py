@@ -1222,6 +1222,23 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
         lcs_1_in_lcs3, expected_orientation, expected_coordinates, True
     )
 
+    # self referencing --------------------------
+    lcs_1_in_lcs1 = csm.get_local_coordinate_system("lcs1", "lcs1")
+    expected_orientation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    expected_coordinates = [0, 0, 0]
+    check_coordinate_system(
+        lcs_1_in_lcs1, expected_orientation, expected_coordinates, True
+    )
+
+    # exceptions --------------------------------
+    # system does not exist
+    with pytest.raises(ValueError):
+        csm.get_local_coordinate_system("not there", "root")
+    with pytest.raises(ValueError):
+        csm.get_local_coordinate_system("root", "not there")
+    with pytest.raises(ValueError):
+        csm.get_local_coordinate_system("not there", "not there")
+
 
 def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
     """Test the get_local_coordinate_system function with time dependent systems.
@@ -1229,6 +1246,9 @@ def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
     The point of this test is to assure that necessary time interpolations do not cause
     wrong results when transforming to the desired reference coordinate system.
     """
+    # TODO: Make the test more flexible
+    # Currently, the test only works with times that have specific boundaries. The
+    # reason for this is how the expected results are calculated.
     lcs_0_time = pd.date_range("2020-01-01", periods=12 * 4 + 1, freq="6H")
     lcs_0_coordinates = np.zeros([len(lcs_0_time), 3])
     lcs_0_in_root = tf.LocalCoordinateSystem(
@@ -1293,7 +1313,73 @@ def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
         assert ut.vector_is_close(lcs_2_in_root.coordinates[i], lcs_2_coordinates_exp)
         assert ut.vector_is_close(lcs_3_in_root.coordinates[i], lcs_3_coordinates_exp)
 
-    print(csm.get_parent_system_name("root"))
+    # define helper function --------------------
+
+    def _validate_transformed_lcs_2(lcs_2, time):
+        num_times = len(lcs_2.time)
+
+        assert num_times == len(time)
+        assert np.all(lcs_2.time == time)
+
+        for i in range(num_times):
+            weight = i / (num_times - 1)
+            angle = weight * 2 * np.pi
+            pos_x = weight * 3
+
+            # check orientations
+            lcs_2_orientation_exp = tf.rotation_matrix_z(2 * angle)
+            assert ut.matrix_is_close(lcs_2.orientation[i], lcs_2_orientation_exp)
+
+            # check coordinates
+            c = np.cos(angle)
+            s = np.sin(angle)
+            rot_p_x = c
+            rot_p_y = s
+
+            lcs_2_coordinates_exp = [rot_p_x + pos_x, rot_p_y, 0]
+            assert ut.vector_is_close(lcs_2.coordinates[i], lcs_2_coordinates_exp)
+
+    # use time of another system ----------------
+
+    lcs_2_in_root_t_lcs_1 = csm.get_local_coordinate_system("lcs_2", "root", "lcs_1")
+    _validate_transformed_lcs_2(lcs_2_in_root_t_lcs_1, lcs_1_time)
+
+    # use DatetimeIndex -------------------------
+    time_custom = pd.date_range("2020-01-01", periods=12 * 6 + 1, freq="4H")
+    lcs_2_in_root_t_custom = csm.get_local_coordinate_system(
+        "lcs_2", "root", time_custom
+    )
+    _validate_transformed_lcs_2(lcs_2_in_root_t_custom, time_custom)
+
+    # use list of dates -------------------------
+    time_list = ["2020-01-01", "2020-01-07", "2020-01-13"]
+    lcs_2_in_root_t_list = csm.get_local_coordinate_system("lcs_2", "root", time_list)
+    _validate_transformed_lcs_2(lcs_2_in_root_t_list, pd.DatetimeIndex(time_list))
+
+    # self referencing --------------------------
+
+    lcs_2_in_lcs_2 = csm.get_local_coordinate_system("lcs_2", "lcs_2", lcs_1_time)
+    expected_orientation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    expected_coordinates = [0, 0, 0]
+    check_coordinate_system(
+        lcs_2_in_lcs_2, expected_orientation, expected_coordinates, True
+    )
+
+    # exceptions --------------------------------
+    # time reference system does not exist
+    with pytest.raises(ValueError):
+        csm.get_local_coordinate_system("lcs_2", "root", "not there")
+    # root system is never time dependent
+    with pytest.raises(ValueError):
+        csm.get_local_coordinate_system("lcs_2", "root", "root")
+    # time reference system is not time dependent
+    with pytest.raises(ValueError):
+        csm.get_local_coordinate_system("lcs_2", "root", "lcs_3")
+    # invalid inputs
+    with pytest.raises(TypeError):
+        csm.get_local_coordinate_system("lcs_2", "root", 1)
+    with pytest.raises(Exception):
+        csm.get_local_coordinate_system("lcs_2", "root", ["grr", "42", "asdf"])
 
 
 def test_coordinate_system_manager_time_union():
