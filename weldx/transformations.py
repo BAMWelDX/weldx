@@ -1005,27 +1005,42 @@ class CoordinateSystemManager:
         self._graph.nodes[coordinate_system_name]["data"].append(data_name)
 
     def get_local_coordinate_system(
-        self, coordinate_system_name: Hashable, reference_system_name: Hashable
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        time: Union[pd.DatetimeIndex, str, None] = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
 
         If any coordinate system that is involved in the coordinate transformation has
-        a time dependency, the union of all coordinate systems' timestamps is
-        determined. Subsequently, all coordinate systems are interpolated in time to
-        match the time union before they are used in the transformation. The purpose is
-        to prevent interpolation errors when rotations are involved. In result, the
-        returned 'LocalCoordinateSystem' timestamps equals the time union of all
-        coordinate systems that were used during the transformation.
+        a time dependency, the returned coordinate system will also be time dependent.
 
-        Without the preceding time union interpolation, multiple subsequent
-        transformations can cause changes in the rotation direction and transform
-        circular movements into linear ones. The reason for this is that each individual
-        transformation using the 'LocalCoordinateSystem's + operator generates a new
-        ''set of keyframes'' for the next transformation. Those ''keyframes'' do not
-        preserve the rotational trajectory of a coordinate system attached to a rotating
-        parent system. Additionally, the rotation angle between two keyframes after a
-        transformation might exceed 180°. Since the employed SLERP method always uses
-        the smaller rotation angle, subsequent interpolations will cause a change of the
+        The timestamps of the returned system depend on the functions time parameter.
+        By default, the time union of all involved coordinate systems is taken.
+
+        Information regarding the implementation:
+        It is important to mention that all coordinate systems that are involved in the
+        transformation should be interpolated to a common time line before they are
+        combined using the 'LocalCoordinateSystem's __add__ and __sub__ functions.
+        If this is not done before, serious interpolation errors for rotations can
+        occur. The reason is, that those operators also perform time interpolations
+        if the timestamps of 2 systems do not match. When chaining multiple
+        transformations already interpolated values might be used to perform another
+        interpolation.
+
+        To see why this is problematic, consider a coordinate system which is statically
+        attached to a not moving but rotating parent coordinate system. If it gets
+        transformed to the reference systems of its parent, it will follow a circular
+        trajectory around the parent system. For discrete timestamps, the trajectory is
+        described by a set of corresponding coordinates. If we now interpolate again,
+        the positions between those coordinates will be interpolated linearly, ignoring
+        the originally circular trajectory. The dependency on the rotating parent system
+        is not considered in further transformations.
+
+        Additionally, if the transformed system is rotating itself, the transformation
+        to the parent's reference system might cause the rotation angle between to
+        time steps to exceed 180 degrees. Since the SLERP always takes the shortest
+        angle between 2 ''keyframes'', further interpolations wrongly change the
         rotation order.
 
         Parameters
@@ -1034,6 +1049,11 @@ class CoordinateSystemManager:
             Name of the coordinate system
         reference_system_name :
             Name of the reference coordinate system
+        time:
+            Either a pandas.DatetimeIndex that specifies the target timestamps of the
+            returned system, the name of another coordinate system that provides the
+            timestamps or 'None'. If 'None' is chosen, the time union of all involved
+            transformations is used.
 
         Returns
         -------

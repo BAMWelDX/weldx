@@ -7,9 +7,9 @@ import numpy as np
 import pint
 
 import weldx.geometry as geo
-from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
+from weldx.constants import WELDX_QUANTITY as Q_
 
 _DEFAULT_LEN_UNIT = "mm"
 
