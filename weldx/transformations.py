@@ -1320,7 +1320,6 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-        # TODO Test this branch explicitly
         if reference_system_name is None:
             reference_system_name = self.get_parent_system_name(coordinate_system_name)
             if reference_system_name is None:

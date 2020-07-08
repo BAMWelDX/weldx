@@ -1435,17 +1435,17 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
     csm.add_coordinate_system("lcs3", "lcs2", lcs3_in_lcs2)
 
     # check stored transformations
-    lcs1_in_root_returned = csm.get_local_coordinate_system("lcs1", "root")
+    lcs1_in_root_returned = csm.get_local_coordinate_system("lcs1")
     check_coordinate_system(
         lcs1_in_root_returned, lcs1_in_root.orientation, lcs1_in_root.coordinates, True
     )
 
-    lcs2_in_root_returned = csm.get_local_coordinate_system("lcs2", "root")
+    lcs2_in_root_returned = csm.get_local_coordinate_system("lcs2")
     check_coordinate_system(
         lcs2_in_root_returned, lcs2_in_root.orientation, lcs2_in_root.coordinates, True
     )
 
-    lcs3_in_lcs2_returned = csm.get_local_coordinate_system("lcs3", "lcs2")
+    lcs3_in_lcs2_returned = csm.get_local_coordinate_system("lcs3")
     check_coordinate_system(
         lcs3_in_lcs2_returned, lcs3_in_lcs2.orientation, lcs3_in_lcs2.coordinates, True
     )
@@ -1495,6 +1495,9 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
         csm.get_local_coordinate_system("root", "not there")
     with pytest.raises(ValueError):
         csm.get_local_coordinate_system("not there", "not there")
+    # no parent system
+    with pytest.raises(ValueError):
+        csm.get_local_coordinate_system("root")
 
 
 def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
