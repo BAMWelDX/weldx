@@ -849,6 +849,39 @@ class LocalCoordinateSystem:
         )
         return LocalCoordinateSystem(orientation, coordinates)
 
+    def as_rotation(self) -> Rot:  # pragma: no cover
+        """Get a scipy.Rotation object from the coordinate system orientation.
+
+        Returns
+        -------
+        scipy.spatial.transform.Rotation
+            Scipy rotation object representing the orientation.
+
+        """
+        return Rot.from_matrix(self.orientation.values)
+
+    def as_euler(
+        self, seq: str = "xyz", degrees: bool = False
+    ) -> np.ndarray:  # pragma: no cover
+        """Return Euler angle representation of the coordinate system orientation.
+
+        Parameters
+        ----------
+        seq :
+            Euler rotation sequence as described in
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_euler.html
+        degrees :
+            Returned angles are in degrees if True, else they are in radians.
+            Default is False.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of euler angles.
+
+        """
+        return self.as_rotation().as_euler(seq=seq, degrees=degrees)
+
 
 # coordinate system manager class ------------------------------------------------------
 
