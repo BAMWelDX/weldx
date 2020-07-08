@@ -425,7 +425,6 @@ def check_coordinate_system_orientation(
     assert np.allclose(orientation, orientation_expected)
 
 
-# TODO: add time dependency
 def check_coordinate_system(
     cs_p: tf.LocalCoordinateSystem,
     orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
@@ -734,9 +733,65 @@ def test_coordinate_system_factories_time_dependent():
     cs_euler_o = lcs.construct_from_euler("yx", angles, False, coords[0], time)
     check_coordinate_system(cs_euler_o, orientations, coords[0], time=time)
 
+    # construction with x,y,z-vectors ---------------------
 
-# TODO: remove
-test_coordinate_system_factories_time_dependent()
+    vec_x = orientations[:, :, 0]
+    vec_y = orientations[:, :, 1]
+    vec_z = orientations[:, :, 2]
+
+    cs_xyz_oc = lcs.construct_from_xyz(vec_x, vec_y, vec_z, coords, time)
+    check_coordinate_system(cs_xyz_oc, orientations, coords, time=time)
+
+    cs_xyz_c = lcs.construct_from_xyz(vec_x[0], vec_y[0], vec_z[0], coords, time)
+    check_coordinate_system(cs_xyz_c, orientations[0], coords, time=time)
+
+    cs_xyz_o = lcs.construct_from_xyz(vec_x, vec_y, vec_z, coords[0], time)
+    check_coordinate_system(cs_xyz_o, orientations, coords[0], time=time)
+
+    # construction with x,y-vectors and orientation -------
+
+    cs_xyo_oc = lcs.construct_from_xy_and_orientation(vec_x, vec_y, True, coords, time)
+    check_coordinate_system(cs_xyo_oc, orientations, coords, True, time=time)
+
+    cs_xyo_c = lcs.construct_from_xy_and_orientation(
+        vec_x[0], vec_y[0], True, coords, time
+    )
+    check_coordinate_system(cs_xyo_c, orientations[0], coords, True, time=time)
+
+    cs_xyo_o = lcs.construct_from_xy_and_orientation(
+        vec_x, vec_y, True, coords[0], time
+    )
+    check_coordinate_system(cs_xyo_o, orientations, coords[0], True, time=time)
+
+    # construction with y,z-vectors and orientation -------
+
+    cs_yzo_oc = lcs.construct_from_yz_and_orientation(vec_y, vec_z, True, coords, time)
+    check_coordinate_system(cs_yzo_oc, orientations, coords, True, time=time)
+
+    cs_yzo_c = lcs.construct_from_yz_and_orientation(
+        vec_y[0], vec_z[0], True, coords, time
+    )
+    check_coordinate_system(cs_yzo_c, orientations[0], coords, True, time=time)
+
+    cs_yzo_o = lcs.construct_from_yz_and_orientation(
+        vec_y, vec_z, True, coords[0], time
+    )
+    check_coordinate_system(cs_yzo_o, orientations, coords[0], True, time=time)
+
+    # construction with x,z-vectors and orientation -------
+
+    cs_xzo_oc = lcs.construct_from_xz_and_orientation(vec_x, vec_z, True, coords, time)
+    check_coordinate_system(cs_xzo_oc, orientations, coords, True, time=time)
+
+    cs_xzo_c = lcs.construct_from_xz_and_orientation(
+        vec_x[0], vec_z[0], True, coords, time
+    )
+    check_coordinate_system(cs_xzo_c, orientations[0], coords, True, time=time)
+
+    cs_xzo_o = lcs.construct_from_xz_and_orientation(
+        vec_x, vec_z, True, coords[0], time
+    )
+    check_coordinate_system(cs_xzo_o, orientations, coords[0], True, time=time)
 
 
 def test_coordinate_system_addition_and_subtraction():
@@ -1664,6 +1719,3 @@ def test_coordinate_system_manager_data_assignment_and_retrieval():
     # get_data - coordinate system does not exist
     with pytest.raises(Exception):
         csm.get_data("my data", "not there")
-
-
-test_coordinate_system_manager_get_local_coordinate_system_time_dependent()

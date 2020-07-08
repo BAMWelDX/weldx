@@ -593,7 +593,14 @@ class LocalCoordinateSystem:
             Local coordinate system
 
         """
-        orientation = np.transpose([vec_x, vec_y, vec_z])
+        vec_x = ut.to_float_array(vec_x)
+        vec_y = ut.to_float_array(vec_y)
+        vec_z = ut.to_float_array(vec_z)
+
+        orientation = np.concatenate((vec_x, vec_y, vec_z), axis=vec_x.ndim - 1)
+        orientation = np.reshape(orientation, (*vec_x.shape, 3))
+        orientation = orientation.swapaxes(orientation.ndim - 1, orientation.ndim - 2)
+
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
@@ -626,8 +633,7 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        orientation = np.transpose([vec_x, vec_y, vec_z])
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls.construct_from_xyz(vec_x, vec_y, vec_z, coordinates, time)
 
     @classmethod
     def construct_from_yz_and_orientation(
@@ -659,8 +665,7 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        orientation = np.transpose(np.array([vec_x, vec_y, vec_z]))
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls.construct_from_xyz(vec_x, vec_y, vec_z, coordinates, time)
 
     @classmethod
     def construct_from_xz_and_orientation(
@@ -692,8 +697,7 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        orientation = np.transpose([vec_x, vec_y, vec_z])
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls.construct_from_xyz(vec_x, vec_y, vec_z, coordinates, time)
 
     @staticmethod
     def _sign_orientation(positive_orientation):
@@ -906,7 +910,6 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-
         self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
         self._graph.add_edge(node_to, node_from, lcs=lcs.invert(), defined=False)
 
@@ -1097,7 +1100,7 @@ class CoordinateSystemManager:
         return lcs
 
     def get_parent_system_name(self, coordinate_system_name):
-        """ Get the name of a coordinate systems parent system.
+        """Get the name of a coordinate systems parent system.
 
         Parameters
         ----------
