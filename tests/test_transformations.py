@@ -1273,6 +1273,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     angles_x = np.array([0.5, 1, 2, 2.5]) * np.pi / 2
     angles_y = np.array([1.5, 0, 1, 0.5]) * np.pi / 2
     angles = np.array([[*angles_y], [*angles_x]]).transpose()
+    angles_deg = 180 / np.pi * angles
 
     rot_mat_x = tf.rotation_matrix_x(angles_x)
     rot_mat_y = tf.rotation_matrix_y(angles_y)
@@ -1299,7 +1300,33 @@ def test_coordinate_system_manager_create_coordinate_system():
 
     csm.create_coordinate_system("lcs_init_tdp", "root", orientations, coords, time)
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_init_tdp"), orientations, coords, True,
+        csm.get_local_coordinate_system("lcs_init_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from euler ------------------------------------------
+    csm.create_coordinate_system_from_euler(
+        "lcs_euler_default", "root", "yx", angles[0]
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_euler_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_coordinate_system_from_euler(
+        "lcs_euler_tdp", "root", "yx", angles_deg, True, coords, time
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_euler_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
     )
 
 
