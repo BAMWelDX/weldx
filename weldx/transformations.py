@@ -1052,7 +1052,10 @@ class CoordinateSystemManager:
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
     ):
-        """
+        """Create a coordinate system and add it to the coordinate system manager
+
+        This function uses the 'construct_from_euler' method of the
+        'LocalCoordinateSystem' class.
 
         Parameters
         ----------
@@ -1091,6 +1094,169 @@ class CoordinateSystemManager:
         """
         lcs = LocalCoordinateSystem.construct_from_euler(
             sequence, angles, degrees, coordinates, time
+        )
+        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+
+    def create_coordinate_system_from_xyz(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        vec_x,
+        vec_y,
+        vec_z,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager
+
+        This function uses the 'construct_from_xyz' method of the
+        'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        vec_x :
+            Vector defining the x-axis
+        vec_y :
+            Vector defining the y-axis
+        vec_z :
+            Vector defining the z-axis
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+
+        """
+        lcs = LocalCoordinateSystem.construct_from_xyz(
+            vec_x, vec_y, vec_z, coordinates, time
+        )
+        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+
+    def create_coordinate_system_from_xy_and_orientation(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        vec_x,
+        vec_y,
+        positive_orientation=True,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager
+
+        This function uses the 'construct_from_xy_and_orientation' method of the
+        'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        vec_x :
+            Vector defining the x-axis
+        vec_y :
+            Vector defining the y-axis
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not (Default value = True)
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+
+        """
+        lcs = LocalCoordinateSystem.construct_from_xy_and_orientation(
+            vec_x, vec_y, positive_orientation, coordinates, time
+        )
+        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+
+    def create_coordinate_system_from_xz_and_orientation(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        vec_x,
+        vec_z,
+        positive_orientation=True,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager
+
+        This function uses the 'construct_from_xz_and_orientation' method of the
+        'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        vec_x :
+            Vector defining the x-axis
+        vec_z :
+            Vector defining the z-axis
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not (Default value = True)
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+
+        """
+        lcs = LocalCoordinateSystem.construct_from_xz_and_orientation(
+            vec_x, vec_z, positive_orientation, coordinates, time
+        )
+        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+
+    def create_coordinate_system_from_yz_and_orientation(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        vec_y,
+        vec_z,
+        positive_orientation=True,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager
+
+        This function uses the 'construct_from_yz_and_orientation' method of the
+        'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        vec_y :
+            Vector defining the y-axis
+        vec_z :
+            Vector defining the z-axis
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not (Default value = True)
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+
+        """
+        lcs = LocalCoordinateSystem.construct_from_yz_and_orientation(
+            vec_y, vec_z, positive_orientation, coordinates, time
         )
         self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
 

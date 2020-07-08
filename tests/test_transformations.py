@@ -1329,6 +1329,94 @@ def test_coordinate_system_manager_create_coordinate_system():
         time=time,
     )
 
+    # from xyz --------------------------------------------
+    csm.create_coordinate_system_from_xyz(
+        "lcs_xyz_default", "root", vec_x[0], vec_y[0], vec_z[0]
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_xyz_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_coordinate_system_from_xyz(
+        "lcs_xyz_tdp", "root", vec_x, vec_y, vec_z, coords, time
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_xyz_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from xy and orientation -----------------------------
+    csm.create_coordinate_system_from_xy_and_orientation(
+        "lcs_xyo_default", "root", vec_x[0], vec_y[0]
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_xyo_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_coordinate_system_from_xy_and_orientation(
+        "lcs_xyo_tdp", "root", vec_x, vec_y, True, coords, time
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_xyo_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from xz and orientation -----------------------------
+    csm.create_coordinate_system_from_xz_and_orientation(
+        "lcs_xzo_default", "root", vec_x[0], vec_z[0]
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_xzo_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_coordinate_system_from_xz_and_orientation(
+        "lcs_xzo_tdp", "root", vec_x, vec_z, True, coords, time
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_xzo_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from yz and orientation -----------------------------
+    csm.create_coordinate_system_from_yz_and_orientation(
+        "lcs_yzo_default", "root", vec_y[0], vec_z[0]
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_yzo_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_coordinate_system_from_yz_and_orientation(
+        "lcs_yzo_tdp", "root", vec_y, vec_z, True, coords, time
+    )
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_yzo_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
 
 def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependency():
     """Test the get_local_coordinate_system function.
