@@ -1015,7 +1015,7 @@ class CoordinateSystemManager:
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
     ):
-        """Create a coordinate system and add it to the coordinate system manager
+        """Create a coordinate system and add it to the coordinate system manager.
 
         This function uses the '__init__' method of the 'LocalCoordinateSystem' class.
 
@@ -1052,7 +1052,7 @@ class CoordinateSystemManager:
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
     ):
-        """Create a coordinate system and add it to the coordinate system manager
+        """Create a coordinate system and add it to the coordinate system manager.
 
         This function uses the 'construct_from_euler' method of the
         'LocalCoordinateSystem' class.
@@ -1107,7 +1107,7 @@ class CoordinateSystemManager:
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
     ):
-        """Create a coordinate system and add it to the coordinate system manager
+        """Create a coordinate system and add it to the coordinate system manager.
 
         This function uses the 'construct_from_xyz' method of the
         'LocalCoordinateSystem' class.
@@ -1147,7 +1147,7 @@ class CoordinateSystemManager:
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
     ):
-        """Create a coordinate system and add it to the coordinate system manager
+        """Create a coordinate system and add it to the coordinate system manager.
 
         This function uses the 'construct_from_xy_and_orientation' method of the
         'LocalCoordinateSystem' class.
@@ -1188,7 +1188,7 @@ class CoordinateSystemManager:
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
     ):
-        """Create a coordinate system and add it to the coordinate system manager
+        """Create a coordinate system and add it to the coordinate system manager.
 
         This function uses the 'construct_from_xz_and_orientation' method of the
         'LocalCoordinateSystem' class.
@@ -1229,7 +1229,7 @@ class CoordinateSystemManager:
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
     ):
-        """Create a coordinate system and add it to the coordinate system manager
+        """Create a coordinate system and add it to the coordinate system manager.
 
         This function uses the 'construct_from_yz_and_orientation' method of the
         'LocalCoordinateSystem' class.
