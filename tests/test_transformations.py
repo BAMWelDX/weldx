@@ -705,7 +705,7 @@ def test_coordinate_system_factories_time_dependent():
     rot_mat_x = tf.rotation_matrix_x(angles_x)
     rot_mat_y = tf.rotation_matrix_y(angles_y)
 
-    time = lcs_0_time = pd.date_range("2020-01-01", periods=4, freq="6H")
+    time = pd.date_range("2020-01-01", periods=4, freq="6H")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
 
