@@ -956,11 +956,10 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be
-            any hashable type, but it is recommended to use strings.
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
         reference_system_name :
-            Name of the parent system. This must have been
-            already added.
+            Name of the parent system. This must have been already added.
         local_coordinate_system :
             An instance of
             weldx.transformations.LocalCoordinateSystem that describes how the new
@@ -1007,6 +1006,43 @@ class CoordinateSystemManager:
 
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
         self._graph.nodes[coordinate_system_name]["data"].append(data_name)
+
+    def create_coordinate_system(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager
+
+        This function uses the '__init__' method of the 'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        orientation :
+            Matrix of 3 orthogonal column vectors which represent
+            the coordinate systems orientation. Keep in mind, that the columns of the
+            corresponding orientation matrix is equal to the normalized orientation
+            vectors. So each orthogonal transformation matrix can also be
+            provided as orientation.
+            Passing a scipy.spatial.transform.Rotation object is also supported.
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+        """
+        lcs = LocalCoordinateSystem(
+            orientation=orientation, coordinates=coordinates, time=time
+        )
+        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
 
     def get_local_coordinate_system(
         self,

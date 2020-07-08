@@ -701,6 +701,7 @@ def test_coordinate_system_factories_time_dependent():
 
     angles_x = np.array([0.5, 1, 2, 2.5]) * np.pi / 2
     angles_y = np.array([1.5, 0, 1, 0.5]) * np.pi / 2
+    angles = np.array([[*angles_y], [*angles_x]]).transpose()
 
     rot_mat_x = tf.rotation_matrix_x(angles_x)
     rot_mat_y = tf.rotation_matrix_y(angles_y)
@@ -708,6 +709,10 @@ def test_coordinate_system_factories_time_dependent():
     time = pd.date_range("2020-01-01", periods=4, freq="6H")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
+
+    vec_x = orientations[:, :, 0]
+    vec_y = orientations[:, :, 1]
+    vec_z = orientations[:, :, 2]
 
     # construction with orientation -----------------------
 
@@ -722,8 +727,6 @@ def test_coordinate_system_factories_time_dependent():
 
     # construction with euler -----------------------------
 
-    angles = np.array([[*angles_y], [*angles_x]]).transpose()
-
     cs_euler_oc = lcs.construct_from_euler("yx", angles, False, coords, time)
     check_coordinate_system(cs_euler_oc, orientations, coords, time=time)
 
@@ -734,10 +737,6 @@ def test_coordinate_system_factories_time_dependent():
     check_coordinate_system(cs_euler_o, orientations, coords[0], time=time)
 
     # construction with x,y,z-vectors ---------------------
-
-    vec_x = orientations[:, :, 0]
-    vec_y = orientations[:, :, 1]
-    vec_z = orientations[:, :, 2]
 
     cs_xyz_oc = lcs.construct_from_xyz(vec_x, vec_y, vec_z, coords, time)
     check_coordinate_system(cs_xyz_oc, orientations, coords, time=time)
@@ -1262,6 +1261,49 @@ def test_coordinate_system_manager_add_coordinate_system():
     # Invalid parent system
     with pytest.raises(Exception):
         csm.add_coordinate_system("lcs4", "something", tf.LocalCoordinateSystem())
+
+
+def test_coordinate_system_manager_create_coordinate_system():
+    """Test direct construction of coordinate systems in the coordinate system manager.
+
+    Create multiple coordinate systems with all provided methods and check
+    if they are constructed correctly.
+
+    """
+    angles_x = np.array([0.5, 1, 2, 2.5]) * np.pi / 2
+    angles_y = np.array([1.5, 0, 1, 0.5]) * np.pi / 2
+    angles = np.array([[*angles_y], [*angles_x]]).transpose()
+
+    rot_mat_x = tf.rotation_matrix_x(angles_x)
+    rot_mat_y = tf.rotation_matrix_y(angles_y)
+
+    time = pd.date_range("2020-01-01", periods=4, freq="6H")
+    orientations = np.matmul(rot_mat_x, rot_mat_y)
+    coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
+
+    vec_x = orientations[:, :, 0]
+    vec_y = orientations[:, :, 1]
+    vec_z = orientations[:, :, 2]
+
+    csm = tf.CoordinateSystemManager("root")
+    lcs_default = tf.LocalCoordinateSystem()
+
+    # orientation and coordinates -------------------------
+    csm.create_coordinate_system("lcs_init_default", "root")
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_init_default", "root"),
+        lcs_default.orientation,
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_coordinate_system("lcs_init_tdp", "root", orientations, coords, time)
+    check_coordinate_system(
+        csm.get_local_coordinate_system("lcs_init_tdp", "root"),
+        orientations,
+        coords,
+        True,
+    )
 
 
 def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependency():
