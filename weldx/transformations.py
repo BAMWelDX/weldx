@@ -1047,10 +1047,13 @@ class CoordinateSystemManager:
     def get_local_coordinate_system(
         self,
         coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        reference_system_name: Union[Hashable, None] = None,
         time_interp_like: Union[pd.DatetimeIndex, List, str, None] = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
+
+        If no reference system is specified, the parent system will be used as
+        reference.
 
         If any coordinate system that is involved in the coordinate transformation has
         a time dependency, the returned coordinate system will also be time dependent.
@@ -1101,6 +1104,14 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
+        # TODO Test this branch explicitly
+        if reference_system_name is None:
+            reference_system_name = self.get_parent_system_name(coordinate_system_name)
+            if reference_system_name is None:
+                raise ValueError(
+                    f"The system {coordinate_system_name} has no parent system. "
+                    f"You need to explicitly specify a reference system"
+                )
         self._check_coordinate_system_exists(coordinate_system_name)
         self._check_coordinate_system_exists(reference_system_name)
 

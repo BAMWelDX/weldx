@@ -1291,7 +1291,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     # orientation and coordinates -------------------------
     csm.create_coordinate_system("lcs_init_default", "root")
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_init_default", "root"),
+        csm.get_local_coordinate_system("lcs_init_default"),
         lcs_default.orientation,
         lcs_default.coordinates,
         True,
@@ -1299,10 +1299,7 @@ def test_coordinate_system_manager_create_coordinate_system():
 
     csm.create_coordinate_system("lcs_init_tdp", "root", orientations, coords, time)
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_init_tdp", "root"),
-        orientations,
-        coords,
-        True,
+        csm.get_local_coordinate_system("lcs_init_tdp"), orientations, coords, True,
     )
 
 
