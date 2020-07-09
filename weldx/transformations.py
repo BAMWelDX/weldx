@@ -1603,14 +1603,22 @@ class CoordinateSystemManager:
     def interp_time(
         self,
         time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
+        affected_coordinate_systems: Union[str, List[str], None] = None,
         inplace: bool = False,
     ) -> "CoordinateSystemManager":
         """Interpolates the coordinate systems in time.
+
+        If no list of affected coordinate systems is provided, all systems will be
+        interpolated to the same timeline.
 
         Parameters
         ----------
         time :
             Time data.
+        affected_coordinate_systems :
+            A single coordinate system name or a list of coordinate system names that
+            should be interpolated in time. Only transformations towards the systems
+            root node are affected.
         inplace :
             If 'True' the interpolation is performed in place, otherwise a
             new instance is returned. (Default value = False)
@@ -1622,13 +1630,27 @@ class CoordinateSystemManager:
 
         """
         if inplace:
-            for edge in self._graph.edges:
+            if affected_coordinate_systems is not None:
+                if isinstance(affected_coordinate_systems, str):
+                    affected_coordinate_systems = [affected_coordinate_systems]
+
+                affected_edges = []
+                for cs in affected_coordinate_systems:
+                    ps = self.get_parent_system_name(cs)
+                    affected_edges.append((cs, ps))
+                    affected_edges.append((ps, cs))
+            else:
+                affected_edges = self._graph.edges
+
+            for edge in affected_edges:
                 self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
                     "lcs"
                 ].interp_time(time)
             return self
 
-        return deepcopy(self).interp_time(time, inplace=True)
+        return deepcopy(self).interp_time(
+            time, affected_coordinate_systems, inplace=True
+        )
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """Get the time union of all or selected local coordinate systems.

@@ -463,6 +463,25 @@ def check_coordinate_system(
     assert np.allclose(cs_p.coordinates.values, coordinates_expected, atol=1e-9)
 
 
+def check_coordinate_systems_close(lcs_0, lcs_1):
+    """Check if 2 coordinate systems are nearly identical.
+
+    Parameters
+    ----------
+    lcs_0:
+        First coordinate system.
+    lcs_1
+        Second coordinate system.
+
+    """
+    time = None
+    if "time" in lcs_1.dataset:
+        time = lcs_1.time
+    check_coordinate_system(
+        lcs_0, lcs_1.orientation.data, lcs_1.coordinates.data, True, time
+    )
+
+
 def test_coordinate_system_init():
     """Check the __init__ method with and without time dependency."""
     # reference data
@@ -1694,7 +1713,7 @@ def test_coordinate_system_manager_time_union():
 
 
 def test_coordinate_system_manager_interp_time():
-    """Test the coordinate system managers interp_time and interp_like functions."""
+    """Test the coordinate system managers interp_time functions."""
     # Setup -------------------------------------
     angles = ut.to_float_array([0, np.pi / 2, np.pi])
     orientation = tf.rotation_matrix_z(angles)
@@ -1725,52 +1744,122 @@ def test_coordinate_system_manager_interp_time():
     csm.add_coordinate_system("lcs_3", "lcs_2", lcs_3_in_lcs_2)
 
     # interp_time -------------------------------
+    # TODO: Check inverse directions too
     time_interp = pd.date_range("2042-01-01", periods=5, freq="2D")
     csm_interp = csm.interp_time(time_interp)
 
     assert np.all(csm_interp.time_union() == time_interp)
 
-    lcs_0_in_root_csm = csm_interp.get_local_coordinate_system("lcs_0", "root")
-    lcs_1_in_lcs_0_csm = csm_interp.get_local_coordinate_system("lcs_1", "lcs_0")
-    lcs_2_in_root_csm = csm_interp.get_local_coordinate_system("lcs_2", "root")
-    lcs_3_in_lcs_2_csm = csm_interp.get_local_coordinate_system("lcs_3", "lcs_2")
+    lcs_0_in_root_csm = csm_interp.get_local_coordinate_system("lcs_0")
+    lcs_1_in_lcs_0_csm = csm_interp.get_local_coordinate_system("lcs_1")
+    lcs_2_in_root_csm = csm_interp.get_local_coordinate_system("lcs_2")
+    lcs_3_in_lcs_2_csm = csm_interp.get_local_coordinate_system("lcs_3")
 
     assert np.all(lcs_0_in_root_csm.time == time_interp)
     assert np.all(lcs_1_in_lcs_0_csm.time == time_interp)
     assert np.all(lcs_2_in_root_csm.time == time_interp)
     assert lcs_3_in_lcs_2_csm.time is None
 
-    coordinates_exp = [
+    coords_0_exp = [
         [5, 0, 0],
         [7 / 3, 0, 0],
         [1, 4 / 3, 4 / 3],
         [1, 4, 4],
         [1, 4, 4],
     ]
-    orientation_exp = tf.rotation_matrix_z([0, np.pi / 3, 2 * np.pi / 3, np.pi, np.pi])
-    check_coordinate_system(lcs_0_in_root_csm, orientation_exp, coordinates_exp, True)
+    orient_0_exp = tf.rotation_matrix_z([0, np.pi / 3, 2 * np.pi / 3, np.pi, np.pi])
+    check_coordinate_system(lcs_0_in_root_csm, orient_0_exp, coords_0_exp, True)
 
-    coordinates_exp = [[5, 0, 0], [3, 0, 0], [1, 0, 0], [1, 2, 2], [1, 4, 4]]
-    orientation_exp = tf.rotation_matrix_z(
-        [0, np.pi / 4, np.pi / 2, 3 * np.pi / 4, np.pi]
-    )
-    check_coordinate_system(lcs_1_in_lcs_0_csm, orientation_exp, coordinates_exp, True)
+    coords_1_exp = [[5, 0, 0], [3, 0, 0], [1, 0, 0], [1, 2, 2], [1, 4, 4]]
+    orient_1_exp = tf.rotation_matrix_z([0, np.pi / 4, np.pi / 2, 3 * np.pi / 4, np.pi])
+    check_coordinate_system(lcs_1_in_lcs_0_csm, orient_1_exp, coords_1_exp, True)
 
-    coordinates_exp = [
+    coords_2_exp = [
         [5, 0, 0],
         [17 / 5, 0, 0],
         [9 / 5, 0, 0],
         [1, 4 / 5, 4 / 5],
         [1, 12 / 5, 12 / 5],
     ]
-    orientation_exp = tf.rotation_matrix_z(
+    orient_2_exp = tf.rotation_matrix_z(
         [0, np.pi / 5, 2 * np.pi / 5, 3 * np.pi / 5, 4 * np.pi / 5]
     )
-    check_coordinate_system(lcs_2_in_root_csm, orientation_exp, coordinates_exp, True)
+    check_coordinate_system(lcs_2_in_root_csm, orient_2_exp, coords_2_exp, True)
 
     check_coordinate_system(
         lcs_3_in_lcs_2_csm, lcs_3_in_lcs_2.orientation, lcs_3_in_lcs_2.coordinates, True
     )
+
+    # specific coordinate system (single) -----------------
+    time_interp_lcs0 = pd.date_range("2042-01-03", periods=2, freq="2D")
+    csm_interp_single = csm.interp_time(time_interp_lcs0, "lcs_0")
+
+    coords_0_exp = np.array(coords_0_exp)[[1, 2], :]
+    orient_0_exp = np.array(orient_0_exp)[[1, 2], :]
+    lcs_0_in_root_exp = tf.LocalCoordinateSystem(
+        orient_0_exp, coords_0_exp, time_interp_lcs0
+    )
+
+    for cs_name in csm_interp_single.graph.nodes:
+        if cs_name == "root":
+            continue
+        ps_name = csm_interp_single.get_parent_system_name(cs_name)
+
+        if cs_name == "lcs_0":
+            exp = lcs_0_in_root_exp
+            exp_inv = lcs_0_in_root_exp.invert()
+        else:
+            exp = csm.get_local_coordinate_system(cs_name, ps_name)
+            exp_inv = csm.get_local_coordinate_system(ps_name, cs_name)
+
+        lcs = csm_interp_single.get_local_coordinate_system(cs_name, ps_name)
+        lcs_inv = csm_interp_single.get_local_coordinate_system(ps_name, cs_name)
+
+        check_coordinate_systems_close(lcs, exp)
+        # TODO: Make it work
+        # check_coordinate_systems_close(lcs_inv, exp_inv)
+
+    # specific coordinate systems (multiple) --------------
+    time_interp_multiple = pd.date_range("2042-01-05", periods=3, freq="2D")
+    csm_interp_multiple = csm.interp_time(time_interp_multiple, ["lcs_1", "lcs_2"])
+
+    coords_1_exp = np.array(coords_1_exp)[2:, :]
+    orient_1_exp = np.array(orient_1_exp)[2:, :]
+    coords_2_exp = np.array(coords_2_exp)[2:, :]
+    orient_2_exp = np.array(orient_2_exp)[2:, :]
+
+    lcs_1_in_lcs_0_exp = tf.LocalCoordinateSystem(
+        orient_1_exp, coords_1_exp, time_interp_multiple
+    )
+    lcs_2_in_lcs_1_exp = tf.LocalCoordinateSystem(
+        orient_2_exp, coords_2_exp, time_interp_multiple
+    )
+
+    for cs_name in csm_interp_multiple.graph.nodes:
+        if cs_name == "root":
+            continue
+        ps_name = csm_interp_multiple.get_parent_system_name(cs_name)
+
+        if cs_name == "lcs_1":
+            exp = lcs_1_in_lcs_0_exp
+            exp_inv = lcs_1_in_lcs_0_exp.invert()
+        elif cs_name == "lcs_2":
+            exp = lcs_2_in_lcs_1_exp
+            exp_inv = lcs_2_in_lcs_1_exp.invert()
+        else:
+            exp = csm.get_local_coordinate_system(cs_name, ps_name)
+            exp_inv = csm.get_local_coordinate_system(ps_name, cs_name)
+
+        lcs = csm_interp_multiple.get_local_coordinate_system(cs_name, ps_name)
+        lcs_inv = csm_interp_multiple.get_local_coordinate_system(ps_name, cs_name)
+
+        check_coordinate_systems_close(lcs, exp)
+        # TODO: Make it work
+        # check_coordinate_systems_close(lcs_inv, exp_inv)
+
+
+# TODO: remove
+test_coordinate_system_manager_interp_time()
 
 
 def test_coordinate_system_manager_transform_data():
