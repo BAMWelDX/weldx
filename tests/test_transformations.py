@@ -1873,10 +1873,6 @@ def test_coordinate_system_manager_interp_time():
         check_coordinate_systems_close(lcs_inv, exp_inv)
 
 
-# TODO: remove
-test_coordinate_system_manager_interp_time()
-
-
 def test_coordinate_system_manager_transform_data():
     """Test the coordinate system managers transform_data function."""
     # define some coordinate systems
