@@ -1643,9 +1643,15 @@ class CoordinateSystemManager:
                 affected_edges = self._graph.edges
 
             for edge in affected_edges:
-                self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
-                    "lcs"
-                ].interp_time(time)
+                if self._graph.edges[edge]["defined"]:
+                    self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
+                        "lcs"
+                    ].interp_time(time)
+            for edge in affected_edges:
+                if not self._graph.edges[edge]["defined"]:
+                    self._graph.edges[edge]["lcs"] = self._graph.edges[
+                        (edge[1], edge[0])
+                    ]["lcs"].invert()
             return self
 
         return deepcopy(self).interp_time(
