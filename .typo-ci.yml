@@ -80,6 +80,9 @@ excluded_words:
   - ipython
   # scipy ---------------------------------------
   - Slerp
+  # sympy ---------------------------------------
+  - lambdify
+  - sympify
   # welding -------------------------------------
   - weldment
   # conda ---------------------------------------
@@ -103,3 +106,4 @@ excluded_words:
   - bamwelding
   - netcdf
   - msm
+  - Beckhoff
