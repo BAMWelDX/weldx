@@ -9,7 +9,7 @@ import xarray as xr
 # measurement --------------------------------------------------------------------------
 @dataclass
 class Data:
-    """<TODO CLASS DOCSTRING>"""
+    """Simple dataclass implementation for measurement data."""
 
     name: str
     data: xr.DataArray
@@ -17,14 +17,14 @@ class Data:
 
 @dataclass
 class Error:
-    """<TODO CLASS DOCSTRING>"""
+    """Simple dataclass implementation for signal transformation errors."""
 
     deviation: float
 
 
 @dataclass
 class Signal:
-    """<TODO CLASS DOCSTRING>"""
+    """Simple dataclass implementation for measurement signals."""
 
     signal_type: str
     unit: str
@@ -33,7 +33,7 @@ class Signal:
 
 @dataclass
 class DataTransformation:
-    """<TODO CLASS DOCSTRING>"""
+    """Simple dataclass implementation for signal transformations."""
 
     name: str
     input_signal: Signal
