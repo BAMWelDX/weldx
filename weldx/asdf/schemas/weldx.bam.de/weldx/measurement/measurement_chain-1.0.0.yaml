@@ -6,8 +6,6 @@ tag: "tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0"
 
 title: |
   Schema that describes a measurement_chain
-description: |
-  TODO
 type: object
 properties:
   name:

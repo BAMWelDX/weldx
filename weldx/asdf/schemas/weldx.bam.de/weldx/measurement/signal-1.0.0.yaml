@@ -5,9 +5,7 @@ id: "http://weldx.bam.de/schemas/weldx/measurement/signal-1.0.0"
 tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
 
 title: |
-  &lt;TODO DESCRIPTION&gt;
-description: |
-  &lt;TODO DESCRIPTION&gt;
+  Representation of a measurement signal with optional data attached.
 type: object
 properties:
   signal_type:

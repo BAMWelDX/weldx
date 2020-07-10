@@ -5,9 +5,10 @@ id: "http://weldx.bam.de/schemas/weldx/measurement/data-1.0.0"
 tag: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
 
 title: |
-  &lt;TODO DESCRIPTION&gt;
+  Data container for measurement recordings.
 description: |
-  &lt;TODO DESCRIPTION&gt;
+  Data is stored using data_array format.
+  TODO: rework schema, add time axes requirement
 type: object
 properties:
   name:

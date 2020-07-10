@@ -5,9 +5,7 @@ id: "http://weldx.bam.de/schemas/weldx/measurement/source-1.0.0"
 tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
 
 title: |
-  Schema that describes a measurement source
-description: |
-  TODO
+  Schema that describes a measurement source.
 type: object
 properties:
   name:

@@ -5,9 +5,10 @@ id: "http://weldx.bam.de/schemas/weldx/measurement/data_transformation-1.0.0"
 tag: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
 
 title: |
-  &lt;TODO DESCRIPTION&gt;
+  Signal transformation step.
 description: |
-  &lt;TODO DESCRIPTION&gt;
+  Describes the transformation between an input and output signal.
+  Optionally describes the associated error of the transformation step and the mathematical formula.
 type: object
 properties:
   name:
@@ -18,10 +19,12 @@ properties:
     $ref: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
   error:
     $ref: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
+  func:
+    $ref: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
 
-propertyOrder: [name, input_signal, output_signal, error]
 required: [name, input_signal, output_signal]
+propertyOrder: [name, input_signal, output_signal, error, func]
 
 flowStyle: block
-additionalProperties: true
+additionalProperties: false
 ...
