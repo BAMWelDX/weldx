@@ -45,7 +45,7 @@ class DataTransformation:
 
 @dataclass
 class Source:
-    """<TODO CLASS DOCSTRING>"""
+    """Simple dataclass implementation for signal sources."""
 
     name: str
     output_signal: Signal
@@ -54,7 +54,7 @@ class Source:
 
 @dataclass
 class MeasurementChain:
-    """<TODO CLASS DOCSTRING>"""
+    """Simple dataclass implementation for measurement chains."""
 
     name: str
     data_source: Source
@@ -63,7 +63,7 @@ class MeasurementChain:
 
 @dataclass
 class Measurement:
-    """<TODO CLASS DOCSTRING>"""
+    """Simple dataclass implementation for generic measurements."""
 
     name: str
     data: Data
@@ -73,7 +73,7 @@ class Measurement:
 # equipment ----------------------------------------------------------------------------
 @dataclass
 class GenericEquipment:
-    """<TODO CLASS DOCSTRING>"""
+    """Simple dataclass implementation for generic equipment."""
 
     name: str
     sources: List = field(default_factory=lambda: [])
