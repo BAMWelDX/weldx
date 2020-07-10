@@ -78,10 +78,3 @@ class GenericEquipment:
     name: str
     sources: List = field(default_factory=lambda: [])
     data_transformations: List = field(default_factory=lambda: [])
-
-
-@dataclass
-class Sensor:
-    """<TODO CLASS DOCSTRING>"""
-
-    data: str

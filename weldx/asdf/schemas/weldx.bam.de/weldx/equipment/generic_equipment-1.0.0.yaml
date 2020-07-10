@@ -5,9 +5,10 @@ id: "http://weldx.bam.de/schemas/weldx/equipment/generic_equipment-1.0.0"
 tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
 
 title: |
-  &lt;TODO DESCRIPTION&gt;
+  A generic piece of equipment.
 description: |
-  &lt;TODO DESCRIPTION&gt;
+  Generic placeholder class do describe any kind of equipment with additional metadata.
+  Equipments can be associated with signal sources and data transformations.
 type: object
 properties:
   name:
