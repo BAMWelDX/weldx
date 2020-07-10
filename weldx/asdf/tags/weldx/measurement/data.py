@@ -6,7 +6,7 @@ __all__ = ["Data", "DataType"]
 
 
 class DataType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Serialization class measurement data."""
 
     name = "measurement/data"
     version = "1.0.0"

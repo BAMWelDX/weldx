@@ -6,7 +6,7 @@ __all__ = ["DataTransformation", "DataTransformationType"]
 
 
 class DataTransformationType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Serialization class for data transformations."""
 
     name = "measurement/data_transformation"
     version = "1.0.0"

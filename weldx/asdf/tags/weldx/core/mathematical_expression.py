@@ -30,7 +30,7 @@ class MathematicalExpression:
 
 
 class MathematicalExpressionType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Serialization class for sympy style math expressions."""
 
     name = "core/mathematical_expression"
     version = "1.0.0"

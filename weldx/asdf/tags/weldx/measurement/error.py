@@ -6,7 +6,7 @@ __all__ = ["Error", "ErrorType"]
 
 
 class ErrorType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Serialization class for measurement errors."""
 
     name = "measurement/error"
     version = "1.0.0"

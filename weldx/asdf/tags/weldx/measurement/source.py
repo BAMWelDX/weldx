@@ -6,7 +6,7 @@ __all__ = ["Source", "SourceType"]
 
 
 class SourceType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Serialization class for measurement sources."""
 
     name = "measurement/source"
     version = "1.0.0"

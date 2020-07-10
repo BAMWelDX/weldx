@@ -6,7 +6,7 @@ __all__ = ["Signal", "SignalType"]
 
 
 class SignalType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Serialization class for measurement signals."""
 
     name = "measurement/signal"
     version = "1.0.0"

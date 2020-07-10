@@ -6,7 +6,7 @@ __all__ = ["GenericEquipment", "GenericEquipmentType"]
 
 
 class GenericEquipmentType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Serialization class for generic-equipment."""
 
     name = "equipment/generic_equipment"
     version = "1.0.0"
