@@ -1,34 +1,32 @@
 """Tests basic asdf implementations."""
 
-import pytest
-
 import os
 from io import BytesIO
+
+import asdf
+import jsonschema
 import numpy as np
 import pandas as pd
-import jsonschema
-import asdf
+import pytest
 
-from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
-
+from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
+from weldx.asdf.tags.weldx.aws.design.connection import Connection
+# weld design -----------------------------------------------------------------
+from weldx.asdf.tags.weldx.aws.design.joint_penetration import JointPenetration
+from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
+from weldx.asdf.tags.weldx.aws.design.weld_details import WeldDetails
+from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
+from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
+from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
 # welding process -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.aws.process.gas_component import GasComponent
-from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
 from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
     ShieldingGasForProcedure,
 )
-from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
-
-# weld design -----------------------------------------------------------------
-from weldx.asdf.tags.weldx.aws.design.joint_penetration import JointPenetration
-from weldx.asdf.tags.weldx.aws.design.weld_details import WeldDetails
-from weldx.asdf.tags.weldx.aws.design.connection import Connection
-from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
-from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
-from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
-from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
+from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
+from weldx.constants import WELDX_QUANTITY as Q_
 
 
 def test_aws_example():

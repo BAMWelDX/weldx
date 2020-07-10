@@ -310,7 +310,7 @@ class LocalCoordinateSystem:
 
     def __init__(
         self,
-        orientation: Union[xr.DataArray, np.ndarray, List[List]] = None,
+        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
         construction_checks: bool = True,
@@ -325,6 +325,7 @@ class LocalCoordinateSystem:
             corresponding orientation matrix is equal to the normalized orientation
             vectors. So each orthogonal transformation matrix can also be
             provided as orientation.
+            Passing a scipy.spatial.transform.Rotation object is also supported.
         coordinates :
             Coordinates of the origin
         time :
@@ -338,6 +339,9 @@ class LocalCoordinateSystem:
             Cartesian coordinate system
 
         """
+        if isinstance(orientation, Rot):
+            orientation = orientation.as_matrix()
+
         if construction_checks:
             if orientation is None:
                 orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
@@ -494,7 +498,7 @@ class LocalCoordinateSystem:
         return self + rhs_cs_inv
 
     @classmethod
-    def construct_from_euler(
+    def from_euler(
         cls, sequence, angles, degrees=False, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
@@ -538,11 +542,11 @@ class LocalCoordinateSystem:
             Local coordinate system
 
         """
-        orientation = Rot.from_euler(sequence, angles, degrees).as_matrix()
+        orientation = Rot.from_euler(sequence, angles, degrees)
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
-    def construct_from_orientation(
+    def from_orientation(
         cls, orientation, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from orientation matrix.
@@ -565,7 +569,7 @@ class LocalCoordinateSystem:
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
-    def construct_from_xyz(
+    def from_xyz(
         cls, vec_x, vec_y, vec_z, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from 3 vectors defining the orientation.
@@ -589,11 +593,18 @@ class LocalCoordinateSystem:
             Local coordinate system
 
         """
-        orientation = np.transpose([vec_x, vec_y, vec_z])
+        vec_x = ut.to_float_array(vec_x)
+        vec_y = ut.to_float_array(vec_y)
+        vec_z = ut.to_float_array(vec_z)
+
+        orientation = np.concatenate((vec_x, vec_y, vec_z), axis=vec_x.ndim - 1)
+        orientation = np.reshape(orientation, (*vec_x.shape, 3))
+        orientation = orientation.swapaxes(orientation.ndim - 1, orientation.ndim - 2)
+
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
-    def construct_from_xy_and_orientation(
+    def from_xy_and_orientation(
         cls, vec_x, vec_y, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
@@ -622,11 +633,10 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        orientation = np.transpose([vec_x, vec_y, vec_z])
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
 
     @classmethod
-    def construct_from_yz_and_orientation(
+    def from_yz_and_orientation(
         cls, vec_y, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
@@ -655,11 +665,10 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        orientation = np.transpose(np.array([vec_x, vec_y, vec_z]))
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
 
     @classmethod
-    def construct_from_xz_and_orientation(
+    def from_xz_and_orientation(
         cls, vec_x, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
@@ -688,8 +697,7 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        orientation = np.transpose([vec_x, vec_y, vec_z])
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
 
     @staticmethod
     def _sign_orientation(positive_orientation):
@@ -845,6 +853,39 @@ class LocalCoordinateSystem:
         )
         return LocalCoordinateSystem(orientation, coordinates)
 
+    def as_rotation(self) -> Rot:  # pragma: no cover
+        """Get a scipy.Rotation object from the coordinate system orientation.
+
+        Returns
+        -------
+        scipy.spatial.transform.Rotation
+            Scipy rotation object representing the orientation.
+
+        """
+        return Rot.from_matrix(self.orientation.values)
+
+    def as_euler(
+        self, seq: str = "xyz", degrees: bool = False
+    ) -> np.ndarray:  # pragma: no cover
+        """Return Euler angle representation of the coordinate system orientation.
+
+        Parameters
+        ----------
+        seq :
+            Euler rotation sequence as described in
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_euler.html
+        degrees :
+            Returned angles are in degrees if True, else they are in radians.
+            Default is False.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of euler angles.
+
+        """
+        return self.as_rotation().as_euler(seq=seq, degrees=degrees)
+
 
 # coordinate system manager class ------------------------------------------------------
 
@@ -902,8 +943,8 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-        self._graph.add_edge(node_from, node_to, lcs=lcs)
-        self._graph.add_edge(node_to, node_from, lcs=lcs.invert())
+        self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
+        self._graph.add_edge(node_to, node_from, lcs=lcs.invert(), defined=False)
 
     def _check_coordinate_system_exists(self, coordinate_system_name: Hashable):
         """Raise an exception if the specified coordinate system does not exist.
@@ -937,7 +978,7 @@ class CoordinateSystemManager:
                 + str(coordinate_system_name)
             )
 
-    def add_coordinate_system(
+    def add_cs(
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
@@ -948,11 +989,10 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be
-            any hashable type, but it is recommended to use strings.
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
         reference_system_name :
-            Name of the parent system. This must have been
-            already added.
+            Name of the parent system. This must have been already added.
         local_coordinate_system :
             An instance of
             weldx.transformations.LocalCoordinateSystem that describes how the new
@@ -1000,28 +1040,297 @@ class CoordinateSystemManager:
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
         self._graph.nodes[coordinate_system_name]["data"].append(data_name)
 
+    def create_cs(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager.
+
+        This function uses the '__init__' method of the 'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        orientation :
+            Matrix of 3 orthogonal column vectors which represent
+            the coordinate systems orientation. Keep in mind, that the columns of the
+            corresponding orientation matrix is equal to the normalized orientation
+            vectors. So each orthogonal transformation matrix can also be
+            provided as orientation.
+            Passing a scipy.spatial.transform.Rotation object is also supported.
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+        """
+        lcs = LocalCoordinateSystem(orientation, coordinates, time)
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+
+    def create_cs_from_euler(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        sequence,
+        angles,
+        degrees=False,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager.
+
+        This function uses the 'from_euler' method of the
+        'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        sequence :
+            Specifies sequence of axes for rotations. Up to 3 characters
+            belonging to the set {‘X’, ‘Y’, ‘Z’} for intrinsic rotations,
+            or {‘x’, ‘y’, ‘z’} for extrinsic rotations.
+            Extrinsic and intrinsic rotations cannot be mixed in one function call.
+        angles :
+            Euler angles specified in radians (degrees is False) or degrees
+            (degrees is True). For a single character seq, angles can be:
+            - a single value
+            - array_like with shape (N,), where each angle[i] corresponds to a single
+            rotation
+            - array_like with shape (N, 1), where each angle[i, 0] corresponds to a
+            single rotation
+            For 2- and 3-character wide seq, angles can be:
+            - array_like with shape (W,) where W is the width of seq, which corresponds
+            to a single rotation with W axes
+            - array_like with shape (N, W) where each angle[i] corresponds to a sequence
+            of Euler angles describing a single rotation
+        degrees :
+            If True, then the given angles are assumed to be in degrees.
+            Default is False.
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+
+        """
+        lcs = LocalCoordinateSystem.from_euler(
+            sequence, angles, degrees, coordinates, time
+        )
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+
+    def create_cs_from_xyz(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        vec_x,
+        vec_y,
+        vec_z,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager.
+
+        This function uses the 'from_xyz' method of the
+        'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        vec_x :
+            Vector defining the x-axis
+        vec_y :
+            Vector defining the y-axis
+        vec_z :
+            Vector defining the z-axis
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+
+        """
+        lcs = LocalCoordinateSystem.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+
+    def create_cs_from_xy_and_orientation(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        vec_x,
+        vec_y,
+        positive_orientation=True,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager.
+
+        This function uses the 'from_xy_and_orientation' method of the
+        'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        vec_x :
+            Vector defining the x-axis
+        vec_y :
+            Vector defining the y-axis
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not (Default value = True)
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+
+        """
+        lcs = LocalCoordinateSystem.from_xy_and_orientation(
+            vec_x, vec_y, positive_orientation, coordinates, time
+        )
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+
+    def create_cs_from_xz_and_orientation(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        vec_x,
+        vec_z,
+        positive_orientation=True,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager.
+
+        This function uses the 'from_xz_and_orientation' method of the
+        'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        vec_x :
+            Vector defining the x-axis
+        vec_z :
+            Vector defining the z-axis
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not (Default value = True)
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+
+        """
+        lcs = LocalCoordinateSystem.from_xz_and_orientation(
+            vec_x, vec_z, positive_orientation, coordinates, time
+        )
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+
+    def create_cs_from_yz_and_orientation(
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Hashable,
+        vec_y,
+        vec_z,
+        positive_orientation=True,
+        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create a coordinate system and add it to the coordinate system manager.
+
+        This function uses the 'from_yz_and_orientation' method of the
+        'LocalCoordinateSystem' class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system. This can be any hashable type, but it is
+            recommended to use strings.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        vec_y :
+            Vector defining the y-axis
+        vec_z :
+            Vector defining the z-axis
+        positive_orientation :
+            Set to True if the orientation should
+            be positive and to False if not (Default value = True)
+        coordinates :
+            Coordinates of the origin.
+        time :
+            Time data for time dependent coordinate systems.
+
+
+        """
+        lcs = LocalCoordinateSystem.from_yz_and_orientation(
+            vec_y, vec_z, positive_orientation, coordinates, time
+        )
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+
     def get_local_coordinate_system(
-        self, coordinate_system_name: Hashable, reference_system_name: Hashable
+        self,
+        coordinate_system_name: Hashable,
+        reference_system_name: Union[Hashable, None] = None,
+        time: Union[pd.DatetimeIndex, List, str, None] = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
 
-        If any coordinate system that is involved in the coordinate transformation has
-        a time dependency, the union of all coordinate systems' timestamps is
-        determined. Subsequently, all coordinate systems are interpolated in time to
-        match the time union before they are used in the transformation. The purpose is
-        to prevent interpolation errors when rotations are involved. In result, the
-        returned 'LocalCoordinateSystem' timestamps equals the time union of all
-        coordinate systems that were used during the transformation.
+        If no reference system is specified, the parent system will be used as
+        reference.
 
-        Without the preceding time union interpolation, multiple subsequent
-        transformations can cause changes in the rotation direction and transform
-        circular movements into linear ones. The reason for this is that each individual
-        transformation using the 'LocalCoordinateSystem's + operator generates a new
-        ''set of keyframes'' for the next transformation. Those ''keyframes'' do not
-        preserve the rotational trajectory of a coordinate system attached to a rotating
-        parent system. Additionally, the rotation angle between two keyframes after a
-        transformation might exceed 180°. Since the employed SLERP method always uses
-        the smaller rotation angle, subsequent interpolations will cause a change of the
+        If any coordinate system that is involved in the coordinate transformation has
+        a time dependency, the returned coordinate system will also be time dependent.
+
+        The timestamps of the returned system depend on the functions time parameter.
+        By default, the time union of all involved coordinate systems is taken.
+
+        Information regarding the implementation:
+        It is important to mention that all coordinate systems that are involved in the
+        transformation should be interpolated to a common time line before they are
+        combined using the 'LocalCoordinateSystem's __add__ and __sub__ functions.
+        If this is not done before, serious interpolation errors for rotations can
+        occur. The reason is, that those operators also perform time interpolations
+        if the timestamps of 2 systems do not match. When chaining multiple
+        transformations already interpolated values might be used to perform another
+        interpolation.
+
+        To see why this is problematic, consider a coordinate system which is statically
+        attached to a not moving but rotating parent coordinate system. If it gets
+        transformed to the reference systems of its parent, it will follow a circular
+        trajectory around the parent system. For discrete timestamps, the trajectory is
+        described by a set of corresponding coordinates. If we now interpolate again,
+        the positions between those coordinates will be interpolated linearly, ignoring
+        the originally circular trajectory. The dependency on the rotating parent system
+        is not considered in further transformations.
+
+        Additionally, if the transformed system is rotating itself, the transformation
+        to the parent's reference system might cause the rotation angle between to
+        time steps to exceed 180 degrees. Since the SLERP always takes the shortest
+        angle between 2 ''keyframes'', further interpolations wrongly change the
         rotation order.
 
         Parameters
@@ -1030,6 +1339,11 @@ class CoordinateSystemManager:
             Name of the coordinate system
         reference_system_name :
             Name of the reference coordinate system
+        time:
+            Either a pandas.DatetimeIndex that specifies the target timestamps of the
+            returned system, the name of another coordinate system that provides the
+            timestamps or 'None'. If 'None' is chosen, the time union of all involved
+            transformations is used.
 
         Returns
         -------
@@ -1037,26 +1351,68 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-        # TODO: Add time parameter
-        # TODO: Treat static separately
-        # TODO: What if coordinate system and reference are the same?
+        if reference_system_name is None:
+            reference_system_name = self.get_parent_system_name(coordinate_system_name)
+            if reference_system_name is None:
+                raise ValueError(
+                    f"The system {coordinate_system_name} has no parent system. "
+                    f"You need to explicitly specify a reference system"
+                )
         self._check_coordinate_system_exists(coordinate_system_name)
         self._check_coordinate_system_exists(reference_system_name)
+
+        if coordinate_system_name == reference_system_name:
+            return LocalCoordinateSystem()
 
         path = nx.shortest_path(
             self.graph, coordinate_system_name, reference_system_name
         )
         path_edges = [edge for edge in zip(path[:-1], path[1:])]
 
-        time_union = self.time_union(path_edges)
+        if time is None:
+            time_interp = self.time_union(path_edges)
 
-        lcs = self.graph.edges[path_edges[0]]["lcs"]
+        elif isinstance(time, str):
+            parent_name = self.get_parent_system_name(time)
+            if parent_name is None:
+                raise ValueError("The root system has no time dependency.")
 
-        lcs = lcs.interp_time(time_union)
+            time_interp = self.get_local_coordinate_system(time, parent_name).time
+            if time_interp is None:
+                raise ValueError(f'The system "{time}" is not time dependent')
+
+        else:
+            time_interp = pd.DatetimeIndex(time)
+
+        lcs = self.graph.edges[path_edges[0]]["lcs"].interp_time(time_interp)
         for edge in path_edges[1:]:
-            lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time_union)
+            lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time_interp)
 
         return lcs
+
+    def get_parent_system_name(self, coordinate_system_name):
+        """Get the name of a coordinate systems parent system.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+
+        Returns
+        -------
+        str
+            Name of the parent system
+        None
+            If the coordinate system has no parent (root system)
+
+        """
+        self._check_coordinate_system_exists(coordinate_system_name)
+
+        neighbors = self._graph.neighbors(coordinate_system_name)
+        for neighbor in neighbors:
+            if self._graph.edges[(coordinate_system_name, neighbor)]["defined"]:
+                return neighbor
+        return None
 
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
         """Return 'True' if a coordinate system with specified name already exists.
@@ -1243,14 +1599,22 @@ class CoordinateSystemManager:
     def interp_time(
         self,
         time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
+        affected_coordinate_systems: Union[str, List[str], None] = None,
         inplace: bool = False,
     ) -> "CoordinateSystemManager":
         """Interpolates the coordinate systems in time.
+
+        If no list of affected coordinate systems is provided, all systems will be
+        interpolated to the same timeline.
 
         Parameters
         ----------
         time :
             Time data.
+        affected_coordinate_systems :
+            A single coordinate system name or a list of coordinate system names that
+            should be interpolated in time. Only transformations towards the systems
+            root node are affected.
         inplace :
             If 'True' the interpolation is performed in place, otherwise a
             new instance is returned. (Default value = False)
@@ -1262,13 +1626,33 @@ class CoordinateSystemManager:
 
         """
         if inplace:
-            for edge in self._graph.edges:
-                self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
-                    "lcs"
-                ].interp_time(time)
+            if affected_coordinate_systems is not None:
+                if isinstance(affected_coordinate_systems, str):
+                    affected_coordinate_systems = [affected_coordinate_systems]
+
+                affected_edges = []
+                for cs in affected_coordinate_systems:
+                    ps = self.get_parent_system_name(cs)
+                    affected_edges.append((cs, ps))
+                    affected_edges.append((ps, cs))
+            else:
+                affected_edges = self._graph.edges
+
+            for edge in affected_edges:
+                if self._graph.edges[edge]["defined"]:
+                    self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
+                        "lcs"
+                    ].interp_time(time)
+            for edge in affected_edges:
+                if not self._graph.edges[edge]["defined"]:
+                    self._graph.edges[edge]["lcs"] = self._graph.edges[
+                        (edge[1], edge[0])
+                    ]["lcs"].invert()
             return self
 
-        return deepcopy(self).interp_time(time, inplace=True)
+        return deepcopy(self).interp_time(
+            time, affected_coordinate_systems, inplace=True
+        )
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """Get the time union of all or selected local coordinate systems.
