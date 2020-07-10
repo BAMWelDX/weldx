@@ -1,3 +1,4 @@
+"""Test the measurement package."""
 from io import BytesIO
 
 import asdf
@@ -105,9 +106,9 @@ def test_generic_measurement():
         "data": measurement_data,
         "measurements": measurements,
         # "expression": expr_01,
-        # "measurement_chains": measurement_chains,
-        # "data_sources": sources,
-        # "data_processors": processors,
+        "measurement_chains": measurement_chains,
+        "data_sources": sources,
+        "data_processors": processors,
     }
 
     asdf_buffer = BytesIO()
@@ -116,4 +117,4 @@ def test_generic_measurement():
         f.write_to(asdf_buffer)
         asdf_buffer.seek(0)
 
-    res = asdf.open(asdf_buffer, extensions=[WeldxExtension(), WeldxAsdfExtension()])
+    asdf.open(asdf_buffer, extensions=[WeldxExtension(), WeldxAsdfExtension()])
