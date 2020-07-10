@@ -498,7 +498,7 @@ class LocalCoordinateSystem:
         return self + rhs_cs_inv
 
     @classmethod
-    def construct_from_euler(
+    def from_euler(
         cls, sequence, angles, degrees=False, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
@@ -546,7 +546,7 @@ class LocalCoordinateSystem:
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
-    def construct_from_orientation(
+    def from_orientation(
         cls, orientation, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from orientation matrix.
@@ -569,7 +569,7 @@ class LocalCoordinateSystem:
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
-    def construct_from_xyz(
+    def from_xyz(
         cls, vec_x, vec_y, vec_z, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from 3 vectors defining the orientation.
@@ -604,7 +604,7 @@ class LocalCoordinateSystem:
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
-    def construct_from_xy_and_orientation(
+    def from_xy_and_orientation(
         cls, vec_x, vec_y, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
@@ -633,10 +633,10 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        return cls.construct_from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
 
     @classmethod
-    def construct_from_yz_and_orientation(
+    def from_yz_and_orientation(
         cls, vec_y, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
@@ -665,10 +665,10 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        return cls.construct_from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
 
     @classmethod
-    def construct_from_xz_and_orientation(
+    def from_xz_and_orientation(
         cls, vec_x, vec_z, positive_orientation=True, coordinates=None, time=None
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
@@ -697,7 +697,7 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        return cls.construct_from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
 
     @staticmethod
     def _sign_orientation(positive_orientation):
@@ -978,7 +978,7 @@ class CoordinateSystemManager:
                 + str(coordinate_system_name)
             )
 
-    def add_coordinate_system(
+    def add_cs(
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
@@ -1040,7 +1040,7 @@ class CoordinateSystemManager:
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
         self._graph.nodes[coordinate_system_name]["data"].append(data_name)
 
-    def create_coordinate_system(
+    def create_cs(
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
@@ -1073,9 +1073,9 @@ class CoordinateSystemManager:
 
         """
         lcs = LocalCoordinateSystem(orientation, coordinates, time)
-        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
 
-    def create_coordinate_system_from_euler(
+    def create_cs_from_euler(
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
@@ -1087,7 +1087,7 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'construct_from_euler' method of the
+        This function uses the 'from_euler' method of the
         'LocalCoordinateSystem' class.
 
         Parameters
@@ -1125,12 +1125,12 @@ class CoordinateSystemManager:
 
 
         """
-        lcs = LocalCoordinateSystem.construct_from_euler(
+        lcs = LocalCoordinateSystem.from_euler(
             sequence, angles, degrees, coordinates, time
         )
-        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
 
-    def create_coordinate_system_from_xyz(
+    def create_cs_from_xyz(
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
@@ -1142,7 +1142,7 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'construct_from_xyz' method of the
+        This function uses the 'from_xyz' method of the
         'LocalCoordinateSystem' class.
 
         Parameters
@@ -1165,12 +1165,10 @@ class CoordinateSystemManager:
 
 
         """
-        lcs = LocalCoordinateSystem.construct_from_xyz(
-            vec_x, vec_y, vec_z, coordinates, time
-        )
-        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+        lcs = LocalCoordinateSystem.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
 
-    def create_coordinate_system_from_xy_and_orientation(
+    def create_cs_from_xy_and_orientation(
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
@@ -1182,7 +1180,7 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'construct_from_xy_and_orientation' method of the
+        This function uses the 'from_xy_and_orientation' method of the
         'LocalCoordinateSystem' class.
 
         Parameters
@@ -1206,12 +1204,12 @@ class CoordinateSystemManager:
 
 
         """
-        lcs = LocalCoordinateSystem.construct_from_xy_and_orientation(
+        lcs = LocalCoordinateSystem.from_xy_and_orientation(
             vec_x, vec_y, positive_orientation, coordinates, time
         )
-        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
 
-    def create_coordinate_system_from_xz_and_orientation(
+    def create_cs_from_xz_and_orientation(
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
@@ -1223,7 +1221,7 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'construct_from_xz_and_orientation' method of the
+        This function uses the 'from_xz_and_orientation' method of the
         'LocalCoordinateSystem' class.
 
         Parameters
@@ -1247,12 +1245,12 @@ class CoordinateSystemManager:
 
 
         """
-        lcs = LocalCoordinateSystem.construct_from_xz_and_orientation(
+        lcs = LocalCoordinateSystem.from_xz_and_orientation(
             vec_x, vec_z, positive_orientation, coordinates, time
         )
-        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
 
-    def create_coordinate_system_from_yz_and_orientation(
+    def create_cs_from_yz_and_orientation(
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
@@ -1264,7 +1262,7 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'construct_from_yz_and_orientation' method of the
+        This function uses the 'from_yz_and_orientation' method of the
         'LocalCoordinateSystem' class.
 
         Parameters
@@ -1288,10 +1286,10 @@ class CoordinateSystemManager:
 
 
         """
-        lcs = LocalCoordinateSystem.construct_from_yz_and_orientation(
+        lcs = LocalCoordinateSystem.from_yz_and_orientation(
             vec_y, vec_z, positive_orientation, coordinates, time
         )
-        self.add_coordinate_system(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(coordinate_system_name, reference_system_name, lcs)
 
     def get_local_coordinate_system(
         self,
