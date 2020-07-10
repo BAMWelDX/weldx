@@ -1,3 +1,5 @@
+from io import BytesIO
+
 import asdf
 import sympy
 import xarray as xr
@@ -5,9 +7,11 @@ import xarray as xr
 import weldx.measurement as msm
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.core.mathematical_expression import MathematicalExpression
+from weldx.constants import WELDX_QUANTITY as Q_
 
 
-def test_generic_save():
+def test_generic_measurement():
+    """Test basic measurement creation and ASDF read/write."""
     data_01 = msm.Data(
         name="Welding current", data=xr.DataArray([1, 2, 3, 4], dims=["time"])
     )
@@ -30,30 +34,30 @@ def test_generic_save():
 
     dp_01 = msm.DataTransformation(
         name="AD conversion current measurement",
-        input_signal=msm.Signal("analog", "V", data=None),
+        input_signal=src_01.output_signal,
         output_signal=msm.Signal("digital", "V", data=None),
         error=msm.Error(999.0),
     )
 
     dp_02 = msm.DataTransformation(
         name="Calibration current measurement",
-        input_signal=msm.Signal("digital", "V", data=None),
+        input_signal=dp_01.output_signal,
         output_signal=msm.Signal("digital", "A", data=data_01),
         error=msm.Error(43.0),
     )
 
     dp_03 = msm.DataTransformation(
         name="AD conversion voltage measurement",
-        input_signal=msm.Signal("analog", "V", data=None),
+        input_signal=dp_02.output_signal,
         output_signal=msm.Signal("digital", "V", data=None),
         error=msm.Error(2.0),
     )
 
     dp_04 = msm.DataTransformation(
         name="Calibration voltage measurement",
-        input_signal=msm.Signal("digital", "V", data=None),
+        input_signal=dp_03.output_signal,
         output_signal=msm.Signal("digital", "V", data=data_02),
-        error=msm.Error(3.0),
+        error=msm.Error(Q_(3.0, "percent")),
     )
 
     chn_01 = msm.MeasurementChain(
@@ -100,26 +104,16 @@ def test_generic_save():
         "equipment": equipment,
         "data": measurement_data,
         "measurements": measurements,
-        "expression": expr_01,
+        # "expression": expr_01,
         # "measurement_chains": measurement_chains,
         # "data_sources": sources,
         # "data_processors": processors,
     }
+
+    asdf_buffer = BytesIO()
+
     with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
-        f.write_to("test.yaml")
+        f.write_to(asdf_buffer)
+        asdf_buffer.seek(0)
 
-
-def test_generic_load():
-    f = asdf.open("test.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()])
-
-    # processors = f.tree["data_processors"]
-    # sources = f.tree["data_sources"]
-    # measurement_chains = f.tree["measurement_chains"]
-
-    # print(processors[0])
-    # print(sources[0])
-    # print(measurement_chains[0])
-    data = f.tree["data"]
-    expr = f.tree["expression"]
-    print(f.tree["expression"].expression)
-    res = expr.evaluate(x=data[0].data)
+    res = asdf.open(asdf_buffer, extensions=[WeldxExtension(), WeldxAsdfExtension()])

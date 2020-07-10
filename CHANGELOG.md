@@ -18,7 +18,6 @@
 - allow using `pint.Quantity` coordinates in `weldx.transformations.LocalCoordinateSystem` [#70]
 - add measurement related ASDF serialization classes: [#70]
   - `equipment/generic_equipment-1.0.0`
-  - `equipment/sensor-1.0.0`
   - `measurement/data-1.0.0`
   - `data_transformation-1.0.0`
   - `measurement/error-1.0.0`
