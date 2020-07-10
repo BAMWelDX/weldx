@@ -170,7 +170,7 @@ class LocalCoordinateSystemASDF(WeldxType):
             for cs_data in coordinate_systems:
                 if not csm.has_coordinate_system(cs_data.name):
                     if csm.has_coordinate_system(cs_data.reference_system):
-                        csm.add_coordinate_system(
+                        csm.add_cs(
                             cs_data.name,
                             cs_data.reference_system,
                             cs_data.transformation,

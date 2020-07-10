@@ -247,22 +247,18 @@ def are_coordinate_system_managers_equal(
 def get_example_coordinate_system_manager():
     """Get a consistent CoordinateSystemManager instance for test purposes."""
     csm = tf.CoordinateSystemManager("root")
-    csm.add_coordinate_system(
-        "lcs_01", "root", tf.LocalCoordinateSystem(coordinates=[1, 2, 3])
-    )
-    csm.add_coordinate_system(
+    csm.create_cs("lcs_01", "root", coordinates=[1, 2, 3])
+    csm.create_cs(
         "lcs_02",
         "root",
-        tf.LocalCoordinateSystem(
-            orientation=tf.rotation_matrix_z(np.pi / 3), coordinates=[4, -7, 8]
-        ),
+        orientation=tf.rotation_matrix_z(np.pi / 3),
+        coordinates=[4, -7, 8],
     )
-    csm.add_coordinate_system(
+    csm.create_cs(
         "lcs_03",
         "lcs_02",
-        tf.LocalCoordinateSystem(
-            orientation=tf.rotation_matrix_y(np.pi / 11), coordinates=[4, -7, 8]
-        ),
+        orientation=tf.rotation_matrix_y(np.pi / 11),
+        coordinates=[4, -7, 8],
     )
     return csm
 
