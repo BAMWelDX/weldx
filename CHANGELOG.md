@@ -15,3 +15,4 @@
 `weldx.transformations.CoordinateSystemManager`.
 - add test for `xarray.DataArray`, `xarray.Dataset`, `weldx.transformations.LocalCoordinateSystem` and
 `weldx.transformations.CoordinateSystemManager` serialization.
+- allow using `pint.Quantity` coordinates in `weldx.transformations.LocalCoordinateSystem` [#70]
