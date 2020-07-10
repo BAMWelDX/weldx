@@ -109,10 +109,6 @@ def test_generic_save():
         f.write_to("test.yaml")
 
 
-# TODO: remove
-test_generic_save()
-
-
 def test_generic_load():
     f = asdf.open("test.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()])
 
@@ -127,9 +123,3 @@ def test_generic_load():
     expr = f.tree["expression"]
     print(f.tree["expression"].expression)
     res = expr.evaluate(x=data[0].data)
-
-    print(res)
-
-
-# TODO: remove
-test_generic_load()

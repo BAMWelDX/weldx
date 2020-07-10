@@ -20,6 +20,7 @@ excluded_words:
   - pandas
   - xarray
   - scipy
+  - sympy
   - pytest
   - pydocstyle
   - matplotlib
@@ -101,3 +102,4 @@ excluded_words:
   - xyz
   - bamwelding
   - netcdf
+  - msm
