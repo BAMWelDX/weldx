@@ -25,14 +25,14 @@ def _write_read_buffer(tree):
         buff, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
     ) as af:
         data = af.tree
-    return data
+    return data, buff
 
 
 def test_property_tag_validator():
     """Test custom ASDF shape validators."""
     test = PropertyTagTestClass()
     tree = {"root_node": test}
-    data = _write_read_buffer(tree)
+    data, buffer = _write_read_buffer(tree)
 
     with pytest.raises(jsonschema.exceptions.ValidationError):
         test = PropertyTagTestClass(prop3=pd.Timedelta(2, "s"))
