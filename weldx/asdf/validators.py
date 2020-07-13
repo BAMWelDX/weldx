@@ -2,6 +2,7 @@ import re
 from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 
 from asdf import ValidationError
+from asdf.schema import validate_tag
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
@@ -535,14 +536,6 @@ def wx_property_tag_validator(
 
     """
     for key, value in instance.items():
-        try:
-            if not (value._tag == wx_property_tag):
-                yield ValidationError(
-                    f"Error validating tag {wx_property_tag}.\nOn instance {instance}"
-                )
-        except AttributeError:
-            yield ValidationError(
-                f"Error validating tag {wx_property_tag}.\nOn instance {instance}"
-            )
-        except Exception as err:
-            raise err
+        yield from validate_tag(
+            validator, tagname=wx_property_tag, instance=value, schema=None
+        )
