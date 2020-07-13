@@ -511,3 +511,20 @@ def debug_validator(validator, debug_validator, instance, schema):
     """Enable simple breakpoint for validation."""
     if debug_validator:
         print(f"triggered validation on schema {schema} against instance {instance}")
+
+
+def wx_property_tag_validator(
+    validator, wx_property_tag, instance, schema
+) -> Iterator[ValidationError]:
+    for key, value in instance.items():
+        try:
+            if not (value._tag == wx_property_tag):
+                yield ValidationError(
+                    f"Error validating tag {wx_property_tag}.\nOn instance {instance}"
+                )
+        except AttributeError:
+            yield ValidationError(
+                f"Error validating tag {wx_property_tag}.\nOn instance {instance}"
+            )
+        except Exception as err:
+            raise err
