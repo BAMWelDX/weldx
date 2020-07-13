@@ -1,3 +1,6 @@
+import pint
+
+from weldx.asdf.tags.weldx.core.common_types import Variable
 from weldx.asdf.types import WeldxType
 from weldx.transformations import LocalCoordinateSystem
 
@@ -32,12 +35,34 @@ class LocalCoordinateSystemASDF(WeldxType):
             type to be serialized.
 
         """
-        tree = {"dataset": node.dataset}
+        orientations = Variable(
+            "orientations", node.orientation.dims, node.orientation.data
+        )
+
+        coordinates = Variable(
+            "coordinates", node.coordinates.dims, node.coordinates.data
+        )
+
+        tree = {
+            "orientations": orientations,
+            "coordinates": coordinates,
+        }
+
+        if "time" in node.dataset.coords:
+            tree["time"] = node.time
+
         # example code to manipulate inline array storage
         if "time" not in node.coordinates.coords:
-            ctx.set_array_storage(node.coordinates.data, "inline")
+            if isinstance(coordinates.data, pint.Quantity):
+                ctx.set_array_storage(coordinates.data.magnitude, "inline")
+            else:
+                ctx.set_array_storage(coordinates.data, "inline")
         if "time" not in node.orientation.coords:
-            ctx.set_array_storage(node.orientation.data, "inline")
+            if isinstance(orientations.data, pint.Quantity):
+                ctx.set_array_storage(orientations.data.magnitude, "inline")
+            else:
+                ctx.set_array_storage(orientations.data, "inline")
+
         ctx.set_array_storage(node.dataset.coords["c"].data, "inline")  # not working
         ctx.set_array_storage(
             node.orientation.coords["v"].data, "inline"

@@ -142,12 +142,30 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
         A local coordinate system
 
     """
-    coords = Q_(np.asarray([2.0, 5.0, 1.0]), "mm")
-    orientation = tf.rotation_matrix_z(np.pi / 3)
+    if not time_dep_coordinates:
+        coords = Q_(np.asarray([2.0, 5.0, 1.0]), "mm")
+    else:
+        coords = Q_(
+            np.asarray(
+                [[2.0, 5.0, 1.0], [1.0, -4.0, 1.2], [0.3, 4.4, 4.2], [1.1, 2.3, 0.2]]
+            ),
+            "mm",
+        )
+
+    if not time_dep_orientation:
+        orientation = tf.rotation_matrix_z(np.pi / 3)
+    else:
+        orientation = tf.rotation_matrix_z(np.pi / 2 * np.array([1, 2, 3, 4]))
 
     if not time_dep_orientation and not time_dep_coordinates:
         return tf.LocalCoordinateSystem(orientation=orientation, coordinates=coords)
-    raise Exception("not implemented")
+    else:
+        time = pd.DatetimeIndex(
+            ["2000-01-01", "2000-01-02", "2000-01-03", "2000-01-04"]
+        )
+        return tf.LocalCoordinateSystem(
+            orientation=orientation, coordinates=coords, time=time
+        )
 
 
 def are_local_coordinate_systems_equal(
@@ -176,12 +194,24 @@ def are_local_coordinate_systems_equal(
 def test_local_coordinate_system_save():
     """Test if a LocalCoordinateSystem can be written to an asdf file."""
     lcs_static = get_local_coordinate_system(False, False)
-    tree = {"lcs_static": lcs_static}
+    lcs_tdp_c = get_local_coordinate_system(False, True)
+    lcs_tdp_o = get_local_coordinate_system(True, False)
+    lcs_tdp_oc = get_local_coordinate_system(True, True)
+    tree = {
+        "lcs_static": lcs_static,
+        "lcs_tdp_c": lcs_tdp_c,
+        "lcs_tdp_o": lcs_tdp_o,
+        "lcs_tdp_oc": lcs_tdp_oc,
+    }
     with asdf.AsdfFile(
         tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
     ) as f:
-        f.write_to(buffer_lcs)
+        f.write_to("buffer_lcs.yaml")
         buffer_lcs.seek(0)
+
+
+# TODO: remove
+test_local_coordinate_system_save()
 
 
 def test_local_coordinate_system_load():

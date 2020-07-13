@@ -10,12 +10,20 @@ description: |
   A local coordinate system is described by time-dependent coordinates and orientations towards a reference system.
 type: object
 properties:
-  dataset:
+  time:
+    tag: tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0
+  coordinates:
     description: |
-      A dataset containing the data of the local coordinate system.
-    $ref: tag:weldx.bam.de:weldx/core/dataset-1.0.0
+      An ndarray containing the coordinates.
+    tag: tag:weldx.bam.de:weldx/core/variable-1.0.0
+  orientations:
+    description: |
+      An ndarray containing the orientations.
+    tag: tag:weldx.bam.de:weldx/core/variable-1.0.0
 
-required: [dataset]
+
+required: [orientations, coordinates]
+propertyOrder: [time, orientations, coordinates]
 flowStyle: block
 additionalProperties: false
 
