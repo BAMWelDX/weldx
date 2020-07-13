@@ -436,7 +436,7 @@ def wx_shape_validator(
     validator:
         A jsonschema.Validator instance.
     wx_shape:
-        Enable shape validation for this schema..
+        Enable shape validation for this schema.
     instance:
         Tree serialization (with default dtypes) of the instance
     schema:
@@ -514,8 +514,26 @@ def debug_validator(validator, debug_validator, instance, schema):
 
 
 def wx_property_tag_validator(
-    validator, wx_property_tag, instance, schema
+    validator, wx_property_tag: str, instance, schema
 ) -> Iterator[ValidationError]:
+    """
+
+    Parameters
+    ----------
+    validator
+        A jsonschema.Validator instance.
+    wx_property_tag
+        The tag to test all object properties against.
+    instance
+        Tree serialization (with default dtypes or as tagged dict) of the instance
+    schema
+        Dict representing the full ASDF schema.
+
+    Yields
+    ------
+    asdf.ValidationError
+
+    """
     for key, value in instance.items():
         try:
             if not (value._tag == wx_property_tag):

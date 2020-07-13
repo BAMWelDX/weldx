@@ -6,11 +6,11 @@ from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_property_tag_validator
 
-__all__ = ["TestPropertyTagClass", "TestPropertyTagClassType"]
+__all__ = ["PropertyTagTestClass", "PropertyTagTestClassType"]
 
 
 @dataclass
-class TestPropertyTagClass:
+class PropertyTagTestClass:
     """Helper class to test the shape validator"""
 
     prop1: pd.Timestamp = pd.Timestamp("2020-01-01")
@@ -18,27 +18,27 @@ class TestPropertyTagClass:
     prop3: pd.Timestamp = pd.Timestamp("2020-01-03")
 
 
-class TestPropertyTagClassType(WeldxType):
+class PropertyTagTestClassType(WeldxType):
     """Helper class to test the shape validator"""
 
     name = "debug/test_property_tag"
     version = "1.0.0"
-    types = [TestPropertyTagClass]
+    types = [PropertyTagTestClass]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node: TestPropertyTagClass, ctx):
+    def to_tree(cls, node: PropertyTagTestClass, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
         tree = drop_none_attr(node)
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        obj = TestPropertyTagClass(**tree)
+        obj = PropertyTagTestClass(**tree)
         return obj
 
 
-TestPropertyTagClassType.validators = {
+PropertyTagTestClassType.validators = {
     "wx_property_tag": wx_property_tag_validator,
 }

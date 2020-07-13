@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.tags.weldx.debug.test_property_tag import TestPropertyTagClass
+from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 
 
 def _write_read_buffer(tree):
@@ -30,19 +30,16 @@ def _write_read_buffer(tree):
 
 def test_property_tag_validator():
     """Test custom ASDF shape validators."""
-    test = TestPropertyTagClass()
+    test = PropertyTagTestClass()
     tree = {"root_node": test}
     data = _write_read_buffer(tree)
 
     with pytest.raises(jsonschema.exceptions.ValidationError):
-        test = TestPropertyTagClass(prop3=pd.Timedelta(2, "s"))
+        test = PropertyTagTestClass(prop3=pd.Timedelta(2, "s"))
         tree = {"root_node": test}
         data = _write_read_buffer(tree)
 
     with pytest.raises(jsonschema.exceptions.ValidationError):
-        test = TestPropertyTagClass(prop3="STRING")
+        test = PropertyTagTestClass(prop3="STRING")
         tree = {"root_node": test}
         data = _write_read_buffer(tree)
-
-
-test_property_tag_validator()

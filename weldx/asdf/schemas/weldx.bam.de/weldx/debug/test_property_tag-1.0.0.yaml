@@ -6,7 +6,11 @@ tag: "tag:weldx.bam.de:weldx/debug/test_property_tag-1.0.0"
 
 title: |
   Test wx_property_type validation.
+description: |
+  This test schema demonstrates usage of the wx_property_tag validator.
+  The validator can be used to restrict all properties of a YAML object to a certain tag.
+  So far only one specific tag can be used.
 type: object
-additionalProperties: true
+additionalProperties: true # must be true to allow any property
 wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
 ...
