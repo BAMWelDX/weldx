@@ -1,0 +1,25 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/mathematical_expression-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
+
+title: |
+  Schema that describes a mathematical_expression.
+description: |
+  Defines a mathematical expression using sympy syntax.
+  https://docs.sympy.org/latest/modules/core.html#module-sympy.core.sympify
+
+  Also contains any predefined (constant) parameters used in the expression.
+type: object
+properties:
+  expression:
+    type: string
+  parameters:
+    type: object
+
+required: [expression]
+propertyOrder: [expression, parameters]
+flowStyle: block
+additionalProperties: false
+...

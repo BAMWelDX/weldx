@@ -142,7 +142,7 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
         A local coordinate system
 
     """
-    coords = [2, 5, 1]
+    coords = Q_(np.asarray([2.0, 5.0, 1.0]), "mm")
     orientation = tf.rotation_matrix_z(np.pi / 3)
 
     if not time_dep_orientation and not time_dep_coordinates:
@@ -247,22 +247,18 @@ def are_coordinate_system_managers_equal(
 def get_example_coordinate_system_manager():
     """Get a consistent CoordinateSystemManager instance for test purposes."""
     csm = tf.CoordinateSystemManager("root")
-    csm.add_coordinate_system(
-        "lcs_01", "root", tf.LocalCoordinateSystem(coordinates=[1, 2, 3])
-    )
-    csm.add_coordinate_system(
+    csm.create_cs("lcs_01", "root", coordinates=[1, 2, 3])
+    csm.create_cs(
         "lcs_02",
         "root",
-        tf.LocalCoordinateSystem(
-            orientation=tf.rotation_matrix_z(np.pi / 3), coordinates=[4, -7, 8]
-        ),
+        orientation=tf.rotation_matrix_z(np.pi / 3),
+        coordinates=[4, -7, 8],
     )
-    csm.add_coordinate_system(
+    csm.create_cs(
         "lcs_03",
         "lcs_02",
-        tf.LocalCoordinateSystem(
-            orientation=tf.rotation_matrix_y(np.pi / 11), coordinates=[4, -7, 8]
-        ),
+        orientation=tf.rotation_matrix_y(np.pi / 11),
+        coordinates=[4, -7, 8],
     )
     return csm
 

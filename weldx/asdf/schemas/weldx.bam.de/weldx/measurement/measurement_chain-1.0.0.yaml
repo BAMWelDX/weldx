@@ -1,0 +1,27 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/measurement/measurement_chain-1.0.0"
+tag: "tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0"
+
+title: |
+  Schema that describes a measurement_chain
+type: object
+properties:
+  name:
+    type: string
+  data_source:
+    $ref: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
+  data_processors:
+    type: array
+    items:
+      $ref: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
+
+
+propertyOrder: [name, data_source, data_processors]
+required: [name, data_source]
+
+
+
+flowStyle: block
+additionalProperties: false

@@ -16,7 +16,7 @@ class ConstClass:
 
 
 class ConstClassType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Serialization testclass for const validator."""
 
     name = "debug/const_class"
     version = "1.0.0"

@@ -1,0 +1,24 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/measurement/signal-1.0.0"
+tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
+
+title: |
+  Representation of a measurement signal with optional data attached.
+type: object
+properties:
+  signal_type:
+    type: string
+  unit:
+    type: string
+  data:
+    $ref: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
+
+
+propertyOrder: [signal_type, unit, data]
+required: [signal_type, unit]
+
+flowStyle: block
+additionalProperties: false
+...

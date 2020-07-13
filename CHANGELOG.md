@@ -15,3 +15,15 @@
 `weldx.transformations.CoordinateSystemManager`.
 - add test for `xarray.DataArray`, `xarray.Dataset`, `weldx.transformations.LocalCoordinateSystem` and
 `weldx.transformations.CoordinateSystemManager` serialization.
+- allow using `pint.Quantity` coordinates in `weldx.transformations.LocalCoordinateSystem` [#70]
+- add measurement related ASDF serialization classes: [#70]
+  - `equipment/generic_equipment-1.0.0`
+  - `measurement/data-1.0.0`
+  - `data_transformation-1.0.0`
+  - `measurement/error-1.0.0`
+  - `measurement/measurement-1.0.0`
+  - `measurement/measurement_chain-1.0.0`
+  - `measurement/signal-1.0.0`
+  - `measurement/source-1.0.0`
+- add ASDF support for `sympy` expressions with `core/mathematical_expression-1.0.0` [#70]
+- add example notebook for measurement chains in tutorials [#70]

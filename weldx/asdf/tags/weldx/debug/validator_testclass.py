@@ -22,7 +22,7 @@ class ValidatorTestClass:
 
 
 class ValidatorTestClassType(WeldxType):
-    """<TODO ASDF TYPE DOCSTRING>"""
+    """Serialization testclass custom validators."""
 
     name = "debug/validator_testclass"
     version = "1.0.0"
