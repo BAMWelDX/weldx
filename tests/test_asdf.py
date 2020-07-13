@@ -471,3 +471,6 @@ def test_shape_validator_syntax():
         val([1, 2], [1, 2, "(-3~1)"])
     with pytest.raises(ValueError):
         val([1, 2, 1], ["(-3~1)", 2, 1])
+    # no variables allowed in '~'
+    with pytest.raises(ValueError):
+        val([1, 2], [1, "(n~m)"])

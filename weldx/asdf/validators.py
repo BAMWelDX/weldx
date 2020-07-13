@@ -99,8 +99,35 @@ def _unit_validator(
 def _compare(_int, exp_string):
     """Compare helper of two strings for _custom_shape_validator.
 
+    An integer and an expected string are compared so that the string either contains
+    a ":" and thus describes an interval or a string consisting of numbers. So if our
+    integer is within the interval or equal to the described number, True is returned.
+    The interval can be open, in that there is no number left or right of the ":"
+    symbol.
 
-    Return a boolean.
+    Examples:
+    ---------
+
+    _int = 5
+    exp_string = "5"
+    -> True
+
+    _int = 5
+    exp_string = ":"
+    -> True
+
+    Open interval:
+    _int = 5
+    exp_string = "3:"
+    -> True
+
+    _int = 5
+    exp_string = "4"
+    -> False
+
+    _int = 5
+    exp_string = "6:8"
+    -> False
 
     Parameters
     ----------
@@ -135,6 +162,11 @@ def _compare(_int, exp_string):
 
 def _prepare_list(_list, list_expected):
     """Prepare a List and an expected List for validation.
+
+    The preparation of the lists consists in accepting all lists that contain
+    whitespaces and rewriting all lists that contain the symbols ":" as well as "~" to
+    a ":". In addition, lists that begin with "..." or parentheses are reversed for
+    validation to work.
 
     parameters
     ----------
@@ -189,6 +221,17 @@ def _is_range_format_valid(format_string: str):
 def _validate_expected_list(list_expected):
     """Validate an expected List and raises exceptions.
 
+    The syntax of the expected list is validated.
+    Examples that will raise errors:
+
+    Variable length should be at beginning or end.
+    [1, 2, "...", 4, 5]
+    [1, 2, "(3)", 4, 5]
+
+    Additional arguments are not accepted
+    [1, 2, 3, 4, "5..."]
+    [1, 2, 3, 4, "5(5)"]
+
     params
     ------
     list_expected:
@@ -236,6 +279,26 @@ def _validate_expected_list(list_expected):
 
 def _compare_lists(_list, list_expected):
     """Compare two lists.
+
+    The two lists are interpreted as a list of dimensions. We compare the dimensions of
+    these lists and in the case of a mismatch, False is returned. If the dimensions
+    match and there are variables in the list_expected, they are entered into a
+    dictionary and this is output. The dictionary can be empty if there are no
+    variables in the list_expected.
+
+    Examples:
+    ---------
+    _compare_lists([1, 2, 3], [1, 2, 3])
+    -> {}
+
+    _compare_lists([1, 2, 3], [1, n1, n2])
+    -> {n1: 2, n2: 3}
+
+    _compare_lists([1, 2, 3], [1, "..."])
+    -> {}
+
+    _compare_lists([1, 2, 3], [1, 2, 4])
+    -> False
 
     params
     ------
