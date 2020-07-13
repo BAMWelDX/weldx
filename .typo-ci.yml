@@ -20,6 +20,7 @@ excluded_words:
   - pandas
   - xarray
   - scipy
+  - sympy
   - pytest
   - pydocstyle
   - matplotlib
@@ -79,6 +80,9 @@ excluded_words:
   - ipython
   # scipy ---------------------------------------
   - Slerp
+  # sympy ---------------------------------------
+  - lambdify
+  - sympify
   # welding -------------------------------------
   - weldment
   # conda ---------------------------------------
@@ -101,3 +105,5 @@ excluded_words:
   - xyz
   - bamwelding
   - netcdf
+  - msm
+  - Beckhoff

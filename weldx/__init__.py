@@ -18,4 +18,4 @@ with warnings.catch_warnings():
 __version__ = get_versions()["version"]
 del get_versions
 
-__all__ = ["geometry", "transformations", "utility", "asdf", "Q_"]
+__all__ = ["geometry", "measurement", "transformations", "utility", "asdf", "Q_"]

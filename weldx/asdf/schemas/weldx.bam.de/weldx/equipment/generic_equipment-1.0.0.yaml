@@ -1,0 +1,30 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/equipment/generic_equipment-1.0.0"
+tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
+
+title: |
+  A generic piece of equipment.
+description: |
+  Generic placeholder class do describe any kind of equipment with additional metadata.
+  Equipments can be associated with signal sources and data transformations.
+type: object
+properties:
+  name:
+    type: string
+  sources:
+    type: array
+    items:
+      $ref: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
+  data_transformations:
+    type: array
+    items:
+      $ref: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
+
+propertyOrder: [name, sources, data_transformations]
+required: [name]
+
+flowStyle: block
+additionalProperties: false
+...

@@ -1,0 +1,25 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/measurement/source-1.0.0"
+tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
+
+title: |
+  Schema that describes a measurement source.
+type: object
+properties:
+  name:
+    type: string
+  output_signal:
+    $ref: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
+  error:
+    $ref: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
+
+required: [name, output_signal]
+propertyOrder: [name, output_signal, error]
+
+
+
+flowStyle: block
+additionalProperties: false
+...

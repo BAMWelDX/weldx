@@ -17,6 +17,7 @@ requirements = [
     "pandas>=1.0",
     "xarray>=0.15",
     "scipy>=1.4",
+    "sympy>=1.6",
     "pint>=0.11",
     "asdf>=2.6",
     "bottleneck>=1.3",
