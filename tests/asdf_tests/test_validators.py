@@ -32,14 +32,14 @@ def test_property_tag_validator():
     """Test custom ASDF shape validators."""
     test = PropertyTagTestClass()
     tree = {"root_node": test}
-    data, buffer = _write_read_buffer(tree)
+    _write_read_buffer(tree)
 
     with pytest.raises(jsonschema.exceptions.ValidationError):
         test = PropertyTagTestClass(prop3=pd.Timedelta(2, "s"))
         tree = {"root_node": test}
-        data = _write_read_buffer(tree)
+        _write_read_buffer(tree)
 
     with pytest.raises(jsonschema.exceptions.ValidationError):
         test = PropertyTagTestClass(prop3="STRING")
         tree = {"root_node": test}
-        data = _write_read_buffer(tree)
+        _write_read_buffer(tree)
