@@ -2,6 +2,7 @@ import re
 from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 
 from asdf import ValidationError
+from asdf.schema import validate_tag
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
@@ -436,7 +437,7 @@ def wx_shape_validator(
     validator:
         A jsonschema.Validator instance.
     wx_shape:
-        Enable shape validation for this schema..
+        Enable shape validation for this schema.
     instance:
         Tree serialization (with default dtypes) of the instance
     schema:
@@ -511,3 +512,30 @@ def debug_validator(validator, debug_validator, instance, schema):
     """Enable simple breakpoint for validation."""
     if debug_validator:
         print(f"triggered validation on schema {schema} against instance {instance}")
+
+
+def wx_property_tag_validator(
+    validator, wx_property_tag: str, instance, schema
+) -> Iterator[ValidationError]:
+    """
+
+    Parameters
+    ----------
+    validator
+        A jsonschema.Validator instance.
+    wx_property_tag
+        The tag to test all object properties against.
+    instance
+        Tree serialization (with default dtypes or as tagged dict) of the instance
+    schema
+        Dict representing the full ASDF schema.
+
+    Yields
+    ------
+    asdf.ValidationError
+
+    """
+    for key, value in instance.items():
+        yield from validate_tag(
+            validator, tagname=wx_property_tag, instance=value, schema=None
+        )

@@ -15,8 +15,8 @@
 `weldx.transformations.CoordinateSystemManager`.
 - add test for `xarray.DataArray`, `xarray.Dataset`, `weldx.transformations.LocalCoordinateSystem` and
 `weldx.transformations.CoordinateSystemManager` serialization.
-- allow using `pint.Quantity` coordinates in `weldx.transformations.LocalCoordinateSystem` [#70]
-- add measurement related ASDF serialization classes: [#70]
+- allow using `pint.Quantity` coordinates in `weldx.transformations.LocalCoordinateSystem` [#70](https://github.com/BAMWelDX/weldx/pull/70)
+- add measurement related ASDF serialization classes: [#70](https://github.com/BAMWelDX/weldx/pull/70)
   - `equipment/generic_equipment-1.0.0`
   - `measurement/data-1.0.0`
   - `data_transformation-1.0.0`
@@ -25,5 +25,16 @@
   - `measurement/measurement_chain-1.0.0`
   - `measurement/signal-1.0.0`
   - `measurement/source-1.0.0`
-- add ASDF support for `sympy` expressions with `core/mathematical_expression-1.0.0` [#70]
-- add example notebook for measurement chains in tutorials [#70]
+- add ASDF support for `sympy` expressions with `core/mathematical_expression-1.0.0` [#70](https://github.com/BAMWelDX/weldx/pull/70)
+- add example notebook for measurement chains in tutorials [#70](https://github.com/BAMWelDX/weldx/pull/70)
+- add `wx_property_tag` validator [#72](https://github.com/BAMWelDX/weldx/pull/72)
+ 
+    the `wx_property_tag` validator restricts **all** properties of an object to a single tag.
+    For example the following object can have any number of properties but all must be
+    of type `tag:weldx.bam.de:weldx/time/timestamp-1.0.0`
+    ```yaml
+    type: object
+    additionalProperties: true # must be true to allow any property
+    wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"  
+    ```
+    It can be used as a "named" mapping replacement instead of YAML `arrays`.
