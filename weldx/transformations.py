@@ -384,11 +384,15 @@ class LocalCoordinateSystem:
                 # TODO: Test if xarray has correct format
                 pass
 
-            orientation = xr.apply_ufunc(
-                normalize,
-                orientation,
-                input_core_dims=[["c"]],
-                output_core_dims=[["c"]],
+            # TODO: Remove the deepcopy when asdf 2.7.0 is available
+            #  - the copy circumvents an asdf bug
+            orientation = deepcopy(
+                xr.apply_ufunc(
+                    normalize,
+                    orientation,
+                    input_core_dims=[["c"]],
+                    output_core_dims=[["c"]],
+                )
             )
 
             # unify time axis

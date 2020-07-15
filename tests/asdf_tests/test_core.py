@@ -204,7 +204,7 @@ def test_local_coordinate_system_save():
         "lcs_tdp_oc": lcs_tdp_oc,
     }
     with asdf.AsdfFile(
-        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
+        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True,
     ) as f:
         f.write_to("buffer_lcs.yaml")
         buffer_lcs.seek(0)
@@ -216,12 +216,30 @@ test_local_coordinate_system_save()
 
 def test_local_coordinate_system_load():
     """Test if an xarray.DataArray can be restored from an asdf file."""
-    f = asdf.open(buffer_lcs, extensions=[WeldxExtension(), WeldxAsdfExtension()],)
+    f = asdf.open(
+        "buffer_lcs.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()],
+    )
     lcs_static_file = f.tree["lcs_static"]
+    lcs_tdp_c_file = f.tree["lcs_tdp_c"]
+    lcs_tdp_o_file = f.tree["lcs_tdp_o"]
+    lcs_tdp_oc_file = f.tree["lcs_tdp_oc"]
+
     lcs_static_exp = get_local_coordinate_system(False, False)
+    lcs_tdp_c_exp = get_local_coordinate_system(False, True)
+    lcs_tdp_o_exp = get_local_coordinate_system(True, False)
+    lcs_tdp_oc_exp = get_local_coordinate_system(True, True)
 
     assert are_local_coordinate_systems_equal(lcs_static_file, lcs_static_exp)
+    assert are_local_coordinate_systems_equal(lcs_tdp_c_file, lcs_tdp_c_exp)
+    # print(lcs_tdp_o_exp.orientation[0])
+    # print(lcs_tdp_o_file.orientation[0])
 
+    assert are_local_coordinate_systems_equal(lcs_tdp_o_file, lcs_tdp_o_exp)
+    assert are_local_coordinate_systems_equal(lcs_tdp_oc_file, lcs_tdp_oc_exp)
+
+
+# TODO: remove
+test_local_coordinate_system_load()
 
 # weldx.transformations.CoordinateSystemManager ----------------------------------------
 

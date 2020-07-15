@@ -63,10 +63,10 @@ class LocalCoordinateSystemASDF(WeldxType):
             else:
                 ctx.set_array_storage(orientations.data, "inline")
 
-        ctx.set_array_storage(node.dataset.coords["c"].data, "inline")  # not working
-        ctx.set_array_storage(
-            node.orientation.coords["v"].data, "inline"
-        )  # not working
+        # ctx.set_array_storage(node.dataset.coords["c"].data, "inline")  # not working
+        # ctx.set_array_storage(
+        #    node.orientation.coords["v"].data, "inline"
+        # )  # not working
         return tree
 
     @classmethod
@@ -88,7 +88,14 @@ class LocalCoordinateSystemASDF(WeldxType):
             An instance of the 'LocalCoordinateSystem' type.
 
         """
-        dataset = tree["dataset"]
+        orientations = tree["orientations"].data
+        coordinates = tree["coordinates"].data
+
+        if "time" in tree:
+            time = tree["time"]
+        else:
+            time = None
+
         return LocalCoordinateSystem(
-            orientation=dataset.orientation.data, coordinates=dataset.coordinates.data
+            orientation=orientations, coordinates=coordinates, time=time
         )
