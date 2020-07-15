@@ -247,7 +247,7 @@ def test_local_coordinate_system_shape_violation():
         with asdf.AsdfFile(
             {"lcs": lcs}, extensions=[WeldxExtension(), WeldxAsdfExtension()],
         ) as f:
-            f.write_to("buff.yaml")
+            f.write_to(buff)
 
     # orientations have wrong shape -----------------------
     orientation = xr.DataArray(
