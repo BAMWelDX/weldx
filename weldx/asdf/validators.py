@@ -348,7 +348,9 @@ def _custom_shape_validator(dict_test, dict_expected):
         )
 
     if _dict_values is False:
-        return False
+        raise ValidationError(
+            f"Shape {list_test[::-1]} does not match requirement {list_expected[::-1]}"
+        )
 
     dict_values = {}
     for key in _dict_values:

@@ -8,6 +8,7 @@ import jsonschema
 import numpy as np
 import pandas as pd
 import pytest
+from asdf import ValidationError
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
@@ -392,10 +393,11 @@ def test_shape_validator_syntax():
 
     def val(list_test, list_expected):
         """Add shape key to lists."""
-        res = _custom_shape_validator({"shape": list_test}, list_expected)
-        if isinstance(res, dict):
+        try:
+            _custom_shape_validator({"shape": list_test}, list_expected)
             return True
-        return False
+        except ValidationError:
+            return False
 
     # correct evaluation
     assert val([3], [3])
