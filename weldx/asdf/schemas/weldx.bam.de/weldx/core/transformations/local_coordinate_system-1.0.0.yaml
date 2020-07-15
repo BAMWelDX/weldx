@@ -9,8 +9,11 @@ title: |
 description: |
   A local coordinate system is described by time-dependent coordinates and orientations towards a reference system.
 type: object
+
 properties:
   time:
+    description: |
+      A list of timestamps
     tag: tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0
   coordinates:
     description: |
@@ -21,16 +24,14 @@ properties:
       An ndarray containing the orientations.
     tag: tag:weldx.bam.de:weldx/core/variable-1.0.0
 
+wx_shape:
+  coordinates:
+    data: [(t), 3]
+  orientations:
+    data: [(t), 3, 3]
 
 required: [orientations, coordinates]
 propertyOrder: [time, orientations, coordinates]
 flowStyle: block
 additionalProperties: false
-
-#wx_shape_validate: true
-#wx_shape:
-#  orientation:
-#    data: [3, 3]
-#  coordinates:
-#    data: [3]
 ...

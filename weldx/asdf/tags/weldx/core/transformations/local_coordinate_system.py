@@ -2,6 +2,7 @@ import pint
 
 from weldx.asdf.tags.weldx.core.common_types import Variable
 from weldx.asdf.types import WeldxType
+from weldx.asdf.validators import wx_shape_validator
 from weldx.transformations import LocalCoordinateSystem
 
 
@@ -13,7 +14,7 @@ class LocalCoordinateSystemASDF(WeldxType):
     types = [LocalCoordinateSystem]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-    validators = {}
+    validators = {"wx_shape": wx_shape_validator}
 
     @classmethod
     def to_tree(cls, node: LocalCoordinateSystem, ctx):

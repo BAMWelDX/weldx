@@ -231,9 +231,6 @@ def test_local_coordinate_system_load():
 
     assert are_local_coordinate_systems_equal(lcs_static_file, lcs_static_exp)
     assert are_local_coordinate_systems_equal(lcs_tdp_c_file, lcs_tdp_c_exp)
-    # print(lcs_tdp_o_exp.orientation[0])
-    # print(lcs_tdp_o_file.orientation[0])
-
     assert are_local_coordinate_systems_equal(lcs_tdp_o_file, lcs_tdp_o_exp)
     assert are_local_coordinate_systems_equal(lcs_tdp_oc_file, lcs_tdp_oc_exp)
 
