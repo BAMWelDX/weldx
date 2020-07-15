@@ -5,7 +5,9 @@ from io import BytesIO
 import asdf
 import numpy as np
 import pandas as pd
+import pytest
 import xarray as xr
+from jsonschema.exceptions import ValidationError
 
 import weldx.transformations as tf
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
@@ -159,13 +161,11 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
 
     if not time_dep_orientation and not time_dep_coordinates:
         return tf.LocalCoordinateSystem(orientation=orientation, coordinates=coords)
-    else:
-        time = pd.DatetimeIndex(
-            ["2000-01-01", "2000-01-02", "2000-01-03", "2000-01-04"]
-        )
-        return tf.LocalCoordinateSystem(
-            orientation=orientation, coordinates=coords, time=time
-        )
+
+    time = pd.DatetimeIndex(["2000-01-01", "2000-01-02", "2000-01-03", "2000-01-04"])
+    return tf.LocalCoordinateSystem(
+        orientation=orientation, coordinates=coords, time=time
+    )
 
 
 def are_local_coordinate_systems_equal(
@@ -206,19 +206,13 @@ def test_local_coordinate_system_save():
     with asdf.AsdfFile(
         tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True,
     ) as f:
-        f.write_to("buffer_lcs.yaml")
+        f.write_to(buffer_lcs)
         buffer_lcs.seek(0)
-
-
-# TODO: remove
-test_local_coordinate_system_save()
 
 
 def test_local_coordinate_system_load():
     """Test if an xarray.DataArray can be restored from an asdf file."""
-    f = asdf.open(
-        "buffer_lcs.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()],
-    )
+    f = asdf.open(buffer_lcs, extensions=[WeldxExtension(), WeldxAsdfExtension()],)
     lcs_static_file = f.tree["lcs_static"]
     lcs_tdp_c_file = f.tree["lcs_tdp_c"]
     lcs_tdp_o_file = f.tree["lcs_tdp_o"]
@@ -235,8 +229,48 @@ def test_local_coordinate_system_load():
     assert are_local_coordinate_systems_equal(lcs_tdp_oc_file, lcs_tdp_oc_exp)
 
 
+def test_local_coordinate_system_shape_violation():
+    """Test if the shape validators work as expected."""
+    # coordinates have wrong shape ------------------------
+    orientation = xr.DataArray(
+        data=[[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+        dims=["u", "v"],
+        coords={"u": ["x", "y", "z"], "v": [0, 1, 2]},
+    )
+    coordinates = xr.DataArray(data=[1, 2], dims=["c"], coords={"c": ["x", "y"]},)
+    lcs = tf.LocalCoordinateSystem(
+        orientation=orientation, coordinates=coordinates, construction_checks=False
+    )
+
+    with pytest.raises(ValidationError):
+        buff = BytesIO()
+        with asdf.AsdfFile(
+            {"lcs": lcs}, extensions=[WeldxExtension(), WeldxAsdfExtension()],
+        ) as f:
+            f.write_to("buff.yaml")
+
+    # orientations have wrong shape -----------------------
+    orientation = xr.DataArray(
+        data=[[1, 2], [3, 4]], dims=["c", "v"], coords={"c": ["x", "y"], "v": [0, 1]},
+    )
+    coordinates = xr.DataArray(
+        data=[1, 2, 3], dims=["u"], coords={"u": ["x", "y", "z"]},
+    )
+    lcs = tf.LocalCoordinateSystem(
+        orientation=orientation, coordinates=coordinates, construction_checks=False
+    )
+
+    with pytest.raises(ValidationError):
+        buff = BytesIO()
+        with asdf.AsdfFile(
+            {"lcs": lcs}, extensions=[WeldxExtension(), WeldxAsdfExtension()]
+        ) as f:
+            f.write_to(buff)
+
+
 # TODO: remove
-test_local_coordinate_system_load()
+test_local_coordinate_system_shape_violation()
+
 
 # weldx.transformations.CoordinateSystemManager ----------------------------------------
 
