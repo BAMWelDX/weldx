@@ -125,7 +125,7 @@ def test_generic_measurement():
 # TimeSeries ---------------------------------------------------------------------------
 
 
-def test_construction():
+def test_time_series_construction():
     # single value ----------------------------------------
     value = Q_(1, "m")
     ts_constant = msm.TimeSeries(data=value)
@@ -166,17 +166,28 @@ def test_construction():
         assert parameters[parameter] == ts_expr.expression.parameters[parameter]
 
 
-# TODO: remove
-test_construction()
-
-
 def test_factories():
     pass
 
 
-def test_evaluation_discrete():
-    pass
+def test_time_series_interp_time_constant():
+    value = Q_(1, "m")
+    ts_constant = msm.TimeSeries(data=value)
+
+    # single timedelta ------------------------------------
+    time_delta_single = pd.TimedeltaIndex([2], "D")
+    time_interp_single = ts_constant.interp_time(time_delta_single)
+
+    assert time_interp_single == value
+
+    # multiple time deltas --------------------------------
+    time_delta_multi = pd.TimedeltaIndex([0, 2, 5], "D")
+    time_interp_multi = ts_constant.interp_time(time_delta_multi)
+
+    assert len(time_interp_multi) == 3
+    for value_interp in time_interp_multi:
+        assert value_interp == value
 
 
-def test_evaluation_sympy():
-    pass
+# TODO: remove
+test_time_series_interp_time_constant()

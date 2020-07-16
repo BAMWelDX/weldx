@@ -156,6 +156,16 @@ class TimeSeries:
     def from_mathematical_expression(cls):
         pass
 
+    def interp_time(self, time):
+        if self._data is not None:
+            if isinstance(self._data.magnitude, np.ndarray):
+                pass
+            else:
+                if len(time) == 1:
+                    return self.data
+                else:
+                    return self.data * np.ones(len(time))
+
 
 # equipment ----------------------------------------------------------------------------
 @dataclass
