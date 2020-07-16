@@ -82,6 +82,7 @@ class TimeSeries:
     def __init__(self, data, time=None, interpolation=None):
         self._time = None
         self._data = None
+        self._expression = None
         self._interpolation = None
 
         if isinstance(data, pint.Quantity):
@@ -102,15 +103,25 @@ class TimeSeries:
                 self._time = time
                 self._data = data
         elif isinstance(data, MathematicalExpression):
-            pass
+            # TODO: check if time is None or time range
+            if data.num_variables() != 1:
+                raise Exception(
+                    "The mathematical expression must have exactly 1 free "
+                    "variable that represents time."
+                )
+            self._expression = data
         else:
-            raise ValueError(f'The data type "{type(data)}" is not supported.')
+            raise TypeError(f'The data type "{type(data)}" is not supported.')
 
     @property
     def data(self):
         if isinstance(self._data, xr.DataArray):
             return self._data.data
         return self._data
+
+    @property
+    def expression(self):
+        return self._expression
 
     @property
     def interpolation(self):

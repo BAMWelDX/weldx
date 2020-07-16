@@ -133,6 +133,7 @@ def test_construction():
     assert ts_constant.data == value
     assert ts_constant.time is None
     assert ts_constant.interpolation is None
+    assert ts_constant.expression is None
 
     # discrete values -------------------------------------
     time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="D")
@@ -142,6 +143,27 @@ def test_construction():
     assert np.all(ts_discrete.time == time)
     assert np.all(ts_discrete.data == values)
     assert ts_discrete.interpolation == "constant"
+    assert ts_discrete.expression is None
+
+    # mathematical expression -----------------------------
+    expr_string = "a*t+b"
+    parameters = {"a": 2, "b": -2}
+    expr = MathematicalExpression(expression=expr_string, parameters=parameters)
+
+    ts_expr = msm.TimeSeries(data=expr)
+
+    assert ts_expr.data is None
+    assert ts_expr.time is None
+    assert ts_expr.interpolation is None
+
+    assert isinstance(ts_expr.expression, MathematicalExpression)
+    assert ts_expr.expression.num_variables() == 1
+    assert ts_expr.expression.num_parameters() == 2
+    assert ts_expr.expression.get_variable_names()[0] == "t"
+
+    for parameter in parameters:
+        assert parameter in ts_expr.expression.parameters
+        assert parameters[parameter] == ts_expr.expression.parameters[parameter]
 
 
 # TODO: remove
