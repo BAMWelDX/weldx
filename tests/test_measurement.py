@@ -2,6 +2,8 @@
 from io import BytesIO
 
 import asdf
+import numpy as np
+import pandas as pd
 import sympy
 import xarray as xr
 
@@ -118,3 +120,41 @@ def test_generic_measurement():
         asdf_buffer.seek(0)
 
     asdf.open(asdf_buffer, extensions=[WeldxExtension(), WeldxAsdfExtension()])
+
+
+# TimeSeries ---------------------------------------------------------------------------
+
+
+def test_construction():
+    # single value ----------------------------------------
+    value = Q_(1, "m")
+    ts_constant = msm.TimeSeries(data=value)
+
+    assert ts_constant.data == value
+    assert ts_constant.time is None
+    assert ts_constant.interpolation is None
+
+    # discrete values -------------------------------------
+    time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="D")
+    values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
+    ts_discrete = msm.TimeSeries(data=values, time=time, interpolation="constant")
+
+    assert np.all(ts_discrete.time == time)
+    assert np.all(ts_discrete.data == values)
+    assert ts_discrete.interpolation == "constant"
+
+
+# TODO: remove
+test_construction()
+
+
+def test_factories():
+    pass
+
+
+def test_evaluation_discrete():
+    pass
+
+
+def test_evaluation_sympy():
+    pass
