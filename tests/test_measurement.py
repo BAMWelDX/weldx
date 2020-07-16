@@ -182,12 +182,37 @@ def test_time_series_interp_time_constant():
 
     # multiple time deltas --------------------------------
     time_delta_multi = pd.TimedeltaIndex([0, 2, 5], "D")
-    time_interp_multi = ts_constant.interp_time(time_delta_multi)
+    value_interp_multi = ts_constant.interp_time(time_delta_multi)
 
-    assert len(time_interp_multi) == 3
-    for value_interp in time_interp_multi:
+    assert len(value_interp_multi) == 3
+    for value_interp in value_interp_multi:
         assert value_interp == value
 
 
+def test_time_series_interp_time_expression():
+    expr_string = "a*t+b"
+    parameters = {"a": Q_(2, "meter/second"), "b": Q_(-2, "meter")}
+    expr = MathematicalExpression(expression=expr_string, parameters=parameters)
+
+    ts_expr = msm.TimeSeries(data=expr)
+
+    # single timedelta ------------------------------------
+    time_single = Q_(1, "second")
+    value_interp_single = ts_expr.interp_time(time_single)
+
+    assert value_interp_single == Q_(0, "meter")
+
+    # multiple time deltas --------------------------------
+    time_multi = Q_([0, 1, 2, 10], "second")
+    value_interp_multi = ts_expr.interp_time(time_multi)
+
+    assert len(value_interp_multi) == 4
+
+    for i in range(4):
+        assert (
+            value_interp_multi[i] == parameters["a"] * time_multi[i] + parameters["b"]
+        )
+
+
 # TODO: remove
-test_time_series_interp_time_constant()
+test_time_series_interp_time_expression()

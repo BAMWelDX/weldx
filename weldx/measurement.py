@@ -158,13 +158,16 @@ class TimeSeries:
 
     def interp_time(self, time):
         if self._data is not None:
-            if isinstance(self._data.magnitude, np.ndarray):
-                pass
+            if isinstance(self._data.magnitude, xr.DataArray):
+                return None
             else:
                 if len(time) == 1:
                     return self.data
                 else:
                     return self.data * np.ones(len(time))
+
+        time = {self.expression.get_variable_names()[0]: time}
+        return self.expression.evaluate(**time)
 
 
 # equipment ----------------------------------------------------------------------------
