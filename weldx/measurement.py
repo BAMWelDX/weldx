@@ -10,6 +10,7 @@ import xarray as xr
 
 import weldx.utility as ut
 from weldx.asdf.tags.weldx.core.mathematical_expression import MathematicalExpression
+from weldx.constants import WELDX_QUANTITY as Q_
 
 
 # measurement --------------------------------------------------------------------------
@@ -84,13 +85,13 @@ class TimeSeries:
         # TODO:
         #  - Data + expression one variable
         #  - All xarray except expressions
-        #  - store expression free parameter name
         #  - expression check if free parameter is time
         #  - check expression vectorization support
         self._time = None
         self._data = None
         self._expression = None
         self._interpolation = None
+        self._time_var_name = None
 
         if isinstance(data, pint.Quantity):
             if isinstance(data.magnitude, np.ndarray):
@@ -110,13 +111,25 @@ class TimeSeries:
                 self._time = time
                 self._data = data
         elif isinstance(data, MathematicalExpression):
-            # TODO: check if time is None or time range
+
             if data.num_variables() != 1:
                 raise Exception(
                     "The mathematical expression must have exactly 1 free "
                     "variable that represents time."
                 )
+            time_var_name = data.get_variable_names()[0]
+            try:
+                data.evaluate(**{time_var_name: Q_([0, 1, 2], "second")})
+            except (pint.errors.DimensionalityError):
+                raise Exception(
+                    "Expression can not be evaluated with"
+                    ' "pint.Quantity([0,1,2], "seconds")". Ensure that '
+                    "every parameter posses the correct unit and that "
+                    "vectorization is supported"
+                )
+
             self._expression = data
+            self._time_var_name = time_var_name
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
@@ -187,7 +200,7 @@ class TimeSeries:
                 else:
                     return self._data * np.ones(len(time))
 
-        time = {self._expression.get_variable_names()[0]: time}
+        time = {self._time_var_name: time}
         return self._expression.evaluate(**time)
 
     def shape(self):

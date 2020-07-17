@@ -148,7 +148,7 @@ def test_time_series_construction():
 
     # mathematical expression -----------------------------
     expr_string = "a*t+b"
-    parameters = {"a": 2, "b": -2}
+    parameters = {"a": Q_(2, "1/s"), "b": Q_(-2, "")}
     expr = MathematicalExpression(expression=expr_string, parameters=parameters)
 
     ts_expr = msm.TimeSeries(data=expr)
@@ -165,6 +165,18 @@ def test_time_series_construction():
     for parameter in parameters:
         assert parameter in ts_expr.expression.parameters
         assert parameters[parameter] == ts_expr.expression.parameters[parameter]
+
+    # exceptions ------------------------------------------
+    # too many free variables
+    with pytest.raises(Exception):
+        expr_2 = MathematicalExpression(expression=expr_string, parameters={})
+        msm.TimeSeries(data=expr_2)
+    # incompatible parameter units
+    with pytest.raises(Exception):
+        expr_3 = MathematicalExpression(
+            expression=expr_string, parameters={"a": Q_(2, "1/s"), "b": Q_(-2, "m")}
+        )
+        msm.TimeSeries(data=expr_3)
 
 
 def test_factories():
@@ -208,10 +220,6 @@ def test_time_series_interp_time_discrete_linear():
 
     assert np.all(np.isclose(value_interp_multi.magnitude, [10, 13, 14, 16, 16]))
     assert value_interp_multi.check(values.dimensionality)
-
-
-# TODO: remove
-test_time_series_interp_time_discrete_linear()
 
 
 def test_time_series_interp_time_expression():
