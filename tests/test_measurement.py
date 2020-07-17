@@ -136,7 +136,7 @@ def test_time_series_construction():
     assert ts_constant.expression is None
 
     # discrete values -------------------------------------
-    time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="D")
+    time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
     values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
     ts_discrete = msm.TimeSeries(data=values, time=time, interpolation="constant")
 
@@ -175,13 +175,13 @@ def test_time_series_interp_time_constant():
     ts_constant = msm.TimeSeries(data=value)
 
     # single timedelta ------------------------------------
-    time_delta_single = pd.TimedeltaIndex([2], "D")
+    time_delta_single = pd.TimedeltaIndex([2], "s")
     time_interp_single = ts_constant.interp_time(time_delta_single)
 
     assert time_interp_single == value
 
     # multiple time deltas --------------------------------
-    time_delta_multi = pd.TimedeltaIndex([0, 2, 5], "D")
+    time_delta_multi = pd.TimedeltaIndex([0, 2, 5], "s")
     value_interp_multi = ts_constant.interp_time(time_delta_multi)
 
     assert len(value_interp_multi) == 3
