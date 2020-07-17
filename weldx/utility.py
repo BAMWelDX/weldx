@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
+import pint
 import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
@@ -435,6 +436,14 @@ def xr_interp_like(
     else:  # assume da2 to be dict-like
         sel_coords = da2
 
+    # store and strip pint units at this point, since the unit is lost during
+    # interpolation and because of some other conflicts. Unit is restored before
+    # returning the result.
+    units = None
+    if isinstance(da1.data, pint.Quantity):
+        units = da1.data.units
+        da1 = xr.DataArray(data=da1.data.magnitude, dims=da1.dims, coords=da1.coords)
+
     if interp_coords is not None:
         sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
 
@@ -492,7 +501,15 @@ def xr_interp_like(
     else:  # careful not to select coordinates that are only in da_temp
         sel_coords = {d: v for d, v in sel_coords.items() if d in da1.coords}
 
-    return da.sel(sel_coords)
+    result = da.sel(sel_coords)
+    if units is not None:
+        result = xr.DataArray(
+            data=pint.Quantity(result.data, units),
+            dims=result.dims,
+            coords=result.coords,
+        )
+
+    return result
 
 
 def xr_3d_vector(data, times=None) -> xr.DataArray:

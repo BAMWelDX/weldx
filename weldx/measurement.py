@@ -75,6 +75,7 @@ class Measurement:
     data: Data
     measurement_chain: MeasurementChain
 
+
 # TODO: move to core package
 class TimeSeries:
     """Describes a the behaviour of a quantity in time."""
@@ -167,23 +168,36 @@ class TimeSeries:
         #  TODO:
         #   - expression check if free parameter is time
         if self._data is not None:
-            if isinstance(self._data.magnitude, xr.DataArray):
-                return None
+            if isinstance(self._data, xr.DataArray):
+                if self._interpolation == "linear":
+                    interp_data = ut.xr_interp_like(
+                        self._data,
+                        {"time": time},
+                        assume_sorted=True,
+                        broadcast_missing=False,
+                    ).data
+                    if len(time) == 1:
+                        return interp_data[0]
+                    else:
+                        return interp_data
+                raise Exception("not implemented")
             else:
                 if len(time) == 1:
-                    return self.data
+                    return self._data
                 else:
-                    return self.data * np.ones(len(time))
+                    return self._data * np.ones(len(time))
 
-        time = {self.expression.get_variable_names()[0]: time}
-        return self.expression.evaluate(**time)
+        time = {self._expression.get_variable_names()[0]: time}
+        return self._expression.evaluate(**time)
 
     def shape(self):
         # TODO: Math expression: Evaluate t=0
+        pass
 
     def unit(self):
         # TODO: Return pint unit string
         pass
+
 
 # equipment ----------------------------------------------------------------------------
 @dataclass

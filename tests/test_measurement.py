@@ -4,6 +4,7 @@ from io import BytesIO
 import asdf
 import numpy as np
 import pandas as pd
+import pytest
 import sympy
 import xarray as xr
 
@@ -189,6 +190,30 @@ def test_time_series_interp_time_constant():
         assert value_interp == value
 
 
+def test_time_series_interp_time_discrete_linear():
+    time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
+    values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
+    ts_discrete = msm.TimeSeries(data=values, time=time, interpolation="linear")
+
+    # single timedelta ------------------------------------
+    time_delta_single = pd.TimedeltaIndex([1.5], "s")
+    value_interp_single = ts_discrete.interp_time(time_delta_single)
+
+    assert np.isclose(value_interp_single.magnitude, 11.5)
+    assert value_interp_single.check(values.dimensionality)
+
+    # multiple time deltas --------------------------------
+    time_delta_multi = pd.TimedeltaIndex([-3, 2.5, 3, 4, 7], "s")
+    value_interp_multi = ts_discrete.interp_time(time_delta_multi)
+
+    assert np.all(np.isclose(value_interp_multi.magnitude, [10, 13, 14, 16, 16]))
+    assert value_interp_multi.check(values.dimensionality)
+
+
+# TODO: remove
+test_time_series_interp_time_discrete_linear()
+
+
 def test_time_series_interp_time_expression():
     expr_string = "a*t+b"
     parameters = {"a": Q_(2, "meter/second"), "b": Q_(-2, "meter")}
@@ -212,7 +237,3 @@ def test_time_series_interp_time_expression():
         assert (
             value_interp_multi[i] == parameters["a"] * time_multi[i] + parameters["b"]
         )
-
-
-# TODO: remove
-test_time_series_interp_time_expression()
