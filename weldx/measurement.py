@@ -75,11 +75,17 @@ class Measurement:
     data: Data
     measurement_chain: MeasurementChain
 
-
+# TODO: move to core package
 class TimeSeries:
     """Describes a the behaviour of a quantity in time."""
 
     def __init__(self, data, time=None, interpolation=None):
+        # TODO:
+        #  - Data + expression one variable
+        #  - All xarray except expressions
+        #  - store expression free parameter name
+        #  - expression check if free parameter is time
+        #  - check expression vectorization support
         self._time = None
         self._data = None
         self._expression = None
@@ -157,6 +163,9 @@ class TimeSeries:
         pass
 
     def interp_time(self, time):
+
+        #  TODO:
+        #   - expression check if free parameter is time
         if self._data is not None:
             if isinstance(self._data.magnitude, xr.DataArray):
                 return None
@@ -169,6 +178,12 @@ class TimeSeries:
         time = {self.expression.get_variable_names()[0]: time}
         return self.expression.evaluate(**time)
 
+    def shape(self):
+        # TODO: Math expression: Evaluate t=0
+
+    def unit(self):
+        # TODO: Return pint unit string
+        pass
 
 # equipment ----------------------------------------------------------------------------
 @dataclass
