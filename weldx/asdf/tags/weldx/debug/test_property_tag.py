@@ -26,6 +26,9 @@ class PropertyTagTestClassType(WeldxType):
     types = [PropertyTagTestClass]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
+    validators = {
+        "wx_property_tag": wx_property_tag_validator,
+    }
 
     @classmethod
     def to_tree(cls, node: PropertyTagTestClass, ctx):
@@ -37,8 +40,3 @@ class PropertyTagTestClassType(WeldxType):
     def from_tree(cls, tree, ctx):
         obj = PropertyTagTestClass(**tree)
         return obj
-
-
-PropertyTagTestClassType.validators = {
-    "wx_property_tag": wx_property_tag_validator,
-}

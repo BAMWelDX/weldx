@@ -1702,6 +1702,7 @@ class GrooveType(WeldxType):
     ]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
+    validators = {"wx_unit": wx_unit_validator}
 
     @classmethod
     def to_tree(cls, node, ctx):
@@ -1724,8 +1725,3 @@ class GrooveType(WeldxType):
             return obj
         else:  # pragma: no cover
             raise ValueError(f"Unknown groove name {tree['type']}")
-
-
-GrooveType.validators = {
-    "wx_unit": wx_unit_validator,
-}

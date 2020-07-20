@@ -430,12 +430,6 @@ def wx_shape_validator(
         )
 
 
-def debug_validator(validator, debug_validator, instance, schema):
-    """Enable simple breakpoint for validation."""
-    if debug_validator:
-        print(f"triggered validation on schema {schema} against instance {instance}")
-
-
 def wx_property_tag_validator(
     validator, wx_property_tag: str, instance, schema
 ) -> Iterator[ValidationError]:
