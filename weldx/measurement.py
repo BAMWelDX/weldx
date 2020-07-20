@@ -125,14 +125,25 @@ class TimeSeries:
                     self._shape = tuple([1])
             except pint.errors.DimensionalityError:
                 raise Exception(
-                    "Expression can not be evaluated with"
-                    ' "pint.Quantity([0,1,2], "seconds")". Ensure that '
-                    "every parameter posses the correct unit and that "
-                    "vectorization is supported"
+                    'Expression can not be evaluated with "pint.Quantity(1, "seconds")"'
+                    ". Ensure that every parameter posses the correct unit."
                 )
 
             self._data = data
             self._time_var_name = time_var_name
+
+            try:
+                self.interp_time(Q_([1, 2], "second"))
+                self.interp_time(Q_([1, 2, 3], "second"))
+            except Exception as e:
+                raise Exception(
+                    "The expression can not be evaluated with arrays of time deltas. "
+                    "Ensure that all parameters that are multiplied with the time "
+                    "variable have an outer dimension of size 1. This dimension is "
+                    "broadcasted during multiplication. The original error message was:"
+                    f' "{str(e)}"'
+                )
+
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 

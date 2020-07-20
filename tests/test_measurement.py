@@ -169,7 +169,7 @@ def test_time_series_construction():
 
     # vector
     expr_string_vec = "a*t+b"
-    parameters_vec = {"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")}
+    parameters_vec = {"a": Q_([[2, 3, 4]], "1/s"), "b": Q_([[-2, 3, 1]], "")}
     expr_vec = MathematicalExpression(
         expression=expr_string_vec, parameters=parameters_vec
     )
@@ -193,6 +193,13 @@ def test_time_series_construction():
             expression=expr_string, parameters={"a": Q_(2, "1/s"), "b": Q_(-2, "m")}
         )
         msm.TimeSeries(data=expr_3)
+    # cannot be evaluated with time vectors
+    with pytest.raises(Exception):
+        expr_4 = MathematicalExpression(
+            expression=expr_string,
+            parameters={"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")},
+        )
+        msm.TimeSeries(data=expr_4)
 
 
 # TODO: remove
