@@ -268,10 +268,6 @@ def test_local_coordinate_system_shape_violation():
             f.write_to(buff)
 
 
-# TODO: remove
-test_local_coordinate_system_shape_violation()
-
-
 # weldx.transformations.CoordinateSystemManager ----------------------------------------
 
 buffer_csm = BytesIO()

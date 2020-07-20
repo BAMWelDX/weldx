@@ -362,37 +362,6 @@ def _custom_shape_validator(dict_test, dict_expected):
     return dict_values
 
 
-def _shape_validator(
-    instance: Mapping, expected_shape: List[int], position: List[str]
-) -> Iterator[ValidationError]:
-    """Validate the 'shape' key of the instance against the given list of integers.
-
-    Parameters
-    ----------
-    instance:
-        Tree serialization with 'shape' key to validate.
-    expected_shape:
-        String representation of the unit dimensionality to test against.
-    position:
-        Current position in nested structure for debugging
-
-    Yields
-    ------
-    asdf.ValidationError
-
-    """
-    if not position:
-        position = instance
-
-    shape = instance["shape"]
-    valid = shape == expected_shape  # TODO: custom shape validator with "any" syntax
-    if not valid:
-        yield ValidationError(
-            f"Error validating shape for property '{position}'. "
-            f"Expected shape '{expected_shape}' but got '{shape}'"
-        )
-
-
 def wx_unit_validator(
     validator, wx_unit, instance, schema
 ) -> Iterator[ValidationError]:
@@ -459,55 +428,6 @@ def wx_shape_validator(
         yield ValidationError(
             f"Error validating shape {wx_shape}.\nOn instance {instance}"
         )
-
-    # yield from _walk_validator(
-    #     instance=instance,
-    #     validator_dict=wx_shape,
-    #     validator_function=_shape_validator,
-    #     position=[],
-    #     allow_missing_keys=False,
-    # )
-
-
-def _run_validation(
-    instance, schema, validator_function, keyword_glob, allow_missing_keys
-):
-    import dpath
-
-    """Gather keywords from schema and run validation along tree instance from root."""
-    schema_key_list = [k for k in dpath.util.search(schema, keyword_glob, yielded=True)]
-    schema_key_list = [
-        (s[0].replace("properties/", "").split("/"), s[1]) for s in schema_key_list
-    ]
-    for s in schema_key_list:
-        if len(s[0]) > 1:
-            position = s[0][:-1]
-            instance_dict = dpath.util.get(instance, s[0][:-1])
-        else:
-            position = []
-            instance_dict = instance
-        yield from _walk_validator(
-            instance=instance_dict,
-            validator_dict=s[1],
-            validator_function=validator_function,
-            position=position,
-            allow_missing_keys=allow_missing_keys,
-        )
-
-    # old example implementation:
-    # validator_function = _shape_validator
-    # keyword_glob = "**/wx_shape"
-    # allow_missing_keys = False
-    #
-    # if isinstance(wx_shape_validate, bool):
-    #     enable = wx_shape_validate
-    # else:
-    #     raise ValueError("validator Option 'wx_shape_validate' must be true/false")
-    #
-    # if enable:
-    #     yield from _run_validation(
-    #         instance, schema, validator_function, keyword_glob, allow_missing_keys
-    #     )
 
 
 def debug_validator(validator, debug_validator, instance, schema):
