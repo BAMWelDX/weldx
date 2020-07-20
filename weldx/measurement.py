@@ -85,11 +85,9 @@ class TimeSeries:
 
     def __init__(self, data, time=None, interpolation=None):
         # TODO:
-        #  - Data + expression one variable
         #  - All xarray except expressions
         self._time = None
         self._data = None
-        self._expression = None
         self._interpolation = None
         self._time_var_name = None
 
@@ -128,7 +126,7 @@ class TimeSeries:
                     "vectorization is supported"
                 )
 
-            self._expression = data
+            self._data = data
             self._time_var_name = time_var_name
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
@@ -138,10 +136,6 @@ class TimeSeries:
         if isinstance(self._data, xr.DataArray):
             return self._data.data
         return self._data
-
-    @property
-    def expression(self):
-        return self._expression
 
     @property
     def interpolation(self):
@@ -177,7 +171,7 @@ class TimeSeries:
         pass
 
     def interp_time(self, time):
-        if self._data is not None:
+        if not isinstance(self._data, MathematicalExpression):
             if isinstance(self._data, xr.DataArray):
                 if self._interpolation == "linear":
                     interp_data = ut.xr_interp_like(
@@ -201,7 +195,7 @@ class TimeSeries:
             raise ValueError('"time" must be a time quantity.')
 
         time = {self._time_var_name: time}
-        return self._expression.evaluate(**time)
+        return self._data.evaluate(**time)
 
     def shape(self):
         # TODO: Math expression: Evaluate t=0
