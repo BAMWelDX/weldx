@@ -90,6 +90,8 @@ class TimeSeries:
         self._data = None
         self._interpolation = None
         self._time_var_name = None
+        self._shape = None
+        self._unit = None
 
         if isinstance(data, pint.Quantity):
             if not isinstance(data.magnitude, np.ndarray):
@@ -114,9 +116,14 @@ class TimeSeries:
                     "variable that represents time."
                 )
             time_var_name = data.get_variable_names()[0]
+            # TODO: check vector support
             try:
-                data.evaluate(**{time_var_name: Q_([0, 1, 2], "second")})
-            except (pint.errors.DimensionalityError):
+                eval_data = data.evaluate(**{time_var_name: Q_(1, "second")})
+                if isinstance(eval_data.magnitude, np.ndarray):
+                    self._shape = eval_data.magnitude.shape
+                else:
+                    self._shape = tuple([1])
+            except pint.errors.DimensionalityError:
                 raise Exception(
                     "Expression can not be evaluated with"
                     ' "pint.Quantity([0,1,2], "seconds")". Ensure that '
@@ -148,37 +155,37 @@ class TimeSeries:
         return self._time
 
     def interp_time(self, time):
-        if not isinstance(self._data, MathematicalExpression):
-            if isinstance(self._data, xr.DataArray):
-                if self._interpolation == "linear":
-                    interp_data = ut.xr_interp_like(
-                        self._data,
-                        {"time": time},
-                        assume_sorted=True,
-                        broadcast_missing=False,
-                    ).data
-                    if len(time) == 1:
-                        return interp_data[0]
-                    else:
-                        return interp_data
-                raise Exception("not implemented")
-            else:
+        if isinstance(self._data, xr.DataArray):
+            if self._interpolation == "linear":
+                interp_data = ut.xr_interp_like(
+                    self._data,
+                    {"time": time},
+                    assume_sorted=True,
+                    broadcast_missing=False,
+                ).data
                 if len(time) == 1:
-                    return self._data
+                    return interp_data[0]
                 else:
-                    return self._data * np.ones(len(time))
+                    return interp_data
+            raise Exception("not implemented")
 
         if not isinstance(time, Q_) or not time.check(UREG.get_dimensionality("s")):
             raise ValueError('"time" must be a time quantity.')
 
+        if len(self.shape) > 1 and isinstance(time.magnitude, np.ndarray):
+            while len(time.magnitude.shape) < len(self.shape):
+                time = Q_(time.magnitude[:, np.newaxis], time.units)
+
         time = {self._time_var_name: time}
         return self._data.evaluate(**time)
 
+    @property
     def shape(self):
-        # TODO: Math expression: Evaluate t=0
-        # what about the time dimension? ---> : ???
-        pass
+        if isinstance(self._data, xr.DataArray):
+            return self._data.shape
+        return self._shape
 
+    @property
     def unit(self):
         # TODO: Return pint unit string
         pass

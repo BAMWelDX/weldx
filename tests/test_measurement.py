@@ -134,6 +134,7 @@ def test_time_series_construction():
     assert ts_constant.data == value
     assert ts_constant.time is None
     assert ts_constant.interpolation == "linear"
+    assert ts_constant.shape == tuple([1])
 
     # discrete values -------------------------------------
     time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
@@ -143,8 +144,10 @@ def test_time_series_construction():
     assert np.all(ts_discrete.time == time)
     assert np.all(ts_discrete.data == values)
     assert ts_discrete.interpolation == "step"
+    assert ts_discrete.shape == tuple([5])
 
     # mathematical expression -----------------------------
+    # scalar
     expr_string = "a*t+b"
     parameters = {"a": Q_(2, "1/s"), "b": Q_(-2, "")}
     expr = MathematicalExpression(expression=expr_string, parameters=parameters)
@@ -153,6 +156,7 @@ def test_time_series_construction():
 
     assert ts_expr.time is None
     assert ts_expr.interpolation is None
+    assert ts_expr.shape == tuple([1])
 
     assert isinstance(ts_expr.data, MathematicalExpression)
     assert ts_expr.data.num_variables() == 1
@@ -162,6 +166,15 @@ def test_time_series_construction():
     for parameter in parameters:
         assert parameter in ts_expr.data.parameters
         assert parameters[parameter] == ts_expr.data.parameters[parameter]
+
+    # vector
+    expr_string_vec = "a*t+b"
+    parameters_vec = {"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")}
+    expr_vec = MathematicalExpression(
+        expression=expr_string_vec, parameters=parameters_vec
+    )
+
+    ts_expr = msm.TimeSeries(data=expr_vec)
 
     # exceptions ------------------------------------------
     # invalid interpolation
@@ -180,6 +193,10 @@ def test_time_series_construction():
             expression=expr_string, parameters={"a": Q_(2, "1/s"), "b": Q_(-2, "m")}
         )
         msm.TimeSeries(data=expr_3)
+
+
+# TODO: remove
+test_time_series_construction()
 
 
 def test_time_series_interp_time_constant():
@@ -222,19 +239,20 @@ def test_time_series_interp_time_discrete_linear():
 
 
 def test_time_series_interp_time_expression():
+    # scalar ----------------------------------------------
     expr_string = "a*t+b"
     parameters = {"a": Q_(2, "meter/second"), "b": Q_(-2, "meter")}
     expr = MathematicalExpression(expression=expr_string, parameters=parameters)
 
     ts_expr = msm.TimeSeries(data=expr)
 
-    # single timedelta ------------------------------------
+    # single timedelta
     time_single = Q_(1, "second")
     value_interp_single = ts_expr.interp_time(time_single)
 
     assert value_interp_single == Q_(0, "meter")
 
-    # multiple time deltas --------------------------------
+    # multiple time deltas
     time_multi = Q_([0, 1, 2, 10], "second")
     value_interp_multi = ts_expr.interp_time(time_multi)
 
@@ -245,6 +263,34 @@ def test_time_series_interp_time_expression():
             value_interp_multi[i] == parameters["a"] * time_multi[i] + parameters["b"]
         )
 
+    # vector -----------------------------------------------
+    expr_string_vec = "a*t+b"
+    parameters_vec = {"a": Q_([[2, 3, 4]], "1/s"), "b": Q_([[-2, 3, 1]], "")}
+    expr_vec = MathematicalExpression(
+        expression=expr_string_vec, parameters=parameters_vec
+    )
+
+    ts_expr_vec = msm.TimeSeries(data=expr_vec)
+
+    # single time delta
+    value_interp_vec_single = ts_expr_vec.interp_time(time_single)
+
+    assert np.all(np.isclose(value_interp_vec_single, [0, 6, 5]))
+
+    # multiple time deltas
+    value_interp_vec_multi = ts_expr_vec.interp_time(time_multi)
+
+    assert value_interp_vec_multi.shape == tuple([4, 3])
+
+    for i in range(4):
+        assert (
+            value_interp_multi[i] == parameters["a"] * time_multi[i] + parameters["b"]
+        )
+
     # exceptions ------------------------------------------
     with pytest.raises(ValueError):
         ts_expr.interp_time(Q_(2, "s/m"))
+
+
+# TODO: remove
+test_time_series_interp_time_expression()

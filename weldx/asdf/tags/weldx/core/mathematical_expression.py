@@ -1,3 +1,5 @@
+from typing import Any
+
 import sympy
 
 from weldx.asdf.types import WeldxType
@@ -94,7 +96,8 @@ class MathematicalExpression:
 
         Returns
         -------
-        float
+        Any:
+            Result of the evaluated function
 
         """
         inputs = {**kwargs, **self.parameters}
