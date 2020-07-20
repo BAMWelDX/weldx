@@ -91,7 +91,7 @@ class TimeSeries:
         self._interpolation = None
         self._time_var_name = None
         self._shape = None
-        self._unit = None
+        self._units = None
 
         if isinstance(data, pint.Quantity):
             if not isinstance(data.magnitude, np.ndarray):
@@ -116,9 +116,9 @@ class TimeSeries:
                     "variable that represents time."
                 )
             time_var_name = data.get_variable_names()[0]
-            # TODO: check vector support
             try:
                 eval_data = data.evaluate(**{time_var_name: Q_(1, "second")})
+                self._units = eval_data.units
                 if isinstance(eval_data.magnitude, np.ndarray):
                     self._shape = eval_data.magnitude.shape
                 else:
@@ -193,9 +193,10 @@ class TimeSeries:
         return self._shape
 
     @property
-    def unit(self):
-        # TODO: Return pint unit string
-        pass
+    def units(self):
+        if isinstance(self._data, xr.DataArray):
+            return self._data.data.units
+        return self._units
 
 
 # equipment ----------------------------------------------------------------------------

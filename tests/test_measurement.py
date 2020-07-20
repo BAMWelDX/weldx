@@ -12,6 +12,7 @@ import weldx.measurement as msm
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.core.mathematical_expression import MathematicalExpression
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 
 def test_generic_measurement():
@@ -135,6 +136,7 @@ def test_time_series_construction():
     assert ts_constant.time is None
     assert ts_constant.interpolation == "linear"
     assert ts_constant.shape == tuple([1])
+    assert value.check(UREG.get_dimensionality(ts_constant.units))
 
     # discrete values -------------------------------------
     time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
@@ -145,6 +147,7 @@ def test_time_series_construction():
     assert np.all(ts_discrete.data == values)
     assert ts_discrete.interpolation == "step"
     assert ts_discrete.shape == tuple([5])
+    assert values.check(UREG.get_dimensionality(ts_discrete.units))
 
     # mathematical expression -----------------------------
     # scalar
@@ -162,19 +165,36 @@ def test_time_series_construction():
     assert ts_expr.data.num_variables() == 1
     assert ts_expr.data.num_parameters() == 2
     assert ts_expr.data.get_variable_names()[0] == "t"
+    assert parameters["b"].check(UREG.get_dimensionality(ts_expr.units))
 
     for parameter in parameters:
         assert parameter in ts_expr.data.parameters
         assert parameters[parameter] == ts_expr.data.parameters[parameter]
 
     # vector
-    expr_string_vec = "a*t+b"
-    parameters_vec = {"a": Q_([[2, 3, 4]], "1/s"), "b": Q_([[-2, 3, 1]], "")}
+    expr_string_vec = "a * time + b"
+    parameters_vec = {"a": Q_([[2, 3, 4]], "m/s"), "b": Q_([[-2, 3, 1]], "m")}
     expr_vec = MathematicalExpression(
         expression=expr_string_vec, parameters=parameters_vec
     )
 
-    ts_expr = msm.TimeSeries(data=expr_vec)
+    ts_expr_vec = msm.TimeSeries(data=expr_vec)
+
+    assert ts_expr_vec.time is None
+    assert ts_expr_vec.interpolation is None
+    assert ts_expr_vec.shape == tuple([1, 3])
+
+    assert isinstance(ts_expr_vec.data, MathematicalExpression)
+    assert ts_expr_vec.data.num_variables() == 1
+    assert ts_expr_vec.data.num_parameters() == 2
+    assert ts_expr_vec.data.get_variable_names()[0] == "time"
+    assert parameters_vec["b"].check(UREG.get_dimensionality(ts_expr_vec.units))
+
+    for parameter in parameters_vec:
+        assert parameter in ts_expr_vec.data.parameters
+        assert np.all(
+            parameters_vec[parameter] == ts_expr_vec.data.parameters[parameter]
+        )
 
     # exceptions ------------------------------------------
     # invalid interpolation
@@ -200,10 +220,6 @@ def test_time_series_construction():
             parameters={"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")},
         )
         msm.TimeSeries(data=expr_4)
-
-
-# TODO: remove
-test_time_series_construction()
 
 
 def test_time_series_interp_time_constant():
@@ -297,7 +313,3 @@ def test_time_series_interp_time_expression():
     # exceptions ------------------------------------------
     with pytest.raises(ValueError):
         ts_expr.interp_time(Q_(2, "s/m"))
-
-
-# TODO: remove
-test_time_series_interp_time_expression()
