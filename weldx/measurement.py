@@ -83,6 +83,8 @@ class Measurement:
 class TimeSeries:
     """Describes a the behaviour of a quantity in time."""
 
+    _valid_interpolations = ["step", "linear"]
+
     def __init__(self, data, time=None, interpolation="linear"):
         # TODO:
         #  - All xarray except expressions
@@ -92,17 +94,16 @@ class TimeSeries:
         self._time_var_name = None
 
         if isinstance(data, pint.Quantity):
-            # TODO: check if time is None or time range
             if not isinstance(data.magnitude, np.ndarray):
                 data = Q_([data.magnitude], data.units)
                 if time is None:
                     time = pd.TimedeltaIndex([0])
 
             # TODO: check interpolation type (constant, linear, etc.)
-            if interpolation is None:
+            if interpolation not in self._valid_interpolations:
                 raise ValueError(
-                    "An interpolation method must be specified "
-                    "if discrete values are used."
+                    "A valid interpolation method must be specified "
+                    f'if discrete values are used. "{interpolation}" is not supported'
                 )
 
             self._data = xr.DataArray(data=data, dims=["time"], coords={"time": time})

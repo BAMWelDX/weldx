@@ -138,11 +138,11 @@ def test_time_series_construction():
     # discrete values -------------------------------------
     time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
     values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
-    ts_discrete = msm.TimeSeries(data=values, time=time, interpolation="constant")
+    ts_discrete = msm.TimeSeries(data=values, time=time, interpolation="step")
 
     assert np.all(ts_discrete.time == time)
     assert np.all(ts_discrete.data == values)
-    assert ts_discrete.interpolation == "constant"
+    assert ts_discrete.interpolation == "step"
 
     # mathematical expression -----------------------------
     expr_string = "a*t+b"
@@ -164,6 +164,12 @@ def test_time_series_construction():
         assert parameters[parameter] == ts_expr.data.parameters[parameter]
 
     # exceptions ------------------------------------------
+    # invalid interpolation
+    with pytest.raises(ValueError):
+        msm.TimeSeries(values, time, "super interpolator 2000")
+    with pytest.raises(ValueError):
+        msm.TimeSeries(values, time, None)
+
     # too many free variables
     with pytest.raises(Exception):
         expr_2 = MathematicalExpression(expression=expr_string, parameters={})
