@@ -182,10 +182,6 @@ def test_time_series_construction():
         msm.TimeSeries(data=expr_3)
 
 
-def test_factories():
-    pass
-
-
 def test_time_series_interp_time_constant():
     value = Q_(1, "m")
     ts_constant = msm.TimeSeries(data=value)

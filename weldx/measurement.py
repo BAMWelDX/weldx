@@ -86,8 +86,6 @@ class TimeSeries:
     _valid_interpolations = ["step", "linear"]
 
     def __init__(self, data, time=None, interpolation="linear"):
-        # TODO:
-        #  - All xarray except expressions
         self._time = None
         self._data = None
         self._interpolation = None
@@ -99,7 +97,6 @@ class TimeSeries:
                 if time is None:
                     time = pd.TimedeltaIndex([0])
 
-            # TODO: check interpolation type (constant, linear, etc.)
             if interpolation not in self._valid_interpolations:
                 raise ValueError(
                     "A valid interpolation method must be specified "
@@ -149,29 +146,6 @@ class TimeSeries:
                 return None
             return ut.to_pandas_time_index(self._data.time.data)
         return self._time
-
-    @classmethod
-    def from_discrete_values(
-        cls, time: pd.TimedeltaIndex, data: pint.Quantity, interpolation: str
-    ):
-        """
-        Create a time series from discrete timestamps/time deltas and data points.
-
-        Parameters
-        ----------
-        time
-        data
-        interpolation
-
-        Returns
-        -------
-
-        """
-        return cls(time=time, values=data, interpolation=interpolation)
-
-    @classmethod
-    def from_mathematical_expression(cls):
-        pass
 
     def interp_time(self, time):
         if not isinstance(self._data, MathematicalExpression):
