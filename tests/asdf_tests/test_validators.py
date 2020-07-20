@@ -8,24 +8,7 @@ import pytest
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 
-
-def _write_read_buffer(tree):
-    # Write the data to buffer
-    with asdf.AsdfFile(
-        tree,
-        extensions=[WeldxExtension(), WeldxAsdfExtension()],
-        ignore_version_mismatch=False,
-    ) as ff:
-        buff = BytesIO()
-        ff.write_to(buff, all_array_storage="inline")
-        buff.seek(0)
-
-    # read back data from ASDF file contents in buffer
-    with asdf.open(
-        buff, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
-    ) as af:
-        data = af.tree
-    return data, buff
+from .utility import _write_read_buffer
 
 
 def test_property_tag_validator():
