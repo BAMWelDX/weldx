@@ -212,9 +212,9 @@ def test_time_series_interp_time_constant():
 
     # single timedelta ------------------------------------
     time_delta_single = pd.TimedeltaIndex([2], "s")
-    time_interp_single = ts_constant.interp_time(time_delta_single)
+    value_interp_single = ts_constant.interp_time(time_delta_single)
 
-    assert time_interp_single == value
+    assert value_interp_single == value
 
     # multiple time deltas --------------------------------
     time_delta_multi = pd.TimedeltaIndex([0, 2, 5], "s")
@@ -234,15 +234,15 @@ def test_time_series_interp_time_discrete_linear():
     time_delta_single = pd.TimedeltaIndex([1.5], "s")
     value_interp_single = ts_discrete.interp_time(time_delta_single)
 
-    assert np.isclose(value_interp_single.magnitude, 11.5)
-    assert value_interp_single.check(values.dimensionality)
+    assert np.isclose(value_interp_single.data.magnitude, 11.5)
+    assert value_interp_single.data.check(values.dimensionality)
 
     # multiple time deltas --------------------------------
     time_delta_multi = pd.TimedeltaIndex([-3, 2.5, 3, 4, 7], "s")
     value_interp_multi = ts_discrete.interp_time(time_delta_multi)
 
-    assert np.all(np.isclose(value_interp_multi.magnitude, [10, 13, 14, 16, 16]))
-    assert value_interp_multi.check(values.dimensionality)
+    assert np.all(np.isclose(value_interp_multi.data.magnitude, [10, 13, 14, 16, 16]))
+    assert value_interp_multi.data.check(values.dimensionality)
 
 
 def test_time_series_interp_time_expression():

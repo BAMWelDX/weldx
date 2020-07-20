@@ -100,11 +100,10 @@ def to_pandas_time_index(time):
         if not isinstance(time, list):
             time = [time]
         time = np.array(time)
-    if np.issubdtype(time.dtype, np.timedelta64):
-        return pd.TimedeltaIndex(time)
-    elif np.issubdtype(time.dtype, np.datetime64):
+
+    if np.issubdtype(time.dtype, np.datetime64):
         return pd.DatetimeIndex(time)
-    raise ValueError(f"{type(time)} is not a supported type.")
+    return pd.TimedeltaIndex(time)
 
 
 def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:

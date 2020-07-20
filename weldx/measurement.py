@@ -168,16 +168,12 @@ class TimeSeries:
     def interp_time(self, time):
         if isinstance(self._data, xr.DataArray):
             if self._interpolation == "linear":
-                interp_data = ut.xr_interp_like(
+                return ut.xr_interp_like(
                     self._data,
                     {"time": time},
                     assume_sorted=True,
                     broadcast_missing=False,
-                ).data
-                if len(time) == 1:
-                    return interp_data[0]
-                else:
-                    return interp_data
+                )
             raise Exception("not implemented")
 
         if not isinstance(time, Q_) or not time.check(UREG.get_dimensionality("s")):
