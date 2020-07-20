@@ -171,7 +171,7 @@ class TimeSeries:
                 return ut.xr_interp_like(
                     self._data,
                     {"time": time},
-                    assume_sorted=True,
+                    assume_sorted=False,
                     broadcast_missing=False,
                 )
             raise Exception("not implemented")
