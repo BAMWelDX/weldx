@@ -83,7 +83,7 @@ class Measurement:
 class TimeSeries:
     """Describes a the behaviour of a quantity in time."""
 
-    def __init__(self, data, time=None, interpolation=None):
+    def __init__(self, data, time=None, interpolation="linear"):
         # TODO:
         #  - All xarray except expressions
         self._time = None
@@ -92,22 +92,22 @@ class TimeSeries:
         self._time_var_name = None
 
         if isinstance(data, pint.Quantity):
-            if isinstance(data.magnitude, np.ndarray):
-                # TODO: check interpolation type (constant, linear, etc.)
-                if interpolation is None:
-                    raise ValueError(
-                        "An interpolation method must be specified "
-                        "if discrete values are used."
-                    )
+            # TODO: check if time is None or time range
+            if not isinstance(data.magnitude, np.ndarray):
+                data = Q_([data.magnitude], data.units)
+                if time is None:
+                    time = pd.TimedeltaIndex([0])
 
-                self._data = xr.DataArray(
-                    data=data, dims=["time"], coords={"time": time}
+            # TODO: check interpolation type (constant, linear, etc.)
+            if interpolation is None:
+                raise ValueError(
+                    "An interpolation method must be specified "
+                    "if discrete values are used."
                 )
-                self._interpolation = interpolation
-            else:
-                # TODO: check if time is None or time range
-                self._time = time
-                self._data = data
+
+            self._data = xr.DataArray(data=data, dims=["time"], coords={"time": time})
+            self._interpolation = interpolation
+
         elif isinstance(data, MathematicalExpression):
 
             if data.num_variables() != 1:
@@ -144,6 +144,8 @@ class TimeSeries:
     @property
     def time(self):
         if isinstance(self._data, xr.DataArray):
+            if len(self._data.time) == 1:
+                return None
             return ut.to_pandas_time_index(self._data.time.data)
         return self._time
 

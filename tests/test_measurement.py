@@ -133,7 +133,7 @@ def test_time_series_construction():
 
     assert ts_constant.data == value
     assert ts_constant.time is None
-    assert ts_constant.interpolation is None
+    assert ts_constant.interpolation == "linear"
 
     # discrete values -------------------------------------
     time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
