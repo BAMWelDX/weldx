@@ -245,3 +245,7 @@ def test_time_series_interp_time_expression():
         assert (
             value_interp_multi[i] == parameters["a"] * time_multi[i] + parameters["b"]
         )
+
+    # exceptions ------------------------------------------
+    with pytest.raises(ValueError):
+        ts_expr.interp_time(Q_(2, "s/m"))

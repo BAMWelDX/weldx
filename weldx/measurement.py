@@ -11,6 +11,7 @@ import xarray as xr
 import weldx.utility as ut
 from weldx.asdf.tags.weldx.core.mathematical_expression import MathematicalExpression
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 
 # measurement --------------------------------------------------------------------------
@@ -78,6 +79,7 @@ class Measurement:
 
 
 # TODO: move to core package
+# TODO: move mathematical expression too
 class TimeSeries:
     """Describes a the behaviour of a quantity in time."""
 
@@ -85,8 +87,6 @@ class TimeSeries:
         # TODO:
         #  - Data + expression one variable
         #  - All xarray except expressions
-        #  - expression check if free parameter is time
-        #  - check expression vectorization support
         self._time = None
         self._data = None
         self._expression = None
@@ -177,9 +177,6 @@ class TimeSeries:
         pass
 
     def interp_time(self, time):
-
-        #  TODO:
-        #   - expression check if free parameter is time
         if self._data is not None:
             if isinstance(self._data, xr.DataArray):
                 if self._interpolation == "linear":
@@ -200,11 +197,15 @@ class TimeSeries:
                 else:
                     return self._data * np.ones(len(time))
 
+        if not isinstance(time, Q_) or not time.check(UREG.get_dimensionality("s")):
+            raise ValueError('"time" must be a time quantity.')
+
         time = {self._time_var_name: time}
         return self._expression.evaluate(**time)
 
     def shape(self):
         # TODO: Math expression: Evaluate t=0
+        # what about the time dimension? ---> : ???
         pass
 
     def unit(self):
