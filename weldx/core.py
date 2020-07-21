@@ -13,6 +13,7 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 
+# TODO: Add __repr__ functions
 class MathematicalExpression:
     """Mathematical expression using sympy syntax."""
 

@@ -1,0 +1,29 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/time_series-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+
+title: |
+  Schema that describes a time series.
+description: |
+  Describes a time dependent quantity.
+type: object
+properties:
+  time:
+    # do we want to mark constant values somehow?
+    tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
+  unit:
+    description: |
+      Optional field describing the unit of the data as valid string representation.
+    type: string
+  data:
+    anyOf:
+      - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
+
+required: [data]
+propertyOrder: [time,unit, data]
+flowStyle: block
+additionalProperties: false
+...

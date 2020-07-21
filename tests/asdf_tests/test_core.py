@@ -12,6 +12,7 @@ from jsonschema.exceptions import ValidationError
 import weldx.transformations as tf
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.core import MathematicalExpression, TimeSeries
 
 # xarray.DataArray ---------------------------------------------------------------------
 
@@ -359,3 +360,35 @@ def test_coordinate_system_manager_load():
 
 
 # weldx.core.TimeSeries ----------------------------------------------------------------
+
+buffer_ts = BytesIO()
+
+
+def get_example_time_series(num):
+    if num == 1:
+        return TimeSeries(Q_(42, "m"))
+    if num == 2:
+        return TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 5]))
+
+    expr = MathematicalExpression(
+        "a*t+b", parameters={"a": Q_(2, "1/s"), "b": Q_(5, "")}
+    )
+    return TimeSeries(expr)
+
+
+def test_time_series_save():
+    """Test if a TimeSeries can be written to an asdf file."""
+    tree = {
+        "ts1": get_example_time_series(1),
+        "ts2": get_example_time_series(2),
+        "ts3": get_example_time_series(3),
+    }
+    with asdf.AsdfFile(
+        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
+    ) as f:
+        f.write_to("buffer_ts.yaml")
+        # buffer_csm.seek(0)
+
+
+# TODO: remove
+test_time_series_save()
