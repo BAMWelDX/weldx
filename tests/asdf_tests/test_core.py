@@ -356,3 +356,6 @@ def test_coordinate_system_manager_load():
     csm_file = f.tree["cs_hierarchy"]
 
     assert are_coordinate_system_managers_equal(csm_exp, csm_file)
+
+
+# weldx.core.TimeSeries ----------------------------------------------------------------

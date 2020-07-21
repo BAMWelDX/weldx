@@ -91,9 +91,6 @@ def test_mathematical_function_evaluation():
         expr.evaluate(a=1, b=2)
 
 
-# TODO:  remove
-test_mathematical_function_evaluation()
-
 # TimeSeries ---------------------------------------------------------------------------
 
 
@@ -133,8 +130,8 @@ def test_time_series_construction():
     assert ts_expr.shape == tuple([1])
 
     assert isinstance(ts_expr.data, MathematicalExpression)
-    assert ts_expr.data.num_variables() == 1
-    assert ts_expr.data.num_parameters() == 2
+    assert ts_expr.data.num_variables == 1
+    assert ts_expr.data.num_parameters == 2
     assert ts_expr.data.get_variable_names()[0] == "t"
     assert parameters["b"].check(UREG.get_dimensionality(ts_expr.units))
 
@@ -156,8 +153,8 @@ def test_time_series_construction():
     assert ts_expr_vec.shape == tuple([1, 3])
 
     assert isinstance(ts_expr_vec.data, MathematicalExpression)
-    assert ts_expr_vec.data.num_variables() == 1
-    assert ts_expr_vec.data.num_parameters() == 2
+    assert ts_expr_vec.data.num_variables == 1
+    assert ts_expr_vec.data.num_parameters == 2
     assert ts_expr_vec.data.get_variable_names()[0] == "time"
     assert parameters_vec["b"].check(UREG.get_dimensionality(ts_expr_vec.units))
 
