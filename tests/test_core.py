@@ -161,7 +161,7 @@ def test_time_series_interp_time_expression():
     time_single = Q_(1, "second")
     value_interp_single = ts_expr.interp_time(time_single)
 
-    assert value_interp_single == Q_(0, "meter")
+    assert value_interp_single.data == Q_(0, "meter")
 
     # multiple time deltas
     time_multi = Q_([0, 1, 2, 10], "second")
@@ -171,7 +171,8 @@ def test_time_series_interp_time_expression():
 
     for i in range(4):
         assert (
-            value_interp_multi[i] == parameters["a"] * time_multi[i] + parameters["b"]
+            value_interp_multi[i].data
+            == parameters["a"] * time_multi[i] + parameters["b"]
         )
 
     # vector -----------------------------------------------
@@ -186,7 +187,7 @@ def test_time_series_interp_time_expression():
     # single time delta
     value_interp_vec_single = ts_expr_vec.interp_time(time_single)
 
-    assert np.all(np.isclose(value_interp_vec_single, [0, 6, 5]))
+    assert np.all(np.isclose(value_interp_vec_single.data.magnitude, [0, 6, 5]))
 
     # multiple time deltas
     value_interp_vec_multi = ts_expr_vec.interp_time(time_multi)
@@ -195,9 +196,14 @@ def test_time_series_interp_time_expression():
 
     for i in range(4):
         assert (
-            value_interp_multi[i] == parameters["a"] * time_multi[i] + parameters["b"]
+            value_interp_multi[i].data
+            == parameters["a"] * time_multi[i] + parameters["b"]
         )
 
     # exceptions ------------------------------------------
     with pytest.raises(ValueError):
         ts_expr.interp_time(Q_(2, "s/m"))
+
+
+# TODO: remove
+test_time_series_interp_time_expression()

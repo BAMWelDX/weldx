@@ -144,10 +144,6 @@ def test_to_pandas_time_index():
     )
 
 
-# TODO: remove
-test_to_pandas_time_index()
-
-
 def test_xr_interp_like():
     """Test behaviour of custom interpolation method for xarray Objects."""
     # basic interpolation behavior on a single coordinate

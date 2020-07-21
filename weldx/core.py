@@ -290,9 +290,18 @@ class TimeSeries:
             while len(time.magnitude.shape) < len(self.shape):
                 time = Q_(time.magnitude[:, np.newaxis], time.units)
 
-        # TODO: Convert to DataArray
-        time = {self._time_var_name: time}
-        return self._data.evaluate(**time)
+        # evaluate expression
+        data = self._data.evaluate(**{self._time_var_name: time})
+
+        # create data array
+        if not np.iterable(data.magnitude):  # make sure quantity is not scalar value
+            data = data * np.array([1])
+        if hasattr(time, "shape"):  # squeeze out any helper dimensions
+            time = np.squeeze(time)
+        time = ut.to_pandas_time_index(time)
+        dax = xr.DataArray(data=data)  # don't know exact dimensions so far
+        dax = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
+        return dax
 
     @property
     def shape(self) -> Tuple:
