@@ -1,11 +1,12 @@
 """Test the internal utility functions."""
 
-import pytest
 import numpy as np
 import pandas as pd
+import pytest
 import xarray as xr
-import weldx.utility as ut
+
 import weldx.transformations as tf
+import weldx.utility as ut
 
 
 def test_is_column_in_matrix():
@@ -96,6 +97,50 @@ def test_vector_is_close():
 
     # vectors have different size
     assert not ut.vector_is_close(vec_a, vec_a[0:2])
+
+
+def test_to_pandas_time_index():
+    """Test the to_pandas_time_index function."""
+    # time delta ------------------------------------------
+    # scalar
+    exp_time_delta_index_single = pd.TimedeltaIndex([42])
+
+    assert ut.to_pandas_time_index(42) == exp_time_delta_index_single
+    assert ut.to_pandas_time_index([42]) == exp_time_delta_index_single
+    assert ut.to_pandas_time_index(np.timedelta64(42)) == exp_time_delta_index_single
+
+    # array
+    exp_time_delta_index_array = pd.TimedeltaIndex([1, 2, 3])
+    assert np.all(ut.to_pandas_time_index([1, 2, 3]) == exp_time_delta_index_array)
+    assert np.all(
+        ut.to_pandas_time_index(np.array([1, 2, 3]).astype("timedelta64[ns]"))
+        == exp_time_delta_index_array
+    )
+
+    # date time -------------------------------------------
+    # scalar
+    exp_date_time_index_single = pd.DatetimeIndex(["2012-10-02"])
+
+    assert (
+        ut.to_pandas_time_index(np.datetime64("2012-10-02"))
+        == exp_date_time_index_single
+    )
+
+    # array
+    exp_date_time_index_array = pd.DatetimeIndex(
+        ["2012-10-02", "2012-10-05", "2012-10-11"]
+    )
+
+    assert np.all(
+        ut.to_pandas_time_index(
+            np.array(["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]")
+        )
+        == exp_date_time_index_array
+    )
+
+
+# TODO: remove
+test_to_pandas_time_index()
 
 
 def test_xr_interp_like():
