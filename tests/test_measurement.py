@@ -10,9 +10,9 @@ import xarray as xr
 
 import weldx.measurement as msm
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.tags.weldx.core.mathematical_expression import MathematicalExpression
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.core import MathematicalExpression
 
 
 def test_generic_measurement():
