@@ -7,6 +7,7 @@ import xarray as xr
 
 import weldx.transformations as tf
 import weldx.utility as ut
+from weldx.constants import WELDX_QUANTITY as Q_
 
 
 def test_is_column_in_matrix():
@@ -108,6 +109,7 @@ def test_to_pandas_time_index():
     assert ut.to_pandas_time_index(42) == exp_time_delta_index_single
     assert ut.to_pandas_time_index([42]) == exp_time_delta_index_single
     assert ut.to_pandas_time_index(np.timedelta64(42)) == exp_time_delta_index_single
+    assert ut.to_pandas_time_index(Q_(42, "ns")) == exp_time_delta_index_single
 
     # array
     exp_time_delta_index_array = pd.TimedeltaIndex([1, 2, 3])
@@ -115,6 +117,9 @@ def test_to_pandas_time_index():
     assert np.all(
         ut.to_pandas_time_index(np.array([1, 2, 3]).astype("timedelta64[ns]"))
         == exp_time_delta_index_array
+    )
+    assert np.all(
+        ut.to_pandas_time_index(Q_([1, 2, 3], "ns")) == exp_time_delta_index_array
     )
 
     # date time -------------------------------------------
