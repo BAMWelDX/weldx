@@ -95,7 +95,19 @@ def to_list(var) -> list:
     return [var]
 
 
-def to_pandas_time_index(time):
+def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+    """Convert a time variable to the corresponding pandas time index type.
+
+    Parameters
+    ----------
+    time :
+        Variable that should be converted.
+
+    Returns
+    -------
+        Variable as pandas time index
+
+    """
     if not isinstance(time, np.ndarray):
         if not isinstance(time, list):
             time = [time]

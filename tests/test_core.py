@@ -12,6 +12,7 @@ from weldx.core import MathematicalExpression, TimeSeries
 
 
 def test_time_series_construction():
+    """Test the construction of the TimeSeries class."""
     # single value ----------------------------------------
     value = Q_(1, "m")
     ts_constant = TimeSeries(data=value)
@@ -107,6 +108,7 @@ def test_time_series_construction():
 
 
 def test_time_series_interp_time_constant():
+    """Test the TimeSeries.inter_time method for constants as data."""
     value = Q_(1, "m")
     ts_constant = TimeSeries(data=value)
 
@@ -126,6 +128,7 @@ def test_time_series_interp_time_constant():
 
 
 def test_time_series_interp_time_discrete_linear():
+    """Test the inter_time method for discrete data and liner interpolation."""
     time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
     values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
     ts_discrete = TimeSeries(data=values, time=time, interpolation="linear")
@@ -146,6 +149,7 @@ def test_time_series_interp_time_discrete_linear():
 
 
 def test_time_series_interp_time_expression():
+    """Test the TimeSeries.inter_time method for mathematical expressions as data."""
     # scalar ----------------------------------------------
     expr_string = "a*t+b"
     parameters = {"a": Q_(2, "meter/second"), "b": Q_(-2, "meter")}
