@@ -1,7 +1,3 @@
-from typing import Any
-
-import sympy
-
 from weldx.asdf.types import WeldxType
 from weldx.core import MathematicalExpression
 
