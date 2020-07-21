@@ -8,6 +8,92 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, TimeSeries
 
+# MathematicalExpression ---------------------------------------------------------------
+
+
+def test_mathematical_expression_construction():
+    """Test the construction of a MathematicalExpression."""
+    expr = MathematicalExpression("a*b+c/d-e", parameters={"d": 1, "e": 2})
+
+    assert expr.num_parameters == 2
+    assert expr.num_variables == 3
+
+    for variable in ["a", "b", "c"]:
+        assert variable in expr.get_variable_names()
+
+    for parameter, value in {"d": 1, "e": 2}.items():
+        assert parameter in expr.parameters
+        assert expr.parameters[parameter] == value
+
+    # exceptions ------------------------------------------
+    # parameter not in expression
+    with pytest.raises(ValueError):
+        expr = MathematicalExpression("a*b+c/d-e", parameters={"f": 1})
+    # invalid parameter type
+    with pytest.raises(ValueError):
+        expr = MathematicalExpression("a*b+c/d-e", parameters=1)
+
+
+def test_mathematical_expression_set_parameter():
+    """Test the set_parameter function of the mathematical expression."""
+    expr = MathematicalExpression("a*b+c/d-e")
+
+    assert expr.num_parameters == 0
+    assert expr.num_variables == 5
+
+    for variable in ["a", "b", "c", "d", "e"]:
+        assert variable in expr.get_variable_names()
+
+    assert len(expr.parameters) == 0
+
+    # set first parameters
+    expr.set_parameter("d", 1)
+    expr.set_parameter("e", 2)
+
+    assert expr.num_parameters == 2
+    assert expr.num_variables == 3
+
+    for variable in ["a", "b", "c"]:
+        assert variable in expr.get_variable_names()
+
+    for parameter, value in {"d": 1, "e": 2}.items():
+        assert parameter in expr.parameters
+        assert expr.parameters[parameter] == value
+
+    # set another parameter and overwrite others
+    expr.set_parameter("a", 5)
+    expr.set_parameter("d", 7)
+    expr.set_parameter("e", -1)
+
+    assert expr.num_parameters == 3
+    assert expr.num_variables == 2
+
+    for variable in ["b", "c"]:
+        assert variable in expr.get_variable_names()
+
+    for parameter, value in {"a": 5, "d": 7, "e": -1}.items():
+        assert parameter in expr.parameters
+        assert expr.parameters[parameter] == value
+
+
+def test_mathematical_function_evaluation():
+    """Test the evaluation of the mathematical function."""
+    expr = MathematicalExpression("a*b+c/d-e", parameters={"d": 1, "e": 2})
+
+    assert expr.evaluate(a=1, b=2, c=3) == 3
+
+    # exceptions ------------------------------------------
+    # input already defined as expression parameter
+    with pytest.raises(ValueError):
+        expr.evaluate(a=1, b=2, c=3, d=2)
+    # not enough values provided
+    with pytest.raises(Exception):
+        expr.evaluate(a=1, b=2)
+
+
+# TODO:  remove
+test_mathematical_function_evaluation()
+
 # TimeSeries ---------------------------------------------------------------------------
 
 

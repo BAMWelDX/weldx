@@ -62,6 +62,7 @@ class MathematicalExpression:
         """
         self.parameters[name] = value
 
+    @property
     def num_parameters(self):
         """Get the expressions number of parameters.
 
@@ -73,6 +74,7 @@ class MathematicalExpression:
         """
         return len(self.parameters)
 
+    @property
     def num_variables(self):
         """Get the expressions number of free variables.
 
@@ -112,6 +114,11 @@ class MathematicalExpression:
             Result of the evaluated function
 
         """
+        intersection = set(kwargs).intersection(self.parameters)
+        if len(intersection) > 0:
+            raise ValueError(
+                f"The variables {intersection} are already defined as parameters."
+            )
         inputs = {**kwargs, **self.parameters}
         return self.function(**inputs)
 
@@ -171,7 +178,7 @@ class TimeSeries:
 
         elif isinstance(data, MathematicalExpression):
 
-            if data.num_variables() != 1:
+            if data.num_variables != 1:
                 raise Exception(
                     "The mathematical expression must have exactly 1 free "
                     "variable that represents time."
