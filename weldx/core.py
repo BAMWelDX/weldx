@@ -318,6 +318,20 @@ class TimeSeries:
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
+    def __eq__(self, other):
+        if not isinstance(other, TimeSeries):
+            return False
+        if isinstance(self.data, pint.Quantity):
+            if not isinstance(other.data, pint.Quantity):
+                return False
+            return (
+                np.all(self.data == other.data)
+                and np.all(self.time == other.time)
+                and self._interpolation == other.interpolation
+            )
+
+        return self._data == other.data
+
     @property
     def data(self) -> Union[xr.DataArray, MathematicalExpression]:
         """Return the data of the TimeSeries.

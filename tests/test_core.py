@@ -282,6 +282,144 @@ def test_time_series_construction():
         TimeSeries(data=expr_4)
 
 
+def test_time_series_comparison():
+    """Test the comparison functions of the TimeSeries class."""
+    value_constant = Q_(1, "m")
+    ts_constant = TimeSeries(data=value_constant)
+
+    time_dicrete = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
+    values_discrete = Q_(np.array([10, 11, 12, 14, 16]), "mm")
+    ts_discrete = TimeSeries(
+        data=values_discrete, time=time_dicrete, interpolation="step"
+    )
+
+    expr_string = "a*t+b"
+    parameters = {"a": Q_(2, "1/s"), "b": Q_(-2, "")}
+    expr = MathematicalExpression(expression=expr_string, parameters=parameters)
+
+    ts_expr = TimeSeries(data=expr)
+
+    # self comparison -------------------------------------
+
+    assert ts_constant == ts_constant
+    assert ts_discrete == ts_discrete
+    assert ts_expr == ts_expr
+
+    assert not ts_constant != ts_constant
+    assert not ts_discrete != ts_discrete
+    assert not ts_expr != ts_expr
+
+    # comparison with duplicate ---------------------------
+
+    assert ts_constant == TimeSeries(value_constant)
+    assert ts_discrete == TimeSeries(values_discrete, time_dicrete, "step")
+    assert ts_expr == TimeSeries(expr)
+
+    assert not ts_constant != TimeSeries(value_constant)
+    assert not ts_discrete != TimeSeries(values_discrete, time_dicrete, "step")
+    assert not ts_expr != TimeSeries(expr)
+
+    # comparison against each other -----------------------
+
+    assert not ts_constant == ts_discrete
+    assert not ts_constant == ts_expr
+    assert not ts_discrete == ts_expr
+
+    assert ts_constant != ts_discrete
+    assert ts_constant != ts_expr
+    assert ts_discrete != ts_expr
+
+    # comparison with other type --------------------------
+
+    assert not ts_constant == 1
+    assert not ts_discrete == 1
+    assert not ts_expr == 1
+
+    assert ts_constant != 1
+    assert ts_discrete != 1
+    assert ts_expr != 1
+
+    assert not ts_constant == "nope"
+    assert not ts_discrete == "nope"
+    assert not ts_expr == "nope"
+
+    assert ts_constant != "nope"
+    assert ts_discrete != "nope"
+    assert ts_expr != "nope"
+
+    # constant value specific mismatches ------------------
+    ts_constant_value_wrong = TimeSeries(Q_(1337, "m"))
+    assert not ts_constant == ts_constant_value_wrong
+    assert ts_constant != ts_constant_value_wrong
+
+    ts_constant_unit_wrong = TimeSeries(Q_(1, "s"))
+    assert not ts_constant == ts_constant_unit_wrong
+    assert ts_constant != ts_constant_unit_wrong
+
+    ts_constant_unit_prefix_wrong = TimeSeries(Q_(1, "mm"))
+    assert not ts_constant == ts_constant_unit_prefix_wrong
+    assert ts_constant != ts_constant_unit_prefix_wrong
+
+    # discrete value specific mismatches ------------------
+    time_wrong = pd.TimedeltaIndex([0, 1, 2, 3, 5])
+    ts_discrete_time_wrong = TimeSeries(values_discrete, time_wrong, "step")
+    assert not ts_discrete == ts_discrete_time_wrong
+    assert ts_discrete != ts_discrete_time_wrong
+
+    values_discrete_wrong = Q_(np.array([10, 11, 12, 15, 16]), "mm")
+    ts_discrete_values_wrong = TimeSeries(values_discrete_wrong, time_dicrete, "step")
+    assert not ts_discrete == ts_discrete_values_wrong
+    assert ts_discrete != ts_discrete_values_wrong
+
+    values_unit_wrong = Q_(np.array([10, 11, 12, 14, 16]), "s")
+    ts_discrete_unit_wrong = TimeSeries(values_unit_wrong, time_dicrete, "step")
+    assert not ts_discrete == ts_discrete_unit_wrong
+    assert ts_discrete != ts_discrete_unit_wrong
+
+    values_unit_prefix_wrong = Q_(np.array([10, 11, 12, 14, 16]), "m")
+    ts_discrete_unit_prefix_wrong = TimeSeries(
+        values_unit_prefix_wrong, time_dicrete, "step"
+    )
+    assert not ts_discrete == ts_discrete_unit_prefix_wrong
+    assert ts_discrete != ts_discrete_unit_prefix_wrong
+
+    ts_discrete_interp_wrong = TimeSeries(values_discrete, time_dicrete, "linear")
+    assert not ts_discrete == ts_discrete_interp_wrong
+    assert ts_discrete != ts_discrete_interp_wrong
+
+    # expression specific mismatches ----------------------
+
+    expr_string_wrong_exp = "a*t+b"
+    expr_wrong_exp = MathematicalExpression("a*t+ 2*b", parameters)
+    ts_expr_wrong_expr = TimeSeries(expr_wrong_exp)
+    assert not ts_expr == ts_expr_wrong_expr
+    assert ts_expr != ts_expr_wrong_expr
+
+    parameters_wrong_vals = {"a": Q_(2, "1/s"), "b": Q_(-1, "")}
+    expr_wrong_param_vals = MathematicalExpression(expr_string, parameters_wrong_vals)
+    ts_expr_wrong_param_vals = TimeSeries(expr_wrong_param_vals)
+    assert not ts_expr == ts_expr_wrong_param_vals
+    assert ts_expr != ts_expr_wrong_param_vals
+
+    parameters_wrong_unit = {"a": Q_(2, "m/s"), "b": Q_(-2, "m")}
+    expr_wrong_param_unit = MathematicalExpression(expr_string, parameters_wrong_unit)
+    ts_expr_wrong_param_unit = TimeSeries(expr_wrong_param_unit)
+    assert not ts_expr == ts_expr_wrong_param_unit
+    assert ts_expr != ts_expr_wrong_param_unit
+
+    parameters_wrong_unit_prefix = {"a": Q_(2, "1/ms"), "b": Q_(-2, "")}
+    expr_wrong_param_unit_prefix = MathematicalExpression(
+        expr_string, parameters_wrong_unit_prefix
+    )
+    ts_expr_wrong_param_unit_prefix = TimeSeries(expr_wrong_param_unit_prefix)
+    assert not ts_expr == ts_expr_wrong_param_unit_prefix
+    assert ts_expr != ts_expr_wrong_param_unit_prefix
+
+
+# TODO: remove
+test_time_series_comparison()
+
+
 def test_time_series_interp_time_constant():
     """Test the TimeSeries.inter_time method for constants as data."""
     value = Q_(1, "m")
