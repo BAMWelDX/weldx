@@ -1,14 +1,13 @@
-from io import BytesIO
-
-import asdf
 import jsonschema
 import numpy as np
 import pandas as pd
 import pytest
 from asdf import ValidationError
 
+from weldx import Q_
 from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
+from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass
 from weldx.asdf.validators import _custom_shape_validator
 
 from .utility import _write_read_buffer
@@ -165,3 +164,81 @@ def test_shape_validator():
         )
         tree = {"root_node": test}
         _write_read_buffer(tree)
+
+
+def test_unit_validator():
+    """Test custom ASDF validators."""
+    test = UnitValidatorTestClass(
+        length_prop=Q_(1, "inch"),
+        velocity_prop=Q_(2, "km / s"),
+        current_prop=Q_(np.eye(2, 2), "mA"),
+        nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+        simple_prop={"value": float(3), "unit": "m"},
+    )
+
+    tree = {"root_node": test}
+
+    data = _write_read_buffer(tree)
+    test_read = data["root_node"]
+    assert isinstance(data, dict)
+    assert test_read.length_prop == test.length_prop
+    assert test_read.velocity_prop == test.velocity_prop
+    assert np.all(test_read.current_prop == test.current_prop)
+    assert np.all(test_read.nested_prop["q1"] == test.nested_prop["q1"])
+    assert test_read.nested_prop["q2"] == test.nested_prop["q2"]
+    assert test_read.simple_prop == test.simple_prop
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = UnitValidatorTestClass(
+            length_prop=Q_(1, "s"),  # wrong unit
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 2), "mA"),
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = UnitValidatorTestClass(
+            length_prop=Q_(1, "s"),
+            velocity_prop=Q_(2, "liter"),  # wrong unit
+            current_prop=Q_(np.eye(2, 2), "mA"),
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = UnitValidatorTestClass(
+            length_prop=Q_(1, "inch"),
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 2), "V"),  # wrong unit
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = UnitValidatorTestClass(
+            length_prop=Q_(1, "m"),
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 2), "mA"),
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "V")),  # wrong unit
+            simple_prop={"value": float(3), "unit": "m"},
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
+
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        test = UnitValidatorTestClass(
+            length_prop=Q_(1, "m"),
+            velocity_prop=Q_(2, "km / s"),
+            current_prop=Q_(np.eye(2, 2), "mA"),
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
+            simple_prop={"value": float(3), "unit": "s"},  # wrong unit
+        )
+        tree = {"root_node": test}
+        data = _write_read_buffer(tree)
