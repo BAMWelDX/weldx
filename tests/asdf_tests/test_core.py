@@ -414,11 +414,6 @@ def test_time_series_load():
     expr_exp = ts3_exp.data
     expr_file = ts3_file.data
 
-    assert expr_exp.expression.__str__() == expr_file.expression.__str__()
-    assert len(expr_exp.parameters) == len(expr_file.parameters)
-    for parameter, value in expr_file.parameters.items():
-        assert parameter in expr_exp.parameters
-        assert expr_file.parameters[parameter] == expr_exp.parameters[parameter]
-
+    assert expr_exp == expr_file
     assert ts3_file.time == ts3_exp.time
     assert ts3_file.interpolation == ts3_exp.interpolation

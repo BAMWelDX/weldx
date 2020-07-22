@@ -156,10 +156,16 @@ def test_mathematical_expression_comparison():
     assert not expr.equals(expr_different_different)
     assert not expr.equals(expr_different_different, check_parameters=False)
 
-    print(expr)
+    # other types -----------------------------------------
+    assert not expr == 1
+    assert expr != 1
+    assert not expr.equals(1)
+    assert not expr.equals(1, check_parameters=False)
 
-
-test_mathematical_expression_comparison()
+    assert not expr == "nope"
+    assert expr != "nope"
+    assert not expr.equals("nope")
+    assert not expr.equals("nope", check_parameters=False)
 
 
 def test_mathematical_function_evaluation():
