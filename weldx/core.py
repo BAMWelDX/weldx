@@ -50,6 +50,20 @@ class MathematicalExpression:
                     )
             self._parameters = parameters
 
+    def __repr__(self):
+        """Give __repr__ output."""
+        repres = (
+            f"<MathematicalExpression>\n"
+            f"Expression:\n\t {self._expression.__repr__()}"
+            f"\nParameters:\n"
+        )
+        if len(self._parameters) > 0:
+            for parameter, value in self._parameters.items():
+                repres += f"\t{parameter} = {value}\n"
+        else:
+            repres += f"\tNone"
+        return repres
+
     def __eq__(self, other):
         """Return the result of a structural equality comparison with another object.
 

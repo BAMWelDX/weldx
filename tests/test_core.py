@@ -156,6 +156,11 @@ def test_mathematical_expression_comparison():
     assert not expr.equals(expr_different_different)
     assert not expr.equals(expr_different_different, check_parameters=False)
 
+    print(expr)
+
+
+test_mathematical_expression_comparison()
+
 
 def test_mathematical_function_evaluation():
     """Test the evaluation of the mathematical function."""
