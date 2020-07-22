@@ -17,6 +17,9 @@ properties:
     description: |
       Optional field describing the unit of the data as valid string representation.
     type: string
+  interpolation:
+    type:
+      string
   data:
     anyOf:
       - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"

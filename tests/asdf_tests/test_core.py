@@ -387,8 +387,45 @@ def test_time_series_save():
         tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
     ) as f:
         f.write_to("buffer_ts.yaml")
-        # buffer_csm.seek(0)
+        buffer_ts.seek(0)
+
+
+def test_time_series_load():
+    """Test if a TimeSeries can be read from an asdf file."""
+    f = asdf.open(
+        "buffer_ts.yaml",
+        extensions=[WeldxExtension(), WeldxAsdfExtension()],
+        lazy_load=False,
+    )
+
+    ts1_exp = get_example_time_series(1)
+    ts1_file = f.tree["ts1"]
+    assert ts1_file.data == ts1_exp.data
+    assert ts1_file.time == ts1_exp.time
+    assert ts1_file.interpolation == ts1_exp.interpolation
+
+    ts2_exp = get_example_time_series(2)
+    ts2_file = f.tree["ts2"]
+    assert np.all(ts2_file.data == ts2_exp.data)
+    assert np.all(ts2_file.time == ts2_exp.time)
+    assert ts2_file.interpolation == ts2_exp.interpolation
+
+    ts3_exp = get_example_time_series(3)
+    ts3_file = f.tree["ts3"]
+
+    expr_exp = ts3_exp.data
+    expr_file = ts3_file.data
+
+    assert expr_exp.expression.__str__() == expr_file.expression.__str__()
+    assert len(expr_exp.parameters) == len(expr_file.parameters)
+    for parameter, value in expr_file.parameters.items():
+        assert parameter in expr_exp.parameters
+        assert expr_file.parameters[parameter] == expr_exp.parameters[parameter]
+
+    assert ts3_file.time == ts3_exp.time
+    assert ts3_file.interpolation == ts3_exp.interpolation
 
 
 # TODO: remove
-test_time_series_save()
+# test_time_series_save()
+test_time_series_load()

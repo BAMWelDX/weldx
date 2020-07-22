@@ -1,8 +1,11 @@
 import pint
+from asdf.tags.core.ndarray import NDArrayType
+from numpy import ndarray
 from xarray import DataArray
 
 from weldx.asdf.tags.weldx.core.common_types import Variable
 from weldx.asdf.types import WeldxType
+from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import TimeSeries
 
 
@@ -37,15 +40,13 @@ class TimeSeriesTypeASDF(WeldxType):
         """
 
         if isinstance(node.data, pint.Quantity):
-            tree = {
+            return {
                 "time": node.time,
                 "data": node.data.magnitude,
+                "interpolation": node.interpolation,
                 "unit": str(node.units),
             }
-        else:
-            tree = {"data": node.data, "unit": str(node.units)}
-
-        return tree
+        return {"data": node.data, "unit": str(node.units)}
 
     @classmethod
     def from_tree(cls, tree, ctx):
@@ -66,5 +67,13 @@ class TimeSeriesTypeASDF(WeldxType):
             An instance of the 'weldx.core.TimeSeries' type.
 
         """
+        if isinstance(tree["data"], NDArrayType):
+            if "time" in tree:
+                time = tree["time"]
+            else:
+                time = None
+            NDArrayType.mro()
+            values = Q_(tree["data"], tree["unit"])
+            return TimeSeries(values, time, tree["interpolation"])
 
-        return None
+        return TimeSeries(tree["data"])

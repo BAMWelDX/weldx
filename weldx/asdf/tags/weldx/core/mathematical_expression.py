@@ -23,6 +23,7 @@ class MathematicalExpressionType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        obj = MathematicalExpression(sympy.sympify(tree["expression"]))
-        obj.parameters = tree["parameters"]
+        obj = MathematicalExpression(
+            sympy.sympify(tree["expression"]), parameters=tree["parameters"]
+        )
         return obj

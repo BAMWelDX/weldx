@@ -7,6 +7,7 @@ import pandas as pd
 import pint
 import sympy
 import xarray as xr
+from asdf.tags.core.ndarray import NDArrayType
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -34,11 +35,11 @@ class MathematicalExpression:
         """
         if isinstance(expression, str):
             expression = sympy.sympify(expression)
-        self.expression = expression
+        self._expression = expression
         self.function = sympy.lambdify(
-            self.expression.free_symbols, self.expression, "numpy"
+            self._expression.free_symbols, self._expression, "numpy"
         )
-        self.parameters = {}
+        self._parameters = {}
         if parameters is not None:
             if not isinstance(parameters, dict):
                 raise ValueError('"parameters" must be dictionary')
@@ -48,7 +49,7 @@ class MathematicalExpression:
                     raise ValueError(
                         f'The expression does not have a parameter "{key}"'
                     )
-            self.parameters = parameters
+            self._parameters = parameters
 
     def set_parameter(self, name, value):
         """Define an expression parameter as constant value.
@@ -61,7 +62,7 @@ class MathematicalExpression:
             Parameter value. This can be number, array or weldx.Quantity
 
         """
-        self.parameters[name] = value
+        self._parameters[name] = value
 
     @property
     def num_parameters(self):
@@ -73,7 +74,7 @@ class MathematicalExpression:
             Number of parameters.
 
         """
-        return len(self.parameters)
+        return len(self._parameters)
 
     @property
     def num_variables(self):
@@ -85,7 +86,33 @@ class MathematicalExpression:
             Number of free variables.
 
         """
-        return len(self.expression.free_symbols) - len(self.parameters)
+        return len(self.expression.free_symbols) - len(self._parameters)
+
+    @property
+    def expression(self) -> sympy.core.basic.Basic:
+        """
+        Return the internal sympy expression.
+
+        Returns
+        -------
+        sympy.core.basic.Basic
+            Internal sympy expression
+
+        """
+        return self._expression
+
+    @property
+    def parameters(self) -> Dict:
+        """
+        Return the internal parameters dictionary.
+
+        Returns
+        -------
+        Dict
+            Internal parameters dictionary
+
+        """
+        return self._parameters
 
     def get_variable_names(self):
         """Get a list of all expression variables.
@@ -96,8 +123,8 @@ class MathematicalExpression:
 
         """
         variable_names = []
-        for var in self.expression.free_symbols:
-            if var.__str__() not in self.parameters:
+        for var in self._expression.free_symbols:
+            if var.__str__() not in self._parameters:
                 variable_names.append(var.__str__())
         return variable_names
 
@@ -115,12 +142,12 @@ class MathematicalExpression:
             Result of the evaluated function
 
         """
-        intersection = set(kwargs).intersection(self.parameters)
+        intersection = set(kwargs).intersection(self._parameters)
         if len(intersection) > 0:
             raise ValueError(
                 f"The variables {intersection} are already defined as parameters."
             )
-        inputs = {**kwargs, **self.parameters}
+        inputs = {**kwargs, **self._parameters}
         return self.function(**inputs)
 
 
@@ -162,11 +189,11 @@ class TimeSeries:
         self._shape = None
         self._units = None
 
-        if isinstance(data, Q_):
-            if not isinstance(data.magnitude, np.ndarray):
+        if isinstance(data, pint.Quantity):
+            if not np.iterable(data.magnitude):
                 data = Q_([data.magnitude], data.units)
-                if time is None:
-                    time = pd.TimedeltaIndex([0])
+            if time is None and data.shape[0] == 1:
+                time = pd.TimedeltaIndex([0])
 
             if interpolation not in self._valid_interpolations:
                 raise ValueError(
