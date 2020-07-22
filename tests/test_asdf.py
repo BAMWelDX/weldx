@@ -10,8 +10,6 @@ import pandas as pd
 import pytest
 from asdf import ValidationError
 
-from .asdf_tests.utility import _write_read_buffer
-
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
 # weld design -----------------------------------------------------------------
@@ -37,8 +35,21 @@ from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 # validators -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
+from weldx.asdf.utils import _write_read_buffer
 from weldx.asdf.validators import _custom_shape_validator
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.transformations import WXRotation
+
+
+def test_rotation():
+    """Test Scipy.Rotation implementation."""
+    rot = WXRotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True)
+    tree = {"rot": rot}
+    _write_read_buffer(tree=tree)
+
+    rot = WXRotation.from_euler(seq="y", angles=[10, 20, 60, 40, 90], degrees=True)
+    tree = {"rot": rot}
+    _write_read_buffer(tree=tree)
 
 
 def test_aws_example():

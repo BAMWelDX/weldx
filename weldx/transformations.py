@@ -18,6 +18,24 @@ import weldx.utility as ut
 # functions -------------------------------------------------------------------
 
 
+class WXRotation:
+    """Wrapper for creating meta-tagged Scipy.Rotation objects."""
+
+    @classmethod
+    def from_euler(cls, seq, angles, degrees=False):
+        seq_str = seq
+        if not len(seq_str) == 3:
+            seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
+        if any(seq_str[i] == seq_str[i + 1] for i in range(2)):
+            raise ValueError(
+                f"Expected consecutive axes to be different got '{seq_str}'."
+            )
+        meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
+        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
+        rot._wx_meta = meta
+        return rot
+
+
 def rotation_matrix_x(angle):
     """Create a rotation matrix that rotates around the x-axis.
 
