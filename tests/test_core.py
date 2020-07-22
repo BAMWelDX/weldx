@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+import sympy
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
@@ -74,6 +75,86 @@ def test_mathematical_expression_set_parameter():
     for parameter, value in {"a": 5, "d": 7, "e": -1}.items():
         assert parameter in expr.parameters
         assert expr.parameters[parameter] == value
+
+
+def test_mathematical_expression_comparison():
+    """Test the different comparison functions of the MathematicalExpression."""
+    expr_string = "(a + b)**2 + c - d"
+
+    parameters = {"a": 2, "c": 3.5}
+
+    expr = MathematicalExpression(expr_string, parameters)
+
+    # check structurally equal ----------------------------
+    expr_equal = MathematicalExpression(expr_string, parameters)
+    assert expr == expr_equal
+    assert not expr != expr_equal
+    assert expr.equals(expr_equal)
+    assert expr.equals(expr_equal, check_parameters=False)
+
+    # check mathematical equal expression -----------------
+    expr_string_math_equal = "a**2 + 2*a*b + b**2 + c - d"
+    expr_math_equal = MathematicalExpression(expr_string_math_equal, parameters)
+    assert not expr == expr_math_equal
+    assert expr != expr_math_equal
+    assert expr.equals(expr_math_equal)
+    assert expr.equals(expr_math_equal, check_parameters=False)
+
+    # check totally different expression ------------------
+    expr_string_different = "a*b + c*d"
+    expr_different = MathematicalExpression(expr_string_different, parameters)
+    assert not expr == expr_different
+    assert expr != expr_different
+    assert not expr.equals(expr_different)
+    assert not expr.equals(expr_different, check_parameters=False)
+
+    # check different number of parameters ----------------
+    parameters_plus_one = {"a": 2, "c": 3.5, "d": 4}
+    expr_plus_one = MathematicalExpression(expr_string, parameters_plus_one)
+    assert not expr == expr_plus_one
+    assert expr != expr_plus_one
+    assert not expr.equals(expr_plus_one)
+    assert expr.equals(expr_plus_one, check_parameters=False)
+
+    expr_math_equal_plus_one = MathematicalExpression(
+        expr_string_math_equal, parameters_plus_one
+    )
+    assert not expr == expr_math_equal_plus_one
+    assert expr != expr_math_equal_plus_one
+    assert not expr.equals(expr_math_equal_plus_one)
+    assert expr.equals(expr_math_equal_plus_one, check_parameters=False)
+
+    expr_different_plus_one = MathematicalExpression(
+        expr_string_different, parameters_plus_one
+    )
+    assert not expr == expr_different_plus_one
+    assert expr != expr_different_plus_one
+    assert not expr.equals(expr_different_plus_one)
+    assert not expr.equals(expr_different_plus_one, check_parameters=False)
+
+    # check different parameter values --------------------
+    parameters_different = {"a": 2, "c": 3.4}
+    expr_different = MathematicalExpression(expr_string, parameters_different)
+    assert not expr == expr_different
+    assert expr != expr_different
+    assert not expr.equals(expr_different)
+    assert expr.equals(expr_different, check_parameters=False)
+
+    expr_math_equal_different = MathematicalExpression(
+        expr_string_math_equal, parameters_different
+    )
+    assert not expr == expr_math_equal_different
+    assert expr != expr_math_equal_different
+    assert not expr.equals(expr_math_equal_different)
+    assert expr.equals(expr_math_equal_different, check_parameters=False)
+
+    expr_different_different = MathematicalExpression(
+        expr_string_different, parameters_different
+    )
+    assert not expr == expr_different_different
+    assert expr != expr_different_different
+    assert not expr.equals(expr_different_different)
+    assert not expr.equals(expr_different_different, check_parameters=False)
 
 
 def test_mathematical_function_evaluation():
@@ -286,7 +367,3 @@ def test_time_series_interp_time_expression():
     # exceptions ------------------------------------------
     with pytest.raises(ValueError):
         ts_expr.interp_time(Q_(2, "s/m"))
-
-
-# TODO: remove
-test_time_series_interp_time_expression()

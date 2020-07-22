@@ -19,21 +19,20 @@ class MathematicalExpression:
     """Mathematical expression using sympy syntax."""
 
     def __init__(
-        self, expression: sympy.core.basic.Basic, parameters: Union[Dict, None] = None
+        self, expression: Union[sympy.Expr, str], parameters: Union[Dict, None] = None
     ):
-        """Initialize a MathematicalExpression from sympy objects.
+        """Construct a MathematicalExpression.
 
         Parameters
         ----------
         expression
-            sympy object that can be turned into an expression.
-            E.g. any valid combination of previously defined sympy.symbols.
+            A sympy expression or a string that can be evaluated as one.
         parameters :
             A dictionary containing constant values for variables of the
             expression.
 
         """
-        if isinstance(expression, str):
+        if not isinstance(expression, sympy.Expr):
             expression = sympy.sympify(expression)
         self._expression = expression
         self.function = sympy.lambdify(
@@ -50,6 +49,68 @@ class MathematicalExpression:
                         f'The expression does not have a parameter "{key}"'
                     )
             self._parameters = parameters
+
+    def __eq__(self, other):
+        """Return the result of a structural equality comparison with another object.
+
+        If the other object is not a MathematicalExpression this function always returns
+        'False'.
+
+        Parameters
+        ----------
+        other:
+            Other object.
+
+        Returns
+        -------
+        bool:
+            'True' if the compared object is also a Mathematical expression and equal to
+             this instance, 'False' otherwise
+
+        """
+        return self.equals(other, check_parameters=True, check_structural_equality=True)
+
+    def equals(
+        self,
+        other: Any,
+        check_parameters: bool = True,
+        check_structural_equality: bool = False,
+    ):
+        """Compare the instance with another object for equality and return the result.
+
+        If the other object is not a MathematicalExpression this function always returns
+        'False'. The function offers the choice to compare for structural or
+        mathematical equality by setting the 'structural_expression_equality' parameter
+        accordingly. Additionally, the comparison can be limited to the expression only,
+        if 'check_parameters' is set to 'False'.
+
+        Parameters
+        ----------
+        other:
+            Arbitrary other object.
+        check_parameters
+            Set to 'True' if the parameters should be included during the comparison. If
+            'False', only the expression is checked for equality.
+        check_structural_equality:
+            Set to 'True' if the expression should be checked for structural equality.
+            Set to 'False' if mathematical equality is sufficient.
+
+        Returns
+        -------
+        bool:
+            'True' if both objects are equal, 'False' otherwise
+
+        """
+        if isinstance(other, MathematicalExpression):
+            if check_structural_equality:
+                equality = self.expression == other.expression
+            else:
+                equality = sympy.simplify(self.expression - other.expression) == 0
+
+            if check_parameters:
+                equality = equality and self._parameters == other.parameters
+            return equality
+        return False
 
     def set_parameter(self, name, value):
         """Define an expression parameter as constant value.
@@ -89,14 +150,13 @@ class MathematicalExpression:
         return len(self.expression.free_symbols) - len(self._parameters)
 
     @property
-    def expression(self) -> sympy.core.basic.Basic:
+    def expression(self):
         """
         Return the internal sympy expression.
 
         Returns
         -------
-        sympy.core.basic.Basic
-            Internal sympy expression
+        Internal sympy expression
 
         """
         return self._expression

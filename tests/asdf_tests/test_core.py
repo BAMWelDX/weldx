@@ -386,16 +386,14 @@ def test_time_series_save():
     with asdf.AsdfFile(
         tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
     ) as f:
-        f.write_to("buffer_ts.yaml")
+        f.write_to(buffer_ts)
         buffer_ts.seek(0)
 
 
 def test_time_series_load():
     """Test if a TimeSeries can be read from an asdf file."""
     f = asdf.open(
-        "buffer_ts.yaml",
-        extensions=[WeldxExtension(), WeldxAsdfExtension()],
-        lazy_load=False,
+        buffer_ts, extensions=[WeldxExtension(), WeldxAsdfExtension()], lazy_load=False,
     )
 
     ts1_exp = get_example_time_series(1)
@@ -424,8 +422,3 @@ def test_time_series_load():
 
     assert ts3_file.time == ts3_exp.time
     assert ts3_file.interpolation == ts3_exp.interpolation
-
-
-# TODO: remove
-# test_time_series_save()
-test_time_series_load()
