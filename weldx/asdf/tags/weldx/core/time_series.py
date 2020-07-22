@@ -1,9 +1,8 @@
+"""Contains the serialization class for the weldx.core.TimeSeries."""
+
 import pint
 from asdf.tags.core.ndarray import NDArrayType
-from numpy import ndarray
-from xarray import DataArray
 
-from weldx.asdf.tags.weldx.core.common_types import Variable
 from weldx.asdf.types import WeldxType
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import TimeSeries

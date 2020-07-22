@@ -120,7 +120,7 @@ class MathematicalExpression:
         name
             Name of the parameter used in the expression.
         value
-            Parameter value. This can be number, array or weldx.Quantity
+            Parameter value. This can be number, array or pint.Quantity
 
         """
         self._parameters[name] = value
@@ -221,7 +221,7 @@ class TimeSeries:
 
     def __init__(
         self,
-        data: Union[Q_, MathematicalExpression],
+        data: Union[pint.Quantity, MathematicalExpression],
         time: Union[None, pd.TimedeltaIndex] = None,
         interpolation: str = "linear",
     ):
@@ -230,7 +230,7 @@ class TimeSeries:
         Parameters
         ----------
         data:
-            Either a weldx Quantity or a weldx.MathematicalExpression. If a mathematical
+            Either a pint.Quantity or a weldx.MathematicalExpression. If a mathematical
             expression is chosen, it is only allowed to have a single free variable,
             which represents time.
         time:
@@ -350,7 +350,7 @@ class TimeSeries:
             return ut.to_pandas_time_index(self._data.time.data)
         return self._time
 
-    def interp_time(self, time: Union[pd.TimedeltaIndex, Q_]):
+    def interp_time(self, time: Union[pd.TimedeltaIndex, pint.Quantity]):
         """Interpolate the TimeSeries in time.
 
         If the internal data consists of discrete values, an interpolation with the
@@ -378,7 +378,9 @@ class TimeSeries:
                 )
             raise Exception("not implemented")
 
-        if not isinstance(time, Q_) or not time.check(UREG.get_dimensionality("s")):
+        if not isinstance(time, pint.Quantity) or not time.check(
+            UREG.get_dimensionality("s")
+        ):
             raise ValueError('"time" must be a time quantity.')
 
         if len(self.shape) > 1 and isinstance(time.magnitude, np.ndarray):
