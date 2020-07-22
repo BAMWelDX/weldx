@@ -30,7 +30,6 @@ class ValidatorTestClassType(WeldxType):
     requires = ["weldx"]
     handle_dynamic_subclasses = True
     validators = {
-        "wx_shape": wx_shape_validator,
         "wx_unit": wx_unit_validator,
     }
 

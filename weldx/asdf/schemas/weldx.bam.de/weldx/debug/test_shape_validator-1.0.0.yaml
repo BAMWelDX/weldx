@@ -14,7 +14,7 @@ properties:
 
   prop2:
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
-    wx_shape: [3,2,1]
+    wx_shape: [~,2,1]
 
   prop3:
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
@@ -22,7 +22,11 @@ properties:
 
   prop4:
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
-    wx_shape: [1,3,5,7,9]
+    wx_shape: [~,3,5,7,9]
+
+  prop5:
+    type: number
+    wx_shape: [1]
 
   nested_prop:
     type: object
@@ -44,7 +48,8 @@ wx_shape:
   prop1: [(~),2,n]
   prop2: [n,2,1]
   prop3: [2,4,5~7,...]
-  prop4: [1,3,5,k,m]
+  prop4: [a,3,5,k,m]
+  prop5: [a]
   nested_prop:
     p1: [10,1~10,6,4,2]
     p2: [(m),7,5,3,1]
