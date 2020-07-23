@@ -41,6 +41,8 @@ anyOf:
         tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
       unit:
         type: string
+      shape:
+        type: array
       required: [values,unit]
       additionalProperties: false
 

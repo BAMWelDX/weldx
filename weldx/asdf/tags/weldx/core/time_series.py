@@ -51,7 +51,7 @@ class TimeSeriesTypeASDF(WeldxType):
                     "interpolation": node.interpolation,
                     "values": node.data.magnitude,
                 }
-        return {"values": node.data, "unit": str(node.units)}
+        return {"values": node.data, "unit": str(node.units), "shape": node.shape}
 
     @classmethod
     def from_tree(cls, tree, ctx):
