@@ -66,8 +66,8 @@ class MathematicalExpression:
     def __eq__(self, other):
         """Return the result of a structural equality comparison with another object.
 
-        If the other object is not a MathematicalExpression this function always returns
-        'False'.
+        If the other object is not a 'MathematicalExpression' this function always
+        returns 'False'.
 
         Parameters
         ----------
@@ -77,8 +77,8 @@ class MathematicalExpression:
         Returns
         -------
         bool:
-            'True' if the compared object is also a Mathematical expression and equal to
-             this instance, 'False' otherwise
+            'True' if the compared object is also a 'MathematicalExpression' and equal
+            to this instance, 'False' otherwise
 
         """
         return self.equals(other, check_parameters=True, check_structural_equality=True)
@@ -164,8 +164,7 @@ class MathematicalExpression:
 
     @property
     def expression(self):
-        """
-        Return the internal sympy expression.
+        """Return the internal sympy expression.
 
         Returns
         -------
@@ -176,8 +175,7 @@ class MathematicalExpression:
 
     @property
     def parameters(self) -> Dict:
-        """
-        Return the internal parameters dictionary.
+        """Return the internal parameters dictionary.
 
         Returns
         -------
@@ -317,6 +315,22 @@ class TimeSeries:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
     def __eq__(self, other):
+        """Return the result of a structural equality comparison with another object.
+
+        If the other object is not a 'TimeSeries' this function always returns 'False'.
+
+        Parameters
+        ----------
+        other:
+            Other object.
+
+        Returns
+        -------
+        bool:
+           'True' if the compared object is also a 'TimeSeries' and equal to
+            this instance, 'False' otherwise
+
+        """
         if not isinstance(other, TimeSeries):
             return False
         if isinstance(self.data, pint.Quantity):
