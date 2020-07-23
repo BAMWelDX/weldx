@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from asdf import ValidationError
+from scipy.spatial.transform import Rotation
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
@@ -48,6 +49,11 @@ def test_rotation():
     _write_read_buffer(tree=tree)
 
     rot = WXRotation.from_euler(seq="y", angles=[10, 20, 60, 40, 90], degrees=True)
+    tree = {"rot": rot}
+    _write_read_buffer(tree=tree)
+
+    # default Rotation object as quaternions
+    rot = Rotation.from_euler(seq="y", angles=[10, 20, 60, 40, 90], degrees=True)
     tree = {"rot": rot}
     _write_read_buffer(tree=tree)
 

@@ -35,11 +35,12 @@ class WXRotationTypeASDF(WeldxType):
             serialized.
 
         """
-        if not hasattr(node, "_wx_meta"):
-            raise NotImplementedError("need _wx_meta for serialization")
-
         tree = {}
-        if node._wx_meta["constructor"] is "from_euler":
+
+        if not hasattr(node, "_wx_meta"):  # default to quaternion representation
+            tree["quaternions"] = node.as_quat()
+
+        elif node._wx_meta["constructor"] == "from_euler":
             seq_str = node._wx_meta["seq"]
             if not len(seq_str) == 3:
                 seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
@@ -79,13 +80,16 @@ class WXRotationTypeASDF(WeldxType):
             An instance of the 'Dimension' type.
 
         """
-        if "degree" in str(tree["angles"].units):
-            angles = tree["angles"].to("degree").magnitude
-            degrees = True
-        else:
-            angles = tree["angles"].to("rad").magnitude
-            degrees = False
+        if "quaternions" in tree:
+            return Rotation.from_quat(tree["quaternions"])
 
-        return WXRotation.from_euler(
-            seq=tree["sequence"], angles=angles, degrees=degrees
-        )
+        elif "angles" in tree:
+            if "degree" in str(tree["angles"].units):
+                angles = tree["angles"].to("degree").magnitude
+                degrees = True
+            else:
+                angles = tree["angles"].to("rad").magnitude
+                degrees = False
+            return WXRotation.from_euler(
+                seq=tree["sequence"], angles=angles, degrees=degrees
+            )
