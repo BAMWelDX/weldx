@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import pytest
-import sympy
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG

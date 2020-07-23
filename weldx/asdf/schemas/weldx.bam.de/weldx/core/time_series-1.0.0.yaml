@@ -70,8 +70,8 @@ anyOf:
           Set of discrete n-dimensional data.
         tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
     wx_shape:
-      description: |
-        The outer dimension of the data needs to be identical to the times dimension.
+      #description: |
+      #  The outer dimension of the data needs to be identical to the times dimension.
       time:
         values: [t]
       values: [t, ...]
