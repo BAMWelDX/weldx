@@ -390,6 +390,10 @@ def test_time_series_save():
         buffer_ts.seek(0)
 
 
+# TODO: remove
+test_time_series_save()
+
+
 def test_time_series_load():
     """Test if a TimeSeries can be read from an asdf file."""
     f = asdf.open(

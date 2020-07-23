@@ -20,6 +20,17 @@ anyOf:
     required: [values, unit]
     additionalProperties: false
 
+  - type: object # math expression
+    properties:
+      values:
+        tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
+      unit:
+        type: string
+      shape:
+        type: array
+      required: [values,unit]
+      additionalProperties: false
+
   - type: object # discrete values
     properties:
       time:
@@ -32,19 +43,14 @@ anyOf:
         type: string
       values:
         tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    wx_shape:
+      time:
+        values: [t]
+      values: [t,...]
     required: [time, unit, shape, interpolation, values]
     additionalProperties: false
 
-  - type: object # math expression
-    properties:
-      values:
-        tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
-      unit:
-        type: string
-      shape:
-        type: array
-      required: [values,unit]
-      additionalProperties: false
+
 
 propertyOrder: [time, unit, shape, interpolation, values]
 flowStyle: block
