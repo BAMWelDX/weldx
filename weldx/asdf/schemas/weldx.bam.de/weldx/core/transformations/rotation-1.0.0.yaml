@@ -22,6 +22,26 @@ anyOf:
 
   - type: object
     description: |
+      Matrix rotation representation.
+    properties:
+      matrix:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    required: [matrix]
+    flowStyle: block
+    additionalProperties: false
+
+  - type: object
+    description: |
+      Rotation vector representation.
+    properties:
+      rotvec:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    required: [rotvec]
+    flowStyle: block
+    additionalProperties: false
+
+  - type: object
+    description: |
       Euler angles representation.
     properties:
       sequence:

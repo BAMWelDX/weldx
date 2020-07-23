@@ -22,10 +22,27 @@ class WXRotation:
     """Wrapper for creating meta-tagged Scipy.Rotation objects."""
 
     @classmethod
+    def from_quat(cls, quat):
+        rot = Rot.from_quat(quat)
+        rot._wx_meta = {"constructor": "from_quat"}
+        return rot
+
+    @classmethod
+    def from_matrix(cls, matrix):
+        rot = Rot.from_matrix(matrix)
+        rot._wx_meta = {"constructor": "from_matrix"}
+        return rot
+
+    @classmethod
+    def from_rotvec(cls, rotvec):
+        rot = Rot.from_rotvec(rotvec)
+        rot._wx_meta = {"constructor": "from_rotvec"}
+        return rot
+
+    @classmethod
     def from_euler(cls, seq, angles, degrees=False):
-        meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
         rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
-        rot._wx_meta = meta
+        rot._wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
         return rot
 
 

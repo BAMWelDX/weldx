@@ -39,7 +39,12 @@ class WXRotationTypeASDF(WeldxType):
 
         if not hasattr(node, "_wx_meta"):  # default to quaternion representation
             tree["quaternions"] = node.as_quat()
-
+        elif node._wx_meta["constructor"] == "from_quat":
+            tree["quaternions"] = node.as_quat()
+        elif node._wx_meta["constructor"] == "from_matrix":
+            tree["matrix"] = node.as_matrix()
+        elif node._wx_meta["constructor"] == "from_rotvec":
+            tree["rotvec"] = node.as_rotvec()
         elif node._wx_meta["constructor"] == "from_euler":
             seq_str = node._wx_meta["seq"]
             if not len(seq_str) == 3:
@@ -81,8 +86,11 @@ class WXRotationTypeASDF(WeldxType):
 
         """
         if "quaternions" in tree:
-            return Rotation.from_quat(tree["quaternions"])
-
+            return WXRotation.from_quat(tree["quaternions"])
+        elif "matrix" in tree:
+            return WXRotation.from_matrix(tree["matrix"])
+        elif "rotvec" in tree:
+            return WXRotation.from_rotvec(tree["rotvec"])
         elif "angles" in tree:
             if "degree" in str(tree["angles"].units):
                 angles = tree["angles"].to("degree").magnitude

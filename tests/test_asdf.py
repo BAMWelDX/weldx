@@ -44,6 +44,21 @@ from weldx.transformations import WXRotation
 
 def test_rotation():
     """Test Scipy.Rotation implementation."""
+    rot = Rotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True)
+    rot = WXRotation.from_quat(rot.as_quat())
+    tree = {"rot": rot}
+    _write_read_buffer(tree=tree)
+
+    rot = Rotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True)
+    rot = WXRotation.from_matrix(rot.as_matrix())
+    tree = {"rot": rot}
+    _write_read_buffer(tree=tree)
+
+    rot = Rotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True)
+    rot = WXRotation.from_rotvec(rot.as_rotvec())
+    tree = {"rot": rot}
+    _write_read_buffer(tree=tree)
+
     rot = WXRotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True)
     tree = {"rot": rot}
     _write_read_buffer(tree=tree)
