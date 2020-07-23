@@ -194,7 +194,7 @@ def test_time_series_construction():
 
     assert ts_constant.data == value
     assert ts_constant.time is None
-    assert ts_constant.interpolation == "linear"
+    assert ts_constant.interpolation is None
     assert ts_constant.shape == tuple([1])
     assert value.check(UREG.get_dimensionality(ts_constant.units))
 
@@ -415,14 +415,6 @@ def test_time_series_comparison():
     ts_expr_wrong_param_unit_prefix = TimeSeries(expr_wrong_param_unit_prefix)
     assert not ts_expr == ts_expr_wrong_param_unit_prefix
     assert ts_expr != ts_expr_wrong_param_unit_prefix
-
-    print(ts_constant)
-    print(ts_discrete)
-    print(ts_expr)
-
-
-# TODO: remove
-test_time_series_comparison()
 
 
 def test_time_series_interp_time_constant():

@@ -1,11 +1,10 @@
 """Contains the serialization class for the weldx.core.TimeSeries."""
 
 import pint
-from asdf.tags.core.ndarray import NDArrayType
 
 from weldx.asdf.types import WeldxType
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.core import TimeSeries
+from weldx.core import MathematicalExpression, TimeSeries
 
 
 class TimeSeriesTypeASDF(WeldxType):
@@ -39,13 +38,20 @@ class TimeSeriesTypeASDF(WeldxType):
         """
 
         if isinstance(node.data, pint.Quantity):
-            return {
-                "time": node.time,
-                "data": node.data.magnitude,
-                "interpolation": node.interpolation,
-                "unit": str(node.units),
-            }
-        return {"data": node.data, "unit": str(node.units)}
+            if node.shape == tuple([1]):
+                return {
+                    "unit": str(node.units),
+                    "values": node.data.magnitude[0],
+                }
+            else:
+                return {
+                    "time": node.time,
+                    "unit": str(node.units),
+                    "shape": node.shape,
+                    "interpolation": node.interpolation,
+                    "values": node.data.magnitude,
+                }
+        return {"values": node.data, "unit": str(node.units)}
 
     @classmethod
     def from_tree(cls, tree, ctx):
@@ -66,13 +72,14 @@ class TimeSeriesTypeASDF(WeldxType):
             An instance of the 'weldx.core.TimeSeries' type.
 
         """
-        if isinstance(tree["data"], NDArrayType):
+        if not isinstance(tree["values"], MathematicalExpression):
             if "time" in tree:
                 time = tree["time"]
+                interpolation = tree["interpolation"]
             else:
                 time = None
-            NDArrayType.mro()
-            values = Q_(tree["data"], tree["unit"])
-            return TimeSeries(values, time, tree["interpolation"])
+                interpolation = None
+            values = Q_(tree["values"], tree["unit"])
+            return TimeSeries(values, time, interpolation)
 
-        return TimeSeries(tree["data"])
+        return TimeSeries(tree["values"])

@@ -8,25 +8,42 @@ title: |
   Schema that describes a time series.
 description: |
   Describes a time dependent quantity.
-type: object
-properties:
-  time:
-    # do we want to mark constant values somehow?
-    tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
-  unit:
-    description: |
-      Optional field describing the unit of the data as valid string representation.
-    type: string
-  interpolation:
-    type:
-      string
-  data:
-    anyOf:
-      - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
-      - tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
+anyOf:
+  - type: object # constant value
+    properties:
+      values:
+        anyOf:
+          - type: number
+          - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+      unit:
+        type: string
+    required: [values, unit]
+    additionalProperties: false
 
-required: [data]
-propertyOrder: [time,unit, data]
+  - type: object # discrete values
+    properties:
+      time:
+        tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
+      unit:
+        type: string
+      shape:
+        type: array
+      interpolation:
+        type: string
+      values:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    required: [time, unit, shape, interpolation, values]
+    additionalProperties: false
+
+  - type: object # math expression
+    properties:
+      values:
+        tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
+      unit:
+        type: string
+      required: [values,unit]
+      additionalProperties: false
+
+propertyOrder: [time, unit, shape, interpolation, values]
 flowStyle: block
-additionalProperties: false
 ...

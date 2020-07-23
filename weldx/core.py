@@ -7,7 +7,6 @@ import pandas as pd
 import pint
 import sympy
 import xarray as xr
-from asdf.tags.core.ndarray import NDArrayType
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -268,15 +267,14 @@ class TimeSeries:
                 data = Q_([data.magnitude], data.units)
             if time is None and data.shape[0] == 1:
                 time = pd.TimedeltaIndex([0])
-
-            if interpolation not in self._valid_interpolations:
-                raise ValueError(
-                    "A valid interpolation method must be specified "
-                    f'if discrete values are used. "{interpolation}" is not supported'
-                )
-
+            else:
+                if interpolation not in self._valid_interpolations:
+                    raise ValueError(
+                        "A valid interpolation method must be specified if discrete "
+                        f'values are used. "{interpolation}" is not supported'
+                    )
+                self._interpolation = interpolation
             self._data = xr.DataArray(data=data, dims=["time"], coords={"time": time})
-            self._interpolation = interpolation
 
         elif isinstance(data, MathematicalExpression):
 
@@ -415,7 +413,8 @@ class TimeSeries:
 
         """
         if isinstance(self._data, xr.DataArray):
-            if self._interpolation == "linear":
+            # constant values are also treated by this branch
+            if self._interpolation == "linear" or self.shape[0] == 1:
                 return ut.xr_interp_like(
                     self._data,
                     {"time": time},
