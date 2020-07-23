@@ -9,44 +9,72 @@ title: |
 description: |
   Describes a time dependent quantity.
 anyOf:
-  - type: object # constant value
+  - type: object
+    description: |
+      Implementation for constant values.
     properties:
       values:
+        description: |
+          Number or n-dimensional array that is constant in time.
         anyOf:
           - type: number
           - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
       unit:
+        description: |
+          Unit of the data.
         type: string
     required: [values, unit]
     additionalProperties: false
 
-  - type: object # math expression
+  - type: object
+    description: |
+      Implementation for expressions.
     properties:
       values:
+        description: |
+          A mathematical expression that describes the time dependent behaviour.
         tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
       unit:
+        description: |
+          Resulting unit of the data when the expression is evaluated.
         type: string
       shape:
+        description: |
+          (optional) Resulting shape of the data when the expression is evaluated.
         type: array
-      required: [values,unit]
+      required: [values, unit]
       additionalProperties: false
 
-  - type: object # discrete values
+  - type: object
+    description: |
+      Implementation for discrete data.
     properties:
       time:
+        description: |
+          A set of time deltas.
         tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
       unit:
+        description: |
+          Unit of the data.
         type: string
       shape:
+        description: |
+          Shape of the data.
         type: array
       interpolation:
+        description: |
+          Method how the data should be interpolated.
         type: string
       values:
+        description: |
+          Set of discrete n-dimensional data.
         tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
     wx_shape:
+      description: |
+        The outer dimension of the data needs to be identical to the times dimension.
       time:
         values: [t]
-      values: [t,...]
+      values: [t, ...]
     required: [time, unit, shape, interpolation, values]
     additionalProperties: false
 
