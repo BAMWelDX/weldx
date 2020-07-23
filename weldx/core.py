@@ -52,17 +52,17 @@ class MathematicalExpression:
 
     def __repr__(self):
         """Give __repr__ output."""
-        repres = (
+        representation = (
             f"<MathematicalExpression>\n"
             f"Expression:\n\t {self._expression.__repr__()}"
             f"\nParameters:\n"
         )
         if len(self._parameters) > 0:
             for parameter, value in self._parameters.items():
-                repres += f"\t{parameter} = {value}\n"
+                representation += f"\t{parameter} = {value}\n"
         else:
-            repres += f"\tNone"
-        return repres
+            representation += f"\tNone"
+        return representation
 
     def __eq__(self, other):
         """Return the result of a structural equality comparison with another object.
@@ -331,6 +331,24 @@ class TimeSeries:
             )
 
         return self._data == other.data
+
+    def __repr__(self):
+        """Give __repr__ output."""
+        representation = f"<TimeSeries>"
+        if isinstance(self._data, xr.DataArray):
+            if self._data.shape[0] == 1:
+                representation += f"\nConstant value:\n\t{self.data.magnitude[0]}\n"
+            else:
+                representation += (
+                    f"\nTime:\n\t{self.time}\n"
+                    + f"Values:\n\t{self.data.magnitude}\n"
+                    + f"Interpolation:\n\t{self.interpolation}\n"
+                )
+        else:
+            representation += self.data.__repr__().replace(
+                "<MathematicalExpression>", ""
+            )
+        return representation + f"Units:\n\t{self.units}\n"
 
     @property
     def data(self) -> Union[xr.DataArray, MathematicalExpression]:

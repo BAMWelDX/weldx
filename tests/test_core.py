@@ -287,10 +287,10 @@ def test_time_series_comparison():
     value_constant = Q_(1, "m")
     ts_constant = TimeSeries(data=value_constant)
 
-    time_dicrete = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
+    time_discrete = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
     values_discrete = Q_(np.array([10, 11, 12, 14, 16]), "mm")
     ts_discrete = TimeSeries(
-        data=values_discrete, time=time_dicrete, interpolation="step"
+        data=values_discrete, time=time_discrete, interpolation="step"
     )
 
     expr_string = "a*t+b"
@@ -312,11 +312,11 @@ def test_time_series_comparison():
     # comparison with duplicate ---------------------------
 
     assert ts_constant == TimeSeries(value_constant)
-    assert ts_discrete == TimeSeries(values_discrete, time_dicrete, "step")
+    assert ts_discrete == TimeSeries(values_discrete, time_discrete, "step")
     assert ts_expr == TimeSeries(expr)
 
     assert not ts_constant != TimeSeries(value_constant)
-    assert not ts_discrete != TimeSeries(values_discrete, time_dicrete, "step")
+    assert not ts_discrete != TimeSeries(values_discrete, time_discrete, "step")
     assert not ts_expr != TimeSeries(expr)
 
     # comparison against each other -----------------------
@@ -367,39 +367,40 @@ def test_time_series_comparison():
     assert ts_discrete != ts_discrete_time_wrong
 
     values_discrete_wrong = Q_(np.array([10, 11, 12, 15, 16]), "mm")
-    ts_discrete_values_wrong = TimeSeries(values_discrete_wrong, time_dicrete, "step")
+    ts_discrete_values_wrong = TimeSeries(values_discrete_wrong, time_discrete, "step")
     assert not ts_discrete == ts_discrete_values_wrong
     assert ts_discrete != ts_discrete_values_wrong
 
     values_unit_wrong = Q_(np.array([10, 11, 12, 14, 16]), "s")
-    ts_discrete_unit_wrong = TimeSeries(values_unit_wrong, time_dicrete, "step")
+    ts_discrete_unit_wrong = TimeSeries(values_unit_wrong, time_discrete, "step")
     assert not ts_discrete == ts_discrete_unit_wrong
     assert ts_discrete != ts_discrete_unit_wrong
 
     values_unit_prefix_wrong = Q_(np.array([10, 11, 12, 14, 16]), "m")
     ts_discrete_unit_prefix_wrong = TimeSeries(
-        values_unit_prefix_wrong, time_dicrete, "step"
+        values_unit_prefix_wrong, time_discrete, "step"
     )
     assert not ts_discrete == ts_discrete_unit_prefix_wrong
     assert ts_discrete != ts_discrete_unit_prefix_wrong
 
-    ts_discrete_interp_wrong = TimeSeries(values_discrete, time_dicrete, "linear")
+    ts_discrete_interp_wrong = TimeSeries(values_discrete, time_discrete, "linear")
     assert not ts_discrete == ts_discrete_interp_wrong
     assert ts_discrete != ts_discrete_interp_wrong
 
     # expression specific mismatches ----------------------
 
-    expr_string_wrong_exp = "a*t+b"
     expr_wrong_exp = MathematicalExpression("a*t+ 2*b", parameters)
     ts_expr_wrong_expr = TimeSeries(expr_wrong_exp)
     assert not ts_expr == ts_expr_wrong_expr
     assert ts_expr != ts_expr_wrong_expr
 
-    parameters_wrong_vals = {"a": Q_(2, "1/s"), "b": Q_(-1, "")}
-    expr_wrong_param_vals = MathematicalExpression(expr_string, parameters_wrong_vals)
-    ts_expr_wrong_param_vals = TimeSeries(expr_wrong_param_vals)
-    assert not ts_expr == ts_expr_wrong_param_vals
-    assert ts_expr != ts_expr_wrong_param_vals
+    parameters_wrong_values = {"a": Q_(2, "1/s"), "b": Q_(-1, "")}
+    expr_wrong_param_values = MathematicalExpression(
+        expr_string, parameters_wrong_values
+    )
+    ts_expr_wrong_param_values = TimeSeries(expr_wrong_param_values)
+    assert not ts_expr == ts_expr_wrong_param_values
+    assert ts_expr != ts_expr_wrong_param_values
 
     parameters_wrong_unit = {"a": Q_(2, "m/s"), "b": Q_(-2, "m")}
     expr_wrong_param_unit = MathematicalExpression(expr_string, parameters_wrong_unit)
@@ -414,6 +415,10 @@ def test_time_series_comparison():
     ts_expr_wrong_param_unit_prefix = TimeSeries(expr_wrong_param_unit_prefix)
     assert not ts_expr == ts_expr_wrong_param_unit_prefix
     assert ts_expr != ts_expr_wrong_param_unit_prefix
+
+    print(ts_constant)
+    print(ts_discrete)
+    print(ts_expr)
 
 
 # TODO: remove
