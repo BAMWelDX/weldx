@@ -447,6 +447,8 @@ class TimeSeries:
 
         """
         if isinstance(self._data, xr.DataArray):
+            if isinstance(time, pint.Quantity):
+                time = ut.to_pandas_time_index(time)
             # constant values are also treated by this branch
             if self._data.attrs["interpolation"] == "linear" or self.shape[0] == 1:
                 return ut.xr_interp_like(

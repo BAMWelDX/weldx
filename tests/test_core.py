@@ -445,16 +445,31 @@ def test_time_series_interp_time_constant():
 
     # single timedelta ------------------------------------
     time_delta_single = pd.TimedeltaIndex([2], "s")
+    time_delta_single_q = Q_(2, "s")
     value_interp_single = ts_constant.interp_time(time_delta_single)
+    value_interp_single_q = ts_constant.interp_time(time_delta_single_q)
 
     assert value_interp_single == value
+    assert value_interp_single_q == value
+
+    assert value_interp_single.time == time_delta_single
+    assert value_interp_single_q.time == time_delta_single
 
     # multiple time deltas --------------------------------
     time_delta_multi = pd.TimedeltaIndex([0, 2, 5], "s")
+    time_delta_multi_q = Q_([0, 2, 5], "s")
     value_interp_multi = ts_constant.interp_time(time_delta_multi)
+    value_interp_multi_q = ts_constant.interp_time(time_delta_multi_q)
 
     assert len(value_interp_multi) == 3
+    assert len(value_interp_multi_q) == 3
+
+    assert np.all(value_interp_multi.time == time_delta_multi)
+    assert np.all(value_interp_multi_q.time == time_delta_multi)
+
     for value_interp in value_interp_multi:
+        assert value_interp == value
+    for value_interp in value_interp_multi_q:
         assert value_interp == value
 
 
@@ -466,19 +481,39 @@ def test_time_series_interp_time_discrete_step():
 
     # single timedelta ------------------------------------
     time_delta_single = pd.TimedeltaIndex([1.5], "s")
+    time_delta_single_q = Q_(1.5, "s")
     value_interp_single = ts_discrete.interp_time(time_delta_single)
+    value_interp_single_q = ts_discrete.interp_time(time_delta_single_q)
 
     assert np.isclose(value_interp_single.data.magnitude, 11)
+    assert np.isclose(value_interp_single_q.data.magnitude, 11)
+
+    assert value_interp_single.time == time_delta_single
+    assert value_interp_single_q.time == time_delta_single
+
     assert value_interp_single.data.check(values.dimensionality)
+    assert value_interp_single_q.data.check(values.dimensionality)
 
     # multiple time deltas --------------------------------
     time_delta_multi = pd.TimedeltaIndex([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
+    time_delta_multi_q = Q_([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
     value_interp_multi = ts_discrete.interp_time(time_delta_multi)
+    value_interp_multi_q = ts_discrete.interp_time(time_delta_multi_q)
 
     assert np.all(
         np.isclose(value_interp_multi.data.magnitude, [10, 10, 11, 11, 12, 14, 16, 16])
     )
+    assert np.all(
+        np.isclose(
+            value_interp_multi_q.data.magnitude, [10, 10, 11, 11, 12, 14, 16, 16]
+        )
+    )
+
+    assert np.all(value_interp_multi.time == time_delta_multi)
+    assert np.all(value_interp_multi_q.time == time_delta_multi)
+
     assert value_interp_multi.data.check(values.dimensionality)
+    assert value_interp_multi_q.data.check(values.dimensionality)
 
 
 def test_time_series_interp_time_discrete_linear():
@@ -489,17 +524,33 @@ def test_time_series_interp_time_discrete_linear():
 
     # single timedelta ------------------------------------
     time_delta_single = pd.TimedeltaIndex([1.5], "s")
+    time_delta_single_q = Q_(1.5, "s")
     value_interp_single = ts_discrete.interp_time(time_delta_single)
+    value_interp_single_q = ts_discrete.interp_time(time_delta_single_q)
 
     assert np.isclose(value_interp_single.data.magnitude, 11.5)
+    assert np.isclose(value_interp_single_q.data.magnitude, 11.5)
+
+    assert value_interp_single.time == time_delta_single
+    assert value_interp_single_q.time == time_delta_single
+
     assert value_interp_single.data.check(values.dimensionality)
+    assert value_interp_single_q.data.check(values.dimensionality)
 
     # multiple time deltas --------------------------------
     time_delta_multi = pd.TimedeltaIndex([-3, 2.5, 3, 4, 7], "s")
+    time_delta_multi_q = Q_([-3, 2.5, 3, 4, 7], "s")
     value_interp_multi = ts_discrete.interp_time(time_delta_multi)
+    value_interp_multi_q = ts_discrete.interp_time(time_delta_multi_q)
 
     assert np.all(np.isclose(value_interp_multi.data.magnitude, [10, 13, 14, 16, 16]))
+    assert np.all(np.isclose(value_interp_multi_q.data.magnitude, [10, 13, 14, 16, 16]))
+
+    assert np.all(value_interp_multi.time == time_delta_multi)
+    assert np.all(value_interp_multi_q.time == time_delta_multi)
+
     assert value_interp_multi.data.check(values.dimensionality)
+    assert value_interp_multi_q.data.check(values.dimensionality)
 
 
 def test_time_series_interp_time_expression():
@@ -557,3 +608,7 @@ def test_time_series_interp_time_expression():
     # exceptions ------------------------------------------
     with pytest.raises(ValueError):
         ts_expr.interp_time(Q_(2, "s/m"))
+
+
+# TODO: remove
+test_time_series_interp_time_expression()
