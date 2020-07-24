@@ -436,8 +436,31 @@ def test_time_series_interp_time_constant():
         assert value_interp == value
 
 
+def test_time_series_interp_time_discrete_step():
+    """Test the inter_time method for discrete data and step interpolation."""
+    time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
+    values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
+    ts_discrete = TimeSeries(data=values, time=time, interpolation="step")
+
+    # single timedelta ------------------------------------
+    time_delta_single = pd.TimedeltaIndex([1.5], "s")
+    value_interp_single = ts_discrete.interp_time(time_delta_single)
+
+    assert np.isclose(value_interp_single.data.magnitude, 11)
+    assert value_interp_single.data.check(values.dimensionality)
+
+    # multiple time deltas --------------------------------
+    time_delta_multi = pd.TimedeltaIndex([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
+    value_interp_multi = ts_discrete.interp_time(time_delta_multi)
+
+    assert np.all(
+        np.isclose(value_interp_multi.data.magnitude, [10, 10, 11, 11, 12, 14, 16, 16])
+    )
+    assert value_interp_multi.data.check(values.dimensionality)
+
+
 def test_time_series_interp_time_discrete_linear():
-    """Test the inter_time method for discrete data and liner interpolation."""
+    """Test the inter_time method for discrete data and linear interpolation."""
     time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
     values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
     ts_discrete = TimeSeries(data=values, time=time, interpolation="linear")

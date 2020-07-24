@@ -435,7 +435,9 @@ class TimeSeries:
                     assume_sorted=False,
                     broadcast_missing=False,
                 )
-            raise Exception("not implemented")
+
+            dax = self._data.reindex({"time": time}, method="ffill")
+            return dax.fillna(self._data[0])
 
         if not isinstance(time, pint.Quantity) or not time.check(
             UREG.get_dimensionality("s")
