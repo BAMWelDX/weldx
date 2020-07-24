@@ -6,10 +6,8 @@ from asdf import ValidationError
 
 from weldx import Q_
 from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
-from weldx.asdf.tags.weldx.debug.test_shape_validator import \
-    ShapeValidatorTestClass
-from weldx.asdf.tags.weldx.debug.test_unit_validator import \
-    UnitValidatorTestClass
+from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
+from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass
 from weldx.asdf.validators import _custom_shape_validator
 
 from .utility import _write_read_buffer

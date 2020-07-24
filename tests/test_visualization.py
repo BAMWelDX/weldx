@@ -1,16 +1,16 @@
 """Test functions of the visualization package."""
 
-import weldx.visualization as vs
-import weldx.transformations as tf
+import matplotlib.pyplot as plt
+import pandas as pd
+import pytest
 
 # pylint: disable=W0611
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 
-# pylint: enable=W0611
+import weldx.transformations as tf
+import weldx.visualization as vs
 
-import matplotlib.pyplot as plt
-import pandas as pd
-import pytest
+# pylint: enable=W0611
 
 
 def test_plot_coordinate_system():
