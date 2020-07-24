@@ -21,8 +21,8 @@ import weldx.utility as ut
 class WXRotation:
     """Wrapper for creating meta-tagged Scipy.Rotation objects."""
 
-    @classmethod
-    def from_quat(cls, quat: np.ndarray) -> Rot:
+    @staticmethod
+    def from_quat(quat: np.ndarray) -> Rot:
         """Initialize from quaternions.
 
         scipy.spatial.transform.Rotation docs for details.
@@ -31,8 +31,8 @@ class WXRotation:
         rot._wx_meta = {"constructor": "from_quat"}
         return rot
 
-    @classmethod
-    def from_matrix(cls, matrix: np.ndarray) -> Rot:
+    @staticmethod
+    def from_matrix(matrix: np.ndarray) -> Rot:
         """Initialize from matrix.
 
         scipy.spatial.transform.Rotation docs for details.
@@ -41,8 +41,8 @@ class WXRotation:
         rot._wx_meta = {"constructor": "from_matrix"}
         return rot
 
-    @classmethod
-    def from_rotvec(cls, rotvec: np.ndarray) -> Rot:
+    @staticmethod
+    def from_rotvec(rotvec: np.ndarray) -> Rot:
         """Initialize from rotation vector.
 
         scipy.spatial.transform.Rotation docs for details.
@@ -51,8 +51,8 @@ class WXRotation:
         rot._wx_meta = {"constructor": "from_rotvec"}
         return rot
 
-    @classmethod
-    def from_euler(cls, seq: str, angles: np.ndarray, degrees: bool = False) -> Rot:
+    @staticmethod
+    def from_euler(seq: str, angles: np.ndarray, degrees: bool = False) -> Rot:
         """Initialize from euler angles.
 
         scipy.spatial.transform.Rotation docs for details.
