@@ -1,6 +1,6 @@
 """Collection of common classes and functions."""
 
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -185,13 +185,13 @@ class MathematicalExpression:
         """
         return self._parameters
 
-    def get_variable_names(self):
+    def get_variable_names(self) -> List:
         """Get a list of all expression variables.
 
         Returns
         -------
-        List
-
+        List:
+            List of all expression variables.
         """
         variable_names = []
         for var in self._expression.free_symbols:
@@ -313,7 +313,7 @@ class TimeSeries:
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Return the result of a structural equality comparison with another object.
 
         If the other object is not a 'TimeSeries' this function always returns 'False'.
@@ -362,15 +362,15 @@ class TimeSeries:
         return representation + f"Units:\n\t{self.units}\n"
 
     @property
-    def data(self) -> Union[xr.DataArray, MathematicalExpression]:
+    def data(self) -> Union[pint.Quantity, MathematicalExpression]:
         """Return the data of the TimeSeries.
 
-        This is either a set of discrete values or a mathematical expression.
+        This is either a set of discrete values/quantities or a mathematical expression.
 
         Returns
         -------
-        xr.DataArray:
-            Underlying data array with discrete values in time.
+        pint.Quantity:
+            Underlying data array.
         MathematicalExpression:
             A mathematical expression describing the time dependency
 
@@ -378,6 +378,21 @@ class TimeSeries:
         if isinstance(self._data, xr.DataArray):
             return self._data.data
         return self._data
+
+    @property
+    def data_array(self) -> Union[xr.DataArray, None]:
+        """Return the internal data as 'xarray.DataArray'.
+
+        If the TimeSeries contains an expression, 'None' is returned.
+
+        Returns
+        -------
+        xr.DataArray:
+            The internal data as 'xarray.DataArray'.
+        """
+        if isinstance(self._data, xr.DataArray):
+            return self._data
+        return None
 
     @property
     def interpolation(self) -> Union[str, None]:
@@ -405,7 +420,9 @@ class TimeSeries:
             return ut.to_pandas_time_index(self._data.time.data)
         return None
 
-    def interp_time(self, time: Union[pd.TimedeltaIndex, pint.Quantity]):
+    def interp_time(
+        self, time: Union[pd.TimedeltaIndex, pint.Quantity]
+    ) -> xr.DataArray:
         """Interpolate the TimeSeries in time.
 
         If the internal data consists of discrete values, an interpolation with the

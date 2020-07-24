@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from xarray import DataArray
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
@@ -197,6 +198,11 @@ def test_time_series_construction():
     assert ts_constant.shape == (1,)
     assert value.check(UREG.get_dimensionality(ts_constant.units))
 
+    exp_data_array_constant = DataArray(
+        data=Q_([1], "m"), dims=["time"], coords={"time": pd.TimedeltaIndex([0])}
+    )
+    assert ts_constant.data_array.identical(exp_data_array_constant)
+
     # discrete values -------------------------------------
     time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
     values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
@@ -207,6 +213,11 @@ def test_time_series_construction():
     assert ts_discrete.interpolation == "step"
     assert ts_discrete.shape == (5,)
     assert values.check(UREG.get_dimensionality(ts_discrete.units))
+
+    exp_data_array_discrete = DataArray(
+        data=values, dims=["time"], coords={"time": time}
+    )
+    assert ts_discrete.data_array.identical(exp_data_array_discrete)
 
     # mathematical expression -----------------------------
     # scalar
@@ -219,6 +230,7 @@ def test_time_series_construction():
     assert ts_expr.time is None
     assert ts_expr.interpolation is None
     assert ts_expr.shape == (1,)
+    assert ts_expr.data_array is None
 
     assert isinstance(ts_expr.data, MathematicalExpression)
     assert ts_expr.data.num_variables == 1
@@ -242,6 +254,7 @@ def test_time_series_construction():
     assert ts_expr_vec.time is None
     assert ts_expr_vec.interpolation is None
     assert ts_expr_vec.shape == (1, 3)
+    assert ts_expr_vec.data_array is None
 
     assert isinstance(ts_expr_vec.data, MathematicalExpression)
     assert ts_expr_vec.data.num_variables == 1
@@ -279,6 +292,10 @@ def test_time_series_construction():
             parameters={"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")},
         )
         TimeSeries(data=expr_4)
+
+
+# TODO: remove
+test_time_series_construction()
 
 
 def test_time_series_comparison():
