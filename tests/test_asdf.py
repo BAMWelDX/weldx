@@ -8,7 +8,6 @@ import jsonschema
 import numpy as np
 import pandas as pd
 import pytest
-from asdf import ValidationError
 from scipy.spatial.transform import Rotation
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
