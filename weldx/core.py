@@ -253,7 +253,6 @@ class TimeSeries:
             'step', 'linear'.
 
         """
-        self._time = None
         self._data = None
         self._interpolation = None
         self._time_var_name = None
@@ -402,11 +401,9 @@ class TimeSeries:
             Timestamps of the  data
 
         """
-        if isinstance(self._data, xr.DataArray):
-            if len(self._data.time) == 1:
-                return None
+        if isinstance(self._data, xr.DataArray) and len(self._data.time) > 1:
             return ut.to_pandas_time_index(self._data.time.data)
-        return self._time
+        return None
 
     def interp_time(self, time: Union[pd.TimedeltaIndex, pint.Quantity]):
         """Interpolate the TimeSeries in time.
