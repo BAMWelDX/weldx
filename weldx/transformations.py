@@ -498,6 +498,12 @@ class LocalCoordinateSystem:
         rhs_cs_inv = rhs_cs.invert()
         return self + rhs_cs_inv
 
+    def __eq__(self: "LocalCoordinateSystem", other: "LocalCoordinateSystem") -> bool:
+        """Check equality of LocalCoordinateSystems."""
+        return self.orientation.identical(
+            other.orientation
+        ) and self.coordinates.identical(other.coordinates)
+
     @classmethod
     def from_euler(
         cls, sequence, angles, degrees=False, coordinates=None, time=None

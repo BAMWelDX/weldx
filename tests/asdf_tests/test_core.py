@@ -11,6 +11,7 @@ from jsonschema.exceptions import ValidationError
 
 import weldx.transformations as tf
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.asdf.utils import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 
 # xarray.DataArray ---------------------------------------------------------------------
@@ -168,65 +169,15 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
     )
 
 
-def are_local_coordinate_systems_equal(
-    lcs_0: tf.LocalCoordinateSystem, lcs_1: tf.LocalCoordinateSystem
-):
-    """
-    Check if 2 local coordinate systems are identical
-
-    Parameters
-    ----------
-    lcs_0 :
-        First local coordinate system
-    lcs_1 :
-        Second local coordinate system
-
-    Returns
-    -------
-    bool:
-        True if both systems are identical, False otherwise
-    """
-    return lcs_0.orientation.identical(
-        lcs_1.orientation
-    ) and lcs_0.coordinates.identical(lcs_1.coordinates)
-
-
-def test_local_coordinate_system_save():
-    """Test if a LocalCoordinateSystem can be written to an asdf file."""
-    lcs_static = get_local_coordinate_system(False, False)
-    lcs_tdp_c = get_local_coordinate_system(False, True)
-    lcs_tdp_o = get_local_coordinate_system(True, False)
-    lcs_tdp_oc = get_local_coordinate_system(True, True)
-    tree = {
-        "lcs_static": lcs_static,
-        "lcs_tdp_c": lcs_tdp_c,
-        "lcs_tdp_o": lcs_tdp_o,
-        "lcs_tdp_oc": lcs_tdp_oc,
-    }
-    with asdf.AsdfFile(
-        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True,
-    ) as f:
-        f.write_to(buffer_lcs)
-        buffer_lcs.seek(0)
-
-
-def test_local_coordinate_system_load():
-    """Test if an xarray.DataArray can be restored from an asdf file."""
-    f = asdf.open(buffer_lcs, extensions=[WeldxExtension(), WeldxAsdfExtension()],)
-    lcs_static_file = f.tree["lcs_static"]
-    lcs_tdp_c_file = f.tree["lcs_tdp_c"]
-    lcs_tdp_o_file = f.tree["lcs_tdp_o"]
-    lcs_tdp_oc_file = f.tree["lcs_tdp_oc"]
-
-    lcs_static_exp = get_local_coordinate_system(False, False)
-    lcs_tdp_c_exp = get_local_coordinate_system(False, True)
-    lcs_tdp_o_exp = get_local_coordinate_system(True, False)
-    lcs_tdp_oc_exp = get_local_coordinate_system(True, True)
-
-    assert are_local_coordinate_systems_equal(lcs_static_file, lcs_static_exp)
-    assert are_local_coordinate_systems_equal(lcs_tdp_c_file, lcs_tdp_c_exp)
-    assert are_local_coordinate_systems_equal(lcs_tdp_o_file, lcs_tdp_o_exp)
-    assert are_local_coordinate_systems_equal(lcs_tdp_oc_file, lcs_tdp_oc_exp)
+@pytest.mark.parametrize(
+    "time_dep_orientation,time_dep_coordinates",
+    [(False, False), (False, True), (True, False), (True, True)],
+)
+def test_local_coordinate_system(time_dep_orientation, time_dep_coordinates):
+    """Test (de)serialization of LocalCoordinateSystem in ASDF."""
+    lcs = get_local_coordinate_system(time_dep_orientation, time_dep_coordinates)
+    data = _write_read_buffer({"lcs": lcs})
+    assert data["lcs"] == lcs
 
 
 def test_local_coordinate_system_shape_violation():
@@ -313,7 +264,7 @@ def are_coordinate_system_managers_equal(
     for edge in graph_0.edges:
         lcs_0 = csm_0.get_local_coordinate_system(edge[0], edge[1])
         lcs_1 = csm_1.get_local_coordinate_system(edge[0], edge[1])
-        if not are_local_coordinate_systems_equal(lcs_0, lcs_1):
+        if not (lcs_0 == lcs_1):
             return False
 
     return True
