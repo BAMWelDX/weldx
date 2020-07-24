@@ -17,6 +17,7 @@ class ShapeValidatorTestClass:
     prop2: np.ndarray
     prop3: np.ndarray
     prop4: np.ndarray
+    prop5: float
     nested_prop: dict
 
 

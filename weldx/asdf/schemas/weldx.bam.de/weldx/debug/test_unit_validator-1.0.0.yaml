@@ -1,18 +1,18 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/debug/validator_testclass-1.0.0"
-tag: "tag:weldx.bam.de:weldx/debug/validator_testclass-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/debug/test_unit_validator-1.0.0"
+tag: "tag:weldx.bam.de:weldx/debug/test_unit_validator-1.0.0"
 
 title: |
-  simple demonstration schema for wx_unit and wx_shape validator
+  simple demonstration schema for wx_unit validator
 type: object
 properties:
   length_prop:
     description: |
       a simple length quantity with unit validator
-    $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
-    wx_unit: "s * liter" # this does not trigger a validator on wx_unit! (because of $ref resolving?)
+    tag: tag:stsci.edu:asdf/unit/quantity-1.1.0
+    wx_unit: "m"
 
   velocity_prop:
     description: |
@@ -40,9 +40,6 @@ properties:
         $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
     wx_unit:
       q1: "m"
-    wx_shape:
-      q1:
-        value: [3,3]
 
   simple_prop:
     description: simple property without any references ref
@@ -64,7 +61,4 @@ wx_unit:
   current_prop: A
   nested_prop:
     q2: "m*mm*cm"
-wx_shape:
-  current_prop:
-    value: [2,2]
 ...
