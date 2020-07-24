@@ -21,7 +21,6 @@ from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
 from weldx.asdf.tags.weldx.aws.design.weld_details import WeldDetails
 from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
 from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
-from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
 
 # welding process -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
