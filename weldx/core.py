@@ -13,7 +13,6 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 
-# TODO: Add __repr__ functions
 class MathematicalExpression:
     """Mathematical expression using sympy syntax."""
 
@@ -427,7 +426,7 @@ class TimeSeries:
         return None
 
     def interp_time(
-        self, time: Union[pd.TimedeltaIndex, pint.Quantity]
+        self, time: Union[pd.TimedeltaIndex, pint.Quantity], time_unit: str = "s"
     ) -> xr.DataArray:
         """Interpolate the TimeSeries in time.
 
@@ -439,6 +438,13 @@ class TimeSeries:
         ----------
         time:
             A set of timestamps.
+        time_unit:
+            Only important if the time series is described by an expression and a
+            'pandas.TimedeltaIndex' is passed to this function. In this case, time is
+            converted to a quantity with the provided unit. Even though pint handles
+            unit prefixes automatically, the accuracy of the results can be heavily
+            influenced if the provided unit results in extreme large or
+            small values when compared to the parameters of the expression.
 
         Returns
         -------
@@ -447,6 +453,7 @@ class TimeSeries:
 
         """
         if isinstance(self._data, xr.DataArray):
+            # todo: catch wrong types
             if isinstance(time, pint.Quantity):
                 time = ut.to_pandas_time_index(time)
             # constant values are also treated by this branch
@@ -461,27 +468,31 @@ class TimeSeries:
             dax = self._data.reindex({"time": time}, method="ffill")
             return dax.fillna(self._data[0])
 
-        if not isinstance(time, pint.Quantity) or not time.check(
-            UREG.get_dimensionality("s")
-        ):
-            raise ValueError('"time" must be a time quantity.')
+        # Transform time to both formats
+        if isinstance(time, pint.Quantity) and time.check(UREG.get_dimensionality("s")):
+            time_q = time
+            time_pd = ut.to_pandas_time_index(time)
+        elif isinstance(time, pd.TimedeltaIndex):
+            time_q = ut.pandas_time_delta_to_quantity(time, time_unit)
+            time_pd = time
+        else:
+            raise ValueError(
+                '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
+            )
 
-        if len(self.shape) > 1 and isinstance(time.magnitude, np.ndarray):
-            while len(time.magnitude.shape) < len(self.shape):
-                time = Q_(time.magnitude[:, np.newaxis], time.units)
+        if len(self.shape) > 1 and isinstance(time_q.magnitude, np.ndarray):
+            while len(time_q.magnitude.shape) < len(self.shape):
+                time_q = Q_(time_q.magnitude[:, np.newaxis], time_q.units)
 
         # evaluate expression
-        data = self._data.evaluate(**{self._time_var_name: time})
+        data = self._data.evaluate(**{self._time_var_name: time_q})
 
         # create data array
         if not np.iterable(data.magnitude):  # make sure quantity is not scalar value
             data = data * np.array([1])
-        if hasattr(time, "shape"):  # squeeze out any helper dimensions
-            time = np.squeeze(time)
-        time = ut.to_pandas_time_index(time)
+
         dax = xr.DataArray(data=data)  # don't know exact dimensions so far
-        dax = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
-        return dax
+        return dax.rename({"dim_0": "time"}).assign_coords({"time": time_pd})
 
     @property
     def shape(self) -> Tuple:

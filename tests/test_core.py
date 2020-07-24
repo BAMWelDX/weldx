@@ -1,4 +1,5 @@
 """Tests of the core package."""
+import math
 
 import numpy as np
 import pandas as pd
@@ -555,6 +556,14 @@ def test_time_series_interp_time_discrete_linear():
 
 def test_time_series_interp_time_expression():
     """Test the TimeSeries.inter_time method for mathematical expressions as data."""
+    # needed for TimedeltaIndex tests, since internal conversion introduces small errors
+    def _check_close(q1, q2):
+        q1 = q1.to_reduced_units()
+        q2 = q2.to_reduced_units()
+
+        assert np.all(np.isclose(q1.magnitude, q2.magnitude, atol=1e-9))
+        assert q1.units == q2.units
+
     # scalar ----------------------------------------------
     expr_string = "a*t+b"
     parameters = {"a": Q_(2, "meter/second"), "b": Q_(-2, "meter")}
@@ -564,21 +573,26 @@ def test_time_series_interp_time_expression():
 
     # single timedelta
     time_single = Q_(1, "second")
+    time_single_pd = pd.TimedeltaIndex([1], unit="s")
     value_interp_single = ts_expr.interp_time(time_single)
+    value_interp_single_pd = ts_expr.interp_time(time_single_pd)
 
     assert value_interp_single.data == Q_(0, "meter")
+    _check_close(value_interp_single_pd.data, Q_(0, "meter"))
 
     # multiple time deltas
     time_multi = Q_([0, 1, 2, 10], "second")
+    time_multi_pd = pd.TimedeltaIndex([0, 1, 2, 10], unit="s")
     value_interp_multi = ts_expr.interp_time(time_multi)
+    value_interp_multi_pd = ts_expr.interp_time(time_multi_pd)
 
     assert len(value_interp_multi) == 4
+    assert len(value_interp_multi_pd) == 4
 
     for i in range(4):
-        assert (
-            value_interp_multi[i].data
-            == parameters["a"] * time_multi[i] + parameters["b"]
-        )
+        exp = parameters["a"] * time_multi[i] + parameters["b"]
+        assert value_interp_multi[i].data == exp
+        _check_close(value_interp_multi_pd[i].data, exp)
 
     # vector -----------------------------------------------
     expr_string_vec = "a*t+b"
@@ -591,23 +605,28 @@ def test_time_series_interp_time_expression():
 
     # single time delta
     value_interp_vec_single = ts_expr_vec.interp_time(time_single)
+    value_interp_vec_single_pd = ts_expr_vec.interp_time(time_single_pd)
 
     assert np.all(np.isclose(value_interp_vec_single.data.magnitude, [0, 6, 5]))
+    _check_close(value_interp_vec_single_pd.data, Q_([0, 6, 5], ""))
 
     # multiple time deltas
     value_interp_vec_multi = ts_expr_vec.interp_time(time_multi)
+    value_interp_vec_multi_pd = ts_expr_vec.interp_time(time_multi_pd)
 
     assert value_interp_vec_multi.shape == (4, 3)
+    assert value_interp_vec_multi_pd.shape == (4, 3)
 
     for i in range(4):
-        assert (
-            value_interp_multi[i].data
-            == parameters["a"] * time_multi[i] + parameters["b"]
-        )
+        exp = parameters_vec["a"] * time_multi[i] + parameters_vec["b"]
+        assert np.all(value_interp_vec_multi[i].data == exp)
+        _check_close(value_interp_vec_multi_pd[i].data, exp)
 
     # exceptions ------------------------------------------
     with pytest.raises(ValueError):
         ts_expr.interp_time(Q_(2, "s/m"))
+    with pytest.raises(ValueError):
+        ts_expr.interp_time(1)
 
 
 # TODO: remove
