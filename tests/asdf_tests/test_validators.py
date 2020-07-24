@@ -1,11 +1,7 @@
-from io import BytesIO
-
-import asdf
 import jsonschema
 import pandas as pd
 import pytest
 
-from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 
 from .utility import _write_read_buffer

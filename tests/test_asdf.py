@@ -12,7 +12,6 @@ from asdf import ValidationError
 from scipy.spatial.transform import Rotation
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-
 # weld design -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
 from weldx.asdf.tags.weldx.aws.design.connection import Connection
@@ -21,7 +20,6 @@ from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
 from weldx.asdf.tags.weldx.aws.design.weld_details import WeldDetails
 from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
 from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
-
 # welding process -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
 from weldx.asdf.tags.weldx.aws.process.gas_component import GasComponent
@@ -29,10 +27,8 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
     ShieldingGasForProcedure,
 )
 from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
-
 # iso groove -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
-
 # validators -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.validator_testclass import ValidatorTestClass
@@ -44,7 +40,9 @@ from weldx.transformations import WXRotation
 
 def test_rotation():
     """Test Scipy.Rotation implementation."""
-    base_rotation = Rotation.from_euler(seq="xyz", angles=[[10, 20, 60],[25, 50, 175]], degrees=True)
+    base_rotation = Rotation.from_euler(
+        seq="xyz", angles=[[10, 20, 60], [25, 50, 175]], degrees=True
+    )
 
     # default Rotation object as quaternions
     tree = {"rot": base_rotation}
@@ -76,7 +74,6 @@ def test_rotation():
     data = _write_read_buffer(tree=tree)
     assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
 
-test_rotation()
 
 def test_aws_example():
     """Test validity of current AWS Data Dictionary standard implementation."""
