@@ -5,14 +5,14 @@ import pint
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
-from weldx.asdf.validators import wx_shape_validator, wx_unit_validator
+from weldx.asdf.validators import wx_unit_validator
 
-__all__ = ["ValidatorTestClass", "ValidatorTestClassType"]
+__all__ = ["UnitValidatorTestClass", "UnitValidatorTestClassType"]
 
 
 @dataclass
-class ValidatorTestClass:
-    """<TODO CLASS DOCSTRING>"""
+class UnitValidatorTestClass:
+    """Testclass for validating pint.Quantities with wx_unit."""
 
     length_prop: pint.Quantity
     velocity_prop: pint.Quantity
@@ -21,26 +21,25 @@ class ValidatorTestClass:
     simple_prop: dict
 
 
-class ValidatorTestClassType(WeldxType):
+class UnitValidatorTestClassType(WeldxType):
     """Serialization testclass custom validators."""
 
-    name = "debug/validator_testclass"
+    name = "debug/test_unit_validator"
     version = "1.0.0"
-    types = [ValidatorTestClass]
+    types = [UnitValidatorTestClass]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
     validators = {
-        "wx_shape": wx_shape_validator,
         "wx_unit": wx_unit_validator,
     }
 
     @classmethod
-    def to_tree(cls, node: ValidatorTestClass, ctx):
+    def to_tree(cls, node: UnitValidatorTestClass, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
         tree = drop_none_attr(node)
         return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        obj = ValidatorTestClass(**tree)
+        obj = UnitValidatorTestClass(**tree)
         return obj
