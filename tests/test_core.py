@@ -225,6 +225,19 @@ def test_time_series_construction():
     )
     assert ts_discrete.data_array.identical(exp_data_array_discrete)
 
+    # discrete values - pint time quantity ----------------
+    time_pint = Q_([0, 1, 2, 3, 4], "s")
+    values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
+    ts_discrete_pint = TimeSeries(data=values, time=time_pint, interpolation="step")
+
+    assert np.all(ts_discrete_pint.time == time)
+    assert np.all(ts_discrete_pint.data == values)
+    assert ts_discrete_pint.interpolation == "step"
+    assert ts_discrete_pint.shape == (5,)
+    assert values.check(UREG.get_dimensionality(ts_discrete_pint.units))
+
+    assert ts_discrete_pint.data_array.identical(exp_data_array_discrete)
+
     # mathematical expression -----------------------------
     # scalar
     expr_string = "a*t+b"

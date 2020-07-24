@@ -234,7 +234,7 @@ class TimeSeries:
     def __init__(
         self,
         data: Union[pint.Quantity, MathematicalExpression],
-        time: Union[None, pd.TimedeltaIndex] = None,
+        time: Union[None, pd.TimedeltaIndex, pint.Quantity] = None,
         interpolation: str = "linear",
     ):
         """Construct a TimSeries.
@@ -270,6 +270,9 @@ class TimeSeries:
                     "A valid interpolation method must be specified if discrete "
                     f'values are used. "{interpolation}" is not supported'
                 )
+            if isinstance(time, pint.Quantity):
+                time = ut.to_pandas_time_index(time)
+
             self._data = xr.DataArray(
                 data=data,
                 dims=["time"],
