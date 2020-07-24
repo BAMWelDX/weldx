@@ -53,7 +53,7 @@ definitions:
       Special depth
     $ref: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
 
-anyOf:
+oneOf:
   # I Groove
   - type: object
     properties:
@@ -70,13 +70,11 @@ anyOf:
           code_number:
             type: array
         required: [t, b]
-        additionalProperties: false
         wx_unit:
           t: "m"
           b: "m"
     required: [type, components]
     propertyOrder: [type, components]
-    additionalProperties: true
 
   # Single U Groove
   - type: object

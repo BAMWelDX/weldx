@@ -40,7 +40,7 @@ definitions:
       Maximum timedelta in the index.
     $ref: timedelta-1.0.0
 
-anyOf:
+oneOf:
   - type: object
     properties:
       values:

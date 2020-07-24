@@ -39,3 +39,5 @@
     ```
     It can be used as a "named" mapping replacement instead of YAML `arrays`.
 - add `core/transoformations/rotation-1.0.0` schema that implements `scipy.spatial.transform.Rotation` and `transformations.WXRotation` class to create custom tagged `Rotation` instances for custom serialization. [#79]
+- update requirements to `asdf>=2.7` [#83]
+- update `anyOf` to `oneOf` in ASDF schemas [#83]
