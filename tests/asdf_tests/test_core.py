@@ -169,10 +169,8 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
     )
 
 
-@pytest.mark.parametrize(
-    "time_dep_orientation,time_dep_coordinates",
-    [(False, False), (False, True), (True, False), (True, True)],
-)
+@pytest.mark.parametrize("time_dep_orientation", [False, True])
+@pytest.mark.parametrize("time_dep_coordinates", [False, True])
 def test_local_coordinate_system(time_dep_orientation, time_dep_coordinates):
     """Test (de)serialization of LocalCoordinateSystem in ASDF."""
     lcs = get_local_coordinate_system(time_dep_orientation, time_dep_coordinates)
