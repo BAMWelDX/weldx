@@ -42,8 +42,8 @@ anyOf:
         description: |
           (optional) Resulting shape of the data when the expression is evaluated.
         type: array
-      required: [values, unit]
-      additionalProperties: false
+    required: [values, unit]
+    additionalProperties: false
 
   - type: object
     description: |

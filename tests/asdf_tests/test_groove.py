@@ -1,29 +1,17 @@
 """Test all ASDF groove implementations."""
 
 from io import BytesIO
+
 import asdf
 import matplotlib.pyplot as plt
 import pytest
 
-from weldx.geometry import Profile
-from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
+from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.core.iso_groove import (
-    get_groove,
-    BaseGroove,
-    VGroove,
-    UGroove,
-    IGroove,
-    UVGroove,
-    VVGroove,
-    HVGroove,
-    HUGroove,
-    DVGroove,
-    DUGroove,
-    DHVGroove,
-    DHUGroove,
-    FFGroove,
-)
+    BaseGroove, DHUGroove, DHVGroove, DUGroove, DVGroove, FFGroove, HUGroove,
+    HVGroove, IGroove, UGroove, UVGroove, VGroove, VVGroove, get_groove)
+from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.geometry import Profile
 
 
 def _create_test_grooves():

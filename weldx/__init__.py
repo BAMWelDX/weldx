@@ -2,7 +2,6 @@ import warnings
 
 # asdf extensions and tags
 import weldx.asdf
-
 # geometry packages
 import weldx.core
 import weldx.geometry
