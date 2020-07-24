@@ -60,7 +60,7 @@ class MathematicalExpression:
             for parameter, value in self._parameters.items():
                 representation += f"\t{parameter} = {value}\n"
         else:
-            representation += f"\tNone"
+            representation += "\tNone"
         return representation
 
     def __eq__(self, other):
@@ -288,7 +288,7 @@ class TimeSeries:
                 if isinstance(eval_data.magnitude, np.ndarray):
                     self._shape = eval_data.magnitude.shape
                 else:
-                    self._shape = tuple([1])
+                    self._shape = (1,)
             except pint.errors.DimensionalityError:
                 raise Exception(
                     "Expression can not be evaluated with "
@@ -346,7 +346,7 @@ class TimeSeries:
 
     def __repr__(self):
         """Give __repr__ output."""
-        representation = f"<TimeSeries>"
+        representation = "<TimeSeries>"
         if isinstance(self._data, xr.DataArray):
             if self._data.shape[0] == 1:
                 representation += f"\nConstant value:\n\t{self.data.magnitude[0]}\n"

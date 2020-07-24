@@ -194,7 +194,7 @@ def test_time_series_construction():
     assert ts_constant.data == value
     assert ts_constant.time is None
     assert ts_constant.interpolation is None
-    assert ts_constant.shape == tuple([1])
+    assert ts_constant.shape == (1,)
     assert value.check(UREG.get_dimensionality(ts_constant.units))
 
     # discrete values -------------------------------------
@@ -205,7 +205,7 @@ def test_time_series_construction():
     assert np.all(ts_discrete.time == time)
     assert np.all(ts_discrete.data == values)
     assert ts_discrete.interpolation == "step"
-    assert ts_discrete.shape == tuple([5])
+    assert ts_discrete.shape == (5,)
     assert values.check(UREG.get_dimensionality(ts_discrete.units))
 
     # mathematical expression -----------------------------
@@ -218,7 +218,7 @@ def test_time_series_construction():
 
     assert ts_expr.time is None
     assert ts_expr.interpolation is None
-    assert ts_expr.shape == tuple([1])
+    assert ts_expr.shape == (1,)
 
     assert isinstance(ts_expr.data, MathematicalExpression)
     assert ts_expr.data.num_variables == 1
@@ -241,7 +241,7 @@ def test_time_series_construction():
 
     assert ts_expr_vec.time is None
     assert ts_expr_vec.interpolation is None
-    assert ts_expr_vec.shape == tuple([1, 3])
+    assert ts_expr_vec.shape == (1, 3)
 
     assert isinstance(ts_expr_vec.data, MathematicalExpression)
     assert ts_expr_vec.data.num_variables == 1
@@ -297,16 +297,6 @@ def test_time_series_comparison():
     expr = MathematicalExpression(expression=expr_string, parameters=parameters)
 
     ts_expr = TimeSeries(data=expr)
-
-    # self comparison -------------------------------------
-
-    assert ts_constant == ts_constant
-    assert ts_discrete == ts_discrete
-    assert ts_expr == ts_expr
-
-    assert not ts_constant != ts_constant
-    assert not ts_discrete != ts_discrete
-    assert not ts_expr != ts_expr
 
     # comparison with duplicate ---------------------------
 
@@ -524,7 +514,7 @@ def test_time_series_interp_time_expression():
     # multiple time deltas
     value_interp_vec_multi = ts_expr_vec.interp_time(time_multi)
 
-    assert value_interp_vec_multi.shape == tuple([4, 3])
+    assert value_interp_vec_multi.shape == (4, 3)
 
     for i in range(4):
         assert (
