@@ -1,5 +1,5 @@
 """Tests of the core package."""
-import math
+
 
 import numpy as np
 import pandas as pd
@@ -294,6 +294,9 @@ def test_time_series_construction():
         TimeSeries(values, time, "super interpolator 2000")
     with pytest.raises(ValueError):
         TimeSeries(values, time, None)
+    # invalid time component
+    with pytest.raises(ValueError):
+        TimeSeries(values, values.magnitude)
 
     # too many free variables
     with pytest.raises(Exception):
@@ -473,6 +476,15 @@ def test_time_series_interp_time_constant():
     for value_interp in value_interp_multi_q:
         assert value_interp == value
 
+    # exceptions ------------------------------------------
+    # wrong type
+    with pytest.raises(ValueError):
+        ts_constant.interp_time(pd.DatetimeIndex(["2010-10-10"]))
+    with pytest.raises(ValueError):
+        ts_constant.interp_time("str")
+    with pytest.raises(ValueError):
+        ts_constant.interp_time([1, 2, 3])
+
 
 def test_time_series_interp_time_discrete_step():
     """Test the inter_time method for discrete data and step interpolation."""
@@ -516,6 +528,15 @@ def test_time_series_interp_time_discrete_step():
     assert value_interp_multi.data.check(values.dimensionality)
     assert value_interp_multi_q.data.check(values.dimensionality)
 
+    # exceptions ------------------------------------------
+    # wrong type
+    with pytest.raises(ValueError):
+        ts_discrete.interp_time(pd.DatetimeIndex(["2010-10-10"]))
+    with pytest.raises(ValueError):
+        ts_discrete.interp_time("str")
+    with pytest.raises(ValueError):
+        ts_discrete.interp_time([1, 2, 3])
+
 
 def test_time_series_interp_time_discrete_linear():
     """Test the inter_time method for discrete data and linear interpolation."""
@@ -552,6 +573,15 @@ def test_time_series_interp_time_discrete_linear():
 
     assert value_interp_multi.data.check(values.dimensionality)
     assert value_interp_multi_q.data.check(values.dimensionality)
+
+    # exceptions ------------------------------------------
+    # wrong type
+    with pytest.raises(ValueError):
+        ts_discrete.interp_time(pd.DatetimeIndex(["2010-10-10"]))
+    with pytest.raises(ValueError):
+        ts_discrete.interp_time("str")
+    with pytest.raises(ValueError):
+        ts_discrete.interp_time([1, 2, 3])
 
 
 def test_time_series_interp_time_expression():
@@ -627,7 +657,9 @@ def test_time_series_interp_time_expression():
         ts_expr.interp_time(Q_(2, "s/m"))
     with pytest.raises(ValueError):
         ts_expr.interp_time(1)
-
-
-# TODO: remove
-test_time_series_interp_time_expression()
+    with pytest.raises(ValueError):
+        ts_expr.interp_time(pd.DatetimeIndex(["2010-10-10"]))
+    with pytest.raises(ValueError):
+        ts_expr.interp_time("str")
+    with pytest.raises(ValueError):
+        ts_expr.interp_time([1, 2, 3])

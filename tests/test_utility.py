@@ -148,7 +148,6 @@ def test_to_pandas_time_index():
 
 def test_pandas_time_delta_to_quantity():
     """Test the 'pandas_time_delta_to_quantity' utility function."""
-
     is_close = np.vectorize(math.isclose)
 
     def _check_close(t1, t2):

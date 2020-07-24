@@ -131,7 +131,7 @@ def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
 def pandas_time_delta_to_quantity(
     time: pd.TimedeltaIndex, unit: str = "s"
 ) -> pint.Quantity:
-    """ Convert a 'pandas.TimedeltaIndex' into a corresponding 'pint.Quantity'
+    """Convert a 'pandas.TimedeltaIndex' into a corresponding 'pint.Quantity'.
 
     Parameters
     ----------
@@ -144,6 +144,7 @@ def pandas_time_delta_to_quantity(
     -------
     pint.Quantity :
         Converted time quantity
+
     """
     # from pandas Timedelta documentation: "The .value attribute is always in ns."
     # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas.Timedelta.html
