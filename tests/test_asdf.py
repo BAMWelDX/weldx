@@ -30,8 +30,6 @@ from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 # validators -----------------------------------------------------------------
 from weldx.constants import WELDX_QUANTITY as Q_
 
-from .asdf_tests.utility import _write_read_buffer
-
 
 def test_aws_example():
     """Test validity of current AWS Data Dictionary standard implementation."""
