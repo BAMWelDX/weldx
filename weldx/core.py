@@ -255,7 +255,6 @@ class TimeSeries:
 
         """
         self._data = None
-        self._interpolation = None
         self._time_var_name = None
         self._shape = None
         self._units = None
@@ -265,14 +264,18 @@ class TimeSeries:
                 data = Q_([data.magnitude], data.units)
             if time is None and data.shape[0] == 1:
                 time = pd.TimedeltaIndex([0])
-            else:
-                if interpolation not in self._valid_interpolations:
-                    raise ValueError(
-                        "A valid interpolation method must be specified if discrete "
-                        f'values are used. "{interpolation}" is not supported'
-                    )
-                self._interpolation = interpolation
-            self._data = xr.DataArray(data=data, dims=["time"], coords={"time": time})
+                interpolation = None
+            elif interpolation not in self._valid_interpolations:
+                raise ValueError(
+                    "A valid interpolation method must be specified if discrete "
+                    f'values are used. "{interpolation}" is not supported'
+                )
+            self._data = xr.DataArray(
+                data=data,
+                dims=["time"],
+                coords={"time": time},
+                attrs={"interpolation": interpolation},
+            )
 
         elif isinstance(data, MathematicalExpression):
 
@@ -333,14 +336,10 @@ class TimeSeries:
         """
         if not isinstance(other, TimeSeries):
             return False
-        if isinstance(self.data, pint.Quantity):
+        if not isinstance(self.data, MathematicalExpression):
             if not isinstance(other.data, pint.Quantity):
                 return False
-            return (
-                np.all(self.data == other.data)
-                and np.all(self.time == other.time)
-                and self._interpolation == other.interpolation
-            )
+            return self._data.identical(other.data_array)
 
         return self._data == other.data
 
@@ -354,7 +353,7 @@ class TimeSeries:
                 representation += (
                     f"\nTime:\n\t{self.time}\n"
                     + f"Values:\n\t{self.data.magnitude}\n"
-                    + f"Interpolation:\n\t{self.interpolation}\n"
+                    + f'Interpolation:\n\t{self._data.attrs["interpolation"]}\n'
                 )
         else:
             representation += self.data.__repr__().replace(
@@ -406,7 +405,9 @@ class TimeSeries:
             Interpolation of the TimeSeries
 
         """
-        return self._interpolation
+        if isinstance(self._data, xr.DataArray):
+            return self._data.attrs["interpolation"]
+        return None
 
     @property
     def time(self) -> Union[None, pd.TimedeltaIndex]:
@@ -444,7 +445,7 @@ class TimeSeries:
         """
         if isinstance(self._data, xr.DataArray):
             # constant values are also treated by this branch
-            if self._interpolation == "linear" or self.shape[0] == 1:
+            if self._data.attrs["interpolation"] == "linear" or self.shape[0] == 1:
                 return ut.xr_interp_like(
                     self._data,
                     {"time": time},

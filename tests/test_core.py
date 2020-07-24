@@ -199,7 +199,10 @@ def test_time_series_construction():
     assert value.check(UREG.get_dimensionality(ts_constant.units))
 
     exp_data_array_constant = DataArray(
-        data=Q_([1], "m"), dims=["time"], coords={"time": pd.TimedeltaIndex([0])}
+        data=Q_([1], "m"),
+        dims=["time"],
+        coords={"time": pd.TimedeltaIndex([0])},
+        attrs={"interpolation": None},
     )
     assert ts_constant.data_array.identical(exp_data_array_constant)
 
@@ -215,7 +218,10 @@ def test_time_series_construction():
     assert values.check(UREG.get_dimensionality(ts_discrete.units))
 
     exp_data_array_discrete = DataArray(
-        data=values, dims=["time"], coords={"time": time}
+        data=values,
+        dims=["time"],
+        coords={"time": time},
+        attrs={"interpolation": "step"},
     )
     assert ts_discrete.data_array.identical(exp_data_array_discrete)
 
@@ -292,10 +298,6 @@ def test_time_series_construction():
             parameters={"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")},
         )
         TimeSeries(data=expr_4)
-
-
-# TODO: remove
-test_time_series_construction()
 
 
 def test_time_series_comparison():
