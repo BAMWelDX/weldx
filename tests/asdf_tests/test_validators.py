@@ -172,10 +172,11 @@ def test_shape_validator():
             prop3=np.ones((2, 4, 6, 8, 10)),
             prop4=np.ones((1, 3, 5, 7, 9)),
             prop5=3.141,
-            nested_prop={"p1": np.ones((10, 8, 6, 4, 2))}
+            nested_prop={"p1": np.ones((10, 8, 6, 4, 2))},
         )
         tree = {"root_node": test}
         _write_read_buffer(tree)
+
 
 def test_unit_validator():
     """Test custom ASDF validators."""

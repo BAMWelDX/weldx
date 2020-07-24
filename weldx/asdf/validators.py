@@ -353,7 +353,9 @@ def _custom_shape_validator(dict_test, dict_expected):
     elif isinstance(dict_expected, dict):
         for item in dict_expected:
             if item not in dict_test:
-                raise ValidationError(f"Could not access key '{item}'  in instance {dict_test}.")
+                raise ValidationError(
+                    f"Could not access key '{item}'  in instance {dict_test}."
+                )
             # go one level deeper in the dictionary
             _dict_values = _custom_shape_validator(dict_test[item], dict_expected[item])
 
