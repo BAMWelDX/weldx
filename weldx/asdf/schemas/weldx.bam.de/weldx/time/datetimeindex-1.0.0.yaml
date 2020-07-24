@@ -40,7 +40,7 @@ definitions:
       Maximum timestamp in the index.
     $ref: timestamp-1.0.0
 
-anyOf:
+oneOf:
   - type: object
     properties:
       values:

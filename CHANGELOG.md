@@ -38,3 +38,5 @@
     wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"  
     ```
     It can be used as a "named" mapping replacement instead of YAML `arrays`.
+- update requirements to `asdf>=2.7` [#83]
+- update `anyOf` to `oneOf` in ASDF schemas [#83]
