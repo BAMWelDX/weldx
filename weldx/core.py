@@ -191,7 +191,8 @@ class MathematicalExpression:
         Returns
         -------
         List:
-            List of all expression variables.
+            List of all expression variables
+
         """
         variable_names = []
         for var in self._expression.free_symbols:
@@ -388,7 +389,8 @@ class TimeSeries:
         Returns
         -------
         xr.DataArray:
-            The internal data as 'xarray.DataArray'.
+            The internal data as 'xarray.DataArray'
+
         """
         if isinstance(self._data, xr.DataArray):
             return self._data
