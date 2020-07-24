@@ -65,6 +65,7 @@ anyOf:
         description: |
           Method how the data should be interpolated.
         type: string
+        enum: [linear, step]
       values:
         description: |
           Set of discrete n-dimensional data.
