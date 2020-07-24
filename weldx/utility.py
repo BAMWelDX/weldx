@@ -11,6 +11,7 @@ from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
 import weldx.transformations as tf
+from weldx.constants import WELDX_QUANTITY as Q_
 
 
 def is_column_in_matrix(column, matrix) -> bool:
@@ -125,6 +126,31 @@ def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
     if np.issubdtype(time.dtype, np.datetime64):
         return pd.DatetimeIndex(time)
     return pd.TimedeltaIndex(time)
+
+
+def pandas_time_delta_to_quantity(
+    time: pd.TimedeltaIndex, unit: str = "s"
+) -> pint.Quantity:
+    """ Convert a 'pandas.TimedeltaIndex' into a corresponding 'pint.Quantity'
+
+    Parameters
+    ----------
+    time :
+        Instance of 'pandas.TimedeltaIndex'
+    unit :
+        String that specifies the desired time unit.
+
+    Returns
+    -------
+    pint.Quantity :
+        Converted time quantity
+    """
+    # from pandas Timedelta documentation: "The .value attribute is always in ns."
+    # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas.Timedelta.html
+    nanoseconds = time.values.astype(np.int64)
+    if len(nanoseconds) == 1:
+        nanoseconds = nanoseconds[0]
+    return Q_(nanoseconds, "ns").to(unit)
 
 
 def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:

@@ -1,5 +1,7 @@
 """Test the internal utility functions."""
 
+import math
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -141,6 +143,39 @@ def test_to_pandas_time_index():
             np.array(["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]")
         )
         == exp_date_time_index_array
+    )
+
+
+def test_pandas_time_delta_to_quantity():
+    """Test the 'pandas_time_delta_to_quantity' utility function."""
+
+    is_close = np.vectorize(math.isclose)
+
+    def _check_close(t1, t2):
+        assert np.all(is_close(t1.magnitude, t2.magnitude))
+        assert t1.units == t2.units
+
+    time_single = pd.TimedeltaIndex([1], unit="s")
+
+    _check_close(ut.pandas_time_delta_to_quantity(time_single), Q_(1, "s"))
+    _check_close(ut.pandas_time_delta_to_quantity(time_single, "ms"), Q_(1000, "ms"))
+    _check_close(ut.pandas_time_delta_to_quantity(time_single, "us"), Q_(1000000, "us"))
+    _check_close(
+        ut.pandas_time_delta_to_quantity(time_single, "ns"), Q_(1000000000, "ns")
+    )
+
+    time_multi = pd.TimedeltaIndex([1, 2, 3], unit="s")
+    _check_close(ut.pandas_time_delta_to_quantity(time_multi), Q_([1, 2, 3], "s"))
+    _check_close(
+        ut.pandas_time_delta_to_quantity(time_multi, "ms"), Q_([1000, 2000, 3000], "ms")
+    )
+    _check_close(
+        ut.pandas_time_delta_to_quantity(time_multi, "us"),
+        Q_([1000000, 2000000, 3000000], "us"),
+    )
+    _check_close(
+        ut.pandas_time_delta_to_quantity(time_multi, "ns"),
+        Q_([1000000000, 2000000000, 3000000000], "ns"),
     )
 
 
