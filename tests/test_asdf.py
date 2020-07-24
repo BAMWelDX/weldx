@@ -69,10 +69,23 @@ def test_rotation():
     data = _write_read_buffer(tree=tree)
     assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
 
+    rot = WXRotation.from_euler(seq="XYZ", angles=[10, 20, 60], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
     rot = WXRotation.from_euler(seq="y", angles=[10, 20, 60, 40, 90], degrees=True)
     tree = {"rot": rot}
     data = _write_read_buffer(tree=tree)
     assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_euler(seq="Z", angles=[10, 20, 60, 40, 90], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    with pytest.raises(ValueError):
+        rot = WXRotation.from_euler(seq="XyZ", angles=[10, 20, 60], degrees=True)
 
 
 def test_aws_example():

@@ -48,7 +48,12 @@ class WXRotationTypeASDF(WeldxType):
         elif node._wx_meta["constructor"] == "from_euler":
             seq_str = node._wx_meta["seq"]
             if not len(seq_str) == 3:
-                seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
+                if all([c in "xyz" for c in seq_str]):
+                    seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
+                elif all([c in "XYZ" for c in seq_str]):
+                    seq_str = seq_str + "".join([c for c in "XYZ" if c not in seq_str])
+                else:
+                    raise ValueError("Mix of intrinsic and extrinsic euler angles.")
 
             angles = node.as_euler(seq_str, degrees=node._wx_meta["degrees"])
             angles = np.squeeze(angles[..., : len(node._wx_meta["seq"])])
