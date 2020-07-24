@@ -384,15 +384,11 @@ class LocalCoordinateSystem:
                 # TODO: Test if xarray has correct format
                 pass
 
-            # TODO: Remove the deepcopy when asdf 2.7.0 is available
-            #  - the copy circumvents an asdf bug
-            orientation = deepcopy(
-                xr.apply_ufunc(
-                    normalize,
-                    orientation,
-                    input_core_dims=[["c"]],
-                    output_core_dims=[["c"]],
-                )
+            orientation = xr.apply_ufunc(
+                normalize,
+                orientation,
+                input_core_dims=[["c"]],
+                output_core_dims=[["c"]],
             )
 
             # unify time axis
@@ -1605,7 +1601,7 @@ class CoordinateSystemManager:
         self,
         time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
         affected_coordinate_systems: Union[str, List[str], None] = None,
-        inplace: bool = False,
+        in_place: bool = False,
     ) -> "CoordinateSystemManager":
         """Interpolates the coordinate systems in time.
 
@@ -1620,7 +1616,7 @@ class CoordinateSystemManager:
             A single coordinate system name or a list of coordinate system names that
             should be interpolated in time. Only transformations towards the systems
             root node are affected.
-        inplace :
+        in_place :
             If 'True' the interpolation is performed in place, otherwise a
             new instance is returned. (Default value = False)
 
@@ -1630,7 +1626,7 @@ class CoordinateSystemManager:
             Coordinate system manager with interpolated data
 
         """
-        if inplace:
+        if in_place:
             if affected_coordinate_systems is not None:
                 if isinstance(affected_coordinate_systems, str):
                     affected_coordinate_systems = [affected_coordinate_systems]
@@ -1656,7 +1652,7 @@ class CoordinateSystemManager:
             return self
 
         return deepcopy(self).interp_time(
-            time, affected_coordinate_systems, inplace=True
+            time, affected_coordinate_systems, in_place=True
         )
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
