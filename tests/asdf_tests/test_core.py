@@ -14,11 +14,8 @@ from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.utils import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 
+
 # xarray.DataArray ---------------------------------------------------------------------
-
-buffer_data_array = BytesIO()
-
-
 def get_xarray_example_data_array():
     """
     Get an xarray.DataArray for test purposes.
@@ -43,31 +40,18 @@ def get_xarray_example_data_array():
     return dax
 
 
-def test_xarray_data_array_save():
-    """Test if an xarray.DataArray can be written to an asdf file."""
+@pytest.mark.parametrize(
+    "copy_arrays", [True, False],
+)
+def test_xarray_data_array(copy_arrays):
+    """Test ASDF read/write of xarray.DataArray."""
     dax = get_xarray_example_data_array()
     tree = {"dax": dax}
-    with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
-        f.write_to(buffer_data_array)
-        buffer_data_array.seek(0)
+    dax_file = _write_read_buffer(tree, open_kwargs={"copy_arrays": copy_arrays})["dax"]
+    assert dax.identical(dax_file)
 
 
-def test_xarray_data_array_load():
-    """Test if an xarray.DataArray can be restored from an asdf file."""
-    f = asdf.open(
-        buffer_data_array, extensions=[WeldxExtension(), WeldxAsdfExtension()]
-    )
-    dax_file = f.tree["dax"]
-    dax_exp = get_xarray_example_data_array()
-    assert dax_exp.identical(dax_file)
-
-
-# xarray.DataArray ---------------------------------------------------------------------
-
-
-buffer_dataset = BytesIO()
-
-
+# xarray.Dataset ---------------------------------------------------------------------
 def get_xarray_example_dataset():
     """
     Get an xarray.Dataset for test purposes.
@@ -106,21 +90,14 @@ def get_xarray_example_dataset():
     return dsx
 
 
-def test_xarray_dataset_save():
-    """Test if an xarray.DataSet can be written to an asdf file."""
+@pytest.mark.parametrize(
+    "copy_arrays", [True, False],
+)
+def test_xarray_dataset(copy_arrays):
     dsx = get_xarray_example_dataset()
     tree = {"dsx": dsx}
-    with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
-        f.write_to(buffer_dataset)
-        buffer_dataset.seek(0)
-
-
-def test_xarray_dataset_load():
-    """Test if an xarray.Dataset can be restored from an asdf file."""
-    f = asdf.open(buffer_dataset, extensions=[WeldxExtension(), WeldxAsdfExtension()])
-    dsx_file = f.tree["dsx"]
-    dsx_exp = get_xarray_example_dataset()
-    assert dsx_exp.identical(dsx_file)
+    dsx_file = _write_read_buffer(tree, open_kwargs={"copy_arrays": copy_arrays})["dsx"]
+    assert dsx.identical(dsx_file)
 
 
 # weldx.transformations.LocalCoordinateSystem ------------------------------------------

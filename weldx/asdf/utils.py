@@ -290,18 +290,18 @@ def _write_read_buffer(
         Extensions are always set.
     open_kwargs
         Additional keywords to pass to asdf.AsdfFile.open()
-        Extensions and copy_arrays=True are always set.
+        Extensions are always set, copy_arrays=True is set by default.
     Returns
     -------
     dict
     """
     # Write the data to buffer
-    if open_kwargs is None:
-        open_kwargs = {}
-    if write_kwargs is None:
-        write_kwargs = {}
     if asdffile_kwargs is None:
         asdffile_kwargs = {}
+    if write_kwargs is None:
+        write_kwargs = {}
+    if open_kwargs is None:
+        open_kwargs = {"copy_arrays": True}
 
     with asdf.AsdfFile(
         tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], **asdffile_kwargs
@@ -312,10 +312,7 @@ def _write_read_buffer(
 
     # read back data from ASDF file contents in buffer
     with asdf.open(
-        buff,
-        extensions=[WeldxExtension(), WeldxAsdfExtension()],
-        copy_arrays=True,
-        **open_kwargs,
+        buff, extensions=[WeldxExtension(), WeldxAsdfExtension()], **open_kwargs,
     ) as af:
         data = af.tree
     return data
