@@ -1,8 +1,5 @@
 """Tests asdf implementations of core module."""
 
-from io import BytesIO
-
-import asdf
 import numpy as np
 import pandas as pd
 import pytest
@@ -10,8 +7,7 @@ import xarray as xr
 from jsonschema.exceptions import ValidationError
 
 import weldx.transformations as tf
-from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.utils import _write_read_buffer
+from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
@@ -40,9 +36,7 @@ def get_xarray_example_data_array():
     return dax
 
 
-@pytest.mark.parametrize(
-    "copy_arrays", [True, False],
-)
+@pytest.mark.parametrize("copy_arrays", [True, False])
 def test_xarray_data_array(copy_arrays):
     """Test ASDF read/write of xarray.DataArray."""
     dax = get_xarray_example_data_array()
@@ -90,9 +84,7 @@ def get_xarray_example_dataset():
     return dsx
 
 
-@pytest.mark.parametrize(
-    "copy_arrays", [True, False],
-)
+@pytest.mark.parametrize("copy_arrays", [True, False])
 def test_xarray_dataset(copy_arrays):
     dsx = get_xarray_example_dataset()
     tree = {"dsx": dsx}
@@ -101,10 +93,6 @@ def test_xarray_dataset(copy_arrays):
 
 
 # weldx.transformations.LocalCoordinateSystem ------------------------------------------
-
-buffer_lcs = BytesIO()
-
-
 def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates: bool):
     """
     Get a local coordinate system.
@@ -169,11 +157,7 @@ def test_local_coordinate_system_shape_violation():
     )
 
     with pytest.raises(ValidationError):
-        buff = BytesIO()
-        with asdf.AsdfFile(
-            {"lcs": lcs}, extensions=[WeldxExtension(), WeldxAsdfExtension()],
-        ) as f:
-            f.write_to(buff)
+        _write_buffer({"lcs": lcs})
 
     # orientations have wrong shape -----------------------
     orientation = xr.DataArray(
@@ -187,64 +171,10 @@ def test_local_coordinate_system_shape_violation():
     )
 
     with pytest.raises(ValidationError):
-        buff = BytesIO()
-        with asdf.AsdfFile(
-            {"lcs": lcs}, extensions=[WeldxExtension(), WeldxAsdfExtension()]
-        ) as f:
-            f.write_to(buff)
+        _write_buffer({"lcs": lcs})
 
 
 # weldx.transformations.CoordinateSystemManager ----------------------------------------
-
-buffer_csm = BytesIO()
-
-
-def are_coordinate_system_managers_equal(
-    csm_0: tf.CoordinateSystemManager, csm_1: tf.CoordinateSystemManager
-):
-    """
-    Test if two CoordinateSystemManager instances are equal.
-
-    Parameters
-    ----------
-    csm_0:
-        First CoordinateSystemManager instance.
-    csm_1:
-        Second CoordinateSystemManager instance.
-
-    Returns
-    -------
-    bool:
-        True if both coordinate system managers are identical, False otherwise
-    """
-    graph_0 = csm_0.graph
-    graph_1 = csm_1.graph
-
-    if len(graph_0.nodes) != len(graph_1.nodes):
-        return False
-    if len(graph_0.edges) != len(graph_1.edges):
-        return False
-
-    # check nodes
-    for node in graph_0.nodes:
-        if node not in graph_1.nodes:
-            return False
-
-    # check edges
-    for edge in graph_0.edges:
-        if edge not in graph_1.edges:
-            return False
-
-    # check coordinate systems
-    for edge in graph_0.edges:
-        lcs_0 = csm_0.get_local_coordinate_system(edge[0], edge[1])
-        lcs_1 = csm_1.get_local_coordinate_system(edge[0], edge[1])
-        if not (lcs_0 == lcs_1):
-            return False
-
-    return True
-
-
 def get_example_coordinate_system_manager():
     """Get a consistent CoordinateSystemManager instance for test purposes."""
     csm = tf.CoordinateSystemManager("root")
@@ -264,21 +194,10 @@ def get_example_coordinate_system_manager():
     return csm
 
 
-def test_coordinate_system_manager_save():
-    """Test if a CoordinateSystemManager can be written to an asdf file."""
+@pytest.mark.parametrize("copy_arrays", [True, False])
+def test_coordinate_system_manager(copy_arrays):
     csm = get_example_coordinate_system_manager()
     tree = {"cs_hierarchy": csm}
-    with asdf.AsdfFile(
-        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
-    ) as f:
-        f.write_to(buffer_csm)
-        buffer_csm.seek(0)
-
-
-def test_coordinate_system_manager_load():
-    """Test if a CoordinateSystemManager can be read from an asdf file."""
-    f = asdf.open(buffer_csm, extensions=[WeldxExtension(), WeldxAsdfExtension()])
-    csm_exp = get_example_coordinate_system_manager()
-    csm_file = f.tree["cs_hierarchy"]
-
-    assert are_coordinate_system_managers_equal(csm_exp, csm_file)
+    data = _write_read_buffer(tree, open_kwargs={"copy_arrays": copy_arrays})
+    csm_file = data["cs_hierarchy"]
+    assert csm == csm_file

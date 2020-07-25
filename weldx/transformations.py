@@ -931,6 +931,38 @@ class CoordinateSystemManager:
             f"CoordinateSystemManager('graph': {self._graph!r}, 'data': {self._data!r})"
         )
 
+    def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
+        """Test equality of CSM instances."""
+        if not isinstance(other, self.__class__):
+            return False
+
+        graph_0 = self.graph
+        graph_1 = other.graph
+
+        if len(graph_0.nodes) != len(graph_1.nodes):
+            return False
+        if len(graph_0.edges) != len(graph_1.edges):
+            return False
+
+        # check nodes
+        for node in graph_0.nodes:
+            if node not in graph_1.nodes:
+                return False
+
+        # check edges
+        for edge in graph_0.edges:
+            if edge not in graph_1.edges:
+                return False
+
+        # check coordinate systems
+        for edge in graph_0.edges:
+            lcs_0 = self.get_local_coordinate_system(edge[0], edge[1])
+            lcs_1 = other.get_local_coordinate_system(edge[0], edge[1])
+            if not (lcs_0 == lcs_1):
+                return False
+
+        return True
+
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
         self._graph.add_node(coordinate_system_name, data=[])
