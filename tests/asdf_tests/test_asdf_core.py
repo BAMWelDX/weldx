@@ -6,13 +6,66 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from jsonschema.exceptions import ValidationError
+from asdf import ValidationError
+from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression, TimeSeries
+from weldx.transformations import WXRotation
+
+
+# WXRotation ---------------------------------------------------------------------
+def test_rotation():
+    """Test Scipy.Rotation implementation."""
+    base_rotation = Rotation.from_euler(
+        seq="xyz", angles=[[10, 20, 60], [25, 50, 175]], degrees=True
+    )
+
+    # default Rotation object as quaternions
+    tree = {"rot": base_rotation}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_quat(base_rotation.as_quat())
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_matrix(base_rotation.as_matrix())
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_rotvec(base_rotation.as_rotvec())
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_euler(seq="XYZ", angles=[10, 20, 60], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_euler(seq="y", angles=[10, 20, 60, 40, 90], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_euler(seq="Z", angles=[10, 20, 60, 40, 90], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    with pytest.raises(ValueError):
+        rot = WXRotation.from_euler(seq="XyZ", angles=[10, 20, 60], degrees=True)
 
 
 # xarray.DataArray ---------------------------------------------------------------------
