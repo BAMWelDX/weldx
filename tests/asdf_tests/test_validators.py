@@ -64,7 +64,7 @@ def test_shape_validator_syntax():
     assert val([1, 200, 3], [1, "~", 3])
     assert val([1, 2, 3], [1, 2, "(~)"])
     assert val([1, 2, 300], [1, 2, "(~)"])
-    # assert val([1, 2, 3], [1, "(n)", "..."])  # should this be allowed?
+    assert val([1, 2, 3], [1, "(n)", "..."])
     _custom_shape_validator(1.0, [1])
 
     # shape mismatch
@@ -105,8 +105,7 @@ def test_shape_validator_syntax():
         val([1, 2], ["(1)", "..."])
     with pytest.raises(ValueError):
         val([1, 2], [1, "4~1"])
-    # no negative shape numbers allowed in syntax
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # no negative shape numbers allowed in syntax
         val([-1, -2], [-1, -2])
     with pytest.raises(ValueError):
         val([1, 2], [1, 2, "(-3)"])
@@ -116,6 +115,10 @@ def test_shape_validator_syntax():
         val([1, 2], [1, 2, "(-3~1)"])
     with pytest.raises(ValueError):
         val([1, 2, 1], ["(-3~1)", 2, 1])
+    with pytest.raises(ValueError):  # no variables allowed in '~'
+        val([1, 2], [1, "(n~m)"])
+    with pytest.raises(ValueError):  # only single '~' allowed
+        val([1, 2], [1, "(1~3~5)"])
     with pytest.raises(ValidationError):  # test single value
         _custom_shape_validator(1.0, [2])
 
