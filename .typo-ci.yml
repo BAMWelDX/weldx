@@ -71,6 +71,7 @@ excluded_words:
   # pytest --------------------------------------
   - conftest
   - addoption
+  - xfail
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat
@@ -80,6 +81,8 @@ excluded_words:
   - ipython
   # scipy ---------------------------------------
   - Slerp
+  - rotvec
+  - quat
   # sympy ---------------------------------------
   - lambdify
   - sympify
