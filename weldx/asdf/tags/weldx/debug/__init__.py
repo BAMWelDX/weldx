@@ -1,1 +1,1 @@
-from . import anyof_class, const_class, validator_testclass
+from . import test_property_tag, test_unit_validator

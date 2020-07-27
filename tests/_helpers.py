@@ -1,7 +1,8 @@
 """Provides some utility functions for tests."""
 
-import weldx.transformations as tf
 import numpy as np
+
+import weldx.transformations as tf
 
 
 def rotated_coordinate_system(

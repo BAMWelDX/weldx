@@ -18,6 +18,50 @@ import weldx.utility as ut
 # functions -------------------------------------------------------------------
 
 
+class WXRotation(Rot):
+    """Wrapper for creating meta-tagged Scipy.Rotation objects."""
+
+    @classmethod
+    def from_quat(cls, quat: np.ndarray, normalized=None) -> "WXRotation":
+        """Initialize from quaternions.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_quat(quat, normalized)
+        rot.wx_meta = {"constructor": "from_quat"}
+        return rot
+
+    @classmethod
+    def from_matrix(cls, matrix: np.ndarray) -> "WXRotation":
+        """Initialize from matrix.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_matrix(matrix)
+        rot.wx_meta = {"constructor": "from_matrix"}
+        return rot
+
+    @classmethod
+    def from_rotvec(cls, rotvec: np.ndarray) -> "WXRotation":
+        """Initialize from rotation vector.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_rotvec(rotvec)
+        rot.wx_meta = {"constructor": "from_rotvec"}
+        return rot
+
+    @classmethod
+    def from_euler(cls, seq: str, angles, degrees: bool = False) -> "WXRotation":
+        """Initialize from euler angles.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
+        rot.wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
+        return rot
+
+
 def rotation_matrix_x(angle):
     """Create a rotation matrix that rotates around the x-axis.
 
@@ -498,6 +542,12 @@ class LocalCoordinateSystem:
         rhs_cs_inv = rhs_cs.invert()
         return self + rhs_cs_inv
 
+    def __eq__(self: "LocalCoordinateSystem", other: "LocalCoordinateSystem") -> bool:
+        """Check equality of LocalCoordinateSystems."""
+        return self.orientation.identical(
+            other.orientation
+        ) and self.coordinates.identical(other.coordinates)
+
     @classmethod
     def from_euler(
         cls, sequence, angles, degrees=False, coordinates=None, time=None
@@ -924,6 +974,38 @@ class CoordinateSystemManager:
         return (
             f"CoordinateSystemManager('graph': {self._graph!r}, 'data': {self._data!r})"
         )
+
+    def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
+        """Test equality of CSM instances."""
+        if not isinstance(other, self.__class__):
+            return False
+
+        graph_0 = self.graph
+        graph_1 = other.graph
+
+        if len(graph_0.nodes) != len(graph_1.nodes):
+            return False
+        if len(graph_0.edges) != len(graph_1.edges):
+            return False
+
+        # check nodes
+        for node in graph_0.nodes:
+            if node not in graph_1.nodes:
+                return False
+
+        # check edges
+        for edge in graph_0.edges:
+            if edge not in graph_1.edges:
+                return False
+
+        # check coordinate systems
+        for edge in graph_0.edges:
+            lcs_0 = self.get_local_coordinate_system(edge[0], edge[1])
+            lcs_1 = other.get_local_coordinate_system(edge[0], edge[1])
+            if not (lcs_0 == lcs_1):
+                return False
+
+        return True
 
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
@@ -1601,7 +1683,7 @@ class CoordinateSystemManager:
         self,
         time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
         affected_coordinate_systems: Union[str, List[str], None] = None,
-        inplace: bool = False,
+        in_place: bool = False,
     ) -> "CoordinateSystemManager":
         """Interpolates the coordinate systems in time.
 
@@ -1616,7 +1698,7 @@ class CoordinateSystemManager:
             A single coordinate system name or a list of coordinate system names that
             should be interpolated in time. Only transformations towards the systems
             root node are affected.
-        inplace :
+        in_place :
             If 'True' the interpolation is performed in place, otherwise a
             new instance is returned. (Default value = False)
 
@@ -1626,7 +1708,7 @@ class CoordinateSystemManager:
             Coordinate system manager with interpolated data
 
         """
-        if inplace:
+        if in_place:
             if affected_coordinate_systems is not None:
                 if isinstance(affected_coordinate_systems, str):
                     affected_coordinate_systems = [affected_coordinate_systems]
@@ -1652,7 +1734,7 @@ class CoordinateSystemManager:
             return self
 
         return deepcopy(self).interp_time(
-            time, affected_coordinate_systems, inplace=True
+            time, affected_coordinate_systems, in_place=True
         )
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:

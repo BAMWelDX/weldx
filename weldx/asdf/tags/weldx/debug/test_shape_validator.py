@@ -17,6 +17,7 @@ class ShapeValidatorTestClass:
     prop2: np.ndarray
     prop3: np.ndarray
     prop4: np.ndarray
+    prop5: float
     nested_prop: dict
 
 
@@ -28,6 +29,9 @@ class ShapeValidatorTestClassType(WeldxType):
     types = [ShapeValidatorTestClass]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
+    validators = {
+        "wx_shape": wx_shape_validator,
+    }
 
     @classmethod
     def to_tree(cls, node: ShapeValidatorTestClass, ctx):
@@ -39,8 +43,3 @@ class ShapeValidatorTestClassType(WeldxType):
     def from_tree(cls, tree, ctx):
         obj = ShapeValidatorTestClass(**tree)
         return obj
-
-
-ShapeValidatorTestClassType.validators = {
-    "wx_shape": wx_shape_validator,
-}

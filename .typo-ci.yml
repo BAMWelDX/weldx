@@ -27,7 +27,6 @@ excluded_words:
   - versioneer
   - isort
   - networkx
-  - dpath
   # matplotlib ----------------------------------
   - pyplot
   - gca
@@ -45,6 +44,7 @@ excluded_words:
   - dtype
   - hstack
   - isclose
+  - issubdtype
   - linalg
   - matmul
   - ndarray
@@ -71,6 +71,7 @@ excluded_words:
   # pytest --------------------------------------
   - conftest
   - addoption
+  - xfail
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat
@@ -80,6 +81,8 @@ excluded_words:
   - ipython
   # scipy ---------------------------------------
   - Slerp
+  - rotvec
+  - quat
   # sympy ---------------------------------------
   - lambdify
   - sympify

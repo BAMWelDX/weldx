@@ -13,7 +13,7 @@ properties:
   deviation:
     description: |
       A simple numerical representation of the error.
-    anyOf:
+    oneOf:
       - type: number
       - $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
 
