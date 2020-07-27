@@ -9,7 +9,7 @@ title: |
 description: |
   ASDF implementation for Scipy.Rotation class.
 
-anyOf:
+oneOf:
   - type: object
     description: |
       Quaternion rotation representation.
@@ -52,6 +52,7 @@ anyOf:
         description: |
           Rotation angles data.
         tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+        wx_unit: "degree"
     required: [sequence, angles]
     flowStyle: block
     additionalProperties: false

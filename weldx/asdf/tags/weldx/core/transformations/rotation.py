@@ -2,6 +2,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from weldx.asdf.types import WeldxType
+from weldx.asdf.validators import wx_unit_validator
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.transformations import WXRotation
 
@@ -14,6 +15,7 @@ class WXRotationTypeASDF(WeldxType):
     types = [Rotation]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
+    validators = {"wx_unit": wx_unit_validator}
 
     @classmethod
     def to_tree(cls, node: Rotation, ctx):
