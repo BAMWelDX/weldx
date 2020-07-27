@@ -34,7 +34,7 @@ _base_rotation = Rotation.from_euler(
         WXRotation.from_euler(seq="y", angles=[10, 60, 40, 90], degrees=True),
         WXRotation.from_euler(seq="Z", angles=[10, 60, 40, 90], degrees=True),
         WXRotation.from_euler(
-            seq="xy", angles=[[10, 10], [60, 60], [40, 40], [90, 90]], degrees=True
+            seq="xy", angles=[[10, 10], [60, 60], [40, 40], [70, 75]], degrees=True
         ),
     ],
 )
