@@ -246,7 +246,7 @@ def _validate_expected_list(list_expected):
     """
     validator = 0
     for exp in list_expected:
-        if validator == 1 and "(" not in str(exp):
+        if validator == 1 and not ("(" in str(exp) or "..." in str(exp)):
             raise ValueError(
                 "Optional dimensions in the expected "
                 "shape should only stand at the end/beginning."
