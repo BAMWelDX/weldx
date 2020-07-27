@@ -115,8 +115,6 @@ def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
             return pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
         except TypeError:
             return pd.TimedeltaIndex(data=[time.to(base).magnitude], unit=base)
-        except Exception as e:
-            raise e
 
     if not isinstance(time, np.ndarray):
         if not isinstance(time, list):

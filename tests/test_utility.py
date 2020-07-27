@@ -145,6 +145,18 @@ def test_to_pandas_time_index():
         == exp_date_time_index_array
     )
 
+    # exceptions ------------------------------------------
+    # quantity has wrong unit
+    with pytest.raises(Exception):
+        ut.to_pandas_time_index(Q_(10, "m"))
+    # wrong type
+    with pytest.raises(Exception):
+        ut.to_pandas_time_index("string")
+
+
+# todo: remove
+test_to_pandas_time_index()
+
 
 def test_pandas_time_delta_to_quantity():
     """Test the 'pandas_time_delta_to_quantity' utility function."""
