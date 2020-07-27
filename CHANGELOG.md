@@ -25,8 +25,9 @@
   - `measurement/measurement_chain-1.0.0`
   - `measurement/signal-1.0.0`
   - `measurement/source-1.0.0`
-- add ASDF support for `sympy` expressions with `core/mathematical_expression-1.0.0` [#70](https://github.com/BAMWelDX/weldx/pull/70)
 - add example notebook for measurement chains in tutorials [#70](https://github.com/BAMWelDX/weldx/pull/70)
+- add and test support for `sympy` expressions with 'weldx.core.MathematicalExpression' and ASDF serialization in '`core/mathematical_expression-1.0.0` [#70](https://github.com/BAMWelDX/weldx/pull/70), [#76](https://github.com/BAMWelDX/weldx/pull/76)
+- add and test class to describe time series - 'weldx.core.TimeSeries' [#76](https://github.com/BAMWelDX/weldx/pull/76)
 - add `wx_property_tag` validator [#72](https://github.com/BAMWelDX/weldx/pull/72)
  
     the `wx_property_tag` validator restricts **all** properties of an object to a single tag.
@@ -38,5 +39,6 @@
     wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"  
     ```
     It can be used as a "named" mapping replacement instead of YAML `arrays`.
-- update requirements to `asdf>=2.7` [#83]
-- update `anyOf` to `oneOf` in ASDF schemas [#83]
+- add `core/transoformations/rotation-1.0.0` schema that implements `scipy.spatial.transform.Rotation` and `transformations.WXRotation` class to create custom tagged `Rotation` instances for custom serialization. [#79]
+- update requirements to `asdf>=2.7` [#83](https://github.com/BAMWelDX/weldx/pull/83)
+- update `anyOf` to `oneOf` in ASDF schemas [#83](https://github.com/BAMWelDX/weldx/pull/83)

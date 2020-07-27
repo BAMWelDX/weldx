@@ -44,6 +44,7 @@ excluded_words:
   - dtype
   - hstack
   - isclose
+  - issubdtype
   - linalg
   - matmul
   - ndarray

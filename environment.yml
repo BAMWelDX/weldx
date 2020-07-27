@@ -23,6 +23,7 @@ dependencies:
   - black
   - codecov
   - flake8=3.7
+  - isort>=5.1
   - pydocstyle=5
   - pytest
   - pytest-cov

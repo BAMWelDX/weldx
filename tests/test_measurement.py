@@ -4,9 +4,9 @@ import sympy
 import xarray as xr
 
 import weldx.measurement as msm
-from weldx.asdf.tags.weldx.core.mathematical_expression import MathematicalExpression
 from weldx.asdf.utils import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.core import MathematicalExpression
 
 
 def test_generic_measurement():

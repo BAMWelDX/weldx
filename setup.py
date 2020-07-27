@@ -4,8 +4,9 @@
 
 from os import path
 
-import versioneer
 from setuptools import find_packages, setup
+
+import versioneer
 
 # add README.md as long description
 this_directory = path.abspath(path.dirname(__file__))

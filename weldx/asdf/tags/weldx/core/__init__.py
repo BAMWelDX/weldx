@@ -4,5 +4,6 @@ from . import (
     dataset,
     iso_groove,
     mathematical_expression,
+    time_series,
     transformations,
 )

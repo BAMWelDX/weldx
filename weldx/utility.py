@@ -5,11 +5,13 @@ from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
+import pint
 import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
 import weldx.transformations as tf
+from weldx.constants import WELDX_QUANTITY as Q_
 
 
 def is_column_in_matrix(column, matrix) -> bool:
@@ -92,6 +94,62 @@ def to_list(var) -> list:
     if var is None:
         return []
     return [var]
+
+
+def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+    """Convert a time variable to the corresponding pandas time index type.
+
+    Parameters
+    ----------
+    time :
+        Variable that should be converted.
+
+    Returns
+    -------
+        Variable as pandas time index
+
+    """
+    if isinstance(time, pint.Quantity):
+        base = "s"  # using low base unit could cause rounding errors
+        try:
+            return pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
+        except TypeError:
+            return pd.TimedeltaIndex(data=[time.to(base).magnitude], unit=base)
+
+    if not isinstance(time, np.ndarray):
+        if not isinstance(time, list):
+            time = [time]
+        time = np.array(time)
+
+    if np.issubdtype(time.dtype, np.datetime64):
+        return pd.DatetimeIndex(time)
+    return pd.TimedeltaIndex(time)
+
+
+def pandas_time_delta_to_quantity(
+    time: pd.TimedeltaIndex, unit: str = "s"
+) -> pint.Quantity:
+    """Convert a 'pandas.TimedeltaIndex' into a corresponding 'pint.Quantity'.
+
+    Parameters
+    ----------
+    time :
+        Instance of 'pandas.TimedeltaIndex'
+    unit :
+        String that specifies the desired time unit.
+
+    Returns
+    -------
+    pint.Quantity :
+        Converted time quantity
+
+    """
+    # from pandas Timedelta documentation: "The .value attribute is always in ns."
+    # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas.Timedelta.html
+    nanoseconds = time.values.astype(np.int64)
+    if len(nanoseconds) == 1:
+        nanoseconds = nanoseconds[0]
+    return Q_(nanoseconds, "ns").to(unit)
 
 
 def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
@@ -423,6 +481,14 @@ def xr_interp_like(
     else:  # assume da2 to be dict-like
         sel_coords = da2
 
+    # store and strip pint units at this point, since the unit is lost during
+    # interpolation and because of some other conflicts. Unit is restored before
+    # returning the result.
+    units = None
+    if isinstance(da1.data, pint.Quantity):
+        units = da1.data.units
+        da1 = xr.DataArray(data=da1.data.magnitude, dims=da1.dims, coords=da1.coords)
+
     if interp_coords is not None:
         sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
 
@@ -480,7 +546,15 @@ def xr_interp_like(
     else:  # careful not to select coordinates that are only in da_temp
         sel_coords = {d: v for d, v in sel_coords.items() if d in da1.coords}
 
-    return da.sel(sel_coords)
+    result = da.sel(sel_coords)
+    if units is not None:
+        result = xr.DataArray(
+            data=pint.Quantity(result.data, units),
+            dims=result.dims,
+            coords=result.coords,
+        )
+
+    return result
 
 
 def xr_3d_vector(data, times=None) -> xr.DataArray:

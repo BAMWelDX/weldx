@@ -4,6 +4,7 @@ import warnings
 import weldx.asdf
 
 # geometry packages
+import weldx.core
 import weldx.geometry
 import weldx.transformations
 import weldx.utility
@@ -19,4 +20,12 @@ with warnings.catch_warnings():
 __version__ = get_versions()["version"]
 del get_versions
 
-__all__ = ["geometry", "measurement", "transformations", "utility", "asdf", "Q_"]
+__all__ = [
+    "core",
+    "geometry",
+    "measurement",
+    "transformations",
+    "utility",
+    "asdf",
+    "Q_",
+]
