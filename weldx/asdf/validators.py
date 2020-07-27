@@ -515,7 +515,12 @@ def wx_shape_validator(
 
     """
 
-    dim_dict = _custom_shape_validator(instance, wx_shape)
+    try:
+        dim_dict = _custom_shape_validator(instance, wx_shape)
+    except ValidationError:
+        yield ValidationError(
+            f"Error validating shape {wx_shape}.\nOn instance {instance}"
+        )
 
     if isinstance(dim_dict, dict):
         return None

@@ -8,7 +8,7 @@ title: |
   Schema that describes a time series.
 description: |
   Describes a time dependent quantity.
-anyOf:
+oneOf:
   - type: object
     description: |
       Implementation for constant values.
