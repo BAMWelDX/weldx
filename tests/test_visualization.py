@@ -13,7 +13,6 @@ import weldx.visualization as vs
 # pylint: enable=W0611
 
 
-
 def test_plot_coordinate_system():
     """Test executing all possible code paths."""
     lcs_constant = tf.LocalCoordinateSystem()

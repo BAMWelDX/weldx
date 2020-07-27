@@ -1,17 +1,16 @@
 """Tests the geometry package."""
 
+import copy
+import math
+from typing import List, Union
+
+import numpy as np
+import pytest
+
+import tests._helpers as helpers
 import weldx.geometry as geo
 import weldx.transformations as tf
 import weldx.utility as ut
-from typing import List, Union
-
-import tests._helpers as helpers
-
-import pytest
-import numpy as np
-import math
-import copy
-
 
 # helpers ---------------------------------------------------------------------
 

@@ -2,22 +2,21 @@
 
 import asdf
 
-from weldx.asdf.extension import WeldxExtension, WeldxAsdfExtension
+from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.core.iso_groove import (
-    VGroove,
-    UGroove,
-    IGroove,
-    UVGroove,
-    VVGroove,
-    HVGroove,
-    HUGroove,
-    DVGroove,
-    DUGroove,
-    DHVGroove,
     DHUGroove,
+    DHVGroove,
+    DUGroove,
+    DVGroove,
     FFGroove,
+    HUGroove,
+    HVGroove,
+    IGroove,
+    UGroove,
+    UVGroove,
+    VGroove,
+    VVGroove,
 )
-
 
 opened = asdf.open("testfile.yml", extensions=[WeldxAsdfExtension(), WeldxExtension()])
 
