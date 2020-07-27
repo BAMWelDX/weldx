@@ -271,7 +271,7 @@ class TimeSeries:
                 )
             if isinstance(time, pint.Quantity):
                 time = ut.to_pandas_time_index(time)
-            if not (isinstance(time, pd.TimedeltaIndex)):
+            if not isinstance(time, pd.TimedeltaIndex):
                 raise ValueError(
                     '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
                 )
