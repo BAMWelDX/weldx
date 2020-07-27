@@ -1,5 +1,4 @@
 """Tests asdf implementations of core module."""
-
 from io import BytesIO
 
 import asdf
@@ -11,14 +10,12 @@ from jsonschema.exceptions import ValidationError
 
 import weldx.transformations as tf
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression, TimeSeries
 
+
 # xarray.DataArray ---------------------------------------------------------------------
-
-buffer_data_array = BytesIO()
-
-
 def get_xarray_example_data_array():
     """
     Get an xarray.DataArray for test purposes.
@@ -43,31 +40,16 @@ def get_xarray_example_data_array():
     return dax
 
 
-def test_xarray_data_array_save():
-    """Test if an xarray.DataArray can be written to an asdf file."""
+@pytest.mark.parametrize("copy_arrays", [True, False])
+def test_xarray_data_array(copy_arrays):
+    """Test ASDF read/write of xarray.DataArray."""
     dax = get_xarray_example_data_array()
     tree = {"dax": dax}
-    with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
-        f.write_to(buffer_data_array)
-        buffer_data_array.seek(0)
+    dax_file = _write_read_buffer(tree, open_kwargs={"copy_arrays": copy_arrays})["dax"]
+    assert dax.identical(dax_file)
 
 
-def test_xarray_data_array_load():
-    """Test if an xarray.DataArray can be restored from an asdf file."""
-    f = asdf.open(
-        buffer_data_array, extensions=[WeldxExtension(), WeldxAsdfExtension()]
-    )
-    dax_file = f.tree["dax"]
-    dax_exp = get_xarray_example_data_array()
-    assert dax_exp.identical(dax_file)
-
-
-# xarray.DataArray ---------------------------------------------------------------------
-
-
-buffer_dataset = BytesIO()
-
-
+# xarray.Dataset ---------------------------------------------------------------------
 def get_xarray_example_dataset():
     """
     Get an xarray.Dataset for test purposes.
@@ -106,28 +88,15 @@ def get_xarray_example_dataset():
     return dsx
 
 
-def test_xarray_dataset_save():
-    """Test if an xarray.DataSet can be written to an asdf file."""
+@pytest.mark.parametrize("copy_arrays", [True, False])
+def test_xarray_dataset(copy_arrays):
     dsx = get_xarray_example_dataset()
     tree = {"dsx": dsx}
-    with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
-        f.write_to(buffer_dataset)
-        buffer_dataset.seek(0)
-
-
-def test_xarray_dataset_load():
-    """Test if an xarray.Dataset can be restored from an asdf file."""
-    f = asdf.open(buffer_dataset, extensions=[WeldxExtension(), WeldxAsdfExtension()])
-    dsx_file = f.tree["dsx"]
-    dsx_exp = get_xarray_example_dataset()
-    assert dsx_exp.identical(dsx_file)
+    dsx_file = _write_read_buffer(tree, open_kwargs={"copy_arrays": copy_arrays})["dsx"]
+    assert dsx.identical(dsx_file)
 
 
 # weldx.transformations.LocalCoordinateSystem ------------------------------------------
-
-buffer_lcs = BytesIO()
-
-
 def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates: bool):
     """
     Get a local coordinate system.
@@ -169,65 +138,16 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
     )
 
 
-def are_local_coordinate_systems_equal(
-    lcs_0: tf.LocalCoordinateSystem, lcs_1: tf.LocalCoordinateSystem
+@pytest.mark.parametrize("time_dep_orientation", [False, True])
+@pytest.mark.parametrize("time_dep_coordinates", [False, True])
+@pytest.mark.parametrize("copy_arrays", [True, False])
+def test_local_coordinate_system(
+    time_dep_orientation, time_dep_coordinates, copy_arrays
 ):
-    """
-    Check if 2 local coordinate systems are identical
-
-    Parameters
-    ----------
-    lcs_0 :
-        First local coordinate system
-    lcs_1 :
-        Second local coordinate system
-
-    Returns
-    -------
-    bool:
-        True if both systems are identical, False otherwise
-    """
-    return lcs_0.orientation.identical(
-        lcs_1.orientation
-    ) and lcs_0.coordinates.identical(lcs_1.coordinates)
-
-
-def test_local_coordinate_system_save():
-    """Test if a LocalCoordinateSystem can be written to an asdf file."""
-    lcs_static = get_local_coordinate_system(False, False)
-    lcs_tdp_c = get_local_coordinate_system(False, True)
-    lcs_tdp_o = get_local_coordinate_system(True, False)
-    lcs_tdp_oc = get_local_coordinate_system(True, True)
-    tree = {
-        "lcs_static": lcs_static,
-        "lcs_tdp_c": lcs_tdp_c,
-        "lcs_tdp_o": lcs_tdp_o,
-        "lcs_tdp_oc": lcs_tdp_oc,
-    }
-    with asdf.AsdfFile(
-        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True,
-    ) as f:
-        f.write_to(buffer_lcs)
-        buffer_lcs.seek(0)
-
-
-def test_local_coordinate_system_load():
-    """Test if an xarray.DataArray can be restored from an asdf file."""
-    f = asdf.open(buffer_lcs, extensions=[WeldxExtension(), WeldxAsdfExtension()],)
-    lcs_static_file = f.tree["lcs_static"]
-    lcs_tdp_c_file = f.tree["lcs_tdp_c"]
-    lcs_tdp_o_file = f.tree["lcs_tdp_o"]
-    lcs_tdp_oc_file = f.tree["lcs_tdp_oc"]
-
-    lcs_static_exp = get_local_coordinate_system(False, False)
-    lcs_tdp_c_exp = get_local_coordinate_system(False, True)
-    lcs_tdp_o_exp = get_local_coordinate_system(True, False)
-    lcs_tdp_oc_exp = get_local_coordinate_system(True, True)
-
-    assert are_local_coordinate_systems_equal(lcs_static_file, lcs_static_exp)
-    assert are_local_coordinate_systems_equal(lcs_tdp_c_file, lcs_tdp_c_exp)
-    assert are_local_coordinate_systems_equal(lcs_tdp_o_file, lcs_tdp_o_exp)
-    assert are_local_coordinate_systems_equal(lcs_tdp_oc_file, lcs_tdp_oc_exp)
+    """Test (de)serialization of LocalCoordinateSystem in ASDF."""
+    lcs = get_local_coordinate_system(time_dep_orientation, time_dep_coordinates)
+    data = _write_read_buffer({"lcs": lcs}, open_kwargs={"copy_arrays": copy_arrays})
+    assert data["lcs"] == lcs
 
 
 def test_local_coordinate_system_shape_violation():
@@ -244,11 +164,7 @@ def test_local_coordinate_system_shape_violation():
     )
 
     with pytest.raises(ValidationError):
-        buff = BytesIO()
-        with asdf.AsdfFile(
-            {"lcs": lcs}, extensions=[WeldxExtension(), WeldxAsdfExtension()],
-        ) as f:
-            f.write_to(buff)
+        _write_buffer({"lcs": lcs})
 
     # orientations have wrong shape -----------------------
     orientation = xr.DataArray(
@@ -262,64 +178,10 @@ def test_local_coordinate_system_shape_violation():
     )
 
     with pytest.raises(ValidationError):
-        buff = BytesIO()
-        with asdf.AsdfFile(
-            {"lcs": lcs}, extensions=[WeldxExtension(), WeldxAsdfExtension()]
-        ) as f:
-            f.write_to(buff)
+        _write_buffer({"lcs": lcs})
 
 
 # weldx.transformations.CoordinateSystemManager ----------------------------------------
-
-buffer_csm = BytesIO()
-
-
-def are_coordinate_system_managers_equal(
-    csm_0: tf.CoordinateSystemManager, csm_1: tf.CoordinateSystemManager
-):
-    """
-    Test if two CoordinateSystemManager instances are equal.
-
-    Parameters
-    ----------
-    csm_0:
-        First CoordinateSystemManager instance.
-    csm_1:
-        Second CoordinateSystemManager instance.
-
-    Returns
-    -------
-    bool:
-        True if both coordinate system managers are identical, False otherwise
-    """
-    graph_0 = csm_0.graph
-    graph_1 = csm_1.graph
-
-    if len(graph_0.nodes) != len(graph_1.nodes):
-        return False
-    if len(graph_0.edges) != len(graph_1.edges):
-        return False
-
-    # check nodes
-    for node in graph_0.nodes:
-        if node not in graph_1.nodes:
-            return False
-
-    # check edges
-    for edge in graph_0.edges:
-        if edge not in graph_1.edges:
-            return False
-
-    # check coordinate systems
-    for edge in graph_0.edges:
-        lcs_0 = csm_0.get_local_coordinate_system(edge[0], edge[1])
-        lcs_1 = csm_1.get_local_coordinate_system(edge[0], edge[1])
-        if not are_local_coordinate_systems_equal(lcs_0, lcs_1):
-            return False
-
-    return True
-
-
 def get_example_coordinate_system_manager():
     """Get a consistent CoordinateSystemManager instance for test purposes."""
     csm = tf.CoordinateSystemManager("root")
@@ -339,24 +201,13 @@ def get_example_coordinate_system_manager():
     return csm
 
 
-def test_coordinate_system_manager_save():
-    """Test if a CoordinateSystemManager can be written to an asdf file."""
+@pytest.mark.parametrize("copy_arrays", [True, False])
+def test_coordinate_system_manager(copy_arrays):
     csm = get_example_coordinate_system_manager()
     tree = {"cs_hierarchy": csm}
-    with asdf.AsdfFile(
-        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
-    ) as f:
-        f.write_to(buffer_csm)
-        buffer_csm.seek(0)
-
-
-def test_coordinate_system_manager_load():
-    """Test if a CoordinateSystemManager can be read from an asdf file."""
-    f = asdf.open(buffer_csm, extensions=[WeldxExtension(), WeldxAsdfExtension()])
-    csm_exp = get_example_coordinate_system_manager()
-    csm_file = f.tree["cs_hierarchy"]
-
-    assert are_coordinate_system_managers_equal(csm_exp, csm_file)
+    data = _write_read_buffer(tree, open_kwargs={"copy_arrays": copy_arrays})
+    csm_file = data["cs_hierarchy"]
+    assert csm == csm_file
 
 
 # weldx.core.TimeSeries ----------------------------------------------------------------

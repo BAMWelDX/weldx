@@ -42,3 +42,4 @@
 - add `core/transoformations/rotation-1.0.0` schema that implements `scipy.spatial.transform.Rotation` and `transformations.WXRotation` class to create custom tagged `Rotation` instances for custom serialization. [#79]
 - update requirements to `asdf>=2.7` [#83](https://github.com/BAMWelDX/weldx/pull/83)
 - update `anyOf` to `oneOf` in ASDF schemas [#83](https://github.com/BAMWelDX/weldx/pull/83)
+- add `__eq__` functions to `LocalCoordinateSystem` and `CoordinateSystemManager` [#87](https://github.com/BAMWelDX/weldx/pull/87)

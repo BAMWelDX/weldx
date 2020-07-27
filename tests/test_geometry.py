@@ -2212,6 +2212,7 @@ def test_trace_construction():
         geo.Trace(custom_segment)
 
 
+@pytest.mark.slow
 def test_trace_local_coordinate_system():
     """Test the trace's local coordinate system function.
 
@@ -2281,6 +2282,7 @@ def test_trace_local_coordinate_system():
         check_coordinate_systems_identical(cs_trace, cs_exp)
 
 
+@pytest.mark.slow
 def test_trace_rasterization():
     """Test the trace's rasterize function.
 
@@ -2588,6 +2590,7 @@ def test_geometry_construction():
         geo.Geometry("42", trace)
 
 
+@pytest.mark.slow
 def test_geometry_rasterization_trace():
     """Test if the rasterized geometry data follows the trace.
 
@@ -2700,6 +2703,7 @@ def test_geometry_rasterization_trace():
         geometry.rasterize(-2.3, -4.6)
 
 
+@pytest.mark.slow
 def test_geometry_rasterization_profile_interpolation():
     """Check if the rasterized geometry interpolates profiles correctly."""
     interpol = geo.linear_profile_interpolation_sbs

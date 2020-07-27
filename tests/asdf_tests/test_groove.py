@@ -1,12 +1,8 @@
 """Test all ASDF groove implementations."""
 
-from io import BytesIO
-
-import asdf
 import matplotlib.pyplot as plt
 import pytest
 
-from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.tags.weldx.core.iso_groove import (
     BaseGroove,
     DHUGroove,
@@ -23,6 +19,7 @@ from weldx.asdf.tags.weldx.core.iso_groove import (
     VVGroove,
     get_groove,
 )
+from weldx.asdf.utils import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.geometry import Profile
 
@@ -265,35 +262,23 @@ def test_asdf_groove(groove: BaseGroove, expected_dtype):
     k = "groove"
     tree = {k: groove}
 
-    with asdf.AsdfFile(
-        tree,
-        extensions=[WeldxExtension(), WeldxAsdfExtension()],
-        ignore_version_mismatch=False,
-    ) as ff:
-        buff = BytesIO()
-        ff.write_to(buff, all_array_storage="inline")
-        buff.seek(0)
+    data = _write_read_buffer(tree)
+    assert isinstance(
+        data[k], expected_dtype
+    ), f"Did not match expected type {expected_dtype} on item {data[k]}"
+    # test content equality using dataclass built-in functions
+    assert (
+        groove == data[k]
+    ), f"Could not correctly reconstruct groove of type {type(groove)}"
+    # test to_profile
+    assert isinstance(
+        groove.to_profile(), Profile
+    ), f"Error calling plot function of {type(groove)} "
 
-    with asdf.open(
-        buff, copy_arrays=True, extensions=[WeldxExtension(), WeldxAsdfExtension()]
-    ) as af:
-        data = af.tree
-        assert isinstance(
-            data[k], expected_dtype
-        ), f"Did not match expected type {expected_dtype} on item {data[k]}"
-        # test content equality using dataclass built-in functions
-        assert (
-            groove == data[k]
-        ), f"Could not correctly reconstruct groove of type {type(groove)}"
-        # test to_profile
-        assert isinstance(
-            groove.to_profile(), Profile
-        ), f"Error calling plot function of {type(groove)} "
-
-        # call plot function
-        fig, ax = plt.subplots()
-        groove.plot(ax=ax)
-        plt.close(fig)
+    # call plot function
+    fig, ax = plt.subplots()
+    groove.plot(ax=ax)
+    plt.close(fig)
 
 
 def test_asdf_groove_exceptions():

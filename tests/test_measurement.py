@@ -1,12 +1,10 @@
 """Test the measurement package."""
-from io import BytesIO
 
-import asdf
 import sympy
 import xarray as xr
 
 import weldx.measurement as msm
-from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.asdf.utils import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression
 
@@ -111,10 +109,4 @@ def test_generic_measurement():
         "data_processors": processors,
     }
 
-    asdf_buffer = BytesIO()
-
-    with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as f:
-        f.write_to(asdf_buffer)
-        asdf_buffer.seek(0)
-
-    asdf.open(asdf_buffer, extensions=[WeldxExtension(), WeldxAsdfExtension()])
+    _write_read_buffer(tree)
