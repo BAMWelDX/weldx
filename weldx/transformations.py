@@ -18,6 +18,50 @@ import weldx.utility as ut
 # functions -------------------------------------------------------------------
 
 
+class WXRotation(Rot):
+    """Wrapper for creating meta-tagged Scipy.Rotation objects."""
+
+    @classmethod
+    def from_quat(cls, quat: np.ndarray, normalized=None) -> "WXRotation":
+        """Initialize from quaternions.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_quat(quat, normalized)
+        rot._wx_meta = {"constructor": "from_quat"}
+        return rot
+
+    @classmethod
+    def from_matrix(cls, matrix: np.ndarray) -> "WXRotation":
+        """Initialize from matrix.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_matrix(matrix)
+        rot._wx_meta = {"constructor": "from_matrix"}
+        return rot
+
+    @classmethod
+    def from_rotvec(cls, rotvec: np.ndarray) -> "WXRotation":
+        """Initialize from rotation vector.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_rotvec(rotvec)
+        rot._wx_meta = {"constructor": "from_rotvec"}
+        return rot
+
+    @classmethod
+    def from_euler(cls, seq: str, angles, degrees: bool = False) -> "WXRotation":
+        """Initialize from euler angles.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
+        rot._wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
+        return rot
+
+
 def rotation_matrix_x(angle):
     """Create a rotation matrix that rotates around the x-axis.
 

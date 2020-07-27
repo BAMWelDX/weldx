@@ -8,6 +8,7 @@ import jsonschema
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.spatial.transform import Rotation
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
@@ -32,9 +33,59 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasTyp
 
 # iso groove -----------------------------------------------------------------
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
-
-# validators -----------------------------------------------------------------
+from weldx.asdf.utils import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.transformations import WXRotation
+
+
+def test_rotation():
+    """Test Scipy.Rotation implementation."""
+    base_rotation = Rotation.from_euler(
+        seq="xyz", angles=[[10, 20, 60], [25, 50, 175]], degrees=True
+    )
+
+    # default Rotation object as quaternions
+    tree = {"rot": base_rotation}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_quat(base_rotation.as_quat())
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_matrix(base_rotation.as_matrix())
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_rotvec(base_rotation.as_rotvec())
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_euler(seq="XYZ", angles=[10, 20, 60], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_euler(seq="y", angles=[10, 20, 60, 40, 90], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    rot = WXRotation.from_euler(seq="Z", angles=[10, 20, 60, 40, 90], degrees=True)
+    tree = {"rot": rot}
+    data = _write_read_buffer(tree=tree)
+    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+
+    with pytest.raises(ValueError):
+        rot = WXRotation.from_euler(seq="XyZ", angles=[10, 20, 60], degrees=True)
 
 
 def test_aws_example():
