@@ -1,6 +1,7 @@
 import re
 from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 
+import asdf
 import pandas as pd
 from asdf import ValidationError
 from asdf.schema import validate_tag
@@ -358,14 +359,20 @@ def _custom_shape_validator(dict_test, dict_expected):
                 _dict_values = _custom_shape_validator(
                     dict_test[item], dict_expected[item]
                 )
-            elif "weldx/time/timedeltaindex" in dict_test._tag:
-                td_temp = pd.timedelta_range(
-                    start=dict_test["start"]["value"],
-                    end=dict_test["end"]["value"],
-                    freq=dict_test["freq"],
-                )
-                shape = {"shape": [len(td_temp)]}
-                _dict_values = _custom_shape_validator(shape, dict_expected[item])
+            elif isinstance(dict_test, asdf.types.tagged.Tagged):
+                # add custom type implementations
+                if "weldx/time/timedeltaindex" in dict_test._tag:
+                    td_temp = pd.timedelta_range(
+                        start=dict_test["start"]["value"],
+                        end=dict_test["end"]["value"],
+                        freq=dict_test["freq"],
+                    )
+                    shape = {"shape": [len(td_temp)]}
+                    _dict_values = _custom_shape_validator(shape, dict_expected[item])
+                else:
+                    raise ValidationError(
+                        f"Could not access key '{item}'  in instance {dict_test}."
+                    )
             else:
                 raise ValidationError(
                     f"Could not access key '{item}'  in instance {dict_test}."
