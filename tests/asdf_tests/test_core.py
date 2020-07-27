@@ -369,6 +369,8 @@ def get_example_time_series(num):
         return TimeSeries(Q_(42, "m"))
     if num == 2:
         return TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 5]))
+    if num == 4:
+        return TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 4]))
 
     expr = MathematicalExpression(
         "a*t+b", parameters={"a": Q_(2, "1/s"), "b": Q_(5, "")}
@@ -382,6 +384,7 @@ def test_time_series_save():
         "ts1": get_example_time_series(1),
         "ts2": get_example_time_series(2),
         "ts3": get_example_time_series(3),
+        "ts4": get_example_time_series(4),
     }
     with asdf.AsdfFile(
         tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
@@ -421,3 +424,9 @@ def test_time_series_load():
     assert expr_exp == expr_file
     assert ts3_file.time == ts3_exp.time
     assert ts3_file.interpolation == ts3_exp.interpolation
+
+    ts4_exp = get_example_time_series(4)
+    ts4_file = f.tree["ts4"]
+    assert np.all(ts4_file.data == ts4_exp.data)
+    assert np.all(ts4_file.time == ts4_exp.time)
+    assert ts4_file.interpolation == ts4_exp.interpolation
