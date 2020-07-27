@@ -136,10 +136,13 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
 
 @pytest.mark.parametrize("time_dep_orientation", [False, True])
 @pytest.mark.parametrize("time_dep_coordinates", [False, True])
-def test_local_coordinate_system(time_dep_orientation, time_dep_coordinates):
+@pytest.mark.parametrize("copy_arrays", [True, False])
+def test_local_coordinate_system(
+    time_dep_orientation, time_dep_coordinates, copy_arrays
+):
     """Test (de)serialization of LocalCoordinateSystem in ASDF."""
     lcs = get_local_coordinate_system(time_dep_orientation, time_dep_coordinates)
-    data = _write_read_buffer({"lcs": lcs})
+    data = _write_read_buffer({"lcs": lcs}, open_kwargs={"copy_arrays": copy_arrays})
     assert data["lcs"] == lcs
 
 
