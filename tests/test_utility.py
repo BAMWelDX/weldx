@@ -154,10 +154,6 @@ def test_to_pandas_time_index():
         ut.to_pandas_time_index("string")
 
 
-# todo: remove
-test_to_pandas_time_index()
-
-
 def test_pandas_time_delta_to_quantity():
     """Test the 'pandas_time_delta_to_quantity' utility function."""
     is_close = np.vectorize(math.isclose)
