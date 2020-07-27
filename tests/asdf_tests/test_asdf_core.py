@@ -16,54 +16,34 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.transformations import WXRotation
 
-
 # WXRotation ---------------------------------------------------------------------
-def test_rotation():
-    """Test Scipy.Rotation implementation."""
-    base_rotation = Rotation.from_euler(
-        seq="xyz", angles=[[10, 20, 60], [25, 50, 175]], degrees=True
-    )
+_base_rotation = Rotation.from_euler(
+    seq="xyz", angles=[[10, 20, 60], [25, 50, 175]], degrees=True
+)
 
-    # default Rotation object as quaternions
-    tree = {"rot": base_rotation}
-    data = _write_read_buffer(tree=tree)
-    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
 
-    rot = WXRotation.from_quat(base_rotation.as_quat())
-    tree = {"rot": rot}
-    data = _write_read_buffer(tree=tree)
-    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
+@pytest.mark.parametrize(
+    "input",
+    [
+        _base_rotation,
+        WXRotation.from_quat(_base_rotation.as_quat()),
+        WXRotation.from_matrix(_base_rotation.as_matrix()),
+        WXRotation.from_rotvec(_base_rotation.as_rotvec()),
+        WXRotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True),
+        WXRotation.from_euler(seq="XYZ", angles=[10, 20, 60], degrees=True),
+        WXRotation.from_euler(seq="y", angles=[10, 60, 40, 90], degrees=True),
+        WXRotation.from_euler(seq="Z", angles=[10, 60, 40, 90], degrees=True),
+        WXRotation.from_euler(
+            seq="xy", angles=[[10, 10], [60, 60], [40, 40], [90, 90]], degrees=True
+        ),
+    ],
+)
+def test_rotation(input):
+    data = _write_read_buffer({"rot": input})
+    assert np.allclose(data["rot"].as_quat(), input.as_quat())
 
-    rot = WXRotation.from_matrix(base_rotation.as_matrix())
-    tree = {"rot": rot}
-    data = _write_read_buffer(tree=tree)
-    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
 
-    rot = WXRotation.from_rotvec(base_rotation.as_rotvec())
-    tree = {"rot": rot}
-    data = _write_read_buffer(tree=tree)
-    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
-
-    rot = WXRotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True)
-    tree = {"rot": rot}
-    data = _write_read_buffer(tree=tree)
-    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
-
-    rot = WXRotation.from_euler(seq="XYZ", angles=[10, 20, 60], degrees=True)
-    tree = {"rot": rot}
-    data = _write_read_buffer(tree=tree)
-    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
-
-    rot = WXRotation.from_euler(seq="y", angles=[10, 20, 60, 40, 90], degrees=True)
-    tree = {"rot": rot}
-    data = _write_read_buffer(tree=tree)
-    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
-
-    rot = WXRotation.from_euler(seq="Z", angles=[10, 20, 60, 40, 90], degrees=True)
-    tree = {"rot": rot}
-    data = _write_read_buffer(tree=tree)
-    assert np.allclose(data["rot"].as_quat(), tree["rot"].as_quat())
-
+def test_rotation_euler_exception():
     with pytest.raises(ValueError):
         rot = WXRotation.from_euler(seq="XyZ", angles=[10, 20, 60], degrees=True)
 
