@@ -13,27 +13,54 @@ from weldx.core import MathematicalExpression, TimeSeries
 # MathematicalExpression ---------------------------------------------------------------
 
 
-def test_mathematical_expression_construction():
-    """Test the construction of a MathematicalExpression."""
-    expr = MathematicalExpression("a*b+c/d-e", parameters={"d": 1, "e": 2})
+def get_test_name(param):
+    """Get the test name from the parameter list of a parametrized test."""
+    if isinstance(param, str) and param[0] == "#":
+        return param[1:]
+    return ""
 
-    assert expr.num_parameters == 2
-    assert expr.num_variables == 3
 
-    for variable in ["a", "b", "c"]:
-        assert variable in expr.get_variable_names()
+class TestMathematicalExpression:
+    """Tests the mathematical expression class."""
 
-    for parameter, value in {"d": 1, "e": 2}.items():
-        assert parameter in expr.parameters
-        assert expr.parameters[parameter] == value
+    @pytest.mark.parametrize(
+        "expression, parameters,  exp_vars",
+        [
+            ("a*b + c/d - e", {"d": 1, "e": 2}, ["a", "b", "c"]),
+            ("a*b + c/d - e", {}, ["a", "b", "c", "d", "e"]),
+            ("a**2 + b - c", {"a": 1, "c": 2}, ["b"]),
+        ],
+    )
+    def test_construction(self, expression, parameters, exp_vars):
+        """Test the construction"""
+        expr = MathematicalExpression(expression=expression, parameters=parameters)
 
-    # exceptions ------------------------------------------
-    # parameter not in expression
-    with pytest.raises(ValueError):
-        expr = MathematicalExpression("a*b+c/d-e", parameters={"f": 1})
-    # invalid parameter type
-    with pytest.raises(ValueError):
-        expr = MathematicalExpression("a*b+c/d-e", parameters=1)
+        assert expr.num_variables == len(exp_vars)
+        for variable in exp_vars:
+            assert variable in expr.get_variable_names()
+
+        assert expr.num_parameters == len(parameters)
+        for parameter, value in parameters.items():
+            assert parameter in expr.parameters
+            assert expr.parameters[parameter] == value
+
+    # -----------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "expression, parameters, exception_type, name",
+        [
+            ("a*b + c/d - e", {"f": 1}, ValueError, "#parameter not in expression"),
+            ("a*b + c/d - e", 1, ValueError, "#invalid parameter type"),
+            ("a + $b#!==3", {"a": 1}, Exception, "#invalid expression"),
+        ],
+        ids=get_test_name,
+    )
+    def test_construction_exceptions(
+        self, expression, parameters, exception_type, name
+    ):
+        """Test the exceptions of the '__init__' method."""
+        with pytest.raises(exception_type):
+            MathematicalExpression(expression=expression, parameters=parameters)
 
 
 def test_mathematical_expression_set_parameter():
