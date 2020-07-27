@@ -5,6 +5,7 @@
 - add `wx_unit` and `wx_shape` validators
 - add basic tests for `wx_unit` validation
 - add basic tests for `wx_shape` validation
+- add `doc/shape_validation.md` documentation for `wx_shape` [[#75]](https://github.com/BAMWelDX/weldx/pull/75)
 - add unit validation to `iso_groove-1.0.0.yaml` 
 - fixed const/enum constraints and properties in `iso_groove-1.0.0.yaml`
 - add some examples for testing `oneOf`, `anyOf` and other asdf keywords
