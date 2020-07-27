@@ -1,5 +1,7 @@
 """Tests asdf implementations of core module."""
+from io import BytesIO
 
+import asdf
 import numpy as np
 import pandas as pd
 import pytest
@@ -7,6 +9,7 @@ import xarray as xr
 from jsonschema.exceptions import ValidationError
 
 import weldx.transformations as tf
+from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression, TimeSeries
