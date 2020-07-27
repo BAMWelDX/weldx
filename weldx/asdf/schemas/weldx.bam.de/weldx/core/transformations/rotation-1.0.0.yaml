@@ -1,0 +1,59 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/rotation-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/rotation-1.0.0"
+
+title: |
+  Schema to describe a 3D rotation.
+description: |
+  ASDF implementation for Scipy.Rotation class.
+
+oneOf:
+  - type: object
+    description: |
+      Quaternion rotation representation.
+    properties:
+      quaternions:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    required: [quaternions]
+    flowStyle: block
+    additionalProperties: false
+
+  - type: object
+    description: |
+      Matrix rotation representation.
+    properties:
+      matrix:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    required: [matrix]
+    flowStyle: block
+    additionalProperties: false
+
+  - type: object
+    description: |
+      Rotation vector representation.
+    properties:
+      rotvec:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    required: [rotvec]
+    flowStyle: block
+    additionalProperties: false
+
+  - type: object
+    description: |
+      Euler angles representation.
+    properties:
+      sequence:
+        description: |
+          Euler angles rotation sequence.
+        type: string # TODO: add enum or regex
+      angles:
+        description: |
+          Rotation angles data.
+        tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+        wx_unit: "degree"
+    required: [sequence, angles]
+    flowStyle: block
+    additionalProperties: false
+...
