@@ -39,16 +39,16 @@ class WXRotationTypeASDF(WeldxType):
         """
         tree = {}
 
-        if not hasattr(node, "_wx_meta"):  # default to quaternion representation
+        if not hasattr(node, "wx_meta"):  # default to quaternion representation
             tree["quaternions"] = node.as_quat()
-        elif node._wx_meta["constructor"] == "from_quat":
+        elif node.wx_meta["constructor"] == "from_quat":
             tree["quaternions"] = node.as_quat()
-        elif node._wx_meta["constructor"] == "from_matrix":
+        elif node.wx_meta["constructor"] == "from_matrix":
             tree["matrix"] = node.as_matrix()
-        elif node._wx_meta["constructor"] == "from_rotvec":
+        elif node.wx_meta["constructor"] == "from_rotvec":
             tree["rotvec"] = node.as_rotvec()
-        elif node._wx_meta["constructor"] == "from_euler":
-            seq_str = node._wx_meta["seq"]
+        elif node.wx_meta["constructor"] == "from_euler":
+            seq_str = node.wx_meta["seq"]
             if not len(seq_str) == 3:
                 if all([c in "xyz" for c in seq_str]):
                     seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
@@ -57,15 +57,15 @@ class WXRotationTypeASDF(WeldxType):
                 else:
                     raise ValueError("Mix of intrinsic and extrinsic euler angles.")
 
-            angles = node.as_euler(seq_str, degrees=node._wx_meta["degrees"])
-            angles = np.squeeze(angles[..., : len(node._wx_meta["seq"])])
+            angles = node.as_euler(seq_str, degrees=node.wx_meta["degrees"])
+            angles = np.squeeze(angles[..., : len(node.wx_meta["seq"])])
 
-            if node._wx_meta["degrees"]:
+            if node.wx_meta["degrees"]:
                 angles = Q_(angles, "degree")
             else:
                 angles = Q_(angles, "rad")
 
-            tree["sequence"] = node._wx_meta["seq"]
+            tree["sequence"] = node.wx_meta["seq"]
             tree["angles"] = angles
 
         else:
