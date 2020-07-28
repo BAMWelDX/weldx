@@ -1,8 +1,6 @@
 """Tests of the core package."""
 
 
-from typing import Dict
-
 import numpy as np
 import pandas as pd
 import pytest
@@ -12,7 +10,9 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, TimeSeries
 
-# MathematicalExpression ---------------------------------------------------------------
+# --------------------------------------------------------------------------------------
+# MathematicalExpression
+# --------------------------------------------------------------------------------------
 
 
 def get_test_name(param):
@@ -24,6 +24,8 @@ def get_test_name(param):
 
 class TestMathematicalExpression:
     """Tests the mathematical expression class."""
+
+    # Fixtures and variables -----------------------------------------------------------
 
     ME = MathematicalExpression
     # unfortunately, fixtures can not be used in a parametrize section
@@ -37,7 +39,22 @@ class TestMathematicalExpression:
             TestMathematicalExpression.expr_def, TestMathematicalExpression.params_def,
         )
 
-    # -----------------------------------------------------
+    # Helper functions -----------------------------------------------------------------
+
+    @staticmethod
+    def _check_params_and_vars(expression, exp_params, exp_vars):
+        """Check parameters and variables of an MathematicalExpression."""
+        assert expression.num_parameters == len(exp_params)
+        assert len(expression.parameters) == len(exp_params)
+        for parameter, value in exp_params.items():
+            assert parameter in expression.parameters
+            assert expression.parameters[parameter] == value
+
+        assert expression.num_variables == len(exp_vars)
+        for variable in exp_vars:
+            assert variable in expression.get_variable_names()
+
+    # Tests ----------------------------------------------------------------------------
 
     @pytest.mark.parametrize(
         "expression, parameters,  exp_vars",
@@ -84,32 +101,21 @@ class TestMathematicalExpression:
         """Test the set_parameter function of the mathematical expression."""
         expr = MathematicalExpression("a*b + c/d - e")
 
-        def _check_params_and_vars(expression, exp_params, exp_vars):
-            assert expression.num_parameters == len(exp_params)
-            assert len(expression.parameters) == len(exp_params)
-            for parameter, value in exp_params.items():
-                assert parameter in expression.parameters
-                assert expression.parameters[parameter] == value
-
-            assert expression.num_variables == len(exp_vars)
-            for variable in exp_vars:
-                assert variable in expression.get_variable_names()
-
         # check initial configuration
-        _check_params_and_vars(expr, {}, ["a", "b", "c", "d", "e"])
+        self._check_params_and_vars(expr, {}, ["a", "b", "c", "d", "e"])
 
         # set first parameters
         expr.set_parameter("d", 1)
         expr.set_parameter("e", 2)
 
-        _check_params_and_vars(expr, {"d": 1, "e": 2}, ["a", "b", "c"])
+        self._check_params_and_vars(expr, {"d": 1, "e": 2}, ["a", "b", "c"])
 
         # set another parameter and overwrite others
         expr.set_parameter("a", 5)
         expr.set_parameter("d", 7)
         expr.set_parameter("e", -1)
 
-        _check_params_and_vars(expr, {"a": 5, "d": 7, "e": -1}, ["b", "c"])
+        self._check_params_and_vars(expr, {"a": 5, "d": 7, "e": -1}, ["b", "c"])
 
     # -----------------------------------------------------
 
@@ -195,7 +201,9 @@ class TestMathematicalExpression:
             ma_def.evaluate(**variables)
 
 
-# TimeSeries ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
+# TimeSeries
+# --------------------------------------------------------------------------------------
 
 
 def test_time_series_construction():
