@@ -1,6 +1,8 @@
 """Tests of the core package."""
 
 
+from typing import Dict
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -22,6 +24,20 @@ def get_test_name(param):
 
 class TestMathematicalExpression:
     """Tests the mathematical expression class."""
+
+    ME = MathematicalExpression
+    # unfortunately, fixtures can not be used in a parametrize section
+    expr_def = "(a + b)**2 + c - d"
+    params_def = {"a": 2, "c": 3.5}
+
+    @pytest.fixture()
+    def ma_def(self) -> MathematicalExpression:
+        """Get a default instance for tests."""
+        return MathematicalExpression(
+            TestMathematicalExpression.expr_def, TestMathematicalExpression.params_def,
+        )
+
+    # -----------------------------------------------------
 
     @pytest.mark.parametrize(
         "expression, parameters,  exp_vars",
@@ -49,9 +65,9 @@ class TestMathematicalExpression:
     @pytest.mark.parametrize(
         "expression, parameters, exception_type, name",
         [
-            ("a*b + c/d - e", {"f": 1}, ValueError, "#parameter not in expression"),
-            ("a*b + c/d - e", 1, ValueError, "#invalid parameter type"),
-            ("a + $b#!==3", {"a": 1}, Exception, "#invalid expression"),
+            ("a*b + c/d - e", {"f": 1}, ValueError, "# parameter not in expression"),
+            ("a*b + c/d - e", 1, ValueError, "# invalid parameter type"),
+            ("a + $b#!==3", {"a": 1}, Exception, "# invalid expression"),
         ],
         ids=get_test_name,
     )
@@ -62,153 +78,121 @@ class TestMathematicalExpression:
         with pytest.raises(exception_type):
             MathematicalExpression(expression=expression, parameters=parameters)
 
+    # -----------------------------------------------------
 
-def test_mathematical_expression_set_parameter():
-    """Test the set_parameter function of the mathematical expression."""
-    expr = MathematicalExpression("a*b+c/d-e")
+    def test_set_parameter(self):
+        """Test the set_parameter function of the mathematical expression."""
+        expr = MathematicalExpression("a*b + c/d - e")
 
-    assert expr.num_parameters == 0
-    assert expr.num_variables == 5
+        def _check_params_and_vars(expression, exp_params, exp_vars):
+            assert expression.num_parameters == len(exp_params)
+            assert len(expression.parameters) == len(exp_params)
+            for parameter, value in exp_params.items():
+                assert parameter in expression.parameters
+                assert expression.parameters[parameter] == value
 
-    for variable in ["a", "b", "c", "d", "e"]:
-        assert variable in expr.get_variable_names()
+            assert expression.num_variables == len(exp_vars)
+            for variable in exp_vars:
+                assert variable in expression.get_variable_names()
 
-    assert len(expr.parameters) == 0
+        # check initial configuration
+        _check_params_and_vars(expr, {}, ["a", "b", "c", "d", "e"])
 
-    # set first parameters
-    expr.set_parameter("d", 1)
-    expr.set_parameter("e", 2)
+        # set first parameters
+        expr.set_parameter("d", 1)
+        expr.set_parameter("e", 2)
 
-    assert expr.num_parameters == 2
-    assert expr.num_variables == 3
+        _check_params_and_vars(expr, {"d": 1, "e": 2}, ["a", "b", "c"])
 
-    for variable in ["a", "b", "c"]:
-        assert variable in expr.get_variable_names()
+        # set another parameter and overwrite others
+        expr.set_parameter("a", 5)
+        expr.set_parameter("d", 7)
+        expr.set_parameter("e", -1)
 
-    for parameter, value in {"d": 1, "e": 2}.items():
-        assert parameter in expr.parameters
-        assert expr.parameters[parameter] == value
+        _check_params_and_vars(expr, {"a": 5, "d": 7, "e": -1}, ["b", "c"])
 
-    # set another parameter and overwrite others
-    expr.set_parameter("a", 5)
-    expr.set_parameter("d", 7)
-    expr.set_parameter("e", -1)
+    # -----------------------------------------------------
 
-    assert expr.num_parameters == 3
-    assert expr.num_variables == 2
-
-    for variable in ["b", "c"]:
-        assert variable in expr.get_variable_names()
-
-    for parameter, value in {"a": 5, "d": 7, "e": -1}.items():
-        assert parameter in expr.parameters
-        assert expr.parameters[parameter] == value
-
-
-def test_mathematical_expression_comparison():
-    """Test the different comparison functions of the MathematicalExpression."""
-    expr_string = "(a + b)**2 + c - d"
-
-    parameters = {"a": 2, "c": 3.5}
-
-    expr = MathematicalExpression(expr_string, parameters)
-
-    # check structurally equal ----------------------------
-    expr_equal = MathematicalExpression(expr_string, parameters)
-    assert expr == expr_equal
-    assert not expr != expr_equal
-    assert expr.equals(expr_equal)
-    assert expr.equals(expr_equal, check_parameters=False)
-
-    # check mathematical equal expression -----------------
-    expr_string_math_equal = "a**2 + 2*a*b + b**2 + c - d"
-    expr_math_equal = MathematicalExpression(expr_string_math_equal, parameters)
-    assert not expr == expr_math_equal
-    assert expr != expr_math_equal
-    assert expr.equals(expr_math_equal)
-    assert expr.equals(expr_math_equal, check_parameters=False)
-
-    # check totally different expression ------------------
-    expr_string_different = "a*b + c*d"
-    expr_different = MathematicalExpression(expr_string_different, parameters)
-    assert not expr == expr_different
-    assert expr != expr_different
-    assert not expr.equals(expr_different)
-    assert not expr.equals(expr_different, check_parameters=False)
-
-    # check different number of parameters ----------------
-    parameters_plus_one = {"a": 2, "c": 3.5, "d": 4}
-    expr_plus_one = MathematicalExpression(expr_string, parameters_plus_one)
-    assert not expr == expr_plus_one
-    assert expr != expr_plus_one
-    assert not expr.equals(expr_plus_one)
-    assert expr.equals(expr_plus_one, check_parameters=False)
-
-    expr_math_equal_plus_one = MathematicalExpression(
-        expr_string_math_equal, parameters_plus_one
+    @pytest.mark.parametrize(
+        "name, value, exception_type, test_name",
+        [
+            ("k", 1, ValueError, "# parameter not in expression"),
+            (33, 1, TypeError, "# wrong type as name #1"),
+            ({"a": 1}, 1, TypeError, "# wrong type as name #2"),
+        ],
+        ids=get_test_name,
     )
-    assert not expr == expr_math_equal_plus_one
-    assert expr != expr_math_equal_plus_one
-    assert not expr.equals(expr_math_equal_plus_one)
-    assert expr.equals(expr_math_equal_plus_one, check_parameters=False)
+    def test_set_parameter_exceptions(
+        self, ma_def, name, value, exception_type, test_name
+    ):
+        """Test the exceptions of the 'set_parameter' method."""
+        with pytest.raises(exception_type):
+            ma_def.set_parameter(name, value)
 
-    expr_different_plus_one = MathematicalExpression(
-        expr_string_different, parameters_plus_one
+    # -----------------------------------------------------
+
+    expr_mat_identical = "a**2 + 2*a*b + b**2 + c - d"
+    expr_different = "a*b + c*d"
+    params_too_many = {"a": 2, "c": 3.5, "d": 4}
+    params_wrong_value = {"a": 2, "c": 1.5}
+
+    @pytest.mark.parametrize(
+        "other, equal, equal_no_params, mat_equal, mat_equal_no_params",
+        [
+            (ME(expr_def, params_def), True, True, True, True),
+            (ME(expr_mat_identical, params_def), False, False, True, True),
+            (ME(expr_different, params_def), False, False, False, False),
+            (ME(expr_def, params_too_many), False, True, False, True),
+            (ME(expr_mat_identical, params_too_many), False, False, False, True),
+            (ME(expr_different, params_too_many), False, False, False, False),
+            (ME(expr_def, params_wrong_value), False, True, False, True),
+            (ME(expr_mat_identical, params_wrong_value), False, False, False, True),
+            (ME(expr_different, params_wrong_value), False, False, False, False),
+            (1, False, False, False, False),
+            ("I am not a MathematicalExpression", False, False, False, False),
+        ],
     )
-    assert not expr == expr_different_plus_one
-    assert expr != expr_different_plus_one
-    assert not expr.equals(expr_different_plus_one)
-    assert not expr.equals(expr_different_plus_one, check_parameters=False)
+    def test_comparison(
+        self, ma_def, other, equal, equal_no_params, mat_equal, mat_equal_no_params,
+    ):
+        """Test if another object is equal to the default instance."""
+        assert (ma_def == other) is equal
+        assert (ma_def != other) is not equal
+        assert ma_def.equals(other, False, True) is equal_no_params
+        assert ma_def.equals(other) is mat_equal
+        assert ma_def.equals(other, False, False) is mat_equal_no_params
 
-    # check different parameter values --------------------
-    parameters_different = {"a": 2, "c": 3.4}
-    expr_different = MathematicalExpression(expr_string, parameters_different)
-    assert not expr == expr_different
-    assert expr != expr_different
-    assert not expr.equals(expr_different)
-    assert expr.equals(expr_different, check_parameters=False)
+    # -----------------------------------------------------
 
-    expr_math_equal_different = MathematicalExpression(
-        expr_string_math_equal, parameters_different
+    # TODO: Add tests for quantities
+    @pytest.mark.parametrize(
+        "expression, parameters, variables, exp_result",
+        [
+            ("a*b + c/d - e", {"d": 1, "e": 2}, {"a": 1, "b": 2, "c": 3}, 3),
+            ("(a + b)**2 + c - d", {"a": 3, "d": 2}, {"b": 2, "c": 4}, 27),
+            ("a + b", {"a": np.array([1, 2])}, {"b": np.array([2, 4])}, [3, 6],),
+        ],
     )
-    assert not expr == expr_math_equal_different
-    assert expr != expr_math_equal_different
-    assert not expr.equals(expr_math_equal_different)
-    assert expr.equals(expr_math_equal_different, check_parameters=False)
+    def test_evaluation(self, expression, parameters, variables, exp_result):
+        """Test the evaluation of the mathematical function."""
+        expr = MathematicalExpression(expression=expression, parameters=parameters)
 
-    expr_different_different = MathematicalExpression(
-        expr_string_different, parameters_different
+        assert np.all(expr.evaluate(**variables) == exp_result)
+
+    # -----------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "variables, exception_type, test_name",
+        [
+            ({"b": 1, "c": 2, "d": 3}, ValueError, "# input is expression parameter"),
+            ({"b": 1}, Exception, "# not enough values provided"),
+        ],
+        ids=get_test_name,
     )
-    assert not expr == expr_different_different
-    assert expr != expr_different_different
-    assert not expr.equals(expr_different_different)
-    assert not expr.equals(expr_different_different, check_parameters=False)
-
-    # other types -----------------------------------------
-    assert not expr == 1
-    assert expr != 1
-    assert not expr.equals(1)
-    assert not expr.equals(1, check_parameters=False)
-
-    assert not expr == "nope"
-    assert expr != "nope"
-    assert not expr.equals("nope")
-    assert not expr.equals("nope", check_parameters=False)
-
-
-def test_mathematical_function_evaluation():
-    """Test the evaluation of the mathematical function."""
-    expr = MathematicalExpression("a*b+c/d-e", parameters={"d": 1, "e": 2})
-
-    assert expr.evaluate(a=1, b=2, c=3) == 3
-
-    # exceptions ------------------------------------------
-    # input already defined as expression parameter
-    with pytest.raises(ValueError):
-        expr.evaluate(a=1, b=2, c=3, d=2)
-    # not enough values provided
-    with pytest.raises(Exception):
-        expr.evaluate(a=1, b=2)
+    def test_evaluate_exceptions(self, ma_def, variables, exception_type, test_name):
+        """Test the exceptions of the 'set_parameter' method."""
+        with pytest.raises(exception_type):
+            ma_def.evaluate(**variables)
 
 
 # TimeSeries ---------------------------------------------------------------------------
