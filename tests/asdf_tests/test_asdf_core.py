@@ -1,7 +1,4 @@
 """Tests asdf implementations of core module."""
-from io import BytesIO
-
-import asdf
 import numpy as np
 import pandas as pd
 import pytest
@@ -13,7 +10,8 @@ import weldx.transformations as tf
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.core import MathematicalExpression, TimeSeries
+from weldx.core import MathematicalExpression as ME
+from weldx.core import TimeSeries
 from weldx.transformations import WXRotation
 
 # WXRotation ---------------------------------------------------------------------
@@ -235,78 +233,40 @@ def get_example_coordinate_system_manager():
 
 
 @pytest.mark.parametrize("copy_arrays", [True, False])
-def test_coordinate_system_manager(copy_arrays):
+@pytest.mark.parametrize("lazy_load", [True, False])
+def test_coordinate_system_manager(copy_arrays, lazy_load):
     csm = get_example_coordinate_system_manager()
     tree = {"cs_hierarchy": csm}
-    data = _write_read_buffer(tree, open_kwargs={"copy_arrays": copy_arrays})
+    data = _write_read_buffer(
+        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )
     csm_file = data["cs_hierarchy"]
     assert csm == csm_file
 
 
-# weldx.core.TimeSeries ----------------------------------------------------------------
-
-buffer_ts = BytesIO()
-
-
-def get_example_time_series(num):
-    if num == 1:
-        return TimeSeries(Q_(42, "m"))
-    if num == 2:
-        return TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 5]))
-    if num == 4:
-        return TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 4]))
-
-    expr = MathematicalExpression(
-        "a*t+b", parameters={"a": Q_(2, "1/s"), "b": Q_(5, "")}
-    )
-    return TimeSeries(expr)
+# --------------------------------------------------------------------------------------
+# TimeSeries
+# --------------------------------------------------------------------------------------
 
 
-def test_time_series_save():
-    """Test if a TimeSeries can be written to an asdf file."""
-    tree = {
-        "ts1": get_example_time_series(1),
-        "ts2": get_example_time_series(2),
-        "ts3": get_example_time_series(3),
-        "ts4": get_example_time_series(4),
-    }
-    with asdf.AsdfFile(
-        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], copy_arrays=True
-    ) as f:
-        f.write_to(buffer_ts)
-        buffer_ts.seek(0)
-
-
-def test_time_series_load():
-    """Test if a TimeSeries can be read from an asdf file."""
-    f = asdf.open(
-        buffer_ts, extensions=[WeldxExtension(), WeldxAsdfExtension()], lazy_load=False,
-    )
-
-    ts1_exp = get_example_time_series(1)
-    ts1_file = f.tree["ts1"]
-    assert ts1_file.data == ts1_exp.data
-    assert ts1_file.time == ts1_exp.time
-    assert ts1_file.interpolation == ts1_exp.interpolation
-
-    ts2_exp = get_example_time_series(2)
-    ts2_file = f.tree["ts2"]
-    assert np.all(ts2_file.data == ts2_exp.data)
-    assert np.all(ts2_file.time == ts2_exp.time)
-    assert ts2_file.interpolation == ts2_exp.interpolation
-
-    ts3_exp = get_example_time_series(3)
-    ts3_file = f.tree["ts3"]
-
-    expr_exp = ts3_exp.data
-    expr_file = ts3_file.data
-
-    assert expr_exp == expr_file
-    assert ts3_file.time == ts3_exp.time
-    assert ts3_file.interpolation == ts3_exp.interpolation
-
-    ts4_exp = get_example_time_series(4)
-    ts4_file = f.tree["ts4"]
-    assert np.all(ts4_file.data == ts4_exp.data)
-    assert np.all(ts4_file.time == ts4_exp.time)
-    assert ts4_file.interpolation == ts4_exp.interpolation
+@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("lazy_load", [True, False])
+@pytest.mark.parametrize(
+    "ts",
+    [
+        TimeSeries(Q_(42, "m")),
+        TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 4])),
+        TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 5])),
+        TimeSeries(ME("a*t+b", parameters={"a": Q_(2, "1/s"), "b": Q_(5, "")})),
+    ],
+)
+def test_time_series_discrete(ts, copy_arrays, lazy_load):
+    ts_file = _write_read_buffer(
+        {"ts": ts}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )["ts"]
+    if isinstance(ts.data, ME):
+        assert ts.data == ts_file.data
+    else:
+        assert np.all(ts_file.data == ts.data)
+    assert np.all(ts_file.time == ts.time)
+    assert ts_file.interpolation == ts.interpolation
