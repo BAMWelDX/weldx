@@ -31,97 +31,87 @@ def test_property_tag_validator(test_input):
     _write_read_buffer({"root_node": test_input})
 
 
-def test_shape_validator_syntax():
-    """Test handling of custom shape validation syntax in Python."""
+def _val(list_test, list_expected):
+    """Add shape key to lists."""
+    if isinstance(list_test, list):
+        res = _custom_shape_validator({"shape": list_test}, list_expected)
+        return isinstance(res, dict)
+    return isinstance(_custom_shape_validator(list_test, list_expected), dict)
 
-    def val(list_test, list_expected):
-        """Add shape key to lists."""
-        try:
-            _custom_shape_validator({"shape": list_test}, list_expected)
-            return True
-        except ValidationError:
-            return False
 
-    # correct evaluation
-    assert val([3], [3])
-    assert val([2, 4, 5], [2, 4, 5])
-    assert val([1, 2, 3], ["..."])
-    assert val([1, 2], [1, 2, "..."])
-    assert val([1, 2], ["...", 1, 2])
-    assert val([1, 2, 3], [1, 2, None])
-    assert val([1, 2, 3], [None, 2, 3])
-    assert val([1], [1, "..."])
-    assert val([1, 2, 3, 4, 5], [1, "..."])
-    assert val([1, 2, 3, 4, 5], ["...", 4, 5])
-    assert val([1, 2], [1, 2, "(3)"])
-    assert val([2, 3], ["(1)", 2, 3])
-    assert val([1, 2, 3], ["(1)", 2, 3])
-    assert val([2, 3], ["(1~3)", 2, 3])
-    assert val([2, 2, 3], ["(1~3)", 2, 3])
-    assert val([1, 2, 3], [1, "1~3", 3])
-    assert val([1, 2, 3], [1, "1~", 3])
-    assert val([1, 2, 3], [1, "~3", 3])
-    assert val([1, 2, 3], [1, "~", 3])
-    assert val([1, 200, 3], [1, "~", 3])
-    assert val([1, 2, 3], [1, 2, "(~)"])
-    assert val([1, 2, 300], [1, 2, "(~)"])
-    assert val([1, 2, 3], [1, "(n)", "..."])
-    _custom_shape_validator(1.0, [1])
+@pytest.mark.parametrize(
+    "shape, exp",
+    [
+        ([3], [3]),
+        ([2, 4, 5], [2, 4, 5]),
+        ([1, 2, 3], ["..."]),
+        ([1, 2], [1, 2, "..."]),
+        ([1, 2], ["...", 1, 2]),
+        ([1, 2, 3], [1, 2, None]),
+        ([1, 2, 3], [None, 2, 3]),
+        ([1], [1, "..."]),
+        ([1, 2, 3, 4, 5], [1, "..."]),
+        ([1, 2, 3, 4, 5], ["...", 4, 5]),
+        ([1, 2], [1, 2, "(3)"]),
+        ([2, 3], ["(1)", 2, 3]),
+        ([1, 2, 3], ["(1)", 2, 3]),
+        ([2, 3], ["(1~3)", 2, 3]),
+        ([2, 2, 3], ["(1~3)", 2, 3]),
+        ([1, 2, 3], [1, "1~3", 3]),
+        ([1, 2, 3], [1, "1~", 3]),
+        ([1, 2, 3], [1, "~3", 3]),
+        ([1, 2, 3], [1, "~", 3]),
+        ([1, 200, 3], [1, "~", 3]),
+        ([1, 2, 3], [1, 2, "(~)"]),
+        ([1, 2, 300], [1, 2, "(~)"]),
+        ([1, 2, 3], [1, "(n)", "..."]),
+        (1.0, [1]),
+    ],
+)
+def test_shape_validator_syntax2(shape, exp):
+    assert _val(shape, exp)
 
-    # shape mismatch
-    assert not val([2, 2, 3], [1, "..."])
-    assert not val([2, 2, 3], ["...", 1])
-    assert not val([1], [1, 2])
-    assert not val([1, 2], [1])
-    assert not val([1, 2], [3, 2])
-    assert not val([1], [1, "~"])
-    assert not val([1], ["~", 1])
-    assert not val([1, 2, 3], [1, 2, "(4)"])
-    assert not val([1, 2, 3], ["(2)", 2, 3])
-    assert not val([1, 2], [1, "4~8"])
-    assert not val([1, 9], [1, "4~8"])
-    assert not val([1, 2], [1, "(4~8)"])
-    assert not val([1, 9], [1, "(4~8)"])
 
-    # syntax errors, these should throw a ValueError
-    with pytest.raises(ValueError):
-        val([1, 2], [1, "~", "(...)"])  # value error?
-    with pytest.raises(ValueError):
-        val([1, 2], [1, "(2)", 3])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, 2, "((3))"])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, 2, "3)"])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, 2, "*3"])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, 2, "(3"])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, 2, "(3)3"])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, 2, "2(3)"])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, "...", 2])  # should this be allowed? syntax/value error?
-    with pytest.raises(ValueError):
-        val([1, 2], ["(1)", "..."])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, "4~1"])
-    with pytest.raises(ValueError):  # no negative shape numbers allowed in syntax
-        val([-1, -2], [-1, -2])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, 2, "(-3)"])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, 2, "(-3~-1)"])
-    with pytest.raises(ValueError):
-        val([1, 2], [1, 2, "(-3~1)"])
-    with pytest.raises(ValueError):
-        val([1, 2, 1], ["(-3~1)", 2, 1])
-    with pytest.raises(ValueError):  # no variables allowed in '~'
-        val([1, 2], [1, "(n~m)"])
-    with pytest.raises(ValueError):  # only single '~' allowed
-        val([1, 2], [1, "(1~3~5)"])
-    with pytest.raises(ValidationError):  # test single value
-        _custom_shape_validator(1.0, [2])
+@pytest.mark.parametrize(
+    "shape, exp, err",
+    [
+        ([2, 2, 3], [1, "..."], ValidationError),
+        ([2, 2, 3], ["...", 1], ValidationError),
+        ([1], [1, 2], ValidationError),
+        ([1, 2], [1], ValidationError),
+        ([1, 2], [3, 2], ValidationError),
+        ([1], [1, "~"], ValidationError),
+        ([1], ["~", 1], ValidationError),
+        ([1, 2, 3], [1, 2, "(4)"], ValidationError),
+        ([1, 2, 3], ["(2)", 2, 3], ValidationError),
+        ([1, 2], [1, "4~8"], ValidationError),
+        ([1, 9], [1, "4~8"], ValidationError),
+        ([1, 2], [1, "(4~8)"], ValidationError),
+        ([1, 9], [1, "(4~8)"], ValidationError),
+        (1.0, [2], ValidationError),
+        ([1, 2], [1, "~", "(...)"], ValueError),
+        ([1, 2], [1, "(2)", 3], ValueError),
+        ([1, 2], [1, 2, "((3))"], ValueError),
+        ([1, 2], [1, 2, "3)"], ValueError),
+        ([1, 2], [1, 2, "*3"], ValueError),
+        ([1, 2], [1, 2, "(3"], ValueError),
+        ([1, 2], [1, 2, "(3)3"], ValueError),
+        ([1, 2], [1, 2, "2(3)"], ValueError),
+        ([1, 2], [1, "...", 2], ValueError),
+        ([1, 2], ["(1)", "..."], ValueError),
+        ([1, 2], [1, "4~1"], ValueError),
+        ([-1, -2], [-1, -2], ValueError),
+        ([1, 2], [1, 2, "(-3)"], ValueError),
+        ([1, 2], [1, 2, "(-3~-1)"], ValueError),
+        ([1, 2], [1, 2, "(-3~1)"], ValueError),
+        ([1, 2, 1], ["(-3~1)", 2, 1], ValueError),
+        ([1, 2], [1, "(n~m)"], ValueError),
+        ([1, 2], [1, "(1~3~5)"], ValueError),
+    ],
+)
+def test_shape_validation_error_exception(shape, exp, err):
+    with pytest.raises(err):
+        assert _val(shape, exp)
 
 
 @pytest.mark.parametrize(
