@@ -46,7 +46,7 @@ def test_rotation(input):
 
 def test_rotation_euler_exception():
     with pytest.raises(ValueError):
-        rot = WXRotation.from_euler(seq="XyZ", angles=[10, 20, 60], degrees=True)
+        WXRotation.from_euler(seq="XyZ", angles=[10, 20, 60], degrees=True)
 
 
 # xarray.DataArray ---------------------------------------------------------------------

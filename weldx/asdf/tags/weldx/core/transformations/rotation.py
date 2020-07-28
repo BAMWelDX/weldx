@@ -69,7 +69,7 @@ class WXRotationTypeASDF(WeldxType):
             tree["angles"] = angles
 
         else:
-            raise NotImplementedError(f"unknown constructor")
+            raise NotImplementedError("unknown or missing constructor")
 
         return tree
 

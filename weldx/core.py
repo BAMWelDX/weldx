@@ -276,12 +276,8 @@ class TimeSeries:
                     '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
                 )
 
-            self._data = xr.DataArray(
-                data=data,
-                dims=["time"],
-                coords={"time": time},
-                attrs={"interpolation": interpolation},
-            )
+            dax = xr.DataArray(data=data, attrs={"interpolation": interpolation},)
+            self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
 
         elif isinstance(data, MathematicalExpression):
 
@@ -492,7 +488,7 @@ class TimeSeries:
                 time_q = Q_(time_q.magnitude[:, np.newaxis], time_q.units)
 
         # evaluate expression
-        data = self._data.evaluate(**{self._time_var_name: time_q})
+        data = self._data.evaluate(**{self._time_var_name: time_q}).to_reduced_units()
 
         # create data array
         if not np.iterable(data.magnitude):  # make sure quantity is not scalar value
