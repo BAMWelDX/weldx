@@ -10,16 +10,17 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, TimeSeries
 
-# --------------------------------------------------------------------------------------
-# MathematicalExpression
-# --------------------------------------------------------------------------------------
-
-
+# Todo: Move this to conftest.py?
 def get_test_name(param):
     """Get the test name from the parameter list of a parametrized test."""
     if isinstance(param, str) and param[0] == "#":
         return param[1:]
     return ""
+
+
+# --------------------------------------------------------------------------------------
+# MathematicalExpression
+# --------------------------------------------------------------------------------------
 
 
 class TestMathematicalExpression:
