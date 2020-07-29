@@ -47,11 +47,7 @@ class TestMathematicalExpression:
     @staticmethod
     def _check_params_and_vars(expression, exp_params, exp_vars):
         """Check parameters and variables of an MathematicalExpression."""
-        assert expression.num_parameters == len(exp_params)
-        assert len(expression.parameters) == len(exp_params)
-        for parameter, value in exp_params.items():
-            assert parameter in expression.parameters
-            assert expression.parameters[parameter] == value
+        assert exp_params == expression.parameters
 
         assert expression.num_variables == len(exp_vars)
         for variable in exp_vars:
@@ -71,14 +67,7 @@ class TestMathematicalExpression:
         """Test the construction."""
         expr = MathematicalExpression(expression=expression, parameters=parameters)
 
-        assert expr.num_variables == len(exp_vars)
-        for variable in exp_vars:
-            assert variable in expr.get_variable_names()
-
-        assert expr.num_parameters == len(parameters)
-        for parameter, value in parameters.items():
-            assert parameter in expr.parameters
-            assert expr.parameters[parameter] == value
+        _check_params_and_vars(expression, parameters, exp_vars)
 
     # test_construction_exceptions -----------------------------------------------------
 
