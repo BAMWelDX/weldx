@@ -67,7 +67,7 @@ class TestMathematicalExpression:
         """Test the construction."""
         expr = MathematicalExpression(expression=expression, parameters=parameters)
 
-        _check_params_and_vars(expression, parameters, exp_vars)
+        self._check_params_and_vars(expr, parameters, exp_vars)
 
     # test_construction_exceptions -----------------------------------------------------
 
