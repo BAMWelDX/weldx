@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import pint
 import pytest
-from xarray import DataArray
 
+import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, TimeSeries
@@ -28,7 +28,7 @@ def get_test_name(param):
 class TestMathematicalExpression:
     """Tests the mathematical expression class."""
 
-    # Fixtures and variables -----------------------------------------------------------
+    # Fixtures, aliases and shared variables -------------------------------------------
 
     ME = MathematicalExpression
     # unfortunately, fixtures can not be used in a parametrize section
@@ -57,7 +57,7 @@ class TestMathematicalExpression:
         for variable in exp_vars:
             assert variable in expression.get_variable_names()
 
-    # Tests ----------------------------------------------------------------------------
+    # test_construction ----------------------------------------------------------------
 
     @pytest.mark.parametrize(
         "expression, parameters,  exp_vars",
@@ -68,7 +68,7 @@ class TestMathematicalExpression:
         ],
     )
     def test_construction(self, expression, parameters, exp_vars):
-        """Test the construction"""
+        """Test the construction."""
         expr = MathematicalExpression(expression=expression, parameters=parameters)
 
         assert expr.num_variables == len(exp_vars)
@@ -80,7 +80,7 @@ class TestMathematicalExpression:
             assert parameter in expr.parameters
             assert expr.parameters[parameter] == value
 
-    # -----------------------------------------------------
+    # test_construction_exceptions -----------------------------------------------------
 
     @pytest.mark.parametrize(
         "expression, parameters, exception_type, name",
@@ -98,7 +98,7 @@ class TestMathematicalExpression:
         with pytest.raises(exception_type):
             MathematicalExpression(expression=expression, parameters=parameters)
 
-    # -----------------------------------------------------
+    # test_set_parameter ---------------------------------------------------------------
 
     def test_set_parameter(self):
         """Test the set_parameter function of the mathematical expression."""
@@ -120,7 +120,7 @@ class TestMathematicalExpression:
 
         self._check_params_and_vars(expr, {"a": 5, "d": 7, "e": -1}, ["b", "c"])
 
-    # -----------------------------------------------------
+    # test_set_parameter_exceptions ----------------------------------------------------
 
     @pytest.mark.parametrize(
         "name, value, exception_type, test_name",
@@ -138,7 +138,7 @@ class TestMathematicalExpression:
         with pytest.raises(exception_type):
             ma_def.set_parameter(name, value)
 
-    # -----------------------------------------------------
+    # test_comparison ------------------------------------------------------------------
 
     expr_mat_identical = "a**2 + 2*a*b + b**2 + c - d"
     expr_different = "a*b + c*d"
@@ -188,7 +188,7 @@ class TestMathematicalExpression:
 
         assert np.all(expr.evaluate(**variables) == exp_result)
 
-    # -----------------------------------------------------
+    # test_evaluate_exceptions ---------------------------------------------------------
 
     @pytest.mark.parametrize(
         "variables, exception_type, test_name",
@@ -212,7 +212,10 @@ class TestMathematicalExpression:
 class TestTimeSeries:
     """Tests for the TimeSeries class."""
 
+    # Fixtures, aliases and shared variables -------------------------------------------
+
     ME = MathematicalExpression
+    DTI = pd.DatetimeIndex
     TDI = pd.TimedeltaIndex
     TS = TimeSeries
 
@@ -222,11 +225,15 @@ class TestTimeSeries:
     me_expr_str = "a*t + b"
     me_params = {"a": Q_(2, "m/s"), "b": Q_(-2, "m")}
 
-    ts_constant = TimeSeries(value_constant)
-    ts_discrete = TimeSeries(values_discrete, time_discrete, "step")
-    ts_expr = TimeSeries(ME(me_expr_str, me_params))
+    me_params_vec = {"a": Q_([[2, 0, 1]], "m/s"), "b": Q_([[-2, 3, 0]], "m")}
 
-    # tests ----------------------------------------------------------------------------
+    ts_constant = TimeSeries(value_constant)
+    ts_disc_step = TimeSeries(values_discrete, time_discrete, "step")
+    ts_disc_linear = TimeSeries(values_discrete, time_discrete, "linear")
+    ts_expr = TimeSeries(ME(me_expr_str, me_params))
+    ts_expr_vec = TimeSeries(ME(me_expr_str, me_params_vec))
+
+    # test_construction_discrete -------------------------------------------------------
 
     @pytest.mark.parametrize(
         "data, time, interpolation, shape_exp",
@@ -261,7 +268,7 @@ class TestTimeSeries:
         else:
             assert np.all(ts.data_array.time == time_exp)
 
-    # ----------------------------------------------------------------------------------
+    # test_construction_expression -----------------------------------------------------
 
     params_scalar = {"a": Q_(2, "1/s"), "b": Q_(-2, "")}
     params_vec = {"a": Q_([[2, 3, 4]], "m/s"), "b": Q_([[-2, 3, 1]], "m")}
@@ -285,7 +292,7 @@ class TestTimeSeries:
         assert ts.data_array is None
         assert Q_(1, unit_exp).check(UREG.get_dimensionality(ts.units))
 
-    # -----------------------------------------------------
+    # test_construction_exceptions -----------------------------------------------------
 
     values_def = Q_([5, 7, 3, 6, 8], "m")
     time_def = Q_([0, 1, 2, 3, 4], "s")
@@ -312,7 +319,7 @@ class TestTimeSeries:
         with pytest.raises(exception_type):
             TimeSeries(data=data, time=time, interpolation=interpolation)
 
-    # test_comparison ------------------------------------------------------------------
+    # test_comparison -------------------------------------
 
     time_wrong_values = TDI([0, 1, 2, 3, 5], unit="s")
     values_discrete_wrong = Q_(np.array([10, 11, 12, 15, 16]), "mm")
@@ -326,24 +333,24 @@ class TestTimeSeries:
         "ts, ts_other, result_exp",
         [
             (ts_constant, TS(value_constant), True),
-            (ts_discrete, TS(values_discrete, time_discrete, "step"), True),
+            (ts_disc_step, TS(values_discrete, time_discrete, "step"), True),
             (ts_expr, TS(ME(me_expr_str, me_params)), True),
-            (ts_constant, ts_discrete, False),
+            (ts_constant, ts_disc_step, False),
             (ts_constant, ts_expr, False),
-            (ts_discrete, ts_expr, False),
+            (ts_disc_step, ts_expr, False),
             (ts_constant, 1, False),
-            (ts_discrete, 1, False),
+            (ts_disc_step, 1, False),
             (ts_expr, 1, False),
             (ts_constant, "wrong", False),
-            (ts_discrete, "wrong", False),
+            (ts_disc_step, "wrong", False),
             (ts_expr, "wrong", False),
             (ts_constant, TS(Q_(1337, "m")), False),
             (ts_constant, TS(Q_(1, "mm")), False),
             (ts_constant, TS(Q_(1, "s")), False),
-            (ts_discrete, TS(values_discrete, time_wrong_values, "step"), False),
-            (ts_discrete, TS(values_discrete_wrong, time_discrete, "step"), False),
-            (ts_discrete, TS(values_unit_prefix_wrong, time_discrete, "step"), False),
-            (ts_discrete, TS(values_discrete, time_discrete, "linear"), False),
+            (ts_disc_step, TS(values_discrete, time_wrong_values, "step"), False),
+            (ts_disc_step, TS(values_discrete_wrong, time_discrete, "step"), False),
+            (ts_disc_step, TS(values_unit_prefix_wrong, time_discrete, "step"), False),
+            (ts_disc_step, TS(values_discrete, time_discrete, "linear"), False),
             (ts_expr, TS(ME("a*t + 2*b", me_params)), False),
             (ts_expr, TS(ME(me_expr_str, params_wrong_values)), False),
             (ts_expr, TS(ME(me_expr_str, params_wrong_unit)), False),
@@ -351,228 +358,78 @@ class TestTimeSeries:
         ],
     )
     def test_comparison(self, ts, ts_other, result_exp):
+        """Test the TimeSeries comparison methods."""
         assert (ts == ts_other) is result_exp
         assert (ts != ts_other) is not result_exp
 
+    # test_interp_time -----------------------------------------------------------------
 
-def test_time_series_interp_time_constant():
-    """Test the TimeSeries.inter_time method for constants as data."""
-    value = Q_(1, "m")
-    ts_constant = TimeSeries(data=value)
+    time_single = pd.TimedeltaIndex([2.1], "s")
+    time_single_q = Q_(2.1, "s")
+    time_mul = pd.TimedeltaIndex([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
+    time_mul_q = Q_([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
+    results_exp_vec = [
+        [-8, 3, -3],
+        [-0.6, 3, 0.7],
+        [0.2, 3, 1.1],
+        [1.8, 3, 1.9],
+        [3, 3, 2.5],
+        [4, 3, 3],
+        [6, 3, 4],
+        [12, 3, 7],
+    ]
 
-    # single timedelta ------------------------------------
-    time_delta_single = pd.TimedeltaIndex([2], "s")
-    time_delta_single_q = Q_(2, "s")
-    value_interp_single = ts_constant.interp_time(time_delta_single)
-    value_interp_single_q = ts_constant.interp_time(time_delta_single_q)
-
-    assert value_interp_single == value
-    assert value_interp_single_q == value
-
-    assert value_interp_single.time == time_delta_single
-    assert value_interp_single_q.time == time_delta_single
-
-    # multiple time deltas --------------------------------
-    time_delta_multi = pd.TimedeltaIndex([0, 2, 5], "s")
-    time_delta_multi_q = Q_([0, 2, 5], "s")
-    value_interp_multi = ts_constant.interp_time(time_delta_multi)
-    value_interp_multi_q = ts_constant.interp_time(time_delta_multi_q)
-
-    assert len(value_interp_multi) == 3
-    assert len(value_interp_multi_q) == 3
-
-    assert np.all(value_interp_multi.time == time_delta_multi)
-    assert np.all(value_interp_multi_q.time == time_delta_multi)
-
-    for value_interp in value_interp_multi:
-        assert value_interp == value
-    for value_interp in value_interp_multi_q:
-        assert value_interp == value
-
-    # exceptions ------------------------------------------
-    # wrong type
-    with pytest.raises(ValueError):
-        ts_constant.interp_time(pd.DatetimeIndex(["2010-10-10"]))
-    with pytest.raises(ValueError):
-        ts_constant.interp_time("str")
-    with pytest.raises(ValueError):
-        ts_constant.interp_time([1, 2, 3])
-
-
-def test_time_series_interp_time_discrete_step():
-    """Test the inter_time method for discrete data and step interpolation."""
-    time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
-    values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
-    ts_discrete = TimeSeries(data=values, time=time, interpolation="step")
-
-    # single timedelta ------------------------------------
-    time_delta_single = pd.TimedeltaIndex([1.5], "s")
-    time_delta_single_q = Q_(1.5, "s")
-    value_interp_single = ts_discrete.interp_time(time_delta_single)
-    value_interp_single_q = ts_discrete.interp_time(time_delta_single_q)
-
-    assert np.isclose(value_interp_single.data.magnitude, 11)
-    assert np.isclose(value_interp_single_q.data.magnitude, 11)
-
-    assert value_interp_single.time == time_delta_single
-    assert value_interp_single_q.time == time_delta_single
-
-    assert value_interp_single.data.check(values.dimensionality)
-    assert value_interp_single_q.data.check(values.dimensionality)
-
-    # multiple time deltas --------------------------------
-    time_delta_multi = pd.TimedeltaIndex([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
-    time_delta_multi_q = Q_([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
-    value_interp_multi = ts_discrete.interp_time(time_delta_multi)
-    value_interp_multi_q = ts_discrete.interp_time(time_delta_multi_q)
-
-    assert np.all(
-        np.isclose(value_interp_multi.data.magnitude, [10, 10, 11, 11, 12, 14, 16, 16])
+    @pytest.mark.parametrize(
+        "ts, time, magnitude_exp, unit_exp",
+        [
+            (ts_constant, time_single, 1, "m"),
+            (ts_constant, time_single_q, 1, "m"),
+            (ts_constant, time_mul, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (ts_constant, time_mul_q, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (ts_disc_step, time_single, 12, "mm"),
+            (ts_disc_step, time_single_q, 12, "mm"),
+            (ts_disc_step, time_mul, [10, 10, 11, 11, 12, 14, 16, 16], "mm"),
+            (ts_disc_step, time_mul_q, [10, 10, 11, 11, 12, 14, 16, 16], "mm"),
+            (ts_disc_linear, time_single, 12.2, "mm"),
+            (ts_disc_linear, time_single_q, 12.2, "mm"),
+            (ts_disc_linear, time_mul, [10, 10.7, 11.1, 11.9, 13, 14, 16, 16], "mm"),
+            (ts_disc_linear, time_mul_q, [10, 10.7, 11.1, 11.9, 13, 14, 16, 16], "mm"),
+            (ts_expr, time_single, 2.2, "m"),
+            (ts_expr, time_single_q, 2.2, "m"),
+            (ts_expr, time_mul, [-8, -0.6, 0.2, 1.8, 3, 4, 6, 12], "m"),
+            (ts_expr, time_mul_q, [-8, -0.6, 0.2, 1.8, 3, 4, 6, 12], "m"),
+            (ts_expr_vec, time_single, [[2.2, 3, 2.1]], "m"),
+            (ts_expr_vec, time_single_q, [[2.2, 3, 2.1]], "m"),
+            (ts_expr_vec, time_mul, results_exp_vec, "m"),
+        ],
     )
-    assert np.all(
-        np.isclose(
-            value_interp_multi_q.data.magnitude, [10, 10, 11, 11, 12, 14, 16, 16]
-        )
+    def test_interp_time(self, ts, time, magnitude_exp, unit_exp):
+        """Test the interp_time function."""
+        result = ts.interp_time(time)
+
+        assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
+        assert Q_(1, str(result.data.units)) == Q_(1, unit_exp)
+
+        if isinstance(time, pint.Quantity):
+            assert np.all(result.time == ut.to_pandas_time_index(time))
+        else:
+            assert np.all(result.time == time)
+
+    # test_interp_time_exceptions ------------------------------------------------------
+
+    @pytest.mark.parametrize("ts", [ts_constant, ts_disc_step, ts_disc_linear, ts_expr])
+    @pytest.mark.parametrize(
+        "time,  exception_type, test_name",
+        [
+            (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),
+            ("a string", ValueError, "# wrong type #2"),
+            ([1, 2, 3], ValueError, "# wrong type #3"),
+            (1, ValueError, "# wrong type #4"),
+            (Q_(2, "s/m"), Exception, "# wrong type #5"),
+        ],
+        ids=get_test_name,
     )
-
-    assert np.all(value_interp_multi.time == time_delta_multi)
-    assert np.all(value_interp_multi_q.time == time_delta_multi)
-
-    assert value_interp_multi.data.check(values.dimensionality)
-    assert value_interp_multi_q.data.check(values.dimensionality)
-
-    # exceptions ------------------------------------------
-    # wrong type
-    with pytest.raises(ValueError):
-        ts_discrete.interp_time(pd.DatetimeIndex(["2010-10-10"]))
-    with pytest.raises(ValueError):
-        ts_discrete.interp_time("str")
-    with pytest.raises(ValueError):
-        ts_discrete.interp_time([1, 2, 3])
-
-
-def test_time_series_interp_time_discrete_linear():
-    """Test the inter_time method for discrete data and linear interpolation."""
-    time = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
-    values = Q_(np.array([10, 11, 12, 14, 16]), "mm")
-    ts_discrete = TimeSeries(data=values, time=time, interpolation="linear")
-
-    # single timedelta ------------------------------------
-    time_delta_single = pd.TimedeltaIndex([1.5], "s")
-    time_delta_single_q = Q_(1.5, "s")
-    value_interp_single = ts_discrete.interp_time(time_delta_single)
-    value_interp_single_q = ts_discrete.interp_time(time_delta_single_q)
-
-    assert np.isclose(value_interp_single.data.magnitude, 11.5)
-    assert np.isclose(value_interp_single_q.data.magnitude, 11.5)
-
-    assert value_interp_single.time == time_delta_single
-    assert value_interp_single_q.time == time_delta_single
-
-    assert value_interp_single.data.check(values.dimensionality)
-    assert value_interp_single_q.data.check(values.dimensionality)
-
-    # multiple time deltas --------------------------------
-    time_delta_multi = pd.TimedeltaIndex([-3, 2.5, 3, 4, 7], "s")
-    time_delta_multi_q = Q_([-3, 2.5, 3, 4, 7], "s")
-    value_interp_multi = ts_discrete.interp_time(time_delta_multi)
-    value_interp_multi_q = ts_discrete.interp_time(time_delta_multi_q)
-
-    assert np.all(np.isclose(value_interp_multi.data.magnitude, [10, 13, 14, 16, 16]))
-    assert np.all(np.isclose(value_interp_multi_q.data.magnitude, [10, 13, 14, 16, 16]))
-
-    assert np.all(value_interp_multi.time == time_delta_multi)
-    assert np.all(value_interp_multi_q.time == time_delta_multi)
-
-    assert value_interp_multi.data.check(values.dimensionality)
-    assert value_interp_multi_q.data.check(values.dimensionality)
-
-    # exceptions ------------------------------------------
-    # wrong type
-    with pytest.raises(ValueError):
-        ts_discrete.interp_time(pd.DatetimeIndex(["2010-10-10"]))
-    with pytest.raises(ValueError):
-        ts_discrete.interp_time("str")
-    with pytest.raises(ValueError):
-        ts_discrete.interp_time([1, 2, 3])
-
-
-def test_time_series_interp_time_expression():
-    """Test the TimeSeries.inter_time method for mathematical expressions as data."""
-    # needed for TimedeltaIndex tests, since internal conversion introduces small errors
-    def _check_close(q1, q2):
-        q1 = q1.to_reduced_units()
-        q2 = q2.to_reduced_units()
-
-        assert np.all(np.isclose(q1.magnitude, q2.magnitude, atol=1e-9))
-        assert q1.units == q2.units
-
-    # scalar ----------------------------------------------
-    expr_string = "a*t+b"
-    parameters = {"a": Q_(2, "meter/second"), "b": Q_(-2, "meter")}
-    expr = MathematicalExpression(expression=expr_string, parameters=parameters)
-
-    ts_expr = TimeSeries(data=expr)
-
-    # single timedelta
-    time_single = Q_(1, "second")
-    time_single_pd = pd.TimedeltaIndex([1], unit="s")
-    value_interp_single = ts_expr.interp_time(time_single)
-    value_interp_single_pd = ts_expr.interp_time(time_single_pd)
-
-    assert value_interp_single.data == Q_(0, "meter")
-    _check_close(value_interp_single_pd.data, Q_(0, "meter"))
-
-    # multiple time deltas
-    time_multi = Q_([0, 1, 2, 10], "second")
-    time_multi_pd = pd.TimedeltaIndex([0, 1, 2, 10], unit="s")
-    value_interp_multi = ts_expr.interp_time(time_multi)
-    value_interp_multi_pd = ts_expr.interp_time(time_multi_pd)
-
-    assert len(value_interp_multi) == 4
-    assert len(value_interp_multi_pd) == 4
-
-    for i in range(4):
-        exp = parameters["a"] * time_multi[i] + parameters["b"]
-        assert value_interp_multi[i].data == exp
-        _check_close(value_interp_multi_pd[i].data, exp)
-
-    # vector -----------------------------------------------
-    expr_string_vec = "a*t+b"
-    parameters_vec = {"a": Q_([[2, 3, 4]], "1/s"), "b": Q_([[-2, 3, 1]], "")}
-    expr_vec = MathematicalExpression(
-        expression=expr_string_vec, parameters=parameters_vec
-    )
-
-    ts_expr_vec = TimeSeries(data=expr_vec)
-
-    # single time delta
-    value_interp_vec_single = ts_expr_vec.interp_time(time_single)
-    value_interp_vec_single_pd = ts_expr_vec.interp_time(time_single_pd)
-
-    assert np.all(np.isclose(value_interp_vec_single.data.magnitude, [0, 6, 5]))
-    _check_close(value_interp_vec_single_pd.data, Q_([0, 6, 5], ""))
-
-    # multiple time deltas
-    value_interp_vec_multi = ts_expr_vec.interp_time(time_multi)
-    value_interp_vec_multi_pd = ts_expr_vec.interp_time(time_multi_pd)
-
-    assert value_interp_vec_multi.shape == (4, 3)
-    assert value_interp_vec_multi_pd.shape == (4, 3)
-
-    for i in range(4):
-        exp = parameters_vec["a"] * time_multi[i] + parameters_vec["b"]
-        assert np.all(value_interp_vec_multi[i].data == exp)
-        _check_close(value_interp_vec_multi_pd[i].data, exp)
-
-    # exceptions ------------------------------------------
-    with pytest.raises(ValueError):
-        ts_expr.interp_time(Q_(2, "s/m"))
-    with pytest.raises(ValueError):
-        ts_expr.interp_time(1)
-    with pytest.raises(ValueError):
-        ts_expr.interp_time(pd.DatetimeIndex(["2010-10-10"]))
-    with pytest.raises(ValueError):
-        ts_expr.interp_time("str")
-    with pytest.raises(ValueError):
-        ts_expr.interp_time([1, 2, 3])
+    def test_interp_time_exceptions(self, ts, time, exception_type, test_name):
+        """Test the exceptions of the 'set_parameter' method."""
+        with pytest.raises(exception_type):
+            ts.interp_time(time)
