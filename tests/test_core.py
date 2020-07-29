@@ -47,7 +47,8 @@ class TestMathematicalExpression:
     @staticmethod
     def _check_params_and_vars(expression, exp_params, exp_vars):
         """Check parameters and variables of an MathematicalExpression."""
-        assert exp_params == expression.parameters
+        assert expression.num_parameters == len(exp_params)
+        assert expression.parameters == exp_params
 
         assert expression.num_variables == len(exp_vars)
         for variable in exp_vars:
@@ -298,6 +299,7 @@ class TestTimeSeries:
             (me_too_many_vars, None, None, Exception, "# too many free variables"),
             (me_param_units, None, None, Exception, "# incompatible parameter units"),
             (me_time_vec, None, None, Exception, "# not compatible with time vectors"),
+            ("a string", None, None, TypeError, "# wrong data type"),
         ],
         ids=get_test_name,
     )
