@@ -985,8 +985,6 @@ class CoordinateSystemManager:
 
         if len(graph_0.nodes) != len(graph_1.nodes):
             return False
-        if len(graph_0.edges) != len(graph_1.edges):
-            return False
 
         # check nodes
         for node in graph_0.nodes:
