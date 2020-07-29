@@ -202,11 +202,11 @@ class MathematicalExpression:
             List of all expression variables
 
         """
-        variable_names = []
-        for var in self._expression.free_symbols:
-            if var.__str__() not in self._parameters:
-                variable_names.append(var.__str__())
-        return variable_names
+        return [
+            str(var)
+            for var in self._expression.free_symbols
+            if not str(var) in self._parameters
+        ]
 
     def evaluate(self, **kwargs) -> Any:
         """Evaluate the expression for specific variable values.
