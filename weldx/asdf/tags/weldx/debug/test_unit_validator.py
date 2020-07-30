@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List  # noqa: F401
 
 import pint
 

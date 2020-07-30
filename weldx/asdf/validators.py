@@ -551,7 +551,7 @@ def wx_property_tag_validator(
     asdf.ValidationError
 
     """
-    for key, value in instance.items():
+    for _, value in instance.items():
         yield from validate_tag(
             validator, tagname=wx_property_tag, instance=value, schema=None
         )
