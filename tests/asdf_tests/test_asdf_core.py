@@ -20,7 +20,7 @@ _base_rotation = Rotation.from_euler(
 
 
 @pytest.mark.parametrize(
-    "input",
+    "inputs",
     [
         _base_rotation,
         WXRotation.from_quat(_base_rotation.as_quat()),
@@ -36,12 +36,12 @@ _base_rotation = Rotation.from_euler(
         ),
     ],
 )
-def test_wx_rotation(input):
-    data = _write_read_buffer({"rot": input})
-    assert np.allclose(data["rot"].as_quat(), input.as_quat())
+def test_rotation(inputs):
+    data = _write_read_buffer({"rot": inputs})
+    assert np.allclose(data["rot"].as_quat(), inputs.as_quat())
 
 
-def test_wx_rotation_euler_exception():
+def test_rotation_euler_exception():
     with pytest.raises(ValueError):
         WXRotation.from_euler(seq="XyZ", angles=[10, 20, 60], degrees=True)
 
