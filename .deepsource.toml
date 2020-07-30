@@ -7,7 +7,6 @@ test_patterns = [
 
 exclude_patterns = [
   "docs/**",
-  ".vulture_whitelist.py",
   "versioneer.py",
   "weldx/_version.py",
   "weldx/asdf/**",

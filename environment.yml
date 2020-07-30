@@ -27,7 +27,6 @@ dependencies:
   - pydocstyle=5
   - pytest
   - pytest-cov
-  - vulture
   # Plotting
   #- graphviz
   - ipykernel
