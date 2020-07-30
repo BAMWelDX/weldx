@@ -3,10 +3,10 @@ environment:
     - PYTHON_VERSION: 3.7
       MINICONDA: "C:\\Miniconda37"
 
-
+platform:
+  - x64
 
 install:
-  #- "set path=%path%;%MINICONDA%;%MINICONDA%\\Scripts;"
   - set PATH=C:\Miniconda3;C:\Miniconda3\Scripts;%PATH%
   - cmd: conda config --set always_yes yes --set changeps1 no
   - cmd: conda update -q conda
