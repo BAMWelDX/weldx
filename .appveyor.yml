@@ -8,7 +8,7 @@ image: Visual Studio 2019
 platform: x64
 
 install:
-  - set PATH=C:\Miniconda3;C:\Miniconda3\Scripts;%PATH%
+  - set PATH=C:\Miniconda38-x64;C:\Miniconda38-x64;%PATH%
   - cmd: conda config --set always_yes yes --set changeps1 no
   - cmd: conda update -q conda
   - cmd: conda info -a
