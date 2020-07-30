@@ -26,32 +26,32 @@ So what we need is a set of rules for the syntax of those shapes. The document w
 ### Syntax
 
 Each shape item follows these rules:
-* an ``Integer`` indicates a fix dimension for the same item
+*   an ``Integer`` indicates a fix dimension for the same item
 
-* a ``~``, `:` or `None` indicates a single dimension of arbitrary length.
+*   a ``~``, `:` or `None` indicates a single dimension of arbitrary length.
 
-* a ``...`` indicates an arbitrary number of dimensions of arbitrary length, which can be optional.
+*   a ``...`` indicates an arbitrary number of dimensions of arbitrary length, which can be optional.
 
-* a ``n`` indicates a single dimension fixed to an alphanumeric. So a string out of letters and numbers is allowed.
+*   a ``n`` indicates a single dimension fixed to an alphanumeric. So a string out of letters and numbers is allowed.
 
-* parenthesis ``(_)`` indicate that the dimension is optional. This can be combined with the other rules.
+*   parenthesis ``(_)`` indicate that the dimension is optional. This can be combined with the other rules.
 
-* the symbols ``~`` or `:` furthermore add the option to implement an interval. This string `4~` would be an open
+*   the symbols ``~`` or `:` furthermore add the option to implement an interval. This string `4~` would be an open
 interval that accepts all dimensions that are greater or equal to 4.
 
 ### Exceptions
 
 This is an additional rule set which describes (un-)intuitive rules:
 
-* No negative Dimensions are allowed.
+*   No negative Dimensions are allowed.
 
-* Parenthesis and `...` cannot be combined to `(...)`.
+*   Parenthesis and `...` cannot be combined to `(...)`.
 
-* The addition with the interval can only be ascending. Wrong would be `5~2`
+*   The addition with the interval can only be ascending. Wrong would be `5~2`
 
-* Parenthesis and `...` can either be at the beginning or the end of the shape syntax.
+*   Parenthesis and `...` can either be at the beginning or the end of the shape syntax.
 
-* It is possible to have multiple optional dimensions. They must stand all be at the beginning or the end.
+*   It is possible to have multiple optional dimensions. They must stand all be at the beginning or the end.
 So ``[(1), 2, (3)]`` is not allowed.
 
 ### Examples
@@ -145,15 +145,14 @@ wx_shape:
   array_prop2: [n]
 ```
 Note the following:
-* `wx_shape` is now defined on the same level as the `properties` keyword.
-
-* `wx_shape` is no longer a shape-like list but itself a nested object with shape-like lists as leaves.
+*   `wx_shape` is now defined on the same level as the `properties` keyword.
+*   `wx_shape` is no longer a shape-like list but itself a nested object with shape-like lists as leaves.
 
 ### custom types validation
 The following custom types can be validate with `wx_shape` even though the might not always define a shape property in itself.
-* `number` will validate like `shape: [1]`
+*   `number` will validate like `shape: [1]`
 
-* `tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0` will validate against the length of the `TimedeltaIndex` even if no data is stored.
+*   `tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0` will validate against the length of the `TimedeltaIndex` even if no data is stored.
 
 ### complex nested example
 Here is a more complex example demonstration some of the above points.
