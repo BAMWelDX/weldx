@@ -151,7 +151,6 @@ Note the following:
 ### custom types validation
 The following custom types can be validate with `wx_shape` even though the might not always define a shape property in itself.
 *   `number` will validate like `shape: [1]`
-
 *   `tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0` will validate against the length of the `TimedeltaIndex` even if no data is stored.
 
 ### complex nested example
