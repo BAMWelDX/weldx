@@ -41,7 +41,7 @@ def _walk_validator(
     asdf.ValidationError
 
     """
-    if position is None:
+    if position is None:  # pragma: no cover
         position = []
     if isinstance(validator_dict, dict):
         for key, item in validator_dict.items():
@@ -56,9 +56,9 @@ def _walk_validator(
             else:
                 if key in instance:
                     yield from validator_function(instance[key], item, position + [key])
-                elif allow_missing_keys:
+                elif allow_missing_keys:  # pragma: no cover
                     pass
-                else:
+                else:  # pragma: no cover
                     pass
                     # TODO: if a property is not required the key might be missing
                     # yield ValidationError(f"Missing key {key}")
@@ -331,8 +331,8 @@ def _compare_lists(_list, list_expected):
         if "(" in str(exp):
             if i < len(_list):
                 exp = re.search(r"\((.*)\)", exp).group(1)
-            else:
-                continue
+            else:  # pragma: no cover
+                continue  # TODO: actually covered, but not registered by codecov - bug?
 
         # all alphanumeric strings are OK - only numeric strings are not
         # eg: "n", "n1", "n1234", "myasdfstring1337"

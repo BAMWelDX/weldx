@@ -25,8 +25,8 @@
   - `measurement/signal-1.0.0`
   - `measurement/source-1.0.0`
 - add example notebook for measurement chains in tutorials [[#70]](https://github.com/BAMWelDX/weldx/pull/70)
-- add and test support for `sympy` expressions with 'weldx.core.MathematicalExpression' and ASDF serialization in '`core/mathematical_expression-1.0.0` [#70](https://github.com/BAMWelDX/weldx/pull/70), [#76](https://github.com/BAMWelDX/weldx/pull/76)
-- add and test class to describe time series - 'weldx.core.TimeSeries' [[#76]](https://github.com/BAMWelDX/weldx/pull/76)
+- add support for `sympy` expressions with `weldx.core.MathematicalExpression` and ASDF serialization in `core/mathematical_expression-1.0.0` [#70](https://github.com/BAMWelDX/weldx/pull/70), [#76](https://github.com/BAMWelDX/weldx/pull/76)
+- add class to describe time series - `weldx.core.TimeSeries` [[#76]](https://github.com/BAMWelDX/weldx/pull/76)
 - add `wx_property_tag` validator [[#72]](https://github.com/BAMWelDX/weldx/pull/72)
  
     the `wx_property_tag` validator restricts **all** properties of an object to a single tag.
