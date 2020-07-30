@@ -135,13 +135,13 @@ wx_shape:
   array_prop2: [n]
 ```
 Note the following:
-- `wx_shape` is now defined on the same level as the `properties` keyword.
-- `wx_shape` is no longer a shape-like list but itself a nested object with shape-like lists as leaves.
+  * `wx_shape` is now defined on the same level as the `properties` keyword.
+  * `wx_shape` is no longer a shape-like list but itself a nested object with shape-like lists as leaves.
 
 ### custom types validation
 The following custom types can be validate with `wx_shape` even though the might not always define a shape property in itself.
-- `number` will validate like `shape: [1]`
-- `tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0` will validate against the length of the `TimedeltaIndex` even if no data is stored.
+  * `number` will validate like `shape: [1]`
+  * `tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0` will validate against the length of the `TimedeltaIndex` even if no data is stored.
 
 ### complex nested example
 Here is a more complex example demonstration some of the above points.
