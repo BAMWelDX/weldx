@@ -35,6 +35,7 @@ excluded_words:
   - noqa
   - addopts
   # asdf ----------------------------------------
+  - tagname
   - yamlutil
   # numpy ---------------------------------------
   - arange
