@@ -167,7 +167,7 @@ def _prepare_list(_list, list_expected):
     """Prepare a List and an expected List for validation.
 
     The preparation of the lists consists in accepting all lists that contain
-    whitespaces and rewriting all lists that contain the symbols ":" as well as "~" to
+    white spaces and rewriting all lists that contain the symbols ":" as well as "~" to
     a ":". In addition, lists that begin with "..." or parentheses are reversed for
     validation to work.
 

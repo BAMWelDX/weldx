@@ -9,7 +9,7 @@ from scipy.spatial.transform import Rotation
 import weldx.transformations as tf
 from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.core import MathematicalExpression as ME
+from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
 from weldx.transformations import WXRotation
 
