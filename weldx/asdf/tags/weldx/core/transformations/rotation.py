@@ -54,7 +54,7 @@ class WXRotationTypeASDF(WeldxType):
                     seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
                 elif all([c in "XYZ" for c in seq_str]):
                     seq_str = seq_str + "".join([c for c in "XYZ" if c not in seq_str])
-                else:
+                else:  # pragma: no cover
                     raise ValueError("Mix of intrinsic and extrinsic euler angles.")
 
             angles = node.as_euler(seq_str, degrees=node.wx_meta["degrees"])
@@ -68,7 +68,7 @@ class WXRotationTypeASDF(WeldxType):
             tree["sequence"] = node.wx_meta["seq"]
             tree["angles"] = angles
 
-        else:
+        else:  # pragma: no cover
             raise NotImplementedError("unknown or missing constructor")
 
         return tree

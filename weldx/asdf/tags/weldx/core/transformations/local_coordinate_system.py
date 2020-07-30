@@ -59,10 +59,7 @@ class LocalCoordinateSystemASDF(WeldxType):
             else:
                 ctx.set_array_storage(coordinates.data, "inline")
         if "time" not in node.orientation.coords:
-            if isinstance(orientations.data, pint.Quantity):
-                ctx.set_array_storage(orientations.data.magnitude, "inline")
-            else:
-                ctx.set_array_storage(orientations.data, "inline")
+            ctx.set_array_storage(orientations.data, "inline")
 
         return tree
 

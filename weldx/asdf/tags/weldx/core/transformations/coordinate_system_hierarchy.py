@@ -175,6 +175,6 @@ class LocalCoordinateSystemASDF(WeldxType):
                             cs_data.reference_system,
                             cs_data.transformation,
                         )
-                    else:
-                        all_systems_included = False
+                    else:  # pragma: no cover
+                        all_systems_included = False  # TODO: test as soon as possible
         return csm
