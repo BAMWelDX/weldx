@@ -3,8 +3,9 @@ environment:
     - PYTHON_VERSION: 3.7
       MINICONDA: "C:\\Miniconda37"
 
-platform:
-  - x64
+image: Visual Studio 2019
+
+platform: x64
 
 install:
   - set PATH=C:\Miniconda3;C:\Miniconda3\Scripts;%PATH%
