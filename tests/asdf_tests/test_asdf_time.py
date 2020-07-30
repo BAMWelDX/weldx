@@ -8,7 +8,7 @@ from weldx.asdf.utils import _write_buffer, _write_read_buffer
 
 
 @pytest.mark.parametrize(
-    "input",
+    "inputs",
     [
         pd.Timedelta("5m3ns"),
         pd.Timedelta("106751 days 23:47:16.854775"),
@@ -22,9 +22,9 @@ from weldx.asdf.utils import _write_buffer, _write_read_buffer
         pd.DatetimeIndex(["2020-01-01", "2020-01-02", "2020-01-04", "2020-01-05"]),
     ],
 )
-def test_time_classes(input):
-    data = _write_read_buffer({"root": input})
-    assert np.all(data["root"] == input)
+def test_time_classes(inputs):
+    data = _write_read_buffer({"root": inputs})
+    assert np.all(data["root"] == inputs)
 
 
 def test_time_classes_max_inline():

@@ -39,7 +39,9 @@ class MathematicalExpression:
         self._parameters = {}
         if parameters is not None:
             if not isinstance(parameters, dict):
-                raise ValueError('"parameters" must be dictionary')
+                raise ValueError(
+                    f'"parameters" must be dictionary, got {type(parameters)}'
+                )
             variable_names = self.get_variable_names()
             for key in parameters:
                 if key not in variable_names:
@@ -135,6 +137,13 @@ class MathematicalExpression:
             Parameter value. This can be number, array or pint.Quantity
 
         """
+        if not isinstance(name, str):
+            raise TypeError(f'Parameter "name" must be a string, got {type(name)}')
+        if name not in str(self._expression.free_symbols):
+            raise ValueError(
+                f'The expression "{self._expression}" does not have a '
+                f'parameter with name "{name}".'
+            )
         self._parameters[name] = value
 
     @property
@@ -193,11 +202,11 @@ class MathematicalExpression:
             List of all expression variables
 
         """
-        variable_names = []
-        for var in self._expression.free_symbols:
-            if var.__str__() not in self._parameters:
-                variable_names.append(var.__str__())
-        return variable_names
+        return [
+            str(var)
+            for var in self._expression.free_symbols
+            if str(var) not in self._parameters
+        ]
 
     def evaluate(self, **kwargs) -> Any:
         """Evaluate the expression for specific variable values.

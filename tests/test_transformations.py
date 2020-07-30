@@ -379,7 +379,9 @@ def test_reflection_sign():
         tf.reflection_sign([[2, 2], [1, 1]])
 
 
-# test cartesian coordinate system class --------------------------------------
+# --------------------------------------------------------------------------------------
+# LocalCoordinateSystem
+# --------------------------------------------------------------------------------------
 
 
 def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
@@ -1195,6 +1197,57 @@ def test_coordinate_system_time_interpolation():
     # no time component
     with pytest.raises(TypeError):
         lcs.interp_time(tf.LocalCoordinateSystem())
+
+
+# --------------------------------------------------------------------------------------
+# Test CoordinateSystemManager
+# --------------------------------------------------------------------------------------
+
+# todo: Refactor old tests
+
+
+class TestCoordinateSystemManager:
+    """Test the CoordinateSystemManager class."""
+
+    CSM = tf.CoordinateSystemManager
+    LCS = tf.LocalCoordinateSystem
+
+    # test_comparison ------------------------------------------------------------------
+
+    csm_0 = CSM("root")
+    csm_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_0.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    # different LCS
+    csm_1 = CSM("root")
+    csm_1.add_cs("lcs_0", "root", LCS(coordinates=[1, 1, 2]))
+    csm_1.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    # different nodes
+    csm_2 = CSM("root")
+    csm_2.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_2.add_cs("lcs_2", "root", LCS(coordinates=[0, -1, -2]))
+    # different edges
+    csm_3 = CSM("root")
+    csm_3.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_3.add_cs("lcs_1", "lcs_0", LCS(coordinates=[0, -1, -2]))
+
+    @pytest.mark.parametrize(
+        "csm, other, result_exp",
+        [
+            (CSM("root"), CSM("root"), True),
+            (CSM("root"), CSM("boot"), False),
+            (CSM("root"), "a string", False),
+            (csm_0, deepcopy(csm_0), True),
+            (csm_0, CSM("root"), False),
+            (csm_0, csm_1, False),
+            (csm_0, csm_2, False),
+            (csm_0, csm_3, False),
+        ],
+    )
+    def test_comparison(self, csm, other, result_exp):
+        """Test the comparison of 2 'CoordinateSystemManager' instances."""
+        assert isinstance(csm, self.CSM), "csm must be a CoordinateSystemManager"
+        assert (csm == other) is result_exp
+        assert (csm != other) is not result_exp
 
 
 def test_coordinate_system_manager_init():

@@ -985,8 +985,6 @@ class CoordinateSystemManager:
 
         if len(graph_0.nodes) != len(graph_1.nodes):
             return False
-        if len(graph_0.edges) != len(graph_1.edges):
-            return False
 
         # check nodes
         for node in graph_0.nodes:
@@ -1002,7 +1000,7 @@ class CoordinateSystemManager:
         for edge in graph_0.edges:
             lcs_0 = self.get_local_coordinate_system(edge[0], edge[1])
             lcs_1 = other.get_local_coordinate_system(edge[0], edge[1])
-            if not (lcs_0 == lcs_1):
+            if lcs_0 != lcs_1:
                 return False
 
         return True
