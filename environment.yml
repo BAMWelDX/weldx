@@ -8,10 +8,11 @@ dependencies:
   - numpy>=1.18
   - pandas>=1.0
   - scipy>=1.4
+  - sympy>=1.6
   - xarray>=0.15
   - pint>=0.11
   - bottleneck
-  - asdf=2.6
+  - asdf>=2.7
   - sphinx
   - recommonmark
   - openpyxl
@@ -22,10 +23,10 @@ dependencies:
   - black
   - codecov
   - flake8=3.7
+  - isort>=5.1
   - pydocstyle=5
   - pytest
   - pytest-cov
-  - vulture
   # Plotting
   #- graphviz
   - ipykernel

@@ -9,12 +9,57 @@ from typing import Hashable, List, Union
 import networkx as nx
 import numpy as np
 import pandas as pd
+import pint
 import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 
 # functions -------------------------------------------------------------------
+
+
+class WXRotation(Rot):
+    """Wrapper for creating meta-tagged Scipy.Rotation objects."""
+
+    @classmethod
+    def from_quat(cls, quat: np.ndarray, normalized=None) -> "WXRotation":
+        """Initialize from quaternions.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_quat(quat, normalized)
+        rot.wx_meta = {"constructor": "from_quat"}
+        return rot
+
+    @classmethod
+    def from_matrix(cls, matrix: np.ndarray) -> "WXRotation":
+        """Initialize from matrix.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_matrix(matrix)
+        rot.wx_meta = {"constructor": "from_matrix"}
+        return rot
+
+    @classmethod
+    def from_rotvec(cls, rotvec: np.ndarray) -> "WXRotation":
+        """Initialize from rotation vector.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_rotvec(rotvec)
+        rot.wx_meta = {"constructor": "from_rotvec"}
+        return rot
+
+    @classmethod
+    def from_euler(cls, seq: str, angles, degrees: bool = False) -> "WXRotation":
+        """Initialize from euler angles.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
+        rot.wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
+        return rot
 
 
 def rotation_matrix_x(angle):
@@ -373,7 +418,7 @@ class LocalCoordinateSystem:
                 pass
 
             if not isinstance(coordinates, xr.DataArray):
-                if not isinstance(coordinates, np.ndarray):
+                if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                     coordinates = np.array(coordinates)
                 time_coordinates = None
                 if coordinates.ndim == 2:
@@ -496,6 +541,12 @@ class LocalCoordinateSystem:
         """
         rhs_cs_inv = rhs_cs.invert()
         return self + rhs_cs_inv
+
+    def __eq__(self: "LocalCoordinateSystem", other: "LocalCoordinateSystem") -> bool:
+        """Check equality of LocalCoordinateSystems."""
+        return self.orientation.identical(
+            other.orientation
+        ) and self.coordinates.identical(other.coordinates)
 
     @classmethod
     def from_euler(
@@ -923,6 +974,36 @@ class CoordinateSystemManager:
         return (
             f"CoordinateSystemManager('graph': {self._graph!r}, 'data': {self._data!r})"
         )
+
+    def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
+        """Test equality of CSM instances."""
+        if not isinstance(other, self.__class__):
+            return False
+
+        graph_0 = self.graph
+        graph_1 = other.graph
+
+        if len(graph_0.nodes) != len(graph_1.nodes):
+            return False
+
+        # check nodes
+        for node in graph_0.nodes:
+            if node not in graph_1.nodes:
+                return False
+
+        # check edges
+        for edge in graph_0.edges:
+            if edge not in graph_1.edges:
+                return False
+
+        # check coordinate systems
+        for edge in graph_0.edges:
+            lcs_0 = self.get_local_coordinate_system(edge[0], edge[1])
+            lcs_1 = other.get_local_coordinate_system(edge[0], edge[1])
+            if lcs_0 != lcs_1:
+                return False
+
+        return True
 
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)

@@ -4,8 +4,9 @@
 
 from os import path
 
-import versioneer
 from setuptools import find_packages, setup
+
+import versioneer
 
 # add README.md as long description
 this_directory = path.abspath(path.dirname(__file__))
@@ -17,8 +18,9 @@ requirements = [
     "pandas>=1.0",
     "xarray>=0.15",
     "scipy>=1.4",
+    "sympy>=1.6",
     "pint>=0.11",
-    "asdf>=2.6",
+    "asdf>=2.7",
     "bottleneck>=1.3",
     "Jinja2>=2.11",
     "networkx>=2",

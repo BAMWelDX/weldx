@@ -1,0 +1,24 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/measurement/data-1.0.0"
+tag: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
+
+title: |
+  Data container for measurement recordings.
+description: |
+  Data is stored using data_array format.
+  TODO: rework schema, add time axes requirement
+type: object
+properties:
+  name:
+    type: string
+  data:
+    $ref: "tag:weldx.bam.de:weldx/core/data_array-1.0.0"
+
+propertyOrder: [name, data]
+required: [data]
+
+flowStyle: block
+additionalProperties: false
+...

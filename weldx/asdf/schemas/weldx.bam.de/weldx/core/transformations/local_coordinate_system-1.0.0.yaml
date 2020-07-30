@@ -1,0 +1,37 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/local_coordinate_system-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
+
+title: |
+  Schema that describes a local coordinate system
+description: |
+  A local coordinate system is described by time-dependent coordinates and orientations towards a reference system.
+type: object
+
+properties:
+  time:
+    description: |
+      A list of timestamps
+    tag: tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0
+  coordinates:
+    description: |
+      An ndarray containing the coordinates.
+    tag: tag:weldx.bam.de:weldx/core/variable-1.0.0
+  orientations:
+    description: |
+      An ndarray containing the orientations.
+    tag: tag:weldx.bam.de:weldx/core/variable-1.0.0
+
+wx_shape:
+  coordinates:
+    data: [(t), 3]
+  orientations:
+    data: [(t), 3, 3]
+
+required: [orientations, coordinates]
+propertyOrder: [time, orientations, coordinates]
+flowStyle: block
+additionalProperties: false
+...

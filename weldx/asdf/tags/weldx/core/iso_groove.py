@@ -1,4 +1,4 @@
-"""<DOCSTRING>"""
+"""Welding groove type definitions"""
 
 from dataclasses import dataclass, field
 from typing import List
@@ -9,6 +9,7 @@ import pint
 import weldx.geometry as geo
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
+from weldx.asdf.validators import wx_unit_validator
 from weldx.constants import WELDX_QUANTITY as Q_
 
 _DEFAULT_LEN_UNIT = "mm"
@@ -1701,6 +1702,7 @@ class GrooveType(WeldxType):
     ]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
+    validators = {"wx_unit": wx_unit_validator}
 
     @classmethod
     def to_tree(cls, node, ctx):

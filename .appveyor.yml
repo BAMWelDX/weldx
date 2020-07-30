@@ -3,13 +3,16 @@ environment:
     - PYTHON_VERSION: 3.7
       MINICONDA: "C:\\Miniconda37"
 
+image: Visual Studio 2019
 
+platform: x64
 
 install:
-  - "set path=%path%;%MINICONDA%;%MINICONDA%\\Scripts;"
-  - conda config --set always_yes yes --set changeps1 no
-  - conda info -a
-  - conda env create -f ./environment.yml
+  - set PATH=C:\Miniconda38-x64;C:\Miniconda38-x64\Scripts;%PATH%
+  - cmd: conda config --set always_yes yes --set changeps1 no
+  - cmd: conda update -q conda
+  - cmd: conda info -a
+  - cmd: conda env create -f ./environment.yml
   - activate weldx
 
 build: false

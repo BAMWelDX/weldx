@@ -63,21 +63,4 @@ jobs:
         run: |
           isort ./weldx/*.py -c
 
-  vulture:
-    name: vulture
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-18.04]
-        py: [ '3.7', '3.8' ]
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.py }}
-      - name: pip installs
-        run: pip install vulture==1.4
-      - name: run vulture
-        run: |
-          vulture . --exclude weldx/asdf/,versioneer.py,weldx/_version.py,tests/conftest.py
+

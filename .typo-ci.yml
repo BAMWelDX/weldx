@@ -20,6 +20,7 @@ excluded_words:
   - pandas
   - xarray
   - scipy
+  - sympy
   - pytest
   - pydocstyle
   - matplotlib
@@ -34,6 +35,7 @@ excluded_words:
   - noqa
   - addopts
   # asdf ----------------------------------------
+  - tagname
   - yamlutil
   # numpy ---------------------------------------
   - arange
@@ -43,6 +45,7 @@ excluded_words:
   - dtype
   - hstack
   - isclose
+  - issubdtype
   - linalg
   - matmul
   - ndarray
@@ -69,6 +72,7 @@ excluded_words:
   # pytest --------------------------------------
   - conftest
   - addoption
+  - xfail
   # jupyter notebooks ---------------------------
   - jupyter
   - nbformat
@@ -78,6 +82,11 @@ excluded_words:
   - ipython
   # scipy ---------------------------------------
   - Slerp
+  - rotvec
+  - quat
+  # sympy ---------------------------------------
+  - lambdify
+  - sympify
   # welding -------------------------------------
   - weldment
   # conda ---------------------------------------
@@ -99,3 +108,6 @@ excluded_words:
   - Fabry
   - xyz
   - bamwelding
+  - netcdf
+  - msm
+  - Beckhoff
