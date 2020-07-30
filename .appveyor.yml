@@ -6,10 +6,12 @@ environment:
 
 
 install:
-  - "set path=%path%;%MINICONDA%;%MINICONDA%\\Scripts;"
-  - conda config --set always_yes yes --set changeps1 no
-  - conda info -a
-  - conda env create -f ./environment.yml
+  #- "set path=%path%;%MINICONDA%;%MINICONDA%\\Scripts;"
+  - set PATH=C:\Miniconda3;C:\Miniconda3\Scripts;%PATH%
+  - cmd: conda config --set always_yes yes --set changeps1 no
+  - cmd: conda update -q conda
+  - cmd: conda info -a
+  - cmd: conda env create -f ./environment.yml
   - activate weldx
 
 build: false
