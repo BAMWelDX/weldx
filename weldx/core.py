@@ -205,7 +205,7 @@ class MathematicalExpression:
         return [
             str(var)
             for var in self._expression.free_symbols
-            if not str(var) in self._parameters
+            if str(var) not in self._parameters
         ]
 
     def evaluate(self, **kwargs) -> Any:

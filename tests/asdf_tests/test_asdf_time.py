@@ -22,12 +22,12 @@ from weldx.asdf.utils import _write_buffer, _write_read_buffer
         pd.DatetimeIndex(["2020-01-01", "2020-01-02", "2020-01-04", "2020-01-05"]),
     ],
 )
-def test_time_classes(input):
+def test_pandas_time_classes(input):
     data = _write_read_buffer({"root": input})
     assert np.all(data["root"] == input)
 
 
-def test_time_classes_max_inline():
+def test_pandas_time_classes_max_inline():
     with pytest.raises(ValidationError):
         # cannot store large ints >52 bits inline in asdf
         dti = pd.DatetimeIndex(["2020-01-01", "2020-01-02", "2020-01-04", "2020-01-05"])
