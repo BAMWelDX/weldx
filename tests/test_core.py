@@ -35,8 +35,9 @@ class TestMathematicalExpression:
     expr_def = "(a + b)**2 + c - d"
     params_def = {"a": 2, "c": 3.5}
 
+    @staticmethod
     @pytest.fixture()
-    def ma_def(self) -> MathematicalExpression:
+    def ma_def() -> MathematicalExpression:
         """Get a default instance for tests."""
         return MathematicalExpression(
             TestMathematicalExpression.expr_def, TestMathematicalExpression.params_def,
@@ -72,6 +73,7 @@ class TestMathematicalExpression:
 
     # test_construction_exceptions -----------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "expression, parameters, exception_type, name",
         [
@@ -81,9 +83,7 @@ class TestMathematicalExpression:
         ],
         ids=get_test_name,
     )
-    def test_construction_exceptions(
-        self, expression, parameters, exception_type, name
-    ):
+    def test_construction_exceptions(expression, parameters, exception_type, name):
         """Test the exceptions of the '__init__' method."""
         with pytest.raises(exception_type):
             MathematicalExpression(expression=expression, parameters=parameters)
@@ -112,6 +112,7 @@ class TestMathematicalExpression:
 
     # test_set_parameter_exceptions ----------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "name, value, exception_type, test_name",
         [
@@ -121,9 +122,7 @@ class TestMathematicalExpression:
         ],
         ids=get_test_name,
     )
-    def test_set_parameter_exceptions(
-        self, ma_def, name, value, exception_type, test_name
-    ):
+    def test_set_parameter_exceptions(ma_def, name, value, exception_type, test_name):
         """Test the exceptions of the 'set_parameter' method."""
         with pytest.raises(exception_type):
             ma_def.set_parameter(name, value)
@@ -135,6 +134,7 @@ class TestMathematicalExpression:
     params_too_many = {"a": 2, "c": 3.5, "d": 4}
     params_wrong_value = {"a": 2, "c": 1.5}
 
+    @staticmethod
     @pytest.mark.parametrize(
         "other, equal, equal_no_params, mat_equal, mat_equal_no_params",
         [
@@ -152,7 +152,7 @@ class TestMathematicalExpression:
         ],
     )
     def test_comparison(
-        self, ma_def, other, equal, equal_no_params, mat_equal, mat_equal_no_params,
+        ma_def, other, equal, equal_no_params, mat_equal, mat_equal_no_params,
     ):
         """Test if another object is equal to the default instance."""
         assert (ma_def == other) is equal
@@ -164,6 +164,7 @@ class TestMathematicalExpression:
     # -----------------------------------------------------
 
     # TODO: Add tests for quantities
+    @staticmethod
     @pytest.mark.parametrize(
         "expression, parameters, variables, exp_result",
         [
@@ -172,7 +173,7 @@ class TestMathematicalExpression:
             ("a + b", {"a": np.array([1, 2])}, {"b": np.array([2, 4])}, [3, 6],),
         ],
     )
-    def test_evaluation(self, expression, parameters, variables, exp_result):
+    def test_evaluation(expression, parameters, variables, exp_result):
         """Test the evaluation of the mathematical function."""
         expr = MathematicalExpression(expression=expression, parameters=parameters)
 
@@ -180,6 +181,7 @@ class TestMathematicalExpression:
 
     # test_evaluate_exceptions ---------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "variables, exception_type, test_name",
         [
@@ -188,7 +190,7 @@ class TestMathematicalExpression:
         ],
         ids=get_test_name,
     )
-    def test_evaluate_exceptions(self, ma_def, variables, exception_type, test_name):
+    def test_evaluate_exceptions(ma_def, variables, exception_type, test_name):
         """Test the exceptions of the 'set_parameter' method."""
         with pytest.raises(exception_type):
             ma_def.evaluate(**variables)
@@ -225,6 +227,7 @@ class TestTimeSeries:
 
     # test_construction_discrete -------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "data, time, interpolation, shape_exp",
         [
@@ -233,7 +236,7 @@ class TestTimeSeries:
             (Q_([3, 7, 1], ""), Q_([0, 1, 2], "s"), "step", (3,)),
         ],
     )
-    def test_construction_discrete(self, data, time, interpolation, shape_exp):
+    def test_construction_discrete(data, time, interpolation, shape_exp):
         """Test the construction of the TimeSeries class."""
         # set expected values
         if isinstance(time, pint.Quantity):
@@ -263,6 +266,7 @@ class TestTimeSeries:
     params_scalar = {"a": Q_(2, "1/s"), "b": Q_(-2, "")}
     params_vec = {"a": Q_([[2, 3, 4]], "m/s"), "b": Q_([[-2, 3, 1]], "m")}
 
+    @staticmethod
     @pytest.mark.parametrize(
         "data,  shape_exp, unit_exp",
         [
@@ -270,7 +274,7 @@ class TestTimeSeries:
             (ME("a*t + b", params_vec), (1, 3), "m"),
         ],
     )
-    def test_construction_expression(self, data, shape_exp, unit_exp):
+    def test_construction_expression(data, shape_exp, unit_exp):
         """Test the construction of the TimeSeries class."""
         ts = TimeSeries(data=data)
 
@@ -290,6 +294,7 @@ class TestTimeSeries:
     me_param_units = ME("a*t + b", {"a": Q_(2, "1/s"), "b": Q_(-2, "m")})
     me_time_vec = ME("a*t + b", {"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")})
 
+    @staticmethod
     @pytest.mark.parametrize(
         "data, time, interpolation, exception_type, test_name",
         [
@@ -304,7 +309,7 @@ class TestTimeSeries:
         ids=get_test_name,
     )
     def test_construction_exceptions(
-        self, data, time, interpolation, exception_type, test_name
+        data, time, interpolation, exception_type, test_name
     ):
         """Test the exceptions of the 'set_parameter' method."""
         with pytest.raises(exception_type):
@@ -320,6 +325,7 @@ class TestTimeSeries:
     params_wrong_unit = {"a": Q_(2, "g/s"), "b": Q_(-2, "g")}
     params_wrong_unit_prefix = {"a": Q_(2, "m/ms"), "b": Q_(-2, "m")}
 
+    @staticmethod
     @pytest.mark.parametrize(
         "ts, ts_other, result_exp",
         [
@@ -348,7 +354,7 @@ class TestTimeSeries:
             (ts_expr, TS(ME(me_expr_str, params_wrong_unit_prefix)), False),
         ],
     )
-    def test_comparison(self, ts, ts_other, result_exp):
+    def test_comparison(ts, ts_other, result_exp):
         """Test the TimeSeries comparison methods."""
         assert (ts == ts_other) is result_exp
         assert (ts != ts_other) is not result_exp
@@ -370,6 +376,7 @@ class TestTimeSeries:
         [12, 3, 7],
     ]
 
+    @staticmethod
     @pytest.mark.parametrize(
         "ts, time, magnitude_exp, unit_exp",
         [
@@ -394,7 +401,7 @@ class TestTimeSeries:
             (ts_expr_vec, time_mul, results_exp_vec, "m"),
         ],
     )
-    def test_interp_time(self, ts, time, magnitude_exp, unit_exp):
+    def test_interp_time(ts, time, magnitude_exp, unit_exp):
         """Test the interp_time function."""
         result = ts.interp_time(time)
 
@@ -408,6 +415,7 @@ class TestTimeSeries:
 
     # test_interp_time_exceptions ------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize("ts", [ts_constant, ts_disc_step, ts_disc_linear, ts_expr])
     @pytest.mark.parametrize(
         "time,  exception_type, test_name",
@@ -420,7 +428,7 @@ class TestTimeSeries:
         ],
         ids=get_test_name,
     )
-    def test_interp_time_exceptions(self, ts, time, exception_type, test_name):
+    def test_interp_time_exceptions(ts, time, exception_type, test_name):
         """Test the exceptions of the 'set_parameter' method."""
         with pytest.raises(exception_type):
             ts.interp_time(time)
