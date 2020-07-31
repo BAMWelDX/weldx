@@ -1,5 +1,11 @@
 # WelDX CHANGELOG.md
 
+## 0.2.1 (unreleased)
+### changes
+- `LocalCoordinateSytem` now accepts `pd.TimedeltaIndex` and `pint.Quantity` as `time` inputs when provided with a reference `pd.Timestamp` as `time_ref`
+- `LocalCoordinateSystem` now accepts `Rotation`-Objects as `orientation`
+- `weldx.utility.xr_interp_like` now accepts non-iterable scalar inputs for interpolation
+
 ## 0.2.0 (30.07.2020)
 ### ASDF
 - add `wx_unit` and `wx_shape` validators

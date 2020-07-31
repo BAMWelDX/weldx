@@ -1180,7 +1180,8 @@ class Profile:
         if ax is None:  # pragma: no cover
             _, ax = plt.subplots()
         ax.grid(grid)
-        ax.axis(axis)
+        if not (ax.name == "3d"):
+            ax.axis(axis)
         ax.set_title(title, loc="center", wrap=True)
         if label is not None:
             ax.set_xlabel(label[0])

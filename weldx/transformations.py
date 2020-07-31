@@ -15,6 +15,8 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 
+__all__ = ["LocalCoordinateSystem", "CoordinateSystemManager"]
+
 # functions -------------------------------------------------------------------
 
 
@@ -357,7 +359,8 @@ class LocalCoordinateSystem:
         self,
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
-        time: pd.DatetimeIndex = None,
+        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
+        time_ref: pd.Timestamp = None,
         construction_checks: bool = True,
     ):
         """Construct a cartesian coordinate system.
@@ -375,6 +378,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin
         time :
             Time data for time dependent coordinate systems
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
         construction_checks :
             If 'True', the validity of the data will be verified
 
@@ -394,6 +399,12 @@ class LocalCoordinateSystem:
             if coordinates is None:
                 coordinates = np.array([0, 0, 0])
 
+            if isinstance(time, pint.Quantity):
+                time = ut.to_pandas_time_index(time)
+
+            if time_ref is not None:
+                time = pd.TimedeltaIndex(time) + time_ref
+
             if time is not None:
                 try:
                     time = pd.DatetimeIndex(time)
@@ -404,6 +415,9 @@ class LocalCoordinateSystem:
                         "pd.Timestamp])"
                     )
                     raise err
+
+            if isinstance(orientation, Rot):
+                orientation = orientation.as_matrix()
 
             if not isinstance(orientation, xr.DataArray):
                 if not isinstance(orientation, np.ndarray):
@@ -644,14 +658,7 @@ class LocalCoordinateSystem:
             Local coordinate system
 
         """
-        vec_x = ut.to_float_array(vec_x)
-        vec_y = ut.to_float_array(vec_y)
-        vec_z = ut.to_float_array(vec_z)
-
-        orientation = np.concatenate((vec_x, vec_y, vec_z), axis=vec_x.ndim - 1)
-        orientation = np.reshape(orientation, (*vec_x.shape, 3))
-        orientation = orientation.swapaxes(orientation.ndim - 1, orientation.ndim - 2)
-
+        orientation = np.transpose([vec_x, vec_y, vec_z]).astype(float)
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
