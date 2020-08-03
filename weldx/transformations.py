@@ -360,8 +360,8 @@ class LocalCoordinateSystem:
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
-        time_ref: pd.Timestamp = None,
         construction_checks: bool = True,
+        time_ref: pd.Timestamp = None,
     ):
         """Construct a cartesian coordinate system.
 
@@ -378,10 +378,10 @@ class LocalCoordinateSystem:
             Coordinates of the origin
         time :
             Time data for time dependent coordinate systems
-        time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
         construction_checks :
             If 'True', the validity of the data will be verified
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -389,59 +389,16 @@ class LocalCoordinateSystem:
             Cartesian coordinate system
 
         """
-        if isinstance(orientation, Rot):
-            orientation = orientation.as_matrix()
+        if orientation is None:
+            orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        if coordinates is None:
+            coordinates = np.array([0, 0, 0])
+
+        time = self._build_time_index(time, time_ref)
+        orientation = self._build_orientation(orientation, time)
+        coordinates = self._build_coordinates(coordinates, time)
 
         if construction_checks:
-            if orientation is None:
-                orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-
-            if coordinates is None:
-                coordinates = np.array([0, 0, 0])
-
-            if isinstance(time, pint.Quantity):
-                time = ut.to_pandas_time_index(time)
-
-            if time_ref is not None:
-                time = pd.TimedeltaIndex(time) + time_ref
-
-            if time is not None:
-                try:
-                    time = pd.DatetimeIndex(time)
-                except Exception as err:
-                    print(
-                        "Unable to convert input argument to pd.DatetimeIndex. "
-                        + "If passing single values convert to list first (like ["
-                        "pd.Timestamp])"
-                    )
-                    raise err
-
-            if isinstance(orientation, Rot):
-                orientation = orientation.as_matrix()
-
-            if not isinstance(orientation, xr.DataArray):
-                if not isinstance(orientation, np.ndarray):
-                    orientation = np.array(orientation)
-                time_orientation = None
-                if orientation.ndim == 3:
-                    time_orientation = time
-
-                orientation = ut.xr_3d_matrix(orientation, time_orientation)
-            else:
-                # TODO: Test if xarray has correct format
-                pass
-
-            if not isinstance(coordinates, xr.DataArray):
-                if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
-                    coordinates = np.array(coordinates)
-                time_coordinates = None
-                if coordinates.ndim == 2:
-                    time_coordinates = time
-                coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
-            else:
-                # TODO: Test if xarray has correct format
-                pass
-
             orientation = xr.apply_ufunc(
                 normalize,
                 orientation,
@@ -449,20 +406,16 @@ class LocalCoordinateSystem:
                 output_core_dims=[["c"]],
             )
 
-            # unify time axis
-            if ("time" in orientation.coords) and ("time" in coordinates.coords):
-                if not np.all(orientation.time.data == coordinates.time.data):
-                    time_union = ut.get_time_union([orientation.time, coordinates.time])
-                    orientation = ut.xr_interp_orientation_in_time(
-                        orientation, time_union
-                    )
-                    coordinates = ut.xr_interp_coordinates_in_time(
-                        coordinates, time_union
-                    )
-
             # vectorize test if orthogonal
             if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
                 raise ValueError("Orientation vectors must be orthogonal")
+
+        # unify time axis
+        if ("time" in orientation.coords) and ("time" in coordinates.coords):
+            if not np.all(orientation.time.data == coordinates.time.data):
+                time_union = ut.get_time_union([orientation.time, coordinates.time])
+                orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
+                coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
 
         coordinates.name = "coordinates"
         orientation.name = "orientation"
@@ -562,6 +515,56 @@ class LocalCoordinateSystem:
             other.orientation
         ) and self.coordinates.identical(other.coordinates)
 
+    @staticmethod
+    def _build_orientation(orientation, time=None):
+        if isinstance(orientation, xr.DataArray):
+            return orientation
+            # TODO: Test if xarray has correct format
+
+        time_orientation = None
+        if isinstance(orientation, Rot):
+            orientation = orientation.as_matrix()
+        elif not isinstance(orientation, np.ndarray):
+            orientation = np.array(orientation)
+
+        if orientation.ndim == 3:
+            time_orientation = time
+        orientation = ut.xr_3d_matrix(orientation, time_orientation)
+        return orientation
+
+    @staticmethod
+    def _build_coordinates(coordinates, time=None):
+        if isinstance(coordinates, xr.DataArray):
+            return coordinates
+            # TODO: Test if xarray has correct format
+
+        time_coordinates = None
+        if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
+            coordinates = np.array(coordinates)
+        if coordinates.ndim == 2:
+            time_coordinates = time
+        coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
+        return coordinates
+
+    @staticmethod
+    def _build_time_index(time, time_ref):
+        if isinstance(time, pint.Quantity):
+            time = ut.to_pandas_time_index(time)
+
+        if time is not None:
+            if time_ref is not None:
+                time = pd.TimedeltaIndex(time) + time_ref
+            try:
+                time = pd.DatetimeIndex(time)
+            except Exception as err:
+                print(
+                    "Unable to convert input argument to pd.DatetimeIndex. "
+                    + "If passing single values convert to list first (like ["
+                    "pd.Timestamp])"
+                )
+                raise err
+        return time
+
     @classmethod
     def from_euler(
         cls, sequence, angles, degrees=False, coordinates=None, time=None
@@ -658,7 +661,13 @@ class LocalCoordinateSystem:
             Local coordinate system
 
         """
-        orientation = np.transpose([vec_x, vec_y, vec_z]).astype(float)
+        vec_x = ut.to_float_array(vec_x)
+        vec_y = ut.to_float_array(vec_y)
+        vec_z = ut.to_float_array(vec_z)
+
+        orientation = np.concatenate((vec_x, vec_y, vec_z), axis=vec_x.ndim - 1)
+        orientation = np.reshape(orientation, (*vec_x.shape, 3))
+        orientation = orientation.swapaxes(orientation.ndim - 1, orientation.ndim - 2)
         return cls(orientation, coordinates=coordinates, time=time)
 
     @classmethod
