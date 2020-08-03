@@ -542,7 +542,7 @@ def _compare_tag_version(instance_tag: str, tagname: str):
 
     Returns
     -------
-
+        bool
     """
     if instance_tag is None:
         return True
@@ -571,9 +571,9 @@ def _compare_tag_version(instance_tag: str, tagname: str):
 
 
 def wx_tag_validator(validator, tagname, instance, schema):
-    """
+    """Validate instance tag string with flexible version syntax.
 
-    The following syntax is allowed:
+    The following syntax is allowed to validate against:
 
     wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
     wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version

@@ -29,7 +29,7 @@ from weldx.asdf.validators import _compare_tag_version, _custom_shape_validator
     ],
 )
 def test_wx_tag_syntax(instance_tag, tagname, result):
-    """Test custom ASDF shape validators."""
+    """Test ASDF tag version syntax resolving."""
     assert _compare_tag_version(instance_tag, tagname) == result
 
 
