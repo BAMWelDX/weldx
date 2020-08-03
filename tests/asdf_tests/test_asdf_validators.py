@@ -9,7 +9,28 @@ from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass
 from weldx.asdf.utils import _write_read_buffer
-from weldx.asdf.validators import _custom_shape_validator
+from weldx.asdf.validators import _compare_tag_version, _custom_shape_validator
+
+
+@pytest.mark.parametrize(
+    "instance_tag,tagname,result",
+    [
+        ("tag:debug.com/object-1.2.3", "tag:debug.com/object-*", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-*", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-1.2.3", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-1.2", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-1", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-2", False),
+        ("http://debug.com/object-2.0.0", "http://debug.com/object-1", False),
+        ("http://debug.com/object-2.0.0", "http://debug.com/object-2.1", False),
+        ("http://debug.com/object-2.0.0", "http://debug.com/other-2.0.0", False),
+        ("http://debug.com/object-2.0.0", "http://other.com/object-2.0.0", False),
+        ("http://debug.com/object-1.2.3", "http://other.com/object-1.2.3", False),
+    ],
+)
+def test_wx_tag_syntax(instance_tag, tagname, result):
+    """Test custom ASDF shape validators."""
+    assert _compare_tag_version(instance_tag, tagname) == result
 
 
 @pytest.mark.parametrize(
