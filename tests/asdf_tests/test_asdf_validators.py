@@ -5,6 +5,7 @@ import pytest
 from asdf import ValidationError
 
 from weldx import Q_
+from weldx.asdf.extension import WxSyntaxError
 from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass
@@ -15,6 +16,7 @@ from weldx.asdf.validators import _compare_tag_version, _custom_shape_validator
 @pytest.mark.parametrize(
     "instance_tag,tagname,result",
     [
+        (None, "tag:debug.com/object-*", True),
         ("tag:debug.com/object-1.2.3", "tag:debug.com/object-*", True),
         ("http://debug.com/object-1.2.3", "http://debug.com/object-*", True),
         ("http://debug.com/object-1.2.3", "http://debug.com/object-1.2.3", True),
@@ -31,6 +33,20 @@ from weldx.asdf.validators import _compare_tag_version, _custom_shape_validator
 def test_wx_tag_syntax(instance_tag, tagname, result):
     """Test ASDF tag version syntax resolving."""
     assert _compare_tag_version(instance_tag, tagname) == result
+
+
+@pytest.mark.parametrize(
+    "instance_tag,tagname,err",
+    [
+        ("tag:debug.com/object-1.2.3", "tag:debug.com/object", WxSyntaxError),
+        ("tag:debug.com/object-1.2.3", "tag:debug.com/object-", WxSyntaxError),
+        ("tag:debug.com/object-1.2.3", "tag:debug.com/object-**", WxSyntaxError),
+    ],
+)
+def test_wx_tag_syntax_exceptions(instance_tag, tagname, err):
+    """Test custom ASDF shape validators."""
+    with pytest.raises(err):
+        _compare_tag_version(instance_tag, tagname)
 
 
 @pytest.mark.parametrize(
@@ -115,28 +131,28 @@ def test_shape_validator_syntax2(shape, exp):
         ([1, 9], [1, "(4~8)"], ValidationError),
         (1.0, [2], ValidationError),
         ([1, 2, 3, 4], [1, 2, "n", "n"], ValidationError),
-        ([1, 2], [1, "~", "(...)"], ValueError),
-        ([1, 2], [1, "(2)", 3], ValueError),
-        ([1, 2], [1, 2, "((3))"], ValueError),
-        ([1, 2], [1, 2, "3)"], ValueError),
-        ([1, 2], [1, 2, "*3"], ValueError),
-        ([1, 2], [1, 2, "(3"], ValueError),
-        ([1, 2], [1, 2, "(3)3"], ValueError),
-        ([1, 2], [1, 2, "2(3)"], ValueError),
-        ([1, 2], [1, "...", 2], ValueError),
-        ([1, 2], ["(1)", "..."], ValueError),
-        ([1, 2], [1, "4~1"], ValueError),
-        ([-1, -2], [-1, -2], ValueError),
-        ([-1, 2], [1, 2], ValueError),
-        ([1, 2], [-1, 2], ValueError),
-        ([1, 2], [1, 2, "(-3)"], ValueError),
-        ([1, 2], [1, 2, "(-3~-1)"], ValueError),
-        ([1, 2], [1, 2, "(-3~1)"], ValueError),
-        ([1, 2, 1], ["(-3~1)", 2, 1], ValueError),
-        ([1, 2], [1, "(n~m)"], ValueError),
-        ([1, 2], [1, "(1~3~5)"], ValueError),
+        ([1, 2], [1, "~", "(...)"], WxSyntaxError),
+        ([1, 2], [1, "(2)", 3], WxSyntaxError),
+        ([1, 2], [1, 2, "((3))"], WxSyntaxError),
+        ([1, 2], [1, 2, "3)"], WxSyntaxError),
+        ([1, 2], [1, 2, "*3"], WxSyntaxError),
+        ([1, 2], [1, 2, "(3"], WxSyntaxError),
+        ([1, 2], [1, 2, "(3)3"], WxSyntaxError),
+        ([1, 2], [1, 2, "2(3)"], WxSyntaxError),
+        ([1, 2], [1, "...", 2], WxSyntaxError),
+        ([1, 2], ["(1)", "..."], WxSyntaxError),
+        ([1, 2], [1, "4~1"], WxSyntaxError),
+        ([-1, -2], [-1, -2], WxSyntaxError),
+        ([-1, 2], [1, 2], WxSyntaxError),
+        ([1, 2], [-1, 2], WxSyntaxError),
+        ([1, 2], [1, 2, "(-3)"], WxSyntaxError),
+        ([1, 2], [1, 2, "(-3~-1)"], WxSyntaxError),
+        ([1, 2], [1, 2, "(-3~1)"], WxSyntaxError),
+        ([1, 2, 1], ["(-3~1)", 2, 1], WxSyntaxError),
+        ([1, 2], [1, "(n~m)"], WxSyntaxError),
+        ([1, 2], [1, "(1~3~5)"], WxSyntaxError),
         ("a string", [1, "(1~3~5)"], ValidationError),
-        ([1, 2], "a string", ValueError),
+        ([1, 2], "a string", WxSyntaxError),
     ],
 )
 def test_shape_validation_error_exception(shape, exp, err):

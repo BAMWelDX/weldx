@@ -10,6 +10,7 @@
     wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version
     wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patchversion
     ```
+*   add `WxSyntaxError` exception for custom weldx ASDF syntax errors
 
 
 ## 0.2.0 (30.07.2020)
