@@ -13,22 +13,24 @@ from weldx.asdf.validators import _custom_shape_validator
 
 
 @pytest.mark.parametrize(
-    "test_input",
-    [
-        PropertyTagTestClass(),
-        pytest.param(
-            PropertyTagTestClass(prop3=pd.Timedelta(2, "s")),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            PropertyTagTestClass(prop3="STRING"),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-    ],
+    "test_input", [PropertyTagTestClass()],
 )
 def test_property_tag_validator(test_input):
     """Test custom ASDF shape validators."""
     _write_read_buffer({"root_node": test_input})
+
+
+@pytest.mark.parametrize(
+    "test_input,err",
+    [
+        (PropertyTagTestClass(prop3=pd.Timedelta(2, "s")), ValidationError),
+        (PropertyTagTestClass(prop3="STRING"), ValidationError),
+    ],
+)
+def test_property_tag_validator_exceptions(test_input, err):
+    """Test custom ASDF shape validators."""
+    with pytest.raises(err):
+        _write_read_buffer({"root_node": test_input})
 
 
 def _val(list_test, list_expected):

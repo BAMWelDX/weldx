@@ -4,7 +4,7 @@ from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 import asdf
 import pandas as pd
 from asdf import ValidationError
-from asdf.schema import validate_tag
+from asdf.schema import _type_to_tag
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
@@ -530,6 +530,85 @@ def wx_shape_validator(
         )
 
 
+def _compare_tag_version(instance_tag: str, tagname: str):
+    """Compare ASDF tag-strings with flexible version syntax.
+
+    Parameters
+    ----------
+    instance_tag:
+        the full ASDF tag to validate
+    tagname:
+        tag string with custom version syntax to validate against
+
+    Returns
+    -------
+
+    """
+    if instance_tag is None:
+        return True
+
+    if instance_tag.startswith("tag:yaml.org"):  # test for python builtins
+        return instance_tag == tagname
+    instance_tag_version = [int(v) for v in instance_tag.rpartition("-")[-1].split(".")]
+
+    tag_parts = tagname.rpartition("-")
+    tag_uri = tag_parts[0]
+    tag_version = [v for v in tag_parts[-1].split(".")]
+
+    if tag_version == ["*"]:
+        version_compatible = True
+    elif all([vstr.isdigit() for vstr in tag_version]):
+        vnum = [int(vstr) for vstr in tag_version]
+        version_compatible = all(
+            [v[0] == v[1] for v in zip(vnum, instance_tag_version)]
+        )
+    else:
+        raise ValueError(f"Unknown wx_tag syntax {tagname}")
+
+    if (not instance_tag.startswith(tag_uri)) or (not version_compatible):
+        return False
+    return True
+
+
+def wx_tag_validator(validator, tagname, instance, schema):
+    """
+
+    The following syntax is allowed:
+
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patch version
+
+    Parameters
+    ----------
+    validator:
+        A jsonschema.Validator instance.
+    tagname:
+        tag string with custom version syntax to validate against
+    instance:
+        Tree serialization (with default dtypes) of the instance
+    schema:
+        Dict representing the full ASDF schema.
+
+    Returns
+    -------
+        bool
+
+    """
+    if hasattr(instance, "_tag"):
+        instance_tag = instance._tag
+    else:
+        # Try tags for known Python builtins
+        instance_tag = _type_to_tag(type(instance))
+
+    if instance_tag is not None:
+        if not _compare_tag_version(instance_tag, tagname):
+            yield ValidationError(
+                "mismatched tags, wanted '{0}', got '{1}'".format(tagname, instance_tag)
+            )
+
+
 def wx_property_tag_validator(
     validator, wx_property_tag: str, instance, schema
 ) -> Iterator[ValidationError]:
@@ -552,6 +631,6 @@ def wx_property_tag_validator(
 
     """
     for _, value in instance.items():
-        yield from validate_tag(
+        yield from wx_tag_validator(
             validator, tagname=wx_property_tag, instance=value, schema=None
         )

@@ -12,5 +12,5 @@ description: |
   So far only one specific tag can be used.
 type: object
 additionalProperties: true # must be true to allow any property
-wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-*"
 ...
