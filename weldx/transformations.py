@@ -516,38 +516,24 @@ class LocalCoordinateSystem:
         ) and self.coordinates.identical(other.coordinates)
 
     @staticmethod
-    def _build_orientation(orientation, time=None):
-        if isinstance(orientation, xr.DataArray):
-            return orientation
-            # TODO: Test if xarray has correct format
+    def _build_time_index(
+        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
+        time_ref: pd.Timestamp = None,
+    ):
+        """Build time index used for xarray objects.
 
-        time_orientation = None
-        if isinstance(orientation, Rot):
-            orientation = orientation.as_matrix()
-        elif not isinstance(orientation, np.ndarray):
-            orientation = np.array(orientation)
+        Parameters
+        ----------
+        time:
+            Datetime- or Timedelta-like time index.
+        time_ref:
+            Reference timestamp for Timedelta inputs.
 
-        if orientation.ndim == 3:
-            time_orientation = time
-        orientation = ut.xr_3d_matrix(orientation, time_orientation)
-        return orientation
+        Returns
+        -------
+        pandas.DatetimeIndex
 
-    @staticmethod
-    def _build_coordinates(coordinates, time=None):
-        if isinstance(coordinates, xr.DataArray):
-            return coordinates
-            # TODO: Test if xarray has correct format
-
-        time_coordinates = None
-        if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
-            coordinates = np.array(coordinates)
-        if coordinates.ndim == 2:
-            time_coordinates = time
-        coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
-        return coordinates
-
-    @staticmethod
-    def _build_time_index(time, time_ref):
+        """
         if isinstance(time, pint.Quantity):
             time = ut.to_pandas_time_index(time)
 
@@ -564,6 +550,68 @@ class LocalCoordinateSystem:
                 )
                 raise err
         return time
+
+    @staticmethod
+    def _build_orientation(
+        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot],
+        time: pd.DatetimeIndex = None,
+    ):
+        """Create xarray orientation from different formats and time-inputs.
+
+        Parameters
+        ----------
+        orientation :
+            Orientation object or data.
+        time :
+            Valid time index formatted with _build_time_index.
+
+        Returns
+        -------
+        xarray.DataArray
+
+        """
+        if isinstance(orientation, xr.DataArray):
+            return orientation
+            # TODO: Test if xarray has correct format
+
+        time_orientation = None
+        if isinstance(orientation, Rot):
+            orientation = orientation.as_matrix()
+        elif not isinstance(orientation, np.ndarray):
+            orientation = np.array(orientation)
+
+        if orientation.ndim == 3:
+            time_orientation = time
+        orientation = ut.xr_3d_matrix(orientation, time_orientation)
+        return orientation
+
+    @staticmethod
+    def _build_coordinates(coordinates, time: pd.DatetimeIndex = None):
+        """Create xarray coordinates from different formats and time-inputs.
+
+        Parameters
+        ----------
+        coordinates:
+            Coordinates data.
+        time:
+            Valid time index formatted with _build_time_index.
+
+        Returns
+        -------
+        xarray.DataArray
+
+        """
+        if isinstance(coordinates, xr.DataArray):
+            return coordinates
+            # TODO: Test if xarray has correct format
+
+        time_coordinates = None
+        if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
+            coordinates = np.array(coordinates)
+        if coordinates.ndim == 2:
+            time_coordinates = time
+        coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
+        return coordinates
 
     @classmethod
     def from_euler(
