@@ -13,8 +13,6 @@ __all__ = ["WeldxExtension", "WeldxAsdfExtension"]
 class WxSyntaxError(Exception):
     """Exception raising on custom weldx ASDF syntax errors."""
 
-    pass
-
 
 class WeldxExtension(AsdfExtension):
     """Extension class registering types with both tags and schemas defined by weldx."""
