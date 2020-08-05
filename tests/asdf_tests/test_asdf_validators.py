@@ -149,6 +149,8 @@ def test_shape_validator_syntax2(shape, exp):
         ([1, 2], [1, 2, "(-3~-1)"], WxSyntaxError),
         ([1, 2], [1, 2, "(-3~1)"], WxSyntaxError),
         ([1, 2, 1], ["(-3~1)", 2, 1], WxSyntaxError),
+        ([1, 2], [1, "(9~m)"], WxSyntaxError),
+        ([1, 2], [1, "(n~9)"], WxSyntaxError),
         ([1, 2], [1, "(n~m)"], WxSyntaxError),
         ([1, 2], [1, "(1~3~5)"], WxSyntaxError),
         ("a string", [1, "(1~3~5)"], ValidationError),
