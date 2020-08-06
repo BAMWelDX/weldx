@@ -4,8 +4,9 @@ from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
 import asdf
 import pandas as pd
 from asdf import ValidationError
-from asdf.schema import validate_tag
+from asdf.schema import _type_to_tag
 
+from weldx.asdf.extension import WxSyntaxError
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
@@ -145,18 +146,26 @@ def _compare(_int, exp_string):
         True or False
     """
     if _int < 0:
-        raise ValueError("Negative dimension found")
+        raise WxSyntaxError("Negative dimension found")
 
     if ":" in exp_string:
         ranges = exp_string.split(":")
 
         if ranges[0] == "":
             ranges[0] = 0
+        elif ranges[0].isnumeric():
+            ranges[0] = int(ranges[0])
+        else:
+            raise WxSyntaxError(f"Non numeric character in range {exp_string}")
         if ranges[1] == "":
             ranges[1] = _int
+        elif ranges[1].isnumeric():
+            ranges[1] = int(ranges[1])
+        else:
+            raise WxSyntaxError(f"Non numeric character in range {exp_string}")
 
-        if int(ranges[0]) > int(ranges[1]):
-            raise ValueError(f"The range should not be descending in {exp_string}")
+        if ranges[0] > ranges[1]:
+            raise WxSyntaxError(f"The range should not be descending in {exp_string}")
         return int(ranges[0]) <= _int <= int(ranges[1])
 
     else:
@@ -250,15 +259,15 @@ def _validate_expected_list(list_expected):
     validator = 0
     for exp in list_expected:
         if validator == 1 and not ("(" in str(exp) or "..." in str(exp)):
-            raise ValueError(
+            raise WxSyntaxError(
                 "Optional dimensions in the expected "
                 "shape should only stand at the end/beginning."
             )
         if validator == 2:
-            raise ValueError('After "..." should not be another dimension.')
+            raise WxSyntaxError('After "..." should not be another dimension.')
         if "..." in str(exp):
             if "..." != exp:
-                raise ValueError(
+                raise WxSyntaxError(
                     f'"..." should not have additional properties:' f" {exp} was found."
                 )
             validator = 2
@@ -269,14 +278,14 @@ def _validate_expected_list(list_expected):
                 or len(val.group(1)) + 2 != len(exp)
                 or not _is_range_format_valid(val.group(1))
             ):
-                raise ValueError(
+                raise WxSyntaxError(
                     f'Invalid optional dimension format. Correct format is "(_)", but '
                     f" {exp} was found."
                 )
 
             validator = 1
         elif not _is_range_format_valid(str(exp)):
-            raise ValueError(
+            raise WxSyntaxError(
                 f"{exp} is an invalid range format."
                 f"Consult the documentation for a list of all valid options"
             )
@@ -449,7 +458,7 @@ def _custom_shape_validator(dict_test, dict_expected):
                 elif dict_values[key] != _dict_values[key]:
                     return False
     else:
-        raise ValueError(
+        raise WxSyntaxError(
             f"Found an incorrect object: {type(dict_expected)}. "
             "Should be a dict or list."
         )
@@ -530,6 +539,85 @@ def wx_shape_validator(
         )
 
 
+def _compare_tag_version(instance_tag: str, tagname: str):
+    """Compare ASDF tag-strings with flexible version syntax.
+
+    Parameters
+    ----------
+    instance_tag:
+        the full ASDF tag to validate
+    tagname:
+        tag string with custom version syntax to validate against
+
+    Returns
+    -------
+        bool
+    """
+    if instance_tag is None:
+        return True
+
+    if instance_tag.startswith("tag:yaml.org"):  # test for python builtins
+        return instance_tag == tagname
+    instance_tag_version = [int(v) for v in instance_tag.rpartition("-")[-1].split(".")]
+
+    tag_parts = tagname.rpartition("-")
+    tag_uri = tag_parts[0]
+    tag_version = [v for v in tag_parts[-1].split(".")]
+
+    if tag_version == ["*"]:
+        version_compatible = True
+    elif all([vstr.isdigit() for vstr in tag_version]):
+        vnum = [int(vstr) for vstr in tag_version]
+        version_compatible = all(
+            [v[0] == v[1] for v in zip(vnum, instance_tag_version)]
+        )
+    else:
+        raise WxSyntaxError(f"Unknown wx_tag syntax {tagname}")
+
+    if (not instance_tag.startswith(tag_uri)) or (not version_compatible):
+        return False
+    return True
+
+
+def wx_tag_validator(validator, tagname, instance, schema):
+    """Validate instance tag string with flexible version syntax.
+
+    The following syntax is allowed to validate against:
+
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patch version
+
+    Parameters
+    ----------
+    validator:
+        A jsonschema.Validator instance.
+    tagname:
+        tag string with custom version syntax to validate against
+    instance:
+        Tree serialization (with default dtypes) of the instance
+    schema:
+        Dict representing the full ASDF schema.
+
+    Returns
+    -------
+        bool
+
+    """
+    if hasattr(instance, "_tag"):
+        instance_tag = instance._tag
+    else:
+        # Try tags for known Python builtins
+        instance_tag = _type_to_tag(type(instance))
+
+    if instance_tag is not None:
+        if not _compare_tag_version(instance_tag, tagname):
+            yield ValidationError(
+                "mismatched tags, wanted '{0}', got '{1}'".format(tagname, instance_tag)
+            )
+
+
 def wx_property_tag_validator(
     validator, wx_property_tag: str, instance, schema
 ) -> Iterator[ValidationError]:
@@ -552,6 +640,6 @@ def wx_property_tag_validator(
 
     """
     for _, value in instance.items():
-        yield from validate_tag(
+        yield from wx_tag_validator(
             validator, tagname=wx_property_tag, instance=value, schema=None
         )
