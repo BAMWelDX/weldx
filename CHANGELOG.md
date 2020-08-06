@@ -1,5 +1,18 @@
 # WelDX CHANGELOG.md
 
+## 0.2.1 (unreleased)
+### changes
+*   add custom `wx_tag` validation and update `wx_property_tag` to allow new syntax\
+    the following syntax can be used:
+    ```yaml
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version
+    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patchversion
+    ```
+*   add `WxSyntaxError` exception for custom weldx ASDF syntax errors
+
+
 ## 0.2.0 (30.07.2020)
 ### ASDF
 - add `wx_unit` and `wx_shape` validators
