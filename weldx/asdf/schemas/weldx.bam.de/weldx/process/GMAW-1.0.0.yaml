@@ -7,6 +7,6 @@ tag: "tag:weldx.bam.de:weldx/process/GMAW-1.0.0"
 title: |
   Generic GMAW process definition.
 
-$ref: "./terms-1.0.0#/process/base_process"
+$ref: "./terms-1.0.0#/base_process"
 
 ...

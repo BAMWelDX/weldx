@@ -357,3 +357,39 @@ def _write_read_buffer(
     """
     buffer = _write_buffer(tree, asdffile_kwargs, write_kwargs)
     return _read_buffer(buffer, open_kwargs)
+
+
+try:
+    import IPython
+    from pygments import highlight
+    from pygments.formatters import HtmlFormatter
+    from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
+except ImportError as error:
+    pass
+else:
+
+    def notebook_fileprinter(filename):
+        """
+        Prints the code from the filename highlighted depending on its type.
+
+        eg.:
+        > notebook_fileprinter(test.py)
+        > def test:
+        >     return
+        Would have python highlighting.
+        """
+
+        with open(filename) as f:
+            code = f.read()
+
+        if Path(filename).suffix == ".asdf":
+            lexer = get_lexer_by_name("YAML")
+        else:
+            lexer = get_lexer_for_filename(filename)
+        formatter = HtmlFormatter()
+        return IPython.display.HTML(
+            '<style type="text/css">{}</style>{}'.format(
+                formatter.get_style_defs(".highlight"),
+                highlight(code, lexer, formatter),
+            )
+        )

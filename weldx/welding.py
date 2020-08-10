@@ -16,9 +16,13 @@ class GmawProcess:
     manufacturer: str
     power_source: str
     parameters: Dict[str, TimeSeries]
-    tag: str = "CLOOS/spray_arc"
+    tag: str = None
+    meta: dict = None
 
     def __post_init__(self):
+        if self.tag is None:
+            self.tag = "GMAW"
+
         self.parameters = {
             k: (v if isinstance(v, TimeSeries) else TimeSeries(v))
             for k, v in self.parameters.items()

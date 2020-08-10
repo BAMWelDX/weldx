@@ -8,6 +8,6 @@ title: |
   CLOOS spray arc process.
 
 allOf:
-  - $ref: "../terms-1.0.0#/process/base_process"
-  - $ref: "../terms-1.0.0#/process/spray_parameters"
+  - $ref: "../terms-1.0.0#/base_process"
+  - $ref: "../terms-1.0.0#/process/spray"
 ...

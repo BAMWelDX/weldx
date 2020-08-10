@@ -8,9 +8,11 @@ title: |
   CLOOS GMAW pulsed processes.
 
 description: |
-  Base schema describing a default UI modulated pulsed GMAW processes.
+  Base schema describing a default UI or II modulated pulsed GMAW processes.
 
 allOf:
-  - $ref: "../terms-1.0.0#/process/base_process"
-  - $ref: "../terms-1.0.0#/process/pulse_parameters"
+  - $ref: "../terms-1.0.0#/base_process"
+  - oneOf:
+    - $ref: "../terms-1.0.0#/process/pulse/UI"
+    - $ref: "../terms-1.0.0#/process/pulse/II"
 ...
