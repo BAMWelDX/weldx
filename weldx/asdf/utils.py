@@ -368,24 +368,32 @@ except ImportError as error:
     pass
 else:
 
-    def notebook_fileprinter(filename):
+    def notebook_fileprinter(file, style="YAML"):
+        """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
+
+        Parameters
+        ----------
+        file
+            filename or BytesIO buffer
+        style
+            Syntax style to use
+
         """
-        Prints the code from the filename highlighted depending on its type.
-
-        eg.:
-        > notebook_fileprinter(test.py)
-        > def test:
-        >     return
-        Would have python highlighting.
-        """
-
-        with open(filename) as f:
-            code = f.read()
-
-        if Path(filename).suffix == ".asdf":
-            lexer = get_lexer_by_name("YAML")
+        if isinstance(file, BytesIO):
+            file.seek(0)
+            code = file.read()
+            lexer = get_lexer_by_name(style)
         else:
-            lexer = get_lexer_for_filename(filename)
+            with open(file, "rb") as f:
+                code = f.read()
+            if Path(file).suffix == ".asdf":
+                lexer = get_lexer_by_name("YAML")
+            else:
+                lexer = get_lexer_for_filename(file)
+
+        parts = code.partition(b"\n...")
+        code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
+
         formatter = HtmlFormatter()
         return IPython.display.HTML(
             '<style type="text/css">{}</style>{}'.format(
