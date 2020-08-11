@@ -1,3 +1,5 @@
+"""Temporay module for welding related classes."""
+
 from dataclasses import dataclass
 from typing import Dict
 
@@ -20,6 +22,7 @@ class GmawProcess:
     meta: dict = None
 
     def __post_init__(self):
+        """Set defaults and convert parmater inputs."""
         if self.tag is None:
             self.tag = "GMAW"
 
@@ -30,7 +33,7 @@ class GmawProcess:
 
 
 class GmawProcessTypeAsdf(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
+    """Custom serialization class for GmawProcess."""
 
     name = ["process/GMAW", "process/CLOOS/spray_arc", "process/CLOOS/pulse"]
     version = "1.0.0"
@@ -39,18 +42,19 @@ class GmawProcessTypeAsdf(WeldxType):
 
     @classmethod
     def to_tree(cls, node: GmawProcess, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
+        """Convert tree and remove all None entries from node dictionary."""
         tree = drop_none_attr(node)
         return tree
 
     @classmethod
     def to_tree_tagged(cls, node: GmawProcess, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
+        """Serialize tree with custom tag definition."""
         tree = cls.to_tree(node, ctx)
         tag = "tag:weldx.bam.de:weldx/process/" + tree["tag"] + "-" + str(cls.version)
         return tag_object(tag, tree, ctx=ctx)
 
     @classmethod
     def from_tree(cls, tree, ctx):
+        """Read tree object into dataclass."""
         obj = GmawProcess(**tree)
         return obj

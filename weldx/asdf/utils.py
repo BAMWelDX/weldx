@@ -364,7 +364,7 @@ try:
     from pygments import highlight
     from pygments.formatters import HtmlFormatter
     from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
-except ImportError as error:
+except ImportError:
     pass
 else:
 
