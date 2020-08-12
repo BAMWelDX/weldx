@@ -359,14 +359,14 @@ def _write_read_buffer(
     return _read_buffer(buffer, open_kwargs)
 
 
-try:
+try:  # pragma: no cover
     import IPython
     from pygments import highlight
     from pygments.formatters import HtmlFormatter
     from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
-else:
+else:  # pragma: no cover
 
     def notebook_fileprinter(file, style="YAML"):
         """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.

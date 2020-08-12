@@ -18,6 +18,9 @@ allOf:
           impedance:
             tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
             wx_unit: "percent"
-        required: [impedance]
+          characteristic:
+            tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+            wx_unit: "V/A"
+        required: [impedance,characteristic]
 
 ...
