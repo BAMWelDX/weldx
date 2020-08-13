@@ -1059,6 +1059,24 @@ class CoordinateSystemManager:
                 + str(coordinate_system_name)
             )
 
+    def _update_local_coordinate_system(
+        self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
+    ):
+        """Update the local coordinate systems on the edges between two nodes.
+
+        Parameters
+        ----------
+        node_from :
+            Start node of the edge
+        node_to :
+            End node of the edge
+        lcs :
+            Local coordinate system
+
+        """
+        self.graph.edges[(node_from, node_to)]["lcs"] = lcs
+        self.graph.edges[(node_to, node_from)]["lcs"] = lcs.invert()
+
     def add_cs(
         self,
         coordinate_system_name: Hashable,
@@ -1066,6 +1084,9 @@ class CoordinateSystemManager:
         local_coordinate_system: LocalCoordinateSystem,
     ):
         """Add a coordinate system to the coordinate system manager.
+
+        If the specified system already exists with the same parent system it will be
+        updated. If the parent systems do not match, an exception is raised.
 
         Parameters
         ----------
@@ -1085,12 +1106,26 @@ class CoordinateSystemManager:
                 "'local_coordinate_system' must be an instance of "
                 + "weldx.transformations.LocalCoordinateSystem"
             )
-        self._check_coordinate_system_exists(reference_system_name)
 
-        self._add_coordinate_system_node(coordinate_system_name)
-        self._add_edges(
-            coordinate_system_name, reference_system_name, local_coordinate_system
-        )
+        if self.has_coordinate_system(coordinate_system_name):
+            # todo: use None or "" to automatically reuse old system?
+            current_parent_system = self.get_parent_system_name(coordinate_system_name)
+            if current_parent_system != reference_system_name:
+                raise ValueError(
+                    f'Can not replace existing system "{coordinate_system_name}".'
+                    "Reference systems must be identical."
+                    f'\nYou provided: {coordinate_system_name}"'
+                    f"\nCurrent reference is: {current_parent_system}"
+                )
+            self._update_local_coordinate_system(
+                coordinate_system_name, reference_system_name, local_coordinate_system
+            )
+        else:
+            self._check_coordinate_system_exists(reference_system_name)
+            self._add_coordinate_system_node(coordinate_system_name)
+            self._add_edges(
+                coordinate_system_name, reference_system_name, local_coordinate_system
+            )
 
     def assign_data(
         self, data: xr.DataArray, data_name: Hashable, coordinate_system_name: Hashable

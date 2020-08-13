@@ -16,6 +16,14 @@ import weldx.utility as ut
 # helpers for tests -----------------------------------------------------------
 
 
+# Todo: Move this to conftest.py?
+def get_test_name(param):
+    """Get the test name from the parameter list of a parametrized test."""
+    if isinstance(param, str) and param[0] == "#":
+        return param[1:]
+    return ""
+
+
 def check_matrix_does_not_reflect(matrix):
     """Check if a matrix does not reflect.
 
@@ -1212,6 +1220,109 @@ class TestCoordinateSystemManager:
     CSM = tf.CoordinateSystemManager
     LCS = tf.LocalCoordinateSystem
 
+    @pytest.fixture
+    def csm_default(self):
+        """Create default coordinate system fixture."""
+        csm_default = self.CSM("root")
+        lcs_1 = self.LCS(coordinates=[0, 1, 2])
+        lcs_2 = self.LCS(coordinates=[0, -1, -2])
+        lcs_3 = self.LCS(tf.rotation_matrix_y(0), [-1, -2, -3])
+        lcs_4 = self.LCS(tf.rotation_matrix_y(np.pi / 2), [1, 2, 3])
+        lcs_5 = self.LCS(tf.rotation_matrix_y(np.pi * 3 / 2), [2, 3, 1])
+        csm_default.add_cs("lcs1", "root", lcs_1)
+        csm_default.add_cs("lcs2", "root", lcs_2)
+        csm_default.add_cs("lcs3", "lcs1", lcs_3)
+        csm_default.add_cs("lcs4", "lcs1", lcs_4)
+        csm_default.add_cs("lcs5", "lcs2", lcs_5)
+
+        return csm_default
+
+    # test_add_coordinate_system -------------------------------------------------------
+
+    # todo
+    #  add time dependent systems. The problem is, that currently something messes
+    #  up the comparison. The commented version of lcs_2 somehow switches the order of
+    #  how 2 coordinates are stored in the Dataset. This lets the coordinate comparison
+    #  fail.
+    csm_acs = CSM("root")
+    time = pd.DatetimeIndex(["2000-01-01", "2000-01-04"])
+    lcs_1_acs = LCS(coordinates=[0, 1, 2])
+    # lcs_2_acs = LCS(coordinates=[[0, -1, -2], [8, 2, 7]], time=time)
+    lcs_2_acs = LCS(coordinates=[0, -1, -2])
+    lcs_3_acs = LCS(tf.rotation_matrix_y(0), [-1, -2, -3])
+    lcs_4_acs = LCS(tf.rotation_matrix_y(np.pi / 2), [1, 2, 3])
+    lcs_5_acs = LCS(tf.rotation_matrix_y(np.pi * 3 / 2), [2, 3, 1])
+
+    @pytest.mark.parametrize(
+        "name , parent, lcs, exp_num_cs",
+        [
+            ("lcs1", "root", lcs_1_acs, 2),
+            ("lcs2", "root", lcs_2_acs, 3),
+            ("lcs3", "lcs2", lcs_4_acs, 4),
+            ("lcs3", "lcs2", lcs_3_acs, 4),
+            ("lcs4", "lcs2", lcs_1_acs, 5),
+            ("lcs4", "lcs2", lcs_4_acs, 5),
+            ("lcs5", "lcs1", lcs_4_acs, 6),
+        ],
+    )
+    def test_add_coordinate_system(self, name, parent, lcs, exp_num_cs):
+        """Test the 'add_cs' function."""
+        self.csm_acs.add_cs(name, parent, lcs)
+        assert self.csm_acs.number_of_coordinate_systems == exp_num_cs
+        assert self.csm_acs.get_local_coordinate_system(name, parent) == lcs
+        assert self.csm_acs.get_local_coordinate_system(parent, name) == lcs.invert()
+
+    # test_add_coordinate_system_exceptions --------------------------------------------
+
+    @pytest.mark.parametrize(
+        "name, parent_name, lcs, exception_type, test_name",
+        [
+            ("lcs", "r00t", LCS(), ValueError, "# invalid parent system"),
+            ("lcs4", "root", LCS(), ValueError, "# name exist with different parent"),
+            ("lcs", LCS(), LCS(), TypeError, "# invalid parent system name type"),
+            (LCS(), "root", LCS(), TypeError, "# invalid system name type"),
+            ("new_lcs", "root", "a string", TypeError, "# invalid system type"),
+        ],
+        ids=get_test_name,
+    )
+    def test_add_coordinate_system_exceptions(
+        self, csm_default, name, parent_name, lcs, exception_type, test_name
+    ):
+        """Test the exceptions of the 'add_cs' method."""
+        with pytest.raises(exception_type):
+            csm_default.add_cs(name, parent_name, lcs)
+
+    # test num_neighbors ---------------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "name, exp_num_neighbors",
+        [("root", 2), ("lcs1", 3), ("lcs2", 2), ("lcs3", 1), ("lcs4", 1), ("lcs5", 1)],
+    )
+    def test_num_neighbors(self, csm_default, name, exp_num_neighbors):
+        """Test the num_neighbors function."""
+        assert csm_default.number_of_neighbors(name) == exp_num_neighbors
+
+    # test is_neighbor_of --------------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "name1, exp_result",
+        [
+            ("root", [False, True, True, False, False, False]),
+            ("lcs1", [True, False, False, True, True, False]),
+            ("lcs2", [True, False, False, False, False, True]),
+            ("lcs3", [False, True, False, False, False, False]),
+            ("lcs4", [False, True, False, False, False, False]),
+            ("lcs5", [False, False, True, False, False, False]),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "name2, result_idx",
+        [("root", 0), ("lcs1", 1), ("lcs2", 2), ("lcs3", 3), ("lcs4", 4), ("lcs5", 5)],
+    )
+    def test_is_neighbor_of(self, csm_default, name1, name2, result_idx, exp_result):
+        """Test the is_neighbor_of function."""
+        assert csm_default.is_neighbor_of(name1, name2) is exp_result[result_idx]
+
     # test_comparison ------------------------------------------------------------------
 
     csm_0 = CSM("root")
@@ -1261,66 +1372,6 @@ def test_coordinate_system_manager_init():
     # Invalid root system name
     with pytest.raises(Exception):
         tf.CoordinateSystemManager({})
-
-
-def test_coordinate_system_manager_add_coordinate_system():
-    """Test the add_cs function of the coordinate system manager.
-
-    Adds some coordinate systems to a CSM and checks if the the edges and nodes
-    are set as expected.
-
-    """
-    # define some coordinate systems
-    lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
-    lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
-    lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
-
-    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
-    assert csm.number_of_coordinate_systems == 1
-    assert csm.number_of_neighbors("root") == 0
-
-    csm.add_cs("lcs1", "root", lcs1_in_root)
-    assert csm.number_of_coordinate_systems == 2
-    assert csm.number_of_neighbors("root") == 1
-    assert csm.number_of_neighbors("lcs1") == 1
-    assert csm.is_neighbor_of("root", "lcs1")
-    assert csm.is_neighbor_of("lcs1", "root")
-
-    csm.add_cs("lcs2", "root", lcs2_in_root)
-    assert csm.number_of_coordinate_systems == 3
-    assert csm.number_of_neighbors("root") == 2
-    assert csm.number_of_neighbors("lcs1") == 1
-    assert csm.number_of_neighbors("lcs2") == 1
-    assert csm.is_neighbor_of("root", "lcs2")
-    assert csm.is_neighbor_of("lcs2", "root")
-    assert not csm.is_neighbor_of("lcs1", "lcs2")
-    assert not csm.is_neighbor_of("lcs2", "lcs1")
-
-    csm.add_cs("lcs3", "lcs2", lcs3_in_lcs2)
-    assert csm.number_of_coordinate_systems == 4
-    assert csm.number_of_neighbors("root") == 2
-    assert csm.number_of_neighbors("lcs1") == 1
-    assert csm.number_of_neighbors("lcs2") == 2
-    assert csm.number_of_neighbors("lcs3") == 1
-    assert not csm.is_neighbor_of("root", "lcs3")
-    assert not csm.is_neighbor_of("lcs3", "root")
-    assert not csm.is_neighbor_of("lcs1", "lcs3")
-    assert not csm.is_neighbor_of("lcs3", "lcs1")
-    assert csm.is_neighbor_of("lcs2", "lcs3")
-    assert csm.is_neighbor_of("lcs3", "lcs2")
-
-    # Exceptions---------------------------------
-    # Incorrect coordinate system type
-    with pytest.raises(Exception):
-        csm.add_cs("lcs4", "root", "wrong")
-
-    # Coordinate system already exists
-    with pytest.raises(Exception):
-        csm.add_cs("lcs3", "lcs2", lcs3_in_lcs2)
-
-    # Invalid parent system
-    with pytest.raises(Exception):
-        csm.add_cs("lcs4", "something", tf.LocalCoordinateSystem())
 
 
 def test_coordinate_system_manager_create_coordinate_system():
