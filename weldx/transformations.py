@@ -967,6 +967,7 @@ class CoordinateSystemManager:
         """
         self._graph = nx.DiGraph()
         self._data = {}
+        self._root_system_name = root_coordinate_system_name
         self._add_coordinate_system_node(root_coordinate_system_name)
 
     def __repr__(self):
@@ -1522,13 +1523,15 @@ class CoordinateSystemManager:
             If the coordinate system has no parent (root system)
 
         """
-        self._check_coordinate_system_exists(coordinate_system_name)
+        if coordinate_system_name == self._root_system_name:
+            return None
 
-        neighbors = self._graph.neighbors(coordinate_system_name)
-        for neighbor in neighbors:
-            if self._graph.edges[(coordinate_system_name, neighbor)]["defined"]:
-                return neighbor
-        return None
+        self._check_coordinate_system_exists(coordinate_system_name)
+        path = nx.shortest_path(
+            self.graph, coordinate_system_name, self._root_system_name
+        )
+
+        return path[1]
 
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
         """Return 'True' if a coordinate system with specified name already exists.
