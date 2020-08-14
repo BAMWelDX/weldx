@@ -1083,6 +1083,29 @@ class CoordinateSystemManager:
         edge_to_from["lcs"] = lcs.invert()
         edge_to_from["defined"] = False
 
+    @property
+    def graph(self) -> nx.DiGraph:
+        """Get the internal graph.
+
+        Returns
+        -------
+        networkx.DiGraph
+
+        """
+        return self._graph
+
+    @property
+    def number_of_coordinate_systems(self) -> int:
+        """Get the number of coordinate systems inside the coordinate system manager.
+
+        Returns
+        -------
+        int
+            Number of coordinate systems
+
+        """
+        return self._graph.number_of_nodes()
+
     def add_cs(
         self,
         coordinate_system_name: Hashable,
@@ -1437,6 +1460,39 @@ class CoordinateSystemManager:
         )
         self.add_cs(coordinate_system_name, reference_system_name, lcs)
 
+    def get_data(
+        self, data_name, target_coordinate_system_name=None
+    ) -> Union[np.ndarray, xr.DataArray]:
+        """Get the specified data, optionally transformed into any coordinate system.
+
+        Parameters
+        ----------
+        data_name :
+            Name of the data
+        target_coordinate_system_name :
+            Name of the target coordinate system. If it is not None or not identical to
+            the owning coordinate system name, the data will be transformed to the
+            desired system. (Default value = None)
+
+        Returns
+        -------
+        np.ndarray
+            Transformed data
+
+        """
+        data_struct = self._data[data_name]
+        if (
+            target_coordinate_system_name is None
+            or target_coordinate_system_name == data_struct.coordinate_system_name
+        ):
+            return data_struct.data
+
+        return self.transform_data(
+            data_struct.data,
+            data_struct.coordinate_system_name,
+            target_coordinate_system_name,
+        )
+
     def get_local_coordinate_system(
         self,
         coordinate_system_name: Hashable,
@@ -1598,154 +1654,6 @@ class CoordinateSystemManager:
         """
         return data_name in self._graph.nodes[coordinate_system_name]["data"]
 
-    def get_data(
-        self, data_name, target_coordinate_system_name=None
-    ) -> Union[np.ndarray, xr.DataArray]:
-        """Get the specified data, optionally transformed into any coordinate system.
-
-        Parameters
-        ----------
-        data_name :
-            Name of the data
-        target_coordinate_system_name :
-            Name of the target coordinate system. If it is not None or not identical to
-            the owning coordinate system name, the data will be transformed to the
-            desired system. (Default value = None)
-
-        Returns
-        -------
-        np.ndarray
-            Transformed data
-
-        """
-        data_struct = self._data[data_name]
-        if (
-            target_coordinate_system_name is None
-            or target_coordinate_system_name == data_struct.coordinate_system_name
-        ):
-            return data_struct.data
-
-        return self.transform_data(
-            data_struct.data,
-            data_struct.coordinate_system_name,
-            target_coordinate_system_name,
-        )
-
-    def transform_data(
-        self,
-        data: Union[xr.DataArray, np.ndarray, List],
-        source_coordinate_system_name: Hashable,
-        target_coordinate_system_name: Hashable,
-    ):
-        """Transform spatial data from one coordinate system to another.
-
-        Parameters
-        ----------
-        data :
-            Point cloud input as array-like with cartesian x,y,z-data stored in
-            the last dimension. When using xarray objects, the vector dimension is
-            expected to be named "c" and have coordinates "x","y","z"
-        source_coordinate_system_name :
-            Name of the coordinate system the data is
-            defined in
-        target_coordinate_system_name :
-            Name of the coordinate system the data
-            should be transformed to
-
-        Returns
-        -------
-        np.ndarray
-            Transformed data
-
-        """
-        lcs = self.get_local_coordinate_system(
-            source_coordinate_system_name, target_coordinate_system_name
-        )
-        if isinstance(data, xr.DataArray):
-            mul = ut.xr_matmul(
-                lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
-            )
-            return mul + lcs.coordinates
-
-        data = ut.to_float_array(data)
-        rotation = lcs.orientation.data
-        translation = lcs.coordinates.data
-        return ut.mat_vec_mul(rotation, data) + translation
-
-    @property
-    def graph(self) -> nx.DiGraph:
-        """Get the internal graph.
-
-        Returns
-        -------
-        networkx.DiGraph
-
-        """
-        return self._graph
-
-    @property
-    def number_of_coordinate_systems(self) -> int:
-        """Get the number of coordinate systems inside the coordinate system manager.
-
-        Returns
-        -------
-        int
-            Number of coordinate systems
-
-        """
-        return self._graph.number_of_nodes()
-
-    def neighbors(self, coordinate_system_name: Hashable) -> List:
-        """Get a list of neighbors of a certain coordinate system.
-
-        Parameters
-        ----------
-        coordinate_system_name :
-            Name of the coordinate system
-
-        Returns
-        -------
-        list
-            List of neighbors
-
-        """
-        self._check_coordinate_system_exists(coordinate_system_name)
-        return list(self._graph.neighbors(coordinate_system_name))
-
-    def number_of_neighbors(self, coordinate_system_name) -> int:
-        """Get the number of neighbors  of a certain coordinate system.
-
-        Parameters
-        ----------
-        coordinate_system_name :
-            Name of the coordinate system
-
-        Returns
-        -------
-        int
-            Number of neighbors
-
-        """
-        return len(self.neighbors(coordinate_system_name))
-
-    def is_neighbor_of(
-        self, coordinate_system_name_0: Hashable, coordinate_system_name_1: Hashable
-    ) -> bool:
-        """Get a boolean result, specifying if 2 coordinate systems are neighbors.
-
-        Parameters
-        ----------
-        coordinate_system_name_0 :
-            Name of the first coordinate system
-        coordinate_system_name_1 :
-            Name of the second coordinate system
-
-        """
-        self._check_coordinate_system_exists(coordinate_system_name_0)
-        self._check_coordinate_system_exists(coordinate_system_name_1)
-
-        return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
-
     def interp_time(
         self,
         time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
@@ -1804,6 +1712,57 @@ class CoordinateSystemManager:
             time, affected_coordinate_systems, in_place=True
         )
 
+    def is_neighbor_of(
+        self, coordinate_system_name_0: Hashable, coordinate_system_name_1: Hashable
+    ) -> bool:
+        """Get a boolean result, specifying if 2 coordinate systems are neighbors.
+
+        Parameters
+        ----------
+        coordinate_system_name_0 :
+            Name of the first coordinate system
+        coordinate_system_name_1 :
+            Name of the second coordinate system
+
+        """
+        self._check_coordinate_system_exists(coordinate_system_name_0)
+        self._check_coordinate_system_exists(coordinate_system_name_1)
+
+        return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
+
+    def neighbors(self, coordinate_system_name: Hashable) -> List:
+        """Get a list of neighbors of a certain coordinate system.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+
+        Returns
+        -------
+        list
+            List of neighbors
+
+        """
+        self._check_coordinate_system_exists(coordinate_system_name)
+        return list(self._graph.neighbors(coordinate_system_name))
+
+    def number_of_neighbors(self, coordinate_system_name) -> int:
+        """Get the number of neighbors  of a certain coordinate system.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+
+        Returns
+        -------
+        int
+            Number of neighbors
+
+        """
+        return len(self.neighbors(coordinate_system_name))
+
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """Get the time union of all or selected local coordinate systems.
 
@@ -1831,3 +1790,44 @@ class CoordinateSystemManager:
                 time_union = time_union.union(time_edge)
 
         return time_union
+
+    def transform_data(
+        self,
+        data: Union[xr.DataArray, np.ndarray, List],
+        source_coordinate_system_name: Hashable,
+        target_coordinate_system_name: Hashable,
+    ):
+        """Transform spatial data from one coordinate system to another.
+
+        Parameters
+        ----------
+        data :
+            Point cloud input as array-like with cartesian x,y,z-data stored in
+            the last dimension. When using xarray objects, the vector dimension is
+            expected to be named "c" and have coordinates "x","y","z"
+        source_coordinate_system_name :
+            Name of the coordinate system the data is
+            defined in
+        target_coordinate_system_name :
+            Name of the coordinate system the data
+            should be transformed to
+
+        Returns
+        -------
+        np.ndarray
+            Transformed data
+
+        """
+        lcs = self.get_local_coordinate_system(
+            source_coordinate_system_name, target_coordinate_system_name
+        )
+        if isinstance(data, xr.DataArray):
+            mul = ut.xr_matmul(
+                lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
+            )
+            return mul + lcs.coordinates
+
+        data = ut.to_float_array(data)
+        rotation = lcs.orientation.data
+        translation = lcs.coordinates.data
+        return ut.mat_vec_mul(rotation, data) + translation
