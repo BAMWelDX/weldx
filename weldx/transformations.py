@@ -1075,14 +1075,20 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-        self.graph.edges[(node_from, node_to)]["lcs"] = lcs
-        self.graph.edges[(node_to, node_from)]["lcs"] = lcs.invert()
+        edge_from_to = self.graph.edges[(node_from, node_to)]
+        edge_from_to["lcs"] = lcs
+        edge_from_to["defined"] = True
+
+        edge_to_from = self.graph.edges[(node_to, node_from)]
+        edge_to_from["lcs"] = lcs.invert()
+        edge_to_from["defined"] = False
 
     def add_cs(
         self,
         coordinate_system_name: Hashable,
         reference_system_name: Hashable,
         local_coordinate_system: LocalCoordinateSystem,
+        lsc_child_in_parent: bool = True,
     ):
         """Add a coordinate system to the coordinate system manager.
 
@@ -1100,6 +1106,10 @@ class CoordinateSystemManager:
             An instance of
             weldx.transformations.LocalCoordinateSystem that describes how the new
             coordinate system is oriented in its parent system.
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         if not isinstance(local_coordinate_system, LocalCoordinateSystem):
@@ -1109,24 +1119,43 @@ class CoordinateSystemManager:
             )
 
         if self.has_coordinate_system(coordinate_system_name):
-            # todo: use None or "" to automatically reuse old system?
-            current_parent_system = self.get_parent_system_name(coordinate_system_name)
-            if current_parent_system != reference_system_name:
+            # todo:
+            #  discuss: update and add functionality should be separated
+            #  why?   : to prevent errors. Misspelling of the system name might cause
+            #           unwanted updates or unwanted additions. Separate function can
+            #           catch that by knowing about the users intention.
+            if not self.is_neighbor_of(coordinate_system_name, reference_system_name):
                 raise ValueError(
-                    f'Can not replace existing system "{coordinate_system_name}".'
-                    "Reference systems must be identical."
-                    f'\nYou provided: {coordinate_system_name}"'
-                    f"\nCurrent reference is: {current_parent_system}"
+                    f'Can not update coordinate system. "{reference_system_name}" is '
+                    f"not a neighbor of {coordinate_system_name}"
                 )
-            self._update_local_coordinate_system(
-                coordinate_system_name, reference_system_name, local_coordinate_system
-            )
+            if lsc_child_in_parent:
+                self._update_local_coordinate_system(
+                    coordinate_system_name,
+                    reference_system_name,
+                    local_coordinate_system,
+                )
+            else:
+                self._update_local_coordinate_system(
+                    reference_system_name,
+                    coordinate_system_name,
+                    local_coordinate_system,
+                )
         else:
             self._check_coordinate_system_exists(reference_system_name)
             self._add_coordinate_system_node(coordinate_system_name)
-            self._add_edges(
-                coordinate_system_name, reference_system_name, local_coordinate_system
-            )
+            if lsc_child_in_parent:
+                self._add_edges(
+                    coordinate_system_name,
+                    reference_system_name,
+                    local_coordinate_system,
+                )
+            else:
+                self._add_edges(
+                    reference_system_name,
+                    coordinate_system_name,
+                    local_coordinate_system,
+                )
 
     def assign_data(
         self, data: xr.DataArray, data_name: Hashable, coordinate_system_name: Hashable
@@ -1507,8 +1536,10 @@ class CoordinateSystemManager:
 
         return lcs
 
-    def get_parent_system_name(self, coordinate_system_name):
+    def get_parent_system_name(self, coordinate_system_name) -> Union[str, None]:
         """Get the name of a coordinate systems parent system.
+
+        The parent is the next system on the path towards the root node.
 
         Parameters
         ----------

@@ -1254,23 +1254,33 @@ class TestCoordinateSystemManager:
     lcs_5_acs = LCS(tf.rotation_matrix_y(np.pi * 3 / 2), [2, 3, 1])
 
     @pytest.mark.parametrize(
-        "name , parent, lcs, exp_num_cs",
+        "name , parent, lcs, child_in_parent, exp_num_cs",
         [
-            ("lcs1", "root", lcs_1_acs, 2),
-            ("lcs2", "root", lcs_2_acs, 3),
-            ("lcs3", "lcs2", lcs_4_acs, 4),
-            ("lcs3", "lcs2", lcs_3_acs, 4),
-            ("lcs4", "lcs2", lcs_1_acs, 5),
-            ("lcs4", "lcs2", lcs_4_acs, 5),
-            ("lcs5", "lcs1", lcs_4_acs, 6),
+            ("lcs1", "root", lcs_1_acs, True, 2),
+            ("lcs2", "root", lcs_2_acs, False, 3),
+            ("lcs3", "lcs2", lcs_4_acs, True, 4),
+            ("lcs3", "lcs2", lcs_3_acs, True, 4),
+            ("lcs2", "lcs3", lcs_3_acs, False, 4),
+            ("lcs2", "lcs3", lcs_3_acs, True, 4),
+            ("lcs4", "lcs2", lcs_1_acs, True, 5),
+            ("lcs4", "lcs2", lcs_4_acs, True, 5),
+            ("lcs5", "lcs1", lcs_5_acs, True, 6),
         ],
     )
-    def test_add_coordinate_system(self, name, parent, lcs, exp_num_cs):
+    def test_add_coordinate_system(
+        self, name, parent, lcs, child_in_parent, exp_num_cs
+    ):
         """Test the 'add_cs' function."""
-        self.csm_acs.add_cs(name, parent, lcs)
-        assert self.csm_acs.number_of_coordinate_systems == exp_num_cs
-        assert self.csm_acs.get_local_coordinate_system(name, parent) == lcs
-        assert self.csm_acs.get_local_coordinate_system(parent, name) == lcs.invert()
+        csm = self.csm_acs
+        csm.add_cs(name, parent, lcs, child_in_parent)
+
+        assert csm.number_of_coordinate_systems == exp_num_cs
+        if child_in_parent:
+            assert csm.get_local_coordinate_system(name, parent) == lcs
+            assert csm.get_local_coordinate_system(parent, name) == lcs.invert()
+        else:
+            assert csm.get_local_coordinate_system(name, parent) == lcs.invert()
+            assert csm.get_local_coordinate_system(parent, name) == lcs
 
     # test_add_coordinate_system_exceptions --------------------------------------------
 
@@ -1278,7 +1288,7 @@ class TestCoordinateSystemManager:
         "name, parent_name, lcs, exception_type, test_name",
         [
             ("lcs", "r00t", LCS(), ValueError, "# invalid parent system"),
-            ("lcs4", "root", LCS(), ValueError, "# name exist with different parent"),
+            ("lcs4", "root", LCS(), ValueError, "# can't update - no neighbors"),
             ("lcs", LCS(), LCS(), TypeError, "# invalid parent system name type"),
             (LCS(), "root", LCS(), TypeError, "# invalid system name type"),
             ("new_lcs", "root", "a string", TypeError, "# invalid system type"),
