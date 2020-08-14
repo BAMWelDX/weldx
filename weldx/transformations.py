@@ -1460,6 +1460,17 @@ class CoordinateSystemManager:
         )
         self.add_cs(coordinate_system_name, reference_system_name, lcs)
 
+    def get_coordinate_system_names(self) -> List:
+        """Get the names of all contained coordinate systems.
+
+        Returns
+        -------
+        List:
+            List of coordinate system names.
+
+        """
+        return self.graph.nodes
+
     def get_data(
         self, data_name, target_coordinate_system_name=None
     ) -> Union[np.ndarray, xr.DataArray]:
@@ -1729,6 +1740,45 @@ class CoordinateSystemManager:
         self._check_coordinate_system_exists(coordinate_system_name_1)
 
         return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
+
+    def merge(self, other):
+        """Merge another coordinate system managers into the current instance.
+
+        Both 'CoordinateSystemManager' need to have exactly one common coordinate
+        system. They are merged at this node. Internally, information is kept
+        to undo the merge process.
+
+        Parameters
+        ----------
+        other:
+            CoordinateSystemManager instance that should be merged into the current
+            instance.
+
+        """
+        intersection = set(self._graph.nodes) & set(other.get_coordinate_system_names())
+        if len(intersection) != 1:
+            raise ValueError(
+                "Both instances must have exactly one common coordinate system. "
+                f"Found the following common systems: {intersection}"
+            )
+        self._graph = nx.compose(self._graph, other.graph)
+
+    def demerge(self) -> List:
+        """Undo previous merges and return a list of all previously merged instances.
+
+        If additional coordinate systems were added after merging two instances, they
+        won't be lost. Depending on their parent system, they will be kept in one of the
+        returned sub-instances or the current instance. All new systems with the
+        parent system being the shared node of two merged systems are kept in the
+        current instance and won't be passed to the sub-instances.
+
+        Returns
+        -------
+        List:
+            A list containing previously merged 'CoordinateSystemManager' instances.
+
+        """
+        pass
 
     def neighbors(self, coordinate_system_name: Hashable) -> List:
         """Get a list of neighbors of a certain coordinate system.

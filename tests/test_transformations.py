@@ -1370,6 +1370,45 @@ class TestCoordinateSystemManager:
         assert (csm == other) is result_exp
         assert (csm != other) is not result_exp
 
+    # test_merge_and_demerge -----------------------------------------------------------
+
+    def test_merge_and_demerge(self):
+        """Test the merge and demerge functions."""
+        # setup -------------------------------------------
+        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(7)]
+
+        csm_0 = self.CSM("lcs0")
+        csm_0.add_cs("lcs1", "lcs0", lcs[1])
+        csm_0.add_cs("lcs2", "lcs0", lcs[2])
+        csm_0.add_cs("lcs3", "lcs2", lcs[3])
+
+        csm_1 = self.CSM("lcs0")
+        csm_1.add_cs("lcs4", "lcs0", lcs[4])
+
+        csm_2 = self.CSM("lcs5")
+        csm_2.add_cs("lcs3", "lcs5", lcs[5], lsc_child_in_parent=False)
+        csm_2.add_cs("lcs6", "lcs5", lcs[6])
+
+        # merge -------------------------------------------
+        csm_0.merge(csm_1)
+        csm_0.merge(csm_2)
+
+        # check merge results -----------------------------
+        csm_0_systems = csm_0.get_coordinate_system_names()
+        assert np.all([f"lcs{i}" in csm_0_systems for i in range(7)])
+
+        for i in range(7):
+            system_name = f"lcs{i}"
+            parent_name = csm_0.get_parent_system_name(system_name)
+            if i == 0:
+                assert parent_name is None
+                continue
+            assert csm_0.get_local_coordinate_system(system_name, parent_name) == lcs[i]
+            assert (
+                csm_0.get_local_coordinate_system(parent_name, system_name)
+                == lcs[i].invert()
+            )
+
 
 def test_coordinate_system_manager_init():
     """Test the init method of the coordinate system manager."""
