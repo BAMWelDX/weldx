@@ -1,6 +1,7 @@
 """Contains methods and classes for coordinate transformations."""
 
 import collections.abc as cl
+import itertools
 import math
 from copy import deepcopy
 from dataclasses import dataclass
@@ -944,6 +945,8 @@ class LocalCoordinateSystem:
 class CoordinateSystemManager:
     """Manages multiple coordinate systems and the transformations between them."""
 
+    _id_gen = itertools.count()
+
     @dataclass
     class CoordinateSystemData:
         """Class that stores data and the coordinate system, the data is assigned to."""
@@ -951,7 +954,11 @@ class CoordinateSystemManager:
         coordinate_system_name: Hashable
         data: xr.DataArray
 
-    def __init__(self, root_coordinate_system_name: Hashable):
+    def __init__(
+        self,
+        root_coordinate_system_name: Hashable,
+        coordinate_system_manager_name: Union[str, None] = None,
+    ):
         """Construct a coordinate system manager.
 
         Parameters
@@ -959,6 +966,10 @@ class CoordinateSystemManager:
         root_coordinate_system_name :
             Name of the root coordinate system. This can be any hashable type, but it is
             recommended to use strings.
+        coordinate_system_manager_name:
+            Name of the coordinate system manager. If 'None' is passed, a default name
+            is chosen.
+
 
         Returns
         -------
@@ -967,8 +978,12 @@ class CoordinateSystemManager:
         """
         self._graph = nx.DiGraph()
         self._data = {}
+        self._merges = {}
         self._root_system_name = root_coordinate_system_name
         self._add_coordinate_system_node(root_coordinate_system_name)
+        if coordinate_system_manager_name is None:
+            coordinate_system_manager_name = self._generate_default_name()
+        self._name = coordinate_system_manager_name
 
     def __repr__(self):
         """Output representation of a CoordinateSystemManager class."""
@@ -1060,6 +1075,18 @@ class CoordinateSystemManager:
                 + str(coordinate_system_name)
             )
 
+    @staticmethod
+    def _generate_default_name() -> str:
+        """Get a default name for the current coordinate system manager instance.
+
+        Returns
+        -------
+        str:
+            Default name.
+
+        """
+        return f"Coordinate system manager {next(CoordinateSystemManager._id_gen)}"
+
     def _update_local_coordinate_system(
         self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
     ):
@@ -1093,6 +1120,18 @@ class CoordinateSystemManager:
 
         """
         return self._graph
+
+    @property
+    def name(self) -> str:
+        """Get the name of the coordinate system manager instance.
+
+        Returns
+        -------
+        str:
+            Name of the coordinate system manager instance.
+            
+        """
+        return self._name
 
     @property
     def number_of_coordinate_systems(self) -> int:
