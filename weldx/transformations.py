@@ -1512,7 +1512,7 @@ class CoordinateSystemManager:
         path = nx.shortest_path(
             self.graph, coordinate_system_name, reference_system_name
         )
-        path_edges = [edge for edge in zip(path[:-1], path[1:])]
+        path_edges = list(zip(path[:-1], path[1:]))
 
         if time is None:
             time_interp = self.time_union(path_edges)
