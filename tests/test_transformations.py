@@ -1221,7 +1221,7 @@ class TestCoordinateSystemManager:
     LCS = tf.LocalCoordinateSystem
 
     @pytest.fixture
-    def csm_default(self):
+    def csm_fix(self):
         """Create default coordinate system fixture."""
         csm_default = self.CSM("root")
         lcs_1 = self.LCS(coordinates=[0, 1, 2])
@@ -1236,6 +1236,26 @@ class TestCoordinateSystemManager:
         csm_default.add_cs("lcs5", "lcs2", lcs_5)
 
         return csm_default
+
+    @pytest.fixture
+    def list_of_csm_and_lcs_instances(self):
+        """Get a list of LCS and CSM instances."""
+        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(7)]
+
+        csm_0 = self.CSM("lcs0")
+        csm_0.add_cs("lcs1", "lcs0", lcs[1])
+        csm_0.add_cs("lcs2", "lcs0", lcs[2])
+        csm_0.add_cs("lcs3", "lcs2", lcs[3])
+
+        csm_1 = self.CSM("lcs0")
+        csm_1.add_cs("lcs4", "lcs0", lcs[4])
+
+        csm_2 = self.CSM("lcs5")
+        csm_2.add_cs("lcs3", "lcs5", lcs[5], lsc_child_in_parent=False)
+        csm_2.add_cs("lcs6", "lcs5", lcs[6])
+
+        csm = [csm_0, csm_1, csm_2]
+        return [csm, lcs]
 
     # test_add_coordinate_system -------------------------------------------------------
 
@@ -1296,11 +1316,11 @@ class TestCoordinateSystemManager:
         ids=get_test_name,
     )
     def test_add_coordinate_system_exceptions(
-        self, csm_default, name, parent_name, lcs, exception_type, test_name
+        self, csm_fix, name, parent_name, lcs, exception_type, test_name
     ):
         """Test the exceptions of the 'add_cs' method."""
         with pytest.raises(exception_type):
-            csm_default.add_cs(name, parent_name, lcs)
+            csm_fix.add_cs(name, parent_name, lcs)
 
     # test num_neighbors ---------------------------------------------------------------
 
@@ -1308,9 +1328,9 @@ class TestCoordinateSystemManager:
         "name, exp_num_neighbors",
         [("root", 2), ("lcs1", 3), ("lcs2", 2), ("lcs3", 1), ("lcs4", 1), ("lcs5", 1)],
     )
-    def test_num_neighbors(self, csm_default, name, exp_num_neighbors):
+    def test_num_neighbors(self, csm_fix, name, exp_num_neighbors):
         """Test the num_neighbors function."""
-        assert csm_default.number_of_neighbors(name) == exp_num_neighbors
+        assert csm_fix.number_of_neighbors(name) == exp_num_neighbors
 
     # test is_neighbor_of --------------------------------------------------------------
 
@@ -1329,9 +1349,9 @@ class TestCoordinateSystemManager:
         "name2, result_idx",
         [("root", 0), ("lcs1", 1), ("lcs2", 2), ("lcs3", 3), ("lcs4", 4), ("lcs5", 5)],
     )
-    def test_is_neighbor_of(self, csm_default, name1, name2, result_idx, exp_result):
+    def test_is_neighbor_of(self, csm_fix, name1, name2, result_idx, exp_result):
         """Test the is_neighbor_of function."""
-        assert csm_default.is_neighbor_of(name1, name2) is exp_result[result_idx]
+        assert csm_fix.is_neighbor_of(name1, name2) is exp_result[result_idx]
 
     # test_comparison ------------------------------------------------------------------
 
@@ -1370,24 +1390,16 @@ class TestCoordinateSystemManager:
         assert (csm == other) is result_exp
         assert (csm != other) is not result_exp
 
-    # test_merge_and_demerge -----------------------------------------------------------
+    # test_merge -----------------------------------------------------------------------
 
-    def test_merge_and_demerge(self):
-        """Test the merge and demerge functions."""
+    def test_merge(self, list_of_csm_and_lcs_instances):
+        """Test the merge function."""
         # setup -------------------------------------------
-        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(7)]
+        lcs = list_of_csm_and_lcs_instances[1]
 
-        csm_0 = self.CSM("lcs0")
-        csm_0.add_cs("lcs1", "lcs0", lcs[1])
-        csm_0.add_cs("lcs2", "lcs0", lcs[2])
-        csm_0.add_cs("lcs3", "lcs2", lcs[3])
-
-        csm_1 = self.CSM("lcs0")
-        csm_1.add_cs("lcs4", "lcs0", lcs[4])
-
-        csm_2 = self.CSM("lcs5")
-        csm_2.add_cs("lcs3", "lcs5", lcs[5], lsc_child_in_parent=False)
-        csm_2.add_cs("lcs6", "lcs5", lcs[6])
+        csm_0 = list_of_csm_and_lcs_instances[0][0]
+        csm_1 = list_of_csm_and_lcs_instances[0][1]
+        csm_2 = list_of_csm_and_lcs_instances[0][2]
 
         # merge -------------------------------------------
         csm_0.merge(csm_1)
@@ -1408,6 +1420,27 @@ class TestCoordinateSystemManager:
                 csm_0.get_local_coordinate_system(parent_name, system_name)
                 == lcs[i].invert()
             )
+
+    # test get_subsystems --------------------------------------------------------------
+
+    def test_get_subsystems(self, list_of_csm_and_lcs_instances):
+        """Test the get_subsystem method."""
+        # setup -------------------------------------------
+        csm_0 = list_of_csm_and_lcs_instances[0][0]
+        csm_1 = list_of_csm_and_lcs_instances[0][1]
+        csm_2 = list_of_csm_and_lcs_instances[0][2]
+
+        csm_0.merge(csm_1)
+        csm_0.merge(csm_2)
+
+        # get subsystems ----------------------------------
+        subs = csm_0.get_sub_systems()
+
+        # checks ------------------------------------------
+        assert len(subs) == 2
+
+        assert subs[0] == csm_1
+        assert subs[1] == csm_2
 
 
 def test_coordinate_system_manager_init():

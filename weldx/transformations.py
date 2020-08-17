@@ -958,6 +958,7 @@ class CoordinateSystemManager:
         self,
         root_coordinate_system_name: Hashable,
         coordinate_system_manager_name: Union[str, None] = None,
+        _graph: Union[nx.DiGraph, None] = None,
     ):
         """Construct a coordinate system manager.
 
@@ -969,6 +970,9 @@ class CoordinateSystemManager:
         coordinate_system_manager_name:
             Name of the coordinate system manager. If 'None' is passed, a default name
             is chosen.
+        _graph:
+            A graph that should be used internally. Do not set this parameter. It is
+            only meant for class internal usage.
 
 
         Returns
@@ -976,14 +980,18 @@ class CoordinateSystemManager:
         CoordinateSystemManager
 
         """
-        self._graph = nx.DiGraph()
-        self._data = {}
-        self._merges = {}
-        self._root_system_name = root_coordinate_system_name
-        self._add_coordinate_system_node(root_coordinate_system_name)
         if coordinate_system_manager_name is None:
             coordinate_system_manager_name = self._generate_default_name()
         self._name = coordinate_system_manager_name
+
+        self._data = {}
+        self._sub_systems = {}
+        self._root_system_name = root_coordinate_system_name
+
+        self._graph = _graph
+        if self._graph is None:
+            self._graph = nx.DiGraph()
+            self._add_coordinate_system_node(root_coordinate_system_name)
 
     def __repr__(self):
         """Output representation of a CoordinateSystemManager class."""
@@ -1134,6 +1142,18 @@ class CoordinateSystemManager:
             
         """
         return self._name
+
+    @property
+    def root_system_name(self) -> str:
+        """Get the name of the root system.
+
+        Returns
+        -------
+        str:
+            Name of the root system
+
+        """
+        return self._root_system_name
 
     @property
     def number_of_coordinate_systems(self) -> int:
@@ -1672,6 +1692,37 @@ class CoordinateSystemManager:
 
         return path[1]
 
+    def get_sub_systems(self) -> List:
+        """Extract all subsystems from the CoordinateSystemManager.
+
+        Returns
+        -------
+        List:
+            List containing all the subsystems.
+
+        """
+        sub_systems = []
+        for sub_system_name, sub_sys_data in self._sub_systems.items():
+            csm_sub_nodes = [sub_sys_data["common node"]] + sub_sys_data["neighbors"]
+            current_leafs = sub_sys_data["neighbors"]
+            while current_leafs:
+                new_leafs = []
+                for leaf in current_leafs:
+                    new_leafs += [
+                        new_leaf
+                        for new_leaf in self.neighbors(leaf)
+                        if new_leaf not in csm_sub_nodes
+                    ]
+                csm_sub_nodes += new_leafs
+                current_leafs = new_leafs
+
+            csm_sub = CoordinateSystemManager(
+                sub_sys_data["root"], _graph=self._graph.subgraph(csm_sub_nodes).copy()
+            )
+            sub_systems.append(csm_sub)
+
+        return sub_systems
+
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
         """Return 'True' if a coordinate system with specified name already exists.
 
@@ -1782,7 +1833,7 @@ class CoordinateSystemManager:
 
         return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
 
-    def merge(self, other):
+    def merge(self, other: "CoordinateSystemManager"):
         """Merge another coordinate system managers into the current instance.
 
         Both 'CoordinateSystemManager' need to have exactly one common coordinate
@@ -1796,13 +1847,25 @@ class CoordinateSystemManager:
             instance.
 
         """
-        intersection = set(self._graph.nodes) & set(other.get_coordinate_system_names())
+        intersection = list(
+            set(self.get_coordinate_system_names())
+            & set(other.get_coordinate_system_names())
+        )
+
         if len(intersection) != 1:
             raise ValueError(
                 "Both instances must have exactly one common coordinate system. "
                 f"Found the following common systems: {intersection}"
             )
+
         self._graph = nx.compose(self._graph, other.graph)
+
+        subsystem_data = {
+            "common node": intersection[0],
+            "root": other.root_system_name,
+            "neighbors": other.neighbors(intersection[0]),
+        }
+        self._sub_systems[other.name] = subsystem_data
 
     def demerge(self) -> List:
         """Undo previous merges and return a list of all previously merged instances.
@@ -1819,7 +1882,27 @@ class CoordinateSystemManager:
             A list containing previously merged 'CoordinateSystemManager' instances.
 
         """
-        pass
+        sub_systems = []
+        for sub_system_name, sub_sys_data in self._sub_systems.items():
+            csm_sub_nodes = [sub_sys_data["common node"]] + sub_sys_data["neighbors"]
+            current_leafs = sub_sys_data["neighbors"]
+            while current_leafs:
+                new_leafs = []
+                for leaf in current_leafs:
+                    new_leafs += [
+                        new_leaf
+                        for new_leaf in self.neighbors(leaf)
+                        if new_leaf not in csm_sub_nodes
+                    ]
+                csm_sub_nodes += new_leafs
+                current_leafs = new_leafs
+
+            csm_sub = CoordinateSystemManager(
+                sub_sys_data["root"], _graph=self._graph.subgraph(csm_sub_nodes).copy()
+            )
+            sub_systems.append(csm_sub)
+
+        return sub_systems
 
     def neighbors(self, coordinate_system_name: Hashable) -> List:
         """Get a list of neighbors of a certain coordinate system.
