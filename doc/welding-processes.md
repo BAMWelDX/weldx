@@ -108,6 +108,7 @@ The power source settings available are the following:
 So in addition to the default pray arc parameters `wire_feedrate` and `voltage`, both `impedance` and `characteristics` also need to be defined for the CLOOS pray arc process.
 We create the new schema file as `/process/CLOOS/spray_arc-1.0.0.yaml` to imply the manufacturer.
 Here is the complete schema, covering the base_process metadata requirements as well as generic spray arc and addition CLOOS specific welding parameters:
+
 ```yaml
 %YAML 1.1
 ---
