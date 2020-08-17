@@ -988,7 +988,9 @@ class CoordinateSystemManager:
     def __repr__(self):
         """Output representation of a CoordinateSystemManager class."""
         return (
-            f"CoordinateSystemManager('graph': {self._graph!r}, 'data': {self._data!r})"
+            f"<CoordinateSystemManager>\nname:\n\t{self._name}\n"
+            f"Coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
+            f"data:\n\t {self._data!r})"
         )
 
     def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
