@@ -1498,6 +1498,50 @@ class TestCoordinateSystemManager:
         assert subs[0] == csm_1
         assert subs[1] == csm_2
 
+    # test_unmerge ---------------------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "additional_cs",
+        [
+            ({}),
+            ({"lcs0": 0}),
+            ({"lcs1": 0}),
+            ({"lcs2": 0}),
+            ({"lcs3": 0}),
+            ({"lcs4": 1}),
+            ({"lcs5": 2}),
+            ({"lcs6": 2}),
+            ({"lcs2": 0, "lcs5": 2}),
+            ({"lcs0": 0, "lcs3": 0, "lcs4": 1, "lcs6": 2}),
+        ],
+    )
+    def test_unmerge(self, list_of_csm_and_lcs_instances, additional_cs):
+        """Test the CSM unmerge function."""
+        # setup -------------------------------------------
+        csm = list_of_csm_and_lcs_instances[0]
+
+        csm_merged = deepcopy(csm[0])
+
+        csm_merged.merge(csm[1])
+        csm_merged.merge(csm[2])
+
+        count = 0
+        for parent_cs, target_csm in additional_cs.items():
+            lcs = self.LCS(coordinates=[count, count + 1, count + 2])
+            csm_merged.add_cs(f"additional_{count}", parent_cs, lcs)
+            csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
+            count += 1
+
+        # unmerge -----------------------------------------
+        subs = csm_merged.unmerge()
+
+        # checks ------------------------------------------
+        csm_res = [csm_merged] + subs
+        assert len(csm_res) == 3
+
+        for i in range(len(csm_res)):
+            assert csm_res[i] == csm[i]
+
 
 def test_coordinate_system_manager_init():
     """Test the init method of the coordinate system manager."""

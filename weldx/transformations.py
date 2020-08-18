@@ -1554,25 +1554,6 @@ class CoordinateSystemManager:
 
         self._graph.remove_node(coordinate_system_name)
 
-    def demerge(self) -> List:
-        """Undo previous merges and return a list of all previously merged instances.
-
-        If additional coordinate systems were added after merging two instances, they
-        won't be lost. Depending on their parent system, they will be kept in one of the
-        returned sub-instances or the current instance. All new systems with the
-        parent system being the shared node of two merged systems are kept in the
-        current instance and won't be passed to the sub-instances.
-
-        Returns
-        -------
-        List:
-            A list containing previously merged 'CoordinateSystemManager' instances.
-
-        """
-        sub_systems = self.get_sub_systems()
-
-        return sub_systems
-
     def get_child_system_names(
         self, coordinate_system_name: str, neighbors_only: bool = True
     ) -> List[str]:
@@ -1792,6 +1773,8 @@ class CoordinateSystemManager:
             List containing all the subsystems.
 
         """
+        # todo: if another system is merged at a previously merged subsystem, all
+        #  corresponding nodes must be removed from the previously merged one
         sub_systems = []
         for sub_system_name, sub_sys_data in self._sub_systems.items():
             csm_sub_nodes = [sub_sys_data["common node"]] + sub_sys_data["neighbors"]
@@ -2050,3 +2033,27 @@ class CoordinateSystemManager:
         rotation = lcs.orientation.data
         translation = lcs.coordinates.data
         return ut.mat_vec_mul(rotation, data) + translation
+
+    def unmerge(self) -> List:
+        """Undo previous merges and return a list of all previously merged instances.
+
+        If additional coordinate systems were added after merging two instances, they
+        won't be lost. Depending on their parent system, they will be kept in one of the
+        returned sub-instances or the current instance. All new systems with the
+        parent system being the shared node of two merged systems are kept in the
+        current instance and won't be passed to the sub-instances.
+
+        Returns
+        -------
+        List:
+            A list containing previously merged 'CoordinateSystemManager' instances.
+
+        """
+        sub_systems = self.get_sub_systems()
+        # todo: move to remove subsystems function
+        for _, sub_system_data in self._sub_systems.items():
+            for lcs in sub_system_data["neighbors"]:
+                self.delete_cs(lcs, True)
+
+        self._sub_systems = {}
+        return sub_systems
