@@ -925,7 +925,8 @@ class LocalCoordinateSystem:
         ----------
         seq :
             Euler rotation sequence as described in
-            https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_euler.html
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial
+            .transform.Rotation.as_euler.html
         degrees :
             Returned angles are in degrees if True, else they are in radians.
             Default is False.
@@ -1003,6 +1004,7 @@ class CoordinateSystemManager:
 
     def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
         """Test equality of CSM instances."""
+        # todo: also check fields like data, name, and sub_systems -> add tests
         if not isinstance(other, self.__class__):
             return False
 
@@ -1521,6 +1523,95 @@ class CoordinateSystemManager:
         )
         self.add_cs(coordinate_system_name, reference_system_name, lcs)
 
+    def delete_cs(self, coordinate_system_name: str, delete_children: bool = False):
+        """Delete a coordinate system from the coordinate system manager.
+
+        Parameters
+        ----------
+        coordinate_system_name:
+            Name of the coordinate system that should be deleted.
+        delete_children:
+            If 'False', an exception is raised if the coordinate system has one or more
+            children since deletion would cause them to be disconnected to the root.
+            If 'True', all children are deleted as well.
+
+        """
+        if coordinate_system_name == self._root_system_name:
+            raise ValueError("The root system can't be deleted.")
+
+        if delete_children:
+            children = self.get_child_system_names(coordinate_system_name, False)
+            for child in children:
+                self._graph.remove_node(child)
+        else:
+            children = self.get_child_system_names(coordinate_system_name, True)
+            if len(children) > 0:
+                raise Exception(
+                    f'Can not delete coordinate system "{coordinate_system_name}". It '
+                    "has one or more children that would be disconnected to the root "
+                    f"after deletion. The attached child systems are: {children}"
+                )
+
+        self._graph.remove_node(coordinate_system_name)
+
+    def demerge(self) -> List:
+        """Undo previous merges and return a list of all previously merged instances.
+
+        If additional coordinate systems were added after merging two instances, they
+        won't be lost. Depending on their parent system, they will be kept in one of the
+        returned sub-instances or the current instance. All new systems with the
+        parent system being the shared node of two merged systems are kept in the
+        current instance and won't be passed to the sub-instances.
+
+        Returns
+        -------
+        List:
+            A list containing previously merged 'CoordinateSystemManager' instances.
+
+        """
+        sub_systems = self.get_sub_systems()
+
+        return sub_systems
+
+    def get_child_system_names(
+        self, coordinate_system_name: str, neighbors_only: bool = True
+    ) -> List[str]:
+        """Get a list with the passed coordinate systems children.
+
+        Parameters
+        ----------
+        coordinate_system_name:
+            Name of the coordinate system
+        neighbors_only:
+            If 'True', only child coordinate systems that are directly connected to the
+            specified coordinate system are included in the returned list. If 'False',
+            child systems of arbitrary hierarchical depth are included.
+
+        Returns
+        -------
+        List[str]:
+            List of child systems.
+
+        """
+        # todo: test
+        if neighbors_only:
+            return [
+                cs
+                for cs in self.neighbors(coordinate_system_name)
+                if cs != self.get_parent_system_name(coordinate_system_name)
+            ]
+
+        current_children = self.get_child_system_names(coordinate_system_name, True)
+        all_children = deepcopy(current_children)
+        while current_children:
+            new_children = []
+            for child in current_children:
+                new_children += self.get_child_system_names(child, True)
+            all_children += new_children
+            current_children = new_children
+
+        return all_children
+
     def get_coordinate_system_names(self) -> List:
         """Get the names of all contained coordinate systems.
 
@@ -1704,17 +1795,8 @@ class CoordinateSystemManager:
         sub_systems = []
         for sub_system_name, sub_sys_data in self._sub_systems.items():
             csm_sub_nodes = [sub_sys_data["common node"]] + sub_sys_data["neighbors"]
-            current_leafs = sub_sys_data["neighbors"]
-            while current_leafs:
-                new_leafs = []
-                for leaf in current_leafs:
-                    new_leafs += [
-                        new_leaf
-                        for new_leaf in self.neighbors(leaf)
-                        if new_leaf not in csm_sub_nodes
-                    ]
-                csm_sub_nodes += new_leafs
-                current_leafs = new_leafs
+            for child in sub_sys_data["neighbors"]:
+                csm_sub_nodes += self.get_child_system_names(child, False)
 
             csm_sub = CoordinateSystemManager(
                 sub_sys_data["root"], _graph=self._graph.subgraph(csm_sub_nodes).copy()
@@ -1866,43 +1948,6 @@ class CoordinateSystemManager:
             "neighbors": other.neighbors(intersection[0]),
         }
         self._sub_systems[other.name] = subsystem_data
-
-    def demerge(self) -> List:
-        """Undo previous merges and return a list of all previously merged instances.
-
-        If additional coordinate systems were added after merging two instances, they
-        won't be lost. Depending on their parent system, they will be kept in one of the
-        returned sub-instances or the current instance. All new systems with the
-        parent system being the shared node of two merged systems are kept in the
-        current instance and won't be passed to the sub-instances.
-
-        Returns
-        -------
-        List:
-            A list containing previously merged 'CoordinateSystemManager' instances.
-
-        """
-        sub_systems = []
-        for sub_system_name, sub_sys_data in self._sub_systems.items():
-            csm_sub_nodes = [sub_sys_data["common node"]] + sub_sys_data["neighbors"]
-            current_leafs = sub_sys_data["neighbors"]
-            while current_leafs:
-                new_leafs = []
-                for leaf in current_leafs:
-                    new_leafs += [
-                        new_leaf
-                        for new_leaf in self.neighbors(leaf)
-                        if new_leaf not in csm_sub_nodes
-                    ]
-                csm_sub_nodes += new_leafs
-                current_leafs = new_leafs
-
-            csm_sub = CoordinateSystemManager(
-                sub_sys_data["root"], _graph=self._graph.subgraph(csm_sub_nodes).copy()
-            )
-            sub_systems.append(csm_sub)
-
-        return sub_systems
 
     def neighbors(self, coordinate_system_name: Hashable) -> List:
         """Get a list of neighbors of a certain coordinate system.

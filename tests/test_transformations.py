@@ -1353,6 +1353,62 @@ class TestCoordinateSystemManager:
         """Test the is_neighbor_of function."""
         assert csm_fix.is_neighbor_of(name1, name2) is exp_result[result_idx]
 
+    # test_delete_coordinate_system ----------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "lcs_del, delete_children, exp_children_deleted",
+        [
+            ("lcs1", True, ["lcs3", "lcs4"]),
+            ("lcs2", True, ["lcs5"]),
+            ("lcs3", True, []),
+            ("lcs4", True, []),
+            ("lcs5", True, []),
+            ("lcs3", False, []),
+            ("lcs4", False, []),
+            ("lcs5", False, []),
+        ],
+    )
+    def test_delete_coordinate_system(
+        self, csm_fix, lcs_del, delete_children, exp_children_deleted
+    ):
+        """Test the delete function of the CSM."""
+        # setup
+        num_cs_before = csm_fix.number_of_coordinate_systems
+        removed_lcs_exp = [lcs_del] + exp_children_deleted
+        num_cs_exp = num_cs_before - len(removed_lcs_exp)
+
+        # delete coordinate system
+        csm_fix.delete_cs(lcs_del, delete_children)
+
+        # check
+        edges = csm_fix.graph.edges
+
+        assert csm_fix.number_of_coordinate_systems == num_cs_exp
+        for lcs in removed_lcs_exp:
+            assert not csm_fix.has_coordinate_system(lcs)
+            for edge in edges:
+                assert lcs not in edge
+
+    # test_delete_coordinate_system_exceptions -----------------------------------------
+
+    @pytest.mark.parametrize(
+        "name, delete_children, exception_type, test_name",
+        [
+            ("root", True, ValueError, "# root system can't be deleted #1"),
+            ("root", False, ValueError, "# root system can't be deleted #2"),
+            ("not there", True, ValueError, "# system does not exist #1"),
+            ("not there", False, ValueError, "# system does not exist #2"),
+            ("lcs1", False, Exception, "# system has children"),
+        ],
+        ids=get_test_name,
+    )
+    def test_delete_coordinate_system_exceptions(
+        self, csm_fix, name, delete_children, exception_type, test_name
+    ):
+        """Test the exceptions of the 'add_cs' method."""
+        with pytest.raises(exception_type):
+            csm_fix.delete_cs(name, delete_children)
+
     # test_comparison ------------------------------------------------------------------
 
     csm_0 = CSM("root")
