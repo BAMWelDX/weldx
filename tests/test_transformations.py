@@ -1237,10 +1237,10 @@ class TestCoordinateSystemManager:
 
         return csm_default
 
-    @pytest.fixture
+    @pytest.fixture()
     def list_of_csm_and_lcs_instances(self):
         """Get a list of LCS and CSM instances."""
-        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(7)]
+        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(10)]
 
         csm_0 = self.CSM("lcs0")
         csm_0.add_cs("lcs1", "lcs0", lcs[1])
@@ -1254,7 +1254,14 @@ class TestCoordinateSystemManager:
         csm_2.add_cs("lcs3", "lcs5", lcs[5], lsc_child_in_parent=False)
         csm_2.add_cs("lcs6", "lcs5", lcs[6])
 
-        csm = [csm_0, csm_1, csm_2]
+        csm_3 = self.CSM("lcs6")
+        csm_3.add_cs("lcs7", "lcs6", lcs[7])
+        csm_3.add_cs("lcs8", "lcs6", lcs[8])
+
+        csm_4 = self.CSM("lcs9")
+        csm_4.add_cs("lcs3", "lcs9", lcs[9], lsc_child_in_parent=False)
+
+        csm = [csm_0, csm_1, csm_2, csm_3, csm_4]
         return [csm, lcs]
 
     # test_add_coordinate_system -------------------------------------------------------
@@ -1353,6 +1360,34 @@ class TestCoordinateSystemManager:
         """Test the is_neighbor_of function."""
         assert csm_fix.is_neighbor_of(name1, name2) is exp_result[result_idx]
 
+    # test_get_child_system_names ------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "cs_name, neighbors_only, result_exp",
+        [
+            ("root", True, ["lcs1", "lcs2"]),
+            ("lcs1", True, ["lcs3", "lcs4"]),
+            ("lcs2", True, ["lcs5"]),
+            ("lcs3", True, []),
+            ("lcs4", True, []),
+            ("lcs5", True, []),
+            ("root", False, ["lcs1", "lcs2", "lcs3", "lcs4", "lcs5"]),
+            ("lcs1", False, ["lcs3", "lcs4"]),
+            ("lcs2", False, ["lcs5"]),
+            ("lcs3", False, []),
+            ("lcs4", False, []),
+            ("lcs5", False, []),
+        ],
+    )
+    def test_get_child_system_names(self, csm_fix, cs_name, neighbors_only, result_exp):
+        """Test the get_child_system_names function."""
+        result = csm_fix.get_child_system_names(cs_name, neighbors_only)
+
+        # check -------------------------------------------
+        assert len(result) == len(result_exp)
+        for name in result_exp:
+            assert name in result
+
     # test_delete_coordinate_system ----------------------------------------------------
 
     @pytest.mark.parametrize(
@@ -1409,21 +1444,21 @@ class TestCoordinateSystemManager:
 
     # test_comparison ------------------------------------------------------------------
 
-    csm_0 = CSM("root")
-    csm_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_0.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_0 = CSM("root")
+    csm_comp_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_comp_0.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
     # different LCS
-    csm_1 = CSM("root")
-    csm_1.add_cs("lcs_0", "root", LCS(coordinates=[1, 1, 2]))
-    csm_1.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_1 = CSM("root")
+    csm_comp_1.add_cs("lcs_0", "root", LCS(coordinates=[1, 1, 2]))
+    csm_comp_1.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
     # different nodes
-    csm_2 = CSM("root")
-    csm_2.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_2.add_cs("lcs_2", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_2 = CSM("root")
+    csm_comp_2.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_comp_2.add_cs("lcs_2", "root", LCS(coordinates=[0, -1, -2]))
     # different edges
-    csm_3 = CSM("root")
-    csm_3.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_3.add_cs("lcs_1", "lcs_0", LCS(coordinates=[0, -1, -2]))
+    csm_comp_3 = CSM("root")
+    csm_comp_3.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_comp_3.add_cs("lcs_1", "lcs_0", LCS(coordinates=[0, -1, -2]))
 
     @pytest.mark.parametrize(
         "csm, other, result_exp",
@@ -1431,11 +1466,11 @@ class TestCoordinateSystemManager:
             (CSM("root"), CSM("root"), True),
             (CSM("root"), CSM("boot"), False),
             (CSM("root"), "a string", False),
-            (csm_0, deepcopy(csm_0), True),
-            (csm_0, CSM("root"), False),
-            (csm_0, csm_1, False),
-            (csm_0, csm_2, False),
-            (csm_0, csm_3, False),
+            (csm_comp_0, deepcopy(csm_comp_0), True),
+            (csm_comp_0, CSM("root"), False),
+            (csm_comp_0, csm_comp_1, False),
+            (csm_comp_0, csm_comp_2, False),
+            (csm_comp_0, csm_comp_3, False),
         ],
     )
     def test_comparison(self, csm, other, result_exp):
@@ -1451,50 +1486,49 @@ class TestCoordinateSystemManager:
         # setup -------------------------------------------
         lcs = list_of_csm_and_lcs_instances[1]
 
-        csm_0 = list_of_csm_and_lcs_instances[0][0]
-        csm_1 = list_of_csm_and_lcs_instances[0][1]
-        csm_2 = list_of_csm_and_lcs_instances[0][2]
+        csm = list_of_csm_and_lcs_instances[0]
 
         # merge -------------------------------------------
-        csm_0.merge(csm_1)
-        csm_0.merge(csm_2)
+        csm[0].merge(csm[1])
+        csm[0].merge(csm[2])
+        csm[0].merge(csm[3])
+        csm[0].merge(csm[4])
 
         # check merge results -----------------------------
-        csm_0_systems = csm_0.get_coordinate_system_names()
-        assert np.all([f"lcs{i}" in csm_0_systems for i in range(7)])
+        csm_0_systems = csm[0].get_coordinate_system_names()
+        assert np.all([f"lcs{i}" in csm_0_systems for i in range(len(lcs))])
 
-        for i in range(7):
-            system_name = f"lcs{i}"
-            parent_name = csm_0.get_parent_system_name(system_name)
+        for i in range(len(lcs)):
+            child = f"lcs{i}"
+            parent = csm[0].get_parent_system_name(child)
             if i == 0:
-                assert parent_name is None
+                assert parent is None
                 continue
-            assert csm_0.get_local_coordinate_system(system_name, parent_name) == lcs[i]
-            assert (
-                csm_0.get_local_coordinate_system(parent_name, system_name)
-                == lcs[i].invert()
-            )
+            assert csm[0].get_local_coordinate_system(child, parent) == lcs[i]
+            assert csm[0].get_local_coordinate_system(parent, child) == lcs[i].invert()
 
     # test get_subsystems --------------------------------------------------------------
 
     def test_get_subsystems(self, list_of_csm_and_lcs_instances):
         """Test the get_subsystem method."""
         # setup -------------------------------------------
-        csm_0 = list_of_csm_and_lcs_instances[0][0]
-        csm_1 = list_of_csm_and_lcs_instances[0][1]
-        csm_2 = list_of_csm_and_lcs_instances[0][2]
+        csm = list_of_csm_and_lcs_instances[0]
 
-        csm_0.merge(csm_1)
-        csm_0.merge(csm_2)
+        csm[0].merge(csm[1])
+        csm[0].merge(csm[2])
+        csm[0].merge(csm[3])
+        csm[0].merge(csm[4])
 
         # get subsystems ----------------------------------
-        subs = csm_0.get_sub_systems()
+        subs = csm[0].get_sub_systems()
 
         # checks ------------------------------------------
-        assert len(subs) == 2
+        assert len(subs) == 4
 
-        assert subs[0] == csm_1
-        assert subs[1] == csm_2
+        assert subs[0] == csm[1]
+        assert subs[1] == csm[2]
+        assert subs[2] == csm[3]
+        assert subs[3] == csm[4]
 
     # test_remove_subsystems -----------------------------------------------------------
 
@@ -1533,7 +1567,7 @@ class TestCoordinateSystemManager:
     def test_unmerge(self, list_of_csm_and_lcs_instances, additional_cs):
         """Test the CSM unmerge function."""
         # setup -------------------------------------------
-        csm = list_of_csm_and_lcs_instances[0]
+        csm = deepcopy(list_of_csm_and_lcs_instances[0])
 
         csm_merged = deepcopy(csm[0])
 

@@ -5,7 +5,7 @@ import itertools
 import math
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Hashable, List, Union
+from typing import Dict, Hashable, List, Union
 
 import networkx as nx
 import numpy as np
@@ -960,6 +960,7 @@ class CoordinateSystemManager:
         root_coordinate_system_name: Hashable,
         coordinate_system_manager_name: Union[str, None] = None,
         _graph: Union[nx.DiGraph, None] = None,
+        _sub_systems=None,
     ):
         """Construct a coordinate system manager.
 
@@ -974,6 +975,9 @@ class CoordinateSystemManager:
         _graph:
             A graph that should be used internally. Do not set this parameter. It is
             only meant for class internal usage.
+        _sub_systems:
+            A dictionary containing data about the CSMs attached subsystems. This
+            parameter should never be set manually. It is for internal usage only.
 
 
         Returns
@@ -986,8 +990,11 @@ class CoordinateSystemManager:
         self._name = coordinate_system_manager_name
 
         self._data = {}
-        self._sub_systems = {}
         self._root_system_name = root_coordinate_system_name
+
+        self._sub_systems = _sub_systems
+        if self._sub_systems is None:
+            self._sub_systems = {}
 
         self._graph = _graph
         if self._graph is None:
@@ -1168,6 +1175,11 @@ class CoordinateSystemManager:
 
         """
         return self._graph.number_of_nodes()
+
+    @property
+    def sub_system_data(self) -> Dict:
+        """Get a dictionary containing data about the attached subsystems."""
+        return self._sub_systems
 
     def add_cs(
         self,
@@ -1579,7 +1591,6 @@ class CoordinateSystemManager:
             List of child systems.
 
         """
-        # todo: test
         if neighbors_only:
             return [
                 cs
@@ -1782,12 +1793,28 @@ class CoordinateSystemManager:
         #  corresponding nodes must be removed from the previously merged one
         sub_systems = []
         for sub_system_name, sub_sys_data in self._sub_systems.items():
-            csm_sub_nodes = [sub_sys_data["common node"]] + sub_sys_data["neighbors"]
+            csm_sub_nodes = deepcopy(sub_sys_data["neighbors"])
+
             for child in sub_sys_data["neighbors"]:
                 csm_sub_nodes += self.get_child_system_names(child, False)
 
+            # remove nodes that belong to other sub systems
+            for _, other_sub_system_data in self._sub_systems.items():
+                common_node = other_sub_system_data["common node"]
+                if common_node in csm_sub_nodes:
+                    other_sub_sys_nodes = self.get_child_system_names(common_node)
+                    csm_sub_nodes = [
+                        node
+                        for node in csm_sub_nodes
+                        if node not in other_sub_sys_nodes
+                    ]
+
+            csm_sub_nodes += [sub_sys_data["common node"]]
+
             csm_sub = CoordinateSystemManager(
-                sub_sys_data["root"], _graph=self._graph.subgraph(csm_sub_nodes).copy()
+                sub_sys_data["root"],
+                _graph=self._graph.subgraph(csm_sub_nodes).copy(),
+                _sub_systems=sub_sys_data["sub system data"],
             )
             sub_systems.append(csm_sub)
 
@@ -1934,6 +1961,7 @@ class CoordinateSystemManager:
             "common node": intersection[0],
             "root": other.root_system_name,
             "neighbors": other.neighbors(intersection[0]),
+            "sub system data": other.sub_system_data,
         }
         self._sub_systems[other.name] = subsystem_data
 
