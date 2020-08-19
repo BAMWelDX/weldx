@@ -1356,26 +1356,26 @@ class TestCoordinateSystemManager:
     # test_delete_coordinate_system ----------------------------------------------------
 
     @pytest.mark.parametrize(
-        "lcs_del, delete_children, exp_children_deleted",
+        "lcs_del, delete_children, num_cs_exp, exp_children_deleted",
         [
-            ("lcs1", True, ["lcs3", "lcs4"]),
-            ("lcs2", True, ["lcs5"]),
-            ("lcs3", True, []),
-            ("lcs4", True, []),
-            ("lcs5", True, []),
-            ("lcs3", False, []),
-            ("lcs4", False, []),
-            ("lcs5", False, []),
+            ("lcs1", True, 3, ["lcs3", "lcs4"]),
+            ("lcs2", True, 4, ["lcs5"]),
+            ("lcs3", True, 5, []),
+            ("lcs4", True, 5, []),
+            ("lcs5", True, 5, []),
+            ("lcs3", False, 5, []),
+            ("lcs4", False, 5, []),
+            ("lcs5", False, 5, []),
+            ("not included", False, 6, []),
+            ("not included", True, 6, []),
         ],
     )
     def test_delete_coordinate_system(
-        self, csm_fix, lcs_del, delete_children, exp_children_deleted
+        self, csm_fix, lcs_del, delete_children, exp_children_deleted, num_cs_exp
     ):
         """Test the delete function of the CSM."""
         # setup
-        num_cs_before = csm_fix.number_of_coordinate_systems
         removed_lcs_exp = [lcs_del] + exp_children_deleted
-        num_cs_exp = num_cs_before - len(removed_lcs_exp)
 
         # delete coordinate system
         csm_fix.delete_cs(lcs_del, delete_children)
@@ -1396,8 +1396,6 @@ class TestCoordinateSystemManager:
         [
             ("root", True, ValueError, "# root system can't be deleted #1"),
             ("root", False, ValueError, "# root system can't be deleted #2"),
-            ("not there", True, ValueError, "# system does not exist #1"),
-            ("not there", False, ValueError, "# system does not exist #2"),
             ("lcs1", False, Exception, "# system has children"),
         ],
         ids=get_test_name,
@@ -1497,6 +1495,23 @@ class TestCoordinateSystemManager:
 
         assert subs[0] == csm_1
         assert subs[1] == csm_2
+
+    # test_remove_subsystems -----------------------------------------------------------
+
+    def test_remove_subsystems(self, list_of_csm_and_lcs_instances):
+        # setup -------------------------------------------
+        csm = list_of_csm_and_lcs_instances[0]
+
+        csm_merged = deepcopy(csm[0])
+
+        csm_merged.merge(csm[1])
+        csm_merged.merge(csm[2])
+
+        # remove subsystems -------------------------------
+        csm_merged.remove_subsystems()
+
+        # check -------------------------------------------
+        assert csm_merged == csm[0]
 
     # test_unmerge ---------------------------------------------------------------------
 

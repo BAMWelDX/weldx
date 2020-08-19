@@ -1536,6 +1536,9 @@ class CoordinateSystemManager:
             If 'True', all children are deleted as well.
 
         """
+        if not self.has_coordinate_system(coordinate_system_name):
+            return
+
         if coordinate_system_name == self._root_system_name:
             raise ValueError("The root system can't be deleted.")
 
@@ -1549,7 +1552,9 @@ class CoordinateSystemManager:
                 raise Exception(
                     f'Can not delete coordinate system "{coordinate_system_name}". It '
                     "has one or more children that would be disconnected to the root "
-                    f"after deletion. The attached child systems are: {children}"
+                    f'after deletion. Set the delete_children option to "True" to '
+                    f"delete the coordinate system and all its children. "
+                    f"The attached child systems are: {children}"
                 )
 
         self._graph.remove_node(coordinate_system_name)
@@ -1965,6 +1970,14 @@ class CoordinateSystemManager:
         """
         return len(self.neighbors(coordinate_system_name))
 
+    def remove_subsystems(self):
+        """Remove all subsystems from the coordinate system manager."""
+        for _, sub_system_data in self._sub_systems.items():
+            for lcs in sub_system_data["neighbors"]:
+                self.delete_cs(lcs, True)
+
+        self._sub_systems = {}
+
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """Get the time union of all or selected local coordinate systems.
 
@@ -2050,10 +2063,6 @@ class CoordinateSystemManager:
 
         """
         sub_systems = self.get_sub_systems()
-        # todo: move to remove subsystems function
-        for _, sub_system_data in self._sub_systems.items():
-            for lcs in sub_system_data["neighbors"]:
-                self.delete_cs(lcs, True)
+        self.remove_subsystems()
 
-        self._sub_systems = {}
         return sub_systems
