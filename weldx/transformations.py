@@ -1106,6 +1106,27 @@ class CoordinateSystemManager:
         """
         return f"Coordinate system manager {next(CoordinateSystemManager._id_gen)}"
 
+    def _get_sub_system_data_with_child_node_candidates(self):
+        subsystem_data = deepcopy(self._sub_systems)
+        for sub_system_name, sub_sys_data in subsystem_data.items():
+            csm_sub_nodes = deepcopy(sub_sys_data["neighbors"])
+            for child in sub_sys_data["neighbors"]:
+                csm_sub_nodes += self.get_child_system_names(child, False)
+            sub_sys_data["nodes"] = csm_sub_nodes
+        return subsystem_data
+
+    def _get_subsystem_nodes(self, sub_sys_data, subsystem_data):
+        csm_sub_nodes = sub_sys_data["nodes"]
+        for _, other_sub_system_data in subsystem_data.items():
+            if other_sub_system_data["common node"] in csm_sub_nodes:
+                csm_sub_nodes = [
+                    node
+                    for node in csm_sub_nodes
+                    if node not in other_sub_system_data["nodes"]
+                ]
+        csm_sub_nodes += [sub_sys_data["common node"]]
+        return csm_sub_nodes
+
     def _update_local_coordinate_system(
         self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
     ):
@@ -1780,7 +1801,7 @@ class CoordinateSystemManager:
 
         return path[1]
 
-    def get_sub_systems(self) -> List:
+    def get_sub_systems(self) -> List["CoordinateSystemManager"]:
         """Extract all subsystems from the CoordinateSystemManager.
 
         Returns
@@ -1789,28 +1810,23 @@ class CoordinateSystemManager:
             List containing all the subsystems.
 
         """
-        # todo: if another system is merged at a previously merged subsystem, all
-        #  corresponding nodes must be removed from the previously merged one
+        # _get_sub_system_data_with_child_node_candidates
+        subsystem_data = self._get_sub_system_data_with_child_node_candidates()
+
         sub_systems = []
-        for sub_system_name, sub_sys_data in self._sub_systems.items():
-            csm_sub_nodes = deepcopy(sub_sys_data["neighbors"])
-
-            for child in sub_sys_data["neighbors"]:
-                csm_sub_nodes += self.get_child_system_names(child, False)
-
-            # remove nodes that belong to other sub systems
-            for _, other_sub_system_data in self._sub_systems.items():
-                common_node = other_sub_system_data["common node"]
-                if common_node in csm_sub_nodes:
-                    other_sub_sys_nodes = self.get_child_system_names(common_node)
+        for sub_system_name, sub_sys_data in subsystem_data.items():
+            csm_sub_nodes = sub_sys_data["nodes"]
+            # _get_subsystem_nodes
+            for _, other_sub_system_data in subsystem_data.items():
+                if other_sub_system_data["common node"] in csm_sub_nodes:
                     csm_sub_nodes = [
                         node
                         for node in csm_sub_nodes
-                        if node not in other_sub_sys_nodes
+                        if node not in other_sub_system_data["nodes"]
                     ]
+            csm_sub_nodes = self._get_subsystem_nodes(sub_sys_data, subsystem_data)
 
-            csm_sub_nodes += [sub_sys_data["common node"]]
-
+            # create sub system
             csm_sub = CoordinateSystemManager(
                 sub_sys_data["root"],
                 _graph=self._graph.subgraph(csm_sub_nodes).copy(),

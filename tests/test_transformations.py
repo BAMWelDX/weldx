@@ -1240,7 +1240,7 @@ class TestCoordinateSystemManager:
     @pytest.fixture()
     def list_of_csm_and_lcs_instances(self):
         """Get a list of LCS and CSM instances."""
-        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(10)]
+        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(11)]
 
         csm_0 = self.CSM("lcs0")
         csm_0.add_cs("lcs1", "lcs0", lcs[1])
@@ -1261,7 +1261,10 @@ class TestCoordinateSystemManager:
         csm_4 = self.CSM("lcs9")
         csm_4.add_cs("lcs3", "lcs9", lcs[9], lsc_child_in_parent=False)
 
-        csm = [csm_0, csm_1, csm_2, csm_3, csm_4]
+        csm_5 = self.CSM("lcs7")
+        csm_5.add_cs("lcs10", "lcs7", lcs[10])
+
+        csm = [csm_0, csm_1, csm_2, csm_3, csm_4, csm_5]
         return [csm, lcs]
 
     # test_add_coordinate_system -------------------------------------------------------
@@ -1481,36 +1484,51 @@ class TestCoordinateSystemManager:
 
     # test_merge -----------------------------------------------------------------------
 
-    def test_merge(self, list_of_csm_and_lcs_instances):
+    @pytest.mark.parametrize("nested", [(True,), (False,)])
+    def test_merge(self, list_of_csm_and_lcs_instances, nested):
         """Test the merge function."""
         # setup -------------------------------------------
+        csm = list_of_csm_and_lcs_instances[0]
         lcs = list_of_csm_and_lcs_instances[1]
 
-        csm = list_of_csm_and_lcs_instances[0]
-
         # merge -------------------------------------------
-        csm[0].merge(csm[1])
-        csm[0].merge(csm[2])
-        csm[0].merge(csm[3])
-        csm[0].merge(csm[4])
+        csm_mg = deepcopy(csm[0])
+
+        if nested:
+            csm_n3 = deepcopy(csm[3])
+            csm_n3.merge(csm[5])
+            csm_n2 = deepcopy(csm[2])
+            csm_n2.merge(csm_n3)
+            csm_mg.merge(csm[1])
+            csm_mg.merge(csm[4])
+            csm_mg.merge(csm_n2)
+        else:
+            csm_mg.merge(csm[1])
+            csm_mg.merge(csm[2])
+            csm_mg.merge(csm[3])
+            csm_mg.merge(csm[4])
+            csm_mg.merge(csm[5])
 
         # check merge results -----------------------------
-        csm_0_systems = csm[0].get_coordinate_system_names()
+        csm_0_systems = csm_mg.get_coordinate_system_names()
         assert np.all([f"lcs{i}" in csm_0_systems for i in range(len(lcs))])
 
         for i in range(len(lcs)):
             child = f"lcs{i}"
-            parent = csm[0].get_parent_system_name(child)
+            parent = csm_mg.get_parent_system_name(child)
             if i == 0:
                 assert parent is None
                 continue
-            assert csm[0].get_local_coordinate_system(child, parent) == lcs[i]
-            assert csm[0].get_local_coordinate_system(parent, child) == lcs[i].invert()
+            assert csm_mg.get_local_coordinate_system(child, parent) == lcs[i]
+            assert csm_mg.get_local_coordinate_system(parent, child) == lcs[i].invert()
 
-    # test get_subsystems --------------------------------------------------------------
+    # test get_subsystems_merged_serially ----------------------------------------------
 
-    def test_get_subsystems(self, list_of_csm_and_lcs_instances):
-        """Test the get_subsystem method."""
+    def test_get_subsystems_merged_serially(self, list_of_csm_and_lcs_instances):
+        """Test the get_subsystem method.
+
+        In this test case, all sub systems are merged to the same target system.
+        """
         # setup -------------------------------------------
         csm = list_of_csm_and_lcs_instances[0]
 
@@ -1518,34 +1536,97 @@ class TestCoordinateSystemManager:
         csm[0].merge(csm[2])
         csm[0].merge(csm[3])
         csm[0].merge(csm[4])
+        csm[0].merge(csm[5])
 
         # get subsystems ----------------------------------
         subs = csm[0].get_sub_systems()
 
         # checks ------------------------------------------
-        assert len(subs) == 4
+        assert len(subs) == 5
 
         assert subs[0] == csm[1]
         assert subs[1] == csm[2]
         assert subs[2] == csm[3]
         assert subs[3] == csm[4]
+        assert subs[4] == csm[5]
 
-    # test_remove_subsystems -----------------------------------------------------------
+    # test get_subsystems_merged_nested ----------------------------------------------
 
-    def test_remove_subsystems(self, list_of_csm_and_lcs_instances):
+    def test_get_subsystems_merged_nested(self, list_of_csm_and_lcs_instances):
+        """Test the get_subsystem method.
+
+        In this test case, several systems are merged together before they are merged
+        to the target system. This creates a nested subsystem structure.
+        """
         # setup -------------------------------------------
         csm = list_of_csm_and_lcs_instances[0]
 
-        csm_merged = deepcopy(csm[0])
+        csm_n3 = deepcopy(csm[3])
+        csm_n3.merge(csm[5])
 
-        csm_merged.merge(csm[1])
-        csm_merged.merge(csm[2])
+        csm_n2 = deepcopy(csm[2])
+        csm_n2.merge(csm_n3)
 
-        # remove subsystems -------------------------------
-        csm_merged.remove_subsystems()
+        csm_mg = deepcopy(csm[0])
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm_n2)
+
+        # get sub systems ---------------------------------
+        subs = csm_mg.get_sub_systems()
+
+        # checks ------------------------------------------
+        assert len(subs) == 3
+
+        assert subs[0] == csm[1]
+        assert subs[1] == csm[4]
+        assert subs[2] == csm_n2
+
+        # get sub sub system ------------------------------
+        sub_subs = subs[2].get_sub_systems()
 
         # check -------------------------------------------
-        assert csm_merged == csm[0]
+        assert len(sub_subs) == 1
+
+        assert sub_subs[0] == csm_n3
+
+        # get sub sub sub systems -------------------------
+        sub_sub_subs = sub_subs[0].get_sub_systems()
+
+        # check -------------------------------------------
+        assert len(sub_sub_subs) == 1
+
+        assert sub_sub_subs[0] == csm[5]
+
+    # test_remove_subsystems -----------------------------------------------------------
+
+    @pytest.mark.parametrize("nested", [(True,), (False,)])
+    def test_remove_subsystems(self, list_of_csm_and_lcs_instances, nested):
+        # setup -------------------------------------------
+        csm = list_of_csm_and_lcs_instances[0]
+
+        csm_mg = deepcopy(csm[0])
+
+        if nested:
+            csm_n3 = deepcopy(csm[3])
+            csm_n3.merge(csm[5])
+            csm_n2 = deepcopy(csm[2])
+            csm_n2.merge(csm_n3)
+            csm_mg.merge(csm[1])
+            csm_mg.merge(csm[4])
+            csm_mg.merge(csm_n2)
+        else:
+            csm_mg.merge(csm[1])
+            csm_mg.merge(csm[2])
+            csm_mg.merge(csm[3])
+            csm_mg.merge(csm[4])
+            csm_mg.merge(csm[5])
+
+        # remove subsystems -------------------------------
+        csm_mg.remove_subsystems()
+
+        # check -------------------------------------------
+        assert csm_mg == csm[0]
 
     # test_unmerge ---------------------------------------------------------------------
 
