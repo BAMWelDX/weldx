@@ -2117,7 +2117,7 @@ class CoordinateSystemManager:
         translation = lcs.coordinates.data
         return ut.mat_vec_mul(rotation, data) + translation
 
-    def unmerge(self) -> List:
+    def unmerge(self) -> List["CoordinateSystemManager"]:
         """Undo previous merges and return a list of all previously merged instances.
 
         If additional coordinate systems were added after merging two instances, they
@@ -2128,7 +2128,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List:
+        List["CoordinateSystemManager"]:
             A list containing previously merged 'CoordinateSystemManager' instances.
 
         """

@@ -1641,11 +1641,17 @@ class TestCoordinateSystemManager:
             ({"lcs4": 1}),
             ({"lcs5": 2}),
             ({"lcs6": 2}),
-            ({"lcs2": 0, "lcs5": 2}),
-            ({"lcs0": 0, "lcs3": 0, "lcs4": 1, "lcs6": 2}),
+            ({"lcs7": 3}),
+            ({"lcs8": 3}),
+            ({"lcs9": 4}),
+            ({"lcs10": 5}),
+            ({"lcs2": 0, "lcs5": 2, "lcs7": 3, "lcs8": 3}),
+            ({"lcs0": 0, "lcs3": 0, "lcs4": 1, "lcs6": 2, "lcs10": 5}),
         ],
     )
-    def test_unmerge(self, list_of_csm_and_lcs_instances, additional_cs):
+    def test_unmerge_merged_serially(
+        self, list_of_csm_and_lcs_instances, additional_cs
+    ):
         """Test the CSM unmerge function.
 
         In this test case, all sub systems are merged into the same target system.
@@ -1653,27 +1659,110 @@ class TestCoordinateSystemManager:
         # setup -------------------------------------------
         csm = deepcopy(list_of_csm_and_lcs_instances[0])
 
-        csm_merged = deepcopy(csm[0])
+        csm_mg = deepcopy(csm[0])
 
-        csm_merged.merge(csm[1])
-        csm_merged.merge(csm[2])
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[2])
+        csm_mg.merge(csm[3])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm[5])
 
         count = 0
         for parent_cs, target_csm in additional_cs.items():
             lcs = self.LCS(coordinates=[count, count + 1, count + 2])
-            csm_merged.add_cs(f"additional_{count}", parent_cs, lcs)
+            csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
             csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
             count += 1
 
         # unmerge -----------------------------------------
-        subs = csm_merged.unmerge()
+        subs = csm_mg.unmerge()
 
         # checks ------------------------------------------
-        csm_res = [csm_merged] + subs
-        assert len(csm_res) == 3
+        csm_res = [csm_mg] + subs
+        assert len(csm_res) == 6
 
         for i in range(len(csm_res)):
             assert csm_res[i] == csm[i]
+
+    # test_unmerge_merged_nested -------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "additional_cs",
+        [
+            ({}),
+            ({"lcs0": 0}),
+            ({"lcs1": 0}),
+            ({"lcs2": 0}),
+            ({"lcs3": 0}),
+            ({"lcs4": 1}),
+            ({"lcs5": 2}),
+            ({"lcs6": 2}),
+            ({"lcs7": 3}),
+            ({"lcs8": 3}),
+            ({"lcs9": 4}),
+            ({"lcs10": 5}),
+            ({"lcs2": 0, "lcs5": 2, "lcs7": 3, "lcs8": 3}),
+            ({"lcs0": 0, "lcs3": 0, "lcs4": 1, "lcs6": 2, "lcs10": 5}),
+        ],
+    )
+    def test_unmerge_merged_nested(self, list_of_csm_and_lcs_instances, additional_cs):
+        """Test the CSM unmerge function.
+
+        In this test case, several systems are merged together before they are merged
+        to the target system. This creates a nested subsystem structure.
+        """
+        # setup -------------------------------------------
+        csm = deepcopy(list_of_csm_and_lcs_instances[0])
+
+        csm_mg = deepcopy(csm[0])
+
+        csm_n3 = deepcopy(csm[3])
+        csm_n3.merge(csm[5])
+        csm_n2 = deepcopy(csm[2])
+        csm_n2.merge(csm_n3)
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm_n2)
+
+        count = 0
+        for parent_cs, target_csm in additional_cs.items():
+            lcs = self.LCS(coordinates=[count, count + 1, count + 2])
+            csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
+            csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
+            if target_csm in [3, 5]:
+                csm_n3.add_cs(f"additional_{count}", parent_cs, lcs)
+            if target_csm in [2, 3, 5]:
+                csm_n2.add_cs(f"additional_{count}", parent_cs, lcs)
+            count += 1
+
+        # unmerge -----------------------------------------
+        subs = csm_mg.unmerge()
+
+        # checks ------------------------------------------
+        assert len(subs) == 3
+
+        assert csm_mg == csm[0]
+        assert subs[0] == csm[1]
+        assert subs[1] == csm[4]
+        assert subs[2] == csm_n2
+
+        # unmerge sub -------------------------------------
+        sub_subs = subs[2].unmerge()
+
+        # checks ------------------------------------------
+        assert len(sub_subs) == 1
+
+        assert subs[2] == csm[2]
+        assert sub_subs[0] == csm_n3
+
+        # unmerge sub sub ---------------------------------
+        sub_sub_subs = sub_subs[0].unmerge()
+
+        # checks ------------------------------------------
+        assert len(sub_sub_subs) == 1
+
+        assert sub_subs[0] == csm[3]
+        assert sub_sub_subs[0] == csm[5]
 
 
 def test_coordinate_system_manager_init():
