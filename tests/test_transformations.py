@@ -1527,7 +1527,7 @@ class TestCoordinateSystemManager:
     def test_get_subsystems_merged_serially(self, list_of_csm_and_lcs_instances):
         """Test the get_subsystem method.
 
-        In this test case, all sub systems are merged to the same target system.
+        In this test case, all sub systems are merged into the same target system.
         """
         # setup -------------------------------------------
         csm = list_of_csm_and_lcs_instances[0]
@@ -1628,7 +1628,7 @@ class TestCoordinateSystemManager:
         # check -------------------------------------------
         assert csm_mg == csm[0]
 
-    # test_unmerge ---------------------------------------------------------------------
+    # test_unmerge_merged_serially -----------------------------------------------------
 
     @pytest.mark.parametrize(
         "additional_cs",
@@ -1646,7 +1646,10 @@ class TestCoordinateSystemManager:
         ],
     )
     def test_unmerge(self, list_of_csm_and_lcs_instances, additional_cs):
-        """Test the CSM unmerge function."""
+        """Test the CSM unmerge function.
+
+        In this test case, all sub systems are merged into the same target system.
+        """
         # setup -------------------------------------------
         csm = deepcopy(list_of_csm_and_lcs_instances[0])
 

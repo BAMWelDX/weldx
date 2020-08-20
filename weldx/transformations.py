@@ -992,9 +992,9 @@ class CoordinateSystemManager:
         self._data = {}
         self._root_system_name = root_coordinate_system_name
 
-        self._sub_systems = _sub_systems
-        if self._sub_systems is None:
-            self._sub_systems = {}
+        self._sub_system_data_dict = _sub_systems
+        if self._sub_system_data_dict is None:
+            self._sub_system_data_dict = {}
 
         self._graph = _graph
         if self._graph is None:
@@ -1106,26 +1106,59 @@ class CoordinateSystemManager:
         """
         return f"Coordinate system manager {next(CoordinateSystemManager._id_gen)}"
 
-    def _get_sub_system_data_with_child_node_candidates(self):
-        subsystem_data = deepcopy(self._sub_systems)
-        for sub_system_name, sub_sys_data in subsystem_data.items():
-            csm_sub_nodes = deepcopy(sub_sys_data["neighbors"])
-            for child in sub_sys_data["neighbors"]:
-                csm_sub_nodes += self.get_child_system_names(child, False)
-            sub_sys_data["nodes"] = csm_sub_nodes
-        return subsystem_data
+    def _get_extended_sub_system_data(self) -> Dict:
+        """Get an extended copy of the internal sub system data.
 
-    def _get_subsystem_nodes(self, sub_sys_data, subsystem_data):
-        csm_sub_nodes = sub_sys_data["nodes"]
-        for _, other_sub_system_data in subsystem_data.items():
-            if other_sub_system_data["common node"] in csm_sub_nodes:
-                csm_sub_nodes = [
-                    node
-                    for node in csm_sub_nodes
-                    if node not in other_sub_system_data["nodes"]
+        The function adds a list of potential child coordinate systems to each
+        sub system. Coordinate systems in this list might belong to other sub systems
+        that share a common coordinate system with the current sub system.
+
+        Returns
+        -------
+        Dict:
+            Extended copy of the internal sub system data.
+
+        """
+        sub_system_data_dict = deepcopy(self._sub_system_data_dict)
+        for _, sub_system_data in sub_system_data_dict.items():
+            potential_members = []
+            for cs_name in sub_system_data["neighbors"]:
+                potential_members += self.get_child_system_names(cs_name, False)
+
+            sub_system_data["nodes"] = potential_members + sub_system_data["neighbors"]
+
+        return sub_system_data_dict
+
+    @staticmethod
+    def _get_sub_system_members(
+        ext_sub_system_data, ext_sub_system_data_dict
+    ) -> List[str]:
+        """Get a list with all coordinate system names, that belong to the sub system.
+        
+        Parameters
+        ----------
+        ext_sub_system_data:
+            The extended sub system data of a single sub system.
+        ext_sub_system_data_dict:
+            Dictionary containing the extended sub system data of all sub systems.
+
+        Returns
+        -------
+        List[str]:
+            List of all the sub systems coordinate systems.
+
+        """
+        all_members = ext_sub_system_data["nodes"]
+        for _, other_sub_system_data in ext_sub_system_data_dict.items():
+            if other_sub_system_data["common node"] in all_members:
+                all_members = [
+                    cs_name
+                    for cs_name in all_members
+                    if cs_name not in other_sub_system_data["nodes"]
                 ]
-        csm_sub_nodes += [sub_sys_data["common node"]]
-        return csm_sub_nodes
+
+        all_members += [ext_sub_system_data["common node"]]
+        return all_members
 
     def _update_local_coordinate_system(
         self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
@@ -1200,7 +1233,7 @@ class CoordinateSystemManager:
     @property
     def sub_system_data(self) -> Dict:
         """Get a dictionary containing data about the attached subsystems."""
-        return self._sub_systems
+        return self._sub_system_data_dict
 
     def add_cs(
         self,
@@ -1569,6 +1602,7 @@ class CoordinateSystemManager:
             If 'True', all children are deleted as well.
 
         """
+        # TODO: what if a nodes deletion removes a sub system root node?
         if not self.has_coordinate_system(coordinate_system_name):
             return
 
@@ -1810,31 +1844,23 @@ class CoordinateSystemManager:
             List containing all the subsystems.
 
         """
-        # _get_sub_system_data_with_child_node_candidates
-        subsystem_data = self._get_sub_system_data_with_child_node_candidates()
+        ext_sub_system_data_dict = self._get_extended_sub_system_data()
 
-        sub_systems = []
-        for sub_system_name, sub_sys_data in subsystem_data.items():
-            csm_sub_nodes = sub_sys_data["nodes"]
-            # _get_subsystem_nodes
-            for _, other_sub_system_data in subsystem_data.items():
-                if other_sub_system_data["common node"] in csm_sub_nodes:
-                    csm_sub_nodes = [
-                        node
-                        for node in csm_sub_nodes
-                        if node not in other_sub_system_data["nodes"]
-                    ]
-            csm_sub_nodes = self._get_subsystem_nodes(sub_sys_data, subsystem_data)
-
-            # create sub system
-            csm_sub = CoordinateSystemManager(
-                sub_sys_data["root"],
-                _graph=self._graph.subgraph(csm_sub_nodes).copy(),
-                _sub_systems=sub_sys_data["sub system data"],
+        sub_system_list = []
+        for sub_system_name, ext_sub_system_data in ext_sub_system_data_dict.items():
+            members = self._get_sub_system_members(
+                ext_sub_system_data, ext_sub_system_data_dict
             )
-            sub_systems.append(csm_sub)
 
-        return sub_systems
+            csm_sub = CoordinateSystemManager(
+                ext_sub_system_data["root"],
+                sub_system_name,
+                _graph=self._graph.subgraph(members).copy(),
+                _sub_systems=ext_sub_system_data["sub system data"],
+            )
+            sub_system_list.append(csm_sub)
+
+        return sub_system_list
 
     def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
         """Return 'True' if a coordinate system with specified name already exists.
@@ -1979,7 +2005,7 @@ class CoordinateSystemManager:
             "neighbors": other.neighbors(intersection[0]),
             "sub system data": other.sub_system_data,
         }
-        self._sub_systems[other.name] = subsystem_data
+        self._sub_system_data_dict[other.name] = subsystem_data
 
     def neighbors(self, coordinate_system_name: Hashable) -> List:
         """Get a list of neighbors of a certain coordinate system.
@@ -2016,11 +2042,11 @@ class CoordinateSystemManager:
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
-        for _, sub_system_data in self._sub_systems.items():
+        for _, sub_system_data in self._sub_system_data_dict.items():
             for lcs in sub_system_data["neighbors"]:
                 self.delete_cs(lcs, True)
 
-        self._sub_systems = {}
+        self._sub_system_data_dict = {}
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """Get the time union of all or selected local coordinate systems.
