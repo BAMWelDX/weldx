@@ -1462,6 +1462,25 @@ class TestCoordinateSystemManager:
     csm_comp_3 = CSM("root", "name")
     csm_comp_3.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
     csm_comp_3.add_cs("lcs_1", "lcs_0", LCS(coordinates=[0, -1, -2]))
+    # merged systems
+    csm_merge_0 = CSM("root", "sub 1")
+    csm_merge_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_merge_1 = CSM("lcs_0", "sub 2")
+    csm_merge_1.add_cs("lcs_2", "lcs_0", LCS(coordinates=[0, 1, 2]))
+    csm_comp_4 = CSM("root", "name")
+    csm_comp_4.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_4.merge(csm_merge_0)
+    # serial merge
+    csm_comp_5 = CSM("root", "name")
+    csm_comp_5.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_5.merge(csm_merge_0)
+    csm_comp_5.merge(csm_merge_1)
+    # nested merge
+    csm_comp_6 = CSM("root", "name")
+    csm_comp_6.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_nest_0 = deepcopy(csm_merge_0)
+    csm_nest_0.merge(csm_merge_1)
+    csm_comp_6.merge(csm_nest_0)
 
     @pytest.mark.parametrize(
         "csm, other, result_exp",
@@ -1475,6 +1494,12 @@ class TestCoordinateSystemManager:
             (csm_comp_0, csm_comp_1, False),
             (csm_comp_0, csm_comp_2, False),
             (csm_comp_0, csm_comp_3, False),
+            (csm_comp_4, csm_comp_4, True),
+            (csm_comp_4, csm_comp_5, False),
+            (csm_comp_4, csm_comp_6, False),
+            (csm_comp_5, csm_comp_5, True),
+            (csm_comp_5, csm_comp_6, False),
+            (csm_comp_6, csm_comp_6, True),
         ],
     )
     def test_comparison(self, csm, other, result_exp):

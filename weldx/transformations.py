@@ -1006,12 +1006,14 @@ class CoordinateSystemManager:
         return (
             f"<CoordinateSystemManager>\nname:\n\t{self._name}\n"
             f"Coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
-            f"data:\n\t {self._data!r})"
+            f"data:\n\t {self._data!r}\n"
+            f"sub systems:\n\t {[sub_sys for sub_sys in self.sub_system_data]}\n"
+            f")"
         )
 
     def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
         """Test equality of CSM instances."""
-        # todo: also check fields like data, name, and sub_systems -> add tests
+        # todo: also check fields like data and sub_systems -> add tests
         if not isinstance(other, self.__class__):
             return False
 
@@ -1022,6 +1024,9 @@ class CoordinateSystemManager:
             return False
 
         if len(graph_0.nodes) != len(graph_1.nodes):
+            return False
+
+        if self.sub_system_data != other.sub_system_data:
             return False
 
         # check nodes
@@ -1042,6 +1047,20 @@ class CoordinateSystemManager:
                 return False
 
         return True
+
+    @staticmethod
+    def _sub_systems_identical(sys_0, sys_1):
+        """Check if 2 subsystem data dictionaries are identical
+
+        Parameters
+        ----------
+        sys_0
+        sys_1
+
+        Returns
+        -------
+
+        """
 
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
