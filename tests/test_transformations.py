@@ -1447,30 +1447,31 @@ class TestCoordinateSystemManager:
 
     # test_comparison ------------------------------------------------------------------
 
-    csm_comp_0 = CSM("root")
+    csm_comp_0 = CSM("root", "name")
     csm_comp_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
     csm_comp_0.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
     # different LCS
-    csm_comp_1 = CSM("root")
+    csm_comp_1 = CSM("root", "name")
     csm_comp_1.add_cs("lcs_0", "root", LCS(coordinates=[1, 1, 2]))
     csm_comp_1.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
     # different nodes
-    csm_comp_2 = CSM("root")
+    csm_comp_2 = CSM("root", "name")
     csm_comp_2.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
     csm_comp_2.add_cs("lcs_2", "root", LCS(coordinates=[0, -1, -2]))
     # different edges
-    csm_comp_3 = CSM("root")
+    csm_comp_3 = CSM("root", "name")
     csm_comp_3.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
     csm_comp_3.add_cs("lcs_1", "lcs_0", LCS(coordinates=[0, -1, -2]))
 
     @pytest.mark.parametrize(
         "csm, other, result_exp",
         [
-            (CSM("root"), CSM("root"), True),
-            (CSM("root"), CSM("boot"), False),
-            (CSM("root"), "a string", False),
+            (CSM("root", "name"), CSM("root", "name"), True),
+            (CSM("root", "name"), CSM("root", "wrong name"), False),
+            (CSM("root", "name"), CSM("boot", "name"), False),
+            (CSM("root", "name"), "a string", False),
             (csm_comp_0, deepcopy(csm_comp_0), True),
-            (csm_comp_0, CSM("root"), False),
+            (csm_comp_0, CSM("root", "name"), False),
             (csm_comp_0, csm_comp_1, False),
             (csm_comp_0, csm_comp_2, False),
             (csm_comp_0, csm_comp_3, False),

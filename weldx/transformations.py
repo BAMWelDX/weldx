@@ -1018,6 +1018,9 @@ class CoordinateSystemManager:
         graph_0 = self.graph
         graph_1 = other.graph
 
+        if self.name != other.name:
+            return False
+
         if len(graph_0.nodes) != len(graph_1.nodes):
             return False
 
