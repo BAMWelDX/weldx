@@ -560,6 +560,36 @@ def xr_interp_like(
     return result
 
 
+def xr_check_format(dax: xr.DataArray, ref: dict):
+    """Validate the format of the DataArray against a dictionary.
+
+    Does nothing if everything is valid?
+
+    """
+
+    # use this error?
+    from asdf import ValidationError
+
+    # check labels in ref
+    # there should only be "time" and "c"?
+    for key in ref:
+        if key is "time":
+            # everything with key = time
+            if ref[key].get("optional"):
+                # if time is optional - no comparison
+                pass
+            else:
+                # if time not optional - compare
+                for n, dim in enumerate(dax.coords.dims):
+                    if not getattr(dax, dim).dtype == np.dtype(ref[key]["dtype"][n]):
+                        ValidationError(f"Datatype mismatch in dimension {dim}.")
+        else:
+            # in c are the  dimensions of the xarray
+            for dim in ref[key]["values"]:
+                if not hasattr(dax, dim):
+                    ValidationError(f"Dimension {dim} is missing in the xarray.")
+
+
 def xr_3d_vector(data, times=None) -> xr.DataArray:
     """Create an xarray 3d vector with correctly named dimensions and coordinates.
 
