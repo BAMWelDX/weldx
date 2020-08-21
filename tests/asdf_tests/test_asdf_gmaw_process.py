@@ -13,6 +13,17 @@ from weldx.welding import GmawProcess
     [
         GmawProcess(
             "spray",
+            "Fronius",
+            "TPSi",
+            dict(
+                wire_feedrate=Q_(10, "m/min"),
+                voltage=TimeSeries(Q_(40.0, "V")),
+                impedance=Q_(10.0, "percent"),
+                characteristic=Q_(5, "V/A"),
+            ),
+        ),
+        GmawProcess(
+            "spray",
             "CLOOS",
             "Quinto",
             dict(
