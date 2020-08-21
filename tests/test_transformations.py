@@ -1242,26 +1242,26 @@ class TestCoordinateSystemManager:
         """Get a list of LCS and CSM instances."""
         lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(11)]
 
-        csm_0 = self.CSM("lcs0")
+        csm_0 = self.CSM("lcs0", "csm0")
         csm_0.add_cs("lcs1", "lcs0", lcs[1])
         csm_0.add_cs("lcs2", "lcs0", lcs[2])
         csm_0.add_cs("lcs3", "lcs2", lcs[3])
 
-        csm_1 = self.CSM("lcs0")
+        csm_1 = self.CSM("lcs0", "csm1")
         csm_1.add_cs("lcs4", "lcs0", lcs[4])
 
-        csm_2 = self.CSM("lcs5")
+        csm_2 = self.CSM("lcs5", "csm2")
         csm_2.add_cs("lcs3", "lcs5", lcs[5], lsc_child_in_parent=False)
         csm_2.add_cs("lcs6", "lcs5", lcs[6])
 
-        csm_3 = self.CSM("lcs6")
+        csm_3 = self.CSM("lcs6", "csm3")
         csm_3.add_cs("lcs7", "lcs6", lcs[7])
         csm_3.add_cs("lcs8", "lcs6", lcs[8])
 
-        csm_4 = self.CSM("lcs9")
+        csm_4 = self.CSM("lcs9", "csm4")
         csm_4.add_cs("lcs3", "lcs9", lcs[9], lsc_child_in_parent=False)
 
-        csm_5 = self.CSM("lcs7")
+        csm_5 = self.CSM("lcs7", "csm5")
         csm_5.add_cs("lcs10", "lcs7", lcs[10])
 
         csm = [csm_0, csm_1, csm_2, csm_3, csm_4, csm_5]
@@ -1789,6 +1789,59 @@ class TestCoordinateSystemManager:
 
         assert sub_subs[0] == csm[3]
         assert sub_sub_subs[0] == csm[5]
+
+    # test_delete_cs_with_serially_merged_subsystems -----------------------------------
+
+    @pytest.mark.parametrize(
+        "name, subsystems_exp, num_cs_exp",
+        [
+            ("lcs1", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("lcs2", ["csm1", "csm2", "csm3", "csm4", "csm5"], 14),
+            ("lcs3", ["csm1"], 6),
+            ("lcs4", ["csm2", "csm3", "csm4", "csm5"], 15),
+            ("lcs5", ["csm1", "csm4"], 8),
+            ("lcs6", ["csm1", "csm4"], 9),
+            ("lcs7", ["csm1", "csm2", "csm4"], 12),
+            ("lcs8", ["csm1", "csm2", "csm4", "csm5"], 15),
+            ("lcs9", ["csm1", "csm2", "csm3", "csm5"], 15),
+            ("lcs10", ["csm1", "csm2", "csm3", "csm4"], 14),
+            ("add0", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("add1", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("add2", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("add3", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("add4", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+        ],
+    )
+    def test_delete_cs_with_serially_merged_subsystems(
+        self, list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
+    ):
+        # setup -------------------------------------------
+        csm = deepcopy(list_of_csm_and_lcs_instances[0])
+
+        csm_mg = deepcopy(csm[0])
+
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[2])
+        csm_mg.merge(csm[3])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm[5])
+
+        target_system_index = [0, 2, 5, 7, 10]
+        for i in range(len(target_system_index)):
+            lcs = self.LCS(coordinates=[i, 2 * i, -i])
+            csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
+
+        assert name in csm_mg.get_coordinate_system_names()
+
+        # delete coordinate system ------------------------
+        csm_mg.delete_cs(name, True)
+
+        # check -------------------------------------------
+        assert csm_mg.number_of_subsystems == len(subsystems_exp)
+        assert csm_mg.number_of_coordinate_systems == num_cs_exp
+
+        for sub_exp in subsystems_exp:
+            assert sub_exp in csm_mg.subsystem_names
 
 
 def test_coordinate_system_manager_init():

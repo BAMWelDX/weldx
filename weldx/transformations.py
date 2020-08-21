@@ -943,6 +943,7 @@ class LocalCoordinateSystem:
 # coordinate system manager class ------------------------------------------------------
 
 
+# Todo: Convert all getter functions that need no input into properties.
 class CoordinateSystemManager:
     """Manages multiple coordinate systems and the transformations between them."""
 
@@ -1013,7 +1014,7 @@ class CoordinateSystemManager:
 
     def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
         """Test equality of CSM instances."""
-        # todo: also check fields like data and sub_systems -> add tests
+        # todo: also check data  -> add tests
         if not isinstance(other, self.__class__):
             return False
 
@@ -1229,18 +1230,6 @@ class CoordinateSystemManager:
         return self._name
 
     @property
-    def root_system_name(self) -> str:
-        """Get the name of the root system.
-
-        Returns
-        -------
-        str:
-            Name of the root system
-
-        """
-        return self._root_system_name
-
-    @property
     def number_of_coordinate_systems(self) -> int:
         """Get the number of coordinate systems inside the coordinate system manager.
 
@@ -1253,9 +1242,45 @@ class CoordinateSystemManager:
         return self._graph.number_of_nodes()
 
     @property
+    def number_of_subsystems(self) -> int:
+        """Get the number of attached subsystems.
+
+        Returns
+        -------
+        int:
+            Number of attached subsystems.
+
+        """
+        return len(self._sub_system_data_dict)
+
+    @property
+    def root_system_name(self) -> str:
+        """Get the name of the root system.
+
+        Returns
+        -------
+        str:
+            Name of the root system
+
+        """
+        return self._root_system_name
+
+    @property
     def sub_system_data(self) -> Dict:
         """Get a dictionary containing data about the attached subsystems."""
         return self._sub_system_data_dict
+
+    @property
+    def subsystem_names(self) -> List[str]:
+        """Get the names of all subsystems.
+
+        Returns
+        -------
+        List[str]:
+            List with subsystem names.
+
+        """
+        return [name for name in self._sub_system_data_dict]
 
     def add_cs(
         self,
@@ -1614,6 +1639,20 @@ class CoordinateSystemManager:
     def delete_cs(self, coordinate_system_name: str, delete_children: bool = False):
         """Delete a coordinate system from the coordinate system manager.
 
+        If the Coordinate system manager has attached sub system, there are multiple
+        possible  consequences.
+
+        - All subsystems attached to the deleted coordinate system or one of
+          its child systems are removed from the coordinate system manager
+        - If the coordinate system is part of a subsystem and belongs to the systems
+          that were present when the subsystem was merged, the subsystem is removed and
+          can not be restored using "get_sub_systems" or "unmerge". Coordinate systems
+          of the subsystem that aren't a child of the deleted coordinate system will
+          remain in the coordinate system manager
+        - If the coordinate system is part of a subsystem but was added after merging,
+          only the systems and its children are removed. The subsystem remains in the
+          coordinate system manager.
+
         Parameters
         ----------
         coordinate_system_name:
@@ -1631,21 +1670,29 @@ class CoordinateSystemManager:
         if coordinate_system_name == self._root_system_name:
             raise ValueError("The root system can't be deleted.")
 
+        children = self.get_child_system_names(coordinate_system_name, False)
+
+        if not delete_children and len(children) > 0:
+            raise Exception(
+                f'Can not delete coordinate system "{coordinate_system_name}". It '
+                "has one or more children that would be disconnected to the root "
+                f'after deletion. Set the delete_children option to "True" to '
+                f"delete the coordinate system and all its children. "
+                f"The attached child systems are: {children}"
+            )
+
+        # update subsystems
+        remove_systems = []
+        for sub_system_name, sub_system_data in self._sub_system_data_dict.items():
+            if coordinate_system_name in sub_system_data["original members"]:
+                remove_systems += [sub_system_name]
+        for sub_system_name in remove_systems:
+            del self._sub_system_data_dict[sub_system_name]
+
+        # delete nodes and edges
         if delete_children:
-            children = self.get_child_system_names(coordinate_system_name, False)
             for child in children:
                 self._graph.remove_node(child)
-        else:
-            children = self.get_child_system_names(coordinate_system_name, True)
-            if len(children) > 0:
-                raise Exception(
-                    f'Can not delete coordinate system "{coordinate_system_name}". It '
-                    "has one or more children that would be disconnected to the root "
-                    f'after deletion. Set the delete_children option to "True" to '
-                    f"delete the coordinate system and all its children. "
-                    f"The attached child systems are: {children}"
-                )
-
         self._graph.remove_node(coordinate_system_name)
 
     def get_child_system_names(
@@ -1695,7 +1742,7 @@ class CoordinateSystemManager:
             List of coordinate system names.
 
         """
-        return self.graph.nodes
+        return list(self.graph.nodes)
 
     def get_data(
         self, data_name, target_coordinate_system_name=None
@@ -2025,6 +2072,7 @@ class CoordinateSystemManager:
             "common node": intersection[0],
             "root": other.root_system_name,
             "neighbors": other.neighbors(intersection[0]),
+            "original members": other.get_coordinate_system_names(),
             "sub system data": other.sub_system_data,
         }
         self._sub_system_data_dict[other.name] = subsystem_data
