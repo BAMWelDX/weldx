@@ -10,7 +10,7 @@ engines:
       - tests/**
 
 exclude_paths:
-  - 'docs/**'
+  - 'doc/**'
   - 'versioneer.py'
   - 'weldx/_version.py'
   - 'scripts/**'
