@@ -1,5 +1,6 @@
 """Contains the serialization class for the weldx.core.TimeSeries."""
 
+import numpy as np
 import pint
 
 from weldx.asdf.types import WeldxType
@@ -79,7 +80,7 @@ class TimeSeriesTypeASDF(WeldxType):
             else:
                 time = None
                 interpolation = None
-            values = Q_(tree["values"], tree["unit"])
+            values = Q_(np.asarray(tree["values"]), tree["unit"])
             return TimeSeries(values, time, interpolation)
 
         return TimeSeries(tree["values"])
