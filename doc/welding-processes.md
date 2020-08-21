@@ -50,7 +50,7 @@ $ref: "./terms-1.0.0#/base_process"
 This tag class can be used to define any kind of GMAW process that matches the the `base_process` layout as described above.
 While possible to use it, it should only be used in circumstances where no explicit process definition exists (yet). The `process/GMAW` schema might be removed in future versions of the standard.
 
-## default spray and pulse arc process defintions
+## default spray and pulse arc process definitions
 In addition to the `base_process` structure, the basic process variations like spray and pulsed transfer modes are also defined in `process/terms`.
 These define the parameters that *must* be provided for all variations of the process.
 Here are the requirements to match when describing a generic spray arc process:
@@ -140,7 +140,7 @@ allOf:
 
 ## use in python API
 All GMAW process definitions are handle as instances of the `weldx.welding.GmawProcess` class.
-Here is how to create an example isntance implementing the CLOOS GMAW spray arc process above:
+Here is how to create an example instance implementing the CLOOS GMAW spray arc process above:
 ```python
 from weldx import Q_
 from weldx.welding import GmawProcess

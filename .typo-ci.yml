@@ -89,6 +89,10 @@ excluded_words:
   - sympify
   # welding -------------------------------------
   - weldment
+  - GmawProcess
+  - GmawProcessTypeAsdf
+  - CLOOS
+  - Quinto
   # conda ---------------------------------------
   - conda
   - noarch
