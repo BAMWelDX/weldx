@@ -1684,8 +1684,13 @@ class CoordinateSystemManager:
         # update subsystems
         remove_systems = []
         for sub_system_name, sub_system_data in self._sub_system_data_dict.items():
-            if coordinate_system_name in sub_system_data["original members"]:
+            if (
+                coordinate_system_name in sub_system_data["original members"]
+            ) or coordinate_system_name in nx.shortest_path(
+                self.graph, sub_system_data["root"], self._root_system_name
+            ):
                 remove_systems += [sub_system_name]
+
         for sub_system_name in remove_systems:
             del self._sub_system_data_dict[sub_system_name]
 
@@ -2112,11 +2117,15 @@ class CoordinateSystemManager:
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
+
+        cs_delete = []
         for _, sub_system_data in self._sub_system_data_dict.items():
             for lcs in sub_system_data["neighbors"]:
-                self.delete_cs(lcs, True)
+                cs_delete += [lcs]
 
         self._sub_system_data_dict = {}
+        for lcs in cs_delete:
+            self.delete_cs(lcs, True)
 
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """Get the time union of all or selected local coordinate systems.

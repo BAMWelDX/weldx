@@ -1796,11 +1796,11 @@ class TestCoordinateSystemManager:
         "name, subsystems_exp, num_cs_exp",
         [
             ("lcs1", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
-            ("lcs2", ["csm1", "csm2", "csm3", "csm4", "csm5"], 14),
+            ("lcs2", ["csm1"], 4),
             ("lcs3", ["csm1"], 6),
             ("lcs4", ["csm2", "csm3", "csm4", "csm5"], 15),
             ("lcs5", ["csm1", "csm4"], 8),
-            ("lcs6", ["csm1", "csm4"], 9),
+            ("lcs6", ["csm1", "csm4"], 10),
             ("lcs7", ["csm1", "csm2", "csm4"], 12),
             ("lcs8", ["csm1", "csm2", "csm4", "csm5"], 15),
             ("lcs9", ["csm1", "csm2", "csm3", "csm5"], 15),
@@ -1815,6 +1815,7 @@ class TestCoordinateSystemManager:
     def test_delete_cs_with_serially_merged_subsystems(
         self, list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
     ):
+        """Test the delete_cs function with subsystems that were merged serially."""
         # setup -------------------------------------------
         csm = deepcopy(list_of_csm_and_lcs_instances[0])
 
@@ -1826,11 +1827,75 @@ class TestCoordinateSystemManager:
         csm_mg.merge(csm[4])
         csm_mg.merge(csm[5])
 
+        # add some additional coordinate systems
         target_system_index = [0, 2, 5, 7, 10]
         for i in range(len(target_system_index)):
             lcs = self.LCS(coordinates=[i, 2 * i, -i])
             csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
 
+        # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
+        assert name in csm_mg.get_coordinate_system_names()
+
+        # delete coordinate system ------------------------
+        csm_mg.delete_cs(name, True)
+
+        # check -------------------------------------------
+        assert csm_mg.number_of_subsystems == len(subsystems_exp)
+        assert csm_mg.number_of_coordinate_systems == num_cs_exp
+
+        for sub_exp in subsystems_exp:
+            assert sub_exp in csm_mg.subsystem_names
+
+    # test_delete_cs_with_nested_subsystems --------------------------------------------
+
+    @pytest.mark.parametrize(
+        "name, subsystems_exp, num_cs_exp",
+        [
+            ("lcs1", ["csm1", "csm2", "csm4"], 17),
+            ("lcs2", ["csm1"], 4),
+            ("lcs3", ["csm1"], 6),
+            ("lcs4", ["csm2", "csm4"], 17),
+            ("lcs5", ["csm1", "csm4"], 8),
+            ("lcs6", ["csm1", "csm4"], 11),
+            ("lcs7", ["csm1", "csm4"], 14),
+            ("lcs8", ["csm1", "csm4"], 16),
+            ("lcs9", ["csm1", "csm2"], 17),
+            ("lcs10", ["csm1", "csm4"], 16),
+            ("add0", ["csm1", "csm2", "csm4"], 17),
+            ("add1", ["csm1", "csm2", "csm4"], 17),
+            ("add2", ["csm1", "csm2", "csm4"], 17),
+            ("add3", ["csm1", "csm2", "csm4"], 17),
+            ("add4", ["csm1", "csm2", "csm4"], 17),
+            ("nes0", ["csm1", "csm4"], 17),
+            ("nes1", ["csm1", "csm4"], 17),
+        ],
+    )
+    def test_delete_cs_with_nested_subsystems(
+        self, list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
+    ):
+        """Test the delete_cs function with nested subsystems."""
+        # setup -------------------------------------------
+        csm = deepcopy(list_of_csm_and_lcs_instances[0])
+
+        csm_mg = deepcopy(csm[0])
+
+        csm_n3 = deepcopy(csm[3])
+        csm_n3.add_cs("nes0", "lcs8", self.LCS(coordinates=[1, 2, 3]))
+        csm_n3.merge(csm[5])
+        csm_n2 = deepcopy(csm[2])
+        csm_n2.add_cs("nes1", "lcs5", self.LCS(coordinates=[-1, -2, -3]))
+        csm_n2.merge(csm_n3)
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm_n2)
+
+        # add some additional coordinate systems
+        target_system_index = [0, 2, 5, 7, 10]
+        for i in range(len(target_system_index)):
+            lcs = self.LCS(coordinates=[i, 2 * i, -i])
+            csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
+
+        # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
         assert name in csm_mg.get_coordinate_system_names()
 
         # delete coordinate system ------------------------
