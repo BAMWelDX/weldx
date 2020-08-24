@@ -134,6 +134,7 @@ class LocalCoordinateSystemASDF(WeldxType):
             coordinate_system_data.append(transformation)
 
         tree = {
+            "name": node.name,
             "root_system_name": root_system_name,
             "coordinate_systems": coordinate_system_data,
         }
@@ -159,7 +160,8 @@ class LocalCoordinateSystemASDF(WeldxType):
 
         """
         csm = CoordinateSystemManager(
-            root_coordinate_system_name=tree["root_system_name"]
+            root_coordinate_system_name=tree["root_system_name"],
+            coordinate_system_manager_name=tree["name"],
         )
 
         coordinate_systems = tree["coordinate_systems"]

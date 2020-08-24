@@ -1663,7 +1663,6 @@ class CoordinateSystemManager:
             If 'True', all children are deleted as well.
 
         """
-        # TODO: what if a nodes deletion removes a sub system root node?
         if not self.has_coordinate_system(coordinate_system_name):
             return
 
