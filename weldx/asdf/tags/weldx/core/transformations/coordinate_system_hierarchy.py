@@ -1,5 +1,6 @@
 from copy import deepcopy
 from dataclasses import dataclass
+from typing import Dict, List, Tuple
 
 from weldx.asdf.types import WeldxType
 from weldx.transformations import CoordinateSystemManager, LocalCoordinateSystem
@@ -88,6 +89,67 @@ class LocalCoordinateSystemASDF(WeldxType):
     validators = {}
 
     @classmethod
+    def _extract_all_subsystems(
+        cls, csm: CoordinateSystemManager, _recursive_call: bool = False
+    ) -> List[Tuple[CoordinateSystemManager, str]]:
+        """Return a list of all subsystems and their corresponding parent names.
+
+        This function extracts all subsystems and nested subsystems of the passed
+        coordinate system manager instance. Each subsystem is stored inside a tuple
+        together with the parent systems' name.
+
+        Parameters
+        ----------
+        csm:
+            Coordinate system manager instance
+        _recursive_call:
+            Specifies if the current function call happened recursively
+
+        Returns
+        -------
+        List[Tuple[CoordinateSystemManager, str]]:
+            List of subsystems and their parent names
+
+        """
+        if not _recursive_call:
+            csm = deepcopy(csm)
+
+        subsystems = csm.unmerge()
+
+        subsystems = [(subsystem, csm.name) for subsystem in subsystems]
+        for subsystem, _ in subsystems:
+            if subsystem.number_of_subsystems > 0:
+                subsystems += cls._extract_all_subsystems(subsystem, True)
+
+        return subsystems
+
+    @classmethod
+    def _extract_subsystem_data(cls, csm: CoordinateSystemManager) -> List[Dict]:
+        """Get the subsystem data of a CoordinateSystemManager instance.
+
+        Parameters
+        ----------
+        csm:
+            CoordinateSystemManager instance.
+
+        Returns
+        -------
+
+        """
+        subsystems = cls._extract_all_subsystems(csm)
+        subsystem_data = []
+        for subsystem, parent in subsystems:
+            subsystem_data += [
+                {
+                    "name": subsystem.name,
+                    "root_cs": subsystem.root_system_name,
+                    "parent_system": parent,
+                    "members": subsystem.get_coordinate_system_names(),
+                }
+            ]
+        return subsystem_data
+
+    @classmethod
     def to_tree(cls, node: CoordinateSystemManager, ctx):
         """
         Convert a 'CoordinateSystemManager' instance into YAML representations.
@@ -133,8 +195,11 @@ class LocalCoordinateSystemASDF(WeldxType):
             )
             coordinate_system_data.append(transformation)
 
+        subsystems = cls._extract_subsystem_data(node)
+
         tree = {
             "name": node.name,
+            "subsystems": subsystems,
             "root_system_name": root_system_name,
             "coordinate_systems": coordinate_system_data,
         }

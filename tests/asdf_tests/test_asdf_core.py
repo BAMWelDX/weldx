@@ -1,4 +1,5 @@
 """Tests asdf implementations of core module."""
+import asdf  # todo: remove
 import numpy as np
 import pandas as pd
 import pytest
@@ -7,6 +8,7 @@ from asdf import ValidationError
 from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
+from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension  # todo:remove
 from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
@@ -222,6 +224,8 @@ def test_local_coordinate_system_shape_violation():
 
 
 # weldx.transformations.CoordinateSystemManager ----------------------------------------
+
+
 def get_example_coordinate_system_manager():
     """Get a consistent CoordinateSystemManager instance for test purposes."""
     csm = tf.CoordinateSystemManager("root")
@@ -251,6 +255,55 @@ def test_coordinate_system_manager(copy_arrays, lazy_load):
     )
     csm_file = data["cs_hierarchy"]
     assert csm == csm_file
+
+
+def get_coordinate_system_manager_with_subsystems(nested: bool):
+    lcs = [tf.LocalCoordinateSystem(coordinates=[i, -i, -i]) for i in range(10)]
+
+    # global system
+    csm_global = tf.CoordinateSystemManager("base", "Global System")
+    csm_global.add_cs("robot", "base", lcs[0])
+    csm_global.add_cs("specimen", "base", lcs[1])
+
+    # robot system
+    csm_robot = tf.CoordinateSystemManager("robot", "Robot system")
+    csm_robot.add_cs("head", "robot", lcs[2])
+
+    # robot head system
+    csm_head = tf.CoordinateSystemManager("head", "Head system")
+    csm_head.add_cs("torch tcp", "head", lcs[3])
+    csm_head.add_cs("camera tcp", "head", lcs[4], lsc_child_in_parent=False)
+    csm_head.add_cs("scanner tcp", "head", lcs[5])
+
+    # scanner system
+    csm_scanner = tf.CoordinateSystemManager("scanner", "Scanner system")
+    csm_scanner.add_cs("scanner tcp", "scanner", lcs[6])
+
+    # specimen system
+    csm_specimen = tf.CoordinateSystemManager("specimen", "Specimen system")
+    csm_specimen.add_cs("thermocouple 1", "specimen", lcs[7])
+    csm_specimen.add_cs("thermocouple 2", "specimen", lcs[8])
+    csm_specimen.add_cs("thermocouple 3", "thermocouple 2", lcs[9])
+
+    if nested:
+        csm_head.merge(csm_scanner)
+        csm_robot.merge(csm_head)
+        csm_global.merge(csm_robot)
+        csm_global.merge(csm_specimen)
+    else:
+        csm_global.merge(csm_specimen)
+        csm_global.merge(csm_robot)
+        csm_global.merge(csm_head)
+        csm_global.merge(csm_scanner)
+
+    return csm_global
+
+
+def test_coordinate_system_manager_with_subsystems():
+    csm = get_coordinate_system_manager_with_subsystems(True)
+    tree = {"hierarchy": csm}
+    with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as ff:
+        ff.write_to("test.yaml")
 
 
 # --------------------------------------------------------------------------------------
