@@ -13,29 +13,21 @@ type: object
 properties:
   name:
     type: string
+
   root_system_name:
     description: |
       Name of the root coordinate system
     type: string
+
   subsystems:
     type: array
     items:
-      type: object
-      properties:
-        name:
-          type: string
-        parent_sytem:
-          type: string
-        root_cs:
-          type: string
-        connecting_cs:
-          type: string
-        members:
-          type: array
-          items:
-            type: string
-      #propertyOrder: [name, parent_system, root_cs, connecting_cs, members]
+      type: string
 
+  subsystem_data:
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
 
   coordinate_systems:
     description: |
@@ -45,7 +37,7 @@ properties:
     items:
       $ref: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
 
-propertyOrder: [name, root_system_name, subsystems, coordinate_systems]
+propertyOrder: [name, root_system_name, subsystems, subsystem_data,  coordinate_systems]
 required: [name, root_system_name, coordinate_systems]
 flowStyle: block
 additionalProperties: false

@@ -1,0 +1,37 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
+
+title: |
+  Schema that describes a local coordinate system hierarchy
+description: |
+  It stores information how the different coordinate systems are arranged towards each other. The basic data structure
+  is a tree.
+type: object
+properties:
+  name:
+    type: string
+
+  parent_system:
+    type: string
+
+  root_cs:
+    type: string
+
+  members:
+    type: array
+    items:
+      type: string
+
+  subsystems:
+    type: array
+    items:
+      type: string
+
+propertyOrder: [name, parent_system, root_cs, members, subsystems]
+flowStyle: block
+additionalProperties: false
+
+...

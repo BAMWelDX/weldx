@@ -78,7 +78,40 @@ class CoordinateTransformationASDF(WeldxType):
         )
 
 
-class LocalCoordinateSystemASDF(WeldxType):
+@dataclass
+class CoordinateSystemManagerSubsystem:
+    name: str
+    parent_system: str
+    root_cs: str
+    subsystems: List[str]
+    members: List[str]
+
+
+class CoordinateSystemManagerSubsystemASDF(WeldxType):
+    name = "core/transformations/coordinate_system_hierarchy_subsystem"
+    version = "1.0.0"
+    types = [CoordinateSystemManagerSubsystem]
+    requires = ["weldx"]
+    handle_dynamic_subclasses = True
+    validators = {}
+
+    @classmethod
+    def to_tree(cls, node: CoordinateSystemManagerSubsystem, ctx):
+        tree = {
+            "name": node.name,
+            "root_cs": node.root_cs,
+            "parent_system": node.parent_system,
+            "subsystems": node.subsystems,
+            "members": node.members,
+        }
+        return tree
+
+    @classmethod
+    def from_tree(cls, tree, ctx):
+        return tree
+
+
+class CoordinateSystemManagerASDF(WeldxType):
     """Serialization class for weldx.transformations.LocalCoordinateSystem"""
 
     name = "core/transformations/coordinate_system_hierarchy"
@@ -124,7 +157,9 @@ class LocalCoordinateSystemASDF(WeldxType):
         return subsystems
 
     @classmethod
-    def _extract_subsystem_data(cls, csm: CoordinateSystemManager) -> List[Dict]:
+    def _extract_subsystem_data(
+        cls, csm: CoordinateSystemManager
+    ) -> List[CoordinateSystemManagerSubsystem]:
         """Get the subsystem data of a CoordinateSystemManager instance.
 
         Parameters
@@ -139,15 +174,47 @@ class LocalCoordinateSystemASDF(WeldxType):
         subsystems = cls._extract_all_subsystems(csm)
         subsystem_data = []
         for subsystem, parent in subsystems:
+            child_systems = [
+                child.name for child, parent in subsystems if parent == subsystem.name
+            ]
             subsystem_data += [
-                {
-                    "name": subsystem.name,
-                    "root_cs": subsystem.root_system_name,
-                    "parent_system": parent,
-                    "members": subsystem.get_coordinate_system_names(),
-                }
+                CoordinateSystemManagerSubsystem(
+                    subsystem.name,
+                    parent,
+                    subsystem.root_system_name,
+                    child_systems,
+                    subsystem.get_coordinate_system_names(),
+                )
             ]
         return subsystem_data
+
+    @classmethod
+    def _add_coordinate_systems_to_manager(
+        cls, csm: CoordinateSystemManager, lcs_data_list
+    ):
+        # todo: ugly but does the job. check if this can be enhanced
+        leaf_nodes = [csm.root_system_name]
+        while lcs_data_list:
+            leaf_nodes_next = []
+            lcs_data_list_next = []
+            for lcs_data in lcs_data_list:
+                lcs_added = False
+                for leaf_node in leaf_nodes:
+                    edge = lcs_data[0]
+                    if leaf_node in edge:
+                        if leaf_node == edge[0]:
+                            csm.add_cs(edge[1], leaf_node, lcs_data[1], False)
+                            leaf_nodes_next += [edge[1]]
+                        else:
+                            csm.add_cs(edge[0], leaf_node, lcs_data[1], True)
+                            leaf_nodes_next += [edge[0]]
+                        lcs_added = True
+                        break
+                if not lcs_added:
+                    lcs_data_list_next += [lcs_data]
+
+            leaf_nodes = leaf_nodes_next
+            lcs_data_list = lcs_data_list_next
 
     @classmethod
     def to_tree(cls, node: CoordinateSystemManager, ctx):
@@ -178,29 +245,28 @@ class LocalCoordinateSystemASDF(WeldxType):
                 remove_edges.append(edge)
         graph.remove_edges_from(remove_edges)
 
-        # find root coordinate system
-        root_system_name = None
-        for graph_node in graph.nodes:
-            if graph.out_degree(graph_node) == 0:
-                root_system_name = graph_node
-                break
-
         coordinate_system_data = []
-
         for name, reference_system in graph.edges:
-            transformation = CoordinateTransformation(
-                name,
-                reference_system,
-                node.get_local_coordinate_system(name, reference_system),
-            )
-            coordinate_system_data.append(transformation)
+            coordinate_system_data += [
+                CoordinateTransformation(
+                    name,
+                    reference_system,
+                    node.get_local_coordinate_system(name, reference_system),
+                )
+            ]
 
-        subsystems = cls._extract_subsystem_data(node)
+        subsystem_data = cls._extract_subsystem_data(node)
+        subsystems = [
+            subsystem.name
+            for subsystem in subsystem_data
+            if subsystem.parent_system == node.name
+        ]
 
         tree = {
             "name": node.name,
             "subsystems": subsystems,
-            "root_system_name": root_system_name,
+            "subsystem_data": subsystem_data,
+            "root_system_name": node.root_system_name,
             "coordinate_systems": coordinate_system_data,
         }
         return tree
@@ -229,19 +295,29 @@ class LocalCoordinateSystemASDF(WeldxType):
             coordinate_system_manager_name=tree["name"],
         )
 
+        subsystem_data_list = tree["subsystem_data"]
+        subsystems = [
+            CoordinateSystemManager(subsystem_data["root_cs"], subsystem_data["name"])
+            for subsystem_data in subsystem_data_list
+        ]
+
+        main_system_lcs = []
+        subsystem_lcs = [[] for _ in range(len(subsystems))]
         coordinate_systems = tree["coordinate_systems"]
 
-        all_systems_included = False
-        while not all_systems_included:
-            all_systems_included = True
-            for cs_data in coordinate_systems:
-                if not csm.has_coordinate_system(cs_data.name):
-                    if csm.has_coordinate_system(cs_data.reference_system):
-                        csm.add_cs(
-                            cs_data.name,
-                            cs_data.reference_system,
-                            cs_data.transformation,
-                        )
-                    else:  # pragma: no cover
-                        all_systems_included = False  # TODO: test as soon as possible
+        for lcs_data in coordinate_systems:
+            edge = [lcs_data.name, lcs_data.reference_system]
+            is_subsystem_lcs = False
+            for i in range(len(subsystems)):
+                if set(edge).issubset(subsystem_data_list[i]["members"]):
+                    subsystem_lcs[i] += [(edge, lcs_data.transformation)]
+                    is_subsystem_lcs = True
+                    break
+            if not is_subsystem_lcs:
+                main_system_lcs += [(edge, lcs_data.transformation)]
+
+        cls._add_coordinate_systems_to_manager(csm, main_system_lcs)
+        for i in range(len(subsystems)):
+            cls._add_coordinate_systems_to_manager(subsystems[i], subsystem_lcs[i])
+
         return csm

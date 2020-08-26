@@ -306,6 +306,13 @@ def test_coordinate_system_manager_with_subsystems():
         ff.write_to("test.yaml")
 
 
+def test_tmp():
+    with asdf.open(
+        "test.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()],
+    ) as af:
+        data = af["hierarchy"]
+
+
 # --------------------------------------------------------------------------------------
 # TimeSeries
 # --------------------------------------------------------------------------------------
