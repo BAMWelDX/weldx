@@ -381,9 +381,9 @@ class CoordinateSystemManagerASDF(WeldxType):
         ]
 
         subsystem_data_dict = {}
-        for i in range(len(subsystem_data_list)):
-            subsystem_data_list[i]["csm"] = subsystems[i]
-            subsystem_data_dict[subsystem_data_list[i]["name"]] = subsystem_data_list[i]
+        for i, subsystem_data in enumerate(subsystem_data_list):
+            subsystem_data["csm"] = subsystems[i]
+            subsystem_data_dict[subsystem_data["name"]] = subsystem_data
 
         main_system_lcs = []
         subsystem_lcs = [[] for _ in range(len(subsystems))]
@@ -401,8 +401,8 @@ class CoordinateSystemManagerASDF(WeldxType):
                 main_system_lcs += [(edge, lcs_data.transformation)]
 
         cls._add_coordinate_systems_to_manager(csm, main_system_lcs)
-        for i in range(len(subsystems)):
-            cls._add_coordinate_systems_to_manager(subsystems[i], subsystem_lcs[i])
+        for i, subsystem in enumerate(subsystems):
+            cls._add_coordinate_systems_to_manager(subsystem, subsystem_lcs[i])
 
         if subsystems:
             cls._merge_subsystems(csm, tree["subsystems"], subsystem_data_dict)
