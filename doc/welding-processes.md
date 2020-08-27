@@ -23,7 +23,7 @@ base_process:
       type: object
   required: [base_process,manufacturer,power_source,parameters]
 ```
-The properties `base_process`, `manufacturer` and `power_source` are general metadata fields that must be provided to identify the process. For now these are basic string entries but will be defined more explicitly in later `weldx` iterations.
+The properties `base_process`, `manufacturer`, and `power_source` are general metadata fields that must be provided to identify the process. For now, these are basic string entries but will be defined more explicitly in later `weldx` iterations.
 The `meta` properties is an optional field that can hold additional metadata if required.
 
 ## power source parameters
@@ -47,7 +47,7 @@ title: |
 $ref: "./terms-1.0.0#/base_process"
 ...
 ```
-This tag class can be used to define any kind of GMAW process that matches the the `base_process` layout as described above.
+This tag class can be used to define any kind of GMAW process that matches the `base_process` layout as described above.
 While possible to use it, it should only be used in circumstances where no explicit process definition exists (yet). The `process/GMAW` schema might be removed in future versions of the standard.
 
 ## default spray and pulse arc process definitions
@@ -105,9 +105,10 @@ The power source settings available are the following:
 - welding voltage
 - impedance
 - characteristics
+
 So in addition to the default pray arc parameters `wire_feedrate` and `voltage`, both `impedance` and `characteristics` also need to be defined for the CLOOS pray arc process.
 We create the new schema file as `/process/CLOOS/spray_arc-1.0.0.yaml` to imply the manufacturer.
-Here is the complete schema, covering the base_process metadata requirements as well as generic spray arc and addition CLOOS specific welding parameters:
+Here is the complete schema, covering the base_process metadata requirements as well as generic spray arc and additional CLOOS specific welding parameters:
 
 ```yaml
 %YAML 1.1
