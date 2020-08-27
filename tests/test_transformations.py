@@ -1314,6 +1314,7 @@ class TestCoordinateSystemManager:
 
     # test_add_coordinate_system_exceptions --------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "name, parent_name, lcs, exception_type, test_name",
         [
@@ -1326,7 +1327,7 @@ class TestCoordinateSystemManager:
         ids=get_test_name,
     )
     def test_add_coordinate_system_exceptions(
-        self, csm_fix, name, parent_name, lcs, exception_type, test_name
+        csm_fix, name, parent_name, lcs, exception_type, test_name
     ):
         """Test the exceptions of the 'add_cs' method."""
         with pytest.raises(exception_type):
@@ -1334,16 +1335,18 @@ class TestCoordinateSystemManager:
 
     # test num_neighbors ---------------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "name, exp_num_neighbors",
         [("root", 2), ("lcs1", 3), ("lcs2", 2), ("lcs3", 1), ("lcs4", 1), ("lcs5", 1)],
     )
-    def test_num_neighbors(self, csm_fix, name, exp_num_neighbors):
+    def test_num_neighbors(csm_fix, name, exp_num_neighbors):
         """Test the num_neighbors function."""
         assert csm_fix.number_of_neighbors(name) == exp_num_neighbors
 
     # test is_neighbor_of --------------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "name1, exp_result",
         [
@@ -1359,12 +1362,13 @@ class TestCoordinateSystemManager:
         "name2, result_idx",
         [("root", 0), ("lcs1", 1), ("lcs2", 2), ("lcs3", 3), ("lcs4", 4), ("lcs5", 5)],
     )
-    def test_is_neighbor_of(self, csm_fix, name1, name2, result_idx, exp_result):
+    def test_is_neighbor_of(csm_fix, name1, name2, result_idx, exp_result):
         """Test the is_neighbor_of function."""
         assert csm_fix.is_neighbor_of(name1, name2) is exp_result[result_idx]
 
     # test_get_child_system_names ------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "cs_name, neighbors_only, result_exp",
         [
@@ -1382,7 +1386,7 @@ class TestCoordinateSystemManager:
             ("lcs5", False, []),
         ],
     )
-    def test_get_child_system_names(self, csm_fix, cs_name, neighbors_only, result_exp):
+    def test_get_child_system_names(csm_fix, cs_name, neighbors_only, result_exp):
         """Test the get_child_system_names function."""
         result = csm_fix.get_child_system_names(cs_name, neighbors_only)
 
@@ -1393,6 +1397,7 @@ class TestCoordinateSystemManager:
 
     # test_delete_coordinate_system ----------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "lcs_del, delete_children, num_cs_exp, exp_children_deleted",
         [
@@ -1409,7 +1414,7 @@ class TestCoordinateSystemManager:
         ],
     )
     def test_delete_coordinate_system(
-        self, csm_fix, lcs_del, delete_children, exp_children_deleted, num_cs_exp
+        csm_fix, lcs_del, delete_children, exp_children_deleted, num_cs_exp
     ):
         """Test the delete function of the CSM."""
         # setup
@@ -1429,6 +1434,7 @@ class TestCoordinateSystemManager:
 
     # test_delete_coordinate_system_exceptions -----------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "name, delete_children, exception_type, test_name",
         [
@@ -1439,7 +1445,7 @@ class TestCoordinateSystemManager:
         ids=get_test_name,
     )
     def test_delete_coordinate_system_exceptions(
-        self, csm_fix, name, delete_children, exception_type, test_name
+        csm_fix, name, delete_children, exception_type, test_name
     ):
         """Test the exceptions of the 'add_cs' method."""
         with pytest.raises(exception_type):
@@ -1510,8 +1516,9 @@ class TestCoordinateSystemManager:
 
     # test_merge -----------------------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize("nested", [(True,), (False,)])
-    def test_merge(self, list_of_csm_and_lcs_instances, nested):
+    def test_merge(list_of_csm_and_lcs_instances, nested):
         """Test the merge function."""
         # setup -------------------------------------------
         csm = list_of_csm_and_lcs_instances[0]
@@ -1550,7 +1557,8 @@ class TestCoordinateSystemManager:
 
     # test get_subsystems_merged_serially ----------------------------------------------
 
-    def test_get_subsystems_merged_serially(self, list_of_csm_and_lcs_instances):
+    @staticmethod
+    def test_get_subsystems_merged_serially(list_of_csm_and_lcs_instances):
         """Test the get_subsystem method.
 
         In this test case, all sub systems are merged into the same target system.
@@ -1578,7 +1586,8 @@ class TestCoordinateSystemManager:
 
     # test get_subsystems_merged_nested ----------------------------------------------
 
-    def test_get_subsystems_merged_nested(self, list_of_csm_and_lcs_instances):
+    @staticmethod
+    def test_get_subsystems_merged_nested(list_of_csm_and_lcs_instances):
         """Test the get_subsystem method.
 
         In this test case, several systems are merged together before they are merged
@@ -1626,8 +1635,9 @@ class TestCoordinateSystemManager:
 
     # test_remove_subsystems -----------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize("nested", [(True,), (False,)])
-    def test_remove_subsystems(self, list_of_csm_and_lcs_instances, nested):
+    def test_remove_subsystems(list_of_csm_and_lcs_instances, nested):
         """Test the remove_subsystem function."""
         # setup -------------------------------------------
         csm = list_of_csm_and_lcs_instances[0]
