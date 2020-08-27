@@ -1,5 +1,5 @@
 """Tests asdf implementations of core module."""
-import asdf  # todo: remove
+# import asdf  # todo: remove
 import numpy as np
 import pandas as pd
 import pytest
@@ -8,7 +8,8 @@ from asdf import ValidationError
 from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
-from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension  # todo:remove
+
+# from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension  # todo:remove
 from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
@@ -311,18 +312,19 @@ def test_coordinate_system_manager_with_subsystems(copy_arrays, lazy_load):
     assert csm == csm_file
 
 
-def test_tmp_save():
-    csm = get_coordinate_system_manager_with_subsystems(True)
-    tree = {"hierarchy": csm}
-    with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as ff:
-        ff.write_to("test.yaml")
+# todo: remove
+# def test_tmp_save():
+# csm = get_coordinate_system_manager_with_subsystems(True)
+#  tree = {"hierarchy": csm}
+#   with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as ff:
+#       ff.write_to("test.yaml")
 
 
-def test_tmp_load():
-    with asdf.open(
-        "test.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()],
-    ) as af:
-        data = af["hierarchy"]
+# def test_tmp_load():
+#  aa  with asdf.open(
+#           "test.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()],
+#   ) as af:
+#        data = af["hierarchy"]
 
 
 # --------------------------------------------------------------------------------------

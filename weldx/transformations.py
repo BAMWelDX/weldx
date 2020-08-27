@@ -1185,7 +1185,7 @@ class CoordinateSystemManager:
         ext_sub_system_data, ext_sub_system_data_dict
     ) -> List[str]:
         """Get a list with all coordinate system names, that belong to the sub system.
-        
+
         Parameters
         ----------
         ext_sub_system_data:
@@ -1253,7 +1253,7 @@ class CoordinateSystemManager:
         -------
         str:
             Name of the coordinate system manager instance.
-            
+
         """
         return self._name
 

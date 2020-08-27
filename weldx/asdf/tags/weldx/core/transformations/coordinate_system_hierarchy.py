@@ -143,8 +143,7 @@ class CoordinateSystemManagerSubsystemASDF(WeldxType):
         Returns
         -------
         CoordinateSystemManagerSubsystem :
-            An instance of the 'CoordinateSystemManagerSubsystem' type.
-
+            An instance of the 'CoordinateSystemManagerSubsystem
         """
         return tree
 
@@ -229,7 +228,7 @@ class CoordinateSystemManagerASDF(WeldxType):
         return subsystem_data
 
     @classmethod
-    def _merge_subsystems(cls, csm, subsystem_names, subsystem_data_dict):
+    def _merge_subsystems(cls, csm, subsystem_names, subsystem_data_dict: Dict):
         """Merge a list of subsystems into a CoordinateSystemManager instance.
 
         This function also considers nested subsystems using recursive function calls.
