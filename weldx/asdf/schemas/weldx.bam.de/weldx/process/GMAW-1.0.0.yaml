@@ -1,0 +1,11 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/process/GMAW-1.0.0"
+tag: "tag:weldx.bam.de:weldx/process/GMAW-1.0.0"
+
+title: |
+  Generic GMAW process definition.
+
+$ref: "./terms-1.0.0#/base_process"
+...
