@@ -246,7 +246,7 @@ class CoordinateSystemManagerASDF(WeldxType):
         """
         for subsystem_name in subsystem_names:
             subsystem_data = subsystem_data_dict[subsystem_name]
-            for member in subsystem_data["subsystems"]:
+            if subsystem_data["subsystems"]:
                 cls._merge_subsystems(
                     subsystem_data["csm"],
                     subsystem_data["subsystems"],

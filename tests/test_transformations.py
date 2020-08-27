@@ -1546,14 +1546,14 @@ class TestCoordinateSystemManager:
         csm_0_systems = csm_mg.get_coordinate_system_names()
         assert np.all([f"lcs{i}" in csm_0_systems for i in range(len(lcs))])
 
-        for i in range(len(lcs)):
+        for i, cur_lcs in enumerate(lcs):
             child = f"lcs{i}"
             parent = csm_mg.get_parent_system_name(child)
             if i == 0:
                 assert parent is None
                 continue
-            assert csm_mg.get_local_coordinate_system(child, parent) == lcs[i]
-            assert csm_mg.get_local_coordinate_system(parent, child) == lcs[i].invert()
+            assert csm_mg.get_local_coordinate_system(child, parent) == cur_lcs
+            assert csm_mg.get_local_coordinate_system(parent, child) == cur_lcs.invert()
 
     # test get_subsystems_merged_serially ----------------------------------------------
 
@@ -1718,8 +1718,8 @@ class TestCoordinateSystemManager:
         csm_res = [csm_mg] + subs
         assert len(csm_res) == 6
 
-        for i in range(len(csm_res)):
-            assert csm_res[i] == csm[i]
+        for i, current_lcs in enumerate(csm_res):
+            assert csm_res[i] == current_lcs
 
     # test_unmerge_merged_nested -------------------------------------------------------
 
@@ -1840,7 +1840,7 @@ class TestCoordinateSystemManager:
 
         # add some additional coordinate systems
         target_system_index = [0, 2, 5, 7, 10]
-        for i in range(len(target_system_index)):
+        for i, _ in enumerate(target_system_index):
             lcs = self.LCS(coordinates=[i, 2 * i, -i])
             csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
 
