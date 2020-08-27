@@ -80,6 +80,8 @@ class CoordinateTransformationASDF(WeldxType):
 
 @dataclass
 class CoordinateSystemManagerSubsystem:
+    """Helper class to collect all relevant data of a CSM subsystem."""
+
     name: str
     parent_system: str
     root_cs: str
@@ -88,6 +90,8 @@ class CoordinateSystemManagerSubsystem:
 
 
 class CoordinateSystemManagerSubsystemASDF(WeldxType):
+    """Serialization class for a CoordinateSystemManagerSubsystem instance"""
+
     name = "core/transformations/coordinate_system_hierarchy_subsystem"
     version = "1.0.0"
     types = [CoordinateSystemManagerSubsystem]
@@ -97,6 +101,23 @@ class CoordinateSystemManagerSubsystemASDF(WeldxType):
 
     @classmethod
     def to_tree(cls, node: CoordinateSystemManagerSubsystem, ctx):
+        """Convert a 'CoordinateSystemManagerSubsystem' instance into YAML reprs.
+
+        Parameters
+        ----------
+        node :
+            Instance of the 'CoordinateSystemManagerSubsystem' type to be serialized.
+
+        ctx :
+            An instance of the 'AsdfFile' object that is being written out.
+
+        Returns
+        -------
+            A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
+            'complex') representing the properties of the
+            'CoordinateSystemManagerSubsystem' type to be serialized.
+
+        """
         tree = {
             "name": node.name,
             "root_cs": node.root_cs,
@@ -108,6 +129,23 @@ class CoordinateSystemManagerSubsystemASDF(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
+        """
+        Converts YAML trees into a 'CoordinateSystemManagerSubsystem'.
+
+        Parameters
+        ----------
+        tree :
+            An instance of a basic Python type (possibly nested) that
+            corresponds to a YAML subtree.
+        ctx :
+            An instance of the 'AsdfFile' object that is being constructed.
+
+        Returns
+        -------
+        CoordinateSystemManagerSubsystem :
+            An instance of the 'CoordinateSystemManagerSubsystem' type.
+
+        """
         return tree
 
 
@@ -169,6 +207,8 @@ class CoordinateSystemManagerASDF(WeldxType):
 
         Returns
         -------
+        List[CoordinateSystemManagerSubsystem]:
+            Data of all subsystems
 
         """
         subsystems = cls._extract_all_subsystems(csm)
@@ -190,6 +230,21 @@ class CoordinateSystemManagerASDF(WeldxType):
 
     @classmethod
     def _merge_subsystems(cls, csm, subsystem_names, subsystem_data_dict):
+        """Merge a list of subsystems into a CoordinateSystemManager instance.
+
+        This function also considers nested subsystems using recursive function calls.
+
+        Parameters
+        ----------
+        csm:
+            CoordinateSystemManager instance
+        subsystem_names:
+            Names of all subsystems that should be added.
+        subsystem_data_dict
+            Dictionary containing the data of all subsystems from the
+            CoordinateSystemManager instance
+
+        """
         for subsystem_name in subsystem_names:
             subsystem_data = subsystem_data_dict[subsystem_name]
             for member in subsystem_data["subsystems"]:
@@ -202,8 +257,21 @@ class CoordinateSystemManagerASDF(WeldxType):
 
     @classmethod
     def _add_coordinate_systems_to_manager(
-        cls, csm: CoordinateSystemManager, lcs_data_list
+        cls,
+        csm: CoordinateSystemManager,
+        lcs_data_list: List[Tuple[Tuple[str, str], LocalCoordinateSystem]],
     ):
+        """Add all coordinate systems to a CSM instance.
+
+        Parameters
+        ----------
+        csm:
+            CoordinateSystemManager instance.
+        lcs_data_list:
+            List containing all the necessary data of all coordinate systems that should
+             be added.
+
+        """
         # todo: ugly but does the job. check if this can be enhanced
         leaf_nodes = [csm.root_system_name]
         while lcs_data_list:
@@ -230,8 +298,7 @@ class CoordinateSystemManagerASDF(WeldxType):
 
     @classmethod
     def to_tree(cls, node: CoordinateSystemManager, ctx):
-        """
-        Convert a 'CoordinateSystemManager' instance into YAML representations.
+        """Convert a 'CoordinateSystemManager' instance into YAML representations.
 
         Parameters
         ----------

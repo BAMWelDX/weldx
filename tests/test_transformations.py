@@ -1628,6 +1628,7 @@ class TestCoordinateSystemManager:
 
     @pytest.mark.parametrize("nested", [(True,), (False,)])
     def test_remove_subsystems(self, list_of_csm_and_lcs_instances, nested):
+        """Test the remove_subsystem function."""
         # setup -------------------------------------------
         csm = list_of_csm_and_lcs_instances[0]
 

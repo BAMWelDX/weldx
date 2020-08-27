@@ -1012,29 +1012,6 @@ class CoordinateSystemManager:
             f")"
         )
 
-    def _compare_subsystems_equal(self, data, other):
-        if len(data) != len(other):
-            return False
-        for subsystem_name, subsystem_data in data.items():
-            if subsystem_name not in other:
-                return False
-            other_data = other[subsystem_name]
-            if subsystem_data["common node"] != other_data["common node"]:
-                return False
-            if subsystem_data["root"] != other_data["root"]:
-                return False
-            if set(subsystem_data["neighbors"]) != set(other_data["neighbors"]):
-                return False
-            if set(subsystem_data["original members"]) != set(
-                other_data["original members"]
-            ):
-                return False
-            if not self._compare_subsystems_equal(
-                subsystem_data["sub system data"], other_data["sub system data"]
-            ):
-                return False
-        return True
-
     def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
         """Test equality of CSM instances."""
         # todo: also check data  -> add tests
@@ -1074,20 +1051,6 @@ class CoordinateSystemManager:
                 return False
 
         return True
-
-    @staticmethod
-    def _sub_systems_identical(sys_0, sys_1):
-        """Check if 2 subsystem data dictionaries are identical
-
-        Parameters
-        ----------
-        sys_0
-        sys_1
-
-        Returns
-        -------
-
-        """
 
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
@@ -1142,6 +1105,45 @@ class CoordinateSystemManager:
                 "There already is a coordinate system with name "
                 + str(coordinate_system_name)
             )
+
+    @classmethod
+    def _compare_subsystems_equal(cls, data: Dict, other: Dict) -> bool:
+        """Compare if to subsystem data dictionaries are equal.
+
+        Parameters
+        ----------
+        data:
+            First subsystem data dictionary.
+        other
+            Second subsystem data dictionary.
+
+        Returns
+        -------
+        bool:
+            'True' if both dictionaries are identical, 'False' otherwise.
+
+        """
+        if len(data) != len(other):
+            return False
+        for subsystem_name, subsystem_data in data.items():
+            if subsystem_name not in other:
+                return False
+            other_data = other[subsystem_name]
+            if subsystem_data["common node"] != other_data["common node"]:
+                return False
+            if subsystem_data["root"] != other_data["root"]:
+                return False
+            if set(subsystem_data["neighbors"]) != set(other_data["neighbors"]):
+                return False
+            if set(subsystem_data["original members"]) != set(
+                other_data["original members"]
+            ):
+                return False
+            if not cls._compare_subsystems_equal(
+                subsystem_data["sub system data"], other_data["sub system data"]
+            ):
+                return False
+        return True
 
     @staticmethod
     def _generate_default_name() -> str:
@@ -2142,7 +2144,6 @@ class CoordinateSystemManager:
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
-
         cs_delete = []
         for _, sub_system_data in self._sub_system_data_dict.items():
             for lcs in sub_system_data["neighbors"]:
