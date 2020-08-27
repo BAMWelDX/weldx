@@ -299,14 +299,26 @@ def get_coordinate_system_manager_with_subsystems(nested: bool):
     return csm_global
 
 
-def test_coordinate_system_manager_with_subsystems():
+@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("lazy_load", [True, False])
+def test_coordinate_system_manager_with_subsystems(copy_arrays, lazy_load):
+    csm = get_coordinate_system_manager_with_subsystems(True)
+    tree = {"cs_hierarchy": csm}
+    data = _write_read_buffer(
+        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )
+    csm_file = data["cs_hierarchy"]
+    assert csm == csm_file
+
+
+def test_tmp_save():
     csm = get_coordinate_system_manager_with_subsystems(True)
     tree = {"hierarchy": csm}
     with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as ff:
         ff.write_to("test.yaml")
 
 
-def test_tmp():
+def test_tmp_load():
     with asdf.open(
         "test.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()],
     ) as af:

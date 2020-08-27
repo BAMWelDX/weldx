@@ -1012,6 +1012,29 @@ class CoordinateSystemManager:
             f")"
         )
 
+    def _compare_subsystems_equal(self, data, other):
+        if len(data) != len(other):
+            return False
+        for subsystem_name, subsystem_data in data.items():
+            if subsystem_name not in other:
+                return False
+            other_data = other[subsystem_name]
+            if subsystem_data["common node"] != other_data["common node"]:
+                return False
+            if subsystem_data["root"] != other_data["root"]:
+                return False
+            if set(subsystem_data["neighbors"]) != set(other_data["neighbors"]):
+                return False
+            if set(subsystem_data["original members"]) != set(
+                other_data["original members"]
+            ):
+                return False
+            if not self._compare_subsystems_equal(
+                subsystem_data["sub system data"], other_data["sub system data"]
+            ):
+                return False
+        return True
+
     def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
         """Test equality of CSM instances."""
         # todo: also check data  -> add tests
@@ -1027,7 +1050,10 @@ class CoordinateSystemManager:
         if len(graph_0.nodes) != len(graph_1.nodes):
             return False
 
-        if self.sub_system_data != other.sub_system_data:
+        # if self.sub_system_data != other.sub_system_data:
+        if not self._compare_subsystems_equal(
+            self.sub_system_data, other.sub_system_data
+        ):
             return False
 
         # check nodes
