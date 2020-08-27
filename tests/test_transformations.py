@@ -1901,10 +1901,10 @@ class TestCoordinateSystemManager:
         csm_mg.merge(csm_n2)
 
         # add some additional coordinate systems
-        target_system_index = [0, 2, 5, 7, 10]
-        for i in range(len(target_system_index)):
+        target_system_indices = [0, 2, 5, 7, 10]
+        for i, target_system_index in enumerate(target_system_indices):
             lcs = self.LCS(coordinates=[i, 2 * i, -i])
-            csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
+            csm_mg.add_cs(f"add{i}", f"lcs{target_system_index}", lcs)
 
         # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
         assert name in csm_mg.get_coordinate_system_names()

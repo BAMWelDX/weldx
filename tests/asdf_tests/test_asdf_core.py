@@ -1,5 +1,4 @@
 """Tests asdf implementations of core module."""
-# import asdf  # todo: remove
 import numpy as np
 import pandas as pd
 import pytest
@@ -9,7 +8,6 @@ from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
 
-# from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension  # todo:remove
 from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
@@ -309,29 +307,15 @@ def get_coordinate_system_manager_with_subsystems(nested: bool):
 
 @pytest.mark.parametrize("copy_arrays", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
-def test_coordinate_system_manager_with_subsystems(copy_arrays, lazy_load):
-    csm = get_coordinate_system_manager_with_subsystems(True)
+@pytest.mark.parametrize("nested", [True, False])
+def test_coordinate_system_manager_with_subsystems(copy_arrays, lazy_load, nested):
+    csm = get_coordinate_system_manager_with_subsystems(nested)
     tree = {"cs_hierarchy": csm}
     data = _write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )
     csm_file = data["cs_hierarchy"]
     assert csm == csm_file
-
-
-# todo: remove
-# def test_tmp_save():
-# csm = get_coordinate_system_manager_with_subsystems(True)
-#  tree = {"hierarchy": csm}
-#   with asdf.AsdfFile(tree, extensions=[WeldxExtension(), WeldxAsdfExtension()]) as ff:
-#       ff.write_to("test.yaml")
-
-
-# def test_tmp_load():
-#  aa  with asdf.open(
-#           "test.yaml", extensions=[WeldxExtension(), WeldxAsdfExtension()],
-#   ) as af:
-#        data = af["hierarchy"]
 
 
 # --------------------------------------------------------------------------------------
