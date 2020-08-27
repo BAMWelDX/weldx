@@ -101,7 +101,7 @@ class CoordinateSystemManagerSubsystemASDF(WeldxType):
 
     @classmethod
     def to_tree(cls, node: CoordinateSystemManagerSubsystem, ctx):
-        """Convert a 'CoordinateSystemManagerSubsystem' instance into YAML reprs.
+        """Convert a 'CoordinateSystemManagerSubsystem' instance into YAML repr.
 
         Parameters
         ----------

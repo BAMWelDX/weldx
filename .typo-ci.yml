@@ -111,3 +111,5 @@ excluded_words:
   - netcdf
   - msm
   - Beckhoff
+  - unmerge
+  - itertools
