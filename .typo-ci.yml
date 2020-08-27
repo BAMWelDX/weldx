@@ -114,4 +114,7 @@ excluded_words:
   - bamwelding
   - netcdf
   - msm
+  - Fronius
+  - gmaw
+  - feedrate
   - Beckhoff
