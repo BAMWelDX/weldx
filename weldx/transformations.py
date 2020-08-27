@@ -1008,7 +1008,7 @@ class CoordinateSystemManager:
             f"<CoordinateSystemManager>\nname:\n\t{self._name}\n"
             f"Coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
             f"data:\n\t {self._data!r}\n"
-            f"sub systems:\n\t {[sub_sys for sub_sys in self.sub_system_data]}\n"
+            f"sub systems:\n\t {self._sub_system_data_dict.keys()}\n"
             f")"
         )
 
@@ -1308,7 +1308,7 @@ class CoordinateSystemManager:
             List with subsystem names.
 
         """
-        return [name for name in self._sub_system_data_dict]
+        return self._sub_system_data_dict.keys()
 
     def add_cs(
         self,
@@ -1885,7 +1885,7 @@ class CoordinateSystemManager:
         path = nx.shortest_path(
             self.graph, coordinate_system_name, reference_system_name
         )
-        path_edges = [edge for edge in zip(path[:-1], path[1:])]
+        path_edges = list(zip(path[:-1], path[1:]))
 
         if time is None:
             time_interp = self.time_union(path_edges)
