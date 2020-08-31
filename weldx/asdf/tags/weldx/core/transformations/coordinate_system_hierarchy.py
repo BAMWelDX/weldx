@@ -237,16 +237,14 @@ class CoordinateSystemManagerASDF(WeldxType):
         csm:
             CoordinateSystemManager instance
         subsystem_data_list:
-
-
-        Returns
-        -------
+            List containing all relevant subsystem data from the CoordinateSystemManager
+            instance
 
         """
-
-        subsystem_data_dict = {}
-        for i, subsystem_data in enumerate(subsystem_data_list):
-            subsystem_data_dict[subsystem_data["name"]] = subsystem_data
+        subsystem_data_dict = {
+            subsystem_data["name"]: subsystem_data
+            for subsystem_data in subsystem_data_list
+        }
 
         if subsystem_data_list:
             cls._recursively_merge_subsystems(
@@ -283,10 +281,46 @@ class CoordinateSystemManagerASDF(WeldxType):
             csm.merge(subsystem_data["csm"])
 
     @classmethod
+    def _add_coordinate_systems_to_subsystems(
+        cls, tree, csm, subsystem_data_list: List[Dict]
+    ):
+        """Add all coordinate systems to the owning subsystem.
+
+        Parameters
+        ----------
+        tree:
+            The dictionary representing the ASDF files YAML tree
+        csm:
+            CoordinateSystemManager instance
+        subsystem_data_list:
+            A list containing all relevant subsystem data
+
+        """
+        main_system_lcs = []
+
+        for lcs_data in tree["coordinate_systems"]:
+            edge = [lcs_data.name, lcs_data.reference_system]
+            is_subsystem_lcs = False
+            for subsystem_data in subsystem_data_list:
+                if set(edge).issubset(subsystem_data["members"]):
+                    subsystem_data["lcs"] += [(*edge, lcs_data.transformation)]
+                    is_subsystem_lcs = True
+                    break
+            if not is_subsystem_lcs:
+                main_system_lcs += [(*edge, lcs_data.transformation)]
+
+        # add coordinate systems to corresponding csm
+        cls._add_coordinate_systems_to_manager(csm, main_system_lcs)
+        for subsystem_data in subsystem_data_list:
+            cls._add_coordinate_systems_to_manager(
+                subsystem_data["csm"], subsystem_data["lcs"]
+            )
+
+    @classmethod
     def _add_coordinate_systems_to_manager(
         cls,
         csm: CoordinateSystemManager,
-        lcs_data_list: List[Tuple[Tuple[str, str], LocalCoordinateSystem]],
+        lcs_data_list: List[Tuple[str, str, LocalCoordinateSystem]],
     ):
         """Add all coordinate systems to a CSM instance.
 
@@ -296,7 +330,7 @@ class CoordinateSystemManagerASDF(WeldxType):
             CoordinateSystemManager instance.
         lcs_data_list:
             List containing all the necessary data of all coordinate systems that should
-             be added.
+            be added.
 
         """
         # todo: ugly but does the job. check if this can be enhanced
@@ -307,14 +341,13 @@ class CoordinateSystemManagerASDF(WeldxType):
             for lcs_data in lcs_data_list:
                 lcs_added = False
                 for leaf_node in leaf_nodes:
-                    edge = lcs_data[0]
-                    if leaf_node in edge:
-                        if leaf_node == edge[0]:
-                            csm.add_cs(edge[1], leaf_node, lcs_data[1], False)
-                            leaf_nodes_next += [edge[1]]
+                    if leaf_node in lcs_data[0:2]:
+                        if leaf_node == lcs_data[0]:
+                            csm.add_cs(lcs_data[1], leaf_node, lcs_data[2], False)
+                            leaf_nodes_next += [lcs_data[1]]
                         else:
-                            csm.add_cs(edge[0], leaf_node, lcs_data[1], True)
-                            leaf_nodes_next += [edge[0]]
+                            csm.add_cs(lcs_data[0], leaf_node, lcs_data[2], True)
+                            leaf_nodes_next += [lcs_data[0]]
                         lcs_added = True
                         break
                 if not lcs_added:
@@ -396,10 +429,7 @@ class CoordinateSystemManagerASDF(WeldxType):
             An instance of the 'CoordinateSystemManager' type.
 
         """
-        csm = CoordinateSystemManager(
-            root_coordinate_system_name=tree["root_system_name"],
-            coordinate_system_manager_name=tree["name"],
-        )
+        csm = CoordinateSystemManager(tree["root_system_name"], tree["name"],)
 
         subsystem_data_list = tree["subsystem_data"]
 
@@ -407,29 +437,9 @@ class CoordinateSystemManagerASDF(WeldxType):
             subsystem_data["csm"] = CoordinateSystemManager(
                 subsystem_data["root_cs"], subsystem_data["name"]
             )
+            subsystem_data["lcs"] = []
 
-        # determine which lcs belongs to which csm
-        main_system_lcs = []
-        subsystem_lcs = [[] for _ in range(len(subsystem_data_list))]
-        coordinate_systems = tree["coordinate_systems"]
-
-        for lcs_data in coordinate_systems:
-            edge = [lcs_data.name, lcs_data.reference_system]
-            is_subsystem_lcs = False
-            for i in range(len(subsystem_data_list)):
-                if set(edge).issubset(subsystem_data_list[i]["members"]):
-                    subsystem_lcs[i] += [(edge, lcs_data.transformation)]
-                    is_subsystem_lcs = True
-                    break
-            if not is_subsystem_lcs:
-                main_system_lcs += [(edge, lcs_data.transformation)]
-
-        # add coordinate systems to corresponding csm
-        cls._add_coordinate_systems_to_manager(csm, main_system_lcs)
-        for i, subsystem in enumerate(subsystem_data_list):
-            cls._add_coordinate_systems_to_manager(subsystem["csm"], subsystem_lcs[i])
-
-        # add subsystems
+        cls._add_coordinate_systems_to_subsystems(tree, csm, subsystem_data_list)
         cls._merge_subsystems(tree, csm, subsystem_data_list)
 
         return csm
