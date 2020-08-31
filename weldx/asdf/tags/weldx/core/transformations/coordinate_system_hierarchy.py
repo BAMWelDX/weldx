@@ -167,7 +167,6 @@ class CoordinateSystemManagerASDF(WeldxType):
         This function extracts all subsystems and nested subsystems of the passed
         coordinate system manager instance. Each subsystem is stored inside a tuple
         together with the parent systems' name.
-
         Parameters
         ----------
         csm:
@@ -228,7 +227,36 @@ class CoordinateSystemManagerASDF(WeldxType):
         return subsystem_data
 
     @classmethod
-    def _merge_subsystems(cls, csm, subsystem_names, subsystem_data_dict: Dict):
+    def _merge_subsystems(cls, tree, csm, subsystem_data_list):
+        """Merge all subsystems into the CoordinateSystemManager instance.
+
+        Parameters
+        ----------
+        tree:
+            The dictionary representing the ASDF files YAML tree
+        csm:
+            CoordinateSystemManager instance
+        subsystem_data_list:
+
+
+        Returns
+        -------
+
+        """
+
+        subsystem_data_dict = {}
+        for i, subsystem_data in enumerate(subsystem_data_list):
+            subsystem_data_dict[subsystem_data["name"]] = subsystem_data
+
+        if subsystem_data_list:
+            cls._recursively_merge_subsystems(
+                csm, tree["subsystems"], subsystem_data_dict
+            )
+
+    @classmethod
+    def _recursively_merge_subsystems(
+        cls, csm, subsystem_names, subsystem_data_dict: Dict
+    ):
         """Merge a list of subsystems into a CoordinateSystemManager instance.
 
         This function also considers nested subsystems using recursive function calls.
@@ -247,7 +275,7 @@ class CoordinateSystemManagerASDF(WeldxType):
         for subsystem_name in subsystem_names:
             subsystem_data = subsystem_data_dict[subsystem_name]
             if subsystem_data["subsystems"]:
-                cls._merge_subsystems(
+                cls._recursively_merge_subsystems(
                     subsystem_data["csm"],
                     subsystem_data["subsystems"],
                     subsystem_data_dict,
@@ -375,24 +403,20 @@ class CoordinateSystemManagerASDF(WeldxType):
 
         subsystem_data_list = tree["subsystem_data"]
 
-        subsystems = [
-            CoordinateSystemManager(subsystem_data["root_cs"], subsystem_data["name"])
-            for subsystem_data in subsystem_data_list
-        ]
+        for subsystem_data in subsystem_data_list:
+            subsystem_data["csm"] = CoordinateSystemManager(
+                subsystem_data["root_cs"], subsystem_data["name"]
+            )
 
-        subsystem_data_dict = {}
-        for i, subsystem_data in enumerate(subsystem_data_list):
-            subsystem_data["csm"] = subsystems[i]
-            subsystem_data_dict[subsystem_data["name"]] = subsystem_data
-
+        # determine which lcs belongs to which csm
         main_system_lcs = []
-        subsystem_lcs = [[] for _ in range(len(subsystems))]
+        subsystem_lcs = [[] for _ in range(len(subsystem_data_list))]
         coordinate_systems = tree["coordinate_systems"]
 
         for lcs_data in coordinate_systems:
             edge = [lcs_data.name, lcs_data.reference_system]
             is_subsystem_lcs = False
-            for i in range(len(subsystems)):
+            for i in range(len(subsystem_data_list)):
                 if set(edge).issubset(subsystem_data_list[i]["members"]):
                     subsystem_lcs[i] += [(edge, lcs_data.transformation)]
                     is_subsystem_lcs = True
@@ -400,11 +424,12 @@ class CoordinateSystemManagerASDF(WeldxType):
             if not is_subsystem_lcs:
                 main_system_lcs += [(edge, lcs_data.transformation)]
 
+        # add coordinate systems to corresponding csm
         cls._add_coordinate_systems_to_manager(csm, main_system_lcs)
-        for i, subsystem in enumerate(subsystems):
-            cls._add_coordinate_systems_to_manager(subsystem, subsystem_lcs[i])
+        for i, subsystem in enumerate(subsystem_data_list):
+            cls._add_coordinate_systems_to_manager(subsystem["csm"], subsystem_lcs[i])
 
-        if subsystems:
-            cls._merge_subsystems(csm, tree["subsystems"], subsystem_data_dict)
+        # add subsystems
+        cls._merge_subsystems(tree, csm, subsystem_data_list)
 
         return csm
