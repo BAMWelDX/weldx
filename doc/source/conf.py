@@ -24,6 +24,10 @@ author = 'BAM'
 # The full version, including alpha/beta/rc tags
 release = '0.0.2'
 
+# The name of the Pygments (syntax highlighting) style to use.
+pygments_style = "sphinx"
+
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -47,6 +51,13 @@ source_suffix = {
     ".md": "markdown",
 }
 
+# The encoding of source files.
+# source_encoding = 'utf-8-sig'
+
+# The master toctree document.
+master_doc = "index"
+
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -67,3 +78,13 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
+html_logo = "WelDX_notext.svg"
+
+# Theme options are theme-specific and customize the look and feel of a theme
+# further.  For a list of options available for each theme, see the
+# documentation.
+#html_theme_options = {"logo_only": True}
+
