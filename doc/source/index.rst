@@ -1,11 +1,13 @@
 
 
-Welcome to weldx's documentation!
+Welcome to WelDX documentation!
 =================================
 
 .. toctree::
    :maxdepth: 2
+   :caption: Contents:
 
+   contents
 
 
 
