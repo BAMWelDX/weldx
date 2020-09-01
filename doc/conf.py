@@ -37,17 +37,11 @@ pygments_style = "sphinx"
 extensions = [
     "recommonmark",
     "sphinx.ext.autodoc",
-    "sphinx.ext.coverage",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.extlinks",
-    "sphinx.ext.mathjax",
 ]
 
 # The suffix of source filenames.
 source_suffix = {
     ".rst": "restructuredtext",
-    ".txt": "markdown",
     ".md": "markdown",
 }
 
