@@ -54,163 +54,163 @@ def get_groove(
     are in Quantity values from pint and related units are accepted.
     Required Groove attributes:
         "VGroove":
-            t: workpiece thickness
+            t: workpiece_thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
-            alpha: groove angle
+            alpha: groove_angle
                 - The groove angle is the whole angle of the V-Groove.
                   It is a pint Quantity in degree or radian.
-            b: root gap
+            b: root_gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
-            c: root face
+            c: root_face
                 - The root face is the length of the Y-Groove which is not
                   part of the V. It can be 0.
 
         "UGroove":
-            t: workpiece thickness
+            t: workpiece_thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
-            beta: bevel angle
+            beta: bevel_angle
                 - The bevel angle is the angle that emerges from the circle segment.
                   Where 0 degree would be a parallel to the root face and 90 degree
                   would be a parallel to the workpiece.
-            R: bevel radius
+            R: bevel_radius
                 - The bevel radius defines the length of the radius of the U-segment.
                   It is usually 6 millimeters.
-            b: root gap
+            b: root_gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
-            c: root face
+            c: root_face
                 - The root face is the height of the part below the U-segment.
 
         "IGroove":
-            t: workpiece thickness
+            t: workpiece_thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
-            b: root gap
+            b: root_gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
 
         "UVGroove":
-            t: workpiece thickness
+            t: workpiece_thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
-            alpha: groove angle
+            alpha: groove_angle
                 - The groove angle is the whole angle of the V-Groove part.
                   It is a pint Quantity in degree or radian.
-            beta: bevel angle
+            beta: bevel_angle
                 - The bevel angle is the angle that emerges from the circle segment.
                   Where 0 degree would be a parallel to the root face and 90 degree
                   would be a parallel to the workpiece.
-            R: bevel radius
+            R: bevel_radius
                 - The bevel radius defines the length of the radius of the U-segment.
                   It is usually 6 millimeters.
-            b: root gap
+            b: root_gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
-            h: root face
+            h: root_face
                 - The root face is the height of the V-segment.
 
         "VVGroove":
-            t: workpiece thickness
+            t: workpiece_thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
-            alpha: groove angle
+            alpha: groove_angle
                 - The groove angle is the whole angle of the lower V-Groove part.
                   It is a pint Quantity in degree or radian.
-            beta: bevel angle
+            beta: bevel_angle
                 - The bevel angle is the angle of the upper V-Groove part.
                   It is a pint Quantity in degree or radian.
-            b: root gap
+            b: root_gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
-            c: root face
+            c: root_face
                 - The root face is the height of the part below the lower V-segment.
                   It can be 0 or None.
-            h: root face 2
+            h: root_face2
                 - This root face is the height of the part of the lower V-segment
                   and the root face c.
 
         "HVGroove":
-            t: workpiece thickness
+            t: workpiece_thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
-            beta: bevel angle
+            beta: bevel_angle
                 - The bevel angle is the angle of the V-Groove part.
                   It is a pint Quantity in degree or radian.
-            b: root gap
+            b: root_gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
-            c: root face
+            c: root_face
                 - The root face is the height of the part below the V-segment.
 
         "HUGroove":
-            t: workpiece thickness
+            t: workpiece_thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
-            beta: bevel angle
+            beta: bevel_angle
                 - The bevel angle is the angle that emerges from the circle segment.
                   Where 0 degree would be a parallel to the root face and 90 degree
                   would be a parallel to the workpiece.
-            R: bevel radius
+            R: bevel_radius
                 - The bevel radius defines the length of the radius of the U-segment.
                   It is usually 6 millimeters.
-            b: root gap
+            b: root_gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
-            c: root face
+            c: root_face
                 - The root face is the height of the part below the U-segment.
 
         "DoubleVGroove":
-            t: workpiece thickness
+            t: workpiece_thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
-            alpha: groove angle
+            alpha: groove_angle
                 - The groove angle is the whole angle of the upper V-Groove part.
                   It is a pint Quantity in degree or radian.
-            alpha2: groove angle
+            alpha2: groove_angle
                 - The groove angle is the whole angle of the lower V-Groove part.
                   It is a pint Quantity in degree or radian.
-            b: root gap
+            b: root_gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
-            c: root face
+            c: root_face
                 - The root face is the height of the part between the V-segments.
-            h1: root face 2
+            h1: root_face2
                 - The root face is the height of the upper V-segment.
                   Only c is needed.
-            h2: root face 3
+            h2: root_face3
                 - The root face is the height of the lower V-segment.
                   Only c is needed.
 
         "DoubleUGroove":
-            t: workpiece thickness
+            t: workpiece_thickness
                 - The workpiece thickness is a length Quantity, e.g.: "mm".
                   It is assumed that both workpieces have the same thickness.
-            beta: bevel angle
+            beta: bevel_angle
                 - The bevel angle is the angle that emerges from the circle segment.
                   Where 0 degree would be a parallel to the root face and 90 degree
                   would be a parallel to the workpiece. The upper U-segment.
-            beta2: bevel angle 2
+            beta2: bevel_angle2
                 - The bevel angle is the angle that emerges from the circle segment.
                   Where 0 degree would be a parallel to the root face and 90 degree
                   would be a parallel to the workpiece. The lower U-segment.
-            R: bevel radius
+            R: bevel_radius
                 - The bevel radius defines the length of the radius of the
                   upper U-segment. It is usually 6 millimeters.
-            R2: bevel radius 2
+            R2: bevel_radius2
                 - The bevel radius defines the length of the radius of the
                   lower U-segment. It is usually 6 millimeters.
-            b: root gap
+            b: root_gap
                 - The root gap is the distance of the 2 workpieces.
                   It can be 0 or None.
-            c: root face
+            c: root_face
                 - The root face is the height of the part between the U-segments.
-            h1: root face 2
+            h1: root_face2
                 - The root face is the height of the upper U-segment.
                   Only c is needed.
-            h2: root face 3
+            h2: root_face3
                 - The root face is the height of the lower U-segment.
                   Only c is needed.
 
@@ -231,21 +231,21 @@ def get_groove(
 
 
     Example:
-        from weldx import Q_ as Quantity
+        from weldx import Q_
         from weldx.asdf.tags.weldx.core.groove import get_groove
 
         get_groove(groove_type="VGroove",
-                   workpiece_thickness=Quantity(9, "mm"),
-                   groove_angle=Quantity(50, "deg"),
-                   root_face=Quantity(4, "mm"),
-                   root_gap=Quantity(2, "mm"))
+                   workpiece_thickness=Q_(9, "mm"),
+                   groove_angle=Q_(50, "deg"),
+                   root_face=Q_(4, "mm"),
+                   root_gap=Q_(2, "mm"))
 
         get_groove(groove_type="UGroove",
-                   workpiece_thickness=Quantity(15, "mm"),
-                   bevel_angle=Quantity(9, "deg"),
-                   bevel_radius=Quantity(6, "mm"),
-                   root_face=Quantity(3, "mm"),
-                   root_gap=Quantity(1, "mm"))
+                   workpiece_thickness=Q_(15, "mm"),
+                   bevel_angle=Q_(9, "deg"),
+                   bevel_radius=Q_(6, "mm"),
+                   root_face=Q_(3, "mm"),
+                   root_gap=Q_(1, "mm"))
 
     Parameters
     ----------
@@ -407,7 +407,7 @@ class BaseGroove:
     """Generic base class for all groove types."""
 
     def parameters(self):
-        """ """
+        """Return groove parameters as dictionary of quantities."""
         return {k: v for k, v in self.__dict__.items() if isinstance(v, pint.Quantity)}
 
     def param_strings(self):
@@ -1609,7 +1609,7 @@ class FFGroove(BaseGroove):
             )
 
 
-def _helperfunction(segment, array):
+def _helperfunction(segment, array) -> geo.Shape:
     """Calculate a shape from input.
     Input segment of successive segments as strings.
     Input array of the points in the correct sequence. e.g.:
