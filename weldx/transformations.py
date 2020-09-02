@@ -1,11 +1,11 @@
 """Contains methods and classes for coordinate transformations."""
 
-import collections.abc as cl
+
 import itertools
 import math
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Dict, Hashable, List, Union
+from typing import Dict, List, Union
 
 import networkx as nx
 import numpy as np
@@ -953,12 +953,12 @@ class CoordinateSystemManager:
     class CoordinateSystemData:
         """Class that stores data and the coordinate system, the data is assigned to."""
 
-        coordinate_system_name: Hashable
+        coordinate_system_name: str
         data: xr.DataArray
 
     def __init__(
         self,
-        root_coordinate_system_name: Hashable,
+        root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
         _graph: Union[nx.DiGraph, None] = None,
         _sub_systems=None,
@@ -968,8 +968,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         root_coordinate_system_name :
-            Name of the root coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the root coordinate system.
         coordinate_system_manager_name:
             Name of the coordinate system manager. If 'None' is passed, a default name
             is chosen.
@@ -1056,9 +1055,7 @@ class CoordinateSystemManager:
         self._check_new_coordinate_system_name(coordinate_system_name)
         self._graph.add_node(coordinate_system_name, data=[])
 
-    def _add_edges(
-        self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
-    ):
+    def _add_edges(self, node_from: str, node_to: str, lcs: LocalCoordinateSystem):
         """Add an edge to the internal graph.
 
         Parameters
@@ -1074,7 +1071,7 @@ class CoordinateSystemManager:
         self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
         self._graph.add_edge(node_to, node_from, lcs=lcs.invert(), defined=False)
 
-    def _check_coordinate_system_exists(self, coordinate_system_name: Hashable):
+    def _check_coordinate_system_exists(self, coordinate_system_name: str):
         """Raise an exception if the specified coordinate system does not exist.
 
         Parameters
@@ -1089,7 +1086,7 @@ class CoordinateSystemManager:
                 "There is no coordinate system with name " + str(coordinate_system_name)
             )
 
-    def _check_new_coordinate_system_name(self, coordinate_system_name: Hashable):
+    def _check_new_coordinate_system_name(self, coordinate_system_name: str):
         """Raise an exception if the new coordinate systems' name is invalid.
 
         Parameters
@@ -1098,8 +1095,8 @@ class CoordinateSystemManager:
             Name of the new coordinate system, that should be checked.
 
         """
-        if not isinstance(coordinate_system_name, cl.Hashable):
-            raise TypeError("The coordinate system name must be a hashable type.")
+        if not isinstance(coordinate_system_name, str):
+            raise TypeError("The coordinate system name must be a string.")
         if self.has_coordinate_system(coordinate_system_name):
             raise ValueError(
                 "There already is a coordinate system with name "
@@ -1212,7 +1209,7 @@ class CoordinateSystemManager:
         return all_members
 
     def _update_local_coordinate_system(
-        self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
+        self, node_from: str, node_to: str, lcs: LocalCoordinateSystem
     ):
         """Update the local coordinate systems on the edges between two nodes.
 
@@ -1312,8 +1309,8 @@ class CoordinateSystemManager:
 
     def add_cs(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         local_coordinate_system: LocalCoordinateSystem,
         lsc_child_in_parent: bool = True,
     ):
@@ -1325,8 +1322,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         local_coordinate_system :
@@ -1385,7 +1381,7 @@ class CoordinateSystemManager:
                 )
 
     def assign_data(
-        self, data: xr.DataArray, data_name: Hashable, coordinate_system_name: Hashable
+        self, data: xr.DataArray, data_name: str, coordinate_system_name: str
     ):
         """Assign spatial data to a coordinate system.
 
@@ -1394,8 +1390,7 @@ class CoordinateSystemManager:
         data :
             Spatial data
         data_name :
-            Name of the data. Can be any hashable type, but strings are
-            recommended.
+            Name of the data.
         coordinate_system_name :
             Name of the coordinate system the data should be
             assigned to.
@@ -1406,8 +1401,8 @@ class CoordinateSystemManager:
         # - which time is taken as reference? (probably the one of the data)
         # - what happens during cal of time interpolation functions with data? Also
         #   interpolated or not?
-        if not isinstance(data_name, cl.Hashable):
-            raise TypeError("The data name must be a hashable type.")
+        if not isinstance(data_name, str):
+            raise TypeError("The data name must be a string.")
         self._check_coordinate_system_exists(coordinate_system_name)
 
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
@@ -1415,8 +1410,8 @@ class CoordinateSystemManager:
 
     def create_cs(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
@@ -1428,8 +1423,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         orientation :
@@ -1450,8 +1444,8 @@ class CoordinateSystemManager:
 
     def create_cs_from_euler(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         sequence,
         angles,
         degrees=False,
@@ -1466,8 +1460,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         sequence :
@@ -1505,8 +1498,8 @@ class CoordinateSystemManager:
 
     def create_cs_from_xyz(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         vec_x,
         vec_y,
         vec_z,
@@ -1521,8 +1514,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         vec_x :
@@ -1543,8 +1535,8 @@ class CoordinateSystemManager:
 
     def create_cs_from_xy_and_orientation(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         vec_x,
         vec_y,
         positive_orientation=True,
@@ -1559,8 +1551,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         vec_x :
@@ -1584,8 +1575,8 @@ class CoordinateSystemManager:
 
     def create_cs_from_xz_and_orientation(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         vec_x,
         vec_z,
         positive_orientation=True,
@@ -1600,8 +1591,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         vec_x :
@@ -1625,8 +1615,8 @@ class CoordinateSystemManager:
 
     def create_cs_from_yz_and_orientation(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         vec_y,
         vec_z,
         positive_orientation=True,
@@ -1641,8 +1631,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         vec_y :
@@ -1811,8 +1800,8 @@ class CoordinateSystemManager:
 
     def get_local_coordinate_system(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Union[Hashable, None] = None,
+        coordinate_system_name: str,
+        reference_system_name: Union[str, None] = None,
         time: Union[pd.DatetimeIndex, List, str, None] = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
@@ -1963,7 +1952,7 @@ class CoordinateSystemManager:
 
         return sub_system_list
 
-    def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
+    def has_coordinate_system(self, coordinate_system_name: str) -> bool:
         """Return 'True' if a coordinate system with specified name already exists.
 
         Parameters
@@ -1979,7 +1968,7 @@ class CoordinateSystemManager:
         """
         return coordinate_system_name in self._graph.nodes
 
-    def has_data(self, coordinate_system_name: Hashable, data_name: Hashable) -> bool:
+    def has_data(self, coordinate_system_name: str, data_name: str) -> bool:
         """Return 'True' if the desired coordinate system owns the specified data.
 
         Parameters
@@ -2056,7 +2045,7 @@ class CoordinateSystemManager:
         )
 
     def is_neighbor_of(
-        self, coordinate_system_name_0: Hashable, coordinate_system_name_1: Hashable
+        self, coordinate_system_name_0: str, coordinate_system_name_1: str
     ) -> bool:
         """Get a boolean result, specifying if 2 coordinate systems are neighbors.
 
@@ -2109,7 +2098,7 @@ class CoordinateSystemManager:
         }
         self._sub_system_data_dict[other.name] = subsystem_data
 
-    def neighbors(self, coordinate_system_name: Hashable) -> List:
+    def neighbors(self, coordinate_system_name: str) -> List:
         """Get a list of neighbors of a certain coordinate system.
 
         Parameters
@@ -2184,8 +2173,8 @@ class CoordinateSystemManager:
     def transform_data(
         self,
         data: Union[xr.DataArray, np.ndarray, List],
-        source_coordinate_system_name: Hashable,
-        target_coordinate_system_name: Hashable,
+        source_coordinate_system_name: str,
+        target_coordinate_system_name: str,
     ):
         """Transform spatial data from one coordinate system to another.
 
