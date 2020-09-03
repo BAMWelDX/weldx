@@ -42,6 +42,10 @@ jobs:
         shell: bash -l {0}
         run: conda develop .
 
+      - name: copy turorials
+        shell: bash -l {0}
+        run: cp ./tutorials/welding_example_01_basics.ipynb ./doc/tutorials/
+
       - name: Build docs
         shell: bash -l {0}
         run: sphinx-build -W -n -j auto -b html -d build/doctrees doc build/html
