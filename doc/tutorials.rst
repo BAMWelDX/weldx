@@ -1,16 +1,13 @@
 
 
-Welcome to WelDX documentation!
+List of WelDX tutorials!
 =================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   validators
-   shape-validation
-   unit-validation
-   tutorials
+   tutorials/welding_example_01_basics
 
 
 
