@@ -45,7 +45,11 @@ jobs:
       - name: copy tutorials
         shell: bash -l {0}
         run: |
+          cp ./tutorials/geometry_01_profiles.ipynb ./doc/tutorials/
           cp ./tutorials/GMAW_process.ipynb ./doc/tutorials/
+          cp ./tutorials/groove_types_01.ipynb ./doc/tutorials/
+          cp ./tutorials/measurement_example.ipynb ./doc/tutorials/
+          cp ./tutorials/timeseries_01.ipynb ./doc/tutorials/
           cp ./tutorials/welding_example_01_basics.ipynb ./doc/tutorials/
           cp ./tutorials/welding_example_02_weaving.ipynb ./doc/tutorials/
 
