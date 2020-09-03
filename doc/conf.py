@@ -87,3 +87,9 @@ html_favicon = "_static\WelDX_notext.ico"
 # further.  For a list of options available for each theme, see the
 # documentation.
 # html_theme_options = {"logo_only": True}
+
+# nbsphinx configuration
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc={'figure.dpi': 96}",
+]
