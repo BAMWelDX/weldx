@@ -13,8 +13,6 @@ dependencies:
   - pint>=0.11
   - bottleneck
   - asdf>=2.7
-  - sphinx
-  - recommonmark
   - openpyxl
   - jinja2
   # graph packages
@@ -37,3 +35,9 @@ dependencies:
   #- python-graphviz
   - seaborn
   - snakeviz
+  # documentation
+  - sphinx
+  - recommonmark
+  - sphinxcontrib-napoleon
+  - nbsphinx
+  - pydata-sphinx-theme
