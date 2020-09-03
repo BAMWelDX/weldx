@@ -14,6 +14,9 @@
   wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patchversion
   ```
 - add `WxSyntaxError` exception for custom weldx ASDF syntax errors [#99]
+- add basic schema layout and `GmawProcess` class for arc welding process implementation [#104]
+- add example notebook and documentation for arc welding process [#104]
+- fix propagating the `name` attribute when reading an ndarray `TimeSeries` object back from ASDF files [#104] 
 
 
 ## 0.2.0 (30.07.2020)
