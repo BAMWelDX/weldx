@@ -1928,8 +1928,8 @@ class TestCoordinateSystemManager:
         csm_global.create_cs("robot head", "root", coordinates=[4, 5, 6])
 
         csm_specimen = self.CSM("specimen", "specimen coordinate systems")
-        csm_specimen.create_cs("thermo couple 1", "specimen", coordinates=[1, 1, 0])
-        csm_specimen.create_cs("thermo couple 2", "specimen", coordinates=[1, 4, 0])
+        csm_specimen.create_cs("thermocouple 1", "specimen", coordinates=[1, 1, 0])
+        csm_specimen.create_cs("thermocouple 2", "specimen", coordinates=[1, 4, 0])
 
         csm_robot = self.CSM("robot head", "robot coordinate systems")
         csm_robot.create_cs("torch", "robot head", coordinates=[0, 0, -2])
