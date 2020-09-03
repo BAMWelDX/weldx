@@ -7,6 +7,9 @@ Welcome to WelDX documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   validators
+   shape-validation
+   unit-validation
    contents
 
 
