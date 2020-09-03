@@ -37,6 +37,7 @@ pygments_style = "sphinx"
 extensions = [
     "recommonmark",
     "sphinxcontrib.napoleon",
+    "nbsphinx",
     "sphinx.ext.autodoc",
 ]
 
@@ -52,6 +53,9 @@ source_suffix = {
 # The master toctree document.
 master_doc = "index"
 
+# nbsphinx
+nbsphinx_execute = "always"
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -59,7 +63,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ["**.ipynb_checkpoints"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -76,7 +80,7 @@ html_static_path = ["_static"]
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "WelDX_notext.svg"
+html_logo = "_static\WelDX_notext.svg"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

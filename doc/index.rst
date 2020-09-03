@@ -10,6 +10,7 @@ Welcome to WelDX documentation!
    validators
    shape-validation
    unit-validation
+   tutorials/welding_example_01_basics
    contents
 
 
