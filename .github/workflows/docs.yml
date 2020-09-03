@@ -44,7 +44,7 @@ jobs:
 
       - name: copy turorials
         shell: bash -l {0}
-        run: cp ./tutorials/welding_example_01_basics.ipynb ./doc/tutorials/
+        run: cp ./tutorials/* ./doc/tutorials/
 
       - name: Build docs
         shell: bash -l {0}
@@ -52,5 +52,5 @@ jobs:
 
       - uses: actions/upload-artifact@v1
         with:
-          name: TEMPLATE-docs
+          name: weldx-docs
           path: build/html
