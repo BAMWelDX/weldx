@@ -21,6 +21,8 @@ properties:
     $ref: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
   func:
     $ref: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
+  meta:
+    type: object
 
 required: [name, input_signal, output_signal]
 propertyOrder: [name, input_signal, output_signal, error, func]
