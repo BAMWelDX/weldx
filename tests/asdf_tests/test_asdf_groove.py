@@ -5,18 +5,6 @@ import pytest
 
 from weldx.asdf.tags.weldx.core.iso_groove import (
     BaseGroove,
-    DHUGroove,
-    DHVGroove,
-    DUGroove,
-    DVGroove,
-    FFGroove,
-    HUGroove,
-    HVGroove,
-    IGroove,
-    UGroove,
-    UVGroove,
-    VGroove,
-    VVGroove,
     _create_test_grooves,
     get_groove,
 )
