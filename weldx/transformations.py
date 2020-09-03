@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
-from networkx.drawing.nx_agraph import graphviz_layout
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
@@ -2197,11 +2196,44 @@ class CoordinateSystemManager:
         """
         return len(self.neighbors(coordinate_system_name))
 
+    def _get_tree_positions_for_plot(self):
+        """Create the position data for the plot function."""
+        pos = {}
+        lcs_names = [self.root_system_name]
+        meta_data = {self._root_system_name: {"position": (1, 0), "boundaries": [0, 2]}}
+        level = 1
+        while lcs_names:
+            lcs_names_next = []
+            for lcs_name in lcs_names:
+                children_names = self.get_child_system_names(lcs_name)
+                num_children = len(children_names)
+                if num_children == 0:
+                    continue
+
+                bound = meta_data[lcs_name]["boundaries"]
+                delta = (bound[1] - bound[0]) / num_children
+
+                for i, child_name in enumerate(children_names):
+                    pos_child = [bound[0] + (i + 0.5) * delta, -level]
+                    bound_child = [bound[0] + i * delta, bound[0] + (i + 1) * delta]
+                    meta_data[child_name] = {
+                        "position": pos_child,
+                        "boundaries": bound_child,
+                    }
+                lcs_names_next += children_names
+
+            level += 1
+            lcs_names = lcs_names_next
+
+        for child, data in meta_data.items():
+            pos[child] = data["position"]
+        return pos
+
     def plot(self):
         """Plot the graph of the coordinate system manager."""
         plt.figure()
         color_map = []
-        pos = graphviz_layout(self._graph, prog="dot")
+        pos = self._get_tree_positions_for_plot()
         nx.draw(
             self._graph, pos, with_labels=True, font_weight="bold", node_color=color_map
         )
