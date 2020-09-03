@@ -7,11 +7,13 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Dict, List, Union
 
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
+from networkx.drawing.nx_agraph import graphviz_layout
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
@@ -2194,6 +2196,15 @@ class CoordinateSystemManager:
 
         """
         return len(self.neighbors(coordinate_system_name))
+
+    def plot(self):
+        """Plot the graph of the coordinate system manager."""
+        plt.figure()
+        color_map = []
+        pos = graphviz_layout(self._graph, prog="dot")
+        nx.draw(
+            self._graph, pos, with_labels=True, font_weight="bold", node_color=color_map
+        )
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""

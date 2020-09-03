@@ -3,6 +3,7 @@ channels:
   - defaults
   - anaconda
   - conda-forge
+  - alubbock # graphviz
 dependencies:
   - python=3.7
   - numpy>=1.18
@@ -28,12 +29,11 @@ dependencies:
   - pytest
   - pytest-cov
   # Plotting
-  #- graphviz
   - ipykernel
   - ipympl
   - line_profiler
   - matplotlib
   - memory_profiler
-  #- python-graphviz
+  - python-graphviz
   - seaborn
   - snakeviz
