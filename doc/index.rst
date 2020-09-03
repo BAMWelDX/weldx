@@ -8,6 +8,7 @@ Welcome to WelDX documentation!
    :caption: Contents:
 
    contents
+   autosum
 
 
 
