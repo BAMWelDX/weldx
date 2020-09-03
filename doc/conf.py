@@ -13,6 +13,8 @@
 import os
 import sys
 
+import weldx
+
 sys.path.insert(0, os.path.abspath(""))
 
 
@@ -23,7 +25,7 @@ copyright = "2020, BAM"
 author = "BAM"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.2"
+release = weldx.__version__
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
