@@ -49,6 +49,8 @@ jobs:
           cp ./tutorials/GMAW_process.ipynb ./doc/tutorials/
           cp ./tutorials/groove_types_01.ipynb ./doc/tutorials/
           cp ./tutorials/measurement_example.ipynb ./doc/tutorials/
+          cp ./tutorials/transformations_01_coordinate_systems.ipynb ./doc/tutorials/
+          cp ./tutorials/transformations_02_coordinate_system_manager.ipynb ./doc/tutorials/
           cp ./tutorials/welding_example_01_basics.ipynb ./doc/tutorials/
           cp ./tutorials/welding_example_02_weaving.ipynb ./doc/tutorials/
 
