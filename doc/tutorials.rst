@@ -1,13 +1,14 @@
 
 
-List of WelDX tutorials!
+Tutorials
 =================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :glob:
 
-   tutorials/welding_example_01_basics
+   tutorials/*
 
 
 
