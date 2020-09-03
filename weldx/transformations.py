@@ -1480,6 +1480,7 @@ class CoordinateSystemManager:
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1502,10 +1503,16 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem(orientation, coordinates, time)
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_euler(
         self,
@@ -1516,6 +1523,7 @@ class CoordinateSystemManager:
         degrees=False,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1553,13 +1561,19 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
 
         """
         lcs = LocalCoordinateSystem.from_euler(
             sequence, angles, degrees, coordinates, time
         )
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_xyz(
         self,
@@ -1570,6 +1584,7 @@ class CoordinateSystemManager:
         vec_z,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1592,11 +1607,16 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_xy_and_orientation(
         self,
@@ -1607,6 +1627,7 @@ class CoordinateSystemManager:
         positive_orientation=True,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1630,13 +1651,18 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem.from_xy_and_orientation(
             vec_x, vec_y, positive_orientation, coordinates, time
         )
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_xz_and_orientation(
         self,
@@ -1647,6 +1673,7 @@ class CoordinateSystemManager:
         positive_orientation=True,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1670,13 +1697,18 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem.from_xz_and_orientation(
             vec_x, vec_z, positive_orientation, coordinates, time
         )
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_yz_and_orientation(
         self,
@@ -1687,6 +1719,7 @@ class CoordinateSystemManager:
         positive_orientation=True,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1710,13 +1743,18 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem.from_yz_and_orientation(
             vec_y, vec_z, positive_orientation, coordinates, time
         )
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def delete_cs(self, coordinate_system_name: str, delete_children: bool = False):
         """Delete a coordinate system from the coordinate system manager.
