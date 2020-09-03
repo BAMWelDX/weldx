@@ -2,8 +2,7 @@ name: documentation
 on: [push]
 
 jobs:
-  pytest:
-    name: pytest
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

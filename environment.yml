@@ -36,6 +36,7 @@ dependencies:
   - seaborn
   - snakeviz
   # documentation
+  - conda-build
   - sphinx
   - recommonmark
   - sphinxcontrib-napoleon
