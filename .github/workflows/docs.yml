@@ -34,6 +34,10 @@ jobs:
         shell: bash -l {0}
         run: conda list
 
+      - name: install weldx kernel
+        shell: bash -l {0}
+        run: ipython kernel install --user --name=weldx
+
       - name: develop install
         shell: bash -l {0}
         run: conda develop .
