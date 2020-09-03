@@ -1922,6 +1922,7 @@ class TestCoordinateSystemManager:
     # test_plot ------------------------------------------------------------------------
 
     def test_plot(self):
+        """Test if the plot function runs without problems. Output is not checked."""
         csm_global = self.CSM("root", "global coordinate systems")
         csm_global.create_cs("specimen", "root", coordinates=[1, 2, 3])
         csm_global.create_cs("robot head", "root", coordinates=[4, 5, 6])
