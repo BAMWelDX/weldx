@@ -41,6 +41,7 @@ extensions = [
     "sphinxcontrib.napoleon",
     "nbsphinx",
     "sphinx.ext.autodoc",
+    "sphinx_asdf",
 ]
 
 # The suffix of source filenames.
@@ -57,7 +58,19 @@ master_doc = "index"
 
 # nbsphinx
 nbsphinx_execute = "always"
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc={'figure.dpi': 96}",
+]
+nbsphinx_kernel_name = "weldx"
 
+# sphinx-asdf
+# This variable indicates the top-level directory containing schemas.
+# The path is relative to the location of conf.py in the package
+asdf_schema_path = "../weldx/asdf/schemas"
+# This variable indicates the standard prefix that is common to all schemas
+# provided by the package.
+asdf_schema_standard_prefix = "weldx.bam.de/weldx"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -89,11 +102,3 @@ html_favicon = "_static/WelDX_notext.ico"
 # further.  For a list of options available for each theme, see the
 # documentation.
 # html_theme_options = {"logo_only": True}
-
-# nbsphinx configuration
-nbsphinx_execute_arguments = [
-    "--InlineBackend.figure_formats={'svg', 'pdf'}",
-    "--InlineBackend.rc={'figure.dpi': 96}",
-]
-
-nbsphinx_kernel_name = "weldx"

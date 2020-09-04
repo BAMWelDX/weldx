@@ -42,3 +42,7 @@ dependencies:
   - sphinxcontrib-napoleon
   - nbsphinx
   - pydata-sphinx-theme
+  # pip packages
+  - pip
+  - pip:
+    - sphinx-asdf
