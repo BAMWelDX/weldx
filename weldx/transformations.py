@@ -1273,6 +1273,10 @@ class CoordinateSystemManager:
         all_members += [ext_sub_system_data["common node"]]
         return all_members
 
+    def _ipython_display_(self):
+        """Display the coordinate system manager as plot in jupyter notebooks."""
+        self.plot()
+
     def _update_local_coordinate_system(
         self, node_from: str, node_to: str, lcs: LocalCoordinateSystem
     ):
