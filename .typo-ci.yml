@@ -118,3 +118,5 @@ excluded_words:
   - gmaw
   - feedrate
   - Beckhoff
+  - unmerge
+  - itertools

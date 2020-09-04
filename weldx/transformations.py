@@ -1,11 +1,13 @@
 """Contains methods and classes for coordinate transformations."""
 
-import collections.abc as cl
+
+import itertools
 import math
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Hashable, List, Union
+from typing import Dict, List, Union
 
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -988,7 +990,8 @@ class LocalCoordinateSystem:
         ----------
         seq :
             Euler rotation sequence as described in
-            https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.as_euler.html
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial
+            .transform.Rotation.as_euler.html
         degrees :
             Returned angles are in degrees if True, else they are in radians.
             Default is False.
@@ -1005,49 +1008,93 @@ class LocalCoordinateSystem:
 # coordinate system manager class ------------------------------------------------------
 
 
+# Todo: Convert all getter functions that need no input into properties.
 class CoordinateSystemManager:
     """Manages multiple coordinate systems and the transformations between them."""
+
+    _id_gen = itertools.count()
 
     @dataclass
     class CoordinateSystemData:
         """Class that stores data and the coordinate system, the data is assigned to."""
 
-        coordinate_system_name: Hashable
+        coordinate_system_name: str
         data: xr.DataArray
 
-    def __init__(self, root_coordinate_system_name: Hashable):
+    def __init__(
+        self,
+        root_coordinate_system_name: str,
+        coordinate_system_manager_name: Union[str, None] = None,
+        _graph: Union[nx.DiGraph, None] = None,
+        _sub_systems=None,
+    ):
         """Construct a coordinate system manager.
 
         Parameters
         ----------
         root_coordinate_system_name :
-            Name of the root coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the root coordinate system.
+        coordinate_system_manager_name:
+            Name of the coordinate system manager. If 'None' is passed, a default name
+            is chosen.
+        _graph:
+            A graph that should be used internally. Do not set this parameter. It is
+            only meant for class internal usage.
+        _sub_systems:
+            A dictionary containing data about the CSMs attached subsystems. This
+            parameter should never be set manually. It is for internal usage only.
+
 
         Returns
         -------
         CoordinateSystemManager
 
         """
-        self._graph = nx.DiGraph()
+        if coordinate_system_manager_name is None:
+            coordinate_system_manager_name = self._generate_default_name()
+        self._name = coordinate_system_manager_name
+
         self._data = {}
-        self._add_coordinate_system_node(root_coordinate_system_name)
+        self._root_system_name = root_coordinate_system_name
+
+        self._sub_system_data_dict = _sub_systems
+        if self._sub_system_data_dict is None:
+            self._sub_system_data_dict = {}
+
+        self._graph = _graph
+        if self._graph is None:
+            self._graph = nx.DiGraph()
+            self._add_coordinate_system_node(root_coordinate_system_name)
 
     def __repr__(self):
         """Output representation of a CoordinateSystemManager class."""
         return (
-            f"CoordinateSystemManager('graph': {self._graph!r}, 'data': {self._data!r})"
+            f"<CoordinateSystemManager>\nname:\n\t{self._name}\n"
+            f"Coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
+            f"data:\n\t {self._data!r}\n"
+            f"sub systems:\n\t {self._sub_system_data_dict.keys()}\n"
+            f")"
         )
 
     def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
         """Test equality of CSM instances."""
+        # todo: also check data  -> add tests
         if not isinstance(other, self.__class__):
             return False
 
         graph_0 = self.graph
         graph_1 = other.graph
 
+        if self.name != other.name:
+            return False
+
         if len(graph_0.nodes) != len(graph_1.nodes):
+            return False
+
+        # if self.sub_system_data != other.sub_system_data:
+        if not self._compare_subsystems_equal(
+            self.sub_system_data, other.sub_system_data
+        ):
             return False
 
         # check nodes
@@ -1073,9 +1120,7 @@ class CoordinateSystemManager:
         self._check_new_coordinate_system_name(coordinate_system_name)
         self._graph.add_node(coordinate_system_name, data=[])
 
-    def _add_edges(
-        self, node_from: Hashable, node_to: Hashable, lcs: LocalCoordinateSystem
-    ):
+    def _add_edges(self, node_from: str, node_to: str, lcs: LocalCoordinateSystem):
         """Add an edge to the internal graph.
 
         Parameters
@@ -1091,7 +1136,7 @@ class CoordinateSystemManager:
         self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
         self._graph.add_edge(node_to, node_from, lcs=lcs.invert(), defined=False)
 
-    def _check_coordinate_system_exists(self, coordinate_system_name: Hashable):
+    def _check_coordinate_system_exists(self, coordinate_system_name: str):
         """Raise an exception if the specified coordinate system does not exist.
 
         Parameters
@@ -1106,7 +1151,7 @@ class CoordinateSystemManager:
                 "There is no coordinate system with name " + str(coordinate_system_name)
             )
 
-    def _check_new_coordinate_system_name(self, coordinate_system_name: Hashable):
+    def _check_new_coordinate_system_name(self, coordinate_system_name: str):
         """Raise an exception if the new coordinate systems' name is invalid.
 
         Parameters
@@ -1115,33 +1160,248 @@ class CoordinateSystemManager:
             Name of the new coordinate system, that should be checked.
 
         """
-        if not isinstance(coordinate_system_name, cl.Hashable):
-            raise TypeError("The coordinate system name must be a hashable type.")
+        if not isinstance(coordinate_system_name, str):
+            raise TypeError("The coordinate system name must be a string.")
         if self.has_coordinate_system(coordinate_system_name):
             raise ValueError(
                 "There already is a coordinate system with name "
                 + str(coordinate_system_name)
             )
 
+    @classmethod
+    def _compare_subsystems_equal(cls, data: Dict, other: Dict) -> bool:
+        """Compare if to subsystem data dictionaries are equal.
+
+        Parameters
+        ----------
+        data:
+            First subsystem data dictionary.
+        other
+            Second subsystem data dictionary.
+
+        Returns
+        -------
+        bool:
+            'True' if both dictionaries are identical, 'False' otherwise.
+
+        """
+        if len(data) != len(other):
+            return False
+        for subsystem_name, subsystem_data in data.items():
+            if subsystem_name not in other:
+                return False
+            other_data = other[subsystem_name]
+            if subsystem_data["common node"] != other_data["common node"]:
+                return False
+            if subsystem_data["root"] != other_data["root"]:
+                return False
+            if set(subsystem_data["neighbors"]) != set(other_data["neighbors"]):
+                return False
+            if set(subsystem_data["original members"]) != set(
+                other_data["original members"]
+            ):
+                return False
+            if not cls._compare_subsystems_equal(
+                subsystem_data["sub system data"], other_data["sub system data"]
+            ):
+                return False
+        return True
+
+    @staticmethod
+    def _generate_default_name() -> str:
+        """Get a default name for the current coordinate system manager instance.
+
+        Returns
+        -------
+        str:
+            Default name.
+
+        """
+        return f"Coordinate system manager {next(CoordinateSystemManager._id_gen)}"
+
+    def _get_extended_sub_system_data(self) -> Dict:
+        """Get an extended copy of the internal sub system data.
+
+        The function adds a list of potential child coordinate systems to each
+        sub system. Coordinate systems in this list might belong to other sub systems
+        that share a common coordinate system with the current sub system.
+
+        Returns
+        -------
+        Dict:
+            Extended copy of the internal sub system data.
+
+        """
+        sub_system_data_dict = deepcopy(self._sub_system_data_dict)
+        for _, sub_system_data in sub_system_data_dict.items():
+            potential_members = []
+            for cs_name in sub_system_data["neighbors"]:
+                potential_members += self.get_child_system_names(cs_name, False)
+
+            sub_system_data["nodes"] = potential_members + sub_system_data["neighbors"]
+
+        return sub_system_data_dict
+
+    @staticmethod
+    def _get_sub_system_members(
+        ext_sub_system_data, ext_sub_system_data_dict
+    ) -> List[str]:
+        """Get a list with all coordinate system names, that belong to the sub system.
+
+        Parameters
+        ----------
+        ext_sub_system_data:
+            The extended sub system data of a single sub system.
+        ext_sub_system_data_dict:
+            Dictionary containing the extended sub system data of all sub systems.
+
+        Returns
+        -------
+        List[str]:
+            List of all the sub systems coordinate systems.
+
+        """
+        all_members = ext_sub_system_data["nodes"]
+        for _, other_sub_system_data in ext_sub_system_data_dict.items():
+            if other_sub_system_data["common node"] in all_members:
+                all_members = [
+                    cs_name
+                    for cs_name in all_members
+                    if cs_name not in other_sub_system_data["nodes"]
+                ]
+
+        all_members += [ext_sub_system_data["common node"]]
+        return all_members
+
+    def _ipython_display_(self):
+        """Display the coordinate system manager as plot in jupyter notebooks."""
+        self.plot()
+
+    def _update_local_coordinate_system(
+        self, node_from: str, node_to: str, lcs: LocalCoordinateSystem
+    ):
+        """Update the local coordinate systems on the edges between two nodes.
+
+        Parameters
+        ----------
+        node_from :
+            Start node of the edge
+        node_to :
+            End node of the edge
+        lcs :
+            Local coordinate system
+
+        """
+        edge_from_to = self.graph.edges[(node_from, node_to)]
+        edge_from_to["lcs"] = lcs
+        edge_from_to["defined"] = True
+
+        edge_to_from = self.graph.edges[(node_to, node_from)]
+        edge_to_from["lcs"] = lcs.invert()
+        edge_to_from["defined"] = False
+
+    @property
+    def graph(self) -> nx.DiGraph:
+        """Get the internal graph.
+
+        Returns
+        -------
+        networkx.DiGraph
+
+        """
+        return self._graph
+
+    @property
+    def name(self) -> str:
+        """Get the name of the coordinate system manager instance.
+
+        Returns
+        -------
+        str:
+            Name of the coordinate system manager instance.
+
+        """
+        return self._name
+
+    @property
+    def number_of_coordinate_systems(self) -> int:
+        """Get the number of coordinate systems inside the coordinate system manager.
+
+        Returns
+        -------
+        int
+            Number of coordinate systems
+
+        """
+        return self._graph.number_of_nodes()
+
+    @property
+    def number_of_subsystems(self) -> int:
+        """Get the number of attached subsystems.
+
+        Returns
+        -------
+        int:
+            Number of attached subsystems.
+
+        """
+        return len(self._sub_system_data_dict)
+
+    @property
+    def root_system_name(self) -> str:
+        """Get the name of the root system.
+
+        Returns
+        -------
+        str:
+            Name of the root system
+
+        """
+        return self._root_system_name
+
+    @property
+    def sub_system_data(self) -> Dict:
+        """Get a dictionary containing data about the attached subsystems."""
+        return self._sub_system_data_dict
+
+    @property
+    def subsystem_names(self) -> List[str]:
+        """Get the names of all subsystems.
+
+        Returns
+        -------
+        List[str]:
+            List with subsystem names.
+
+        """
+        return self._sub_system_data_dict.keys()
+
     def add_cs(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         local_coordinate_system: LocalCoordinateSystem,
+        lsc_child_in_parent: bool = True,
     ):
         """Add a coordinate system to the coordinate system manager.
+
+        If the specified system already exists with the same parent system it will be
+        updated. If the parent systems do not match, an exception is raised.
 
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         local_coordinate_system :
             An instance of
             weldx.transformations.LocalCoordinateSystem that describes how the new
             coordinate system is oriented in its parent system.
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         if not isinstance(local_coordinate_system, LocalCoordinateSystem):
@@ -1149,15 +1409,48 @@ class CoordinateSystemManager:
                 "'local_coordinate_system' must be an instance of "
                 + "weldx.transformations.LocalCoordinateSystem"
             )
-        self._check_coordinate_system_exists(reference_system_name)
 
-        self._add_coordinate_system_node(coordinate_system_name)
-        self._add_edges(
-            coordinate_system_name, reference_system_name, local_coordinate_system
-        )
+        if self.has_coordinate_system(coordinate_system_name):
+            # todo:
+            #  discuss: update and add functionality should be separated
+            #  why?   : to prevent errors. Misspelling of the system name might cause
+            #           unwanted updates or unwanted additions. Separate function can
+            #           catch that by knowing about the users intention.
+            if not self.is_neighbor_of(coordinate_system_name, reference_system_name):
+                raise ValueError(
+                    f'Can not update coordinate system. "{reference_system_name}" is '
+                    f"not a neighbor of {coordinate_system_name}"
+                )
+            if lsc_child_in_parent:
+                self._update_local_coordinate_system(
+                    coordinate_system_name,
+                    reference_system_name,
+                    local_coordinate_system,
+                )
+            else:
+                self._update_local_coordinate_system(
+                    reference_system_name,
+                    coordinate_system_name,
+                    local_coordinate_system,
+                )
+        else:
+            self._check_coordinate_system_exists(reference_system_name)
+            self._add_coordinate_system_node(coordinate_system_name)
+            if lsc_child_in_parent:
+                self._add_edges(
+                    coordinate_system_name,
+                    reference_system_name,
+                    local_coordinate_system,
+                )
+            else:
+                self._add_edges(
+                    reference_system_name,
+                    coordinate_system_name,
+                    local_coordinate_system,
+                )
 
     def assign_data(
-        self, data: xr.DataArray, data_name: Hashable, coordinate_system_name: Hashable
+        self, data: xr.DataArray, data_name: str, coordinate_system_name: str
     ):
         """Assign spatial data to a coordinate system.
 
@@ -1166,8 +1459,7 @@ class CoordinateSystemManager:
         data :
             Spatial data
         data_name :
-            Name of the data. Can be any hashable type, but strings are
-            recommended.
+            Name of the data.
         coordinate_system_name :
             Name of the coordinate system the data should be
             assigned to.
@@ -1178,8 +1470,8 @@ class CoordinateSystemManager:
         # - which time is taken as reference? (probably the one of the data)
         # - what happens during cal of time interpolation functions with data? Also
         #   interpolated or not?
-        if not isinstance(data_name, cl.Hashable):
-            raise TypeError("The data name must be a hashable type.")
+        if not isinstance(data_name, str):
+            raise TypeError("The data name must be a string.")
         self._check_coordinate_system_exists(coordinate_system_name)
 
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
@@ -1187,11 +1479,12 @@ class CoordinateSystemManager:
 
     def create_cs(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1200,8 +1493,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         orientation :
@@ -1215,20 +1507,27 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem(orientation, coordinates, time)
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_euler(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         sequence,
         angles,
         degrees=False,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1238,8 +1537,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         sequence :
@@ -1267,23 +1565,30 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
 
         """
         lcs = LocalCoordinateSystem.from_euler(
             sequence, angles, degrees, coordinates, time
         )
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_xyz(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         vec_x,
         vec_y,
         vec_z,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1293,8 +1598,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         vec_x :
@@ -1307,21 +1611,27 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_xy_and_orientation(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         vec_x,
         vec_y,
         positive_orientation=True,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1331,8 +1641,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         vec_x :
@@ -1346,23 +1655,29 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem.from_xy_and_orientation(
             vec_x, vec_y, positive_orientation, coordinates, time
         )
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_xz_and_orientation(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         vec_x,
         vec_z,
         positive_orientation=True,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1372,8 +1687,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         vec_x :
@@ -1387,23 +1701,29 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem.from_xz_and_orientation(
             vec_x, vec_z, positive_orientation, coordinates, time
         )
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
 
     def create_cs_from_yz_and_orientation(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Hashable,
+        coordinate_system_name: str,
+        reference_system_name: str,
         vec_y,
         vec_z,
         positive_orientation=True,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: pd.DatetimeIndex = None,
+        lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
@@ -1413,8 +1733,7 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the new coordinate system. This can be any hashable type, but it is
-            recommended to use strings.
+            Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
         vec_y :
@@ -1428,18 +1747,168 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-
+        lsc_child_in_parent:
+            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
+            the new system orientation towards is parent. If 'False', it describes
+            how the parent system is positioned in its new child system.
 
         """
         lcs = LocalCoordinateSystem.from_yz_and_orientation(
             vec_y, vec_z, positive_orientation, coordinates, time
         )
-        self.add_cs(coordinate_system_name, reference_system_name, lcs)
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
+
+    def delete_cs(self, coordinate_system_name: str, delete_children: bool = False):
+        """Delete a coordinate system from the coordinate system manager.
+
+        If the Coordinate system manager has attached sub system, there are multiple
+        possible  consequences.
+
+        - All subsystems attached to the deleted coordinate system or one of
+          its child systems are removed from the coordinate system manager
+        - If the coordinate system is part of a subsystem and belongs to the systems
+          that were present when the subsystem was merged, the subsystem is removed and
+          can not be restored using "get_sub_systems" or "unmerge". Coordinate systems
+          of the subsystem that aren't a child of the deleted coordinate system will
+          remain in the coordinate system manager
+        - If the coordinate system is part of a subsystem but was added after merging,
+          only the systems and its children are removed. The subsystem remains in the
+          coordinate system manager.
+
+        Parameters
+        ----------
+        coordinate_system_name:
+            Name of the coordinate system that should be deleted.
+        delete_children:
+            If 'False', an exception is raised if the coordinate system has one or more
+            children since deletion would cause them to be disconnected to the root.
+            If 'True', all children are deleted as well.
+
+        """
+        if not self.has_coordinate_system(coordinate_system_name):
+            return
+
+        if coordinate_system_name == self._root_system_name:
+            raise ValueError("The root system can't be deleted.")
+
+        children = self.get_child_system_names(coordinate_system_name, False)
+
+        if not delete_children and len(children) > 0:
+            raise Exception(
+                f'Can not delete coordinate system "{coordinate_system_name}". It '
+                "has one or more children that would be disconnected to the root "
+                f'after deletion. Set the delete_children option to "True" to '
+                f"delete the coordinate system and all its children. "
+                f"The attached child systems are: {children}"
+            )
+
+        # update subsystems
+        remove_systems = []
+        for sub_system_name, sub_system_data in self._sub_system_data_dict.items():
+            if (
+                coordinate_system_name in sub_system_data["original members"]
+            ) or coordinate_system_name in nx.shortest_path(
+                self.graph, sub_system_data["root"], self._root_system_name
+            ):
+                remove_systems += [sub_system_name]
+
+        for sub_system_name in remove_systems:
+            del self._sub_system_data_dict[sub_system_name]
+
+        # delete nodes and edges
+        if delete_children:
+            for child in children:
+                self._graph.remove_node(child)
+        self._graph.remove_node(coordinate_system_name)
+
+    def get_child_system_names(
+        self, coordinate_system_name: str, neighbors_only: bool = True
+    ) -> List[str]:
+        """Get a list with the passed coordinate systems children.
+
+        Parameters
+        ----------
+        coordinate_system_name:
+            Name of the coordinate system
+        neighbors_only:
+            If 'True', only child coordinate systems that are directly connected to the
+            specified coordinate system are included in the returned list. If 'False',
+            child systems of arbitrary hierarchical depth are included.
+
+        Returns
+        -------
+        List[str]:
+            List of child systems.
+
+        """
+        if neighbors_only:
+            return [
+                cs
+                for cs in self.neighbors(coordinate_system_name)
+                if cs != self.get_parent_system_name(coordinate_system_name)
+            ]
+
+        current_children = self.get_child_system_names(coordinate_system_name, True)
+        all_children = deepcopy(current_children)
+        while current_children:
+            new_children = []
+            for child in current_children:
+                new_children += self.get_child_system_names(child, True)
+            all_children += new_children
+            current_children = new_children
+
+        return all_children
+
+    def get_coordinate_system_names(self) -> List:
+        """Get the names of all contained coordinate systems.
+
+        Returns
+        -------
+        List:
+            List of coordinate system names.
+
+        """
+        return list(self.graph.nodes)
+
+    def get_data(
+        self, data_name, target_coordinate_system_name=None
+    ) -> Union[np.ndarray, xr.DataArray]:
+        """Get the specified data, optionally transformed into any coordinate system.
+
+        Parameters
+        ----------
+        data_name :
+            Name of the data
+        target_coordinate_system_name :
+            Name of the target coordinate system. If it is not None or not identical to
+            the owning coordinate system name, the data will be transformed to the
+            desired system. (Default value = None)
+
+        Returns
+        -------
+        np.ndarray
+            Transformed data
+
+        """
+        data_struct = self._data[data_name]
+        if (
+            target_coordinate_system_name is None
+            or target_coordinate_system_name == data_struct.coordinate_system_name
+        ):
+            return data_struct.data
+
+        return self.transform_data(
+            data_struct.data,
+            data_struct.coordinate_system_name,
+            target_coordinate_system_name,
+        )
 
     def get_local_coordinate_system(
         self,
-        coordinate_system_name: Hashable,
-        reference_system_name: Union[Hashable, None] = None,
+        coordinate_system_name: str,
+        reference_system_name: Union[str, None] = None,
         time: Union[pd.DatetimeIndex, List, str, None] = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
@@ -1535,8 +2004,10 @@ class CoordinateSystemManager:
 
         return lcs
 
-    def get_parent_system_name(self, coordinate_system_name):
+    def get_parent_system_name(self, coordinate_system_name) -> Union[str, None]:
         """Get the name of a coordinate systems parent system.
+
+        The parent is the next system on the path towards the root node.
 
         Parameters
         ----------
@@ -1551,15 +2022,44 @@ class CoordinateSystemManager:
             If the coordinate system has no parent (root system)
 
         """
+        if coordinate_system_name == self._root_system_name:
+            return None
+
         self._check_coordinate_system_exists(coordinate_system_name)
+        path = nx.shortest_path(
+            self.graph, coordinate_system_name, self._root_system_name
+        )
 
-        neighbors = self._graph.neighbors(coordinate_system_name)
-        for neighbor in neighbors:
-            if self._graph.edges[(coordinate_system_name, neighbor)]["defined"]:
-                return neighbor
-        return None
+        return path[1]
 
-    def has_coordinate_system(self, coordinate_system_name: Hashable) -> bool:
+    def get_sub_systems(self) -> List["CoordinateSystemManager"]:
+        """Extract all subsystems from the CoordinateSystemManager.
+
+        Returns
+        -------
+        List:
+            List containing all the subsystems.
+
+        """
+        ext_sub_system_data_dict = self._get_extended_sub_system_data()
+
+        sub_system_list = []
+        for sub_system_name, ext_sub_system_data in ext_sub_system_data_dict.items():
+            members = self._get_sub_system_members(
+                ext_sub_system_data, ext_sub_system_data_dict
+            )
+
+            csm_sub = CoordinateSystemManager(
+                ext_sub_system_data["root"],
+                sub_system_name,
+                _graph=self._graph.subgraph(members).copy(),
+                _sub_systems=ext_sub_system_data["sub system data"],
+            )
+            sub_system_list.append(csm_sub)
+
+        return sub_system_list
+
+    def has_coordinate_system(self, coordinate_system_name: str) -> bool:
         """Return 'True' if a coordinate system with specified name already exists.
 
         Parameters
@@ -1575,7 +2075,7 @@ class CoordinateSystemManager:
         """
         return coordinate_system_name in self._graph.nodes
 
-    def has_data(self, coordinate_system_name: Hashable, data_name: Hashable) -> bool:
+    def has_data(self, coordinate_system_name: str, data_name: str) -> bool:
         """Return 'True' if the desired coordinate system owns the specified data.
 
         Parameters
@@ -1592,154 +2092,6 @@ class CoordinateSystemManager:
 
         """
         return data_name in self._graph.nodes[coordinate_system_name]["data"]
-
-    def get_data(
-        self, data_name, target_coordinate_system_name=None
-    ) -> Union[np.ndarray, xr.DataArray]:
-        """Get the specified data, optionally transformed into any coordinate system.
-
-        Parameters
-        ----------
-        data_name :
-            Name of the data
-        target_coordinate_system_name :
-            Name of the target coordinate system. If it is not None or not identical to
-            the owning coordinate system name, the data will be transformed to the
-            desired system. (Default value = None)
-
-        Returns
-        -------
-        np.ndarray
-            Transformed data
-
-        """
-        data_struct = self._data[data_name]
-        if (
-            target_coordinate_system_name is None
-            or target_coordinate_system_name == data_struct.coordinate_system_name
-        ):
-            return data_struct.data
-
-        return self.transform_data(
-            data_struct.data,
-            data_struct.coordinate_system_name,
-            target_coordinate_system_name,
-        )
-
-    def transform_data(
-        self,
-        data: Union[xr.DataArray, np.ndarray, List],
-        source_coordinate_system_name: Hashable,
-        target_coordinate_system_name: Hashable,
-    ):
-        """Transform spatial data from one coordinate system to another.
-
-        Parameters
-        ----------
-        data :
-            Point cloud input as array-like with cartesian x,y,z-data stored in
-            the last dimension. When using xarray objects, the vector dimension is
-            expected to be named "c" and have coordinates "x","y","z"
-        source_coordinate_system_name :
-            Name of the coordinate system the data is
-            defined in
-        target_coordinate_system_name :
-            Name of the coordinate system the data
-            should be transformed to
-
-        Returns
-        -------
-        np.ndarray
-            Transformed data
-
-        """
-        lcs = self.get_local_coordinate_system(
-            source_coordinate_system_name, target_coordinate_system_name
-        )
-        if isinstance(data, xr.DataArray):
-            mul = ut.xr_matmul(
-                lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
-            )
-            return mul + lcs.coordinates
-
-        data = ut.to_float_array(data)
-        rotation = lcs.orientation.data
-        translation = lcs.coordinates.data
-        return ut.mat_vec_mul(rotation, data) + translation
-
-    @property
-    def graph(self) -> nx.DiGraph:
-        """Get the internal graph.
-
-        Returns
-        -------
-        networkx.DiGraph
-
-        """
-        return self._graph
-
-    @property
-    def number_of_coordinate_systems(self) -> int:
-        """Get the number of coordinate systems inside the coordinate system manager.
-
-        Returns
-        -------
-        int
-            Number of coordinate systems
-
-        """
-        return self._graph.number_of_nodes()
-
-    def neighbors(self, coordinate_system_name: Hashable) -> List:
-        """Get a list of neighbors of a certain coordinate system.
-
-        Parameters
-        ----------
-        coordinate_system_name :
-            Name of the coordinate system
-
-        Returns
-        -------
-        list
-            List of neighbors
-
-        """
-        self._check_coordinate_system_exists(coordinate_system_name)
-        return list(self._graph.neighbors(coordinate_system_name))
-
-    def number_of_neighbors(self, coordinate_system_name) -> int:
-        """Get the number of neighbors  of a certain coordinate system.
-
-        Parameters
-        ----------
-        coordinate_system_name :
-            Name of the coordinate system
-
-        Returns
-        -------
-        int
-            Number of neighbors
-
-        """
-        return len(self.neighbors(coordinate_system_name))
-
-    def is_neighbor_of(
-        self, coordinate_system_name_0: Hashable, coordinate_system_name_1: Hashable
-    ) -> bool:
-        """Get a boolean result, specifying if 2 coordinate systems are neighbors.
-
-        Parameters
-        ----------
-        coordinate_system_name_0 :
-            Name of the first coordinate system
-        coordinate_system_name_1 :
-            Name of the second coordinate system
-
-        """
-        self._check_coordinate_system_exists(coordinate_system_name_0)
-        self._check_coordinate_system_exists(coordinate_system_name_1)
-
-        return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
 
     def interp_time(
         self,
@@ -1799,6 +2151,146 @@ class CoordinateSystemManager:
             time, affected_coordinate_systems, in_place=True
         )
 
+    def is_neighbor_of(
+        self, coordinate_system_name_0: str, coordinate_system_name_1: str
+    ) -> bool:
+        """Get a boolean result, specifying if 2 coordinate systems are neighbors.
+
+        Parameters
+        ----------
+        coordinate_system_name_0 :
+            Name of the first coordinate system
+        coordinate_system_name_1 :
+            Name of the second coordinate system
+
+        """
+        self._check_coordinate_system_exists(coordinate_system_name_0)
+        self._check_coordinate_system_exists(coordinate_system_name_1)
+
+        return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
+
+    def merge(self, other: "CoordinateSystemManager"):
+        """Merge another coordinate system managers into the current instance.
+
+        Both 'CoordinateSystemManager' need to have exactly one common coordinate
+        system. They are merged at this node. Internally, information is kept
+        to undo the merge process.
+
+        Parameters
+        ----------
+        other:
+            CoordinateSystemManager instance that should be merged into the current
+            instance.
+
+        """
+        intersection = list(
+            set(self.get_coordinate_system_names())
+            & set(other.get_coordinate_system_names())
+        )
+
+        if len(intersection) != 1:
+            raise ValueError(
+                "Both instances must have exactly one common coordinate system. "
+                f"Found the following common systems: {intersection}"
+            )
+
+        self._graph = nx.compose(self._graph, other.graph)
+
+        subsystem_data = {
+            "common node": intersection[0],
+            "root": other.root_system_name,
+            "neighbors": other.neighbors(intersection[0]),
+            "original members": other.get_coordinate_system_names(),
+            "sub system data": other.sub_system_data,
+        }
+        self._sub_system_data_dict[other.name] = subsystem_data
+
+    def neighbors(self, coordinate_system_name: str) -> List:
+        """Get a list of neighbors of a certain coordinate system.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+
+        Returns
+        -------
+        list
+            List of neighbors
+
+        """
+        self._check_coordinate_system_exists(coordinate_system_name)
+        return list(self._graph.neighbors(coordinate_system_name))
+
+    def number_of_neighbors(self, coordinate_system_name) -> int:
+        """Get the number of neighbors  of a certain coordinate system.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system
+
+        Returns
+        -------
+        int
+            Number of neighbors
+
+        """
+        return len(self.neighbors(coordinate_system_name))
+
+    def _get_tree_positions_for_plot(self):
+        """Create the position data for the plot function."""
+        pos = {}
+        lcs_names = [self.root_system_name]
+        meta_data = {self._root_system_name: {"position": (1, 0), "boundaries": [0, 2]}}
+        level = 1
+        while lcs_names:
+            lcs_names_next = []
+            for lcs_name in lcs_names:
+                children_names = self.get_child_system_names(lcs_name)
+                num_children = len(children_names)
+                if num_children == 0:
+                    continue
+
+                bound = meta_data[lcs_name]["boundaries"]
+                delta = (bound[1] - bound[0]) / num_children
+
+                for i, child_name in enumerate(children_names):
+                    pos_child = [bound[0] + (i + 0.5) * delta, -level]
+                    bound_child = [bound[0] + i * delta, bound[0] + (i + 1) * delta]
+                    meta_data[child_name] = {
+                        "position": pos_child,
+                        "boundaries": bound_child,
+                    }
+                lcs_names_next += children_names
+
+            level += 1
+            lcs_names = lcs_names_next
+
+        for child, data in meta_data.items():
+            pos[child] = data["position"]
+        return pos
+
+    def plot(self):
+        """Plot the graph of the coordinate system manager."""
+        plt.figure()
+        color_map = []
+        pos = self._get_tree_positions_for_plot()
+        nx.draw(
+            self._graph, pos, with_labels=True, font_weight="bold", node_color=color_map
+        )
+
+    def remove_subsystems(self):
+        """Remove all subsystems from the coordinate system manager."""
+        cs_delete = []
+        for _, sub_system_data in self._sub_system_data_dict.items():
+            for lcs in sub_system_data["neighbors"]:
+                cs_delete += [lcs]
+
+        self._sub_system_data_dict = {}
+        for lcs in cs_delete:
+            self.delete_cs(lcs, True)
+
     def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
         """Get the time union of all or selected local coordinate systems.
 
@@ -1826,3 +2318,64 @@ class CoordinateSystemManager:
                 time_union = time_union.union(time_edge)
 
         return time_union
+
+    def transform_data(
+        self,
+        data: Union[xr.DataArray, np.ndarray, List],
+        source_coordinate_system_name: str,
+        target_coordinate_system_name: str,
+    ):
+        """Transform spatial data from one coordinate system to another.
+
+        Parameters
+        ----------
+        data :
+            Point cloud input as array-like with cartesian x,y,z-data stored in
+            the last dimension. When using xarray objects, the vector dimension is
+            expected to be named "c" and have coordinates "x","y","z"
+        source_coordinate_system_name :
+            Name of the coordinate system the data is
+            defined in
+        target_coordinate_system_name :
+            Name of the coordinate system the data
+            should be transformed to
+
+        Returns
+        -------
+        np.ndarray
+            Transformed data
+
+        """
+        lcs = self.get_local_coordinate_system(
+            source_coordinate_system_name, target_coordinate_system_name
+        )
+        if isinstance(data, xr.DataArray):
+            mul = ut.xr_matmul(
+                lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
+            )
+            return mul + lcs.coordinates
+
+        data = ut.to_float_array(data)
+        rotation = lcs.orientation.data
+        translation = lcs.coordinates.data
+        return ut.mat_vec_mul(rotation, data) + translation
+
+    def unmerge(self) -> List["CoordinateSystemManager"]:
+        """Undo previous merges and return a list of all previously merged instances.
+
+        If additional coordinate systems were added after merging two instances, they
+        won't be lost. Depending on their parent system, they will be kept in one of the
+        returned sub-instances or the current instance. All new systems with the
+        parent system being the shared node of two merged systems are kept in the
+        current instance and won't be passed to the sub-instances.
+
+        Returns
+        -------
+        List["CoordinateSystemManager"]:
+            A list containing previously merged 'CoordinateSystemManager' instances.
+
+        """
+        sub_systems = self.get_sub_systems()
+        self.remove_subsystems()
+
+        return sub_systems
