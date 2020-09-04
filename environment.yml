@@ -28,12 +28,10 @@ dependencies:
   - pytest
   - pytest-cov
   # Plotting
-  #- graphviz
   - ipykernel
   - ipympl
   - line_profiler
   - matplotlib
   - memory_profiler
-  #- python-graphviz
   - seaborn
   - snakeviz
