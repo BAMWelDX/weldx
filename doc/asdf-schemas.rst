@@ -1,10 +1,8 @@
-ASDF Schemas
+ASDF Schema Definitions
 =======================
 
-coming soon ...
+.. toctree::
+   :maxdepth: 2
 
-https://github.com/asdf-format/sphinx-asdf
-
-.. asdf-autoschemas::
-
-   core/time_series-1.0.0
+   schemas/core.rst
+   schemas/time.rst
