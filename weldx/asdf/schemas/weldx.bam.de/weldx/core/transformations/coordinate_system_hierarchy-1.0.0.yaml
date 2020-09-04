@@ -20,11 +20,16 @@ properties:
     type: string
 
   subsystem_names:
+    description: |
+      A list containing the names of subsystems that are directly attached to the main hierarchy. Nested subsystems
+      are excluded.
     type: array
     items:
       type: string
 
   subsystems:
+    description: |
+      A list containing the data of all subsystems including nested structures.
     type: array
     items:
       tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
