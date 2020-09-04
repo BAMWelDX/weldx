@@ -5,10 +5,9 @@ id: "http://weldx.bam.de/schemas/weldx/core/transformations/coordinate_system_hi
 tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
 
 title: |
-  Schema that describes a local coordinate system hierarchy
+  Schema that describes a subsystem of a local coordinate system hierarchy
 description: |
-  It stores information how the different coordinate systems are arranged towards each other. The basic data structure
-  is a tree.
+  It contains the data that is necessary to describe a subsystem.
 type: object
 properties:
   name:
