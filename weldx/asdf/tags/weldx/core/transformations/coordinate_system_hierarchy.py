@@ -122,7 +122,7 @@ class CoordinateSystemManagerSubsystemASDF(WeldxType):
             "name": node.name,
             "root_cs": node.root_cs,
             "parent_system": node.parent_system,
-            "subsystems": node.subsystems,
+            "subsystem_names": node.subsystems,
             "members": node.members,
         }
         return tree
@@ -248,7 +248,7 @@ class CoordinateSystemManagerASDF(WeldxType):
 
         if subsystem_data_list:
             cls._recursively_merge_subsystems(
-                csm, tree["subsystems"], subsystem_data_dict
+                csm, tree["subsystem_names"], subsystem_data_dict
             )
 
     @classmethod
@@ -272,10 +272,10 @@ class CoordinateSystemManagerASDF(WeldxType):
         """
         for subsystem_name in subsystem_names:
             subsystem_data = subsystem_data_dict[subsystem_name]
-            if subsystem_data["subsystems"]:
+            if subsystem_data["subsystem_names"]:
                 cls._recursively_merge_subsystems(
                     subsystem_data["csm"],
-                    subsystem_data["subsystems"],
+                    subsystem_data["subsystem_names"],
                     subsystem_data_dict,
                 )
             csm.merge(subsystem_data["csm"])
@@ -403,8 +403,8 @@ class CoordinateSystemManagerASDF(WeldxType):
 
         tree = {
             "name": node.name,
-            "subsystems": subsystems,
-            "subsystem_data": subsystem_data,
+            "subsystem_names": subsystems,
+            "subsystems": subsystem_data,
             "root_system_name": node.root_system_name,
             "coordinate_systems": coordinate_system_data,
         }
@@ -431,7 +431,7 @@ class CoordinateSystemManagerASDF(WeldxType):
         """
         csm = CoordinateSystemManager(tree["root_system_name"], tree["name"],)
 
-        subsystem_data_list = tree["subsystem_data"]
+        subsystem_data_list = tree["subsystems"]
 
         for subsystem_data in subsystem_data_list:
             subsystem_data["csm"] = CoordinateSystemManager(

@@ -19,12 +19,12 @@ properties:
       Name of the root coordinate system
     type: string
 
-  subsystems:
+  subsystem_names:
     type: array
     items:
       type: string
 
-  subsystem_data:
+  subsystems:
     type: array
     items:
       tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
