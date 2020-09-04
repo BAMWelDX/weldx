@@ -1,4 +1,4 @@
-# WelDX CHANGELOG.md
+# Release Notes
 
 ## 0.2.1 (unreleased)
 ### changes
