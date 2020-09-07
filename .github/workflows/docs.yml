@@ -40,7 +40,7 @@ jobs:
 
       - name: develop install
         shell: bash -l {0}
-        run: conda develop .
+        run: pip install -e .
 
       - name: copy changelog
         shell: bash -l {0}
