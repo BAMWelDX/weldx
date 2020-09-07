@@ -118,3 +118,4 @@ excluded_words:
   - gmaw
   - feedrate
   - Beckhoff
+  - rst
