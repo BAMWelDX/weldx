@@ -396,7 +396,7 @@ class LocalCoordinateSystem:
         if coordinates is None:
             coordinates = np.array([0, 0, 0])
 
-        time = self._build_time_index(time, time_ref)
+        time, time_ref = self._build_time_index(time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
@@ -423,6 +423,7 @@ class LocalCoordinateSystem:
         orientation.name = "orientation"
 
         self._dataset = xr.merge([coordinates, orientation], join="exact")
+        self._dataset.attrs["time_ref"] = time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -533,17 +534,20 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        pandas.DatetimeIndex
+        pandas.TimedeltaIndex
 
         """
         if isinstance(time, pint.Quantity):
             time = ut.to_pandas_time_index(time)
 
         if time is not None:
-            if time_ref is not None:
-                time = pd.TimedeltaIndex(time) + time_ref
+            if isinstance(time, pd.DatetimeIndex):
+                if time_ref is None:
+                    time_ref = time[0]
+                time = time - time_ref
+
             try:
-                time = pd.DatetimeIndex(time)
+                time = pd.TimedeltaIndex(time)
             except Exception as err:
                 print(
                     "Unable to convert input argument to pd.DatetimeIndex. "
@@ -551,12 +555,13 @@ class LocalCoordinateSystem:
                     "pd.Timestamp])"
                 )
                 raise err
-        return time
+        return time, time_ref
 
     @staticmethod
     def _build_orientation(
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot],
         time: pd.DatetimeIndex = None,
+        time_ref: pd.Timestamp = None,
     ):
         """Create xarray orientation from different formats and time-inputs.
 
@@ -588,7 +593,9 @@ class LocalCoordinateSystem:
         return orientation
 
     @staticmethod
-    def _build_coordinates(coordinates, time: pd.DatetimeIndex = None):
+    def _build_coordinates(
+        coordinates, time: pd.DatetimeIndex = None, time_ref: pd.Timestamp = None
+    ):
         """Create xarray coordinates from different formats and time-inputs.
 
         Parameters
@@ -884,6 +891,16 @@ class LocalCoordinateSystem:
         return self.dataset.coordinates
 
     @property
+    def reference_time(self):
+        return self._dataset.attrs["time_ref"]
+
+    @property
+    def datetimeindex(self):
+        if self.reference_time is None:
+            return None
+        return self.time + self.reference_time
+
+    @property
     def time(self) -> Union[pd.DatetimeIndex, None]:
         """Get the time union of the local coordinate system (None if system is static).
 
@@ -894,7 +911,7 @@ class LocalCoordinateSystem:
 
         """
         if "time" in self._dataset.coords:
-            return pd.DatetimeIndex(self._dataset.time.data)
+            return pd.TimedeltaIndex(self._dataset.time.data)
         return None
 
     @property

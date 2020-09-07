@@ -392,6 +392,40 @@ def test_reflection_sign():
 # --------------------------------------------------------------------------------------
 
 
+class TestLocalCoordinateSystem:
+    @pytest.mark.parametrize(
+        "time, time_ref, time_exp, time_ref_exp, datetime_exp",
+        [
+            ([1, 2, 3], None, pd.TimedeltaIndex([1, 2, 3]), None, None),
+            (
+                pd.TimedeltaIndex([1, 2, 3]),
+                None,
+                pd.TimedeltaIndex([1, 2, 3]),
+                None,
+                None,
+            ),
+        ],
+    )
+    def test_init_time_formats(
+        self, time, time_ref, time_exp, time_ref_exp, datetime_exp
+    ):
+        # setup
+        orientation = tf.rotation_matrix_z(np.array([0.5, 1.0, 1.5]) * np.pi)
+        coordinates = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+        lcs = tf.LocalCoordinateSystem(
+            orientation, coordinates, time, time_ref=time_ref
+        )
+
+        # check results
+
+        assert np.all(lcs.time == time_exp)
+        assert lcs.reference_time == time_ref_exp
+        assert lcs.datetimeindex == datetime_exp
+        # print(lcs)
+        # np.allclose(lcs.time, time_exp)
+        # np.allclose(lcs.time ==time_exp)
+
+
 def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
     """Check if the time component of a LocalCoordinateSystem is as expected.
 

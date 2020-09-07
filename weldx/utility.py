@@ -584,7 +584,7 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
     return dsx.astype(float)
 
 
-def xr_3d_matrix(data, times=None) -> xr.DataArray:
+def xr_3d_matrix(data, times=None, time_ref: pd.Timestamp = None) -> xr.DataArray:
     """Create an xarray 3d matrix with correctly named dimensions and coordinates.
 
     Parameters
@@ -607,7 +607,10 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
         )
     else:
         dsx = xr.DataArray(
-            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]}
+            data=data,
+            dims=["c", "v"],
+            coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
+            attrs={"time_ref": time_ref},
         )
     return dsx.astype(float)
 
