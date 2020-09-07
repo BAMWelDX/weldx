@@ -72,6 +72,14 @@ asdf_schema_path = "../weldx/asdf/schemas"
 # provided by the package.
 asdf_schema_standard_prefix = "weldx.bam.de/weldx"
 
+# enable references to the ASDF Standard documentation
+asdf_schema_reference_mappings = [
+    (
+        "tag:stsci.edu:asdf",
+        "http://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/",
+    ),
+]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
