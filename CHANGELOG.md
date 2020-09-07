@@ -2,6 +2,12 @@
 
 ## 0.2.1 (unreleased)
 ### changes
+- `CoordinateSystemManager` 
+    - each instance can be named
+    - gets a `plot` function to visualize the graph
+    - coordinate systems can be updated using `add_cs`
+    - supports deletion of coordinate systems
+    - instances can now be merged and unmerged
 - `LocalCoordinateSystem` now accepts `pd.TimedeltaIndex` and `pint.Quantity` as `time` inputs when provided with a reference `pd.Timestamp` as `time_ref` [#97]
 - `LocalCoordinateSystem` now accepts `Rotation`-Objects as `orientation` [#97]
 - `weldx.utility.xr_interp_like` now accepts non-iterable scalar inputs for interpolation [#97]
@@ -16,7 +22,8 @@
 - add `WxSyntaxError` exception for custom weldx ASDF syntax errors [#99]
 - add basic schema layout and `GmawProcess` class for arc welding process implementation [#104]
 - add example notebook and documentation for arc welding process [#104]
-- fix propagating the `name` attribute when reading an ndarray `TimeSeries` object back from ASDF files [#104] 
+- fix propagating the `name` attribute when reading an ndarray `TimeSeries` object back from ASDF files [#104]
+- fix `pint` regression in `TimeSeries` when mixing integer and float values 
 
 
 ## 0.2.0 (30.07.2020)
