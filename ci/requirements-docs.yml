@@ -1,8 +1,15 @@
-name: TEMPLATE-docs
+name: weldx-docs
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - sphinx=2
-  - sphinx_rtd_theme
-  # TODO: add any dependencies needed to import the project modules
+  - sphinx=3
+  - recommonmark
+  - sphinxcontrib-napoleon
+  - nbsphinx
+  - sphinx-copybutton
+  - sphinxcontrib-bibtex
+  - pydata-sphinx-theme
+  - pip
+  - pip:
+      - sphinx-asdf
