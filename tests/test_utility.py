@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pandas import DatetimeIndex as DTI
+from pandas import TimedeltaIndex as TDI
+from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.utility as ut
@@ -338,16 +341,32 @@ def test_xr_interp_like():
     assert np.all(test == np.arange(3, 7, 0.125))
 
 
-def test_get_time_union():
-    """Test input types for get_time_union function."""
-    t1 = pd.Timestamp("1970")
-    t2 = pd.Timestamp("2020")
-    dsx = tf.LocalCoordinateSystem().dataset.expand_dims({"time": [t1, t2]})
-    cs = tf.LocalCoordinateSystem(
-        orientation=dsx.orientation, coordinates=dsx.coordinates
-    )
-    res = ut.get_time_union([cs.time, dsx, cs, [0]])
-    assert np.all(res == pd.DatetimeIndex([t1, t2]))
+@pytest.mark.parametrize(
+    "list_of_objects, time_exp",
+    [
+        (
+            [
+                date_range("2020-02-02", periods=4, freq="2D"),
+                date_range("2020-02-01", periods=4, freq="2D"),
+                date_range("2020-02-03", periods=2, freq="3D"),
+            ],
+            date_range("2020-02-01", periods=8, freq="1D"),
+        ),
+        ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
+    ],
+)
+def test_get_time_union(list_of_objects, time_exp):
+    """Test input types for get_time_union function.
+
+    Parameters
+    ----------
+    list_of_objects:
+        List with input objects
+    time_exp:
+        Expected result time
+
+    """
+    assert np.all(ut.get_time_union(list_of_objects) == time_exp)
 
 
 def test_xf_fill_all():

@@ -32,9 +32,7 @@ def plot_coordinate_system(
         if isinstance(time_idx, int):
             dsx = coordinate_system.dataset.isel(time=time_idx)
         else:
-            dsx = coordinate_system.dataset.sel(time=pd.DatetimeIndex([time_idx])).isel(
-                time=0
-            )
+            dsx = coordinate_system.dataset.sel(time=time_idx).isel(time=0)
     else:
         dsx = coordinate_system.dataset
 

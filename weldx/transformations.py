@@ -412,6 +412,21 @@ class LocalCoordinateSystem:
             if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
                 raise ValueError("Orientation vectors must be orthogonal")
 
+            if "time" in orientation.coords and not isinstance(
+                ut.to_pandas_time_index(orientation.time.data), pd.TimedeltaIndex
+            ):
+                raise ValueError(
+                    "The 'orientation' data set's time coordinate is not a valid "
+                    "time delta type."
+                )
+            if "time" in coordinates.coords and not isinstance(
+                ut.to_pandas_time_index(coordinates.time.data), pd.TimedeltaIndex
+            ):
+                raise ValueError(
+                    "The 'coordinate' data set's time coordinate is not a valid time"
+                    " delta type."
+                )
+
         # unify time axis
         if ("time" in orientation.coords) and ("time" in coordinates.coords):
             if not np.all(orientation.time.data == coordinates.time.data):
@@ -557,7 +572,6 @@ class LocalCoordinateSystem:
     def _build_orientation(
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot],
         time: pd.DatetimeIndex = None,
-        time_ref: pd.Timestamp = None,
     ):
         """Create xarray orientation from different formats and time-inputs.
 
@@ -589,9 +603,7 @@ class LocalCoordinateSystem:
         return orientation
 
     @staticmethod
-    def _build_coordinates(
-        coordinates, time: pd.DatetimeIndex = None, time_ref: pd.Timestamp = None
-    ):
+    def _build_coordinates(coordinates, time: pd.DatetimeIndex = None):
         """Create xarray coordinates from different formats and time-inputs.
 
         Parameters

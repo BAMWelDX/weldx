@@ -269,11 +269,12 @@ def get_time_union(list_of_objects):
 
     Returns
     -------
-    pd.DatetimeIndex
-        pandas DatetimeIndex with merged times
+    Union[pd.DatetimeIndex, pd.TimedeltaIndex]
+        Pandas time index class with merged times
 
     """
     # TODO: make non-nested function
+    # TODO: reevaluate if LCS and xarray types should be supported. If yes, add tests
     def _get_time(input_object):
         if isinstance(input_object, (pd.DatetimeIndex, pd.TimedeltaIndex)):
             return input_object
