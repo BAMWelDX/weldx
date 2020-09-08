@@ -406,6 +406,7 @@ class TestLocalCoordinateSystem:
     time_quantity = Q_([0, 1, 2], "s")
     date_time = date_range("2000-01-01", periods=3, freq="s")
 
+    @staticmethod
     @pytest.mark.parametrize(
         "time, time_ref, time_exp, time_ref_exp, datetime_exp, quantity_exp",
         [
@@ -425,8 +426,26 @@ class TestLocalCoordinateSystem:
         ],
     )
     def test_init_time_formats(
-        self, time, time_ref, time_exp, time_ref_exp, datetime_exp, quantity_exp
+        time, time_ref, time_exp, time_ref_exp, datetime_exp, quantity_exp
     ):
+        """Test the __init__ method with the different supported time formats.
+
+        Parameters
+        ----------
+        time:
+            Time object passed to the __init__ method
+        time_ref:
+            Reference time passed to the __init__ method
+        time_exp:
+            Expected return value of the 'time' property
+        time_ref_exp:
+            Expected return value of the 'reference_time' property
+        datetime_exp:
+            Expected return value of the 'datetimeindex' property
+        quantity_exp:
+            Expected return value of the 'time_quantity' property
+
+        """
         # setup
         orientation = tf.rotation_matrix_z(np.array([0.5, 1.0, 1.5]) * np.pi)
         coordinates = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
@@ -440,6 +459,45 @@ class TestLocalCoordinateSystem:
         assert lcs.reference_time == time_ref_exp
         assert np.all(lcs.datetimeindex == datetime_exp)
         assert np.all(lcs.time_quantity == quantity_exp)
+
+    # test_init_time_dsx ---------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "time_o,  time_c,  time_exp",
+        [
+            (TDI([0, 1, 2], "s"), TDI([0, 1, 2], "s"), TDI([0, 1, 2], "s")),
+            (TDI([0, 2, 4], "s"), TDI([1, 3, 5], "s"), TDI([0, 1, 2, 3, 4, 5], "s"),),
+        ],
+    )
+    @pytest.mark.parametrize("time_ref", [None, TS("2020-02-02")])
+    def test_init_time_dsx(time_o, time_c, time_exp, time_ref):
+        """Test if __init__ sets the internal time correctly when DataArrays are passed.
+
+        Parameters
+        ----------
+        time_o:
+            Time of the orientation DataArray
+        time_c:
+            Time of the coordinates DataArray
+        time_exp:
+            Expected result time
+        time_ref:
+            The coordinate systems reference time
+
+        """
+        orientations = tf.rotation_matrix_z(np.array([i for i in range(len(time_o))]))
+        coordinates = [[i, i, i] for i in range(len(time_o))]
+
+        dax_o = ut.xr_3d_matrix(orientations, time_o)
+        dax_c = ut.xr_3d_vector(coordinates, time_c)
+
+        lcs = tf.LocalCoordinateSystem(dax_o, dax_c, time_ref=time_ref)
+
+        # check results
+
+        assert np.all(lcs.time == time_exp)
+        assert lcs.reference_time == time_ref
 
 
 def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
