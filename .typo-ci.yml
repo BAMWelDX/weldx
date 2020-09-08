@@ -96,6 +96,12 @@ excluded_words:
   # conda ---------------------------------------
   - conda
   - noarch
+  # documentation -------------------------------
+  - readthedocs
+  - recommonmark
+  - nbsphinx
+  - mathjax
+  - toctree
   # markdown / latex ----------------------------
   - cdot
   # other ---------------------------------------
