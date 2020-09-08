@@ -1,7 +1,6 @@
 name: weldx
 channels:
   - defaults
-  - anaconda
   - conda-forge
 dependencies:
   - python=3.7
@@ -38,6 +37,8 @@ dependencies:
   - recommonmark
   - sphinxcontrib-napoleon
   - nbsphinx
+  - sphinx-copybutton
+  - sphinxcontrib-bibtex
   - pydata-sphinx-theme
   # pip packages
   - pip
