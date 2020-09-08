@@ -560,34 +560,96 @@ def xr_interp_like(
     return result
 
 
-def xr_check_format(dax: xr.DataArray, ref: dict):
-    """Validate the format of the DataArray against a dictionary.
+# Notes:
+# 2 functions: xr_check_coords, xr_check_dtype, (xr_check_unit - not
+# possible with xr yet)
+# both functions check if the keys in ref are valid in the xarray
+# keywords with functionality:
+# dtype: 1 of the dtype in the list should be valid
+# values: check if the values are the same as in the xarray
+# optional: default false, if true it has to have some attributes (dtype, values)
 
-    Does nothing if everything is valid?
+
+def xr_valid_key(dax: xr.DataArray, ref: dict):
+    """Validate if the keys in ref are present in the DataArray.
+
+    TODO: Warnings or raise an error? Would suggest a raise here.
+        Since the other functions will get stuck otherwise
+
+    """
+    # use this error?
+    # from asdf import ValidationError
+
+    for key in ref:
+        if not hasattr(dax, ref):
+            # Attributes not found in dax
+            print("TODO: add error message / raise Error.")
+
+
+def xr_check_coords(dax: xr.DataArray, ref: dict):
+    """Validate the coordinates of the DataArray against a dictionary.
+
+    TODO: Warnings or raise an error?
 
     """
 
-    # use this error?
-    from asdf import ValidationError
+    # check if the keys in ref are also in dax
+    xr_valid_key(dax, ref)
 
-    # check labels in ref
-    # there should only be "time" and "c"?
     for key in ref:
-        if key is "time":
-            # everything with key = time
-            if ref[key].get("optional"):
-                # if time is optional - no comparison
-                pass
-            else:
-                # if time not optional - compare
-                for n, dim in enumerate(dax.coords.dims):
-                    if not getattr(dax, dim).dtype == np.dtype(ref[key]["dtype"][n]):
-                        ValidationError(f"Datatype mismatch in dimension {dim}.")
-        else:
-            # in c are the  dimensions of the xarray
-            for dim in ref[key]["values"]:
-                if not hasattr(dax, dim):
-                    ValidationError(f"Dimension {dim} is missing in the xarray.")
+        # check if the optional key is set to true
+        if hasattr(ref[key], "optional"):
+            if (
+                getattr(ref[key]["optional"]) is True
+                and not hasattr(ref[key], "dtype")
+                and not hasattr(ref[key], "values")
+            ):
+                # Optional is True so there has to be "dtype" or "values"
+                print(
+                    "TODO: add error message / raise Error. "
+                    "The dtype or values have to be in ref."
+                )
+
+        # only if the key "values" is given do the validation
+        if hasattr(ref[key], "values"):
+            # TODO: compare against a set? what if some variables are doubled?
+            # Suggestion: Values should be in an array which should be identical to the
+            #           array to compare against!
+            # Solution for the suggestion:
+            if (getattr(dax, key).values == ref[key]["values"]).all():
+                # TODO: Error or Warning?
+                print("Value mismatch")
+
+
+def xr_check_dtype(dax: xr.DataArray, ref: dict):
+    """Validate the dtype of the DataArray against a dictionary.
+
+    TODO: Warnings or raise an error?
+
+    """
+
+    # check if the keys in ref are also in dax
+    xr_valid_key(dax, ref)
+
+    for key in ref:
+        # check if the optional key is set to true
+        if hasattr(ref[key], "optional"):
+            if (
+                getattr(ref[key]["optional"]) is True
+                and not hasattr(ref[key], "dtype")
+                and not hasattr(ref[key], "values")
+            ):
+                # Optional is True so there has to be "dtype" or "values"
+                print(
+                    "TODO: add error message / raise Error. "
+                    "Either dtype or values have to be in ref."
+                )
+
+        # only if the key "dtype" is given do the validation
+        if hasattr(ref[key], "dtype"):
+            if getattr(dax, key).dtype not in [np.dtype(x) for x in ref[key]["dtype"]]:
+                # TODO: Error or Warning?
+                print("Data type mismatch of ref and dax.")
 
 
 def xr_3d_vector(data, times=None) -> xr.DataArray:
