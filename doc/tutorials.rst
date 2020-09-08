@@ -9,12 +9,3 @@ Tutorials
    :glob:
 
    tutorials/*
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
