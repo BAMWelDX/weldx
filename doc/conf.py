@@ -77,6 +77,10 @@ nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
     "--InlineBackend.rc={'figure.dpi': 96}",
 ]
+
+# Select notebook kernel for nbsphinx
+# default "python3" is needed for readthedocs run
+# if building locally, this might need to be "weldx" - try setting using -D option
 nbsphinx_kernel_name = "python3"
 
 # sphinx-asdf
