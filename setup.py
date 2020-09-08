@@ -25,6 +25,7 @@ requirements = [
     "Jinja2>=2.11",
     "networkx>=2",
     "matplotlib>=3",
+    "ipywidgets",
 ]
 
 entry_points = {}
