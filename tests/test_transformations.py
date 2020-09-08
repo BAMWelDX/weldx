@@ -9,9 +9,14 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pandas import DatetimeIndex as DTI
+from pandas import TimedeltaIndex as TDI
+from pandas import Timestamp as TS
+from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.utility as ut
+from weldx.constants import WELDX_QUANTITY as Q_
 
 # helpers for tests -----------------------------------------------------------
 
@@ -393,21 +398,34 @@ def test_reflection_sign():
 
 
 class TestLocalCoordinateSystem:
+
+    # test_init_time_formats -----------------------------------------------------------
+
+    timestamp = TS("2000-01-01")
+    time_delta = TDI([0, 1, 2], "s")
+    time_quantity = Q_([0, 1, 2], "s")
+    date_time = date_range("2000-01-01", periods=3, freq="s")
+
     @pytest.mark.parametrize(
-        "time, time_ref, time_exp, time_ref_exp, datetime_exp",
+        "time, time_ref, time_exp, time_ref_exp, datetime_exp, quantity_exp",
         [
-            ([1, 2, 3], None, pd.TimedeltaIndex([1, 2, 3]), None, None),
+            (time_delta, None, time_delta, None, None, time_quantity),
+            (time_delta, timestamp, time_delta, timestamp, date_time, time_quantity),
+            (time_quantity, None, time_delta, None, None, time_quantity),
+            (time_quantity, timestamp, time_delta, timestamp, date_time, time_quantity),
+            (date_time, None, time_delta, timestamp, date_time, time_quantity),
             (
-                pd.TimedeltaIndex([1, 2, 3]),
-                None,
-                pd.TimedeltaIndex([1, 2, 3]),
-                None,
-                None,
+                date_time,
+                TS("1999-12-31"),
+                TDI([86400, 86401, 86402], "s"),
+                TS("1999-12-31"),
+                date_time,
+                Q_([86400, 86401, 86402], "s"),
             ),
         ],
     )
     def test_init_time_formats(
-        self, time, time_ref, time_exp, time_ref_exp, datetime_exp
+        self, time, time_ref, time_exp, time_ref_exp, datetime_exp, quantity_exp
     ):
         # setup
         orientation = tf.rotation_matrix_z(np.array([0.5, 1.0, 1.5]) * np.pi)
@@ -420,10 +438,8 @@ class TestLocalCoordinateSystem:
 
         assert np.all(lcs.time == time_exp)
         assert lcs.reference_time == time_ref_exp
-        assert lcs.datetimeindex == datetime_exp
-        # print(lcs)
-        # np.allclose(lcs.time, time_exp)
-        # np.allclose(lcs.time ==time_exp)
+        assert np.all(lcs.datetimeindex == datetime_exp)
+        assert np.all(lcs.time_quantity == quantity_exp)
 
 
 def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):

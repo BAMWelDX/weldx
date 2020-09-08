@@ -545,16 +545,12 @@ class LocalCoordinateSystem:
                 if time_ref is None:
                     time_ref = time[0]
                 time = time - time_ref
-
-            try:
-                time = pd.TimedeltaIndex(time)
-            except Exception as err:
-                print(
+            elif not isinstance(time, pd.TimedeltaIndex):
+                raise TypeError(
                     "Unable to convert input argument to pd.DatetimeIndex. "
                     + "If passing single values convert to list first (like ["
                     "pd.Timestamp])"
                 )
-                raise err
         return time, time_ref
 
     @staticmethod
@@ -911,8 +907,12 @@ class LocalCoordinateSystem:
 
         """
         if "time" in self._dataset.coords:
-            return pd.TimedeltaIndex(self._dataset.time.data)
+            return pd.TimedeltaIndex(self._dataset.time)
         return None
+
+    @property
+    def time_quantity(self):
+        return ut.pandas_time_delta_to_quantity(self.time)
 
     @property
     def dataset(self) -> xr.Dataset:
