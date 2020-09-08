@@ -22,7 +22,7 @@ version: 2
 # Optionally set the version of Python and requirements required to build your docs
 
 conda:
-  environment: environment.yml
+  environment: ci/requirements-docs.yml
 python:
    version: 3.7
    install:

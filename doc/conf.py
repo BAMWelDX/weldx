@@ -77,7 +77,7 @@ nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
     "--InlineBackend.rc={'figure.dpi': 96}",
 ]
-nbsphinx_kernel_name = "weldx"
+# nbsphinx_kernel_name = "weldx"
 
 # sphinx-asdf
 # This variable indicates the top-level directory containing schemas.
