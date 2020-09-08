@@ -1,4 +1,4 @@
-# WelDX CHANGELOG.md
+# Release Notes
 
 ## 0.2.1 (unreleased)
 ### changes
@@ -68,3 +68,27 @@
 - update requirements to `asdf>=2.7` [[#83]](https://github.com/BAMWelDX/weldx/pull/83)
 - update `anyOf` to `oneOf` in ASDF schemas [[#83]](https://github.com/BAMWelDX/weldx/pull/83)
 - add `__eq__` functions to `LocalCoordinateSystem` and `CoordinateSystemManager` [[#87]](https://github.com/BAMWelDX/weldx/pull/87)
+
+## 0.1.0 (05.05.2020)
+### ASDF
+- add basic file/directory layout for asdf files
+  - asdf schemas are located in `weldx/asdf/schemas/weldx.bam.de/weldx`
+  - tag implementations are in `weldx/asdf/tags/weldx`
+- implement support for pint quantities
+- implement support for basic pandas time class
+- implement base welding classes from AWS/NIST "A Welding Data Dictionary"
+- add and implement ISO groove types (DIN EN ISO 9692-1:2013)
+- add basic jinja templates and functions for adding simple dataclass objects
+- setup package to include and install ASDF extensions and schemas (see setup.py, MANIFEST.in)
+- add basic tests for writing/reading all ASDF classes (these only run code without any real checks!)
+
+### module:
+- add setup.py package configuration for install
+  - required packages
+  - package metadata
+  - asdf extension entry points
+  - version support
+- update pandas, scipy, xarray and pint minimum versions (in conda env and setup.py)
+- add versioneer
+- update options in setup.cfg
+- update tool configurations
