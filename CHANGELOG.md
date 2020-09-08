@@ -92,4 +92,3 @@
 - add versioneer
 - update options in setup.cfg
 - update tool configurations
-  - ignore `asdf`-module in deepsource run

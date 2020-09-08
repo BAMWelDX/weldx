@@ -27,6 +27,7 @@ excluded_words:
   - versioneer
   - isort
   - networkx
+  - shutil
   # matplotlib ----------------------------------
   - pyplot
   - gca
