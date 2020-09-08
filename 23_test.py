@@ -45,7 +45,13 @@ print("coords check - wrong coords:")
 xr_check_coords(dax, ref2)
 print()
 print("dtype check - additional entry:")
-xr_check_dtype(dax, ref_additional)
+try:
+    xr_check_dtype(dax, ref_additional)
+except AttributeError as err:
+    print(err)
 print()
 print("coords check - additional entry:")
-xr_check_coords(dax, ref_additional)
+try:
+    xr_check_coords(dax, ref_additional)
+except AttributeError as err:
+    print(err)

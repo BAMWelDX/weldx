@@ -583,7 +583,7 @@ def xr_valid_key(dax: xr.DataArray, ref: dict):
     for key in ref:
         if not hasattr(dax, key):
             # Attributes not found in dax
-            print("TODO: add error message / raise Error.")
+            raise AttributeError(f"Data array 'dax'  has no attribute '{key}'.")
 
 
 def xr_check_coords(dax: xr.DataArray, ref: dict):
