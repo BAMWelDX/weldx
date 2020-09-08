@@ -11,11 +11,23 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import pathlib
+import shutil
 import sys
 
 import weldx
 
 sys.path.insert(0, os.path.abspath(""))
+
+# -- copy files to doc folder -------------------------------------------------
+doc_dir = pathlib.Path(".")
+changelog_file = pathlib.Path("./../CHANGELOG.md")
+shutil.copy(changelog_file, doc_dir)
+
+tutorials_dir = pathlib.Path("./tutorials")
+tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
+for f in tutorial_files:
+    shutil.copy(f, tutorials_dir)
 
 
 # -- Project information -----------------------------------------------------

@@ -42,14 +42,6 @@ jobs:
         shell: bash -l {0}
         run: pip install -e .
 
-      - name: copy changelog
-        shell: bash -l {0}
-        run: cp ./CHANGELOG.md ./doc/
-
-      - name: copy tutorials
-        shell: bash -l {0}
-        run: cp ./tutorials/* ./doc/tutorials/
-
       - name: Build docs
         shell: bash -l {0}
         run: sphinx-build -W -n -b html -d build/doctrees doc build/html
