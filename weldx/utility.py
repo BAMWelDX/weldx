@@ -560,27 +560,16 @@ def xr_interp_like(
     return result
 
 
-# Notes:
-# 2 functions: xr_check_coords, xr_check_dtype, (xr_check_unit - not
-# possible with xr yet)
-# both functions check if the keys in ref are valid in the xarray
-# keywords with functionality:
-# dtype: 1 of the dtype in the list should be valid
-# values: check if the values are the same as in the xarray
-# optional: default false, if true it has to have some attributes (dtype, values)
-
-
 def xr_valid_key(dax: xr.DataArray, ref: dict):
     """Validate if the keys in ref are present in the DataArray.
 
-    TODO: Warnings or raise an error? Would suggest a raise here.
-        Since the other functions will get stuck otherwise
-
     """
-    # use this error?
-    # from asdf import ValidationError
 
     for key in ref:
+        # if optional is set to true, then dax does not need to have this key
+        if "optional" in ref[key]:
+            if ref[key]["optional"]:
+                continue
         if not hasattr(dax, key):
             # Attributes not found in dax
             raise AttributeError(f"Data array 'dax'  has no attribute '{key}'.")
@@ -589,8 +578,6 @@ def xr_valid_key(dax: xr.DataArray, ref: dict):
 def xr_check_coords(dax: xr.DataArray, ref: dict):
     """Validate the coordinates of the DataArray against a dictionary.
 
-    TODO: Warnings or raise an error?
-
     """
 
     # check if the keys in ref are also in dax
@@ -599,57 +586,38 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
     for key in ref:
         # check if the optional key is set to true
         if "optional" in ref[key]:
-            if (
-                ref[key]["optional"] is True
-                and "dtype" not in ref[key]
-                and "values" not in ref[key]
-            ):
-                # Optional is True so there has to be "dtype" or "values"
-                print(
-                    "TODO: add error message / raise Error. "
-                    "The dtype or values have to be in ref."
-                )
+            if ref[key]["optional"] and not hasattr(dax, key):
+                # skip this key - it is not in dax
+                continue
 
         # only if the key "values" is given do the validation
         if "values" in ref[key]:
-            # TODO: compare against a set? what if some variables are doubled?
-            # Suggestion: Values should be in an array which should be identical to the
-            #           array to compare against!
-            # Solution for the suggestion:
             if not (getattr(dax, key).values == ref[key]["values"]).all():
-                # TODO: Error or Warning?
-                print("Value mismatch")
+                raise Exception(f"Value mismatch in DataArray and ref['{key}']")
+
+        # only if the key "dtype" is given do the validation
+        if "dtype" in ref[key]:
+            if type(ref[key]["dtype"]) is list:
+                if getattr(dax, key).dtype not in [
+                    np.dtype(x) for x in ref[key]["dtype"]
+                ]:
+                    raise Exception(
+                        f"Mismatch in the dtype of the DataArray and ref['{key}']"
+                    )
+            elif getattr(dax, key).dtype != np.dtype(ref[key]["dtype"]):
+                raise Exception(
+                    f"Mismatch in the dtype of the DataArray and ref['{key}']"
+                )
+
+    return True
 
 
 def xr_check_dtype(dax: xr.DataArray, ref: dict):
     """Validate the dtype of the DataArray against a dictionary.
 
-    TODO: Warnings or raise an error?
-
     """
 
-    # check if the keys in ref are also in dax
-    xr_valid_key(dax, ref)
-
-    for key in ref:
-        # check if the optional key is set to true
-        if "optional" in ref[key]:
-            if (
-                ref[key]["optional"] is True
-                and "dtype" not in ref[key]
-                and "values" not in ref[key]
-            ):
-                # Optional is True so there has to be "dtype" or "values"
-                print(
-                    "TODO: add error message / raise Error. "
-                    "Either dtype or values have to be in ref."
-                )
-
-        # only if the key "dtype" is given do the validation
-        if "dtype" in ref[key]:
-            if getattr(dax, key).dtype not in [np.dtype(x) for x in ref[key]["dtype"]]:
-                # TODO: Error or Warning?
-                print("Data type mismatch of ref and dax.")
+    return True
 
 
 def xr_3d_vector(data, times=None) -> xr.DataArray:

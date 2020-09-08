@@ -412,10 +412,11 @@ _dax_ref = dict(
         (_dax_check, {"d1": {"dtype": ["float64", int]}}),
         (_dax_check, {"d2": {"dtype": ["float64", int]}}),
         (_dax_check, {"no_dim": {"optional": True, "dtype": float}}),
-        # (_dax_check, {"d5": {"dtype": str}}), # das wäre schöner als "<U1"
+        # (_dax_check, {"d5": {"dtype": str}}),  # das wäre schöner als "<U1"
     ],
 )
 def test_xr_check_coords(dax, ref_dict):
+    """A test."""
     assert ut.xr_check_coords(dax, ref_dict)
 
 
@@ -423,9 +424,10 @@ def test_xr_check_coords(dax, ref_dict):
     "dax, ref_dict, exception_type",
     [
         (_dax_check, {"d1": {"dtype": int}}, Exception),
-        (_dax_check, {"no_dim": {"dtype": float}}, Exception),
+        (_dax_check, {"no_dim": {"dtype": float}}, AttributeError),
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):
+    """A test."""
     with pytest.raises(exception_type):
         ut.xr_check_coords(dax, ref_dict)
