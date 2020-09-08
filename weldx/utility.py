@@ -581,7 +581,7 @@ def xr_valid_key(dax: xr.DataArray, ref: dict):
     # from asdf import ValidationError
 
     for key in ref:
-        if not hasattr(dax, ref):
+        if not hasattr(dax, key):
             # Attributes not found in dax
             print("TODO: add error message / raise Error.")
 
@@ -598,11 +598,11 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
 
     for key in ref:
         # check if the optional key is set to true
-        if hasattr(ref[key], "optional"):
+        if "optional" in ref[key]:
             if (
-                getattr(ref[key]["optional"]) is True
-                and not hasattr(ref[key], "dtype")
-                and not hasattr(ref[key], "values")
+                ref[key]["optional"] is True
+                and "dtype" not in ref[key]
+                and "values" not in ref[key]
             ):
                 # Optional is True so there has to be "dtype" or "values"
                 print(
@@ -611,12 +611,12 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
                 )
 
         # only if the key "values" is given do the validation
-        if hasattr(ref[key], "values"):
+        if "values" in ref[key]:
             # TODO: compare against a set? what if some variables are doubled?
             # Suggestion: Values should be in an array which should be identical to the
             #           array to compare against!
             # Solution for the suggestion:
-            if (getattr(dax, key).values == ref[key]["values"]).all():
+            if not (getattr(dax, key).values == ref[key]["values"]).all():
                 # TODO: Error or Warning?
                 print("Value mismatch")
 
@@ -633,11 +633,11 @@ def xr_check_dtype(dax: xr.DataArray, ref: dict):
 
     for key in ref:
         # check if the optional key is set to true
-        if hasattr(ref[key], "optional"):
+        if "optional" in ref[key]:
             if (
-                getattr(ref[key]["optional"]) is True
-                and not hasattr(ref[key], "dtype")
-                and not hasattr(ref[key], "values")
+                ref[key]["optional"] is True
+                and "dtype" not in ref[key]
+                and "values" not in ref[key]
             ):
                 # Optional is True so there has to be "dtype" or "values"
                 print(
@@ -646,7 +646,7 @@ def xr_check_dtype(dax: xr.DataArray, ref: dict):
                 )
 
         # only if the key "dtype" is given do the validation
-        if hasattr(ref[key], "dtype"):
+        if "dtype" in ref[key]:
             if getattr(dax, key).dtype not in [np.dtype(x) for x in ref[key]["dtype"]]:
                 # TODO: Error or Warning?
                 print("Data type mismatch of ref and dax.")
