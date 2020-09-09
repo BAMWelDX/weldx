@@ -2430,19 +2430,13 @@ def test_coordinate_system_manager_time_union():
     orientation = tf.rotation_matrix_z([0, 1, 2])
     coordinates = [[1, 6, 3], [8, 2, 6], [4, 4, 4]]
     lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation,
-        coordinates=coordinates,
-        time=pd.date_range("2042-01-01", periods=3, freq="3D"),
+        orientation=orientation, coordinates=coordinates, time=TDI([1, 4, 7], "D"),
     )
     lcs_1 = tf.LocalCoordinateSystem(
-        orientation=orientation,
-        coordinates=coordinates,
-        time=pd.date_range("2042-01-01", periods=3, freq="4D"),
+        orientation=orientation, coordinates=coordinates, time=TDI([1, 5, 9], "D"),
     )
     lcs_2 = tf.LocalCoordinateSystem(
-        orientation=orientation,
-        coordinates=coordinates,
-        time=pd.date_range("2042-01-01", periods=3, freq="5D"),
+        orientation=orientation, coordinates=coordinates, time=TDI([1, 6, 11], "D"),
     )
     lcs_3 = tf.LocalCoordinateSystem()
 
@@ -2453,24 +2447,12 @@ def test_coordinate_system_manager_time_union():
     csm.add_cs("lcs_3", "lcs_2", lcs_3)
 
     # full union --------------------------------
-    expected_times = pd.DatetimeIndex(
-        [
-            "2042-01-01",
-            "2042-01-04",
-            "2042-01-05",
-            "2042-01-06",
-            "2042-01-07",
-            "2042-01-09",
-            "2042-01-11",
-        ]
-    )
+    expected_times = TDI([1, 4, 5, 6, 7, 9, 11], "D")
 
     assert np.all(expected_times == csm.time_union())
 
     # selected union ------------------------------
-    expected_times = pd.DatetimeIndex(
-        ["2042-01-01", "2042-01-04", "2042-01-05", "2042-01-07", "2042-01-09"]
-    )
+    expected_times = TDI([1, 4, 5, 7, 9], "D")
     list_of_edges = [("root", "lcs_0"), ("lcs_0", "lcs_1")]
 
     assert np.all(expected_times == csm.time_union(list_of_edges=list_of_edges))
