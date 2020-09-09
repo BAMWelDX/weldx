@@ -608,6 +608,9 @@ def test_coordinate_system_init():
     time_0 = pd.date_range(time_start_0, periods=3, freq="2D")
     time_1 = pd.date_range(time_start_1, periods=3, freq="2D")
 
+    time_0 = TDI([1, 3, 5], "s")
+    time_1 = TDI([2, 4, 6], "s")
+
     orientation_fix = tf.rotation_matrix_z(np.pi)
     orientation_tdp = tf.rotation_matrix_z(np.pi * np.array([0, 0.25, 0.5]))
     coordinates_fix = ut.to_float_array([3, 7, 1])
@@ -682,7 +685,7 @@ def test_coordinate_system_init():
         orientation=xr_orientation_tdp_0, coordinates=xr_coordinates_tdp_1
     )
 
-    time_exp = pd.date_range("2042-01-01", periods=6, freq="1D")
+    time_exp = TDI([1, 2, 3, 4, 5, 6], "s")
     coordinates_exp = ut.to_float_array(
         [
             [3, 7, 1],
