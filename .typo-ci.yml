@@ -27,6 +27,7 @@ excluded_words:
   - versioneer
   - isort
   - networkx
+  - shutil
   # matplotlib ----------------------------------
   - pyplot
   - gca
@@ -96,6 +97,12 @@ excluded_words:
   # conda ---------------------------------------
   - conda
   - noarch
+  # documentation -------------------------------
+  - readthedocs
+  - recommonmark
+  - nbsphinx
+  - mathjax
+  - toctree
   # markdown / latex ----------------------------
   - cdot
   # other ---------------------------------------
@@ -120,3 +127,4 @@ excluded_words:
   - Beckhoff
   - unmerge
   - itertools
+  - rst
