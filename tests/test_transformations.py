@@ -603,11 +603,6 @@ def check_coordinate_systems_close(lcs_0, lcs_1):
 def test_coordinate_system_init():
     """Check the __init__ method with and without time dependency."""
     # reference data
-    time_start_0 = "2042-01-01"
-    time_start_1 = "2042-01-02"
-    time_0 = pd.date_range(time_start_0, periods=3, freq="2D")
-    time_1 = pd.date_range(time_start_1, periods=3, freq="2D")
-
     time_0 = TDI([1, 3, 5], "s")
     time_1 = TDI([2, 4, 6], "s")
 
@@ -930,11 +925,6 @@ def test_coordinate_system_addition_and_subtraction():
 
     """
     # reference data ----------------------------
-    time_start_0 = "2042-01-01"
-    time_start_1 = "2042-01-02"
-    time_0 = pd.date_range(time_start_0, periods=3, freq="2D")
-    time_1 = pd.date_range(time_start_1, periods=3, freq="2D")
-
     time_0 = TDI([1, 3, 5], "s")
     time_1 = TDI([2, 4, 6], "s")
 
@@ -1199,7 +1189,7 @@ def test_coordinate_system_invert():
     )
 
     # time dependent ----------------------------
-    time = pd.date_range("2042-01-01", periods=4, freq="1D")
+    time = TDI([1, 2, 3, 4], "s")
     orientation = tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi)
     coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
 
