@@ -935,6 +935,9 @@ def test_coordinate_system_addition_and_subtraction():
     time_0 = pd.date_range(time_start_0, periods=3, freq="2D")
     time_1 = pd.date_range(time_start_1, periods=3, freq="2D")
 
+    time_0 = TDI([1, 3, 5], "s")
+    time_1 = TDI([2, 4, 6], "s")
+
     orientation_fix_0 = tf.rotation_matrix_z(np.pi * 0.5)
     orientation_fix_1 = tf.rotation_matrix_y(np.pi * 0.5)
     orientation_tdp_0 = tf.rotation_matrix_z(np.pi * np.array([0, 0.5, 1]))

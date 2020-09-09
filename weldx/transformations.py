@@ -965,7 +965,7 @@ class LocalCoordinateSystem:
             time = time.time
 
         try:
-            time = pd.DatetimeIndex(time)
+            time = pd.TimedeltaIndex(time)
         except Exception as err:
             print(
                 "Unable to convert input argument to pd.DatetimeIndex. "
