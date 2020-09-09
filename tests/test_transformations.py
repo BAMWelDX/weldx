@@ -486,7 +486,7 @@ class TestLocalCoordinateSystem:
             The coordinate systems reference time
 
         """
-        orientations = tf.rotation_matrix_z(np.array([i for i in range(len(time_o))]))
+        orientations = tf.rotation_matrix_z(np.array(range(len(time_o))))
         coordinates = [[i, i, i] for i in range(len(time_o))]
 
         dax_o = ut.xr_3d_matrix(orientations, time_o)
