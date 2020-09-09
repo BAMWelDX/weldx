@@ -2025,7 +2025,7 @@ class CoordinateSystemManager:
                 raise ValueError(f'The system "{time}" is not time dependent')
 
         else:
-            time_interp = pd.DatetimeIndex(time)
+            time_interp = pd.TimedeltaIndex(time)
 
         lcs = self.graph.edges[path_edges[0]]["lcs"].interp_time(time_interp)
         for edge in path_edges[1:]:

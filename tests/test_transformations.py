@@ -2297,20 +2297,20 @@ def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
     # TODO: Make the test more flexible
     # Currently, the test only works with times that have specific boundaries. The
     # reason for this is how the expected results are calculated.
-    lcs_0_time = pd.date_range("2020-01-01", periods=12 * 4 + 1, freq="6H")
+    lcs_0_time = TDI([i * 6 for i in range(49)], "H")
     lcs_0_coordinates = np.zeros([len(lcs_0_time), 3])
     lcs_0_in_root = tf.LocalCoordinateSystem(
         coordinates=lcs_0_coordinates, time=lcs_0_time
     )
 
-    lcs_1_time = pd.date_range("2020-01-01", periods=4, freq="4D")
+    lcs_1_time = TDI([0, 4, 8, 12], "D")
     lcs_1_coordinates = [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0]]
     lcs_1_orientation = tf.rotation_matrix_z(np.array([0, 1 / 3, 2 / 3, 1]) * np.pi * 2)
     lcs_1_in_lcs0 = tf.LocalCoordinateSystem(
         coordinates=lcs_1_coordinates, orientation=lcs_1_orientation, time=lcs_1_time
     )
 
-    lcs_2_time = pd.date_range("2020-01-01", periods=4, freq="4D")
+    lcs_2_time = TDI([0, 4, 8, 12], "D")
     lcs_2_coordinates = [1, 0, 0]
     lcs_2_orientation = tf.rotation_matrix_z(np.array([0, 1 / 3, 2 / 3, 1]) * np.pi * 2)
     lcs_2_in_lcs1 = tf.LocalCoordinateSystem(
@@ -2393,16 +2393,11 @@ def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
     _validate_transformed_lcs_2(lcs_2_in_root_t_lcs_1, lcs_1_time)
 
     # use DatetimeIndex -------------------------
-    time_custom = pd.date_range("2020-01-01", periods=12 * 6 + 1, freq="4H")
+    time_custom = TDI([i * 4 for i in range(73)], "H")
     lcs_2_in_root_t_custom = csm.get_local_coordinate_system(
         "lcs_2", "root", time_custom
     )
     _validate_transformed_lcs_2(lcs_2_in_root_t_custom, time_custom)
-
-    # use list of dates -------------------------
-    time_list = ["2020-01-01", "2020-01-07", "2020-01-13"]
-    lcs_2_in_root_t_list = csm.get_local_coordinate_system("lcs_2", "root", time_list)
-    _validate_transformed_lcs_2(lcs_2_in_root_t_list, pd.DatetimeIndex(time_list))
 
     # self referencing --------------------------
 
