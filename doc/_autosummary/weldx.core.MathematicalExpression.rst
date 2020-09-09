@@ -4,6 +4,10 @@ weldx.core.MathematicalExpression
 .. currentmodule:: weldx.core
 
 .. autoclass:: MathematicalExpression
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __repr__, __eq__, __call__, __add__, __mul__
 
    
    .. automethod:: __init__

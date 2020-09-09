@@ -1,5 +1,4 @@
 
-
 Welcome to WelDX documentation!
 =================================
 
@@ -8,13 +7,10 @@ Welcome to WelDX documentation!
    :caption: Contents:
 
    contents
-   autosum
+   shape-validation
+   unit-validation
+   validators
+   API
 
 
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

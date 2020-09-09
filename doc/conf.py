@@ -38,9 +38,26 @@ extensions = [
     "recommonmark",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "sphinx_autodoc_typehints",
+    "numpydoc",
 ]
 
+# Mappings for sphinx.ext.intersphinx. Projects have to have Sphinx-generated doc! (.inv file)
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+}
+
 autosummary_generate = True
+
+numpydoc_show_class_members = False
+
+#autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
+#html_show_sourcelink = False  # Remove 'view source code' from top of page (for html, not python)
+#autodoc_inherit_docstrings = True  # If no class summary, inherit base class summary
+
+
 
 # The suffix of source filenames.
 source_suffix = {
