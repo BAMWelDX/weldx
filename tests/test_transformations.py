@@ -1244,7 +1244,6 @@ def coordinate_system_time_interpolation_test_case(
 
 def test_coordinate_system_time_interpolation():
     """Test the local coordinate systems interp_time and interp_like functions."""
-    time_0 = pd.date_range("2042-01-10", periods=4, freq="4D")
     time_0 = TDI([10, 14, 18, 22], "D")
     orientation = tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi)
     coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
@@ -1254,7 +1253,6 @@ def test_coordinate_system_time_interpolation():
     )
 
     # broadcast left ----------------------------
-    time_interp = pd.date_range("2042-01-01", periods=2, freq="1D")
     time_interp = TDI([1, 2])
 
     orientation_exp = tf.rotation_matrix_z(np.array([0, 0]) * np.pi)
@@ -1265,7 +1263,6 @@ def test_coordinate_system_time_interpolation():
     )
 
     # broadcast right ---------------------------
-    time_interp = pd.date_range("2042-02-01", periods=2, freq="1D")
     time_interp = TDI([29, 30], "D")
 
     orientation_exp = tf.rotation_matrix_z(np.array([0.5, 0.5]) * np.pi)
@@ -1276,7 +1273,6 @@ def test_coordinate_system_time_interpolation():
     )
 
     # pure interpolation ------------------------
-    time_interp = pd.date_range("2042-01-11", periods=4, freq="3D")
     time_interp = TDI([11, 14, 17, 20], "D")
 
     orientation_exp = tf.rotation_matrix_z(np.array([0.125, 0.5, 0.875, 0.75]) * np.pi)
@@ -1289,7 +1285,6 @@ def test_coordinate_system_time_interpolation():
     )
 
     # mixed -------------------------------------
-    time_interp = pd.date_range("2042-01-06", periods=5, freq="6D")
     time_interp = TDI([6, 12, 18, 24, 32], "D")
 
     orientation_exp = tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi)
@@ -2083,7 +2078,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     rot_mat_x = tf.rotation_matrix_x(angles_x)
     rot_mat_y = tf.rotation_matrix_y(angles_y)
 
-    time = pd.date_range("2020-01-01", periods=4, freq="6H")
+    time = TDI([0, 6, 12, 18], "H")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
 
