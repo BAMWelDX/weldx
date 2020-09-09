@@ -1,7 +1,6 @@
 """Contains some functions to help with visualization."""
 
 import numpy as np
-import pandas as pd
 
 
 def plot_coordinate_system(

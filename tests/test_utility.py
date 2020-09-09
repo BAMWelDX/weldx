@@ -6,11 +6,9 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import DatetimeIndex as DTI
 from pandas import TimedeltaIndex as TDI
 from pandas import date_range
 
-import weldx.transformations as tf
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 

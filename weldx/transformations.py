@@ -899,11 +899,29 @@ class LocalCoordinateSystem:
         return self.dataset.coordinates
 
     @property
-    def reference_time(self):
+    def reference_time(self) -> pd.Timestamp:
+        """Get the coordinate systems reference time.
+
+        Returns
+        -------
+        pd.Timestamp:
+            The coordinate systems reference time
+
+        """
         return self._dataset.attrs["time_ref"]
 
     @property
-    def datetimeindex(self):
+    def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
+        """Get the time as 'pandas.DatetimeIndex'.
+
+        If the coordinate system has no reference time, 'None' is returned.
+
+        Returns
+        -------
+        Union[pd.DatetimeIndex, None]:
+            The coordinate systems time as 'pandas.DatetimeIndex'
+
+        """
         if self.reference_time is None:
             return None
         return self.time + self.reference_time
@@ -923,7 +941,15 @@ class LocalCoordinateSystem:
         return None
 
     @property
-    def time_quantity(self):
+    def time_quantity(self) -> pint.Quantity:
+        """Get the time as 'pint.Quantity'.
+
+        Returns
+        -------
+        pint.Quantity:
+            The coordinate systems time as 'pint.Quantity'
+
+        """
         return ut.pandas_time_delta_to_quantity(self.time)
 
     @property

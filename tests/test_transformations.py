@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import DatetimeIndex as DTI
 from pandas import TimedeltaIndex as TDI
 from pandas import Timestamp as TS
 from pandas import date_range
@@ -398,6 +397,7 @@ def test_reflection_sign():
 
 
 class TestLocalCoordinateSystem:
+    """Test the 'LocalCoordinateSystem' class."""
 
     # test_init_time_formats -----------------------------------------------------------
 
