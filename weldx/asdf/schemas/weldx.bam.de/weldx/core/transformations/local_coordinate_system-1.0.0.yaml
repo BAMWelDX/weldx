@@ -14,7 +14,7 @@ properties:
   time:
     description: |
       A list of timestamps
-    tag: tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0
+    tag: tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0
   coordinates:
     description: |
       An ndarray containing the coordinates.
