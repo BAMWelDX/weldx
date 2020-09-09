@@ -529,9 +529,11 @@ class LocalCoordinateSystem:
 
     def __eq__(self: "LocalCoordinateSystem", other: "LocalCoordinateSystem") -> bool:
         """Check equality of LocalCoordinateSystems."""
-        return self.orientation.identical(
-            other.orientation
-        ) and self.coordinates.identical(other.coordinates)
+        return (
+            self.orientation.identical(other.orientation)
+            and self.coordinates.identical(other.coordinates)
+            and self.reference_time == other.reference_time
+        )
 
     @staticmethod
     def _build_time_index(

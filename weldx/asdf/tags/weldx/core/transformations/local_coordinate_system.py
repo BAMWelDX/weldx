@@ -52,6 +52,9 @@ class LocalCoordinateSystemASDF(WeldxType):
         if "time" in node.dataset.coords:
             tree["time"] = node.time
 
+        if node.reference_time is not None:
+            tree["reference_time"] = node.reference_time
+
         # example code to manipulate inline array storage
         if "time" not in node.coordinates.coords:
             if isinstance(coordinates.data, pint.Quantity):
@@ -90,6 +93,14 @@ class LocalCoordinateSystemASDF(WeldxType):
         else:
             time = None
 
+        if "reference_time" in tree:
+            time_ref = tree["reference_time"]
+        else:
+            time_ref = None
+
         return LocalCoordinateSystem(
-            orientation=orientations, coordinates=coordinates, time=time
+            orientation=orientations,
+            coordinates=coordinates,
+            time=time,
+            time_ref=time_ref,
         )

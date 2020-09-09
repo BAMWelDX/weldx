@@ -11,6 +11,10 @@ description: |
 type: object
 
 properties:
+  reference_time:
+    description: |
+      A timestamp that serves as reference point for the time deltas of the 'time' tag.
+    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
   time:
     description: |
       A list of timestamps
@@ -31,7 +35,7 @@ wx_shape:
     data: [(t), 3, 3]
 
 required: [orientations, coordinates]
-propertyOrder: [time, orientations, coordinates]
+propertyOrder: [reference_time, time, orientations, coordinates]
 flowStyle: block
 additionalProperties: false
 ...
