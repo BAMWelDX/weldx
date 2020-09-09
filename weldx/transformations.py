@@ -1061,6 +1061,13 @@ class LocalCoordinateSystem:
         """
         return self.as_rotation().as_euler(seq=seq, degrees=degrees)
 
+    def reset_reference_time(self, time_ref_new):
+        if isinstance(time_ref_new, str):
+            time_ref_new = pd.Timestamp(time_ref_new)
+        delta = self.reference_time - time_ref_new
+        self._dataset.attrs["time_ref"] = time_ref_new
+        self._dataset.coords["time"] = self.time + delta
+
 
 # coordinate system manager class ------------------------------------------------------
 

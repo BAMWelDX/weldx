@@ -499,6 +499,87 @@ class TestLocalCoordinateSystem:
         assert np.all(lcs.time == time_exp)
         assert lcs.reference_time == time_ref
 
+    # test_reset_reference_time --------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "time, time_ref, time_ref_new, time_exp",
+        [
+            (
+                TDI([1, 2, 3], "D"),
+                TS("2020-02-02"),
+                TS("2020-02-01"),
+                TDI([2, 3, 4], "D"),
+            ),
+            (TDI([1, 2, 3], "D"), TS("2020-02-02"), "2020-02-01", TDI([2, 3, 4], "D"),),
+        ],
+    )
+    def test_reset_reference_time(time, time_ref, time_ref_new, time_exp):
+        """Test the 'reset_reference_time' function.
+
+        Parameters
+        ----------
+        time:
+            The time of the LCS
+        time_ref:
+            The reference time of the LCS
+        time_ref_new:
+            Reference time that should be set
+        time_exp:
+            Expected time of the LCS after the reset
+
+        """
+        orientation = tf.rotation_matrix_z([1, 2, 3])
+        coordinates = [[i, i, i] for i in range(3)]
+        lcs = tf.LocalCoordinateSystem(
+            orientation, coordinates, time, time_ref=time_ref
+        )
+
+        lcs.reset_reference_time(time_ref_new)
+
+        # check results
+        assert np.all(lcs.time == time_exp)
+
+    # test_reset_reference_time exceptions ---------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "time_ref, time_ref_new,  exception_type, test_name",
+        [
+            (TS("2020-02-02"), None, TypeError, "# invalid type #1"),
+            (TS("2020-02-02"), 42, TypeError, "# invalid type #2"),
+            (None, TS("2020-02-02"), TypeError, "# lcs has no reference time"),
+        ],
+        ids=get_test_name,
+    )
+    def test_delete_coordinate_system_exceptions(
+        time_ref, time_ref_new, exception_type, test_name
+    ):
+        """Test the exceptions of the 'reset_reference_time' method.
+
+        Parameters
+        ----------
+        time_ref:
+            Reference time of the LCS
+        time_ref_new:
+            Reference time that should be set
+        exception_type:
+            Expected exception type
+        test_name:
+            Name of the test
+
+        """
+        orientation = tf.rotation_matrix_z([1, 2, 3])
+        coordinates = [[i, i, i] for i in range(3)]
+        time = TDI([1, 2, 3], "D")
+
+        lcs = tf.LocalCoordinateSystem(
+            orientation, coordinates, time, time_ref=time_ref
+        )
+
+        with pytest.raises(exception_type):
+            lcs.reset_reference_time(time_ref_new)
+
 
 def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
     """Check if the time component of a LocalCoordinateSystem is as expected.
