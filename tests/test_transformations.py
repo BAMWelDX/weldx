@@ -2465,9 +2465,9 @@ def test_coordinate_system_manager_interp_time():
     orientation = tf.rotation_matrix_z(angles)
     coordinates = ut.to_float_array([[5, 0, 0], [1, 0, 0], [1, 4, 4]])
 
-    time_0 = pd.date_range("2042-01-01", periods=3, freq="3D")
-    time_1 = pd.date_range("2042-01-01", periods=3, freq="4D")
-    time_2 = pd.date_range("2042-01-01", periods=3, freq="5D")
+    time_0 = TDI([1, 4, 7], "D")
+    time_1 = TDI([1, 5, 9], "D")
+    time_2 = TDI([1, 6, 11], "D")
 
     lcs_3_in_lcs_2 = tf.LocalCoordinateSystem(
         orientation=tf.rotation_matrix_y(1), coordinates=[4, 2, 0]
@@ -2480,7 +2480,7 @@ def test_coordinate_system_manager_interp_time():
     csm.create_cs("lcs_3", "lcs_2", tf.rotation_matrix_y(1), [4, 2, 0])
 
     # interp_time -------------------------------
-    time_interp = pd.date_range("2042-01-01", periods=5, freq="2D")
+    time_interp = TDI([1, 3, 5, 7, 9], "D")
     csm_interp = csm.interp_time(time_interp)
 
     assert np.all(csm_interp.time_union() == time_interp)
@@ -2554,7 +2554,7 @@ def test_coordinate_system_manager_interp_time():
         check_coordinate_systems_close(lcs_inv, exp_inv)
 
     # specific coordinate system (single) -----------------
-    time_interp_lcs0 = pd.date_range("2042-01-03", periods=2, freq="2D")
+    time_interp_lcs0 = TDI([3, 5], "D")
     csm_interp_single = csm.interp_time(time_interp_lcs0, "lcs_0")
 
     coords_0_exp = np.array(coords_0_exp)[[1, 2], :]
@@ -2582,7 +2582,7 @@ def test_coordinate_system_manager_interp_time():
         check_coordinate_systems_close(lcs_inv, exp_inv)
 
     # specific coordinate systems (multiple) --------------
-    time_interp_multiple = pd.date_range("2042-01-05", periods=3, freq="2D")
+    time_interp_multiple = TDI([5, 7, 9], "D")
     csm_interp_multiple = csm.interp_time(time_interp_multiple, ["lcs_1", "lcs_2"])
 
     coords_1_exp = np.array(coords_1_exp)[2:, :]
