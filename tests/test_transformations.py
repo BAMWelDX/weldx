@@ -430,19 +430,21 @@ class TestLocalCoordinateSystem:
 
         assert np.allclose(orientation, orientation_expected)
 
-    @staticmethod
+    @classmethod
     def check_coordinate_system(
-        cs_p: tf.LocalCoordinateSystem,
+        cls,
+        lcs: tf.LocalCoordinateSystem,
         orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
         coordinates_expected: Union[np.ndarray, List[Any], xr.DataArray],
         positive_orientation_expected: bool = True,
         time=None,
+        time_ref=None,
     ):
         """Check the values of a coordinate system.
 
         Parameters
         ----------
-        cs_p :
+        lcs :
             Coordinate system that should be checked
         orientation_expected :
             Expected orientation
@@ -453,6 +455,8 @@ class TestLocalCoordinateSystem:
         time :
             A pandas.DatetimeIndex object, if the coordinate system is expected to
             be time dependent. None otherwise.
+        time_ref:
+            The expected reference time
 
         """
         orientation_expected = np.array(orientation_expected)
@@ -460,13 +464,14 @@ class TestLocalCoordinateSystem:
 
         if time is not None:
             assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
-            check_coordinate_system_time(cs_p, time)
+            check_coordinate_system_time(lcs, time)
+            assert lcs.reference_time == time_ref
 
-        check_coordinate_system_orientation(
-            cs_p.orientation, orientation_expected, positive_orientation_expected
+        cls.check_coordinate_system_orientation(
+            lcs.orientation, orientation_expected, positive_orientation_expected
         )
 
-        assert np.allclose(cs_p.coordinates.values, coordinates_expected, atol=1e-9)
+        assert np.allclose(lcs.coordinates.values, coordinates_expected, atol=1e-9)
 
     # test_init_time_formats -----------------------------------------------------------
 
@@ -734,13 +739,13 @@ class TestLocalCoordinateSystem:
         # test time as input
         lcs_interp = lcs.interp_time(time, time_ref)
         self.check_coordinate_system(
-            lcs_interp, orientation_exp, coordinates_exp, True, time
+            lcs_interp, orientation_exp, coordinates_exp, True, time, time_ref
         )
 
         # test lcs as input
         lcs_interp_like = lcs.interp_time(lcs_interp)
         self.check_coordinate_system(
-            lcs_interp_like, orientation_exp, coordinates_exp, True, time
+            lcs_interp_like, orientation_exp, coordinates_exp, True, time, time_ref
         )
 
 
