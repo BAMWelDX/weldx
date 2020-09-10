@@ -569,7 +569,7 @@ class LocalCoordinateSystem:
                 except Exception:
                     raise TypeError(
                         "Unable to convert input argument to pd.DatetimeIndex or "
-                        "pd.TiemdeltaIndex. If passing single values convert to list"
+                        "pd.TimedeltaIndex. If passing single values convert to list"
                         "first (like [pd.Timestamp])"
                     )
             except Exception as err:
