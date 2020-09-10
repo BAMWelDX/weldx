@@ -399,6 +399,75 @@ def test_reflection_sign():
 class TestLocalCoordinateSystem:
     """Test the 'LocalCoordinateSystem' class."""
 
+    # support functions ----------------------------------------------------------------
+
+    @staticmethod
+    def check_coordinate_system_orientation(
+        orientation: xr.DataArray,
+        orientation_expected: np.ndarray,
+        positive_orientation_expected: bool,
+    ):
+        """Check if the orientation of a local coordinate system is as expected.
+
+        Parameters
+        ----------
+        orientation :
+            Orientation
+        orientation_expected :
+            Expected orientation
+        positive_orientation_expected :
+            True, if the orientation is expected to be
+            positive. False otherwise.
+
+        """
+        # test expected positive orientation
+        det = np.linalg.det(orientation.sel(v=[2, 0, 1]))
+        assert np.all((det > 0) == positive_orientation_expected)
+
+        assert tf.is_orthogonal_matrix(orientation.values)
+
+        orientation_expected = tf.normalize(orientation_expected)
+
+        assert np.allclose(orientation, orientation_expected)
+
+    @staticmethod
+    def check_coordinate_system(
+        cs_p: tf.LocalCoordinateSystem,
+        orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
+        coordinates_expected: Union[np.ndarray, List[Any], xr.DataArray],
+        positive_orientation_expected: bool = True,
+        time=None,
+    ):
+        """Check the values of a coordinate system.
+
+        Parameters
+        ----------
+        cs_p :
+            Coordinate system that should be checked
+        orientation_expected :
+            Expected orientation
+        coordinates_expected :
+            Expected coordinates
+        positive_orientation_expected :
+            Expected orientation
+        time :
+            A pandas.DatetimeIndex object, if the coordinate system is expected to
+            be time dependent. None otherwise.
+
+        """
+        orientation_expected = np.array(orientation_expected)
+        coordinates_expected = np.array(coordinates_expected)
+
+        if time is not None:
+            assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
+            check_coordinate_system_time(cs_p, time)
+
+        check_coordinate_system_orientation(
+            cs_p.orientation, orientation_expected, positive_orientation_expected
+        )
+
+        assert np.allclose(cs_p.coordinates.values, coordinates_expected, atol=1e-9)
+
     # test_init_time_formats -----------------------------------------------------------
 
     timestamp = TS("2000-01-01")
@@ -579,6 +648,44 @@ class TestLocalCoordinateSystem:
 
         with pytest.raises(exception_type):
             lcs.reset_reference_time(time_ref_new)
+
+    # test_interp_time -----------------------------------------------------------------
+
+    # broadcast left ----------------------------
+    time_interp = TDI([1, 2])
+
+    orientation_exp = tf.rotation_matrix_z(np.array([0, 0]) * np.pi)
+    coordinates_exp = np.array([[2, 8, 7], [2, 8, 7]])
+
+    @pytest.mark.parametrize(
+        "time, orientation_exp, coordinates_exp",
+        [
+            (  # broadcast left
+                TDI([1, 2]),
+                tf.rotation_matrix_z(np.array([0, 0]) * np.pi),
+                np.array([[2, 8, 7], [2, 8, 7]]),
+            )
+        ],
+    )
+    def test_interp_time(self, time, orientation_exp, coordinates_exp):
+        # setup
+        lcs = tf.LocalCoordinateSystem(
+            orientation=tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi),
+            coordinates=np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]]),
+            time=TDI([10, 14, 18, 22], "D"),
+        )
+
+        # test time as input
+        lcs_interp = lcs.interp_time(time)
+        self.check_coordinate_system(
+            lcs_interp, orientation_exp, coordinates_exp, True, time
+        )
+
+        # test lcs as input
+        lcs_interp_like = lcs.interp_time(lcs_interp)
+        self.check_coordinate_system(
+            lcs_interp_like, orientation_exp, coordinates_exp, True, time
+        )
 
 
 def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
