@@ -983,6 +983,7 @@ class LocalCoordinateSystem:
         time: Union[
             pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem", None
         ],
+        time_ref: Union[pd.Timestamp, None] = None,
     ) -> "LocalCoordinateSystem":
         """Interpolates the data in time.
 
@@ -991,6 +992,8 @@ class LocalCoordinateSystem:
         time :
             Series of times.
             If passing "None" no interpolation will be performed.
+        time_ref:
+            The reference timestamp
 
         Returns
         -------
@@ -1002,20 +1005,21 @@ class LocalCoordinateSystem:
             return self
 
         if isinstance(time, LocalCoordinateSystem):
+            time_ref = time.reference_time
             time = time.time
 
-        try:
-            time = pd.TimedeltaIndex(time)
-        except Exception as err:
-            print(
-                "Unable to convert input argument to pd.DatetimeIndex. "
-                + "If passing single values convert to list first (like [pd.Timestamp])"
-            )
-            raise err
-        orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
-        coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
+        time, time_ref = self._build_time_index(time, time_ref)
 
-        return LocalCoordinateSystem(orientation, coordinates)
+        if self.reference_time == time_ref:
+            lcs_ref = self
+        else:
+            lcs_ref = deepcopy(self)
+            lcs_ref.reset_reference_time(time_ref)
+
+        orientation = ut.xr_interp_orientation_in_time(lcs_ref.orientation, time)
+        coordinates = ut.xr_interp_coordinates_in_time(lcs_ref.coordinates, time)
+
+        return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
 
     def invert(self) -> "LocalCoordinateSystem":
         """Get a local coordinate system defining the parent in the child system.

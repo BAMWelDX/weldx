@@ -651,32 +651,88 @@ class TestLocalCoordinateSystem:
 
     # test_interp_time -----------------------------------------------------------------
 
-    # broadcast left ----------------------------
-    time_interp = TDI([1, 2])
+    time_interp = TDI([29, 30], "D")
 
-    orientation_exp = tf.rotation_matrix_z(np.array([0, 0]) * np.pi)
-    coordinates_exp = np.array([[2, 8, 7], [2, 8, 7]])
+    orientation_exp = tf.rotation_matrix_z(np.array([0.5, 0.5]) * np.pi)
+    coordinates_exp = np.array([[3, 1, 2], [3, 1, 2]])
+
+    # pure interpolation ------------------------
+    time_interp = TDI([11, 14, 17, 20], "D")
+
+    orientation_exp = tf.rotation_matrix_z(np.array([0.125, 0.5, 0.875, 0.75]) * np.pi)
+    coordinates_exp = np.array(
+        [[2.5, 8.25, 5.75], [4, 9, 2], [1, 3.75, 1.25], [1.5, 1.5, 1.5]]
+    )
+
+    # mixed -------------------------------------
+    time_interp = TDI([6, 12, 18, 24, 32], "D")
+    orientation_exp = tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi)
+    coordinates_exp = np.array(
+        [[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]
+    )
 
     @pytest.mark.parametrize(
-        "time, orientation_exp, coordinates_exp",
+        "time_ref_lcs, time,time_ref, orientation_exp, coordinates_exp",
         [
             (  # broadcast left
-                TDI([1, 2]),
+                TS("2020-02-10"),
+                TDI([1, 2], "D"),
+                TS("2020-02-10"),
                 tf.rotation_matrix_z(np.array([0, 0]) * np.pi),
                 np.array([[2, 8, 7], [2, 8, 7]]),
-            )
+            ),
+            (  # broadcast right
+                TS("2020-02-10"),
+                TDI([29, 30], "D"),
+                TS("2020-02-10"),
+                tf.rotation_matrix_z(np.array([0.5, 0.5]) * np.pi),
+                np.array([[3, 1, 2], [3, 1, 2]]),
+            ),
+            (  # pure interpolation
+                TS("2020-02-10"),
+                TDI([11, 14, 17, 20], "D"),
+                TS("2020-02-10"),
+                tf.rotation_matrix_z(np.array([0.125, 0.5, 0.875, 0.75]) * np.pi),
+                np.array(
+                    [[2.5, 8.25, 5.75], [4, 9, 2], [1, 3.75, 1.25], [1.5, 1.5, 1.5]]
+                ),
+            ),
+            (  # mixed
+                TS("2020-02-10"),
+                TDI([6, 12, 18, 24, 32], "D"),
+                TS("2020-02-10"),
+                tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi),
+                np.array([[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]),
+            ),
+            (  # different reference times
+                TS("2020-02-10"),
+                TDI([8, 14, 20, 26, 34], "D"),
+                TS("2020-02-08"),
+                tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi),
+                np.array([[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]),
+            ),
+            (  # no reference time
+                None,
+                TDI([6, 12, 18, 24, 32], "D"),
+                None,
+                tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi),
+                np.array([[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]),
+            ),
         ],
     )
-    def test_interp_time(self, time, orientation_exp, coordinates_exp):
+    def test_interp_time(
+        self, time_ref_lcs, time, time_ref, orientation_exp, coordinates_exp
+    ):
         # setup
         lcs = tf.LocalCoordinateSystem(
             orientation=tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi),
             coordinates=np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]]),
             time=TDI([10, 14, 18, 22], "D"),
+            time_ref=time_ref_lcs,
         )
 
         # test time as input
-        lcs_interp = lcs.interp_time(time)
+        lcs_interp = lcs.interp_time(time, time_ref)
         self.check_coordinate_system(
             lcs_interp, orientation_exp, coordinates_exp, True, time
         )
@@ -1440,50 +1496,6 @@ def test_coordinate_system_time_interpolation():
         orientation=orientation, coordinates=coordinates, time=time_0
     )
 
-    # broadcast left ----------------------------
-    time_interp = TDI([1, 2])
-
-    orientation_exp = tf.rotation_matrix_z(np.array([0, 0]) * np.pi)
-    coordinates_exp = np.array([[2, 8, 7], [2, 8, 7]])
-
-    coordinate_system_time_interpolation_test_case(
-        lcs, time_interp, orientation_exp, coordinates_exp
-    )
-
-    # broadcast right ---------------------------
-    time_interp = TDI([29, 30], "D")
-
-    orientation_exp = tf.rotation_matrix_z(np.array([0.5, 0.5]) * np.pi)
-    coordinates_exp = np.array([[3, 1, 2], [3, 1, 2]])
-
-    coordinate_system_time_interpolation_test_case(
-        lcs, time_interp, orientation_exp, coordinates_exp
-    )
-
-    # pure interpolation ------------------------
-    time_interp = TDI([11, 14, 17, 20], "D")
-
-    orientation_exp = tf.rotation_matrix_z(np.array([0.125, 0.5, 0.875, 0.75]) * np.pi)
-    coordinates_exp = np.array(
-        [[2.5, 8.25, 5.75], [4, 9, 2], [1, 3.75, 1.25], [1.5, 1.5, 1.5]]
-    )
-
-    coordinate_system_time_interpolation_test_case(
-        lcs, time_interp, orientation_exp, coordinates_exp
-    )
-
-    # mixed -------------------------------------
-    time_interp = TDI([6, 12, 18, 24, 32], "D")
-
-    orientation_exp = tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi)
-    coordinates_exp = np.array(
-        [[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]
-    )
-
-    coordinate_system_time_interpolation_test_case(
-        lcs, time_interp, orientation_exp, coordinates_exp
-    )
-
     # test xr_interp_orientation_in_time for single time point interpolation
     orientation = ut.xr_interp_orientation_in_time(
         lcs.orientation.isel({"time": [1]}), time_0
@@ -1495,7 +1507,7 @@ def test_coordinate_system_time_interpolation():
     with pytest.raises(Exception):
         lcs.interp_time("wrong")
     # no time component
-    with pytest.raises(TypeError):
+    with pytest.raises(Exception):
         lcs.interp_time(tf.LocalCoordinateSystem())
 
 
