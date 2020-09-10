@@ -4,18 +4,15 @@ weldx.core.TimeSeries
 .. currentmodule:: weldx.core
 
 .. autoclass:: TimeSeries
-   :members:
-   :show-inheritance:
-   :inherited-members:
-   :special-members: __repr__, __eq__, __call__, __add__, __mul__
+   :special-members: __repr__, __eq__
 
    
-   .. automethod:: __init__
-
    
    .. rubric:: Methods
 
    .. autosummary::
+      :toctree:
+      :nosignatures:
    
       ~TimeSeries.__init__
       ~TimeSeries.interp_time
@@ -27,6 +24,8 @@ weldx.core.TimeSeries
    .. rubric:: Attributes
 
    .. autosummary::
+      :toctree:
+      :nosignatures:
    
       ~TimeSeries.data
       ~TimeSeries.data_array

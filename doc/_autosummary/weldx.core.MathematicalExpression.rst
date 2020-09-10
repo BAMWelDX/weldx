@@ -4,18 +4,15 @@ weldx.core.MathematicalExpression
 .. currentmodule:: weldx.core
 
 .. autoclass:: MathematicalExpression
-   :members:
-   :show-inheritance:
-   :inherited-members:
-   :special-members: __repr__, __eq__, __call__, __add__, __mul__
+   :special-members: __repr__, __eq__
 
    
-   .. automethod:: __init__
-
    
    .. rubric:: Methods
 
    .. autosummary::
+      :toctree:
+      :nosignatures:
    
       ~MathematicalExpression.__init__
       ~MathematicalExpression.equals
@@ -30,6 +27,8 @@ weldx.core.MathematicalExpression
    .. rubric:: Attributes
 
    .. autosummary::
+      :toctree:
+      :nosignatures:
    
       ~MathematicalExpression.expression
       ~MathematicalExpression.num_parameters

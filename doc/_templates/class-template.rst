@@ -3,18 +3,15 @@
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
-   :members:
-   :show-inheritance:
-   :inherited-members:
-   :special-members: __repr__, __eq__, __call__, __add__, __mul__
+   :special-members: __repr__, __eq__
 
    {% block methods %}
-   .. automethod:: __init__
-
    {% if methods %}
    .. rubric:: {{ _('Methods') }}
 
    .. autosummary::
+      :toctree:
+      :nosignatures:
    {% for item in methods %}
       ~{{ name }}.{{ item }}
    {%- endfor %}
@@ -26,8 +23,11 @@
    .. rubric:: {{ _('Attributes') }}
 
    .. autosummary::
+      :toctree:
+      :nosignatures:
    {% for item in attributes %}
       ~{{ name }}.{{ item }}
    {%- endfor %}
    {% endif %}
    {% endblock %}
+
