@@ -412,7 +412,7 @@ _dax_ref = dict(
         (_dax_check, {"d1": {"dtype": ["float64", int]}}),
         (_dax_check, {"d2": {"dtype": ["float64", int]}}),
         (_dax_check, {"no_dim": {"optional": True, "dtype": float}}),
-        # (_dax_check, {"d5": {"dtype": str}}),  # das wäre schöner als "<U1"
+        (_dax_check, {"d5": {"dtype": str}}),  # das wäre schöner als "<U1"
     ],
 )
 def test_xr_check_coords(dax, ref_dict):
@@ -424,6 +424,7 @@ def test_xr_check_coords(dax, ref_dict):
     "dax, ref_dict, exception_type",
     [
         (_dax_check, {"d1": {"dtype": int}}, Exception),
+        (_dax_check, {"d1": {"dtype": int, "optional": True}}, Exception),
         (_dax_check, {"no_dim": {"dtype": float}}, AttributeError),
     ],
 )
