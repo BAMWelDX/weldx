@@ -480,16 +480,35 @@ class LocalCoordinateSystem:
             Resulting coordinate system.
 
         """
-        rhs_cs = rhs_cs.interp_time(self.time)
+        lhs_cs = self
+        if (
+            lhs_cs != rhs_cs
+            and lhs_cs.reference_time is not None
+            and rhs_cs.reference_time is not None
+        ):
+            if lhs_cs.reference_time < rhs_cs.reference_time:
+                time_ref = lhs_cs.reference_time
+                rhs_cs = deepcopy(rhs_cs)
+                rhs_cs.reset_reference_time(time_ref)
+            else:
+                time_ref = rhs_cs.reference_time
+                lhs_cs = deepcopy(lhs_cs)
+                lhs_cs.reset_reference_time(time_ref)
+        elif lhs_cs.reference_time is None:
+            time_ref = rhs_cs.reference_time
+        else:
+            time_ref = lhs_cs.reference_time
+
+        rhs_cs = rhs_cs.interp_time(lhs_cs.time, time_ref)
 
         orientation = ut.xr_matmul(
-            rhs_cs.orientation, self.orientation, dims_a=["c", "v"]
+            rhs_cs.orientation, lhs_cs.orientation, dims_a=["c", "v"]
         )
         coordinates = (
-            ut.xr_matmul(rhs_cs.orientation, self.coordinates, ["c", "v"], ["c"])
+            ut.xr_matmul(rhs_cs.orientation, lhs_cs.coordinates, ["c", "v"], ["c"])
             + rhs_cs.coordinates
         )
-        return LocalCoordinateSystem(orientation, coordinates)
+        return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
 
     def __sub__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
         """Subtract 2 coordinate systems.
@@ -1080,9 +1099,12 @@ class LocalCoordinateSystem:
     def reset_reference_time(self, time_ref_new):
         if isinstance(time_ref_new, str):
             time_ref_new = pd.Timestamp(time_ref_new)
-        delta = self.reference_time - time_ref_new
-        self._dataset.attrs["time_ref"] = time_ref_new
-        self._dataset.coords["time"] = self.time + delta
+        if self.reference_time is None:
+            self._dataset.attrs["time_ref"] = time_ref_new
+        else:
+            delta = self.reference_time - time_ref_new
+            self._dataset.attrs["time_ref"] = time_ref_new
+            self._dataset.coords["time"] = self.time + delta
 
 
 # coordinate system manager class ------------------------------------------------------
