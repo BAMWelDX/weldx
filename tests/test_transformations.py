@@ -656,26 +656,6 @@ class TestLocalCoordinateSystem:
 
     # test_interp_time -----------------------------------------------------------------
 
-    time_interp = TDI([29, 30], "D")
-
-    orientation_exp = tf.rotation_matrix_z(np.array([0.5, 0.5]) * np.pi)
-    coordinates_exp = np.array([[3, 1, 2], [3, 1, 2]])
-
-    # pure interpolation ------------------------
-    time_interp = TDI([11, 14, 17, 20], "D")
-
-    orientation_exp = tf.rotation_matrix_z(np.array([0.125, 0.5, 0.875, 0.75]) * np.pi)
-    coordinates_exp = np.array(
-        [[2.5, 8.25, 5.75], [4, 9, 2], [1, 3.75, 1.25], [1.5, 1.5, 1.5]]
-    )
-
-    # mixed -------------------------------------
-    time_interp = TDI([6, 12, 18, 24, 32], "D")
-    orientation_exp = tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi)
-    coordinates_exp = np.array(
-        [[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]
-    )
-
     @pytest.mark.parametrize(
         "time_ref_lcs, time,time_ref, orientation_exp, coordinates_exp",
         [
@@ -728,6 +708,22 @@ class TestLocalCoordinateSystem:
     def test_interp_time(
         self, time_ref_lcs, time, time_ref, orientation_exp, coordinates_exp
     ):
+        """Test the interp_time function.
+
+        Parameters
+        ----------
+        time_ref_lcs:
+            Reference time of the coordinate system
+        time:
+            Time that is passed to the function
+        time_ref:
+            Reference time that is passed to the function
+        orientation_exp:
+            Expected orientations of the result
+        coordinates_exp:
+            Expected coordinates of the result
+
+        """
         # setup
         lcs = tf.LocalCoordinateSystem(
             orientation=tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi),
