@@ -16,6 +16,14 @@ import weldx.utility as ut
 # helpers for tests -----------------------------------------------------------
 
 
+# Todo: Move this to conftest.py?
+def get_test_name(param):
+    """Get the test name from the parameter list of a parametrized test."""
+    if isinstance(param, str) and param[0] == "#":
+        return param[1:]
+    return ""
+
+
 def check_matrix_does_not_reflect(matrix):
     """Check if a matrix does not reflect.
 
@@ -1212,35 +1220,292 @@ class TestCoordinateSystemManager:
     CSM = tf.CoordinateSystemManager
     LCS = tf.LocalCoordinateSystem
 
+    @pytest.fixture
+    def csm_fix(self):
+        """Create default coordinate system fixture."""
+        csm_default = self.CSM("root")
+        lcs_1 = self.LCS(coordinates=[0, 1, 2])
+        lcs_2 = self.LCS(coordinates=[0, -1, -2])
+        lcs_3 = self.LCS(tf.rotation_matrix_y(0), [-1, -2, -3])
+        lcs_4 = self.LCS(tf.rotation_matrix_y(np.pi / 2), [1, 2, 3])
+        lcs_5 = self.LCS(tf.rotation_matrix_y(np.pi * 3 / 2), [2, 3, 1])
+        csm_default.add_cs("lcs1", "root", lcs_1)
+        csm_default.add_cs("lcs2", "root", lcs_2)
+        csm_default.add_cs("lcs3", "lcs1", lcs_3)
+        csm_default.add_cs("lcs4", "lcs1", lcs_4)
+        csm_default.add_cs("lcs5", "lcs2", lcs_5)
+
+        return csm_default
+
+    @pytest.fixture()
+    def list_of_csm_and_lcs_instances(self):
+        """Get a list of LCS and CSM instances."""
+        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(11)]
+
+        csm_0 = self.CSM("lcs0", "csm0")
+        csm_0.add_cs("lcs1", "lcs0", lcs[1])
+        csm_0.add_cs("lcs2", "lcs0", lcs[2])
+        csm_0.add_cs("lcs3", "lcs2", lcs[3])
+
+        csm_1 = self.CSM("lcs0", "csm1")
+        csm_1.add_cs("lcs4", "lcs0", lcs[4])
+
+        csm_2 = self.CSM("lcs5", "csm2")
+        csm_2.add_cs("lcs3", "lcs5", lcs[5], lsc_child_in_parent=False)
+        csm_2.add_cs("lcs6", "lcs5", lcs[6])
+
+        csm_3 = self.CSM("lcs6", "csm3")
+        csm_3.add_cs("lcs7", "lcs6", lcs[7])
+        csm_3.add_cs("lcs8", "lcs6", lcs[8])
+
+        csm_4 = self.CSM("lcs9", "csm4")
+        csm_4.add_cs("lcs3", "lcs9", lcs[9], lsc_child_in_parent=False)
+
+        csm_5 = self.CSM("lcs7", "csm5")
+        csm_5.add_cs("lcs10", "lcs7", lcs[10])
+
+        csm = [csm_0, csm_1, csm_2, csm_3, csm_4, csm_5]
+        return [csm, lcs]
+
+    # test_add_coordinate_system -------------------------------------------------------
+
+    # todo
+    #  add time dependent systems. The problem is, that currently something messes
+    #  up the comparison. The commented version of lcs_2 somehow switches the order of
+    #  how 2 coordinates are stored in the Dataset. This lets the coordinate comparison
+    #  fail.
+    csm_acs = CSM("root")
+    time = pd.DatetimeIndex(["2000-01-01", "2000-01-04"])
+    lcs_1_acs = LCS(coordinates=[0, 1, 2])
+    # lcs_2_acs = LCS(coordinates=[[0, -1, -2], [8, 2, 7]], time=time)
+    lcs_2_acs = LCS(coordinates=[0, -1, -2])
+    lcs_3_acs = LCS(tf.rotation_matrix_y(0), [-1, -2, -3])
+    lcs_4_acs = LCS(tf.rotation_matrix_y(np.pi / 2), [1, 2, 3])
+    lcs_5_acs = LCS(tf.rotation_matrix_y(np.pi * 3 / 2), [2, 3, 1])
+
+    @pytest.mark.parametrize(
+        "name , parent, lcs, child_in_parent, exp_num_cs",
+        [
+            ("lcs1", "root", lcs_1_acs, True, 2),
+            ("lcs2", "root", lcs_2_acs, False, 3),
+            ("lcs3", "lcs2", lcs_4_acs, True, 4),
+            ("lcs3", "lcs2", lcs_3_acs, True, 4),
+            ("lcs2", "lcs3", lcs_3_acs, False, 4),
+            ("lcs2", "lcs3", lcs_3_acs, True, 4),
+            ("lcs4", "lcs2", lcs_1_acs, True, 5),
+            ("lcs4", "lcs2", lcs_4_acs, True, 5),
+            ("lcs5", "lcs1", lcs_5_acs, True, 6),
+        ],
+    )
+    def test_add_coordinate_system(
+        self, name, parent, lcs, child_in_parent, exp_num_cs
+    ):
+        """Test the 'add_cs' function."""
+        csm = self.csm_acs
+        csm.add_cs(name, parent, lcs, child_in_parent)
+
+        assert csm.number_of_coordinate_systems == exp_num_cs
+        if child_in_parent:
+            assert csm.get_local_coordinate_system(name, parent) == lcs
+            assert csm.get_local_coordinate_system(parent, name) == lcs.invert()
+        else:
+            assert csm.get_local_coordinate_system(name, parent) == lcs.invert()
+            assert csm.get_local_coordinate_system(parent, name) == lcs
+
+    # test_add_coordinate_system_exceptions --------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "name, parent_name, lcs, exception_type, test_name",
+        [
+            ("lcs", "r00t", LCS(), ValueError, "# invalid parent system"),
+            ("lcs4", "root", LCS(), ValueError, "# can't update - no neighbors"),
+            ("lcs", LCS(), LCS(), TypeError, "# invalid parent system name type"),
+            (LCS(), "root", LCS(), TypeError, "# invalid system name type"),
+            ("new_lcs", "root", "a string", TypeError, "# invalid system type"),
+        ],
+        ids=get_test_name,
+    )
+    def test_add_coordinate_system_exceptions(
+        csm_fix, name, parent_name, lcs, exception_type, test_name
+    ):
+        """Test the exceptions of the 'add_cs' method."""
+        with pytest.raises(exception_type):
+            csm_fix.add_cs(name, parent_name, lcs)
+
+    # test num_neighbors ---------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "name, exp_num_neighbors",
+        [("root", 2), ("lcs1", 3), ("lcs2", 2), ("lcs3", 1), ("lcs4", 1), ("lcs5", 1)],
+    )
+    def test_num_neighbors(csm_fix, name, exp_num_neighbors):
+        """Test the num_neighbors function."""
+        assert csm_fix.number_of_neighbors(name) == exp_num_neighbors
+
+    # test is_neighbor_of --------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "name1, exp_result",
+        [
+            ("root", [False, True, True, False, False, False]),
+            ("lcs1", [True, False, False, True, True, False]),
+            ("lcs2", [True, False, False, False, False, True]),
+            ("lcs3", [False, True, False, False, False, False]),
+            ("lcs4", [False, True, False, False, False, False]),
+            ("lcs5", [False, False, True, False, False, False]),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "name2, result_idx",
+        [("root", 0), ("lcs1", 1), ("lcs2", 2), ("lcs3", 3), ("lcs4", 4), ("lcs5", 5)],
+    )
+    def test_is_neighbor_of(csm_fix, name1, name2, result_idx, exp_result):
+        """Test the is_neighbor_of function."""
+        assert csm_fix.is_neighbor_of(name1, name2) is exp_result[result_idx]
+
+    # test_get_child_system_names ------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "cs_name, neighbors_only, result_exp",
+        [
+            ("root", True, ["lcs1", "lcs2"]),
+            ("lcs1", True, ["lcs3", "lcs4"]),
+            ("lcs2", True, ["lcs5"]),
+            ("lcs3", True, []),
+            ("lcs4", True, []),
+            ("lcs5", True, []),
+            ("root", False, ["lcs1", "lcs2", "lcs3", "lcs4", "lcs5"]),
+            ("lcs1", False, ["lcs3", "lcs4"]),
+            ("lcs2", False, ["lcs5"]),
+            ("lcs3", False, []),
+            ("lcs4", False, []),
+            ("lcs5", False, []),
+        ],
+    )
+    def test_get_child_system_names(csm_fix, cs_name, neighbors_only, result_exp):
+        """Test the get_child_system_names function."""
+        result = csm_fix.get_child_system_names(cs_name, neighbors_only)
+
+        # check -------------------------------------------
+        assert len(result) == len(result_exp)
+        for name in result_exp:
+            assert name in result
+
+    # test_delete_coordinate_system ----------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "lcs_del, delete_children, num_cs_exp, exp_children_deleted",
+        [
+            ("lcs1", True, 3, ["lcs3", "lcs4"]),
+            ("lcs2", True, 4, ["lcs5"]),
+            ("lcs3", True, 5, []),
+            ("lcs4", True, 5, []),
+            ("lcs5", True, 5, []),
+            ("lcs3", False, 5, []),
+            ("lcs4", False, 5, []),
+            ("lcs5", False, 5, []),
+            ("not included", False, 6, []),
+            ("not included", True, 6, []),
+        ],
+    )
+    def test_delete_coordinate_system(
+        csm_fix, lcs_del, delete_children, exp_children_deleted, num_cs_exp
+    ):
+        """Test the delete function of the CSM."""
+        # setup
+        removed_lcs_exp = [lcs_del] + exp_children_deleted
+
+        # delete coordinate system
+        csm_fix.delete_cs(lcs_del, delete_children)
+
+        # check
+        edges = csm_fix.graph.edges
+
+        assert csm_fix.number_of_coordinate_systems == num_cs_exp
+        for lcs in removed_lcs_exp:
+            assert not csm_fix.has_coordinate_system(lcs)
+            for edge in edges:
+                assert lcs not in edge
+
+    # test_delete_coordinate_system_exceptions -----------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "name, delete_children, exception_type, test_name",
+        [
+            ("root", True, ValueError, "# root system can't be deleted #1"),
+            ("root", False, ValueError, "# root system can't be deleted #2"),
+            ("lcs1", False, Exception, "# system has children"),
+        ],
+        ids=get_test_name,
+    )
+    def test_delete_coordinate_system_exceptions(
+        csm_fix, name, delete_children, exception_type, test_name
+    ):
+        """Test the exceptions of the 'add_cs' method."""
+        with pytest.raises(exception_type):
+            csm_fix.delete_cs(name, delete_children)
+
     # test_comparison ------------------------------------------------------------------
 
-    csm_0 = CSM("root")
-    csm_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_0.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_0 = CSM("root", "name")
+    csm_comp_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_comp_0.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
     # different LCS
-    csm_1 = CSM("root")
-    csm_1.add_cs("lcs_0", "root", LCS(coordinates=[1, 1, 2]))
-    csm_1.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_1 = CSM("root", "name")
+    csm_comp_1.add_cs("lcs_0", "root", LCS(coordinates=[1, 1, 2]))
+    csm_comp_1.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
     # different nodes
-    csm_2 = CSM("root")
-    csm_2.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_2.add_cs("lcs_2", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_2 = CSM("root", "name")
+    csm_comp_2.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_comp_2.add_cs("lcs_2", "root", LCS(coordinates=[0, -1, -2]))
     # different edges
-    csm_3 = CSM("root")
-    csm_3.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_3.add_cs("lcs_1", "lcs_0", LCS(coordinates=[0, -1, -2]))
+    csm_comp_3 = CSM("root", "name")
+    csm_comp_3.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_comp_3.add_cs("lcs_1", "lcs_0", LCS(coordinates=[0, -1, -2]))
+    # merged systems
+    csm_merge_0 = CSM("root", "sub 1")
+    csm_merge_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
+    csm_merge_1 = CSM("lcs_0", "sub 2")
+    csm_merge_1.add_cs("lcs_2", "lcs_0", LCS(coordinates=[0, 1, 2]))
+    csm_comp_4 = CSM("root", "name")
+    csm_comp_4.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_4.merge(csm_merge_0)
+    # serial merge
+    csm_comp_5 = CSM("root", "name")
+    csm_comp_5.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_comp_5.merge(csm_merge_0)
+    csm_comp_5.merge(csm_merge_1)
+    # nested merge
+    csm_comp_6 = CSM("root", "name")
+    csm_comp_6.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
+    csm_nest_0 = deepcopy(csm_merge_0)
+    csm_nest_0.merge(csm_merge_1)
+    csm_comp_6.merge(csm_nest_0)
 
     @pytest.mark.parametrize(
         "csm, other, result_exp",
         [
-            (CSM("root"), CSM("root"), True),
-            (CSM("root"), CSM("boot"), False),
-            (CSM("root"), "a string", False),
-            (csm_0, deepcopy(csm_0), True),
-            (csm_0, CSM("root"), False),
-            (csm_0, csm_1, False),
-            (csm_0, csm_2, False),
-            (csm_0, csm_3, False),
+            (CSM("root", "name"), CSM("root", "name"), True),
+            (CSM("root", "name"), CSM("root", "wrong name"), False),
+            (CSM("root", "name"), CSM("boot", "name"), False),
+            (CSM("root", "name"), "a string", False),
+            (csm_comp_0, deepcopy(csm_comp_0), True),
+            (csm_comp_0, CSM("root", "name"), False),
+            (csm_comp_0, csm_comp_1, False),
+            (csm_comp_0, csm_comp_2, False),
+            (csm_comp_0, csm_comp_3, False),
+            (csm_comp_4, csm_comp_4, True),
+            (csm_comp_4, csm_comp_5, False),
+            (csm_comp_4, csm_comp_6, False),
+            (csm_comp_5, csm_comp_5, True),
+            (csm_comp_5, csm_comp_6, False),
+            (csm_comp_6, csm_comp_6, True),
         ],
     )
     def test_comparison(self, csm, other, result_exp):
@@ -1248,6 +1513,437 @@ class TestCoordinateSystemManager:
         assert isinstance(csm, self.CSM), "csm must be a CoordinateSystemManager"
         assert (csm == other) is result_exp
         assert (csm != other) is not result_exp
+
+    # test_merge -----------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("nested", [(True,), (False,)])
+    def test_merge(list_of_csm_and_lcs_instances, nested):
+        """Test the merge function."""
+        # setup -------------------------------------------
+        csm = list_of_csm_and_lcs_instances[0]
+        lcs = list_of_csm_and_lcs_instances[1]
+
+        # merge -------------------------------------------
+        csm_mg = deepcopy(csm[0])
+
+        if nested:
+            csm_n3 = deepcopy(csm[3])
+            csm_n3.merge(csm[5])
+            csm_n2 = deepcopy(csm[2])
+            csm_n2.merge(csm_n3)
+            csm_mg.merge(csm[1])
+            csm_mg.merge(csm[4])
+            csm_mg.merge(csm_n2)
+        else:
+            csm_mg.merge(csm[1])
+            csm_mg.merge(csm[2])
+            csm_mg.merge(csm[3])
+            csm_mg.merge(csm[4])
+            csm_mg.merge(csm[5])
+
+        # check merge results -----------------------------
+        csm_0_systems = csm_mg.get_coordinate_system_names()
+        assert np.all([f"lcs{i}" in csm_0_systems for i in range(len(lcs))])
+
+        for i, cur_lcs in enumerate(lcs):
+            child = f"lcs{i}"
+            parent = csm_mg.get_parent_system_name(child)
+            if i == 0:
+                assert parent is None
+                continue
+            assert csm_mg.get_local_coordinate_system(child, parent) == cur_lcs
+            assert csm_mg.get_local_coordinate_system(parent, child) == cur_lcs.invert()
+
+    # test get_subsystems_merged_serially ----------------------------------------------
+
+    @staticmethod
+    def test_get_subsystems_merged_serially(list_of_csm_and_lcs_instances):
+        """Test the get_subsystem method.
+
+        In this test case, all sub systems are merged into the same target system.
+        """
+        # setup -------------------------------------------
+        csm = list_of_csm_and_lcs_instances[0]
+
+        csm[0].merge(csm[1])
+        csm[0].merge(csm[2])
+        csm[0].merge(csm[3])
+        csm[0].merge(csm[4])
+        csm[0].merge(csm[5])
+
+        # get subsystems ----------------------------------
+        subs = csm[0].get_sub_systems()
+
+        # checks ------------------------------------------
+        assert len(subs) == 5
+
+        assert subs[0] == csm[1]
+        assert subs[1] == csm[2]
+        assert subs[2] == csm[3]
+        assert subs[3] == csm[4]
+        assert subs[4] == csm[5]
+
+    # test get_subsystems_merged_nested ----------------------------------------------
+
+    @staticmethod
+    def test_get_subsystems_merged_nested(list_of_csm_and_lcs_instances):
+        """Test the get_subsystem method.
+
+        In this test case, several systems are merged together before they are merged
+        to the target system. This creates a nested subsystem structure.
+        """
+        # setup -------------------------------------------
+        csm = list_of_csm_and_lcs_instances[0]
+
+        csm_n3 = deepcopy(csm[3])
+        csm_n3.merge(csm[5])
+
+        csm_n2 = deepcopy(csm[2])
+        csm_n2.merge(csm_n3)
+
+        csm_mg = deepcopy(csm[0])
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm_n2)
+
+        # get sub systems ---------------------------------
+        subs = csm_mg.get_sub_systems()
+
+        # checks ------------------------------------------
+        assert len(subs) == 3
+
+        assert subs[0] == csm[1]
+        assert subs[1] == csm[4]
+        assert subs[2] == csm_n2
+
+        # get sub sub system ------------------------------
+        sub_subs = subs[2].get_sub_systems()
+
+        # check -------------------------------------------
+        assert len(sub_subs) == 1
+
+        assert sub_subs[0] == csm_n3
+
+        # get sub sub sub systems -------------------------
+        sub_sub_subs = sub_subs[0].get_sub_systems()
+
+        # check -------------------------------------------
+        assert len(sub_sub_subs) == 1
+
+        assert sub_sub_subs[0] == csm[5]
+
+    # test_remove_subsystems -----------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("nested", [(True,), (False,)])
+    def test_remove_subsystems(list_of_csm_and_lcs_instances, nested):
+        """Test the remove_subsystem function."""
+        # setup -------------------------------------------
+        csm = list_of_csm_and_lcs_instances[0]
+
+        csm_mg = deepcopy(csm[0])
+
+        if nested:
+            csm_n3 = deepcopy(csm[3])
+            csm_n3.merge(csm[5])
+            csm_n2 = deepcopy(csm[2])
+            csm_n2.merge(csm_n3)
+            csm_mg.merge(csm[1])
+            csm_mg.merge(csm[4])
+            csm_mg.merge(csm_n2)
+        else:
+            csm_mg.merge(csm[1])
+            csm_mg.merge(csm[2])
+            csm_mg.merge(csm[3])
+            csm_mg.merge(csm[4])
+            csm_mg.merge(csm[5])
+
+        # remove subsystems -------------------------------
+        csm_mg.remove_subsystems()
+
+        # check -------------------------------------------
+        assert csm_mg == csm[0]
+
+    # test_unmerge_merged_serially -----------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "additional_cs",
+        [
+            ({}),
+            ({"lcs0": 0}),
+            ({"lcs1": 0}),
+            ({"lcs2": 0}),
+            ({"lcs3": 0}),
+            ({"lcs4": 1}),
+            ({"lcs5": 2}),
+            ({"lcs6": 2}),
+            ({"lcs7": 3}),
+            ({"lcs8": 3}),
+            ({"lcs9": 4}),
+            ({"lcs10": 5}),
+            ({"lcs2": 0, "lcs5": 2, "lcs7": 3, "lcs8": 3}),
+            ({"lcs0": 0, "lcs3": 0, "lcs4": 1, "lcs6": 2, "lcs10": 5}),
+        ],
+    )
+    def test_unmerge_merged_serially(
+        self, list_of_csm_and_lcs_instances, additional_cs
+    ):
+        """Test the CSM unmerge function.
+
+        In this test case, all sub systems are merged into the same target system.
+        """
+        # setup -------------------------------------------
+        csm = deepcopy(list_of_csm_and_lcs_instances[0])
+
+        csm_mg = deepcopy(csm[0])
+
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[2])
+        csm_mg.merge(csm[3])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm[5])
+
+        count = 0
+        for parent_cs, target_csm in additional_cs.items():
+            lcs = self.LCS(coordinates=[count, count + 1, count + 2])
+            csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
+            csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
+            count += 1
+
+        # unmerge -----------------------------------------
+        subs = csm_mg.unmerge()
+
+        # checks ------------------------------------------
+        csm_res = [csm_mg] + subs
+        assert len(csm_res) == 6
+
+        for i, current_lcs in enumerate(csm_res):
+            assert csm_res[i] == current_lcs
+
+    # test_unmerge_merged_nested -------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "additional_cs",
+        [
+            ({}),
+            ({"lcs0": 0}),
+            ({"lcs1": 0}),
+            ({"lcs2": 0}),
+            ({"lcs3": 0}),
+            ({"lcs4": 1}),
+            ({"lcs5": 2}),
+            ({"lcs6": 2}),
+            ({"lcs7": 3}),
+            ({"lcs8": 3}),
+            ({"lcs9": 4}),
+            ({"lcs10": 5}),
+            ({"lcs2": 0, "lcs5": 2, "lcs7": 3, "lcs8": 3}),
+            ({"lcs0": 0, "lcs3": 0, "lcs4": 1, "lcs6": 2, "lcs10": 5}),
+        ],
+    )
+    def test_unmerge_merged_nested(self, list_of_csm_and_lcs_instances, additional_cs):
+        """Test the CSM unmerge function.
+
+        In this test case, several systems are merged together before they are merged
+        to the target system. This creates a nested subsystem structure.
+        """
+        # setup -------------------------------------------
+        csm = deepcopy(list_of_csm_and_lcs_instances[0])
+
+        csm_mg = deepcopy(csm[0])
+
+        csm_n3 = deepcopy(csm[3])
+        csm_n3.merge(csm[5])
+        csm_n2 = deepcopy(csm[2])
+        csm_n2.merge(csm_n3)
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm_n2)
+
+        count = 0
+        for parent_cs, target_csm in additional_cs.items():
+            lcs = self.LCS(coordinates=[count, count + 1, count + 2])
+            csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
+            csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
+            if target_csm in [3, 5]:
+                csm_n3.add_cs(f"additional_{count}", parent_cs, lcs)
+            if target_csm in [2, 3, 5]:
+                csm_n2.add_cs(f"additional_{count}", parent_cs, lcs)
+            count += 1
+
+        # unmerge -----------------------------------------
+        subs = csm_mg.unmerge()
+
+        # checks ------------------------------------------
+        assert len(subs) == 3
+
+        assert csm_mg == csm[0]
+        assert subs[0] == csm[1]
+        assert subs[1] == csm[4]
+        assert subs[2] == csm_n2
+
+        # unmerge sub -------------------------------------
+        sub_subs = subs[2].unmerge()
+
+        # checks ------------------------------------------
+        assert len(sub_subs) == 1
+
+        assert subs[2] == csm[2]
+        assert sub_subs[0] == csm_n3
+
+        # unmerge sub sub ---------------------------------
+        sub_sub_subs = sub_subs[0].unmerge()
+
+        # checks ------------------------------------------
+        assert len(sub_sub_subs) == 1
+
+        assert sub_subs[0] == csm[3]
+        assert sub_sub_subs[0] == csm[5]
+
+    # test_delete_cs_with_serially_merged_subsystems -----------------------------------
+
+    @pytest.mark.parametrize(
+        "name, subsystems_exp, num_cs_exp",
+        [
+            ("lcs1", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("lcs2", ["csm1"], 4),
+            ("lcs3", ["csm1"], 6),
+            ("lcs4", ["csm2", "csm3", "csm4", "csm5"], 15),
+            ("lcs5", ["csm1", "csm4"], 8),
+            ("lcs6", ["csm1", "csm4"], 10),
+            ("lcs7", ["csm1", "csm2", "csm4"], 12),
+            ("lcs8", ["csm1", "csm2", "csm4", "csm5"], 15),
+            ("lcs9", ["csm1", "csm2", "csm3", "csm5"], 15),
+            ("lcs10", ["csm1", "csm2", "csm3", "csm4"], 14),
+            ("add0", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("add1", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("add2", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("add3", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+            ("add4", ["csm1", "csm2", "csm3", "csm4", "csm5"], 15),
+        ],
+    )
+    def test_delete_cs_with_serially_merged_subsystems(
+        self, list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
+    ):
+        """Test the delete_cs function with subsystems that were merged serially."""
+        # setup -------------------------------------------
+        csm = deepcopy(list_of_csm_and_lcs_instances[0])
+
+        csm_mg = deepcopy(csm[0])
+
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[2])
+        csm_mg.merge(csm[3])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm[5])
+
+        # add some additional coordinate systems
+        target_system_index = [0, 2, 5, 7, 10]
+        for i, _ in enumerate(target_system_index):
+            lcs = self.LCS(coordinates=[i, 2 * i, -i])
+            csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
+
+        # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
+        assert name in csm_mg.get_coordinate_system_names()
+
+        # delete coordinate system ------------------------
+        csm_mg.delete_cs(name, True)
+
+        # check -------------------------------------------
+        assert csm_mg.number_of_subsystems == len(subsystems_exp)
+        assert csm_mg.number_of_coordinate_systems == num_cs_exp
+
+        for sub_exp in subsystems_exp:
+            assert sub_exp in csm_mg.subsystem_names
+
+    # test_delete_cs_with_nested_subsystems --------------------------------------------
+
+    @pytest.mark.parametrize(
+        "name, subsystems_exp, num_cs_exp",
+        [
+            ("lcs1", ["csm1", "csm2", "csm4"], 17),
+            ("lcs2", ["csm1"], 4),
+            ("lcs3", ["csm1"], 6),
+            ("lcs4", ["csm2", "csm4"], 17),
+            ("lcs5", ["csm1", "csm4"], 8),
+            ("lcs6", ["csm1", "csm4"], 11),
+            ("lcs7", ["csm1", "csm4"], 14),
+            ("lcs8", ["csm1", "csm4"], 16),
+            ("lcs9", ["csm1", "csm2"], 17),
+            ("lcs10", ["csm1", "csm4"], 16),
+            ("add0", ["csm1", "csm2", "csm4"], 17),
+            ("add1", ["csm1", "csm2", "csm4"], 17),
+            ("add2", ["csm1", "csm2", "csm4"], 17),
+            ("add3", ["csm1", "csm2", "csm4"], 17),
+            ("add4", ["csm1", "csm2", "csm4"], 17),
+            ("nes0", ["csm1", "csm4"], 17),
+            ("nes1", ["csm1", "csm4"], 17),
+        ],
+    )
+    def test_delete_cs_with_nested_subsystems(
+        self, list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
+    ):
+        """Test the delete_cs function with nested subsystems."""
+        # setup -------------------------------------------
+        csm = deepcopy(list_of_csm_and_lcs_instances[0])
+
+        csm_mg = deepcopy(csm[0])
+
+        csm_n3 = deepcopy(csm[3])
+        csm_n3.add_cs("nes0", "lcs8", self.LCS(coordinates=[1, 2, 3]))
+        csm_n3.merge(csm[5])
+        csm_n2 = deepcopy(csm[2])
+        csm_n2.add_cs("nes1", "lcs5", self.LCS(coordinates=[-1, -2, -3]))
+        csm_n2.merge(csm_n3)
+        csm_mg.merge(csm[1])
+        csm_mg.merge(csm[4])
+        csm_mg.merge(csm_n2)
+
+        # add some additional coordinate systems
+        target_system_indices = [0, 2, 5, 7, 10]
+        for i, target_system_index in enumerate(target_system_indices):
+            lcs = self.LCS(coordinates=[i, 2 * i, -i])
+            csm_mg.add_cs(f"add{i}", f"lcs{target_system_index}", lcs)
+
+        # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
+        assert name in csm_mg.get_coordinate_system_names()
+
+        # delete coordinate system ------------------------
+        csm_mg.delete_cs(name, True)
+
+        # check -------------------------------------------
+        assert csm_mg.number_of_subsystems == len(subsystems_exp)
+        assert csm_mg.number_of_coordinate_systems == num_cs_exp
+
+        for sub_exp in subsystems_exp:
+            assert sub_exp in csm_mg.subsystem_names
+
+    # test_plot ------------------------------------------------------------------------
+
+    def test_plot(self):
+        """Test if the plot function runs without problems. Output is not checked."""
+        csm_global = self.CSM("root", "global coordinate systems")
+        csm_global.create_cs("specimen", "root", coordinates=[1, 2, 3])
+        csm_global.create_cs("robot head", "root", coordinates=[4, 5, 6])
+
+        csm_specimen = self.CSM("specimen", "specimen coordinate systems")
+        csm_specimen.create_cs("thermocouple 1", "specimen", coordinates=[1, 1, 0])
+        csm_specimen.create_cs("thermocouple 2", "specimen", coordinates=[1, 4, 0])
+
+        csm_robot = self.CSM("robot head", "robot coordinate systems")
+        csm_robot.create_cs("torch", "robot head", coordinates=[0, 0, -2])
+        csm_robot.create_cs("mount point 1", "robot head", coordinates=[0, 1, -1])
+        csm_robot.create_cs("mount point 2", "robot head", coordinates=[0, -1, -1])
+
+        csm_scanner = self.CSM("scanner", "scanner coordinate systems")
+        csm_scanner.create_cs("mount point 1", "scanner", coordinates=[0, 0, 2])
+
+        csm_robot.merge(csm_scanner)
+        csm_global.merge(csm_robot)
+        csm_global.merge(csm_specimen)
+
+        csm_global.plot()
 
 
 def test_coordinate_system_manager_init():
@@ -1261,66 +1957,6 @@ def test_coordinate_system_manager_init():
     # Invalid root system name
     with pytest.raises(Exception):
         tf.CoordinateSystemManager({})
-
-
-def test_coordinate_system_manager_add_coordinate_system():
-    """Test the add_cs function of the coordinate system manager.
-
-    Adds some coordinate systems to a CSM and checks if the the edges and nodes
-    are set as expected.
-
-    """
-    # define some coordinate systems
-    lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
-    lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
-    lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
-
-    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
-    assert csm.number_of_coordinate_systems == 1
-    assert csm.number_of_neighbors("root") == 0
-
-    csm.add_cs("lcs1", "root", lcs1_in_root)
-    assert csm.number_of_coordinate_systems == 2
-    assert csm.number_of_neighbors("root") == 1
-    assert csm.number_of_neighbors("lcs1") == 1
-    assert csm.is_neighbor_of("root", "lcs1")
-    assert csm.is_neighbor_of("lcs1", "root")
-
-    csm.add_cs("lcs2", "root", lcs2_in_root)
-    assert csm.number_of_coordinate_systems == 3
-    assert csm.number_of_neighbors("root") == 2
-    assert csm.number_of_neighbors("lcs1") == 1
-    assert csm.number_of_neighbors("lcs2") == 1
-    assert csm.is_neighbor_of("root", "lcs2")
-    assert csm.is_neighbor_of("lcs2", "root")
-    assert not csm.is_neighbor_of("lcs1", "lcs2")
-    assert not csm.is_neighbor_of("lcs2", "lcs1")
-
-    csm.add_cs("lcs3", "lcs2", lcs3_in_lcs2)
-    assert csm.number_of_coordinate_systems == 4
-    assert csm.number_of_neighbors("root") == 2
-    assert csm.number_of_neighbors("lcs1") == 1
-    assert csm.number_of_neighbors("lcs2") == 2
-    assert csm.number_of_neighbors("lcs3") == 1
-    assert not csm.is_neighbor_of("root", "lcs3")
-    assert not csm.is_neighbor_of("lcs3", "root")
-    assert not csm.is_neighbor_of("lcs1", "lcs3")
-    assert not csm.is_neighbor_of("lcs3", "lcs1")
-    assert csm.is_neighbor_of("lcs2", "lcs3")
-    assert csm.is_neighbor_of("lcs3", "lcs2")
-
-    # Exceptions---------------------------------
-    # Incorrect coordinate system type
-    with pytest.raises(Exception):
-        csm.add_cs("lcs4", "root", "wrong")
-
-    # Coordinate system already exists
-    with pytest.raises(Exception):
-        csm.add_cs("lcs3", "lcs2", lcs3_in_lcs2)
-
-    # Invalid parent system
-    with pytest.raises(Exception):
-        csm.add_cs("lcs4", "something", tf.LocalCoordinateSystem())
 
 
 def test_coordinate_system_manager_create_coordinate_system():
