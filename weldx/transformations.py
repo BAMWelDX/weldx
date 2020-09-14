@@ -1032,6 +1032,15 @@ class LocalCoordinateSystem:
         if self.reference_time == time_ref:
             lcs_ref = self
         else:
+            if type(self.reference_time) != type(time_ref):
+                raise TypeError(
+                    "Only 1 reference time provided. Either the reference time of the "
+                    "coordinate system or the one passed to the function is 'None'. "
+                    "Only cases where the reference times are both 'None' or both "
+                    "contain a timestamp are allowed. Also check that the reference "
+                    "time has the correct type."
+                )
+
             lcs_ref = deepcopy(self)
             lcs_ref.reset_reference_time(time_ref)
 

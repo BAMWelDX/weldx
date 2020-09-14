@@ -744,6 +744,49 @@ class TestLocalCoordinateSystem:
             lcs_interp_like, orientation_exp, coordinates_exp, True, time, time_ref
         )
 
+    # test_interp_time_exceptions ------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "time_ref_lcs, time, time_ref,  exception_type, test_name",
+        [
+            (TS("2020-02-02"), TDI([1]), None, TypeError, "# mixed ref. times #1"),
+            (None, TDI([1]), TS("2020-02-02"), TypeError, "# mixed ref. times #2"),
+            (TS("2020-02-02"), "no", TS("2020-02-02"), TypeError, "# wrong type #1"),
+            (TS("2020-02-02"), TDI([1]), "no", TypeError, "# wrong type #2"),
+        ],
+        ids=get_test_name,
+    )
+    def test_interp_time_exceptions(
+        time_ref_lcs, time, time_ref, exception_type, test_name
+    ):
+        """Test the exceptions of the 'reset_reference_time' method.
+
+        Parameters
+        ----------
+        time_ref_lcs:
+            Reference time of the LCS
+        time:
+            Time that is passed to interp_time
+        time_ref:
+            Reference time that is passed to interp_time
+        exception_type:
+            Expected exception type
+        test_name:
+            Name of the test
+
+        """
+        orientation = tf.rotation_matrix_z([1, 2, 3])
+        coordinates = [[i, i, i] for i in range(3)]
+        time_lcs = TDI([1, 2, 3], "D")
+
+        lcs = tf.LocalCoordinateSystem(
+            orientation, coordinates, time_lcs, time_ref=time_ref_lcs
+        )
+
+        with pytest.raises(exception_type):
+            lcs.interp_time(time, time_ref)
+
     # test_addition --------------------------------------------------------------------
 
     # reference data ----------------------------
