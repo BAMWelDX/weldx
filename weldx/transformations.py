@@ -1029,16 +1029,21 @@ class LocalCoordinateSystem:
 
         time, time_ref = self._build_time_index(time, time_ref)
 
-        if self.reference_time == time_ref:
+        if self.time is None:
+            lcs_time_ref = time_ref
+        else:
+            lcs_time_ref = self.reference_time
+
+        if lcs_time_ref == time_ref:
             lcs_ref = self
         else:
-            if type(self.reference_time) != type(time_ref):
+            if type(lcs_time_ref) != type(time_ref):
                 raise TypeError(
-                    "Only 1 reference time provided. Either the reference time of the "
-                    "coordinate system or the one passed to the function is 'None'. "
-                    "Only cases where the reference times are both 'None' or both "
-                    "contain a timestamp are allowed. Also check that the reference "
-                    "time has the correct type."
+                    "Only 1 reference time provided for time dependent coordinate "
+                    "system. Either the reference time of the coordinate system or the "
+                    "one passed to the function is 'None'. Only cases where the "
+                    "reference times are both 'None' or both contain a timestamp are "
+                    "allowed. Also check that the reference time has the correct type."
                 )
 
             lcs_ref = deepcopy(self)
