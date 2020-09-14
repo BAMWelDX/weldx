@@ -623,11 +623,10 @@ class TestLocalCoordinateSystem:
         [
             (TS("2020-02-02"), None, TypeError, "# invalid type #1"),
             (TS("2020-02-02"), 42, TypeError, "# invalid type #2"),
-            (None, TS("2020-02-02"), TypeError, "# lcs has no reference time"),
         ],
         ids=get_test_name,
     )
-    def test_delete_coordinate_system_exceptions(
+    def test_reset_reference_time_exceptions(
         time_ref, time_ref_new, exception_type, test_name
     ):
         """Test the exceptions of the 'reset_reference_time' method.
@@ -1303,7 +1302,6 @@ def test_coordinate_system_addition_and_subtraction():
     coordinate systems to keep track of the supposed operation results.
 
     """
-    546
     # reference data ----------------------------
     time_0 = TDI([1, 3, 5], "s")
     time_1 = TDI([2, 4, 6], "s")

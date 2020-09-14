@@ -1097,6 +1097,19 @@ class LocalCoordinateSystem:
         return self.as_rotation().as_euler(seq=seq, degrees=degrees)
 
     def reset_reference_time(self, time_ref_new):
+        """Reset the reference time of the coordinate system.
+
+        The time values of the coordinate system are adjusted to the new reference time.
+        If no reference time has been set before, the time values will remain
+        unmodified. This assumes that the current time delta values are already
+        referring to the new reference time.
+
+        Parameters
+        ----------
+        time_ref_new:
+            The new reference time
+
+        """
         if isinstance(time_ref_new, str):
             time_ref_new = pd.Timestamp(time_ref_new)
         if self.reference_time is None:
