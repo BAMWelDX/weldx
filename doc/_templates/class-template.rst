@@ -3,7 +3,7 @@
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
-   :special-members: __repr__, __eq__
+   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    {% block methods %}
    {% if methods %}
@@ -13,10 +13,11 @@
       :toctree:
       :nosignatures:
    {% for item in methods %}
-      ~{{ name }}.{{ item }}
+       ~{{ name }}.{{ item }}
    {%- endfor %}
    {% endif %}
    {% endblock %}
+
 
    {% block attributes %}
    {% if attributes %}

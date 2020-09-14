@@ -54,7 +54,7 @@ autosummary_generate = True
 
 numpydoc_show_class_members = False
 
-#autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
+#autodata_content = "both"  # Add __init__ doc (ie. params) to class summaries
 #html_show_sourcelink = False  # Remove 'view source code' from top of page (for html, not python)
 #autodoc_inherit_docstrings = True  # If no class summary, inherit base class summary
 
