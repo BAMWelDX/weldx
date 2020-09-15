@@ -665,7 +665,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def from_euler(
-        cls, sequence, angles, degrees=False, coordinates=None, time=None
+        cls, sequence, angles, degrees=False, coordinates=None, time=None, time_ref=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
 
@@ -701,6 +701,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -709,11 +711,11 @@ class LocalCoordinateSystem:
 
         """
         orientation = Rot.from_euler(sequence, angles, degrees)
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @classmethod
     def from_orientation(
-        cls, orientation, coordinates=None, time=None
+        cls, orientation, coordinates=None, time=None, time_ref=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from orientation matrix.
 
@@ -725,6 +727,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -732,11 +736,11 @@ class LocalCoordinateSystem:
             Local coordinate system
 
         """
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @classmethod
     def from_xyz(
-        cls, vec_x, vec_y, vec_z, coordinates=None, time=None
+        cls, vec_x, vec_y, vec_z, coordinates=None, time=None, time_ref=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from 3 vectors defining the orientation.
 
@@ -752,6 +756,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -766,11 +772,17 @@ class LocalCoordinateSystem:
         orientation = np.concatenate((vec_x, vec_y, vec_z), axis=vec_x.ndim - 1)
         orientation = np.reshape(orientation, (*vec_x.shape, 3))
         orientation = orientation.swapaxes(orientation.ndim - 1, orientation.ndim - 2)
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @classmethod
     def from_xy_and_orientation(
-        cls, vec_x, vec_y, positive_orientation=True, coordinates=None, time=None
+        cls,
+        vec_x,
+        vec_y,
+        positive_orientation=True,
+        coordinates=None,
+        time=None,
+        time_ref=None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -787,6 +799,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -798,11 +812,17 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time, time_ref=time_ref)
 
     @classmethod
     def from_yz_and_orientation(
-        cls, vec_y, vec_z, positive_orientation=True, coordinates=None, time=None
+        cls,
+        vec_y,
+        vec_z,
+        positive_orientation=True,
+        coordinates=None,
+        time=None,
+        time_ref=None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -819,6 +839,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -830,11 +852,17 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time, time_ref=time_ref)
 
     @classmethod
     def from_xz_and_orientation(
-        cls, vec_x, vec_z, positive_orientation=True, coordinates=None, time=None
+        cls,
+        vec_x,
+        vec_z,
+        positive_orientation=True,
+        coordinates=None,
+        time=None,
+        time_ref=None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -851,6 +879,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -862,7 +892,7 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time, time_ref=time_ref)
 
     @staticmethod
     def _sign_orientation(positive_orientation):
