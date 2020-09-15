@@ -864,7 +864,46 @@ class TestLocalCoordinateSystem:
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
-            (  # 4 - both fully time dependent - same time and reference time
+            (  # 4 - right system orientation time dependent
+                LCS(r_mat_z(0.5), [3, 7, 1]),
+                LCS(
+                    r_mat_z([0, 0.5, 1]),
+                    [1, 4, 2],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z([0.5, 1, 1.5]),
+                [[4, 11, 3], [-6, 7, 3], [-2, -3, 3]],
+                TDI([1, 3, 5], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 5 - right system coordinates time dependent
+                LCS(r_mat_z(0.5), [3, 7, 1]),
+                LCS(
+                    r_mat_z(0.5),
+                    [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z(1),
+                [[-4, 10, 2], [-3, 1, 9], [-12, 6, 0]],
+                TDI([1, 3, 5], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 6 - right system fully time dependent
+                LCS(r_mat_z(0.5), [3, 7, 1]),
+                LCS(
+                    r_mat_z([0, 0.5, 1]),
+                    [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z([0.5, 1, 1.5]),
+                [[6, 14, 2], [-3, 1, 9], [-8, -4, 0]],
+                TDI([1, 3, 5], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 7 - both fully time dependent - same time and reference time
                 LCS(
                     r_mat_z([1, 0, 0]),
                     [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
@@ -882,7 +921,7 @@ class TestLocalCoordinateSystem:
                 TDI([1, 3, 5], "D"),
                 TS("2020-02-02"),
             ),
-            (  # 5 - both fully time dependent - different time but same reference time
+            (  # 8 - both fully time dependent - different time but same reference time
                 LCS(
                     r_mat_z([1.5, 1.0, 0.75]),
                     [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
@@ -900,7 +939,7 @@ class TestLocalCoordinateSystem:
                 TDI([2, 4, 6], "D"),
                 TS("2020-02-02"),
             ),
-            (  # 6 - both fully time dependent - different time and reference time #1
+            (  # 9 - both fully time dependent - different time and reference time #1
                 LCS(
                     r_mat_z([1.5, 1.0, 0.75]),
                     [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
@@ -918,7 +957,7 @@ class TestLocalCoordinateSystem:
                 TDI([2, 4, 6], "D"),
                 TS("2020-02-02"),
             ),
-            (  # 7 - both fully time dependent - different time and reference time #2
+            (  # 10 - both fully time dependent - different time and reference time #2
                 LCS(
                     r_mat_z([1.5, 1.0, 0.75]),
                     [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
