@@ -362,8 +362,8 @@ class LocalCoordinateSystem:
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
-        construction_checks: bool = True,
         time_ref: pd.Timestamp = None,
+        construction_checks: bool = True,
     ):
         """Construct a cartesian coordinate system.
 
@@ -380,10 +380,10 @@ class LocalCoordinateSystem:
             Coordinates of the origin
         time :
             Time data for time dependent coordinate systems
-        construction_checks :
-            If 'True', the validity of the data will be verified
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
+        construction_checks :
+            If 'True', the validity of the data will be verified
 
         Returns
         -------
