@@ -1007,6 +1007,188 @@ class TestLocalCoordinateSystem:
             time_ref_exp,
         )
 
+    # test_subtraction -----------------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp",
+        [
+            (  # 1 - both static
+                LCS([[0, -1, 0], [0, 0, 1], [-1, 0, 0]], [-1, 8, 3]),
+                LCS(r_mat_z(0.5), [3, 7, 1]),
+                r_mat_y(0.5),
+                [1, 4, 2],
+                None,
+                None,
+            ),
+            (  # 2 - left system orientation time dependent
+                LCS(
+                    r_mat_z([0.5, 1, 1.5]),
+                    [-1, 8, 3],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                LCS(r_mat_z(0.5), [3, 7, 1]),
+                r_mat_z([0, 0.5, 1]),
+                [[1, 4, 2], [1, 4, 2], [1, 4, 2]],
+                TDI([1, 3, 5], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 3 - left system coordinates time dependent
+                LCS(
+                    [[0, -1, 0], [0, 0, 1], [-1, 0, 0]],
+                    [[-4, 10, 2], [5, 11, 9], [0, 2, 0]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                LCS(r_mat_z(0.5), [3, 7, 1]),
+                r_mat_y([0.5, 0.5, 0.5]),
+                [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                TDI([1, 3, 5], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 4 - right system orientation time dependent
+                LCS(r_mat_z(0.5), [3, 7, 1]),
+                LCS(
+                    r_mat_z([0, 0.5, 1]),
+                    [1, 4, 2],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z([0.5, 0, 1.5]),
+                [[2, 3, -1], [3, -2, -1], [-2, -3, -1]],
+                TDI([1, 3, 5], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 5 - right system coordinates time dependent
+                LCS(r_mat_z(0.5), [3, 7, 1]),
+                LCS(
+                    r_mat_z(0.5),
+                    [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z(0),
+                [[0, 0, 0], [9, 1, -7], [4, -8, 2]],
+                TDI([1, 3, 5], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 6 - right system fully time dependent
+                LCS(r_mat_z(0.5), [3, 7, 1]),
+                LCS(
+                    r_mat_z([0, 0.5, 1]),
+                    [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z([0.5, 0, 1.5]),
+                [[0, 0, 0], [9, 1, -7], [-8, -4, 2]],
+                TDI([1, 3, 5], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 7 - both fully time dependent - same time and reference time
+                LCS(
+                    r_mat_z([1, 0.5, 1]),
+                    [[7, 9, 6], [7, 1, 10], [-6, -4, -10]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                LCS(
+                    r_mat_z([0, 0.5, 1]),
+                    [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z([1, 0, 0]),
+                [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                TDI([1, 3, 5], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 8 - both fully time dependent - different time but same reference time
+                LCS(
+                    r_mat_z([1.5, 1.0, 0.75]),
+                    [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                    TDI([2, 4, 6], "D"),
+                    TS("2020-02-02"),
+                ),
+                LCS(
+                    r_mat_z([1, 1.5, 1]),
+                    [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z([0.25, 1.75, 1.75]),
+                [[-3.7426406, 2.9142135, 0.5], [-3.5, 3.742640, -1.5], [-6, -4, -8.0],],
+                TDI([2, 4, 6], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 9 - both fully time dependent - different time and reference time #1
+                LCS(
+                    r_mat_z([1.5, 1.0, 0.75]),
+                    [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-03"),
+                ),
+                LCS(
+                    r_mat_z([1, 1.5, 1]),
+                    [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z([0.25, 1.75, 1.75]),
+                [[-3.7426406, 2.9142135, 0.5], [-3.5, 3.742640, -1.5], [-6, -4, -8.0],],
+                TDI([2, 4, 6], "D"),
+                TS("2020-02-02"),
+            ),
+            (  # 10 - both fully time dependent - different time and reference time #2
+                LCS(
+                    r_mat_z([1.5, 1.0, 0.75]),
+                    [[4, 2, 5], [3, -3, 2], [1, 7, -9]],
+                    TDI([3, 5, 7], "D"),
+                    TS("2020-02-01"),
+                ),
+                LCS(
+                    r_mat_z([1, 1.5, 1]),
+                    [[3, 7, 1], [4, -2, 8], [-5, 3, -1]],
+                    TDI([1, 3, 5], "D"),
+                    TS("2020-02-02"),
+                ),
+                r_mat_z([0.25, 1.75, 1.75]),
+                [[-3.7426406, 2.9142135, 0.5], [-3.5, 3.742640, -1.5], [-6, -4, -8.0],],
+                TDI([3, 5, 7], "D"),
+                TS("2020-02-01"),
+            ),
+        ],
+    )
+    def test_subtraction(
+        self, lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp
+    ):
+        """Test the subtraction of 2 coordinate systems.
+
+        Parameters
+        ----------
+        lcs_lhs:
+            Left hand side coordinate system
+        lcs_rhs:
+            Right hand side coordinate system
+        orientation_exp:
+            Expected orientations of the resulting coordinate system
+        coordinates_exp:
+            Expected coordinates of the resulting coordinate system
+        time_exp:
+            Expected time of the resulting coordinate system
+        time_ref_exp:
+            Expected reference time of the resulting coordinate system
+
+        """
+        self.check_coordinate_system(
+            lcs_lhs - lcs_rhs,
+            orientation_exp,
+            coordinates_exp,
+            True,
+            time_exp,
+            time_ref_exp,
+        )
+
 
 def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
     """Check if the time component of a LocalCoordinateSystem is as expected.
@@ -1422,253 +1604,6 @@ def test_coordinate_system_factories_time_dependent():
 
     cs_xzo_o = lcs.from_xz_and_orientation(vec_x, vec_z, True, coords[0], time)
     check_coordinate_system(cs_xzo_o, orientations, coords[0], True, time=time)
-
-
-def test_coordinate_system_addition_and_subtraction():
-    """Test the + and - operator of the coordinate system class.
-
-    Creates some coordinate systems and uses the operators on them. Results
-    are compared to expected values. The naming pattern 'X_in_Y' is used for the
-    coordinate systems to keep track of the supposed operation results.
-
-    """
-    # reference data ----------------------------
-    time_0 = TDI([1, 3, 5], "s")
-    time_1 = TDI([2, 4, 6], "s")
-
-    orientation_fix_0 = tf.rotation_matrix_z(np.pi * 0.5)
-    orientation_fix_1 = tf.rotation_matrix_y(np.pi * 0.5)
-    orientation_tdp_0 = tf.rotation_matrix_z(np.pi * np.array([0, 0.5, 1]))
-    orientation_tdp_1 = tf.rotation_matrix_z(np.pi * np.array([1, 0, 0]))
-    orientation_tdp_2 = tf.rotation_matrix_z(np.pi * np.array([0.75, 1.25, 0.75]))
-    orientation_tdp_3 = tf.rotation_matrix_z(np.pi * np.array([1.5, 1.0, 0.75]))
-    orientation_tdp_4 = tf.rotation_matrix_z(np.pi * np.array([1, 1.5, 1]))
-    coordinates_fix_0 = ut.to_float_array([3, 7, 1])
-    coordinates_fix_1 = ut.to_float_array([1, 4, 2])
-    coordinates_tdp_0 = ut.to_float_array([[3, 7, 1], [4, -2, 8], [-5, 3, -1]])
-    coordinates_tdp_1 = ut.to_float_array([[4, 2, 5], [3, -3, 2], [1, 7, -9]])
-
-    # No time dependency ------------------------
-    lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, coordinates=coordinates_fix_0
-    )
-    lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_1, coordinates=coordinates_fix_1
-    )
-
-    lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
-    lcs1_in_lcs_0_calc = lcs1_in_base - lcs0_in_base
-
-    orientation_exp = [[0, -1, 0], [0, 0, 1], [-1, 0, 0]]
-    coordinates_exp = [-1, 8, 3]
-
-    check_coordinate_system(lcs1_in_base, orientation_exp, coordinates_exp, True)
-    check_coordinate_system(
-        lcs1_in_lcs_0_calc, lcs1_in_lcs_0.orientation, lcs1_in_lcs_0.coordinates, True
-    )
-
-    # orientation of left cs time dependent -----
-    lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, coordinates=coordinates_fix_0
-    )
-    lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_0, coordinates=coordinates_fix_1, time=time_0
-    )
-
-    lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
-    lcs1_in_lcs_0_calc = lcs1_in_base - lcs0_in_base
-
-    orientation_exp = tf.rotation_matrix_z(np.pi * np.array([0.5, 1, 1.5]))
-    coordinates_exp = [[-1, 8, 3], [-1, 8, 3], [-1, 8, 3]]
-
-    check_coordinate_system(
-        lcs1_in_base, orientation_exp, coordinates_exp, True, time_0
-    )
-    check_coordinate_system(
-        lcs1_in_lcs_0_calc,
-        lcs1_in_lcs_0.orientation,
-        lcs1_in_lcs_0.coordinates,
-        True,
-        time_0,
-    )
-
-    # coordinates of left cs time dependent -----
-    lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, coordinates=coordinates_fix_0
-    )
-    lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_1, coordinates=coordinates_tdp_0, time=time_0
-    )
-
-    lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
-    lcs1_in_lcs_0_calc = lcs1_in_base - lcs0_in_base
-
-    orientation_exp = [
-        [[0, -1, 0], [0, 0, 1], [-1, 0, 0]],
-        [[0, -1, 0], [0, 0, 1], [-1, 0, 0]],
-        [[0, -1, 0], [0, 0, 1], [-1, 0, 0]],
-    ]
-    coordinates_exp = [[-4, 10, 2], [5, 11, 9], [0, 2, 0]]
-    check_coordinate_system(
-        lcs1_in_base, orientation_exp, coordinates_exp, True, time_0
-    )
-    check_coordinate_system(
-        lcs1_in_lcs_0_calc,
-        lcs1_in_lcs_0.orientation,
-        lcs1_in_lcs_0.coordinates,
-        True,
-        time_0,
-    )
-
-    # both fully time dependent, equal times ----
-    lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_0, coordinates=coordinates_tdp_0, time=time_0
-    )
-    lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_1, coordinates=coordinates_tdp_1, time=time_0
-    )
-
-    lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
-    lcs1_in_lcs_0_calc = lcs1_in_base - lcs0_in_base
-
-    orientation_exp = tf.rotation_matrix_z(np.pi * np.array([1, 0.5, 1]))
-    coordinates_exp = [[7, 9, 6], [7, 1, 10], [-6, -4, -10]]
-
-    check_coordinate_system(
-        lcs1_in_base, orientation_exp, coordinates_exp, True, time_0
-    )
-    check_coordinate_system(
-        lcs1_in_lcs_0_calc,
-        lcs1_in_lcs_0.orientation,
-        lcs1_in_lcs_0.coordinates,
-        True,
-        time_0,
-    )
-
-    # both fully time dependent, different times - addition only
-    # INFO:
-    # The subtraction can not be tested as in the previous tests by subtracting the
-    # added coordinate system and comparing the result to the initial one. The problem
-    # is, that the necessary interpolated values depend on the reference coordinate
-    # system, the interpolation is performed in. Since the reference systems differ
-    # between the addition and the subsequent subtraction, the result can not be
-    # compared to the initial coordinate system.
-
-    lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_2, coordinates=coordinates_tdp_0, time=time_0
-    )
-    lcs1_in_lcs_0 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_3, coordinates=coordinates_tdp_1, time=time_1
-    )
-
-    lcs1_in_base = lcs1_in_lcs_0 + lcs0_in_base
-
-    c = np.cos(np.pi * 0.75)
-    s = np.sin(np.pi * 0.75)
-    coordinates_exp = ut.to_float_array(
-        [
-            [-0.5, 0.5, 9.5],
-            [-3.5, 3.5, 5.5],
-            [-5 + c * 1 - s * 7, 3 + s * 1 + c * 7, -10],
-        ]
-    )
-    orientation_exp = tf.rotation_matrix_z(np.pi * np.array([0.5, 0.0, 1.5]))
-
-    check_coordinate_system(
-        lcs1_in_base, orientation_exp, coordinates_exp, True, time_1
-    )
-
-    # both fully time dependent, different times - subtraction only
-    lcs0_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_4, coordinates=coordinates_tdp_0, time=time_0
-    )
-    lcs1_in_base = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_3, coordinates=coordinates_tdp_1, time=time_1
-    )
-
-    lcs1_in_lcs_0 = lcs1_in_base - lcs0_in_base
-
-    orientation_exp = tf.rotation_matrix_z(np.pi * np.array([0.25, 1.75, 1.75]))
-    c = np.cos(np.pi * 0.75)
-    s = np.sin(np.pi * 0.75)
-    coordinates_exp = ut.to_float_array(
-        [
-            [0.5 + c * 4 - s * 2, 1.5 + s * 4 + c * 2, 0.5],
-            [-3.5 + c * 3 - s * -3, -0.5 + s * 3 + c * -3, -1.5],
-            [-6, -4, -8],
-        ]
-    )
-
-    check_coordinate_system(
-        lcs1_in_lcs_0, orientation_exp, coordinates_exp, True, time_1
-    )
-
-    # orientation of right cs time dependent -----
-    lcs0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, coordinates=coordinates_fix_0
-    )
-    lcs1 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_0, coordinates=coordinates_fix_1, time=time_0
-    )
-
-    lcs_add = lcs0 + lcs1
-    lcs_sub = lcs0 - lcs1
-
-    orientation_add_exp = tf.rotation_matrix_z(np.pi * np.array([0.5, 1, 1.5]))
-    coordinates_add_exp = [[4, 11, 3], [-6, 7, 3], [-2, -3, 3]]
-    orientation_sub_exp = tf.rotation_matrix_z(np.pi * np.array([0.5, 0, 1.5]))
-    coordinates_sub_exp = [[2, 3, -1], [3, -2, -1], [-2, -3, -1]]
-
-    check_coordinate_system(
-        lcs_add, orientation_add_exp, coordinates_add_exp, True, time_0
-    )
-    check_coordinate_system(
-        lcs_sub, orientation_sub_exp, coordinates_sub_exp, True, time_0
-    )
-
-    # coordinates of right cs time dependent ----
-    lcs0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, coordinates=coordinates_fix_0
-    )
-    lcs1 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, coordinates=coordinates_tdp_0, time=time_0
-    )
-
-    lcs_add = lcs0 + lcs1
-    lcs_sub = lcs0 - lcs1
-
-    orientation_add_exp = tf.rotation_matrix_z(np.pi)
-    coordinates_add_exp = [[-4, 10, 2], [-3, 1, 9], [-12, 6, 0]]
-    orientation_sub_exp = tf.rotation_matrix_z(0)
-    coordinates_sub_exp = [[0, 0, 0], [9, 1, -7], [4, -8, 2]]
-    check_coordinate_system(
-        lcs_add, orientation_add_exp, coordinates_add_exp, True, time_0
-    )
-    check_coordinate_system(
-        lcs_sub, orientation_sub_exp, coordinates_sub_exp, True, time_0
-    )
-
-    # right cs with full time dependency --------
-    lcs0 = tf.LocalCoordinateSystem(
-        orientation=orientation_fix_0, coordinates=coordinates_fix_0
-    )
-    lcs1 = tf.LocalCoordinateSystem(
-        orientation=orientation_tdp_0, coordinates=coordinates_tdp_0, time=time_0
-    )
-
-    lcs_add = lcs0 + lcs1
-    lcs_sub = lcs0 - lcs1
-
-    orientation_add_exp = tf.rotation_matrix_z(np.pi * np.array([0.5, 1, 1.5]))
-    coordinates_add_exp = [[6, 14, 2], [-3, 1, 9], [-8, -4, 0]]
-    orientation_sub_exp = tf.rotation_matrix_z(np.pi * np.array([0.5, 0, 1.5]))
-    coordinates_sub_exp = [[0, 0, 0], [9, 1, -7], [-8, -4, 2]]
-    check_coordinate_system(
-        lcs_add, orientation_add_exp, coordinates_add_exp, True, time_0
-    )
-    check_coordinate_system(
-        lcs_sub, orientation_sub_exp, coordinates_sub_exp, True, time_0
-    )
 
 
 def test_coordinate_system_invert():

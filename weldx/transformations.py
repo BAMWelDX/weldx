@@ -1104,7 +1104,9 @@ class LocalCoordinateSystem:
             dims_b=["c"],
             trans_a=True,
         )
-        return LocalCoordinateSystem(orientation, coordinates)
+        return LocalCoordinateSystem(
+            orientation, coordinates, self.time, self.reference_time
+        )
 
     def as_rotation(self) -> Rot:  # pragma: no cover
         """Get a scipy.Rotation object from the coordinate system orientation.
