@@ -1067,7 +1067,7 @@ class LocalCoordinateSystem:
         if lcs_time_ref == time_ref:
             lcs_ref = self
         else:
-            if type(lcs_time_ref) != type(time_ref):
+            if not isinstance(lcs_time_ref, type(time_ref)):
                 raise TypeError(
                     "Only 1 reference time provided for time dependent coordinate "
                     "system. Either the reference time of the coordinate system or the "

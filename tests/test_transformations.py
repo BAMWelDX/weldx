@@ -9,14 +9,14 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import TimedeltaIndex as TDI
-from pandas import Timestamp as TS
+from pandas import TimedeltaIndex as TDI  # noqa
+from pandas import Timestamp as TS  # noqa
 from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.transformations import LocalCoordinateSystem as LCS
+from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 
 # helpers for tests -----------------------------------------------------------
 
