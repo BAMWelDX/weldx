@@ -34,7 +34,9 @@ def test_plot_coordinate_system():
     vs.plot_coordinate_system(lcs_constant, ax, "g")
     vs.plot_coordinate_system(lcs_tdp, ax, "r", "2016-01-10")
     vs.plot_coordinate_system(lcs_tdp, ax, "b", "2016-01-11", time_idx=1)
-    vs.plot_coordinate_system(lcs_tdp, ax, "y", "2016-01-12", pd.TimedeltaIndex([12]))
+    vs.plot_coordinate_system(
+        lcs_tdp, ax, "y", "2016-01-12", pd.TimedeltaIndex([12], "s")
+    )
 
     # exceptions ------------------------------------------
 
