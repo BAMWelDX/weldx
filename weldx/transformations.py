@@ -438,7 +438,7 @@ class LocalCoordinateSystem:
         orientation.name = "orientation"
 
         self._dataset = xr.merge([coordinates, orientation], join="exact")
-        if "time" in self._dataset:
+        if "time" in self._dataset and time_ref is not None:
             self._dataset.time.attrs["time_ref"] = time_ref
 
     def __repr__(self):
@@ -972,7 +972,7 @@ class LocalCoordinateSystem:
             The coordinate systems reference time
 
         """
-        if "time" in self._dataset:
+        if "time" in self._dataset and "time_ref" in self._dataset.time.attrs:
             return self._dataset.time.attrs["time_ref"]
         return None
 
