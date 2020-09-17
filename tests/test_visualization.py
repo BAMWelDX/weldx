@@ -17,7 +17,7 @@ def test_plot_coordinate_system():
     """Test executing all possible code paths."""
     lcs_constant = tf.LocalCoordinateSystem()
 
-    time = pd.TimedeltaIndex([10, 11, 12])
+    time = pd.TimedeltaIndex([10, 11, 12], "s")
     orientation_tdp = [
         [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
         [[0, 1, 0], [-1, 0, 0], [0, 0, 1]],
