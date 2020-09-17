@@ -438,7 +438,8 @@ class LocalCoordinateSystem:
         orientation.name = "orientation"
 
         self._dataset = xr.merge([coordinates, orientation], join="exact")
-        self._dataset.attrs["time_ref"] = time_ref
+        if "time" in self._dataset:
+            self._dataset.time.attrs["time_ref"] = time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -482,7 +483,7 @@ class LocalCoordinateSystem:
         """
         lhs_cs = self
         if (
-            lhs_cs != rhs_cs
+            lhs_cs.reference_time != rhs_cs.reference_time
             and lhs_cs.reference_time is not None
             and rhs_cs.reference_time is not None
         ):
@@ -971,7 +972,9 @@ class LocalCoordinateSystem:
             The coordinate systems reference time
 
         """
-        return self._dataset.attrs["time_ref"]
+        if "time" in self._dataset:
+            return self._dataset.time.attrs["time_ref"]
+        return None
 
     @property
     def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
@@ -1159,11 +1162,11 @@ class LocalCoordinateSystem:
         if isinstance(time_ref_new, str):
             time_ref_new = pd.Timestamp(time_ref_new)
         if self.reference_time is None:
-            self._dataset.attrs["time_ref"] = time_ref_new
+            self._dataset.time.attrs["time_ref"] = time_ref_new
         else:
             delta = self.reference_time - time_ref_new
-            self._dataset.attrs["time_ref"] = time_ref_new
             self._dataset.coords["time"] = self.time + delta
+            self._dataset.time.attrs["time_ref"] = time_ref_new
 
 
 # coordinate system manager class ------------------------------------------------------
