@@ -15,7 +15,7 @@ from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.utility as ut
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx import Q_
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 
 # helpers for tests -----------------------------------------------------------
