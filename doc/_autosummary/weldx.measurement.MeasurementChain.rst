@@ -4,7 +4,6 @@ weldx.measurement.MeasurementChain
 .. currentmodule:: weldx.measurement
 
 .. autoclass:: MeasurementChain
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.measurement.MeasurementChain
       :toctree:
       :nosignatures:
    
+       ~MeasurementChain.__eq__
        ~MeasurementChain.__init__
+       ~MeasurementChain.__repr__
+       ~MeasurementChain.__str__
    
    
 

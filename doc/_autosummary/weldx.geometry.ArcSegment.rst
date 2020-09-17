@@ -4,7 +4,6 @@ weldx.geometry.ArcSegment
 .. currentmodule:: weldx.geometry
 
 .. autoclass:: ArcSegment
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.geometry.ArcSegment
       :toctree:
       :nosignatures:
    
+       ~ArcSegment.__eq__
        ~ArcSegment.__init__
+       ~ArcSegment.__repr__
+       ~ArcSegment.__str__
        ~ArcSegment.apply_transformation
        ~ArcSegment.apply_translation
        ~ArcSegment.construct_with_points

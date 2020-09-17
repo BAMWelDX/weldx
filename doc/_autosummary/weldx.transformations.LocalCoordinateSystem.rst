@@ -4,7 +4,6 @@ weldx.transformations.LocalCoordinateSystem
 .. currentmodule:: weldx.transformations
 
 .. autoclass:: LocalCoordinateSystem
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,12 @@ weldx.transformations.LocalCoordinateSystem
       :toctree:
       :nosignatures:
    
+       ~LocalCoordinateSystem.__add__
+       ~LocalCoordinateSystem.__eq__
        ~LocalCoordinateSystem.__init__
+       ~LocalCoordinateSystem.__repr__
+       ~LocalCoordinateSystem.__str__
+       ~LocalCoordinateSystem.__sub__
        ~LocalCoordinateSystem.as_euler
        ~LocalCoordinateSystem.as_rotation
        ~LocalCoordinateSystem.from_euler

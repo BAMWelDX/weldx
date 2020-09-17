@@ -4,7 +4,6 @@ weldx.transformations.WXRotation
 .. currentmodule:: weldx.transformations
 
 .. autoclass:: WXRotation
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.transformations.WXRotation
       :toctree:
       :nosignatures:
    
+       ~WXRotation.__eq__
        ~WXRotation.__init__
+       ~WXRotation.__repr__
+       ~WXRotation.__str__
        ~WXRotation.align_vectors
        ~WXRotation.apply
        ~WXRotation.as_dcm

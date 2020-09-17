@@ -4,7 +4,6 @@ weldx.geometry.Profile
 .. currentmodule:: weldx.geometry
 
 .. autoclass:: Profile
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.geometry.Profile
       :toctree:
       :nosignatures:
    
+       ~Profile.__eq__
        ~Profile.__init__
+       ~Profile.__repr__
+       ~Profile.__str__
        ~Profile.add_shapes
        ~Profile.plot
        ~Profile.rasterize

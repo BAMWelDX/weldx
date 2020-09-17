@@ -4,7 +4,6 @@ weldx.utility.WeldxAccessor
 .. currentmodule:: weldx.utility
 
 .. autoclass:: WeldxAccessor
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.utility.WeldxAccessor
       :toctree:
       :nosignatures:
    
+       ~WeldxAccessor.__eq__
        ~WeldxAccessor.__init__
+       ~WeldxAccessor.__repr__
+       ~WeldxAccessor.__str__
        ~WeldxAccessor.interp_like
    
    

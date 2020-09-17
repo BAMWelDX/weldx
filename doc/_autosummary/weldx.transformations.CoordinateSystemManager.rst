@@ -4,7 +4,6 @@ weldx.transformations.CoordinateSystemManager
 .. currentmodule:: weldx.transformations
 
 .. autoclass:: CoordinateSystemManager
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.transformations.CoordinateSystemManager
       :toctree:
       :nosignatures:
    
+       ~CoordinateSystemManager.__eq__
        ~CoordinateSystemManager.__init__
+       ~CoordinateSystemManager.__repr__
+       ~CoordinateSystemManager.__str__
        ~CoordinateSystemManager.add_cs
        ~CoordinateSystemManager.assign_data
        ~CoordinateSystemManager.create_cs

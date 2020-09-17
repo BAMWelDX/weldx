@@ -4,7 +4,6 @@ weldx.geometry.Geometry
 .. currentmodule:: weldx.geometry
 
 .. autoclass:: Geometry
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.geometry.Geometry
       :toctree:
       :nosignatures:
    
+       ~Geometry.__eq__
        ~Geometry.__init__
+       ~Geometry.__repr__
+       ~Geometry.__str__
        ~Geometry.rasterize
    
    

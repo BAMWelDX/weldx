@@ -4,7 +4,6 @@ weldx.geometry.RadialHorizontalTraceSegment
 .. currentmodule:: weldx.geometry
 
 .. autoclass:: RadialHorizontalTraceSegment
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.geometry.RadialHorizontalTraceSegment
       :toctree:
       :nosignatures:
    
+       ~RadialHorizontalTraceSegment.__eq__
        ~RadialHorizontalTraceSegment.__init__
+       ~RadialHorizontalTraceSegment.__repr__
+       ~RadialHorizontalTraceSegment.__str__
        ~RadialHorizontalTraceSegment.local_coordinate_system
    
    

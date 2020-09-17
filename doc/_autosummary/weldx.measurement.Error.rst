@@ -4,7 +4,6 @@ weldx.measurement.Error
 .. currentmodule:: weldx.measurement
 
 .. autoclass:: Error
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.measurement.Error
       :toctree:
       :nosignatures:
    
+       ~Error.__eq__
        ~Error.__init__
+       ~Error.__repr__
+       ~Error.__str__
    
    
 

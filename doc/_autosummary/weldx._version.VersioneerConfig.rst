@@ -4,7 +4,6 @@ weldx.\_version.VersioneerConfig
 .. currentmodule:: weldx._version
 
 .. autoclass:: VersioneerConfig
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.\_version.VersioneerConfig
       :toctree:
       :nosignatures:
    
+       ~VersioneerConfig.__eq__
        ~VersioneerConfig.__init__
+       ~VersioneerConfig.__repr__
+       ~VersioneerConfig.__str__
    
    
 

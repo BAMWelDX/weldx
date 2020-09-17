@@ -3,7 +3,6 @@
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    {% block methods %}
    {% if methods %}
@@ -12,8 +11,16 @@
    .. autosummary::
       :toctree:
       :nosignatures:
-   {% for item in methods %}
+   {% for item in all_methods %}
+      {%- if not item.startswith('_') or item in ['__init__',
+                                                  '__eq__',
+                                                  '__repr__',
+                                                  '__str__',
+                                                  '__add__',
+                                                  '__sub__',
+                                                  ] %}
        ~{{ name }}.{{ item }}
+       {%- endif -%}
    {%- endfor %}
    {% endif %}
    {% endblock %}

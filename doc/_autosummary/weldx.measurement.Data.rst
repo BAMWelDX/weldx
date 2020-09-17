@@ -4,7 +4,6 @@ weldx.measurement.Data
 .. currentmodule:: weldx.measurement
 
 .. autoclass:: Data
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.measurement.Data
       :toctree:
       :nosignatures:
    
+       ~Data.__eq__
        ~Data.__init__
+       ~Data.__repr__
+       ~Data.__str__
    
    
 

@@ -4,7 +4,6 @@ weldx.geometry.LineSegment
 .. currentmodule:: weldx.geometry
 
 .. autoclass:: LineSegment
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.geometry.LineSegment
       :toctree:
       :nosignatures:
    
+       ~LineSegment.__eq__
        ~LineSegment.__init__
+       ~LineSegment.__repr__
+       ~LineSegment.__str__
        ~LineSegment.apply_transformation
        ~LineSegment.apply_translation
        ~LineSegment.construct_with_points

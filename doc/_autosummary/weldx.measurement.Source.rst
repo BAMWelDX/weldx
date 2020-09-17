@@ -4,7 +4,6 @@ weldx.measurement.Source
 .. currentmodule:: weldx.measurement
 
 .. autoclass:: Source
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.measurement.Source
       :toctree:
       :nosignatures:
    
+       ~Source.__eq__
        ~Source.__init__
+       ~Source.__repr__
+       ~Source.__str__
    
    
 

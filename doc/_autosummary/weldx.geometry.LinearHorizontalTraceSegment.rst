@@ -4,7 +4,6 @@ weldx.geometry.LinearHorizontalTraceSegment
 .. currentmodule:: weldx.geometry
 
 .. autoclass:: LinearHorizontalTraceSegment
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.geometry.LinearHorizontalTraceSegment
       :toctree:
       :nosignatures:
    
+       ~LinearHorizontalTraceSegment.__eq__
        ~LinearHorizontalTraceSegment.__init__
+       ~LinearHorizontalTraceSegment.__repr__
+       ~LinearHorizontalTraceSegment.__str__
        ~LinearHorizontalTraceSegment.local_coordinate_system
    
    

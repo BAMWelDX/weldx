@@ -4,7 +4,6 @@ weldx.geometry.Trace
 .. currentmodule:: weldx.geometry
 
 .. autoclass:: Trace
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.geometry.Trace
       :toctree:
       :nosignatures:
    
+       ~Trace.__eq__
        ~Trace.__init__
+       ~Trace.__repr__
+       ~Trace.__str__
        ~Trace.local_coordinate_system
        ~Trace.rasterize
    

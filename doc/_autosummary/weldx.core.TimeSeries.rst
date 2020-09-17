@@ -4,7 +4,6 @@ weldx.core.TimeSeries
 .. currentmodule:: weldx.core
 
 .. autoclass:: TimeSeries
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.core.TimeSeries
       :toctree:
       :nosignatures:
    
+       ~TimeSeries.__eq__
        ~TimeSeries.__init__
+       ~TimeSeries.__repr__
+       ~TimeSeries.__str__
        ~TimeSeries.interp_time
    
    

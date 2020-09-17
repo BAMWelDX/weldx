@@ -4,7 +4,6 @@ weldx.geometry.Shape
 .. currentmodule:: weldx.geometry
 
 .. autoclass:: Shape
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.geometry.Shape
       :toctree:
       :nosignatures:
    
+       ~Shape.__eq__
        ~Shape.__init__
+       ~Shape.__repr__
+       ~Shape.__str__
        ~Shape.add_line_segments
        ~Shape.add_segments
        ~Shape.apply_reflection

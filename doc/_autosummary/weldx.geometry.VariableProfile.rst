@@ -4,7 +4,6 @@ weldx.geometry.VariableProfile
 .. currentmodule:: weldx.geometry
 
 .. autoclass:: VariableProfile
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.geometry.VariableProfile
       :toctree:
       :nosignatures:
    
+       ~VariableProfile.__eq__
        ~VariableProfile.__init__
+       ~VariableProfile.__repr__
+       ~VariableProfile.__str__
        ~VariableProfile.local_profile
    
    

@@ -4,7 +4,6 @@ weldx.measurement.GenericEquipment
 .. currentmodule:: weldx.measurement
 
 .. autoclass:: GenericEquipment
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.measurement.GenericEquipment
       :toctree:
       :nosignatures:
    
+       ~GenericEquipment.__eq__
        ~GenericEquipment.__init__
+       ~GenericEquipment.__repr__
+       ~GenericEquipment.__str__
    
    
 

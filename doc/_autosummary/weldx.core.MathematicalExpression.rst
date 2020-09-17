@@ -4,7 +4,6 @@ weldx.core.MathematicalExpression
 .. currentmodule:: weldx.core
 
 .. autoclass:: MathematicalExpression
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.core.MathematicalExpression
       :toctree:
       :nosignatures:
    
+       ~MathematicalExpression.__eq__
        ~MathematicalExpression.__init__
+       ~MathematicalExpression.__repr__
+       ~MathematicalExpression.__str__
        ~MathematicalExpression.equals
        ~MathematicalExpression.evaluate
        ~MathematicalExpression.get_variable_names

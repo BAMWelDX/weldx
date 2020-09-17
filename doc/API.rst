@@ -7,7 +7,6 @@ API
    :template: module-template.rst
    :recursive:
 
-
    weldx._version
    weldx.constants
    weldx.core
@@ -16,6 +15,7 @@ API
    weldx.transformations
    weldx.utility
    weldx.visualization
+
 
 
 

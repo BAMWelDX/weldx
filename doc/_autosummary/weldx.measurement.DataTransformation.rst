@@ -4,7 +4,6 @@ weldx.measurement.DataTransformation
 .. currentmodule:: weldx.measurement
 
 .. autoclass:: DataTransformation
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.measurement.DataTransformation
       :toctree:
       :nosignatures:
    
+       ~DataTransformation.__eq__
        ~DataTransformation.__init__
+       ~DataTransformation.__repr__
+       ~DataTransformation.__str__
    
    
 

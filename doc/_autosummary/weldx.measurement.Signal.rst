@@ -4,7 +4,6 @@ weldx.measurement.Signal
 .. currentmodule:: weldx.measurement
 
 .. autoclass:: Signal
-   :special-members: __repr__, __eq__, __str__, __add__, __sub__
 
    
    
@@ -14,7 +13,10 @@ weldx.measurement.Signal
       :toctree:
       :nosignatures:
    
+       ~Signal.__eq__
        ~Signal.__init__
+       ~Signal.__repr__
+       ~Signal.__str__
    
    
 
