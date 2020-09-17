@@ -398,7 +398,7 @@ def test_reflection_sign():
 
 
 def r_mat_y(factors) -> np.ndarray:
-    """Get an array of rotation matrices that repesent a rotation around the y-axis.
+    """Get an array of rotation matrices that represent a rotation around the y-axis.
 
     The rotation angles are the provided factors times pi.
 
@@ -417,7 +417,7 @@ def r_mat_y(factors) -> np.ndarray:
 
 
 def r_mat_z(factors):
-    """Get an array of rotation matrices that repesent a rotation around the z-axis.
+    """Get an array of rotation matrices that represent a rotation around the z-axis.
 
     The rotation angles are the provided factors times pi.
 
