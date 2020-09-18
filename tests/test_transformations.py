@@ -625,6 +625,7 @@ class TestLocalCoordinateSystem:
                 TDI([2, 3, 4], "D"),
             ),
             (TDI([1, 2, 3], "D"), TS("2020-02-02"), "2020-02-01", TDI([2, 3, 4], "D"),),
+            (TDI([1, 2, 3], "D"), None, "2020-02-01", TDI([1, 2, 3], "D"),),
         ],
     )
     def test_reset_reference_time(time, time_ref, time_ref_new, time_exp):
@@ -814,7 +815,7 @@ class TestLocalCoordinateSystem:
             Name of the test
 
         """
-        orientation = tf.rotation_matrix_z([1, 2, 3])
+        orientation = r_mat_z([1, 2, 3])
         coordinates = [[i, i, i] for i in range(3)]
         time_lcs = TDI([1, 2, 3], "D")
 
