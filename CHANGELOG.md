@@ -10,6 +10,7 @@
     - instances can now be merged and unmerged
 - `LocalCoordinateSystem` now accepts `pd.TimedeltaIndex` and `pint.Quantity` as `time` inputs when provided with a reference `pd.Timestamp` as `time_ref` [#97]
 - `LocalCoordinateSystem` now accepts `Rotation`-Objects as `orientation` [#97]
+- Internal structure of `LocalCoordinateSystem` is now based on `pd.TimedeltaIndex` and a reference `pd.Timestamp` instead of `pd.DatetimeIndex`. As a consequence, providing a reference timestamp is now optional. [#126]
 - `weldx.utility.xr_interp_like` now accepts non-iterable scalar inputs for interpolation [#97]
 - add custom `wx_tag` validation and update `wx_property_tag` to allow new syntax [#99]\
   the following syntax can be used:
