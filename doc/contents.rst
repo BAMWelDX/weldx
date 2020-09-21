@@ -1,4 +1,4 @@
 WelDX - Welding Data Exchange Format
 ======================================
 
-Simple documentation
+Simple documentation of weldx
