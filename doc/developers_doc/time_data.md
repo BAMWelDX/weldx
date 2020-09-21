@@ -1,0 +1,44 @@
+# Time Data
+
+## Why is time special?
+
+An important property of time that distinguishes it from most other dimensions we use is that it is constantly growing.
+In consequence, we usually expect time dependent data to be ordered. 
+In addition, time has a unique unit system with varying conversion factors: Seconds, Hours, Days, Years, etc.
+While other dimensions also have unit systems with varying conversion factors that are not powers of 10 (1 mile = 1760 
+yards, 1 yard = 3 feet), it is not so common to mix them when specifying a quantity, especially when using SI units.
+Instead of writing `q = 5km + 169m + 33mm` one would usually express it using a single unit, for example: 
+`q = 5,169033km`.
+On the other hand, we often specify a certain point in time in form of a timestamp like `2016-12-06 17:36:48` instead of
+using a fractional number of years.
+
+There is certainly a lot more to write about what makes time special, but the details are not really relevant for this
+document. 
+
+## Data types
+
+The `weldx` package interfaces support `pandas.TimedeltaIndex`, `pandas.DatetimeIndex`, `pandas.Timestamp` and 
+`pint.Quantities` as time data types.
+To keep things as simple as possible we are not planning on extending this list in the near future.
+It is up to the user to take care of other types by casting them to one of the supported data types.
+
+### Which type should be used internally?
+
+The preferred data type for internal usage is `pandas.TimedeltaIndex`.
+In combination with a `pandas.Timestamp` as reference time it can store the same information as a 
+`pandas.DatetimeIndex` but it can also be used without a reference time.
+This makes it more flexible to use than the `pandas.DatetimeIndex` that has a "baked in" reference time that must always
+be specified.
+Often we are only interested in the temporal relations towards a specific event (like the start of an experiment) and 
+not when exactly this event occurred.
+In this case the combination of `pandas.TimedeltaIndex` and `pandas.Timestamp` enables us to omit irrelevant data.
+
+- Internally `NumPy` time data types are used too for some specific task.
+- Quantities provide less utility -> no sort
+
+### How should time be handled in public interfaces?
+
+## Common operations and their solutions
+
+### Type casting 
+
