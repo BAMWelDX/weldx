@@ -497,7 +497,12 @@ class TimeSeries:
                 time_q = Q_(time_q.magnitude[:, np.newaxis], time_q.units)
 
         # evaluate expression
-        data = self._data.evaluate(**{self._time_var_name: time_q}).to_reduced_units()
+        data = self._data.evaluate(**{self._time_var_name: time_q})
+        if isinstance(data.m, np.ndarray):  # make sure we continue with floats
+            data = Q_(data.m.astype(float), data.units)
+        else:
+            data = Q_(float(data.m), data.units)
+        data = data.to_reduced_units()
 
         # create data array
         if not np.iterable(data.magnitude):  # make sure quantity is not scalar value

@@ -17,7 +17,7 @@ def test_plot_coordinate_system():
     """Test executing all possible code paths."""
     lcs_constant = tf.LocalCoordinateSystem()
 
-    time = pd.DatetimeIndex(["2016-01-10", "2016-01-11", "2016-01-12"])
+    time = pd.TimedeltaIndex([10, 11, 12], "s")
     orientation_tdp = [
         [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
         [[0, 1, 0], [-1, 0, 0], [0, 0, 1]],
@@ -34,7 +34,9 @@ def test_plot_coordinate_system():
     vs.plot_coordinate_system(lcs_constant, ax, "g")
     vs.plot_coordinate_system(lcs_tdp, ax, "r", "2016-01-10")
     vs.plot_coordinate_system(lcs_tdp, ax, "b", "2016-01-11", time_idx=1)
-    vs.plot_coordinate_system(lcs_tdp, ax, "y", "2016-01-12", "2016-01-12")
+    vs.plot_coordinate_system(
+        lcs_tdp, ax, "y", "2016-01-12", pd.TimedeltaIndex([12], "s")
+    )
 
     # exceptions ------------------------------------------
 

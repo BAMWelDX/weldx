@@ -269,20 +269,21 @@ def get_time_union(list_of_objects):
 
     Returns
     -------
-    pd.DatetimeIndex
-        pandas DatetimeIndex with merged times
+    Union[pd.DatetimeIndex, pd.TimedeltaIndex]
+        Pandas time index class with merged times
 
     """
     # TODO: make non-nested function
+    # TODO: reevaluate if LCS and xarray types should be supported. If yes, add tests
     def _get_time(input_object):
         if isinstance(input_object, (pd.DatetimeIndex, pd.TimedeltaIndex)):
             return input_object
         if isinstance(input_object, (xr.DataArray, xr.Dataset)):
-            return pd.DatetimeIndex(input_object.time.data)
+            return to_pandas_time_index(input_object.time.data)
         if isinstance(input_object, tf.LocalCoordinateSystem):
             return input_object.time
 
-        return pd.DatetimeIndex(input_object)
+        return to_pandas_time_index(input_object)
 
     times = None
     for idx, val in enumerate(list_of_objects):
@@ -577,7 +578,7 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
     """
     if times is not None:
         dsx = xr.DataArray(
-            data=data, dims=["time", "c"], coords={"time": times, "c": ["x", "y", "z"]}
+            data=data, dims=["time", "c"], coords={"time": times, "c": ["x", "y", "z"]},
         )
     else:
         dsx = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
@@ -607,7 +608,7 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
         )
     else:
         dsx = xr.DataArray(
-            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]}
+            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
         )
     return dsx.astype(float)
 
@@ -636,7 +637,10 @@ def xr_interp_orientation_in_time(
     # extract intersecting times and add time range boundaries of the data set
     times_ds = dsx.time.data
     if len(times_ds) > 1:
-        times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
+        if isinstance(times_ds, pd.DatetimeIndex):
+            times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
+        else:
+            times_ds_limits = pd.TimedeltaIndex([times_ds.min(), times_ds.max()])
         times_union = times.union(times_ds_limits)
         times_intersect = times_union[
             (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])

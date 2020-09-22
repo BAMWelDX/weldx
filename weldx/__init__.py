@@ -3,11 +3,12 @@ import warnings
 # asdf extensions and tags
 import weldx.asdf
 
-# geometry packages
+# main packages
 import weldx.core
 import weldx.geometry
 import weldx.transformations
 import weldx.utility
+import weldx.welding
 from weldx.constants import WELDX_QUANTITY as Q_
 
 # versioneer
@@ -28,4 +29,5 @@ __all__ = [
     "utility",
     "asdf",
     "Q_",
+    "welding",
 ]

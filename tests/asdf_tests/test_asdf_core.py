@@ -222,6 +222,8 @@ def test_local_coordinate_system_shape_violation():
 
 
 # weldx.transformations.CoordinateSystemManager ----------------------------------------
+
+
 def get_example_coordinate_system_manager():
     """Get a consistent CoordinateSystemManager instance for test purposes."""
     csm = tf.CoordinateSystemManager("root")
@@ -245,6 +247,68 @@ def get_example_coordinate_system_manager():
 @pytest.mark.parametrize("lazy_load", [True, False])
 def test_coordinate_system_manager(copy_arrays, lazy_load):
     csm = get_example_coordinate_system_manager()
+    tree = {"cs_hierarchy": csm}
+    data = _write_read_buffer(
+        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )
+    csm_file = data["cs_hierarchy"]
+    assert csm == csm_file
+
+
+def get_coordinate_system_manager_with_subsystems(nested: bool):
+    lcs = [tf.LocalCoordinateSystem(coordinates=[i, -i, -i]) for i in range(12)]
+
+    # global system
+    csm_global = tf.CoordinateSystemManager("base", "Global System")
+    csm_global.add_cs("robot", "base", lcs[0])
+    csm_global.add_cs("specimen", "base", lcs[1])
+
+    # robot system
+    csm_robot = tf.CoordinateSystemManager("robot", "Robot system")
+    csm_robot.add_cs("head", "robot", lcs[2])
+
+    # robot head system
+    csm_head = tf.CoordinateSystemManager("head", "Head system")
+    csm_head.add_cs("torch tcp", "head", lcs[3])
+    csm_head.add_cs("camera tcp", "head", lcs[4], lsc_child_in_parent=False)
+    csm_head.add_cs("scanner 1 tcp", "head", lcs[5])
+    csm_head.add_cs("scanner 2 tcp", "head", lcs[6])
+
+    # scanner system 1
+    csm_scanner_1 = tf.CoordinateSystemManager("scanner 1", "Scanner 1 system")
+    csm_scanner_1.add_cs("scanner 1 tcp", "scanner 1", lcs[7])
+
+    # scanner system 2
+    csm_scanner_2 = tf.CoordinateSystemManager("scanner 2", "Scanner 2 system")
+    csm_scanner_2.add_cs("scanner 2 tcp", "scanner 2", lcs[8])
+
+    # specimen system
+    csm_specimen = tf.CoordinateSystemManager("specimen", "Specimen system")
+    csm_specimen.add_cs("thermocouple 1", "specimen", lcs[9])
+    csm_specimen.add_cs("thermocouple 2", "specimen", lcs[10])
+    csm_specimen.add_cs("thermocouple 3", "thermocouple 2", lcs[11])
+
+    if nested:
+        csm_head.merge(csm_scanner_1)
+        csm_head.merge(csm_scanner_2)
+        csm_robot.merge(csm_head)
+        csm_global.merge(csm_robot)
+        csm_global.merge(csm_specimen)
+    else:
+        csm_global.merge(csm_specimen)
+        csm_global.merge(csm_robot)
+        csm_global.merge(csm_head)
+        csm_global.merge(csm_scanner_1)
+        csm_global.merge(csm_scanner_2)
+
+    return csm_global
+
+
+@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("lazy_load", [True, False])
+@pytest.mark.parametrize("nested", [True, False])
+def test_coordinate_system_manager_with_subsystems(copy_arrays, lazy_load, nested):
+    csm = get_coordinate_system_manager_with_subsystems(nested)
     tree = {"cs_hierarchy": csm}
     data = _write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
