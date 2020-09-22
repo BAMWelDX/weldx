@@ -12,9 +12,8 @@
 #
 import os
 import sys
+import re
 sys.path.insert(0, os.path.abspath('..'))
-
-import numpydoc
 
 
 # -- Project information -----------------------------------------------------
@@ -70,6 +69,18 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
+
+
+
+import numpydoc
+# version = .__version__
+# The full version, including alpha/beta/rc tags.
+release = numpydoc.__version__
+version = re.sub(r'(\d+\.\d+)\.\d+(.*)', r'\1\2', numpydoc.__version__)
+version = re.sub(r'(\.dev\d+).*?$', r'\1', version)
+numpydoc_xref_param_type = True
+numpydoc_xref_ignore = {'optional', 'type_without_description', 'BadException'}
+
 
 
 # -- Options for HTML output -------------------------------------------------
