@@ -15,10 +15,12 @@ using a fractional number of years.
 There is certainly a lot more to write about what makes time special, but the details are not really relevant for this
 document. 
 
-## Data types
+## Design principles
+
+### Supported data types
 
 The `weldx` package interfaces support `pandas.TimedeltaIndex`, `pandas.DatetimeIndex`, `pandas.Timestamp` and 
-`pint.Quantities` as time data types.
+`pint.Quantitiy` as time data types.
 To keep things as simple as possible we are not planning on extending this list in the near future.
 It is up to the user to take care of other types by casting them to one of the supported data types.
 
@@ -31,14 +33,35 @@ This makes it more flexible to use than the `pandas.DatetimeIndex` that has a "b
 be specified.
 Often we are only interested in the temporal relations towards a specific event (like the start of an experiment) and 
 not when exactly this event occurred.
-In this case the combination of `pandas.TimedeltaIndex` and `pandas.Timestamp` enables us to omit irrelevant data.
+In this case the combination of `pandas.TimedeltaIndex` and the optional `pandas.Timestamp` enables us to omit 
+irrelevant data.
 
-- Internally `NumPy` time data types are used too for some specific task.
-- Quantities provide less utility -> no sort
+Even though a `pint.Quantity` stores the same information as a `pandas.TimedeltaIndex`, it doesn't enforce a temporal 
+order.
+Therefore `pandas.TimedeltaIndex` is better suited as internal data format.
+
+Apart from the officially supported data types, `NumPy` time data types are used internally for some specific tasks like
+serialization.
+The main reason for this is that the `pandas` types are based on them. 
+
 
 ### How should time be handled in public interfaces?
 
+Each function that accepts time as parameter should be able to deal with the supported data types that were previously
+specified.
+This usually means that the corresponding function actually needs two parameters, `time` and `reference_time`.
+The reference time is optional when using `pandas.TimedeltaIndex` or a `pint.Quantity` as `time` and is ignored if 
+`time` is a `pandas.DatetimeIndex`.
+
+> TODO: discuss return type
+
+The favored return type of public functions and class properties is a `pint.Quantity` since it is the most important
+data type for the user.
+Ideally, he is never required to deal with any other type. 
+
 ## Common operations and their solutions
+
+This section covers some frequently required operations that already have a default solution that should be utilized.
 
 ### Type casting 
 
