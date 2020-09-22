@@ -15,7 +15,7 @@ dependencies:
   - asdf>=2.7
   - sphinx
   - recommonmark
-  - numpydoc
+  - numpydoc>=0.5
   - openpyxl
   - jinja2
   # graph packages
