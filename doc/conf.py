@@ -38,7 +38,7 @@ extensions = [
     "recommonmark",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "numpydoc",
+    "numpydoc"
 ]
 
 autosummary_generate = True
