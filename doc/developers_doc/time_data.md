@@ -65,3 +65,16 @@ This section covers some frequently required operations that already have a defa
 
 ### Type casting 
 
+An obvious task that often occurs is casting between the different time data types. 
+There are already two functions implemented that can be found in the `weldx.utility` package.
+
+The first one is `to_pandas_time_index`.
+Depending on the input variable type, it either returns an `pandas.DatetimeIndex` or a `pandas.TimedeltaIndex`.
+It accepts all of the supported data types as arguments but some others like the `NumPy` time data types are also
+accepted.
+Check the API documentation for further information.
+The second function is called `pandas_time_delta_to_quantity` and casts, as the name suggests, a `pandas.TimedeltaIndex`
+into a `pint.Quantity`.
+
+In case you want to split a `pandas.DatetimeIndex` into a time delta and a reference time, you can simply subtract the
+`pandas.Timestamp` of your choice from the `pandas.DatetimeIndex` to get a corresponding `pandas.TimedeltaIndex`.
