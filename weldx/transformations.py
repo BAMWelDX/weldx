@@ -944,7 +944,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        xr.DataArray
+        xarray.DataArray
             Orientation matrix
 
         """
@@ -956,7 +956,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        xr.DataArray
+        xarray.DataArray
             Coordinates of the coordinate system
 
         """
@@ -968,7 +968,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        pd.Timestamp:
+        pandas.Timestamp:
             The coordinate systems reference time
 
         """
@@ -1024,7 +1024,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        xr.Dataset
+        xarray.Dataset
             xarray Dataset with coordinates and orientation as DataVariables.
 
         """
@@ -2535,7 +2535,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List["CoordinateSystemManager"]:
+        List[CoordinateSystemManager]:
             A list containing previously merged 'CoordinateSystemManager' instances.
 
         """
