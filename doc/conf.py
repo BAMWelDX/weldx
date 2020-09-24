@@ -16,6 +16,8 @@ import re
 import shutil
 import sys
 
+import numpydoc
+
 import weldx
 
 sys.path.insert(0, os.path.abspath(""))
@@ -62,10 +64,20 @@ extensions = [
     "numpydoc",
 ]
 
-# autosummary related
+# autosummary --------------------------------------------------------------------------
 autosummary_generate = True
 numpydoc_show_class_members = False
 
+# version = .__version__
+# The full version, including alpha/beta/rc tags.
+release = numpydoc.__version__
+version = re.sub(r"(\d+\.\d+)\.\d+(.*)", r"\1\2", numpydoc.__version__)
+version = re.sub(r"(\.dev\d+).*?$", r"\1", version)
+numpydoc_xref_param_type = True
+numpydoc_xref_ignore = {"optional", "type_without_description", "BadException"}
+
+
+# --------------------------------------------------------------------------------------
 
 # The suffix of source filenames.
 source_suffix = {
@@ -115,16 +127,6 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["**.ipynb_checkpoints"]
 
-
-import numpydoc
-
-# version = .__version__
-# The full version, including alpha/beta/rc tags.
-release = numpydoc.__version__
-version = re.sub(r"(\d+\.\d+)\.\d+(.*)", r"\1\2", numpydoc.__version__)
-version = re.sub(r"(\.dev\d+).*?$", r"\1", version)
-numpydoc_xref_param_type = True
-numpydoc_xref_ignore = {"optional", "type_without_description", "BadException"}
 
 # -- Options for HTML output -------------------------------------------------
 
