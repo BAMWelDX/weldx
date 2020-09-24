@@ -1,0 +1,24 @@
+# networkx
+py:class networkx.DiGraph
+py:class networkx.classes.digraph.DiGraph
+
+# numpy
+py:class numpy.ndarray
+
+# pandas
+py:class pandas._libs.tslibs.timestamps.Timestamp
+py:class pandas.core.indexes.datetimes.DatetimeIndex
+py:class pandas.core.indexes.timedeltas.TimedeltaIndex
+
+# pint
+py:class pint.Quantity
+py:class pint.quantity.Quantity
+
+# scipy
+py:class scipy.spatial.transform.rotation.Rotation
+
+# sympy
+py:class sympy.core.expr.Expr
+
+# xarray
+py:class xarray.core.dataarray.DataArray

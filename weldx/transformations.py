@@ -76,7 +76,7 @@ def rotation_matrix_x(angle):
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Rotation matrix
 
     """
@@ -93,7 +93,7 @@ def rotation_matrix_y(angle):
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Rotation matrix
 
     """
@@ -110,7 +110,7 @@ def rotation_matrix_z(angle) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Rotation matrix
 
     """
@@ -131,7 +131,7 @@ def scale_matrix(scale_x, scale_y, scale_z) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Scaling matrix
 
     """
@@ -148,7 +148,7 @@ def normalize(a):
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Normalized ndarray
 
     """
@@ -932,7 +932,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Orthogonal axis
 
         """
@@ -984,7 +984,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        Union[pd.DatetimeIndex, None]:
+        Union[pandas.DatetimeIndex, None]:
             The coordinate systems time as 'pandas.DatetimeIndex'
 
         """
@@ -993,12 +993,12 @@ class LocalCoordinateSystem:
         return self.time + self.reference_time
 
     @property
-    def time(self) -> Union[pd.DatetimeIndex, None]:
+    def time(self) -> Union[pd.TimedeltaIndex, None]:
         """Get the time union of the local coordinate system (None if system is static).
 
         Returns
         -------
-        pd.DatetimeIndex
+        pandas.TimedeltaIndex
             DateTimeIndex-like time union
 
         """
@@ -2052,7 +2052,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Transformed data
 
         """
@@ -2466,7 +2466,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        pd.DatetimeIndex
+        pandas.DatetimeIndex
             Time union
 
         """
@@ -2506,7 +2506,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Transformed data
 
         """
