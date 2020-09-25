@@ -1,3 +1,9 @@
+API
+=================================
+
+
+Python modules
+**************
 .. autosummary::
    :toctree: _autosummary
    :caption: API Reference
