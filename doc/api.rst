@@ -10,7 +10,6 @@ API
    :template: module-template.rst
    :recursive:
 
-   weldx._version
    weldx.constants
    weldx.core
    weldx.geometry
