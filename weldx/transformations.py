@@ -355,7 +355,14 @@ def vector_points_to_left_of_vector(vector, vector_reference):
 
 
 class LocalCoordinateSystem:
-    """Defines a local cartesian coordinate system in 3d."""
+    """Defines a local cartesian coordinate system in 3d.
+
+    Notes
+    -----
+    Learn how to use this class by reading the
+    :doc:`Tutorial <../tutorials/transformations_01_coordinate_systems>`.
+
+    """
 
     def __init__(
         self,
@@ -1178,8 +1185,9 @@ class CoordinateSystemManager:
 
     Notes
     -----
+    Learn how to use this class by reading the
+    :doc:`Tutorial <../tutorials/transformations_02_coordinate_system_manager>`.
 
-    :doc:`Tutorial <../tutorials/transformations_02_coordinate_system_manager>`
     """
 
     _id_gen = itertools.count()
