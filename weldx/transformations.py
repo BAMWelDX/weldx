@@ -1176,8 +1176,7 @@ class LocalCoordinateSystem:
 class CoordinateSystemManager:
     """Handles hierarchical dependencies between multiple coordinate systems.
 
-    Links:
-    ******
+    **Links:**
 
     :doc:`Tutorial <../tutorials/transformations_02_coordinate_system_manager>`
     """
