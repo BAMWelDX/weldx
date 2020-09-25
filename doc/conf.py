@@ -12,8 +12,11 @@
 #
 import os
 import pathlib
+import re
 import shutil
 import sys
+
+import numpydoc
 
 import weldx
 
@@ -53,11 +56,28 @@ extensions = [
     "sphinxcontrib.napoleon",
     "nbsphinx",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "sphinx_asdf",
+    "numpydoc",
 ]
+
+# autosummary --------------------------------------------------------------------------
+autosummary_generate = True
+numpydoc_show_class_members = False
+
+# version = .__version__
+# The full version, including alpha/beta/rc tags.
+release = numpydoc.__version__
+version = re.sub(r"(\d+\.\d+)\.\d+(.*)", r"\1\2", numpydoc.__version__)
+version = re.sub(r"(\.dev\d+).*?$", r"\1", version)
+numpydoc_xref_param_type = True
+numpydoc_xref_ignore = {"optional", "type_without_description", "BadException"}
+
+
+# --------------------------------------------------------------------------------------
 
 # The suffix of source filenames.
 source_suffix = {
@@ -80,7 +100,8 @@ nbsphinx_execute_arguments = [
 
 # Select notebook kernel for nbsphinx
 # default "python3" is needed for readthedocs run
-# if building locally, this might need to be "weldx" - try setting using -D option
+# if building locally, this might need to be "weldx" - try setting using -D option:
+# -D nbsphinx_kernel_name="weldx"
 nbsphinx_kernel_name = "python3"
 
 # sphinx-asdf
@@ -143,3 +164,18 @@ html_context = {
 # further.  For a list of options available for each theme, see the
 # documentation.
 # html_theme_options = {"logo_only": True}
+
+
+# Disable warnings caused by a bug -----------------------------------------------------
+
+# see this Stack Overflow answer for further information:
+# https://stackoverflow.com/a/30624034/6700329
+
+nitpick_ignore = []
+
+for line in open("nitpick_ignore"):
+    if line.strip() == "" or line.startswith("#"):
+        continue
+    dtype, target = line.split(None, 1)
+    target = target.strip()
+    nitpick_ignore.append((dtype, target))

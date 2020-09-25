@@ -76,7 +76,7 @@ def rotation_matrix_x(angle):
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Rotation matrix
 
     """
@@ -93,7 +93,7 @@ def rotation_matrix_y(angle):
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Rotation matrix
 
     """
@@ -110,7 +110,7 @@ def rotation_matrix_z(angle) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Rotation matrix
 
     """
@@ -131,7 +131,7 @@ def scale_matrix(scale_x, scale_y, scale_z) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Scaling matrix
 
     """
@@ -148,7 +148,7 @@ def normalize(a):
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Normalized ndarray
 
     """
@@ -355,7 +355,14 @@ def vector_points_to_left_of_vector(vector, vector_reference):
 
 
 class LocalCoordinateSystem:
-    """Defines a local cartesian coordinate system in 3d."""
+    """Defines a local cartesian coordinate system in 3d.
+
+    Notes
+    -----
+    Learn how to use this class by reading the
+    :doc:`Tutorial <../tutorials/transformations_01_coordinate_systems>`.
+
+    """
 
     def __init__(
         self,
@@ -932,7 +939,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Orthogonal axis
 
         """
@@ -944,7 +951,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        xr.DataArray
+        xarray.DataArray
             Orientation matrix
 
         """
@@ -956,7 +963,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        xr.DataArray
+        xarray.DataArray
             Coordinates of the coordinate system
 
         """
@@ -968,7 +975,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        pd.Timestamp:
+        pandas.Timestamp:
             The coordinate systems reference time
 
         """
@@ -984,7 +991,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        Union[pd.DatetimeIndex, None]:
+        Union[pandas.DatetimeIndex, None]:
             The coordinate systems time as 'pandas.DatetimeIndex'
 
         """
@@ -993,12 +1000,12 @@ class LocalCoordinateSystem:
         return self.time + self.reference_time
 
     @property
-    def time(self) -> Union[pd.DatetimeIndex, None]:
+    def time(self) -> Union[pd.TimedeltaIndex, None]:
         """Get the time union of the local coordinate system (None if system is static).
 
         Returns
         -------
-        pd.DatetimeIndex
+        pandas.TimedeltaIndex
             DateTimeIndex-like time union
 
         """
@@ -1024,7 +1031,7 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        xr.Dataset
+        xarray.Dataset
             xarray Dataset with coordinates and orientation as DataVariables.
 
         """
@@ -1174,7 +1181,14 @@ class LocalCoordinateSystem:
 
 # Todo: Convert all getter functions that need no input into properties.
 class CoordinateSystemManager:
-    """Manages multiple coordinate systems and the transformations between them."""
+    """Handles hierarchical dependencies between multiple coordinate systems.
+
+    Notes
+    -----
+    Learn how to use this class by reading the
+    :doc:`Tutorial <../tutorials/transformations_02_coordinate_system_manager>`.
+
+    """
 
     _id_gen = itertools.count()
 
@@ -2052,7 +2066,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Transformed data
 
         """
@@ -2466,7 +2480,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        pd.DatetimeIndex
+        pandas.DatetimeIndex
             Time union
 
         """
@@ -2506,7 +2520,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Transformed data
 
         """
@@ -2535,7 +2549,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List["CoordinateSystemManager"]:
+        List[CoordinateSystemManager]:
             A list containing previously merged 'CoordinateSystemManager' instances.
 
         """

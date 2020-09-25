@@ -119,7 +119,7 @@ class LineSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             End point
 
         """
@@ -131,7 +131,7 @@ class LineSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Starting point
 
         """
@@ -145,7 +145,7 @@ class LineSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             2x2 matrix containing the segments points
 
         """
@@ -188,7 +188,7 @@ class LineSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Array of contour points
 
         """
@@ -508,7 +508,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Center point
 
         """
@@ -520,7 +520,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             End point
 
         """
@@ -532,7 +532,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Starting point
 
         """
@@ -547,7 +547,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             2x3 matrix containing the segments points
 
         """
@@ -603,7 +603,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Array of contour points
 
         """
@@ -956,7 +956,7 @@ class Shape:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Array of contour points (2d)
 
         """
@@ -1135,7 +1135,7 @@ class Profile:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """
@@ -1570,7 +1570,7 @@ class Trace:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
 
@@ -1895,7 +1895,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """
@@ -1922,7 +1922,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Transformed profile data
 
         """
@@ -1945,7 +1945,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Rasterized profile in 3d
 
         """
@@ -1964,7 +1964,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """
@@ -1990,7 +1990,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """
@@ -2038,7 +2038,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """

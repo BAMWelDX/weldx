@@ -29,10 +29,10 @@ Contents
 .. toctree::
    :maxdepth: 1
 
-   asdf-extension
    tutorials
-   api
+   asdf-extension
    asdf-schemas
+   api
    CHANGELOG
 
 
