@@ -1174,7 +1174,13 @@ class LocalCoordinateSystem:
 
 # Todo: Convert all getter functions that need no input into properties.
 class CoordinateSystemManager:
-    """Manages multiple coordinate systems and the transformations between them."""
+    """Handles hierarchical dependencies between multiple coordinate systems.
+
+    Links:
+    ******
+
+    :doc:`Tutorial <../tutorials/transformations_02_coordinate_system_manager>`
+    """
 
     _id_gen = itertools.count()
 
