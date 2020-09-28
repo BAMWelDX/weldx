@@ -563,8 +563,8 @@ def xr_interp_like(
 def xr_valid_key(dax: xr.DataArray, ref: dict):
     """Validate if the keys in ref are present in the DataArray.
 
-    This is a helper function for xr_check_coords. Throws an exception when the dimension is requested in dax and not
-    optional.
+    This is a helper function for xr_check_coords. Throws an exception when the
+    dimension is requested in dax and not optional.
 
     Parameters
     ----------
