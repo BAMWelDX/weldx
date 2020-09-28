@@ -19,8 +19,8 @@ conda install weldx -c conda-forge -c bamwelding
 The full documentation is published on readthedocs.org. 
 Click on one of the following links to get to the desired version:
 
-- [Latest](https://weldx.readthedocs.io/en/latest/)  
-- [Stable](https://weldx.readthedocs.io/en/stable/)  
+  - [Latest](https://weldx.readthedocs.io/en/latest/)  
+  - [Stable](https://weldx.readthedocs.io/en/stable/)  
 
 
 ## Funding
@@ -40,8 +40,7 @@ This research is funded by the Federal Ministry of Education and Research of Ger
 [![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/BAMWelDX/weldx/?ref=repository-badge)
 
-### Documentation
+### Documentation build
 
 [![Documentation Status](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest)
 [![documentation](https://github.com/BAMWelDX/weldx/workflows/documentation/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Adocumentation+branch%3Amaster)
-
