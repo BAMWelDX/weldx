@@ -428,6 +428,8 @@ def test_xr_check_coords(dax, ref_dict):
         (_dax_check, {"d1": {"dtype": int}}, Exception),
         (_dax_check, {"d1": {"dtype": int, "optional": True}}, Exception),
         (_dax_check, {"no_dim": {"dtype": float}}, AttributeError),
+        (_dax_check, {"d5": {"values": ["x", "noty", "z"], "dtype": "str"}}, Exception),
+        (_dax_check, {"d1": {"dtype": [int, str, bool]}}, Exception),
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):
