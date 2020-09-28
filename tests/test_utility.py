@@ -412,11 +412,13 @@ _dax_ref = dict(
         (_dax_check, {"d1": {"dtype": ["float64", int]}}),
         (_dax_check, {"d2": {"dtype": ["float64", int]}}),
         (_dax_check, {"no_dim": {"optional": True, "dtype": float}}),
-        (_dax_check, {"d5": {"dtype": str}}),  # das wäre schöner als "<U1"
+        (_dax_check, {"d5": {"dtype": str}}),
     ],
 )
 def test_xr_check_coords(dax, ref_dict):
-    """A test."""
+    """Test of the validator function weldx.utility.xr_check_coords.
+
+    Validate the coordinates of an DataArray against different dictionarys."""
     assert ut.xr_check_coords(dax, ref_dict)
 
 
@@ -429,6 +431,8 @@ def test_xr_check_coords(dax, ref_dict):
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):
-    """A test."""
+    """Test of the validator function weldx.utility.xr_check_coords especially checking for exceptions.
+
+    Validate the coordinates of an DataArray against different dictionarys."""
     with pytest.raises(exception_type):
         ut.xr_check_coords(dax, ref_dict)

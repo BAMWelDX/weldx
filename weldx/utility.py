@@ -563,6 +563,19 @@ def xr_interp_like(
 def xr_valid_key(dax: xr.DataArray, ref: dict):
     """Validate if the keys in ref are present in the DataArray.
 
+    This is a helper function for xr_check_coords. Throws an exception when the dimension is requested in dax and not optional.
+
+    Parameters
+    ----------
+    dax:
+        xarray object
+    ref:
+        reference dictionary
+
+    Returns
+    -------
+    None
+        Does not have a return value. Throws an exception if
     """
 
     for key in ref:
@@ -572,12 +585,58 @@ def xr_valid_key(dax: xr.DataArray, ref: dict):
                 continue
         if not hasattr(dax, key):
             # Attributes not found in dax
-            raise AttributeError(f"Data array 'dax'  has no attribute '{key}'.")
+            raise AttributeError(f"Data array has no attribute '{key}'.")
 
 
 def xr_check_coords(dax: xr.DataArray, ref: dict):
-    """Validate the coordinates of the DataArray against a dictionary.
+    """Validate the coordinates of the DataArray against a reference dictionary.
 
+    The reference dictionary should have the dimensions as keys and those contain
+    dictionaries with the following keywords (all optional):
+    'optional':
+        boolean, default False - if True, the dimension has to be in the DataArray dax
+    'values':
+        Any allowed value from XArray is allowed here. (numpy.ndarray)
+    'dtype':
+        Any allowed data type from XArray is allowed here.
+
+    Example:
+    ---------
+    import numpy as np
+    import pandas as pd
+    import xarray as xr
+
+    dax = xr.DataArray(
+        data=np.ones((3,2,3)),
+        dims=["d1", "d2", "d3"],
+        coords={
+            "d1": np.array([-1, 0, 2], dtype=int),
+            "d2": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+            "d3": ["x", "y", "z"],
+        }
+    )
+    ref = dict(
+        d1={"optional": True, "values": np.array([-1, 0, 2], dtype=int)},
+        d2={
+            "values": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+            "dtype": ["datetime64[ns]", "timedelta64[ns]"],
+        },
+        d3={"values": ["x", "y", "z"], "dtype": "<U1"},
+    )
+    xr_check_coords(dax, ref)
+
+
+    Parameters
+    ----------
+    dax:
+        xarray object which should be validated
+    ref:
+        reference dictionary
+
+    Returns
+    -------
+    bool
+        True, if the test was a success, else throws an exception
     """
 
     # check if the keys in ref are also in dax
@@ -608,14 +667,6 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
                 raise Exception(
                     f"Mismatch in the dtype of the DataArray and ref['{key}']"
                 )
-
-    return True
-
-
-def xr_check_dtype(dax: xr.DataArray, ref: dict):
-    """Validate the dtype of the DataArray against a dictionary.
-
-    """
 
     return True
 
