@@ -12,11 +12,8 @@
 #
 import os
 import pathlib
-import re
 import shutil
 import sys
-
-import numpydoc
 
 import weldx
 
@@ -66,15 +63,18 @@ extensions = [
 
 # autosummary --------------------------------------------------------------------------
 autosummary_generate = True
-numpydoc_show_class_members = False
 
-# version = .__version__
-# The full version, including alpha/beta/rc tags.
-release = numpydoc.__version__
-version = re.sub(r"(\d+\.\d+)\.\d+(.*)", r"\1\2", numpydoc.__version__)
-version = re.sub(r"(\.dev\d+).*?$", r"\1", version)
+# numpydoc option documentation:
+# https://numpydoc.readthedocs.io/en/latest/install.html
+numpydoc_use_plots = True
+numpydoc_show_class_members = False
+numpydoc_show_inherited_class_members = True
+numpydoc_class_members_toctree = True
+# numpydoc_citation_re = str - check documentation
+numpydoc_attributes_as_param_list = True
 numpydoc_xref_param_type = True
-numpydoc_xref_ignore = {"optional", "type_without_description", "BadException"}
+# numpydoc_xref_aliases = dict - check documentation
+# numpydoc_xref_ignore = set - check documentation
 
 
 # --------------------------------------------------------------------------------------
