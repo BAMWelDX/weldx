@@ -1402,7 +1402,7 @@ class RadialHorizontalTraceSegment:
 class Trace:
     """Defines a 3d trace."""
 
-    def __init__(self, segments, coordinate_system=tf.LocalCoordinateSystem()):
+    def __init__(self, segments, coordinate_system=None):
         """Construct trace.
 
         Parameters
@@ -1417,6 +1417,9 @@ class Trace:
         Trace
 
         """
+        if coordinate_system is None:
+            coordinate_system = tf.LocalCoordinateSystem()
+
         if not isinstance(coordinate_system, tf.LocalCoordinateSystem):
             raise TypeError(
                 "'coordinate_system' must be of type "
