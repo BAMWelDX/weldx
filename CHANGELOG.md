@@ -2,6 +2,9 @@
 
 ## 0.2.1 (unreleased)
 ### changes
+- Documentation
+    - Documentation is [published on readthedocs](https://weldx.readthedocs.io/en/latest/)
+    - API documentation is now available
 - `CoordinateSystemManager` 
     - each instance can be named
     - gets a `plot` function to visualize the graph

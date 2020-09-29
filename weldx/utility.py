@@ -68,7 +68,7 @@ def to_float_array(container) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
 
     """
     return np.array(container, dtype=float)
@@ -107,6 +107,7 @@ def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
 
     Returns
     -------
+    Union[pandas.TimedeltaIndex, pandas.DatetimeIndex]:
         Variable as pandas time index
 
     """
@@ -225,7 +226,7 @@ def mat_vec_mul(a, b) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Resulting vector [n, ]
 
     """
@@ -269,7 +270,7 @@ def get_time_union(list_of_objects):
 
     Returns
     -------
-    Union[pd.DatetimeIndex, pd.TimedeltaIndex]
+    Union[pandas.DatetimeIndex, pandas.TimedeltaIndex]
         Pandas time index class with merged times
 
     """
@@ -308,7 +309,7 @@ def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
 
     Returns
     -------
-    xr.DataArray
+    xarray.DataArray
         xarray DataArray with transposed data at specified dimensions
 
     """
@@ -358,7 +359,7 @@ def xr_matmul(
 
     Returns
     -------
-    xr.DataArray
+    xarray.DataArray
 
     """
     if dims_b is None:
@@ -422,7 +423,7 @@ def xr_fill_all(da, order="bf") -> xr.DataArray:
 
     Returns
     -------
-    xr.DataArray
+    xarray.DataArray
         xarray object with NaN values filled in all dimensions
 
     """
@@ -474,7 +475,7 @@ def xr_interp_like(
 
     Returns
     -------
-    xr.DataArray
+    xarray.DataArray
         interpolated DataArray
 
     """
@@ -573,7 +574,7 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
 
     Returns
     -------
-    xr.DataArray
+    xarray.DataArray
 
     """
     if times is not None:
@@ -597,7 +598,7 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
 
     Returns
     -------
-    xr.DataArray
+    xarray.DataArray
 
     """
     if times is not None:
@@ -627,7 +628,7 @@ def xr_interp_orientation_in_time(
 
     Returns
     -------
-    xr.DataArray
+    xarray.DataArray
         Interpolated data
 
     """
@@ -677,7 +678,7 @@ def xr_interp_coordinates_in_time(
 
     Returns
     -------
-    xr.DataArray
+    xarray.DataArray
         Interpolated data
 
     """
@@ -708,7 +709,7 @@ class WeldxAccessor:  # pragma: no cover
 
         Returns
         -------
-        xr.DataArray
+        xarray.DataArray
             interpolated DataArray
 
         """
