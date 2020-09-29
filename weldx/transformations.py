@@ -362,8 +362,8 @@ class LocalCoordinateSystem:
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
         time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
-        construction_checks: bool = True,
         time_ref: pd.Timestamp = None,
+        construction_checks: bool = True,
     ):
         """Construct a cartesian coordinate system.
 
@@ -380,10 +380,10 @@ class LocalCoordinateSystem:
             Coordinates of the origin
         time :
             Time data for time dependent coordinate systems
-        construction_checks :
-            If 'True', the validity of the data will be verified
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
+        construction_checks :
+            If 'True', the validity of the data will be verified
 
         Returns
         -------
@@ -396,7 +396,7 @@ class LocalCoordinateSystem:
         if coordinates is None:
             coordinates = np.array([0, 0, 0])
 
-        time = self._build_time_index(time, time_ref)
+        time, time_ref = self._build_time_index(time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
@@ -412,6 +412,21 @@ class LocalCoordinateSystem:
             if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
                 raise ValueError("Orientation vectors must be orthogonal")
 
+            if "time" in orientation.coords and not isinstance(
+                ut.to_pandas_time_index(orientation.time.data), pd.TimedeltaIndex
+            ):
+                raise ValueError(
+                    "The 'orientation' data set's time coordinate is not a valid "
+                    "time delta type."
+                )
+            if "time" in coordinates.coords and not isinstance(
+                ut.to_pandas_time_index(coordinates.time.data), pd.TimedeltaIndex
+            ):
+                raise ValueError(
+                    "The 'coordinate' data set's time coordinate is not a valid time"
+                    " delta type."
+                )
+
         # unify time axis
         if ("time" in orientation.coords) and ("time" in coordinates.coords):
             if not np.all(orientation.time.data == coordinates.time.data):
@@ -423,6 +438,8 @@ class LocalCoordinateSystem:
         orientation.name = "orientation"
 
         self._dataset = xr.merge([coordinates, orientation], join="exact")
+        if "time" in self._dataset and time_ref is not None:
+            self._dataset.time.attrs["time_ref"] = time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -464,16 +481,35 @@ class LocalCoordinateSystem:
             Resulting coordinate system.
 
         """
-        rhs_cs = rhs_cs.interp_time(self.time)
+        lhs_cs = self
+        if (
+            lhs_cs.reference_time != rhs_cs.reference_time
+            and lhs_cs.reference_time is not None
+            and rhs_cs.reference_time is not None
+        ):
+            if lhs_cs.reference_time < rhs_cs.reference_time:
+                time_ref = lhs_cs.reference_time
+                rhs_cs = deepcopy(rhs_cs)
+                rhs_cs.reset_reference_time(time_ref)
+            else:
+                time_ref = rhs_cs.reference_time
+                lhs_cs = deepcopy(lhs_cs)
+                lhs_cs.reset_reference_time(time_ref)
+        elif lhs_cs.reference_time is None:
+            time_ref = rhs_cs.reference_time
+        else:
+            time_ref = lhs_cs.reference_time
+
+        rhs_cs = rhs_cs.interp_time(lhs_cs.time, time_ref)
 
         orientation = ut.xr_matmul(
-            rhs_cs.orientation, self.orientation, dims_a=["c", "v"]
+            rhs_cs.orientation, lhs_cs.orientation, dims_a=["c", "v"]
         )
         coordinates = (
-            ut.xr_matmul(rhs_cs.orientation, self.coordinates, ["c", "v"], ["c"])
+            ut.xr_matmul(rhs_cs.orientation, lhs_cs.coordinates, ["c", "v"], ["c"])
             + rhs_cs.coordinates
         )
-        return LocalCoordinateSystem(orientation, coordinates)
+        return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
 
     def __sub__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
         """Subtract 2 coordinate systems.
@@ -513,9 +549,11 @@ class LocalCoordinateSystem:
 
     def __eq__(self: "LocalCoordinateSystem", other: "LocalCoordinateSystem") -> bool:
         """Check equality of LocalCoordinateSystems."""
-        return self.orientation.identical(
-            other.orientation
-        ) and self.coordinates.identical(other.coordinates)
+        return (
+            self.orientation.identical(other.orientation)
+            and self.coordinates.identical(other.coordinates)
+            and self.reference_time == other.reference_time
+        )
 
     @staticmethod
     def _build_time_index(
@@ -533,25 +571,36 @@ class LocalCoordinateSystem:
 
         Returns
         -------
-        pandas.DatetimeIndex
+        pandas.TimedeltaIndex
 
         """
+        if time is None:
+            return time, time_ref
+
         if isinstance(time, pint.Quantity):
             time = ut.to_pandas_time_index(time)
 
-        if time is not None:
-            if time_ref is not None:
-                time = pd.TimedeltaIndex(time) + time_ref
-            try:
+        if not isinstance(time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
+            try:  # try supported formats like str etc.
                 time = pd.DatetimeIndex(time)
+            except TypeError:
+                try:  # maybe
+                    time = pd.TimedeltaIndex(time)
+                except Exception:
+                    raise TypeError(
+                        "Unable to convert input argument to pd.DatetimeIndex or "
+                        "pd.TimedeltaIndex. If passing single values convert to list"
+                        "first (like [pd.Timestamp])"
+                    )
             except Exception as err:
-                print(
-                    "Unable to convert input argument to pd.DatetimeIndex. "
-                    + "If passing single values convert to list first (like ["
-                    "pd.Timestamp])"
-                )
                 raise err
-        return time
+
+        if isinstance(time, pd.DatetimeIndex):
+            if time_ref is None:
+                time_ref = time[0]
+            time = time - time_ref
+
+        return time, time_ref
 
     @staticmethod
     def _build_orientation(
@@ -617,7 +666,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def from_euler(
-        cls, sequence, angles, degrees=False, coordinates=None, time=None
+        cls, sequence, angles, degrees=False, coordinates=None, time=None, time_ref=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
 
@@ -653,6 +702,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -661,11 +712,11 @@ class LocalCoordinateSystem:
 
         """
         orientation = Rot.from_euler(sequence, angles, degrees)
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @classmethod
     def from_orientation(
-        cls, orientation, coordinates=None, time=None
+        cls, orientation, coordinates=None, time=None, time_ref=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from orientation matrix.
 
@@ -677,6 +728,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -684,11 +737,11 @@ class LocalCoordinateSystem:
             Local coordinate system
 
         """
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @classmethod
     def from_xyz(
-        cls, vec_x, vec_y, vec_z, coordinates=None, time=None
+        cls, vec_x, vec_y, vec_z, coordinates=None, time=None, time_ref=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from 3 vectors defining the orientation.
 
@@ -704,6 +757,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -718,11 +773,17 @@ class LocalCoordinateSystem:
         orientation = np.concatenate((vec_x, vec_y, vec_z), axis=vec_x.ndim - 1)
         orientation = np.reshape(orientation, (*vec_x.shape, 3))
         orientation = orientation.swapaxes(orientation.ndim - 1, orientation.ndim - 2)
-        return cls(orientation, coordinates=coordinates, time=time)
+        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @classmethod
     def from_xy_and_orientation(
-        cls, vec_x, vec_y, positive_orientation=True, coordinates=None, time=None
+        cls,
+        vec_x,
+        vec_y,
+        positive_orientation=True,
+        coordinates=None,
+        time=None,
+        time_ref=None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -739,6 +800,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -750,11 +813,17 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time, time_ref=time_ref)
 
     @classmethod
     def from_yz_and_orientation(
-        cls, vec_y, vec_z, positive_orientation=True, coordinates=None, time=None
+        cls,
+        vec_y,
+        vec_z,
+        positive_orientation=True,
+        coordinates=None,
+        time=None,
+        time_ref=None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -771,6 +840,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -782,11 +853,17 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time, time_ref=time_ref)
 
     @classmethod
     def from_xz_and_orientation(
-        cls, vec_x, vec_z, positive_orientation=True, coordinates=None, time=None
+        cls,
+        vec_x,
+        vec_z,
+        positive_orientation=True,
+        coordinates=None,
+        time=None,
+        time_ref=None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -803,6 +880,8 @@ class LocalCoordinateSystem:
             Coordinates of the origin (Default value = None)
         time :
             Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Reference Timestamp to use if time is Timedelta or pint.Quantity.
 
         Returns
         -------
@@ -814,7 +893,7 @@ class LocalCoordinateSystem:
             positive_orientation
         )
 
-        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time, time_ref=time_ref)
 
     @staticmethod
     def _sign_orientation(positive_orientation):
@@ -884,6 +963,36 @@ class LocalCoordinateSystem:
         return self.dataset.coordinates
 
     @property
+    def reference_time(self) -> pd.Timestamp:
+        """Get the coordinate systems reference time.
+
+        Returns
+        -------
+        pd.Timestamp:
+            The coordinate systems reference time
+
+        """
+        if "time" in self._dataset and "time_ref" in self._dataset.time.attrs:
+            return self._dataset.time.attrs["time_ref"]
+        return None
+
+    @property
+    def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
+        """Get the time as 'pandas.DatetimeIndex'.
+
+        If the coordinate system has no reference time, 'None' is returned.
+
+        Returns
+        -------
+        Union[pd.DatetimeIndex, None]:
+            The coordinate systems time as 'pandas.DatetimeIndex'
+
+        """
+        if self.reference_time is None:
+            return None
+        return self.time + self.reference_time
+
+    @property
     def time(self) -> Union[pd.DatetimeIndex, None]:
         """Get the time union of the local coordinate system (None if system is static).
 
@@ -894,8 +1003,20 @@ class LocalCoordinateSystem:
 
         """
         if "time" in self._dataset.coords:
-            return pd.DatetimeIndex(self._dataset.time.data)
+            return pd.TimedeltaIndex(self._dataset.time)
         return None
+
+    @property
+    def time_quantity(self) -> pint.Quantity:
+        """Get the time as 'pint.Quantity'.
+
+        Returns
+        -------
+        pint.Quantity:
+            The coordinate systems time as 'pint.Quantity'
+
+        """
+        return ut.pandas_time_delta_to_quantity(self.time)
 
     @property
     def dataset(self) -> xr.Dataset:
@@ -914,6 +1035,7 @@ class LocalCoordinateSystem:
         time: Union[
             pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem", None
         ],
+        time_ref: Union[pd.Timestamp, None] = None,
     ) -> "LocalCoordinateSystem":
         """Interpolates the data in time.
 
@@ -922,6 +1044,8 @@ class LocalCoordinateSystem:
         time :
             Series of times.
             If passing "None" no interpolation will be performed.
+        time_ref:
+            The reference timestamp
 
         Returns
         -------
@@ -933,20 +1057,35 @@ class LocalCoordinateSystem:
             return self
 
         if isinstance(time, LocalCoordinateSystem):
+            time_ref = time.reference_time
             time = time.time
 
-        try:
-            time = pd.DatetimeIndex(time)
-        except Exception as err:
-            print(
-                "Unable to convert input argument to pd.DatetimeIndex. "
-                + "If passing single values convert to list first (like [pd.Timestamp])"
-            )
-            raise err
-        orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
-        coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
+        time, time_ref = self._build_time_index(time, time_ref)
 
-        return LocalCoordinateSystem(orientation, coordinates)
+        if self.time is None:
+            lcs_time_ref = time_ref
+        else:
+            lcs_time_ref = self.reference_time
+
+        if lcs_time_ref == time_ref:
+            lcs_ref = self
+        else:
+            if not isinstance(lcs_time_ref, type(time_ref)):
+                raise TypeError(
+                    "Only 1 reference time provided for time dependent coordinate "
+                    "system. Either the reference time of the coordinate system or the "
+                    "one passed to the function is 'None'. Only cases where the "
+                    "reference times are both 'None' or both contain a timestamp are "
+                    "allowed. Also check that the reference time has the correct type."
+                )
+
+            lcs_ref = deepcopy(self)
+            lcs_ref.reset_reference_time(time_ref)
+
+        orientation = ut.xr_interp_orientation_in_time(lcs_ref.orientation, time)
+        coordinates = ut.xr_interp_coordinates_in_time(lcs_ref.coordinates, time)
+
+        return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
 
     def invert(self) -> "LocalCoordinateSystem":
         """Get a local coordinate system defining the parent in the child system.
@@ -968,7 +1107,9 @@ class LocalCoordinateSystem:
             dims_b=["c"],
             trans_a=True,
         )
-        return LocalCoordinateSystem(orientation, coordinates)
+        return LocalCoordinateSystem(
+            orientation, coordinates, self.time, self.reference_time
+        )
 
     def as_rotation(self) -> Rot:  # pragma: no cover
         """Get a scipy.Rotation object from the coordinate system orientation.
@@ -1003,6 +1144,29 @@ class LocalCoordinateSystem:
 
         """
         return self.as_rotation().as_euler(seq=seq, degrees=degrees)
+
+    def reset_reference_time(self, time_ref_new):
+        """Reset the reference time of the coordinate system.
+
+        The time values of the coordinate system are adjusted to the new reference time.
+        If no reference time has been set before, the time values will remain
+        unmodified. This assumes that the current time delta values are already
+        referring to the new reference time.
+
+        Parameters
+        ----------
+        time_ref_new:
+            The new reference time
+
+        """
+        if isinstance(time_ref_new, str):
+            time_ref_new = pd.Timestamp(time_ref_new)
+        if self.reference_time is None:
+            self._dataset.time.attrs["time_ref"] = time_ref_new
+        else:
+            delta = self.reference_time - time_ref_new
+            self._dataset.coords["time"] = self.time + delta
+            self._dataset.time.attrs["time_ref"] = time_ref_new
 
 
 # coordinate system manager class ------------------------------------------------------
@@ -1996,7 +2160,7 @@ class CoordinateSystemManager:
                 raise ValueError(f'The system "{time}" is not time dependent')
 
         else:
-            time_interp = pd.DatetimeIndex(time)
+            time_interp = pd.TimedeltaIndex(time)
 
         lcs = self.graph.edges[path_edges[0]]["lcs"].interp_time(time_interp)
         for edge in path_edges[1:]:

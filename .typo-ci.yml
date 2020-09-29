@@ -128,3 +128,4 @@ excluded_words:
   - unmerge
   - itertools
   - rst
+  - pycharm
