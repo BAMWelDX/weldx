@@ -8,3 +8,4 @@ dependencies:
   - conda-build
   - conda-verify
   - anaconda-client
+  - numpydoc>=0.5

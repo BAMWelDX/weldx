@@ -176,7 +176,8 @@ class MathematicalExpression:
 
         Returns
         -------
-        Internal sympy expression
+        sympy.core.expr.Expr:
+            Internal sympy expression
 
         """
         return self._expression
@@ -398,7 +399,7 @@ class TimeSeries:
 
         Returns
         -------
-        xr.DataArray:
+        xarray.DataArray:
             The internal data as 'xarray.DataArray'
 
         """
@@ -426,7 +427,7 @@ class TimeSeries:
 
         Returns
         -------
-        pd.TimedeltaIndex:
+        pandas.TimedeltaIndex:
             Timestamps of the  data
 
         """
@@ -457,7 +458,7 @@ class TimeSeries:
 
         Returns
         -------
-        xr.DataArray:
+        xarray.DataArray:
             A data array containing the interpolated data.
 
         """
