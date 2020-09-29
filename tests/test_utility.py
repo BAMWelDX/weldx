@@ -6,8 +6,9 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pandas import TimedeltaIndex as TDI
+from pandas import date_range
 
-import weldx.transformations as tf
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 
@@ -338,16 +339,32 @@ def test_xr_interp_like():
     assert np.all(test == np.arange(3, 7, 0.125))
 
 
-def test_get_time_union():
-    """Test input types for get_time_union function."""
-    t1 = pd.Timestamp("1970")
-    t2 = pd.Timestamp("2020")
-    dsx = tf.LocalCoordinateSystem().dataset.expand_dims({"time": [t1, t2]})
-    cs = tf.LocalCoordinateSystem(
-        orientation=dsx.orientation, coordinates=dsx.coordinates
-    )
-    res = ut.get_time_union([cs.time, dsx, cs, [0]])
-    assert np.all(res == pd.DatetimeIndex([t1, t2]))
+@pytest.mark.parametrize(
+    "list_of_objects, time_exp",
+    [
+        (
+            [
+                date_range("2020-02-02", periods=4, freq="2D"),
+                date_range("2020-02-01", periods=4, freq="2D"),
+                date_range("2020-02-03", periods=2, freq="3D"),
+            ],
+            date_range("2020-02-01", periods=8, freq="1D"),
+        ),
+        ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
+    ],
+)
+def test_get_time_union(list_of_objects, time_exp):
+    """Test input types for get_time_union function.
+
+    Parameters
+    ----------
+    list_of_objects:
+        List with input objects
+    time_exp:
+        Expected result time
+
+    """
+    assert np.all(ut.get_time_union(list_of_objects) == time_exp)
 
 
 def test_xf_fill_all():
@@ -412,11 +429,13 @@ _dax_ref = dict(
         (_dax_check, {"d1": {"dtype": ["float64", int]}}),
         (_dax_check, {"d2": {"dtype": ["float64", int]}}),
         (_dax_check, {"no_dim": {"optional": True, "dtype": float}}),
-        (_dax_check, {"d5": {"dtype": str}}),  # das wäre schöner als "<U1"
+        (_dax_check, {"d5": {"dtype": str}}),
     ],
 )
 def test_xr_check_coords(dax, ref_dict):
-    """A test."""
+    """Test of the validator function weldx.utility.xr_check_coords.
+
+    Validate the coordinates of an DataArray against different dictionarys."""
     assert ut.xr_check_coords(dax, ref_dict)
 
 
@@ -426,9 +445,14 @@ def test_xr_check_coords(dax, ref_dict):
         (_dax_check, {"d1": {"dtype": int}}, Exception),
         (_dax_check, {"d1": {"dtype": int, "optional": True}}, Exception),
         (_dax_check, {"no_dim": {"dtype": float}}, AttributeError),
+        (_dax_check, {"d5": {"values": ["x", "noty", "z"], "dtype": "str"}}, Exception),
+        (_dax_check, {"d1": {"dtype": [int, str, bool]}}, Exception),
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):
-    """A test."""
+    """Test of the validator function weldx.utility.xr_check_coords especially
+    checking for exceptions.
+
+    Validate the coordinates of an DataArray against different dictionarys."""
     with pytest.raises(exception_type):
         ut.xr_check_coords(dax, ref_dict)

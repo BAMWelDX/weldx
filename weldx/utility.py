@@ -269,20 +269,21 @@ def get_time_union(list_of_objects):
 
     Returns
     -------
-    pd.DatetimeIndex
-        pandas DatetimeIndex with merged times
+    Union[pd.DatetimeIndex, pd.TimedeltaIndex]
+        Pandas time index class with merged times
 
     """
     # TODO: make non-nested function
+    # TODO: reevaluate if LCS and xarray types should be supported. If yes, add tests
     def _get_time(input_object):
         if isinstance(input_object, (pd.DatetimeIndex, pd.TimedeltaIndex)):
             return input_object
         if isinstance(input_object, (xr.DataArray, xr.Dataset)):
-            return pd.DatetimeIndex(input_object.time.data)
+            return to_pandas_time_index(input_object.time.data)
         if isinstance(input_object, tf.LocalCoordinateSystem):
             return input_object.time
 
-        return pd.DatetimeIndex(input_object)
+        return to_pandas_time_index(input_object)
 
     times = None
     for idx, val in enumerate(list_of_objects):
@@ -563,6 +564,20 @@ def xr_interp_like(
 def xr_valid_key(dax: xr.DataArray, ref: dict):
     """Validate if the keys in ref are present in the DataArray.
 
+    This is a helper function for xr_check_coords. Throws an exception when the
+    dimension is requested in dax and not optional.
+
+    Parameters
+    ----------
+    dax:
+        xarray object
+    ref:
+        reference dictionary
+
+    Returns
+    -------
+    None
+        Does not have a return value. Throws an exception if
     """
 
     for key in ref:
@@ -572,12 +587,58 @@ def xr_valid_key(dax: xr.DataArray, ref: dict):
                 continue
         if not hasattr(dax, key):
             # Attributes not found in dax
-            raise AttributeError(f"Data array 'dax'  has no attribute '{key}'.")
+            raise AttributeError(f"Data array has no attribute '{key}'.")
 
 
 def xr_check_coords(dax: xr.DataArray, ref: dict):
-    """Validate the coordinates of the DataArray against a dictionary.
+    """Validate the coordinates of the DataArray against a reference dictionary.
 
+    The reference dictionary should have the dimensions as keys and those contain
+    dictionaries with the following keywords (all optional):
+    'optional':
+        boolean, default False - if True, the dimension has to be in the DataArray dax
+    'values':
+        Any allowed value from XArray is allowed here. (numpy.ndarray)
+    'dtype':
+        Any allowed data type from XArray is allowed here.
+
+    Example:
+    ---------
+    import numpy as np
+    import pandas as pd
+    import xarray as xr
+
+    dax = xr.DataArray(
+        data=np.ones((3,2,3)),
+        dims=["d1", "d2", "d3"],
+        coords={
+            "d1": np.array([-1, 0, 2], dtype=int),
+            "d2": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+            "d3": ["x", "y", "z"],
+        }
+    )
+    ref = dict(
+        d1={"optional": True, "values": np.array([-1, 0, 2], dtype=int)},
+        d2={
+            "values": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+            "dtype": ["datetime64[ns]", "timedelta64[ns]"],
+        },
+        d3={"values": ["x", "y", "z"], "dtype": "<U1"},
+    )
+    xr_check_coords(dax, ref)
+
+
+    Parameters
+    ----------
+    dax:
+        xarray object which should be validated
+    ref:
+        reference dictionary
+
+    Returns
+    -------
+    bool
+        True, if the test was a success, else throws an exception
     """
 
     # check if the keys in ref are also in dax
@@ -605,17 +666,13 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
                         f"Mismatch in the dtype of the DataArray and ref['{key}']"
                     )
             elif getattr(dax, key).dtype != np.dtype(ref[key]["dtype"]):
-                raise Exception(
-                    f"Mismatch in the dtype of the DataArray and ref['{key}']"
-                )
-
-    return True
-
-
-def xr_check_dtype(dax: xr.DataArray, ref: dict):
-    """Validate the dtype of the DataArray against a dictionary.
-
-    """
+                if not (
+                    np.issubdtype(getattr(dax, key).dtype, np.dtype(ref[key]["dtype"]))
+                    and np.dtype(ref[key]["dtype"]) == str
+                ):
+                    raise Exception(
+                        f"Mismatch in the dtype of the DataArray and ref['{key}']"
+                    )
 
     return True
 
@@ -637,7 +694,7 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
     """
     if times is not None:
         dsx = xr.DataArray(
-            data=data, dims=["time", "c"], coords={"time": times, "c": ["x", "y", "z"]}
+            data=data, dims=["time", "c"], coords={"time": times, "c": ["x", "y", "z"]},
         )
     else:
         dsx = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
@@ -667,7 +724,7 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
         )
     else:
         dsx = xr.DataArray(
-            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]}
+            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
         )
     return dsx.astype(float)
 
@@ -696,7 +753,10 @@ def xr_interp_orientation_in_time(
     # extract intersecting times and add time range boundaries of the data set
     times_ds = dsx.time.data
     if len(times_ds) > 1:
-        times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
+        if isinstance(times_ds, pd.DatetimeIndex):
+            times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
+        else:
+            times_ds_limits = pd.TimedeltaIndex([times_ds.min(), times_ds.max()])
         times_union = times.union(times_ds_limits)
         times_intersect = times_union[
             (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])
