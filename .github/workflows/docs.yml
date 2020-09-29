@@ -1,8 +1,20 @@
 name: documentation
-on: [push]
+on:
+  # Trigger the workflow on push events on master
+  push:
+    branches:
+      - master
+  # Trigger the workflow on all pull request (except draft PRs)
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # Trigger the workflow on all release created events (this could redirect to main conda channel)
+  release:
+    types:
+      - created
 
 jobs:
   build:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
