@@ -17,7 +17,7 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 
-__all__ = ["LocalCoordinateSystem", "CoordinateSystemManager"]
+__all__ = ["LocalCoordinateSystem", "CoordinateSystemManager", "WXRotation"]
 
 # functions -------------------------------------------------------------------
 
