@@ -29,8 +29,8 @@ Contents
 .. toctree::
    :maxdepth: 1
 
-   asdf-extension
    tutorials
+   asdf-extension
    devdoc
    api
    asdf-schemas
