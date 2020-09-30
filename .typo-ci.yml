@@ -103,6 +103,7 @@ excluded_words:
   - nbsphinx
   - mathjax
   - toctree
+  - numpydoc
   # markdown / latex ----------------------------
   - cdot
   # other ---------------------------------------
@@ -129,3 +130,4 @@ excluded_words:
   - itertools
   - rst
   - pycharm
+  - tslibs
