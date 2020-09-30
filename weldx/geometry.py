@@ -8,6 +8,7 @@ import numpy as np
 
 import weldx.transformations as tf
 import weldx.utility as ut
+import weldx.visualization as vs
 
 # LineSegment -----------------------------------------------------------------
 
@@ -1605,6 +1606,35 @@ class Trace:
 
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
+
+    def plot(self, raster_width=1, axes=None, *args):
+        """Plot the trace.
+
+        Parameters
+        ----------
+        raster_width : float, int
+            The target distance between two raster points
+        axes : matplotlib.axes.Axes
+            The target `Axes` object of the plot. If 'None' is passed, a new figure will
+            be created
+        args : 
+            All additional arguments are passed on to the matplotlib.pyplot.plot
+            function
+
+        """
+        data = self.rasterize(raster_width)
+        if len(args) == 0:
+            args = ("x-",)
+        if axes is None:
+            fig = plt.figure()
+            axes = fig.gca(projection="3d")
+            axes.plot(data[0], data[1], data[2], *args)
+            axes.set_xlabel("x")
+            axes.set_ylabel("y")
+            axes.set_zlabel("z")
+            vs.set_axes_equal(axes)
+        else:
+            axes.plot(data[0], data[1], data[2], *args)
 
 
 # Linear profile interpolation class ------------------------------------------
