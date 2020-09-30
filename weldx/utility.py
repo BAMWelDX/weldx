@@ -596,12 +596,15 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
 
     The reference dictionary should have the dimensions as keys and those contain
     dictionaries with the following keywords (all optional):
-    'optional':
-        boolean, default False - if True, the dimension has to be in the DataArray dax
-    'values':
-        Any allowed value from XArray is allowed here. (numpy.ndarray)
-    'dtype':
-        Any allowed data type from XArray is allowed here.
+
+    - ``values``: Specify exact coordinate values to match.
+
+    - ``dtype``: Ensure coordinate dtype matches at least one of the given dtypes.
+
+    - ``optional``: boolean, default ``False`` -
+      if ``True``, the dimension has to be in the DataArray dax
+
+
 
     Examples
     --------
@@ -627,8 +630,6 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
     ... )
     >>> wx.utility.xr_check_coords(dax, ref)
     True
-
-
 
     Parameters
     ----------
