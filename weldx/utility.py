@@ -591,7 +591,7 @@ def xr_valid_key(dax: xr.DataArray, ref: dict):
             raise AttributeError(f"Data array has no attribute '{key}'.")
 
 
-def xr_check_coords(dax: xr.DataArray, ref: dict):
+def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     """Validate the coordinates of the DataArray against a reference dictionary.
 
     The reference dictionary should have the dimensions as keys and those contain
@@ -605,6 +605,18 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
 
     ``optional`` : boolean
         default ``False`` - if ``True``, the dimension has to be in the DataArray dax
+
+    Parameters
+    ----------
+    dax:
+        xarray object which should be validated
+    ref:
+        reference dictionary
+
+    Returns
+    -------
+    bool
+        True, if the test was a success, else throws an exception
 
     Examples
     --------
@@ -630,18 +642,6 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
     ... )
     >>> wx.utility.xr_check_coords(dax, ref)
     True
-
-    Parameters
-    ----------
-    dax:
-        xarray object which should be validated
-    ref:
-        reference dictionary
-
-    Returns
-    -------
-    bool
-        True, if the test was a success, else throws an exception
     """
 
     # check if the keys in ref are also in dax

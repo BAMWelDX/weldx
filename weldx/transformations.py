@@ -629,8 +629,15 @@ class LocalCoordinateSystem:
 
         """
         if isinstance(orientation, xr.DataArray):
+            ut.xr_check_coords(
+                orientation,
+                dict(
+                    c={"values": ["x", "y", "z"]},
+                    v={"values": [0, 1, 2]},
+                    time={"dtype": "timedelta64[ns]", "optional": True},
+                ),
+            )
             return orientation
-            # TODO: Test if xarray has correct format
 
         time_orientation = None
         if isinstance(orientation, Rot):
@@ -660,8 +667,14 @@ class LocalCoordinateSystem:
 
         """
         if isinstance(coordinates, xr.DataArray):
+            ut.xr_check_coords(
+                coordinates,
+                dict(
+                    c={"values": ["x", "y", "z"]},
+                    time={"dtype": "timedelta64[ns]", "optional": True},
+                ),
+            )
             return coordinates
-            # TODO: Test if xarray has correct format
 
         time_coordinates = None
         if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
