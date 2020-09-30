@@ -1607,7 +1607,7 @@ class Trace:
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
-    def plot(self, raster_width=1, axes=None, *args):
+    def plot(self, raster_width=1, axes=None, fmt=None):
         """Plot the trace.
 
         Parameters
@@ -1617,24 +1617,23 @@ class Trace:
         axes : matplotlib.axes.Axes
             The target `Axes` object of the plot. If 'None' is passed, a new figure will
             be created
-        args : 
-            All additional arguments are passed on to the matplotlib.pyplot.plot
-            function
+        fmt : str
+            Format string that is passed to matplotlib.pyplot.plot.
 
         """
         data = self.rasterize(raster_width)
-        if len(args) == 0:
-            args = ("x-",)
+        if fmt is None:
+            fmt = "x-"
         if axes is None:
             fig = plt.figure()
             axes = fig.gca(projection="3d")
-            axes.plot(data[0], data[1], data[2], *args)
+            axes.plot(data[0], data[1], data[2], fmt)
             axes.set_xlabel("x")
             axes.set_ylabel("y")
             axes.set_zlabel("z")
             vs.set_axes_equal(axes)
         else:
-            axes.plot(data[0], data[1], data[2], *args)
+            axes.plot(data[0], data[1], data[2], fmt)
 
 
 # Linear profile interpolation class ------------------------------------------
@@ -2089,3 +2088,36 @@ class Geometry:
         return self._rasterize_variable_profile(
             profile_raster_width, trace_raster_width
         )
+
+    def plot(self, profile_raster_width, trace_raster_width, axes=None, fmt=None):
+        """Plot the geometry.
+
+        Parameters
+        ----------
+        profile_raster_width: float, int
+            Target distance between the individual points of a profile
+        trace_raster_width: float, int
+            Target distance between the individual profiles on the trace
+        axes : matplotlib.axes.Axes
+            The target `Axes` object of the plot. If 'None' is passed, a new figure will
+            be created
+        fmt : str
+            Format string that is passed to matplotlib.pyplot.plot.
+
+        Returns
+        -------
+
+        """
+        data = self.rasterize(profile_raster_width, trace_raster_width)
+        if fmt is None:
+            fmt = "o"
+        if axes is None:
+            fig = plt.figure()
+            axes = fig.gca(projection="3d")
+            axes.plot(data[0], data[1], data[2], fmt)
+            axes.set_xlabel("x")
+            axes.set_ylabel("y")
+            axes.set_zlabel("z")
+            vs.set_axes_equal(axes)
+        else:
+            axes.plot(data[0], data[1], data[2], fmt)
