@@ -1829,21 +1829,28 @@ class VariableProfile:
 
 
 class Geometry:
-    """Define the experimental geometry."""
+    """Defines a 3 dimensional geometry by extrusion of a 2 dimensional profile.
+
+    The path of the extrusion can be chosen arbitrarily. It is also possible to vary
+    the profile along the extrusion path.
+
+    """
 
     def __init__(self, profile, trace):
-        """Construct geometry.
+        """Construct a geometry.
 
         Parameters
         ----------
-        profile :
-            Constant or variable profile.
-        trace :
-            Trace
+        profile : Profile, VariableProfile
+            Constant or variable profile that is used as cross section along the
+            specified trace
+        trace : Trace
+            The path that is used to extrude the given profile
 
         Returns
         -------
-        Geometry
+        Geometry :
+            A Geometry class instance
 
         """
         self._check_inputs(profile, trace)
