@@ -430,6 +430,7 @@ _dax_ref = dict(
         (_dax_check, {"d2": {"dtype": ["float64", int]}}),
         (_dax_check, {"no_dim": {"optional": True, "dtype": float}}),
         (_dax_check, {"d5": {"dtype": str}}),
+        (_dax_check, {"d5": {"dtype": [str]}}),
     ],
 )
 def test_xr_check_coords(dax, ref_dict):
