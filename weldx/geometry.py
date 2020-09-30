@@ -166,6 +166,7 @@ class LineSegment:
         self._points = np.matmul(matrix, self._points)
         self._calculate_length()
 
+    @UREG.wraps(None, (None, UREG.millimeters), strict=False)
     def apply_translation(self, vector):
         """Apply a translation to the segment.
 
@@ -177,6 +178,7 @@ class LineSegment:
         """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
+    @UREG.wraps(None, (None, UREG.millimeters), strict=False)
     def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the segments contour.
 
@@ -227,6 +229,7 @@ class LineSegment:
         new_segment.apply_transformation(matrix)
         return new_segment
 
+    @UREG.wraps(None, (None, UREG.millimeters), strict=False)
     def translate(self, vector):
         """Get a translated copy of the segment.
 
@@ -819,6 +822,7 @@ class Shape:
         """
         return self._segments
 
+    @UREG.wraps(None, (None, UREG.millimeters), strict=False)
     def add_line_segments(self, points):
         """Add line segments to the shape.
 
