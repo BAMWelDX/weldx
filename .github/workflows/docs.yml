@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-  # Trigger the workflow on all pull request (except draft PRs)
+  # Trigger the workflow on relevant pull request events
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   # Trigger the workflow on all release created events (this could redirect to main conda channel)
@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false # exclude job from draft PR
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
