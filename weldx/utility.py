@@ -661,7 +661,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
         # only if the key "dtype" is given do the validation
         if "dtype" in ref[key]:
-            if type(ref[key]["dtype"]) is list:
+            if isinstance(ref[key]["dtype"], list):
                 if getattr(dax, key).dtype not in [
                     np.dtype(x) for x in ref[key]["dtype"]
                 ]:
