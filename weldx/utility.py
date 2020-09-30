@@ -662,9 +662,13 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
                 if getattr(dax, key).dtype not in [
                     np.dtype(x) for x in ref[key]["dtype"]
                 ]:
-                    raise Exception(
-                        f"Mismatch in the dtype of the DataArray and ref['{key}']"
-                    )
+                    if not (
+                        str in [np.dtype(x) for x in ref[key]["dtype"]]
+                        and np.issubdtype(getattr(dax, key).dtype, str)
+                    ):
+                        raise Exception(
+                            f"Mismatch in the dtype of the DataArray and ref['{key}']"
+                        )
             elif getattr(dax, key).dtype != np.dtype(ref[key]["dtype"]):
                 if not (
                     np.issubdtype(getattr(dax, key).dtype, np.dtype(ref[key]["dtype"]))
