@@ -8,6 +8,7 @@ import numpy as np
 
 import weldx.transformations as tf
 import weldx.utility as ut
+from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 # LineSegment -----------------------------------------------------------------
 
@@ -15,6 +16,7 @@ import weldx.utility as ut
 class LineSegment:
     """Line segment."""
 
+    @UREG.wraps(None, (None, UREG.millimeters), strict=False)
     def __init__(self, points):
         """Construct line segment.
 
@@ -55,6 +57,7 @@ class LineSegment:
             raise ValueError("Segment length is 0.")
 
     @classmethod
+    @UREG.wraps(None, (None, UREG.millimeters, UREG.millimeters), strict=False)
     def construct_with_points(cls, point_start, point_end) -> "LineSegment":
         """Construct a line segment with two points.
 
@@ -249,6 +252,7 @@ class LineSegment:
 class ArcSegment:
     """Arc segment."""
 
+    @UREG.wraps(None, (None, UREG.millimeters, None), strict=False)
     def __init__(self, points, arc_winding_ccw=True):
         """Construct arc segment.
 
@@ -344,6 +348,11 @@ class ArcSegment:
             raise ValueError("Arc length is 0.")
 
     @classmethod
+    @UREG.wraps(
+        None,
+        (None, UREG.millimeters, UREG.millimeters, UREG.millimeters, None),
+        strict=False,
+    )
     def construct_with_points(
         cls, point_start, point_end, point_center, arc_winding_ccw=True
     ):
@@ -373,6 +382,11 @@ class ArcSegment:
         return cls(points, arc_winding_ccw)
 
     @classmethod
+    @UREG.wraps(
+        None,
+        (None, UREG.millimeters, UREG.millimeters, UREG.millimeters, None, None),
+        strict=False,
+    )
     def construct_with_radius(
         cls,
         point_start,
