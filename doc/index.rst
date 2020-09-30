@@ -31,6 +31,7 @@ Contents
 
    asdf-extension
    tutorials
+   devdoc
    api
    asdf-schemas
    CHANGELOG
