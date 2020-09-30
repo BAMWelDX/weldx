@@ -603,13 +603,12 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
     'dtype':
         Any allowed data type from XArray is allowed here.
 
-    Examples:
-    ---------
+    Examples
+    --------
     >>> import pandas as pd
-    ... import xarray as xr
-    ... import weldx as wx
-    ...
-    ... dax = xr.DataArray(
+    >>> import xarray as xr
+    >>> import weldx as wx
+    >>> dax = xr.DataArray(
     ...     data=np.ones((3, 2, 3)),
     ...     dims=["d1", "d2", "d3"],
     ...     coords={
@@ -618,7 +617,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
     ...         "d3": ["x", "y", "z"],
     ...     }
     ... )
-    ... ref = dict(
+    >>> ref = dict(
     ...     d1={"optional": True, "values": np.array([-1, 0, 2], dtype=int)},
     ...     d2={
     ...         "values": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
@@ -626,7 +625,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
     ...     },
     ...     d3={"values": ["x", "y", "z"], "dtype": "<U1"},
     ... )
-    ... wx.utility.xr_check_coords(dax, ref)
+    >>> wx.utility.xr_check_coords(dax, ref)
     True
 
 
