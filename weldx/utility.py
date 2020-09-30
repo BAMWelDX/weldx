@@ -597,14 +597,14 @@ def xr_check_coords(dax: xr.DataArray, ref: dict):
     The reference dictionary should have the dimensions as keys and those contain
     dictionaries with the following keywords (all optional):
 
-    - ``values``: Specify exact coordinate values to match.
+    ``values``
+        Specify exact coordinate values to match.
 
-    - ``dtype``: Ensure coordinate dtype matches at least one of the given dtypes.
+    ``dtype`` : str or type
+        Ensure coordinate dtype matches at least one of the given dtypes.
 
-    - ``optional``: boolean, default ``False`` -
-      if ``True``, the dimension has to be in the DataArray dax
-
-
+    ``optional`` : boolean
+        default ``False`` - if ``True``, the dimension has to be in the DataArray dax
 
     Examples
     --------
