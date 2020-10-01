@@ -1150,8 +1150,8 @@ class Profile:
     def plot(
         self,
         title=None,
-        label=None,
         raster_width=0.5,
+        label=None,
         axis="equal",
         axis_labels=None,
         grid=True,
@@ -1164,10 +1164,10 @@ class Profile:
         ----------
         title :
             Matplotlib plot title. (Default value = None)
-        label :
-            Matplotlib plot label. (Default value = None)
         raster_width :
             Distance between Points to plot (Default value = 0.5)
+        label :
+            Matplotlib plot label. (Default value = None)
         axis :
             Matplotlib axis setting. (Default value = "equal")
         axis_labels :
