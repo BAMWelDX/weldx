@@ -78,6 +78,7 @@ class LineSegment:
         return cls(points)
 
     @classmethod
+    @UREG.wraps(None, (None, None, None, ""), strict=False)
     def linear_interpolation(cls, segment_a, segment_b, weight):
         """Interpolate two line segments linearly.
 
@@ -154,6 +155,7 @@ class LineSegment:
         """
         return self._points
 
+    @UREG.wraps(None, (None, ""), strict=False)
     def apply_transformation(self, matrix):
         """Apply a transformation matrix to the segment.
 
@@ -211,6 +213,7 @@ class LineSegment:
 
         return np.matmul(self._points, weight_matrix)
 
+    @UREG.wraps(None, (None, ""), strict=False)
     def transform(self, matrix):
         """Get a transformed copy of the segment.
 
@@ -445,6 +448,7 @@ class ArcSegment:
         )
 
     @classmethod
+    @UREG.wraps(None, (None, None, None, ""), strict=False)
     def linear_interpolation(cls, segment_a, segment_b, weight):
         """Interpolate two arc segments linearly.
 
@@ -582,6 +586,7 @@ class ArcSegment:
         """
         return self._radius
 
+    @UREG.wraps(None, (None, ""), strict=False)
     def apply_transformation(self, matrix):
         """Apply a transformation to the segment.
 
@@ -595,6 +600,7 @@ class ArcSegment:
         self._sign_arc_winding *= tf.reflection_sign(matrix)
         self._calculate_arc_parameters()
 
+    @UREG.wraps(None, (None, UREG.millimeters), strict=False)
     def apply_translation(self, vector):
         """Apply a translation to the segment.
 
@@ -606,6 +612,7 @@ class ArcSegment:
         """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
+    @UREG.wraps(None, (None, UREG.millimeters), strict=False)
     def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the segments contour.
 
@@ -644,6 +651,7 @@ class ArcSegment:
 
         return data.transpose()
 
+    @UREG.wraps(None, (None, ""), strict=False)
     def transform(self, matrix):
         """Get a transformed copy of the segment.
 
@@ -662,6 +670,7 @@ class ArcSegment:
         new_segment.apply_transformation(matrix)
         return new_segment
 
+    @UREG.wraps(None, (None, UREG.millimeters), strict=False)
     def translate(self, vector):
         """Get a translated copy of the segment.
 
