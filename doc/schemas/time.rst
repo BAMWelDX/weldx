@@ -1,7 +1,7 @@
 Time
 ====
 
-The ``time`` contains schema implementations for :code:`pandas` time types.
+The ``time`` directory contains schema implementations for :code:`pandas` time types.
 
 .. asdf-autoschemas::
 
