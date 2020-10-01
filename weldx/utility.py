@@ -579,8 +579,8 @@ def xr_valid_key(dax: xr.DataArray, ref: dict):
     -------
     None
         Does not have a return value. Throws an exception if
-    """
 
+    """
     for key in ref:
         # if optional is set to true, then dax does not need to have this key
         if "optional" in ref[key]:
@@ -642,8 +642,8 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     ... )
     >>> wx.utility.xr_check_coords(dax, ref)
     True
-    """
 
+    """
     # check if the keys in ref are also in dax
     xr_valid_key(dax, ref)
 
