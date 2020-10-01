@@ -2107,9 +2107,6 @@ class Geometry:
         fmt : str
             Format string that is passed to matplotlib.pyplot.plot.
 
-        Returns
-        -------
-
         """
         data = self.rasterize(profile_raster_width, trace_raster_width)
         if fmt is None:
