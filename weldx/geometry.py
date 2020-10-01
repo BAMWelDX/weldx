@@ -1303,7 +1303,7 @@ class LinearHorizontalTraceSegment:
 class RadialHorizontalTraceSegment:
     """Trace segment describing an arc with constant z-component."""
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_ANG_UNIT), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_ANG_UNIT, None), strict=False)
     def __init__(self, radius, angle, clockwise=False):
         """Construct radial horizontal trace segment.
 
