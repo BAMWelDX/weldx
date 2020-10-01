@@ -1153,6 +1153,7 @@ class Profile:
         label=None,
         raster_width=0.5,
         axis="equal",
+        axis_labels=None,
         grid=True,
         line_style=".-",
         ax=None,
@@ -1169,6 +1170,8 @@ class Profile:
             Distance between Points to plot (Default value = 0.5)
         axis :
             Matplotlib axis setting. (Default value = "equal")
+        axis_labels :
+            List of Matplotlib axis labels. (Default value = None)
         grid :
             Matplotlib grid setting. (Default value = True)
         line_style :
@@ -1184,13 +1187,13 @@ class Profile:
         if not ax.name == "3d":
             ax.axis(axis)
         ax.set_title(title, loc="center", wrap=True)
-        if label is not None:
-            ax.set_xlabel(label[0])
-            ax.set_ylabel(label[1])
+        if axis_labels is not None:
+            ax.set_xlabel(axis_labels[0])
+            ax.set_ylabel(axis_labels[1])
         elif "units" in self.attrs:
             ax.set_xlabel("y in " + self.attrs["units"])
             ax.set_ylabel("z in " + self.attrs["units"])
-        ax.plot(raster_data[0], raster_data[1], line_style)
+        ax.plot(raster_data[0], raster_data[1], line_style, label=label)
 
     @property
     def shapes(self):
