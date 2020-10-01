@@ -14,7 +14,7 @@ import weldx.welding
 from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression, TimeSeries
-from weldx.geometry import ArcSegment, Geometry, LineSegment, Trace
+from weldx.geometry import ArcSegment, Geometry, LineSegment, Profile, Shape, Trace
 from weldx.transformations import (
     CoordinateSystemManager,
     LocalCoordinateSystem,
