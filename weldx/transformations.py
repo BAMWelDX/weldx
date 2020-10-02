@@ -20,7 +20,7 @@ from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
-__all__ = ["LocalCoordinateSystem", "CoordinateSystemManager"]
+__all__ = ["LocalCoordinateSystem", "CoordinateSystemManager", "WXRotation"]
 
 # functions -------------------------------------------------------------------
 
