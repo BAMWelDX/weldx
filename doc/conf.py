@@ -54,6 +54,7 @@ extensions = [
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
@@ -170,6 +171,19 @@ html_context = {
 # documentation.
 # html_theme_options = {"logo_only": True}
 
+# Intersphinx mappings -----------------------------------------------------
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    "xarray": ("http://xarray.pydata.org/en/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "matplotlib": ("https://matplotlib.org", None),
+    "dask": ("https://docs.dask.org/en/latest", None),
+    "numba": ("https://numba.pydata.org/numba-doc/latest", None),
+    "pint": ("https://pint.readthedocs.io/en/stable", None),
+}
 
 # Disable warnings caused by a bug -----------------------------------------------------
 
