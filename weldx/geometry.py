@@ -1610,7 +1610,7 @@ class Trace:
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
-    def plot(self, raster_width=1, axes=None, fmt=None):
+    def plot(self, raster_width=1, axes=None, fmt=None):  # pragma: no cover
         """Plot the trace.
 
         Parameters
@@ -2092,7 +2092,9 @@ class Geometry:
             profile_raster_width, trace_raster_width
         )
 
-    def plot(self, profile_raster_width, trace_raster_width, axes=None, fmt=None):
+    def plot(
+        self, profile_raster_width, trace_raster_width, axes=None, fmt=None
+    ):  # pragma: no cover
         """Plot the geometry.
 
         Parameters
