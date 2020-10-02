@@ -1669,7 +1669,7 @@ class Trace:
             fmt = "x-"
         if axes is None:
             fig = plt.figure()
-            axes = fig.gca(projection="3d")
+            axes = fig.gca(projection="3d", proj_type="ortho")
             axes.plot(data[0], data[1], data[2], fmt)
             axes.set_xlabel("x")
             axes.set_ylabel("y")
@@ -2163,7 +2163,7 @@ class Geometry:
             fmt = "o"
         if axes is None:
             fig = plt.figure()
-            axes = fig.gca(projection="3d")
+            axes = fig.gca(projection="3d", proj_type="ortho")
             axes.plot(data[0], data[1], data[2], fmt)
             axes.set_xlabel("x")
             axes.set_ylabel("y")
