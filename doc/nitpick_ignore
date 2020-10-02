@@ -1,3 +1,6 @@
+# matplotlib
+py:class matplotlib.axes.Axes
+
 # networkx
 py:class networkx.DiGraph
 py:class networkx.classes.digraph.DiGraph
