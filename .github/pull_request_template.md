@@ -7,4 +7,4 @@ Closes # (add issue numbers)
 ## Checks
 - [ ] updated CHANGELOG.md
 - [ ] updated tests
-- [ ] updated docs/
+- [ ] updated doc/
