@@ -5,6 +5,7 @@
 - Documentation
     - Documentation is [published on readthedocs](https://weldx.readthedocs.io/en/latest/)
     - API documentation is now available
+    - New tutorial about 3 dimensional geometries [#105]
 - `CoordinateSystemManager` 
     - each instance can be named
     - gets a `plot` function to visualize the graph
