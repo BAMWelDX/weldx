@@ -493,7 +493,7 @@ class VGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -578,7 +578,7 @@ class VVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -597,7 +597,7 @@ class VVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
@@ -644,7 +644,7 @@ class VVGroove(BaseGroove):
 
 @dataclass
 class UVGroove(BaseGroove):
-    """An UV-Groove.
+    """A UV-Groove.
 
     For a detailed description of the execution look in get_groove.
 
@@ -665,7 +665,7 @@ class UVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -684,7 +684,7 @@ class UVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
@@ -748,7 +748,7 @@ class UGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -766,7 +766,7 @@ class UGroove(BaseGroove):
              pint.Quantity (Default value = Q_(3, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
         R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
@@ -851,7 +851,7 @@ class IGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
@@ -866,7 +866,7 @@ class IGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
         width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
@@ -905,7 +905,7 @@ class HVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -922,7 +922,7 @@ class HVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
         b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
@@ -985,7 +985,7 @@ class HUGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -1003,7 +1003,7 @@ class HUGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
         R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
@@ -1074,7 +1074,7 @@ class DVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     alpha_1: pint.Quantity
@@ -1094,7 +1094,7 @@ class DVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha_1 = self.alpha_1.to("rad").magnitude
         alpha_2 = self.alpha_2.to("rad").magnitude
@@ -1174,7 +1174,7 @@ class DUGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1196,7 +1196,7 @@ class DUGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta_1 = self.beta_1.to("rad").magnitude
         beta_2 = self.beta_2.to("rad").magnitude
@@ -1278,7 +1278,7 @@ class DHVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1298,7 +1298,7 @@ class DHVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         dv_groove = DVGroove(
             self.t,
             self.beta_1 * 2,
@@ -1357,7 +1357,7 @@ class DHUGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1379,7 +1379,7 @@ class DHUGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         du_profile = DUGroove(
             self.t,
             self.beta_1,
@@ -1432,7 +1432,7 @@ class FFGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t_1: pint.Quantity
     t_2: pint.Quantity = None
@@ -1451,7 +1451,7 @@ class FFGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         if (
             self.code_number == "1.12"
             or self.code_number == "1.13"

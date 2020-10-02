@@ -2460,9 +2460,13 @@ class CoordinateSystemManager:
         plt.figure()
         color_map = []
         pos = self._get_tree_positions_for_plot()
-        nx.draw(
-            self._graph, pos, with_labels=True, font_weight="bold", node_color=color_map
-        )
+
+        graph = deepcopy(self._graph)  # TODO: Check if deepcopy is necessary
+        # only plot inverted directional arrows
+        remove_edges = [edge for edge in graph.edges if graph.edges[edge]["defined"]]
+        graph.remove_edges_from(remove_edges)
+
+        nx.draw(graph, pos, with_labels=True, font_weight="bold", node_color=color_map)
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
