@@ -5,6 +5,7 @@
 - Documentation
     - Documentation is [published on readthedocs](https://weldx.readthedocs.io/en/latest/)
     - API documentation is now available
+    - New tutorial about 3 dimensional geometries [#105]
 - `CoordinateSystemManager` 
     - each instance can be named
     - gets a `plot` function to visualize the graph
@@ -27,7 +28,10 @@
 - add basic schema layout and `GmawProcess` class for arc welding process implementation [#104]
 - add example notebook and documentation for arc welding process [#104]
 - fix propagating the `name` attribute when reading an ndarray `TimeSeries` object back from ASDF files [#104]
-- fix `pint` regression in `TimeSeries` when mixing integer and float values 
+- fix `pint` regression in `TimeSeries` when mixing integer and float values
+- add `pint` compatibility to some `geometry` classes (**experimental**)
+  - when passing quantities to constructors (and some functions), values get converted to default unit `mm` and passed on as magnitude
+  - old behavior is preserved
 
 
 ## 0.2.0 (30.07.2020)

@@ -458,7 +458,9 @@ class BaseGroove:
         if show_params:
             title = title + "\n" + ", ".join(self.param_strings())
 
-        profile.plot(title, axis_label, raster_width, axis, grid, line_style, ax=ax)
+        profile.plot(
+            title, raster_width, None, axis, axis_label, grid, line_style, ax=ax
+        )
 
     def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Implements profile generation.
@@ -491,7 +493,7 @@ class VGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -509,44 +511,44 @@ class VGroove(BaseGroove):
 
 
        """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha.to("rad").magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        alpha = self.alpha  # .to("rad").magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations:
         s = np.tan(alpha / 2) * (t - c)
 
         # Scaling
-        edge = np.min([-s, 0])
-        if width <= -edge + 1:
+        edge = np.append(-s, 0).min()
+        if width <= -edge + Q_(1, "mm"):
             width = width - edge
 
         # Bottom segment
-        x_value = [-width, 0]
-        y_value = [0, 0]
+        x_value = np.append(-width, 0)
+        y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
         # root face
         if c != 0:
-            x_value.append(0)
-            y_value.append(c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
             segment_list.append("line")
 
         # groove face
-        x_value.append(-s)
-        y_value.append(t)
+        x_value = np.append(x_value, -s)
+        y_value = np.append(y_value, t)
         segment_list.append("line")
 
         # Top segment
-        x_value.append(-width)
-        y_value.append(t)
+        x_value = np.append(x_value, -width)
+        y_value = np.append(y_value, t)
         segment_list.append("line")
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis is mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
@@ -576,7 +578,7 @@ class VVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -595,7 +597,7 @@ class VVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
@@ -642,7 +644,7 @@ class VVGroove(BaseGroove):
 
 @dataclass
 class UVGroove(BaseGroove):
-    """An UV-Groove.
+    """A UV-Groove.
 
     For a detailed description of the execution look in get_groove.
 
@@ -663,7 +665,7 @@ class UVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     alpha: pint.Quantity
@@ -682,7 +684,7 @@ class UVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
@@ -746,7 +748,7 @@ class UGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -764,7 +766,7 @@ class UGroove(BaseGroove):
              pint.Quantity (Default value = Q_(3, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
         R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
@@ -849,7 +851,7 @@ class IGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
@@ -864,7 +866,7 @@ class IGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
         width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
@@ -903,7 +905,7 @@ class HVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -920,7 +922,7 @@ class HVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
         b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
@@ -983,7 +985,7 @@ class HUGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta: pint.Quantity
@@ -1001,7 +1003,7 @@ class HUGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
         R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
@@ -1072,7 +1074,7 @@ class DVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     alpha_1: pint.Quantity
@@ -1092,7 +1094,7 @@ class DVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         alpha_1 = self.alpha_1.to("rad").magnitude
         alpha_2 = self.alpha_2.to("rad").magnitude
@@ -1172,7 +1174,7 @@ class DUGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1194,7 +1196,7 @@ class DUGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
         beta_1 = self.beta_1.to("rad").magnitude
         beta_2 = self.beta_2.to("rad").magnitude
@@ -1276,7 +1278,7 @@ class DHVGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1296,7 +1298,7 @@ class DHVGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         dv_groove = DVGroove(
             self.t,
             self.beta_1 * 2,
@@ -1355,7 +1357,7 @@ class DHUGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t: pint.Quantity
     beta_1: pint.Quantity
@@ -1377,7 +1379,7 @@ class DHUGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         du_profile = DUGroove(
             self.t,
             self.beta_1,
@@ -1430,7 +1432,7 @@ class FFGroove(BaseGroove):
     code_number :
         Numbers of the standard
 
-   """
+    """
 
     t_1: pint.Quantity
     t_2: pint.Quantity = None
@@ -1449,7 +1451,7 @@ class FFGroove(BaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
 
-       """
+        """
         if (
             self.code_number == "1.12"
             or self.code_number == "1.13"
@@ -1635,7 +1637,9 @@ def _helperfunction(segment, array) -> geo.Shape:
     for elem in segment:
         if elem == "line":
             seg = geo.LineSegment(
-                [array[0][counter : counter + 2], array[1][counter : counter + 2]]
+                np.vstack(
+                    [array[0][counter : counter + 2], array[1][counter : counter + 2]]
+                )
             )
             segment_list.append(seg)
             counter += 1
