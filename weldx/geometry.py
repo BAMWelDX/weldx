@@ -8,6 +8,7 @@ import numpy as np
 
 import weldx.transformations as tf
 import weldx.utility as ut
+import weldx.visualization as vs
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -1185,9 +1186,10 @@ class Profile:
     def plot(
         self,
         title=None,
-        label=None,
         raster_width=0.5,
+        label=None,
         axis="equal",
+        axis_labels=None,
         grid=True,
         line_style=".-",
         ax=None,
@@ -1198,12 +1200,14 @@ class Profile:
         ----------
         title :
             Matplotlib plot title. (Default value = None)
-        label :
-            Matplotlib plot label. (Default value = None)
         raster_width :
             Distance between Points to plot (Default value = 0.5)
+        label :
+            Matplotlib plot label. (Default value = None)
         axis :
             Matplotlib axis setting. (Default value = "equal")
+        axis_labels :
+            List of Matplotlib axis labels. (Default value = None)
         grid :
             Matplotlib grid setting. (Default value = True)
         line_style :
@@ -1219,13 +1223,13 @@ class Profile:
         if not ax.name == "3d":
             ax.axis(axis)
         ax.set_title(title, loc="center", wrap=True)
-        if label is not None:
-            ax.set_xlabel(label[0])
-            ax.set_ylabel(label[1])
+        if axis_labels is not None:
+            ax.set_xlabel(axis_labels[0])
+            ax.set_ylabel(axis_labels[1])
         elif "units" in self.attrs:
             ax.set_xlabel("y in " + self.attrs["units"])
             ax.set_ylabel("z in " + self.attrs["units"])
-        ax.plot(raster_data[0], raster_data[1], line_style)
+        ax.plot(raster_data[0], raster_data[1], line_style, label=label)
 
     @property
     def shapes(self):
@@ -1440,7 +1444,7 @@ class RadialHorizontalTraceSegment:
 class Trace:
     """Defines a 3d trace."""
 
-    def __init__(self, segments, coordinate_system=tf.LocalCoordinateSystem()):
+    def __init__(self, segments, coordinate_system=None):
         """Construct trace.
 
         Parameters
@@ -1455,6 +1459,9 @@ class Trace:
         Trace
 
         """
+        if coordinate_system is None:
+            coordinate_system = tf.LocalCoordinateSystem()
+
         if not isinstance(coordinate_system, tf.LocalCoordinateSystem):
             raise TypeError(
                 "'coordinate_system' must be of type "
@@ -1641,6 +1648,34 @@ class Trace:
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
+    def plot(self, raster_width=1, axes=None, fmt=None):  # pragma: no cover
+        """Plot the trace.
+
+        Parameters
+        ----------
+        raster_width : float, int
+            The target distance between two raster points
+        axes : matplotlib.axes.Axes
+            The target `Axes` object of the plot. If 'None' is passed, a new figure will
+            be created
+        fmt : str
+            Format string that is passed to matplotlib.pyplot.plot.
+
+        """
+        data = self.rasterize(raster_width)
+        if fmt is None:
+            fmt = "x-"
+        if axes is None:
+            fig = plt.figure()
+            axes = fig.gca(projection="3d")
+            axes.plot(data[0], data[1], data[2], fmt)
+            axes.set_xlabel("x")
+            axes.set_ylabel("y")
+            axes.set_zlabel("z")
+            vs.set_axes_equal(axes)
+        else:
+            axes.plot(data[0], data[1], data[2], fmt)
+
 
 # Linear profile interpolation class ------------------------------------------
 
@@ -1650,11 +1685,11 @@ def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
 
     Parameters
     ----------
-    profile_a :
+    profile_a : Profile
         First profile
-    profile_b :
+    profile_b : Profile
         Second profile
-    weight :
+    weight : float
         Weighting factor [0 .. 1]. If 0, the profile is identical
         to 'a' and if 1, it is identical to b.
 
@@ -1864,21 +1899,28 @@ class VariableProfile:
 
 
 class Geometry:
-    """Define the experimental geometry."""
+    """Defines a 3 dimensional geometry by extrusion of a 2 dimensional profile.
+
+    The path of the extrusion can be chosen arbitrarily. It is also possible to vary
+    the profile along the extrusion path.
+
+    """
 
     def __init__(self, profile, trace):
-        """Construct geometry.
+        """Construct a geometry.
 
         Parameters
         ----------
-        profile :
-            Constant or variable profile.
-        trace :
-            Trace
+        profile : Profile, VariableProfile
+            Constant or variable profile that is used as cross section along the
+            specified trace
+        trace : Trace
+            The path that is used to extrude the given profile
 
         Returns
         -------
-        Geometry
+        Geometry :
+            A Geometry class instance
 
         """
         self._check_inputs(profile, trace)
@@ -2092,3 +2134,35 @@ class Geometry:
         return self._rasterize_variable_profile(
             profile_raster_width, trace_raster_width
         )
+
+    def plot(
+        self, profile_raster_width, trace_raster_width, axes=None, fmt=None
+    ):  # pragma: no cover
+        """Plot the geometry.
+
+        Parameters
+        ----------
+        profile_raster_width: float, int
+            Target distance between the individual points of a profile
+        trace_raster_width: float, int
+            Target distance between the individual profiles on the trace
+        axes : matplotlib.axes.Axes
+            The target `Axes` object of the plot. If 'None' is passed, a new figure will
+            be created
+        fmt : str
+            Format string that is passed to matplotlib.pyplot.plot.
+
+        """
+        data = self.rasterize(profile_raster_width, trace_raster_width)
+        if fmt is None:
+            fmt = "o"
+        if axes is None:
+            fig = plt.figure()
+            axes = fig.gca(projection="3d")
+            axes.plot(data[0], data[1], data[2], fmt)
+            axes.set_xlabel("x")
+            axes.set_ylabel("y")
+            axes.set_zlabel("z")
+            vs.set_axes_equal(axes)
+        else:
+            axes.plot(data[0], data[1], data[2], fmt)
