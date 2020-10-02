@@ -1647,11 +1647,11 @@ def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
 
     Parameters
     ----------
-    profile_a :
+    profile_a : Profile
         First profile
-    profile_b :
+    profile_b : Profile
         Second profile
-    weight :
+    weight : float
         Weighting factor [0 .. 1]. If 0, the profile is identical
         to 'a' and if 1, it is identical to b.
 
