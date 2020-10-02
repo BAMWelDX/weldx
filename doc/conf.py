@@ -118,6 +118,10 @@ asdf_schema_reference_mappings = [
         "tag:stsci.edu:asdf",
         "http://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/",
     ),
+    (
+        "tag:weldx.bam.de:weldx",
+        "http://weldx.readthedocs.io/en/latest/generated/weldx.bam.de/weldx/",
+    ),
 ]
 
 # Add any paths that contain templates here, relative to this directory.
