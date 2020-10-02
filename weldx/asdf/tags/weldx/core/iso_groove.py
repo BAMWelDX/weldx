@@ -511,44 +511,44 @@ class VGroove(BaseGroove):
 
 
        """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha.to("rad").magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        alpha = self.alpha  # .to("rad").magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations:
         s = np.tan(alpha / 2) * (t - c)
 
         # Scaling
-        edge = np.min([-s, 0])
-        if width <= -edge + 1:
+        edge = np.append(-s, 0).min()
+        if width <= -edge + Q_(1, "mm"):
             width = width - edge
 
         # Bottom segment
-        x_value = [-width, 0]
-        y_value = [0, 0]
+        x_value = np.append(-width, 0)
+        y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
         # root face
         if c != 0:
-            x_value.append(0)
-            y_value.append(c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
             segment_list.append("line")
 
         # groove face
-        x_value.append(-s)
-        y_value.append(t)
+        x_value = np.append(x_value, -s)
+        y_value = np.append(y_value, t)
         segment_list.append("line")
 
         # Top segment
-        x_value.append(-width)
-        y_value.append(t)
+        x_value = np.append(x_value, -width)
+        y_value = np.append(y_value, t)
         segment_list.append("line")
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis is mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
@@ -1637,7 +1637,9 @@ def _helperfunction(segment, array) -> geo.Shape:
     for elem in segment:
         if elem == "line":
             seg = geo.LineSegment(
-                [array[0][counter : counter + 2], array[1][counter : counter + 2]]
+                np.vstack(
+                    [array[0][counter : counter + 2], array[1][counter : counter + 2]]
+                )
             )
             segment_list.append(seg)
             counter += 1
