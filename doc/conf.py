@@ -95,7 +95,7 @@ master_doc = "index"
 nbsphinx_execute = "always"
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
-    "--InlineBackend.rc={'figure.dpi': 96}",
+    "--InlineBackend.rc <figure.dpi=96>",
 ]
 
 # Select notebook kernel for nbsphinx
