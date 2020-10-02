@@ -1605,6 +1605,7 @@ class Trace:
 
         return local_segment_cs + segment_start_cs
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def rasterize(self, raster_width):
         """Rasterize the trace.
 
@@ -1648,6 +1649,7 @@ class Trace:
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None), strict=False)
     def plot(self, raster_width=1, axes=None, fmt=None):  # pragma: no cover
         """Plot the trace.
 
@@ -2135,6 +2137,9 @@ class Geometry:
             profile_raster_width, trace_raster_width
         )
 
+    @UREG.wraps(
+        None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None), strict=False
+    )
     def plot(
         self, profile_raster_width, trace_raster_width, axes=None, fmt=None
     ):  # pragma: no cover

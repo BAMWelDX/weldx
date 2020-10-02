@@ -16,7 +16,10 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
+from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
+_DEFAULT_LEN_UNIT = UREG.millimeters
+_DEFAULT_ANG_UNIT = UREG.rad
 __all__ = ["LocalCoordinateSystem", "CoordinateSystemManager"]
 
 # functions -------------------------------------------------------------------
@@ -66,6 +69,7 @@ class WXRotation(Rot):
         return rot
 
 
+@UREG.wraps(None, (_DEFAULT_ANG_UNIT), strict=False)
 def rotation_matrix_x(angle):
     """Create a rotation matrix that rotates around the x-axis.
 
@@ -83,6 +87,7 @@ def rotation_matrix_x(angle):
     return Rot.from_euler("x", angle).as_matrix()
 
 
+@UREG.wraps(None, (_DEFAULT_ANG_UNIT), strict=False)
 def rotation_matrix_y(angle):
     """Create a rotation matrix that rotates around the y-axis.
 
@@ -100,6 +105,7 @@ def rotation_matrix_y(angle):
     return Rot.from_euler("y", angle).as_matrix()
 
 
+@UREG.wraps(None, (_DEFAULT_ANG_UNIT), strict=False)
 def rotation_matrix_z(angle) -> np.ndarray:
     """Create a rotation matrix that rotates around the z-axis.
 
