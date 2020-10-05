@@ -131,3 +131,5 @@ excluded_words:
   - rst
   - pycharm
   - tslibs
+  # German ---------------------------------------
+  - Bundesanstalt für Materialforschung und -prüfung
