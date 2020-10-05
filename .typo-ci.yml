@@ -118,6 +118,7 @@ excluded_words:
   - ureg
   - Cagtay
   - Fabry
+  - Pittner
   - xyz
   - bamwelding
   - netcdf
@@ -131,3 +132,9 @@ excluded_words:
   - rst
   - pycharm
   - tslibs
+  # German ---------------------------------------
+  - Bundesanstalt 
+  - für 
+  - Materialforschung 
+  - und 
+  - prüfung
