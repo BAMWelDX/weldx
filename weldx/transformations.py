@@ -1209,6 +1209,7 @@ class CoordinateSystemManager:
         self,
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
+        reference_time: pd.Timestamp = None,
         _graph: Union[nx.DiGraph, None] = None,
         _sub_systems=None,
     ):
@@ -1216,11 +1217,14 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        root_coordinate_system_name :
+        root_coordinate_system_name : str
             Name of the root coordinate system.
-        coordinate_system_manager_name:
+        coordinate_system_manager_name:str
             Name of the coordinate system manager. If 'None' is passed, a default name
             is chosen.
+        reference_time : pandas.Timestamp
+            A reference timestamp. If it is defined, all time dependent information
+            returned by the CoordinateSystemManager will refer to it by default.
         _graph:
             A graph that should be used internally. Do not set this parameter. It is
             only meant for class internal usage.
@@ -1237,6 +1241,7 @@ class CoordinateSystemManager:
         if coordinate_system_manager_name is None:
             coordinate_system_manager_name = self._generate_default_name()
         self._name = coordinate_system_manager_name
+        self._reference_time = reference_time
 
         self._data = {}
         self._root_system_name = root_coordinate_system_name
@@ -1270,6 +1275,9 @@ class CoordinateSystemManager:
         graph_1 = other.graph
 
         if self.name != other.name:
+            return False
+
+        if self.reference_time != other.reference_time:
             return False
 
         if len(graph_0.nodes) != len(graph_1.nodes):
@@ -1530,6 +1538,18 @@ class CoordinateSystemManager:
 
         """
         return len(self._sub_system_data_dict)
+
+    @property
+    def reference_time(self):
+        """Get the reference time of the CoordinateSystemManager.
+
+        Returns
+        -------
+        pandas.timestamp :
+            Reference time of the CoordinateSystemManager
+
+        """
+        return self._reference_time
 
     @property
     def root_system_name(self) -> str:
