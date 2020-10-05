@@ -1242,6 +1242,7 @@ class CoordinateSystemManager:
             coordinate_system_manager_name = self._generate_default_name()
         self._name = coordinate_system_manager_name
         self._reference_time = reference_time
+        self._lcs_use_ref_time = None  # only relevant if CSM has no reference time
 
         self._data = {}
         self._root_system_name = root_coordinate_system_name
@@ -1594,15 +1595,15 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        coordinate_system_name :
+        coordinate_system_name : str
             Name of the new coordinate system.
-        reference_system_name :
+        reference_system_name : str
             Name of the parent system. This must have been already added.
-        local_coordinate_system :
+        local_coordinate_system : LocalCoordinateSystem
             An instance of
             weldx.transformations.LocalCoordinateSystem that describes how the new
             coordinate system is oriented in its parent system.
-        lsc_child_in_parent:
+        lsc_child_in_parent: bool
             If set to 'True', the passed 'LocalCoordinateSystem' instance describes
             the new system orientation towards is parent. If 'False', it describes
             how the parent system is positioned in its new child system.
@@ -1613,6 +1614,19 @@ class CoordinateSystemManager:
                 "'local_coordinate_system' must be an instance of "
                 + "weldx.transformations.LocalCoordinateSystem"
             )
+
+        if local_coordinate_system.time is not None and self.reference_time is None:
+            current_lcs_has_ref_time = (
+                local_coordinate_system.reference_time is not None
+            )
+            if self._lcs_use_ref_time is None:
+                self._lcs_use_ref_time = current_lcs_has_ref_time
+            elif current_lcs_has_ref_time != self._lcs_use_ref_time:
+                raise Exception(
+                    "Inconsistent usage of reference times! If you didn't specify a "
+                    "reference time for the CoordinateSystemManager, either all or "
+                    "none of the added coordinate systems must have a reference time."
+                )
 
         if self.has_coordinate_system(coordinate_system_name):
             # todo:
