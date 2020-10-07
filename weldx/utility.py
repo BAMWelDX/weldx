@@ -562,7 +562,7 @@ def xr_interp_like(
     return result
 
 
-def xr_valid_key(dax: xr.DataArray, ref: dict):
+def _xr_valid_key(coords, ref: dict):
     """Validate if the keys in ref are present in the DataArray.
 
     This is a helper function for xr_check_coords. Throws an exception when the
@@ -570,8 +570,8 @@ def xr_valid_key(dax: xr.DataArray, ref: dict):
 
     Parameters
     ----------
-    dax:
-        xarray object
+    coords:
+        xarray coords
     ref:
         reference dictionary
 
@@ -586,9 +586,16 @@ def xr_valid_key(dax: xr.DataArray, ref: dict):
         if "optional" in ref[key]:
             if ref[key]["optional"]:
                 continue
-        if not hasattr(dax, key):
-            # Attributes not found in dax
+        if key not in coords:
+            # Attributes not found in coords
             raise AttributeError(f"Data array has no attribute '{key}'.")
+
+
+def _check_dtype(var_dtype, ref_dtype) -> bool:
+    """Checks if dtype mtaches a reference dtype.
+
+    Returns True or False
+    """
 
 
 def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
@@ -644,19 +651,25 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     True
 
     """
+    # only process the coords of the xarray
+    if isinstance(dax, (xr.DataArray, xr.Dataset)):
+        coords = dax.coords
+    else:
+        coords = dax
+
     # check if the keys in ref are also in dax
-    xr_valid_key(dax, ref)
+    _xr_valid_key(coords, ref)
 
     for key in ref:
         # check if the optional key is set to true
         if "optional" in ref[key]:
-            if ref[key]["optional"] and not hasattr(dax, key):
+            if ref[key]["optional"] and key not in coords:
                 # skip this key - it is not in dax
                 continue
 
         # only if the key "values" is given do the validation
         if "values" in ref[key]:
-            if not (getattr(dax, key).values == ref[key]["values"]).all():
+            if not (coords[key].values == ref[key]["values"]).all():
                 raise Exception(f"Value mismatch in DataArray and ref['{key}']")
 
         # only if the key "dtype" is given do the validation
@@ -668,21 +681,19 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                     if "timedelta64" in x or "datetime64" in x
                 ]:
                     if np.issubdtype(
-                        getattr(dax, key).dtype, np.dtype("timedelta64")
-                    ) or np.issubdtype(getattr(dax, key).dtype, np.dtype("datetime64")):
+                        coords[key].dtype, np.dtype("timedelta64")
+                    ) or np.issubdtype(coords[key].dtype, np.dtype("datetime64")):
                         continue
 
-                if getattr(dax, key).dtype not in [
-                    np.dtype(x) for x in ref[key]["dtype"]
-                ]:
+                if coords[key].dtype not in [np.dtype(x) for x in ref[key]["dtype"]]:
                     if not (
                         str in [np.dtype(x) for x in ref[key]["dtype"]]
-                        and np.issubdtype(getattr(dax, key).dtype, np.str_)
+                        and np.issubdtype(coords[key].dtype, np.str_)
                     ):
                         raise Exception(
                             f"Mismatch in the dtype of the DataArray and ref['{key}']"
                         )
-            elif getattr(dax, key).dtype != np.dtype(ref[key]["dtype"]):
+            elif coords[key].dtype != np.dtype(ref[key]["dtype"]):
                 if isinstance(ref[key]["dtype"], str):
                     if (
                         "timedelta64" in ref[key]["dtype"]
