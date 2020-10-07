@@ -596,7 +596,7 @@ class LocalCoordinateSystem:
         if not isinstance(time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
             try:  # try supported formats like str etc.
                 time = pd.TimedeltaIndex(time)
-            except TypeError:
+            except Exception:
                 try:  # maybe
                     time = pd.DatetimeIndex(time)
                 except Exception:
@@ -605,8 +605,6 @@ class LocalCoordinateSystem:
                         "pd.TimedeltaIndex. If passing single values convert to list"
                         "first (like [pd.Timestamp])"
                     )
-            except Exception as err:
-                raise err
 
         if isinstance(time, pd.DatetimeIndex):
             if time_ref is None:
