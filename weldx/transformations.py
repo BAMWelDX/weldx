@@ -595,10 +595,10 @@ class LocalCoordinateSystem:
 
         if not isinstance(time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
             try:  # try supported formats like str etc.
-                time = pd.DatetimeIndex(time)
+                time = pd.TimedeltaIndex(time)
             except TypeError:
                 try:  # maybe
-                    time = pd.TimedeltaIndex(time)
+                    time = pd.DatetimeIndex(time)
                 except Exception:
                     raise TypeError(
                         "Unable to convert input argument to pd.DatetimeIndex or "
@@ -976,7 +976,7 @@ class LocalCoordinateSystem:
         return self.dataset.coordinates
 
     @property
-    def reference_time(self) -> pd.Timestamp:
+    def reference_time(self) -> Union[pd.Timestamp, None]:
         """Get the coordinate systems reference time.
 
         Returns
@@ -1592,6 +1592,18 @@ class CoordinateSystemManager:
 
         If the specified system already exists with the same parent system it will be
         updated. If the parent systems do not match, an exception is raised.
+
+        Notes
+        -----
+        The time component of coordinate systems without defined reference time is
+        assumed to refer to the same reference time as the `CoordinateSystemManager`.
+        In case that the `CoordinateSystemManager` does not possess a reference time,
+        you have to assure that either all or none of the added coordinate systems have
+        a reference time.
+        Violation of this rule will cause an exception.
+        If neither the `CoordinateSystemManager` nor the attached coordinate systems
+        have a reference time, all time deltas are expected to have common but undefined
+        reference time.
 
         Parameters
         ----------

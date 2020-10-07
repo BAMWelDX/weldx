@@ -1839,6 +1839,74 @@ class TestCoordinateSystemManager:
         with pytest.raises(exception_type):
             csm_fix.add_cs(name, parent_name, lcs)
 
+    # test_add_cs_reference_time -------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "has_timestamp_csm, has_timestamp_lcs_1, has_timestamp_lcs_2, should_raise",
+        [
+            (True, False, False, False),
+            (True, True, False, False),
+            (True, False, True, False),
+            (True, True, True, False),
+            (False, False, False, False),
+            (False, True, False, True),
+            (False, False, True, True),
+            (False, True, True, False),
+        ],
+    )
+    def test_add_cs_reference_time(
+        has_timestamp_csm, has_timestamp_lcs_1, has_timestamp_lcs_2, should_raise
+    ):
+        """Test if reference time issues are caught while adding new coordinate systems.
+
+        See notes of add_cs method.
+
+        Parameters
+        ----------
+        has_timestamp_csm : bool
+            Set to `True` if the CoordinateSystemManager should have a reference time.
+        has_timestamp_lcs_1 : bool
+            Set to `True` if the first added coordinate system should have a reference
+            time.
+        has_timestamp_lcs_2 : bool
+            Set to `True` if the second added coordinate system should have a reference
+            time.
+        should_raise : bool
+            Set to `True` if the combination of refernce times is invalid and an
+            Exception should be raised
+
+        """
+        timestamp_csm = None
+        timestamp_lcs_1 = None
+        timestamp_lcs_2 = None
+
+        if has_timestamp_csm:
+            timestamp_csm = pd.Timestamp("2000-01-01")
+        if has_timestamp_lcs_1:
+            timestamp_lcs_1 = pd.Timestamp("2000-01-02")
+        if has_timestamp_lcs_2:
+            timestamp_lcs_2 = pd.Timestamp("2000-01-03")
+        csm = tf.CoordinateSystemManager("root", reference_time=timestamp_csm)
+        lcs_1 = tf.LocalCoordinateSystem(
+            coordinates=[[1, 2, 3], [3, 2, 1]],
+            time=pd.TimedeltaIndex([1, 2]),
+            time_ref=timestamp_lcs_1,
+        )
+        lcs_2 = tf.LocalCoordinateSystem(
+            coordinates=[[1, 5, 3], [3, 5, 1]],
+            time=pd.TimedeltaIndex([0, 2]),
+            time_ref=timestamp_lcs_2,
+        )
+
+        csm.add_cs("lcs_1", "root", lcs_1)
+
+        if should_raise:
+            with pytest.raises(Exception):
+                csm.add_cs("lcs_2", "root", lcs_2)
+        else:
+            csm.add_cs("lcs_2", "root", lcs_2)
+
     # test num_neighbors ---------------------------------------------------------------
 
     @staticmethod
