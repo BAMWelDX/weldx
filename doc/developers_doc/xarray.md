@@ -21,3 +21,11 @@ Unit support should be added later.
 
 ## weldx xarray Accessors
 Custom xarray Accessors should be registered under `"weldx"` (see `weldx.utility`). Currently accessors are not actively used.
+
+## naming conventions (up for discussion)
+A small list of naming conventions to use throughout `weldx` with regards to internal xarray dimensions/coordinates.
+- time-axis coordinates should be name `"time"`
+  - dtype for time-axis shold either be `datetime64` or `timedelta64`
+  - when associating values stored as `timedelta64` with a reference time the reference time should be stored in `.attrs["time_ref"]`
+- Cartesian-Coordinates should be named `"c"` and consist of values `["x","y","z"]`
+- a (dimensionless) variable describing progression along a trace should run from 0 to 1 and be named `"s"`
