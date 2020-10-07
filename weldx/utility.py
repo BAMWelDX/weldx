@@ -592,9 +592,20 @@ def _xr_valid_key(coords, ref: dict):
 
 
 def _check_dtype(var_dtype, ref_dtype) -> bool:
-    """Checks if dtype matches a reference dtype.
+    """Check if dtype matches a reference dtype (or is subdtype).
 
-    Returns True or False.
+    Parameters
+    ----------
+    var_dtype:
+        A numpy-dtype to test against.
+    ref_dtype
+        Python type or string description
+
+    Returns
+    -------
+    bool
+        True if dtypes matches.
+
     """
     if var_dtype != np.dtype(ref_dtype):
         if isinstance(ref_dtype, str):
