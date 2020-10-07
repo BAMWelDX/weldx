@@ -53,11 +53,32 @@ extensions = [
     "sphinxcontrib.napoleon",
     "nbsphinx",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "sphinx_asdf",
+    "numpydoc",
 ]
+
+# autosummary --------------------------------------------------------------------------
+autosummary_generate = True
+
+# numpydoc option documentation:
+# https://numpydoc.readthedocs.io/en/latest/install.html
+numpydoc_use_plots = True
+numpydoc_show_class_members = False
+numpydoc_show_inherited_class_members = True
+numpydoc_class_members_toctree = True
+# numpydoc_citation_re = str - check documentation
+numpydoc_attributes_as_param_list = True
+numpydoc_xref_param_type = True
+# numpydoc_xref_aliases = dict - check documentation
+# numpydoc_xref_ignore = set - check documentation
+
+
+# --------------------------------------------------------------------------------------
 
 # The suffix of source filenames.
 source_suffix = {
@@ -75,12 +96,13 @@ master_doc = "index"
 nbsphinx_execute = "always"
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
-    "--InlineBackend.rc={'figure.dpi': 96}",
+    "--InlineBackend.rc <figure.dpi=96>",
 ]
 
 # Select notebook kernel for nbsphinx
 # default "python3" is needed for readthedocs run
-# if building locally, this might need to be "weldx" - try setting using -D option
+# if building locally, this might need to be "weldx" - try setting using -D option:
+# -D nbsphinx_kernel_name="weldx"
 nbsphinx_kernel_name = "python3"
 
 # sphinx-asdf
@@ -96,6 +118,10 @@ asdf_schema_reference_mappings = [
     (
         "tag:stsci.edu:asdf",
         "http://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/",
+    ),
+    (
+        "tag:weldx.bam.de:weldx",
+        "http://weldx.readthedocs.io/en/latest/generated/weldx.bam.de/weldx/",
     ),
 ]
 
@@ -126,10 +152,11 @@ html_logo = "_static/WelDX_notext.svg"
 html_favicon = "_static/WelDX_notext.ico"
 
 html_theme_options = {
-    "external_links": [{"url": "https://asdf.readthedocs.io/", "name": "ASDF Docs"}],
+    "external_links": [{"url": "https://asdf.readthedocs.io/", "name": "ASDF"}],
     "github_url": "https://github.com/BAMWelDX/weldx",
     "twitter_url": "https://twitter.com/BAMweldx",
     "use_edit_page_button": False,
+    "show_prev_next": False,
 }
 
 html_context = {
@@ -143,3 +170,31 @@ html_context = {
 # further.  For a list of options available for each theme, see the
 # documentation.
 # html_theme_options = {"logo_only": True}
+
+# Intersphinx mappings -----------------------------------------------------
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    "xarray": ("http://xarray.pydata.org/en/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "matplotlib": ("https://matplotlib.org", None),
+    "dask": ("https://docs.dask.org/en/latest", None),
+    "numba": ("https://numba.pydata.org/numba-doc/latest", None),
+    "pint": ("https://pint.readthedocs.io/en/stable", None),
+}
+
+# Disable warnings caused by a bug -----------------------------------------------------
+
+# see this Stack Overflow answer for further information:
+# https://stackoverflow.com/a/30624034/6700329
+
+nitpick_ignore = []
+
+for line in open("nitpick_ignore"):
+    if line.strip() == "" or line.startswith("#"):
+        continue
+    dtype, target = line.split(None, 1)
+    target = target.strip()
+    nitpick_ignore.append((dtype, target))

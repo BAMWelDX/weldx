@@ -103,6 +103,7 @@ excluded_words:
   - nbsphinx
   - mathjax
   - toctree
+  - numpydoc
   # markdown / latex ----------------------------
   - cdot
   # other ---------------------------------------
@@ -117,6 +118,7 @@ excluded_words:
   - ureg
   - Cagtay
   - Fabry
+  - Pittner
   - xyz
   - bamwelding
   - netcdf
@@ -129,3 +131,10 @@ excluded_words:
   - itertools
   - rst
   - pycharm
+  - tslibs
+  # German ---------------------------------------
+  - Bundesanstalt 
+  - für 
+  - Materialforschung 
+  - und 
+  - prüfung
