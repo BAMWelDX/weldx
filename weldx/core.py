@@ -315,8 +315,8 @@ class TimeSeries:
             self._time_var_name = time_var_name
 
             try:
-                self.interp_time(Q_([1, 2], "second"))
-                self.interp_time(Q_([1, 2, 3], "second"))
+                self.interp_time(Q_([1, 2], "second").astype(float))
+                self.interp_time(Q_([1, 2, 3], "second").astype(float))
             except Exception as e:
                 raise Exception(
                     "The expression can not be evaluated with arrays of time deltas. "
