@@ -431,6 +431,8 @@ _dax_ref = dict(
         (_dax_check, {"no_dim": {"optional": True, "dtype": float}}),
         (_dax_check, {"d5": {"dtype": str}}),
         (_dax_check, {"d5": {"dtype": [str]}}),
+        (_dax_check, {"d4": {"dtype": "timedelta64"}}),
+        (_dax_check, {"d3": {"dtype": ["datetime64", "timedelta64"]}}),
     ],
 )
 def test_xr_check_coords(dax, ref_dict):
@@ -449,6 +451,7 @@ def test_xr_check_coords(dax, ref_dict):
         (_dax_check, {"no_dim": {"dtype": float}}, AttributeError),
         (_dax_check, {"d5": {"values": ["x", "noty", "z"], "dtype": "str"}}, Exception),
         (_dax_check, {"d1": {"dtype": [int, str, bool]}}, Exception),
+        (_dax_check, {"d4": {"dtype": "datetime64"}}, Exception),
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):

@@ -662,17 +662,37 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
         # only if the key "dtype" is given do the validation
         if "dtype" in ref[key]:
             if isinstance(ref[key]["dtype"], list):
+                if [
+                    x
+                    for x in [x for x in ref[key]["dtype"] if isinstance(x, str)]
+                    if "timedelta64" in x or "datetime64" in x
+                ]:
+                    if np.issubdtype(
+                        getattr(dax, key).dtype, np.dtype("timedelta64")
+                    ) or np.issubdtype(getattr(dax, key).dtype, np.dtype("datetime64")):
+                        continue
+
                 if getattr(dax, key).dtype not in [
                     np.dtype(x) for x in ref[key]["dtype"]
                 ]:
                     if not (
                         str in [np.dtype(x) for x in ref[key]["dtype"]]
-                        and np.issubdtype(getattr(dax, key).dtype, str)
+                        and np.issubdtype(getattr(dax, key).dtype, np.str_)
                     ):
                         raise Exception(
                             f"Mismatch in the dtype of the DataArray and ref['{key}']"
                         )
             elif getattr(dax, key).dtype != np.dtype(ref[key]["dtype"]):
+                if isinstance(ref[key]["dtype"], str):
+                    if (
+                        "timedelta64" in ref[key]["dtype"]
+                        or "datetime64" in ref[key]["dtype"]
+                    ):
+                        if np.issubdtype(
+                            getattr(dax, key).dtype, np.dtype(ref[key]["dtype"])
+                        ):
+                            continue
+
                 if not (
                     np.issubdtype(getattr(dax, key).dtype, np.dtype(ref[key]["dtype"]))
                     and np.dtype(ref[key]["dtype"]) == str
