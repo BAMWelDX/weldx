@@ -594,7 +594,7 @@ def _xr_valid_key(coords, ref: dict):
 def _check_dtype(var_dtype, ref_dtype) -> bool:
     """Checks if dtype mtaches a reference dtype.
 
-    Returns True or raises exception.
+    Returns True or False.
     """
     if var_dtype != np.dtype(ref_dtype):
         if isinstance(ref_dtype, str):
@@ -685,7 +685,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
         # only if the key "values" is given do the validation
         if "values" in ref[key]:
             if not (coords[key].values == ref[key]["values"]).all():
-                raise Exception(f"Value mismatch in DataArray and ref['{key}']")
+                raise ValueError(f"Value mismatch in DataArray and ref['{key}']")
 
         # only if the key "dtype" is given do the validation
         if "dtype" in ref[key]:
@@ -694,11 +694,11 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                     _check_dtype(coords[key].dtype, var_dtype)
                     for var_dtype in ref[key]["dtype"]
                 ):
-                    raise Exception(
+                    raise TypeError(
                         f"Mismatch in the dtype of the DataArray and ref['{key}']"
                     )
             elif not _check_dtype(coords[key].dtype, ref[key]["dtype"]):
-                raise Exception(
+                raise TypeError(
                     f"Mismatch in the dtype of the DataArray and ref['{key}']"
                 )
 

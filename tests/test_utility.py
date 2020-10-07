@@ -426,6 +426,7 @@ _dax_ref = dict(
     "dax, ref_dict",
     [
         (_dax_check, _dax_ref),
+        (_dax_check.coords, _dax_ref),
         (_dax_check, {"d1": {"dtype": ["float64", int]}}),
         (_dax_check, {"d2": {"dtype": ["float64", int]}}),
         (_dax_check, {"no_dim": {"optional": True, "dtype": float}}),
@@ -443,12 +444,16 @@ def test_xr_check_coords(dax, ref_dict):
 @pytest.mark.parametrize(
     "dax, ref_dict, exception_type",
     [
-        (_dax_check, {"d1": {"dtype": int}}, Exception),
-        (_dax_check, {"d1": {"dtype": int, "optional": True}}, Exception),
+        (_dax_check, {"d1": {"dtype": int}}, TypeError),
+        (_dax_check, {"d1": {"dtype": int, "optional": True}}, TypeError),
         (_dax_check, {"no_dim": {"dtype": float}}, AttributeError),
-        (_dax_check, {"d5": {"values": ["x", "noty", "z"], "dtype": "str"}}, Exception),
-        (_dax_check, {"d1": {"dtype": [int, str, bool]}}, Exception),
-        (_dax_check, {"d4": {"dtype": "datetime64"}}, Exception),
+        (
+            _dax_check,
+            {"d5": {"values": ["x", "noty", "z"], "dtype": "str"}},
+            ValueError,
+        ),
+        (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
+        (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):
