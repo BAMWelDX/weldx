@@ -592,7 +592,7 @@ def _xr_valid_key(coords, ref: dict):
 
 
 def _check_dtype(var_dtype, ref_dtype) -> bool:
-    """Checks if dtype mtaches a reference dtype.
+    """Checks if dtype matches a reference dtype.
 
     Returns True or False.
     """
