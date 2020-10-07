@@ -689,15 +689,12 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
         # only if the key "dtype" is given do the validation
         if "dtype" in ref[key]:
-            if isinstance(ref[key]["dtype"], list):
-                if not any(
-                    _check_dtype(coords[key].dtype, var_dtype)
-                    for var_dtype in ref[key]["dtype"]
-                ):
-                    raise TypeError(
-                        f"Mismatch in the dtype of the DataArray and ref['{key}']"
-                    )
-            elif not _check_dtype(coords[key].dtype, ref[key]["dtype"]):
+            dtype_list = ref[key]["dtype"]
+            if not isinstance(dtype_list, list):
+                dtype_list = [dtype_list]
+            if not any(
+                _check_dtype(coords[key].dtype, var_dtype) for var_dtype in dtype_list
+            ):
                 raise TypeError(
                     f"Mismatch in the dtype of the DataArray and ref['{key}']"
                 )
