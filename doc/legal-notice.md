@@ -1,4 +1,4 @@
-# Disclaimer
+# Legal Notice
 
 ## License
 The WelDX project is hosted on [GitHub](https://github.com/BAMWelDX/weldx) under a [BSD 3-Clause-License](https://github.com/BAMWelDX/weldx/blob/master/LICENSE).
@@ -9,6 +9,7 @@ WelDX - Welding Data Exchange Format\
 c/o Bundesanstalt für Materialforschung und -prüfung (BAM)\
 Unter den Eichen 87, 12205 Berlin\
 Postal address: 12200 Berlin\
+VAT Reg.No.: DE 136630222\
 Email: [weldx@bam.de](mailto:weldx@bam.de)\
 [https://www.bam.de](https://www.bam.de)\
 [https://www.bam.de/weldx](https://www.bam.de/weldx)
