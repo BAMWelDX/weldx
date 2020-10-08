@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pint
 import pytest
+from numpy.core._exceptions import UFuncTypeError
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -305,6 +306,13 @@ class TestTimeSeries:
             (me_param_units, None, None, Exception, "# incompatible parameter units"),
             (me_time_vec, None, None, Exception, "# not compatible with time vectors"),
             ("a string", None, None, TypeError, "# wrong data type"),
+            (
+                ME("a*t", {"a": Q_(2, "1/ms")}),
+                None,
+                None,
+                UFuncTypeError,
+                "# uncaught float <-> int inplace arithmetic",
+            ),
         ],
         ids=get_test_name,
     )
@@ -323,7 +331,7 @@ class TestTimeSeries:
     values_unit_prefix_wrong = Q_(np.array([10, 11, 12, 14, 16]), "m")
     params_wrong_values = {"a": Q_(2, "1/s"), "b": Q_(-1, "")}
     params_wrong_unit = {"a": Q_(2, "g/s"), "b": Q_(-2, "g")}
-    params_wrong_unit_prefix = {"a": Q_(2, "m/ms"), "b": Q_(-2, "m")}
+    params_wrong_unit_prefix = {"a": Q_(2.0, "m/ms"), "b": Q_(-2, "m")}
 
     @staticmethod
     @pytest.mark.parametrize(
