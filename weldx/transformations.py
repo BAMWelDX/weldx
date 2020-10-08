@@ -596,7 +596,7 @@ class LocalCoordinateSystem:
         if not isinstance(time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
             try:  # try supported formats like str etc.
                 time = pd.TimedeltaIndex(time)
-            except Exception:
+            except (TypeError, ValueError):
                 try:  # maybe
                     time = pd.DatetimeIndex(time)
                 except Exception:
