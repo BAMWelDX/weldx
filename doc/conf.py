@@ -4,6 +4,11 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+# Local build command ------------------------------------------------------------------
+
+# sphinx-build -W -n -b html -D nbsphinx_kernel_name="weldx" -d build/doctrees doc
+# build/html --keep-going
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -93,7 +98,7 @@ source_suffix = {
 master_doc = "index"
 
 # nbsphinx
-nbsphinx_execute = "always"
+nbsphinx_execute = "never"
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
     "--InlineBackend.rc <figure.dpi=96>",
@@ -198,3 +203,6 @@ for line in open("nitpick_ignore"):
     dtype, target = line.split(None, 1)
     target = target.strip()
     nitpick_ignore.append((dtype, target))
+
+
+default_role = "py:obj"

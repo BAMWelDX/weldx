@@ -1540,12 +1540,12 @@ class CoordinateSystemManager:
 
     @property
     def reference_time(self):
-        """Get the reference time of the CoordinateSystemManager.
+        """Get the reference time of the `CoordinateSystemManager`.
 
         Returns
         -------
-        pandas.timestamp :
-            Reference time of the CoordinateSystemManager
+        pandas.Timestamp :
+            Reference time of the `CoordinateSystemManager`
 
         """
         return self._reference_time
@@ -1589,7 +1589,7 @@ class CoordinateSystemManager:
         """Add a coordinate system to the coordinate system manager.
 
         If the specified system already exists with the same parent system it will be
-        updated. If the parent systems do not match, an exception is raised.
+        updated. If the parent systems does not match, an exception is raised.
 
         Notes
         -----
@@ -1611,11 +1611,11 @@ class CoordinateSystemManager:
             Name of the parent system. This must have been already added.
         local_coordinate_system : LocalCoordinateSystem
             An instance of
-            weldx.transformations.LocalCoordinateSystem that describes how the new
+            `~weldx.transformations.LocalCoordinateSystem` that describes how the new
             coordinate system is oriented in its parent system.
         lsc_child_in_parent: bool
-            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
-            the new system orientation towards is parent. If 'False', it describes
+            If set to `True`, the passed `LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
         """
