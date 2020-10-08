@@ -654,10 +654,10 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     else:
         coords = dax
 
-    for key in ref:
+    for key, check in ref.items():
         # check if the optional key is set to true
-        if "optional" in ref[key]:
-            if ref[key]["optional"] and key not in coords:
+        if "optional" in check:
+            if check["optional"] and key not in coords:
                 # skip this key - it is not in dax
                 continue
 
@@ -666,13 +666,13 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
             raise KeyError(f"Could not find required coordinate '{key}'.")
 
         # only if the key "values" is given do the validation
-        if "values" in ref[key]:
-            if not (coords[key].values == ref[key]["values"]).all():
+        if "values" in check:
+            if not (coords[key].values == check["values"]).all():
                 raise ValueError(f"Value mismatch in DataArray and ref['{key}']")
 
         # only if the key "dtype" is given do the validation
-        if "dtype" in ref[key]:
-            dtype_list = ref[key]["dtype"]
+        if "dtype" in check:
+            dtype_list = check["dtype"]
             if not isinstance(dtype_list, list):
                 dtype_list = [dtype_list]
             if not any(
