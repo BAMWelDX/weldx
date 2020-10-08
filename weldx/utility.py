@@ -612,15 +612,15 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     Parameters
     ----------
-    dax:
+    dax : xr.DataArray
         xarray object which should be validated
-    ref:
+    ref : dict
         reference dictionary
 
     Returns
     -------
     bool
-        True, if the test was a success, else throws an exception
+        True, if the test was a success, else an exception is raised
 
     Examples
     --------
