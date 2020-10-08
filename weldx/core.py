@@ -493,9 +493,9 @@ class TimeSeries:
                 '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
             )
 
-        if len(self.shape) > 1 and isinstance(time_q.magnitude, np.ndarray):
-            while len(time_q.magnitude.shape) < len(self.shape):
-                time_q = Q_(time_q.magnitude[:, np.newaxis], time_q.units)
+        if len(self.shape) > 1 and len(time_q.shape) > 0:
+            while len(time_q.shape) < len(self.shape):
+                time_q = time_q[:, np.newaxis]
 
         # evaluate expression
         data = self._data.evaluate(**{self._time_var_name: time_q})
