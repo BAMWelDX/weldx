@@ -562,14 +562,14 @@ def xr_interp_like(
     return result
 
 
-def _check_dtype(var_dtype, ref_dtype) -> bool:
+def _check_dtype(var_dtype, ref_dtype: dict) -> bool:
     """Check if dtype matches a reference dtype (or is subdtype).
 
     Parameters
     ----------
-    var_dtype:
+    var_dtype : numpy dtype
         A numpy-dtype to test against.
-    ref_dtype
+    ref_dtype : dict
         Python type or string description
 
     Returns
@@ -651,8 +651,16 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     # only process the coords of the xarray
     if isinstance(dax, (xr.DataArray, xr.Dataset)):
         coords = dax.coords
-    else:
+    elif isinstance(
+        dax,
+        (
+            xr.core.coordinates.DataArrayCoordinates,
+            xr.core.coordinates.DatasetCoordinates,
+        ),
+    ):
         coords = dax
+    else:
+        raise ValueError("Input variable is not an xarray object")
 
     for key, check in ref.items():
         # check if the optional key is set to true

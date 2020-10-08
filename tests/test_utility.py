@@ -454,6 +454,7 @@ def test_xr_check_coords(dax, ref_dict):
         ),
         (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
         (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
+        ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):
