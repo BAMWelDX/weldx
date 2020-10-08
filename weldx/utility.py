@@ -562,35 +562,6 @@ def xr_interp_like(
     return result
 
 
-def _xr_valid_key(coords, ref: dict):
-    """Validate if the keys in ref are present in the DataArray.
-
-    This is a helper function for xr_check_coords. Throws an exception when the
-    dimension is requested in dax and not optional.
-
-    Parameters
-    ----------
-    coords:
-        xarray coords
-    ref:
-        reference dictionary
-
-    Returns
-    -------
-    None
-        Does not have a return value. Throws an exception if
-
-    """
-    for key in ref:
-        # if optional is set to true, then dax does not need to have this key
-        if "optional" in ref[key]:
-            if ref[key]["optional"]:
-                continue
-        if key not in coords:
-            # Attributes not found in coords
-            raise AttributeError(f"Data array has no attribute '{key}'.")
-
-
 def _check_dtype(var_dtype, ref_dtype) -> bool:
     """Check if dtype matches a reference dtype (or is subdtype).
 
@@ -683,15 +654,16 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     else:
         coords = dax
 
-    # check if the keys in ref are also in dax
-    _xr_valid_key(coords, ref)
-
     for key in ref:
         # check if the optional key is set to true
         if "optional" in ref[key]:
             if ref[key]["optional"] and key not in coords:
                 # skip this key - it is not in dax
                 continue
+
+        if key not in coords:
+            # Attributes not found in coords
+            raise KeyError(f"Could not find required coordinate '{key}'.")
 
         # only if the key "values" is given do the validation
         if "values" in ref[key]:

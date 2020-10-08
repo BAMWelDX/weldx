@@ -446,7 +446,7 @@ def test_xr_check_coords(dax, ref_dict):
     [
         (_dax_check, {"d1": {"dtype": int}}, TypeError),
         (_dax_check, {"d1": {"dtype": int, "optional": True}}, TypeError),
-        (_dax_check, {"no_dim": {"dtype": float}}, AttributeError),
+        (_dax_check, {"no_dim": {"dtype": float}}, KeyError),
         (
             _dax_check,
             {"d5": {"values": ["x", "noty", "z"], "dtype": "str"}},
