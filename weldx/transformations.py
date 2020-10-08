@@ -418,7 +418,7 @@ class LocalCoordinateSystem:
                 coordinates,
                 dict(
                     c={"values": ["x", "y", "z"]},
-                    time={"dtype": "timedelta64[ns]", "optional": True},
+                    time={"dtype": "timedelta64", "optional": True},
                 ),
             )
 
@@ -427,7 +427,7 @@ class LocalCoordinateSystem:
                 dict(
                     c={"values": ["x", "y", "z"]},
                     v={"values": [0, 1, 2]},
-                    time={"dtype": "timedelta64[ns]", "optional": True},
+                    time={"dtype": "timedelta64", "optional": True},
                 ),
             )
 
