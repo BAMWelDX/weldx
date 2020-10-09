@@ -393,3 +393,71 @@ def test_xf_fill_all():
 
     with pytest.raises(ValueError):
         ut.xr_fill_all(da3, order="wrong")
+
+
+_dax_check = xr.DataArray(
+    data=np.ones((2, 2, 2, 4, 3)),
+    dims=["d1", "d2", "d3", "d4", "d5"],
+    coords={
+        "d1": np.array([-1, 1], dtype=float),
+        "d2": np.array([-1, 1], dtype=int),
+        "d3": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+        "d4": pd.TimedeltaIndex([0, 1, 2, 3], "s"),
+        "d5": ["x", "y", "z"],
+    },
+)
+
+_dax_ref = dict(
+    d1={"values": np.array([-1, 1]), "dtype": "float"},
+    d2={"values": np.array([-1, 1]), "dtype": int},
+    d3={
+        "values": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+        "dtype": ["datetime64[ns]", "timedelta64[ns]"],
+    },
+    d4={
+        "values": pd.TimedeltaIndex([0, 1, 2, 3], "s"),
+        "dtype": ["datetime64[ns]", "timedelta64[ns]"],
+    },
+    d5={"values": ["x", "y", "z"], "dtype": "<U1"},
+)
+
+
+@pytest.mark.parametrize(
+    "dax, ref_dict",
+    [
+        (_dax_check, _dax_ref),
+        (_dax_check.coords, _dax_ref),
+        (_dax_check, {"d1": {"dtype": ["float64", int]}}),
+        (_dax_check, {"d2": {"dtype": ["float64", int]}}),
+        (_dax_check, {"no_dim": {"optional": True, "dtype": float}}),
+        (_dax_check, {"d5": {"dtype": str}}),
+        (_dax_check, {"d5": {"dtype": [str]}}),
+        (_dax_check, {"d4": {"dtype": "timedelta64"}}),
+        (_dax_check, {"d3": {"dtype": ["datetime64", "timedelta64"]}}),
+    ],
+)
+def test_xr_check_coords(dax, ref_dict):
+    """Test weldx.utility.xr_check_coords function."""
+    assert ut.xr_check_coords(dax, ref_dict)
+
+
+@pytest.mark.parametrize(
+    "dax, ref_dict, exception_type",
+    [
+        (_dax_check, {"d1": {"dtype": int}}, TypeError),
+        (_dax_check, {"d1": {"dtype": int, "optional": True}}, TypeError),
+        (_dax_check, {"no_dim": {"dtype": float}}, KeyError),
+        (
+            _dax_check,
+            {"d5": {"values": ["x", "noty", "z"], "dtype": "str"}},
+            ValueError,
+        ),
+        (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
+        (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
+        ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
+    ],
+)
+def test_xr_check_coords_exception(dax, ref_dict, exception_type):
+    """Test weldx.utility.xr_check_coords function."""
+    with pytest.raises(exception_type):
+        ut.xr_check_coords(dax, ref_dict)

@@ -597,6 +597,137 @@ def xr_interp_like(
     return result
 
 
+def _check_dtype(var_dtype, ref_dtype: dict) -> bool:
+    """Check if dtype matches a reference dtype (or is subdtype).
+
+    Parameters
+    ----------
+    var_dtype : numpy dtype
+        A numpy-dtype to test against.
+    ref_dtype : dict
+        Python type or string description
+
+    Returns
+    -------
+    bool
+        True if dtypes matches.
+
+    """
+    if var_dtype != np.dtype(ref_dtype):
+        if isinstance(ref_dtype, str):
+            if (
+                "timedelta64" in ref_dtype
+                or "datetime64" in ref_dtype
+                and np.issubdtype(var_dtype, np.dtype(ref_dtype))
+            ):
+                return True
+
+        if not (
+            np.issubdtype(var_dtype, np.dtype(ref_dtype)) and np.dtype(ref_dtype) == str
+        ):
+            return False
+
+    return True
+
+
+def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
+    """Validate the coordinates of the DataArray against a reference dictionary.
+
+    The reference dictionary should have the dimensions as keys and those contain
+    dictionaries with the following keywords (all optional):
+
+    ``values``
+        Specify exact coordinate values to match.
+
+    ``dtype`` : str or type
+        Ensure coordinate dtype matches at least one of the given dtypes.
+
+    ``optional`` : boolean
+        default ``False`` - if ``True``, the dimension has to be in the DataArray dax
+
+    Parameters
+    ----------
+    dax : xarray.DataArray
+        xarray object which should be validated
+    ref : dict
+        reference dictionary
+
+    Returns
+    -------
+    bool
+        True, if the test was a success, else an exception is raised
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> import xarray as xr
+    >>> import weldx as wx
+    >>> dax = xr.DataArray(
+    ...     data=np.ones((3, 2, 3)),
+    ...     dims=["d1", "d2", "d3"],
+    ...     coords={
+    ...         "d1": np.array([-1, 0, 2], dtype=int),
+    ...         "d2": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+    ...         "d3": ["x", "y", "z"],
+    ...     }
+    ... )
+    >>> ref = dict(
+    ...     d1={"optional": True, "values": np.array([-1, 0, 2], dtype=int)},
+    ...     d2={
+    ...         "values": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+    ...         "dtype": ["datetime64[ns]", "timedelta64[ns]"],
+    ...     },
+    ...     d3={"values": ["x", "y", "z"], "dtype": "<U1"},
+    ... )
+    >>> wx.utility.xr_check_coords(dax, ref)
+    True
+
+    """
+    # only process the coords of the xarray
+    if isinstance(dax, (xr.DataArray, xr.Dataset)):
+        coords = dax.coords
+    elif isinstance(
+        dax,
+        (
+            xr.core.coordinates.DataArrayCoordinates,
+            xr.core.coordinates.DatasetCoordinates,
+        ),
+    ):
+        coords = dax
+    else:
+        raise ValueError("Input variable is not an xarray object")
+
+    for key, check in ref.items():
+        # check if the optional key is set to true
+        if "optional" in check:
+            if check["optional"] and key not in coords:
+                # skip this key - it is not in dax
+                continue
+
+        if key not in coords:
+            # Attributes not found in coords
+            raise KeyError(f"Could not find required coordinate '{key}'.")
+
+        # only if the key "values" is given do the validation
+        if "values" in check:
+            if not (coords[key].values == check["values"]).all():
+                raise ValueError(f"Value mismatch in DataArray and ref['{key}']")
+
+        # only if the key "dtype" is given do the validation
+        if "dtype" in check:
+            dtype_list = check["dtype"]
+            if not isinstance(dtype_list, list):
+                dtype_list = [dtype_list]
+            if not any(
+                _check_dtype(coords[key].dtype, var_dtype) for var_dtype in dtype_list
+            ):
+                raise TypeError(
+                    f"Mismatch in the dtype of the DataArray and ref['{key}']"
+                )
+
+    return True
+
+
 def xr_3d_vector(data, times=None) -> xr.DataArray:
     """Create an xarray 3d vector with correctly named dimensions and coordinates.
 
