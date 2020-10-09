@@ -612,7 +612,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     Parameters
     ----------
-    dax : xr.DataArray
+    dax : xarray.DataArray
         xarray object which should be validated
     ref : dict
         reference dictionary
