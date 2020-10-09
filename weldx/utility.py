@@ -589,9 +589,7 @@ def xr_interp_like(
     result = da.sel(sel_coords)
     if units is not None:
         result = xr.DataArray(
-            data=pint.Quantity(result.data, units),
-            dims=result.dims,
-            coords=result.coords,
+            data=result.data * units, dims=result.dims, coords=result.coords,
         )
 
     return result

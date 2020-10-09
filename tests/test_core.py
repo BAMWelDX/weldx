@@ -270,7 +270,7 @@ class TestTimeSeries:
     @pytest.mark.parametrize(
         "data,  shape_exp, unit_exp",
         [
-            (ME("a*t + b", params_scalar), (), ""),
+            (ME("a*t + b", params_scalar), (1,), ""),
             (ME("a*t + b", params_vec), (1, 3), "m"),
         ],
     )

@@ -269,9 +269,7 @@ class TimeSeries:
         self._units = None
 
         if isinstance(data, pint.Quantity):
-            if not np.iterable(data.magnitude):
-                data = Q_([data.magnitude], data.units)
-            if time is None and data.shape[0] == 1:
+            if time is None and not np.iterable(data):
                 time = pd.TimedeltaIndex([0])
                 interpolation = None
             elif interpolation not in self._valid_interpolations:
@@ -279,6 +277,8 @@ class TimeSeries:
                     "A valid interpolation method must be specified if discrete "
                     f'values are used. "{interpolation}" is not supported'
                 )
+            if not np.iterable(data):  # expand dim for scalar input
+                data = np.expand_dims(data, 0)
             if isinstance(time, pint.Quantity):
                 time = ut.to_pandas_time_index(time)
             if not isinstance(time, pd.TimedeltaIndex):
@@ -300,8 +300,8 @@ class TimeSeries:
             try:
                 eval_data = data.evaluate(**{time_var_name: Q_(1, "second")})
                 self._units = eval_data.units
-                if isinstance(eval_data.magnitude, np.ndarray):
-                    self._shape = eval_data.magnitude.shape
+                if np.iterable(eval_data):
+                    self._shape = eval_data.shape
                 else:
                     self._shape = (1,)
             except pint.errors.DimensionalityError:
@@ -506,8 +506,8 @@ class TimeSeries:
         data = data.to_reduced_units()
 
         # create data array
-        if not np.iterable(data.magnitude):  # make sure quantity is not scalar value
-            data = data * np.array([1])
+        if not np.iterable(data):  # make sure quantity is not scalar value
+            data = np.expand_dims(data, 0)
 
         dax = xr.DataArray(data=data)  # don't know exact dimensions so far
         return dax.rename({"dim_0": "time"}).assign_coords({"time": time_pd})
