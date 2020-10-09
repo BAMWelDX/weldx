@@ -37,5 +37,5 @@ Contents
    asdf-schemas
    api
    CHANGELOG
-   disclaimer
+   legal-notice
 
