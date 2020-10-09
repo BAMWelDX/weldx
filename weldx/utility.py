@@ -13,6 +13,41 @@ from scipy.spatial.transform import Slerp
 
 import weldx.transformations as tf
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.core import MathematicalExpression, TimeSeries
+
+
+def _sine(
+    f: pint.Quantity,
+    amp: pint.Quantity,
+    bias: pint.Quantity = None,
+    phase: pint.Quantity = Q_(0, "rad"),
+) -> TimeSeries:  # pragma: no cover
+    """Create a simple sine TimeSeries from quantity parameters.
+
+    f(t) = amp*sin(f*t+phase)+bias
+
+    Parameters
+    ----------
+    f : pint.Quantity
+        Frequency of the sine (in Hz)
+    amp : pint.Quantity
+        Sine amplitude
+    bias : pint.Quantity
+        function bias
+    phase : pint.Quantity
+        phase shift
+
+    Returns
+    -------
+    TimeSeries
+
+    """
+    if bias is None:
+        bias = 0.0 * amp.u
+    expr_string = "a*sin(o*t+p)+b"
+    parameters = {"a": amp, "b": bias, "o": Q_(2 * np.pi, "rad") * f, "p": phase}
+    expr = MathematicalExpression(expression=expr_string, parameters=parameters)
+    return TimeSeries(expr)
 
 
 def is_column_in_matrix(column, matrix) -> bool:
@@ -78,7 +113,7 @@ def to_list(var) -> list:
     """Store the passed variable into a list and return it.
 
     If the variable is already a list, it is returned without modification.
-    If 'None' is passed, the function returns an empty list.
+    If `None` is passed, the function returns an empty list.
 
     Parameters
     ----------
@@ -131,12 +166,12 @@ def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
 def pandas_time_delta_to_quantity(
     time: pd.TimedeltaIndex, unit: str = "s"
 ) -> pint.Quantity:
-    """Convert a 'pandas.TimedeltaIndex' into a corresponding 'pint.Quantity'.
+    """Convert a `pandas.TimedeltaIndex` into a corresponding `pint.Quantity`.
 
     Parameters
     ----------
-    time :
-        Instance of 'pandas.TimedeltaIndex'
+    time : pandas.TimedeltaIndex
+        Instance of `pandas.TimedeltaIndex`
     unit :
         String that specifies the desired time unit.
 
