@@ -204,5 +204,11 @@ for line in open("nitpick_ignore"):
     target = target.strip()
     nitpick_ignore.append((dtype, target))
 
+# Enable better object linkage ---------------------------------------------------------
 
+# This option basically turns every Markdown like inline code block into a sphinx
+# reference
 default_role = "py:obj"
+
+# see:
+# https://stackoverflow.com/questions/34052582/how-do-i-refer-to-classes-and-methods-in-other-files-my-project-with-sphinx
