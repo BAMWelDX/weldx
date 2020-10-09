@@ -32,6 +32,7 @@
 - add `pint` compatibility to some `geometry` classes (**experimental**)
   - when passing quantities to constructors (and some functions), values get converted to default unit `mm` and passed on as magnitude
   - old behavior is preserved
+- add `weldx.utility._sine` to easily create sine TimeSeries [#168] 
 
 
 ## 0.2.0 (30.07.2020)

@@ -21,7 +21,7 @@ def _sine(
     amp: pint.Quantity,
     bias: pint.Quantity = None,
     phase: pint.Quantity = Q_(0, "rad"),
-) -> TimeSeries:
+) -> TimeSeries:  # pragma: no cover
     """Create a simple sine TimeSeries from quantity parameters.
 
     Parameters
