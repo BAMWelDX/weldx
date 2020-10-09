@@ -826,6 +826,35 @@ class TestLocalCoordinateSystem:
         with pytest.raises(exception_type):
             lcs.interp_time(time, time_ref)
 
+    # test_time_union ------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "function_ref_time_day, csm_ref_time_day, lcs_times, lcs_ref_time_days, "
+        "exp_time, exp_ref_time_day",
+        [("21", "21", [[1, 5, 6], [3, 6, 9]], ["22", "21"], [2, 3, 6, 7, 9], "21",)],
+    )
+    def test_time_union(
+        function_ref_time_day,
+        csm_ref_time_day,
+        lcs_times,
+        lcs_ref_time_days,
+        exp_time,
+        exp_ref_time_day,
+    ):
+        csm = tf.CoordinateSystemManager("root", "base", f"2010-03-{csm_ref_time_day}")
+        for i in range(len(lcs_times)):
+            csm.add_cs(
+                f"lcs_{i}",
+                "root",
+                tf.LocalCoordinateSystem(
+                    coordinates=[[j, j, j] for j in range(len(lcs_times[i]))],
+                    time=pd.TimedeltaIndex(lcs_times[i], "D"),
+                    time_ref=pd.Timestamp(f"2010-03-{lcs_ref_time_days[i]}"),
+                ),
+            )
+        print(csm.time_union())
+
     # test_addition --------------------------------------------------------------------
 
     @pytest.mark.parametrize(
@@ -2895,7 +2924,7 @@ def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
         csm.get_local_coordinate_system("lcs_2", "root", ["grr", "42", "asdf"])
 
 
-def test_coordinate_system_manager_time_union():
+def test_coordinate_system_manager_time_union(remindh):
     """Test the coordinate system managers time union function."""
     orientation = tf.rotation_matrix_z([0, 1, 2])
     coordinates = [[1, 6, 3], [8, 2, 6], [4, 4, 4]]
