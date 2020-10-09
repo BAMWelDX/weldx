@@ -24,12 +24,18 @@ def _sine(
 ) -> TimeSeries:  # pragma: no cover
     """Create a simple sine TimeSeries from quantity parameters.
 
+    f(t) = amp*sin(f*t+phase)+bias
+
     Parameters
     ----------
     f : pint.Quantity
+        Frequency of the sine (in Hz)
     amp : pint.Quantity
+        Sine amplitude
     bias : pint.Quantity
+        function bias
     phase : pint.Quantity
+        phase shift
 
     Returns
     -------
