@@ -28,10 +28,11 @@
 - add basic schema layout and `GmawProcess` class for arc welding process implementation [#104]
 - add example notebook and documentation for arc welding process [#104]
 - fix propagating the `name` attribute when reading an ndarray `TimeSeries` object back from ASDF files [#104]
-- fix `pint` regression in `TimeSeries` when mixing integer and float values
+- fix `pint` regression in `TimeSeries` when mixing integer and float values [#121]
 - add `pint` compatibility to some `geometry` classes (**experimental**)
   - when passing quantities to constructors (and some functions), values get converted to default unit `mm` and passed on as magnitude
   - old behavior is preserved
+- add `weldx.utility.xr_check_coords` function to check coordinates of xarray object against dtype and value restrictions [#125]
 
 
 ## 0.2.0 (30.07.2020)
