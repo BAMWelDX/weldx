@@ -13,6 +13,35 @@ from scipy.spatial.transform import Slerp
 
 import weldx.transformations as tf
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.core import MathematicalExpression, TimeSeries
+
+
+def _sine(
+    f: pint.Quantity,
+    amp: pint.Quantity,
+    bias: pint.Quantity = None,
+    phase: pint.Quantity = Q_(0, "rad"),
+) -> TimeSeries:
+    """Create a simple sine TimeSeries from quantity parameters.
+
+    Parameters
+    ----------
+    f : pint.Quantity
+    amp : pint.Quantity
+    bias : pint.Quantity
+    phase : pint.Quantity
+
+    Returns
+    -------
+    TimeSeries
+
+    """
+    if bias is None:
+        bias = 0.0 * amp.u
+    expr_string = "a*sin(o*t+p)+b"
+    parameters = {"a": amp, "b": bias, "o": Q_(2 * np.pi, "rad") * f, "p": phase}
+    expr = MathematicalExpression(expression=expr_string, parameters=parameters)
+    return TimeSeries(expr)
 
 
 def is_column_in_matrix(column, matrix) -> bool:
@@ -78,7 +107,7 @@ def to_list(var) -> list:
     """Store the passed variable into a list and return it.
 
     If the variable is already a list, it is returned without modification.
-    If 'None' is passed, the function returns an empty list.
+    If `None` is passed, the function returns an empty list.
 
     Parameters
     ----------
@@ -131,12 +160,12 @@ def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
 def pandas_time_delta_to_quantity(
     time: pd.TimedeltaIndex, unit: str = "s"
 ) -> pint.Quantity:
-    """Convert a 'pandas.TimedeltaIndex' into a corresponding 'pint.Quantity'.
+    """Convert a `pandas.TimedeltaIndex` into a corresponding `pint.Quantity`.
 
     Parameters
     ----------
-    time :
-        Instance of 'pandas.TimedeltaIndex'
+    time : pandas.TimedeltaIndex
+        Instance of `pandas.TimedeltaIndex`
     unit :
         String that specifies the desired time unit.
 
