@@ -414,6 +414,23 @@ class LocalCoordinateSystem:
         coordinates = self._build_coordinates(coordinates, time)
 
         if construction_checks:
+            ut.xr_check_coords(
+                coordinates,
+                dict(
+                    c={"values": ["x", "y", "z"]},
+                    time={"dtype": "timedelta64", "optional": True},
+                ),
+            )
+
+            ut.xr_check_coords(
+                orientation,
+                dict(
+                    c={"values": ["x", "y", "z"]},
+                    v={"values": [0, 1, 2]},
+                    time={"dtype": "timedelta64", "optional": True},
+                ),
+            )
+
             orientation = xr.apply_ufunc(
                 normalize,
                 orientation,
@@ -636,7 +653,6 @@ class LocalCoordinateSystem:
         """
         if isinstance(orientation, xr.DataArray):
             return orientation
-            # TODO: Test if xarray has correct format
 
         time_orientation = None
         if isinstance(orientation, Rot):
@@ -667,7 +683,6 @@ class LocalCoordinateSystem:
         """
         if isinstance(coordinates, xr.DataArray):
             return coordinates
-            # TODO: Test if xarray has correct format
 
         time_coordinates = None
         if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
