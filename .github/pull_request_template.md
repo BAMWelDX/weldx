@@ -8,3 +8,4 @@ Closes # (add issue numbers)
 - [ ] updated CHANGELOG.md
 - [ ] updated tests
 - [ ] updated doc/
+- [ ] update example/tutorial notebooks 
