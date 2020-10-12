@@ -3,7 +3,8 @@
 from pint import UnitRegistry
 
 WELDX_UNIT_REGISTRY = UnitRegistry(
-    preprocessors=[lambda string: string.replace("%", "percent")]  # allow use of %-sign
+    preprocessors=[lambda string: string.replace("%", "percent")],  # allow %-sign
+    force_ndarray_like=True,
 )
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 

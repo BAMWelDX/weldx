@@ -8,7 +8,7 @@ In addition to fostering scientific collaboration inside the national and intern
 The proposed file format will be developed with regards to current needs of the community regarding interoperability, data quality and performance and will be published under an appropriate open source license.
 By using the file format objectivity, comparability and reproducibility across different experimental setups can be improved.
 
-The project is under active development by [Division 9.3 Welding Technology](https://www.bam.de/Navigation/EN/About-us/Organisation/Organisation-Chart/President/Department-9/Division-93/division93.html) at the German Federal Institute for Materials Research and Testing (BAM).
+The project is under active development by the [Welding Technology](https://www.bam.de/Navigation/EN/About-us/Organisation/Organisation-Chart/President/Department-9/Division-93/division93.html) division at Bundesanstalt für Materialforschung und -prüfung (BAM).
 
 
 ## Installation
