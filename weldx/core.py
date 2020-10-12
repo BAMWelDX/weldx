@@ -269,7 +269,9 @@ class TimeSeries:
         self._units = None
 
         if isinstance(data, pint.Quantity):
-            if time is None and not np.iterable(data):
+            if not np.iterable(data):  # expand dim for scalar input
+                data = np.expand_dims(data, 0)
+            if time is None:  # constant value case
                 time = pd.TimedeltaIndex([0])
                 interpolation = None
             elif interpolation not in self._valid_interpolations:
@@ -277,8 +279,6 @@ class TimeSeries:
                     "A valid interpolation method must be specified if discrete "
                     f'values are used. "{interpolation}" is not supported'
                 )
-            if not np.iterable(data):  # expand dim for scalar input
-                data = np.expand_dims(data, 0)
             if isinstance(time, pint.Quantity):
                 time = ut.to_pandas_time_index(time)
             if not isinstance(time, pd.TimedeltaIndex):
