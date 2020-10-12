@@ -269,9 +269,9 @@ class TimeSeries:
         self._units = None
 
         if isinstance(data, pint.Quantity):
-            if not np.iterable(data.magnitude):
-                data = Q_([data.magnitude], data.units)
-            if time is None and data.shape[0] == 1:
+            if not np.iterable(data):  # expand dim for scalar input
+                data = np.expand_dims(data, 0)
+            if time is None:  # constant value case
                 time = pd.TimedeltaIndex([0])
                 interpolation = None
             elif interpolation not in self._valid_interpolations:
@@ -300,8 +300,8 @@ class TimeSeries:
             try:
                 eval_data = data.evaluate(**{time_var_name: Q_(1, "second")})
                 self._units = eval_data.units
-                if isinstance(eval_data.magnitude, np.ndarray):
-                    self._shape = eval_data.magnitude.shape
+                if np.iterable(eval_data):
+                    self._shape = eval_data.shape
                 else:
                     self._shape = (1,)
             except pint.errors.DimensionalityError:
@@ -493,9 +493,9 @@ class TimeSeries:
                 '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
             )
 
-        if len(self.shape) > 1 and isinstance(time_q.magnitude, np.ndarray):
-            while len(time_q.magnitude.shape) < len(self.shape):
-                time_q = Q_(time_q.magnitude[:, np.newaxis], time_q.units)
+        if len(self.shape) > 1 and np.iterable(time_q):
+            while len(time_q.shape) < len(self.shape):
+                time_q = time_q[:, np.newaxis]
 
         # evaluate expression
         data = self._data.evaluate(**{self._time_var_name: time_q})
@@ -506,8 +506,8 @@ class TimeSeries:
         data = data.to_reduced_units()
 
         # create data array
-        if not np.iterable(data.magnitude):  # make sure quantity is not scalar value
-            data = data * np.array([1])
+        if not np.iterable(data):  # make sure quantity is not scalar value
+            data = np.expand_dims(data, 0)
 
         dax = xr.DataArray(data=data)  # don't know exact dimensions so far
         return dax.rename({"dim_0": "time"}).assign_coords({"time": time_pd})

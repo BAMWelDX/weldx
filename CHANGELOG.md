@@ -33,7 +33,8 @@
   - when passing quantities to constructors (and some functions), values get converted to default unit `mm` and passed on as magnitude
   - old behavior is preserved
 - add `weldx.utility.xr_check_coords` function to check coordinates of xarray object against dtype and value restrictions [#125]
-- add `weldx.utility._sine` to easily create sine TimeSeries [#168] 
+- add `weldx.utility._sine` to easily create sine TimeSeries [#168]
+- enable `force_ndarray_like=True` as default option when creating the global `pint.UnitRegistry` [#167]
 
 
 ## 0.2.0 (30.07.2020)

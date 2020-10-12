@@ -19,7 +19,10 @@ class PintQuantityType(WeldxAsdfType):
     @classmethod
     def to_tree(cls, node: pint.Quantity, ctx):
         tree = {}
-        tree["value"] = node.magnitude
+        value = node.magnitude
+        if not value.shape:
+            value = value.item()  # convert scalars to native Python numeric types
+        tree["value"] = value
         tree["unit"] = str(node.units)
         return tree
 
