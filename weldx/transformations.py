@@ -1239,6 +1239,8 @@ class CoordinateSystemManager:
         if coordinate_system_manager_name is None:
             coordinate_system_manager_name = self._generate_default_name()
         self._name = coordinate_system_manager_name
+        if reference_time is not None and not isinstance(reference_time, pd.Timestamp):
+            reference_time = pd.Timestamp(reference_time)
         self._reference_time = reference_time
         self._lcs_use_ref_time = None  # only relevant if CSM has no reference time
 
@@ -2523,31 +2525,74 @@ class CoordinateSystemManager:
         for lcs in cs_delete:
             self.delete_cs(lcs, True)
 
-    def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
+    def time_union(self, list_of_edges: List = None,) -> pd.DatetimeIndex:
         """Get the time union of all or selected local coordinate systems.
+
+         If neither the `CoordinateSystemManger` nor its attached
+         `LocalCoordinateSystem` instances possess a reference time, the function
+         returns a `pandas.TimedeltaIndex`. Otherwise, a `pandas.DatetimeIndex` is
+         returned. The following table gives an overview of all possible reference time
+         combinations and the corresponding return type:
+
+
+        +------------+------------------+-------------------------+
+        | CSM        | LCS              | Return type             |
+        | reference  | reference        |                         |
+        | time       | times            |                         |
+        +============+==================+=========================+
+        | True       | all/mixed/none   | `pandas.DatetimeIndex`  |
+        +------------+------------------+-------------------------+
+        | False      | all              | `pandas.DatetimeIndex`  |
+        +------------+------------------+-------------------------+
+        | False      | none             | `pandas.TimedeltaIndex` |
+        +------------+------------------+-------------------------+
+
+
 
         Parameters
         ----------
         list_of_edges :
-            If not None, the union is only calculated from the
-            specified edges (Default value = None)
+            If not `None`, the union is only calculated from the specified edges.
 
         Returns
         -------
-        pandas.DatetimeIndex
+        pandas.DatetimeIndex or pandas.TimedeltaIndex
             Time union
 
         """
         edges = self.graph.edges
         if list_of_edges is None:
             list_of_edges = edges
+
         time_union = None
+        list_of_lcs = []
+        return_time_delta = None
+
         for edge in list_of_edges:
-            time_edge = edges[edge]["lcs"].time
+            current_lcs = edges[edge]["lcs"]
+            list_of_lcs += [current_lcs]
+            if (
+                self.reference_time is None
+                and return_time_delta is None
+                and current_lcs.time is not None
+            ):
+                return_time_delta = current_lcs.reference_time is None
+
+        for lcs in list_of_lcs:
+            if lcs.time is None:
+                continue
+
+            if return_time_delta:
+                time_lcs = lcs.time
+            elif lcs.reference_time is None:
+                time_lcs = self.reference_time + lcs.time
+            else:
+                time_lcs = lcs.reference_time + lcs.time
+
             if time_union is None:
-                time_union = time_edge
-            elif time_edge is not None:
-                time_union = time_union.union(time_edge)
+                time_union = time_lcs
+            elif time_lcs is not None:
+                time_union = time_union.union(time_lcs)
 
         return time_union
 

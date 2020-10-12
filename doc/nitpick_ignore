@@ -51,16 +51,16 @@ py:class RandomState instance
 py:class Rotation object
 py:class shape
 py:class string
-py:class a
-py:class b
-py:class weights
-py:class Rotation
-py:class return_sensitivity
-py:class vectors[i]
-py:class (3, )
-py:class (1, 3)
-py:class rotated_vectors
-py:class n
-py:class num
-py:class left
-py:class right
+py:obj a
+py:obj b
+py:obj weights
+py:obj Rotation
+py:obj return_sensitivity
+py:obj vectors[i]
+py:obj (3, )
+py:obj (1, 3)
+py:obj rotated_vectors
+py:obj n
+py:obj num
+py:obj left
+py:obj right
