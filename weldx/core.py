@@ -493,7 +493,7 @@ class TimeSeries:
                 '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
             )
 
-        if len(self.shape) > 1 and len(time_q.shape) > 0:
+        if len(self.shape) > 1 and np.iterable(time_q):
             while len(time_q.shape) < len(self.shape):
                 time_q = time_q[:, np.newaxis]
 
