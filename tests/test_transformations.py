@@ -3120,7 +3120,7 @@ def test_coordinate_system_manager_interp_time():
 
     # specific coordinate system (single) -----------------
     time_interp_lcs0 = TDI([3, 5], "D")
-    csm_interp_single = csm.interp_time(time_interp_lcs0, "lcs_0")
+    csm_interp_single = csm.interp_time(time_interp_lcs0, None, "lcs_0")
 
     coords_0_exp = np.array(coords_0_exp)[[1, 2], :]
     orient_0_exp = np.array(orient_0_exp)[[1, 2], :]
@@ -3148,7 +3148,9 @@ def test_coordinate_system_manager_interp_time():
 
     # specific coordinate systems (multiple) --------------
     time_interp_multiple = TDI([5, 7, 9], "D")
-    csm_interp_multiple = csm.interp_time(time_interp_multiple, ["lcs_1", "lcs_2"])
+    csm_interp_multiple = csm.interp_time(
+        time_interp_multiple, None, ["lcs_1", "lcs_2"]
+    )
 
     coords_1_exp = np.array(coords_1_exp)[2:, :]
     orient_1_exp = np.array(orient_1_exp)[2:, :]

@@ -1059,7 +1059,11 @@ class LocalCoordinateSystem:
     def interp_time(
         self,
         time: Union[
-            pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem", None
+            pd.DatetimeIndex,
+            pd.TimedeltaIndex,
+            List[pd.Timestamp],
+            "LocalCoordinateSystem",
+            None,
         ],
         time_ref: Union[pd.Timestamp, None] = None,
     ) -> "LocalCoordinateSystem":
@@ -2340,7 +2344,13 @@ class CoordinateSystemManager:
 
     def interp_time(
         self,
-        time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
+        time: Union[
+            pd.DatetimeIndex,
+            pd.TimedeltaIndex,
+            List[pd.Timestamp],
+            "LocalCoordinateSystem",
+        ],
+        time_ref: pd.Timestamp = None,
         affected_coordinate_systems: Union[str, List[str], None] = None,
         in_place: bool = False,
     ) -> "CoordinateSystemManager":
@@ -2351,13 +2361,19 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        time :
-            Time data.
-        affected_coordinate_systems :
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+               LocalCoordinateSystem
+            The target time for the interpolation. In addition to the supported
+            time formats, the function also accepts a `LocalCoordinateSystem` as
+            ``time`` source object
+        time_ref : pandas.Timestamp
+            A reference timestamp that can be provided if the ``time`` parameter is a
+            `pandas.TimedeltaIndex`
+        affected_coordinate_systems : str or List[str]
             A single coordinate system name or a list of coordinate system names that
             should be interpolated in time. Only transformations towards the systems
             root node are affected.
-        in_place :
+        in_place : bool
             If 'True' the interpolation is performed in place, otherwise a
             new instance is returned. (Default value = False)
 
@@ -2384,7 +2400,7 @@ class CoordinateSystemManager:
                 if self._graph.edges[edge]["defined"]:
                     self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
                         "lcs"
-                    ].interp_time(time)
+                    ].interp_time(time, time_ref)
             for edge in affected_edges:
                 if not self._graph.edges[edge]["defined"]:
                     self._graph.edges[edge]["lcs"] = self._graph.edges[
@@ -2393,7 +2409,7 @@ class CoordinateSystemManager:
             return self
 
         return deepcopy(self).interp_time(
-            time, affected_coordinate_systems, in_place=True
+            time, time_ref, affected_coordinate_systems, in_place=True
         )
 
     def is_neighbor_of(
