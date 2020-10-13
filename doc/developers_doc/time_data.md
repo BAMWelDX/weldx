@@ -20,7 +20,7 @@ document.
 ### Supported data types
 
 The `weldx` package interfaces support `pandas.TimedeltaIndex`, `pandas.DatetimeIndex`, `pandas.Timestamp` and 
-`pint.Quantitiy` as time data types.
+`pint.Quantity` as time data types.
 To keep things as simple as possible we are not planning on extending this list in the near future.
 It is up to the user to take care of other types by casting them to one of the supported data types.
 
