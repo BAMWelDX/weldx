@@ -1261,7 +1261,6 @@ class CoordinateSystemManager:
         if reference_time is not None and not isinstance(reference_time, pd.Timestamp):
             reference_time = pd.Timestamp(reference_time)
         self._reference_time = reference_time
-        self._lcs_use_ref_time = None  # only relevant if CSM has no reference time
 
         self._data = {}
         self._root_system_name = root_coordinate_system_name
@@ -1485,9 +1484,45 @@ class CoordinateSystemManager:
         all_members += [ext_sub_system_data["common node"]]
         return all_members
 
+    @property
+    def _has_lcs_with_time_ref(self):
+        """Return `True` if one of the attached coordinate systems has a reference time.
+        
+        Returns
+        -------
+        bool :
+            `True` if one of the attached coordinate systems has a reference time.
+            `False` otherwise
+
+        """
+        for edge in self.graph.edges:
+            if self.graph.edges[edge]["lcs"].reference_time is not None:
+                return True
+        return False
+
     def _ipython_display_(self):
         """Display the coordinate system manager as plot in jupyter notebooks."""
         self.plot()
+
+    @property
+    def _number_of_time_dependent_lcs(self):
+        """Get the number of time dependent coordinate systems.
+        
+        Note that the automatically added inverse systems have no effect on the returned
+        val
+        
+        Returns
+        -------
+        int :
+            Number of time dependent coordinate systems
+
+        """
+        num_tdp_lcs = 0
+        for edge in self.graph.edges:
+            edge_data = self.graph.edges[edge]
+            if edge_data["defined"] and edge_data["lcs"].time is not None:
+                num_tdp_lcs += 1
+        return num_tdp_lcs
 
     def _update_local_coordinate_system(
         self, node_from: str, node_to: str, lcs: LocalCoordinateSystem
@@ -1650,9 +1685,10 @@ class CoordinateSystemManager:
             current_lcs_has_ref_time = (
                 local_coordinate_system.reference_time is not None
             )
-            if self._lcs_use_ref_time is None:
-                self._lcs_use_ref_time = current_lcs_has_ref_time
-            elif current_lcs_has_ref_time != self._lcs_use_ref_time:
+            if (
+                self._number_of_time_dependent_lcs > 0
+                and current_lcs_has_ref_time != self._has_lcs_with_time_ref
+            ):
                 raise Exception(
                     "Inconsistent usage of reference times! If you didn't specify a "
                     "reference time for the CoordinateSystemManager, either all or "
@@ -2171,7 +2207,10 @@ class CoordinateSystemManager:
         The timestamps of the returned system depend on the functions time parameter.
         By default, the time union of all involved coordinate systems is taken.
 
-        Information regarding the implementation:
+        Notes
+        -----
+        **Information regarding the implementation:**
+        
         It is important to mention that all coordinate systems that are involved in the
         transformation should be interpolated to a common time line before they are
         combined using the 'LocalCoordinateSystem's __add__ and __sub__ functions.
