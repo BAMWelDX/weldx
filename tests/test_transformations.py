@@ -2092,41 +2092,129 @@ class TestCoordinateSystemManager:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "csm_ref_time_day, lcs_times, lcs_ref_time_days, " "exp_time, exp_ref_time_day",
+        "csm_ref_time_day, lcs_times, lcs_ref_time_days, edges,"
+        "exp_time, exp_ref_time_day",
         [
-            ("21", [[1, 5, 6], [3, 6, 9]], ["22", "21"], [2, 3, 6, 7, 9], "21"),
-            ("21", [[1, 5, 6], [3, 6, 9]], ["22", None], [2, 3, 6, 7, 9], "21"),
-            ("21", [[2, 6, 7], [3, 6, 9]], [None, None], [2, 3, 6, 7, 9], "21"),
-            (None, [[1, 5, 6], [3, 6, 9]], ["22", "21"], [2, 3, 6, 7, 9], "21"),
-            (None, [[1, 5, 6], [3, 6, 9]], [None, None], [1, 3, 5, 6, 9], None),
+            # all systems are time dependent
+            ("21", [[1, 5, 6], [3, 6, 9]], ["22", "21"], None, [2, 3, 6, 7, 9], "21"),
+            ("21", [[1, 5, 6], [3, 6, 9]], ["22", None], None, [2, 3, 6, 7, 9], "21"),
+            ("21", [[2, 6, 7], [3, 6, 9]], [None, None], None, [2, 3, 6, 7, 9], "21"),
+            (None, [[1, 5, 6], [3, 6, 9]], ["22", "21"], None, [2, 3, 6, 7, 9], "21"),
+            (None, [[1, 5, 6], [3, 6, 9]], [None, None], None, [1, 3, 5, 6, 9], None),
+            ("21", [[3, 4], [6, 9], [4, 8]], ["22", "20", "21"], None, [4, 5, 8], "21"),
+            ("21", [[3, 4], [5, 8], [4, 8]], ["22", None, None], None, [4, 5, 8], "21"),
+            ("21", [[3, 4], [3, 8], [4, 8]], [None, None, None], None, [3, 4, 8], "21"),
+            (None, [[3, 4], [6, 9], [4, 8]], ["22", "20", "21"], None, [4, 5, 8], "21"),
+            (None, [[3, 4], [3, 8], [4, 8]], [None, None, None], None, [3, 4, 8], None),
+            # Contains static systems
+            ("21", [[3, 4], None, [4, 8]], ["22", None, "21"], None, [4, 5, 8], "21"),
+            ("21", [[3, 4], None, [4, 8]], ["22", None, None], None, [4, 5, 8], "21"),
+            ("21", [[3, 4], None, [4, 8]], [None, None, None], None, [3, 4, 8], "21"),
+            (None, [[3, 4], None, [4, 8]], ["22", None, "21"], None, [4, 5, 8], "21"),
+            (None, [[3, 4], None, [4, 8]], [None, None, None], None, [3, 4, 8], None),
+            # include only specific edges
+            ("21", [[3, 4], None, [4, 8]], ["22", None, "21"], [0, 1], [4, 5], "21"),
+            ("21", [[3, 4], None, [4, 8]], ["22", None, None], [0, 1], [4, 5], "21"),
+            ("21", [[3, 4], None, [4, 8]], [None, None, None], [0, 1], [3, 4], "21"),
+            (None, [[3, 4], None, [4, 8]], ["22", None, "21"], [0, 1], [4, 5], "21"),
+            (None, [[3, 4], None, [4, 8]], [None, None, None], [0, 1], [3, 4], None),
+            ("21", [[3, 4], None, [4, 8]], ["22", None, "21"], [0, 2], [4, 5, 8], "21"),
+            ("21", [[3, 4], None, [4, 8]], ["22", None, None], [0, 2], [4, 5, 8], "21"),
+            ("21", [[3, 4], None, [4, 8]], [None, None, None], [0, 2], [3, 4, 8], "21"),
+            (None, [[3, 4], None, [4, 8]], ["22", None, "21"], [0, 2], [4, 5, 8], "21"),
+            (None, [[3, 4], None, [4, 8]], [None, None, None], [0, 2], [3, 4, 8], None),
+            ("21", [[3, 4], None, [4, 8]], ["22", None, "21"], [1, 2], [4, 8], "21"),
+            ("21", [[3, 4], None, [4, 8]], ["22", None, None], [1, 2], [4, 8], "21"),
+            ("21", [[3, 4], None, [4, 8]], [None, None, None], [1, 2], [4, 8], "21"),
+            (None, [[3, 4], None, [4, 8]], ["22", None, "21"], [1, 2], [4, 8], "21"),
+            (None, [[3, 4], None, [4, 8]], [None, None, None], [1, 2], [4, 8], None),
         ],
     )
     def test_time_union(
-        csm_ref_time_day, lcs_times, lcs_ref_time_days, exp_time, exp_ref_time_day,
+        csm_ref_time_day,
+        lcs_times,
+        lcs_ref_time_days,
+        edges,
+        exp_time,
+        exp_ref_time_day,
     ):
+        """Test the time_union function of the CSM.
+
+        Parameters
+        ----------
+        csm_ref_time_day : str
+            An arbitrary day number string in the range [1, 31] or `None`. The value is
+            used to create the reference timestamp of the CSM
+        lcs_times : List
+            A list containing an arbitrary number of time delta values (days) that are
+            used to create a corresponding number of `LocalCoordinateSystem` instances
+            which are added to the CSM. If a value is `None`, the generated coordinate
+            system will be static
+        lcs_ref_time_days : List
+            A list where the values are either arbitrary day number strings in the range
+            [1, 31] or `None`. Those values are used to create the reference timestamps
+            for the coordinate systems of the CSM. The list must have the same length as
+            the one passed to the ``lcs_times`` parameter
+        edges : List
+            A list that specifies the indices of the ``lcs_times`` parameter that should
+            be considered in the time union. If `None` is passed, all are used. Note
+            that the information is used to create the correct inputs to the
+            ``time_union`` function and isn't passed directly.
+        exp_time : List
+            A list containing time delta values (days) that are used to generate the
+            expected result data
+        exp_ref_time_day : str
+            An arbitrary day number string in the range [1, 31] or `None`. The value is
+            used as reference time to create the expected result data. If it is set to
+            `None`, the expected result data type is a `pandas.TimedeltaIndex` and a
+            `pandas.DatetimeIndex` otherwise
+
+        Returns
+        -------
+
+        """
+        # create full time data
         csm_time_ref = None
         if csm_ref_time_day is not None:
             csm_time_ref = f"2010-03-{csm_ref_time_day}"
+
+        lcs_time_ref = [None for _ in range(len(lcs_times))]
+        for i in range(len(lcs_times)):
+            if lcs_times[i] is not None:
+                lcs_times[i] = pd.TimedeltaIndex(lcs_times[i], "D")
+            if lcs_ref_time_days[i] is not None:
+                lcs_time_ref[i] = pd.Timestamp(f"2010-03-{lcs_ref_time_days[i]}")
+
+        # create coordinate systems
+        lcs = []
+        for i in range(len(lcs_times)):
+            if isinstance(lcs_times[i], pd.TimedeltaIndex):
+                coordinates = [[j, j, j] for j in range(len(lcs_times[i]))]
+            else:
+                coordinates = [1, 2, 3]
+            lcs += [
+                tf.LocalCoordinateSystem(
+                    None, coordinates, lcs_times[i], lcs_time_ref[i],
+                )
+            ]
+
+        # create CSM and add coordinate systems
         csm = tf.CoordinateSystemManager("root", "base", csm_time_ref)
         for i in range(len(lcs_times)):
-            lcs_time_ref = None
-            if lcs_ref_time_days[i] is not None:
-                lcs_time_ref = pd.Timestamp(f"2010-03-{lcs_ref_time_days[i]}")
-            csm.add_cs(
-                f"lcs_{i}",
-                "root",
-                tf.LocalCoordinateSystem(
-                    coordinates=[[j, j, j] for j in range(len(lcs_times[i]))],
-                    time=pd.TimedeltaIndex(lcs_times[i], "D"),
-                    time_ref=lcs_time_ref,
-                ),
-            )
+            csm.add_cs(f"lcs_{i}", "root", lcs[i])
 
+        # create expected data type
         exp_time = pd.TimedeltaIndex(exp_time, "D")
         if exp_ref_time_day is not None:
             exp_time = pd.Timestamp(f"2010-03-{exp_ref_time_day}") + exp_time
 
-        assert np.all(csm.time_union() == exp_time)
+        # create correct list of edges
+        if edges is not None:
+            for i in range(len(edges)):
+                edges[i] = ("root", f"lcs_{edges[i]}")
+
+        # check time_union result
+        assert np.all(csm.time_union(list_of_edges=edges) == exp_time)
 
     # test_merge -----------------------------------------------------------------------
 
