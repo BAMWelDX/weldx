@@ -2281,6 +2281,46 @@ class TestCoordinateSystemManager:
         # test
         assert csm.get_local_coordinate_system(system_name, reference_name) == exp_lcs
 
+    # test_get_local_coordinate_system_exceptions --------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "system_name, reference_name, exception_type, test_name",
+        [
+            ("not there", "root", ValueError, "# system does not exist"),
+            ("root", "not there", ValueError, "# reference system does not exist"),
+            ("not there", "not there", ValueError, "# both systems do not exist"),
+            ("not there", None, ValueError, "# root system has no reference"),
+        ],
+        ids=get_test_name,
+    )
+    def test_get_local_coordinate_system_exceptions(
+        system_name, reference_name, exception_type, test_name
+    ):
+        """Test the exceptions of the ``get_local_coordinate_system`` function.
+
+        Parameters
+        ----------
+        system_name : str
+            Name of the system that should be returned
+        reference_name : str
+            Name of the reference system
+        exception_type :
+            Expected exeption type
+        test_name : str
+            Name of the testcase
+
+        """
+        # setup
+        csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
+        csm.create_cs("lcs_1", "root", r_mat_z(0.5), [1, 2, 3])
+        csm.create_cs("lcs_2", "root", r_mat_y(0.5), [3, -3, 1])
+        csm.create_cs("lcs_3", "lcs_2", r_mat_x(0.5), [1, -1, 3])
+
+        # test
+        with pytest.raises(exception_type):
+            csm.get_local_coordinate_system(system_name, reference_name)
+
     # test_merge -----------------------------------------------------------------------
 
     @staticmethod
@@ -2867,35 +2907,6 @@ def test_coordinate_system_manager_create_coordinate_system():
         True,
         time=time,
     )
-
-
-def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependency():
-    """Test the get_local_coordinate_system function.
-
-    This function also tests, if the internally performed transformations are correct.
-
-    """
-
-    # define some coordinate systems
-    lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
-    lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
-    lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_x(np.pi / 2), [1, -1, 3])
-    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
-    csm.add_cs("lcs1", "root", lcs1_in_root)
-    csm.add_cs("lcs2", "root", lcs2_in_root)
-    csm.add_cs("lcs3", "lcs2", lcs3_in_lcs2)
-
-    # exceptions --------------------------------
-    # system does not exist
-    with pytest.raises(ValueError):
-        csm.get_local_coordinate_system("not there", "root")
-    with pytest.raises(ValueError):
-        csm.get_local_coordinate_system("root", "not there")
-    with pytest.raises(ValueError):
-        csm.get_local_coordinate_system("not there", "not there")
-    # no parent system
-    with pytest.raises(ValueError):
-        csm.get_local_coordinate_system("root")
 
 
 def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
