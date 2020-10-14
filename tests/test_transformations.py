@@ -2273,10 +2273,12 @@ class TestCoordinateSystemManager:
         csm.create_cs("lcs_2", "root", r_mat_y(0.5), [3, -3, 1])
         csm.create_cs("lcs_3", "lcs_2", r_mat_x(0.5), [1, -1, 3])
 
-        exp_lcs = tf.LocalCoordinateSystem(exp_orientation, exp_coordinates)
-
-        # test
-        assert csm.get_local_coordinate_system(system_name, reference_name) == exp_lcs
+        check_coordinate_system(
+            csm.get_local_coordinate_system(system_name, reference_name),
+            exp_orientation,
+            exp_coordinates,
+            True,
+        )
 
     # test_get_local_coordinate_system_exceptions --------------------------------------
 
