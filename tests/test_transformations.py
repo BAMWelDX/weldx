@@ -2188,9 +2188,6 @@ class TestCoordinateSystemManager:
             `None`, the expected result data type is a `pandas.TimedeltaIndex` and a
             `pandas.DatetimeIndex` otherwise
 
-        Returns
-        -------
-
         """
         # create full time data
         csm_time_ref = None
@@ -2253,7 +2250,7 @@ class TestCoordinateSystemManager:
     def test_get_local_coordinate_system_no_time_dep(
         system_name, reference_name, exp_orientation, exp_coordinates
     ):
-        """Test the ``get_local_coordinate_system`` function without time dependencies
+        """Test the ``get_local_coordinate_system`` function without time dependencies.
 
         Have a look into the tests setup section to see which coordinate systems are
         defined in the CSM.
