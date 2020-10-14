@@ -20,6 +20,8 @@ import pathlib
 import shutil
 import sys
 
+import traitlets
+
 import weldx
 
 sys.path.insert(0, os.path.abspath(""))
@@ -101,8 +103,12 @@ master_doc = "index"
 nbsphinx_execute = "always"
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
-    "--InlineBackend.rc <figure.dpi=96>",
 ]
+
+if traitlets.__version__ < "5":
+    nbsphinx_execute_arguments.append("--InlineBackend.rc={'figure.dpi': 96}")
+else:
+    nbsphinx_execute_arguments.append("--InlineBackend.rc <figure.dpi=96>")
 
 # Select notebook kernel for nbsphinx
 # default "python3" is needed for readthedocs run
