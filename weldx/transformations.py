@@ -1487,7 +1487,7 @@ class CoordinateSystemManager:
     @property
     def _has_lcs_with_time_ref(self):
         """Return `True` if one of the attached coordinate systems has a reference time.
-        
+
         Returns
         -------
         bool :
@@ -1507,10 +1507,10 @@ class CoordinateSystemManager:
     @property
     def _number_of_time_dependent_lcs(self):
         """Get the number of time dependent coordinate systems.
-        
+
         Note that the automatically added inverse systems have no effect on the returned
         val
-        
+
         Returns
         -------
         int :
@@ -2210,7 +2210,7 @@ class CoordinateSystemManager:
         Notes
         -----
         **Information regarding the implementation:**
-        
+
         It is important to mention that all coordinate systems that are involved in the
         transformation should be interpolated to a common time line before they are
         combined using the 'LocalCoordinateSystem's __add__ and __sub__ functions.
