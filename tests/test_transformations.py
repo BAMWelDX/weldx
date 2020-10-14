@@ -397,6 +397,25 @@ def test_reflection_sign():
 # --------------------------------------------------------------------------------------
 
 
+def r_mat_x(factors) -> np.ndarray:
+    """Get an array of rotation matrices that represent a rotation around the x-axis.
+
+    The rotation angles are the provided factors times pi.
+
+    Parameters
+    ----------
+    factors:
+        List of factors that are multiplied with pi to get the rotation angles.
+
+    Returns
+    -------
+    numpy.ndarray:
+        An array of rotation matrices
+
+    """
+    return tf.rotation_matrix_x(np.array(factors) * np.pi)
+
+
 def r_mat_y(factors) -> np.ndarray:
     """Get an array of rotation matrices that represent a rotation around the y-axis.
 
@@ -409,14 +428,14 @@ def r_mat_y(factors) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray:
+    numpy.ndarray:
         An array of rotation matrices
 
     """
     return tf.rotation_matrix_y(np.array(factors) * np.pi)
 
 
-def r_mat_z(factors):
+def r_mat_z(factors) -> np.ndarray:
     """Get an array of rotation matrices that represent a rotation around the z-axis.
 
     The rotation angles are the provided factors times pi.
@@ -428,7 +447,7 @@ def r_mat_z(factors):
 
     Returns
     -------
-    np.ndarray:
+    numpy.ndarray:
         An array of rotation matrices
 
     """
@@ -1818,27 +1837,6 @@ class TestCoordinateSystemManager:
             assert csm.get_local_coordinate_system(name, parent) == lcs.invert()
             assert csm.get_local_coordinate_system(parent, name) == lcs
 
-    # test_add_coordinate_system_exceptions --------------------------------------------
-
-    @staticmethod
-    @pytest.mark.parametrize(
-        "name, parent_name, lcs, exception_type, test_name",
-        [
-            ("lcs", "r00t", LCS(), ValueError, "# invalid parent system"),
-            ("lcs4", "root", LCS(), ValueError, "# can't update - no neighbors"),
-            ("lcs", LCS(), LCS(), TypeError, "# invalid parent system name type"),
-            (LCS(), "root", LCS(), TypeError, "# invalid system name type"),
-            ("new_lcs", "root", "a string", TypeError, "# invalid system type"),
-        ],
-        ids=get_test_name,
-    )
-    def test_add_coordinate_system_exceptions(
-        csm_fix, name, parent_name, lcs, exception_type, test_name
-    ):
-        """Test the exceptions of the 'add_cs' method."""
-        with pytest.raises(exception_type):
-            csm_fix.add_cs(name, parent_name, lcs)
-
     # test_add_cs_reference_time -------------------------------------------------------
 
     @staticmethod
@@ -1860,7 +1858,7 @@ class TestCoordinateSystemManager:
     ):
         """Test if reference time issues are caught while adding new coordinate systems.
 
-        See notes of add_cs method.
+        See 'Notes' section of the add_cs method documentation.
 
         Parameters
         ----------
@@ -1873,7 +1871,7 @@ class TestCoordinateSystemManager:
             Set to `True` if the second added coordinate system should have a reference
             time.
         should_raise : bool
-            Set to `True` if the combination of refernce times is invalid and an
+            Set to `True` if the combination of reference times is invalid and an
             Exception should be raised
 
         """
@@ -1906,6 +1904,27 @@ class TestCoordinateSystemManager:
                 csm.add_cs("lcs_2", "root", lcs_2)
         else:
             csm.add_cs("lcs_2", "root", lcs_2)
+
+    # test_add_coordinate_system_exceptions --------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "name, parent_name, lcs, exception_type, test_name",
+        [
+            ("lcs", "r00t", LCS(), ValueError, "# invalid parent system"),
+            ("lcs4", "root", LCS(), ValueError, "# can't update - no neighbors"),
+            ("lcs", LCS(), LCS(), TypeError, "# invalid parent system name type"),
+            (LCS(), "root", LCS(), TypeError, "# invalid system name type"),
+            ("new_lcs", "root", "a string", TypeError, "# invalid system type"),
+        ],
+        ids=get_test_name,
+    )
+    def test_add_coordinate_system_exceptions(
+        csm_fix, name, parent_name, lcs, exception_type, test_name
+    ):
+        """Test the exceptions of the 'add_cs' method."""
+        with pytest.raises(exception_type):
+            csm_fix.add_cs(name, parent_name, lcs)
 
     # test num_neighbors ---------------------------------------------------------------
 
@@ -2215,6 +2234,52 @@ class TestCoordinateSystemManager:
 
         # check time_union result
         assert np.all(csm.time_union(list_of_edges=edges) == exp_time)
+
+    # test_get_local_coordinate_system_no_time_dep -------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "system_name, reference_name, exp_orientation, exp_coordinates",
+        [
+            ("lcs_1", None, r_mat_z(0.5), [1, 2, 3]),
+            ("lcs_2", None, r_mat_y(0.5), [3, -3, 1]),
+            ("lcs_3", None, r_mat_x(0.5), [1, -1, 3]),
+            ("lcs_3", "root", [[0, 1, 0], [0, 0, -1], [-1, 0, 0]], [6, -4, 0]),
+            ("root", "lcs_3", [[0, 0, -1], [1, 0, 0], [0, -1, 0]], [0, -6, -4]),
+            ("lcs_3", "lcs_1", [[0, 0, -1], [0, -1, 0], [-1, 0, 0]], [-6, -5, -3]),
+            ("lcs_1", "lcs_3", [[0, 0, -1], [0, -1, 0], [-1, 0, 0]], [-3, -5, -6]),
+        ],
+    )
+    def test_get_local_coordinate_system_no_time_dep(
+        system_name, reference_name, exp_orientation, exp_coordinates
+    ):
+        """Test the ``get_local_coordinate_system`` function without time dependencies
+
+        Have a look into the tests setup section to see which coordinate systems are
+        defined in the CSM.
+
+        Parameters
+        ----------
+        system_name : str
+            Name of the system that should be returned
+        reference_name : str
+            Name of the reference system
+        exp_orientation : List or numpy.ndarray
+            The expected orientation of the returned system
+        exp_coordinates
+            The expected coordinates of the returned system
+
+        """
+        # setup
+        csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
+        csm.create_cs("lcs_1", "root", r_mat_z(0.5), [1, 2, 3])
+        csm.create_cs("lcs_2", "root", r_mat_y(0.5), [3, -3, 1])
+        csm.create_cs("lcs_3", "lcs_2", r_mat_x(0.5), [1, -1, 3])
+
+        exp_lcs = tf.LocalCoordinateSystem(exp_orientation, exp_coordinates)
+
+        # test
+        assert csm.get_local_coordinate_system(system_name, reference_name) == exp_lcs
 
     # test_merge -----------------------------------------------------------------------
 
@@ -2810,68 +2875,15 @@ def test_coordinate_system_manager_get_local_coordinate_system_no_time_dependenc
     This function also tests, if the internally performed transformations are correct.
 
     """
+
     # define some coordinate systems
     lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
     lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
     lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_x(np.pi / 2), [1, -1, 3])
-
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
     csm.add_cs("lcs1", "root", lcs1_in_root)
     csm.add_cs("lcs2", "root", lcs2_in_root)
     csm.add_cs("lcs3", "lcs2", lcs3_in_lcs2)
-
-    # check stored transformations
-    lcs1_in_root_returned = csm.get_local_coordinate_system("lcs1")
-    check_coordinate_system(
-        lcs1_in_root_returned, lcs1_in_root.orientation, lcs1_in_root.coordinates, True
-    )
-
-    lcs2_in_root_returned = csm.get_local_coordinate_system("lcs2")
-    check_coordinate_system(
-        lcs2_in_root_returned, lcs2_in_root.orientation, lcs2_in_root.coordinates, True
-    )
-
-    lcs3_in_lcs2_returned = csm.get_local_coordinate_system("lcs3")
-    check_coordinate_system(
-        lcs3_in_lcs2_returned, lcs3_in_lcs2.orientation, lcs3_in_lcs2.coordinates, True
-    )
-
-    # check calculated transformations
-    lcs_3_in_root = csm.get_local_coordinate_system("lcs3", "root")
-    expected_orientation = [[0, 1, 0], [0, 0, -1], [-1, 0, 0]]
-    expected_coordinates = [6, -4, 0]
-    check_coordinate_system(
-        lcs_3_in_root, expected_orientation, expected_coordinates, True
-    )
-
-    root_in_lcs3 = csm.get_local_coordinate_system("root", "lcs3")
-    expected_orientation = [[0, 0, -1], [1, 0, 0], [0, -1, 0]]
-    expected_coordinates = [0, -6, -4]
-    check_coordinate_system(
-        root_in_lcs3, expected_orientation, expected_coordinates, True
-    )
-
-    lcs_3_in_lcs1 = csm.get_local_coordinate_system("lcs3", "lcs1")
-    expected_orientation = [[0, 0, -1], [0, -1, 0], [-1, 0, 0]]
-    expected_coordinates = [-6, -5, -3]
-    check_coordinate_system(
-        lcs_3_in_lcs1, expected_orientation, expected_coordinates, True
-    )
-
-    lcs_1_in_lcs3 = csm.get_local_coordinate_system("lcs1", "lcs3")
-    expected_orientation = [[0, 0, -1], [0, -1, 0], [-1, 0, 0]]
-    expected_coordinates = [-3, -5, -6]
-    check_coordinate_system(
-        lcs_1_in_lcs3, expected_orientation, expected_coordinates, True
-    )
-
-    # self referencing --------------------------
-    lcs_1_in_lcs1 = csm.get_local_coordinate_system("lcs1", "lcs1")
-    expected_orientation = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-    expected_coordinates = [0, 0, 0]
-    check_coordinate_system(
-        lcs_1_in_lcs1, expected_orientation, expected_coordinates, True
-    )
 
     # exceptions --------------------------------
     # system does not exist
