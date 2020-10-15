@@ -2203,13 +2203,45 @@ class TestCoordinateSystemManager:
         "function_arguments, time_refs, exp_orientation, exp_coordinates,"
         "exp_time_data",
         [
-            # get cs in its parent system
+            # get cs in its parent system - no reference times
             (
                 ("cs_1",),
                 [None, None, None, None],
                 [np.eye(3) for _ in range(3)],
                 [[i, 0, 0] for i in [0, 0.25, 1]],
                 ([0, 3, 12], None),
+            ),
+            # get cs in its parent system - only CSM has reference time
+            (
+                ("cs_1",),
+                ["2000-03-03", None, None, None],
+                [np.eye(3) for _ in range(3)],
+                [[i, 0, 0] for i in [0, 0.25, 1]],
+                ([0, 3, 12], "2000-03-03"),
+            ),
+            # get cs in its parent system - only system has reference time
+            (
+                ("cs_1",),
+                [None, "2000-03-03", "2000-03-03", "2000-03-03"],
+                [np.eye(3) for _ in range(3)],
+                [[i, 0, 0] for i in [0, 0.25, 1]],
+                ([0, 3, 12], "2000-03-03"),
+            ),
+            # get cs in its parent system - function and CSM have reference times
+            (
+                ("cs_1", None, pd.TimedeltaIndex([6, 9, 18], "D"), "2000-03-10"),
+                ["2000-03-16", None, None, None],
+                [np.eye(3) for _ in range(3)],
+                [[i, 0, 0] for i in [0, 0.25, 1]],
+                ([6, 9, 18], "2000-03-10"),
+            ),
+            # get cs in its parent system - system and CSM have diff. reference times
+            (
+                ("cs_1",),
+                ["2000-03-10", "2000-03-16", None, None],
+                [np.eye(3) for _ in range(3)],
+                [[i, 0, 0] for i in [0, 0.25, 1]],
+                ([6, 9, 18], "2000-03-10"),
             ),
             # get transformed cs
             (
@@ -2291,7 +2323,7 @@ class TestCoordinateSystemManager:
         orientation_4 = None
         coordinates_4 = [0, 1, 0]
 
-        csm = tf.CoordinateSystemManager("root")
+        csm = tf.CoordinateSystemManager("root", "CSM", time_refs[0])
         csm.create_cs("cs_1", "root", orientation_1, coordinates_1, time_1, time_ref_1)
         csm.create_cs("cs_2", "cs_1", orientation_2, coordinates_2, time_2, time_ref_2)
         csm.create_cs("cs_3", "cs_2", orientation_3, coordinates_3, time_3, time_ref_3)

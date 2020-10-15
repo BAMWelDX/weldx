@@ -1189,6 +1189,8 @@ class LocalCoordinateSystem:
             The new reference time
 
         """
+        if self.time is None:
+            return
         if isinstance(time_ref_new, str):
             time_ref_new = pd.Timestamp(time_ref_new)
         if self.reference_time is None:
@@ -2198,6 +2200,7 @@ class CoordinateSystemManager:
         coordinate_system_name: str,
         reference_system_name: Union[str, None] = None,
         time: Union[pd.DatetimeIndex, List, str, None] = None,
+        time_ref: pd.Timestamp = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
 
@@ -2275,6 +2278,7 @@ class CoordinateSystemManager:
         path_edges = list(zip(path[:-1], path[1:]))
 
         if time is None:
+            time_ref = None  # ignore passed reference time if no time was passed
             time_interp = self.time_union(path_edges)
 
         elif isinstance(time, str):
@@ -2285,15 +2289,28 @@ class CoordinateSystemManager:
             time_interp = self.get_local_coordinate_system(time, parent_name).time
             if time_interp is None:
                 raise ValueError(f'The system "{time}" is not time dependent')
-
         else:
             time_interp = pd.TimedeltaIndex(time)
 
-        lcs = self.graph.edges[path_edges[0]]["lcs"].interp_time(time_interp)
-        for edge in path_edges[1:]:
-            lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time_interp)
+        if time_ref is None:
+            time_ref = self.reference_time
+        else:
+            time_ref = pd.Timestamp(time_ref)
 
-        return lcs
+        time_interp, time_ref_interp = LocalCoordinateSystem._build_time_index(
+            time_interp, time_ref
+        )
+
+        lcs_result = LocalCoordinateSystem()
+        for edge in path_edges:
+            lcs = self.graph.edges[edge]["lcs"]
+            if lcs.time is not None:
+                if lcs.reference_time is None:
+                    lcs = deepcopy(lcs)
+                    lcs.reset_reference_time(self.reference_time)
+                lcs = lcs.interp_time(time_interp, time_ref_interp)
+            lcs_result += lcs
+        return lcs_result
 
     def get_parent_system_name(self, coordinate_system_name) -> Union[str, None]:
         """Get the name of a coordinate systems parent system.
