@@ -34,8 +34,9 @@ Contents
 
    tutorials
    asdf-extension
-   asdf-schemas
+   devdoc
    api
+   asdf-schemas
    CHANGELOG
    legal-notice
 

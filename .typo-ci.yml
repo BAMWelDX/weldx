@@ -110,6 +110,7 @@ excluded_words:
   - addopts
   - csm
   - coords
+  - devdoc
   - dsx
   - dtypes
   - interp
@@ -132,6 +133,8 @@ excluded_words:
   - rst
   - pycharm
   - tslibs
+  - quickstart
+  - nsecond
   # German ---------------------------------------
   - Bundesanstalt 
   - für 
