@@ -1768,7 +1768,8 @@ class CoordinateSystemManager:
         reference_system_name: str,
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
-        time: pd.DatetimeIndex = None,
+        time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = None,
+        time_ref: pd.Timestamp = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -1792,13 +1793,15 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        time_ref :
+            Reference time for time dependent coordinate systems
         lsc_child_in_parent:
             If set to 'True', the passed 'LocalCoordinateSystem' instance describes
             the new system orientation towards is parent. If 'False', it describes
             how the parent system is positioned in its new child system.
 
         """
-        lcs = LocalCoordinateSystem(orientation, coordinates, time)
+        lcs = LocalCoordinateSystem(orientation, coordinates, time, time_ref)
         self.add_cs(
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
         )
