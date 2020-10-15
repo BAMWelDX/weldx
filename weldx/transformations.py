@@ -2305,7 +2305,7 @@ class CoordinateSystemManager:
         for edge in path_edges:
             lcs = self.graph.edges[edge]["lcs"]
             if lcs.time is not None:
-                if lcs.reference_time is None:
+                if lcs.reference_time is None and self.reference_time is not None:
                     lcs = deepcopy(lcs)
                     lcs.reset_reference_time(self.reference_time)
                 lcs = lcs.interp_time(time_interp, time_ref_interp)

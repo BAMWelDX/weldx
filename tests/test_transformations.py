@@ -2243,7 +2243,7 @@ class TestCoordinateSystemManager:
                 [[i, 0, 0] for i in [0, 0.25, 1]],
                 ([6, 9, 18], "2000-03-10"),
             ),
-            # get transformed cs
+            # get transformed cs - no reference times
             (
                 ("cs_3", "root"),
                 [None, None, None, None],
@@ -2251,7 +2251,39 @@ class TestCoordinateSystemManager:
                 [[1, 0, 0] for _ in range(7)],
                 ([0, 3, 4, 6, 8, 9, 12], None),
             ),
-            # get transformed cs at times of another system
+            # get transformed cs - only CSM has reference time
+            (
+                ("cs_3", "root"),
+                ["2000-03-10", None, None, None],
+                [np.eye(3) for _ in range(7)],
+                [[1, 0, 0] for _ in range(7)],
+                ([0, 3, 4, 6, 8, 9, 12], "2000-03-10"),
+            ),
+            # get transformed cs - CSM and two systems have a reference time
+            (
+                ("cs_3", "root"),
+                ["2000-03-10", "2000-03-04", None, "2000-03-16"],
+                r_mat_x([0, 0, 0, 2 / 3, 1, 1, 1, 1, 0.5, 0]),
+                [[i, 0, 0] for i in [1, 1.25, 1.5, 1.5, 1.5, 4 / 3, 1.25, 1, 1, 1]],
+                ([-6, -3, 0, 4, 6, 8, 9, 12, 15, 18], "2000-03-10"),
+            ),
+            # get transformed cs - CSM and all systems have a reference time
+            (
+                ("cs_3", "root"),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 0, 0, 2 / 3, 1, 1, 1, 1, 0.5, 0]),
+                [[i, 0, 0] for i in [1, 1.25, 1.5, 1.5, 1.5, 4 / 3, 1.25, 1, 1, 1]],
+                ([-4, -1, 2, 6, 8, 10, 11, 14, 17, 20], "2000-03-08"),
+            ),
+            # get transformed cs - all systems have a reference time
+            (
+                ("cs_3", "root"),
+                [None, "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 0, 0, 2 / 3, 1, 1, 1, 1, 0.5, 0]),
+                [[i, 0, 0] for i in [1, 1.25, 1.5, 1.5, 1.5, 4 / 3, 1.25, 1, 1, 1]],
+                ([0, 3, 6, 10, 12, 14, 15, 18, 21, 24], "2000-03-04"),
+            ),
+            # get transformed cs at times of another system - no reference times
             (
                 ("cs_3", "root", "cs_1"),
                 [None, None, None, None],
@@ -2259,7 +2291,7 @@ class TestCoordinateSystemManager:
                 [[1, 0, 0] for _ in range(3)],
                 ([0, 3, 12], None),
             ),
-            # get transformed cs at specific times
+            # get transformed cs at specific times - no reference times
             (
                 ("cs_4", "root", pd.TimedeltaIndex([0, 3, 6, 9, 12], "D")),
                 [None, None, None, None],
