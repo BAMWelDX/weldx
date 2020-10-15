@@ -1685,7 +1685,7 @@ _groove_type_to_name = {
 _groove_name_to_type = {v: k for k, v in _groove_type_to_name.items()}
 
 
-class GrooveType(WeldxType):
+class IsoGrooveType(WeldxType):
     """ASDF Groove type."""
 
     name = "core/iso_groove"
