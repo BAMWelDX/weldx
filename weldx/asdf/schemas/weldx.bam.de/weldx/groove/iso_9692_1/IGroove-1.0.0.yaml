@@ -15,3 +15,5 @@ properties:
     $ref: "./terms-1.0.0#/definitions/root-gap"
 required: [t,b]
 propertyOrder: [t,b]
+
+...

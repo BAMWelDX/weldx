@@ -3,11 +3,9 @@
 from dataclasses import dataclass, field
 from typing import List
 
-import numpy as np
 import pint
 from asdf.tagged import tag_object
 
-import weldx.geometry as geo
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_unit_validator
@@ -234,6 +232,198 @@ class HUGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.11", "2.10"])
 
 
+@dataclass
+class DVGroove(IsoBaseGroove):
+    """A DV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    alpha_1 :
+        groove angle (upper)
+    alpha_2 :
+        groove angle (lower)
+    b :
+        root gap
+    c :
+        root face (middle)
+    h1 :
+        root face (upper)
+    h2 :
+        root face (lower)
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t: pint.Quantity
+    alpha_1: pint.Quantity
+    alpha_2: pint.Quantity
+    c: pint.Quantity = Q_(0, "mm")
+    h1: pint.Quantity = None
+    h2: pint.Quantity = None
+    b: pint.Quantity = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
+
+
+@dataclass
+class DUGroove(IsoBaseGroove):
+    """A DU-Groove
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta_1 :
+        bevel angle (upper)
+    beta_2 :
+        bevel angle (lower)
+    R :
+        bevel radius (upper)
+    R2 :
+        bevel radius (lower)
+    b :
+        root gap
+    c :
+        root face (middle)
+    h1 :
+        root face (upper)
+    h2 :
+        root face (lower)
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t: pint.Quantity
+    beta_1: pint.Quantity
+    beta_2: pint.Quantity
+    R: pint.Quantity
+    R2: pint.Quantity
+    c: pint.Quantity = Q_(3, "mm")
+    h1: pint.Quantity = None
+    h2: pint.Quantity = None
+    b: pint.Quantity = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["2.7"])
+
+
+@dataclass
+class DHVGroove(IsoBaseGroove):
+    """A DHV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta_1 :
+        bevel angle (upper)
+    beta_2 :
+        bevel angle (lower)
+    b :
+        root gap
+    c :
+        root face (middle)
+    h1 :
+        root face (upper)
+    h2 :
+        root face (lower)
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t: pint.Quantity
+    beta_1: pint.Quantity
+    beta_2: pint.Quantity
+    c: pint.Quantity = Q_(0, "mm")
+    h1: pint.Quantity = None
+    h2: pint.Quantity = None
+    b: pint.Quantity = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
+
+
+@dataclass
+class DHUGroove(IsoBaseGroove):
+    """A DHU-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta_1 :
+        bevel angle (upper)
+    beta_2 :
+        bevel angle (lower)
+    R :
+        bevel radius (upper)
+    R2 :
+        bevel radius (lower)
+    b :
+        root gap
+    c :
+        root face (middle)
+    h1 :
+        root face (upper)
+    h2 :
+        root face (lower)
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t: pint.Quantity
+    beta_1: pint.Quantity
+    beta_2: pint.Quantity
+    R: pint.Quantity
+    R2: pint.Quantity
+    c: pint.Quantity = Q_(0, "mm")
+    h1: pint.Quantity = None
+    h2: pint.Quantity = None
+    b: pint.Quantity = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["2.11"])
+
+
+@dataclass
+class FFGroove(IsoBaseGroove):
+    """A Frontal Face Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t_1 :
+        workpiece thickness
+    t_2 :
+        workpiece thickness, if second thickness is needed
+    alpha :
+        groove angle
+    b :
+        root gap
+    e :
+        special depth
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t_1: pint.Quantity
+    t_2: pint.Quantity = None
+    alpha: pint.Quantity = None
+    # ["1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"]
+    code_number: str = None
+    b: pint.Quantity = None
+    e: pint.Quantity = None
+
+
 _groove_type_to_name = {
     IGroove: "IGroove",
     VGroove: "VGroove",
@@ -242,11 +432,11 @@ _groove_type_to_name = {
     UGroove: "UGroove",
     HVGroove: "HVGroove",
     HUGroove: "HUGroove",
-    # DVGroove: "DVGroove",
-    # DUGroove: "DUGroove",
-    # DHVGroove: "DHVGroove",
-    # DHUGroove: "DHUGroove",
-    # FFGroove: "FFGroove",
+    DVGroove: "DVGroove",
+    DUGroove: "DUGroove",
+    DHVGroove: "DHVGroove",
+    DHUGroove: "DHUGroove",
+    FFGroove: "FFGroove",
 }
 
 _groove_name_to_type = {v: k for k, v in _groove_type_to_name.items()}

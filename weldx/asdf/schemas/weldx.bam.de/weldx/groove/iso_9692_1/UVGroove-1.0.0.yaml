@@ -23,3 +23,5 @@ properties:
     $ref: "./terms-1.0.0#/definitions/root-face"
 required: [t, alpha, beta, R, b, h]
 propertyOrder: [t, alpha, beta, R, b, h]
+
+...
