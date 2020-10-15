@@ -5,7 +5,7 @@ id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1/IGroove-1.0.0"
 tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1/IGroove-1.0.0"
 
 title: |
-  I-Groove representation.
+  IGroove representation.
 
 type: object
 properties:

@@ -76,14 +76,172 @@ class VGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
 
+@dataclass
+class VVGroove(IsoBaseGroove):
+    """A VV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    alpha :
+        groove angle
+    beta :
+        bevel angle
+    b :
+        root gap
+    c :
+        root face
+    h :
+        root face 2
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t: pint.Quantity
+    alpha: pint.Quantity
+    beta: pint.Quantity
+    h: pint.Quantity
+    c: pint.Quantity = Q_(0, "mm")
+    b: pint.Quantity = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.7"])
+
+
+@dataclass
+class UVGroove(IsoBaseGroove):
+    """A UV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    alpha :
+        groove angle
+    beta :
+        bevel angle
+    R :
+        bevel radius
+    b :
+        root gap
+    h :
+        root face
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t: pint.Quantity
+    alpha: pint.Quantity
+    beta: pint.Quantity
+    R: pint.Quantity
+    h: pint.Quantity = Q_(0, "mm")
+    b: pint.Quantity = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.6"])
+
+
+@dataclass
+class UGroove(IsoBaseGroove):
+    """An U-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta :
+        bevel angle
+    R :
+        bevel radius
+    b :
+        root gap
+    c :
+        root face
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t: pint.Quantity
+    beta: pint.Quantity
+    R: pint.Quantity
+    c: pint.Quantity = Q_(0, "mm")
+    b: pint.Quantity = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.8"])
+
+
+@dataclass
+class HVGroove(IsoBaseGroove):
+    """A HV-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta :
+        bevel angle
+    b :
+        root gap
+    c :
+        root face
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t: pint.Quantity
+    beta: pint.Quantity
+    c: pint.Quantity = Q_(0, "mm")
+    b: pint.Quantity = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
+
+
+@dataclass
+class HUGroove(IsoBaseGroove):
+    """A HU-Groove.
+
+    For a detailed description of the execution look in get_groove.
+
+    Parameters
+    ----------
+    t :
+        workpiece thickness
+    beta :
+        bevel angle
+    R :
+        bevel radius
+    b :
+        root gap
+    c :
+        root face
+    code_number :
+        Numbers of the standard
+
+    """
+
+    t: pint.Quantity
+    beta: pint.Quantity
+    R: pint.Quantity
+    c: pint.Quantity = Q_(0, "mm")
+    b: pint.Quantity = Q_(0, "mm")
+    code_number: List[str] = field(default_factory=lambda: ["1.11", "2.10"])
+
+
 _groove_type_to_name = {
-    VGroove: "VGroove",
-    # VVGroove: "VVGroove",
-    # UVGroove: "UVGroove",
-    # UGroove: "UGroove",
     IGroove: "IGroove",
-    # HVGroove: "HVGroove",
-    # HUGroove: "HUGroove",
+    VGroove: "VGroove",
+    VVGroove: "VVGroove",
+    UVGroove: "UVGroove",
+    UGroove: "UGroove",
+    HVGroove: "HVGroove",
+    HUGroove: "HUGroove",
     # DVGroove: "DVGroove",
     # DUGroove: "DUGroove",
     # DHVGroove: "DHVGroove",
@@ -102,12 +260,9 @@ def _get_class_from_tag(instance_tag: str):
 class IsoGrooveType(WeldxType):
     """ASDF Groove type."""
 
-    name = ["groove/iso_9692_1/IGroove", "groove/iso_9692_1/VGroove"]
+    name = ["groove/iso_9692_1/" + g for g in _groove_name_to_type.keys()]
     version = "1.0.0"
-    types = [
-        IGroove,
-        VGroove,
-    ]
+    types = [IsoBaseGroove]
     requires = ["weldx"]
     validators = {"wx_unit": wx_unit_validator}
 

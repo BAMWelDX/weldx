@@ -1,0 +1,23 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1/HUGroove-1.0.0"
+tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1/HUGroove-1.0.0"
+
+title: |
+  HUGroove representation.
+
+type: object
+properties:
+  t:
+    $ref: "#/definitions/workpiece-thickness"
+  beta:
+    $ref: "#/definitions/bevel-angle"
+  R:
+    $ref: "#/definitions/bevel-radius"
+  b:
+    $ref: "#/definitions/root-gap"
+  c:
+    $ref: "#/definitions/root-face"
+required: [t, beta, R, b, c]
+propertyOrder: [t, beta, R, b, c]

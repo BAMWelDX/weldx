@@ -5,7 +5,7 @@ id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1/VGroove-1.0.0"
 tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1/VGroove-1.0.0"
 
 title: |
-  V-Groove representation.
+  VGroove representation.
 
 type: object
 properties:
