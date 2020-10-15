@@ -121,6 +121,96 @@ def rotated_positive_orthogonal_basis(
     return r_tot
 
 
+def check_coordinate_system_orientation(
+    orientation: xr.DataArray,
+    orientation_expected: np.ndarray,
+    positive_orientation_expected: bool,
+):
+    """Check if the orientation of a local coordinate system is as expected.
+
+    Parameters
+    ----------
+    orientation :
+        Orientation
+    orientation_expected :
+        Expected orientation
+    positive_orientation_expected :
+        True, if the orientation is expected to be
+        positive. False otherwise.
+
+    """
+    # test expected positive orientation
+    det = np.linalg.det(orientation.sel(v=[2, 0, 1]))
+    assert np.all((det > 0) == positive_orientation_expected)
+
+    assert tf.is_orthogonal_matrix(orientation.values)
+
+    orientation_expected = tf.normalize(orientation_expected)
+
+    assert np.allclose(orientation, orientation_expected)
+
+
+def check_coordinate_system(
+    lcs: tf.LocalCoordinateSystem,
+    orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
+    coordinates_expected: Union[np.ndarray, List[Any], xr.DataArray],
+    positive_orientation_expected: bool = True,
+    time=None,
+    time_ref=None,
+):
+    """Check the values of a coordinate system.
+
+    Parameters
+    ----------
+    lcs :
+        Coordinate system that should be checked
+    orientation_expected :
+        Expected orientation
+    coordinates_expected :
+        Expected coordinates
+    positive_orientation_expected :
+        Expected orientation
+    time :
+        A pandas.DatetimeIndex object, if the coordinate system is expected to
+        be time dependent. None otherwise.
+    time_ref:
+        The expected reference time
+
+    """
+    orientation_expected = np.array(orientation_expected)
+    coordinates_expected = np.array(coordinates_expected)
+
+    if time is not None:
+        assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
+        assert np.all(lcs.time == time)
+        assert lcs.reference_time == time_ref
+
+    check_coordinate_system_orientation(
+        lcs.orientation, orientation_expected, positive_orientation_expected
+    )
+
+    assert np.allclose(lcs.coordinates.values, coordinates_expected, atol=1e-9)
+
+
+def check_coordinate_systems_close(lcs_0, lcs_1):
+    """Check if 2 coordinate systems are nearly identical.
+
+    Parameters
+    ----------
+    lcs_0:
+        First coordinate system.
+    lcs_1
+        Second coordinate system.
+
+    """
+    time = None
+    if "time" in lcs_1.dataset:
+        time = lcs_1.time
+    check_coordinate_system(
+        lcs_0, lcs_1.orientation.data, lcs_1.coordinates.data, True, time
+    )
+
+
 # test functions --------------------------------------------------------------
 
 
@@ -457,80 +547,6 @@ def r_mat_z(factors) -> np.ndarray:
 class TestLocalCoordinateSystem:
     """Test the 'LocalCoordinateSystem' class."""
 
-    # support functions ----------------------------------------------------------------
-
-    @staticmethod
-    def check_coordinate_system_orientation(
-        orientation: xr.DataArray,
-        orientation_expected: np.ndarray,
-        positive_orientation_expected: bool,
-    ):
-        """Check if the orientation of a local coordinate system is as expected.
-
-        Parameters
-        ----------
-        orientation :
-            Orientation
-        orientation_expected :
-            Expected orientation
-        positive_orientation_expected :
-            True, if the orientation is expected to be
-            positive. False otherwise.
-
-        """
-        # test expected positive orientation
-        det = np.linalg.det(orientation.sel(v=[2, 0, 1]))
-        assert np.all((det > 0) == positive_orientation_expected)
-
-        assert tf.is_orthogonal_matrix(orientation.values)
-
-        orientation_expected = tf.normalize(orientation_expected)
-
-        assert np.allclose(orientation, orientation_expected)
-
-    @classmethod
-    def check_coordinate_system(
-        cls,
-        lcs: tf.LocalCoordinateSystem,
-        orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
-        coordinates_expected: Union[np.ndarray, List[Any], xr.DataArray],
-        positive_orientation_expected: bool = True,
-        time=None,
-        time_ref=None,
-    ):
-        """Check the values of a coordinate system.
-
-        Parameters
-        ----------
-        lcs :
-            Coordinate system that should be checked
-        orientation_expected :
-            Expected orientation
-        coordinates_expected :
-            Expected coordinates
-        positive_orientation_expected :
-            Expected orientation
-        time :
-            A pandas.DatetimeIndex object, if the coordinate system is expected to
-            be time dependent. None otherwise.
-        time_ref:
-            The expected reference time
-
-        """
-        orientation_expected = np.array(orientation_expected)
-        coordinates_expected = np.array(coordinates_expected)
-
-        if time is not None:
-            assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
-            check_coordinate_system_time(lcs, time)
-            assert lcs.reference_time == time_ref
-
-        cls.check_coordinate_system_orientation(
-            lcs.orientation, orientation_expected, positive_orientation_expected
-        )
-
-        assert np.allclose(lcs.coordinates.values, coordinates_expected, atol=1e-9)
-
     # test_init_time_formats -----------------------------------------------------------
 
     timestamp = TS("2000-01-01")
@@ -792,13 +808,13 @@ class TestLocalCoordinateSystem:
 
         # test time as input
         lcs_interp = lcs.interp_time(time, time_ref)
-        self.check_coordinate_system(
+        check_coordinate_system(
             lcs_interp, orientation_exp, coordinates_exp, True, time, time_ref
         )
 
         # test lcs as input
         lcs_interp_like = lcs.interp_time(lcs_interp)
-        self.check_coordinate_system(
+        check_coordinate_system(
             lcs_interp_like, orientation_exp, coordinates_exp, True, time, time_ref
         )
 
@@ -1018,7 +1034,7 @@ class TestLocalCoordinateSystem:
             Expected reference time of the resulting coordinate system
 
         """
-        self.check_coordinate_system(
+        check_coordinate_system(
             lcs_lhs + lcs_rhs,
             orientation_exp,
             coordinates_exp,
@@ -1200,7 +1216,7 @@ class TestLocalCoordinateSystem:
             Expected reference time of the resulting coordinate system
 
         """
-        self.check_coordinate_system(
+        check_coordinate_system(
             lcs_lhs - lcs_rhs,
             orientation_exp,
             coordinates_exp,
@@ -1208,106 +1224,6 @@ class TestLocalCoordinateSystem:
             time_exp,
             time_ref_exp,
         )
-
-
-def check_coordinate_system_time(lcs: tf.LocalCoordinateSystem, expected_time):
-    """Check if the time component of a LocalCoordinateSystem is as expected.
-
-    Parameters
-    ----------
-    lcs :
-        Local coordinate system class
-    expected_time :
-        Expected time
-
-    """
-    assert np.all(lcs.time == expected_time)
-
-
-def check_coordinate_system_orientation(
-    orientation: xr.DataArray,
-    orientation_expected: np.ndarray,
-    positive_orientation_expected: bool,
-):
-    """Check if the orientation of a local coordinate system is as expected.
-
-    Parameters
-    ----------
-    orientation :
-        Orientation
-    orientation_expected :
-        Expected orientation
-    positive_orientation_expected :
-        True, if the orientation is expected to be
-        positive. False otherwise.
-
-    """
-    # test expected positive orientation
-    det = np.linalg.det(orientation.sel(v=[2, 0, 1]))
-    assert np.all((det > 0) == positive_orientation_expected)
-
-    assert tf.is_orthogonal_matrix(orientation.values)
-
-    orientation_expected = tf.normalize(orientation_expected)
-
-    assert np.allclose(orientation, orientation_expected)
-
-
-def check_coordinate_system(
-    cs_p: tf.LocalCoordinateSystem,
-    orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
-    coordinates_expected: Union[np.ndarray, List[Any], xr.DataArray],
-    positive_orientation_expected: bool = True,
-    time=None,
-):
-    """Check the values of a coordinate system.
-
-    Parameters
-    ----------
-    cs_p :
-        Coordinate system that should be checked
-    orientation_expected :
-        Expected orientation
-    coordinates_expected :
-        Expected coordinates
-    positive_orientation_expected :
-        Expected orientation
-    time :
-        A pandas.DatetimeIndex object, if the coordinate system is expected to
-        be time dependent. None otherwise.
-
-    """
-    orientation_expected = np.array(orientation_expected)
-    coordinates_expected = np.array(coordinates_expected)
-
-    if time is not None:
-        assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
-        check_coordinate_system_time(cs_p, time)
-
-    check_coordinate_system_orientation(
-        cs_p.orientation, orientation_expected, positive_orientation_expected
-    )
-
-    assert np.allclose(cs_p.coordinates.values, coordinates_expected, atol=1e-9)
-
-
-def check_coordinate_systems_close(lcs_0, lcs_1):
-    """Check if 2 coordinate systems are nearly identical.
-
-    Parameters
-    ----------
-    lcs_0:
-        First coordinate system.
-    lcs_1
-        Second coordinate system.
-
-    """
-    time = None
-    if "time" in lcs_1.dataset:
-        time = lcs_1.time
-    check_coordinate_system(
-        lcs_0, lcs_1.orientation.data, lcs_1.coordinates.data, True, time
-    )
 
 
 def test_coordinate_system_init():
@@ -2280,6 +2196,68 @@ class TestCoordinateSystemManager:
             True,
         )
 
+    # test_get_local_coordinate_system_time_dep -------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "system_name, reference_name, exp_orientation, exp_coordinates",
+        [("lcs_2", "root", r_mat_z(0.5), [1, 2, 3]),],
+    )
+    def test_get_local_coordinate_system_time_dep(
+        system_name, reference_name, exp_orientation, exp_coordinates
+    ):
+        """Test the ``get_local_coordinate_system`` function with time dependencies.
+
+        Have a look into the tests setup section to see which coordinate systems are
+        defined in the CSM.
+
+        Parameters
+        ----------
+        system_name : str
+            Name of the system that should be returned
+        reference_name : str
+            Name of the reference system
+        exp_orientation : List or numpy.ndarray
+            The expected orientation of the returned system
+        exp_coordinates
+            The expected coordinates of the returned system
+
+        """
+        # setup -------------------------------------------
+        # moves in positive x-direction
+        time_0 = TDI([0, 3, 12], "D")
+        orientation_0 = None
+        coordinates_0 = [[i, 0, 0] for i in [0, 0.25, 1]]
+
+        # moves in negative x-direction and rotates positively around the x-axis
+        time_1 = TDI([0, 4, 8, 12], "D")
+        coordinates_1 = [[-i, 0, 0] for i in [0, 1 / 3, 2 / 3, 1]]
+        orientation_1 = r_mat_x([0, 2 / 3, 4 / 3, 2])
+
+        # rotates negatively around the x-axis
+        time_2 = TDI([0, 3, 6, 9, 12], "D")
+        coordinates_2 = [1, 0, 0]
+        orientation_2 = r_mat_x([0, -0.5, -1, -1.5, -2])
+
+        # static
+        time_3 = None
+        orientation_3 = None
+        coordinates_3 = [0, 1, 0]
+
+        csm = tf.CoordinateSystemManager("root")
+        csm.create_cs("lcs_0", "root", orientation_0, coordinates_0, time_0)
+        csm.create_cs("lcs_1", "lcs_0", orientation_1, coordinates_1, time_1)
+        csm.create_cs("lcs_2", "lcs_1", orientation_2, coordinates_2, time_2)
+        csm.create_cs("lcs_3", "lcs_1", orientation_3, coordinates_3, time_3)
+
+        print(csm.get_local_coordinate_system(system_name, reference_name).coordinates)
+        # check_coordinate_system(
+        #    csm.get_local_coordinate_system(system_name, reference_name),
+        #    exp_orientation,
+        #    exp_coordinates,
+        #    True,
+        # )
+
     # test_get_local_coordinate_system_exceptions --------------------------------------
 
     @staticmethod
@@ -2305,7 +2283,7 @@ class TestCoordinateSystemManager:
         reference_name : str
             Name of the reference system
         exception_type :
-            Expected exeption type
+            Expected exception type
         test_name : str
             Name of the testcase
 
