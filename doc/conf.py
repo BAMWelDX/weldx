@@ -18,6 +18,7 @@ import sys
 import traitlets
 
 import weldx
+from weldx.asdf.constants import WELDX_TAG_BASE
 
 sys.path.insert(0, os.path.abspath(""))
 
@@ -126,7 +127,7 @@ asdf_schema_reference_mappings = [
         "http://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/",
     ),
     (
-        "tag:weldx.bam.de:weldx",
+        WELDX_TAG_BASE,
         "http://weldx.readthedocs.io/en/latest/generated/weldx.bam.de/weldx/",
     ),
 ]

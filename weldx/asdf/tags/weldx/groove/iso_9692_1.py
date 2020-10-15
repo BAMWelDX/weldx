@@ -6,6 +6,7 @@ from typing import List
 import pint
 from asdf.tagged import tag_object
 
+from weldx.asdf.constants import WELDX_TAG_BASE
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_unit_validator
@@ -447,10 +448,13 @@ def _get_class_from_tag(instance_tag: str):
     return groove_tag.rpartition("-")[0]
 
 
+_ISO_GROOVE_SCHEMA = "groove/iso_9692_1/"
+
+
 class IsoGrooveType(WeldxType):
     """ASDF Groove type."""
 
-    name = ["groove/iso_9692_1/" + g for g in _groove_name_to_type.keys()]
+    name = [_ISO_GROOVE_SCHEMA + g for g in _groove_name_to_type.keys()]
     version = "1.0.0"
     types = [IsoBaseGroove]
     requires = ["weldx"]
@@ -467,7 +471,9 @@ class IsoGrooveType(WeldxType):
         """Serialize tree with custom tag definition."""
         tree = cls.to_tree(node, ctx)
         tag = (
-            "tag:weldx.bam.de:weldx/groove/iso_9692_1/"
+            WELDX_TAG_BASE
+            + "/"
+            + _ISO_GROOVE_SCHEMA
             + type(node).__name__
             + "-"
             + str(cls.version)
