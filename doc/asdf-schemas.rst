@@ -9,3 +9,4 @@ ASDF Schema Definitions
    schemas/measurement.rst
    schemas/process.rst
    schemas/time.rst
+   schemas/groove.rst
