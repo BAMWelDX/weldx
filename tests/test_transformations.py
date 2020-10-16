@@ -2470,15 +2470,50 @@ class TestCoordinateSystemManager:
     ):
         """Test the ``get_local_coordinate_system`` function with time dependencies.
 
-        Have a look into the tests setup section to see which coordinate systems are
-        defined in the CSM.
+        The test setup is as follows:
+
+        - 'cs_1' moves in 12 days 1 unit along the x-axis in positive direction.
+          It starts at the origin and refers to the root system
+        - 'cs_2' moves in 12 days 1 unit along the x-axis in negative direction.
+          In the same time it positively rotates 360 degrees around the x-axis.
+          It starts at the origin and refers to 'cs_1'
+        - 'cs_3' rotates in 12 days 360 degrees negatively around the x-axis.
+          It remains static at the coordinate [1, 0, 0] and refers to 'cs_2'
+        - 'cs_4' remains static at the coordinates [0, 1, 0] of its reference system
+          'cs_2'
+        - initially and after their movements, all systems have the same orientation as
+          their refernce system
+
+        In case all systems have the same reference time, the following behavior can be
+        observed in the root system:
+
+        - 'cs_1' moves as described before
+        - 'cs_2' remains at the origin and rotates around the x-axis
+        - 'cs_3' remains completly static at the coordinades [1, 0, 0]
+        - 'cs_4' rotates around the x-axis with a fixed distance of 1 unit to the origin
+
+        Have a look into the tests setup for further details.
 
         Parameters
         ----------
+        function_arguments : Tuple
+            A tuple of values that should be passed to the function
+        time_refs : List(str)
+            A list of date strings. The first entry is used as reference time of the
+            CSM. The others are passed as reference times to the coordinate systems that
+            have the same number as the list index in their name. For example: The
+            second list value with index 1 belongs to 'cs_1'.
         exp_orientation : List or numpy.ndarray
             The expected orientation of the returned system
         exp_coordinates
             The expected coordinates of the returned system
+        exp_time_data : Tuple(List(int), str)
+            A tuple containing the expected time data of the returned coordinate system.
+            The first value is a list of the expected time deltas and the second value
+            is the expected reference time as date string.
+        exp_failure : bool
+            Set to `True` if the function call with the given parameters should raise an
+            error
 
         """
         # setup -------------------------------------------
@@ -2562,10 +2597,8 @@ class TestCoordinateSystemManager:
 
         Parameters
         ----------
-        system_name : str
-            Name of the system that should be returned
-        reference_name : str
-            Name of the reference system
+        function_arguments : Tuple
+            A tuple of values that should be passed to the function
         exception_type :
             Expected exception type
         test_name : str
