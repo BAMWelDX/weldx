@@ -2199,7 +2199,7 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: Union[str, None] = None,
-        time: Union[pd.DatetimeIndex, List, str, None] = None,
+        time: Union[pd.TimedeltaIndex, pd.DatetimeIndex, pint.Quantity, str] = None,
         time_ref: pd.Timestamp = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
@@ -2215,6 +2215,49 @@ class CoordinateSystemManager:
 
         Notes
         -----
+        **Reference time of the returned system**
+
+        The reference time of the returned coordinate system depends on multiple
+        factors like the one passed to the function and the internally stored reference
+        times. Generally, the following rules apply:
+
+        - if a reference time was passed to the function, it will be used as reference
+          time of the returned coordinate system as long as a time was also passed to
+          the function.
+        - else the reference time of the `CoordinateSystemManager` will be used if it
+          has one
+        - if only the coordinate systems have a reference time, the lowest (earliest)
+          will be used
+        - if there is no reference time at all, the resulting coordinate system won't
+          have one either
+
+        A overview of all possible combinations is given in the table below:
+
+        +------------+--------------+-----------+----------------+-----------------+
+        | function   | function has | CSM has   | CS have        | Returned system |
+        | has        | reference    | reference | reference      | uses reference  |
+        | time       | time         | time      | times          | time of         |
+        +============+==============+===========+================+=================+
+        | Yes        | Yes          | Yes       | all/mixed/none | function        |
+        +------------+--------------+-----------+----------------+-----------------+
+        | No         | Yes          | Yes       | all/mixed/none | CSM             |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes / No   | No           | Yes       | all/mixed/none | CSM             |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes        | Yes          | No        | all            | function        |
+        +------------+--------------+-----------+----------------+-----------------+
+        | No         | Yes          | No        | all            | CS (lowest)     |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes / No   | Yes / No     | No        | mixed          | impossible *1)  |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes / No   | Yes          | No        | none           | error *2)       |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes / No   | No           | No        | all            | CS (lowest)     |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes / No   | No           | No        | none           | `None`          |
+        +------------+--------------+-----------+----------------+-----------------+
+
+
         **Information regarding the implementation:**
 
         It is important to mention that all coordinate systems that are involved in the
@@ -2247,11 +2290,12 @@ class CoordinateSystemManager:
             Name of the coordinate system
         reference_system_name :
             Name of the reference coordinate system
-        time:
-            Either a pandas.DatetimeIndex that specifies the target timestamps of the
-            returned system, the name of another coordinate system that provides the
-            timestamps or 'None'. If 'None' is chosen, the time union of all involved
-            transformations is used.
+        time : pandas.TimedeltaIndex, pandas.Datetimeindex, pint.Quantity or str
+            Specifies the desired time of the returned coordinate system. You can also
+            pass the name of another coordinate system to use its time attribute as
+            reference
+        time_ref : pandas.Timestamp
+            The desired reference time of the returned coordinate system
 
         Returns
         -------
