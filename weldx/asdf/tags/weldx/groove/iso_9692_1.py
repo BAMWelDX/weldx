@@ -269,6 +269,15 @@ class DVGroove(IsoBaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
 
+    def __post_init__(self):
+        if self.h1 is None and self.h2 is None:
+            self.h1 = (self.t - self.c) / 2
+            self.h2 = (self.t - self.c) / 2
+        elif self.h1 is not None and self.h2 is None:
+            self.h2 = self.h1
+        elif self.h1 is None and self.h2 is not None:
+            self.h1 = self.h2
+
 
 @dataclass
 class DUGroove(IsoBaseGroove):
@@ -312,6 +321,15 @@ class DUGroove(IsoBaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.7"])
 
+    def __post_init__(self):
+        if self.h1 is None and self.h2 is None:
+            self.h1 = (self.t - self.c) / 2
+            self.h2 = (self.t - self.c) / 2
+        elif self.h1 is not None and self.h2 is None:
+            self.h2 = self.h1
+        elif self.h1 is None and self.h2 is not None:
+            self.h1 = self.h2
+
 
 @dataclass
 class DHVGroove(IsoBaseGroove):
@@ -348,6 +366,15 @@ class DHVGroove(IsoBaseGroove):
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
+
+    def __post_init__(self):
+        if self.h1 is None and self.h2 is None:
+            self.h1 = (self.t - self.c) / 2
+            self.h2 = (self.t - self.c) / 2
+        elif self.h1 is not None and self.h2 is None:
+            self.h2 = self.h1
+        elif self.h1 is None and self.h2 is not None:
+            self.h1 = self.h2
 
 
 @dataclass
@@ -391,6 +418,15 @@ class DHUGroove(IsoBaseGroove):
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["2.11"])
+
+    def __post_init__(self):
+        if self.h1 is None and self.h2 is None:
+            self.h1 = (self.t - self.c) / 2
+            self.h2 = (self.t - self.c) / 2
+        elif self.h1 is not None and self.h2 is None:
+            self.h2 = self.h1
+        elif self.h1 is None and self.h2 is not None:
+            self.h1 = self.h2
 
 
 @dataclass
