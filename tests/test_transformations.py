@@ -2436,6 +2436,28 @@ class TestCoordinateSystemManager:
                 ([0, 12, 14], "2000-03-16"),
                 False,
             ),
+            # should fail - if only the coordinate systems have a reference time,
+            # passing just a time delta results in an undefined reference timestamp of
+            # the resulting coordinate system
+            (
+                ("cs_3", "root", pd.TimedeltaIndex([0, 8, 20], "D")),
+                [None, "2000-03-04", "2000-03-10", "2000-03-16"],
+                None,
+                None,
+                (None, None),
+                True,
+            ),
+            # should fail - if neither the CSM nor its attached coordinate systems have
+            # a reference time, passing one to the function results in undefined
+            # behavior
+            (
+                ("cs_3", "root", pd.TimedeltaIndex([0, 8, 20], "D"), "2000-03-16"),
+                [None, None, None, None],
+                None,
+                None,
+                (None, None),
+                True,
+            ),
         ],
     )
     def test_get_local_coordinate_system_time_dep(
@@ -2495,38 +2517,46 @@ class TestCoordinateSystemManager:
         csm.create_cs("cs_3", "cs_2", orientation_3, coordinates_3, time_3, time_ref_3)
         csm.create_cs("cs_4", "cs_2", orientation_4, coordinates_4, time_4, time_ref_4)
 
-        # create expected time data
-        exp_time = exp_time_data[0]
-        if exp_time is not None:
-            exp_time = pd.TimedeltaIndex(exp_time, "D")
-        exp_time_ref = exp_time_data[1]
-        if exp_time_ref is not None:
-            exp_time_ref = pd.Timestamp(exp_time_ref)
+        if not exp_failure:
+            # create expected time data
+            exp_time = exp_time_data[0]
+            if exp_time is not None:
+                exp_time = pd.TimedeltaIndex(exp_time, "D")
+            exp_time_ref = exp_time_data[1]
+            if exp_time_ref is not None:
+                exp_time_ref = pd.Timestamp(exp_time_ref)
 
-        check_coordinate_system(
-            csm.get_local_coordinate_system(*function_arguments),
-            exp_orientation,
-            exp_coordinates,
-            True,
-            exp_time,
-            exp_time_ref,
-        )
+            check_coordinate_system(
+                csm.get_local_coordinate_system(*function_arguments),
+                exp_orientation,
+                exp_coordinates,
+                True,
+                exp_time,
+                exp_time_ref,
+            )
+        else:
+            with pytest.raises(Exception):
+                csm.get_local_coordinate_system(*function_arguments)
 
     # test_get_local_coordinate_system_exceptions --------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize(
-        "system_name, reference_name, exception_type, test_name",
+        "function_arguments, exception_type, test_name",
         [
-            ("not there", "root", ValueError, "# system does not exist"),
-            ("root", "not there", ValueError, "# reference system does not exist"),
-            ("not there", "not there", ValueError, "# both systems do not exist"),
-            ("not there", None, ValueError, "# root system has no reference"),
+            (("not there", "root"), ValueError, "# system does not exist"),
+            (("root", "not there"), ValueError, "# reference system does not exist"),
+            (("not there", "not there"), ValueError, "# both systems do not exist"),
+            (("not there", None), ValueError, "# root system has no reference"),
+            (("cs_4", "root", "not there"), ValueError, "# ref. system does not exist"),
+            (("cs_4", "root", "cs_1"), ValueError, "# ref. system is not time dep."),
+            (("cs_4", "root", 1), TypeError, "# Invalid time type #1"),
+            (("cs_4", "root", ["grr", "4", "af"]), Exception, "# Invalid time type #2"),
         ],
         ids=get_test_name,
     )
     def test_get_local_coordinate_system_exceptions(
-        system_name, reference_name, exception_type, test_name
+        function_arguments, exception_type, test_name
     ):
         """Test the exceptions of the ``get_local_coordinate_system`` function.
 
@@ -2543,14 +2573,19 @@ class TestCoordinateSystemManager:
 
         """
         # setup
+        time_1 = TDI([0, 3], "D")
+        time_2 = TDI([4, 7], "D")
+
         csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
-        csm.create_cs("lcs_1", "root", r_mat_z(0.5), [1, 2, 3])
-        csm.create_cs("lcs_2", "root", r_mat_y(0.5), [3, -3, 1])
-        csm.create_cs("lcs_3", "lcs_2", r_mat_x(0.5), [1, -1, 3])
+        csm.create_cs("cs_1", "root", r_mat_z(0.5), [1, 2, 3])
+        csm.create_cs("cs_2", "root", r_mat_y(0.5), [3, -3, 1])
+        csm.create_cs("cs_3", "cs_2", r_mat_x(0.5), [1, -1, 3])
+        csm.create_cs("cs_4", "cs_2", r_mat_x([0, 1]), [2, -1, 2], time=time_1)
+        csm.create_cs("cs_5", "root", r_mat_y([0, 1]), [1, -7, 3], time=time_2)
 
         # test
         with pytest.raises(exception_type):
-            csm.get_local_coordinate_system(system_name, reference_name)
+            csm.get_local_coordinate_system(*function_arguments)
 
     # test_merge -----------------------------------------------------------------------
 
@@ -3138,60 +3173,6 @@ def test_coordinate_system_manager_create_coordinate_system():
         True,
         time=time,
     )
-
-
-def test_coordinate_system_manager_get_local_coordinate_system_time_dependent():
-    """Test the get_local_coordinate_system function with time dependent systems.
-
-    The point of this test is to assure that necessary time interpolations do not cause
-    wrong results when transforming to the desired reference coordinate system.
-    """
-    # TODO: Make the test more flexible
-    # Currently, the test only works with times that have specific boundaries. The
-    # reason for this is how the expected results are calculated.
-    lcs_0_time = TDI([i * 6 for i in range(49)], "H")
-    lcs_0_coordinates = np.zeros([len(lcs_0_time), 3])
-    lcs_0_in_root = tf.LocalCoordinateSystem(
-        coordinates=lcs_0_coordinates, time=lcs_0_time
-    )
-
-    lcs_1_time = TDI([0, 4, 8, 12], "D")
-    lcs_1_coordinates = [[0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0]]
-    lcs_1_orientation = tf.rotation_matrix_z(np.array([0, 1 / 3, 2 / 3, 1]) * np.pi * 2)
-    lcs_1_in_lcs0 = tf.LocalCoordinateSystem(
-        coordinates=lcs_1_coordinates, orientation=lcs_1_orientation, time=lcs_1_time
-    )
-
-    lcs_2_time = TDI([0, 4, 8, 12], "D")
-    lcs_2_coordinates = [1, 0, 0]
-    lcs_2_orientation = tf.rotation_matrix_z(np.array([0, 1 / 3, 2 / 3, 1]) * np.pi * 2)
-    lcs_2_in_lcs1 = tf.LocalCoordinateSystem(
-        coordinates=lcs_2_coordinates, orientation=lcs_2_orientation, time=lcs_2_time
-    )
-
-    lcs_3_in_lcs1 = tf.LocalCoordinateSystem(coordinates=[0, 1, 0])
-
-    csm = tf.CoordinateSystemManager("root")
-    csm.add_cs("lcs_0", "root", lcs_0_in_root)
-    csm.add_cs("lcs_1", "lcs_0", lcs_1_in_lcs0)
-    csm.add_cs("lcs_2", "lcs_1", lcs_2_in_lcs1)
-    csm.add_cs("lcs_3", "lcs_1", lcs_3_in_lcs1)
-
-    # exceptions --------------------------------
-    # time reference system does not exist
-    with pytest.raises(ValueError):
-        csm.get_local_coordinate_system("lcs_2", "root", "not there")
-    # root system is never time dependent
-    with pytest.raises(ValueError):
-        csm.get_local_coordinate_system("lcs_2", "root", "root")
-    # time reference system is not time dependent
-    with pytest.raises(ValueError):
-        csm.get_local_coordinate_system("lcs_2", "root", "lcs_3")
-    # invalid inputs
-    with pytest.raises(TypeError):
-        csm.get_local_coordinate_system("lcs_2", "root", 1)
-    with pytest.raises(Exception):
-        csm.get_local_coordinate_system("lcs_2", "root", ["grr", "42", "asdf"])
 
 
 def test_coordinate_system_manager_interp_time():
