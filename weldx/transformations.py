@@ -2279,18 +2279,18 @@ class CoordinateSystemManager:
 
         if time is None:
             time_ref = None  # ignore passed reference time if no time was passed
-            time_interp = self.time_union(path_edges)
+            time = self.time_union(path_edges)
 
         elif isinstance(time, str):
             parent_name = self.get_parent_system_name(time)
             if parent_name is None:
                 raise ValueError("The root system has no time dependency.")
 
-            time_interp = self.get_local_coordinate_system(time, parent_name).time
-            if time_interp is None:
+            time = self.get_local_coordinate_system(time, parent_name).time
+            if time is None:
                 raise ValueError(f'The system "{time}" is not time dependent')
-        else:
-            time_interp = pd.TimedeltaIndex(time)
+        elif not isinstance(time, (pd.DatetimeIndex, pint.Quantity)):
+            time = pd.TimedeltaIndex(time)
 
         if time_ref is None:
             time_ref = self.reference_time
@@ -2298,7 +2298,7 @@ class CoordinateSystemManager:
             time_ref = pd.Timestamp(time_ref)
 
         time_interp, time_ref_interp = LocalCoordinateSystem._build_time_index(
-            time_interp, time_ref
+            time, time_ref
         )
 
         lcs_result = LocalCoordinateSystem()

@@ -2283,6 +2283,51 @@ class TestCoordinateSystemManager:
                 [[i, 0, 0] for i in [1, 1.25, 1.5, 1.5, 1.5, 4 / 3, 1.25, 1, 1, 1]],
                 ([0, 3, 6, 10, 12, 14, 15, 18, 21, 24], "2000-03-04"),
             ),
+            # get transformed cs at specific times - all systems and CSM have a
+            # reference time
+            (
+                ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D")),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+            ),
+            # get transformed cs at specific times - some systems, CSM and function
+            # have a reference time
+            (
+                ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D"), "2000-03-08"),
+                ["2000-03-10", "2000-03-04", None, "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+            ),
+            # get transformed cs at specific times - all systems, CSM and function
+            # have a reference time
+            (
+                ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D"), "2000-03-08"),
+                ["2000-03-02", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+            ),
+            # get transformed cs at specific times - all systems, and the function
+            # have a reference time
+            (
+                ("cs_3", "root", pd.TimedeltaIndex([-4, 8, 20], "D"), "2000-03-08"),
+                [None, "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+            ),
+            # get transformed cs at specific times - the function and the CSM have a
+            # reference time
+            (
+                ("cs_4", "root", pd.TimedeltaIndex([0, 6, 12, 18], "D"), "2000-03-08"),
+                ["2000-03-14", None, None, None],
+                r_mat_x([0, 0, 1, 2]),
+                [[0, 1, 0], [0, 1, 0], [0, -1, 0], [0, 1, 0]],
+                ([0, 6, 12, 18], "2000-03-08"),
+            ),
             # get transformed cs at times of another system - no reference times
             (
                 ("cs_3", "root", "cs_1"),
@@ -2306,6 +2351,15 @@ class TestCoordinateSystemManager:
                 np.eye(3),
                 [0, 0, 0],
                 (None, None),
+            ),
+            # get transformed cs at specific times using a quantitiy - all systems,
+            # CSM and function have a reference time
+            (
+                ("cs_3", "root", Q_([-4, 8, 20], "day"), "2000-03-08"),
+                ["2000-03-02", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
             ),
         ],
     )
