@@ -2201,7 +2201,7 @@ class TestCoordinateSystemManager:
     @staticmethod
     @pytest.mark.parametrize(
         "function_arguments, time_refs, exp_orientation, exp_coordinates,"
-        "exp_time_data",
+        "exp_time_data, exp_failure",
         [
             # get cs in its parent system - no reference times
             (
@@ -2210,6 +2210,7 @@ class TestCoordinateSystemManager:
                 [np.eye(3) for _ in range(3)],
                 [[i, 0, 0] for i in [0, 0.25, 1]],
                 ([0, 3, 12], None),
+                False,
             ),
             # get cs in its parent system - only CSM has reference time
             (
@@ -2218,6 +2219,7 @@ class TestCoordinateSystemManager:
                 [np.eye(3) for _ in range(3)],
                 [[i, 0, 0] for i in [0, 0.25, 1]],
                 ([0, 3, 12], "2000-03-03"),
+                False,
             ),
             # get cs in its parent system - only system has reference time
             (
@@ -2226,6 +2228,7 @@ class TestCoordinateSystemManager:
                 [np.eye(3) for _ in range(3)],
                 [[i, 0, 0] for i in [0, 0.25, 1]],
                 ([0, 3, 12], "2000-03-03"),
+                False,
             ),
             # get cs in its parent system - function and CSM have reference times
             (
@@ -2234,6 +2237,7 @@ class TestCoordinateSystemManager:
                 [np.eye(3) for _ in range(3)],
                 [[i, 0, 0] for i in [0, 0.25, 1]],
                 ([6, 9, 18], "2000-03-10"),
+                False,
             ),
             # get cs in its parent system - system and CSM have diff. reference times
             (
@@ -2242,6 +2246,7 @@ class TestCoordinateSystemManager:
                 [np.eye(3) for _ in range(3)],
                 [[i, 0, 0] for i in [0, 0.25, 1]],
                 ([6, 9, 18], "2000-03-10"),
+                False,
             ),
             # get transformed cs - no reference times
             (
@@ -2250,6 +2255,7 @@ class TestCoordinateSystemManager:
                 [np.eye(3) for _ in range(7)],
                 [[1, 0, 0] for _ in range(7)],
                 ([0, 3, 4, 6, 8, 9, 12], None),
+                False,
             ),
             # get transformed cs - only CSM has reference time
             (
@@ -2258,6 +2264,7 @@ class TestCoordinateSystemManager:
                 [np.eye(3) for _ in range(7)],
                 [[1, 0, 0] for _ in range(7)],
                 ([0, 3, 4, 6, 8, 9, 12], "2000-03-10"),
+                False,
             ),
             # get transformed cs - CSM and two systems have a reference time
             (
@@ -2266,6 +2273,7 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 0, 0, 2 / 3, 1, 1, 1, 1, 0.5, 0]),
                 [[i, 0, 0] for i in [1, 1.25, 1.5, 1.5, 1.5, 4 / 3, 1.25, 1, 1, 1]],
                 ([-6, -3, 0, 4, 6, 8, 9, 12, 15, 18], "2000-03-10"),
+                False,
             ),
             # get transformed cs - CSM and all systems have a reference time
             (
@@ -2274,6 +2282,7 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 0, 0, 2 / 3, 1, 1, 1, 1, 0.5, 0]),
                 [[i, 0, 0] for i in [1, 1.25, 1.5, 1.5, 1.5, 4 / 3, 1.25, 1, 1, 1]],
                 ([-4, -1, 2, 6, 8, 10, 11, 14, 17, 20], "2000-03-08"),
+                False,
             ),
             # get transformed cs - all systems have a reference time
             (
@@ -2282,6 +2291,7 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 0, 0, 2 / 3, 1, 1, 1, 1, 0.5, 0]),
                 [[i, 0, 0] for i in [1, 1.25, 1.5, 1.5, 1.5, 4 / 3, 1.25, 1, 1, 1]],
                 ([0, 3, 6, 10, 12, 14, 15, 18, 21, 24], "2000-03-04"),
+                False,
             ),
             # get transformed cs at specific times - all systems and CSM have a
             # reference time
@@ -2291,6 +2301,7 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 1, 0]),
                 [[i, 0, 0] for i in [1, 1.5, 1]],
                 ([-4, 8, 20], "2000-03-08"),
+                False,
             ),
             # get transformed cs at specific times - some systems, CSM and function
             # have a reference time
@@ -2300,6 +2311,7 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 1, 0]),
                 [[i, 0, 0] for i in [1, 1.5, 1]],
                 ([-4, 8, 20], "2000-03-08"),
+                False,
             ),
             # get transformed cs at specific times - all systems, CSM and function
             # have a reference time
@@ -2309,6 +2321,7 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 1, 0]),
                 [[i, 0, 0] for i in [1, 1.5, 1]],
                 ([-4, 8, 20], "2000-03-08"),
+                False,
             ),
             # get transformed cs at specific times - all systems, and the function
             # have a reference time
@@ -2318,6 +2331,7 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 1, 0]),
                 [[i, 0, 0] for i in [1, 1.5, 1]],
                 ([-4, 8, 20], "2000-03-08"),
+                False,
             ),
             # get transformed cs at specific times - the function and the CSM have a
             # reference time
@@ -2327,6 +2341,7 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 0, 1, 2]),
                 [[0, 1, 0], [0, 1, 0], [0, -1, 0], [0, 1, 0]],
                 ([0, 6, 12, 18], "2000-03-08"),
+                False,
             ),
             # get transformed cs at times of another system - no reference times
             (
@@ -2335,6 +2350,7 @@ class TestCoordinateSystemManager:
                 [np.eye(3) for _ in range(3)],
                 [[1, 0, 0] for _ in range(3)],
                 ([0, 3, 12], None),
+                False,
             ),
             # get transformed cs at specific times - no reference times
             (
@@ -2343,6 +2359,7 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 0.5, 1, 1.5, 2]),
                 [[0, 1, 0], [0, 0, 1], [0, -1, 0], [0, 0, -1], [0, 1, 0]],
                 ([0, 3, 6, 9, 12], None),
+                False,
             ),
             # self referencing
             (
@@ -2351,8 +2368,9 @@ class TestCoordinateSystemManager:
                 np.eye(3),
                 [0, 0, 0],
                 (None, None),
+                False,
             ),
-            # get transformed cs at specific times using a quantitiy - all systems,
+            # get transformed cs at specific times using a quantity - all systems,
             # CSM and function have a reference time
             (
                 ("cs_3", "root", Q_([-4, 8, 20], "day"), "2000-03-08"),
@@ -2360,11 +2378,73 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 1, 0]),
                 [[i, 0, 0] for i in [1, 1.5, 1]],
                 ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at specific times using a quantity - all systems and
+            # CSM have a reference time
+            (
+                ("cs_3", "root", Q_([-4, 8, 20], "day")),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at specific times using a DatetimeIndex - all systems,
+            # CSM and function have a reference time
+            (
+                (
+                    "cs_3",
+                    "root",
+                    pd.DatetimeIndex(["2000-03-04", "2000-03-16", "2000-03-28"]),
+                    "2000-03-08",
+                ),
+                ["2000-03-02", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at specific times using a DatetimeIndex - all systems,
+            # and the CSM have a reference time
+            (
+                (
+                    "cs_3",
+                    "root",
+                    pd.DatetimeIndex(["2000-03-04", "2000-03-16", "2000-03-28"]),
+                ),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at specific times using a DatetimeIndex - all systems
+            # have a reference time - this is a special case since the internally used
+            # mechanism will use the first value of the DatetimeIndex as reference
+            # value. Using Quantities or a TimedeltaIndex will cause an exception since
+            # the reference time of the time delta is undefined.
+            (
+                (
+                    "cs_3",
+                    "root",
+                    pd.DatetimeIndex(["2000-03-16", "2000-03-28", "2000-03-30"]),
+                ),
+                [None, "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([1, 0, 0]),
+                [[i, 0, 0] for i in [1.5, 1, 1]],
+                ([0, 12, 14], "2000-03-16"),
+                False,
             ),
         ],
     )
     def test_get_local_coordinate_system_time_dep(
-        function_arguments, time_refs, exp_orientation, exp_coordinates, exp_time_data,
+        function_arguments,
+        time_refs,
+        exp_orientation,
+        exp_coordinates,
+        exp_time_data,
+        exp_failure,
     ):
         """Test the ``get_local_coordinate_system`` function with time dependencies.
 
