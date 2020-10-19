@@ -2230,8 +2230,15 @@ class CoordinateSystemManager:
           will be used
         - if there is no reference time at all, the resulting coordinate system won't
           have one either
+        - if no time was passed to the function, a passed reference time will be
+          ignored
+        - a `pandas.DatetimeIndex` always has its lowest date as implicit reference time
+          which will be used if the `CoordinateSystemManager` doesn't possess one and
+          the functions reference time isn't set.
 
-        A overview of all possible combinations is given in the table below:
+
+        A overview of all possible combinations using a ``pandas.TimedeltaIndex`` or
+        a ``pint.Quantity`` as ``time`` parameter is given in the table below.
 
         +------------+--------------+-----------+----------------+-----------------+
         | function   | function has | CSM has   | CS have        | Returned system |
@@ -2250,12 +2257,26 @@ class CoordinateSystemManager:
         +------------+--------------+-----------+----------------+-----------------+
         | Yes / No   | Yes / No     | No        | mixed          | impossible *1)  |
         +------------+--------------+-----------+----------------+-----------------+
-        | Yes / No   | Yes          | No        | none           | error *2)       |
+        | Yes        | Yes          | No        | none           | error *2)       |
+        +------------+--------------+-----------+----------------+-----------------+
+        | No         | Yes          | No        | none           | `None`          |
         +------------+--------------+-----------+----------------+-----------------+
         | Yes / No   | No           | No        | all            | CS (lowest)     |
         +------------+--------------+-----------+----------------+-----------------+
         | Yes / No   | No           | No        | none           | `None`          |
         +------------+--------------+-----------+----------------+-----------------+
+
+        1. This case can not occur since it is not allowed to add a combination of
+           coordinate systems with and without reference time to a
+           `CoordinateSystemManager` without own reference time. See `add_cs`
+           documentation for further details
+        2. If neither the `CoordinateSystemManager` nor its attached coordinate systems
+           have a reference time, the intention of passing a time and a reference time
+           to the function is unclear. The caller might be unaware of the missing
+           reference times. Therefore an exception is raised. If your intention is to
+           add a reference time to the resulting coordinate system, you should call this
+           function without a specified reference time and add it explicitly to the
+           returned `LocalCoordinateSystem`.
 
 
         **Information regarding the implementation:**

@@ -2482,7 +2482,7 @@ class TestCoordinateSystemManager:
         - 'cs_4' remains static at the coordinates [0, 1, 0] of its reference system
           'cs_2'
         - initially and after their movements, all systems have the same orientation as
-          their refernce system
+          their reference system
 
         In case all systems have the same reference time, the following behavior can be
         observed in the root system:
