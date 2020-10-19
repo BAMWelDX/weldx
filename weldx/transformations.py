@@ -2307,9 +2307,9 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        coordinate_system_name :
+        coordinate_system_name : str
             Name of the coordinate system
-        reference_system_name :
+        reference_system_name : str
             Name of the reference coordinate system
         time : pandas.TimedeltaIndex, pandas.DatetimeIndex, pint.Quantity or str
             Specifies the desired time of the returned coordinate system. You can also
