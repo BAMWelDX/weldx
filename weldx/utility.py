@@ -450,12 +450,12 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
     return np.allclose(xr_matmul(da, da, dims, trans_b=True), eye)
 
 
-def xr_fill_all(da, order="bf") -> xr.DataArray:
+def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     """Fill NaN values along all dimensions in xarray DataArray.
 
     Parameters
     ----------
-    da :
+    da : xarray.DataArray
         xarray object to fill
     order :
         order in which to apply bfill/ffill operation (Default value = "bf")
@@ -580,6 +580,10 @@ def xr_interp_like(
 
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
+
+    # copy original coord attributes
+    for key in da1.coords:
+        da[key].attrs = da1[key].attrs
 
     # fill out of range nan values for all dimensions
     if fillna:
@@ -783,7 +787,7 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
 
 
 def xr_interp_orientation_in_time(
-    dsx: xr.DataArray, times: pd.DatetimeIndex
+    dsx: xr.DataArray, times: Union[pd.DatetimeIndex, pd.TimedeltaIndex]
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents orientation data in time.
 
@@ -803,8 +807,14 @@ def xr_interp_orientation_in_time(
     if "time" not in dsx.coords:
         return dsx
 
+    time_ref = None
+
     # extract intersecting times and add time range boundaries of the data set
-    times_ds = dsx.time.data
+    times_ds = pd.TimedeltaIndex(dsx.time)
+    if dsx.time.attrs["time_ref"] is not None:
+        time_ref = dsx.time.attrs["time_ref"]
+        times_ds = times_ds + time_ref
+
     if len(times_ds) > 1:
         if isinstance(times_ds, pd.DatetimeIndex):
             times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
@@ -817,7 +827,7 @@ def xr_interp_orientation_in_time(
 
         # interpolate rotations in the intersecting time range
         rotations_key = Rot.from_matrix(dsx.transpose(..., "c", "v").data)
-        times_key = dsx.time.astype(np.int64)
+        times_key = times_ds.astype(np.int64)
         rotations_interp = Slerp(times_key, rotations_key)(
             times_intersect.astype(np.int64)
         )
@@ -829,17 +839,21 @@ def xr_interp_orientation_in_time(
     # use interp_like to select original time values and correctly fill time dimension
     dsx_out = xr_interp_like(dsx_out, {"time": times}, fillna=True)
 
+    if time_ref is not None:
+        dsx_out["time"] = pd.DatetimeIndex(dsx_out.time.data) - time_ref
+        dsx_out.time.attrs["time_ref"] = time_ref
+
     return dsx_out.transpose(..., "c", "v")
 
 
 def xr_interp_coordinates_in_time(
-    dsx: xr.DataArray, times: pd.DatetimeIndex
+    dsx: xr.DataArray, times: Union[pd.TimedeltaIndex, pd.DatetimeIndex]
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents 3d coordinates in time.
 
     Parameters
     ----------
-    dsx :
+    dsx : xarray.DataArray
         xarray DataArray
     times :
         Time data
@@ -850,9 +864,15 @@ def xr_interp_coordinates_in_time(
         Interpolated data
 
     """
-    return xr_interp_like(
-        dsx, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
+    da = dsx.weldx.time_ref_unset()
+
+    da = xr_interp_like(
+        da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
     )
+
+    da = da.weldx.time_ref_restore()
+
+    return da
 
 
 # weldx xarray Accessors --------------------------------------------------------
@@ -869,7 +889,7 @@ class WeldxAccessor:  # pragma: no cover
         """Construct a WeldX xarray object."""
         self._obj = xarray_obj
 
-    def interp_like(self, da, *args, **kwargs):
+    def interp_like(self, da, *args, **kwargs) -> xr.DataArray:
         """Interpolate DataArray along dimensions of another DataArray.
 
         Provides some utility options for handling out of range values and broadcasting.
@@ -882,3 +902,38 @@ class WeldxAccessor:  # pragma: no cover
 
         """
         return xr_interp_like(self._obj, da, *args, **kwargs)
+
+    def time_ref_unset(self) -> xr.DataArray:
+        """Convert Timedelta + reference Timestamp to DatetimeIndex."""
+        da = self._obj
+        if "time" in da.coords:
+            if (
+                np.issubdtype(da.time.dtype, np.timedelta64)
+                and "time_ref" not in da.time.attrs
+            ):
+                da.time.attrs["time_ref"] = None
+            if da.time.attrs["time_ref"] is not None:
+                time_ref = da.time.attrs["time_ref"]
+                da = da.assign_coords({"time": da.time + time_ref})
+                da.time.attrs["_time_ref_stored"] = time_ref
+                return da
+        return da
+
+    def time_ref_restore(self) -> xr.DataArray:
+        """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp"""
+        da = self._obj
+        if "time" in da.coords:
+            if np.issubdtype(da.time.dtype, np.datetime64):
+                if "_time_ref_stored" not in da.time.attrs:
+                    da.time.attrs["_time_ref_stored"] = pd.Timestamp(da.time.data[0])
+                time_ref = da.time.attrs["_time_ref_stored"]
+                da = da.assign_coords(
+                    {"time": pd.DatetimeIndex(da.time.data) - time_ref}
+                )
+                da.time.attrs["time_ref"] = time_ref
+            elif (
+                np.issubdtype(da.time.dtype, np.timedelta64)
+                and "time_ref" not in da.time.attrs
+            ):
+                da.time.attrs["time_ref"] = None
+        return da

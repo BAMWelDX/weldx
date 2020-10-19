@@ -469,7 +469,14 @@ class LocalCoordinateSystem:
 
         self._dataset = xr.merge([coordinates, orientation], join="exact")
         if "time" in self._dataset and time_ref is not None:
-            self._dataset.time.attrs["time_ref"] = time_ref
+            if self._dataset.time.attrs["time_ref"] is not None:  # resync times
+                if not self._dataset.time.attrs["time_ref"] == time_ref:
+                    time_delta = self._dataset.time.attrs["time_ref"] - time_ref
+                    self._dataset["time"] = self._dataset.time + time_delta
+                    self._dataset.time.attrs["time_ref"] = time_ref
+
+            else:
+                self._dataset.time.attrs["time_ref"] = time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -514,8 +521,8 @@ class LocalCoordinateSystem:
         lhs_cs = self
         if (
             lhs_cs.reference_time != rhs_cs.reference_time
-            and lhs_cs.reference_time is not None
-            and rhs_cs.reference_time is not None
+            and lhs_cs.has_reference_time
+            and rhs_cs.has_reference_time
         ):
             if lhs_cs.reference_time < rhs_cs.reference_time:
                 time_ref = lhs_cs.reference_time
@@ -605,6 +612,7 @@ class LocalCoordinateSystem:
 
         """
         if time is None:
+            # time_ref = None
             return time, time_ref
 
         if isinstance(time, pint.Quantity):
@@ -649,18 +657,20 @@ class LocalCoordinateSystem:
         xarray.DataArray
 
         """
-        if isinstance(orientation, xr.DataArray):
-            return orientation
+        if not isinstance(orientation, xr.DataArray):
+            time_orientation = None
+            if isinstance(orientation, Rot):
+                orientation = orientation.as_matrix()
+            elif not isinstance(orientation, np.ndarray):
+                orientation = np.array(orientation)
 
-        time_orientation = None
-        if isinstance(orientation, Rot):
-            orientation = orientation.as_matrix()
-        elif not isinstance(orientation, np.ndarray):
-            orientation = np.array(orientation)
+            if orientation.ndim == 3:
+                time_orientation = time
+            orientation = ut.xr_3d_matrix(orientation, time_orientation)
 
-        if orientation.ndim == 3:
-            time_orientation = time
-        orientation = ut.xr_3d_matrix(orientation, time_orientation)
+        # make sure we have correct "time" format
+        orientation = orientation.weldx.time_ref_restore()
+
         return orientation
 
     @staticmethod
@@ -679,15 +689,17 @@ class LocalCoordinateSystem:
         xarray.DataArray
 
         """
-        if isinstance(coordinates, xr.DataArray):
-            return coordinates
+        if not isinstance(coordinates, xr.DataArray):
+            time_coordinates = None
+            if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
+                coordinates = np.array(coordinates)
+            if coordinates.ndim == 2:
+                time_coordinates = time
+            coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
 
-        time_coordinates = None
-        if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
-            coordinates = np.array(coordinates)
-        if coordinates.ndim == 2:
-            time_coordinates = time
-        coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
+        # make sure we have correct "time" format
+        coordinates = coordinates.weldx.time_ref_restore()
+
         return coordinates
 
     @classmethod
@@ -1091,37 +1103,30 @@ class LocalCoordinateSystem:
             Coordinate system with interpolated data
 
         """
-        if time is None:
+        if (not self.is_time_dependent) or (time is None):
             return self
 
         if isinstance(time, LocalCoordinateSystem):
             time_ref = time.reference_time
             time = time.time
 
-        time, time_ref = self._build_time_index(time, time_ref)
+        if self.has_reference_time != (
+            time_ref is not None or isinstance(time, pd.DatetimeIndex)
+        ):
+            raise TypeError(
+                "Only 1 reference time provided for time dependent coordinate "
+                "system. Either the reference time of the coordinate system or the "
+                "one passed to the function is 'None'. Only cases where the "
+                "reference times are both 'None' or both contain a timestamp are "
+                "allowed. Also check that the reference time has the correct type."
+            )
 
-        if self.time is None:
-            lcs_time_ref = time_ref
-        else:
-            lcs_time_ref = self.reference_time
+        if self.has_reference_time:
+            if not isinstance(time, pd.DatetimeIndex):
+                time = time + time_ref
 
-        if lcs_time_ref == time_ref:
-            lcs_ref = self
-        else:
-            if not isinstance(lcs_time_ref, type(time_ref)):
-                raise TypeError(
-                    "Only 1 reference time provided for time dependent coordinate "
-                    "system. Either the reference time of the coordinate system or the "
-                    "one passed to the function is 'None'. Only cases where the "
-                    "reference times are both 'None' or both contain a timestamp are "
-                    "allowed. Also check that the reference time has the correct type."
-                )
-
-            lcs_ref = deepcopy(self)
-            lcs_ref.reset_reference_time(time_ref)
-
-        orientation = ut.xr_interp_orientation_in_time(lcs_ref.orientation, time)
-        coordinates = ut.xr_interp_coordinates_in_time(lcs_ref.coordinates, time)
+        orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
+        coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
         return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
 
@@ -1699,16 +1704,17 @@ class CoordinateSystemManager:
                 + "weldx.transformations.LocalCoordinateSystem"
             )
 
-        if lcs.time is not None and self.reference_time is None:
-            if (
-                self._number_of_time_dependent_lcs > 0
-                and lcs.has_reference_time != self._has_lcs_with_time_ref
-            ):
-                raise Exception(
-                    "Inconsistent usage of reference times! If you didn't specify a "
-                    "reference time for the CoordinateSystemManager, either all or "
-                    "none of the added coordinate systems must have a reference time."
-                )
+        if (
+            lcs.is_time_dependent  # always add static lcs
+            and self.reference_time is None
+            and self._number_of_time_dependent_lcs > 0
+            and lcs.has_reference_time != self._has_lcs_with_time_ref
+        ):
+            raise Exception(
+                "Inconsistent usage of reference times! If you didn't specify a "
+                "reference time for the CoordinateSystemManager, either all or "
+                "none of the added coordinate systems must have a reference time."
+            )
 
         if self.has_coordinate_system(coordinate_system_name):
             # todo:
