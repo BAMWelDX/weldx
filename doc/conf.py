@@ -72,6 +72,9 @@ extensions = [
 # autosummary --------------------------------------------------------------------------
 autosummary_generate = True
 
+# add __init__ docstrings to class documentation
+autoclass_content = "both"
+
 # numpydoc option documentation:
 # https://numpydoc.readthedocs.io/en/latest/install.html
 numpydoc_use_plots = True
@@ -194,6 +197,7 @@ intersphinx_mapping = {
     # "dask": ("https://docs.dask.org/en/latest", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
     "pint": ("https://pint.readthedocs.io/en/stable", None),
+    "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
 }
 
 # Disable warnings caused by a bug -----------------------------------------------------

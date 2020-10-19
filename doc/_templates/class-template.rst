@@ -12,13 +12,7 @@
       :toctree:
       :nosignatures:
    {% for item in all_methods %}
-      {%- if not item.startswith('_') or item in ['__init__',
-                                                  '__eq__',
-                                                  '__repr__',
-                                                  '__str__',
-                                                  '__add__',
-                                                  '__sub__',
-                                                  ] %}
+      {%- if not item.startswith('_')%}
        ~{{ name }}.{{ item }}
        {%- endif -%}
    {%- endfor %}

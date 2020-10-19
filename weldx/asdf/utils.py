@@ -15,11 +15,11 @@ def drop_none_attr(node):
     The function requires the node to be convertible to dictionary via __dict__. And can
     therefor be applied to all classes created using the @dataclass operator.
     The result is "clean" dictionary with all None entries removed.
-    A simple `to_tree()` function could be implemented as such:
-        ```python
+    A simple `to_tree()` function could be implemented as such::
+
         def to_tree(cls, node, ctx):
             tree = drop_none_attr(node)
-            return tree```
+            return tree
 
     Parameters
     ----------
