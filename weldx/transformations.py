@@ -2237,8 +2237,8 @@ class CoordinateSystemManager:
           the functions reference time isn't set.
 
 
-        A overview of all possible combinations using a ``pandas.TimedeltaIndex`` or
-        a ``pint.Quantity`` as ``time`` parameter is given in the table below.
+        A overview of all possible combinations using a `pandas.TimedeltaIndex` or
+        a `pint.Quantity` as ``time`` parameter is given in the table below.
 
         +------------+--------------+-----------+----------------+-----------------+
         | function   | function has | CSM has   | CS have        | Returned system |
@@ -2255,9 +2255,9 @@ class CoordinateSystemManager:
         +------------+--------------+-----------+----------------+-----------------+
         | No         | Yes          | No        | all            | CS (lowest)     |
         +------------+--------------+-----------+----------------+-----------------+
-        | Yes / No   | Yes / No     | No        | mixed          | impossible *1)  |
+        | Yes / No   | Yes / No     | No        | mixed          | impossible -> 1.|
         +------------+--------------+-----------+----------------+-----------------+
-        | Yes        | Yes          | No        | none           | error *2)       |
+        | Yes        | Yes          | No        | none           | error -> 2.     |
         +------------+--------------+-----------+----------------+-----------------+
         | No         | Yes          | No        | none           | `None`          |
         +------------+--------------+-----------+----------------+-----------------+
@@ -2311,7 +2311,7 @@ class CoordinateSystemManager:
             Name of the coordinate system
         reference_system_name :
             Name of the reference coordinate system
-        time : pandas.TimedeltaIndex, pandas.Datetimeindex, pint.Quantity or str
+        time : pandas.TimedeltaIndex, pandas.DatetimeIndex, pint.Quantity or str
             Specifies the desired time of the returned coordinate system. You can also
             pass the name of another coordinate system to use its time attribute as
             reference
@@ -2683,7 +2683,7 @@ class CoordinateSystemManager:
     def time_union(self, list_of_edges: List = None,) -> pd.DatetimeIndex:
         """Get the time union of all or selected local coordinate systems.
 
-         If neither the `CoordinateSystemManger` nor its attached
+         If neither the `CoordinateSystemManager` nor its attached
          `LocalCoordinateSystem` instances possess a reference time, the function
          returns a `pandas.TimedeltaIndex`. Otherwise, a `pandas.DatetimeIndex` is
          returned. The following table gives an overview of all possible reference time

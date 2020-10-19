@@ -1658,8 +1658,8 @@ class Trace:
         raster_width : float, int
             The target distance between two raster points
         axes : matplotlib.axes.Axes
-            The target `Axes` object of the plot. If 'None' is passed, a new figure will
-            be created
+            The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
+            new figure will be created
         fmt : str
             Format string that is passed to matplotlib.pyplot.plot.
 
@@ -2152,8 +2152,8 @@ class Geometry:
         trace_raster_width: float, int
             Target distance between the individual profiles on the trace
         axes : matplotlib.axes.Axes
-            The target `Axes` object of the plot. If 'None' is passed, a new figure will
-            be created
+            The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
+            new figure will be created
         fmt : str
             Format string that is passed to matplotlib.pyplot.plot.
 
