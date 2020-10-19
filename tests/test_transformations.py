@@ -730,6 +730,7 @@ class TestLocalCoordinateSystem:
 
     # test_interp_time -----------------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "time_ref_lcs, time,time_ref, orientation_exp, coordinates_exp",
         [
@@ -780,7 +781,7 @@ class TestLocalCoordinateSystem:
         ],
     )
     def test_interp_time(
-        self, time_ref_lcs, time, time_ref, orientation_exp, coordinates_exp
+        time_ref_lcs, time, time_ref, orientation_exp, coordinates_exp
     ):
         """Test the interp_time function.
 
@@ -863,6 +864,7 @@ class TestLocalCoordinateSystem:
 
     # test_addition --------------------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp",
         [
@@ -1014,7 +1016,7 @@ class TestLocalCoordinateSystem:
         ],
     )
     def test_addition(
-        self, lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp
+        lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp
     ):
         """Test the addition of 2 coordinate systems.
 
@@ -1045,6 +1047,7 @@ class TestLocalCoordinateSystem:
 
     # test_subtraction -----------------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp",
         [
@@ -1196,7 +1199,7 @@ class TestLocalCoordinateSystem:
         ],
     )
     def test_subtraction(
-        self, lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp
+        lcs_lhs, lcs_rhs, orientation_exp, coordinates_exp, time_exp, time_ref_exp
     ):
         """Test the subtraction of 2 coordinate systems.
 
