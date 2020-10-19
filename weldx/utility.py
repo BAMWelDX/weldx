@@ -298,7 +298,8 @@ def get_time_union(
     """Generate a merged union of pd.DatetimeIndex from list of inputs.
 
     The functions tries to merge common inputs that are "time-like" or might have time
-    coordinates such as xarray objects, `tf.LocalCoordinateSystem` and other time objects
+    coordinates such as xarray objects, `tf.LocalCoordinateSystem` and other time
+    objects
 
     Parameters
     ----------

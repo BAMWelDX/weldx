@@ -989,11 +989,27 @@ class LocalCoordinateSystem:
         return self.dataset.coordinates
 
     @property
-    def is_time_dependent(self):
+    def is_time_dependent(self) -> bool:
+        """Return `True` if the coordinate system is time dependent.
+
+        Returns
+        -------
+        bool :
+            `True` if the coordinate system is time dependent, `False` otherwise.
+
+        """
         return self.time is not None
 
     @property
-    def has_reference_time(self):
+    def has_reference_time(self) -> bool:
+        """Return `True` if the coordinate system has a reference time.
+
+        Returns
+        -------
+        bool :
+            `True` if the coordinate system has a reference time, `False` otherwise.
+
+        """
         return self.reference_time is not None
 
     @property
@@ -1339,6 +1355,17 @@ class CoordinateSystemManager:
 
     @property
     def lcs(self) -> List["LocalCoordinateSystem"]:
+        """Get a list of all attached `LocalCoordinateSystem` instances.
+
+        Only the defined systems and not the automatically generated inverse systems
+        are included.
+
+        Returns
+        -------
+        List[LocalCoordinateSystem] :
+           List of all attached `LocalCoordinateSystem` instances.
+
+        """
         return [
             self.graph.edges[edge]["lcs"]
             for edge in self.graph.edges
@@ -1347,10 +1374,27 @@ class CoordinateSystemManager:
 
     @property
     def lcs_time_dependent(self) -> List["LocalCoordinateSystem"]:
+        """Get a list of all attached time dependent `LocalCoordinateSystem` instances.
+
+        Returns
+        -------
+        List[LocalCoordinateSystem] :
+            List of all attached time dependent `LocalCoordinateSystem` instances
+
+        """
         return [lcs for lcs in self.lcs if lcs.is_time_dependent]
 
     @property
     def uses_absolute_times(self) -> bool:
+        """Return `True` if the CSM or one of its coord. systems has a reference time.
+
+        Returns
+        -------
+        bool :
+            `True` if the `CoordinateSystemManager` or one of its attached coordinate
+            systems possess a reference time. `False` otherwise
+
+        """
         return self._has_lcs_with_time_ref or (self.reference_time is not None)
 
     def _add_coordinate_system_node(self, coordinate_system_name):
