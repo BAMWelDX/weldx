@@ -532,7 +532,7 @@ class LocalCoordinateSystem:
                 time_ref = rhs_cs.reference_time
                 lhs_cs = deepcopy(lhs_cs)
                 lhs_cs.reset_reference_time(time_ref)
-        elif lhs_cs.reference_time is None:
+        elif not lhs_cs.has_reference_time:
             time_ref = rhs_cs.reference_time
         else:
             time_ref = lhs_cs.reference_time
@@ -1050,7 +1050,7 @@ class LocalCoordinateSystem:
             The coordinate systems time as 'pandas.DatetimeIndex'
 
         """
-        if self.reference_time is None:
+        if not self.has_reference_time:
             return None
         return self.time + self.reference_time
 
@@ -1222,7 +1222,7 @@ class LocalCoordinateSystem:
             return
         if isinstance(time_ref_new, str):
             time_ref_new = pd.Timestamp(time_ref_new)
-        if self.reference_time is None:
+        if not self.has_reference_time:
             self._dataset.time.attrs["time_ref"] = time_ref_new
         else:
             delta = self.reference_time - time_ref_new
@@ -1400,7 +1400,19 @@ class CoordinateSystemManager:
             systems possess a reference time. `False` otherwise
 
         """
-        return self._has_lcs_with_time_ref or (self.reference_time is not None)
+        return self._has_lcs_with_time_ref or (self.has_reference_time)
+
+    @property
+    def has_reference_time(self) -> bool:
+        """Return `True` if the coordinate system manager has a reference time.
+
+        Returns
+        -------
+        bool :
+            `True` if the coordinate system manager has a reference time, `False`
+            otherwise.
+        """
+        return self.reference_time is not None
 
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
@@ -1750,7 +1762,7 @@ class CoordinateSystemManager:
 
         if (
             lcs.is_time_dependent  # always add static lcs
-            and self.reference_time is None
+            and self.has_reference_time
             and self._number_of_time_dependent_lcs > 0
             and lcs.has_reference_time != self._has_lcs_with_time_ref
         ):
@@ -2425,7 +2437,7 @@ class CoordinateSystemManager:
         for edge in path_edges:
             lcs = self.graph.edges[edge]["lcs"]
             if lcs.time is not None:
-                if lcs.reference_time is None and self.reference_time is not None:
+                if not lcs.has_reference_time and self.has_reference_time:
                     lcs = deepcopy(lcs)
                     lcs.reset_reference_time(self.reference_time)
                 lcs = lcs.interp_time(time_interp, time_ref_interp)
@@ -2785,7 +2797,7 @@ class CoordinateSystemManager:
             lcs.datetimeindex if lcs.has_reference_time else lcs.time
             for lcs in lcs_list
         ]
-        if self.reference_time is not None:
+        if self.has_reference_time:
             time_list = [
                 t + self.reference_time if isinstance(t, pd.TimedeltaIndex) else t
                 for t in time_list
