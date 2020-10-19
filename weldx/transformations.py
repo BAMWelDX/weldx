@@ -989,6 +989,14 @@ class LocalCoordinateSystem:
         return self.dataset.coordinates
 
     @property
+    def is_time_dependent(self):
+        return self.time is not None
+
+    @property
+    def has_reference_time(self):
+        return self.reference_time is not None
+
+    @property
     def reference_time(self) -> Union[pd.Timestamp, None]:
         """Get the coordinate systems reference time.
 
@@ -1238,7 +1246,7 @@ class CoordinateSystemManager:
         ----------
         root_coordinate_system_name : str
             Name of the root coordinate system.
-        coordinate_system_manager_name:str
+        coordinate_system_manager_name : str
             Name of the coordinate system manager. If 'None' is passed, a default name
             is chosen.
         reference_time : pandas.Timestamp
@@ -1328,6 +1336,22 @@ class CoordinateSystemManager:
                 return False
 
         return True
+
+    @property
+    def lcs(self) -> List["LocalCoordinateSystem"]:
+        return [
+            self.graph.edges[edge]["lcs"]
+            for edge in self.graph.edges
+            if self.graph.edges[edge]["defined"]
+        ]
+
+    @property
+    def lcs_time_dependent(self) -> List["LocalCoordinateSystem"]:
+        return [lcs for lcs in self.lcs if lcs.is_time_dependent]
+
+    @property
+    def uses_absolute_times(self) -> bool:
+        return self._has_lcs_with_time_ref or (self.reference_time is not None)
 
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
@@ -1497,10 +1521,7 @@ class CoordinateSystemManager:
             `False` otherwise
 
         """
-        for edge in self.graph.edges:
-            if self.graph.edges[edge]["lcs"].reference_time is not None:
-                return True
-        return False
+        return any([lcs.has_reference_time for lcs in self.lcs_time_dependent])
 
     def _ipython_display_(self):
         """Display the coordinate system manager as plot in jupyter notebooks."""
@@ -1519,12 +1540,7 @@ class CoordinateSystemManager:
             Number of time dependent coordinate systems
 
         """
-        num_tdp_lcs = 0
-        for edge in self.graph.edges:
-            edge_data = self.graph.edges[edge]
-            if edge_data["defined"] and edge_data["lcs"].time is not None:
-                num_tdp_lcs += 1
-        return num_tdp_lcs
+        return len(self.lcs_time_dependent)
 
     def _update_local_coordinate_system(
         self, node_from: str, node_to: str, lcs: LocalCoordinateSystem
@@ -1641,7 +1657,7 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: str,
-        local_coordinate_system: LocalCoordinateSystem,
+        lcs: LocalCoordinateSystem,
         lsc_child_in_parent: bool = True,
     ):
         """Add a coordinate system to the coordinate system manager.
@@ -1667,7 +1683,7 @@ class CoordinateSystemManager:
             Name of the new coordinate system.
         reference_system_name : str
             Name of the parent system. This must have been already added.
-        local_coordinate_system : LocalCoordinateSystem
+        lcs : LocalCoordinateSystem
             An instance of
             `~weldx.transformations.LocalCoordinateSystem` that describes how the new
             coordinate system is oriented in its parent system.
@@ -1677,19 +1693,16 @@ class CoordinateSystemManager:
             how the parent system is positioned in its new child system.
 
         """
-        if not isinstance(local_coordinate_system, LocalCoordinateSystem):
+        if not isinstance(lcs, LocalCoordinateSystem):
             raise TypeError(
                 "'local_coordinate_system' must be an instance of "
                 + "weldx.transformations.LocalCoordinateSystem"
             )
 
-        if local_coordinate_system.time is not None and self.reference_time is None:
-            current_lcs_has_ref_time = (
-                local_coordinate_system.reference_time is not None
-            )
+        if lcs.time is not None and self.reference_time is None:
             if (
                 self._number_of_time_dependent_lcs > 0
-                and current_lcs_has_ref_time != self._has_lcs_with_time_ref
+                and lcs.has_reference_time != self._has_lcs_with_time_ref
             ):
                 raise Exception(
                     "Inconsistent usage of reference times! If you didn't specify a "
@@ -1710,30 +1723,22 @@ class CoordinateSystemManager:
                 )
             if lsc_child_in_parent:
                 self._update_local_coordinate_system(
-                    coordinate_system_name,
-                    reference_system_name,
-                    local_coordinate_system,
+                    coordinate_system_name, reference_system_name, lcs,
                 )
             else:
                 self._update_local_coordinate_system(
-                    reference_system_name,
-                    coordinate_system_name,
-                    local_coordinate_system,
+                    reference_system_name, coordinate_system_name, lcs,
                 )
         else:
             self._check_coordinate_system_exists(reference_system_name)
             self._add_coordinate_system_node(coordinate_system_name)
             if lsc_child_in_parent:
                 self._add_edges(
-                    coordinate_system_name,
-                    reference_system_name,
-                    local_coordinate_system,
+                    coordinate_system_name, reference_system_name, lcs,
                 )
             else:
                 self._add_edges(
-                    reference_system_name,
-                    coordinate_system_name,
-                    local_coordinate_system,
+                    reference_system_name, coordinate_system_name, lcs,
                 )
 
     def assign_data(
@@ -2680,7 +2685,9 @@ class CoordinateSystemManager:
         for lcs in cs_delete:
             self.delete_cs(lcs, True)
 
-    def time_union(self, list_of_edges: List = None,) -> pd.DatetimeIndex:
+    def time_union(
+        self, list_of_edges: List = None,
+    ) -> Union[None, pd.DatetimeIndex, pd.TimedeltaIndex]:
         """Get the time union of all or selected local coordinate systems.
 
          If neither the `CoordinateSystemManager` nor its attached
@@ -2715,41 +2722,26 @@ class CoordinateSystemManager:
             Time union
 
         """
-        edges = self.graph.edges
         if list_of_edges is None:
-            list_of_edges = edges
+            lcs_list = self.lcs_time_dependent
+        else:
+            lcs_list = [self.graph.edges[edge]["lcs"] for edge in list_of_edges]
+            lcs_list = [lcs for lcs in lcs_list if lcs.is_time_dependent]
 
-        time_union = None
-        list_of_lcs = []
-        return_time_delta = None
+        if not lcs_list:
+            return None
 
-        for edge in list_of_edges:
-            current_lcs = edges[edge]["lcs"]
-            list_of_lcs += [current_lcs]
-            if (
-                self.reference_time is None
-                and return_time_delta is None
-                and current_lcs.time is not None
-            ):
-                return_time_delta = current_lcs.reference_time is None
+        time_list = [
+            lcs.datetimeindex if lcs.has_reference_time else lcs.time
+            for lcs in lcs_list
+        ]
+        if self.reference_time is not None:
+            time_list = [
+                t + self.reference_time if isinstance(t, pd.TimedeltaIndex) else t
+                for t in time_list
+            ]
 
-        for lcs in list_of_lcs:
-            if lcs.time is None:
-                continue
-
-            if return_time_delta:
-                time_lcs = lcs.time
-            elif lcs.reference_time is None:
-                time_lcs = self.reference_time + lcs.time
-            else:
-                time_lcs = lcs.reference_time + lcs.time
-
-            if time_union is None:
-                time_union = time_lcs
-            elif time_lcs is not None:
-                time_union = time_union.union(time_lcs)
-
-        return time_union
+        return ut.get_time_union(time_list)
 
     def transform_data(
         self,

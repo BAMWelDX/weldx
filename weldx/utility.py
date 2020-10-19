@@ -292,11 +292,13 @@ def swap_list_items(arr, i1, i2) -> list:
     return i
 
 
-def get_time_union(list_of_objects):
+def get_time_union(
+    list_of_objects: List[Union[pd.DatetimeIndex, pd.TimedeltaIndex]]
+) -> Union[pd.DatetimeIndex, pd.TimedeltaIndex]:
     """Generate a merged union of pd.DatetimeIndex from list of inputs.
 
     The functions tries to merge common inputs that are "time-like" or might have time
-    coordinates such as xarray objects, tf.LocalCoordinateSystem and other time objects
+    coordinates such as xarray objects, `tf.LocalCoordinateSystem` and other time objects
 
     Parameters
     ----------
@@ -317,6 +319,8 @@ def get_time_union(list_of_objects):
         if isinstance(input_object, (xr.DataArray, xr.Dataset)):
             return to_pandas_time_index(input_object.time.data)
         if isinstance(input_object, tf.LocalCoordinateSystem):
+            if input_object.has_reference_time:
+                return input_object.datetimeindex
             return input_object.time
 
         return to_pandas_time_index(input_object)
