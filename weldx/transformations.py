@@ -596,21 +596,7 @@ class LocalCoordinateSystem:
             # time_ref = None
             return time, time_ref
 
-        if isinstance(time, pint.Quantity):
-            time = ut.to_pandas_time_index(time)
-
-        if not isinstance(time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            try:  # try supported formats like str etc.
-                time = pd.TimedeltaIndex(time)
-            except (TypeError, ValueError):
-                try:  # maybe
-                    time = pd.DatetimeIndex(time)
-                except Exception:
-                    raise TypeError(
-                        "Unable to convert input argument to pd.DatetimeIndex or "
-                        "pd.TimedeltaIndex. If passing single values convert to list"
-                        "first (like [pd.Timestamp])"
-                    )
+        time = ut.to_pandas_time_index(time)
 
         if isinstance(time, pd.DatetimeIndex):
             if time_ref is None:

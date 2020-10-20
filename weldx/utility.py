@@ -182,14 +182,22 @@ def to_pandas_time_index(
                 time_index = time_index + time.attrs["time_ref"]
         return time_index
 
-    if not np.iterable(time):
+    if not np.iterable(time) or isinstance(time, str):
         time = [time]
     time = pd.Index(time)
 
+    # try manual casting if we did not get desired index type so far (i.e. strings)
     if not isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
-        raise TypeError(
-            f"Could not convert {_input_type} to pd.DatetimeIndex or pd.TimedeltaIndex"
-        )
+        for func in (pd.DatetimeIndex, pd.TimedeltaIndex):
+            try:
+                return func(time)
+            except:
+                continue
+        else:
+            raise TypeError(
+                f"Could not convert {_input_type}"
+                f"to pd.DatetimeIndex or pd.TimedeltaIndex"
+            )
 
     return time
 
