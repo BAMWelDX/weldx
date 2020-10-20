@@ -2709,7 +2709,7 @@ class TestCoordinateSystemManager:
         Parameters
         ----------
         time_ref_day_parent : str
-            `None` or day number of the parent systems reference timestamp 
+            `None` or day number of the parent systems reference timestamp
         time_ref_day_sub : str
             `None` or day number of the merged systems reference timestamp
         is_static_parent : bool

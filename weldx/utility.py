@@ -929,7 +929,7 @@ class WeldxAccessor:  # pragma: no cover
         return da
 
     def time_ref_restore(self) -> xr.DataArray:
-        """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp"""
+        """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp."""
         da = self._obj
         if "time" in da.coords:
             if is_datetime64_dtype(da.time):

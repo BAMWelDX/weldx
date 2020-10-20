@@ -1393,6 +1393,7 @@ class CoordinateSystemManager:
         bool :
             `True` if the coordinate system manager has a reference time, `False`
             otherwise.
+
         """
         return self.reference_time is not None
 
