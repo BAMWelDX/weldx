@@ -133,7 +133,16 @@ def to_list(var) -> list:
     return [var]
 
 
-def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+def to_pandas_time_index(
+    time,
+) -> Union[
+    pint.Quantity,
+    np.ndarray,
+    pd.TimedeltaIndex,
+    pd.DatetimeIndex,
+    xr.DataArray,
+    xr.Dataset,
+]:
     """Convert a time variable to the corresponding pandas time index type.
 
     Parameters
