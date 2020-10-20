@@ -455,11 +455,7 @@ class LocalCoordinateSystem:
         self._dataset = xr.merge([coordinates, orientation], join="exact")
         if "time" in self._dataset and time_ref is not None:
             if self._dataset.time.attrs["time_ref"] is not None:  # resync times
-                if not self._dataset.time.attrs["time_ref"] == time_ref:
-                    time_delta = self._dataset.time.attrs["time_ref"] - time_ref
-                    self._dataset["time"] = self._dataset.time + time_delta
-                    self._dataset.time.attrs["time_ref"] = time_ref
-
+                self._dataset = self._dataset.weldx.reset_reference_time(time_ref)
             else:
                 self._dataset.time.attrs["time_ref"] = time_ref
 

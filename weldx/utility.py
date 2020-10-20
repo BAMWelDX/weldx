@@ -964,7 +964,10 @@ class WeldxAccessor:  # pragma: no cover
         da = self._obj
         if "time" in da.coords:
             da = da.weldx.time_ref_restore()
-            if da.time.attrs["time_ref"] is None:
+            if (
+                da.time.attrs["time_ref"] is None
+                or da.time.attrs["time_ref"] == time_ref_new
+            ):
                 return da
             time_new = to_pandas_time_index(da) - time_ref_new
             da = da.assign_coords({"time": time_new})
