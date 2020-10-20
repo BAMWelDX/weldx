@@ -1750,11 +1750,11 @@ class TestCoordinateSystemManager:
 
         assert csm.number_of_coordinate_systems == exp_num_cs
         if child_in_parent:
-            assert csm.get_local_coordinate_system(name, parent) == lcs
-            assert csm.get_local_coordinate_system(parent, name) == lcs.invert()
+            assert csm.get_cs(name, parent) == lcs
+            assert csm.get_cs(parent, name) == lcs.invert()
         else:
-            assert csm.get_local_coordinate_system(name, parent) == lcs.invert()
-            assert csm.get_local_coordinate_system(parent, name) == lcs
+            assert csm.get_cs(name, parent) == lcs.invert()
+            assert csm.get_cs(parent, name) == lcs
 
     # test_add_cs_reference_time -------------------------------------------------------
 
@@ -2169,7 +2169,7 @@ class TestCoordinateSystemManager:
     def test_get_local_coordinate_system_no_time_dep(
         system_name, reference_name, exp_orientation, exp_coordinates
     ):
-        """Test the ``get_local_coordinate_system`` function without time dependencies.
+        """Test the ``get_cs`` function without time dependencies.
 
         Have a look into the tests setup section to see which coordinate systems are
         defined in the CSM.
@@ -2193,7 +2193,7 @@ class TestCoordinateSystemManager:
         csm.create_cs("lcs_3", "lcs_2", r_mat_x(0.5), [1, -1, 3])
 
         check_coordinate_system(
-            csm.get_local_coordinate_system(system_name, reference_name),
+            csm.get_cs(system_name, reference_name),
             exp_orientation,
             exp_coordinates,
             True,
@@ -2471,7 +2471,7 @@ class TestCoordinateSystemManager:
         exp_time_data,
         exp_failure,
     ):
-        """Test the ``get_local_coordinate_system`` function with time dependencies.
+        """Test the ``get_cs`` function with time dependencies.
 
         The test setup is as follows:
 
@@ -2565,7 +2565,7 @@ class TestCoordinateSystemManager:
                 exp_time_ref = pd.Timestamp(exp_time_ref)
 
             check_coordinate_system(
-                csm.get_local_coordinate_system(*function_arguments),
+                csm.get_cs(*function_arguments),
                 exp_orientation,
                 exp_coordinates,
                 True,
@@ -2574,7 +2574,7 @@ class TestCoordinateSystemManager:
             )
         else:
             with pytest.raises(Exception):
-                csm.get_local_coordinate_system(*function_arguments)
+                csm.get_cs(*function_arguments)
 
     # test_get_local_coordinate_system_exceptions --------------------------------------
 
@@ -2596,7 +2596,7 @@ class TestCoordinateSystemManager:
     def test_get_local_coordinate_system_exceptions(
         function_arguments, exception_type, test_name
     ):
-        """Test the exceptions of the ``get_local_coordinate_system`` function.
+        """Test the exceptions of the ``get_cs`` function.
 
         Parameters
         ----------
@@ -2621,7 +2621,7 @@ class TestCoordinateSystemManager:
 
         # test
         with pytest.raises(exception_type):
-            csm.get_local_coordinate_system(*function_arguments)
+            csm.get_cs(*function_arguments)
 
     # test_merge -----------------------------------------------------------------------
 
@@ -2661,8 +2661,8 @@ class TestCoordinateSystemManager:
             if i == 0:
                 assert parent is None
                 continue
-            assert csm_mg.get_local_coordinate_system(child, parent) == cur_lcs
-            assert csm_mg.get_local_coordinate_system(parent, child) == cur_lcs.invert()
+            assert csm_mg.get_cs(child, parent) == cur_lcs
+            assert csm_mg.get_cs(parent, child) == cur_lcs.invert()
 
     # test_merge_reference_times -------------------------------------------------------
 
@@ -3187,7 +3187,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     # orientation and coordinates -------------------------
     csm.create_cs("lcs_init_default", "root")
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_init_default"),
+        csm.get_cs("lcs_init_default"),
         lcs_default.orientation,
         lcs_default.coordinates,
         True,
@@ -3195,109 +3195,70 @@ def test_coordinate_system_manager_create_coordinate_system():
 
     csm.create_cs("lcs_init_tdp", "root", orientations, coords, time)
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_init_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
+        csm.get_cs("lcs_init_tdp"), orientations, coords, True, time=time,
     )
 
     # from euler ------------------------------------------
     csm.create_cs_from_euler("lcs_euler_default", "root", "yx", angles[0])
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_euler_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
+        csm.get_cs("lcs_euler_default"), orientations[0], lcs_default.coordinates, True,
     )
 
     csm.create_cs_from_euler(
         "lcs_euler_tdp", "root", "yx", angles_deg, True, coords, time
     )
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_euler_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
+        csm.get_cs("lcs_euler_tdp"), orientations, coords, True, time=time,
     )
 
     # from xyz --------------------------------------------
     csm.create_cs_from_xyz("lcs_xyz_default", "root", vec_x[0], vec_y[0], vec_z[0])
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_xyz_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
+        csm.get_cs("lcs_xyz_default"), orientations[0], lcs_default.coordinates, True,
     )
 
     csm.create_cs_from_xyz("lcs_xyz_tdp", "root", vec_x, vec_y, vec_z, coords, time)
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_xyz_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
+        csm.get_cs("lcs_xyz_tdp"), orientations, coords, True, time=time,
     )
 
     # from xy and orientation -----------------------------
     csm.create_cs_from_xy_and_orientation("lcs_xyo_default", "root", vec_x[0], vec_y[0])
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_xyo_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
+        csm.get_cs("lcs_xyo_default"), orientations[0], lcs_default.coordinates, True,
     )
 
     csm.create_cs_from_xy_and_orientation(
         "lcs_xyo_tdp", "root", vec_x, vec_y, True, coords, time
     )
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_xyo_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
+        csm.get_cs("lcs_xyo_tdp"), orientations, coords, True, time=time,
     )
 
     # from xz and orientation -----------------------------
     csm.create_cs_from_xz_and_orientation("lcs_xzo_default", "root", vec_x[0], vec_z[0])
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_xzo_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
+        csm.get_cs("lcs_xzo_default"), orientations[0], lcs_default.coordinates, True,
     )
 
     csm.create_cs_from_xz_and_orientation(
         "lcs_xzo_tdp", "root", vec_x, vec_z, True, coords, time
     )
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_xzo_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
+        csm.get_cs("lcs_xzo_tdp"), orientations, coords, True, time=time,
     )
 
     # from yz and orientation -----------------------------
     csm.create_cs_from_yz_and_orientation("lcs_yzo_default", "root", vec_y[0], vec_z[0])
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_yzo_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
+        csm.get_cs("lcs_yzo_default"), orientations[0], lcs_default.coordinates, True,
     )
 
     csm.create_cs_from_yz_and_orientation(
         "lcs_yzo_tdp", "root", vec_y, vec_z, True, coords, time
     )
     check_coordinate_system(
-        csm.get_local_coordinate_system("lcs_yzo_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
+        csm.get_cs("lcs_yzo_tdp"), orientations, coords, True, time=time,
     )
 
 
@@ -3328,10 +3289,10 @@ def test_coordinate_system_manager_interp_time():
 
     assert np.all(csm_interp.time_union() == time_interp)
 
-    assert np.all(csm_interp.get_local_coordinate_system("lcs_0").time == time_interp)
-    assert np.all(csm_interp.get_local_coordinate_system("lcs_1").time == time_interp)
-    assert np.all(csm_interp.get_local_coordinate_system("lcs_2").time == time_interp)
-    assert csm_interp.get_local_coordinate_system("lcs_3").time is None
+    assert np.all(csm_interp.get_cs("lcs_0").time == time_interp)
+    assert np.all(csm_interp.get_cs("lcs_1").time == time_interp)
+    assert np.all(csm_interp.get_cs("lcs_2").time == time_interp)
+    assert csm_interp.get_cs("lcs_3").time is None
 
     coords_0_exp = [
         [5, 0, 0],
@@ -3387,11 +3348,11 @@ def test_coordinate_system_manager_interp_time():
             exp = lcs_3_in_lcs_2_exp
             exp_inv = lcs_3_in_lcs_2_exp.invert()
         else:
-            exp = csm.get_local_coordinate_system(cs_name, ps_name)
-            exp_inv = csm.get_local_coordinate_system(ps_name, cs_name)
+            exp = csm.get_cs(cs_name, ps_name)
+            exp_inv = csm.get_cs(ps_name, cs_name)
 
-        lcs = csm_interp.get_local_coordinate_system(cs_name, ps_name)
-        lcs_inv = csm_interp.get_local_coordinate_system(ps_name, cs_name)
+        lcs = csm_interp.get_cs(cs_name, ps_name)
+        lcs_inv = csm_interp.get_cs(ps_name, cs_name)
 
         check_coordinate_systems_close(lcs, exp)
         check_coordinate_systems_close(lcs_inv, exp_inv)
@@ -3415,11 +3376,11 @@ def test_coordinate_system_manager_interp_time():
             exp = lcs_0_in_root_exp
             exp_inv = lcs_0_in_root_exp.invert()
         else:
-            exp = csm.get_local_coordinate_system(cs_name, ps_name)
-            exp_inv = csm.get_local_coordinate_system(ps_name, cs_name)
+            exp = csm.get_cs(cs_name, ps_name)
+            exp_inv = csm.get_cs(ps_name, cs_name)
 
-        lcs = csm_interp_single.get_local_coordinate_system(cs_name, ps_name)
-        lcs_inv = csm_interp_single.get_local_coordinate_system(ps_name, cs_name)
+        lcs = csm_interp_single.get_cs(cs_name, ps_name)
+        lcs_inv = csm_interp_single.get_cs(ps_name, cs_name)
 
         check_coordinate_systems_close(lcs, exp)
         check_coordinate_systems_close(lcs_inv, exp_inv)
@@ -3454,11 +3415,11 @@ def test_coordinate_system_manager_interp_time():
             exp = lcs_2_in_root_exp
             exp_inv = lcs_2_in_root_exp.invert()
         else:
-            exp = csm.get_local_coordinate_system(cs_name, ps_name)
-            exp_inv = csm.get_local_coordinate_system(ps_name, cs_name)
+            exp = csm.get_cs(cs_name, ps_name)
+            exp_inv = csm.get_cs(ps_name, cs_name)
 
-        lcs = csm_interp_multiple.get_local_coordinate_system(cs_name, ps_name)
-        lcs_inv = csm_interp_multiple.get_local_coordinate_system(ps_name, cs_name)
+        lcs = csm_interp_multiple.get_cs(cs_name, ps_name)
+        lcs_inv = csm_interp_multiple.get_cs(ps_name, cs_name)
 
         check_coordinate_systems_close(lcs, exp)
         check_coordinate_systems_close(lcs_inv, exp_inv)

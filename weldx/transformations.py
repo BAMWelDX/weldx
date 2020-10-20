@@ -2247,7 +2247,7 @@ class CoordinateSystemManager:
             target_coordinate_system_name,
         )
 
-    def get_local_coordinate_system(
+    def get_cs(
         self,
         coordinate_system_name: str,
         reference_system_name: Union[str, None] = None,
@@ -2403,7 +2403,7 @@ class CoordinateSystemManager:
             if parent_name is None:
                 raise ValueError("The root system has no time dependency.")
 
-            time = self.get_local_coordinate_system(time, parent_name).time
+            time = self.get_cs(time, parent_name).time
             if time is None:
                 raise ValueError(f'The system "{time}" is not time dependent')
         elif not isinstance(time, (pd.DatetimeIndex, pint.Quantity)):
@@ -2829,9 +2829,7 @@ class CoordinateSystemManager:
             Transformed data
 
         """
-        lcs = self.get_local_coordinate_system(
-            source_coordinate_system_name, target_coordinate_system_name
-        )
+        lcs = self.get_cs(source_coordinate_system_name, target_coordinate_system_name)
         if isinstance(data, xr.DataArray):
             mul = ut.xr_matmul(
                 lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
