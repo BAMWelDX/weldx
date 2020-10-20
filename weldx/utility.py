@@ -2,6 +2,8 @@
 
 import math
 from collections.abc import Iterable
+from functools import reduce
+from operator import or_
 from typing import Any, Dict, List, Union
 
 import numpy as np
@@ -134,15 +136,15 @@ def to_list(var) -> list:
 
 
 def to_pandas_time_index(
-    time,
-) -> Union[
-    pint.Quantity,
-    np.ndarray,
-    pd.TimedeltaIndex,
-    pd.DatetimeIndex,
-    xr.DataArray,
-    xr.Dataset,
-]:
+    time: Union[
+        pint.Quantity,
+        np.ndarray,
+        pd.TimedeltaIndex,
+        pd.DatetimeIndex,
+        xr.DataArray,
+        xr.Dataset,
+    ],
+) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
     """Convert a time variable to the corresponding pandas time index type.
 
     Parameters
@@ -162,7 +164,7 @@ def to_pandas_time_index(
         return time
 
     if isinstance(time, tf.LocalCoordinateSystem):
-        return to_pandas_time_index(time._dataset)
+        return to_pandas_time_index(time.time)
 
     if isinstance(time, pint.Quantity):
         base = "s"  # using low base unit could cause rounding errors
@@ -328,7 +330,7 @@ def get_time_union(
 
     The functions tries to merge common inputs that are "time-like" or might have time
     coordinates such as xarray objects, `tf.LocalCoordinateSystem` and other time
-    objects
+    objects. See `to_pandas_time_index` for supported input object types.
 
     Parameters
     ----------
@@ -341,27 +343,10 @@ def get_time_union(
         Pandas time index class with merged times
 
     """
-    # TODO: make non-nested function
-    # TODO: reevaluate if LCS and xarray types should be supported. If yes, add tests
-    def _get_time(input_object):
-        if isinstance(input_object, (pd.DatetimeIndex, pd.TimedeltaIndex)):
-            return input_object
-        if isinstance(input_object, (xr.DataArray, xr.Dataset)):
-            return to_pandas_time_index(input_object.time.data)
-        if isinstance(input_object, tf.LocalCoordinateSystem):
-            if input_object.has_reference_time:
-                return input_object.datetimeindex
-            return input_object.time
+    # TODO: add tests
 
-        return to_pandas_time_index(input_object)
-
-    times = None
-    for idx, val in enumerate(list_of_objects):
-        if idx == 0:
-            times = _get_time(val)
-        else:
-            times = times.union(_get_time(val))
-    return times
+    # see https://stackoverflow.com/a/44762908/11242411
+    return reduce(or_, (to_pandas_time_index(idx) for idx in list_of_objects))
 
 
 def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
