@@ -403,6 +403,7 @@ class CoordinateSystemManagerASDF(WeldxType):
 
         tree = {
             "name": node.name,
+            "reference_time": node.reference_time,
             "subsystem_names": subsystems,
             "subsystems": subsystem_data,
             "root_system_name": node.root_system_name,
@@ -429,7 +430,12 @@ class CoordinateSystemManagerASDF(WeldxType):
             An instance of the 'CoordinateSystemManager' type.
 
         """
-        csm = CoordinateSystemManager(tree["root_system_name"], tree["name"],)
+        reference_time = None
+        if "reference_time" in tree:
+            reference_time = tree["reference_time"]
+        csm = CoordinateSystemManager(
+            tree["root_system_name"], tree["name"], reference_time=reference_time
+        )
 
         subsystem_data_list = tree["subsystems"]
 

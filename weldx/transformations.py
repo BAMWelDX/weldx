@@ -1304,7 +1304,8 @@ class CoordinateSystemManager:
         """Output representation of a CoordinateSystemManager class."""
         return (
             f"<CoordinateSystemManager>\nname:\n\t{self._name}\n"
-            f"Coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
+            f"reference time:\n\t {self.reference_time}\n"
+            f"coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
             f"data:\n\t {self._data!r}\n"
             f"sub systems:\n\t {self._sub_system_data_dict.keys()}\n"
             f")"
