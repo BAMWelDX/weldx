@@ -1347,8 +1347,8 @@ class CoordinateSystemManager:
 
         # check coordinate systems
         for edge in graph_0.edges:
-            lcs_0 = self.get_local_coordinate_system(edge[0], edge[1])
-            lcs_1 = other.get_local_coordinate_system(edge[0], edge[1])
+            lcs_0 = self.graph.edges[(edge[0], edge[1])]["lcs"]
+            lcs_1 = other.graph.edges[(edge[0], edge[1])]["lcs"]
             if lcs_0 != lcs_1:
                 return False
 
