@@ -1238,7 +1238,7 @@ class CoordinateSystemManager:
         self,
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
-        reference_time: pd.Timestamp = None,
+        time_ref: pd.Timestamp = None,
         _graph: Union[nx.DiGraph, None] = None,
         _sub_systems=None,
     ):
@@ -1251,7 +1251,7 @@ class CoordinateSystemManager:
         coordinate_system_manager_name : str
             Name of the coordinate system manager. If 'None' is passed, a default name
             is chosen.
-        reference_time : pandas.Timestamp
+        time_ref : pandas.Timestamp
             A reference timestamp. If it is defined, all time dependent information
             returned by the CoordinateSystemManager will refer to it by default.
         _graph:
@@ -1270,9 +1270,9 @@ class CoordinateSystemManager:
         if coordinate_system_manager_name is None:
             coordinate_system_manager_name = self._generate_default_name()
         self._name = coordinate_system_manager_name
-        if reference_time is not None and not isinstance(reference_time, pd.Timestamp):
-            reference_time = pd.Timestamp(reference_time)
-        self._reference_time = reference_time
+        if time_ref is not None and not isinstance(time_ref, pd.Timestamp):
+            time_ref = pd.Timestamp(time_ref)
+        self._reference_time = time_ref
 
         self._data = {}
         self._root_system_name = root_coordinate_system_name
@@ -1290,7 +1290,8 @@ class CoordinateSystemManager:
         """Output representation of a CoordinateSystemManager class."""
         return (
             f"<CoordinateSystemManager>\nname:\n\t{self._name}\n"
-            f"Coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
+            f"reference time:\n\t {self.reference_time}\n"
+            f"coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
             f"data:\n\t {self._data!r}\n"
             f"sub systems:\n\t {self._sub_system_data_dict.keys()}\n"
             f")"
@@ -1332,8 +1333,8 @@ class CoordinateSystemManager:
 
         # check coordinate systems
         for edge in graph_0.edges:
-            lcs_0 = self.get_local_coordinate_system(edge[0], edge[1])
-            lcs_1 = other.get_local_coordinate_system(edge[0], edge[1])
+            lcs_0 = self.graph.edges[(edge[0], edge[1])]["lcs"]
+            lcs_1 = other.graph.edges[(edge[0], edge[1])]["lcs"]
             if lcs_0 != lcs_1:
                 return False
 
@@ -1449,7 +1450,7 @@ class CoordinateSystemManager:
 
     @classmethod
     def _compare_subsystems_equal(cls, data: Dict, other: Dict) -> bool:
-        """Compare if to subsystem data dictionaries are equal.
+        """Compare if two subsystem data dictionaries are equal.
 
         Parameters
         ----------
@@ -1473,6 +1474,8 @@ class CoordinateSystemManager:
             if subsystem_data["common node"] != other_data["common node"]:
                 return False
             if subsystem_data["root"] != other_data["root"]:
+                return False
+            if subsystem_data["time_ref"] != other_data["time_ref"]:
                 return False
             if set(subsystem_data["neighbors"]) != set(other_data["neighbors"]):
                 return False
@@ -2248,7 +2251,7 @@ class CoordinateSystemManager:
             target_coordinate_system_name,
         )
 
-    def get_local_coordinate_system(
+    def get_cs(
         self,
         coordinate_system_name: str,
         reference_system_name: Union[str, None] = None,
@@ -2404,7 +2407,7 @@ class CoordinateSystemManager:
             if parent_name is None:
                 raise ValueError("The root system has no time dependency.")
 
-            time = self.get_local_coordinate_system(time, parent_name).time
+            time = self.get_cs(time, parent_name).time
             if time is None:
                 raise ValueError(f'The system "{time}" is not time dependent')
         elif not isinstance(time, (pd.DatetimeIndex, pint.Quantity)):
@@ -2478,6 +2481,7 @@ class CoordinateSystemManager:
             csm_sub = CoordinateSystemManager(
                 ext_sub_system_data["root"],
                 sub_system_name,
+                time_ref=ext_sub_system_data["time_ref"],
                 _graph=self._graph.subgraph(members).copy(),
                 _sub_systems=ext_sub_system_data["sub system data"],
             )
@@ -2621,6 +2625,16 @@ class CoordinateSystemManager:
             instance.
 
         """
+        if (
+            other._number_of_time_dependent_lcs > 0
+            and self.reference_time != other.reference_time
+        ):
+            raise Exception(
+                "You can only merge subsystems with time dependent coordinate systems"
+                "if the reference times of both 'CoordinateSystemManager' instances"
+                "are identical."
+            )
+
         intersection = list(
             set(self.get_coordinate_system_names())
             & set(other.get_coordinate_system_names())
@@ -2637,6 +2651,7 @@ class CoordinateSystemManager:
         subsystem_data = {
             "common node": intersection[0],
             "root": other.root_system_name,
+            "time_ref": other.reference_time,
             "neighbors": other.neighbors(intersection[0]),
             "original members": other.get_coordinate_system_names(),
             "sub system data": other.sub_system_data,
@@ -2815,9 +2830,7 @@ class CoordinateSystemManager:
             Transformed data
 
         """
-        lcs = self.get_local_coordinate_system(
-            source_coordinate_system_name, target_coordinate_system_name
-        )
+        lcs = self.get_cs(source_coordinate_system_name, target_coordinate_system_name)
         if isinstance(data, xr.DataArray):
             mul = ut.xr_matmul(
                 lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]

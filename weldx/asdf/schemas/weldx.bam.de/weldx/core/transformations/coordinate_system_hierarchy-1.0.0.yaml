@@ -19,6 +19,11 @@ properties:
       Name of the root coordinate system
     type: string
 
+  reference_time:
+    description: |
+      A timestamp that serves as reference point for all attached coordinate systems.
+    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+
   subsystem_names:
     description: |
       A list containing the names of subsystems that are directly attached to the main hierarchy. Nested subsystems
@@ -42,7 +47,7 @@ properties:
     items:
       $ref: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
 
-propertyOrder: [name, root_system_name, subsystems, subsystem_data,  coordinate_systems]
+propertyOrder: [name, root_system_name, time_ref, subsystems, subsystem_data,  coordinate_systems]
 required: [name, root_system_name, coordinate_systems]
 flowStyle: block
 additionalProperties: false

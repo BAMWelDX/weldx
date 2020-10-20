@@ -2,6 +2,8 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
+from pandas import Timestamp
+
 from weldx.asdf.types import WeldxType
 from weldx.transformations import CoordinateSystemManager, LocalCoordinateSystem
 
@@ -84,6 +86,7 @@ class CoordinateSystemManagerSubsystem:
 
     name: str
     parent_system: str
+    reference_time: Timestamp
     root_cs: str
     subsystems: List[str]
     members: List[str]
@@ -121,6 +124,7 @@ class CoordinateSystemManagerSubsystemASDF(WeldxType):
         tree = {
             "name": node.name,
             "root_cs": node.root_cs,
+            "reference_time": node.reference_time,
             "parent_system": node.parent_system,
             "subsystem_names": node.subsystems,
             "members": node.members,
@@ -219,6 +223,7 @@ class CoordinateSystemManagerASDF(WeldxType):
                 CoordinateSystemManagerSubsystem(
                     subsystem.name,
                     parent,
+                    subsystem.reference_time,
                     subsystem.root_system_name,
                     child_systems,
                     subsystem.get_coordinate_system_names(),
@@ -390,7 +395,7 @@ class CoordinateSystemManagerASDF(WeldxType):
                 CoordinateTransformation(
                     name,
                     reference_system,
-                    node.get_local_coordinate_system(name, reference_system),
+                    graph.edges[(name, reference_system)]["lcs"],
                 )
             ]
 
@@ -403,6 +408,7 @@ class CoordinateSystemManagerASDF(WeldxType):
 
         tree = {
             "name": node.name,
+            "reference_time": node.reference_time,
             "subsystem_names": subsystems,
             "subsystems": subsystem_data,
             "root_system_name": node.root_system_name,
@@ -429,13 +435,23 @@ class CoordinateSystemManagerASDF(WeldxType):
             An instance of the 'CoordinateSystemManager' type.
 
         """
-        csm = CoordinateSystemManager(tree["root_system_name"], tree["name"],)
+        reference_time = None
+        if "reference_time" in tree:
+            reference_time = tree["reference_time"]
+        csm = CoordinateSystemManager(
+            tree["root_system_name"], tree["name"], time_ref=reference_time
+        )
 
         subsystem_data_list = tree["subsystems"]
 
         for subsystem_data in subsystem_data_list:
+            subsystem_reference_time = None
+            if "reference_time" in subsystem_data:
+                subsystem_reference_time = subsystem_data["reference_time"]
             subsystem_data["csm"] = CoordinateSystemManager(
-                subsystem_data["root_cs"], subsystem_data["name"]
+                subsystem_data["root_cs"],
+                subsystem_data["name"],
+                subsystem_reference_time,
             )
             subsystem_data["lcs"] = []
 
