@@ -2783,10 +2783,7 @@ class CoordinateSystemManager:
         if not lcs_list:
             return None
 
-        time_list = [
-            lcs.datetimeindex if lcs.has_reference_time else lcs.time
-            for lcs in lcs_list
-        ]
+        time_list = [ut.to_pandas_time_index(lcs.time) for lcs in lcs_list]
         if self.has_reference_time:
             time_list = [
                 t + self.reference_time if isinstance(t, pd.TimedeltaIndex) else t
