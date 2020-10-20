@@ -587,7 +587,7 @@ class TestLocalCoordinateSystem:
         time_exp:
             Expected return value of the 'time' property
         time_ref_exp:
-            Expected return value of the 'reference_time' property
+            Expected return value of the 'time_ref' property
         datetime_exp:
             Expected return value of the 'datetimeindex' property
         quantity_exp:
@@ -1804,7 +1804,7 @@ class TestCoordinateSystemManager:
             timestamp_lcs_1 = pd.Timestamp("2000-01-02")
         if has_timestamp_lcs_2:
             timestamp_lcs_2 = pd.Timestamp("2000-01-03")
-        csm = tf.CoordinateSystemManager("root", reference_time=timestamp_csm)
+        csm = tf.CoordinateSystemManager("root", time_ref=timestamp_csm)
         lcs_1 = tf.LocalCoordinateSystem(
             coordinates=[[1, 2, 3], [3, 2, 1]],
             time=pd.TimedeltaIndex([1, 2]),
@@ -2729,7 +2729,7 @@ class TestCoordinateSystemManager:
         if time_ref_day_parent is not None:
             time_ref_parent = f"2000-01-{time_ref_day_parent}"
         csm_parent = tf.CoordinateSystemManager(
-            "root", "csm_parent", reference_time=time_ref_parent
+            "root", "csm_parent", time_ref=time_ref_parent
         )
         if is_static_parent:
             csm_parent.add_cs("cs_1", "root", lcs_static)
@@ -2739,9 +2739,7 @@ class TestCoordinateSystemManager:
         time_ref_sub = None
         if time_ref_day_sub is not None:
             time_ref_sub = f"2000-01-{time_ref_day_sub}"
-        csm_sub = tf.CoordinateSystemManager(
-            "base", "csm_sub", reference_time=time_ref_sub
-        )
+        csm_sub = tf.CoordinateSystemManager("base", "csm_sub", time_ref=time_ref_sub)
         if is_static_sub:
             csm_sub.add_cs("cs_1", "base", lcs_static)
         else:

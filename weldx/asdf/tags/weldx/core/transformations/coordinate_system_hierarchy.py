@@ -439,7 +439,7 @@ class CoordinateSystemManagerASDF(WeldxType):
         if "reference_time" in tree:
             reference_time = tree["reference_time"]
         csm = CoordinateSystemManager(
-            tree["root_system_name"], tree["name"], reference_time=reference_time
+            tree["root_system_name"], tree["name"], time_ref=reference_time
         )
 
         subsystem_data_list = tree["subsystems"]

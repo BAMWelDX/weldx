@@ -1252,7 +1252,7 @@ class CoordinateSystemManager:
         self,
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
-        reference_time: pd.Timestamp = None,
+        time_ref: pd.Timestamp = None,
         _graph: Union[nx.DiGraph, None] = None,
         _sub_systems=None,
     ):
@@ -1265,7 +1265,7 @@ class CoordinateSystemManager:
         coordinate_system_manager_name : str
             Name of the coordinate system manager. If 'None' is passed, a default name
             is chosen.
-        reference_time : pandas.Timestamp
+        time_ref : pandas.Timestamp
             A reference timestamp. If it is defined, all time dependent information
             returned by the CoordinateSystemManager will refer to it by default.
         _graph:
@@ -1284,9 +1284,9 @@ class CoordinateSystemManager:
         if coordinate_system_manager_name is None:
             coordinate_system_manager_name = self._generate_default_name()
         self._name = coordinate_system_manager_name
-        if reference_time is not None and not isinstance(reference_time, pd.Timestamp):
-            reference_time = pd.Timestamp(reference_time)
-        self._reference_time = reference_time
+        if time_ref is not None and not isinstance(time_ref, pd.Timestamp):
+            time_ref = pd.Timestamp(time_ref)
+        self._reference_time = time_ref
 
         self._data = {}
         self._root_system_name = root_coordinate_system_name
@@ -1477,7 +1477,7 @@ class CoordinateSystemManager:
                 return False
             if subsystem_data["root"] != other_data["root"]:
                 return False
-            if subsystem_data["reference_time"] != other_data["reference_time"]:
+            if subsystem_data["time_ref"] != other_data["time_ref"]:
                 return False
             if set(subsystem_data["neighbors"]) != set(other_data["neighbors"]):
                 return False
@@ -2477,7 +2477,7 @@ class CoordinateSystemManager:
             csm_sub = CoordinateSystemManager(
                 ext_sub_system_data["root"],
                 sub_system_name,
-                reference_time=ext_sub_system_data["reference_time"],
+                time_ref=ext_sub_system_data["time_ref"],
                 _graph=self._graph.subgraph(members).copy(),
                 _sub_systems=ext_sub_system_data["sub system data"],
             )
@@ -2647,7 +2647,7 @@ class CoordinateSystemManager:
         subsystem_data = {
             "common node": intersection[0],
             "root": other.root_system_name,
-            "reference_time": other.reference_time,
+            "time_ref": other.reference_time,
             "neighbors": other.neighbors(intersection[0]),
             "original members": other.get_coordinate_system_names(),
             "sub system data": other.sub_system_data,

@@ -115,7 +115,7 @@ def get_xarray_example_dataset():
             "lat": (["x", "y"], lat),
             "time": pd.date_range("2014-09-06", periods=3),
             "time_labels": (["time"], ["2014-09-06", "2014-09-09", "2014-09-12"]),
-            "reference_time": pd.Timestamp("2014-09-05"),
+            "time_ref": pd.Timestamp("2014-09-05"),
         },
     )
     dsx.attrs = {"temperature": "Celsius"}
