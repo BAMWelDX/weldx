@@ -1762,9 +1762,14 @@ class CoordinateSystemManager:
 
         if (
             lcs.is_time_dependent  # always add static lcs
-            and self.has_reference_time
-            and self._number_of_time_dependent_lcs > 0
-            and lcs.has_reference_time != self._has_lcs_with_time_ref
+            and self._number_of_time_dependent_lcs > 0  # CSM is not static
+            and (
+                (lcs.has_reference_time and not self.uses_absolute_times)
+                or (
+                    (not lcs.has_reference_time and not self.has_reference_time)
+                    and self.uses_absolute_times
+                )
+            )
         ):
             raise Exception(
                 "Inconsistent usage of reference times! If you didn't specify a "

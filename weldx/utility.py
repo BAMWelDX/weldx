@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
+from pandas.api.types import is_timedelta64_dtype, is_datetime64_dtype
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
@@ -866,11 +867,9 @@ def xr_interp_coordinates_in_time(
 
     """
     da = dsx.weldx.time_ref_unset()
-
     da = xr_interp_like(
         da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
     )
-
     da = da.weldx.time_ref_restore()
 
     return da
@@ -924,7 +923,7 @@ class WeldxAccessor:  # pragma: no cover
         """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp"""
         da = self._obj
         if "time" in da.coords:
-            if np.issubdtype(da.time.dtype, np.datetime64):
+            if is_datetime64_dtype(da.time):
                 if "_time_ref_stored" not in da.time.attrs:
                     da.time.attrs["_time_ref_stored"] = pd.Timestamp(da.time.data[0])
                 time_ref = da.time.attrs["_time_ref_stored"]
@@ -932,9 +931,6 @@ class WeldxAccessor:  # pragma: no cover
                     {"time": pd.DatetimeIndex(da.time.data) - time_ref}
                 )
                 da.time.attrs["time_ref"] = time_ref
-            elif (
-                np.issubdtype(da.time.dtype, np.timedelta64)
-                and "time_ref" not in da.time.attrs
-            ):
+            elif is_timedelta64_dtype(da.time) and "time_ref" not in da.time.attrs:
                 da.time.attrs["time_ref"] = None
         return da
