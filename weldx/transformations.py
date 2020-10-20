@@ -1451,7 +1451,7 @@ class CoordinateSystemManager:
 
     @classmethod
     def _compare_subsystems_equal(cls, data: Dict, other: Dict) -> bool:
-        """Compare if to subsystem data dictionaries are equal.
+        """Compare if two subsystem data dictionaries are equal.
 
         Parameters
         ----------
@@ -1475,6 +1475,8 @@ class CoordinateSystemManager:
             if subsystem_data["common node"] != other_data["common node"]:
                 return False
             if subsystem_data["root"] != other_data["root"]:
+                return False
+            if subsystem_data["reference_time"] != other_data["reference_time"]:
                 return False
             if set(subsystem_data["neighbors"]) != set(other_data["neighbors"]):
                 return False
@@ -2474,6 +2476,7 @@ class CoordinateSystemManager:
             csm_sub = CoordinateSystemManager(
                 ext_sub_system_data["root"],
                 sub_system_name,
+                reference_time=ext_sub_system_data["reference_time"],
                 _graph=self._graph.subgraph(members).copy(),
                 _sub_systems=ext_sub_system_data["sub system data"],
             )
@@ -2617,6 +2620,16 @@ class CoordinateSystemManager:
             instance.
 
         """
+        if (
+            other._number_of_time_dependent_lcs > 0
+            and self.reference_time != other.reference_time
+        ):
+            raise Exception(
+                "You can only merge subsystems with time dependent coordinate systems"
+                "if the reference times of both 'CoordinateSystemManager' instances"
+                "are identical."
+            )
+
         intersection = list(
             set(self.get_coordinate_system_names())
             & set(other.get_coordinate_system_names())
@@ -2633,6 +2646,7 @@ class CoordinateSystemManager:
         subsystem_data = {
             "common node": intersection[0],
             "root": other.root_system_name,
+            "reference_time": other.reference_time,
             "neighbors": other.neighbors(intersection[0]),
             "original members": other.get_coordinate_system_names(),
             "sub system data": other.sub_system_data,

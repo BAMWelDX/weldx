@@ -2664,6 +2664,96 @@ class TestCoordinateSystemManager:
             assert csm_mg.get_local_coordinate_system(child, parent) == cur_lcs
             assert csm_mg.get_local_coordinate_system(parent, child) == cur_lcs.invert()
 
+    # test_merge_reference_times -------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "time_ref_day_parent, time_ref_day_sub, is_static_parent, is_static_sub,"
+        "should_fail",
+        [
+            # both static
+            (None, None, True, True, False),
+            ("01", None, True, True, False),
+            ("01", "01", True, True, False),
+            ("01", "03", True, True, False),
+            (None, "01", True, True, False),
+            # sub static
+            (None, None, False, True, False),
+            ("01", None, False, True, False),
+            ("01", "01", False, True, False),
+            ("01", "03", False, True, False),
+            (None, "01", False, True, False),
+            # parent static
+            (None, None, True, False, False),
+            ("01", None, True, False, True),
+            ("01", "01", True, False, False),
+            ("01", "03", True, False, True),
+            (None, "01", True, False, True),
+            # both dynamic
+            (None, None, False, False, False),
+            ("01", None, False, False, True),
+            ("01", "01", False, False, False),
+            ("01", "03", False, False, True),
+            (None, "01", False, False, True),
+        ],
+    )
+    def test_merge_reference_times(
+        time_ref_day_parent,
+        time_ref_day_sub,
+        is_static_parent,
+        is_static_sub,
+        should_fail,
+    ):
+        """Test if ``merge`` raises an error for invalid reference time combinations.
+
+        Parameters
+        ----------
+        time_ref_day_parent : str
+            `None` or day number of the parent systems reference timestamp 
+        time_ref_day_sub : str
+            `None` or day number of the merged systems reference timestamp
+        is_static_parent : bool
+            `True` if the parent system should be static, `False` otherwise
+        is_static_sub : bool
+            `True` if the merged system should be static, `False` otherwise
+        should_fail : bool
+            `True` if the merge operation should fail. `False` otherwise
+
+        """
+        # setup
+        lcs_static = tf.LocalCoordinateSystem(coordinates=[1, 1, 1])
+        lcs_dynamic = tf.LocalCoordinateSystem(
+            coordinates=[[0, 4, 2], [7, 2, 4]], time=TDI([4, 8], "D")
+        )
+        time_ref_parent = None
+        if time_ref_day_parent is not None:
+            time_ref_parent = f"2000-01-{time_ref_day_parent}"
+        csm_parent = tf.CoordinateSystemManager(
+            "root", "csm_parent", reference_time=time_ref_parent
+        )
+        if is_static_parent:
+            csm_parent.add_cs("cs_1", "root", lcs_static)
+        else:
+            csm_parent.add_cs("cs_1", "root", lcs_dynamic)
+
+        time_ref_sub = None
+        if time_ref_day_sub is not None:
+            time_ref_sub = f"2000-01-{time_ref_day_sub}"
+        csm_sub = tf.CoordinateSystemManager(
+            "base", "csm_sub", reference_time=time_ref_sub
+        )
+        if is_static_sub:
+            csm_sub.add_cs("cs_1", "base", lcs_static)
+        else:
+            csm_sub.add_cs("cs_1", "base", lcs_dynamic)
+
+        # test
+        if should_fail:
+            with pytest.raises(Exception):
+                csm_parent.merge(csm_sub)
+        else:
+            csm_parent.merge(csm_sub)
+
     # test get_subsystems_merged_serially ----------------------------------------------
 
     @staticmethod
