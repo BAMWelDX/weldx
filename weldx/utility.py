@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
-from pandas.api.types import is_timedelta64_dtype, is_datetime64_dtype
+from pandas.api.types import is_datetime64_dtype, is_timedelta64_dtype
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
@@ -154,12 +154,23 @@ def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         except TypeError:
             return pd.TimedeltaIndex(data=[time.to(base).magnitude], unit=base)
 
+    if isinstance(time, (xr.DataArray, xr.Dataset)):
+        if "time" in time.coords:
+            time = time.time
+        if is_datetime64_dtype(time):
+            return pd.DatetimeIndex(time)
+        elif is_timedelta64_dtype(time):
+            if "time_ref" in time.attrs:
+                if time.attrs["time_ref"] is not None:
+                    return pd.TimedeltaIndex(time) + time.attrs["time_ref"]
+            return pd.TimedeltaIndex(time)
+
     if not isinstance(time, np.ndarray):
         if not isinstance(time, list):
             time = [time]
         time = np.array(time)
 
-    if np.issubdtype(time.dtype, np.datetime64):
+    if is_datetime64_dtype(time):
         return pd.DatetimeIndex(time)
     return pd.TimedeltaIndex(time)
 
@@ -809,15 +820,13 @@ def xr_interp_orientation_in_time(
     if "time" not in dsx.coords:
         return dsx
 
-    time_ref = None
+    dsx = dsx.weldx.time_ref_restore()
+    time_ref = dsx.time.attrs["time_ref"]
 
-    # extract intersecting times and add time range boundaries of the data set
-    times_ds = pd.TimedeltaIndex(dsx.time)
-    if dsx.time.attrs["time_ref"] is not None:
-        time_ref = dsx.time.attrs["time_ref"]
-        times_ds = times_ds + time_ref
+    times_ds = to_pandas_time_index(dsx)
 
     if len(times_ds) > 1:
+        # extract intersecting times and add time range boundaries of the data set
         if isinstance(times_ds, pd.DatetimeIndex):
             times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
         else:
@@ -842,8 +851,7 @@ def xr_interp_orientation_in_time(
     dsx_out = xr_interp_like(dsx_out, {"time": times}, fillna=True)
 
     if time_ref is not None:
-        dsx_out["time"] = pd.DatetimeIndex(dsx_out.time.data) - time_ref
-        dsx_out.time.attrs["time_ref"] = time_ref
+        dsx_out = dsx_out.weldx.reset_reference_time(time_ref)
 
     return dsx_out.transpose(..., "c", "v")
 
@@ -879,6 +887,7 @@ def xr_interp_coordinates_in_time(
 
 
 @xr.register_dataarray_accessor("weldx")
+@xr.register_dataset_accessor("weldx")
 class WeldxAccessor:  # pragma: no cover
     """Custom accessor for extending DataArray functionality.
 
@@ -933,4 +942,16 @@ class WeldxAccessor:  # pragma: no cover
                 da.time.attrs["time_ref"] = time_ref
             elif is_timedelta64_dtype(da.time) and "time_ref" not in da.time.attrs:
                 da.time.attrs["time_ref"] = None
+        return da
+
+    def reset_reference_time(self, time_ref_new: pd.Timestamp) -> xr.DataArray:
+        """Set a new reference time and shift timedeltas accordingly."""
+        da = self._obj
+        if "time" in da.coords:
+            da = da.weldx.time_ref_restore()
+            if da.time.attrs["time_ref"] is None:
+                return da
+            time_new = to_pandas_time_index(da) - time_ref_new
+            da = da.assign_coords({"time": time_new})
+            da.time.attrs["time_ref"] = time_ref_new
         return da
