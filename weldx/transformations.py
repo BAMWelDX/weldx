@@ -1046,7 +1046,7 @@ class LocalCoordinateSystem:
 
         """
         if "time" in self._dataset.coords:
-            return pd.TimedeltaIndex(self._dataset.time)
+            return self._dataset.time
         return None
 
     @property
