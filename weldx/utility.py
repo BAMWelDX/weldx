@@ -156,6 +156,14 @@ def to_pandas_time_index(
         Variable as pandas time index
 
     """
+    _input_type = type(time)
+
+    if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+        return time
+
+    if isinstance(time, tf.LocalCoordinateSystem):
+        return to_pandas_time_index(time._dataset)
+
     if isinstance(time, pint.Quantity):
         base = "s"  # using low base unit could cause rounding errors
         try:
@@ -166,21 +174,22 @@ def to_pandas_time_index(
     if isinstance(time, (xr.DataArray, xr.Dataset)):
         if "time" in time.coords:
             time = time.time
-        if is_datetime64_dtype(time):
-            return pd.DatetimeIndex(time)
-        elif is_timedelta64_dtype(time):
+        time_index = pd.Index(time.values)
+        if is_timedelta64_dtype(time_index):
             if "time_ref" in time.attrs and time.attrs["time_ref"] is not None:
-                return pd.TimedeltaIndex(time) + time.attrs["time_ref"]
-            return pd.TimedeltaIndex(time)
+                time_index = time_index + time.attrs["time_ref"]
+        return time_index
 
-    if not isinstance(time, np.ndarray):
-        if not isinstance(time, list):
-            time = [time]
-        time = np.array(time)
+    if not np.iterable(time):
+        time = [time]
+    time = pd.Index(time)
 
-    if is_datetime64_dtype(time):
-        return pd.DatetimeIndex(time)
-    return pd.TimedeltaIndex(time)
+    if not isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+        raise TypeError(
+            f"Could not convert {_input_type} to pd.DatetimeIndex or pd.TimedeltaIndex"
+        )
+
+    return time
 
 
 def pandas_time_delta_to_quantity(
@@ -828,6 +837,8 @@ def xr_interp_orientation_in_time(
     if "time" not in dsx.coords:
         return dsx
 
+    times = to_pandas_time_index(times)
+
     dsx = dsx.weldx.time_ref_restore()
     time_ref = dsx.time.attrs["time_ref"]
 
@@ -862,15 +873,15 @@ def xr_interp_orientation_in_time(
 
 
 def xr_interp_coordinates_in_time(
-    dsx: xr.DataArray, times: Union[pd.TimedeltaIndex, pd.DatetimeIndex]
+    da: xr.DataArray, times: Union[pd.TimedeltaIndex, pd.DatetimeIndex]
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents 3d coordinates in time.
 
     Parameters
     ----------
-    dsx : xarray.DataArray
+    da : xarray.DataArray
         xarray DataArray
-    times :
+    times : pandas.TimedeltaIndex or pandas.DatetimeIndex
         Time data
 
     Returns
@@ -879,12 +890,11 @@ def xr_interp_coordinates_in_time(
         Interpolated data
 
     """
-    da = dsx.weldx.time_ref_unset()
+    da = da.weldx.time_ref_unset()
     da = xr_interp_like(
         da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
     )
     da = da.weldx.time_ref_restore()
-
     return da
 
 
