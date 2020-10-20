@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
-from pandas.api.types import is_datetime64_dtype, is_timedelta64_dtype
+from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta64_dtype
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
@@ -186,20 +186,21 @@ def to_pandas_time_index(
         time = [time]
     time = pd.Index(time)
 
-    # try manual casting if we did not get desired index type so far (i.e. strings)
-    if not isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+    if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+        return time
+
+    # try manual casting for object dtypes (i.e. strings), should avoid integers
+    # warning: this allows something like ["1","2","3"] which will be ns !!
+    if is_object_dtype(time):
         for func in (pd.DatetimeIndex, pd.TimedeltaIndex):
             try:
                 return func(time)
             except:
                 continue
-        else:
-            raise TypeError(
-                f"Could not convert {_input_type}"
-                f"to pd.DatetimeIndex or pd.TimedeltaIndex"
-            )
 
-    return time
+    raise TypeError(
+        f"Could not convert {_input_type} " f"to pd.DatetimeIndex or pd.TimedeltaIndex"
+    )
 
 
 def pandas_time_delta_to_quantity(
