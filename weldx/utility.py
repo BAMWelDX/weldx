@@ -160,9 +160,8 @@ def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         if is_datetime64_dtype(time):
             return pd.DatetimeIndex(time)
         elif is_timedelta64_dtype(time):
-            if "time_ref" in time.attrs:
-                if time.attrs["time_ref"] is not None:
-                    return pd.TimedeltaIndex(time) + time.attrs["time_ref"]
+            if "time_ref" in time.attrs and time.attrs["time_ref"] is not None:
+                return pd.TimedeltaIndex(time) + time.attrs["time_ref"]
             return pd.TimedeltaIndex(time)
 
     if not isinstance(time, np.ndarray):
@@ -827,10 +826,7 @@ def xr_interp_orientation_in_time(
 
     if len(times_ds) > 1:
         # extract intersecting times and add time range boundaries of the data set
-        if isinstance(times_ds, pd.DatetimeIndex):
-            times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
-        else:
-            times_ds_limits = pd.TimedeltaIndex([times_ds.min(), times_ds.max()])
+        times_ds_limits = pd.Index([times_ds.min(), times_ds.max()])
         times_union = times.union(times_ds_limits)
         times_intersect = times_union[
             (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])
