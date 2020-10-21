@@ -604,7 +604,8 @@ def xr_interp_like(
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
-    # copy original coord attributes
+    # copy original variable and coord attributes
+    da.attrs = da1.attrs
     for key in da1.coords:
         da[key].attrs = da1[key].attrs
 
