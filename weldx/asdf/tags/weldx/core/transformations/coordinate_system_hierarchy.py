@@ -226,7 +226,7 @@ class CoordinateSystemManagerASDF(WeldxType):
                     subsystem.reference_time,
                     subsystem.root_system_name,
                     child_systems,
-                    subsystem.get_coordinate_system_names(),
+                    subsystem.coordinate_system_names,
                 )
             ]
         return subsystem_data
