@@ -858,7 +858,8 @@ def xr_interp_orientation_in_time(
     dsx_out = xr_interp_like(dsx_out, {"time": times}, fillna=True)
 
     # resync and reset to correct format
-    dsx_out.weldx.time_ref = time_ref
+    if time_ref:
+        dsx_out.weldx.time_ref = time_ref
     dsx_out = dsx_out.weldx.time_ref_restore()
 
     return dsx_out.transpose(..., "c", "v")
@@ -890,12 +891,31 @@ def xr_interp_coordinates_in_time(
     return da
 
 
+def _as_valid_timestamp(value: Union[pd.Timestamp, str]) -> pd.Timestamp:
+    """Create a valid (by convention) Timestamp object or raise TypeError.
+
+    Parameters
+    ----------
+    value: pandas.Timestamp or str
+        Value to convert to `pd.Timestamp`.
+    Returns
+    -------
+    pandas.Timestamp
+
+    """
+    if isinstance(value, str):
+        value = pd.Timestamp(value)
+    if isinstance(value, pd.Timestamp):  # catch NaT from empty str.
+        return value
+    raise TypeError("Could not create a valid pandas.Timestamp.")
+
+
 # weldx xarray Accessors --------------------------------------------------------
 
 
 @xr.register_dataarray_accessor("weldx")
 @xr.register_dataset_accessor("weldx")
-class WeldxAccessor:  # pragma: no cover
+class WeldxAccessor:
     """Custom accessor for extending DataArray functionality.
 
     See http://xarray.pydata.org/en/stable/internals.html#extending-xarray for details.
@@ -905,7 +925,7 @@ class WeldxAccessor:  # pragma: no cover
         """Construct a WeldX xarray object."""
         self._obj = xarray_obj
 
-    def interp_like(self, da, *args, **kwargs) -> xr.DataArray:
+    def interp_like(self, da, *args, **kwargs) -> xr.DataArray:  # pragma: no cover
         """Interpolate DataArray along dimensions of another DataArray.
 
         Provides some utility options for handling out of range values and broadcasting.
@@ -935,7 +955,6 @@ class WeldxAccessor:  # pragma: no cover
         if time_ref and is_datetime64_dtype(da.time):
             da["time"] = pd.DatetimeIndex(da.time.data) - time_ref
             da.time.attrs = self._obj.time.attrs  # restore old attributes !
-
         return da
 
     def reset_reference_time(self, time_ref_new: pd.Timestamp) -> xr.DataArray:
@@ -957,9 +976,13 @@ class WeldxAccessor:  # pragma: no cover
 
     @time_ref.setter
     def time_ref(self, value: pd.Timestamp):
-        """Convert to new reference time INPLACE."""
+        """Convert INPLACE to new reference time.
+
+        If no reference time exists, the new value will be assigned
+        TODO: should None be allowed and pass through or raise TypeError ?
+        """
         if "time" in self._obj.coords:
-            value = pd.Timestamp(value)
+            value = _as_valid_timestamp(value)
             if self._obj.weldx.time_ref and is_timedelta64_dtype(self._obj.time):
                 if value == self._obj.weldx.time_ref:
                     return
@@ -967,6 +990,6 @@ class WeldxAccessor:  # pragma: no cover
                 time_delta = value - self._obj.weldx.time_ref
                 self._obj["time"] = self._obj.time.data - time_delta
                 self._obj.time.attrs = _attrs  # restore old attributes !
-                self._obj.time.attrs["time_ref"] = value  # set ne time_ref value
+                self._obj.time.attrs["time_ref"] = value  # set new time_ref value
             else:
                 self._obj.time.attrs["time_ref"] = value

@@ -1169,7 +1169,7 @@ class LocalCoordinateSystem:
         """
         return self.as_rotation().as_euler(seq=seq, degrees=degrees)
 
-    def reset_reference_time(self, time_ref_new):
+    def reset_reference_time(self, time_ref_new: pd.Timestamp):
         """Reset the reference time of the coordinate system.
 
         The time values of the coordinate system are adjusted to the new reference time.
@@ -1179,20 +1179,11 @@ class LocalCoordinateSystem:
 
         Parameters
         ----------
-        time_ref_new:
+        time_ref_new: pandas.Timestamp
             The new reference time
 
         """
-        if self.time is None:
-            return
-        if isinstance(time_ref_new, str):
-            time_ref_new = pd.Timestamp(time_ref_new)
-        if not self.has_reference_time:
-            self._dataset.time.attrs["time_ref"] = time_ref_new
-        else:
-            delta = self.reference_time - time_ref_new
-            self._dataset.coords["time"] = self.time + delta
-            self._dataset.time.attrs["time_ref"] = time_ref_new
+        self._dataset.weldx.time_ref = time_ref_new
 
 
 # CoordinateSystemManager --------------------------------------------------------------
