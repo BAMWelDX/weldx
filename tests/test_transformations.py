@@ -2864,7 +2864,6 @@ class TestCoordinateSystemManager:
 
     # test_unmerge_merged_serially -----------------------------------------------------
 
-    @pytest.mark.slow
     @pytest.mark.parametrize(
         "additional_cs",
         [
@@ -2884,6 +2883,7 @@ class TestCoordinateSystemManager:
             ({"lcs0": 0, "lcs3": 0, "lcs4": 1, "lcs6": 2, "lcs10": 5}),
         ],
     )
+    @pytest.mark.slow
     def test_unmerge_merged_serially(
         self, list_of_csm_and_lcs_instances, additional_cs
     ):
