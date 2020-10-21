@@ -28,7 +28,7 @@ __all__ = ["LocalCoordinateSystem", "CoordinateSystemManager", "WXRotation"]
 def _build_time_index(
     time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
     time_ref: pd.Timestamp = None,
-):
+) -> pd.TimedeltaIndex:
     """Build time index used for xarray objects.
 
     Parameters
