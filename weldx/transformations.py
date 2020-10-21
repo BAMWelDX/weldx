@@ -1256,7 +1256,7 @@ class CoordinateSystemManager:
         coordinate_system_manager_name: Union[str, None] = None,
         time_ref: pd.Timestamp = None,
         _graph: Union[nx.DiGraph, None] = None,
-        _sub_systems=None,
+        _subsystems=None,
     ):
         """Construct a coordinate system manager.
 
@@ -1273,7 +1273,7 @@ class CoordinateSystemManager:
         _graph:
             A graph that should be used internally. Do not set this parameter. It is
             only meant for class internal usage.
-        _sub_systems:
+        _subsystems:
             A dictionary containing data about the CSMs attached subsystems. This
             parameter should never be set manually. It is for internal usage only.
 
@@ -1293,7 +1293,7 @@ class CoordinateSystemManager:
         self._data = {}
         self._root_system_name = root_coordinate_system_name
 
-        self._sub_system_data_dict = _sub_systems
+        self._sub_system_data_dict = _subsystems
         if self._sub_system_data_dict is None:
             self._sub_system_data_dict = {}
 
@@ -2115,7 +2115,7 @@ class CoordinateSystemManager:
           its child systems are removed from the coordinate system manager
         - If the coordinate system is part of a subsystem and belongs to the systems
           that were present when the subsystem was merged, the subsystem is removed and
-          can not be restored using "sub_systems" or "unmerge". Coordinate systems
+          can not be restored using `subsystems` or `unmerge`. Coordinate systems
           of the subsystem that aren't a child of the deleted coordinate system will
           remain in the coordinate system manager
         - If the coordinate system is part of a subsystem but was added after merging,
@@ -2460,7 +2460,7 @@ class CoordinateSystemManager:
         return path[1]
 
     @property
-    def sub_systems(self) -> List["CoordinateSystemManager"]:
+    def subsystems(self) -> List["CoordinateSystemManager"]:
         """Extract all subsystems from the CoordinateSystemManager.
 
         Returns
@@ -2482,7 +2482,7 @@ class CoordinateSystemManager:
                 sub_system_name,
                 time_ref=ext_sub_system_data["time_ref"],
                 _graph=self._graph.subgraph(members).copy(),
-                _sub_systems=ext_sub_system_data["sub system data"],
+                _subsystems=ext_sub_system_data["sub system data"],
             )
             sub_system_list.append(csm_sub)
 
@@ -2858,7 +2858,7 @@ class CoordinateSystemManager:
             A list containing previously merged 'CoordinateSystemManager' instances.
 
         """
-        sub_systems = self.sub_systems
+        subsystems = self.subsystems
         self.remove_subsystems()
 
-        return sub_systems
+        return subsystems

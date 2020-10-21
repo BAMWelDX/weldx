@@ -2770,7 +2770,7 @@ class TestCoordinateSystemManager:
         csm[0].merge(csm[5])
 
         # get subsystems ----------------------------------
-        subs = csm[0].sub_systems
+        subs = csm[0].subsystems
 
         # checks ------------------------------------------
         assert len(subs) == 5
@@ -2805,7 +2805,7 @@ class TestCoordinateSystemManager:
         csm_mg.merge(csm_n2)
 
         # get sub systems ---------------------------------
-        subs = csm_mg.sub_systems
+        subs = csm_mg.subsystems
 
         # checks ------------------------------------------
         assert len(subs) == 3
@@ -2815,7 +2815,7 @@ class TestCoordinateSystemManager:
         assert subs[2] == csm_n2
 
         # get sub sub system ------------------------------
-        sub_subs = subs[2].sub_systems
+        sub_subs = subs[2].subsystems
 
         # check -------------------------------------------
         assert len(sub_subs) == 1
@@ -2823,7 +2823,7 @@ class TestCoordinateSystemManager:
         assert sub_subs[0] == csm_n3
 
         # get sub sub sub systems -------------------------
-        sub_sub_subs = sub_subs[0].sub_systems
+        sub_sub_subs = sub_subs[0].subsystems
 
         # check -------------------------------------------
         assert len(sub_sub_subs) == 1
