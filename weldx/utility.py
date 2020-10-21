@@ -194,7 +194,7 @@ def to_pandas_time_index(
         for func in (pd.DatetimeIndex, pd.TimedeltaIndex):
             try:
                 return func(time)
-            except Exception:
+            except (ValueError, TypeError):
                 continue
 
     raise TypeError(

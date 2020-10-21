@@ -28,6 +28,7 @@ excluded_words:
   - isort
   - networkx
   - shutil
+  - functools
   # matplotlib ----------------------------------
   - pyplot
   - gca
@@ -136,8 +137,8 @@ excluded_words:
   - quickstart
   - nsecond
   # German ---------------------------------------
-  - Bundesanstalt 
-  - für 
-  - Materialforschung 
-  - und 
+  - Bundesanstalt
+  - für
+  - Materialforschung
+  - und
   - prüfung
