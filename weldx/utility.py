@@ -898,6 +898,7 @@ def _as_valid_timestamp(value: Union[pd.Timestamp, str]) -> pd.Timestamp:
     ----------
     value: pandas.Timestamp or str
         Value to convert to `pd.Timestamp`.
+
     Returns
     -------
     pandas.Timestamp

@@ -128,14 +128,16 @@ def test_vector_is_close():
     ],
 )
 def test_to_pandas_time_index(arg, expected):
+    """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
     assert np.all(ut.to_pandas_time_index(arg) == expected)
 
 
 @pytest.mark.parametrize(
     "arg, exception",
-    [(5, TypeError), ("string", TypeError), (Q_(10, "m"), DimensionalityError),],
+    [(5, TypeError), ("string", TypeError), (Q_(10, "m"), DimensionalityError)],
 )
 def test_to_pandas_time_index_exceptions(arg, exception):
+    """Test correct exceptions on invalid inputs."""
     with pytest.raises(exception):
         ut.to_pandas_time_index(arg)
 
