@@ -925,10 +925,7 @@ class WeldxAccessor:  # pragma: no cover
         """Convert Timedelta + reference Timestamp to DatetimeIndex."""
         da = self._obj
         if "time" in da.coords:
-            if (
-                np.issubdtype(da.time.dtype, np.timedelta64)
-                and "time_ref" not in da.time.attrs
-            ):
+            if is_timedelta64_dtype(da.time) and "time_ref" not in da.time.attrs:
                 da.time.attrs["time_ref"] = None
             if da.time.attrs["time_ref"] is not None:
                 time_ref = da.time.attrs["time_ref"]
@@ -967,3 +964,27 @@ class WeldxAccessor:  # pragma: no cover
             da = da.assign_coords({"time": time_new})
             da.time.attrs["time_ref"] = time_ref_new
         return da
+
+    @property
+    def time_ref(self) -> pd.Timestamp:
+        """Get the time_ref value or `None` if not set."""
+        da = self._obj
+        if "time" in da.coords:
+            if "time_ref" in da.time.attrs:
+                return da.time.attrs["time_ref"]
+
+        return None
+
+    @time_ref.setter
+    def time_ref(self, value: pd.Timestamp):
+        """Convert to new reference time INPLACE."""
+        if "time" in self._obj.coords:
+            value = pd.Timestamp(value)
+            if self._obj.weldx.time_ref and is_timedelta64_dtype(self._obj.time):
+                if value == self._obj.weldx.time_ref:
+                    return
+                time_delta = value - self._obj.weldx.time_ref
+                self._obj["time"] = self._obj.time.data - time_delta
+                self._obj.time.attrs["time_ref"] = value
+            else:
+                self._obj.time.attrs["time_ref"] = value
