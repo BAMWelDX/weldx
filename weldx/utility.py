@@ -832,11 +832,8 @@ def xr_interp_orientation_in_time(
         return dsx
 
     times = to_pandas_time_index(times)
-
-    dsx = dsx.weldx.time_ref_restore()
-    time_ref = dsx.weldx.time_ref
-
     times_ds = to_pandas_time_index(dsx)
+    time_ref = dsx.weldx.time_ref
 
     if len(times_ds) > 1:
         # extract intersecting times and add time range boundaries of the data set
@@ -860,8 +857,9 @@ def xr_interp_orientation_in_time(
     # use interp_like to select original time values and correctly fill time dimension
     dsx_out = xr_interp_like(dsx_out, {"time": times}, fillna=True)
 
-    if time_ref is not None:
-        dsx_out = dsx_out.weldx.reset_reference_time(time_ref)
+    # resync and reset to correct format
+    dsx_out.weldx.time_ref = time_ref
+    dsx_out = dsx_out.weldx.time_ref_restore()
 
     return dsx_out.transpose(..., "c", "v")
 
@@ -965,7 +963,7 @@ class WeldxAccessor:  # pragma: no cover
             if self._obj.weldx.time_ref and is_timedelta64_dtype(self._obj.time):
                 if value == self._obj.weldx.time_ref:
                     return
-                _attrs = self._obj._obj.time.attrs
+                _attrs = self._obj.time.attrs
                 time_delta = value - self._obj.weldx.time_ref
                 self._obj["time"] = self._obj.time.data - time_delta
                 self._obj.time.attrs = _attrs  # restore old attributes !

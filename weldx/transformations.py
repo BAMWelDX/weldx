@@ -1001,9 +1001,7 @@ class LocalCoordinateSystem:
             The coordinate systems reference time
 
         """
-        if "time" in self._dataset and "time_ref" in self._dataset.time.attrs:
-            return self._dataset.time.attrs["time_ref"]
-        return None
+        return self._dataset.weldx.time_ref
 
     @property
     def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
