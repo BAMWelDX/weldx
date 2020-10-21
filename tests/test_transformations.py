@@ -2114,7 +2114,7 @@ class TestCoordinateSystemManager:
             csm_time_ref = f"2010-03-{csm_ref_time_day}"
 
         lcs_time_ref = [None for _ in range(len(lcs_times))]
-        for i in range(len(lcs_times)):
+        for i, _ in enumerate(lcs_times):
             if lcs_times[i] is not None:
                 lcs_times[i] = pd.TimedeltaIndex(lcs_times[i], "D")
             if lcs_ref_time_days[i] is not None:
@@ -2122,7 +2122,7 @@ class TestCoordinateSystemManager:
 
         # create coordinate systems
         lcs = []
-        for i in range(len(lcs_times)):
+        for i, _ in enumerate(lcs_times):
             if isinstance(lcs_times[i], pd.TimedeltaIndex):
                 coordinates = [[j, j, j] for j in range(len(lcs_times[i]))]
             else:
@@ -2145,7 +2145,7 @@ class TestCoordinateSystemManager:
 
         # create correct list of edges
         if edges is not None:
-            for i in range(len(edges)):
+            for i, _ in enumerate(edges):
                 edges[i] = ("root", f"lcs_{edges[i]}")
 
         # check time_union result
@@ -2521,7 +2521,7 @@ class TestCoordinateSystemManager:
         """
         # setup -------------------------------------------
         # set reference times
-        for i in range(len(time_refs)):
+        for i, _ in enumerate(time_refs):
             if time_refs[i] is not None:
                 time_refs[i] = pd.Timestamp(time_refs[i])
 
