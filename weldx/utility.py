@@ -177,8 +177,8 @@ def to_pandas_time_index(
             time = time.time
         time_index = pd.Index(time.values)
         if is_timedelta64_dtype(time_index):
-            if "time_ref" in time.attrs and time.attrs["time_ref"] is not None:
-                time_index = time_index + time.attrs["time_ref"]
+            if time.weldx.time_ref:
+                time_index = time_index + time.weldx.time_ref
         return time_index
 
     if not np.iterable(time) or isinstance(time, str):
