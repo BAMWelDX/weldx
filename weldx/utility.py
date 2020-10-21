@@ -965,8 +965,10 @@ class WeldxAccessor:  # pragma: no cover
             if self._obj.weldx.time_ref and is_timedelta64_dtype(self._obj.time):
                 if value == self._obj.weldx.time_ref:
                     return
+                _attrs = self._obj._obj.time.attrs
                 time_delta = value - self._obj.weldx.time_ref
                 self._obj["time"] = self._obj.time.data - time_delta
-                self._obj.time.attrs["time_ref"] = value
+                self._obj.time.attrs = _attrs  # restore old attributes !
+                self._obj.time.attrs["time_ref"] = value  # set ne time_ref value
             else:
                 self._obj.time.attrs["time_ref"] = value
