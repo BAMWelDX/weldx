@@ -22,51 +22,52 @@ _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
 __all__ = ["LocalCoordinateSystem", "CoordinateSystemManager", "WXRotation"]
 
-# functions -------------------------------------------------------------------
+# functions -----------------------------------------------------------------------
 
 
-class WXRotation(Rot):
-    """Wrapper for creating meta-tagged Scipy.Rotation objects."""
+def _build_time_index(
+    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
+    time_ref: pd.Timestamp = None,
+):
+    """Build time index used for xarray objects.
 
-    @classmethod
-    def from_quat(cls, quat: np.ndarray, normalized=None) -> "WXRotation":
-        """Initialize from quaternions.
+    Parameters
+    ----------
+    time:
+        Datetime- or Timedelta-like time index.
+    time_ref:
+        Reference timestamp for Timedelta inputs.
 
-        scipy.spatial.transform.Rotation docs for details.
-        """
-        rot = super().from_quat(quat, normalized)
-        rot.wx_meta = {"constructor": "from_quat"}
-        return rot
+    Returns
+    -------
+    pandas.TimedeltaIndex
 
-    @classmethod
-    def from_matrix(cls, matrix: np.ndarray) -> "WXRotation":
-        """Initialize from matrix.
+    """
+    if time is None:
+        return time, time_ref
 
-        scipy.spatial.transform.Rotation docs for details.
-        """
-        rot = super().from_matrix(matrix)
-        rot.wx_meta = {"constructor": "from_matrix"}
-        return rot
+    if isinstance(time, pint.Quantity):
+        time = ut.to_pandas_time_index(time)
 
-    @classmethod
-    def from_rotvec(cls, rotvec: np.ndarray) -> "WXRotation":
-        """Initialize from rotation vector.
+    if not isinstance(time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
+        try:  # try supported formats like str etc.
+            time = pd.TimedeltaIndex(time)
+        except (TypeError, ValueError):
+            try:  # maybe
+                time = pd.DatetimeIndex(time)
+            except Exception:
+                raise TypeError(
+                    "Unable to convert input argument to pd.DatetimeIndex or "
+                    "pd.TimedeltaIndex. If passing single values convert to list"
+                    "first (like [pd.Timestamp])"
+                )
 
-        scipy.spatial.transform.Rotation docs for details.
-        """
-        rot = Rot.from_rotvec(rotvec)
-        rot.wx_meta = {"constructor": "from_rotvec"}
-        return rot
+    if isinstance(time, pd.DatetimeIndex):
+        if time_ref is None:
+            time_ref = time[0]
+        time = time - time_ref
 
-    @classmethod
-    def from_euler(cls, seq: str, angles, degrees: bool = False) -> "WXRotation":
-        """Initialize from euler angles.
-
-        scipy.spatial.transform.Rotation docs for details.
-        """
-        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
-        rot.wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
-        return rot
+    return time, time_ref
 
 
 @UREG.wraps(None, (_DEFAULT_ANG_UNIT), strict=False)
@@ -357,7 +358,54 @@ def vector_points_to_left_of_vector(vector, vector_reference):
     return int(np.sign(np.linalg.det([vector_reference, vector])))
 
 
-# local coordinate system class --------------------------------------------------------
+# WXRotation ---------------------------------------------------------------------------
+
+
+class WXRotation(Rot):
+    """Wrapper for creating meta-tagged Scipy.Rotation objects."""
+
+    @classmethod
+    def from_quat(cls, quat: np.ndarray, normalized=None) -> "WXRotation":
+        """Initialize from quaternions.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_quat(quat, normalized)
+        rot.wx_meta = {"constructor": "from_quat"}
+        return rot
+
+    @classmethod
+    def from_matrix(cls, matrix: np.ndarray) -> "WXRotation":
+        """Initialize from matrix.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_matrix(matrix)
+        rot.wx_meta = {"constructor": "from_matrix"}
+        return rot
+
+    @classmethod
+    def from_rotvec(cls, rotvec: np.ndarray) -> "WXRotation":
+        """Initialize from rotation vector.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_rotvec(rotvec)
+        rot.wx_meta = {"constructor": "from_rotvec"}
+        return rot
+
+    @classmethod
+    def from_euler(cls, seq: str, angles, degrees: bool = False) -> "WXRotation":
+        """Initialize from euler angles.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
+        rot.wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
+        return rot
+
+
+# LocalCoordinateSystem ----------------------------------------------------------------
 
 
 class LocalCoordinateSystem:
@@ -409,7 +457,7 @@ class LocalCoordinateSystem:
         if coordinates is None:
             coordinates = np.array([0, 0, 0])
 
-        time, time_ref = self._build_time_index(time, time_ref)
+        time, time_ref = _build_time_index(time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
@@ -586,51 +634,6 @@ class LocalCoordinateSystem:
         )
 
     @staticmethod
-    def _build_time_index(
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
-        time_ref: pd.Timestamp = None,
-    ):
-        """Build time index used for xarray objects.
-
-        Parameters
-        ----------
-        time:
-            Datetime- or Timedelta-like time index.
-        time_ref:
-            Reference timestamp for Timedelta inputs.
-
-        Returns
-        -------
-        pandas.TimedeltaIndex
-
-        """
-        if time is None:
-            return time, time_ref
-
-        if isinstance(time, pint.Quantity):
-            time = ut.to_pandas_time_index(time)
-
-        if not isinstance(time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            try:  # try supported formats like str etc.
-                time = pd.TimedeltaIndex(time)
-            except (TypeError, ValueError):
-                try:  # maybe
-                    time = pd.DatetimeIndex(time)
-                except Exception:
-                    raise TypeError(
-                        "Unable to convert input argument to pd.DatetimeIndex or "
-                        "pd.TimedeltaIndex. If passing single values convert to list"
-                        "first (like [pd.Timestamp])"
-                    )
-
-        if isinstance(time, pd.DatetimeIndex):
-            if time_ref is None:
-                time_ref = time[0]
-            time = time - time_ref
-
-        return time, time_ref
-
-    @staticmethod
     def _build_orientation(
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot],
         time: pd.DatetimeIndex = None,
@@ -642,7 +645,7 @@ class LocalCoordinateSystem:
         orientation :
             Orientation object or data.
         time :
-            Valid time index formatted with _build_time_index.
+            Valid time index formatted with `_build_time_index`.
 
         Returns
         -------
@@ -672,7 +675,7 @@ class LocalCoordinateSystem:
         coordinates:
             Coordinates data.
         time:
-            Valid time index formatted with _build_time_index.
+            Valid time index formatted with `_build_time_index`.
 
         Returns
         -------
@@ -1114,7 +1117,7 @@ class LocalCoordinateSystem:
             time_ref = time.reference_time
             time = time.time
 
-        time, time_ref = self._build_time_index(time, time_ref)
+        time, time_ref = _build_time_index(time, time_ref)
 
         if self.time is None:
             lcs_time_ref = time_ref
@@ -1225,7 +1228,7 @@ class LocalCoordinateSystem:
             self._dataset.time.attrs["time_ref"] = time_ref_new
 
 
-# coordinate system manager class ------------------------------------------------------
+# CoordinateSystemManager --------------------------------------------------------------
 
 
 # Todo: Convert all getter functions that need no input into properties.
@@ -1568,7 +1571,7 @@ class CoordinateSystemManager:
             `False` otherwise
 
         """
-        return any([lcs.has_reference_time for lcs in self.lcs_time_dependent])
+        return any(lcs.has_reference_time for lcs in self.lcs_time_dependent)
 
     def _ipython_display_(self):
         """Display the coordinate system manager as plot in jupyter notebooks."""
@@ -2414,9 +2417,7 @@ class CoordinateSystemManager:
         else:
             time_ref = pd.Timestamp(time_ref)
 
-        time_interp, time_ref_interp = LocalCoordinateSystem._build_time_index(
-            time, time_ref
-        )
+        time_interp, time_ref_interp = _build_time_index(time, time_ref)
 
         lcs_result = LocalCoordinateSystem()
         for edge in path_edges:
