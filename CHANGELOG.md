@@ -35,7 +35,9 @@
 - add `weldx.utility.xr_check_coords` function to check coordinates of xarray object against dtype and value restrictions [#125]
 - add `weldx.utility._sine` to easily create sine TimeSeries [#168]
 - enable `force_ndarray_like=True` as default option when creating the global `pint.UnitRegistry` [#167]
-
+- `ut.xr_interp_like` keeps variable and coordinate attributes from original DataArray [#174]
+- rework `ut.to_pandas_time_index` to accept many different formats (LCS, DataArray) [#174]
+- add utility functions for handling time coordinates to "weldx" accessor [#174]
 
 ## 0.2.0 (30.07.2020)
 ### ASDF
