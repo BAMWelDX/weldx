@@ -135,7 +135,7 @@ def test_to_pandas_time_index(arg, expected):
     "arg, exception",
     [(5, TypeError), ("string", TypeError), (Q_(10, "m"), DimensionalityError),],
 )
-def test_to_pandas_time_index(arg, exception):
+def test_to_pandas_time_index_exceptions(arg, exception):
     with pytest.raises(exception):
         ut.to_pandas_time_index(arg)
 

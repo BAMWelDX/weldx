@@ -489,10 +489,7 @@ class LocalCoordinateSystem:
 
         self._dataset = xr.merge([coordinates, orientation], join="exact")
         if "time" in self._dataset and time_ref is not None:
-            if self._dataset.time.attrs["time_ref"] is not None:  # resync times
-                self._dataset = self._dataset.weldx.reset_reference_time(time_ref)
-            else:
-                self._dataset.time.attrs["time_ref"] = time_ref
+            self._dataset.weldx.time_ref = time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""

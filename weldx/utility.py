@@ -834,7 +834,7 @@ def xr_interp_orientation_in_time(
     times = to_pandas_time_index(times)
 
     dsx = dsx.weldx.time_ref_restore()
-    time_ref = dsx.time.attrs["time_ref"]
+    time_ref = dsx.weldx.time_ref
 
     times_ds = to_pandas_time_index(dsx)
 
@@ -923,46 +923,28 @@ class WeldxAccessor:  # pragma: no cover
 
     def time_ref_unset(self) -> xr.DataArray:
         """Convert Timedelta + reference Timestamp to DatetimeIndex."""
-        da = self._obj
-        if "time" in da.coords:
-            if is_timedelta64_dtype(da.time) and "time_ref" not in da.time.attrs:
-                da.time.attrs["time_ref"] = None
-            if da.time.attrs["time_ref"] is not None:
-                time_ref = da.time.attrs["time_ref"]
-                da = da.assign_coords({"time": da.time + time_ref})
-                da.time.attrs["_time_ref_stored"] = time_ref
-                return da
+        da = self._obj.copy()
+        time_ref = da.weldx.time_ref
+        if time_ref and is_timedelta64_dtype(da.time):
+            da["time"] = da.time.data + time_ref
+            da.time.attrs = self._obj.time.attrs  # restore old attributes !
         return da
 
     def time_ref_restore(self) -> xr.DataArray:
         """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp."""
-        da = self._obj
-        if "time" in da.coords:
-            if is_datetime64_dtype(da.time):
-                if "_time_ref_stored" not in da.time.attrs:
-                    da.time.attrs["_time_ref_stored"] = pd.Timestamp(da.time.data[0])
-                time_ref = da.time.attrs["_time_ref_stored"]
-                da = da.assign_coords(
-                    {"time": pd.DatetimeIndex(da.time.data) - time_ref}
-                )
-                da.time.attrs["time_ref"] = time_ref
-            elif is_timedelta64_dtype(da.time) and "time_ref" not in da.time.attrs:
-                da.time.attrs["time_ref"] = None
+        da = self._obj.copy()
+        time_ref = da.weldx.time_ref
+        if time_ref and is_datetime64_dtype(da.time):
+            da["time"] = pd.DatetimeIndex(da.time.data) - time_ref
+            da.time.attrs = self._obj.time.attrs  # restore old attributes !
+
         return da
 
     def reset_reference_time(self, time_ref_new: pd.Timestamp) -> xr.DataArray:
-        """Set a new reference time and shift timedeltas accordingly."""
-        da = self._obj
-        if "time" in da.coords:
-            da = da.weldx.time_ref_restore()
-            if (
-                da.time.attrs["time_ref"] is None
-                or da.time.attrs["time_ref"] == time_ref_new
-            ):
-                return da
-            time_new = to_pandas_time_index(da) - time_ref_new
-            da = da.assign_coords({"time": time_new})
-            da.time.attrs["time_ref"] = time_ref_new
+        """Return copy with time values shifted to new reference time."""
+        da = self._obj.copy()
+        da = da.weldx.time_ref_restore()
+        da.weldx.time_ref = time_ref_new
         return da
 
     @property
