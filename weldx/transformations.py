@@ -2403,9 +2403,12 @@ class CoordinateSystemManager:
             lcs = self.graph.edges[edge]["lcs"]
             if lcs.is_time_dependent:
                 if not lcs.has_reference_time and self.has_reference_time:
-                    lcs = deepcopy(lcs)
+                    time_lcs = time_interp + (time_ref_interp - self.reference_time)
+                    lcs = lcs.interp_time(time_lcs)
                     lcs.reset_reference_time(self.reference_time)
-                lcs = lcs.interp_time(time_interp, time_ref_interp)
+                    lcs.reset_reference_time(time_ref_interp)
+                else:
+                    lcs = lcs.interp_time(time_interp, time_ref_interp)
             lcs_result += lcs
         return lcs_result
 
