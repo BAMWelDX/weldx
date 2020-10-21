@@ -2122,7 +2122,7 @@ class TestCoordinateSystemManager:
 
         # create coordinate systems
         lcs = []
-        for i in range(len(lcs_times)):
+        for i, _ in enumerate(lcs_times):
             if isinstance(lcs_times[i], pd.TimedeltaIndex):
                 coordinates = [[j, j, j] for j in range(len(lcs_times[i]))]
             else:
