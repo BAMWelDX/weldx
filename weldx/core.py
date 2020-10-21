@@ -499,10 +499,7 @@ class TimeSeries:
 
         # evaluate expression
         data = self._data.evaluate(**{self._time_var_name: time_q})
-        if isinstance(data.m, np.ndarray):  # make sure we continue with floats
-            data = Q_(data.m.astype(float), data.units)
-        else:
-            data = Q_(float(data.m), data.units)
+        data = data.astype(float)  # make sure we continue with floats
         data = data.to_reduced_units()
 
         # create data array
