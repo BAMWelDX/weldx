@@ -2652,7 +2652,7 @@ class TestCoordinateSystemManager:
             csm_mg.merge(csm[5])
 
         # check merge results -----------------------------
-        csm_0_systems = csm_mg.get_coordinate_system_names()
+        csm_0_systems = csm_mg.coordinate_system_names
         assert np.all([f"lcs{i}" in csm_0_systems for i in range(len(lcs))])
 
         for i, cur_lcs in enumerate(lcs):
@@ -2770,7 +2770,7 @@ class TestCoordinateSystemManager:
         csm[0].merge(csm[5])
 
         # get subsystems ----------------------------------
-        subs = csm[0].get_sub_systems()
+        subs = csm[0].sub_systems
 
         # checks ------------------------------------------
         assert len(subs) == 5
@@ -2805,7 +2805,7 @@ class TestCoordinateSystemManager:
         csm_mg.merge(csm_n2)
 
         # get sub systems ---------------------------------
-        subs = csm_mg.get_sub_systems()
+        subs = csm_mg.sub_systems
 
         # checks ------------------------------------------
         assert len(subs) == 3
@@ -2815,7 +2815,7 @@ class TestCoordinateSystemManager:
         assert subs[2] == csm_n2
 
         # get sub sub system ------------------------------
-        sub_subs = subs[2].get_sub_systems()
+        sub_subs = subs[2].sub_systems
 
         # check -------------------------------------------
         assert len(sub_subs) == 1
@@ -2823,7 +2823,7 @@ class TestCoordinateSystemManager:
         assert sub_subs[0] == csm_n3
 
         # get sub sub sub systems -------------------------
-        sub_sub_subs = sub_subs[0].get_sub_systems()
+        sub_sub_subs = sub_subs[0].sub_systems
 
         # check -------------------------------------------
         assert len(sub_sub_subs) == 1
@@ -3042,7 +3042,7 @@ class TestCoordinateSystemManager:
             csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
 
         # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
-        assert name in csm_mg.get_coordinate_system_names()
+        assert name in csm_mg.coordinate_system_names
 
         # delete coordinate system ------------------------
         csm_mg.delete_cs(name, True)
@@ -3104,7 +3104,7 @@ class TestCoordinateSystemManager:
             csm_mg.add_cs(f"add{i}", f"lcs{target_system_index}", lcs)
 
         # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
-        assert name in csm_mg.get_coordinate_system_names()
+        assert name in csm_mg.coordinate_system_names
 
         # delete coordinate system ------------------------
         csm_mg.delete_cs(name, True)

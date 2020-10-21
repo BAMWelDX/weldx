@@ -1231,7 +1231,6 @@ class LocalCoordinateSystem:
 # CoordinateSystemManager --------------------------------------------------------------
 
 
-# Todo: Convert all getter functions that need no input into properties.
 class CoordinateSystemManager:
     """Handles hierarchical dependencies between multiple coordinate systems.
 
@@ -1308,7 +1307,7 @@ class CoordinateSystemManager:
         return (
             f"<CoordinateSystemManager>\nname:\n\t{self._name}\n"
             f"reference time:\n\t {self.reference_time}\n"
-            f"coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
+            f"coordinate systems:\n\t {self.coordinate_system_names}\n"
             f"data:\n\t {self._data!r}\n"
             f"sub systems:\n\t {self._sub_system_data_dict.keys()}\n"
             f")"
@@ -1506,7 +1505,8 @@ class CoordinateSystemManager:
         """
         return f"Coordinate system manager {next(CoordinateSystemManager._id_gen)}"
 
-    def _get_extended_sub_system_data(self) -> Dict:
+    @property
+    def _extended_sub_system_data(self) -> Dict:
         """Get an extended copy of the internal sub system data.
 
         The function adds a list of potential child coordinate systems to each
@@ -2115,7 +2115,7 @@ class CoordinateSystemManager:
           its child systems are removed from the coordinate system manager
         - If the coordinate system is part of a subsystem and belongs to the systems
           that were present when the subsystem was merged, the subsystem is removed and
-          can not be restored using "get_sub_systems" or "unmerge". Coordinate systems
+          can not be restored using "sub_systems" or "unmerge". Coordinate systems
           of the subsystem that aren't a child of the deleted coordinate system will
           remain in the coordinate system manager
         - If the coordinate system is part of a subsystem but was added after merging,
@@ -2206,7 +2206,8 @@ class CoordinateSystemManager:
 
         return all_children
 
-    def get_coordinate_system_names(self) -> List:
+    @property
+    def coordinate_system_names(self) -> List:
         """Get the names of all contained coordinate systems.
 
         Returns
@@ -2458,7 +2459,8 @@ class CoordinateSystemManager:
 
         return path[1]
 
-    def get_sub_systems(self) -> List["CoordinateSystemManager"]:
+    @property
+    def sub_systems(self) -> List["CoordinateSystemManager"]:
         """Extract all subsystems from the CoordinateSystemManager.
 
         Returns
@@ -2467,7 +2469,7 @@ class CoordinateSystemManager:
             List containing all the subsystems.
 
         """
-        ext_sub_system_data_dict = self._get_extended_sub_system_data()
+        ext_sub_system_data_dict = self._extended_sub_system_data
 
         sub_system_list = []
         for sub_system_name, ext_sub_system_data in ext_sub_system_data_dict.items():
@@ -2633,8 +2635,7 @@ class CoordinateSystemManager:
             )
 
         intersection = list(
-            set(self.get_coordinate_system_names())
-            & set(other.get_coordinate_system_names())
+            set(self.coordinate_system_names) & set(other.coordinate_system_names)
         )
 
         if len(intersection) != 1:
@@ -2650,7 +2651,7 @@ class CoordinateSystemManager:
             "root": other.root_system_name,
             "time_ref": other.reference_time,
             "neighbors": other.neighbors(intersection[0]),
-            "original members": other.get_coordinate_system_names(),
+            "original members": other.coordinate_system_names,
             "sub system data": other.sub_system_data,
         }
         self._sub_system_data_dict[other.name] = subsystem_data
@@ -2857,7 +2858,7 @@ class CoordinateSystemManager:
             A list containing previously merged 'CoordinateSystemManager' instances.
 
         """
-        sub_systems = self.get_sub_systems()
+        sub_systems = self.sub_systems
         self.remove_subsystems()
 
         return sub_systems
