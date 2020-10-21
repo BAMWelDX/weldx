@@ -168,9 +168,9 @@ def to_pandas_time_index(
 
     if isinstance(time, pint.Quantity):
         base = "s"  # using low base unit could cause rounding errors
-        if not np.iterable(time):
+        if not np.iterable(time):  # catch zero-dim arrays
             time = np.expand_dims(time, 0)
-            return pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
+        return pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
 
     if isinstance(time, (xr.DataArray, xr.Dataset)):
         if "time" in time.coords:
