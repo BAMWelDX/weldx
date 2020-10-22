@@ -28,7 +28,7 @@ __all__ = ["LocalCoordinateSystem", "CoordinateSystemManager", "WXRotation"]
 def _build_time_index(
     time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
     time_ref: pd.Timestamp = None,
-):
+) -> pd.TimedeltaIndex:
     """Build time index used for xarray objects.
 
     Parameters
@@ -44,23 +44,10 @@ def _build_time_index(
 
     """
     if time is None:
+        # time_ref = None
         return time, time_ref
 
-    if isinstance(time, pint.Quantity):
-        time = ut.to_pandas_time_index(time)
-
-    if not isinstance(time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-        try:  # try supported formats like str etc.
-            time = pd.TimedeltaIndex(time)
-        except (TypeError, ValueError):
-            try:  # maybe
-                time = pd.DatetimeIndex(time)
-            except Exception:
-                raise TypeError(
-                    "Unable to convert input argument to pd.DatetimeIndex or "
-                    "pd.TimedeltaIndex. If passing single values convert to list"
-                    "first (like [pd.Timestamp])"
-                )
+    time = ut.to_pandas_time_index(time)
 
     if isinstance(time, pd.DatetimeIndex):
         if time_ref is None:
@@ -490,25 +477,10 @@ class LocalCoordinateSystem:
             if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
                 raise ValueError("Orientation vectors must be orthogonal")
 
-            if "time" in orientation.coords and not isinstance(
-                ut.to_pandas_time_index(orientation.time.data), pd.TimedeltaIndex
-            ):
-                raise ValueError(
-                    "The 'orientation' data set's time coordinate is not a valid "
-                    "time delta type."
-                )
-            if "time" in coordinates.coords and not isinstance(
-                ut.to_pandas_time_index(coordinates.time.data), pd.TimedeltaIndex
-            ):
-                raise ValueError(
-                    "The 'coordinate' data set's time coordinate is not a valid time"
-                    " delta type."
-                )
-
         # unify time axis
         if ("time" in orientation.coords) and ("time" in coordinates.coords):
             if not np.all(orientation.time.data == coordinates.time.data):
-                time_union = ut.get_time_union([orientation.time, coordinates.time])
+                time_union = ut.get_time_union([orientation, coordinates])
                 orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
                 coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
 
@@ -517,7 +489,7 @@ class LocalCoordinateSystem:
 
         self._dataset = xr.merge([coordinates, orientation], join="exact")
         if "time" in self._dataset and time_ref is not None:
-            self._dataset.time.attrs["time_ref"] = time_ref
+            self._dataset.weldx.time_ref = time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -562,8 +534,8 @@ class LocalCoordinateSystem:
         lhs_cs = self
         if (
             lhs_cs.reference_time != rhs_cs.reference_time
-            and lhs_cs.reference_time is not None
-            and rhs_cs.reference_time is not None
+            and lhs_cs.has_reference_time
+            and rhs_cs.has_reference_time
         ):
             if lhs_cs.reference_time < rhs_cs.reference_time:
                 time_ref = lhs_cs.reference_time
@@ -573,7 +545,7 @@ class LocalCoordinateSystem:
                 time_ref = rhs_cs.reference_time
                 lhs_cs = deepcopy(lhs_cs)
                 lhs_cs.reset_reference_time(time_ref)
-        elif lhs_cs.reference_time is None:
+        elif not lhs_cs.has_reference_time:
             time_ref = rhs_cs.reference_time
         else:
             time_ref = lhs_cs.reference_time
@@ -652,18 +624,20 @@ class LocalCoordinateSystem:
         xarray.DataArray
 
         """
-        if isinstance(orientation, xr.DataArray):
-            return orientation
+        if not isinstance(orientation, xr.DataArray):
+            time_orientation = None
+            if isinstance(orientation, Rot):
+                orientation = orientation.as_matrix()
+            elif not isinstance(orientation, np.ndarray):
+                orientation = np.array(orientation)
 
-        time_orientation = None
-        if isinstance(orientation, Rot):
-            orientation = orientation.as_matrix()
-        elif not isinstance(orientation, np.ndarray):
-            orientation = np.array(orientation)
+            if orientation.ndim == 3:
+                time_orientation = time
+            orientation = ut.xr_3d_matrix(orientation, time_orientation)
 
-        if orientation.ndim == 3:
-            time_orientation = time
-        orientation = ut.xr_3d_matrix(orientation, time_orientation)
+        # make sure we have correct "time" format
+        orientation = orientation.weldx.time_ref_restore()
+
         return orientation
 
     @staticmethod
@@ -682,15 +656,17 @@ class LocalCoordinateSystem:
         xarray.DataArray
 
         """
-        if isinstance(coordinates, xr.DataArray):
-            return coordinates
+        if not isinstance(coordinates, xr.DataArray):
+            time_coordinates = None
+            if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
+                coordinates = np.array(coordinates)
+            if coordinates.ndim == 2:
+                time_coordinates = time
+            coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
 
-        time_coordinates = None
-        if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
-            coordinates = np.array(coordinates)
-        if coordinates.ndim == 2:
-            time_coordinates = time
-        coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
+        # make sure we have correct "time" format
+        coordinates = coordinates.weldx.time_ref_restore()
+
         return coordinates
 
     @classmethod
@@ -1025,9 +1001,7 @@ class LocalCoordinateSystem:
             The coordinate systems reference time
 
         """
-        if "time" in self._dataset and "time_ref" in self._dataset.time.attrs:
-            return self._dataset.time.attrs["time_ref"]
-        return None
+        return self._dataset.weldx.time_ref
 
     @property
     def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
@@ -1041,7 +1015,7 @@ class LocalCoordinateSystem:
             The coordinate systems time as 'pandas.DatetimeIndex'
 
         """
-        if self.reference_time is None:
+        if not self.has_reference_time:
             return None
         return self.time + self.reference_time
 
@@ -1056,7 +1030,7 @@ class LocalCoordinateSystem:
 
         """
         if "time" in self._dataset.coords:
-            return pd.TimedeltaIndex(self._dataset.time)
+            return self._dataset.time
         return None
 
     @property
@@ -1110,37 +1084,31 @@ class LocalCoordinateSystem:
             Coordinate system with interpolated data
 
         """
-        if time is None:
+        if (not self.is_time_dependent) or (time is None):
             return self
 
-        if isinstance(time, LocalCoordinateSystem):
+        # use LCS reference time if none provided
+        if isinstance(time, LocalCoordinateSystem) and time_ref is None:
             time_ref = time.reference_time
-            time = time.time
+        time = ut.to_pandas_time_index(time)
 
-        time, time_ref = _build_time_index(time, time_ref)
+        if self.has_reference_time != (
+            time_ref is not None or isinstance(time, pd.DatetimeIndex)
+        ):
+            raise TypeError(
+                "Only 1 reference time provided for time dependent coordinate "
+                "system. Either the reference time of the coordinate system or the "
+                "one passed to the function is 'None'. Only cases where the "
+                "reference times are both 'None' or both contain a timestamp are "
+                "allowed. Also check that the reference time has the correct type."
+            )
 
-        if self.time is None:
-            lcs_time_ref = time_ref
-        else:
-            lcs_time_ref = self.reference_time
+        if self.has_reference_time:
+            if not isinstance(time, pd.DatetimeIndex):
+                time = time + time_ref
 
-        if lcs_time_ref == time_ref:
-            lcs_ref = self
-        else:
-            if not isinstance(lcs_time_ref, type(time_ref)):
-                raise TypeError(
-                    "Only 1 reference time provided for time dependent coordinate "
-                    "system. Either the reference time of the coordinate system or the "
-                    "one passed to the function is 'None'. Only cases where the "
-                    "reference times are both 'None' or both contain a timestamp are "
-                    "allowed. Also check that the reference time has the correct type."
-                )
-
-            lcs_ref = deepcopy(self)
-            lcs_ref.reset_reference_time(time_ref)
-
-        orientation = ut.xr_interp_orientation_in_time(lcs_ref.orientation, time)
-        coordinates = ut.xr_interp_coordinates_in_time(lcs_ref.coordinates, time)
+        orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
+        coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
         return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
 
@@ -1202,7 +1170,7 @@ class LocalCoordinateSystem:
         """
         return self.as_rotation().as_euler(seq=seq, degrees=degrees)
 
-    def reset_reference_time(self, time_ref_new):
+    def reset_reference_time(self, time_ref_new: pd.Timestamp):
         """Reset the reference time of the coordinate system.
 
         The time values of the coordinate system are adjusted to the new reference time.
@@ -1212,20 +1180,11 @@ class LocalCoordinateSystem:
 
         Parameters
         ----------
-        time_ref_new:
+        time_ref_new: pandas.Timestamp
             The new reference time
 
         """
-        if self.time is None:
-            return
-        if isinstance(time_ref_new, str):
-            time_ref_new = pd.Timestamp(time_ref_new)
-        if self.reference_time is None:
-            self._dataset.time.attrs["time_ref"] = time_ref_new
-        else:
-            delta = self.reference_time - time_ref_new
-            self._dataset.coords["time"] = self.time + delta
-            self._dataset.time.attrs["time_ref"] = time_ref_new
+        self._dataset.weldx.time_ref = time_ref_new
 
 
 # CoordinateSystemManager --------------------------------------------------------------
@@ -1393,12 +1352,25 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        bool :
+        bool :[
             `True` if the `CoordinateSystemManager` or one of its attached coordinate
             systems possess a reference time. `False` otherwise
 
         """
-        return self._has_lcs_with_time_ref or (self.reference_time is not None)
+        return self._has_lcs_with_time_ref or (self.has_reference_time)
+
+    @property
+    def has_reference_time(self) -> bool:
+        """Return `True` if the coordinate system manager has a reference time.
+
+        Returns
+        -------
+        bool :
+            `True` if the coordinate system manager has a reference time, `False`
+            otherwise.
+
+        """
+        return self.reference_time is not None
 
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
@@ -1749,16 +1721,22 @@ class CoordinateSystemManager:
                 + "weldx.transformations.LocalCoordinateSystem"
             )
 
-        if lcs.time is not None and self.reference_time is None:
-            if (
-                self._number_of_time_dependent_lcs > 0
-                and lcs.has_reference_time != self._has_lcs_with_time_ref
-            ):
-                raise Exception(
-                    "Inconsistent usage of reference times! If you didn't specify a "
-                    "reference time for the CoordinateSystemManager, either all or "
-                    "none of the added coordinate systems must have a reference time."
+        if (
+            lcs.is_time_dependent  # always add static lcs
+            and self._number_of_time_dependent_lcs > 0  # CSM is not static
+            and (
+                (lcs.has_reference_time and not self.uses_absolute_times)
+                or (
+                    (not lcs.has_reference_time and not self.has_reference_time)
+                    and self.uses_absolute_times
                 )
+            )
+        ):
+            raise Exception(
+                "Inconsistent usage of reference times! If you didn't specify a "
+                "reference time for the CoordinateSystemManager, either all or "
+                "none of the added coordinate systems must have a reference time."
+            )
 
         if self.has_coordinate_system(coordinate_system_name):
             # todo:
@@ -2423,11 +2401,14 @@ class CoordinateSystemManager:
         lcs_result = LocalCoordinateSystem()
         for edge in path_edges:
             lcs = self.graph.edges[edge]["lcs"]
-            if lcs.time is not None:
-                if lcs.reference_time is None and self.reference_time is not None:
-                    lcs = deepcopy(lcs)
+            if lcs.is_time_dependent:
+                if not lcs.has_reference_time and self.has_reference_time:
+                    time_lcs = time_interp + (time_ref_interp - self.reference_time)
+                    lcs = lcs.interp_time(time_lcs)
                     lcs.reset_reference_time(self.reference_time)
-                lcs = lcs.interp_time(time_interp, time_ref_interp)
+                    lcs.reset_reference_time(time_ref_interp)
+                else:
+                    lcs = lcs.interp_time(time_interp, time_ref_interp)
             lcs_result += lcs
         return lcs_result
 
@@ -2792,11 +2773,8 @@ class CoordinateSystemManager:
         if not lcs_list:
             return None
 
-        time_list = [
-            lcs.datetimeindex if lcs.has_reference_time else lcs.time
-            for lcs in lcs_list
-        ]
-        if self.reference_time is not None:
+        time_list = [ut.to_pandas_time_index(lcs) for lcs in lcs_list]
+        if self.has_reference_time:
             time_list = [
                 t + self.reference_time if isinstance(t, pd.TimedeltaIndex) else t
                 for t in time_list

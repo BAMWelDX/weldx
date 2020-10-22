@@ -1,3 +1,4 @@
+import pandas as pd
 import pint
 
 from weldx.asdf.tags.weldx.core.common_types import Variable
@@ -50,7 +51,7 @@ class LocalCoordinateSystemASDF(WeldxType):
         }
 
         if "time" in node.dataset.coords:
-            tree["time"] = node.time
+            tree["time"] = pd.TimedeltaIndex(node.time)
 
         if node.reference_time is not None:
             tree["reference_time"] = node.reference_time
