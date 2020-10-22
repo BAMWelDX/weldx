@@ -62,6 +62,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_asdf",
     "numpydoc",
+    "sphinx_autodoc_typehints",  # list after napoleon
 ]
 
 # autosummary --------------------------------------------------------------------------
@@ -82,6 +83,26 @@ numpydoc_xref_param_type = True
 # numpydoc_xref_aliases = dict - check documentation
 # numpydoc_xref_ignore = set - check documentation
 
+
+# Napoleon settings
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = True
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+napoleon_use_rtype = True
+napoleon_type_aliases = None
+
+# sphinx-autodoc-typehints https://github.com/agronholm/sphinx-autodoc-typehints
+set_type_checking_flag = False
+typehints_fully_qualified = False
+always_document_param_types = False
+typehints_document_rtype = True
 
 # --------------------------------------------------------------------------------------
 
