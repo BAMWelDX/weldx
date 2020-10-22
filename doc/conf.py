@@ -119,7 +119,7 @@ source_suffix = {
 master_doc = "index"
 
 # nbsphinx
-nbsphinx_execute = "never"
+nbsphinx_execute = "always"
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
 ]
