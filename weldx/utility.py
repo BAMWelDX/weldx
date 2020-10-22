@@ -155,8 +155,8 @@ def to_pandas_time_index(
 
     Returns
     -------
-    Union[pandas.TimedeltaIndex, pandas.DatetimeIndex]:
-        Variable as pandas time index
+    pandas.TimedeltaIndex or pandas.DatetimeIndex
+        Time union of all input objects
 
     """
     _input_type = type(time)
@@ -335,11 +335,11 @@ def swap_list_items(arr, i1, i2) -> list:
 def get_time_union(
     list_of_objects: List[Union[pd.DatetimeIndex, pd.TimedeltaIndex]]
 ) -> Union[pd.DatetimeIndex, pd.TimedeltaIndex]:
-    """Generate a merged union of pd.DatetimeIndex from list of inputs.
+    """Generate a merged union of `pandas.DatetimeIndex` from list of inputs.
 
     The functions tries to merge common inputs that are "time-like" or might have time
-    coordinates such as xarray objects, `tf.LocalCoordinateSystem` and other time
-    objects. See `to_pandas_time_index` for supported input object types.
+    coordinates such as xarray objects, `~weldx.transformations.LocalCoordinateSystem`
+    and other time objects. See `to_pandas_time_index` for supported input object types.
 
     Parameters
     ----------
