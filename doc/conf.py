@@ -98,6 +98,12 @@ napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_type_aliases = None
 
+# sphinx-autodoc-typehints https://github.com/agronholm/sphinx-autodoc-typehints
+set_type_checking_flag = False
+typehints_fully_qualified = False
+always_document_param_types = False
+typehints_document_rtype = True
+
 # --------------------------------------------------------------------------------------
 
 # The suffix of source filenames.
