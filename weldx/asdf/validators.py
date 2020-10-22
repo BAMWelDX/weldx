@@ -1,5 +1,5 @@
 import re
-from typing import Any, Callable, Iterator, List, Mapping, OrderedDict
+from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict
 
 import asdf
 import pandas as pd
@@ -360,7 +360,7 @@ def _compare_lists(_list, list_expected):
     return dict_values
 
 
-def _custom_shape_validator(dict_test, dict_expected):
+def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, Any]):
     """Validate dimensions which are stored in two dictionaries dict_test and
     dict_expected.
 
@@ -400,9 +400,6 @@ def _custom_shape_validator(dict_test, dict_expected):
         Dictionary - keys: variable names in the validation schemes. values: values of
         the validation schemes.
     """
-    # keys have to match
-    # if dict_test.keys() != dict_expected.keys():
-    #     return False
 
     dict_values = {}
 
@@ -427,12 +424,18 @@ def _custom_shape_validator(dict_test, dict_expected):
         return _dict_values
 
     elif isinstance(dict_expected, dict):
-        for item in dict_expected:
-            if item in dict_test:
+        for key, item in dict_expected.items():
+            # allow optional syntax
+            _optional = False
+            if key.startswith("(") and key.endswith(")"):
+                key = key[1:-1]
+                _optional = True
+                if len(key) == 0:
+                    raise WxSyntaxError("wx_shape entry undefined")
+            # test shapes
+            if key in dict_test:
                 # go one level deeper in the dictionary
-                _dict_values = _custom_shape_validator(
-                    dict_test[item], dict_expected[item]
-                )
+                _dict_values = _custom_shape_validator(dict_test[key], item)
             elif isinstance(dict_test, asdf.types.tagged.Tagged):
                 # add custom type implementations
                 if "weldx/time/timedeltaindex" in dict_test._tag:
@@ -442,14 +445,18 @@ def _custom_shape_validator(dict_test, dict_expected):
                         freq=dict_test["freq"],
                     )
                     shape = {"shape": [len(td_temp)]}
-                    _dict_values = _custom_shape_validator(shape, dict_expected[item])
+                    _dict_values = _custom_shape_validator(shape, item)
+                elif _optional:
+                    pass
                 else:
                     raise ValidationError(
-                        f"Could not access key '{item}'  in instance {dict_test}."
+                        f"Could not access key '{key}'  in instance {dict_test}."
                     )
+            elif _optional:
+                pass
             else:
                 raise ValidationError(
-                    f"Could not access key '{item}'  in instance {dict_test}."
+                    f"Could not access key '{key}'  in instance {dict_test}."
                 )
 
             for key in _dict_values:

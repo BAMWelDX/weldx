@@ -35,6 +35,7 @@
 - add `weldx.utility.xr_check_coords` function to check coordinates of xarray object against dtype and value restrictions [#125]
 - add `weldx.utility._sine` to easily create sine TimeSeries [#168]
 - enable `force_ndarray_like=True` as default option when creating the global `pint.UnitRegistry` [#167]
+- allow optional properties for validation with `wx_shape` by putting the name in brackets like `(optional_prop)`[[#176]](https://github.com/BAMWelDX/weldx/pull/176)
 
 
 ## 0.2.0 (30.07.2020)
