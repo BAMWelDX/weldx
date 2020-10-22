@@ -142,7 +142,6 @@ def to_pandas_time_index(
         pd.TimedeltaIndex,
         pd.DatetimeIndex,
         xr.DataArray,
-        xr.Dataset,
         "weldx.transformations.LocalCoordinateSystem",
     ],
 ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
