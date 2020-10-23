@@ -1760,20 +1760,20 @@ class TestCoordinateSystemManager:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "has_timestamp_csm, has_timestamp_lcs_1, has_timestamp_lcs_2, should_raise",
+        "has_timestamp_csm, has_timestamp_lcs_1, has_timestamp_lcs_2, exp_exception",
         [
-            (True, False, False, False),
-            (True, True, False, False),
-            (True, False, True, False),
-            (True, True, True, False),
-            (False, False, False, False),
-            (False, True, False, True),
-            (False, False, True, True),
-            (False, True, True, False),
+            (True, False, False, None),
+            (True, True, False, None),
+            (True, False, True, None),
+            (True, True, True, None),
+            (False, False, False, None),
+            (False, True, False, Exception),
+            (False, False, True, Exception),
+            (False, True, True, None),
         ],
     )
     def test_add_cs_reference_time(
-        has_timestamp_csm, has_timestamp_lcs_1, has_timestamp_lcs_2, should_raise
+        has_timestamp_csm, has_timestamp_lcs_1, has_timestamp_lcs_2, exp_exception
     ):
         """Test if reference time issues are caught while adding new coordinate systems.
 
@@ -1789,9 +1789,9 @@ class TestCoordinateSystemManager:
         has_timestamp_lcs_2 : bool
             Set to `True` if the second added coordinate system should have a reference
             time.
-        should_raise : bool
-            Set to `True` if the combination of reference times is invalid and an
-            Exception should be raised
+        exp_exception : Any
+            Pass the expected exception type if the test should raise. Otherwise set to
+            `None`
 
         """
         timestamp_csm = None
@@ -1818,8 +1818,8 @@ class TestCoordinateSystemManager:
 
         csm.add_cs("lcs_1", "root", lcs_1)
 
-        if should_raise:
-            with pytest.raises(Exception):
+        if exp_exception is not None:
+            with pytest.raises(exp_exception):
                 csm.add_cs("lcs_2", "root", lcs_2)
         else:
             csm.add_cs("lcs_2", "root", lcs_2)
@@ -2251,8 +2251,7 @@ class TestCoordinateSystemManager:
         def create_csm_list(csm_data_list, cs_data_list, merge_data_list):
             """Create a list of CSM instances."""
             csm_list = []
-            for args in csm_data_list:
-                csm_list += [tf.CoordinateSystemManager(*args)]
+            csm_list = [tf.CoordinateSystemManager(*args) for args in csm_data_list]
 
             for data in cs_data_list:
                 csm_list[data[0]].create_cs(*data[1])
