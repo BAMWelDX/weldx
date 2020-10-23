@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pint
 
@@ -37,33 +38,33 @@ class LocalCoordinateSystemASDF(WeldxType):
             type to be serialized.
 
         """
-        orientations = Variable(
-            "orientations", node.orientation.dims, node.orientation.data
-        )
+        tree = {}
 
-        coordinates = Variable(
-            "coordinates", node.coordinates.dims, node.coordinates.data
-        )
+        orientations = None
+        if not np.allclose(node.orientation, np.eye(3)):
+            orientations = Variable(
+                "orientations", node.orientation.dims, node.orientation.data
+            )
+            if "time" not in node.orientation.coords:
+                ctx.set_array_storage(orientations.data, "inline")
+            tree["orientations"] = orientations
 
-        tree = {
-            "orientations": orientations,
-            "coordinates": coordinates,
-        }
+        coordinates = None
+        if not np.allclose(node.coordinates, np.array([0.0, 0.0, 0.0])):
+            coordinates = Variable(
+                "coordinates", node.coordinates.dims, node.coordinates.data
+            )
+            if isinstance(coordinates.data, pint.Quantity):
+                ctx.set_array_storage(coordinates.data.magnitude, "inline")
+            else:
+                ctx.set_array_storage(coordinates.data, "inline")
+            tree["coordinates"] = coordinates
 
         if "time" in node.dataset.coords:
             tree["time"] = pd.TimedeltaIndex(node.time)
 
         if node.reference_time is not None:
             tree["reference_time"] = node.reference_time
-
-        # example code to manipulate inline array storage
-        if "time" not in node.coordinates.coords:
-            if isinstance(coordinates.data, pint.Quantity):
-                ctx.set_array_storage(coordinates.data.magnitude, "inline")
-            else:
-                ctx.set_array_storage(coordinates.data, "inline")
-        if "time" not in node.orientation.coords:
-            ctx.set_array_storage(orientations.data, "inline")
 
         return tree
 
@@ -86,8 +87,13 @@ class LocalCoordinateSystemASDF(WeldxType):
             An instance of the 'LocalCoordinateSystem' type.
 
         """
-        orientations = tree["orientations"].data
-        coordinates = tree["coordinates"].data
+        orientations = None
+        if "orientations" in tree:
+            orientations = tree["orientations"].data
+
+        coordinates = None
+        if "coordinates" in tree:
+            coordinates = tree["coordinates"].data
 
         if "time" in tree:
             time = tree["time"]
