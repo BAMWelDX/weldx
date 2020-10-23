@@ -6,7 +6,8 @@
     - Documentation is [published on readthedocs](https://weldx.readthedocs.io/en/latest/)
     - API documentation is now available
     - New tutorial about 3 dimensional geometries [[#105]](https://github.com/BAMWelDX/weldx/pull/105)
-- `CoordinateSystemManager` 
+- `CoordinateSystemManager`
+    - supports multiple time formats and can get a reference time [[#162]](https://github.com/BAMWelDX/weldx/pull/162)
     - each instance can be named
     - gets a `plot` function to visualize the graph
     - coordinate systems can be updated using `add_cs`
