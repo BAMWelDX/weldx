@@ -413,8 +413,8 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
         elif isinstance(dict_test, asdf.types.tagged.Tagged):
             # add custom type implementations
             if "weldx/time/timedeltaindex" in dict_test._tag:
-                td_temp = TimedeltaIndexType.from_tree_tagged_static(dict_test)
-                list_test, list_expected = _prepare_list([len(td_temp)], dict_expected)
+                shape = TimedeltaIndexType.shape_from_tagged(dict_test)
+                list_test, list_expected = _prepare_list(shape, dict_expected)
 
         if not list_test:
             raise ValidationError(f"Could not find shape key in instance {dict_test}.")
@@ -445,7 +445,7 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
                 # go one level deeper in the dictionary
                 _dict_values = _custom_shape_validator(dict_test[key], item)
             elif _optional:
-                pass
+                _dict_values = {}
             else:
                 raise ValidationError(
                     f"Could not access key '{key}'  in instance {dict_test}."
@@ -523,6 +523,7 @@ def wx_shape_validator(
 
     """
 
+    dim_dict = None
     try:
         dim_dict = _custom_shape_validator(instance, wx_shape)
     except ValidationError:

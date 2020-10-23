@@ -1,6 +1,8 @@
 # Licensed under a 3-clause BSD style license - see LICENSE
 # -*- coding: utf-8 -*-
 
+from typing import List
+
 import numpy as np
 import pandas as pd
 from asdf.tagged import TaggedDict
@@ -44,13 +46,14 @@ class TimedeltaIndexType(WeldxType):
         return pd.TimedeltaIndex(values)
 
     @staticmethod
-    def from_tree_tagged_static(tree: TaggedDict) -> pd.TimedeltaIndex:
-        """Construct TimedeltaIndex from tree."""
+    def shape_from_tagged(tree: TaggedDict) -> List[int]:
+        """Calculate the shape (length of TDI) from static tagged tree instance."""
         if "freq" in tree:
-            return pd.timedelta_range(
+            tdi_temp = pd.timedelta_range(
                 start=tree["start"]["value"],
                 end=tree["end"]["value"],
                 freq=tree["freq"],
             )
+            return [len(tdi_temp)]
         else:
-            raise ValueError("Cannot access shape of pd.TimedeltaIndex in array format")
+            return tree["values"]["shape"]
