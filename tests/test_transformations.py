@@ -2026,6 +2026,284 @@ class TestCoordinateSystemManager:
         assert (csm == other) is result_exp
         assert (csm != other) is not result_exp
 
+    # test_comparison_2 ----------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "csm_data, cs_data, merge_data, csm_diffs, cs_diffs, merge_diffs, exp_results",
+        [
+            (  # No diff in CSM
+                [("root", "csm_root", "2000-05-26")],
+                [],
+                [],
+                [],
+                [],
+                [],
+                [True],
+            ),
+            (  # Diff in CSM root system
+                [("root", "csm_root", "2000-05-26")],
+                [],
+                [],
+                [(0, ("diff", "csm_root", "2000-05-26"))],
+                [],
+                [],
+                [False],
+            ),
+            (  # Diff in CSM name
+                [("root", "csm_root", "2000-05-26")],
+                [],
+                [],
+                [(0, ("root", "csm_diff", "2000-05-26"))],
+                [],
+                [],
+                [False],
+            ),
+            (  # Diff in CSM reference time
+                [("root", "csm_root", "2000-05-26")],
+                [],
+                [],
+                [(0, ("root", "csm_root", "2000-01-11"))],
+                [],
+                [],
+                [False],
+            ),
+            (  # No diffs in CSM with coordinate systems
+                [("root", "csm_root")],
+                [(0, ("cs_1", "root")), (0, ("cs_2", "root"))],
+                [],
+                [],
+                [],
+                [],
+                [True],
+            ),
+            (  # Different number of coordinate systems
+                [("root", "csm_root"), ("root", "csm_root_2")],
+                [(0, ("cs_1", "root")), (0, ("cs_2", "root"))],
+                [],
+                [],
+                [(1, (1, ("cs_2", "root")))],
+                [],
+                [False, False],
+            ),
+            (  # different coordinate systems names
+                [("root", "csm_root")],
+                [(0, ("cs_1", "root")), (0, ("cs_2", "root"))],
+                [],
+                [],
+                [(1, (0, ("cs_3", "root")))],
+                [],
+                [False],
+            ),
+            (  # different coordinate system references
+                [("root", "csm_root")],
+                [(0, ("cs_1", "root")), (0, ("cs_2", "root"))],
+                [],
+                [],
+                [(1, (0, ("cs_2", "cs_1")))],
+                [],
+                [False],
+            ),
+            (  # no diffs in CSM with multiple subsystems
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(1, 0), (2, 0)],
+                [],
+                [],
+                [],
+                [True, True, True],
+            ),
+            (  # different merge order
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(1, 0), (2, 0)],
+                [],
+                [],
+                [(0, (2, 0)), (1, (1, 0))],
+                [True, True, True],
+            ),
+            (  # different number of subsystems
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(1, 0), (2, 0)],
+                [],
+                [],
+                [(1, None)],
+                [False, True, True],
+            ),
+            (  # different root system name of subsystem
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(1, 0), (2, 0)],
+                [(2, ("diff", "csm_2"))],
+                [(2, (2, ("cs_1", "diff")))],
+                [],
+                [False, True, False],
+            ),
+            (  # different subsystem name
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(1, 0), (2, 0)],
+                [(1, ("cs_1", "diff"))],
+                [],
+                [],
+                [False, False, True],
+            ),
+            (  # different subsystem reference time
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(1, 0), (2, 0)],
+                [(1, ("cs_1", "csm_1", "2000-01-01"))],
+                [],
+                [],
+                [False, False, True],
+            ),
+            (  # subsystem merged at different nodes
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(1, 0), (2, 0)],
+                [],
+                [(2, (2, ("root", "cs_2")))],
+                [],
+                [False, True, False],
+            ),
+            (  # subsystem lcs name different
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(1, 0), (2, 0)],
+                [],
+                [(1, (1, ("diff", "cs_1")))],
+                [],
+                [False, False, True],
+            ),
+            (  # subsystem lcs different
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(1, 0), (2, 0)],
+                [],
+                [(1, (1, ("cs_3", "cs_1", None, [1, 0, 0])))],
+                [],
+                [False, False, True],
+            ),
+            (  # no diffs in CSM with nested subsystems
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(2, 1), (1, 0)],
+                [],
+                [],
+                [],
+                [True, True, True],
+            ),
+            (  # nested vs. not nested
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(2, 1), (1, 0)],
+                [],
+                [],
+                [(0, (1, 0)), (0, (2, 0))],
+                [False, False, True],
+            ),
+            (  # nested system has different root system
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(2, 1), (1, 0)],
+                [(2, ("cs_4", "csm_2"))],
+                [(2, (2, ("cs_1", "cs_4")))],
+                [],
+                [False, False, False],
+            ),
+            (  # nested system has different name
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(2, 1), (1, 0)],
+                [(2, ("cs_2", "diff"))],
+                [],
+                [],
+                [False, False, False],
+            ),
+            (  # nested system has different reference time
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(2, 1), (1, 0)],
+                [(2, ("cs_2", "csm_2", "2000-04-01"))],
+                [],
+                [],
+                [False, False, False],
+            ),
+            (  # nested system has lcs with different name
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [
+                    (0, ("cs_1", "root")),
+                    (1, ("cs_3", "cs_1")),
+                    (2, ("cs_1", "cs_2")),
+                    (2, ("cs_4", "cs_2")),
+                ],
+                [(2, 1), (1, 0)],
+                [],
+                [(3, (2, ("diff", "cs_2")))],
+                [],
+                [False, False, False],
+            ),
+            (  # nested system has lcs with different reference system
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [
+                    (0, ("cs_1", "root")),
+                    (1, ("cs_3", "cs_1")),
+                    (2, ("cs_1", "cs_2")),
+                    (2, ("cs_4", "cs_2")),
+                ],
+                [(2, 1), (1, 0)],
+                [],
+                [(3, (2, ("cs_4", "cs_1")))],
+                [],
+                [False, False, False],
+            ),
+            (  # nested system has different lcs
+                [("root", "csm_root"), ("cs_1", "csm_1"), ("cs_2", "csm_2")],
+                [(0, ("cs_1", "root")), (1, ("cs_3", "cs_1")), (2, ("cs_1", "cs_2"))],
+                [(2, 1), (1, 0)],
+                [],
+                [(2, (2, ("cs_1", "cs_2", None, [1, 0, 0])))],
+                [],
+                [False, False, False],
+            ),
+        ],
+    )
+    def test_comparison_2(
+        csm_data, cs_data, merge_data, csm_diffs, cs_diffs, merge_diffs, exp_results
+    ):
+        def create_csm_list(csm_data_list, cs_data_list, merge_data_list):
+            csm_list = []
+            for args in csm_data_list:
+                csm_list += [tf.CoordinateSystemManager(*args)]
+
+            for data in cs_data_list:
+                csm_list[data[0]].create_cs(*data[1])
+
+            for merge in merge_data_list:
+                if merge is not None:
+                    csm_list[merge[1]].merge(csm_list[merge[0]])
+
+            return csm_list
+
+        csm_data_diff = deepcopy(csm_data)
+        for diff in csm_diffs:
+            csm_data_diff[diff[0]] = diff[1]
+
+        cs_data_diff = deepcopy(cs_data)
+        for diff in cs_diffs:
+            cs_data_diff[diff[0]] = diff[1]
+
+        merge_data_diff = deepcopy(merge_data)
+        for diff in merge_diffs:
+            merge_data_diff[diff[0]] = diff[1]
+
+        csm_list_1 = create_csm_list(csm_data, cs_data, merge_data)
+        csm_list_2 = create_csm_list(csm_data_diff, cs_data_diff, merge_data_diff)
+
+        for i, _ in enumerate(csm_list_1):
+            assert (csm_list_1[i] == csm_list_2[i]) is exp_results[i]
+
     # test_time_union ------------------------------------------------------------------
 
     @staticmethod
