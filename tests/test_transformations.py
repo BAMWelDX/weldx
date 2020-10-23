@@ -2272,7 +2272,47 @@ class TestCoordinateSystemManager:
     def test_comparison_2(
         csm_data, cs_data, merge_data, csm_diffs, cs_diffs, merge_diffs, exp_results
     ):
+        """Test the `__eq__` function.
+
+        The test creates one or more CSM instances, adds coordinate systems and merges
+        them. Then a second set of instances is created using a modified copy of the
+        data used to create the first set of CSM instances. Afterwards, all instances
+        are compared using the `==` operator and the results are checked to match the
+        expectation.
+
+        Parameters
+        ----------
+        csm_data :
+            A list containing the arguments that should be passed to the CSM
+            constructor. For each list entry a CSM instance is generated
+        cs_data :
+            A list containing the data to create coordinate systems. Each entry is a
+            tuple containing the list index of the target CSM instance and the
+            arguments that should be passed to the ``create_cs`` method
+        merge_data :
+            A list of tuples. Each tuple consists of two indices. The first one is the
+            index of the source CSM and the second one of the target CSM. If an entry
+            is `None`, it is skipped and no merge operation is performed
+        csm_diffs :
+            A list of modifications that should be applied to the ``csm_data`` before
+            creating the second set of CSM instances. Each entry is a tuple containing
+            the index and new value of the data that should be modified.
+        cs_diffs :
+            A list of modifications that should be applied to the ``cs_data`` before
+            creating the coordinate systems of the second set of CSM instances. Each
+            entry is a tuple containing the index and new value of the data that should
+            be modified.
+        merge_diffs :
+            A list of modifications that should be applied to the ``merge_data`` before
+            merging the second set of CSM instances. Each entry is a tuple containing
+            the index and new value of the data that should be modified.
+        exp_results :
+            A list containing the expected results of each instance comparison
+
+        """
+
         def create_csm_list(csm_data_list, cs_data_list, merge_data_list):
+            """Create a list of CSM instances."""
             csm_list = []
             for args in csm_data_list:
                 csm_list += [tf.CoordinateSystemManager(*args)]
