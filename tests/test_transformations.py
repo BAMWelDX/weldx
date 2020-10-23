@@ -2760,7 +2760,7 @@ class TestCoordinateSystemManager:
 
         - 'cs_1' moves as described before
         - 'cs_2' remains at the origin and rotates around the x-axis
-        - 'cs_3' remains completly static at the coordinades [1, 0, 0]
+        - 'cs_3' remains completely static at the coordinates [1, 0, 0]
         - 'cs_4' rotates around the x-axis with a fixed distance of 1 unit to the origin
 
         Have a look into the tests setup for further details.
