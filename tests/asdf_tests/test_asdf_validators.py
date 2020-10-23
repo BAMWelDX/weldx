@@ -166,6 +166,7 @@ def test_shape_validation_error_exception(shape, exp, err):
     "test_input",
     [
         ShapeValidatorTestClass(),
+        ShapeValidatorTestClass(time_prop=pd.date_range("2020", freq="D", periods=9)),
         ShapeValidatorTestClass(optional_prop=np.ones((1, 2, 3)),),
         ShapeValidatorTestClass(
             nested_prop={
@@ -191,6 +192,7 @@ def test_shape_validator(test_input):
             nested_prop={"p1": np.ones((10, 8, 6, 4, 2))},  # missing p2
         ),
         ShapeValidatorTestClass(optional_prop=np.ones((3, 2, 9)),),  # wrong optional
+        ShapeValidatorTestClass(time_prop=pd.date_range("2020", freq="D", periods=3)),
     ],
 )
 def test_shape_validator_exceptions(test_input):

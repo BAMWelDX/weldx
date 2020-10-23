@@ -1,8 +1,11 @@
 # Licensed under a 3-clause BSD style license - see LICENSE
 # -*- coding: utf-8 -*-
 
+from typing import List
+
 import numpy as np
 import pandas as pd
+from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxType
 
@@ -40,3 +43,16 @@ class DatetimeIndexType(WeldxType):
             )
         values = tree["values"]
         return pd.DatetimeIndex(values)
+
+    @staticmethod
+    def shape_from_tagged(tree: TaggedDict) -> List[int]:
+        """Calculate the shape (length of TDI) from static tagged tree instance."""
+        if "freq" in tree:
+            temp = pd.date_range(
+                start=tree["start"]["value"],
+                end=tree["end"]["value"],
+                freq=tree["freq"],
+            )
+            return [len(temp)]
+        else:
+            return tree["values"]["shape"]

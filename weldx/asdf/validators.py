@@ -1,11 +1,13 @@
 import re
-from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict
+from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict, Union
 
 import asdf
 from asdf import ValidationError
 from asdf.schema import _type_to_tag
+from asdf.tagged import TaggedDict
 
 from weldx.asdf.extension import WxSyntaxError
+from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexType
 from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexType
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
@@ -360,6 +362,22 @@ def _compare_lists(_list, list_expected):
     return dict_values
 
 
+def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> List[int]:
+    """Get the shape of an ASDF instance from its tagged dict form."""
+    if isinstance(instance_dict, (float, int)):  # test against [1] for single values
+        return [1]
+    elif "shape" in instance_dict:
+        return instance_dict["shape"]
+    elif isinstance(instance_dict, asdf.types.tagged.Tagged):
+        # add custom type implementations
+        if "weldx/time/timedeltaindex" in instance_dict._tag:
+            return TimedeltaIndexType.shape_from_tagged(instance_dict)
+        elif "weldx/time/datetimeindex" in instance_dict._tag:
+            return DatetimeIndexType.shape_from_tagged(instance_dict)
+
+    return None
+
+
 def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, Any]):
     """Validate dimensions which are stored in two dictionaries dict_test and
     dict_expected.
@@ -402,22 +420,15 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
     """
 
     dict_values = {}
-    list_test = None
 
     # catch single shape definitions
     if isinstance(dict_expected, list):
-        if isinstance(dict_test, (float, int)):  # test against [1] for single values
-            list_test, list_expected = _prepare_list([1], dict_expected)
-        elif "shape" in dict_test:
-            list_test, list_expected = _prepare_list(dict_test["shape"], dict_expected)
-        elif isinstance(dict_test, asdf.types.tagged.Tagged):
-            # add custom type implementations
-            if "weldx/time/timedeltaindex" in dict_test._tag:
-                shape = TimedeltaIndexType.shape_from_tagged(dict_test)
-                list_test, list_expected = _prepare_list(shape, dict_expected)
+        # get the shape of current
+        shape = _get_instance_shape(dict_test)
+        if not shape:
+            raise ValidationError(f"Could not determine shape in instance {dict_test}.")
 
-        if not list_test:
-            raise ValidationError(f"Could not find shape key in instance {dict_test}.")
+        list_test, list_expected = _prepare_list(shape, dict_expected)
 
         _validate_expected_list(list_expected)
         _dict_values = _compare_lists(list_test, list_expected)

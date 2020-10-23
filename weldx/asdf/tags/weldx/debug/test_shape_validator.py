@@ -25,7 +25,7 @@ class ShapeValidatorTestClass:
             "p2": np.ones((9, 7, 5, 3, 1)),
         }
     )
-    timedelta_prop: pd.DatetimeIndex = pd.timedelta_range("0s", "8s", 9)
+    time_prop: pd.DatetimeIndex = pd.timedelta_range("0s", freq="s", periods=9)
     optional_prop: np.ndarray = None
 
 
