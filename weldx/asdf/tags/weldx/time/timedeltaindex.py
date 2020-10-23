@@ -3,6 +3,7 @@
 
 import numpy as np
 import pandas as pd
+from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxType
 
@@ -41,3 +42,15 @@ class TimedeltaIndexType(WeldxType):
             )
         values = tree["values"]
         return pd.TimedeltaIndex(values)
+
+    @staticmethod
+    def from_tree_tagged_static(tree: TaggedDict) -> pd.TimedeltaIndex:
+        """Construct TimedeltaIndex from tree."""
+        if "freq" in tree:
+            return pd.timedelta_range(
+                start=tree["start"]["value"],
+                end=tree["end"]["value"],
+                freq=tree["freq"],
+            )
+        else:
+            raise ValueError("Cannot access shape of pd.TimedeltaIndex in array format")

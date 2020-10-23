@@ -7,6 +7,7 @@ from asdf import ValidationError
 from asdf.schema import _type_to_tag
 
 from weldx.asdf.extension import WxSyntaxError
+from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexType
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
@@ -402,6 +403,7 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
     """
 
     dict_values = {}
+    list_test = None
 
     # catch single shape definitions
     if isinstance(dict_expected, list):
@@ -409,7 +411,13 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
             list_test, list_expected = _prepare_list([1], dict_expected)
         elif "shape" in dict_test:
             list_test, list_expected = _prepare_list(dict_test["shape"], dict_expected)
-        else:
+        elif isinstance(dict_test, asdf.types.tagged.Tagged):
+            # add custom type implementations
+            if "weldx/time/timedeltaindex" in dict_test._tag:
+                td_temp = TimedeltaIndexType.from_tree_tagged_static(dict_test)
+                list_test, list_expected = _prepare_list([len(td_temp)], dict_expected)
+
+        if not list_test:
             raise ValidationError(f"Could not find shape key in instance {dict_test}.")
 
         _validate_expected_list(list_expected)
@@ -432,26 +440,11 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
                 _optional = True
                 if len(key) == 0:
                     raise WxSyntaxError("wx_shape entry undefined")
+
             # test shapes
             if key in dict_test:
                 # go one level deeper in the dictionary
                 _dict_values = _custom_shape_validator(dict_test[key], item)
-            elif isinstance(dict_test, asdf.types.tagged.Tagged):
-                # add custom type implementations
-                if "weldx/time/timedeltaindex" in dict_test._tag:
-                    td_temp = pd.timedelta_range(
-                        start=dict_test["start"]["value"],
-                        end=dict_test["end"]["value"],
-                        freq=dict_test["freq"],
-                    )
-                    shape = {"shape": [len(td_temp)]}
-                    _dict_values = _custom_shape_validator(shape, item)
-                elif _optional:
-                    pass
-                else:
-                    raise ValidationError(
-                        f"Could not access key '{key}'  in instance {dict_test}."
-                    )
             elif _optional:
                 pass
             else:

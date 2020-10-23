@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 
 import numpy as np
+import pandas as pd
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
@@ -24,6 +25,7 @@ class ShapeValidatorTestClass:
             "p2": np.ones((9, 7, 5, 3, 1)),
         }
     )
+    timedelta_prop: pd.DatetimeIndex = pd.timedelta_range("0s", "8s", 9)
     optional_prop: np.ndarray = None
 
 
