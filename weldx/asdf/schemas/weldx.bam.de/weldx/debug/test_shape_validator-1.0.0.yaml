@@ -40,8 +40,8 @@ properties:
 
   time_prop:
     oneOf:
-      - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-*"
-      - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-*"
+      - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0"
 
   optional_prop:
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
