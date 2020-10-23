@@ -174,32 +174,28 @@ def test_shape_validation_error_exception(shape, exp, err):
                 "p3": np.ones((1, 2, 3)),
             }
         ),
-        pytest.param(
-            ShapeValidatorTestClass(
-                prop4=np.ones((2, 3, 5, 7, 9)),  # mismatch a with prop5
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            ShapeValidatorTestClass(prop2=np.ones((5, 2, 1)),),  # mismatch n with prop1
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            ShapeValidatorTestClass(
-                nested_prop={"p1": np.ones((10, 8, 6, 4, 2))},  # missing p2
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            ShapeValidatorTestClass(
-                optional_prop=np.ones((3, 2, 9)),  # wrong optional
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
     ],
 )
 def test_shape_validator(test_input):
     _write_read_buffer({"root": test_input})
+
+
+@pytest.mark.parametrize(
+    "test_input",
+    [
+        ShapeValidatorTestClass(
+            prop4=np.ones((2, 3, 5, 7, 9)),  # mismatch a with prop5
+        ),
+        ShapeValidatorTestClass(prop2=np.ones((5, 2, 1)),),  # mismatch n with prop1
+        ShapeValidatorTestClass(
+            nested_prop={"p1": np.ones((10, 8, 6, 4, 2))},  # missing p2
+        ),
+        ShapeValidatorTestClass(optional_prop=np.ones((3, 2, 9)),),  # wrong optional
+    ],
+)
+def test_shape_validator_exceptions(test_input):
+    with pytest.raises(ValidationError):
+        _write_read_buffer({"root": test_input})
 
 
 @pytest.mark.parametrize(

@@ -2,7 +2,6 @@ import re
 from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict
 
 import asdf
-import pandas as pd
 from asdf import ValidationError
 from asdf.schema import _type_to_tag
 
