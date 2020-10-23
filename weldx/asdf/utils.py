@@ -10,12 +10,12 @@ from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
 
 def drop_none_attr(node):
-    """Utility function simplify `to_tree` methods of  dataclass objects.
+    """Utility function simplify :code:`to_tree` methods of  dataclass objects.
 
-    The function requires the node to be convertible to dictionary via __dict__. And can
-    therefor be applied to all classes created using the @dataclass operator.
+    The function requires the node to be convertible to dictionary via :code:`__dict__`.
+    And can therefore be applied to all classes created using the @dataclass operator.
     The result is "clean" dictionary with all None entries removed.
-    A simple `to_tree()` function could be implemented as such::
+    A simple :code:`to_tree` function could be implemented as such::
 
         def to_tree(cls, node, ctx):
             tree = drop_none_attr(node)

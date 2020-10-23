@@ -6,8 +6,10 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pandas import DatetimeIndex as DTI
 from pandas import TimedeltaIndex as TDI
 from pandas import date_range
+from pint.errors import DimensionalityError
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -103,56 +105,41 @@ def test_vector_is_close():
     assert not ut.vector_is_close(vec_a, vec_a[0:2])
 
 
-def test_to_pandas_time_index():
-    """Test the to_pandas_time_index function."""
-    # time delta ------------------------------------------
-    # scalar
-    exp_time_delta_index_single = pd.TimedeltaIndex([42])
+@pytest.mark.parametrize(
+    "arg, expected",
+    [
+        # timedeltas
+        (TDI([42]), TDI([42])),
+        (pd.timedelta_range("0s", "20s", 10), pd.timedelta_range("0s", "20s", 10)),
+        (np.timedelta64(42), TDI([42])),
+        (np.array([-10, 0, 20]).astype(np.timedelta64), TDI([-10, 0, 20])),
+        (Q_(42, "ns"), TDI([42])),
+        ("10s", TDI(["10s"])),
+        (["5ms", "10s", "2D"], TDI(["5 ms", "10s", "2D"])),
+        # datetimes
+        (np.datetime64(50, "Y"), DTI(["2020-01-01"])),
+        ("2020-01-01", DTI(["2020-01-01"])),
+        (
+            np.array(
+                ["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]"
+            ),
+            DTI(["2012-10-02", "2012-10-05", "2012-10-11"]),
+        ),
+    ],
+)
+def test_to_pandas_time_index(arg, expected):
+    """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
+    assert np.all(ut.to_pandas_time_index(arg) == expected)
 
-    assert ut.to_pandas_time_index(42) == exp_time_delta_index_single
-    assert ut.to_pandas_time_index([42]) == exp_time_delta_index_single
-    assert ut.to_pandas_time_index(np.timedelta64(42)) == exp_time_delta_index_single
-    assert ut.to_pandas_time_index(Q_(42, "ns")) == exp_time_delta_index_single
 
-    # array
-    exp_time_delta_index_array = pd.TimedeltaIndex([1, 2, 3])
-    assert np.all(ut.to_pandas_time_index([1, 2, 3]) == exp_time_delta_index_array)
-    assert np.all(
-        ut.to_pandas_time_index(np.array([1, 2, 3]).astype("timedelta64[ns]"))
-        == exp_time_delta_index_array
-    )
-    assert np.all(
-        ut.to_pandas_time_index(Q_([1, 2, 3], "ns")) == exp_time_delta_index_array
-    )
-
-    # date time -------------------------------------------
-    # scalar
-    exp_date_time_index_single = pd.DatetimeIndex(["2012-10-02"])
-
-    assert (
-        ut.to_pandas_time_index(np.datetime64("2012-10-02"))
-        == exp_date_time_index_single
-    )
-
-    # array
-    exp_date_time_index_array = pd.DatetimeIndex(
-        ["2012-10-02", "2012-10-05", "2012-10-11"]
-    )
-
-    assert np.all(
-        ut.to_pandas_time_index(
-            np.array(["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]")
-        )
-        == exp_date_time_index_array
-    )
-
-    # exceptions ------------------------------------------
-    # quantity has wrong unit
-    with pytest.raises(Exception):
-        ut.to_pandas_time_index(Q_(10, "m"))
-    # wrong type
-    with pytest.raises(Exception):
-        ut.to_pandas_time_index("string")
+@pytest.mark.parametrize(
+    "arg, exception",
+    [(5, TypeError), ("string", TypeError), (Q_(10, "m"), DimensionalityError)],
+)
+def test_to_pandas_time_index_exceptions(arg, exception):
+    """Test correct exceptions on invalid inputs."""
+    with pytest.raises(exception):
+        ut.to_pandas_time_index(arg)
 
 
 def test_pandas_time_delta_to_quantity():

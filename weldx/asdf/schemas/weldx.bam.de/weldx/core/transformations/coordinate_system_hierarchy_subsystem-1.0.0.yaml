@@ -20,6 +20,11 @@ properties:
       The name of the parent system.
     type: string
 
+  reference_time:
+    description: |
+      A timestamp that serves as reference point for all attached coordinate systems.
+    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+
   root_cs:
     description: |
       The name of the subsystems root coordinate system.

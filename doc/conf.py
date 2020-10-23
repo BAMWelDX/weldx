@@ -4,6 +4,11 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+# Local build command ------------------------------------------------------------------
+
+# sphinx-build -W -n -b html -D nbsphinx_kernel_name="weldx" -D nbsphinx_execute="never"
+# -d build/doctrees doc build/html --keep-going
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -209,11 +214,12 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "xarray": ("http://xarray.pydata.org/en/stable", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
-    # "matplotlib": ("https://matplotlib.org", None),
+    "matplotlib": ("https://matplotlib.org", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
     "pint": ("https://pint.readthedocs.io/en/stable", None),
     "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
+    "asdf": ("https://asdf.readthedocs.io/en/stable/", None),
 }
 
 # Disable warnings caused by a bug -----------------------------------------------------
@@ -229,3 +235,12 @@ for line in open("nitpick_ignore"):
     dtype, target = line.split(None, 1)
     target = target.strip()
     nitpick_ignore.append((dtype, target))
+
+# Enable better object linkage ---------------------------------------------------------
+
+# This option basically turns every Markdown like inline code block into a sphinx
+# reference
+default_role = "py:obj"
+
+# see:
+# https://stackoverflow.com/questions/34052582/how-do-i-refer-to-classes-and-methods-in-other-files-my-project-with-sphinx
