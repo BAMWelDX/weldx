@@ -39,6 +39,7 @@
 - `ut.xr_interp_like` keeps variable and coordinate attributes from original DataArray [[#174]](https://github.com/BAMWelDX/weldx/pull/174)
 - rework `ut.to_pandas_time_index` to accept many different formats (LCS, DataArray) [[#174]](https://github.com/BAMWelDX/weldx/pull/174)
 - add utility functions for handling time coordinates to "weldx" accessor [[#174]](https://github.com/BAMWelDX/weldx/pull/174)
+- allow optional properties for validation with `wx_shape` by putting the name in brackets like `(optional_prop)`[[#176]](https://github.com/BAMWelDX/weldx/pull/176)
 
 ## 0.2.0 (30.07.2020)
 ### ASDF
