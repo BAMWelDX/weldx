@@ -1965,69 +1965,6 @@ class TestCoordinateSystemManager:
 
     # test_comparison ------------------------------------------------------------------
 
-    csm_comp_0 = CSM("root", "name")
-    csm_comp_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_comp_0.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
-    # different LCS
-    csm_comp_1 = CSM("root", "name")
-    csm_comp_1.add_cs("lcs_0", "root", LCS(coordinates=[1, 1, 2]))
-    csm_comp_1.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
-    # different nodes
-    csm_comp_2 = CSM("root", "name")
-    csm_comp_2.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_comp_2.add_cs("lcs_2", "root", LCS(coordinates=[0, -1, -2]))
-    # different edges
-    csm_comp_3 = CSM("root", "name")
-    csm_comp_3.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_comp_3.add_cs("lcs_1", "lcs_0", LCS(coordinates=[0, -1, -2]))
-    # merged systems
-    csm_merge_0 = CSM("root", "sub 1")
-    csm_merge_0.add_cs("lcs_0", "root", LCS(coordinates=[0, 1, 2]))
-    csm_merge_1 = CSM("lcs_0", "sub 2")
-    csm_merge_1.add_cs("lcs_2", "lcs_0", LCS(coordinates=[0, 1, 2]))
-    csm_comp_4 = CSM("root", "name")
-    csm_comp_4.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
-    csm_comp_4.merge(csm_merge_0)
-    # serial merge
-    csm_comp_5 = CSM("root", "name")
-    csm_comp_5.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
-    csm_comp_5.merge(csm_merge_0)
-    csm_comp_5.merge(csm_merge_1)
-    # nested merge
-    csm_comp_6 = CSM("root", "name")
-    csm_comp_6.add_cs("lcs_1", "root", LCS(coordinates=[0, -1, -2]))
-    csm_nest_0 = deepcopy(csm_merge_0)
-    csm_nest_0.merge(csm_merge_1)
-    csm_comp_6.merge(csm_nest_0)
-
-    @pytest.mark.parametrize(
-        "csm, other, result_exp",
-        [
-            (CSM("root", "name"), CSM("root", "name"), True),
-            (CSM("root", "name"), CSM("root", "wrong name"), False),
-            (CSM("root", "name"), CSM("boot", "name"), False),
-            (CSM("root", "name"), "a string", False),
-            (csm_comp_0, deepcopy(csm_comp_0), True),
-            (csm_comp_0, CSM("root", "name"), False),
-            (csm_comp_0, csm_comp_1, False),
-            (csm_comp_0, csm_comp_2, False),
-            (csm_comp_0, csm_comp_3, False),
-            (csm_comp_4, csm_comp_4, True),
-            (csm_comp_4, csm_comp_5, False),
-            (csm_comp_4, csm_comp_6, False),
-            (csm_comp_5, csm_comp_5, True),
-            (csm_comp_5, csm_comp_6, False),
-            (csm_comp_6, csm_comp_6, True),
-        ],
-    )
-    def test_comparison(self, csm, other, result_exp):
-        """Test the comparison of 2 'CoordinateSystemManager' instances."""
-        assert isinstance(csm, self.CSM), "csm must be a CoordinateSystemManager"
-        assert (csm == other) is result_exp
-        assert (csm != other) is not result_exp
-
-    # test_comparison_2 ----------------------------------------------------------------
-
     @staticmethod
     @pytest.mark.parametrize(
         "csm_data, cs_data, merge_data, csm_diffs, cs_diffs, merge_diffs, exp_results",
@@ -2269,7 +2206,7 @@ class TestCoordinateSystemManager:
             ),
         ],
     )
-    def test_comparison_2(
+    def test_comparison(
         csm_data, cs_data, merge_data, csm_diffs, cs_diffs, merge_diffs, exp_results
     ):
         """Test the `__eq__` function.
@@ -2310,7 +2247,7 @@ class TestCoordinateSystemManager:
             A list containing the expected results of each instance comparison
 
         """
-
+        # define support function
         def create_csm_list(csm_data_list, cs_data_list, merge_data_list):
             """Create a list of CSM instances."""
             csm_list = []
@@ -2326,6 +2263,7 @@ class TestCoordinateSystemManager:
 
             return csm_list
 
+        # create diff inputs
         csm_data_diff = deepcopy(csm_data)
         for diff in csm_diffs:
             csm_data_diff[diff[0]] = diff[1]
@@ -2338,11 +2276,23 @@ class TestCoordinateSystemManager:
         for diff in merge_diffs:
             merge_data_diff[diff[0]] = diff[1]
 
+        # create CSM instances
         csm_list_1 = create_csm_list(csm_data, cs_data, merge_data)
         csm_list_2 = create_csm_list(csm_data_diff, cs_data_diff, merge_data_diff)
 
+        # test
         for i, _ in enumerate(csm_list_1):
             assert (csm_list_1[i] == csm_list_2[i]) is exp_results[i]
+            assert (csm_list_1[i] != csm_list_2[i]) is not exp_results[i]
+
+    # test_comparison_wrong_type -------------------------------------------------------
+
+    @staticmethod
+    def test_comparison_wrong_type():
+        """Test the comparison with other types."""
+        csm = tf.CoordinateSystemManager("root", "csm")
+        assert (csm == 4) is False
+        assert (csm != 4) is True
 
     # test_time_union ------------------------------------------------------------------
 
