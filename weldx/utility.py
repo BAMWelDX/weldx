@@ -142,7 +142,7 @@ def to_pandas_time_index(
         pd.TimedeltaIndex,
         pd.DatetimeIndex,
         xr.DataArray,
-        "weldx.transformations.LocalCoordinateSystem",
+        "tf.LocalCoordinateSystem",
     ],
 ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
     """Convert a time variable to the corresponding pandas time index type.
