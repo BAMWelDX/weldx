@@ -34,7 +34,6 @@ wx_shape:
   (orientations):
     data: [(t), 3, 3]
 
-required: []
 propertyOrder: [reference_time, time, orientations, coordinates]
 flowStyle: block
 additionalProperties: false
