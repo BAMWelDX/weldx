@@ -1057,6 +1057,24 @@ class LocalCoordinateSystem:
         """
         return self._dataset.transpose(..., "c", "v")
 
+    @property
+    def is_unity_translation(self) -> bool:
+        """Return true if the LCS has a zero translation/coordinates value."""
+        if self.coordinates.shape[-1] == 3 and np.allclose(
+            self.coordinates, np.zeros(3)
+        ):
+            return True
+        return False
+
+    @property
+    def is_unity_rotation(self) -> bool:
+        """Return true if the LCS represents a unity rotation/orientations value."""
+        if self.orientation.shape[-2:] == (3, 3) and np.allclose(
+            self.orientation, np.eye(3)
+        ):
+            return True
+        return False
+
     def interp_time(
         self,
         time: Union[

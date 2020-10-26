@@ -41,7 +41,7 @@ class LocalCoordinateSystemASDF(WeldxType):
         tree = {}
 
         orientations = None
-        if not np.allclose(node.orientation, np.eye(3)):
+        if not node.is_unity_rotation:
             orientations = Variable(
                 "orientations", node.orientation.dims, node.orientation.data
             )
@@ -50,7 +50,7 @@ class LocalCoordinateSystemASDF(WeldxType):
             tree["orientations"] = orientations
 
         coordinates = None
-        if not np.allclose(node.coordinates, np.array([0.0, 0.0, 0.0])):
+        if not node.is_unity_translation:
             coordinates = Variable(
                 "coordinates", node.coordinates.dims, node.coordinates.data
             )
