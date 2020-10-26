@@ -2,7 +2,7 @@ ASDF Schema Definitions
 =======================
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
    schemas/core.rst
    schemas/equipment.rst

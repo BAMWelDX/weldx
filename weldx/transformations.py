@@ -22,51 +22,39 @@ _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
 __all__ = ["LocalCoordinateSystem", "CoordinateSystemManager", "WXRotation"]
 
-# functions -------------------------------------------------------------------
+# functions -----------------------------------------------------------------------
 
 
-class WXRotation(Rot):
-    """Wrapper for creating meta-tagged Scipy.Rotation objects."""
+def _build_time_index(
+    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
+    time_ref: pd.Timestamp = None,
+) -> pd.TimedeltaIndex:
+    """Build time index used for xarray objects.
 
-    @classmethod
-    def from_quat(cls, quat: np.ndarray, normalized=None) -> "WXRotation":
-        """Initialize from quaternions.
+    Parameters
+    ----------
+    time:
+        Datetime- or Timedelta-like time index.
+    time_ref:
+        Reference timestamp for Timedelta inputs.
 
-        scipy.spatial.transform.Rotation docs for details.
-        """
-        rot = super().from_quat(quat, normalized)
-        rot.wx_meta = {"constructor": "from_quat"}
-        return rot
+    Returns
+    -------
+    pandas.TimedeltaIndex
 
-    @classmethod
-    def from_matrix(cls, matrix: np.ndarray) -> "WXRotation":
-        """Initialize from matrix.
+    """
+    if time is None:
+        # time_ref = None
+        return time, time_ref
 
-        scipy.spatial.transform.Rotation docs for details.
-        """
-        rot = super().from_matrix(matrix)
-        rot.wx_meta = {"constructor": "from_matrix"}
-        return rot
+    time = ut.to_pandas_time_index(time)
 
-    @classmethod
-    def from_rotvec(cls, rotvec: np.ndarray) -> "WXRotation":
-        """Initialize from rotation vector.
+    if isinstance(time, pd.DatetimeIndex):
+        if time_ref is None:
+            time_ref = time[0]
+        time = time - time_ref
 
-        scipy.spatial.transform.Rotation docs for details.
-        """
-        rot = Rot.from_rotvec(rotvec)
-        rot.wx_meta = {"constructor": "from_rotvec"}
-        return rot
-
-    @classmethod
-    def from_euler(cls, seq: str, angles, degrees: bool = False) -> "WXRotation":
-        """Initialize from euler angles.
-
-        scipy.spatial.transform.Rotation docs for details.
-        """
-        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
-        rot.wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
-        return rot
+    return time, time_ref
 
 
 @UREG.wraps(None, (_DEFAULT_ANG_UNIT), strict=False)
@@ -357,7 +345,54 @@ def vector_points_to_left_of_vector(vector, vector_reference):
     return int(np.sign(np.linalg.det([vector_reference, vector])))
 
 
-# local coordinate system class --------------------------------------------------------
+# WXRotation ---------------------------------------------------------------------------
+
+
+class WXRotation(Rot):
+    """Wrapper for creating meta-tagged Scipy.Rotation objects."""
+
+    @classmethod
+    def from_quat(cls, quat: np.ndarray, normalized=None) -> "WXRotation":
+        """Initialize from quaternions.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_quat(quat, normalized)
+        rot.wx_meta = {"constructor": "from_quat"}
+        return rot
+
+    @classmethod
+    def from_matrix(cls, matrix: np.ndarray) -> "WXRotation":
+        """Initialize from matrix.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = super().from_matrix(matrix)
+        rot.wx_meta = {"constructor": "from_matrix"}
+        return rot
+
+    @classmethod
+    def from_rotvec(cls, rotvec: np.ndarray) -> "WXRotation":
+        """Initialize from rotation vector.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_rotvec(rotvec)
+        rot.wx_meta = {"constructor": "from_rotvec"}
+        return rot
+
+    @classmethod
+    def from_euler(cls, seq: str, angles, degrees: bool = False) -> "WXRotation":
+        """Initialize from euler angles.
+
+        scipy.spatial.transform.Rotation docs for details.
+        """
+        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
+        rot.wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
+        return rot
+
+
+# LocalCoordinateSystem ----------------------------------------------------------------
 
 
 class LocalCoordinateSystem:
@@ -409,7 +444,7 @@ class LocalCoordinateSystem:
         if coordinates is None:
             coordinates = np.array([0, 0, 0])
 
-        time, time_ref = self._build_time_index(time, time_ref)
+        time, time_ref = _build_time_index(time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
@@ -442,25 +477,10 @@ class LocalCoordinateSystem:
             if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
                 raise ValueError("Orientation vectors must be orthogonal")
 
-            if "time" in orientation.coords and not isinstance(
-                ut.to_pandas_time_index(orientation.time.data), pd.TimedeltaIndex
-            ):
-                raise ValueError(
-                    "The 'orientation' data set's time coordinate is not a valid "
-                    "time delta type."
-                )
-            if "time" in coordinates.coords and not isinstance(
-                ut.to_pandas_time_index(coordinates.time.data), pd.TimedeltaIndex
-            ):
-                raise ValueError(
-                    "The 'coordinate' data set's time coordinate is not a valid time"
-                    " delta type."
-                )
-
         # unify time axis
         if ("time" in orientation.coords) and ("time" in coordinates.coords):
             if not np.all(orientation.time.data == coordinates.time.data):
-                time_union = ut.get_time_union([orientation.time, coordinates.time])
+                time_union = ut.get_time_union([orientation, coordinates])
                 orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
                 coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
 
@@ -469,7 +489,7 @@ class LocalCoordinateSystem:
 
         self._dataset = xr.merge([coordinates, orientation], join="exact")
         if "time" in self._dataset and time_ref is not None:
-            self._dataset.time.attrs["time_ref"] = time_ref
+            self._dataset.weldx.time_ref = time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -514,8 +534,8 @@ class LocalCoordinateSystem:
         lhs_cs = self
         if (
             lhs_cs.reference_time != rhs_cs.reference_time
-            and lhs_cs.reference_time is not None
-            and rhs_cs.reference_time is not None
+            and lhs_cs.has_reference_time
+            and rhs_cs.has_reference_time
         ):
             if lhs_cs.reference_time < rhs_cs.reference_time:
                 time_ref = lhs_cs.reference_time
@@ -525,7 +545,7 @@ class LocalCoordinateSystem:
                 time_ref = rhs_cs.reference_time
                 lhs_cs = deepcopy(lhs_cs)
                 lhs_cs.reset_reference_time(time_ref)
-        elif lhs_cs.reference_time is None:
+        elif not lhs_cs.has_reference_time:
             time_ref = rhs_cs.reference_time
         else:
             time_ref = lhs_cs.reference_time
@@ -586,53 +606,6 @@ class LocalCoordinateSystem:
         )
 
     @staticmethod
-    def _build_time_index(
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
-        time_ref: pd.Timestamp = None,
-    ):
-        """Build time index used for xarray objects.
-
-        Parameters
-        ----------
-        time:
-            Datetime- or Timedelta-like time index.
-        time_ref:
-            Reference timestamp for Timedelta inputs.
-
-        Returns
-        -------
-        pandas.TimedeltaIndex
-
-        """
-        if time is None:
-            return time, time_ref
-
-        if isinstance(time, pint.Quantity):
-            time = ut.to_pandas_time_index(time)
-
-        if not isinstance(time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            try:  # try supported formats like str etc.
-                time = pd.DatetimeIndex(time)
-            except TypeError:
-                try:  # maybe
-                    time = pd.TimedeltaIndex(time)
-                except Exception:
-                    raise TypeError(
-                        "Unable to convert input argument to pd.DatetimeIndex or "
-                        "pd.TimedeltaIndex. If passing single values convert to list"
-                        "first (like [pd.Timestamp])"
-                    )
-            except Exception as err:
-                raise err
-
-        if isinstance(time, pd.DatetimeIndex):
-            if time_ref is None:
-                time_ref = time[0]
-            time = time - time_ref
-
-        return time, time_ref
-
-    @staticmethod
     def _build_orientation(
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot],
         time: pd.DatetimeIndex = None,
@@ -644,25 +617,27 @@ class LocalCoordinateSystem:
         orientation :
             Orientation object or data.
         time :
-            Valid time index formatted with _build_time_index.
+            Valid time index formatted with `_build_time_index`.
 
         Returns
         -------
         xarray.DataArray
 
         """
-        if isinstance(orientation, xr.DataArray):
-            return orientation
+        if not isinstance(orientation, xr.DataArray):
+            time_orientation = None
+            if isinstance(orientation, Rot):
+                orientation = orientation.as_matrix()
+            elif not isinstance(orientation, np.ndarray):
+                orientation = np.array(orientation)
 
-        time_orientation = None
-        if isinstance(orientation, Rot):
-            orientation = orientation.as_matrix()
-        elif not isinstance(orientation, np.ndarray):
-            orientation = np.array(orientation)
+            if orientation.ndim == 3:
+                time_orientation = time
+            orientation = ut.xr_3d_matrix(orientation, time_orientation)
 
-        if orientation.ndim == 3:
-            time_orientation = time
-        orientation = ut.xr_3d_matrix(orientation, time_orientation)
+        # make sure we have correct "time" format
+        orientation = orientation.weldx.time_ref_restore()
+
         return orientation
 
     @staticmethod
@@ -674,22 +649,24 @@ class LocalCoordinateSystem:
         coordinates:
             Coordinates data.
         time:
-            Valid time index formatted with _build_time_index.
+            Valid time index formatted with `_build_time_index`.
 
         Returns
         -------
         xarray.DataArray
 
         """
-        if isinstance(coordinates, xr.DataArray):
-            return coordinates
+        if not isinstance(coordinates, xr.DataArray):
+            time_coordinates = None
+            if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
+                coordinates = np.array(coordinates)
+            if coordinates.ndim == 2:
+                time_coordinates = time
+            coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
 
-        time_coordinates = None
-        if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
-            coordinates = np.array(coordinates)
-        if coordinates.ndim == 2:
-            time_coordinates = time
-        coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
+        # make sure we have correct "time" format
+        coordinates = coordinates.weldx.time_ref_restore()
+
         return coordinates
 
     @classmethod
@@ -991,7 +968,31 @@ class LocalCoordinateSystem:
         return self.dataset.coordinates
 
     @property
-    def reference_time(self) -> pd.Timestamp:
+    def is_time_dependent(self) -> bool:
+        """Return `True` if the coordinate system is time dependent.
+
+        Returns
+        -------
+        bool :
+            `True` if the coordinate system is time dependent, `False` otherwise.
+
+        """
+        return self.time is not None
+
+    @property
+    def has_reference_time(self) -> bool:
+        """Return `True` if the coordinate system has a reference time.
+
+        Returns
+        -------
+        bool :
+            `True` if the coordinate system has a reference time, `False` otherwise.
+
+        """
+        return self.reference_time is not None
+
+    @property
+    def reference_time(self) -> Union[pd.Timestamp, None]:
         """Get the coordinate systems reference time.
 
         Returns
@@ -1000,9 +1001,7 @@ class LocalCoordinateSystem:
             The coordinate systems reference time
 
         """
-        if "time" in self._dataset and "time_ref" in self._dataset.time.attrs:
-            return self._dataset.time.attrs["time_ref"]
-        return None
+        return self._dataset.weldx.time_ref
 
     @property
     def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
@@ -1016,7 +1015,7 @@ class LocalCoordinateSystem:
             The coordinate systems time as 'pandas.DatetimeIndex'
 
         """
-        if self.reference_time is None:
+        if not self.has_reference_time:
             return None
         return self.time + self.reference_time
 
@@ -1031,7 +1030,7 @@ class LocalCoordinateSystem:
 
         """
         if "time" in self._dataset.coords:
-            return pd.TimedeltaIndex(self._dataset.time)
+            return self._dataset.time
         return None
 
     @property
@@ -1061,7 +1060,11 @@ class LocalCoordinateSystem:
     def interp_time(
         self,
         time: Union[
-            pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem", None
+            pd.DatetimeIndex,
+            pd.TimedeltaIndex,
+            List[pd.Timestamp],
+            "LocalCoordinateSystem",
+            None,
         ],
         time_ref: Union[pd.Timestamp, None] = None,
     ) -> "LocalCoordinateSystem":
@@ -1081,37 +1084,31 @@ class LocalCoordinateSystem:
             Coordinate system with interpolated data
 
         """
-        if time is None:
+        if (not self.is_time_dependent) or (time is None):
             return self
 
-        if isinstance(time, LocalCoordinateSystem):
+        # use LCS reference time if none provided
+        if isinstance(time, LocalCoordinateSystem) and time_ref is None:
             time_ref = time.reference_time
-            time = time.time
+        time = ut.to_pandas_time_index(time)
 
-        time, time_ref = self._build_time_index(time, time_ref)
+        if self.has_reference_time != (
+            time_ref is not None or isinstance(time, pd.DatetimeIndex)
+        ):
+            raise TypeError(
+                "Only 1 reference time provided for time dependent coordinate "
+                "system. Either the reference time of the coordinate system or the "
+                "one passed to the function is 'None'. Only cases where the "
+                "reference times are both 'None' or both contain a timestamp are "
+                "allowed. Also check that the reference time has the correct type."
+            )
 
-        if self.time is None:
-            lcs_time_ref = time_ref
-        else:
-            lcs_time_ref = self.reference_time
+        if self.has_reference_time:
+            if not isinstance(time, pd.DatetimeIndex):
+                time = time + time_ref
 
-        if lcs_time_ref == time_ref:
-            lcs_ref = self
-        else:
-            if not isinstance(lcs_time_ref, type(time_ref)):
-                raise TypeError(
-                    "Only 1 reference time provided for time dependent coordinate "
-                    "system. Either the reference time of the coordinate system or the "
-                    "one passed to the function is 'None'. Only cases where the "
-                    "reference times are both 'None' or both contain a timestamp are "
-                    "allowed. Also check that the reference time has the correct type."
-                )
-
-            lcs_ref = deepcopy(self)
-            lcs_ref.reset_reference_time(time_ref)
-
-        orientation = ut.xr_interp_orientation_in_time(lcs_ref.orientation, time)
-        coordinates = ut.xr_interp_coordinates_in_time(lcs_ref.coordinates, time)
+        orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
+        coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
         return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
 
@@ -1173,7 +1170,7 @@ class LocalCoordinateSystem:
         """
         return self.as_rotation().as_euler(seq=seq, degrees=degrees)
 
-    def reset_reference_time(self, time_ref_new):
+    def reset_reference_time(self, time_ref_new: pd.Timestamp):
         """Reset the reference time of the coordinate system.
 
         The time values of the coordinate system are adjusted to the new reference time.
@@ -1183,24 +1180,16 @@ class LocalCoordinateSystem:
 
         Parameters
         ----------
-        time_ref_new:
+        time_ref_new: pandas.Timestamp
             The new reference time
 
         """
-        if isinstance(time_ref_new, str):
-            time_ref_new = pd.Timestamp(time_ref_new)
-        if self.reference_time is None:
-            self._dataset.time.attrs["time_ref"] = time_ref_new
-        else:
-            delta = self.reference_time - time_ref_new
-            self._dataset.coords["time"] = self.time + delta
-            self._dataset.time.attrs["time_ref"] = time_ref_new
+        self._dataset.weldx.time_ref = time_ref_new
 
 
-# coordinate system manager class ------------------------------------------------------
+# CoordinateSystemManager --------------------------------------------------------------
 
 
-# Todo: Convert all getter functions that need no input into properties.
 class CoordinateSystemManager:
     """Handles hierarchical dependencies between multiple coordinate systems.
 
@@ -1224,22 +1213,26 @@ class CoordinateSystemManager:
         self,
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
+        time_ref: pd.Timestamp = None,
         _graph: Union[nx.DiGraph, None] = None,
-        _sub_systems=None,
+        _subsystems=None,
     ):
         """Construct a coordinate system manager.
 
         Parameters
         ----------
-        root_coordinate_system_name :
+        root_coordinate_system_name : str
             Name of the root coordinate system.
-        coordinate_system_manager_name:
+        coordinate_system_manager_name : str
             Name of the coordinate system manager. If 'None' is passed, a default name
             is chosen.
+        time_ref : pandas.Timestamp
+            A reference timestamp. If it is defined, all time dependent information
+            returned by the CoordinateSystemManager will refer to it by default.
         _graph:
             A graph that should be used internally. Do not set this parameter. It is
             only meant for class internal usage.
-        _sub_systems:
+        _subsystems:
             A dictionary containing data about the CSMs attached subsystems. This
             parameter should never be set manually. It is for internal usage only.
 
@@ -1252,11 +1245,14 @@ class CoordinateSystemManager:
         if coordinate_system_manager_name is None:
             coordinate_system_manager_name = self._generate_default_name()
         self._name = coordinate_system_manager_name
+        if time_ref is not None and not isinstance(time_ref, pd.Timestamp):
+            time_ref = pd.Timestamp(time_ref)
+        self._reference_time = time_ref
 
         self._data = {}
         self._root_system_name = root_coordinate_system_name
 
-        self._sub_system_data_dict = _sub_systems
+        self._sub_system_data_dict = _subsystems
         if self._sub_system_data_dict is None:
             self._sub_system_data_dict = {}
 
@@ -1269,7 +1265,8 @@ class CoordinateSystemManager:
         """Output representation of a CoordinateSystemManager class."""
         return (
             f"<CoordinateSystemManager>\nname:\n\t{self._name}\n"
-            f"Coordinate systems:\n\t {self.get_coordinate_system_names()}\n"
+            f"reference time:\n\t {self.reference_time}\n"
+            f"coordinate systems:\n\t {self.coordinate_system_names}\n"
             f"data:\n\t {self._data!r}\n"
             f"sub systems:\n\t {self._sub_system_data_dict.keys()}\n"
             f")"
@@ -1285,6 +1282,9 @@ class CoordinateSystemManager:
         graph_1 = other.graph
 
         if self.name != other.name:
+            return False
+
+        if self.reference_time != other.reference_time:
             return False
 
         if len(graph_0.nodes) != len(graph_1.nodes):
@@ -1308,12 +1308,69 @@ class CoordinateSystemManager:
 
         # check coordinate systems
         for edge in graph_0.edges:
-            lcs_0 = self.get_local_coordinate_system(edge[0], edge[1])
-            lcs_1 = other.get_local_coordinate_system(edge[0], edge[1])
+            lcs_0 = self.graph.edges[(edge[0], edge[1])]["lcs"]
+            lcs_1 = other.graph.edges[(edge[0], edge[1])]["lcs"]
             if lcs_0 != lcs_1:
                 return False
 
         return True
+
+    @property
+    def lcs(self) -> List["LocalCoordinateSystem"]:
+        """Get a list of all attached `LocalCoordinateSystem` instances.
+
+        Only the defined systems and not the automatically generated inverse systems
+        are included.
+
+        Returns
+        -------
+        List[LocalCoordinateSystem] :
+           List of all attached `LocalCoordinateSystem` instances.
+
+        """
+        return [
+            self.graph.edges[edge]["lcs"]
+            for edge in self.graph.edges
+            if self.graph.edges[edge]["defined"]
+        ]
+
+    @property
+    def lcs_time_dependent(self) -> List["LocalCoordinateSystem"]:
+        """Get a list of all attached time dependent `LocalCoordinateSystem` instances.
+
+        Returns
+        -------
+        List[LocalCoordinateSystem] :
+            List of all attached time dependent `LocalCoordinateSystem` instances
+
+        """
+        return [lcs for lcs in self.lcs if lcs.is_time_dependent]
+
+    @property
+    def uses_absolute_times(self) -> bool:
+        """Return `True` if the CSM or one of its coord. systems has a reference time.
+
+        Returns
+        -------
+        bool :[
+            `True` if the `CoordinateSystemManager` or one of its attached coordinate
+            systems possess a reference time. `False` otherwise
+
+        """
+        return self._has_lcs_with_time_ref or (self.has_reference_time)
+
+    @property
+    def has_reference_time(self) -> bool:
+        """Return `True` if the coordinate system manager has a reference time.
+
+        Returns
+        -------
+        bool :
+            `True` if the coordinate system manager has a reference time, `False`
+            otherwise.
+
+        """
+        return self.reference_time is not None
 
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
@@ -1369,7 +1426,7 @@ class CoordinateSystemManager:
 
     @classmethod
     def _compare_subsystems_equal(cls, data: Dict, other: Dict) -> bool:
-        """Compare if to subsystem data dictionaries are equal.
+        """Compare if two subsystem data dictionaries are equal.
 
         Parameters
         ----------
@@ -1393,6 +1450,8 @@ class CoordinateSystemManager:
             if subsystem_data["common node"] != other_data["common node"]:
                 return False
             if subsystem_data["root"] != other_data["root"]:
+                return False
+            if subsystem_data["time_ref"] != other_data["time_ref"]:
                 return False
             if set(subsystem_data["neighbors"]) != set(other_data["neighbors"]):
                 return False
@@ -1418,7 +1477,8 @@ class CoordinateSystemManager:
         """
         return f"Coordinate system manager {next(CoordinateSystemManager._id_gen)}"
 
-    def _get_extended_sub_system_data(self) -> Dict:
+    @property
+    def _extended_sub_system_data(self) -> Dict:
         """Get an extended copy of the internal sub system data.
 
         The function adds a list of potential child coordinate systems to each
@@ -1472,9 +1532,37 @@ class CoordinateSystemManager:
         all_members += [ext_sub_system_data["common node"]]
         return all_members
 
+    @property
+    def _has_lcs_with_time_ref(self):
+        """Return `True` if one of the attached coordinate systems has a reference time.
+
+        Returns
+        -------
+        bool :
+            `True` if one of the attached coordinate systems has a reference time.
+            `False` otherwise
+
+        """
+        return any(lcs.has_reference_time for lcs in self.lcs_time_dependent)
+
     def _ipython_display_(self):
         """Display the coordinate system manager as plot in jupyter notebooks."""
         self.plot()
+
+    @property
+    def _number_of_time_dependent_lcs(self):
+        """Get the number of time dependent coordinate systems.
+
+        Note that the automatically added inverse systems have no effect on the returned
+        val
+
+        Returns
+        -------
+        int :
+            Number of time dependent coordinate systems
+
+        """
+        return len(self.lcs_time_dependent)
 
     def _update_local_coordinate_system(
         self, node_from: str, node_to: str, lcs: LocalCoordinateSystem
@@ -1547,6 +1635,18 @@ class CoordinateSystemManager:
         return len(self._sub_system_data_dict)
 
     @property
+    def reference_time(self):
+        """Get the reference time of the `CoordinateSystemManager`.
+
+        Returns
+        -------
+        pandas.Timestamp :
+            Reference time of the `CoordinateSystemManager`
+
+        """
+        return self._reference_time
+
+    @property
     def root_system_name(self) -> str:
         """Get the name of the root system.
 
@@ -1579,34 +1679,63 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: str,
-        local_coordinate_system: LocalCoordinateSystem,
+        lcs: LocalCoordinateSystem,
         lsc_child_in_parent: bool = True,
     ):
         """Add a coordinate system to the coordinate system manager.
 
         If the specified system already exists with the same parent system it will be
-        updated. If the parent systems do not match, an exception is raised.
+        updated. If the parent systems does not match, an exception is raised.
+
+        Notes
+        -----
+        The time component of coordinate systems without defined reference time is
+        assumed to refer to the same reference time as the `CoordinateSystemManager`.
+        In case that the `CoordinateSystemManager` does not possess a reference time,
+        you have to assure that either all or none of the added coordinate systems have
+        a reference time.
+        Violation of this rule will cause an exception.
+        If neither the `CoordinateSystemManager` nor the attached coordinate systems
+        have a reference time, all time deltas are expected to have common but undefined
+        reference time.
 
         Parameters
         ----------
-        coordinate_system_name :
+        coordinate_system_name : str
             Name of the new coordinate system.
-        reference_system_name :
+        reference_system_name : str
             Name of the parent system. This must have been already added.
-        local_coordinate_system :
+        lcs : LocalCoordinateSystem
             An instance of
-            weldx.transformations.LocalCoordinateSystem that describes how the new
+            `~weldx.transformations.LocalCoordinateSystem` that describes how the new
             coordinate system is oriented in its parent system.
-        lsc_child_in_parent:
-            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
-            the new system orientation towards is parent. If 'False', it describes
+        lsc_child_in_parent: bool
+            If set to `True`, the passed `LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
         """
-        if not isinstance(local_coordinate_system, LocalCoordinateSystem):
+        if not isinstance(lcs, LocalCoordinateSystem):
             raise TypeError(
                 "'local_coordinate_system' must be an instance of "
                 + "weldx.transformations.LocalCoordinateSystem"
+            )
+
+        if (
+            lcs.is_time_dependent  # always add static lcs
+            and self._number_of_time_dependent_lcs > 0  # CSM is not static
+            and (
+                (lcs.has_reference_time and not self.uses_absolute_times)
+                or (
+                    (not lcs.has_reference_time and not self.has_reference_time)
+                    and self.uses_absolute_times
+                )
+            )
+        ):
+            raise Exception(
+                "Inconsistent usage of reference times! If you didn't specify a "
+                "reference time for the CoordinateSystemManager, either all or "
+                "none of the added coordinate systems must have a reference time."
             )
 
         if self.has_coordinate_system(coordinate_system_name):
@@ -1622,30 +1751,22 @@ class CoordinateSystemManager:
                 )
             if lsc_child_in_parent:
                 self._update_local_coordinate_system(
-                    coordinate_system_name,
-                    reference_system_name,
-                    local_coordinate_system,
+                    coordinate_system_name, reference_system_name, lcs,
                 )
             else:
                 self._update_local_coordinate_system(
-                    reference_system_name,
-                    coordinate_system_name,
-                    local_coordinate_system,
+                    reference_system_name, coordinate_system_name, lcs,
                 )
         else:
             self._check_coordinate_system_exists(reference_system_name)
             self._add_coordinate_system_node(coordinate_system_name)
             if lsc_child_in_parent:
                 self._add_edges(
-                    coordinate_system_name,
-                    reference_system_name,
-                    local_coordinate_system,
+                    coordinate_system_name, reference_system_name, lcs,
                 )
             else:
                 self._add_edges(
-                    reference_system_name,
-                    coordinate_system_name,
-                    local_coordinate_system,
+                    reference_system_name, coordinate_system_name, lcs,
                 )
 
     def assign_data(
@@ -1682,7 +1803,8 @@ class CoordinateSystemManager:
         reference_system_name: str,
         orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
         coordinates: Union[xr.DataArray, np.ndarray, List] = None,
-        time: pd.DatetimeIndex = None,
+        time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = None,
+        time_ref: pd.Timestamp = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -1706,13 +1828,15 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        time_ref :
+            Reference time for time dependent coordinate systems
         lsc_child_in_parent:
             If set to 'True', the passed 'LocalCoordinateSystem' instance describes
             the new system orientation towards is parent. If 'False', it describes
             how the parent system is positioned in its new child system.
 
         """
-        lcs = LocalCoordinateSystem(orientation, coordinates, time)
+        lcs = LocalCoordinateSystem(orientation, coordinates, time, time_ref)
         self.add_cs(
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
         )
@@ -1969,7 +2093,7 @@ class CoordinateSystemManager:
           its child systems are removed from the coordinate system manager
         - If the coordinate system is part of a subsystem and belongs to the systems
           that were present when the subsystem was merged, the subsystem is removed and
-          can not be restored using "get_sub_systems" or "unmerge". Coordinate systems
+          can not be restored using `subsystems` or `unmerge`. Coordinate systems
           of the subsystem that aren't a child of the deleted coordinate system will
           remain in the coordinate system manager
         - If the coordinate system is part of a subsystem but was added after merging,
@@ -2060,7 +2184,8 @@ class CoordinateSystemManager:
 
         return all_children
 
-    def get_coordinate_system_names(self) -> List:
+    @property
+    def coordinate_system_names(self) -> List:
         """Get the names of all contained coordinate systems.
 
         Returns
@@ -2104,11 +2229,12 @@ class CoordinateSystemManager:
             target_coordinate_system_name,
         )
 
-    def get_local_coordinate_system(
+    def get_cs(
         self,
         coordinate_system_name: str,
         reference_system_name: Union[str, None] = None,
-        time: Union[pd.DatetimeIndex, List, str, None] = None,
+        time: Union[pd.TimedeltaIndex, pd.DatetimeIndex, pint.Quantity, str] = None,
+        time_ref: pd.Timestamp = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
 
@@ -2121,7 +2247,74 @@ class CoordinateSystemManager:
         The timestamps of the returned system depend on the functions time parameter.
         By default, the time union of all involved coordinate systems is taken.
 
-        Information regarding the implementation:
+        Notes
+        -----
+        **Reference time of the returned system**
+
+        The reference time of the returned coordinate system depends on multiple
+        factors like the one passed to the function and the internally stored reference
+        times. Generally, the following rules apply:
+
+        - if a reference time was passed to the function, it will be used as reference
+          time of the returned coordinate system as long as a time was also passed to
+          the function.
+        - else the reference time of the `CoordinateSystemManager` will be used if it
+          has one
+        - if only the coordinate systems have a reference time, the lowest (earliest)
+          will be used
+        - if there is no reference time at all, the resulting coordinate system won't
+          have one either
+        - if no time was passed to the function, a passed reference time will be
+          ignored
+        - a `pandas.DatetimeIndex` always has its lowest date as implicit reference time
+          which will be used if the `CoordinateSystemManager` doesn't possess one and
+          the functions reference time isn't set.
+
+
+        A overview of all possible combinations using a `pandas.TimedeltaIndex` or
+        a `pint.Quantity` as ``time`` parameter is given in the table below.
+
+        +------------+--------------+-----------+----------------+-----------------+
+        | function   | function has | CSM has   | CS have        | Returned system |
+        | has        | reference    | reference | reference      | uses reference  |
+        | time       | time         | time      | times          | time of         |
+        +============+==============+===========+================+=================+
+        | Yes        | Yes          | Yes       | all/mixed/none | function        |
+        +------------+--------------+-----------+----------------+-----------------+
+        | No         | Yes          | Yes       | all/mixed/none | CSM             |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes / No   | No           | Yes       | all/mixed/none | CSM             |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes        | Yes          | No        | all            | function        |
+        +------------+--------------+-----------+----------------+-----------------+
+        | No         | Yes          | No        | all            | CS (lowest)     |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes / No   | Yes / No     | No        | mixed          | impossible -> 1.|
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes        | Yes          | No        | none           | error -> 2.     |
+        +------------+--------------+-----------+----------------+-----------------+
+        | No         | Yes          | No        | none           | `None`          |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes / No   | No           | No        | all            | CS (lowest)     |
+        +------------+--------------+-----------+----------------+-----------------+
+        | Yes / No   | No           | No        | none           | `None`          |
+        +------------+--------------+-----------+----------------+-----------------+
+
+        1. This case can not occur since it is not allowed to add a combination of
+           coordinate systems with and without reference time to a
+           `CoordinateSystemManager` without own reference time. See `add_cs`
+           documentation for further details
+        2. If neither the `CoordinateSystemManager` nor its attached coordinate systems
+           have a reference time, the intention of passing a time and a reference time
+           to the function is unclear. The caller might be unaware of the missing
+           reference times. Therefore an exception is raised. If your intention is to
+           add a reference time to the resulting coordinate system, you should call this
+           function without a specified reference time and add it explicitly to the
+           returned `LocalCoordinateSystem`.
+
+
+        **Information regarding the implementation:**
+
         It is important to mention that all coordinate systems that are involved in the
         transformation should be interpolated to a common time line before they are
         combined using the 'LocalCoordinateSystem's __add__ and __sub__ functions.
@@ -2148,15 +2341,16 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        coordinate_system_name :
+        coordinate_system_name : str
             Name of the coordinate system
-        reference_system_name :
+        reference_system_name : str
             Name of the reference coordinate system
-        time:
-            Either a pandas.DatetimeIndex that specifies the target timestamps of the
-            returned system, the name of another coordinate system that provides the
-            timestamps or 'None'. If 'None' is chosen, the time union of all involved
-            transformations is used.
+        time : pandas.TimedeltaIndex, pandas.DatetimeIndex, pint.Quantity or str
+            Specifies the desired time of the returned coordinate system. You can also
+            pass the name of another coordinate system to use its time attribute as
+            reference
+        time_ref : pandas.Timestamp
+            The desired reference time of the returned coordinate system
 
         Returns
         -------
@@ -2183,25 +2377,40 @@ class CoordinateSystemManager:
         path_edges = list(zip(path[:-1], path[1:]))
 
         if time is None:
-            time_interp = self.time_union(path_edges)
+            time_ref = None  # ignore passed reference time if no time was passed
+            time = self.time_union(path_edges)
 
         elif isinstance(time, str):
             parent_name = self.get_parent_system_name(time)
             if parent_name is None:
                 raise ValueError("The root system has no time dependency.")
 
-            time_interp = self.get_local_coordinate_system(time, parent_name).time
-            if time_interp is None:
+            time = self.get_cs(time, parent_name).time
+            if time is None:
                 raise ValueError(f'The system "{time}" is not time dependent')
+        elif not isinstance(time, (pd.DatetimeIndex, pint.Quantity)):
+            time = pd.TimedeltaIndex(time)
 
+        if time_ref is None:
+            time_ref = self.reference_time
         else:
-            time_interp = pd.TimedeltaIndex(time)
+            time_ref = pd.Timestamp(time_ref)
 
-        lcs = self.graph.edges[path_edges[0]]["lcs"].interp_time(time_interp)
-        for edge in path_edges[1:]:
-            lcs = lcs + self.graph.edges[edge]["lcs"].interp_time(time_interp)
+        time_interp, time_ref_interp = _build_time_index(time, time_ref)
 
-        return lcs
+        lcs_result = LocalCoordinateSystem()
+        for edge in path_edges:
+            lcs = self.graph.edges[edge]["lcs"]
+            if lcs.is_time_dependent:
+                if not lcs.has_reference_time and self.has_reference_time:
+                    time_lcs = time_interp + (time_ref_interp - self.reference_time)
+                    lcs = lcs.interp_time(time_lcs)
+                    lcs.reset_reference_time(self.reference_time)
+                    lcs.reset_reference_time(time_ref_interp)
+                else:
+                    lcs = lcs.interp_time(time_interp, time_ref_interp)
+            lcs_result += lcs
+        return lcs_result
 
     def get_parent_system_name(self, coordinate_system_name) -> Union[str, None]:
         """Get the name of a coordinate systems parent system.
@@ -2231,7 +2440,8 @@ class CoordinateSystemManager:
 
         return path[1]
 
-    def get_sub_systems(self) -> List["CoordinateSystemManager"]:
+    @property
+    def subsystems(self) -> List["CoordinateSystemManager"]:
         """Extract all subsystems from the CoordinateSystemManager.
 
         Returns
@@ -2240,7 +2450,7 @@ class CoordinateSystemManager:
             List containing all the subsystems.
 
         """
-        ext_sub_system_data_dict = self._get_extended_sub_system_data()
+        ext_sub_system_data_dict = self._extended_sub_system_data
 
         sub_system_list = []
         for sub_system_name, ext_sub_system_data in ext_sub_system_data_dict.items():
@@ -2251,8 +2461,9 @@ class CoordinateSystemManager:
             csm_sub = CoordinateSystemManager(
                 ext_sub_system_data["root"],
                 sub_system_name,
+                time_ref=ext_sub_system_data["time_ref"],
                 _graph=self._graph.subgraph(members).copy(),
-                _sub_systems=ext_sub_system_data["sub system data"],
+                _subsystems=ext_sub_system_data["sub system data"],
             )
             sub_system_list.append(csm_sub)
 
@@ -2294,7 +2505,13 @@ class CoordinateSystemManager:
 
     def interp_time(
         self,
-        time: Union[pd.DatetimeIndex, List[pd.Timestamp], "LocalCoordinateSystem"],
+        time: Union[
+            pd.DatetimeIndex,
+            pd.TimedeltaIndex,
+            List[pd.Timestamp],
+            "LocalCoordinateSystem",
+        ],
+        time_ref: pd.Timestamp = None,
         affected_coordinate_systems: Union[str, List[str], None] = None,
         in_place: bool = False,
     ) -> "CoordinateSystemManager":
@@ -2305,13 +2522,19 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        time :
-            Time data.
-        affected_coordinate_systems :
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+               LocalCoordinateSystem
+            The target time for the interpolation. In addition to the supported
+            time formats, the function also accepts a `LocalCoordinateSystem` as
+            ``time`` source object
+        time_ref : pandas.Timestamp
+            A reference timestamp that can be provided if the ``time`` parameter is a
+            `pandas.TimedeltaIndex`
+        affected_coordinate_systems : str or List[str]
             A single coordinate system name or a list of coordinate system names that
             should be interpolated in time. Only transformations towards the systems
             root node are affected.
-        in_place :
+        in_place : bool
             If 'True' the interpolation is performed in place, otherwise a
             new instance is returned. (Default value = False)
 
@@ -2338,7 +2561,7 @@ class CoordinateSystemManager:
                 if self._graph.edges[edge]["defined"]:
                     self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
                         "lcs"
-                    ].interp_time(time)
+                    ].interp_time(time, time_ref)
             for edge in affected_edges:
                 if not self._graph.edges[edge]["defined"]:
                     self._graph.edges[edge]["lcs"] = self._graph.edges[
@@ -2347,7 +2570,7 @@ class CoordinateSystemManager:
             return self
 
         return deepcopy(self).interp_time(
-            time, affected_coordinate_systems, in_place=True
+            time, time_ref, affected_coordinate_systems, in_place=True
         )
 
     def is_neighbor_of(
@@ -2382,9 +2605,18 @@ class CoordinateSystemManager:
             instance.
 
         """
+        if (
+            other._number_of_time_dependent_lcs > 0
+            and self.reference_time != other.reference_time
+        ):
+            raise Exception(
+                "You can only merge subsystems with time dependent coordinate systems"
+                "if the reference times of both 'CoordinateSystemManager' instances"
+                "are identical."
+            )
+
         intersection = list(
-            set(self.get_coordinate_system_names())
-            & set(other.get_coordinate_system_names())
+            set(self.coordinate_system_names) & set(other.coordinate_system_names)
         )
 
         if len(intersection) != 1:
@@ -2398,8 +2630,9 @@ class CoordinateSystemManager:
         subsystem_data = {
             "common node": intersection[0],
             "root": other.root_system_name,
+            "time_ref": other.reference_time,
             "neighbors": other.neighbors(intersection[0]),
-            "original members": other.get_coordinate_system_names(),
+            "original members": other.coordinate_system_names,
             "sub system data": other.sub_system_data,
         }
         self._sub_system_data_dict[other.name] = subsystem_data
@@ -2494,33 +2727,60 @@ class CoordinateSystemManager:
         for lcs in cs_delete:
             self.delete_cs(lcs, True)
 
-    def time_union(self, list_of_edges: List = None) -> pd.DatetimeIndex:
+    def time_union(
+        self, list_of_edges: List = None,
+    ) -> Union[None, pd.DatetimeIndex, pd.TimedeltaIndex]:
         """Get the time union of all or selected local coordinate systems.
+
+         If neither the `CoordinateSystemManager` nor its attached
+         `LocalCoordinateSystem` instances possess a reference time, the function
+         returns a `pandas.TimedeltaIndex`. Otherwise, a `pandas.DatetimeIndex` is
+         returned. The following table gives an overview of all possible reference time
+         combinations and the corresponding return type:
+
+
+        +------------+------------------+-------------------------+
+        | CSM        | LCS              | Return type             |
+        | reference  | reference        |                         |
+        | time       | times            |                         |
+        +============+==================+=========================+
+        | True       | all/mixed/none   | `pandas.DatetimeIndex`  |
+        +------------+------------------+-------------------------+
+        | False      | all              | `pandas.DatetimeIndex`  |
+        +------------+------------------+-------------------------+
+        | False      | none             | `pandas.TimedeltaIndex` |
+        +------------+------------------+-------------------------+
+
+
 
         Parameters
         ----------
         list_of_edges :
-            If not None, the union is only calculated from the
-            specified edges (Default value = None)
+            If not `None`, the union is only calculated from the specified edges.
 
         Returns
         -------
-        pandas.DatetimeIndex
+        pandas.DatetimeIndex or pandas.TimedeltaIndex
             Time union
 
         """
-        edges = self.graph.edges
         if list_of_edges is None:
-            list_of_edges = edges
-        time_union = None
-        for edge in list_of_edges:
-            time_edge = edges[edge]["lcs"].time
-            if time_union is None:
-                time_union = time_edge
-            elif time_edge is not None:
-                time_union = time_union.union(time_edge)
+            lcs_list = self.lcs_time_dependent
+        else:
+            lcs_list = [self.graph.edges[edge]["lcs"] for edge in list_of_edges]
+            lcs_list = [lcs for lcs in lcs_list if lcs.is_time_dependent]
 
-        return time_union
+        if not lcs_list:
+            return None
+
+        time_list = [ut.to_pandas_time_index(lcs) for lcs in lcs_list]
+        if self.has_reference_time:
+            time_list = [
+                t + self.reference_time if isinstance(t, pd.TimedeltaIndex) else t
+                for t in time_list
+            ]
+
+        return ut.get_time_union(time_list)
 
     def transform_data(
         self,
@@ -2549,9 +2809,7 @@ class CoordinateSystemManager:
             Transformed data
 
         """
-        lcs = self.get_local_coordinate_system(
-            source_coordinate_system_name, target_coordinate_system_name
-        )
+        lcs = self.get_cs(source_coordinate_system_name, target_coordinate_system_name)
         if isinstance(data, xr.DataArray):
             mul = ut.xr_matmul(
                 lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
@@ -2578,7 +2836,7 @@ class CoordinateSystemManager:
             A list containing previously merged 'CoordinateSystemManager' instances.
 
         """
-        sub_systems = self.get_sub_systems()
+        subsystems = self.subsystems
         self.remove_subsystems()
 
-        return sub_systems
+        return subsystems
