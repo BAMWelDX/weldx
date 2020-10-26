@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.2.1 (unreleased)
+## 0.2.1 (26.10.2020)
 ### changes
 - Documentation
     - Documentation is [published on readthedocs](https://weldx.readthedocs.io/en/latest/)
@@ -13,23 +13,11 @@
     - coordinate systems can be updated using `add_cs`
     - supports deletion of coordinate systems
     - instances can now be merged and unmerged
-- `LocalCoordinateSystem` now accepts `pd.TimedeltaIndex` and `pint.Quantity` as `time` inputs when provided with a reference `pd.Timestamp` as `time_ref` [[#97]](https://github.com/BAMWelDX/weldx/pull/97)
-- `LocalCoordinateSystem` now accepts `Rotation`-Objects as `orientation` [[#97]](https://github.com/BAMWelDX/weldx/pull/97)
-- Internal structure of `LocalCoordinateSystem` is now based on `pd.TimedeltaIndex` and a reference `pd.Timestamp` instead of `pd.DatetimeIndex`. As a consequence, providing a reference timestamp is now optional. [[#126]](https://github.com/BAMWelDX/weldx/pull/126)
+- `LocalCoordinateSystem`
+    - `LocalCoordinateSystem` now accepts `pd.TimedeltaIndex` and `pint.Quantity` as `time` inputs when provided with a reference `pd.Timestamp` as `time_ref` [[#97]](https://github.com/BAMWelDX/weldx/pull/97)
+    - `LocalCoordinateSystem` now accepts `Rotation`-Objects as `orientation` [[#97]](https://github.com/BAMWelDX/weldx/pull/97)
+    - Internal structure of `LocalCoordinateSystem` is now based on `pd.TimedeltaIndex` and a reference `pd.Timestamp` instead of `pd.DatetimeIndex`. As a consequence, providing a reference timestamp is now optional. [[#126]](https://github.com/BAMWelDX/weldx/pull/126)
 - `weldx.utility.xr_interp_like` now accepts non-iterable scalar inputs for interpolation [[#97]](https://github.com/BAMWelDX/weldx/pull/97)
-- add custom `wx_tag` validation and update `wx_property_tag` to allow new syntax [[#99]](https://github.com/BAMWelDX/weldx/pull/99)\
-  the following syntax can be used:
-  ```yaml
-  wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
-  wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version
-  wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version
-  wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patchversion
-  ```
-- add `WxSyntaxError` exception for custom weldx ASDF syntax errors [[#99]](https://github.com/BAMWelDX/weldx/pull/99)
-- add basic schema layout and `GmawProcess` class for arc welding process implementation [[#104]](https://github.com/BAMWelDX/weldx/pull/104)
-- add example notebook and documentation for arc welding process [[#104]](https://github.com/BAMWelDX/weldx/pull/104)
-- fix propagating the `name` attribute when reading an ndarray `TimeSeries` object back from ASDF files [[#104]](https://github.com/BAMWelDX/weldx/pull/104)
-- fix `pint` regression in `TimeSeries` when mixing integer and float values [[#121]](https://github.com/BAMWelDX/weldx/pull/121)
 - add `pint` compatibility to some `geometry` classes (**experimental**)
   - when passing quantities to constructors (and some functions), values get converted to default unit `mm` and passed on as magnitude
   - old behavior is preserved
@@ -39,7 +27,26 @@
 - `ut.xr_interp_like` keeps variable and coordinate attributes from original DataArray [[#174]](https://github.com/BAMWelDX/weldx/pull/174)
 - rework `ut.to_pandas_time_index` to accept many different formats (LCS, DataArray) [[#174]](https://github.com/BAMWelDX/weldx/pull/174)
 - add utility functions for handling time coordinates to "weldx" accessor [[#174]](https://github.com/BAMWelDX/weldx/pull/174)
+
+### ASDF extension & schemas
+- add `WxSyntaxError` exception for custom weldx ASDF syntax errors [[#99]](https://github.com/BAMWelDX/weldx/pull/99)
+- add custom `wx_tag` validation and update `wx_property_tag` to allow new syntax [[#99]](https://github.com/BAMWelDX/weldx/pull/99) \
+  the following syntax can be used:
+  ```yaml
+  wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
+  wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version
+  wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version
+  wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patchversion
+  ```
+- add basic schema layout and `GmawProcess` class for arc welding process implementation [[#104]](https://github.com/BAMWelDX/weldx/pull/104)
+- add example notebook and documentation for arc welding process [[#104]](https://github.com/BAMWelDX/weldx/pull/104)
 - allow optional properties for validation with `wx_shape` by putting the name in brackets like `(optional_prop)`[[#176]](https://github.com/BAMWelDX/weldx/pull/176)
+
+
+### fixes
+- fix propagating the `name` attribute when reading an ndarray `TimeSeries` object back from ASDF files [[#104]](https://github.com/BAMWelDX/weldx/pull/104)
+- fix `pint` regression in `TimeSeries` when mixing integer and float values [[#121]](https://github.com/BAMWelDX/weldx/pull/121)
+
 
 ## 0.2.0 (30.07.2020)
 ### ASDF
