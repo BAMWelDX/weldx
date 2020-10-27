@@ -20,17 +20,26 @@ from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
 
 
-def ureg_check_class(dimensionalities):
-    """
-    Decorate class __init__ function with pint check().
+def ureg_check_class(*dimensionalities):
+    """Decorate class __init__ function with pint.ureg.check().
 
     Parameters
     ----------
     dimensionalities: tuple
         Tuple of dimensionalities to check class init parameters against.
 
-    Returns
-    -------
+
+    Examples
+    --------
+    A simple dataclass cloud look like this::
+
+        @ureg_check_dataclass("[length]","[time]")
+        @dataclass
+        class A:
+            a: pint.Quantity
+            b: pint.Quantity
+
+        A(Q_(3,"mm"),Q_(3,"s"))
 
     """
 
