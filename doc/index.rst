@@ -30,12 +30,13 @@ Contents
 ########
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   tutorials
-   asdf-extension
-   asdf-schemas
-   api
-   CHANGELOG
-   legal-notice
+    tutorials
+    asdf-extension
+    devdoc
+    api
+    asdf-schemas
+    CHANGELOG
+    legal-notice
 

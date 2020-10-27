@@ -148,6 +148,22 @@ Note the following:
 *   `wx_shape` is now defined on the same level as the `properties` keyword.
 *   `wx_shape` is no longer a shape-like list but itself a nested object with shape-like lists as leaves.
 
+### optional properties
+Properties that are optional (not listed as `required`) must be indicated as such for shape validation by putting the name in brackets. 
+In this example, both `optional_prop` will only get validated if it exists in the tree.
+```yaml
+# ASDF schema
+properties:
+  required_prop:
+    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+  optional_prop:
+    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+wx_shape:
+  required_prop: [n]
+  (optional_prop): [n]
+required: [required_prop]
+```
+
 ### custom types validation
 The following custom types can be validate with `wx_shape` even though the might not always define a shape property in itself.
 *   `number` will validate like `shape: [1]`
@@ -195,6 +211,17 @@ properties:
       p2:
         tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
         wx_shape: [9,7,5,3,1]
+
+  optional_prop:
+    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    wx_shape: [1,2,(3),(4)]
+
+
+
+required: [prop1,prop2,prop3,prop4,nested_prop]
+propertyOrder: [prop1,prop2,prop3,prop4,nested_prop,optional_prop]
+flowStyle: block
+additionalProperties: true
 wx_shape:
   prop1: [(~),2,n]
   prop2: [n,2,1]
@@ -204,4 +231,6 @@ wx_shape:
   nested_prop:
     p1: [10,1~10,6,4,2]
     p2: [(m),7,5,3,1]
+    (p3): [a,2,n]
+  (optional_prop): [a,2,n]
 ``` 

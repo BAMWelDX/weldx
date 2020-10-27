@@ -115,7 +115,7 @@ def get_xarray_example_dataset():
             "lat": (["x", "y"], lat),
             "time": pd.date_range("2014-09-06", periods=3),
             "time_labels": (["time"], ["2014-09-06", "2014-09-09", "2014-09-12"]),
-            "reference_time": pd.Timestamp("2014-09-05"),
+            "time_ref": pd.Timestamp("2014-09-05"),
         },
     )
     dsx.attrs = {"temperature": "Celsius"}
@@ -259,7 +259,7 @@ def get_coordinate_system_manager_with_subsystems(nested: bool):
     lcs = [tf.LocalCoordinateSystem(coordinates=[i, -i, -i]) for i in range(12)]
 
     # global system
-    csm_global = tf.CoordinateSystemManager("base", "Global System")
+    csm_global = tf.CoordinateSystemManager("base", "Global System", "2000-06-08")
     csm_global.add_cs("robot", "base", lcs[0])
     csm_global.add_cs("specimen", "base", lcs[1])
 
@@ -315,6 +315,48 @@ def test_coordinate_system_manager_with_subsystems(copy_arrays, lazy_load, neste
     )
     csm_file = data["cs_hierarchy"]
     assert csm == csm_file
+
+
+@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("lazy_load", [True, False])
+@pytest.mark.parametrize("csm_time_ref", [None, "2000-03-16"])
+def test_coordinate_system_manager_time_dependencies(
+    copy_arrays, lazy_load, csm_time_ref
+):
+    """Test serialization of time components from CSM and its attached LCS."""
+    lcs_tdp_1_time_ref = None
+    if csm_time_ref is None:
+        lcs_tdp_1_time_ref = pd.Timestamp("2000-03-17")
+    lcs_tdp_1 = tf.LocalCoordinateSystem(
+        coordinates=[[1, 2, 3], [4, 5, 6]],
+        time=pd.TimedeltaIndex([1, 2], "D"),
+        time_ref=lcs_tdp_1_time_ref,
+    )
+    lcs_tdp_2 = tf.LocalCoordinateSystem(
+        coordinates=[[3, 7, 3], [9, 5, 8]],
+        time=pd.TimedeltaIndex([1, 2], "D"),
+        time_ref=pd.Timestamp("2000-03-21"),
+    )
+
+    csm_root = tf.CoordinateSystemManager("root", "csm_root", csm_time_ref)
+    csm_root.add_cs("cs_1", "root", lcs_tdp_2)
+
+    csm_sub_1 = tf.CoordinateSystemManager("cs_2", "csm_sub_1", csm_time_ref)
+    csm_sub_1.add_cs("cs_1", "cs_2", lcs_tdp_2)
+    csm_sub_1.add_cs("cs_3", "cs_2", lcs_tdp_1)
+
+    csm_sub_2 = tf.CoordinateSystemManager("cs_4", "csm_sub_2")
+    csm_sub_2.create_cs("cs_1", "cs_4")
+
+    csm_root.merge(csm_sub_1)
+    csm_root.merge(csm_sub_2)
+
+    tree = {"cs_hierarchy": csm_root}
+    data = _write_read_buffer(
+        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )
+    csm_file = data["cs_hierarchy"]
+    assert csm_root == csm_file
 
 
 # --------------------------------------------------------------------------------------

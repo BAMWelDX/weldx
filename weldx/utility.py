@@ -2,12 +2,15 @@
 
 import math
 from collections.abc import Iterable
+from functools import reduce
+from operator import or_
 from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
+from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta64_dtype
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
@@ -132,7 +135,16 @@ def to_list(var) -> list:
     return [var]
 
 
-def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+def to_pandas_time_index(
+    time: Union[
+        pint.Quantity,
+        np.ndarray,
+        pd.TimedeltaIndex,
+        pd.DatetimeIndex,
+        xr.DataArray,
+        "tf.LocalCoordinateSystem",
+    ],
+) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
     """Convert a time variable to the corresponding pandas time index type.
 
     Parameters
@@ -142,25 +154,52 @@ def to_pandas_time_index(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
 
     Returns
     -------
-    Union[pandas.TimedeltaIndex, pandas.DatetimeIndex]:
-        Variable as pandas time index
+    pandas.TimedeltaIndex or pandas.DatetimeIndex
+        Time union of all input objects
 
     """
+    _input_type = type(time)
+
+    if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+        return time
+
+    if isinstance(time, tf.LocalCoordinateSystem):
+        return to_pandas_time_index(time.time)
+
     if isinstance(time, pint.Quantity):
         base = "s"  # using low base unit could cause rounding errors
-        try:
-            return pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
-        except TypeError:
-            return pd.TimedeltaIndex(data=[time.to(base).magnitude], unit=base)
+        if not np.iterable(time):  # catch zero-dim arrays
+            time = np.expand_dims(time, 0)
+        return pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
 
-    if not isinstance(time, np.ndarray):
-        if not isinstance(time, list):
-            time = [time]
-        time = np.array(time)
+    if isinstance(time, (xr.DataArray, xr.Dataset)):
+        if "time" in time.coords:
+            time = time.time
+        time_index = pd.Index(time.values)
+        if is_timedelta64_dtype(time_index):
+            if time.weldx.time_ref:
+                time_index = time_index + time.weldx.time_ref
+        return time_index
 
-    if np.issubdtype(time.dtype, np.datetime64):
-        return pd.DatetimeIndex(time)
-    return pd.TimedeltaIndex(time)
+    if not np.iterable(time) or isinstance(time, str):
+        time = [time]
+    time = pd.Index(time)
+
+    if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+        return time
+
+    # try manual casting for object dtypes (i.e. strings), should avoid integers
+    # warning: this allows something like ["1","2","3"] which will be ns !!
+    if is_object_dtype(time):
+        for func in (pd.DatetimeIndex, pd.TimedeltaIndex):
+            try:
+                return func(time)
+            except (ValueError, TypeError):
+                continue
+
+    raise TypeError(
+        f"Could not convert {_input_type} " f"to pd.DatetimeIndex or pd.TimedeltaIndex"
+    )
 
 
 def pandas_time_delta_to_quantity(
@@ -292,11 +331,14 @@ def swap_list_items(arr, i1, i2) -> list:
     return i
 
 
-def get_time_union(list_of_objects):
-    """Generate a merged union of pd.DatetimeIndex from list of inputs.
+def get_time_union(
+    list_of_objects: List[Union[pd.DatetimeIndex, pd.TimedeltaIndex]]
+) -> Union[pd.DatetimeIndex, pd.TimedeltaIndex]:
+    """Generate a merged union of `pandas.DatetimeIndex` from list of inputs.
 
     The functions tries to merge common inputs that are "time-like" or might have time
-    coordinates such as xarray objects, tf.LocalCoordinateSystem and other time objects
+    coordinates such as xarray objects, `~weldx.transformations.LocalCoordinateSystem`
+    and other time objects. See `to_pandas_time_index` for supported input object types.
 
     Parameters
     ----------
@@ -309,25 +351,10 @@ def get_time_union(list_of_objects):
         Pandas time index class with merged times
 
     """
-    # TODO: make non-nested function
-    # TODO: reevaluate if LCS and xarray types should be supported. If yes, add tests
-    def _get_time(input_object):
-        if isinstance(input_object, (pd.DatetimeIndex, pd.TimedeltaIndex)):
-            return input_object
-        if isinstance(input_object, (xr.DataArray, xr.Dataset)):
-            return to_pandas_time_index(input_object.time.data)
-        if isinstance(input_object, tf.LocalCoordinateSystem):
-            return input_object.time
+    # TODO: add tests
 
-        return to_pandas_time_index(input_object)
-
-    times = None
-    for idx, val in enumerate(list_of_objects):
-        if idx == 0:
-            times = _get_time(val)
-        else:
-            times = times.union(_get_time(val))
-    return times
+    # see https://stackoverflow.com/a/44762908/11242411
+    return reduce(or_, (to_pandas_time_index(idx) for idx in list_of_objects))
 
 
 def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
@@ -446,12 +473,12 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
     return np.allclose(xr_matmul(da, da, dims, trans_b=True), eye)
 
 
-def xr_fill_all(da, order="bf") -> xr.DataArray:
+def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     """Fill NaN values along all dimensions in xarray DataArray.
 
     Parameters
     ----------
-    da :
+    da : xarray.DataArray
         xarray object to fill
     order :
         order in which to apply bfill/ffill operation (Default value = "bf")
@@ -576,6 +603,11 @@ def xr_interp_like(
 
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
+
+    # copy original variable and coord attributes
+    da.attrs = da1.attrs
+    for key in da1.coords:
+        da[key].attrs = da1[key].attrs
 
     # fill out of range nan values for all dimensions
     if fillna:
@@ -779,7 +811,7 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
 
 
 def xr_interp_orientation_in_time(
-    dsx: xr.DataArray, times: pd.DatetimeIndex
+    dsx: xr.DataArray, times: Union[pd.DatetimeIndex, pd.TimedeltaIndex]
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents orientation data in time.
 
@@ -799,13 +831,13 @@ def xr_interp_orientation_in_time(
     if "time" not in dsx.coords:
         return dsx
 
-    # extract intersecting times and add time range boundaries of the data set
-    times_ds = dsx.time.data
+    times = to_pandas_time_index(times)
+    times_ds = to_pandas_time_index(dsx)
+    time_ref = dsx.weldx.time_ref
+
     if len(times_ds) > 1:
-        if isinstance(times_ds, pd.DatetimeIndex):
-            times_ds_limits = pd.DatetimeIndex([times_ds.min(), times_ds.max()])
-        else:
-            times_ds_limits = pd.TimedeltaIndex([times_ds.min(), times_ds.max()])
+        # extract intersecting times and add time range boundaries of the data set
+        times_ds_limits = pd.Index([times_ds.min(), times_ds.max()])
         times_union = times.union(times_ds_limits)
         times_intersect = times_union[
             (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])
@@ -813,7 +845,7 @@ def xr_interp_orientation_in_time(
 
         # interpolate rotations in the intersecting time range
         rotations_key = Rot.from_matrix(dsx.transpose(..., "c", "v").data)
-        times_key = dsx.time.astype(np.int64)
+        times_key = times_ds.astype(np.int64)
         rotations_interp = Slerp(times_key, rotations_key)(
             times_intersect.astype(np.int64)
         )
@@ -825,19 +857,24 @@ def xr_interp_orientation_in_time(
     # use interp_like to select original time values and correctly fill time dimension
     dsx_out = xr_interp_like(dsx_out, {"time": times}, fillna=True)
 
+    # resync and reset to correct format
+    if time_ref:
+        dsx_out.weldx.time_ref = time_ref
+    dsx_out = dsx_out.weldx.time_ref_restore()
+
     return dsx_out.transpose(..., "c", "v")
 
 
 def xr_interp_coordinates_in_time(
-    dsx: xr.DataArray, times: pd.DatetimeIndex
+    da: xr.DataArray, times: Union[pd.TimedeltaIndex, pd.DatetimeIndex]
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents 3d coordinates in time.
 
     Parameters
     ----------
-    dsx :
+    da : xarray.DataArray
         xarray DataArray
-    times :
+    times : pandas.TimedeltaIndex or pandas.DatetimeIndex
         Time data
 
     Returns
@@ -846,16 +883,40 @@ def xr_interp_coordinates_in_time(
         Interpolated data
 
     """
-    return xr_interp_like(
-        dsx, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
+    da = da.weldx.time_ref_unset()
+    da = xr_interp_like(
+        da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
     )
+    da = da.weldx.time_ref_restore()
+    return da
+
+
+def _as_valid_timestamp(value: Union[pd.Timestamp, str]) -> pd.Timestamp:
+    """Create a valid (by convention) Timestamp object or raise TypeError.
+
+    Parameters
+    ----------
+    value: pandas.Timestamp or str
+        Value to convert to `pd.Timestamp`.
+
+    Returns
+    -------
+    pandas.Timestamp
+
+    """
+    if isinstance(value, str):
+        value = pd.Timestamp(value)
+    if isinstance(value, pd.Timestamp):  # catch NaT from empty str.
+        return value
+    raise TypeError("Could not create a valid pandas.Timestamp.")
 
 
 # weldx xarray Accessors --------------------------------------------------------
 
 
 @xr.register_dataarray_accessor("weldx")
-class WeldxAccessor:  # pragma: no cover
+@xr.register_dataset_accessor("weldx")
+class WeldxAccessor:
     """Custom accessor for extending DataArray functionality.
 
     See http://xarray.pydata.org/en/stable/internals.html#extending-xarray for details.
@@ -865,7 +926,7 @@ class WeldxAccessor:  # pragma: no cover
         """Construct a WeldX xarray object."""
         self._obj = xarray_obj
 
-    def interp_like(self, da, *args, **kwargs):
+    def interp_like(self, da, *args, **kwargs) -> xr.DataArray:  # pragma: no cover
         """Interpolate DataArray along dimensions of another DataArray.
 
         Provides some utility options for handling out of range values and broadcasting.
@@ -878,3 +939,58 @@ class WeldxAccessor:  # pragma: no cover
 
         """
         return xr_interp_like(self._obj, da, *args, **kwargs)
+
+    def time_ref_unset(self) -> xr.DataArray:
+        """Convert Timedelta + reference Timestamp to DatetimeIndex."""
+        da = self._obj.copy()
+        time_ref = da.weldx.time_ref
+        if time_ref and is_timedelta64_dtype(da.time):
+            da["time"] = da.time.data + time_ref
+            da.time.attrs = self._obj.time.attrs  # restore old attributes !
+        return da
+
+    def time_ref_restore(self) -> xr.DataArray:
+        """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp."""
+        da = self._obj.copy()
+        time_ref = da.weldx.time_ref
+        if time_ref and is_datetime64_dtype(da.time):
+            da["time"] = pd.DatetimeIndex(da.time.data) - time_ref
+            da.time.attrs = self._obj.time.attrs  # restore old attributes !
+        return da
+
+    def reset_reference_time(self, time_ref_new: pd.Timestamp) -> xr.DataArray:
+        """Return copy with time values shifted to new reference time."""
+        da = self._obj.copy()
+        da = da.weldx.time_ref_restore()
+        da.weldx.time_ref = time_ref_new
+        return da
+
+    @property
+    def time_ref(self) -> pd.Timestamp:
+        """Get the time_ref value or `None` if not set."""
+        da = self._obj
+        if "time" in da.coords:
+            if "time_ref" in da.time.attrs:
+                return da.time.attrs["time_ref"]
+
+        return None
+
+    @time_ref.setter
+    def time_ref(self, value: pd.Timestamp):
+        """Convert INPLACE to new reference time.
+
+        If no reference time exists, the new value will be assigned
+        TODO: should None be allowed and pass through or raise TypeError ?
+        """
+        if "time" in self._obj.coords:
+            value = _as_valid_timestamp(value)
+            if self._obj.weldx.time_ref and is_timedelta64_dtype(self._obj.time):
+                if value == self._obj.weldx.time_ref:
+                    return
+                _attrs = self._obj.time.attrs
+                time_delta = value - self._obj.weldx.time_ref
+                self._obj["time"] = self._obj.time.data - time_delta
+                self._obj.time.attrs = _attrs  # restore old attributes !
+                self._obj.time.attrs["time_ref"] = value  # set new time_ref value
+            else:
+                self._obj.time.attrs["time_ref"] = value

@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
+import pandas as pd
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
@@ -13,12 +14,19 @@ __all__ = ["ShapeValidatorTestClass", "ShapeValidatorTestClassType"]
 class ShapeValidatorTestClass:
     """Helper class to test the shape validator"""
 
-    prop1: np.ndarray
-    prop2: np.ndarray
-    prop3: np.ndarray
-    prop4: np.ndarray
-    prop5: float
-    nested_prop: dict
+    prop1: np.ndarray = np.ones((1, 2, 3))
+    prop2: np.ndarray = np.ones((3, 2, 1))
+    prop3: np.ndarray = np.ones((2, 4, 6, 8, 10))
+    prop4: np.ndarray = np.ones((1, 3, 5, 7, 9))
+    prop5: float = 3.141
+    nested_prop: dict = field(
+        default_factory=lambda: {
+            "p1": np.ones((10, 8, 6, 4, 2)),
+            "p2": np.ones((9, 7, 5, 3, 1)),
+        }
+    )
+    time_prop: pd.DatetimeIndex = pd.timedelta_range("0s", freq="s", periods=9)
+    optional_prop: np.ndarray = None
 
 
 class ShapeValidatorTestClassType(WeldxType):

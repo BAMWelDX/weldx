@@ -28,6 +28,7 @@ excluded_words:
   - isort
   - networkx
   - shutil
+  - functools
   # matplotlib ----------------------------------
   - pyplot
   - gca
@@ -110,6 +111,7 @@ excluded_words:
   - addopts
   - csm
   - coords
+  - devdoc
   - dsx
   - dtypes
   - interp
@@ -132,9 +134,11 @@ excluded_words:
   - rst
   - pycharm
   - tslibs
+  - quickstart
+  - nsecond
   # German ---------------------------------------
-  - Bundesanstalt 
-  - für 
-  - Materialforschung 
-  - und 
+  - Bundesanstalt
+  - für
+  - Materialforschung
+  - und
   - prüfung
