@@ -20,14 +20,28 @@ from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
 
 
-def ureg_check_class(*dimensionalities):
-    """Decorate class __init__ function with pint.ureg.check().
+def ureg_check_class(*args):
+    """Decorate class :code:`__init__` function with `pint.UnitRegistry.check`.
+
+    Useful for adding unit checks to classes created with :code:`@dataclass` decorator.
 
     Parameters
     ----------
-    dimensionalities: tuple
-        Tuple of dimensionalities to check class init parameters against.
+    args: str or pint.util.UnitsContainer or None
+        Dimensions of each of the input arguments.
+        Use :code:`None` to skip argument conversion.
 
+    Returns
+    -------
+    type
+        The class with unit checks added to its :code:`__init__` function.
+
+    Raises
+    ------
+    TypeError
+        If number of given dimensions does not match the number of function parameters.
+    ValueError
+        If the any of the provided dimensions cannot be parsed as a dimension.
 
     Examples
     --------
@@ -48,7 +62,7 @@ def ureg_check_class(*dimensionalities):
         orig_init = original_class.__init__
 
         # apply pint check decorator
-        new_init = ureg.check(None, *dimensionalities)(orig_init)
+        new_init = ureg.check(None, *args)(orig_init)
 
         # set new init
         original_class.__init__ = new_init  # Set the class' __init__ to the new one
