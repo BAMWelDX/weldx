@@ -11,6 +11,7 @@ from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_unit_validator
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 
 
 class IsoBaseGroove:
@@ -25,6 +26,7 @@ class IsoBaseGroove:
         return [f"{k}={v:~}" for k, v in self.parameters().items()]
 
 
+@ureg.check("[length]", "[length]", None)
 @dataclass
 class IGroove(IsoBaseGroove):
     """An I-Groove.
@@ -47,6 +49,7 @@ class IGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
 
 
+@ureg.check("[length]", "[]", "[length]", "[length]", None)
 @dataclass
 class VGroove(IsoBaseGroove):
     """A Single-V Groove.
@@ -75,6 +78,7 @@ class VGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
 
+@ureg.check("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class VVGroove(IsoBaseGroove):
     """A VV-Groove.
@@ -109,6 +113,7 @@ class VVGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.7"])
 
 
+@ureg.check("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class UVGroove(IsoBaseGroove):
     """A UV-Groove.
@@ -143,6 +148,7 @@ class UVGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.6"])
 
 
+@ureg.check("[length]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class UGroove(IsoBaseGroove):
     """An U-Groove.
@@ -174,6 +180,7 @@ class UGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.8"])
 
 
+@ureg.check("[length]", "[]", "[length]", "[length]", None)
 @dataclass
 class HVGroove(IsoBaseGroove):
     """A HV-Groove.
@@ -202,6 +209,7 @@ class HVGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
 
 
+@ureg.check("[length]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class HUGroove(IsoBaseGroove):
     """A HU-Groove.
@@ -233,6 +241,9 @@ class HUGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.11", "2.10"])
 
 
+@ureg.check(
+    "[length]", "[]", "[]", "[length]", "[length]", "[length]", "[length]", None
+)
 @dataclass
 class DVGroove(IsoBaseGroove):
     """A DV-Groove.
@@ -279,6 +290,18 @@ class DVGroove(IsoBaseGroove):
             self.h1 = self.h2
 
 
+@ureg.check(
+    "[length]",
+    "[]",
+    "[]",
+    "[length]",
+    "[length]",
+    "[length]",
+    "[length]",
+    "[length]",
+    "[length]",
+    None,
+)
 @dataclass
 class DUGroove(IsoBaseGroove):
     """A DU-Groove
@@ -331,6 +354,9 @@ class DUGroove(IsoBaseGroove):
             self.h1 = self.h2
 
 
+@ureg.check(
+    "[length]", "[]", "[]", "[length]", "[length]", "[length]", "[length]", None
+)
 @dataclass
 class DHVGroove(IsoBaseGroove):
     """A DHV-Groove.
@@ -377,6 +403,18 @@ class DHVGroove(IsoBaseGroove):
             self.h1 = self.h2
 
 
+@ureg.check(
+    "[length]",
+    "[]",
+    "[]",
+    "[length]",
+    "[length]",
+    "[length]",
+    "[length]",
+    "[length]",
+    "[length]",
+    None,
+)
 @dataclass
 class DHUGroove(IsoBaseGroove):
     """A DHU-Groove.
@@ -429,6 +467,9 @@ class DHUGroove(IsoBaseGroove):
             self.h1 = self.h2
 
 
+@ureg.check(
+    "[length]", "[length]", "[]", "[length]", "[length]", None,
+)
 @dataclass
 class FFGroove(IsoBaseGroove):
     """A Frontal Face Groove.
