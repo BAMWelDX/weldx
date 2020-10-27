@@ -16,7 +16,36 @@ from scipy.spatial.transform import Slerp
 
 import weldx.transformations as tf
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
+
+
+def ureg_check_class(dimensionalities):
+    """
+    Decorate class __init__ function with pint check().
+
+    Parameters
+    ----------
+    dimensionalities: tuple
+        Tuple of dimensionalities to check class init parameters against.
+
+    Returns
+    -------
+
+    """
+
+    def inner_decorator(original_class,):
+        # Make copy of original __init__, so we can call it without recursion
+        orig_init = original_class.__init__
+
+        # apply pint check decorator
+        new_init = ureg.check(None, *dimensionalities)(orig_init)
+
+        # set new init
+        original_class.__init__ = new_init  # Set the class' __init__ to the new one
+        return original_class
+
+    return inner_decorator
 
 
 def _sine(
