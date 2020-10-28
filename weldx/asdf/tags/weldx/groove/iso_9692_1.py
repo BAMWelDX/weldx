@@ -11,7 +11,6 @@ from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_unit_validator
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.utility import ureg_check_class
 
 
