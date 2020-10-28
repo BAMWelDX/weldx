@@ -45,7 +45,7 @@ def ureg_check_class(*args):
 
     Examples
     --------
-    A simple dataclass cloud look like this::
+    A simple dataclass could look like this::
 
         @ureg_check_dataclass("[length]","[time]")
         @dataclass
