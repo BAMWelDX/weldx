@@ -29,6 +29,7 @@ class IsoBaseGroove:
 @ureg_check_class("[length]", "[length]", None)
 @dataclass
 class IGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """An I-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -52,6 +53,7 @@ class IGroove(IsoBaseGroove):
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
 @dataclass
 class VGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A Single-V Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -81,6 +83,7 @@ class VGroove(IsoBaseGroove):
 @ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class VVGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A VV-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -116,6 +119,7 @@ class VVGroove(IsoBaseGroove):
 @ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class UVGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A UV-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -151,6 +155,7 @@ class UVGroove(IsoBaseGroove):
 @ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class UGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """An U-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -183,6 +188,7 @@ class UGroove(IsoBaseGroove):
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
 @dataclass
 class HVGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A HV-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -212,6 +218,7 @@ class HVGroove(IsoBaseGroove):
 @ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class HUGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A HU-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -246,6 +253,7 @@ class HUGroove(IsoBaseGroove):
 )
 @dataclass
 class DVGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A DV-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -304,6 +312,7 @@ class DVGroove(IsoBaseGroove):
 )
 @dataclass
 class DUGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A DU-Groove
 
     For a detailed description of the execution look in get_groove.
@@ -359,6 +368,7 @@ class DUGroove(IsoBaseGroove):
 )
 @dataclass
 class DHVGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A DHV-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -417,6 +427,7 @@ class DHVGroove(IsoBaseGroove):
 )
 @dataclass
 class DHUGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A DHU-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -472,6 +483,7 @@ class DHUGroove(IsoBaseGroove):
 )
 @dataclass
 class FFGroove(IsoBaseGroove):
+    # noinspection PyUnresolvedReferences
     """A Frontal Face Groove.
 
     For a detailed description of the execution look in get_groove.
