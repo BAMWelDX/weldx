@@ -47,7 +47,7 @@ def ureg_check_class(*args):
     --------
     A simple dataclass could look like this::
 
-        @ureg_check_dataclass("[length]","[time]")
+        @ureg_check_class("[length]","[time]")
         @dataclass
         class A:
             a: pint.Quantity
