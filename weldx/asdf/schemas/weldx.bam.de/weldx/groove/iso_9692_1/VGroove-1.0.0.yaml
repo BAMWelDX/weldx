@@ -21,12 +21,20 @@ examples:
 type: object
 properties:
   t:
+    description: |
+      The workpiece thickness.
     $ref: "./terms-1.0.0#/definitions/workpiece-thickness"
   alpha:
+    description: |
+      The full groove angle.
     $ref: "./terms-1.0.0#/definitions/groove-angle"
   b:
+    description: |
+      The root gap between both plates.
     $ref: "./terms-1.0.0#/definitions/root-gap"
   c:
+    description: |
+      The root face.
     $ref: "./terms-1.0.0#/definitions/root-face"
 required: [t, alpha, b, c]
 propertyOrder: [t, alpha, b, c]

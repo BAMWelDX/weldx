@@ -6,8 +6,8 @@
 
 # Local build command ------------------------------------------------------------------
 
-# sphinx-build -W -n -b html -D nbsphinx_kernel_name="weldx" -D nbsphinx_execute="never"
-# -d build/doctrees doc build/html --keep-going
+# sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
+# -D nbsphinx_kernel_name="weldx" -D nbsphinx_execute="never"
 
 # -- Path setup --------------------------------------------------------------
 
