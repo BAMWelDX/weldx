@@ -79,6 +79,13 @@ class VGroove(IsoBaseGroove):
     b: pint.Quantity = Q_(0, "mm")
     code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
+    _mapping = {
+        "t": "workpiece_thickness",
+        "alpha": "groove_angle",
+        "b": "root_gap",
+        "c": "root_face",
+    }
+
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
@@ -546,19 +553,11 @@ def get_groove(
     # get list of function parameters
     _loc = locals()
 
-    _mapping = {
-        "VGroove": {
-            "t": "workpiece_thickness",
-            "alpha": "groove_angle",
-            "b": "root_gap",
-            "c": "root_face",
-        }
-    }
-
     groove_cls = _groove_name_to_type[groove_type]
+    _mapping = groove_cls._mapping
 
     # convert function arguments to groove arguments
-    args = {k: _loc[v] for k, v in _mapping[groove_type].items() if _loc[v] is not None}
+    args = {k: _loc[v] for k, v in _mapping.items() if _loc[v] is not None}
 
     return groove_cls(**args)
 
