@@ -1,4 +1,4 @@
-name: Check notebooks
+name: check notebooks
 
 on:
   pull_request:
