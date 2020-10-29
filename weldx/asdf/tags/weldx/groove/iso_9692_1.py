@@ -514,30 +514,16 @@ class FFGroove(IsoBaseGroove):
     e: pint.Quantity = None
 
 
-_groove_type_to_name = {
-    IGroove: "IGroove",
-    VGroove: "VGroove",
-    VVGroove: "VVGroove",
-    UVGroove: "UVGroove",
-    UGroove: "UGroove",
-    HVGroove: "HVGroove",
-    HUGroove: "HUGroove",
-    DVGroove: "DVGroove",
-    DUGroove: "DUGroove",
-    DHVGroove: "DHVGroove",
-    DHUGroove: "DHUGroove",
-    FFGroove: "FFGroove",
-}
-
-_groove_name_to_type = {v: k for k, v in _groove_type_to_name.items()}
-
-
 def _get_class_from_tag(instance_tag: str):
     groove_tag = instance_tag.rpartition("/iso_9692_1/")[-1]
     return groove_tag.rpartition("-")[0]
 
 
 _ISO_GROOVE_SCHEMA = "groove/iso_9692_1/"
+
+# create class <-> name mapping
+_groove_type_to_name = {cls: cls.__name__ for cls in IsoBaseGroove.__subclasses__()}
+_groove_name_to_type = {cls.__name__: cls for cls in IsoBaseGroove.__subclasses__()}
 
 
 class IsoGrooveType(WeldxType):
