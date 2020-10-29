@@ -526,6 +526,43 @@ _groove_type_to_name = {cls: cls.__name__ for cls in IsoBaseGroove.__subclasses_
 _groove_name_to_type = {cls.__name__: cls for cls in IsoBaseGroove.__subclasses__()}
 
 
+def get_groove(
+    groove_type: str,
+    workpiece_thickness=None,
+    workpiece_thickness2=None,
+    root_gap=None,
+    root_face=None,
+    root_face2=None,
+    root_face3=None,
+    bevel_radius=None,
+    bevel_radius2=None,
+    bevel_angle=None,
+    bevel_angle2=None,
+    groove_angle=None,
+    groove_angle2=None,
+    special_depth=None,
+    code_number=None,
+):
+    # get list of function parameters
+    _loc = locals()
+
+    _mapping = {
+        "VGroove": {
+            "t": "workpiece_thickness",
+            "alpha": "groove_angle",
+            "b": "root_gap",
+            "c": "root_face",
+        }
+    }
+
+    groove_cls = _groove_name_to_type[groove_type]
+
+    # convert function arguments to groove arguments
+    args = {k: _loc[v] for k, v in _mapping[groove_type].items() if _loc[v] is not None}
+
+    return groove_cls(**args)
+
+
 class IsoGrooveType(WeldxType):
     """ASDF Groove type."""
 
