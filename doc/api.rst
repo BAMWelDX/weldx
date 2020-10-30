@@ -30,4 +30,5 @@ API
     weldx.asdf.extension
     weldx.asdf.utils
     weldx.asdf.validators
+    weldx.asdf.tags.weldx.groove.iso_9692_1
 
