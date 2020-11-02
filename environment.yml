@@ -45,4 +45,4 @@ dependencies:
   # pip packages
   - pip
   - pip:
-    - sphinx-asdf
+    - git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx
