@@ -11,6 +11,7 @@ from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_unit_validator
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.utility import ureg_check_class
 
 _DEFAULT_LEN_UNIT = "mm"
 
@@ -474,6 +475,7 @@ class BaseGroove:
         raise NotImplementedError("to_profile() must be defined in subclass.")
 
 
+@ureg_check_class("[length]", "[]", "[length]", "[length]", None)
 @dataclass
 class VGroove(BaseGroove):
     """A Single-V Groove.
@@ -555,6 +557,7 @@ class VGroove(BaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
+@ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class VVGroove(BaseGroove):
     """A VV-Groove.
@@ -642,6 +645,7 @@ class VVGroove(BaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
+@ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class UVGroove(BaseGroove):
     """A UV-Groove.
@@ -727,6 +731,7 @@ class UVGroove(BaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
+@ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class UGroove(BaseGroove):
     """An U-Groove.
@@ -836,6 +841,7 @@ class UGroove(BaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
+@ureg_check_class("[length]", "[length]", None)
 @dataclass
 class IGroove(BaseGroove):
     """An I-Groove.
@@ -886,6 +892,7 @@ class IGroove(BaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
+@ureg_check_class("[length]", "[]", "[length]", "[length]", None)
 @dataclass
 class HVGroove(BaseGroove):
     """A HV-Groove.
@@ -964,6 +971,7 @@ class HVGroove(BaseGroove):
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
+@ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
 class HUGroove(BaseGroove):
     """A HU-Groove.
@@ -1049,6 +1057,7 @@ class HUGroove(BaseGroove):
 
 
 # double Grooves
+@ureg_check_class("[length]", "[]", "[]", "[length]", None, None, None, None)
 @dataclass
 class DVGroove(BaseGroove):
     """A DV-Groove.
@@ -1145,6 +1154,9 @@ class DVGroove(BaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
+@ureg_check_class(
+    "[length]", "[]", "[]", "[length]", "[length]", "[length]", None, None, None, None,
+)
 @dataclass
 class DUGroove(BaseGroove):
     """A DU-Groove
@@ -1253,6 +1265,7 @@ class DUGroove(BaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
+@ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", None, None, None)
 @dataclass
 class DHVGroove(BaseGroove):
     """A DHV-Groove.
@@ -1328,6 +1341,18 @@ class DHVGroove(BaseGroove):
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
 
+@ureg_check_class(
+    "[length]",
+    "[]",
+    "[]",
+    "[length]",
+    "[length]",
+    "[length]",
+    "[length]",
+    None,
+    None,
+    None,
+)
 @dataclass
 class DHUGroove(BaseGroove):
     """A DHU-Groove.
@@ -1411,6 +1436,7 @@ class DHUGroove(BaseGroove):
 
 
 # Frontal Face - Groove
+@ureg_check_class("[length]", None, None, None, None, None)
 @dataclass
 class FFGroove(BaseGroove):
     """A Frontal Face Groove.
