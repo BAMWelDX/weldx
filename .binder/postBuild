@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Install required matplotlib JupyterLab extensions
+jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib@0.7.4
