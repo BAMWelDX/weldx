@@ -231,15 +231,17 @@ def get_groove(
             documentation.
 
 
-    Example:
-        from weldx import Q_
-        from weldx.asdf.tags.weldx.core.groove import get_groove
+    Examples
+    --------
+    Create a V-Groove::
 
         get_groove(groove_type="VGroove",
                    workpiece_thickness=Q_(9, "mm"),
                    groove_angle=Q_(50, "deg"),
                    root_face=Q_(4, "mm"),
                    root_gap=Q_(2, "mm"))
+
+    Create a U-Groove::
 
         get_groove(groove_type="UGroove",
                    workpiece_thickness=Q_(15, "mm"),
