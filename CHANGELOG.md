@@ -2,7 +2,8 @@
 
 ## 0.2.2 (unreleased)
 ### added
-- Added `weldx.utility.ureg_check_class` class decorator to enable `pint` dimensionality checks with `@dataclass`.
+- Added `weldx.utility.ureg_check_class` class decorator to enable `pint` dimensionality checks with `@dataclass`. [[#179]](https://github.com/BAMWelDX/weldx/pull/179)
+- Made coordinates and orientations optional for LCS schema. Missing values are interpreted as unity translation/rotation. An empty LCS object represents a unity transformation step. [[#177]](https://github.com/BAMWelDX/weldx/pull/177)
 
 ## 0.2.1 (26.10.2020)
 ### changes

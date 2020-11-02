@@ -29,12 +29,11 @@ properties:
     tag: tag:weldx.bam.de:weldx/core/variable-1.0.0
 
 wx_shape:
-  coordinates:
+  (coordinates):
     data: [(t), 3]
-  orientations:
+  (orientations):
     data: [(t), 3, 3]
 
-required: [orientations, coordinates]
 propertyOrder: [reference_time, time, orientations, coordinates]
 flowStyle: block
 additionalProperties: false
