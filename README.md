@@ -1,4 +1,5 @@
 # WelDX - Welding Data Exchange Format
+[![Documentation](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab?filepath=tutorials%2Fwelding_example_01_basics.ipynb) [![Anaconda-Server Badge](https://anaconda.org/bamwelding/weldx/badges/version.svg)](https://anaconda.org/bamwelding/weldx) [![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause) 
 ## Overview
 Scientific welding data covers a wide range of physical domains and timescales and are measured using various different sensors.
 Complex and highly specialized experimental setups at different welding institutes complicate the exchange of welding research data further.
