@@ -3,14 +3,14 @@
 import matplotlib.pyplot as plt
 import pytest
 
-from weldx.welding.groove.iso_9692_1 import (
-    BaseGroove,
-    _create_test_grooves,
-    get_groove,
-)
 from weldx.asdf.utils import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.geometry import Profile
+from weldx.welding.groove.iso_9692_1 import (
+    IsoBaseGroove,
+    _create_test_grooves,
+    get_groove,
+)
 
 test_params = _create_test_grooves()
 
@@ -18,7 +18,7 @@ test_params = _create_test_grooves()
 @pytest.mark.parametrize(
     "groove, expected_dtype", test_params.values(), ids=test_params.keys()
 )
-def test_asdf_groove(groove: BaseGroove, expected_dtype):
+def test_asdf_groove(groove: IsoBaseGroove, expected_dtype):
     """Test ASDF functionality for all grooves.
 
     Parameters
@@ -76,7 +76,7 @@ def test_asdf_groove_exceptions():
     plt.close(fig)
 
     # test exceptions
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         get_groove(
             groove_type="WrongGrooveString",
             workpiece_thickness=Q_(9, "mm"),
@@ -84,11 +84,11 @@ def test_asdf_groove_exceptions():
         )
 
     with pytest.raises(NotImplementedError):
-        BaseGroove().to_profile()
+        IsoBaseGroove().to_profile()
 
     with pytest.raises(ValueError):
         get_groove(
-            groove_type="FrontalFaceGroove",
+            groove_type="FFGroove",
             workpiece_thickness=Q_(2, "mm"),
             workpiece_thickness2=Q_(5, "mm"),
             groove_angle=Q_(80, "deg"),

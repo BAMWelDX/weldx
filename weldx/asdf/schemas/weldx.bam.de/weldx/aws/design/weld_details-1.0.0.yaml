@@ -13,7 +13,9 @@ properties:
   joint_design:
     description: |
       AWS 3.0, p. 19 : "Detailed Description of mating configuration of two components, sufficient information for shop preparation of the components." TODO CLASS
-    tag: "tag:weldx.bam.de:weldx/core/iso_groove-1.0.0"
+    oneOf:
+      - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UGroove-1.0.0"
 
   weld_sizes:
     description: |
