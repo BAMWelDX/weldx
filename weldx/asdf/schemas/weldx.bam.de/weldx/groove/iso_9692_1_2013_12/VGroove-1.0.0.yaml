@@ -11,7 +11,7 @@ examples:
   -
     - A simple V-Groove
     - |
-        !<tag:weldx.bam.de:weldx/groove/iso_9692_1/VGroove-1.0.0>
+        !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0>
           t: !unit/quantity-1.1.0 {unit: millimeter, value: 15}
           alpha: !unit/quantity-1.1.0 {unit: degree, value: 40}
           b: !unit/quantity-1.1.0 {unit: millimeter, value: 2}
