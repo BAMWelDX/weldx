@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1/VGroove-1.0.0"
-tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1/VGroove-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0"
+tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0"
 
 title: |
   VGroove representation.
@@ -23,19 +23,19 @@ properties:
   t:
     description: |
       The workpiece thickness.
-    $ref: "./terms-1.0.0#/definitions/workpiece-thickness"
+    $ref: "../terms-1.0.0#/definitions/workpiece-thickness"
   alpha:
     description: |
       The full groove angle.
-    $ref: "./terms-1.0.0#/definitions/groove-angle"
+    $ref: "../terms-1.0.0#/definitions/groove-angle"
   b:
     description: |
       The root gap between both plates.
-    $ref: "./terms-1.0.0#/definitions/root-gap"
+    $ref: "../terms-1.0.0#/definitions/root-gap"
   c:
     description: |
       The root face.
-    $ref: "./terms-1.0.0#/definitions/root-face"
+    $ref: "../terms-1.0.0#/definitions/root-face"
 required: [t, alpha, b, c]
 propertyOrder: [t, alpha, b, c]
 

@@ -608,11 +608,11 @@ class FFGroove(IsoBaseGroove):
 
 
 def _get_class_from_tag(instance_tag: str):
-    groove_tag = instance_tag.rpartition("/iso_9692_1/")[-1]
+    groove_tag = instance_tag.rpartition("/iso_9692_1_2013_12/")[-1]
     return groove_tag.rpartition("-")[0]
 
 
-_ISO_GROOVE_SCHEMA = "groove/iso_9692_1/"
+_ISO_GROOVE_SCHEMA = "groove/iso_9692_1_2013_12/"
 
 # create class <-> name mapping
 _groove_type_to_name = {cls: cls.__name__ for cls in IsoBaseGroove.__subclasses__()}

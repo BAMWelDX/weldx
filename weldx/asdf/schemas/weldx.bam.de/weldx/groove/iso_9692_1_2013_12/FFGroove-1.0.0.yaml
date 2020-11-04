@@ -1,0 +1,25 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1_2013_12/FFGroove-1.0.0"
+tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/FFGroove-1.0.0"
+
+title: |
+  FFGroove representation.
+
+type: object
+properties:
+  t_1:
+    $ref: "../terms-1.0.0#/definitions/workpiece-thickness"
+  t_2:
+    $ref: "../terms-1.0.0#/definitions/workpiece-thickness"
+  alpha:
+    $ref: "../terms-1.0.0#/definitions/groove-angle"
+  b:
+    $ref: "../terms-1.0.0#/definitions/root-gap"
+  e:
+    $ref: "../terms-1.0.0#/definitions/special-depth"
+required: [t_1]
+propertyOrder: [t_1]
+
+...
