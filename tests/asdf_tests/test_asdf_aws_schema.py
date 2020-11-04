@@ -21,7 +21,7 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
 from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
 
 # iso groove -----------------------------------------------------------------
-from weldx.asdf.tags.weldx.core.iso_groove import get_groove
+from weldx.welding.groove.iso_9692_1 import get_groove
 from weldx.asdf.utils import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 

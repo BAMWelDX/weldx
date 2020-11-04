@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import pytest
 
-from weldx.asdf.tags.weldx.core.iso_groove import (
+from weldx.welding.groove.iso_9692_1 import (
     BaseGroove,
     _create_test_grooves,
     get_groove,

@@ -3,8 +3,8 @@
 import asdf
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.tags.weldx.core.iso_groove import get_groove
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.welding.groove.iso_9692_1 import get_groove
 
 v_groove = get_groove(
     groove_type="VGroove",

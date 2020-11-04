@@ -3,7 +3,7 @@
 import asdf
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.tags.weldx.core.iso_groove import (
+from weldx.welding.groove.iso_9692_1 import (
     DHUGroove,
     DHVGroove,
     DUGroove,
