@@ -1,1 +1,3 @@
-from . import iso_9692_1
+"""Temporary module for welding related classes."""
+
+from .processes import GmawProcess

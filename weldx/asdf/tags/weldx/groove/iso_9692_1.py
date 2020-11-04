@@ -7,7 +7,7 @@ from weldx.asdf.constants import WELDX_TAG_BASE
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_unit_validator
-from weldx.welding.iso_9692_1 import IsoBaseGroove, _groove_name_to_type
+from weldx.welding.groove.iso_9692_1 import IsoBaseGroove, _groove_name_to_type
 
 _ISO_GROOVE_SCHEMA = "groove/iso_9692_1_2013_12/"
 

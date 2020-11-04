@@ -17,6 +17,7 @@ API
     weldx.transformations
     weldx.utility
     weldx.visualization
+    weldx.welding
 
 
 **ASDF modules**
@@ -30,5 +31,4 @@ API
     weldx.asdf.extension
     weldx.asdf.utils
     weldx.asdf.validators
-    weldx.asdf.tags.weldx.groove.iso_9692_1
 

@@ -1,4 +1,4 @@
-"""Temporary module for welding related classes."""
+"""Welding process classes."""
 
 from dataclasses import dataclass
 from typing import Dict
