@@ -1,10 +1,12 @@
-"""ISO 9692-1 welding groove type definitions"""
+"""ISO 9692-1 welding groove type definitions."""
 
 from dataclasses import dataclass, field
 from typing import List
 
+import numpy as np
 import pint
 
+import weldx.geometry as geo
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.utility import ureg_check_class
 
@@ -24,6 +26,9 @@ __all__ = [
 ]
 
 
+_DEFAULT_LEN_UNIT = "mm"
+
+
 class IsoBaseGroove:
     """Generic base class for all groove types."""
 
@@ -34,6 +39,65 @@ class IsoBaseGroove:
     def param_strings(self):
         """Generate string representation of parameters."""
         return [f"{k}={v:~}" for k, v in self.parameters().items()]
+
+    def _ipython_display_(self):
+        """Display the Groove as plot in notebooks."""
+        self.plot()
+
+    def plot(
+        self,
+        title=None,
+        axis_label=None,
+        raster_width=0.5,
+        show_params=True,
+        axis="equal",
+        grid=True,
+        line_style=".-",
+        ax=None,
+    ):
+        """Plot a 2D-Profile.
+
+        Parameters
+        ----------
+        title :
+             (Default value = None)
+        axis_label :
+            label string to pass onto matplotlib (Default value = None)
+        raster_width :
+             (Default value = 0.1)
+        show_params :
+             (Default value = True)
+        axis :
+             (Default value = "equal")
+        grid :
+             (Default value = True)
+        line_style :
+             (Default value = ".")
+        ax :
+             (Default value = None)
+
+        """
+        profile = self.to_profile()
+        if title is None:
+            title = _groove_type_to_name[self.__class__]
+
+        if show_params:
+            title = title + "\n" + ", ".join(self.param_strings())
+
+        profile.plot(
+            title, raster_width, None, axis, axis_label, grid, line_style, ax=ax
+        )
+
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
+        """Implement profile generation.
+
+        Parameters
+        ----------
+        width_default :
+             optional width to extend each side of the profile (Default value = None)
+
+        """
+        raise NotImplementedError("to_profile() must be defined in subclass.")
 
 
 @ureg_check_class("[length]", "[length]", None)
@@ -60,6 +124,33 @@ class IGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
 
     _mapping = dict(t="workpiece_thickness", b="root_gap")
+
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+        """
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+        # x-values
+        x_value = [-width, 0, 0, -width]
+        # y-values
+        y_value = [0, 0, t, t]
+        segment_list = ["line", "line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
@@ -94,6 +185,59 @@ class VGroove(IsoBaseGroove):
     _mapping = dict(
         t="workpiece_thickness", alpha="groove_angle", b="root_gap", c="root_face",
     )
+
+    def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(2, "mm"))
+
+
+        """
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        alpha = self.alpha  # .to("rad").magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+
+        # Calculations:
+        s = np.tan(alpha / 2) * (t - c)
+
+        # Scaling
+        edge = np.append(-s, 0).min()
+        if width <= -edge + Q_(1, "mm"):
+            width = width - edge
+
+        # Bottom segment
+        x_value = np.append(-width, 0)
+        y_value = Q_([0, 0], "mm")
+        segment_list = ["line"]
+
+        # root face
+        if c != 0:
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
+            segment_list.append("line")
+
+        # groove face
+        x_value = np.append(x_value, -s)
+        y_value = np.append(y_value, t)
+        segment_list.append("line")
+
+        # Top segment
+        x_value = np.append(x_value, -width)
+        y_value = np.append(y_value, t)
+        segment_list.append("line")
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate(np.append(-b / 2, 0))
+        # y-axis is mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
@@ -140,6 +284,58 @@ class VVGroove(IsoBaseGroove):
         h="root_face2",
     )
 
+    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+        """
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        alpha = self.alpha.to("rad").magnitude
+        beta = self.beta.to("rad").magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        h = self.h.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+        # Calculations
+        h_lower = h - c
+        h_upper = t - h
+        s_1 = np.tan(alpha / 2) * h_lower
+        s_2 = np.tan(beta) * h_upper
+
+        # Scaling
+        edge = np.min([-(s_1 + s_2), 0])
+        if width <= -edge + 1:
+            # adjustment of the width
+            width = width - edge
+
+        # x-values
+        x_value = [-width, 0]
+        # y-values
+        y_value = [0, 0]
+        segment_list = ["line"]
+
+        if c != 0:
+            x_value.append(0)
+            y_value.append(c)
+            segment_list.append("line")
+
+        x_value += [-s_1, -s_1 - s_2, -width]
+        y_value += [h + c, t, t]
+        segment_list += ["line", "line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
@@ -185,6 +381,56 @@ class UVGroove(IsoBaseGroove):
         h="root_face",
     )
 
+    def to_profile(self, width_default: pint.Quantity = Q_(2, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(2, "mm"))
+
+        """
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        alpha = self.alpha.to("rad").magnitude
+        beta = self.beta.to("rad").magnitude
+        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        h = self.h.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+        # calculations:
+        x_1 = np.tan(alpha / 2) * h
+        # Center of the circle [0, y_m]
+        y_circle = np.sqrt(R ** 2 - x_1 ** 2)
+        y_m = h + y_circle
+        # From next point to circle center is the vector (x,y)
+        x = R * np.cos(beta)
+        y = R * np.sin(beta)
+        x_arc = -x
+        y_arc = y_m - y
+        # X-section of the upper edge
+        x_end = x_arc - (t - y_arc) * np.tan(beta)
+
+        # Scaling
+        edge = np.max([-x_end, 0])
+        if width <= edge + 1:
+            # adjustment of the width
+            width = width + edge
+
+        # x-values
+        x_value = [-width, 0, -x_1, 0, x_arc, x_end, -width]
+        # y-values
+        y_value = [0, 0, h, y_m, y_arc, t, t]
+        segment_list = ["line", "line", "arc", "line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
 @dataclass
@@ -226,6 +472,83 @@ class UGroove(IsoBaseGroove):
         c="root_face",
     )
 
+    def to_profile(self, width_default: pint.Quantity = Q_(3, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(3, "mm"))
+
+        """
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        beta = self.beta.to("rad").magnitude
+        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+        # calculations:
+        # From next point to circle center is the vector (x,y)
+        x = R * np.cos(beta)
+        y = R * np.sin(beta)
+        # m = [0,c+R] circle center
+        # => [-x,c+R-y] is the next point
+
+        s = np.tan(beta) * (t - (c + R - y))
+
+        # Scaling
+        edge = np.max([x + s, 0])
+        if width <= edge + 1:
+            # adjustment of the width
+            width = width + edge
+
+        # x-values
+        x_value = []
+        # y-values
+        y_value = []
+        segment_list = []
+
+        # bottom segment
+        x_value.append(-width)
+        y_value.append(0)
+        x_value.append(0)
+        y_value.append(0)
+        segment_list.append("line")
+
+        # root face
+        if c != 0:
+            x_value.append(0)
+            y_value.append(c)
+            segment_list.append("line")
+
+        # groove face arc (circle center)
+        x_value.append(0)
+        y_value.append(c + R)
+
+        # groove face arc
+        x_value.append(-x)
+        y_value.append(c + R - y)
+        segment_list.append("arc")
+
+        # groove face line
+        x_value.append(-x - s)
+        y_value.append(t)
+        segment_list.append("line")
+
+        # top segment
+        x_value.append(-width)
+        y_value.append(t)
+        segment_list.append("line")
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
+
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
 @dataclass
@@ -259,6 +582,55 @@ class HVGroove(IsoBaseGroove):
     _mapping = dict(
         t="workpiece_thickness", beta="bevel_angle", b="root_gap", c="root_face"
     )
+
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+        """
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        beta = self.beta.to("rad").magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+        # Calculations
+        s = np.tan(beta) * (t - c)
+
+        # Scaling
+        edge = np.min([-s, 0])
+        if width <= -edge + 1:
+            # adjustment of the width
+            width = width - edge
+
+        x_value = [-width, 0]
+        y_value = [0, 0]
+        segment_list = ["line"]
+
+        if c != 0:
+            x_value.append(0)
+            y_value.append(c)
+            segment_list.append("line")
+
+        x_value += [-s, -width]
+        y_value += [t, t]
+        segment_list += ["line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        shape_h = geo.Shape()
+        shape_h.add_line_segments(
+            [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
+        )
+
+        return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
@@ -300,6 +672,58 @@ class HUGroove(IsoBaseGroove):
         b="root_gap",
         c="root_face",
     )
+
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+        """
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        beta = self.beta.to("rad").magnitude
+        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+        # Calculations
+        x = R * np.cos(beta)
+        y = R * np.sin(beta)
+        s = np.tan(beta) * (t - (c + R - y))
+
+        # Scaling
+        edge = np.max([x + s, 0])
+        if width <= edge + 1:
+            # adjustment of the width
+            width = width + edge
+
+        x_value = [-width, 0]
+        y_value = [0, 0]
+        segment_list = ["line"]
+
+        if c != 0:
+            x_value.append(0)
+            y_value.append(c)
+            segment_list.append("line")
+
+        x_value += [0, -x, -x - s, -width]
+        y_value += [c + R, c + R - y, t, t]
+        segment_list += ["arc", "line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        shape_h = geo.Shape()
+        shape_h.add_line_segments(
+            [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
+        )
+
+        return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", None, None, "[length]", None)
@@ -351,6 +775,7 @@ class DVGroove(IsoBaseGroove):
     )
 
     def __post_init__(self):
+        """Calculate missing values."""
         if self.h1 is None and self.h2 is None:
             self.h1 = (self.t - self.c) / 2
             self.h2 = (self.t - self.c) / 2
@@ -358,6 +783,64 @@ class DVGroove(IsoBaseGroove):
             self.h2 = self.h1
         elif self.h1 is None and self.h2 is not None:
             self.h1 = self.h2
+
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+        """
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        alpha_1 = self.alpha_1.to("rad").magnitude
+        alpha_2 = self.alpha_2.to("rad").magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        if self.h1 is None and self.h2 is None:
+            h1 = (t - c) / 2
+            h2 = (t - c) / 2
+        elif self.h1 is not None and self.h2 is None:
+            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
+            h2 = h1
+        elif self.h1 is None and self.h2 is not None:
+            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+            h1 = h2
+        else:
+            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
+            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+        # Calculations
+        s_upper = np.tan(alpha_1 / 2) * h1
+        s_lower = np.tan(alpha_2 / 2) * h2
+
+        # Scaling
+        edge = np.min([-s_upper, -s_lower, 0])
+        if width <= -edge + 1:
+            # adjustment of the width
+            width = width - edge
+
+        x_value = [-width, -s_lower, 0]
+        y_value = [0, 0, h2]
+        segment_list = ["line", "line"]
+
+        if c != 0:
+            x_value.append(0)
+            y_value.append(h2 + c)
+            segment_list.append("line")
+
+        x_value += [-s_upper, -width]
+        y_value += [t, t]
+        segment_list += ["line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
 @ureg_check_class(
@@ -375,7 +858,7 @@ class DVGroove(IsoBaseGroove):
 @dataclass
 class DUGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
-    """A DU-Groove
+    """A DU-Groove.
 
     For a detailed description of the execution look in get_groove.
 
@@ -428,6 +911,7 @@ class DUGroove(IsoBaseGroove):
     )
 
     def __post_init__(self):
+        """Calculate missing values."""
         if self.h1 is None and self.h2 is None:
             self.h1 = (self.t - self.c) / 2
             self.h2 = (self.t - self.c) / 2
@@ -435,6 +919,70 @@ class DUGroove(IsoBaseGroove):
             self.h2 = self.h1
         elif self.h1 is None and self.h2 is not None:
             self.h1 = self.h2
+
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+        """
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        beta_1 = self.beta_1.to("rad").magnitude
+        beta_2 = self.beta_2.to("rad").magnitude
+        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
+        R2 = self.R2.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
+        if self.h1 is None and self.h2 is None:
+            h1 = (t - c) / 2
+            h2 = (t - c) / 2
+        elif self.h1 is not None and self.h2 is None:
+            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
+            h2 = h1
+        elif self.h1 is None and self.h2 is not None:
+            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+            h1 = h2
+        else:
+            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
+            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+        # Calculations
+        x_upper = R * np.cos(beta_1)
+        y_upper = R * np.sin(beta_1)
+        s_upper = np.tan(beta_1) * (h1 - (R - y_upper))
+        x_lower = R2 * np.cos(beta_2)
+        y_lower = R2 * np.sin(beta_2)
+        s_lower = np.tan(beta_2) * (h2 - (R2 - y_lower))
+
+        # Scaling
+        edge = np.max([x_upper + s_upper, x_lower + s_lower, 0])
+        if width <= edge + 1:
+            # adjustment of the width
+            width = width + edge
+
+        x_value = [-width, -(s_lower + x_lower), -x_lower, 0, 0]
+        y_value = [0, 0, h2 - (R2 - y_lower), h2 - R2, h2]
+        segment_list = ["line", "line", "arc"]
+
+        if c != 0:
+            x_value.append(0)
+            y_value.append(h1 + c)
+            segment_list.append("line")
+
+        x_value += [0, -x_upper, -(s_upper + x_upper), -width]
+        y_value += [h2 + c + R, t - (h1 - (R - y_upper)), t, t]
+        segment_list += ["arc", "line", "line"]
+
+        shape = _helperfunction(segment_list, [x_value, y_value])
+        shape = shape.translate([-b / 2, 0])
+        # y-axis as mirror axis
+        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+
+        return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", None, None, "[length]", None)
@@ -486,6 +1034,7 @@ class DHVGroove(IsoBaseGroove):
     )
 
     def __post_init__(self):
+        """Calculate missing values."""
         if self.h1 is None and self.h2 is None:
             self.h1 = (self.t - self.c) / 2
             self.h2 = (self.t - self.c) / 2
@@ -493,6 +1042,43 @@ class DHVGroove(IsoBaseGroove):
             self.h2 = self.h1
         elif self.h1 is None and self.h2 is not None:
             self.h1 = self.h2
+
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+        """
+        dv_groove = DVGroove(
+            self.t,
+            self.beta_1 * 2,
+            self.beta_2 * 2,
+            self.c,
+            self.h1,
+            self.h2,
+            self.b,
+            self.code_number,
+        )
+        dv_profile = dv_groove.to_profile(width_default)
+        right_shape = dv_profile.shapes[1]
+
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        left_shape = geo.Shape()
+        left_shape.add_line_segments(
+            [
+                [-width_default - (b / 2), 0],
+                [-b / 2, 0],
+                [-b / 2, t],
+                [-width_default - (b / 2), t],
+            ]
+        )
+
+        return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
 
 @ureg_check_class(
@@ -563,6 +1149,7 @@ class DHUGroove(IsoBaseGroove):
     )
 
     def __post_init__(self):
+        """Calculate missing values."""
         if self.h1 is None and self.h2 is None:
             self.h1 = (self.t - self.c) / 2
             self.h2 = (self.t - self.c) / 2
@@ -570,6 +1157,44 @@ class DHUGroove(IsoBaseGroove):
             self.h2 = self.h1
         elif self.h1 is None and self.h2 is not None:
             self.h1 = self.h2
+
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+        """
+        du_profile = DUGroove(
+            self.t,
+            self.beta_1,
+            self.beta_2,
+            self.R,
+            self.R2,
+            self.c,
+            self.h1,
+            self.h2,
+            self.b,
+            self.code_number,
+        ).to_profile(width_default)
+        right_shape = du_profile.shapes[1]
+
+        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+        width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        left_shape = geo.Shape()
+        left_shape.add_line_segments(
+            [
+                [-width_default - (b / 2), 0],
+                [-b / 2, 0],
+                [-b / 2, t],
+                [-width_default - (b / 2), t],
+            ]
+        )
+
+        return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
 
 @ureg_check_class(
@@ -615,6 +1240,231 @@ class FFGroove(IsoBaseGroove):
         e="special_depth",
         code_number="code_number",
     )
+
+    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+        """Calculate a Profile.
+
+        Parameters
+        ----------
+        width_default :
+             pint.Quantity (Default value = Q_(5, "mm"))
+
+
+        """
+        if (
+            self.code_number == "1.12"
+            or self.code_number == "1.13"
+            or self.code_number == "2.12"
+        ):
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            shape1 = geo.Shape()
+            shape1.add_line_segments(
+                [
+                    [0, 0],
+                    [2 * width_default + t_1, 0],
+                    [2 * width_default + t_1, t_1],
+                    [0, t_1],
+                    [0, 0],
+                ]
+            )
+            shape2 = geo.Shape()
+            shape2.add_line_segments(
+                [
+                    [width_default, 0],
+                    [width_default + t_1, 0],
+                    [width_default + t_1, -width_default],
+                    [width_default, -width_default],
+                    [width_default, 0],
+                ]
+            )
+            return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
+        elif self.code_number == "3.1.1":
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
+            alpha = self.alpha.to("rad").magnitude
+            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+            if width_default < t_1 + 1:
+                width_default = t_1 + width_default
+
+            # x = t_1
+            # y = 0
+
+            x_1 = np.cos(alpha) * width_default
+            y_1 = np.sin(alpha) * width_default
+
+            x_2 = np.cos(alpha + np.pi / 2) * t_1
+            y_2 = np.sin(alpha + np.pi / 2) * t_1
+
+            x_3 = x_1 + x_2
+            y_3 = y_1 + y_2
+
+            shape1 = geo.Shape()
+            shape1.add_line_segments(
+                [[t_1 + x_1, y_1], [t_1, 0], [t_1 + x_2, y_2], [t_1 + x_3, y_3]]
+            )
+            shape2 = geo.Shape()
+            shape2.add_line_segments(
+                [[width_default, -b], [0, -b], [0, -t_2 - b], [width_default, -t_2 - b]]
+            )
+            return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
+        elif self.code_number == "3.1.2":
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
+            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            shape1 = geo.Shape()
+            shape1.add_line_segments(
+                [[0, 0], [width_default, 0], [width_default, t_1], [0, t_1]]
+            )
+            shape2 = geo.Shape()
+            shape2.add_line_segments(
+                [
+                    [0, -b],
+                    [2 * width_default, -b],
+                    [2 * width_default, -t_2 - b],
+                    [0, -t_2 - b],
+                ]
+            )
+            return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
+        elif self.code_number == "3.1.3" or self.code_number == "4.1.1":
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
+            alpha = self.alpha.to("rad").magnitude
+            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+            x = np.sin(alpha + np.pi / 2) * b + b
+            y = np.cos(alpha + np.pi / 2) * b
+
+            x_1 = np.sin(alpha) * t_2 + x
+            y_1 = np.cos(alpha) * t_2 + y
+
+            x_2 = np.sin(alpha + np.pi / 2) * (b + width_default) + b
+            y_2 = np.cos(alpha + np.pi / 2) * (b + width_default)
+
+            x_3 = x_1 + x_2 - x
+            y_3 = y_1 + y_2 - y
+
+            shape1 = geo.Shape()
+            shape1.add_line_segments(
+                [[-width_default, 0], [0, 0], [0, t_1], [-width_default, t_1]]
+            )
+            shape2 = geo.Shape()
+            shape2.add_line_segments([[x_3, y_3], [x_1, y_1], [x, y], [x_2, y_2]])
+            return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
+        elif self.code_number == "4.1.2":
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
+            alpha = self.alpha.to("rad").magnitude
+            e = self.e.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+
+            x_1 = np.sin(alpha) * e
+            y_1 = np.cos(alpha) * e
+
+            x_2 = np.sin(alpha + np.pi) * (t_2 - e)
+            y_2 = np.cos(alpha + np.pi) * (t_2 - e)
+
+            x_3 = x_2 + np.sin(alpha + np.pi / 2) * width_default
+            y_3 = y_2 + np.cos(alpha + np.pi / 2) * width_default
+
+            x_4 = x_1 + np.sin(alpha + np.pi / 2) * width_default
+            y_4 = y_1 + np.cos(alpha + np.pi / 2) * width_default
+
+            shape1 = geo.Shape()
+            shape1.add_line_segments(
+                [[-width_default, 0], [0, 0], [0, t_1], [-width_default, t_1]]
+            )
+            shape2 = geo.Shape()
+            shape2.add_line_segments([[x_4, y_4], [x_1, y_1], [x_2, y_2], [x_3, y_3]])
+            return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
+        elif self.code_number == "4.1.3":
+            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
+            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
+            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
+            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            shape1 = geo.Shape()
+            shape1.add_line_segments(
+                [[0, width_default], [0, 0], [t_1, 0], [t_1, width_default]]
+            )
+            shape2 = geo.Shape()
+            shape2.add_line_segments(
+                [
+                    [-width_default, -b],
+                    [t_1 + width_default, -b],
+                    [t_1 + width_default, -t_2 - b],
+                    [-width_default, -t_2 - b],
+                    [-width_default, -b],
+                ]
+            )
+            return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
+        else:
+            raise ValueError(
+                "Wrong code_number. The Code Number has to be"
+                " one of the following strings: "
+                '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
+                ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
+            )
+
+
+def _helperfunction(segment, array) -> geo.Shape:
+    """Calculate a shape from input.
+
+    Input segment of successive segments as strings.
+    Input array of the points in the correct sequence. e.g.:
+    array = [[x-values], [y-values]]
+
+    Parameters
+    ----------
+    segment :
+        list of String, segment names ("line", "arc")
+    array :
+        array of 2 array,
+        first array are x-values
+        second array are y-values
+
+    Returns
+    -------
+    type
+        geo.Shape
+
+    """
+    segment_list = []
+    counter = 0
+    for elem in segment:
+        if elem == "line":
+            seg = geo.LineSegment(
+                np.vstack(
+                    [array[0][counter : counter + 2], array[1][counter : counter + 2]]
+                )
+            )
+            segment_list.append(seg)
+            counter += 1
+        if elem == "arc":
+            arr0 = [
+                # begin
+                array[0][counter],
+                # end
+                array[0][counter + 2],
+                # circle center
+                array[0][counter + 1],
+            ]
+            arr1 = [
+                # begin
+                array[1][counter],
+                # end
+                array[1][counter + 2],
+                # circle center
+                array[1][counter + 1],
+            ]
+            seg = geo.ArcSegment([arr0, arr1], False)
+            segment_list.append(seg)
+            counter += 2
+
+    return geo.Shape(segment_list)
 
 
 # create class <-> name mapping
@@ -717,7 +1567,6 @@ def get_groove(
 
     Notes
     -----
-
     Each groove type has a different set of attributes which are required. Only
     required attributes are considered. All the required attributes for Grooves
     are in Quantity values from pint and related units are accepted.
