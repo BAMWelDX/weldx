@@ -1,8 +1,8 @@
-name: 'Trigger-Binder-build'
+name: trigger binder build
 on:
   push:
     branches:
-      - 185_trigger_binder_build
+      - master
 
 jobs:
   trigger-binder-build:
