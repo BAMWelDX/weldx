@@ -12,6 +12,6 @@ jobs:
         with:
           target-repo: BAMWelDX/weldx
           service-name: gh
-          target-state: 185_trigger_binder_build
+          target-state: master
           use-default-build-servers: true
-          debug: true
+          debug: false
