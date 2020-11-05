@@ -1,0 +1,17 @@
+name: 'Trigger-Binder-build'
+on:
+  push:
+    branches:
+      - 185_trigger_binder_build
+
+jobs:
+  trigger-binder-build:
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: s-weigand/trigger-mybinder-build@v1
+        with:
+          target-repo: BAMWelDX/weldx
+          service-name: gh
+          target-state: 185_trigger_binder_build
+          use-default-build-servers: true
+          debug: true
