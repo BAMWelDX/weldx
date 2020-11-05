@@ -797,18 +797,9 @@ class DVGroove(IsoBaseGroove):
         alpha_2 = self.alpha_2.to("rad").magnitude
         b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
         c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        if self.h1 is None and self.h2 is None:
-            h1 = (t - c) / 2
-            h2 = (t - c) / 2
-        elif self.h1 is not None and self.h2 is None:
-            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
-            h2 = h1
-        elif self.h1 is None and self.h2 is not None:
-            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
-            h1 = h2
-        else:
-            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
-            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+        h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
+        h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+
         width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
@@ -935,18 +926,9 @@ class DUGroove(IsoBaseGroove):
         R2 = self.R2.to(_DEFAULT_LEN_UNIT).magnitude
         b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
         c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        if self.h1 is None and self.h2 is None:
-            h1 = (t - c) / 2
-            h2 = (t - c) / 2
-        elif self.h1 is not None and self.h2 is None:
-            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
-            h2 = h1
-        elif self.h1 is None and self.h2 is not None:
-            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
-            h1 = h2
-        else:
-            h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
-            h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+        h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
+        h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
+
         width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
@@ -1052,14 +1034,14 @@ class DHVGroove(IsoBaseGroove):
 
         """
         dv_groove = DVGroove(
-            self.t,
-            self.beta_1 * 2,
-            self.beta_2 * 2,
-            self.c,
-            self.h1,
-            self.h2,
-            self.b,
-            self.code_number,
+            t=self.t,
+            alpha_1=self.beta_1 * 2,
+            alpha_2=self.beta_2 * 2,
+            c=self.c,
+            h1=self.h1,
+            h2=self.h2,
+            b=self.b,
+            code_number=self.code_number,
         )
         dv_profile = dv_groove.to_profile(width_default)
         right_shape = dv_profile.shapes[1]
@@ -1167,16 +1149,16 @@ class DHUGroove(IsoBaseGroove):
 
         """
         du_profile = DUGroove(
-            self.t,
-            self.beta_1,
-            self.beta_2,
-            self.R,
-            self.R2,
-            self.c,
-            self.h1,
-            self.h2,
-            self.b,
-            self.code_number,
+            t=self.t,
+            beta_1=self.beta_1,
+            beta_2=self.beta_2,
+            R=self.R,
+            R2=self.R2,
+            c=self.c,
+            h1=self.h1,
+            h2=self.h2,
+            b=self.b,
+            code_number=self.code_number,
         ).to_profile(width_default)
         right_shape = du_profile.shapes[1]
 
