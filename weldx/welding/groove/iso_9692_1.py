@@ -194,7 +194,6 @@ class VGroove(IsoBaseGroove):
         width_default :
              pint.Quantity (Default value = Q_(2, "mm"))
 
-
         """
         t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
         alpha = self.alpha  # .to("rad").magnitude
