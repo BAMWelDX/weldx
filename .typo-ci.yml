@@ -27,6 +27,8 @@ excluded_words:
   - versioneer
   - isort
   - networkx
+  - shutil
+  - functools
   # matplotlib ----------------------------------
   - pyplot
   - gca
@@ -89,15 +91,27 @@ excluded_words:
   - sympify
   # welding -------------------------------------
   - weldment
+  - GmawProcess
+  - GmawProcessTypeAsdf
+  - CLOOS
+  - Quinto
   # conda ---------------------------------------
   - conda
   - noarch
+  # documentation -------------------------------
+  - readthedocs
+  - recommonmark
+  - nbsphinx
+  - mathjax
+  - toctree
+  - numpydoc
   # markdown / latex ----------------------------
   - cdot
   # other ---------------------------------------
   - addopts
   - csm
   - coords
+  - devdoc
   - dsx
   - dtypes
   - interp
@@ -106,8 +120,25 @@ excluded_words:
   - ureg
   - Cagtay
   - Fabry
+  - Pittner
   - xyz
   - bamwelding
   - netcdf
   - msm
+  - Fronius
+  - gmaw
+  - feedrate
   - Beckhoff
+  - unmerge
+  - itertools
+  - rst
+  - pycharm
+  - tslibs
+  - quickstart
+  - nsecond
+  # German ---------------------------------------
+  - Bundesanstalt
+  - für
+  - Materialforschung
+  - und
+  - prüfung

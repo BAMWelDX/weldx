@@ -1,3 +1,4 @@
+import pandas as pd
 import pint
 
 from weldx.asdf.tags.weldx.core.common_types import Variable
@@ -36,30 +37,33 @@ class LocalCoordinateSystemASDF(WeldxType):
             type to be serialized.
 
         """
-        orientations = Variable(
-            "orientations", node.orientation.dims, node.orientation.data
-        )
+        tree = {}
 
-        coordinates = Variable(
-            "coordinates", node.coordinates.dims, node.coordinates.data
-        )
+        orientations = None
+        if not node.is_unity_rotation:
+            orientations = Variable(
+                "orientations", node.orientation.dims, node.orientation.data
+            )
+            if "time" not in node.orientation.coords:
+                ctx.set_array_storage(orientations.data, "inline")
+            tree["orientations"] = orientations
 
-        tree = {
-            "orientations": orientations,
-            "coordinates": coordinates,
-        }
-
-        if "time" in node.dataset.coords:
-            tree["time"] = node.time
-
-        # example code to manipulate inline array storage
-        if "time" not in node.coordinates.coords:
+        coordinates = None
+        if not node.is_unity_translation:
+            coordinates = Variable(
+                "coordinates", node.coordinates.dims, node.coordinates.data
+            )
             if isinstance(coordinates.data, pint.Quantity):
                 ctx.set_array_storage(coordinates.data.magnitude, "inline")
             else:
                 ctx.set_array_storage(coordinates.data, "inline")
-        if "time" not in node.orientation.coords:
-            ctx.set_array_storage(orientations.data, "inline")
+            tree["coordinates"] = coordinates
+
+        if "time" in node.dataset.coords:
+            tree["time"] = pd.TimedeltaIndex(node.time)
+
+        if node.reference_time is not None:
+            tree["reference_time"] = node.reference_time
 
         return tree
 
@@ -82,14 +86,27 @@ class LocalCoordinateSystemASDF(WeldxType):
             An instance of the 'LocalCoordinateSystem' type.
 
         """
-        orientations = tree["orientations"].data
-        coordinates = tree["coordinates"].data
+        orientations = None
+        if "orientations" in tree:
+            orientations = tree["orientations"].data
+
+        coordinates = None
+        if "coordinates" in tree:
+            coordinates = tree["coordinates"].data
 
         if "time" in tree:
             time = tree["time"]
         else:
             time = None
 
+        if "reference_time" in tree:
+            time_ref = tree["reference_time"]
+        else:
+            time_ref = None
+
         return LocalCoordinateSystem(
-            orientation=orientations, coordinates=coordinates, time=time
+            orientation=orientations,
+            coordinates=coordinates,
+            time=time,
+            time_ref=time_ref,
         )

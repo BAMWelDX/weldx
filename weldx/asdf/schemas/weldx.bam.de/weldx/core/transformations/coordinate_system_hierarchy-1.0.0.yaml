@@ -11,10 +11,34 @@ description: |
   is a tree.
 type: object
 properties:
+  name:
+    type: string
+
   root_system_name:
     description: |
       Name of the root coordinate system
     type: string
+
+  reference_time:
+    description: |
+      A timestamp that serves as reference point for all attached coordinate systems.
+    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+
+  subsystem_names:
+    description: |
+      A list containing the names of subsystems that are directly attached to the main hierarchy. Nested subsystems
+      are excluded.
+    type: array
+    items:
+      type: string
+
+  subsystems:
+    description: |
+      A list containing the data of all subsystems including nested structures.
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
+
   coordinate_systems:
     description: |
       An array of all the coordinate systems' data. This includes their name, parent system and how they are arranged
@@ -23,8 +47,8 @@ properties:
     items:
       $ref: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
 
-propertyOrder: [root_system_name, coordinate_systems]
-required: [root_system_name, coordinate_systems]
+propertyOrder: [name, root_system_name, reference_time, subsystems, subsystem_data,  coordinate_systems]
+required: [name, root_system_name, coordinate_systems]
 flowStyle: block
 additionalProperties: false
 

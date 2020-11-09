@@ -5,30 +5,69 @@ import pytest
 from asdf import ValidationError
 
 from weldx import Q_
+from weldx.asdf.extension import WxSyntaxError
 from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass
 from weldx.asdf.utils import _write_read_buffer
-from weldx.asdf.validators import _custom_shape_validator
+from weldx.asdf.validators import _compare_tag_version, _custom_shape_validator
 
 
 @pytest.mark.parametrize(
-    "test_input",
+    "instance_tag,tagname,result",
     [
-        PropertyTagTestClass(),
-        pytest.param(
-            PropertyTagTestClass(prop3=pd.Timedelta(2, "s")),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            PropertyTagTestClass(prop3="STRING"),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
+        (None, "tag:debug.com/object-*", True),
+        ("tag:debug.com/object-1.2.3", "tag:debug.com/object-*", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-*", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-1.2.3", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-1.2", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-1", True),
+        ("http://debug.com/object-1.2.3", "http://debug.com/object-2", False),
+        ("http://debug.com/object-2.0.0", "http://debug.com/object-1", False),
+        ("http://debug.com/object-2.0.0", "http://debug.com/object-2.1", False),
+        ("http://debug.com/object-2.0.0", "http://debug.com/other-2.0.0", False),
+        ("http://debug.com/object-2.0.0", "http://other.com/object-2.0.0", False),
+        ("http://debug.com/object-1.2.3", "http://other.com/object-1.2.3", False),
     ],
+)
+def test_wx_tag_syntax(instance_tag, tagname, result):
+    """Test ASDF tag version syntax resolving."""
+    assert _compare_tag_version(instance_tag, tagname) == result
+
+
+@pytest.mark.parametrize(
+    "instance_tag,tagname,err",
+    [
+        ("tag:debug.com/object-1.2.3", "tag:debug.com/object", WxSyntaxError),
+        ("tag:debug.com/object-1.2.3", "tag:debug.com/object-", WxSyntaxError),
+        ("tag:debug.com/object-1.2.3", "tag:debug.com/object-**", WxSyntaxError),
+    ],
+)
+def test_wx_tag_syntax_exceptions(instance_tag, tagname, err):
+    """Test custom ASDF shape validators."""
+    with pytest.raises(err):
+        _compare_tag_version(instance_tag, tagname)
+
+
+@pytest.mark.parametrize(
+    "test_input", [PropertyTagTestClass()],
 )
 def test_property_tag_validator(test_input):
     """Test custom ASDF shape validators."""
     _write_read_buffer({"root_node": test_input})
+
+
+@pytest.mark.parametrize(
+    "test_input,err",
+    [
+        (PropertyTagTestClass(prop3=pd.Timedelta(2, "s")), ValidationError),
+        (PropertyTagTestClass(prop3="STRING"), ValidationError),
+    ],
+)
+def test_property_tag_validator_exceptions(test_input, err):
+    """Test custom ASDF shape validators."""
+    with pytest.raises(err):
+        _write_read_buffer({"root_node": test_input})
 
 
 def _val(list_test, list_expected):
@@ -92,28 +131,30 @@ def test_shape_validator_syntax2(shape, exp):
         ([1, 9], [1, "(4~8)"], ValidationError),
         (1.0, [2], ValidationError),
         ([1, 2, 3, 4], [1, 2, "n", "n"], ValidationError),
-        ([1, 2], [1, "~", "(...)"], ValueError),
-        ([1, 2], [1, "(2)", 3], ValueError),
-        ([1, 2], [1, 2, "((3))"], ValueError),
-        ([1, 2], [1, 2, "3)"], ValueError),
-        ([1, 2], [1, 2, "*3"], ValueError),
-        ([1, 2], [1, 2, "(3"], ValueError),
-        ([1, 2], [1, 2, "(3)3"], ValueError),
-        ([1, 2], [1, 2, "2(3)"], ValueError),
-        ([1, 2], [1, "...", 2], ValueError),
-        ([1, 2], ["(1)", "..."], ValueError),
-        ([1, 2], [1, "4~1"], ValueError),
-        ([-1, -2], [-1, -2], ValueError),
-        ([-1, 2], [1, 2], ValueError),
-        ([1, 2], [-1, 2], ValueError),
-        ([1, 2], [1, 2, "(-3)"], ValueError),
-        ([1, 2], [1, 2, "(-3~-1)"], ValueError),
-        ([1, 2], [1, 2, "(-3~1)"], ValueError),
-        ([1, 2, 1], ["(-3~1)", 2, 1], ValueError),
-        ([1, 2], [1, "(n~m)"], ValueError),
-        ([1, 2], [1, "(1~3~5)"], ValueError),
+        ([1, 2], [1, "~", "(...)"], WxSyntaxError),
+        ([1, 2], [1, "(2)", 3], WxSyntaxError),
+        ([1, 2], [1, 2, "((3))"], WxSyntaxError),
+        ([1, 2], [1, 2, "3)"], WxSyntaxError),
+        ([1, 2], [1, 2, "*3"], WxSyntaxError),
+        ([1, 2], [1, 2, "(3"], WxSyntaxError),
+        ([1, 2], [1, 2, "(3)3"], WxSyntaxError),
+        ([1, 2], [1, 2, "2(3)"], WxSyntaxError),
+        ([1, 2], [1, "...", 2], WxSyntaxError),
+        ([1, 2], ["(1)", "..."], WxSyntaxError),
+        ([1, 2], [1, "4~1"], WxSyntaxError),
+        ([-1, -2], [-1, -2], WxSyntaxError),
+        ([-1, 2], [1, 2], WxSyntaxError),
+        ([1, 2], [-1, 2], WxSyntaxError),
+        ([1, 2], [1, 2, "(-3)"], WxSyntaxError),
+        ([1, 2], [1, 2, "(-3~-1)"], WxSyntaxError),
+        ([1, 2], [1, 2, "(-3~1)"], WxSyntaxError),
+        ([1, 2, 1], ["(-3~1)", 2, 1], WxSyntaxError),
+        ([1, 2], [1, "(9~m)"], WxSyntaxError),
+        ([1, 2], [1, "(n~9)"], WxSyntaxError),
+        ([1, 2], [1, "(n~m)"], WxSyntaxError),
+        ([1, 2], [1, "(1~3~5)"], WxSyntaxError),
         ("a string", [1, "(1~3~5)"], ValidationError),
-        ([1, 2], "a string", ValueError),
+        ([1, 2], "a string", WxSyntaxError),
     ],
 )
 def test_shape_validation_error_exception(shape, exp, err):
@@ -124,60 +165,39 @@ def test_shape_validation_error_exception(shape, exp, err):
 @pytest.mark.parametrize(
     "test_input",
     [
+        ShapeValidatorTestClass(),
+        ShapeValidatorTestClass(time_prop=pd.date_range("2020", freq="D", periods=9)),
+        ShapeValidatorTestClass(optional_prop=np.ones((1, 2, 3)),),
         ShapeValidatorTestClass(
-            prop1=np.ones((1, 2, 3)),
-            prop2=np.ones((3, 2, 1)),
-            prop3=np.ones((2, 4, 6, 8, 10)),
-            prop4=np.ones((1, 3, 5, 7, 9)),
-            prop5=3.141,
             nested_prop={
                 "p1": np.ones((10, 8, 6, 4, 2)),
                 "p2": np.ones((9, 7, 5, 3, 1)),
-            },
-        ),
-        pytest.param(
-            ShapeValidatorTestClass(
-                prop1=np.ones((1, 2, 3)),
-                prop2=np.ones((3, 2, 1)),
-                prop3=np.ones((2, 4, 6, 8, 10)),
-                prop4=np.ones((2, 3, 5, 7, 9)),  # mismatch a with prop5
-                prop5=3.141,
-                nested_prop={
-                    "p1": np.ones((10, 8, 6, 4, 2)),
-                    "p2": np.ones((9, 7, 5, 3, 1)),
-                },
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            ShapeValidatorTestClass(
-                prop1=np.ones((1, 2, 3)),
-                prop2=np.ones((5, 2, 1)),  # mismatch n with prop1
-                prop3=np.ones((2, 4, 6, 8, 10)),
-                prop4=np.ones((1, 3, 5, 7, 9)),
-                prop5=3.141,
-                nested_prop={
-                    "p1": np.ones((10, 8, 6, 4, 2)),
-                    "p2": np.ones((9, 7, 5, 3, 1)),
-                },
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            ShapeValidatorTestClass(
-                prop1=np.ones((1, 2, 3)),
-                prop2=np.ones((3, 2, 1)),
-                prop3=np.ones((2, 4, 6, 8, 10)),
-                prop4=np.ones((1, 3, 5, 7, 9)),
-                prop5=3.141,
-                nested_prop={"p1": np.ones((10, 8, 6, 4, 2))},  # missing p2
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
+                "p3": np.ones((1, 2, 3)),
+            }
         ),
     ],
 )
 def test_shape_validator(test_input):
     _write_read_buffer({"root": test_input})
+
+
+@pytest.mark.parametrize(
+    "test_input",
+    [
+        ShapeValidatorTestClass(
+            prop4=np.ones((2, 3, 5, 7, 9)),  # mismatch a with prop5
+        ),
+        ShapeValidatorTestClass(prop2=np.ones((5, 2, 1)),),  # mismatch n with prop1
+        ShapeValidatorTestClass(
+            nested_prop={"p1": np.ones((10, 8, 6, 4, 2))},  # missing p2
+        ),
+        ShapeValidatorTestClass(optional_prop=np.ones((3, 2, 9)),),  # wrong optional
+        ShapeValidatorTestClass(time_prop=pd.date_range("2020", freq="D", periods=3)),
+    ],
+)
+def test_shape_validator_exceptions(test_input):
+    with pytest.raises(ValidationError):
+        _write_read_buffer({"root": test_input})
 
 
 @pytest.mark.parametrize(

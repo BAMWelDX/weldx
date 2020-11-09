@@ -1,0 +1,8 @@
+*make.bat
+*Makefile
+
+# auto generated and copied files
+CHANGELOG.md
+_autosummary*
+generated*
+tutorials*

@@ -10,16 +10,16 @@ from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
 
 def drop_none_attr(node):
-    """Utility function simplify `to_tree` methods of  dataclass objects.
+    """Utility function simplify :code:`to_tree` methods of  dataclass objects.
 
-    The function requires the node to be convertible to dictionary via __dict__. And can
-    therefor be applied to all classes created using the @dataclass operator.
+    The function requires the node to be convertible to dictionary via :code:`__dict__`.
+    And can therefore be applied to all classes created using the @dataclass operator.
     The result is "clean" dictionary with all None entries removed.
-    A simple `to_tree()` function could be implemented as such:
-        ```python
+    A simple :code:`to_tree` function could be implemented as such::
+
         def to_tree(cls, node, ctx):
             tree = drop_none_attr(node)
-            return tree```
+            return tree
 
     Parameters
     ----------
@@ -357,3 +357,47 @@ def _write_read_buffer(
     """
     buffer = _write_buffer(tree, asdffile_kwargs, write_kwargs)
     return _read_buffer(buffer, open_kwargs)
+
+
+try:  # pragma: no cover
+    import IPython
+    from pygments import highlight
+    from pygments.formatters import HtmlFormatter
+    from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
+except ImportError:  # pragma: no cover
+    pass
+else:  # pragma: no cover
+
+    def notebook_fileprinter(file, style="YAML"):
+        """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
+
+        Parameters
+        ----------
+        file
+            filename or BytesIO buffer
+        style
+            Syntax style to use
+
+        """
+        if isinstance(file, BytesIO):
+            file.seek(0)
+            code = file.read()
+            lexer = get_lexer_by_name(style)
+        else:
+            with open(file, "rb") as f:
+                code = f.read()
+            if Path(file).suffix == ".asdf":
+                lexer = get_lexer_by_name("YAML")
+            else:
+                lexer = get_lexer_for_filename(file)
+
+        parts = code.partition(b"\n...")
+        code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
+
+        formatter = HtmlFormatter()
+        return IPython.display.HTML(
+            '<style type="text/css">{}</style>{}'.format(
+                formatter.get_style_defs(".highlight"),
+                highlight(code, lexer, formatter),
+            )
+        )

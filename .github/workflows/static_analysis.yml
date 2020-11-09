@@ -55,7 +55,7 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       - name: pip installs
-        run: pip install isort==5.1.*
+        run: pip install isort==5.*
       - name: show isort diff
         run: |
           isort ./weldx/*.py --diff

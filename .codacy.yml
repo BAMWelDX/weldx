@@ -10,8 +10,9 @@ engines:
       - tests/**
 
 exclude_paths:
-  - 'docs/**'
+  - 'doc/**'
   - 'versioneer.py'
   - 'weldx/_version.py'
   - 'scripts/**'
   - 'CHANGELOG.md'
+  - '.github/pull_request_template.md'

@@ -1,7 +1,6 @@
 name: weldx
 channels:
   - defaults
-  - anaconda
   - conda-forge
 dependencies:
   - python=3.7
@@ -13,8 +12,6 @@ dependencies:
   - pint>=0.11
   - bottleneck
   - asdf>=2.7
-  - sphinx
-  - recommonmark
   - openpyxl
   - jinja2
   # graph packages
@@ -28,12 +25,24 @@ dependencies:
   - pytest
   - pytest-cov
   # Plotting
-  #- graphviz
   - ipykernel
   - ipympl
   - line_profiler
   - matplotlib
   - memory_profiler
-  #- python-graphviz
   - seaborn
   - snakeviz
+  # documentation
+  - sphinx
+  - recommonmark
+  - sphinxcontrib-napoleon
+  - nbsphinx
+  - sphinx-copybutton
+  - sphinxcontrib-bibtex
+  - pydata-sphinx-theme
+  - numpydoc>=0.5
+  - sphinx-autodoc-typehints
+  # pip packages
+  - pip
+  - pip:
+    - git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx

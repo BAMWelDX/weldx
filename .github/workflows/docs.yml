@@ -1,0 +1,64 @@
+name: documentation
+on:
+  # Trigger the workflow on push events on master
+  push:
+    branches:
+      - master
+  # Trigger the workflow on relevant pull request events
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # Trigger the workflow on all release created events (this could redirect to main conda channel)
+  release:
+    types:
+      - created
+
+jobs:
+  build:
+    if: github.event.pull_request.draft == false # exclude job from draft PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Cache conda
+        uses: actions/cache@v1
+        env:
+          # Increase this value to reset cache if ./environment.yml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./environment.yml') }}
+
+      - name: Setup Conda Environment
+        uses: goanpeca/setup-miniconda@v1
+        with:
+          auto-update-conda: true
+          environment-file: ./environment.yml
+          activate-environment: weldx
+          auto-activate-base: false
+          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+
+      - name: conda info
+        shell: bash -l {0}
+        run: conda info
+
+      - name: conda list
+        shell: bash -l {0}
+        run: conda list
+
+      - name: install weldx kernel
+        shell: bash -l {0}
+        run: ipython kernel install --user --name=weldx
+
+      - name: develop install
+        shell: bash -l {0}
+        run: pip install -e .
+
+      - name: Build docs
+        shell: bash -l {0}
+        run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: weldx-docs
+          path: build/html

@@ -6,8 +6,11 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pandas import DatetimeIndex as DTI
+from pandas import TimedeltaIndex as TDI
+from pandas import date_range
+from pint.errors import DimensionalityError
 
-import weldx.transformations as tf
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 
@@ -102,56 +105,41 @@ def test_vector_is_close():
     assert not ut.vector_is_close(vec_a, vec_a[0:2])
 
 
-def test_to_pandas_time_index():
-    """Test the to_pandas_time_index function."""
-    # time delta ------------------------------------------
-    # scalar
-    exp_time_delta_index_single = pd.TimedeltaIndex([42])
+@pytest.mark.parametrize(
+    "arg, expected",
+    [
+        # timedeltas
+        (TDI([42]), TDI([42])),
+        (pd.timedelta_range("0s", "20s", 10), pd.timedelta_range("0s", "20s", 10)),
+        (np.timedelta64(42), TDI([42])),
+        (np.array([-10, 0, 20]).astype(np.timedelta64), TDI([-10, 0, 20])),
+        (Q_(42, "ns"), TDI([42])),
+        ("10s", TDI(["10s"])),
+        (["5ms", "10s", "2D"], TDI(["5 ms", "10s", "2D"])),
+        # datetimes
+        (np.datetime64(50, "Y"), DTI(["2020-01-01"])),
+        ("2020-01-01", DTI(["2020-01-01"])),
+        (
+            np.array(
+                ["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]"
+            ),
+            DTI(["2012-10-02", "2012-10-05", "2012-10-11"]),
+        ),
+    ],
+)
+def test_to_pandas_time_index(arg, expected):
+    """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
+    assert np.all(ut.to_pandas_time_index(arg) == expected)
 
-    assert ut.to_pandas_time_index(42) == exp_time_delta_index_single
-    assert ut.to_pandas_time_index([42]) == exp_time_delta_index_single
-    assert ut.to_pandas_time_index(np.timedelta64(42)) == exp_time_delta_index_single
-    assert ut.to_pandas_time_index(Q_(42, "ns")) == exp_time_delta_index_single
 
-    # array
-    exp_time_delta_index_array = pd.TimedeltaIndex([1, 2, 3])
-    assert np.all(ut.to_pandas_time_index([1, 2, 3]) == exp_time_delta_index_array)
-    assert np.all(
-        ut.to_pandas_time_index(np.array([1, 2, 3]).astype("timedelta64[ns]"))
-        == exp_time_delta_index_array
-    )
-    assert np.all(
-        ut.to_pandas_time_index(Q_([1, 2, 3], "ns")) == exp_time_delta_index_array
-    )
-
-    # date time -------------------------------------------
-    # scalar
-    exp_date_time_index_single = pd.DatetimeIndex(["2012-10-02"])
-
-    assert (
-        ut.to_pandas_time_index(np.datetime64("2012-10-02"))
-        == exp_date_time_index_single
-    )
-
-    # array
-    exp_date_time_index_array = pd.DatetimeIndex(
-        ["2012-10-02", "2012-10-05", "2012-10-11"]
-    )
-
-    assert np.all(
-        ut.to_pandas_time_index(
-            np.array(["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]")
-        )
-        == exp_date_time_index_array
-    )
-
-    # exceptions ------------------------------------------
-    # quantity has wrong unit
-    with pytest.raises(Exception):
-        ut.to_pandas_time_index(Q_(10, "m"))
-    # wrong type
-    with pytest.raises(Exception):
-        ut.to_pandas_time_index("string")
+@pytest.mark.parametrize(
+    "arg, exception",
+    [(5, TypeError), ("string", TypeError), (Q_(10, "m"), DimensionalityError)],
+)
+def test_to_pandas_time_index_exceptions(arg, exception):
+    """Test correct exceptions on invalid inputs."""
+    with pytest.raises(exception):
+        ut.to_pandas_time_index(arg)
 
 
 def test_pandas_time_delta_to_quantity():
@@ -338,16 +326,32 @@ def test_xr_interp_like():
     assert np.all(test == np.arange(3, 7, 0.125))
 
 
-def test_get_time_union():
-    """Test input types for get_time_union function."""
-    t1 = pd.Timestamp("1970")
-    t2 = pd.Timestamp("2020")
-    dsx = tf.LocalCoordinateSystem().dataset.expand_dims({"time": [t1, t2]})
-    cs = tf.LocalCoordinateSystem(
-        orientation=dsx.orientation, coordinates=dsx.coordinates
-    )
-    res = ut.get_time_union([cs.time, dsx, cs, [0]])
-    assert np.all(res == pd.DatetimeIndex([t1, t2]))
+@pytest.mark.parametrize(
+    "list_of_objects, time_exp",
+    [
+        (
+            [
+                date_range("2020-02-02", periods=4, freq="2D"),
+                date_range("2020-02-01", periods=4, freq="2D"),
+                date_range("2020-02-03", periods=2, freq="3D"),
+            ],
+            date_range("2020-02-01", periods=8, freq="1D"),
+        ),
+        ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
+    ],
+)
+def test_get_time_union(list_of_objects, time_exp):
+    """Test input types for get_time_union function.
+
+    Parameters
+    ----------
+    list_of_objects:
+        List with input objects
+    time_exp:
+        Expected result time
+
+    """
+    assert np.all(ut.get_time_union(list_of_objects) == time_exp)
 
 
 def test_xf_fill_all():
@@ -376,3 +380,71 @@ def test_xf_fill_all():
 
     with pytest.raises(ValueError):
         ut.xr_fill_all(da3, order="wrong")
+
+
+_dax_check = xr.DataArray(
+    data=np.ones((2, 2, 2, 4, 3)),
+    dims=["d1", "d2", "d3", "d4", "d5"],
+    coords={
+        "d1": np.array([-1, 1], dtype=float),
+        "d2": np.array([-1, 1], dtype=int),
+        "d3": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+        "d4": pd.TimedeltaIndex([0, 1, 2, 3], "s"),
+        "d5": ["x", "y", "z"],
+    },
+)
+
+_dax_ref = dict(
+    d1={"values": np.array([-1, 1]), "dtype": "float"},
+    d2={"values": np.array([-1, 1]), "dtype": int},
+    d3={
+        "values": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
+        "dtype": ["datetime64[ns]", "timedelta64[ns]"],
+    },
+    d4={
+        "values": pd.TimedeltaIndex([0, 1, 2, 3], "s"),
+        "dtype": ["datetime64[ns]", "timedelta64[ns]"],
+    },
+    d5={"values": ["x", "y", "z"], "dtype": "<U1"},
+)
+
+
+@pytest.mark.parametrize(
+    "dax, ref_dict",
+    [
+        (_dax_check, _dax_ref),
+        (_dax_check.coords, _dax_ref),
+        (_dax_check, {"d1": {"dtype": ["float64", int]}}),
+        (_dax_check, {"d2": {"dtype": ["float64", int]}}),
+        (_dax_check, {"no_dim": {"optional": True, "dtype": float}}),
+        (_dax_check, {"d5": {"dtype": str}}),
+        (_dax_check, {"d5": {"dtype": [str]}}),
+        (_dax_check, {"d4": {"dtype": "timedelta64"}}),
+        (_dax_check, {"d3": {"dtype": ["datetime64", "timedelta64"]}}),
+    ],
+)
+def test_xr_check_coords(dax, ref_dict):
+    """Test weldx.utility.xr_check_coords function."""
+    assert ut.xr_check_coords(dax, ref_dict)
+
+
+@pytest.mark.parametrize(
+    "dax, ref_dict, exception_type",
+    [
+        (_dax_check, {"d1": {"dtype": int}}, TypeError),
+        (_dax_check, {"d1": {"dtype": int, "optional": True}}, TypeError),
+        (_dax_check, {"no_dim": {"dtype": float}}, KeyError),
+        (
+            _dax_check,
+            {"d5": {"values": ["x", "noty", "z"], "dtype": "str"}},
+            ValueError,
+        ),
+        (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
+        (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
+        ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
+    ],
+)
+def test_xr_check_coords_exception(dax, ref_dict, exception_type):
+    """Test weldx.utility.xr_check_coords function."""
+    with pytest.raises(exception_type):
+        ut.xr_check_coords(dax, ref_dict)

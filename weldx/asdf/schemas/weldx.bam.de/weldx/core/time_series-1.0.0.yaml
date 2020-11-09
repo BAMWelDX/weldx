@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/core/time_series-1.0.0"
+id: "http://weldx.bam.de/weldx/core/time_series-1.0.0"
 tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
 
 title: |
@@ -73,8 +73,7 @@ oneOf:
     wx_shape:
       #description: |
       #  The outer dimension of the data needs to be identical to the times dimension.
-      time:
-        values: [t]
+      time: [t]
       values: [t, ...]
     required: [time, unit, shape, interpolation, values]
     additionalProperties: false

@@ -8,6 +8,11 @@ import numpy as np
 
 import weldx.transformations as tf
 import weldx.utility as ut
+import weldx.visualization as vs
+from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+
+_DEFAULT_LEN_UNIT = UREG.millimeters
+_DEFAULT_ANG_UNIT = UREG.rad
 
 # LineSegment -----------------------------------------------------------------
 
@@ -15,6 +20,7 @@ import weldx.utility as ut
 class LineSegment:
     """Line segment."""
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def __init__(self, points):
         """Construct line segment.
 
@@ -55,6 +61,7 @@ class LineSegment:
             raise ValueError("Segment length is 0.")
 
     @classmethod
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
     def construct_with_points(cls, point_start, point_end) -> "LineSegment":
         """Construct a line segment with two points.
 
@@ -75,6 +82,7 @@ class LineSegment:
         return cls(points)
 
     @classmethod
+    @UREG.wraps(None, (None, None, None, ""), strict=False)
     def linear_interpolation(cls, segment_a, segment_b, weight):
         """Interpolate two line segments linearly.
 
@@ -119,7 +127,7 @@ class LineSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             End point
 
         """
@@ -131,7 +139,7 @@ class LineSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Starting point
 
         """
@@ -145,12 +153,13 @@ class LineSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             2x2 matrix containing the segments points
 
         """
         return self._points
 
+    @UREG.wraps(None, (None, ""), strict=False)
     def apply_transformation(self, matrix):
         """Apply a transformation matrix to the segment.
 
@@ -163,6 +172,7 @@ class LineSegment:
         self._points = np.matmul(matrix, self._points)
         self._calculate_length()
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def apply_translation(self, vector):
         """Apply a translation to the segment.
 
@@ -174,6 +184,7 @@ class LineSegment:
         """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the segments contour.
 
@@ -188,7 +199,7 @@ class LineSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Array of contour points
 
         """
@@ -206,6 +217,7 @@ class LineSegment:
 
         return np.matmul(self._points, weight_matrix)
 
+    @UREG.wraps(None, (None, ""), strict=False)
     def transform(self, matrix):
         """Get a transformed copy of the segment.
 
@@ -224,6 +236,7 @@ class LineSegment:
         new_segment.apply_transformation(matrix)
         return new_segment
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def translate(self, vector):
         """Get a translated copy of the segment.
 
@@ -249,6 +262,7 @@ class LineSegment:
 class ArcSegment:
     """Arc segment."""
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=False)
     def __init__(self, points, arc_winding_ccw=True):
         """Construct arc segment.
 
@@ -344,6 +358,11 @@ class ArcSegment:
             raise ValueError("Arc length is 0.")
 
     @classmethod
+    @UREG.wraps(
+        None,
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
+        strict=False,
+    )
     def construct_with_points(
         cls, point_start, point_end, point_center, arc_winding_ccw=True
     ):
@@ -373,6 +392,11 @@ class ArcSegment:
         return cls(points, arc_winding_ccw)
 
     @classmethod
+    @UREG.wraps(
+        None,
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None),
+        strict=False,
+    )
     def construct_with_radius(
         cls,
         point_start,
@@ -428,6 +452,7 @@ class ArcSegment:
         )
 
     @classmethod
+    @UREG.wraps(None, (None, None, None, ""), strict=False)
     def linear_interpolation(cls, segment_a, segment_b, weight):
         """Interpolate two arc segments linearly.
 
@@ -508,7 +533,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Center point
 
         """
@@ -520,7 +545,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             End point
 
         """
@@ -532,7 +557,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Starting point
 
         """
@@ -547,7 +572,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             2x3 matrix containing the segments points
 
         """
@@ -565,6 +590,7 @@ class ArcSegment:
         """
         return self._radius
 
+    @UREG.wraps(None, (None, ""), strict=False)
     def apply_transformation(self, matrix):
         """Apply a transformation to the segment.
 
@@ -578,6 +604,7 @@ class ArcSegment:
         self._sign_arc_winding *= tf.reflection_sign(matrix)
         self._calculate_arc_parameters()
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def apply_translation(self, vector):
         """Apply a translation to the segment.
 
@@ -589,6 +616,7 @@ class ArcSegment:
         """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the segments contour.
 
@@ -603,7 +631,7 @@ class ArcSegment:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Array of contour points
 
         """
@@ -627,6 +655,7 @@ class ArcSegment:
 
         return data.transpose()
 
+    @UREG.wraps(None, (None, ""), strict=False)
     def transform(self, matrix):
         """Get a transformed copy of the segment.
 
@@ -645,6 +674,7 @@ class ArcSegment:
         new_segment.apply_transformation(matrix)
         return new_segment
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def translate(self, vector):
         """Get a translated copy of the segment.
 
@@ -805,6 +835,7 @@ class Shape:
         """
         return self._segments
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def add_line_segments(self, points):
         """Add line segments to the shape.
 
@@ -898,6 +929,7 @@ class Shape:
         self.apply_transformation(householder_matrix)
         self.apply_translation(offset)
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
     def apply_reflection_across_line(self, point_start, point_end):
         """Apply a reflection across a line.
 
@@ -930,6 +962,7 @@ class Shape:
 
         self.apply_reflection(normal, line_distance_origin)
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def apply_translation(self, vector):
         """Apply a translation to the shape.
 
@@ -942,6 +975,7 @@ class Shape:
         for i in range(self.num_segments):
             self._segments[i].apply_translation(vector)
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the shapes contour.
 
@@ -956,7 +990,7 @@ class Shape:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Array of contour points (2d)
 
         """
@@ -995,6 +1029,7 @@ class Shape:
         new_shape.apply_reflection(reflection_normal, distance_to_origin)
         return new_shape
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
     def reflect_across_line(self, point_start, point_end):
         """Get a reflected copy across a line.
 
@@ -1032,6 +1067,7 @@ class Shape:
         new_shape.apply_transformation(matrix)
         return new_shape
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def translate(self, vector):
         """Get a translated copy of the shape.
 
@@ -1123,6 +1159,7 @@ class Profile:
 
         self._shapes += shapes
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=False)
     def rasterize(self, raster_width, insert_sep=False):
         """Rasterize the profile.
 
@@ -1135,7 +1172,7 @@ class Profile:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """
@@ -1149,9 +1186,10 @@ class Profile:
     def plot(
         self,
         title=None,
-        label=None,
         raster_width=0.5,
+        label=None,
         axis="equal",
+        axis_labels=None,
         grid=True,
         line_style=".-",
         ax=None,
@@ -1162,12 +1200,14 @@ class Profile:
         ----------
         title :
             Matplotlib plot title. (Default value = None)
-        label :
-            Matplotlib plot label. (Default value = None)
         raster_width :
             Distance between Points to plot (Default value = 0.5)
+        label :
+            Matplotlib plot label. (Default value = None)
         axis :
             Matplotlib axis setting. (Default value = "equal")
+        axis_labels :
+            List of Matplotlib axis labels. (Default value = None)
         grid :
             Matplotlib grid setting. (Default value = True)
         line_style :
@@ -1180,15 +1220,16 @@ class Profile:
         if ax is None:  # pragma: no cover
             _, ax = plt.subplots()
         ax.grid(grid)
-        ax.axis(axis)
+        if not ax.name == "3d":
+            ax.axis(axis)
         ax.set_title(title, loc="center", wrap=True)
-        if label is not None:
-            ax.set_xlabel(label[0])
-            ax.set_ylabel(label[1])
+        if axis_labels is not None:
+            ax.set_xlabel(axis_labels[0])
+            ax.set_ylabel(axis_labels[1])
         elif "units" in self.attrs:
             ax.set_xlabel("y in " + self.attrs["units"])
             ax.set_ylabel("z in " + self.attrs["units"])
-        ax.plot(raster_data[0], raster_data[1], line_style)
+        ax.plot(raster_data[0], raster_data[1], line_style, label=label)
 
     @property
     def shapes(self):
@@ -1209,6 +1250,7 @@ class Profile:
 class LinearHorizontalTraceSegment:
     """Trace segment with a linear path and constant z-component."""
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def __init__(self, length):
         """Construct linear horizontal trace segment.
 
@@ -1265,6 +1307,7 @@ class LinearHorizontalTraceSegment:
 class RadialHorizontalTraceSegment:
     """Trace segment describing an arc with constant z-component."""
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_ANG_UNIT, None), strict=False)
     def __init__(self, radius, angle, clockwise=False):
         """Construct radial horizontal trace segment.
 
@@ -1401,7 +1444,7 @@ class RadialHorizontalTraceSegment:
 class Trace:
     """Defines a 3d trace."""
 
-    def __init__(self, segments, coordinate_system=tf.LocalCoordinateSystem()):
+    def __init__(self, segments, coordinate_system=None):
         """Construct trace.
 
         Parameters
@@ -1416,6 +1459,9 @@ class Trace:
         Trace
 
         """
+        if coordinate_system is None:
+            coordinate_system = tf.LocalCoordinateSystem()
+
         if not isinstance(coordinate_system, tf.LocalCoordinateSystem):
             raise TypeError(
                 "'coordinate_system' must be of type "
@@ -1559,6 +1605,7 @@ class Trace:
 
         return local_segment_cs + segment_start_cs
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def rasterize(self, raster_width):
         """Rasterize the trace.
 
@@ -1569,7 +1616,7 @@ class Trace:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
 
@@ -1602,6 +1649,35 @@ class Trace:
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None), strict=False)
+    def plot(self, raster_width=1, axes=None, fmt=None):  # pragma: no cover
+        """Plot the trace.
+
+        Parameters
+        ----------
+        raster_width : float, int
+            The target distance between two raster points
+        axes : matplotlib.axes.Axes
+            The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
+            new figure will be created
+        fmt : str
+            Format string that is passed to matplotlib.pyplot.plot.
+
+        """
+        data = self.rasterize(raster_width)
+        if fmt is None:
+            fmt = "x-"
+        if axes is None:
+            fig = plt.figure()
+            axes = fig.gca(projection="3d", proj_type="ortho")
+            axes.plot(data[0], data[1], data[2], fmt)
+            axes.set_xlabel("x")
+            axes.set_ylabel("y")
+            axes.set_zlabel("z")
+            vs.set_axes_equal(axes)
+        else:
+            axes.plot(data[0], data[1], data[2], fmt)
+
 
 # Linear profile interpolation class ------------------------------------------
 
@@ -1611,11 +1687,11 @@ def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
 
     Parameters
     ----------
-    profile_a :
+    profile_a : Profile
         First profile
-    profile_b :
+    profile_b : Profile
         Second profile
-    weight :
+    weight : float
         Weighting factor [0 .. 1]. If 0, the profile is identical
         to 'a' and if 1, it is identical to b.
 
@@ -1825,21 +1901,28 @@ class VariableProfile:
 
 
 class Geometry:
-    """Define the experimental geometry."""
+    """Defines a 3 dimensional geometry by extrusion of a 2 dimensional profile.
+
+    The path of the extrusion can be chosen arbitrarily. It is also possible to vary
+    the profile along the extrusion path.
+
+    """
 
     def __init__(self, profile, trace):
-        """Construct geometry.
+        """Construct a geometry.
 
         Parameters
         ----------
-        profile :
-            Constant or variable profile.
-        trace :
-            Trace
+        profile : Profile, VariableProfile
+            Constant or variable profile that is used as cross section along the
+            specified trace
+        trace : Trace
+            The path that is used to extrude the given profile
 
         Returns
         -------
-        Geometry
+        Geometry :
+            A Geometry class instance
 
         """
         self._check_inputs(profile, trace)
@@ -1884,6 +1967,7 @@ class Geometry:
         profile = self._profile.local_profile(profile_location)
         return self._profile_raster_data_3d(profile, raster_width)
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def _rasterize_trace(self, raster_width) -> np.ndarray:
         """Rasterize the trace.
 
@@ -1894,7 +1978,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """
@@ -1921,7 +2005,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Transformed profile data
 
         """
@@ -1930,6 +2014,7 @@ class Geometry:
         return local_data + local_cs.coordinates.data[:, np.newaxis]
 
     @staticmethod
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def _profile_raster_data_3d(profile, raster_width):
         """Get the rasterized profile in 3d.
 
@@ -1944,13 +2029,14 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Rasterized profile in 3d
 
         """
         profile_data = profile.rasterize(raster_width)
         return np.insert(profile_data, 0, 0, axis=0)
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
     def _rasterize_constant_profile(self, profile_raster_width, trace_raster_width):
         """Rasterize the geometry with a constant profile.
 
@@ -1963,7 +2049,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """
@@ -1977,6 +2063,7 @@ class Geometry:
 
         return raster_data
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
     def _rasterize_variable_profile(self, profile_raster_width, trace_raster_width):
         """Rasterize the geometry with a variable profile.
 
@@ -1989,7 +2076,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """
@@ -2025,6 +2112,7 @@ class Geometry:
         """
         return self._trace
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
     def rasterize(self, profile_raster_width, trace_raster_width):
         """Rasterize the geometry.
 
@@ -2037,7 +2125,7 @@ class Geometry:
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Raster data
 
         """
@@ -2048,3 +2136,38 @@ class Geometry:
         return self._rasterize_variable_profile(
             profile_raster_width, trace_raster_width
         )
+
+    @UREG.wraps(
+        None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None), strict=False
+    )
+    def plot(
+        self, profile_raster_width, trace_raster_width, axes=None, fmt=None
+    ):  # pragma: no cover
+        """Plot the geometry.
+
+        Parameters
+        ----------
+        profile_raster_width: float, int
+            Target distance between the individual points of a profile
+        trace_raster_width: float, int
+            Target distance between the individual profiles on the trace
+        axes : matplotlib.axes.Axes
+            The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
+            new figure will be created
+        fmt : str
+            Format string that is passed to matplotlib.pyplot.plot.
+
+        """
+        data = self.rasterize(profile_raster_width, trace_raster_width)
+        if fmt is None:
+            fmt = "o"
+        if axes is None:
+            fig = plt.figure()
+            axes = fig.gca(projection="3d", proj_type="ortho")
+            axes.plot(data[0], data[1], data[2], fmt)
+            axes.set_xlabel("x")
+            axes.set_ylabel("y")
+            axes.set_zlabel("z")
+            vs.set_axes_equal(axes)
+        else:
+            axes.plot(data[0], data[1], data[2], fmt)

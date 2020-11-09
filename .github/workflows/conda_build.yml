@@ -4,8 +4,9 @@ on:
   push:
     branches:
       - master
-  # Trigger the workflow on all pull request
+  # Trigger the workflow on relevant pull request events
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   # Trigger the workflow on all release created events (this could redirect to main conda channel)
   release:
     types:
@@ -13,6 +14,7 @@ on:
 
 jobs:
   build:
+    if: github.event.pull_request.draft == false # exclude job from draft PR
     name: conda build (local)
     runs-on: ${{ matrix.os }}
     strategy:

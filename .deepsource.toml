@@ -6,8 +6,9 @@ test_patterns = [
 ]
 
 exclude_patterns = [
-  "docs/**",
+  "doc/**",
   "versioneer.py",
+  "scripts/**",
   "weldx/_version.py",
   "weldx/asdf/**",
 ]

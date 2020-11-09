@@ -1,0 +1,66 @@
+# matplotlib
+py:class matplotlib.axes.Axes
+
+# networkx
+py:class networkx.DiGraph
+py:class networkx.classes.digraph.DiGraph
+
+# numpy
+py:class numpy.ndarray
+
+# pandas
+py:class pandas._libs.tslibs.timestamps.Timestamp
+py:class pandas.core.indexes.datetimes.DatetimeIndex
+py:class pandas.core.indexes.timedeltas.TimedeltaIndex
+py:class pandas.DatetimeIndex
+py:class pandas.TimedeltaIndex
+py:class pandas.Timestamp
+
+# pint
+py:class pint.Quantity
+py:class pint.quantity.Quantity
+
+# scipy
+py:class scipy.spatial.transform.rotation.Rotation
+py:class scipy.spatial.transform.Rotation
+
+# sympy
+py:class sympy.core.expr.Expr
+
+# xarray
+py:class xarray.core.dataarray.DataArray
+py:class xarray.DataArray
+py:class xarray.Dataset
+
+
+# inherited -------------------------------------------------------------------
+# here goes everything that is caused by inheriting from non-weldx types
+
+# scipy
+py:class 3
+py:class array_like
+py:class array_like shape
+py:class boolean
+py:class euler
+py:class integer
+py:class length 3
+py:class N
+py:class ndarray
+py:class optional
+py:class RandomState instance
+py:class Rotation object
+py:class shape
+py:class string
+py:obj a
+py:obj b
+py:obj weights
+py:obj Rotation
+py:obj return_sensitivity
+py:obj vectors[i]
+py:obj (3, )
+py:obj (1, 3)
+py:obj rotated_vectors
+py:obj n
+py:obj num
+py:obj left
+py:obj right
