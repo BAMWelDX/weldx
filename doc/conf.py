@@ -142,7 +142,7 @@ nbsphinx_kernel_name = "python3"
 
 # This is processed by Jinja2 and inserted before each notebook
 nbsphinx_prolog = r"""
-{% set docname = env.doc2path(env.docname, base=None) %}
+{% set docname = env.doc2path(env.docname, base=None).replace("\\","/") %}
 
 .. only:: html
 
