@@ -1,35 +1,10 @@
-"""Temporary module for welding related classes."""
-
-from dataclasses import dataclass
-from typing import Dict
+"""Welding process ASDF classes."""
 
 from asdf.tagged import tag_object
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.utils import drop_none_attr
-from weldx.core import TimeSeries
-
-
-@dataclass
-class GmawProcess:
-    """Container class for all GMAW processes."""
-
-    base_process: str
-    manufacturer: str
-    power_source: str
-    parameters: Dict[str, TimeSeries]
-    tag: str = None
-    meta: dict = None
-
-    def __post_init__(self):
-        """Set defaults and convert parmater inputs."""
-        if self.tag is None:
-            self.tag = "GMAW"
-
-        self.parameters = {
-            k: (v if isinstance(v, TimeSeries) else TimeSeries(v))
-            for k, v in self.parameters.items()
-        }
+from weldx.welding.processes import GmawProcess
 
 
 class GmawProcessTypeAsdf(WeldxType):

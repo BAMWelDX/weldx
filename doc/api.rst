@@ -17,6 +17,7 @@ API
     weldx.transformations
     weldx.utility
     weldx.visualization
+    weldx.welding
 
 
 **ASDF modules**
