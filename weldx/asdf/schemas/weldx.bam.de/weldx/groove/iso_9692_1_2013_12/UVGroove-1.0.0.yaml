@@ -7,6 +7,19 @@ tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UVGroove-1.0.0"
 title: |
   UVGroove representation.
 
+examples:
+  -
+    - A simple UV-Groove
+    - |
+        !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UVGroove-1.0.0>
+          t: !unit/quantity-1.1.0 {unit: millimeter, value: 12}
+          alpha: !unit/quantity-1.1.0 {unit: degree, value: 60}
+          beta: !unit/quantity-1.1.0 {unit: degree, value: 11}
+          R: !unit/quantity-1.1.0 {unit: millimeter, value: 6}
+          b: !unit/quantity-1.1.0 {unit: millimeter, value: 2}
+          h: !unit/quantity-1.1.0 {unit: millimeter, value: 4}
+          code_number: ['1.6']
+
 type: object
 properties:
   t:
@@ -23,5 +36,4 @@ properties:
     $ref: "../terms-1.0.0#/definitions/root-face"
 required: [t, alpha, beta, R, b, h]
 propertyOrder: [t, alpha, beta, R, b, h]
-
 ...

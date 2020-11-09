@@ -7,6 +7,18 @@ tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UGroove-1.0.0"
 title: |
   UGroove representation.
 
+examples:
+  -
+    - A simple U-Groove
+    - |
+        !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UGroove-1.0.0>
+          t: !unit/quantity-1.1.0 {unit: millimeter, value: 15}
+          beta: !unit/quantity-1.1.0 {unit: degree, value: 9}
+          R: !unit/quantity-1.1.0 {unit: millimeter, value: 6}
+          b: !unit/quantity-1.1.0 {unit: millimeter, value: 1}
+          c: !unit/quantity-1.1.0 {unit: millimeter, value: 3}
+          code_number: ['1.8']
+
 type: object
 properties:
   t:
@@ -21,5 +33,4 @@ properties:
     $ref: "../terms-1.0.0#/definitions/root-face"
 required: [t, beta, R, b, c]
 propertyOrder: [t, beta, R, b, c]
-
 ...

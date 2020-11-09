@@ -38,5 +38,4 @@ properties:
     $ref: "../terms-1.0.0#/definitions/root-face"
 required: [t, alpha, b, c]
 propertyOrder: [t, alpha, b, c]
-
 ...
