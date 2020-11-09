@@ -29,6 +29,17 @@ __all__ = [
 _DEFAULT_LEN_UNIT = "mm"
 
 
+def _set_default_heights(groove):
+    """Calculate default h1/h2 values."""
+    if groove.h1 is None and groove.h2 is None:
+        groove.h1 = (groove.t - groove.c) / 2
+        groove.h2 = (groove.t - groove.c) / 2
+    elif groove.h1 is not None and groove.h2 is None:
+        groove.h2 = groove.h1
+    elif groove.h1 is None and groove.h2 is not None:
+        groove.h1 = groove.h2
+
+
 class IsoBaseGroove:
     """Generic base class for all groove types."""
 
@@ -775,13 +786,7 @@ class DVGroove(IsoBaseGroove):
 
     def __post_init__(self):
         """Calculate missing values."""
-        if self.h1 is None and self.h2 is None:
-            self.h1 = (self.t - self.c) / 2
-            self.h2 = (self.t - self.c) / 2
-        elif self.h1 is not None and self.h2 is None:
-            self.h2 = self.h1
-        elif self.h1 is None and self.h2 is not None:
-            self.h1 = self.h2
+        _set_default_heights(self)
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile.
@@ -902,13 +907,7 @@ class DUGroove(IsoBaseGroove):
 
     def __post_init__(self):
         """Calculate missing values."""
-        if self.h1 is None and self.h2 is None:
-            self.h1 = (self.t - self.c) / 2
-            self.h2 = (self.t - self.c) / 2
-        elif self.h1 is not None and self.h2 is None:
-            self.h2 = self.h1
-        elif self.h1 is None and self.h2 is not None:
-            self.h1 = self.h2
+        _set_default_heights(self)
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile.
@@ -1016,13 +1015,7 @@ class DHVGroove(IsoBaseGroove):
 
     def __post_init__(self):
         """Calculate missing values."""
-        if self.h1 is None and self.h2 is None:
-            self.h1 = (self.t - self.c) / 2
-            self.h2 = (self.t - self.c) / 2
-        elif self.h1 is not None and self.h2 is None:
-            self.h2 = self.h1
-        elif self.h1 is None and self.h2 is not None:
-            self.h1 = self.h2
+        _set_default_heights(self)
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile.
@@ -1131,13 +1124,7 @@ class DHUGroove(IsoBaseGroove):
 
     def __post_init__(self):
         """Calculate missing values."""
-        if self.h1 is None and self.h2 is None:
-            self.h1 = (self.t - self.c) / 2
-            self.h2 = (self.t - self.c) / 2
-        elif self.h1 is not None and self.h2 is None:
-            self.h2 = self.h1
-        elif self.h1 is None and self.h2 is not None:
-            self.h1 = self.h2
+        _set_default_heights(self)
 
     def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile.
