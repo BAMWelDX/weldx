@@ -13,6 +13,7 @@
 - create `weldx.welding` module (contains GMAW processes and groove definitions) [[#181]](https://github.com/BAMWelDX/weldx/pull/181)
 - move `GmawProcessTypeAsdf` to `asdf.tags` folder [[#181]](https://github.com/BAMWelDX/weldx/pull/181)
 - reorder module imports in `weldx.__init__` [[#181]](https://github.com/BAMWelDX/weldx/pull/181)
+- support timedelta dtypes in ASDF `data_array/variable` [[#191]](https://github.com/BAMWelDX/weldx/pull/191)
 
 ### ASDF
 - refactor ISO 9692-1 groove schema definitions and classes [[#181]](https://github.com/BAMWelDX/weldx/pull/181)
