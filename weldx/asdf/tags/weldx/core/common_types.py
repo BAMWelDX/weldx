@@ -4,6 +4,7 @@ from typing import List
 import numpy as np
 import pint
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
+from pandas.api.types import is_timedelta64_dtype as is_timedelta
 
 from weldx.asdf.types import WeldxType
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -111,7 +112,7 @@ class VariableTypeASDF(WeldxType):
             Unmodified or converted data.
 
         """
-        if is_datetime(data.dtype):
+        if is_datetime(data.dtype) or is_timedelta(data.dtype):
             return data.astype(np.int64)
         return data
 
