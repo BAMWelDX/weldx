@@ -58,13 +58,15 @@ def get_xarray_example_data_array():
 
     """
     data = np.array([[0, 1], [2, 3]])
+    data = np.repeat(data[:, :, np.newaxis], 3, axis=-1)
 
     time_labels = ["2020-05-01", "2020-05-03"]
     d1 = np.array([-1, 1])
     d2 = pd.DatetimeIndex(time_labels)
-    coords = {"d1": d1, "d2": d2, "time_labels": (["d2"], time_labels)}
+    d3 = pd.timedelta_range("0s", "2s", freq="1s")
+    coords = {"d1": d1, "d2": d2, "d3": d3, "time_labels": (["d2"], time_labels)}
 
-    dax = xr.DataArray(data=data, dims=["d1", "d2"], coords=coords)
+    dax = xr.DataArray(data=data, dims=["d1", "d2", "d3"], coords=coords)
 
     dax.attrs = {"answer": 42}
 
