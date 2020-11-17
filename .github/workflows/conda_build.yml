@@ -62,7 +62,7 @@ jobs:
 
       - name: set package file env
         shell: bash -l {0}
-        run: echo ::set-env name=PACKAGE_DIR::$(conda build . --output)
+        run: echo "PACKAGE_DIR=$(conda build . --output)" >> $GITHUB_ENV
 
       - uses: actions/upload-artifact@v2
         with:
