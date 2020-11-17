@@ -39,7 +39,7 @@ jobs:
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./conda.recipe/build_env.yml') }}
 
       - name: Setup Conda Environment
-        uses: goanpeca/setup-miniconda@v1
+        uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           environment-file: ./conda.recipe/build_env.yml
@@ -62,7 +62,7 @@ jobs:
 
       - name: set package file env
         shell: bash -l {0}
-        run: echo ::set-env name=PACKAGE_DIR::$(conda build . --output)
+        run: echo "PACKAGE_DIR=$(conda build . --output)" >> $GITHUB_ENV
 
       - uses: actions/upload-artifact@v2
         with:
