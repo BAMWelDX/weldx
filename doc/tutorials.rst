@@ -14,6 +14,7 @@ The welding example tutorials provide an overview of common welding related task
     tutorials/measurement_example
     tutorials/welding_example_02_weaving
     tutorials/GMAW_process
+    tutorials/experiment_design_01
 
 API Tutorials
 #############
