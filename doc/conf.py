@@ -213,7 +213,7 @@ html_logo = "_static/WelDX_notext.svg"
 html_favicon = "_static/WelDX_notext.ico"
 
 html_theme_options = {
-    "external_links": [{"url": "https://asdf.readthedocs.io/", "name": "ASDF"}],
+    #  "external_links": [{"url": "https://asdf.readthedocs.io/", "name": "ASDF"}],
     "github_url": "https://github.com/BAMWelDX/weldx",
     "twitter_url": "https://twitter.com/BAMweldx",
     "use_edit_page_button": False,
