@@ -29,3 +29,11 @@ The API tutorials provide more detailed usages and examples of core ``WeLDX`` co
     tutorials/geometry_01_profiles
     tutorials/geometry_02_geometry
     tutorials/timeseries_01
+
+Analysis Tutorials
+##################
+
+.. toctree::
+    :maxdepth: 1
+
+    tutorials/experiment_design_01

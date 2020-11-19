@@ -122,7 +122,7 @@ def _lcs_coords_from_ts(
 
     Returns
     -------
-        xarray.DataArray
+    A xarray.DataArray with correctly labeled dimensions to be used for LCS creation.
 
     """
     ts_data = ts.interp_time(time=time)
