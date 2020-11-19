@@ -4,7 +4,7 @@
 ### added
 - Added `weldx.utility.ureg_check_class` class decorator to enable `pint` dimensionality checks with `@dataclass`. [[#179]](https://github.com/BAMWelDX/weldx/pull/179)
 - Made coordinates and orientations optional for LCS schema. Missing values are interpreted as unity translation/rotation. An empty LCS object represents a unity transformation step. [[#177]](https://github.com/BAMWelDX/weldx/pull/177)
-- add `weldx.utility._lcs_coords_from_ts` [[#199]](https://github.com/BAMWelDX/weldx/pull/199)
+- added `weldx.utility.lcs_coords_from_ts` function [[#199]](https://github.com/BAMWelDX/weldx/pull/199)
 
 ### changes
 - refactor welding groove classes [[#181]](https://github.com/BAMWelDX/weldx/pull/181)
@@ -15,6 +15,8 @@
 - move `GmawProcessTypeAsdf` to `asdf.tags` folder [[#181]](https://github.com/BAMWelDX/weldx/pull/181)
 - reorder module imports in `weldx.__init__` [[#181]](https://github.com/BAMWelDX/weldx/pull/181)
 - support timedelta dtypes in ASDF `data_array/variable` [[#191]](https://github.com/BAMWelDX/weldx/pull/191)
+- add `set_axes_equal` option to some geometry plot functions (now defaults to `False`) [[#199]](https://github.com/BAMWelDX/weldx/pull/199)
+- make `utility.sine` public function [[#199]](https://github.com/BAMWelDX/weldx/pull/199)
 
 ### ASDF
 - refactor ISO 9692-1 groove schema definitions and classes [[#181]](https://github.com/BAMWelDX/weldx/pull/181)

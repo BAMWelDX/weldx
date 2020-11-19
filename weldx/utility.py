@@ -73,7 +73,7 @@ def ureg_check_class(*args):
     return inner_decorator
 
 
-def _sine(
+def sine(
     f: pint.Quantity,
     amp: pint.Quantity,
     bias: pint.Quantity = None,
@@ -107,9 +107,9 @@ def _sine(
     return TimeSeries(expr)
 
 
-def _lcs_coords_from_ts(
+def lcs_coords_from_ts(
     ts: TimeSeries, time: Union[pd.DatetimeIndex, pint.Quantity]
-) -> xr.DataArray:
+) -> xr.DataArray:  # pragma: no cover
     """Create translation coordinates from a TimeSeries at specific timesteps.
 
     Parameters
@@ -118,7 +118,7 @@ def _lcs_coords_from_ts(
         TimeSeries that describes the coordinate motion as a 3D vector.
     time
         Timestamps used for interpolation.
-        TODO: add support for pd.DateTimeinedex as well
+        TODO: add support for pd.DateTimeindex as well
 
     Returns
     -------
