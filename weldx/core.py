@@ -286,7 +286,10 @@ class TimeSeries:
                     '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
                 )
 
-            dax = xr.DataArray(data=data, attrs={"interpolation": interpolation},)
+            dax = xr.DataArray(
+                data=data,
+                attrs={"interpolation": interpolation},
+            )
             self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
 
         elif isinstance(data, MathematicalExpression):
