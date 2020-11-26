@@ -57,9 +57,7 @@ def ureg_check_class(*args):
 
     """
 
-    def inner_decorator(
-        original_class,
-    ):
+    def inner_decorator(original_class,):
         # Make copy of original __init__, so we can call it without recursion
         orig_init = original_class.__init__
 
@@ -122,7 +120,8 @@ def lcs_coords_from_ts(
 
     Returns
     -------
-    A xarray.DataArray with correctly labeled dimensions to be used for LCS creation.
+    xarray.DataArray :
+        A DataArray with correctly labeled dimensions to be used for LCS creation.
 
     """
     ts_data = ts.interp_time(time=time)
@@ -701,9 +700,7 @@ def xr_interp_like(
     result = da.sel(sel_coords)
     if units is not None:
         result = xr.DataArray(
-            data=result.data * units,
-            dims=result.dims,
-            coords=result.coords,
+            data=result.data * units, dims=result.dims, coords=result.coords,
         )
 
     return result
@@ -857,9 +854,7 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
     """
     if times is not None:
         dsx = xr.DataArray(
-            data=data,
-            dims=["time", "c"],
-            coords={"time": times, "c": ["x", "y", "z"]},
+            data=data, dims=["time", "c"], coords={"time": times, "c": ["x", "y", "z"]},
         )
     else:
         dsx = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
@@ -889,9 +884,7 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
         )
     else:
         dsx = xr.DataArray(
-            data=data,
-            dims=["c", "v"],
-            coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
+            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
         )
     return dsx.astype(float)
 
