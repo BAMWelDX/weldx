@@ -5,6 +5,7 @@
 - Added `weldx.utility.ureg_check_class` class decorator to enable `pint` dimensionality checks with `@dataclass`. [[#179]](https://github.com/BAMWelDX/weldx/pull/179)
 - Made coordinates and orientations optional for LCS schema. Missing values are interpreted as unity translation/rotation. An empty LCS object represents a unity transformation step. [[#177]](https://github.com/BAMWelDX/weldx/pull/177)
 - added `weldx.utility.lcs_coords_from_ts` function [[#199]](https://github.com/BAMWelDX/weldx/pull/199)
+- add a tutorial with advanced use case for combining groove interpolation with different TCP movements and distance calculations [[#199]](https://github.com/BAMWelDX/weldx/pull/199)
 
 ### changes
 - refactor welding groove classes [[#181]](https://github.com/BAMWelDX/weldx/pull/181)
