@@ -1649,8 +1649,10 @@ class Trace:
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None), strict=False)
-    def plot(self, raster_width=1, axes=None, fmt=None):  # pragma: no cover
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None, None), strict=False)
+    def plot(
+        self, raster_width=1, axes=None, fmt=None, set_axes_equal=False
+    ):  # pragma: no cover
         """Plot the trace.
 
         Parameters
@@ -1662,6 +1664,8 @@ class Trace:
             new figure will be created
         fmt : str
             Format string that is passed to matplotlib.pyplot.plot.
+        set_axes_equal : bool
+            Set plot axes to equal scaling (Default = False).
 
         """
         data = self.rasterize(raster_width)
@@ -1674,7 +1678,8 @@ class Trace:
             axes.set_xlabel("x")
             axes.set_ylabel("y")
             axes.set_zlabel("z")
-            vs.set_axes_equal(axes)
+            if set_axes_equal:
+                vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
 
@@ -2138,10 +2143,17 @@ class Geometry:
         )
 
     @UREG.wraps(
-        None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None), strict=False
+        None,
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None, None),
+        strict=False,
     )
     def plot(
-        self, profile_raster_width, trace_raster_width, axes=None, fmt=None
+        self,
+        profile_raster_width,
+        trace_raster_width,
+        axes=None,
+        fmt=None,
+        set_axes_equal=False,
     ):  # pragma: no cover
         """Plot the geometry.
 
@@ -2156,6 +2168,8 @@ class Geometry:
             new figure will be created
         fmt : str
             Format string that is passed to matplotlib.pyplot.plot.
+        set_axes_equal : bool
+            Set plot axes to equal scaling (Default = False).
 
         """
         data = self.rasterize(profile_raster_width, trace_raster_width)
@@ -2168,6 +2182,7 @@ class Geometry:
             axes.set_xlabel("x")
             axes.set_ylabel("y")
             axes.set_zlabel("z")
-            vs.set_axes_equal(axes)
+            if set_axes_equal:
+                vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)

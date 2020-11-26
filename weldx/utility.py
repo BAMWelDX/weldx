@@ -73,7 +73,7 @@ def ureg_check_class(*args):
     return inner_decorator
 
 
-def _sine(
+def sine(
     f: pint.Quantity,
     amp: pint.Quantity,
     bias: pint.Quantity = None,
@@ -105,6 +105,33 @@ def _sine(
     parameters = {"a": amp, "b": bias, "o": Q_(2 * np.pi, "rad") * f, "p": phase}
     expr = MathematicalExpression(expression=expr_string, parameters=parameters)
     return TimeSeries(expr)
+
+
+def lcs_coords_from_ts(
+    ts: TimeSeries, time: Union[pd.DatetimeIndex, pint.Quantity]
+) -> xr.DataArray:  # pragma: no cover
+    """Create translation coordinates from a TimeSeries at specific timesteps.
+
+    Parameters
+    ----------
+    ts:
+        TimeSeries that describes the coordinate motion as a 3D vector.
+    time
+        Timestamps used for interpolation.
+        TODO: add support for pd.DateTimeindex as well
+
+    Returns
+    -------
+    xarray.DataArray :
+        A DataArray with correctly labeled dimensions to be used for LCS creation.
+
+    """
+    ts_data = ts.interp_time(time=time)
+    # assign vector coordinates and convert to mm
+    ts_data = ts_data.rename({"dim_1": "c"}).assign_coords({"c": ["x", "y", "z"]})
+    ts_data.data = ts_data.data.to("mm").magnitude
+    ts_data["time"] = pd.TimedeltaIndex(ts_data["time"].data)
+    return ts_data
 
 
 def is_column_in_matrix(column, matrix) -> bool:
