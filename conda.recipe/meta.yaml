@@ -16,6 +16,7 @@ requirements:
     build:
         - python
         - setuptools
+        - setuptools_scm
     run:
         - python
         # dependencies are defined in setup.py
