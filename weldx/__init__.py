@@ -32,6 +32,11 @@ try:
     from ._version import version as __version__
 except ModuleNotFoundError:
     __version__ = None
+    warnings.warn(
+        "Using local weldx package files without version information.\n"
+        "Consider running 'python setup.py --version' or 'pip install -e .' "
+        "in the weldx root repository"
+    )
 
 __all__ = [
     "core",
