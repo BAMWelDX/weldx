@@ -6,8 +6,6 @@ from os import path
 
 from setuptools import find_packages, setup
 
-import versioneer
-
 # add README.md as long description
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
@@ -35,8 +33,10 @@ entry_points["asdf_extensions"] = [
 
 setup(
     name="weldx",
-    version=versioneer.get_version(),
-    cmdclass=versioneer.get_cmdclass(),
+    use_scm_version={
+        "write_to": "weldx/_version.py",
+        "write_to_template": 'version = "{version}"\n',
+    },
     author="Cagtay Fabry",
     author_email="Cagtay.Fabry@bam.de",
     packages=find_packages(),
