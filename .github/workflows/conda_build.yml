@@ -30,7 +30,7 @@ jobs:
         run: git fetch --prune --tags # Fetch all history for all tags and branches
 
       - name: Cache conda
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         env:
           # Increase this value to reset cache if ./conda.recipe/build_env.yml has not changed
           CACHE_NUMBER: 0
