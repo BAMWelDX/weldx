@@ -5,6 +5,7 @@
 from os import path
 
 from setuptools import find_packages, setup
+from setuptools_scm import get_version
 
 # add README.md as long description
 this_directory = path.abspath(path.dirname(__file__))
@@ -33,9 +34,10 @@ entry_points["asdf_extensions"] = [
 
 setup(
     name="weldx",
+    version=get_version(),
     use_scm_version={
         "write_to": "weldx/_version.py",
-        "write_to_template": 'version = "{version}"\n',
+        "write_to_template": '__version__ = "{version}"\n',
     },
     author="Cagtay Fabry",
     author_email="Cagtay.Fabry@bam.de",

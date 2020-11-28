@@ -2,7 +2,7 @@
 
 package:
     name: weldx
-    version: {{ data.get('version') }}
+    version: {{ data["version"] }}
 
 source:
     path: ..

@@ -29,7 +29,7 @@ with warnings.catch_warnings():
     Q_([])
 
 try:
-    from ._version import version as __version__
+    from ._version import __version__
 except ModuleNotFoundError:
     __version__ = None
     warnings.warn(
