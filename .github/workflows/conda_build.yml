@@ -44,7 +44,6 @@ jobs:
           auto-update-conda: true
           environment-file: ./conda.recipe/build_env.yml
           activate-environment: build_env
-          channels: conda-forge
           auto-activate-base: false
           use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
 
