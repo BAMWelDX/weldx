@@ -1,9 +1,11 @@
-name: conda build
+name: build
 on:
-  # Trigger the workflow on push events on master
+  # Trigger the workflow on push events on master and tags
   push:
     branches:
       - master
+    tags:
+      - '*'
   # Trigger the workflow on relevant pull request events
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -13,24 +15,18 @@ on:
       - created
 
 jobs:
-  build:
+  conda:
     if: github.event.pull_request.draft == false # exclude job from draft PR
-    name: conda build (local)
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-18.04]
+    name: conda build
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-
-      - name: Fetch tags
-        run: git fetch --prune --tags # Fetch all history for all tags and branches
+          fetch-depth: 0 # Fetch all history for all tags and branches
 
       - name: Cache conda
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         env:
           # Increase this value to reset cache if ./conda.recipe/build_env.yml has not changed
           CACHE_NUMBER: 0
@@ -44,7 +40,6 @@ jobs:
           auto-update-conda: true
           environment-file: ./conda.recipe/build_env.yml
           activate-environment: build_env
-          channels: conda-forge
           auto-activate-base: false
           use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
 
@@ -66,6 +61,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
+          name: weldx-conda
           path: ${{ env.PACKAGE_DIR }}
 
       - name: upload package to dev label on Anaconda Cloud
@@ -75,3 +71,43 @@ jobs:
           anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
         run: |
           anaconda -t $anaconda_token upload --user BAMwelding --label dev $PACKAGE_DIR
+
+  pypi:
+    if: github.event.pull_request.draft == false # exclude job from draft PR
+    name: pypi build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: pip installs
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools setuptools_scm wheel twine
+
+      - name: build package
+        run: |
+          python setup.py sdist bdist_wheel
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: ./dist/
+
+      - name: upload tags to pypi test channel
+        if: startsWith(github.ref, 'refs/tags/')
+        env: # set access token from GitHub secrets
+          pypi_token: ${{ secrets.TESTPYPI_UPLOAD }}
+        run: |
+          python -m twine upload --repository testpypi dist/* -u __token__ -p $pypi_token
+
+      - name: pypi release
+        if: github.event_name == 'release' && github.event.action == 'created'
+        env: # set access token from GitHub secrets
+          pypi_token: ${{ secrets.PYPI_UPLOAD }}
+        run: |
+          python -m twine upload dist/* -u __token__ -p $pypi_token

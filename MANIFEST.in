@@ -1,3 +1,1 @@
 recursive-include weldx/asdf/schemas *.yaml
-include versioneer.py
-include weldx/_version.py
