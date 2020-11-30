@@ -1,9 +1,11 @@
 name: build
 on:
-  # Trigger the workflow on push events on master
+  # Trigger the workflow on push events on master and tags
   push:
     branches:
       - master
+    tags:
+      - '*'
   # Trigger the workflow on relevant pull request events
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
