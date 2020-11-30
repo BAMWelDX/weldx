@@ -21,10 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-
-      - name: Fetch tags
-        run: git fetch --prune --tags # Fetch all history for all tags and branches
+          fetch-depth: 0 # Fetch all history for all tags and branches
 
       - name: Cache conda
         uses: actions/cache@v2
@@ -79,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Fetch all history for all tags and branches
       - uses: actions/setup-python@v2
         with:
           python-version: '3.x'
@@ -96,3 +93,17 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           path: ./dist/
+
+      - name: upload tags to pypi test channel
+        if: startsWith(github.ref, 'refs/tags/')
+        env: # set access token from GitHub secrets
+          pypi_token: ${{ secrets.TESTPYPI_UPLOAD }}
+        run: |
+          python -m twine upload --repository testpypi dist/* -u __token__ -p $pypi_token
+
+      - name: pypi release
+        if: github.event_name == 'release' && github.event.action == 'created'
+        env: # set access token from GitHub secrets
+          pypi_token: ${{ secrets.PYPI_UPLOAD }}
+        run: |
+          python -m twine upload dist/* -u __token__ -p $pypi_token
