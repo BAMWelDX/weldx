@@ -1,4 +1,4 @@
-name: conda build
+name: build
 on:
   # Trigger the workflow on push events on master
   push:
@@ -13,13 +13,10 @@ on:
       - created
 
 jobs:
-  build:
+  conda:
     if: github.event.pull_request.draft == false # exclude job from draft PR
-    name: conda build (local)
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-18.04]
+    name: conda build
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -74,3 +71,25 @@ jobs:
           anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
         run: |
           anaconda -t $anaconda_token upload --user BAMwelding --label dev $PACKAGE_DIR
+
+  pypi:
+    if: github.event.pull_request.draft == false # exclude job from draft PR
+    name: pypi build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: pip installs
+          run: |
+            pip install setuptools_scm
+
+      - name: build package
+        run: |
+          python setup.py sdist bdist_wheel
+
+      - uses: actions/upload-artifact@v2
+          with:
+            path: ./dist/
