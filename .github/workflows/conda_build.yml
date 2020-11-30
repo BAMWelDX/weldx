@@ -61,6 +61,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
+          name: weldx-conda
           path: ${{ env.PACKAGE_DIR }}
 
       - name: upload package to dev label on Anaconda Cloud
@@ -94,6 +95,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
+          name: dist
           path: ./dist/
 
       - name: upload tags to pypi test channel
