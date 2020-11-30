@@ -83,8 +83,8 @@ jobs:
           python-version: '3.7'
 
       - name: pip installs
-          run: |
-            pip install setuptools_scm
+        run: |
+          pip install setuptools_scm
 
       - name: build package
         run: |
