@@ -98,16 +98,18 @@ jobs:
           name: dist
           path: ./dist/
 
-      - name: upload tags to pypi test channel
-        if: startsWith(github.ref, 'refs/tags/')
-        env: # set access token from GitHub secrets
-          pypi_token: ${{ secrets.TESTPYPI_UPLOAD }}
+      - name: set pypi test repo defaults
         run: |
-          python -m twine upload --repository testpypi dist/* -u __token__ -p $pypi_token
+          echo "pypi_repo=testpypi" >> $GITHUB_ENV
+          echo "pypi_token=${{ secrets.TESTPYPI_UPLOAD }}" >> $GITHUB_ENV
+
+      - name: set pypi main repo for release
+          if: github.event_name == 'release' && github.event.action == 'created'
+          run: |
+            echo "pypi_repo=pypi" >> $GITHUB_ENV
+            echo "pypi_token=${{ secrets.PYPI_UPLOAD }}" >> $GITHUB_ENV
 
       - name: pypi release
-        if: github.event_name == 'release' && github.event.action == 'created'
-        env: # set access token from GitHub secrets
-          pypi_token: ${{ secrets.PYPI_UPLOAD }}
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'release' && github.event.action == 'created')
         run: |
-          python -m twine upload dist/* -u __token__ -p $pypi_token
+          python -m twine upload --repository $pypi_repo dist/* -u __token__ -p $pypi_token

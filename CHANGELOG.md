@@ -1,5 +1,7 @@
 # Release Notes
 
+## 0.2.3 (unreleased)
+
 ## 0.2.2 (30.11.2020)
 ### added
 - Added `weldx.utility.ureg_check_class` class decorator to enable `pint` dimensionality checks with `@dataclass`. [[#179]](https://github.com/BAMWelDX/weldx/pull/179)
