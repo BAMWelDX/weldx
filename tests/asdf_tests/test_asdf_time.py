@@ -32,6 +32,5 @@ def test_time_classes_max_inline():
         # cannot store large ints >52 bits inline in asdf
         dti = pd.DatetimeIndex(["2020-01-01", "2020-01-02", "2020-01-04", "2020-01-05"])
         _write_buffer(
-            {"root": dti},
-            write_kwargs={"all_array_storage": "inline"},
+            {"root": dti}, write_kwargs={"all_array_storage": "inline"},
         )

@@ -5,6 +5,7 @@ import warnings
 
 # main modules
 import weldx.utility  # import this first to avoid circular dependencies
+import weldx.config
 import weldx.core
 import weldx.geometry
 import weldx.transformations
@@ -44,3 +45,5 @@ __all__ = [
     "Q_",
     "welding",
 ]
+
+config.Config.load_installed_standards()
