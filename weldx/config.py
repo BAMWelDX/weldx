@@ -5,33 +5,42 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 import asdf
+import fs
 import pkg_resources
 import yaml
 from asdf import generic_io
 from asdf.config import ResourceMappingProxy
 from asdf.versioning import AsdfVersion, split_tag_version
+from fs.osfs import OSFS
 
 
 class QualityStandard:
     """Stores information about a quality standard."""
 
-    def __init__(self, resource_root_dir: Path):
+    def __init__(
+        self, resource_root_dir: Path, filesystem: fs.opener.base.Opener = None
+    ):
         """Create a `QualityStandard` instance
 
         Parameters
         ----------
         resource_root_dir : Path
             The path to the resource root directory of the standard
+        filesystem : fs.opener.base.Opener
+            An `Opener` instance of tha `fs` package
 
         """
         self._name = None
         self._max_version = None
         self._versions = {}
+        self._filesystem = filesystem
+        if self._filesystem is None:
+            self._filesystem = OSFS("c://")
 
         manifest_file_paths = self._get_manifest_file_paths(resource_root_dir)
 
         for path in manifest_file_paths:
-            filename, version = split_tag_version(path.stem)
+            filename, version = split_tag_version(Path(path).stem)
             if self._name is None:
                 self._name = filename
                 self._max_version = version
@@ -41,7 +50,7 @@ class QualityStandard:
                 if self._max_version < version:
                     self._max_version = version
 
-            with open(path, "r") as stream:
+            with self._filesystem.open(str(path), "r") as stream:
                 content = yaml.load(stream, Loader=yaml.SafeLoader)
                 mappings = self._get_schema_mappings(content, resource_root_dir)
                 self._versions[version] = {
@@ -49,8 +58,7 @@ class QualityStandard:
                     "schema_file_mapping": mappings,
                 }
 
-    @staticmethod
-    def _get_manifest_file_paths(resource_root_dir) -> List:
+    def _get_manifest_file_paths(self, resource_root_dir) -> List:
         """Get a list of all manifest files path's.
 
         Parameters
@@ -64,12 +72,10 @@ class QualityStandard:
            A list of all manifest files path's
 
         """
-        manifest_dir = resource_root_dir / "manifests"
-        return [
-            Path(os.path.join(manifest_dir, file))
-            for file in os.listdir(manifest_dir)
-            if file.endswith((".yml", ".yaml"))
-        ]
+        resource_root_dir = str(resource_root_dir).replace("\\", "/").replace("c:/", "")
+        manifest_dir = resource_root_dir + "/manifests"
+        files = self._filesystem.filterdir(manifest_dir, ["*.yml", "*.yaml"])
+        return [manifest_dir + "/" + file.name for file in files]
 
     @staticmethod
     def _get_schema_mappings(manifest_dict: Dict, resource_root_dir: Path) -> Dict:
