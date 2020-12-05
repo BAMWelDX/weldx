@@ -43,11 +43,15 @@ def from_tree_metadata(func):
     @functools.wraps(func)
     def from_tree_wrapped(cls, tree: dict, ctx):  # need cls for classmethod
         """Call default from_tree method and add metadata attributes."""
-        obj = func(tree, ctx)
+        meta_dict = {}
         for key in [META_ATTR, USER_ATTR]:
-            value = tree.get(key, None)
+            value = tree.pop(key, None)
             if value:
-                setattr(obj, key, value)
+                meta_dict[key] = value
+
+        obj = func(tree, ctx)
+        for key, value in meta_dict.items():
+            setattr(obj, key, value)
         return obj
 
     return from_tree_wrapped
