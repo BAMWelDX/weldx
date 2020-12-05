@@ -5,25 +5,52 @@ import functools
 
 from asdf.types import CustomType, ExtensionTypeMeta
 
-__all__ = ["WeldxType", "WeldxAsdfType", "_weldx_types", "_weldx_asdf_types"]
+META_ATTR = "wx_metadata"
+USER_ATTR = "wx_user"
+
+__all__ = [
+    "WeldxType",
+    "WeldxAsdfType",
+    "_weldx_types",
+    "_weldx_asdf_types",
+    "META_ATTR",
+    "USER_ATTR",
+]
 
 _weldx_types = set()
 _weldx_asdf_types = set()
 
 
-def metadata_decorator(func):
-    """Wrapper that will add the metadata field for to_tree methods."""
+def to_tree_metadata(func):
+    """Wrapper that will add the metadata and userdata field for to_tree methods."""
 
     @functools.wraps(func)
     def to_tree_wrapped(cls, node, ctx):  # need cls for classmethod
-        """Call default to_tree method and add metadata field."""
+        """Call default to_tree method and add metadata fields."""
         tree = func(node, ctx)
-        meta = getattr(node, "metadata", None)
-        if meta:
-            tree["metadata"] = node.metadata
+        for key in [META_ATTR, USER_ATTR]:
+            attr = getattr(node, key, None)
+            if attr:
+                tree[key] = attr
         return tree
 
     return to_tree_wrapped
+
+
+def from_tree_metadata(func):
+    """Wrapper that will add reading metadata and userdata during form_tree methods."""
+
+    @functools.wraps(func)
+    def from_tree_wrapped(cls, tree: dict, ctx):  # need cls for classmethod
+        """Call default from_tree method and add metadata attributes."""
+        obj = func(tree, ctx)
+        for key in [META_ATTR, USER_ATTR]:
+            value = tree.get(key, None)
+            if value:
+                setattr(obj, key, value)
+        return obj
+
+    return from_tree_wrapped
 
 
 class WeldxTypeMeta(ExtensionTypeMeta):
@@ -37,8 +64,9 @@ class WeldxTypeMeta(ExtensionTypeMeta):
         elif cls.organization == "stsci.edu" and cls.standard == "asdf":
             _weldx_asdf_types.add(cls)
 
-        # wrap original to_tree method to include metadata attribute
-        cls.to_tree = classmethod(metadata_decorator(cls.to_tree))
+        # wrap original to/from_tree method to include metadata attributes
+        cls.to_tree = classmethod(to_tree_metadata(cls.to_tree))
+        cls.from_tree = classmethod(from_tree_metadata(cls.from_tree))
 
         return cls
 
