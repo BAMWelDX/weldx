@@ -1,6 +1,9 @@
 # Release Notes
 
 ## 0.2.3 (unreleased)
+### ASDF
+- Added support for serializing generic metadata and userdata attributes for weldx classes. [[#209]](https://github.com/BAMWelDX/weldx/pull/209)
+  - the provisional attribute names are `wx_metadata` and `wx_user`
 
 ## 0.2.2 (30.11.2020)
 ### added
