@@ -24,7 +24,6 @@ oneOf:
           Unit of the data.
         type: string
     required: [values, unit]
-    additionalProperties: false
 
   - type: object
     description: |
@@ -43,7 +42,6 @@ oneOf:
           (optional) Resulting shape of the data when the expression is evaluated.
         type: array
     required: [values, unit]
-    additionalProperties: false
 
   - type: object
     description: |
@@ -76,7 +74,6 @@ oneOf:
       time: [t]
       values: [t, ...]
     required: [time, unit, shape, interpolation, values]
-    additionalProperties: false
 
 
 

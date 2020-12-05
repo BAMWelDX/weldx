@@ -32,5 +32,4 @@ properties:
 required: [gas_component, common_name]
 propertyOrder: [gas_component, common_name, designation]
 flowStyle: block
-additionalProperties: false
 ...

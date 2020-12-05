@@ -33,5 +33,4 @@ propertyOrder: [attributes, coordinates, data]
 
 
 flowStyle: block
-additionalProperties: false
 ...
