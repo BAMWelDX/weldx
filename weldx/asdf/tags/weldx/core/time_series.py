@@ -5,7 +5,7 @@ import pint
 
 from weldx.asdf.types import WeldxType
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.core import MathematicalExpression, TimeSeries
+from weldx.core import TimeSeries
 
 
 class TimeSeriesTypeASDF(WeldxType):
