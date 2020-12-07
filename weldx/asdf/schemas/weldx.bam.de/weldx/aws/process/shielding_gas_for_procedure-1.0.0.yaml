@@ -60,5 +60,4 @@ properties:
 required: [use_torch_shielding_gas, torch_shielding_gas, torch_shielding_gas_flowrate]
 propertyOrder: [use_torch_shielding_gas, torch_shielding_gas, torch_shielding_gas_flowrate, use_backing_gas, backing_gas, backing_gas_flowrate, use_trailing_gas, trailing_shielding_gas, trailing_shielding_gas_flowrate]
 flowStyle: block
-additionalProperties: false
 ...

@@ -38,5 +38,4 @@ properties:
 required: [dimensions, coordinates, variables]
 propertyOrder: [attributes, dimensions, coordinates, variables]
 flowStyle: block
-additionalProperties: false
 ...

@@ -28,5 +28,4 @@ required: [name, input_signal, output_signal]
 propertyOrder: [name, input_signal, output_signal, error, func]
 
 flowStyle: block
-additionalProperties: false
 ...

@@ -26,6 +26,4 @@ properties:
 propertyOrder: [name, reference_system, transformation]
 required: [name, reference_system, transformation]
 flowStyle: block
-additionalProperties: false
-
 ...

@@ -10,6 +10,7 @@ The welding example tutorials provide an overview of common welding related task
     :maxdepth: 1
 
     tutorials/welding_example_01_basics
+    tutorials/custom_metadata
     tutorials/groove_types_01
     tutorials/measurement_example
     tutorials/welding_example_02_weaving

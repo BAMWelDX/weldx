@@ -13,24 +13,23 @@ oneOf:
     description: |
       Implementation for constant values.
     properties:
-      values:
+      value:
         description: |
           Number or n-dimensional array that is constant in time.
-        oneOf:
+        anyOf:
           - type: number
           - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
       unit:
         description: |
           Unit of the data.
         type: string
-    required: [values, unit]
-    additionalProperties: false
+    required: [value, unit]
 
   - type: object
     description: |
       Implementation for expressions.
     properties:
-      values:
+      expression:
         description: |
           A mathematical expression that describes the time dependent behaviour.
         tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
@@ -42,8 +41,7 @@ oneOf:
         description: |
           (optional) Resulting shape of the data when the expression is evaluated.
         type: array
-    required: [values, unit]
-    additionalProperties: false
+    required: [expression, unit]
 
   - type: object
     description: |
@@ -76,10 +74,7 @@ oneOf:
       time: [t]
       values: [t, ...]
     required: [time, unit, shape, interpolation, values]
-    additionalProperties: false
 
-
-
-propertyOrder: [time, unit, shape, interpolation, values]
+propertyOrder: [expression, values, time, unit, shape, interpolation, values]
 flowStyle: block
 ...

@@ -58,7 +58,6 @@ oneOf:
 
     required: [values]
     propertyOrder: [values, start, end, freq, min, max]
-    additionalProperties: false
 
   - type: object
     properties:
@@ -75,7 +74,6 @@ oneOf:
 
     required: [start, end, freq]
     propertyOrder: [start, end, freq, min, max]
-    additionalProperties: false
 ...
 
 
