@@ -1,6 +1,5 @@
 """Classes and functions to configure the WelDX package."""
 
-import os
 from pathlib import Path
 from typing import Dict, List, Union
 
@@ -33,74 +32,46 @@ class QualityStandard:
         self._name = None
         self._max_version = None
         self._versions = {}
-        self._filesystem = filesystem
-        if self._filesystem is None:
-            self._filesystem = OSFS("c://")
 
-        manifest_file_paths = self._get_manifest_file_paths(resource_root_dir)
+        if isinstance(resource_root_dir, Path):
+            resource_root_dir = resource_root_dir.as_posix()
 
-        for path in manifest_file_paths:
-            filename, version = split_tag_version(Path(path).stem)
+        if isinstance(resource_root_dir, str):
+            self._filesystem = OSFS(resource_root_dir)
+        else:
+            self._filesystem = resource_root_dir
+
+        manifest_dir = self._filesystem.opendir("manifests")
+        manifest_files = [
+            file.name
+            for file in self._filesystem.filterdir("manifests", ["*.yml", "*.yaml"])
+        ]
+
+        for filename in manifest_files:
+            # stem of pyfilesystem cuts after first .
+            qs_name, version = split_tag_version(filename[: filename.rindex(".")])
+
             if self._name is None:
-                self._name = filename
+                self._name = qs_name
                 self._max_version = version
             else:
-                if filename != self._name:
+                if qs_name != self._name:
                     raise ValueError("Inconsistent naming of manifest files")
                 if self._max_version < version:
                     self._max_version = version
 
-            with self._filesystem.open(str(path), "r") as stream:
+            with manifest_dir.open(filename, "r") as stream:
                 content = yaml.load(stream, Loader=yaml.SafeLoader)
-                mappings = self._get_schema_mappings(content, resource_root_dir)
                 self._versions[version] = {
-                    "manifest_file_mapping": {content["id"]: path},
-                    "schema_file_mapping": mappings,
+                    "manifest_file_mapping": {content["id"]: filename},
+                    "schema_file_mapping": {
+                        mapping["uri"]: (f"{mapping['file']}.yaml")
+                        for mapping in content["tags"]
+                    },
                 }
 
-    def _get_manifest_file_paths(self, resource_root_dir) -> List:
-        """Get a list of all manifest files path's.
-
-        Parameters
-        ----------
-        resource_root_dir : Path
-            The path to the resource root directory of the standard
-
-        Returns
-        -------
-        List :
-           A list of all manifest files path's
-
-        """
-        resource_root_dir = str(resource_root_dir).replace("\\", "/").replace("c:/", "")
-        manifest_dir = resource_root_dir + "/manifests"
-        files = self._filesystem.filterdir(manifest_dir, ["*.yml", "*.yaml"])
-        return [manifest_dir + "/" + file.name for file in files]
-
-    @staticmethod
-    def _get_schema_mappings(manifest_dict: Dict, resource_root_dir: Path) -> Dict:
-        """Get all schema file mappings from the manifest file.
-
-        Parameters
-        ----------
-        manifest_dict : Dict
-            Content of the manifest file as dictionary
-        resource_root_dir : Path
-            The path to the resource root directory of the standard
-
-        Returns
-        -------
-        Dict :
-            Schema file mappings
-
-        """
-        return {
-            mapping["uri"]: (resource_root_dir / "schemas" / f"{mapping['file']}.yaml")
-            for mapping in manifest_dict["tags"]
-        }
-
     def _map_file_content(
-        self, file_mapping: Dict, version: AsdfVersion
+        self, file_mapping: Dict, directory: str, version: AsdfVersion
     ) -> ResourceMappingProxy:
         """ Get a mapping between an URI and a file content.
 
@@ -108,6 +79,8 @@ class QualityStandard:
         ----------
         file_mapping : Dict
             A dictionary containing the mapping between URI and the file path
+        directory:
+            Directory that contains the files. This is either 'schemas' or 'mappings'
         version : AsdfVersion
             The version of the standard.
 
@@ -118,8 +91,8 @@ class QualityStandard:
 
         """
         content_mapping = {
-            uri: generic_io.get_file(file_path).read().decode("utf-8")
-            for uri, file_path in file_mapping.items()
+            uri: self._filesystem.open(f"{directory}/{filename}").read()
+            for uri, filename in file_mapping.items()
         }
 
         return ResourceMappingProxy(
@@ -160,10 +133,10 @@ class QualityStandard:
 
         file_mappings = self._versions[version]
         manifest_mapping = self._map_file_content(
-            file_mappings["manifest_file_mapping"], version
+            file_mappings["manifest_file_mapping"], "manifests", version
         )
         schema_mapping = self._map_file_content(
-            file_mappings["schema_file_mapping"], version
+            file_mappings["schema_file_mapping"], "schemas", version
         )
 
         return manifest_mapping, schema_mapping
