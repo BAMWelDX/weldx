@@ -3,6 +3,16 @@ isort:skip_file
 """
 import warnings
 
+try:
+    from ._version import __version__
+except ModuleNotFoundError:
+    __version__ = None
+    warnings.warn(
+        "Using local weldx package files without version information.\n"
+        "Consider running 'python setup.py --version' or 'pip install -e .' "
+        "in the weldx root repository"
+    )
+
 # main modules
 import weldx.utility  # import this first to avoid circular dependencies
 import weldx.config
@@ -25,15 +35,9 @@ from weldx.transformations import (
 )
 from weldx.welding.groove.iso_9692_1 import get_groove
 
-# versioneer
-from ._version import get_versions
-
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     Q_([])
-
-__version__ = get_versions()["version"]
-del get_versions
 
 __all__ = [
     "core",

@@ -20,8 +20,5 @@ properties:
 
 propertyOrder: [name, data, measurement_chain]
 required: [name, data]
-
-
-
 flowStyle: block
-additionalProperties: false
+...

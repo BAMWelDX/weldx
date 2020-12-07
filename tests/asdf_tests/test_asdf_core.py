@@ -372,6 +372,7 @@ def test_coordinate_system_manager_time_dependencies(
     "ts",
     [
         TimeSeries(Q_(42, "m")),
+        TimeSeries(Q_(42.0, "m")),
         TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 4])),
         TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 5])),
         TimeSeries(ME("a*t+b", parameters={"a": Q_(2, "1/s"), "b": Q_(5, "")})),

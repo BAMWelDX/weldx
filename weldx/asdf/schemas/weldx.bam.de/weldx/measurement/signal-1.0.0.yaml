@@ -18,7 +18,5 @@ properties:
 
 propertyOrder: [signal_type, unit, data]
 required: [signal_type, unit]
-
 flowStyle: block
-additionalProperties: false
 ...

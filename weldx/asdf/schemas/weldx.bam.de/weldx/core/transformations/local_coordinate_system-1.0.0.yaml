@@ -36,5 +36,4 @@ wx_shape:
 
 propertyOrder: [reference_time, time, orientations, coordinates]
 flowStyle: block
-additionalProperties: false
 ...
