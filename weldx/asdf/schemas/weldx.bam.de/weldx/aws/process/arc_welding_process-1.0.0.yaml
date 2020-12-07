@@ -54,5 +54,4 @@ properties:
 required: [name, abbreviation]
 propertyOrder: [name, abbreviation]
 flowStyle: block
-additionalProperties: false
 ...

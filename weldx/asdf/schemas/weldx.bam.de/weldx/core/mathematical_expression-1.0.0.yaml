@@ -21,5 +21,4 @@ properties:
 required: [expression]
 propertyOrder: [expression, parameters]
 flowStyle: block
-additionalProperties: false
 ...

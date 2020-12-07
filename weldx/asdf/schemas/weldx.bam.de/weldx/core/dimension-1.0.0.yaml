@@ -24,5 +24,4 @@ properties:
 required: [name, length]
 propertyOrder: [name, length]
 flowStyle: block
-additionalProperties: false
 ...

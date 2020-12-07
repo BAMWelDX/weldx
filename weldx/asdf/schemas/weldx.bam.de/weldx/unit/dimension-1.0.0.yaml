@@ -63,5 +63,4 @@ properties:
       - magnetic_dipole
 
 required: [name]
-additionalProperties: false
 ...

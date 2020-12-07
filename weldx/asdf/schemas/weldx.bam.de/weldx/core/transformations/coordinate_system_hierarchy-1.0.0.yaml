@@ -50,6 +50,4 @@ properties:
 propertyOrder: [name, root_system_name, reference_time, subsystems, subsystem_data,  coordinate_systems]
 required: [name, root_system_name, coordinate_systems]
 flowStyle: block
-additionalProperties: false
-
 ...

@@ -23,5 +23,4 @@ properties:
 required: [geometry]
 propertyOrder: [geometry]
 flowStyle: block
-additionalProperties: false
 ...

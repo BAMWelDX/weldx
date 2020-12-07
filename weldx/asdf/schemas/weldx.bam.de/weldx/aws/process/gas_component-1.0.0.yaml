@@ -31,5 +31,4 @@ properties:
 required: [gas_chemical_name, gas_percentage]
 propertyOrder: [gas_chemical_name, gas_percentage]
 flowStyle: block
-additionalProperties: false
 ...

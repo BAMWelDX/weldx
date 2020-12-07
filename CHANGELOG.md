@@ -1,6 +1,11 @@
 # Release Notes
 
-## 0.2.2 (unreleased)
+## 0.2.3 (unreleased)
+### ASDF
+- Added support for serializing generic metadata and userdata attributes for weldx classes. [[#209]](https://github.com/BAMWelDX/weldx/pull/209)
+  - the provisional attribute names are `wx_metadata` and `wx_user`
+
+## 0.2.2 (30.11.2020)
 ### added
 - Added `weldx.utility.ureg_check_class` class decorator to enable `pint` dimensionality checks with `@dataclass`. [[#179]](https://github.com/BAMWelDX/weldx/pull/179)
 - Made coordinates and orientations optional for LCS schema. Missing values are interpreted as unity translation/rotation. An empty LCS object represents a unity transformation step. [[#177]](https://github.com/BAMWelDX/weldx/pull/177)
@@ -18,6 +23,7 @@
 - support timedelta dtypes in ASDF `data_array/variable` [[#191]](https://github.com/BAMWelDX/weldx/pull/191)
 - add `set_axes_equal` option to some geometry plot functions (now defaults to `False`) [[#199]](https://github.com/BAMWelDX/weldx/pull/199)
 - make `utility.sine` public function [[#199]](https://github.com/BAMWelDX/weldx/pull/199)
+- switch to setuptools_scm versioning and move package metadata to setup.cfg [[#206]](https://github.com/BAMWelDX/weldx/pull/206)
 
 ### ASDF
 - refactor ISO 9692-1 groove schema definitions and classes [[#181]](https://github.com/BAMWelDX/weldx/pull/181)

@@ -16,5 +16,4 @@ properties:
 
 required: [value]
 propertyOrder: [value]
-additionalProperties: true
 ...

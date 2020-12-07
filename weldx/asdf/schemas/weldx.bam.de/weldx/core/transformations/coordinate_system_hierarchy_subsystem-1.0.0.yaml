@@ -46,6 +46,4 @@ properties:
 
 propertyOrder: [name, parent_system, root_cs, members, subsystems]
 flowStyle: block
-additionalProperties: false
-
 ...
