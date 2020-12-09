@@ -329,9 +329,7 @@ def _read_buffer(buffer: BytesIO, open_kwargs: dict = None):
 
     buffer.seek(0)
     with asdf.open(
-        buffer,
-        extensions=[WeldxExtension(), WeldxAsdfExtension()],
-        **open_kwargs,
+        buffer, extensions=[WeldxExtension(), WeldxAsdfExtension()], **open_kwargs,
     ) as af:
         data = af.tree
     return data
@@ -381,6 +379,9 @@ else:  # pragma: no cover
             Syntax style to use
 
         """
+        if isinstance(file, str):
+            file = BytesIO(bytes(file, "utf-8"))
+
         if isinstance(file, BytesIO):
             file.seek(0)
             code = file.read()
