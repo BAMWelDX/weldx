@@ -4,6 +4,7 @@
 ### ASDF
 - Added support for serializing generic metadata and userdata attributes for weldx classes. [[#209]](https://github.com/BAMWelDX/weldx/pull/209)
   - the provisional attribute names are `wx_metadata` and `wx_user`
+- `None` values are removed from the asdf tree for all `weldx` classes. [[#212]](https://github.com/BAMWelDX/weldx/pull/212)
 
 ## 0.2.2 (30.11.2020)
 ### added
