@@ -329,7 +329,9 @@ def _read_buffer(buffer: BytesIO, open_kwargs: dict = None):
 
     buffer.seek(0)
     with asdf.open(
-        buffer, extensions=[WeldxExtension(), WeldxAsdfExtension()], **open_kwargs,
+        buffer,
+        extensions=[WeldxExtension(), WeldxAsdfExtension()],
+        **open_kwargs,
     ) as af:
         data = af.tree
     return data

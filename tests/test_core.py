@@ -40,7 +40,8 @@ class TestMathematicalExpression:
     def ma_def() -> MathematicalExpression:
         """Get a default instance for tests."""
         return MathematicalExpression(
-            TestMathematicalExpression.expr_def, TestMathematicalExpression.params_def,
+            TestMathematicalExpression.expr_def,
+            TestMathematicalExpression.params_def,
         )
 
     # Helper functions -----------------------------------------------------------------
@@ -152,7 +153,12 @@ class TestMathematicalExpression:
         ],
     )
     def test_comparison(
-        ma_def, other, equal, equal_no_params, mat_equal, mat_equal_no_params,
+        ma_def,
+        other,
+        equal,
+        equal_no_params,
+        mat_equal,
+        mat_equal_no_params,
     ):
         """Test if another object is equal to the default instance."""
         assert (ma_def == other) is equal
@@ -170,7 +176,12 @@ class TestMathematicalExpression:
         [
             ("a*b + c/d - e", {"d": 1, "e": 2}, {"a": 1, "b": 2, "c": 3}, 3),
             ("(a + b)**2 + c - d", {"a": 3, "d": 2}, {"b": 2, "c": 4}, 27),
-            ("a + b", {"a": np.array([1, 2])}, {"b": np.array([2, 4])}, [3, 6],),
+            (
+                "a + b",
+                {"a": np.array([1, 2])},
+                {"b": np.array([2, 4])},
+                [3, 6],
+            ),
         ],
     )
     def test_evaluation(expression, parameters, variables, exp_result):
