@@ -15,6 +15,7 @@ dependencies:
   - asdf>=2.7
   - openpyxl
   - jinja2
+  - fs
   # graph packages
   - networkx
   # Code quality
