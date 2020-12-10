@@ -50,8 +50,7 @@ def test_wx_tag_syntax_exceptions(instance_tag, tagname, err):
 
 
 @pytest.mark.parametrize(
-    "test_input",
-    [PropertyTagTestClass()],
+    "test_input", [PropertyTagTestClass()],
 )
 def test_property_tag_validator(test_input):
     """Test custom ASDF shape validators."""
@@ -168,9 +167,7 @@ def test_shape_validation_error_exception(shape, exp, err):
     [
         ShapeValidatorTestClass(),
         ShapeValidatorTestClass(time_prop=pd.date_range("2020", freq="D", periods=9)),
-        ShapeValidatorTestClass(
-            optional_prop=np.ones((1, 2, 3)),
-        ),
+        ShapeValidatorTestClass(optional_prop=np.ones((1, 2, 3)),),
         ShapeValidatorTestClass(
             nested_prop={
                 "p1": np.ones((10, 8, 6, 4, 2)),
@@ -190,15 +187,11 @@ def test_shape_validator(test_input):
         ShapeValidatorTestClass(
             prop4=np.ones((2, 3, 5, 7, 9)),  # mismatch a with prop5
         ),
-        ShapeValidatorTestClass(
-            prop2=np.ones((5, 2, 1)),
-        ),  # mismatch n with prop1
+        ShapeValidatorTestClass(prop2=np.ones((5, 2, 1)),),  # mismatch n with prop1
         ShapeValidatorTestClass(
             nested_prop={"p1": np.ones((10, 8, 6, 4, 2))},  # missing p2
         ),
-        ShapeValidatorTestClass(
-            optional_prop=np.ones((3, 2, 9)),
-        ),  # wrong optional
+        ShapeValidatorTestClass(optional_prop=np.ones((3, 2, 9)),),  # wrong optional
         ShapeValidatorTestClass(time_prop=pd.date_range("2020", freq="D", periods=3)),
     ],
 )

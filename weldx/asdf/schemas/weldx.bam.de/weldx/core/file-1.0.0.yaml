@@ -1,0 +1,22 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/weldx/core/file-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/file-1.0.0"
+
+title: |
+  Schema for a file.
+description: |
+  Describes a file.
+type: object
+properties:
+  filename:
+    type: string
+  content:
+    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+
+propertyOrder: [filename, content]
+required: [filename, content]
+
+flowStyle: block
+...

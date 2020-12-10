@@ -1769,30 +1769,22 @@ class CoordinateSystemManager:
                 )
             if lsc_child_in_parent:
                 self._update_local_coordinate_system(
-                    coordinate_system_name,
-                    reference_system_name,
-                    lcs,
+                    coordinate_system_name, reference_system_name, lcs,
                 )
             else:
                 self._update_local_coordinate_system(
-                    reference_system_name,
-                    coordinate_system_name,
-                    lcs,
+                    reference_system_name, coordinate_system_name, lcs,
                 )
         else:
             self._check_coordinate_system_exists(reference_system_name)
             self._add_coordinate_system_node(coordinate_system_name)
             if lsc_child_in_parent:
                 self._add_edges(
-                    coordinate_system_name,
-                    reference_system_name,
-                    lcs,
+                    coordinate_system_name, reference_system_name, lcs,
                 )
             else:
                 self._add_edges(
-                    reference_system_name,
-                    coordinate_system_name,
-                    lcs,
+                    reference_system_name, coordinate_system_name, lcs,
                 )
 
     def assign_data(
@@ -2754,8 +2746,7 @@ class CoordinateSystemManager:
             self.delete_cs(lcs, True)
 
     def time_union(
-        self,
-        list_of_edges: List = None,
+        self, list_of_edges: List = None,
     ) -> Union[None, pd.DatetimeIndex, pd.TimedeltaIndex]:
         """Get the time union of all or selected local coordinate systems.
 

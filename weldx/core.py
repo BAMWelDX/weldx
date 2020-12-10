@@ -1,12 +1,15 @@
 """Collection of common classes and functions."""
 
+from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
+import fs
 import numpy as np
 import pandas as pd
 import pint
 import sympy
 import xarray as xr
+from fs.osfs import OSFS
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -540,3 +543,41 @@ class TimeSeries:
         if isinstance(self._data, xr.DataArray):
             return self._data.data.units
         return self._units
+
+
+# ExternalFile -------------------------------------------------------------------------
+
+
+class ExternalFileBuffer:
+    """Handles external files."""
+
+    def __init__(self, path, file_system=None, buffer: np.ndarray = None):
+        if isinstance(path, str):
+            path = Path(path)
+
+        self._filename = path.name
+
+        if buffer is None:
+            if file_system is None:
+                with OSFS(path.parent.absolute().as_posix()) as file_system:
+                    self._buffer = np.frombuffer(
+                        file_system.readbytes(self._filename), dtype=np.int8
+                    )
+        else:
+            self._buffer = buffer
+        # self._path = path.
+
+    @property
+    def filename(self):
+        return self._filename
+
+    @property
+    def buffer(self):
+        return self._buffer
+
+    def write_to(self, path):
+        if isinstance(path, str):
+            path = Path(path)
+
+        with OSFS(path.absolute().as_posix()) as file_system:
+            file_system.writebytes(self._filename, self._buffer.tobytes())

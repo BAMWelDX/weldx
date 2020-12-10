@@ -194,10 +194,7 @@ class VGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
     _mapping = dict(
-        t="workpiece_thickness",
-        alpha="groove_angle",
-        b="root_gap",
-        c="root_face",
+        t="workpiece_thickness", alpha="groove_angle", b="root_gap", c="root_face",
     )
 
     def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
@@ -1169,12 +1166,7 @@ class DHUGroove(IsoBaseGroove):
 
 
 @ureg_check_class(
-    "[length]",
-    None,
-    None,
-    None,
-    None,
-    None,
+    "[length]", None, None, None, None, None,
 )
 @dataclass
 class FFGroove(IsoBaseGroove):
@@ -1909,9 +1901,7 @@ def _create_test_grooves():
         root_gap=Q_(2, "mm"),
     )
     ff_groove0 = get_groove(
-        groove_type="FFGroove",
-        workpiece_thickness=Q_(5, "mm"),
-        code_number="1.12",
+        groove_type="FFGroove", workpiece_thickness=Q_(5, "mm"), code_number="1.12",
     )
     ff_groove1 = get_groove(
         groove_type="FFGroove",
