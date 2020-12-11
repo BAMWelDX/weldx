@@ -13,7 +13,7 @@ dependencies:
   - pint>=0.11
   - bottleneck
   - boltons
-  # - asdf>=2.7
+  - asdf>=2.7
   - openpyxl
   - jinja2
   # graph packages
@@ -47,5 +47,4 @@ dependencies:
   # pip packages
   - pip
   - pip:
-    - git+https://github.com/asdf-format/asdf
     - git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx
