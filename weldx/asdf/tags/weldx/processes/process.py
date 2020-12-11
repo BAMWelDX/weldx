@@ -3,7 +3,6 @@
 from asdf.tagged import tag_object
 
 from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import drop_none_attr
 from weldx.welding.processes import GmawProcess
 
 
@@ -18,7 +17,7 @@ class GmawProcessTypeAsdf(WeldxType):
     @classmethod
     def to_tree(cls, node: GmawProcess, ctx):
         """Convert tree and remove all None entries from node dictionary."""
-        tree = drop_none_attr(node)
+        tree = node.__dict__
         return tree
 
     @classmethod

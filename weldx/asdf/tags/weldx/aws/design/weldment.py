@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import List
 
 from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import drop_none_attr
 
 from .sub_assembly import SubAssembly
 
@@ -28,7 +27,7 @@ class WeldmentType(WeldxType):
     @classmethod
     def to_tree(cls, node: Weldment, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = drop_none_attr(node)
+        tree = node.__dict__
         return tree
 
     @classmethod
