@@ -73,7 +73,7 @@ class QualityStandard:
     def _map_file_content(
         self, file_mapping: Dict, directory: str, version: AsdfVersion
     ) -> ResourceMappingProxy:
-        """ Get a mapping between an URI and a file content.
+        """Get a mapping between an URI and a file content.
 
         Parameters
         ----------

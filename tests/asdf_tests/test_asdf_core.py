@@ -200,7 +200,11 @@ def test_local_coordinate_system_shape_violation():
         dims=["u", "v"],
         coords={"u": ["x", "y", "z"], "v": [0, 1, 2]},
     )
-    coordinates = xr.DataArray(data=[1, 2], dims=["c"], coords={"c": ["x", "y"]},)
+    coordinates = xr.DataArray(
+        data=[1, 2],
+        dims=["c"],
+        coords={"c": ["x", "y"]},
+    )
     lcs = tf.LocalCoordinateSystem(
         orientation=orientation, coordinates=coordinates, construction_checks=False
     )
@@ -210,10 +214,14 @@ def test_local_coordinate_system_shape_violation():
 
     # orientations have wrong shape -----------------------
     orientation = xr.DataArray(
-        data=[[1, 2], [3, 4]], dims=["c", "v"], coords={"c": ["x", "y"], "v": [0, 1]},
+        data=[[1, 2], [3, 4]],
+        dims=["c", "v"],
+        coords={"c": ["x", "y"], "v": [0, 1]},
     )
     coordinates = xr.DataArray(
-        data=[1, 2, 3], dims=["u"], coords={"u": ["x", "y", "z"]},
+        data=[1, 2, 3],
+        dims=["u"],
+        coords={"u": ["x", "y", "z"]},
     )
     lcs = tf.LocalCoordinateSystem(
         orientation=orientation, coordinates=coordinates, construction_checks=False
