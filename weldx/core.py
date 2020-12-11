@@ -3,7 +3,6 @@
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
-import fs
 import numpy as np
 import pandas as pd
 import pint
@@ -560,24 +559,45 @@ class ExternalFileBuffer:
         if buffer is None:
             if file_system is None:
                 with OSFS(path.parent.absolute().as_posix()) as file_system:
-                    self._buffer = np.frombuffer(
-                        file_system.readbytes(self._filename), dtype=np.int8
-                    )
+                    self._buffer = file_system.readbytes(self._filename)
         else:
             self._buffer = buffer
-        # self._path = path.
 
     @property
     def filename(self):
+        """Get the filename
+
+        Returns
+        -------
+        str:
+            The filename
+
+        """
         return self._filename
 
     @property
     def buffer(self):
+        """Get the content of the buffer.
+
+        Returns
+        -------
+        numpy.ndarray :
+            Content of the buffer
+
+        """
         return self._buffer
 
-    def write_to(self, path):
+    def write_to(self, path: Union[str, Path]):
+        """Write the file to the specified destination.
+
+        Parameters
+        ----------
+        path : :Union[str, Path]
+            Path where the file should be written.
+
+        """
         if isinstance(path, str):
             path = Path(path)
 
         with OSFS(path.absolute().as_posix()) as file_system:
-            file_system.writebytes(self._filename, self._buffer.tobytes())
+            file_system.writebytes(self._filename, self._buffer)

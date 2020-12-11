@@ -14,9 +14,18 @@ properties:
     type: string
   content:
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+  content_hash:
+    type: object
+    properties:
+      algorithm:
+        type: string
+        enum: [ MD5, SHA-256, SHA-512 ] # probably look up some codes
+      value:
+        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
 
-propertyOrder: [filename, content]
-required: [filename, content]
+
+propertyOrder: [filename, content, content_hash]
+required: [filename, content, content_hash]
 
 flowStyle: block
 ...
