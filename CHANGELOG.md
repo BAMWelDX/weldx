@@ -6,6 +6,10 @@
   - the provisional attribute names are `wx_metadata` and `wx_user`
 - `None` values are removed from the asdf tree for all `weldx` classes. [[#212]](https://github.com/BAMWelDX/weldx/pull/212)
 
+### changes
+- pass variable names as tuple to `sympy.lambdify` in `MathematicalExpression` to prevent sympy deprecation [[#214]](https://github.com/BAMWelDX/weldx/pull/214)
+- set `conda-forge` as primary channel in `environment.yaml` and `build_env.yaml` [[#214]](https://github.com/BAMWelDX/weldx/pull/214)
+
 ## 0.2.2 (30.11.2020)
 ### added
 - Added `weldx.utility.ureg_check_class` class decorator to enable `pint` dimensionality checks with `@dataclass`. [[#179]](https://github.com/BAMWelDX/weldx/pull/179)
