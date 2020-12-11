@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 
 from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import drop_none_attr
 from weldx.asdf.validators import wx_shape_validator
 
 __all__ = ["ShapeValidatorTestClass", "ShapeValidatorTestClassType"]
@@ -44,7 +43,7 @@ class ShapeValidatorTestClassType(WeldxType):
     @classmethod
     def to_tree(cls, node: ShapeValidatorTestClass, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = drop_none_attr(node)
+        tree = node.__dict__
         return tree
 
     @classmethod

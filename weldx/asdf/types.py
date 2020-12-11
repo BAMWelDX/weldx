@@ -4,6 +4,7 @@
 import functools
 
 from asdf.types import CustomType, ExtensionTypeMeta
+from boltons.iterutils import remap
 
 META_ATTR = "wx_metadata"
 USER_ATTR = "wx_user"
@@ -22,12 +23,19 @@ _weldx_asdf_types = set()
 
 
 def to_tree_metadata(func):
-    """Wrapper that will add the metadata and userdata field for to_tree methods."""
+    """Wrapper that will add the metadata and userdata field for to_tree methods.
+
+    Also removes all "None" values from the initial tree.
+    Behavior should be similar to ASDF defaults pre v2.8 (ASDF GH #863).
+    """
 
     @functools.wraps(func)
     def to_tree_wrapped(cls, node, ctx):  # need cls for classmethod
         """Call default to_tree method and add metadata fields."""
         tree = func(node, ctx)
+
+        tree = remap(tree, lambda p, k, v: v is not None)  # drop all None values
+
         for key in [META_ATTR, USER_ATTR]:
             attr = getattr(node, key, None)
             if attr:
