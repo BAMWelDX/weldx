@@ -34,7 +34,7 @@ class MathematicalExpression:
             expression = sympy.sympify(expression)
         self._expression = expression
         self.function = sympy.lambdify(
-            self._expression.free_symbols, self._expression, "numpy"
+            tuple(self._expression.free_symbols), self._expression, "numpy"
         )
         self._parameters = {}
         if parameters is not None:
