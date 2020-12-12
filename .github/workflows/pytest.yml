@@ -63,6 +63,7 @@ jobs:
           python-version: ${{ matrix.py }}
       - name: pip installs
         run: |
+          pip install pytest pytest-cov setuptools_scm
           pip install .
       - name: run pytest
         run: |
