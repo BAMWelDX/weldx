@@ -42,6 +42,7 @@ jobs:
           activate-environment: build_env
           auto-activate-base: false
           use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+          channels: conda-forge, defaults
           mamba-version: "*"
 
       - name: conda info
