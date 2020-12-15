@@ -16,7 +16,7 @@ jobs:
           python-version: ${{ matrix.py }}
 
       - uses: actions/cache@v2
-        if: startsWith(runner.os, 'ubuntu')
+        if: startsWith(runner.os, 'Linux')
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
