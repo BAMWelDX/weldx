@@ -95,5 +95,4 @@ properties:
 required: [common_name, product_form, thickness]
 propertyOrder: [common_name, m_number, group_number, product_form, thickness, diameter, specification_number, specification_version, specification_organization, UNS_number, CAS_number, heat_lot_identification, composition, manufacturing_history, service_history, applied_coating_specification]
 flowStyle: block
-additionalProperties: false
 ...

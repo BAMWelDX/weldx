@@ -32,5 +32,4 @@ properties:
 required: [joint_design, weld_sizes, number_of_passes]
 propertyOrder: [joint_design, weld_sizes, number_of_passes]
 flowStyle: block
-additionalProperties: false
 ...

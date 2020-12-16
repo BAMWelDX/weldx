@@ -1,0 +1,116 @@
+name: build
+on:
+  # Trigger the workflow on push events on master and tags
+  push:
+    branches:
+      - master
+    tags:
+      - '*'
+  # Trigger the workflow on relevant pull request events
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  # Trigger the workflow on all release created events (this could redirect to main conda channel)
+  release:
+    types:
+      - created
+
+jobs:
+  conda:
+    if: github.event.pull_request.draft == false # exclude job from draft PR
+    name: conda build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - name: Cache conda
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if ./conda.recipe/build_env.yml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./conda.recipe/build_env.yml') }}
+
+      - name: Setup Conda Environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: ./conda.recipe/build_env.yml
+          activate-environment: build_env
+          auto-activate-base: false
+          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+          channels: conda-forge, defaults
+          mamba-version: "*"
+
+      - name: conda info
+        shell: bash -l {0}
+        run: conda info
+
+      - name: conda list
+        shell: bash -l {0}
+        run: conda list
+
+      - name: Build from local conda recipe
+        shell: bash -l {0}
+        run: conda build .
+
+      - name: set package file env
+        shell: bash -l {0}
+        run: echo "PACKAGE_DIR=$(conda build . --output)" >> $GITHUB_ENV
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: weldx-conda
+          path: ${{ env.PACKAGE_DIR }}
+
+      - name: upload releases to dev label on Anaconda Cloud
+        if: github.event_name == 'release' && github.event.action == 'created'
+        shell: bash -l {0}
+        env: # set access token from GitHub secrets
+          anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
+        run: |
+          anaconda -t $anaconda_token upload --user BAMwelding --label dev $PACKAGE_DIR
+
+  pypi:
+    if: github.event.pull_request.draft == false # exclude job from draft PR
+    name: pypi build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: pip installs
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools setuptools_scm wheel twine
+
+      - name: build package
+        run: |
+          python setup.py sdist bdist_wheel
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: ./dist/
+
+      - name: set pypi test repo defaults
+        run: |
+          echo "pypi_repo=testpypi" >> $GITHUB_ENV
+          echo "pypi_token=${{ secrets.TESTPYPI_UPLOAD }}" >> $GITHUB_ENV
+
+      - name: set pypi main repo for release
+        if: github.event_name == 'release' && github.event.action == 'created'
+        run: |
+          echo "pypi_repo=pypi" >> $GITHUB_ENV
+          echo "pypi_token=${{ secrets.PYPI_UPLOAD }}" >> $GITHUB_ENV
+
+      - name: pypi release
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'release' && github.event.action == 'created')
+        run: |
+          python -m twine upload --repository $pypi_repo dist/* -u __token__ -p $pypi_token

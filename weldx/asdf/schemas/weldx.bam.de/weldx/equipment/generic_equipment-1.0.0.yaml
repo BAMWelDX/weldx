@@ -26,5 +26,4 @@ propertyOrder: [name, sources, data_transformations]
 required: [name]
 
 flowStyle: block
-additionalProperties: false
 ...

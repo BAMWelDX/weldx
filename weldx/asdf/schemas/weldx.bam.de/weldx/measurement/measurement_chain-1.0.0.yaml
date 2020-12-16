@@ -20,8 +20,5 @@ properties:
 
 propertyOrder: [name, data_source, data_processors]
 required: [name, data_source]
-
-
-
 flowStyle: block
-additionalProperties: false
+...

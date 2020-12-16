@@ -36,5 +36,4 @@ properties:
 required: [name, dimensions, dtype, data]
 propertyOrder: [name, dimensions, dtype, unit, data]
 flowStyle: block
-additionalProperties: false
 ...

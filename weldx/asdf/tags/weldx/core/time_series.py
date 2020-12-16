@@ -5,7 +5,7 @@ import pint
 
 from weldx.asdf.types import WeldxType
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.core import MathematicalExpression, TimeSeries
+from weldx.core import TimeSeries
 
 
 class TimeSeriesTypeASDF(WeldxType):
@@ -39,10 +39,10 @@ class TimeSeriesTypeASDF(WeldxType):
         """
 
         if isinstance(node.data, pint.Quantity):
-            if node.shape == tuple([1]):
+            if node.shape == tuple([1]):  # constant
                 return {
                     "unit": str(node.units),
-                    "values": node.data.magnitude[0],
+                    "value": node.data.magnitude[0],
                 }
             else:
                 return {
@@ -52,7 +52,7 @@ class TimeSeriesTypeASDF(WeldxType):
                     "interpolation": node.interpolation,
                     "values": node.data.magnitude,
                 }
-        return {"values": node.data, "unit": str(node.units), "shape": node.shape}
+        return {"expression": node.data, "unit": str(node.units), "shape": node.shape}
 
     @classmethod
     def from_tree(cls, tree, ctx):
@@ -73,14 +73,13 @@ class TimeSeriesTypeASDF(WeldxType):
             An instance of the 'weldx.core.TimeSeries' type.
 
         """
-        if not isinstance(tree["values"], MathematicalExpression):
-            if "time" in tree:
-                time = tree["time"]
-                interpolation = tree["interpolation"]
-            else:
-                time = None
-                interpolation = None
-            values = Q_(np.asarray(tree["values"]), tree["unit"])
+        if "value" in tree:  # constant
+            values = Q_(np.asarray(tree["value"]), tree["unit"])
+            return TimeSeries(values)
+        elif "values" in tree:
+            time = tree["time"]
+            interpolation = tree["interpolation"]
+            values = Q_(tree["values"], tree["unit"])
             return TimeSeries(values, time, interpolation)
 
-        return TimeSeries(tree["values"])
+        return TimeSeries(tree["expression"])  # mathexpression

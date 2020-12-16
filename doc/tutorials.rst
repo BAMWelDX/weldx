@@ -10,6 +10,7 @@ The welding example tutorials provide an overview of common welding related task
     :maxdepth: 1
 
     tutorials/welding_example_01_basics
+    tutorials/custom_metadata
     tutorials/groove_types_01
     tutorials/measurement_example
     tutorials/welding_example_02_weaving
@@ -18,7 +19,7 @@ The welding example tutorials provide an overview of common welding related task
 API Tutorials
 #############
 
-The API tutorials provide more detailed usages and examples of core ``WeLDX`` components for advanced use cases.
+The API tutorials provide more detailed usages and examples of core ``WelDX`` components for advanced use cases.
 
 .. toctree::
     :maxdepth: 1
