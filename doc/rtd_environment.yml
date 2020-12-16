@@ -5,6 +5,7 @@ dependencies:
   - python=3.7
   - setuptools_scm
   - ipykernel
+  - ipywidgets
   # documentation
   - sphinx
   - recommonmark
