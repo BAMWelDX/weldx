@@ -2,7 +2,7 @@
 
 ## 0.2.3 (unreleased)
 ### added
-- add `weldx.transformations.CoordinateSystemManager.relabel` function [#]
+- add `weldx.transformations.CoordinateSystemManager.relabel` function [[#219]](https://github.com/BAMWelDX/weldx/pull/212)
 
 ### ASDF
 - Added support for serializing generic metadata and userdata attributes for weldx classes. [[#209]](https://github.com/BAMWelDX/weldx/pull/209)
