@@ -12,6 +12,16 @@ type: object
 properties:
   filename:
     type: string
+  suffix:
+    type: string
+  created:
+    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+  modified:
+    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+  hostname:
+    type: string
+  location:
+    type: string
   content:
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
   content_hash:
@@ -21,11 +31,13 @@ properties:
         type: string
         enum: [ MD5, SHA-256, SHA-512 ] # probably look up some codes
       value:
-        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+        type: string
 
 
 propertyOrder: [filename, content, content_hash]
-required: [filename, content, content_hash]
+anyOf:
+  - required: [filename, content, content_hash]
+  - required: [filename, location, hostname]
 
 flowStyle: block
 ...

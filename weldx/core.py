@@ -1,5 +1,6 @@
 """Collection of common classes and functions."""
 
+import socket
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
@@ -547,21 +548,31 @@ class TimeSeries:
 # ExternalFile -------------------------------------------------------------------------
 
 
-class ExternalFileBuffer:
+class ExternalFile:
     """Handles external files."""
 
-    def __init__(self, path, file_system=None, buffer: np.ndarray = None):
+    def __init__(
+        self,
+        path,
+        file_system=None,
+        asdf_save_content: bool = False,
+        hostname=None,
+        buffer: np.ndarray = None,
+    ):
         if isinstance(path, str):
             path = Path(path)
+        if file_system is None and not path.is_file():
+            raise ValueError(f"File not found: {path.as_posix()}")
 
+        if hostname is None:
+            hostname = socket.gethostname()
+
+        self._hostname = hostname
+        self._path = path
         self._filename = path.name
-
-        if buffer is None:
-            if file_system is None:
-                with OSFS(path.parent.absolute().as_posix()) as file_system:
-                    self._buffer = file_system.readbytes(self._filename)
-        else:
-            self._buffer = buffer
+        self._save_content = asdf_save_content
+        self._file_system = file_system
+        self._buffer = buffer
 
     @property
     def filename(self):
@@ -585,7 +596,16 @@ class ExternalFileBuffer:
             Content of the buffer
 
         """
+        buffer = self._buffer
+        if buffer is None:
+            if self._file_system is None:
+                with OSFS(self._path.parent.absolute().as_posix()) as file_system:
+                    self._buffer = file_system.readbytes(self._filename)
         return self._buffer
+
+    @property
+    def asdf_save_content(self):
+        return self._save_content
 
     def write_to(self, path: Union[str, Path]):
         """Write the file to the specified destination.
@@ -601,3 +621,11 @@ class ExternalFileBuffer:
 
         with OSFS(path.absolute().as_posix()) as file_system:
             file_system.writebytes(self._filename, self._buffer)
+
+    @property
+    def location(self):
+        return self._path.parent.absolute().as_posix()
+
+    @property
+    def hostname(self):
+        return self._hostname
