@@ -1,3 +1,4 @@
+name: weldx
 channels:
   - conda-forge
   - defaults
