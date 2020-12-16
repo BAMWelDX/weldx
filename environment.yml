@@ -1,7 +1,7 @@
 name: weldx
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
   - python=3.7
   - setuptools_scm
@@ -12,6 +12,7 @@ dependencies:
   - xarray>=0.15
   - pint>=0.11
   - bottleneck
+  - boltons
   - asdf>=2.7
   - openpyxl
   - jinja2
@@ -40,7 +41,6 @@ dependencies:
   - sphinxcontrib-napoleon
   - nbsphinx
   - sphinx-copybutton
-  - sphinxcontrib-bibtex
   - pydata-sphinx-theme
   - numpydoc>=0.5
   - sphinx-autodoc-typehints

@@ -64,7 +64,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
-    "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "sphinx_asdf",
     "numpydoc",

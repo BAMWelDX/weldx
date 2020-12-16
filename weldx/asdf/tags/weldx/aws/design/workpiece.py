@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from weldx.asdf.types import WeldxType
-from weldx.asdf.utils import drop_none_attr
 
 __all__ = ["Workpiece", "WorkpieceType"]
 
@@ -25,7 +24,7 @@ class WorkpieceType(WeldxType):
     @classmethod
     def to_tree(cls, node: Workpiece, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = drop_none_attr(node)
+        tree = node.__dict__
         return tree
 
     @classmethod
