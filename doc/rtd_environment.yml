@@ -1,10 +1,10 @@
-name: weldx
 channels:
   - conda-forge
   - defaults
 dependencies:
   - python=3.7
   - setuptools_scm
+  - ipykernel
   # documentation
   - sphinx
   - recommonmark
