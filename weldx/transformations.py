@@ -1795,6 +1795,20 @@ class CoordinateSystemManager:
                     lcs,
                 )
 
+    def relabel(self, mapping: Dict[str, str]):
+        """Rename one or more nodes of the graph.
+
+        See `networkx.relabel.relabel_nodes` for details.
+        CSM will always be changed inplace.
+
+        Parameters
+        ----------
+        mapping
+             A dictionary mapping with the old node names as keys and new node names
+             labels as values.
+        """
+        nx.relabel_nodes(self.graph, mapping, copy=False)
+
     def assign_data(
         self, data: xr.DataArray, data_name: str, coordinate_system_name: str
     ):
