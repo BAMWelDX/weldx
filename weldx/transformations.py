@@ -1806,6 +1806,7 @@ class CoordinateSystemManager:
         mapping
              A dictionary mapping with the old node names as keys and new node names
              labels as values.
+
         """
         nx.relabel_nodes(self.graph, mapping, copy=False)
 
