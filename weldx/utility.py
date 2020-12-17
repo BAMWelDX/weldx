@@ -1037,10 +1037,16 @@ class WeldxAccessor:
     def time_ref_restore(self) -> xr.DataArray:
         """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp."""
         da = self._obj.copy()
-        time_ref = da.weldx.time_ref
-        if time_ref and is_datetime64_dtype(da.time):
+        if "time" not in da.coords:
+            return da
+
+        if is_datetime64_dtype(da.time):
+            time_ref = da.weldx.time_ref
+            if time_ref is None:
+                time_ref = pd.Timestamp(da.time.data[0])
             da["time"] = pd.DatetimeIndex(da.time.data) - time_ref
             da.time.attrs = self._obj.time.attrs  # restore old attributes !
+            da.time.attrs["time_ref"] = time_ref
         return da
 
     def reset_reference_time(self, time_ref_new: pd.Timestamp) -> xr.DataArray:
