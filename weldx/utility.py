@@ -729,10 +729,8 @@ def _check_dtype(var_dtype, ref_dtype: dict) -> bool:
     if var_dtype != np.dtype(ref_dtype):
         if isinstance(ref_dtype, str):
             if (
-                "timedelta64" in ref_dtype
-                or "datetime64" in ref_dtype
-                and np.issubdtype(var_dtype, np.dtype(ref_dtype))
-            ):
+                "timedelta64" in ref_dtype or "datetime64" in ref_dtype
+            ) and np.issubdtype(var_dtype, np.dtype(ref_dtype)):
                 return True
 
         if not (
