@@ -3429,6 +3429,11 @@ class TestCoordinateSystemManager:
         csm_global.plot()
 
     def test_relabel(self):
+        """Test relabeling unmerged and merged CSM nodes.
+
+        Test covers: relabeling of child system, relabeling root system, merge
+        two systems after relabeling, make sure cannot relabel after merge.
+        """
         csm1 = tf.CoordinateSystemManager("A")
         csm1.add_cs("B", "A", tf.LocalCoordinateSystem())
 
