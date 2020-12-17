@@ -976,12 +976,12 @@ def xr_interp_coordinates_in_time(
     return da
 
 
-def _as_valid_timestamp(value: Union[pd.Timestamp, str]) -> pd.Timestamp:
+def _as_valid_timestamp(value: Union[pd.Timestamp, np.datetime64, str]) -> pd.Timestamp:
     """Create a valid (by convention) Timestamp object or raise TypeError.
 
     Parameters
     ----------
-    value: pandas.Timestamp or str
+    value: pandas.Timestamp, np.datetime64 or str
         Value to convert to `pd.Timestamp`.
 
     Returns
@@ -989,7 +989,7 @@ def _as_valid_timestamp(value: Union[pd.Timestamp, str]) -> pd.Timestamp:
     pandas.Timestamp
 
     """
-    if isinstance(value, str):
+    if isinstance(value, (str, np.datetime64)):
         value = pd.Timestamp(value)
     if isinstance(value, pd.Timestamp):  # catch NaT from empty str.
         return value
@@ -1057,7 +1057,7 @@ class WeldxAccessor:
         return da
 
     @property
-    def time_ref(self) -> pd.Timestamp:
+    def time_ref(self) -> Union[pd.Timestamp, None]:
         """Get the time_ref value or `None` if not set."""
         da = self._obj
         if "time" in da.coords:
