@@ -16,6 +16,8 @@
 
 ### fixes
 - don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
+- fix "datetime64" passing for "timedelta64" in `xr_check_coords` [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
+- fix `time_ref_restore` not working correctly if no `time_ref` was set [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
 
 ## 0.2.2 (30.11.2020)
 ### added
