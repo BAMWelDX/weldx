@@ -14,6 +14,9 @@
 - set `conda-forge` as primary channel in `environment.yaml` and `build_env.yaml` [[#214]](https://github.com/BAMWelDX/weldx/pull/214)
 - set minimum Python version to 3.7 [[#220]](https://github.com/BAMWelDX/weldx/pull/220)
 
+### fixes
+- don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
+
 ## 0.2.2 (30.11.2020)
 ### added
 - Added `weldx.utility.ureg_check_class` class decorator to enable `pint` dimensionality checks with `@dataclass`. [[#179]](https://github.com/BAMWelDX/weldx/pull/179)
