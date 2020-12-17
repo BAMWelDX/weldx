@@ -3428,34 +3428,35 @@ class TestCoordinateSystemManager:
 
         csm_global.plot()
 
-    def test_relabel(self):
-        """Test relabeling unmerged and merged CSM nodes.
 
-        Test covers: relabeling of child system, relabeling root system, merge
-        two systems after relabeling, make sure cannot relabel after merge.
-        """
-        csm1 = tf.CoordinateSystemManager("A")
-        csm1.add_cs("B", "A", tf.LocalCoordinateSystem())
+def test_relabel():
+    """Test relabeling unmerged and merged CSM nodes.
 
-        csm2 = tf.CoordinateSystemManager("C")
-        csm2.add_cs("D", "C", tf.LocalCoordinateSystem())
+    Test covers: relabeling of child system, relabeling root system, merge
+    two systems after relabeling, make sure cannot relabel after merge.
+    """
+    csm1 = tf.CoordinateSystemManager("A")
+    csm1.add_cs("B", "A", tf.LocalCoordinateSystem())
 
-        csm1.relabel({"B": "X"})
-        csm2.relabel({"C": "X"})
+    csm2 = tf.CoordinateSystemManager("C")
+    csm2.add_cs("D", "C", tf.LocalCoordinateSystem())
 
-        assert "B" not in csm1.graph.nodes
-        assert "X" in csm1.graph.nodes
+    csm1.relabel({"B": "X"})
+    csm2.relabel({"C": "X"})
 
-        assert "C" not in csm2.graph.nodes
-        assert "X" in csm2.graph.nodes
-        assert csm2.root_system_name == "X"
+    assert "B" not in csm1.graph.nodes
+    assert "X" in csm1.graph.nodes
 
-        csm1.merge(csm2)
-        for n in ["A", "D", "X"]:
-            assert n in csm1.graph.nodes
+    assert "C" not in csm2.graph.nodes
+    assert "X" in csm2.graph.nodes
+    assert csm2.root_system_name == "X"
 
-        with pytest.raises(NotImplementedError):
-            csm1.relabel({"A": "Z"})
+    csm1.merge(csm2)
+    for n in ["A", "D", "X"]:
+        assert n in csm1.graph.nodes
+
+    with pytest.raises(NotImplementedError):
+        csm1.relabel({"A": "Z"})
 
 
 def test_coordinate_system_manager_init():
