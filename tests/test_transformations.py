@@ -3428,6 +3428,30 @@ class TestCoordinateSystemManager:
 
         csm_global.plot()
 
+    def test_relabel(self):
+        csm1 = tf.CoordinateSystemManager("A")
+        csm1.add_cs("B", "A", tf.LocalCoordinateSystem())
+
+        csm2 = tf.CoordinateSystemManager("C")
+        csm2.add_cs("D", "C", tf.LocalCoordinateSystem())
+
+        csm1.relabel({"B": "X"})
+        csm2.relabel({"C": "X"})
+
+        assert "B" not in csm1.graph.nodes
+        assert "X" in csm1.graph.nodes
+
+        assert "C" not in csm2.graph.nodes
+        assert "X" in csm2.graph.nodes
+        assert csm2.root_system_name == "X"
+
+        csm1.merge(csm2)
+        for n in ["A", "D", "X"]:
+            assert n in csm1.graph.nodes
+
+        with pytest.raises(NotImplementedError):
+            csm1.relabel({"A": "Z"})
+
 
 def test_coordinate_system_manager_init():
     """Test the init method of the coordinate system manager."""

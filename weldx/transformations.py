@@ -1808,8 +1808,11 @@ class CoordinateSystemManager:
              labels as values.
 
         """
-        if len(self.subsystems) > 0:
+        if self.subsystems:
             raise NotImplementedError("Cannot relabel nodes on merged systems.")
+
+        if self.root_system_name in mapping:
+            self._root_system_name = mapping[self._root_system_name]
 
         nx.relabel_nodes(self.graph, mapping, copy=False)
 
