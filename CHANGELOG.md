@@ -15,7 +15,7 @@
 - set minimum Python version to 3.7 [[#220]](https://github.com/BAMWelDX/weldx/pull/220)
 
 ### fixes
-- don't inline time dependent `LCS.coordinates` [[#220]](https://github.com/BAMWelDX/weldx/pull/220)
+- don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
 
 ## 0.2.2 (30.11.2020)
 ### added
