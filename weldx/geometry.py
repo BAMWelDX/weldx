@@ -1160,9 +1160,9 @@ class Profile:
 
         self._shapes += shapes
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=False)
     def rasterize(
-        self, raster_width, insert_sep: bool = False, stack: bool = True
+        self, raster_width, stack: bool = True
     ) -> Union[np.ndarray, List[np.ndarray]]:
         """Rasterize the profile.
 
@@ -1170,8 +1170,6 @@ class Profile:
         ----------
         raster_width :
             Distance between points for rasterization.
-        insert_sep :
-            insert NaN values between profiles (useful for plotting)
         stack :
             hstack data into a single output array
 
@@ -1184,8 +1182,6 @@ class Profile:
         raster_data = []
         for shape in self._shapes:
             raster_data.append(shape.rasterize(raster_width))
-            if insert_sep:
-                raster_data.append(np.full((2, 1), np.nan))
         if stack:
             return np.hstack(raster_data)
         return raster_data
@@ -1226,7 +1222,7 @@ class Profile:
             Color of plot lines
 
         """
-        raster_data = self.rasterize(raster_width, insert_sep=False, stack=False)
+        raster_data = self.rasterize(raster_width, stack=False)
         if ax is None:  # pragma: no cover
             _, ax = plt.subplots()
         ax.grid(grid)
