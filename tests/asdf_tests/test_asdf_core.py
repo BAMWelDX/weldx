@@ -4,11 +4,14 @@ import pandas as pd
 import pytest
 import xarray as xr
 from asdf import ValidationError
+from fs.memoryfs import MemoryFS
+from fs.osfs import OSFS
 from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
 from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.core import ExternalFile
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
 from weldx.transformations import WXRotation
@@ -396,3 +399,33 @@ def test_time_series_discrete(ts, copy_arrays, lazy_load):
         assert np.all(ts_file.data == ts.data)
     assert np.all(ts_file.time == ts.time)
     assert ts_file.interpolation == ts.interpolation
+
+
+# --------------------------------------------------------------------------------------
+# ExternalFile
+# --------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("lazy_load", [True, False])
+@pytest.mark.parametrize("store_content", [True, False])
+def test_external_file(copy_arrays, lazy_load, store_content):
+    ef = ExternalFile(
+        "../../doc/_static/WelDX_notext.ico", asdf_save_content=store_content
+    )
+    tree = {"file": ef}
+    ef_file = _write_read_buffer(
+        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )["file"]
+    assert ef.filename == ef_file.filename
+
+    if store_content:
+        with OSFS("../..") as file_system:
+            original_hash = file_system.hash("doc/_static/WelDX_notext.ico", "md5")
+
+        with MemoryFS() as file_system:
+            ef.write_to("", file_system)
+            assert file_system.hash("WelDX_notext.ico", "md5") == original_hash
+    else:
+        # todo: add to stored version
+        assert ef.hostname == ef_file.hostname

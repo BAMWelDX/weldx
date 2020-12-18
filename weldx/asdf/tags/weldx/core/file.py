@@ -50,8 +50,9 @@ class FileTypeASDF(WeldxType):
         """
         hash_algorithm = "SHA-256"
         if node.asdf_save_content:
-            buffer_hash = cls._get_hash(node.buffer, hash_algorithm)
-            buffer_np = np.frombuffer(node.buffer, dtype=np.uint8)
+            buffer = node.get_file_content()
+            buffer_hash = cls._get_hash(buffer, hash_algorithm)
+            buffer_np = np.frombuffer(buffer, dtype=np.uint8)
             return {
                 "filename": node.filename,
                 "content": buffer_np,
@@ -96,4 +97,4 @@ class FileTypeASDF(WeldxType):
         else:
             path = f"{tree['location']}/{tree['filename']}"
             hostname = tree["hostname"]
-        return ExternalFile(path, buffer=buffer, hostname=hostname)
+        return ExternalFile(path, _buffer=buffer, hostname=hostname)

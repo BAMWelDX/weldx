@@ -1,15 +1,19 @@
 """Tests of the core package."""
 
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pint
 import pytest
+from fs.memoryfs import MemoryFS
+from fs.osfs import OSFS
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.core import MathematicalExpression, TimeSeries
+from weldx.core import ExternalFile, MathematicalExpression, TimeSeries
 
 
 # Todo: Move this to conftest.py?
@@ -448,3 +452,66 @@ class TestTimeSeries:
 # --------------------------------------------------------------------------------------
 # External file
 # --------------------------------------------------------------------------------------
+
+
+class TestExternalFile:
+
+    # test_init ------------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "file_path, save_content, hostname",
+        [
+            ("../doc/_static/WelDX_notext.ico", True, "a host"),
+            ("../doc/_static/WelDX_notext.ico", False, "a host"),
+            (Path("../doc/_static/WelDX_notext.ico"), False, "a host"),
+            ("../doc/_static/WelDX_notext.ico", False, None),
+        ],
+    )
+    def test_init(file_path, save_content, hostname):
+        ef = ExternalFile(file_path, asdf_save_content=save_content, hostname=hostname)
+        assert save_content == ef.asdf_save_content
+        if hostname is not None:
+            assert hostname == ef.hostname
+        else:
+            print(hostname)
+            assert isinstance(ef.hostname, str)
+
+    # test_init_exceptions -------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "variables, exception_type, test_name",
+        [
+            ({"path": "does_not.exist"}, ValueError, "# File does not exist"),
+        ],
+        ids=get_test_name,
+    )
+    def test_init_exceptions(variables, exception_type, test_name):
+        with pytest.raises(exception_type):
+            ExternalFile(**variables)
+
+    # test_write_to --------------------------------------------------------------------
+    @staticmethod
+    @pytest.mark.parametrize(
+        "dir_read, file_name",
+        [
+            ("doc/_static", "WelDX_notext.ico"),
+            ("doc/_static", "WelDX_notext.svg"),
+            ("weldx", "transformations.py"),
+        ],
+    )
+    def test_write_to(dir_read, file_name):
+        path_read = f"{dir_read}/{file_name}"
+
+        with OSFS("..") as file_system:
+            original_hash = file_system.hash(path_read, "md5")
+
+        with MemoryFS() as file_system:
+            file_system.makedir("some_directory")
+            ef = ExternalFile(f"../{path_read}")
+            ef.write_to("some_directory", file_system)
+
+            new_file_path = f"some_directory/{file_name}"
+            assert file_system.isfile(new_file_path)
+            assert file_system.hash(new_file_path, "md5") == original_hash

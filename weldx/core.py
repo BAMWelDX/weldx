@@ -557,11 +557,13 @@ class ExternalFile:
         file_system=None,
         asdf_save_content: bool = False,
         hostname=None,
-        buffer: np.ndarray = None,
+        _buffer: np.ndarray = None,
     ):
         if isinstance(path, str):
             path = Path(path)
-        if file_system is None and not path.is_file():
+
+        # todo: check filesystems too
+        if _buffer is None and file_system is None and not path.is_file():
             raise ValueError(f"File not found: {path.as_posix()}")
 
         if hostname is None:
@@ -569,10 +571,9 @@ class ExternalFile:
 
         self._hostname = hostname
         self._path = path
-        self._filename = path.name
         self._save_content = asdf_save_content
         self._file_system = file_system
-        self._buffer = buffer
+        self._buffer = _buffer
 
     @property
     def filename(self):
@@ -584,43 +585,51 @@ class ExternalFile:
             The filename
 
         """
-        return self._filename
+        return self._path.name
 
-    @property
-    def buffer(self):
-        """Get the content of the buffer.
+    def _write_content(self, buffer, path, file_system):
+        file_system.writebytes(f"{path}/{self.filename}", buffer)
+
+    def get_file_content(self):
+        """Get the content of the file as bytes.
 
         Returns
         -------
-        numpy.ndarray :
-            Content of the buffer
+        bytes :
+            Content of the file
 
         """
-        buffer = self._buffer
-        if buffer is None:
+        if self._buffer is None:
             if self._file_system is None:
                 with OSFS(self._path.parent.absolute().as_posix()) as file_system:
-                    self._buffer = file_system.readbytes(self._filename)
+                    return file_system.readbytes(self.filename)
+                return self._file_system.readbytes(self.filename)
         return self._buffer
 
     @property
     def asdf_save_content(self):
         return self._save_content
 
-    def write_to(self, path: Union[str, Path]):
+    def write_to(self, path: Union[str, Path], file_system=None):
         """Write the file to the specified destination.
 
         Parameters
         ----------
         path : :Union[str, Path]
             Path where the file should be written.
+        file_system :
+            The target file system.
 
         """
         if isinstance(path, str):
             path = Path(path)
 
-        with OSFS(path.absolute().as_posix()) as file_system:
-            file_system.writebytes(self._filename, self._buffer)
+        buffer = self.get_file_content()
+        if file_system is None:
+            with OSFS(path.absolute().as_posix()) as system:
+                self._write_content(buffer, path, system)
+        else:
+            self._write_content(buffer, path, file_system)
 
     @property
     def location(self):
