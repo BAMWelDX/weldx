@@ -1230,6 +1230,7 @@ class Profile:
             ax.set_xlabel("y in " + self.attrs["units"])
             ax.set_ylabel("z in " + self.attrs["units"])
         ax.plot(raster_data[0], raster_data[1], line_style, label=label)
+        return ax
 
     @property
     def shapes(self):
@@ -1682,6 +1683,7 @@ class Trace:
                 vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
+        return axes
 
 
 # Linear profile interpolation class ------------------------------------------
@@ -2186,3 +2188,4 @@ class Geometry:
                 vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
+        return axes
