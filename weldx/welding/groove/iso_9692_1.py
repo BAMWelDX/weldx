@@ -95,10 +95,9 @@ class IsoBaseGroove:
         if show_params:
             title = title + "\n" + ", ".join(self.param_strings())
 
-        ax = profile.plot(
+        profile.plot(
             title, raster_width, None, axis, axis_label, grid, line_style, ax=ax
         )
-        return ax
 
     def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Implement profile generation.

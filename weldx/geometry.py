@@ -1241,7 +1241,6 @@ class Profile:
 
         for segment, c in zip(raster_data, color):
             ax.plot(segment[0], segment[1], line_style, label=label, color=c)
-        return ax
 
     @property
     def shapes(self):
@@ -1694,7 +1693,6 @@ class Trace:
                 vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
-        return axes
 
 
 # Linear profile interpolation class ------------------------------------------
@@ -2199,4 +2197,3 @@ class Geometry:
                 vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
-        return axes
