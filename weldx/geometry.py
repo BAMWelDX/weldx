@@ -1171,7 +1171,7 @@ class Profile:
         raster_width :
             Distance between points for rasterization.
         stack :
-            hstack data into a single output array
+            hstack data into a single output array (default = True)
 
         Returns
         -------
