@@ -1222,6 +1222,8 @@ class Profile:
             Matplotlib line style. (Default value = ".-")
         ax :
             Axis to plot to. (Default value = None)
+        color:
+            Color of plot lines
 
         """
         raster_data = self.rasterize(raster_width, insert_sep=False, stack=False)
@@ -1237,8 +1239,12 @@ class Profile:
         elif "units" in self.attrs:
             ax.set_xlabel("y in " + self.attrs["units"])
             ax.set_ylabel("z in " + self.attrs["units"])
-        for segment in raster_data:
-            ax.plot(segment[0], segment[1], line_style, label=label, color=color)
+
+        if isinstance(color, str):  # single color
+            color = [color] * len(raster_data)
+
+        for segment, c in zip(raster_data, color):
+            ax.plot(segment[0], segment[1], line_style, label=label, color=c)
         return ax
 
     @property
