@@ -11,30 +11,54 @@ description: |
 type: object
 properties:
   filename:
+    description: |
+      The name of the file.
     type: string
   suffix:
+    description: |
+      The suffix of the file.
     type: string
+  size:
+    description: |
+      The files size in bytes.
+    type: number
   created:
+    description: |
+      The timestamp when the file was created.
     tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
   modified:
+    description: |
+      The timestamp when the file was modified last.
     tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
   hostname:
+    description: |
+      The name of the files host.
     type: string
   location:
+    description: |
+      The location of the file on the specified host system.
     type: string
   content:
+    description: |
+      The content of the file.
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
   content_hash:
+    description: |
+      Hash data for the files content.
     type: object
     properties:
       algorithm:
+        description: |
+          The utilized hashing algorithm.
         type: string
         enum: [ MD5, SHA-256, SHA-512 ] # probably look up some codes
       value:
+        description: |
+          The calculated hash.
         type: string
 
 
-propertyOrder: [filename, content, content_hash]
+propertyOrder: [filename, suffix, hostname, location, size, created, modified, content, content_hash]
 anyOf:
   - required: [filename, content, content_hash]
   - required: [filename, location, hostname]

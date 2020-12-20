@@ -455,6 +455,7 @@ class TestTimeSeries:
 
 
 class TestExternalFile:
+    """Collects all tests related to the `ExternalFile` class."""
 
     # test_init ------------------------------------------------------------------------
 
@@ -469,6 +470,18 @@ class TestExternalFile:
         ],
     )
     def test_init(file_path, save_content, hostname):
+        """Test the `__init__` method.
+
+        Parameters
+        ----------
+        file_path: Union[str, Path]
+            Path of the file
+        save_content : bool
+            If `True`, the file should be stored in the asdf file
+        hostname:
+            The files hostname
+
+        """
         ef = ExternalFile(file_path, asdf_save_content=save_content, hostname=hostname)
         assert save_content == ef.asdf_save_content
         if hostname is not None:
@@ -488,6 +501,18 @@ class TestExternalFile:
         ids=get_test_name,
     )
     def test_init_exceptions(variables, exception_type, test_name):
+        """Test the `__init__` methods exceptions.
+
+        Parameters
+        ----------
+        variables : Tuple
+            Parameters that should be passed to the `__init__` method
+        exception_type :
+            The expected exception type
+        test_name : str
+            Name of the test
+
+        """
         with pytest.raises(exception_type):
             ExternalFile(**variables)
 
@@ -502,6 +527,16 @@ class TestExternalFile:
         ],
     )
     def test_write_to(dir_read, file_name):
+        """Test the `write_to` method by writing a read file to a virtual file system.
+
+        Parameters
+        ----------
+        dir_read : str
+            Directory that contains the source file
+        file_name : str
+            Name of the source file
+
+        """
         path_read = f"{dir_read}/{file_name}"
 
         with OSFS("..") as file_system:

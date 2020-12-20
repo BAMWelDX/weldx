@@ -18,15 +18,30 @@ class FileTypeASDF(WeldxType):
     handle_dynamic_subclasses = True
 
     @classmethod
-    def _get_hash(cls, buffer, algorithm: str = "SHA-256"):
+    def _get_hash(cls, buffer: bytes, algorithm: str = "SHA-256"):
+        """Get the hash of the content of a buffer.
+
+        Parameters
+        ----------
+        buffer : bytes
+            A buffer
+        algorithm : str
+            Name of the desired hashing algorithm
+
+        Returns
+        -------
+        str :
+            The calculated hash
+
+        """
         # https://www.freecodecamp.org/news/md5-vs-sha-1-vs-sha-2-which-is-the-most-secure-encryption-hash-and-how-to-check-them/
         # https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed
         if algorithm == "SHA-256":
             hasher = sha256()
-            hasher.update(buffer)
-            return hasher.hexdigest()
         else:
             raise ValueError(f"Unsupported hash algorithm: {algorithm}")
+        hasher.update(buffer)
+        return hasher.hexdigest()
 
     @classmethod
     def to_tree(cls, node: ExternalFile, ctx):
@@ -63,6 +78,9 @@ class FileTypeASDF(WeldxType):
             "filename": node.filename,
             "hostname": node.hostname,
             "location": node.location,
+            "size": node.size,
+            "created": node.created,
+            "modified": node.modified,
         }
 
     @classmethod

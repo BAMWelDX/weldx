@@ -559,6 +559,24 @@ class ExternalFile:
         hostname=None,
         _buffer: np.ndarray = None,
     ):
+        """Create an `ExternalFile` instance.
+
+        Parameters
+        ----------
+        path : Union[str, Path]
+            The path of the file
+        file_system :
+            The file system of the file
+        asdf_save_content : bool
+            Set to `True` if the file should be stored inside of an asdf file during
+            serialization.
+        hostname : str
+            The hostname of the file. If `None` is provided, it is determined
+            automatically.
+        _buffer : bytes
+            This is an internal parameter for deserialization. Do not use it!
+
+        """
         if isinstance(path, str):
             path = Path(path)
 
@@ -570,24 +588,30 @@ class ExternalFile:
             hostname = socket.gethostname()
 
         self._hostname = hostname
-        self._path = path
         self._save_content = asdf_save_content
+        self._path = path
         self._file_system = file_system
         self._buffer = _buffer
 
-    @property
-    def filename(self):
-        """Get the filename
-
-        Returns
-        -------
-        str:
-            The filename
-
-        """
-        return self._path.name
+        if file_system is None:
+            with OSFS(self._path.parent.absolute().as_posix()) as system:
+                self._info = system.getdetails(self._path.name)
+        else:
+            self._info = file_system.getdetails(self._path)
 
     def _write_content(self, buffer, path, file_system):
+        """Write the content of the passed buffer to a file.
+
+        Parameters
+        ----------
+        buffer : bytes
+            A buffer that should be written to a file
+        path : str
+            The destination where the file should be written to
+        file_system :
+            The target file system
+
+        """
         file_system.writebytes(f"{path}/{self.filename}", buffer)
 
     def get_file_content(self):
@@ -603,12 +627,8 @@ class ExternalFile:
             if self._file_system is None:
                 with OSFS(self._path.parent.absolute().as_posix()) as file_system:
                     return file_system.readbytes(self.filename)
-                return self._file_system.readbytes(self.filename)
+            return self._file_system.readbytes(self.filename)
         return self._buffer
-
-    @property
-    def asdf_save_content(self):
-        return self._save_content
 
     def write_to(self, path: Union[str, Path], file_system=None):
         """Write the file to the specified destination.
@@ -627,14 +647,91 @@ class ExternalFile:
         buffer = self.get_file_content()
         if file_system is None:
             with OSFS(path.absolute().as_posix()) as system:
-                self._write_content(buffer, path, system)
+                self._write_content(buffer, "", system)
         else:
             self._write_content(buffer, path, file_system)
 
     @property
-    def location(self):
-        return self._path.parent.absolute().as_posix()
+    def asdf_save_content(self):
+        """Return `True` if the file content should be stored in an asdf file.
+
+        Returns
+        -------
+        bool :
+            `True` if the file content should be stored in an asdf file, `False`
+            otherwise
+
+        """
+        return self._save_content
+
+    @property
+    def created(self):
+        """Get the timestamp of the file's creation.
+
+        Returns
+        -------
+        pandas.Timestamp :
+            Time when the file was created.
+
+        """
+        return pd.Timestamp(self._info.created)
 
     @property
     def hostname(self):
+        """Get the hostname of the file.
+
+        Returns
+        -------
+        str :
+            The file's hostname.
+
+        """
         return self._hostname
+
+    @property
+    def filename(self):
+        """Get the filename.
+
+        Returns
+        -------
+        str:
+            The filename
+
+        """
+        return self._path.name
+
+    @property
+    def modified(self):
+        """Get the timestamp of the file's last modification.
+
+        Returns
+        -------
+        pandas.Timestamp :
+            Time when the file was last modified.
+
+        """
+        return pd.Timestamp(self._info.modified)
+
+    @property
+    def location(self):
+        """Return the file's absolute path.
+
+        Returns
+        -------
+        str:
+            The file's absolute path.
+
+        """
+        return self._path.parent.absolute().as_posix()
+
+    @property
+    def size(self):
+        """Return the size of the file in bytes.
+
+        Returns
+        -------
+        int :
+            Size of the file in bytes
+
+        """
+        return self._info.size
