@@ -1,6 +1,9 @@
 # Release Notes
 
 ## 0.2.3 (unreleased)
+### added
+- add `weldx.transformations.CoordinateSystemManager.relabel` function [[#219]](https://github.com/BAMWelDX/weldx/pull/212)
+
 ### ASDF
 - Added support for serializing generic metadata and userdata attributes for weldx classes. [[#209]](https://github.com/BAMWelDX/weldx/pull/209)
   - the provisional attribute names are `wx_metadata` and `wx_user`
@@ -9,6 +12,12 @@
 ### changes
 - pass variable names as tuple to `sympy.lambdify` in `MathematicalExpression` to prevent sympy deprecation [[#214]](https://github.com/BAMWelDX/weldx/pull/214)
 - set `conda-forge` as primary channel in `environment.yaml` and `build_env.yaml` [[#214]](https://github.com/BAMWelDX/weldx/pull/214)
+- set minimum Python version to 3.7 [[#220]](https://github.com/BAMWelDX/weldx/pull/220)
+- `geometry.Profile.rasterize` can return list of rasterized shapes instead of flat ndarray (with setting `stack=False`) [[#223]](https://github.com/BAMWelDX/weldx/pull/223)
+- `geometry.Profile.plot` plots individual line objects for each shape (instead of a single line object) [[#223]](https://github.com/BAMWelDX/weldx/pull/223)
+
+### fixes
+- don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
 
 ## 0.2.2 (30.11.2020)
 ### added

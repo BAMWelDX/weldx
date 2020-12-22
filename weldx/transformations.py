@@ -1795,6 +1795,27 @@ class CoordinateSystemManager:
                     lcs,
                 )
 
+    def relabel(self, mapping: Dict[str, str]):
+        """Rename one or more nodes of the graph.
+
+        See `networkx.relabel.relabel_nodes` for details.
+        CSM will always be changed inplace.
+
+        Parameters
+        ----------
+        mapping
+             A dictionary mapping with the old node names as keys and new node names
+             labels as values.
+
+        """
+        if self.subsystems:
+            raise NotImplementedError("Cannot relabel nodes on merged systems.")
+
+        if self.root_system_name in mapping:
+            self._root_system_name = mapping[self._root_system_name]
+
+        nx.relabel_nodes(self.graph, mapping, copy=False)
+
     def assign_data(
         self, data: xr.DataArray, data_name: str, coordinate_system_name: str
     ):
@@ -2729,9 +2750,10 @@ class CoordinateSystemManager:
             pos[child] = data["position"]
         return pos
 
-    def plot(self):
+    def plot(self, ax=None):
         """Plot the graph of the coordinate system manager."""
-        plt.figure()
+        if ax is None:
+            _, ax = plt.subplots()
         color_map = []
         pos = self._get_tree_positions_for_plot()
 
@@ -2740,7 +2762,9 @@ class CoordinateSystemManager:
         remove_edges = [edge for edge in graph.edges if graph.edges[edge]["defined"]]
         graph.remove_edges_from(remove_edges)
 
-        nx.draw(graph, pos, with_labels=True, font_weight="bold", node_color=color_map)
+        nx.draw(
+            graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
+        )
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
