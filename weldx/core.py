@@ -555,6 +555,7 @@ class ExternalFile:
         self,
         path,
         file_system=None,
+        hashing_algorithm: str = "SHA-256",
         asdf_save_content: bool = False,
         hostname=None,
         _buffer: np.ndarray = None,
@@ -567,6 +568,8 @@ class ExternalFile:
             The path of the file
         file_system :
             The file system of the file
+        hashing_algorithm : str
+            The name of the hashing algorithm that should be used.
         asdf_save_content : bool
             Set to `True` if the file should be stored inside of an asdf file during
             serialization.
@@ -592,6 +595,7 @@ class ExternalFile:
         self._path = path
         self._file_system = file_system
         self._buffer = _buffer
+        self._hashing_algorithm = hashing_algorithm
 
         if file_system is None:
             with OSFS(self._path.parent.absolute().as_posix()) as system:

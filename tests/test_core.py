@@ -453,6 +453,8 @@ class TestTimeSeries:
 # External file
 # --------------------------------------------------------------------------------------
 
+weldx_root_dir = Path(__file__).parent.parent
+
 
 class TestExternalFile:
     """Collects all tests related to the `ExternalFile` class."""
@@ -463,10 +465,10 @@ class TestExternalFile:
     @pytest.mark.parametrize(
         "file_path, save_content, hostname",
         [
-            ("../doc/_static/WelDX_notext.ico", True, "a host"),
-            ("../doc/_static/WelDX_notext.ico", False, "a host"),
-            (Path("../doc/_static/WelDX_notext.ico"), False, "a host"),
-            ("../doc/_static/WelDX_notext.ico", False, None),
+            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", True, "a host"),
+            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, "a host"),
+            (Path(f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"), False, "a host"),
+            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, None),
         ],
     )
     def test_init(file_path, save_content, hostname):
@@ -539,12 +541,12 @@ class TestExternalFile:
         """
         path_read = f"{dir_read}/{file_name}"
 
-        with OSFS("..") as file_system:
+        with OSFS(weldx_root_dir) as file_system:
             original_hash = file_system.hash(path_read, "md5")
 
         with MemoryFS() as file_system:
             file_system.makedir("some_directory")
-            ef = ExternalFile(f"../{path_read}")
+            ef = ExternalFile(f"{weldx_root_dir}/{path_read}")
             ef.write_to("some_directory", file_system)
 
             new_file_path = f"some_directory/{file_name}"

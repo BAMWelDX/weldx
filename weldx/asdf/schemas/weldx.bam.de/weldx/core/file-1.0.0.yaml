@@ -51,7 +51,7 @@ properties:
         description: |
           The utilized hashing algorithm.
         type: string
-        enum: [ MD5, SHA-256, SHA-512 ] # probably look up some codes
+        enum: [ MD5, SHA-256, SHA-512 ]
       value:
         description: |
           The calculated hash.
