@@ -22,7 +22,7 @@ sphinx:
 # Optionally set the version of Python and requirements required to build your docs
 
 conda:
-  environment: environment.yml
+  environment: doc/rtd_environment.yml
 python:
    version: 3.7
    install:

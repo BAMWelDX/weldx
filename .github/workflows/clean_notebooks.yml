@@ -3,7 +3,7 @@ name: check notebooks
 on:
   pull_request:
     branches:
-    - master
+      - master
 
 jobs:
   check:
