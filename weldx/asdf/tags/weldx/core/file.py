@@ -1,6 +1,5 @@
 """Contains the asdf serialization class for `weldx.core.ExternalFileBuffer`."""
 
-from hashlib import sha256
 
 import numpy as np
 
@@ -16,32 +15,6 @@ class FileTypeASDF(WeldxType):
     types = [ExternalFile]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-
-    @classmethod
-    def _get_hash(cls, buffer: bytes, algorithm: str = "SHA-256"):
-        """Get the hash of the content of a buffer.
-
-        Parameters
-        ----------
-        buffer : bytes
-            A buffer
-        algorithm : str
-            Name of the desired hashing algorithm
-
-        Returns
-        -------
-        str :
-            The calculated hash
-
-        """
-        # https://www.freecodecamp.org/news/md5-vs-sha-1-vs-sha-2-which-is-the-most-secure-encryption-hash-and-how-to-check-them/
-        # https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed
-        if algorithm == "SHA-256":
-            hasher = sha256()
-        else:
-            raise ValueError(f"Unsupported hash algorithm: {algorithm}")
-        hasher.update(buffer)
-        return hasher.hexdigest()
 
     @classmethod
     def to_tree(cls, node: ExternalFile, ctx):
@@ -66,7 +39,7 @@ class FileTypeASDF(WeldxType):
         hash_algorithm = "SHA-256"
         if node.asdf_save_content:
             buffer = node.get_file_content()
-            buffer_hash = cls._get_hash(buffer, hash_algorithm)
+            buffer_hash = node.calculate_hash(buffer, hash_algorithm)
             buffer_np = np.frombuffer(buffer, dtype=np.uint8)
             return {
                 "filename": node.filename,
@@ -99,20 +72,9 @@ class FileTypeASDF(WeldxType):
 
         Returns
         -------
-        weldx.core.ExternalFileBuffer :
+        weldx.core.ExternalFile :
             An instance of the 'weldx.core.ExternalFile' type.
 
         """
-        buffer = None
-        hostname = None
-        if "content" in tree:
-            buffer = tree["content"].tobytes()
-            hash_calc = cls._get_hash(buffer, tree["content_hash"]["algorithm"])
-            hash_stored = tree["content_hash"]["value"]
-            if not np.all(hash_calc == hash_stored):
-                raise Exception("Invalid hash.")
-            path = tree["filename"]
-        else:
-            path = f"{tree['location']}/{tree['filename']}"
-            hostname = tree["hostname"]
-        return ExternalFile(path, _buffer=buffer, hostname=hostname)
+
+        return ExternalFile(None, _tree=tree)

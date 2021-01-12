@@ -1,4 +1,6 @@
 """Tests asdf implementations of core module."""
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -405,13 +407,16 @@ def test_time_series_discrete(ts, copy_arrays, lazy_load):
 # ExternalFile
 # --------------------------------------------------------------------------------------
 
+weldx_root_dir = Path(__file__).parent.parent.parent.absolute().as_posix()
+
 
 @pytest.mark.parametrize("copy_arrays", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize("store_content", [True, False])
 def test_external_file(copy_arrays, lazy_load, store_content):
     ef = ExternalFile(
-        "../../doc/_static/WelDX_notext.ico", asdf_save_content=store_content
+        f"{weldx_root_dir}/doc/_static/WelDX_notext.ico",
+        asdf_save_content=store_content,
     )
     tree = {"file": ef}
     ef_file = _write_read_buffer(
@@ -420,7 +425,7 @@ def test_external_file(copy_arrays, lazy_load, store_content):
     assert ef.filename == ef_file.filename
 
     if store_content:
-        with OSFS("../..") as file_system:
+        with OSFS(weldx_root_dir) as file_system:
             original_hash = file_system.hash("doc/_static/WelDX_notext.ico", "md5")
 
         with MemoryFS() as file_system:

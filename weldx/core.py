@@ -1,6 +1,7 @@
 """Collection of common classes and functions."""
 
 import socket
+from hashlib import sha256
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
@@ -558,7 +559,7 @@ class ExternalFile:
         hashing_algorithm: str = "SHA-256",
         asdf_save_content: bool = False,
         hostname=None,
-        _buffer: np.ndarray = None,
+        _tree: Dict = None,
     ):
         """Create an `ExternalFile` instance.
 
@@ -576,32 +577,57 @@ class ExternalFile:
         hostname : str
             The hostname of the file. If `None` is provided, it is determined
             automatically.
-        _buffer : bytes
+        _tree : Dict
             This is an internal parameter for deserialization. Do not use it!
 
         """
-        if isinstance(path, str):
-            path = Path(path)
+        if _tree is None:
+            if isinstance(path, str):
+                path = Path(path)
 
-        # todo: check filesystems too
-        if _buffer is None and file_system is None and not path.is_file():
-            raise ValueError(f"File not found: {path.as_posix()}")
+            # todo: check filesystems too
+            if file_system is None and not path.is_file():
+                raise ValueError(f"File not found: {path.as_posix()}")
 
-        if hostname is None:
-            hostname = socket.gethostname()
+            if hostname is None:
+                hostname = socket.gethostname()
 
-        self._hostname = hostname
-        self._save_content = asdf_save_content
-        self._path = path
-        self._file_system = file_system
-        self._buffer = _buffer
-        self._hashing_algorithm = hashing_algorithm
+            self._hostname = hostname
+            self._save_content = asdf_save_content
+            self._path = path
+            self._file_system = file_system
+            self._buffer = None
+            self._hashing_algorithm = hashing_algorithm
 
-        if file_system is None:
-            with OSFS(self._path.parent.absolute().as_posix()) as system:
-                self._info = system.getdetails(self._path.name)
+            if file_system is None:
+                with OSFS(self._path.parent.absolute().as_posix()) as system:
+                    self._info = system.getdetails(self._path.name)
+            else:
+                self._info = file_system.getdetails(self._path)
         else:
-            self._info = file_system.getdetails(self._path)
+            directory = _tree.get("location", None)
+            file_name = _tree["filename"]
+            if directory is not None:
+                self._path = Path(f"{directory}/{file_name}")
+            else:
+                self._path = Path(file_name)
+            self._hostname = _tree.get("hostname", None)
+
+            self._hash = None
+            self._hashing_algorithm = None
+            hash_data = _tree.get("content_hash")
+            if hash_data is not None:
+                self._hash = hash_data.get("value", None)
+                self._hashing_algorithm = hash_data.get("algorithm", None)
+
+            buffer = _tree.get("content", None)
+            if buffer is not None:
+                self._buffer = buffer.tobytes()
+                hash_calc = self.calculate_hash(self._buffer, self._hashing_algorithm)
+                if not hash_calc == self._hash:
+                    raise Exception(
+                        "The stored hash does not match the stored contents' hash."
+                    )
 
     def _write_content(self, buffer, path, file_system):
         """Write the content of the passed buffer to a file.
@@ -633,6 +659,32 @@ class ExternalFile:
                     return file_system.readbytes(self.filename)
             return self._file_system.readbytes(self.filename)
         return self._buffer
+
+    @classmethod
+    def calculate_hash(cls, buffer: bytes, algorithm: str):
+        """Get the hash of the content of a buffer.
+
+        Parameters
+        ----------
+        buffer : bytes
+            A buffer
+        algorithm : str
+            Name of the desired hashing algorithm
+
+        Returns
+        -------
+        str :
+            The calculated hash
+
+        """
+        # https://www.freecodecamp.org/news/md5-vs-sha-1-vs-sha-2-which-is-the-most-secure-encryption-hash-and-how-to-check-them/
+        # https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed
+        if algorithm == "SHA-256":
+            hasher = sha256()
+        else:
+            raise ValueError(f"Unsupported hash algorithm: {algorithm}")
+        hasher.update(buffer)
+        return hasher.hexdigest()
 
     def write_to(self, path: Union[str, Path], file_system=None):
         """Write the file to the specified destination.
@@ -679,6 +731,18 @@ class ExternalFile:
 
         """
         return pd.Timestamp(self._info.created)
+
+    @property
+    def hash_algorithm(self) -> str:
+        """Get the hash algorithm.
+
+        Returns
+        -------
+        str :
+            The hash algorithm
+
+        """
+        return self._hashing_algorithm
 
     @property
     def hostname(self):
