@@ -354,7 +354,7 @@ def test_get_time_union(list_of_objects, time_exp):
     assert np.all(ut.get_time_union(list_of_objects) == time_exp)
 
 
-def test_xf_fill_all():
+def test_xr_fill_all():
     """Test filling along all dimensions."""
     da1 = xr.DataArray(
         np.eye(2), dims=["a", "b"], coords={"a": np.arange(2), "b": np.arange(2)}
@@ -440,6 +440,7 @@ def test_xr_check_coords(dax, ref_dict):
             ValueError,
         ),
         (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
+        (_dax_check, {"d3": {"dtype": "timedelta64"}}, TypeError),
         (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
         ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
     ],
@@ -448,3 +449,41 @@ def test_xr_check_coords_exception(dax, ref_dict, exception_type):
     """Test weldx.utility.xr_check_coords function."""
     with pytest.raises(exception_type):
         ut.xr_check_coords(dax, ref_dict)
+
+
+def test_xr_time_ref():
+    """Test weldx accessor functions for time handling."""
+    dt = pd.TimedeltaIndex([0, 1, 2, 3], "s")
+    da1 = xr.DataArray(
+        data=np.ones(4),
+        dims=["time"],
+        coords={"time": dt},
+    )
+
+    da1.time.attrs = {"A": "B"}
+
+    # non changing operations
+    da = da1.weldx.time_ref_unset()
+    assert da1.identical(da)
+    da = da1.weldx.time_ref_restore()
+    assert da1.identical(da)
+
+    t0 = pd.Timestamp("2021-01-01")
+    da1.weldx.time_ref = t0
+    da = da1.weldx.time_ref_unset()
+    assert np.all(da.time.data == (dt + t0))
+
+    da = da.weldx.reset_reference_time(pd.Timestamp("2021-01-01 00:00:01"))
+    assert np.all(da.time.data == pd.TimedeltaIndex([-1, 0, 1, 2], "s"))
+
+    da2 = xr.DataArray(
+        data=np.ones(4),
+        dims=["time"],
+        coords={"time": t0 + dt},
+    )
+    da2 = da2.weldx.time_ref_restore()
+    assert np.all(da2.time.data == pd.TimedeltaIndex([0, 1, 2, 3], "s"))
+    assert da2.time.attrs["time_ref"] == t0
+
+    da2.weldx.time_ref = t0
+    assert da2.time.attrs["time_ref"] == t0
