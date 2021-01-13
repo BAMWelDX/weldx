@@ -452,6 +452,7 @@ def test_xr_check_coords_exception(dax, ref_dict, exception_type):
 
 
 def test_xr_time_ref():
+    """Test weldx accessor functions for time handling."""
     dt = pd.TimedeltaIndex([0, 1, 2, 3], "s")
     da1 = xr.DataArray(
         data=np.ones(4),
