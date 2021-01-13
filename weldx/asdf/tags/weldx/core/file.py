@@ -52,7 +52,7 @@ class FileTypeASDF(WeldxType):
             "hostname": node.hostname,
             "location": node.location,
             "size": node.size,
-            "created": node.created,
+            # "created": node.created,
             # "modified": node.modified,
         }
 
