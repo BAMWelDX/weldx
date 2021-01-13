@@ -15,6 +15,7 @@
 - set minimum Python version to 3.7 [[#220]](https://github.com/BAMWelDX/weldx/pull/220)
 - `geometry.Profile.rasterize` can return list of rasterized shapes instead of flat ndarray (with setting `stack=False`) [[#223]](https://github.com/BAMWelDX/weldx/pull/223)
 - `geometry.Profile.plot` plots individual line objects for each shape (instead of a single line object) [[#223]](https://github.com/BAMWelDX/weldx/pull/223)
+- remove jinja templates and related code [[#228]](https://github.com/BAMWelDX/weldx/pull/228)
 
 ### fixes
 - don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
