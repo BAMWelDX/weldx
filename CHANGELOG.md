@@ -18,6 +18,7 @@
 
 ### fixes
 - don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
+- fix deprecated signature in `WXRotation` [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
 
 ## 0.2.2 (30.11.2020)
 ### added
