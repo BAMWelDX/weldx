@@ -14,9 +14,12 @@
 - set `conda-forge` as primary channel in `environment.yaml` and `build_env.yaml` [[#214]](https://github.com/BAMWelDX/weldx/pull/214)
 - `geometry.Profile.rasterize` can return list of rasterized shapes instead of flat ndarray (with setting `stack=False`) [[#223]](https://github.com/BAMWelDX/weldx/pull/223)
 - `geometry.Profile.plot` plots individual line objects for each shape (instead of a single line object) [[#223]](https://github.com/BAMWelDX/weldx/pull/223)
+- remove jinja templates and related code [[#228]](https://github.com/BAMWelDX/weldx/pull/228)
 
 ### fixes
 - don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
+- fix "datetime64" passing for "timedelta64" in `xr_check_coords` [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
+- fix `time_ref_restore` not working correctly if no `time_ref` was set [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
 
 ### dependencies
 - set minimum Python version to 3.9 [[#229]](https://github.com/BAMWelDX/weldx/pull/229)
