@@ -352,12 +352,12 @@ class WXRotation(Rot):
     """Wrapper for creating meta-tagged Scipy.Rotation objects."""
 
     @classmethod
-    def from_quat(cls, quat: np.ndarray, normalized=None) -> "WXRotation":
+    def from_quat(cls, quat: np.ndarray) -> "WXRotation":
         """Initialize from quaternions.
 
         scipy.spatial.transform.Rotation docs for details.
         """
-        rot = super().from_quat(quat, normalized)
+        rot = super().from_quat(quat)
         rot.wx_meta = {"constructor": "from_quat"}
         return rot
 
