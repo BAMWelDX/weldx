@@ -53,7 +53,7 @@ class FileTypeASDF(WeldxType):
             "location": node.location,
             "size": node.size,
             "created": node.created,
-            "modified": node.modified,
+            # "modified": node.modified,
         }
 
     @classmethod
