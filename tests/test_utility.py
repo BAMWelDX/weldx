@@ -475,3 +475,12 @@ def test_xr_time_ref():
 
     da = da.weldx.reset_reference_time(pd.Timestamp("2021-01-01 00:00:01"))
     assert np.all(da.time.data == pd.TimedeltaIndex([-1, 0, 1, 2], "s"))
+
+    da2 = xr.DataArray(
+        data=np.ones(4),
+        dims=["time"],
+        coords={"time": t0 + dt},
+    )
+    da2 = da2.weldx.time_ref_restore()
+    assert np.all(da2.time.data == pd.TimedeltaIndex([0, 1, 2, 3], "s"))
+    assert da2.time.attrs["time_ref"] == t0
