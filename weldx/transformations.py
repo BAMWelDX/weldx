@@ -358,7 +358,7 @@ class WXRotation(Rot):
         scipy.spatial.transform.Rotation docs for details.
         """
         rot = super().from_quat(quat)
-        rot.wx_meta = {"constructor": "from_quat"}
+        setattr(rot, "wx_meta", {"constructor": "from_quat"})
         return rot
 
     @classmethod
@@ -368,7 +368,7 @@ class WXRotation(Rot):
         scipy.spatial.transform.Rotation docs for details.
         """
         rot = super().from_matrix(matrix)
-        rot.wx_meta = {"constructor": "from_matrix"}
+        setattr(rot, "wx_meta", {"constructor": "from_matrix"})
         return rot
 
     @classmethod
@@ -377,8 +377,8 @@ class WXRotation(Rot):
 
         scipy.spatial.transform.Rotation docs for details.
         """
-        rot = Rot.from_rotvec(rotvec)
-        rot.wx_meta = {"constructor": "from_rotvec"}
+        rot = super().from_rotvec(rotvec)
+        setattr(rot, "wx_meta", {"constructor": "from_rotvec"})
         return rot
 
     @classmethod
@@ -387,8 +387,12 @@ class WXRotation(Rot):
 
         scipy.spatial.transform.Rotation docs for details.
         """
-        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
-        rot.wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
+        rot = super().from_euler(seq=seq, angles=angles, degrees=degrees)
+        setattr(
+            rot,
+            "wx_meta",
+            {"constructor": "from_euler", "seq": seq, "degrees": degrees},
+        )
         return rot
 
 
