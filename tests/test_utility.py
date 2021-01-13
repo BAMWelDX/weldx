@@ -484,3 +484,6 @@ def test_xr_time_ref():
     da2 = da2.weldx.time_ref_restore()
     assert np.all(da2.time.data == pd.TimedeltaIndex([0, 1, 2, 3], "s"))
     assert da2.time.attrs["time_ref"] == t0
+
+    da2.weldx.time_ref = t0
+    assert da2.time.attrs["time_ref"] == t0
