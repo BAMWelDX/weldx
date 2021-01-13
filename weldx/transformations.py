@@ -2754,9 +2754,10 @@ class CoordinateSystemManager:
             pos[child] = data["position"]
         return pos
 
-    def plot(self):
+    def plot(self, ax=None):
         """Plot the graph of the coordinate system manager."""
-        plt.figure()
+        if ax is None:
+            _, ax = plt.subplots()
         color_map = []
         pos = self._get_tree_positions_for_plot()
 
@@ -2765,7 +2766,9 @@ class CoordinateSystemManager:
         remove_edges = [edge for edge in graph.edges if graph.edges[edge]["defined"]]
         graph.remove_edges_from(remove_edges)
 
-        nx.draw(graph, pos, with_labels=True, font_weight="bold", node_color=color_map)
+        nx.draw(
+            graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
+        )
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
