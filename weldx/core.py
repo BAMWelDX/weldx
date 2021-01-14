@@ -1,6 +1,7 @@
 """Collection of common classes and functions."""
 
 import socket
+from dataclasses import dataclass
 from hashlib import sha256
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
@@ -549,7 +550,92 @@ class TimeSeries:
 # ExternalFile -------------------------------------------------------------------------
 
 
+@dataclass
 class ExternalFile:
+    """Handles external files."""
+
+    path: Union[str, Path] = None
+    filename: str = None
+    directory: Path = None
+    hashing_algorithm: str = "SHA-256"
+    asdf_save_content: bool = False
+    hostname: str = None
+    buffer: bytes = None
+    file_system = None
+
+    def __post_init__(self):
+        if self.path is not None:
+            if not isinstance(self.path, Path):
+                self.path = Path(self.path)
+            if not self.path.is_file():
+                raise ValueError(f"File not found: {self.path.as_posix()}")
+
+            self.directory = self.path.parent.absolute().as_posix()
+            self.filename = self.path.name
+
+            if self.hostname is None:
+                self.hostname = socket.gethostname()
+
+    @classmethod
+    def calculate_hash(cls, buffer: bytes, algorithm: str):
+        """Get the hash of the content of a buffer.
+
+        Parameters
+        ----------
+        buffer : bytes
+            A buffer
+        algorithm : str
+            Name of the desired hashing algorithm
+
+        Returns
+        -------
+        str :
+            The calculated hash
+
+        """
+        # https://www.freecodecamp.org/news/md5-vs-sha-1-vs-sha-2-which-is-the-most
+        # -secure-encryption-hash-and-how-to-check-them/
+        # https://softwareengineering.stackexchange.com/questions/49550/which-hashing
+        # -algorithm-is-best-for-uniqueness-and-speed
+        if algorithm == "SHA-256":
+            hasher = sha256()
+        else:
+            raise ValueError(f"Unsupported hash algorithm: {algorithm}")
+        hasher.update(buffer)
+        return hasher.hexdigest()
+
+    def get_file_content(self):
+        if self.file_system is None:
+            return self.path.read_bytes()
+        return self.file_system.readbytes(self.path)
+
+    def write_to(self, path: Union[str, Path], file_system=None):
+        """Write the file to the specified destination.
+
+        Parameters
+        ----------
+        path : :Union[str, Path]
+            Path where the file should be written.
+        file_system :
+            The target file system.
+
+        """
+        if isinstance(path, str):
+            path = Path(path)
+
+        # todo check is dir
+
+        buffer = self.buffer
+        if buffer is None:
+            buffer = self.get_file_content()
+
+        if file_system is None:
+            path.write_bytes(buffer)
+        else:
+            file_system.writebytes(f"{path}/{self.filename}", buffer)
+
+
+class ExternalFileOld:
     """Handles external files."""
 
     def __init__(

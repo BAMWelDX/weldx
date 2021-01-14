@@ -61,7 +61,7 @@ properties:
 propertyOrder: [filename, suffix, hostname, location, size, created, modified, content, content_hash]
 anyOf:
   - required: [filename, content, content_hash]
-  - required: [filename, location, hostname]
+  - required: [filename,  hostname]
 
 flowStyle: block
 ...

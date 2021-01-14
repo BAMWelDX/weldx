@@ -36,22 +36,22 @@ class FileTypeASDF(WeldxType):
             'weldx.core.ExternalFile' type to be serialized.
 
         """
-        hash_algorithm = "SHA-256"
-        if node.asdf_save_content:
-            buffer = node.get_file_content()
-            buffer_hash = node.calculate_hash(buffer, hash_algorithm)
-            buffer_np = np.frombuffer(buffer, dtype=np.uint8)
-            return {
-                "filename": node.filename,
-                "content": buffer_np,
-                "content_hash": {"algorithm": hash_algorithm, "value": buffer_hash},
-            }
+        # hash_algorithm = "SHA-256"
+        # if node.asdf_save_content:
+        # buffer = node.get_file_content()
+        # buffer_hash = node.calculate_hash(buffer, hash_algorithm)
+        # buffer_np = np.frombuffer(buffer, dtype=np.uint8)
+        # return {
+        # "filename": node.filename,
+        # "content": buffer_np,
+        # "content_hash": {"algorithm": hash_algorithm, "value": buffer_hash},
+        #    }
 
         return {
             "filename": node.filename,
             "hostname": node.hostname,
-            "location": node.location,
-            "size": node.size,
+            # "location": node.location,
+            # "size": node.size,
             # "created": node.created,
             # "modified": node.modified,
         }
@@ -77,4 +77,4 @@ class FileTypeASDF(WeldxType):
 
         """
 
-        return ExternalFile(None, _tree=tree)
+        return ExternalFile()
