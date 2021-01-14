@@ -1,6 +1,8 @@
 """Contains the asdf serialization class for `weldx.core.ExternalFileBuffer`."""
 
 
+from copy import deepcopy
+
 import numpy as np
 
 from weldx.asdf.types import WeldxType
@@ -46,15 +48,24 @@ class FileTypeASDF(WeldxType):
         # "content": buffer_np,
         # "content_hash": {"algorithm": hash_algorithm, "value": buffer_hash},
         #    }
+        tree = deepcopy(node.__dict__)
+        tree.pop("path", None)
 
-        return {
-            "filename": node.filename,
-            "hostname": node.hostname,
-            # "location": node.location,
-            # "size": node.size,
-            # "created": node.created,
-            # "modified": node.modified,
-        }
+        buffer = tree.pop("buffer", None)
+        save_content = tree.pop("asdf_save_content")
+        algorithm = tree.pop("hashing_algorithm")
+
+        if save_content:
+            if buffer is None:
+                buffer = node.get_file_content()
+            tree["content"] = np.frombuffer(buffer, dtype=np.uint8)
+
+        # todo stepwise hash if not saving file contents
+        if buffer is None:
+            buffer = node.get_file_content()
+        hash = node.calculate_hash(buffer, node.hashing_algorithm)
+        tree["content_hash"] = {"algorithm": algorithm, "value": hash}
+        return tree
 
     @classmethod
     def from_tree(cls, tree, ctx):
@@ -76,5 +87,19 @@ class FileTypeASDF(WeldxType):
             An instance of the 'weldx.core.ExternalFile' type.
 
         """
+        buffer = tree.pop("content", None)
+        if buffer is not None:
+            buffer = buffer.tobytes()
+            tree["buffer"] = buffer
 
-        return ExternalFile()
+        hash_data = tree.pop("content_hash")
+        tree["hashing_algorithm"] = hash_data["algorithm"]
+        hash_stored = hash_data["value"]
+
+        if buffer is not None:
+            hash_buffer = ExternalFile.calculate_hash(buffer, tree["hashing_algorithm"])
+            if hash_buffer != hash_stored:
+                raise Exception(
+                    "The stored hash does not match the stored contents' hash."
+                )
+        return ExternalFile(**tree)

@@ -429,7 +429,7 @@ def test_external_file(copy_arrays, lazy_load, store_content):
             original_hash = file_system.hash("doc/_static/WelDX_notext.ico", "md5")
 
         with MemoryFS() as file_system:
-            ef.write_to("", file_system)
+            ef_file.write_to("", file_system)
             assert file_system.hash("WelDX_notext.ico", "md5") == original_hash
     else:
         # todo: add to stored version
