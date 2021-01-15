@@ -2,7 +2,7 @@
 
 import socket
 from dataclasses import dataclass
-from hashlib import sha256
+from hashlib import sha256, md5
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
@@ -609,7 +609,7 @@ class ExternalFile:
             class
 
         """
-        return {"SHA-256": sha256}
+        return {"MD5": md5, "SHA-256": sha256}
 
     @staticmethod
     def _get_hashing_class(algorithm: str) -> Any:
