@@ -626,9 +626,8 @@ class ExternalFile:
             Class that implements the requested hashing algorithm.
 
         """
-        hashing_class_type = ExternalFile._get_hash_algorithm_mappings().get(
-            algorithm, None
-        )
+        hashing_class_type = ExternalFile._get_hash_algorithm_mappings().get(algorithm)
+
         if hashing_class_type is None:
             raise ValueError(f"'{algorithm}' is not a supported hashing algorithm.")
 
