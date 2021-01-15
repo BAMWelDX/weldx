@@ -15,7 +15,6 @@ dependencies:
   - boltons
   - asdf>=2.7
   - openpyxl
-  - jinja2
   - fs
   # graph packages
   - networkx

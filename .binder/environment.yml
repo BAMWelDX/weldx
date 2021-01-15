@@ -13,7 +13,6 @@ dependencies:
   - bottleneck
   - asdf>=2.7
   - openpyxl
-  - jinja2
   # graph packages
   - networkx
   # Code quality

@@ -729,10 +729,8 @@ def _check_dtype(var_dtype, ref_dtype: dict) -> bool:
     if var_dtype != np.dtype(ref_dtype):
         if isinstance(ref_dtype, str):
             if (
-                "timedelta64" in ref_dtype
-                or "datetime64" in ref_dtype
-                and np.issubdtype(var_dtype, np.dtype(ref_dtype))
-            ):
+                "timedelta64" in ref_dtype or "datetime64" in ref_dtype
+            ) and np.issubdtype(var_dtype, np.dtype(ref_dtype)):
                 return True
 
         if not (
@@ -978,12 +976,12 @@ def xr_interp_coordinates_in_time(
     return da
 
 
-def _as_valid_timestamp(value: Union[pd.Timestamp, str]) -> pd.Timestamp:
+def _as_valid_timestamp(value: Union[pd.Timestamp, np.datetime64, str]) -> pd.Timestamp:
     """Create a valid (by convention) Timestamp object or raise TypeError.
 
     Parameters
     ----------
-    value: pandas.Timestamp or str
+    value: pandas.Timestamp, np.datetime64 or str
         Value to convert to `pd.Timestamp`.
 
     Returns
@@ -991,7 +989,7 @@ def _as_valid_timestamp(value: Union[pd.Timestamp, str]) -> pd.Timestamp:
     pandas.Timestamp
 
     """
-    if isinstance(value, str):
+    if isinstance(value, (str, np.datetime64)):
         value = pd.Timestamp(value)
     if isinstance(value, pd.Timestamp):  # catch NaT from empty str.
         return value
@@ -1039,10 +1037,16 @@ class WeldxAccessor:
     def time_ref_restore(self) -> xr.DataArray:
         """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp."""
         da = self._obj.copy()
-        time_ref = da.weldx.time_ref
-        if time_ref and is_datetime64_dtype(da.time):
+        if "time" not in da.coords:
+            return da
+
+        if is_datetime64_dtype(da.time):
+            time_ref = da.weldx.time_ref
+            if time_ref is None:
+                time_ref = pd.Timestamp(da.time.data[0])
             da["time"] = pd.DatetimeIndex(da.time.data) - time_ref
             da.time.attrs = self._obj.time.attrs  # restore old attributes !
+            da.time.attrs["time_ref"] = time_ref
         return da
 
     def reset_reference_time(self, time_ref_new: pd.Timestamp) -> xr.DataArray:
@@ -1053,7 +1057,7 @@ class WeldxAccessor:
         return da
 
     @property
-    def time_ref(self) -> pd.Timestamp:
+    def time_ref(self) -> Union[pd.Timestamp, None]:
         """Get the time_ref value or `None` if not set."""
         da = self._obj
         if "time" in da.coords:
