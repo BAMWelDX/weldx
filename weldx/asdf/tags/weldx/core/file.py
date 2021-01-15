@@ -41,7 +41,7 @@ class FileTypeASDF(WeldxType):
         # hash_algorithm = "SHA-256"
         # if node.asdf_save_content:
         # buffer = node.get_file_content()
-        # buffer_hash = node.calculate_hash(buffer, hash_algorithm)
+        # buffer_hash = node.calculate_hash_of_buffer(buffer, hash_algorithm)
         # buffer_np = np.frombuffer(buffer, dtype=np.uint8)
         # return {
         # "filename": node.filename,
@@ -49,8 +49,8 @@ class FileTypeASDF(WeldxType):
         # "content_hash": {"algorithm": hash_algorithm, "value": buffer_hash},
         #    }
         tree = deepcopy(node.__dict__)
-        tree.pop("path", None)
 
+        path = tree.pop("path", None)
         buffer = tree.pop("buffer", None)
         save_content = tree.pop("asdf_save_content")
         algorithm = tree.pop("hashing_algorithm")
@@ -60,11 +60,11 @@ class FileTypeASDF(WeldxType):
                 buffer = node.get_file_content()
             tree["content"] = np.frombuffer(buffer, dtype=np.uint8)
 
-        # todo stepwise hash if not saving file contents
         if buffer is None:
-            buffer = node.get_file_content()
-        hash = node.calculate_hash(buffer, node.hashing_algorithm)
-        tree["content_hash"] = {"algorithm": algorithm, "value": hash}
+            hash_value = node.calculate_hash_of_file(path, node.hashing_algorithm)
+        else:
+            hash_value = node.calculate_hash_of_buffer(buffer, node.hashing_algorithm)
+        tree["content_hash"] = {"algorithm": algorithm, "value": hash_value}
         return tree
 
     @classmethod
@@ -97,7 +97,9 @@ class FileTypeASDF(WeldxType):
         hash_stored = hash_data["value"]
 
         if buffer is not None:
-            hash_buffer = ExternalFile.calculate_hash(buffer, tree["hashing_algorithm"])
+            hash_buffer = ExternalFile.calculate_hash_of_buffer(
+                buffer, tree["hashing_algorithm"]
+            )
             if hash_buffer != hash_stored:
                 raise Exception(
                     "The stored hash does not match the stored contents' hash."

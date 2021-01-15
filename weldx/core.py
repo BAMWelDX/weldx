@@ -552,33 +552,90 @@ class TimeSeries:
 
 @dataclass
 class ExternalFile:
-    """Handles external files."""
+    """Handles the asdf serialization of external files."""
 
     path: Union[str, Path] = None
+
     filename: str = None
-    directory: Path = None
+    suffix: str = None
+    directory: str = None
+    hostname: str = None
+
+    created: pd.Timestamp = None
+    modified: pd.Timestamp = None
+    size: int = None
+
     hashing_algorithm: str = "SHA-256"
     asdf_save_content: bool = False
-    hostname: str = None
     buffer: bytes = None
     file_system = None
 
     def __post_init__(self):
+        if self.file_system is not None:
+            raise Exception(
+                "Using file systems to load a file is currently not supported."
+            )
+
         if self.path is not None:
             if not isinstance(self.path, Path):
                 self.path = Path(self.path)
             if not self.path.is_file():
                 raise ValueError(f"File not found: {self.path.as_posix()}")
 
-            self.directory = self.path.parent.absolute().as_posix()
             self.filename = self.path.name
-
+            self.suffix = self.path.suffix  # should we use suffixes (plural) here?
+            self.directory = self.path.parent.absolute().as_posix()
             if self.hostname is None:
                 self.hostname = socket.gethostname()
 
-    @classmethod
-    def calculate_hash(cls, buffer: bytes, algorithm: str):
-        """Get the hash of the content of a buffer.
+            stat = self.path.stat()
+            self.size = stat.st_size
+            self.created = pd.Timestamp(stat.st_ctime_ns)
+            self.modified = pd.Timestamp(stat.st_mtime_ns)
+
+            if self.hashing_algorithm not in self._get_hash_algorithm_mappings():
+                raise ValueError(
+                    f"'{self.hashing_algorithm}' is not a supported hashing algorithm."
+                )
+
+    @staticmethod
+    def _get_hash_algorithm_mappings() -> Dict:
+        """Get a mapping between hashing algorithm name and corresponding python class.
+
+        Returns
+        -------
+        Dict :
+            A dictionary that maps a hashing algorithm name to a corresponding hashing
+            class
+
+        """
+        return {"SHA-256": sha256}
+
+    @staticmethod
+    def _get_hashing_class(algorithm: str) -> Any:
+        """Get a class that implements the requested hashing algorithm.
+
+        Parameters
+        ----------
+        algorithm : str
+
+        Returns
+        -------
+        Any :
+            Class that implements the requested hashing algorithm.
+
+        """
+        hashing_class_type = ExternalFile._get_hash_algorithm_mappings().get(
+            algorithm, None
+        )
+        if hashing_class_type is None:
+            raise ValueError(f"'{algorithm}' is not a supported hashing algorithm.")
+
+        return hashing_class_type()
+
+    @staticmethod
+    def calculate_hash_of_buffer(buffer: bytes, algorithm: str) -> str:
+        """Calculate the hash of a buffer.
 
         Parameters
         ----------
@@ -593,18 +650,51 @@ class ExternalFile:
             The calculated hash
 
         """
-        # https://www.freecodecamp.org/news/md5-vs-sha-1-vs-sha-2-which-is-the-most
-        # -secure-encryption-hash-and-how-to-check-them/
-        # https://softwareengineering.stackexchange.com/questions/49550/which-hashing
-        # -algorithm-is-best-for-uniqueness-and-speed
-        if algorithm == "SHA-256":
-            hasher = sha256()
-        else:
-            raise ValueError(f"Unsupported hash algorithm: {algorithm}")
-        hasher.update(buffer)
-        return hasher.hexdigest()
+        hashing_class = ExternalFile._get_hashing_class(algorithm)
 
-    def get_file_content(self):
+        hashing_class.update(buffer)
+        return hashing_class.hexdigest()
+
+    @staticmethod
+    def calculate_hash_of_file(
+        path: Union[str, Path], algorithm: str, buffer_size: int = 65536
+    ) -> str:
+        """Calculate the hash of a file.
+
+        Parameters
+        ----------
+        path : Union[str, Path]
+            Path of the file
+        algorithm : str
+            Name of the desired hashing algorithm
+        buffer_size : int
+            Size of the internally used buffer. The file will be read in
+            corresponding chunks.
+
+        Returns
+        -------
+        str :
+            The calculated hash
+
+        """
+        hashing_class = ExternalFile._get_hashing_class(algorithm)
+        with open(path, "rb") as file:
+            while True:
+                data = file.read(buffer_size)
+                if not data:
+                    break
+                hashing_class.update(data)
+        return hashing_class.hexdigest()
+
+    def get_file_content(self) -> bytes:
+        """Get the contained bytes of the file.
+
+        Returns
+        -------
+        bytes :
+            The file's content
+
+        """
         if self.file_system is None:
             return self.path.read_bytes()
         return self.file_system.readbytes(self.path)
@@ -623,8 +713,6 @@ class ExternalFile:
         if isinstance(path, str):
             path = Path(path)
 
-        # todo check is dir
-
         buffer = self.buffer
         if buffer is None:
             buffer = self.get_file_content()
@@ -633,259 +721,3 @@ class ExternalFile:
             path.write_bytes(buffer)
         else:
             file_system.writebytes(f"{path}/{self.filename}", buffer)
-
-
-class ExternalFileOld:
-    """Handles external files."""
-
-    def __init__(
-        self,
-        path,
-        file_system=None,
-        hashing_algorithm: str = "SHA-256",
-        asdf_save_content: bool = False,
-        hostname=None,
-        _tree: Dict = None,
-    ):
-        """Create an `ExternalFile` instance.
-
-        Parameters
-        ----------
-        path : Union[str, Path]
-            The path of the file
-        file_system :
-            The file system of the file
-        hashing_algorithm : str
-            The name of the hashing algorithm that should be used.
-        asdf_save_content : bool
-            Set to `True` if the file should be stored inside of an asdf file during
-            serialization.
-        hostname : str
-            The hostname of the file. If `None` is provided, it is determined
-            automatically.
-        _tree : Dict
-            This is an internal parameter for deserialization. Do not use it!
-
-        """
-        if _tree is None:
-            if isinstance(path, str):
-                path = Path(path)
-
-            # todo: check filesystems too
-            if file_system is None and not path.is_file():
-                raise ValueError(f"File not found: {path.as_posix()}")
-
-            if hostname is None:
-                hostname = socket.gethostname()
-
-            self._hostname = hostname
-            self._save_content = asdf_save_content
-            self._path = path
-            self._file_system = file_system
-            self._buffer = None
-            self._hashing_algorithm = hashing_algorithm
-
-            if file_system is None:
-                with OSFS(self._path.parent.absolute().as_posix()) as system:
-                    self._info = system.getdetails(self._path.name)
-            else:
-                self._info = file_system.getdetails(self._path)
-        else:
-            directory = _tree.get("location", None)
-            file_name = _tree["filename"]
-            if directory is not None:
-                self._path = Path(f"{directory}/{file_name}")
-            else:
-                self._path = Path(file_name)
-            self._hostname = _tree.get("hostname", None)
-
-            self._hash = None
-            self._hashing_algorithm = None
-            hash_data = _tree.get("content_hash")
-            if hash_data is not None:
-                self._hash = hash_data.get("value", None)
-                self._hashing_algorithm = hash_data.get("algorithm", None)
-
-            buffer = _tree.get("content", None)
-            if buffer is not None:
-                self._buffer = buffer.tobytes()
-                hash_calc = self.calculate_hash(self._buffer, self._hashing_algorithm)
-                if not hash_calc == self._hash:
-                    raise Exception(
-                        "The stored hash does not match the stored contents' hash."
-                    )
-
-    def _write_content(self, buffer, path, file_system):
-        """Write the content of the passed buffer to a file.
-
-        Parameters
-        ----------
-        buffer : bytes
-            A buffer that should be written to a file
-        path : str
-            The destination where the file should be written to
-        file_system :
-            The target file system
-
-        """
-        file_system.writebytes(f"{path}/{self.filename}", buffer)
-
-    def get_file_content(self):
-        """Get the content of the file as bytes.
-
-        Returns
-        -------
-        bytes :
-            Content of the file
-
-        """
-        if self._buffer is None:
-            if self._file_system is None:
-                with OSFS(self._path.parent.absolute().as_posix()) as file_system:
-                    return file_system.readbytes(self.filename)
-            return self._file_system.readbytes(self.filename)
-        return self._buffer
-
-    @classmethod
-    def calculate_hash(cls, buffer: bytes, algorithm: str):
-        """Get the hash of the content of a buffer.
-
-        Parameters
-        ----------
-        buffer : bytes
-            A buffer
-        algorithm : str
-            Name of the desired hashing algorithm
-
-        Returns
-        -------
-        str :
-            The calculated hash
-
-        """
-        # https://www.freecodecamp.org/news/md5-vs-sha-1-vs-sha-2-which-is-the-most-secure-encryption-hash-and-how-to-check-them/
-        # https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed
-        if algorithm == "SHA-256":
-            hasher = sha256()
-        else:
-            raise ValueError(f"Unsupported hash algorithm: {algorithm}")
-        hasher.update(buffer)
-        return hasher.hexdigest()
-
-    def write_to(self, path: Union[str, Path], file_system=None):
-        """Write the file to the specified destination.
-
-        Parameters
-        ----------
-        path : :Union[str, Path]
-            Path where the file should be written.
-        file_system :
-            The target file system.
-
-        """
-        if isinstance(path, str):
-            path = Path(path)
-
-        buffer = self.get_file_content()
-        if file_system is None:
-            with OSFS(path.absolute().as_posix()) as system:
-                self._write_content(buffer, "", system)
-        else:
-            self._write_content(buffer, path, file_system)
-
-    @property
-    def asdf_save_content(self):
-        """Return `True` if the file content should be stored in an asdf file.
-
-        Returns
-        -------
-        bool :
-            `True` if the file content should be stored in an asdf file, `False`
-            otherwise
-
-        """
-        return self._save_content
-
-    @property
-    def created(self):
-        """Get the timestamp of the file's creation.
-
-        Returns
-        -------
-        pandas.Timestamp :
-            Time when the file was created.
-
-        """
-        return pd.Timestamp(self._info.created)
-
-    @property
-    def hash_algorithm(self) -> str:
-        """Get the hash algorithm.
-
-        Returns
-        -------
-        str :
-            The hash algorithm
-
-        """
-        return self._hashing_algorithm
-
-    @property
-    def hostname(self):
-        """Get the hostname of the file.
-
-        Returns
-        -------
-        str :
-            The file's hostname.
-
-        """
-        return self._hostname
-
-    @property
-    def filename(self):
-        """Get the filename.
-
-        Returns
-        -------
-        str:
-            The filename
-
-        """
-        return self._path.name
-
-    @property
-    def modified(self):
-        """Get the timestamp of the file's last modification.
-
-        Returns
-        -------
-        pandas.Timestamp :
-            Time when the file was last modified.
-
-        """
-        return pd.Timestamp(self._info.modified)
-
-    @property
-    def location(self):
-        """Return the file's absolute path.
-
-        Returns
-        -------
-        str:
-            The file's absolute path.
-
-        """
-        return self._path.parent.absolute().as_posix()
-
-    @property
-    def size(self):
-        """Return the size of the file in bytes.
-
-        Returns
-        -------
-        int :
-            Size of the file in bytes
-
-        """
-        return self._info.size

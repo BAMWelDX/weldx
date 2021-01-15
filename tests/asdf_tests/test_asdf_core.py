@@ -422,7 +422,17 @@ def test_external_file(copy_arrays, lazy_load, store_content):
     ef_file = _write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )["file"]
+
     assert ef.filename == ef_file.filename
+    assert ef.suffix == ef_file.suffix
+    assert ef.directory == ef_file.directory
+    assert ef.hostname == ef_file.hostname
+
+    assert ef.created == ef_file.created
+    assert ef.modified == ef_file.modified
+    assert ef.size == ef_file.size
+
+    assert ef.hashing_algorithm == ef_file.hashing_algorithm
 
     if store_content:
         with OSFS(weldx_root_dir) as file_system:
@@ -431,6 +441,3 @@ def test_external_file(copy_arrays, lazy_load, store_content):
         with MemoryFS() as file_system:
             ef_file.write_to("", file_system)
             assert file_system.hash("WelDX_notext.ico", "md5") == original_hash
-    else:
-        # todo: add to stored version
-        assert ef.hostname == ef_file.hostname
