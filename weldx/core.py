@@ -699,19 +699,18 @@ class ExternalFile:
             return self.path.read_bytes()
         return self.file_system.readbytes(self.path)
 
-    def write_to(self, path: Union[str, Path], file_system=None):
+    def write_to(self, directory: Union[str, Path], file_system=None):
         """Write the file to the specified destination.
 
         Parameters
         ----------
-        path : :Union[str, Path]
-            Path where the file should be written.
+        directory : :Union[str, Path]
+            Directory where the file should be written.
         file_system :
             The target file system.
 
         """
-        if isinstance(path, str):
-            path = Path(path)
+        path = Path(f"{directory}/{self.filename}")
 
         buffer = self.buffer
         if buffer is None:
@@ -720,4 +719,4 @@ class ExternalFile:
         if file_system is None:
             path.write_bytes(buffer)
         else:
-            file_system.writebytes(f"{path}/{self.filename}", buffer)
+            file_system.writebytes(path.as_posix(), buffer)

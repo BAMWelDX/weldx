@@ -7,12 +7,30 @@ tag: "tag:weldx.bam.de:weldx/core/file-1.0.0"
 title: |
   Schema for a file.
 description: |
-  Describes a file.
+  This schema describes a file by compiling all its meta data. Optionally, the whole file can also be stored in the
+  binary block of an asdf file.
+examples:
+  -
+    - |
+      !<tag:weldx.bam.de:weldx/core/file-1.0.0>
+      filename: file.pdf
+      suffix: .pdf
+      hostname: my_computer
+      directory: C:/weldx/my_files
+      size: 90571
+      created: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> { value: '2020-12-09T12:51:20.653744500' }
+      modified: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> { value: '2020-12-10T13:14:17.362481500' }
+      content: !core/ndarray-1.0.0
+        source: 0
+        datatype: uint8
+        byteorder: big
+        shape: [ 90571 ]
+      content_hash: { algorithm: SHA-256, value: 5a6270ea5e2662c6489ee9e9c2201645e1b3cdadf0e3a621cca213a29ff4ae32 }
 type: object
 properties:
   filename:
     description: |
-      The name of the file.
+      The name of the file including the suffix.
     type: string
   suffix:
     description: |
@@ -32,15 +50,15 @@ properties:
     tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
   hostname:
     description: |
-      The name of the files host.
+      The name of the files host machine.
     type: string
   directory:
     description: |
-      The location of the file on the specified host system.
+      The directory of the file on the specified host system.
     type: string
   content:
     description: |
-      The content of the file.
+      The content of the file. It is stored in the binary block of the file.
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
   content_hash:
     description: |
@@ -51,11 +69,12 @@ properties:
         description: |
           The utilized hashing algorithm.
         type: string
-        enum: [ MD5, SHA-256, SHA-512 ]
+        enum: [MD5, SHA-256]
       value:
         description: |
           The calculated hash.
         type: string
+    required: [algorithm,  value]
 
 
 propertyOrder: [filename, suffix, hostname, directory, size, created, modified, content, content_hash]
