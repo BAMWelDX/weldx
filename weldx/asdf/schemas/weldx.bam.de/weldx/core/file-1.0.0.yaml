@@ -11,6 +11,7 @@ description: |
   binary block of an asdf file.
 examples:
   -
+    - A PDF-file that is stored in the asdf file
     - |
       !<tag:weldx.bam.de:weldx/core/file-1.0.0>
       filename: file.pdf

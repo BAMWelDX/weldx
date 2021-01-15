@@ -11,7 +11,6 @@ import pandas as pd
 import pint
 import sympy
 import xarray as xr
-from fs.osfs import OSFS
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -571,6 +570,7 @@ class ExternalFile:
     file_system = None
 
     def __post_init__(self):
+        """Initialize the internal values."""
         if self.file_system is not None:
             raise Exception(
                 "Using file systems to load a file is currently not supported."
@@ -618,6 +618,7 @@ class ExternalFile:
         Parameters
         ----------
         algorithm : str
+            Name of the hashing algorithm (MD5, SHA-256)
 
         Returns
         -------
