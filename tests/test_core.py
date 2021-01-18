@@ -556,11 +556,12 @@ class TestExternalFile:
     # test_write_to --------------------------------------------------------------------
     @staticmethod
     @pytest.mark.parametrize(
-        "algorithm_buffer, algorithm_",
+        "algorithm_buffer",
         [
             ("doc/_static", "WelDX_notext.ico"),
             ("doc/_static", "WelDX_notext.svg"),
             ("weldx", "transformations.py"),
         ],
     )
-    def test_hashing():
+    def test_hashing(algorithm_buffer):
+        pass
