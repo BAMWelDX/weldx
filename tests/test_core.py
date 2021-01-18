@@ -487,6 +487,9 @@ class TestExternalFile:
         """
         ef = ExternalFile(file_path, asdf_save_content=save_content, hostname=hostname)
         assert save_content == ef.asdf_save_content
+        assert ef.filename == "WelDX_notext.ico"
+        assert ef.suffix == "ico"
+
         if hostname is not None:
             assert hostname == ef.hostname
         else:

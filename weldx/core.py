@@ -565,6 +565,7 @@ class ExternalFile:
     size: int = None
 
     hashing_algorithm: str = "SHA-256"
+    hash: str = None
     asdf_save_content: bool = False
     buffer: bytes = None
     file_system = None
@@ -583,7 +584,7 @@ class ExternalFile:
                 raise ValueError(f"File not found: {self.path.as_posix()}")
 
             self.filename = self.path.name
-            self.suffix = self.path.suffix  # should we use suffixes (plural) here?
+            self.suffix = self.path.suffix[1:]  # should we use suffixes (plural) here?
             self.directory = self.path.parent.absolute().as_posix()
             if self.hostname is None:
                 self.hostname = socket.gethostname()

@@ -54,6 +54,7 @@ class FileTypeASDF(WeldxType):
         buffer = tree.pop("buffer", None)
         save_content = tree.pop("asdf_save_content")
         algorithm = tree.pop("hashing_algorithm")
+        hash_value = tree.pop("hash")
 
         if save_content:
             if buffer is None:
@@ -61,10 +62,13 @@ class FileTypeASDF(WeldxType):
             tree["content"] = np.frombuffer(buffer, dtype=np.uint8)
 
         if buffer is None:
-            hash_value = node.calculate_hash_of_file(path, node.hashing_algorithm)
+            if hash_value is None and path is not None:
+                hash_value = node.calculate_hash_of_file(path, node.hashing_algorithm)
         else:
             hash_value = node.calculate_hash_of_buffer(buffer, node.hashing_algorithm)
-        tree["content_hash"] = {"algorithm": algorithm, "value": hash_value}
+
+        if hash_value is not None:
+            tree["content_hash"] = {"algorithm": algorithm, "value": hash_value}
         return tree
 
     @classmethod
@@ -92,15 +96,16 @@ class FileTypeASDF(WeldxType):
             buffer = buffer.tobytes()
             tree["buffer"] = buffer
 
-        hash_data = tree.pop("content_hash")
-        tree["hashing_algorithm"] = hash_data["algorithm"]
-        hash_stored = hash_data["value"]
+        hash_data = tree.pop("content_hash", None)
+        if hash_data is not None:
+            tree["hashing_algorithm"] = hash_data["algorithm"]
+            tree["hash"] = hash_data["value"]
 
         if buffer is not None:
             hash_buffer = ExternalFile.calculate_hash_of_buffer(
                 buffer, tree["hashing_algorithm"]
             )
-            if hash_buffer != hash_stored:  # pragma: no cover
+            if hash_buffer != tree["hash"]:  # pragma: no cover
                 raise Exception(
                     "The stored hash does not match the stored contents' hash."
                 )
