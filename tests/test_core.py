@@ -553,15 +553,37 @@ class TestExternalFile:
             assert file_system.isfile(new_file_path)
             assert file_system.hash(new_file_path, "md5") == original_hash
 
-    # test_write_to --------------------------------------------------------------------
+    # test_hashing ---------------------------------------------------------------------
     @staticmethod
     @pytest.mark.parametrize(
-        "algorithm_buffer",
+        "algorithm, buffer_size",
         [
-            ("doc/_static", "WelDX_notext.ico"),
-            ("doc/_static", "WelDX_notext.svg"),
-            ("weldx", "transformations.py"),
+            ("SHA-256", 1024),
+            ("MD5", 2048),
         ],
     )
-    def test_hashing(algorithm_buffer):
-        pass
+    def test_hashing(algorithm: str, buffer_size: int):
+        """Test the hashing functions.
+
+        Two things should be tested here:
+        - All available algorithms can be selected and work properly
+        - Both available hashing functions deliver the same hash for the same algorithm
+
+        Parameters
+        ----------
+        algorithm : str
+            The hashing algorithm
+        buffer_size : int
+            The size of the buffer that is used by the `calculate_hash_of_file` method.
+
+        """
+        file_path = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
+        ef = ExternalFile(file_path, hashing_algorithm=algorithm)
+        buffer = ef.get_file_content()
+
+        hash_buffer = ExternalFile.calculate_hash_of_buffer(buffer, algorithm)
+        hash_file = ExternalFile.calculate_hash_of_file(
+            file_path, algorithm, buffer_size
+        )
+
+        assert hash_buffer == hash_file
