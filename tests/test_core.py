@@ -590,7 +590,7 @@ class TestExternalFile:
         algorithm : str
             The hashing algorithm
         buffer_size : int
-            The size of the buffer that is used by the `calculate_hash_of_file` method.
+            The size of the buffer that is used by the `calculate_hash` method.
 
         """
         file_path = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"

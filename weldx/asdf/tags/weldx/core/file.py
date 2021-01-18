@@ -38,16 +38,6 @@ class FileTypeASDF(WeldxType):
             'weldx.core.ExternalFile' type to be serialized.
 
         """
-        # hash_algorithm = "SHA-256"
-        # if node.asdf_save_content:
-        # buffer = node.get_file_content()
-        # buffer_hash = node.calculate_hash_of_buffer(buffer, hash_algorithm)
-        # buffer_np = np.frombuffer(buffer, dtype=np.uint8)
-        # return {
-        # "filename": node.filename,
-        # "content": buffer_np,
-        # "content_hash": {"algorithm": hash_algorithm, "value": buffer_hash},
-        #    }
         tree = deepcopy(node.__dict__)
 
         path = tree.pop("path", None)
@@ -63,9 +53,9 @@ class FileTypeASDF(WeldxType):
 
         if buffer is None:
             if hash_value is None and path is not None:
-                hash_value = node.calculate_hash_of_file(path, node.hashing_algorithm)
+                hash_value = node.calculate_hash(path, node.hashing_algorithm)
         else:
-            hash_value = node.calculate_hash_of_buffer(buffer, node.hashing_algorithm)
+            hash_value = node.calculate_hash(buffer, node.hashing_algorithm)
 
         if hash_value is not None:
             tree["content_hash"] = {"algorithm": algorithm, "value": hash_value}
@@ -102,9 +92,7 @@ class FileTypeASDF(WeldxType):
             tree["hash"] = hash_data["value"]
 
         if buffer is not None:
-            hash_buffer = ExternalFile.calculate_hash_of_buffer(
-                buffer, tree["hashing_algorithm"]
-            )
+            hash_buffer = ExternalFile.calculate_hash(buffer, tree["hashing_algorithm"])
             if hash_buffer != tree["hash"]:  # pragma: no cover
                 raise Exception(
                     "The stored hash does not match the stored contents' hash."
