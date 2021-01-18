@@ -552,3 +552,15 @@ class TestExternalFile:
             new_file_path = f"some_directory/{file_name}"
             assert file_system.isfile(new_file_path)
             assert file_system.hash(new_file_path, "md5") == original_hash
+
+    # test_write_to --------------------------------------------------------------------
+    @staticmethod
+    @pytest.mark.parametrize(
+        "algorithm_buffer, algorithm_",
+        [
+            ("doc/_static", "WelDX_notext.ico"),
+            ("doc/_static", "WelDX_notext.svg"),
+            ("weldx", "transformations.py"),
+        ],
+    )
+    def test_hashing():

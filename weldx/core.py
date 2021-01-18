@@ -2,7 +2,7 @@
 
 import socket
 from dataclasses import dataclass
-from hashlib import sha256, md5
+from hashlib import md5, sha256
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
