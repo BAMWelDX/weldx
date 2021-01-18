@@ -2,6 +2,7 @@
 
 
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 import pandas as pd
@@ -496,27 +497,31 @@ class TestExternalFile:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "variables, exception_type, test_name",
+        "kwa, exception_type, test_name",
         [
             ({"path": "does_not.exist"}, ValueError, "# File does not exist"),
+            ({"hashing_algorithm": "fancy"}, ValueError, "# Invalid hashing algorithm"),
         ],
         ids=get_test_name,
     )
-    def test_init_exceptions(variables, exception_type, test_name):
+    def test_init_exceptions(kwa, exception_type, test_name):
         """Test the `__init__` methods exceptions.
 
         Parameters
         ----------
-        variables : Tuple
-            Parameters that should be passed to the `__init__` method
+        kwa : Dict
+            Key word arguments that should be passed to the `__init__` method
         exception_type :
             The expected exception type
         test_name : str
             Name of the test
 
         """
+        if "path" not in kwa:
+            kwa["path"] = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
+
         with pytest.raises(exception_type):
-            ExternalFile(**variables)
+            ExternalFile(**kwa)
 
     # test_write_to --------------------------------------------------------------------
     @staticmethod
@@ -540,13 +545,21 @@ class TestExternalFile:
 
         """
         path_read = f"{dir_read}/{file_name}"
+        ef = ExternalFile(f"{weldx_root_dir}/{path_read}")
 
         with OSFS(weldx_root_dir) as file_system:
             original_hash = file_system.hash(path_read, "md5")
 
+            # check writing to hard drive
+            with TemporaryDirectory(dir=weldx_root_dir) as td:
+                ef.write_to(td)
+                new_file_path = Path(f"{Path(td).name}/{file_name}").as_posix()
+                assert file_system.isfile(new_file_path)
+                assert file_system.hash(new_file_path, "md5") == original_hash
+
+        # check writing to a memory file system
         with MemoryFS() as file_system:
             file_system.makedir("some_directory")
-            ef = ExternalFile(f"{weldx_root_dir}/{path_read}")
             ef.write_to("some_directory", file_system)
 
             new_file_path = f"some_directory/{file_name}"

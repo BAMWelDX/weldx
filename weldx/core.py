@@ -571,7 +571,7 @@ class ExternalFile:
 
     def __post_init__(self):
         """Initialize the internal values."""
-        if self.file_system is not None:
+        if self.file_system is not None:  # pragma: no cover
             raise Exception(
                 "Using file systems to load a file is currently not supported."
             )
@@ -593,10 +593,8 @@ class ExternalFile:
             self.created = pd.Timestamp(stat.st_ctime_ns)
             self.modified = pd.Timestamp(stat.st_mtime_ns)
 
-            if self.hashing_algorithm not in self._get_hash_algorithm_mappings():
-                raise ValueError(
-                    f"'{self.hashing_algorithm}' is not a supported hashing algorithm."
-                )
+            # Just to test if the passed algorithm is valid
+            self._get_hashing_class(self.hashing_algorithm)
 
     @staticmethod
     def _get_hash_algorithm_mappings() -> Dict:
@@ -695,9 +693,7 @@ class ExternalFile:
             The file's content
 
         """
-        if self.file_system is None:
-            return self.path.read_bytes()
-        return self.file_system.readbytes(self.path)
+        return self.path.read_bytes()
 
     def write_to(self, directory: Union[str, Path], file_system=None):
         """Write the file to the specified destination.
