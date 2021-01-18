@@ -100,7 +100,7 @@ class FileTypeASDF(WeldxType):
             hash_buffer = ExternalFile.calculate_hash_of_buffer(
                 buffer, tree["hashing_algorithm"]
             )
-            if hash_buffer != hash_stored:
+            if hash_buffer != hash_stored:  # pragma: no cover
                 raise Exception(
                     "The stored hash does not match the stored contents' hash."
                 )
