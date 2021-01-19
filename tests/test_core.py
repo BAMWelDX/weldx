@@ -1,20 +1,15 @@
 """Tests of the core package."""
 
 
-from pathlib import Path
-from tempfile import TemporaryDirectory
-
 import numpy as np
 import pandas as pd
 import pint
 import pytest
-from fs.memoryfs import MemoryFS
-from fs.osfs import OSFS
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.core import ExternalFile, MathematicalExpression, TimeSeries
+from weldx.core import MathematicalExpression, TimeSeries
 
 
 # Todo: Move this to conftest.py?
@@ -448,156 +443,3 @@ class TestTimeSeries:
         """Test the exceptions of the 'set_parameter' method."""
         with pytest.raises(exception_type):
             ts.interp_time(time)
-
-
-# --------------------------------------------------------------------------------------
-# External file
-# --------------------------------------------------------------------------------------
-
-weldx_root_dir = Path(__file__).parent.parent
-
-
-class TestExternalFile:
-    """Collects all tests related to the `ExternalFile` class."""
-
-    # test_init ------------------------------------------------------------------------
-
-    @staticmethod
-    @pytest.mark.parametrize(
-        "file_path, save_content, hostname",
-        [
-            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", True, "a host"),
-            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, "a host"),
-            (Path(f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"), False, "a host"),
-            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, None),
-        ],
-    )
-    def test_init(file_path, save_content, hostname):
-        """Test the `__init__` method.
-
-        Parameters
-        ----------
-        file_path: Union[str, Path]
-            Path of the file
-        save_content : bool
-            If `True`, the file should be stored in the asdf file
-        hostname:
-            The files hostname
-
-        """
-        ef = ExternalFile(file_path, asdf_save_content=save_content, hostname=hostname)
-        assert save_content == ef.asdf_save_content
-        assert ef.filename == "WelDX_notext.ico"
-        assert ef.suffix == "ico"
-
-        if hostname is not None:
-            assert hostname == ef.hostname
-        else:
-            print(hostname)
-            assert isinstance(ef.hostname, str)
-
-    # test_init_exceptions -------------------------------------------------------------
-
-    @staticmethod
-    @pytest.mark.parametrize(
-        "kwa, exception_type, test_name",
-        [
-            ({"path": "does_not.exist"}, ValueError, "# File does not exist"),
-            ({"hashing_algorithm": "fancy"}, ValueError, "# Invalid hashing algorithm"),
-        ],
-        ids=get_test_name,
-    )
-    def test_init_exceptions(kwa, exception_type, test_name):
-        """Test the `__init__` methods exceptions.
-
-        Parameters
-        ----------
-        kwa : Dict
-            Key word arguments that should be passed to the `__init__` method
-        exception_type :
-            The expected exception type
-        test_name : str
-            Name of the test
-
-        """
-        if "path" not in kwa:
-            kwa["path"] = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
-
-        with pytest.raises(exception_type):
-            ExternalFile(**kwa)
-
-    # test_write_to --------------------------------------------------------------------
-    @staticmethod
-    @pytest.mark.parametrize(
-        "dir_read, file_name",
-        [
-            ("doc/_static", "WelDX_notext.ico"),
-            ("doc/_static", "WelDX_notext.svg"),
-            ("weldx", "transformations.py"),
-        ],
-    )
-    def test_write_to(dir_read, file_name):
-        """Test the `write_to` method by writing a read file to a virtual file system.
-
-        Parameters
-        ----------
-        dir_read : str
-            Directory that contains the source file
-        file_name : str
-            Name of the source file
-
-        """
-        path_read = f"{dir_read}/{file_name}"
-        ef = ExternalFile(f"{weldx_root_dir}/{path_read}")
-
-        with OSFS(weldx_root_dir) as file_system:
-            original_hash = file_system.hash(path_read, "md5")
-
-            # check writing to hard drive
-            with TemporaryDirectory(dir=weldx_root_dir) as td:
-                ef.write_to(td)
-                new_file_path = Path(f"{Path(td).name}/{file_name}").as_posix()
-                assert file_system.isfile(new_file_path)
-                assert file_system.hash(new_file_path, "md5") == original_hash
-
-        # check writing to a memory file system
-        with MemoryFS() as file_system:
-            file_system.makedir("some_directory")
-            ef.write_to("some_directory", file_system)
-
-            new_file_path = f"some_directory/{file_name}"
-            assert file_system.isfile(new_file_path)
-            assert file_system.hash(new_file_path, "md5") == original_hash
-
-    # test_hashing ---------------------------------------------------------------------
-    @staticmethod
-    @pytest.mark.parametrize(
-        "algorithm, buffer_size",
-        [
-            ("SHA-256", 1024),
-            ("MD5", 2048),
-        ],
-    )
-    def test_hashing(algorithm: str, buffer_size: int):
-        """Test the hashing functions.
-
-        Two things should be tested here:
-        - All available algorithms can be selected and work properly
-        - Both available hashing functions deliver the same hash for the same algorithm
-
-        Parameters
-        ----------
-        algorithm : str
-            The hashing algorithm
-        buffer_size : int
-            The size of the buffer that is used by the `calculate_hash` method.
-
-        """
-        file_path = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
-        ef = ExternalFile(file_path, hashing_algorithm=algorithm)
-        buffer = ef.get_file_content()
-
-        hash_buffer = ExternalFile.calculate_hash(buffer, algorithm)
-        hash_file = ExternalFile.calculate_hash(file_path, algorithm, buffer_size)
-
-        assert hash_buffer == hash_file

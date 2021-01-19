@@ -5,6 +5,9 @@
 - add `weldx.transformations.CoordinateSystemManager.relabel` function [[#219]](https://github.com/BAMWelDX/weldx/pull/212)
 
 ### ASDF
+- Add possibility to store meta data and content of an external file in an ASDF file
+  - Python class: `weldx.asdf.ExternalFile`
+  - Schema: `core/file-1.0.0.yaml`
 - Added support for serializing generic metadata and userdata attributes for weldx classes. [[#209]](https://github.com/BAMWelDX/weldx/pull/209)
   - the provisional attribute names are `wx_metadata` and `wx_user`
 - `None` values are removed from the asdf tree for all `weldx` classes. [[#212]](https://github.com/BAMWelDX/weldx/pull/212)

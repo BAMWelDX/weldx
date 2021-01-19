@@ -1,5 +1,6 @@
 """Tests asdf implementations of core module."""
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 import pandas as pd
@@ -11,12 +12,20 @@ from fs.osfs import OSFS
 from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
+from weldx.asdf.tags.weldx.core.file import ExternalFile
 from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.core import ExternalFile
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
 from weldx.transformations import WXRotation
+
+
+def get_test_name(param):
+    """Get the test name from the parameter list of a parametrized test."""
+    if isinstance(param, str) and param[0] == "#":
+        return param[1:]
+    return ""
+
 
 # WXRotation ---------------------------------------------------------------------
 _base_rotation = Rotation.from_euler(
@@ -410,34 +419,196 @@ def test_time_series_discrete(ts, copy_arrays, lazy_load):
 weldx_root_dir = Path(__file__).parent.parent.parent.absolute().as_posix()
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
-@pytest.mark.parametrize("lazy_load", [True, False])
-@pytest.mark.parametrize("store_content", [True, False])
-def test_external_file(copy_arrays, lazy_load, store_content):
-    ef = ExternalFile(
-        f"{weldx_root_dir}/doc/_static/WelDX_notext.ico",
-        asdf_save_content=store_content,
+class TestExternalFile:
+    """Collects all tests related to the `ExternalFile` class."""
+
+    # test_init ------------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "file_path, save_content, hostname",
+        [
+            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", True, "a host"),
+            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, "a host"),
+            (Path(f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"), False, "a host"),
+            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, None),
+        ],
     )
-    tree = {"file": ef}
-    ef_file = _write_read_buffer(
-        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    )["file"]
+    def test_init(file_path, save_content, hostname):
+        """Test the `__init__` method.
 
-    assert ef.filename == ef_file.filename
-    assert ef.suffix == ef_file.suffix
-    assert ef.directory == ef_file.directory
-    assert ef.hostname == ef_file.hostname
+        Parameters
+        ----------
+        file_path: Union[str, Path]
+            Path of the file
+        save_content : bool
+            If `True`, the file should be stored in the asdf file
+        hostname:
+            The files hostname
 
-    assert ef.created == ef_file.created
-    assert ef.modified == ef_file.modified
-    assert ef.size == ef_file.size
+        """
+        ef = ExternalFile(file_path, asdf_save_content=save_content, hostname=hostname)
+        assert save_content == ef.asdf_save_content
+        assert ef.filename == "WelDX_notext.ico"
+        assert ef.suffix == "ico"
 
-    assert ef.hashing_algorithm == ef_file.hashing_algorithm
+        if hostname is not None:
+            assert hostname == ef.hostname
+        else:
+            print(hostname)
+            assert isinstance(ef.hostname, str)
 
-    if store_content:
+    # test_init_exceptions -------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "kwa, exception_type, test_name",
+        [
+            ({"path": "does_not.exist"}, ValueError, "# File does not exist"),
+            ({"hashing_algorithm": "fancy"}, ValueError, "# Invalid hashing algorithm"),
+        ],
+        ids=get_test_name,
+    )
+    def test_init_exceptions(kwa, exception_type, test_name):
+        """Test the `__init__` methods exceptions.
+
+        Parameters
+        ----------
+        kwa : Dict
+            Key word arguments that should be passed to the `__init__` method
+        exception_type :
+            The expected exception type
+        test_name : str
+            Name of the test
+
+        """
+        if "path" not in kwa:
+            kwa["path"] = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
+
+        with pytest.raises(exception_type):
+            ExternalFile(**kwa)
+
+    # test_write_to --------------------------------------------------------------------
+    @staticmethod
+    @pytest.mark.parametrize(
+        "dir_read, file_name",
+        [
+            ("doc/_static", "WelDX_notext.ico"),
+            ("doc/_static", "WelDX_notext.svg"),
+            ("weldx", "transformations.py"),
+        ],
+    )
+    def test_write_to(dir_read, file_name):
+        """Test the `write_to` method by writing a read file to a virtual file system.
+
+        Parameters
+        ----------
+        dir_read : str
+            Directory that contains the source file
+        file_name : str
+            Name of the source file
+
+        """
+        path_read = f"{dir_read}/{file_name}"
+        ef = ExternalFile(f"{weldx_root_dir}/{path_read}")
+
         with OSFS(weldx_root_dir) as file_system:
-            original_hash = file_system.hash("doc/_static/WelDX_notext.ico", "md5")
+            original_hash = file_system.hash(path_read, "md5")
 
+            # check writing to hard drive
+            with TemporaryDirectory(dir=weldx_root_dir) as td:
+                ef.write_to(td)
+                new_file_path = Path(f"{Path(td).name}/{file_name}").as_posix()
+                assert file_system.isfile(new_file_path)
+                assert file_system.hash(new_file_path, "md5") == original_hash
+
+        # check writing to a memory file system
         with MemoryFS() as file_system:
-            ef_file.write_to("", file_system)
-            assert file_system.hash("WelDX_notext.ico", "md5") == original_hash
+            file_system.makedir("some_directory")
+            ef.write_to("some_directory", file_system)
+
+            new_file_path = f"some_directory/{file_name}"
+            assert file_system.isfile(new_file_path)
+            assert file_system.hash(new_file_path, "md5") == original_hash
+
+    # test_hashing ---------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "algorithm, buffer_size",
+        [
+            ("SHA-256", 1024),
+            ("MD5", 2048),
+        ],
+    )
+    def test_hashing(algorithm: str, buffer_size: int):
+        """Test the hashing functions.
+
+        Two things should be tested here:
+        - All available algorithms can be selected and work properly
+        - Both available hashing functions deliver the same hash for the same algorithm
+
+        Parameters
+        ----------
+        algorithm : str
+            The hashing algorithm
+        buffer_size : int
+            The size of the buffer that is used by the `calculate_hash` method.
+
+        """
+        file_path = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
+        ef = ExternalFile(file_path, hashing_algorithm=algorithm)
+        buffer = ef.get_file_content()
+
+        hash_buffer = ExternalFile.calculate_hash(buffer, algorithm)
+        hash_file = ExternalFile.calculate_hash(file_path, algorithm, buffer_size)
+
+        assert hash_buffer == hash_file
+
+    # test_asdf_serialization ----------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("copy_arrays", [True, False])
+    @pytest.mark.parametrize("lazy_load", [True, False])
+    @pytest.mark.parametrize("store_content", [True, False])
+    def test_asdf_serialization(copy_arrays, lazy_load, store_content):
+        """Test the asdf serialization of the `ExternalFile` class.
+
+        Parameters
+        ----------
+        copy_arrays : bool
+            If `False`, arrays are accessed via memory mapping whenever possible while
+            reading them.
+        lazy_load : bool
+            If `True`, items from the asdf file are not loaded until accessed.
+        store_content : bool
+            If `True`, the file content is stored in the asdf file.
+
+        """
+        ef = ExternalFile(
+            f"{weldx_root_dir}/doc/_static/WelDX_notext.ico",
+            asdf_save_content=store_content,
+        )
+        tree = {"file": ef}
+        ef_file = _write_read_buffer(
+            tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        )["file"]
+
+        assert ef.filename == ef_file.filename
+        assert ef.suffix == ef_file.suffix
+        assert ef.directory == ef_file.directory
+        assert ef.hostname == ef_file.hostname
+
+        assert ef.created == ef_file.created
+        assert ef.modified == ef_file.modified
+        assert ef.size == ef_file.size
+
+        assert ef.hashing_algorithm == ef_file.hashing_algorithm
+
+        if store_content:
+            with OSFS(weldx_root_dir) as file_system:
+                original_hash = file_system.hash("doc/_static/WelDX_notext.ico", "md5")
+
+            with MemoryFS() as file_system:
+                ef_file.write_to("", file_system)
+                assert file_system.hash("WelDX_notext.ico", "md5") == original_hash
