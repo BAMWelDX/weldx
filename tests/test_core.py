@@ -12,7 +12,6 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, TimeSeries
 
-
 # --------------------------------------------------------------------------------------
 # MathematicalExpression
 # --------------------------------------------------------------------------------------
