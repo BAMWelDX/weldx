@@ -48,11 +48,11 @@ properties:
     tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
   hostname:
     description: |
-      The name of the files host machine.
+      The name of the host machine accessing the file.
     type: string
   directory:
     description: |
-      The directory of the file on the specified host system.
+      The directory of the file as seen from the host machine.
     type: string
   content:
     description: |
