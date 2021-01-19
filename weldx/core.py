@@ -574,7 +574,6 @@ class ExternalFile:
 
     def __post_init__(self):
         """Initialize the internal values."""
-
         if self.path is not None:
             if not isinstance(self.path, Path):
                 self.path = Path(self.path)
