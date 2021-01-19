@@ -12,13 +12,13 @@ description: |
 
 examples:
   -
-    - A simple DHU-Groove
+    - Full description of a pdf-file without its content
     - |
         !<tag:weldx.bam.de:weldx/core/file-1.0.0>
           filename: file.pdf
-          suffix: .pdf
-          hostname: NB1459
-          directory: C:/Users/vhirtham/PycharmProjects/bam/custom_scripts/external_files
+          suffix: pdf
+          hostname: my_computer
+          directory: C:/Users/some_user/my_files
           size: 90571
           created: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-12-09T12:51:20.653744500'}
           modified: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-12-10T13:14:17.362481500'}
