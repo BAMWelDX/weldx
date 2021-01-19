@@ -1,6 +1,5 @@
 """Collection of common classes and functions."""
 
-
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
