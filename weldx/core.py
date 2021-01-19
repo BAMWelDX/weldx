@@ -570,6 +570,8 @@ class ExternalFile:
     buffer: bytes = None
     file_system = None
 
+    hash_mapping = {"MD5": md5, "SHA-256": sha256}
+
     def __post_init__(self):
         """Initialize the internal values."""
         if self.file_system is not None:  # pragma: no cover
@@ -595,80 +597,29 @@ class ExternalFile:
             self.modified = pd.Timestamp(stat.st_mtime_ns)
 
             # Just to test if the passed algorithm is valid
-            self._get_hashing_class(self.hashing_algorithm)
+            self.hashing_algorithm = self.hashing_algorithm.upper()
+            if self.hashing_algorithm not in ExternalFile.hash_mapping:
+                raise ValueError(
+                    f"'{self.hashing_algorithm}' is not a supported hashing algorithm."
+                )
 
     @staticmethod
-    def _get_hash_algorithm_mappings() -> Dict:
-        """Get a mapping between hashing algorithm name and corresponding python class.
-
-        Returns
-        -------
-        Dict :
-            A dictionary that maps a hashing algorithm name to a corresponding hashing
-            class
-
-        """
-        return {"MD5": md5, "SHA-256": sha256}
-
-    @staticmethod
-    def _get_hashing_class(algorithm: str) -> Any:
-        """Get a class that implements the requested hashing algorithm.
-
-        Parameters
-        ----------
-        algorithm : str
-            Name of the hashing algorithm (MD5, SHA-256)
-
-        Returns
-        -------
-        Any :
-            Class that implements the requested hashing algorithm.
-
-        """
-        hashing_class_type = ExternalFile._get_hash_algorithm_mappings().get(algorithm)
-
-        if hashing_class_type is None:
-            raise ValueError(f"'{algorithm}' is not a supported hashing algorithm.")
-
-        return hashing_class_type()
-
-    @staticmethod
-    def calculate_hash_of_buffer(buffer: bytes, algorithm: str) -> str:
-        """Calculate the hash of a buffer.
-
-        Parameters
-        ----------
-        buffer : bytes
-            A buffer
-        algorithm : str
-            Name of the desired hashing algorithm
-
-        Returns
-        -------
-        str :
-            The calculated hash
-
-        """
-        hashing_class = ExternalFile._get_hashing_class(algorithm)
-
-        hashing_class.update(buffer)
-        return hashing_class.hexdigest()
-
-    @staticmethod
-    def calculate_hash_of_file(
-        path: Union[str, Path], algorithm: str, buffer_size: int = 65536
+    def calculate_hash(
+        path_or_buffer: Union[str, Path, bytes],
+        algorithm: str,
+        buffer_size: int = 65536,
     ) -> str:
         """Calculate the hash of a file.
 
         Parameters
         ----------
-        path : Union[str, Path]
-            Path of the file
+        path_or_buffer : Union[str, Path, bytes]
+            Path of the file or buffer as bytes
         algorithm : str
             Name of the desired hashing algorithm
         buffer_size : int
             Size of the internally used buffer. The file will be read in
-            corresponding chunks.
+            corresponding chunks. No effect when hashing from buffer.
 
         Returns
         -------
@@ -676,13 +627,16 @@ class ExternalFile:
             The calculated hash
 
         """
-        hashing_class = ExternalFile._get_hashing_class(algorithm)
-        with open(path, "rb") as file:
-            while True:
-                data = file.read(buffer_size)
-                if not data:
-                    break
-                hashing_class.update(data)
+        hashing_class = ExternalFile.hash_mapping[algorithm.upper()]()
+        if isinstance(path_or_buffer, bytes):
+            hashing_class.update(path_or_buffer)
+        else:
+            with open(path_or_buffer, "rb") as file:
+                while True:
+                    data = file.read(buffer_size)
+                    if not data:
+                        break
+                    hashing_class.update(data)
         return hashing_class.hexdigest()
 
     def get_file_content(self) -> bytes:
