@@ -1,4 +1,4 @@
-"""Contains the asdf serialization class for `weldx.core.ExternalFileBuffer`."""
+"""Contains classes for the asdf serialization of an external file."""
 
 
 import socket
