@@ -608,7 +608,7 @@ class ExternalFile:
 
         Parameters
         ----------
-        path_or_buffer : Union[str, Path, bytes]
+        path_or_buffer : Union[str, pathlib.Path, bytes]
             Path of the file or buffer as bytes
         algorithm : str
             Name of the desired hashing algorithm
@@ -650,7 +650,7 @@ class ExternalFile:
 
         Parameters
         ----------
-        directory : :Union[str, Path]
+        directory : Union[str, pathlib.Path]
             Directory where the file should be written.
         file_system :
             The target file system.
