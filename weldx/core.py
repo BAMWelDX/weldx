@@ -605,13 +605,15 @@ class ExternalFile:
 
     @staticmethod
     def calculate_hash(
-        path: Union[str, Path, bytes], algorithm: str, buffer_size: int = 65536
+        path_or_buffer: Union[str, Path, bytes],
+        algorithm: str,
+        buffer_size: int = 65536,
     ) -> str:
         """Calculate the hash of a file.
 
         Parameters
         ----------
-        path : Union[str, Path, bytes]
+        path_or_buffer : Union[str, Path, bytes]
             Path of the file or buffer as bytes
         algorithm : str
             Name of the desired hashing algorithm
@@ -626,10 +628,10 @@ class ExternalFile:
 
         """
         hashing_class = ExternalFile.hash_mapping[algorithm.upper()]()
-        if isinstance(path, bytes):
-            hashing_class.update(path)
+        if isinstance(path_or_buffer, bytes):
+            hashing_class.update(path_or_buffer)
         else:
-            with open(path, "rb") as file:
+            with open(path_or_buffer, "rb") as file:
                 while True:
                     data = file.read(buffer_size)
                     if not data:
