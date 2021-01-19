@@ -455,19 +455,19 @@ class TestExternalFile:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "kwa, exception_type, test_name",
+        "kwargs, exception_type, test_name",
         [
             ({"path": "does_not.exist"}, ValueError, "# File does not exist"),
             ({"hashing_algorithm": "fancy"}, ValueError, "# Invalid hashing algorithm"),
         ],
         ids=get_test_name,
     )
-    def test_init_exceptions(kwa, exception_type, test_name):
+    def test_init_exceptions(kwargs, exception_type, test_name):
         """Test the `__init__` methods exceptions.
 
         Parameters
         ----------
-        kwa : Dict
+        kwargs : Dict
             Key word arguments that should be passed to the `__init__` method
         exception_type :
             The expected exception type
@@ -475,11 +475,11 @@ class TestExternalFile:
             Name of the test
 
         """
-        if "path" not in kwa:
-            kwa["path"] = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
+        if "path" not in kwargs:
+            kwargs["path"] = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
 
         with pytest.raises(exception_type):
-            ExternalFile(**kwa)
+            ExternalFile(**kwargs)
 
     # test_write_to --------------------------------------------------------------------
     @staticmethod
