@@ -15,19 +15,11 @@ from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.utility as ut
+from tests._helpers import get_test_name
 from weldx import Q_
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 
 # helpers for tests -----------------------------------------------------------
-
-
-# Todo: Move this to conftest.py?
-def get_test_name(param):
-    """Get the test name from the parameter list of a parametrized test."""
-    if isinstance(param, str) and param[0] == "#":
-        return param[1:]
-    return ""
-
 
 def check_matrix_does_not_reflect(matrix):
     """Check if a matrix does not reflect.

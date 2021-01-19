@@ -1,6 +1,7 @@
 """Tests asdf implementations of core module."""
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from tests._helpers import get_test_name
 
 import numpy as np
 import pandas as pd
@@ -18,13 +19,6 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
 from weldx.transformations import WXRotation
-
-
-def get_test_name(param):
-    """Get the test name from the parameter list of a parametrized test."""
-    if isinstance(param, str) and param[0] == "#":
-        return param[1:]
-    return ""
 
 
 # WXRotation ---------------------------------------------------------------------
