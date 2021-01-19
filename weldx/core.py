@@ -574,10 +574,6 @@ class ExternalFile:
 
     def __post_init__(self):
         """Initialize the internal values."""
-        if self.file_system is not None:  # pragma: no cover
-            raise Exception(
-                "Using file systems to load a file is currently not supported."
-            )
 
         if self.path is not None:
             if not isinstance(self.path, Path):
@@ -596,7 +592,6 @@ class ExternalFile:
             self.created = pd.Timestamp(stat.st_ctime_ns)
             self.modified = pd.Timestamp(stat.st_mtime_ns)
 
-            # Just to test if the passed algorithm is valid
             self.hashing_algorithm = self.hashing_algorithm.upper()
             if self.hashing_algorithm not in ExternalFile.hash_mapping:
                 raise ValueError(
