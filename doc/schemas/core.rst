@@ -11,6 +11,7 @@ The ``core`` directory contains schema implementations for the base classes.
     core/dimension-1.0.0
     core/data_array-1.0.0
     core/dataset-1.0.0
+    core/file-1.0.0
 
 Transformations
 ===============
