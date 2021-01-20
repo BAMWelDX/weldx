@@ -71,6 +71,9 @@ excluded_words:
   - timedeltaindex
   - datetimeindex
   - isoformat
+  # pyfilesystem --------------------------------
+  - osfs
+  - memoryfs
   # pytest --------------------------------------
   - conftest
   - addoption
