@@ -2,9 +2,12 @@
 
 ## 0.2.3 (unreleased)
 ### added
-- add `weldx.transformations.CoordinateSystemManager.relabel` function [[#219]](https://github.com/BAMWelDX/weldx/pull/212)
+- add `weldx.transformations.CoordinateSystemManager.relabel` function [[#219]](https://github.com/BAMWelDX/weldx/pull/219)
 
 ### ASDF
+- Add possibility to store meta data and content of an external file in an ASDF file [[#215]](https://github.com/BAMWelDX/weldx/pull/215)
+  - Python class: `weldx.asdf.ExternalFile`
+  - Schema: `core/file-1.0.0.yaml`
 - Added support for serializing generic metadata and userdata attributes for weldx classes. [[#209]](https://github.com/BAMWelDX/weldx/pull/209)
   - the provisional attribute names are `wx_metadata` and `wx_user`
 - `None` values are removed from the asdf tree for all `weldx` classes. [[#212]](https://github.com/BAMWelDX/weldx/pull/212)
@@ -22,6 +25,10 @@
 - fix "datetime64" passing for "timedelta64" in `xr_check_coords` [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
 - fix `time_ref_restore` not working correctly if no `time_ref` was set [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
 - fix deprecated signature in `WXRotation` [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
+
+### dependencies
+- Add [PyFilesystem](https://docs.pyfilesystem.org/en/latest/)(`fs`) as new dependency 
+
 
 ## 0.2.2 (30.11.2020)
 ### added
