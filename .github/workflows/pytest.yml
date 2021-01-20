@@ -47,6 +47,7 @@ jobs:
       - name: run pytest
         run: |
           pytest --runslow
+          echo "Exited with '$?'"
           coverage xml
 
       - name: codecov.io
