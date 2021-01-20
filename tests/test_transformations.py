@@ -15,18 +15,11 @@ from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.utility as ut
+from tests._helpers import get_test_name
 from weldx import Q_
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 
 # helpers for tests -----------------------------------------------------------
-
-
-# Todo: Move this to conftest.py?
-def get_test_name(param):
-    """Get the test name from the parameter list of a parametrized test."""
-    if isinstance(param, str) and param[0] == "#":
-        return param[1:]
-    return ""
 
 
 def check_matrix_does_not_reflect(matrix):
@@ -3427,6 +3420,36 @@ class TestCoordinateSystemManager:
         csm_global.merge(csm_specimen)
 
         csm_global.plot()
+
+
+def test_relabel():
+    """Test relabeling unmerged and merged CSM nodes.
+
+    Test covers: relabeling of child system, relabeling root system, merge
+    two systems after relabeling, make sure cannot relabel after merge.
+    """
+    csm1 = tf.CoordinateSystemManager("A")
+    csm1.add_cs("B", "A", tf.LocalCoordinateSystem())
+
+    csm2 = tf.CoordinateSystemManager("C")
+    csm2.add_cs("D", "C", tf.LocalCoordinateSystem())
+
+    csm1.relabel({"B": "X"})
+    csm2.relabel({"C": "X"})
+
+    assert "B" not in csm1.graph.nodes
+    assert "X" in csm1.graph.nodes
+
+    assert "C" not in csm2.graph.nodes
+    assert "X" in csm2.graph.nodes
+    assert csm2.root_system_name == "X"
+
+    csm1.merge(csm2)
+    for n in ["A", "D", "X"]:
+        assert n in csm1.graph.nodes
+
+    with pytest.raises(NotImplementedError):
+        csm1.relabel({"A": "Z"})
 
 
 def test_coordinate_system_manager_init():

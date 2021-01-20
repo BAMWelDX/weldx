@@ -7,7 +7,7 @@ dependencies:
   - setuptools_scm
   - numpy>=1.18
   - pandas>=1.0
-  - scipy>=1.4
+  - scipy=1.5.3
   - sympy>=1.6
   - xarray>=0.15
   - pint>=0.11
@@ -16,7 +16,7 @@ dependencies:
   - fs
   # - asdf>=2.7
   - openpyxl
-  - jinja2
+  - fs
   # graph packages
   - networkx
   # Code quality
@@ -41,7 +41,6 @@ dependencies:
   - sphinxcontrib-napoleon
   - nbsphinx
   - sphinx-copybutton
-  - sphinxcontrib-bibtex
   - pydata-sphinx-theme
   - numpydoc>=0.5
   - sphinx-autodoc-typehints

@@ -1,0 +1,21 @@
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - setuptools_scm
+  - ipykernel
+  - ipywidgets
+  # documentation
+  - sphinx
+  - recommonmark
+  - sphinxcontrib-napoleon
+  - nbsphinx
+  - sphinx-copybutton
+  - pydata-sphinx-theme
+  - numpydoc>=0.5
+  - sphinx-autodoc-typehints
+  # pip packages
+  - pip
+  - pip:
+    - git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx

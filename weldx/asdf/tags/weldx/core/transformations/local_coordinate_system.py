@@ -53,10 +53,11 @@ class LocalCoordinateSystemASDF(WeldxType):
             coordinates = Variable(
                 "coordinates", node.coordinates.dims, node.coordinates.data
             )
-            if isinstance(coordinates.data, pint.Quantity):
-                ctx.set_array_storage(coordinates.data.magnitude, "inline")
-            else:
-                ctx.set_array_storage(coordinates.data, "inline")
+            if "time" not in node.coordinates.coords:
+                if isinstance(coordinates.data, pint.Quantity):
+                    ctx.set_array_storage(coordinates.data.magnitude, "inline")
+                else:
+                    ctx.set_array_storage(coordinates.data, "inline")
             tree["coordinates"] = coordinates
 
         if "time" in node.dataset.coords:

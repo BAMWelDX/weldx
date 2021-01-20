@@ -64,7 +64,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
-    "sphinxcontrib.bibtex",
     "sphinx_copybutton",
     "sphinx_asdf",
     "numpydoc",
@@ -246,6 +245,7 @@ intersphinx_mapping = {
     "pint": ("https://pint.readthedocs.io/en/stable", None),
     "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
     "asdf": ("https://asdf.readthedocs.io/en/stable/", None),
+    "networkx": ("https://networkx.org/documentation/stable/", None),
 }
 
 # Disable warnings caused by a bug -----------------------------------------------------
