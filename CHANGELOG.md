@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.2.3 (unreleased)
+## 0.3.0 (unreleased)
 ### added
 - add `weldx.transformations.CoordinateSystemManager.relabel` function [[#219]](https://github.com/BAMWelDX/weldx/pull/219)
 
@@ -24,9 +24,11 @@
 - don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
 - fix "datetime64" passing for "timedelta64" in `xr_check_coords` [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
 - fix `time_ref_restore` not working correctly if no `time_ref` was set [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
+- fix deprecated signature in `WXRotation` [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
 
 ### dependencies
-- Add [PyFilesystem](https://docs.pyfilesystem.org/en/latest/)(`fs`) as new dependency 
+- Add [PyFilesystem](https://docs.pyfilesystem.org/en/latest/)(`fs`) as new dependency
+- restrict `scipy<1.6` pending [ASDF #916](https://github.com/asdf-format/asdf/issues/916) [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
 
 
 ## 0.2.2 (30.11.2020)
