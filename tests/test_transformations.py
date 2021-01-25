@@ -3419,7 +3419,7 @@ class TestCoordinateSystemManager:
         csm_global.merge(csm_robot)
         csm_global.merge(csm_specimen)
 
-        csm_global.plot()
+        csm_global.plot_graph()
 
 
 def test_relabel():

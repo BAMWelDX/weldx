@@ -17,6 +17,7 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.visualization import plot_coordinate_system
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -1188,6 +1189,47 @@ class LocalCoordinateSystem:
             orientation, coordinates, self.time, self.reference_time
         )
 
+    def plot(
+        self,
+        axes=None,
+        color=None,
+        label=None,
+        time=None,
+        time_ref=None,
+        show_trace=True,
+        show_axes=True,
+    ):
+        if axes is None:
+            _, axes = plt.subplots(subplot_kw={"projection": "3d"})
+        if self.is_time_dependent:
+            if time is None:
+                for i, _ in enumerate(self.time):
+                    # assure label occurs only once
+                    if i > 0:
+                        label = None
+
+                    plot_coordinate_system(
+                        self, axes, color=color, label=label, time_idx=i
+                    )
+
+                coords = self.coordinates
+                if show_trace:
+                    if color is None:
+                        color = "k"
+                    axes.plot(
+                        coords[:, 0], coords[:, 1], coords[:, 2], ":", color=color
+                    )
+            else:
+                self.interp_time(time, time_ref).plot(
+                    axes=axes,
+                    color=color,
+                    label=label,
+                    show_trace=show_trace,
+                    show_axes=show_axes,
+                )
+        else:
+            plot_coordinate_system(self, axes, color=color, label=label)
+
     def reset_reference_time(self, time_ref_new: pd.Timestamp):
         """Reset the reference time of the coordinate system.
 
@@ -1565,7 +1607,7 @@ class CoordinateSystemManager:
 
     def _ipython_display_(self):
         """Display the coordinate system manager as plot in jupyter notebooks."""
-        self.plot()
+        self.plot_graph()
 
     @property
     def _number_of_time_dependent_lcs(self):
@@ -2750,7 +2792,7 @@ class CoordinateSystemManager:
             pos[child] = data["position"]
         return pos
 
-    def plot(self, ax=None):
+    def plot_graph(self, ax=None):
         """Plot the graph of the coordinate system manager."""
         if ax is None:
             _, ax = plt.subplots()
@@ -2765,6 +2807,9 @@ class CoordinateSystemManager:
         nx.draw(
             graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
         )
+
+    def plot_coordinate_systems(self, axes):
+        pass
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
