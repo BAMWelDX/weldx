@@ -1,6 +1,5 @@
 """Contains methods and classes for coordinate transformations."""
 
-
 import itertools
 import math
 from copy import deepcopy
@@ -1203,17 +1202,24 @@ class LocalCoordinateSystem:
             _, axes = plt.subplots(subplot_kw={"projection": "3d"})
         if self.is_time_dependent:
             if time is None:
-                for i, _ in enumerate(self.time):
-                    # assure label occurs only once
-                    if i > 0:
-                        label = None
-
-                    plot_coordinate_system(
-                        self, axes, color=color, label=label, time_idx=i
+                if not (show_trace or show_axes):
+                    raise ValueError(
+                        "At least one of the parameters 'show_trace' or 'show_axes' "
+                        "must be 'True'."
                     )
 
-                coords = self.coordinates
+                if show_axes:
+                    for i, _ in enumerate(self.time):
+                        # assure label occurs only once
+                        if i > 0:
+                            label = None
+
+                        plot_coordinate_system(
+                            self, axes, color=color, label=label, time_idx=i
+                        )
+
                 if show_trace:
+                    coords = self.coordinates
                     if color is None:
                         color = "k"
                     axes.plot(
@@ -2808,8 +2814,45 @@ class CoordinateSystemManager:
             graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
         )
 
-    def plot_coordinate_systems(self, axes):
-        pass
+    def plot_coordinate_systems(
+        self,
+        axes=None,
+        reference_system=None,
+        time=None,
+        time_ref=None,
+        show_trace=True,
+        show_axes=True,
+    ):
+        if time is not None:
+            self.interp_time(time=time, time_ref=time_ref).plot_coordinate_systems(
+                axes=axes,
+                reference_system=reference_system,
+                show_trace=show_trace,
+                show_axes=show_axes,
+            )
+        else:
+            if axes is None:
+                _, axes = plt.subplots(subplot_kw={"projection": "3d"})
+                axes.set_xlabel("x")
+                axes.set_ylabel("y")
+                axes.set_zlabel("z")
+
+            if reference_system is None:
+                reference_system = self._root_system_name
+
+            for lcs_name in self.coordinate_system_names:
+                # https://stackoverflow.com/questions/13831549/
+                # get-matplotlib-color-cycle-state
+                color = next(axes._get_lines.prop_cycler)["color"]
+                lcs = self.get_cs(lcs_name, reference_system)
+                lcs.plot(
+                    axes=axes,
+                    color=color,
+                    label=lcs_name,
+                    show_trace=show_trace,
+                    show_axes=show_axes,
+                )
+            axes.legend()
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
