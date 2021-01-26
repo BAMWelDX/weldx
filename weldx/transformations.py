@@ -1199,7 +1199,7 @@ class LocalCoordinateSystem:
         show_axes=True,
     ):
         if axes is None:
-            _, axes = plt.subplots(subplot_kw={"projection": "3d"})
+            _, axes = plt.subplots(subplot_kw={"projection": "3d", "proj_type": "ortho"})
         if self.is_time_dependent:
             if time is None:
                 if not (show_trace or show_axes):
