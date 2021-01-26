@@ -2832,7 +2832,7 @@ class CoordinateSystemManager:
             )
         else:
             if axes is None:
-                _, axes = plt.subplots(subplot_kw={"projection": "3d"})
+                _, axes = plt.subplots(subplot_kw={"projection": "3d", "proj_type": "ortho"})
                 axes.set_xlabel("x")
                 axes.set_ylabel("y")
                 axes.set_zlabel("z")
