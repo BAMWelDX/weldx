@@ -6,6 +6,7 @@ jobs:
     name: pytest
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         py: ['3.9']
@@ -42,10 +43,11 @@ jobs:
       - name: pip installs
         run: |
           pip install pytest pytest-cov setuptools_scm
-          pip install .
+          pip install -e .
       - name: run pytest
         run: |
           pytest --runslow
+          echo "Exited with '$?'"
           coverage xml
 
       - name: codecov.io

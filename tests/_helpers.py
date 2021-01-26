@@ -1,5 +1,7 @@
 """Provides some utility functions for tests."""
 
+from typing import Any
+
 import numpy as np
 
 import weldx.transformations as tf
@@ -66,3 +68,22 @@ def are_all_columns_unique(matrix, decimals=3):
     """
     unique = np.unique(np.round(matrix, decimals=decimals), axis=1)
     return unique.shape[0] == matrix.shape[0] and unique.shape[1] == matrix.shape[1]
+
+
+def get_test_name(param: Any) -> str:
+    """Get the test name from the parameter list of a parametrized test.
+
+    Parameters
+    ----------
+    param : Any
+        A parameter of the test
+
+    Returns
+    -------
+    str :
+        The name of the test or an empty string.
+
+    """
+    if isinstance(param, str) and param[0] == "#":
+        return param[1:]
+    return ""
