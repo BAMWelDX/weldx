@@ -16,7 +16,10 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.visualization import plot_coordinate_system
+from weldx.visualization import (
+    plot_coordinate_system,
+    plot_coordinate_system_manager_matplotlib,
+)
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -1199,7 +1202,9 @@ class LocalCoordinateSystem:
         show_axes=True,
     ):
         if axes is None:
-            _, axes = plt.subplots(subplot_kw={"projection": "3d", "proj_type": "ortho"})
+            _, axes = plt.subplots(
+                subplot_kw={"projection": "3d", "proj_type": "ortho"}
+            )
         if self.is_time_dependent:
             if time is None:
                 if not (show_trace or show_axes):
@@ -2823,36 +2828,16 @@ class CoordinateSystemManager:
         show_trace=True,
         show_axes=True,
     ):
-        if time is not None:
-            self.interp_time(time=time, time_ref=time_ref).plot_coordinate_systems(
-                axes=axes,
-                reference_system=reference_system,
-                show_trace=show_trace,
-                show_axes=show_axes,
-            )
-        else:
-            if axes is None:
-                _, axes = plt.subplots(subplot_kw={"projection": "3d", "proj_type": "ortho"})
-                axes.set_xlabel("x")
-                axes.set_ylabel("y")
-                axes.set_zlabel("z")
 
-            if reference_system is None:
-                reference_system = self._root_system_name
-
-            for lcs_name in self.coordinate_system_names:
-                # https://stackoverflow.com/questions/13831549/
-                # get-matplotlib-color-cycle-state
-                color = next(axes._get_lines.prop_cycler)["color"]
-                lcs = self.get_cs(lcs_name, reference_system)
-                lcs.plot(
-                    axes=axes,
-                    color=color,
-                    label=lcs_name,
-                    show_trace=show_trace,
-                    show_axes=show_axes,
-                )
-            axes.legend()
+        plot_coordinate_system_manager_matplotlib(
+            csm=self,
+            axes=axes,
+            reference_system=reference_system,
+            time=time,
+            time_ref=time_ref,
+            show_trace=show_trace,
+            show_axes=show_axes,
+        )
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""

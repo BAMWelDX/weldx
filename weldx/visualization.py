@@ -1,6 +1,14 @@
 """Contains some functions to help with visualization."""
 
+import k3d
+import matplotlib.pyplot as plt
 import numpy as np
+from IPython.display import display
+from ipywidgets import Dropdown, FloatSlider
+from pandas import TimedeltaIndex
+
+import weldx.utility as ut
+from weldx.constants import WELDX_QUANTITY as Q_
 
 
 def plot_coordinate_system(
@@ -83,3 +91,169 @@ def set_axes_equal(axes):
     axes.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
     axes.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
     axes.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
+
+
+def plot_coordinate_system_manager_matplotlib(
+    csm,
+    axes=None,
+    reference_system=None,
+    time=None,
+    time_ref=None,
+    show_trace=True,
+    show_axes=True,
+):
+    if time is not None:
+        plot_coordinate_system_manager_matplotlib(
+            csm.interp_time(time=time, time_ref=time_ref),
+            axes=axes,
+            reference_system=reference_system,
+            show_trace=show_trace,
+            show_axes=show_axes,
+        )
+    else:
+        if axes is None:
+            _, axes = plt.subplots(
+                subplot_kw={"projection": "3d", "proj_type": "ortho"}
+            )
+            axes.set_xlabel("x")
+            axes.set_ylabel("y")
+            axes.set_zlabel("z")
+
+        if reference_system is None:
+            reference_system = csm._root_system_name
+
+        for lcs_name in csm.coordinate_system_names:
+            # https://stackoverflow.com/questions/13831549/
+            # get-matplotlib-color-cycle-state
+            color = next(axes._get_lines.prop_cycler)["color"]
+            lcs = csm.get_cs(lcs_name, reference_system)
+            lcs.plot(
+                axes=axes,
+                color=color,
+                label=lcs_name,
+                show_trace=show_trace,
+                show_axes=show_axes,
+            )
+        axes.legend()
+
+
+# k3d ----------------------------------------------------------------------------------
+
+
+class CoordinateSystemVisualizerK3D:
+    def __init__(self, lcs, plot=None):
+        self._lcs = lcs
+
+        coordinates = np.array(lcs.coordinates.values, dtype="float32")
+        orientation = np.array(lcs.orientation.values, dtype="float32")
+        if lcs.is_time_dependent:
+            coordinates = coordinates[0]
+            orientation = orientation[0]
+        orientation = orientation.transpose()
+
+        self._vectors = k3d.vectors(
+            origins=[coordinates for _ in range(3)],
+            vectors=orientation,
+            colors=[[0xFF0000, 0xFF0000], [0x00FF00, 0x00FF00], [0x0000FF, 0x0000FF]],
+            labels=[],
+            label_size=1.5,
+        )
+
+        if plot is not None:
+            plot += self._vectors
+
+    def update_time(self, time, time_ref=None):
+
+        lcs = self._lcs.interp_time(time, time_ref)
+
+        coordinates = np.array(lcs.coordinates.values, dtype="float32")
+        orientation = np.array(lcs.orientation.values, dtype="float32")
+        if lcs.is_time_dependent:
+            coordinates = coordinates[0]
+            orientation = orientation[0]
+        orientation = orientation.transpose()
+
+        self._vectors.origins = [coordinates for _ in range(3)]
+        self._vectors.vectors = orientation
+
+    def update_lcs(self, lcs):
+        self._lcs = lcs
+
+
+class CoordinateSystemManagerVisualizerK3D:
+    def __init__(self, csm):
+        self._csm = csm
+        self._current_time = None
+        plot = k3d.plot(camera_auto_fit=False)
+
+        time_union = csm.time_union()
+
+        if time_union is not None:
+            if isinstance(time_union, TimedeltaIndex):
+                time_union = ut.pandas_time_delta_to_quantity(time_union, "s")
+                self._current_time = time_union[0]
+            else:
+                raise Exception("Only TimedeltaIndex supported at the moment.")
+
+        self._time_slider = FloatSlider(
+            min=time_union[0].magnitude,
+            max=time_union[-1].magnitude,
+            value=0,
+            description="Time:",
+        )
+
+        root_name = csm._root_system_name
+        self._lcs_vis = [
+            CoordinateSystemVisualizerK3D(csm.get_cs(lcs_name, root_name), plot)
+            for lcs_name in csm.coordinate_system_names
+        ]
+
+        def on_time_change(change):
+            time = Q_(change["new"], "s")
+            self._current_time = time
+            self.update_time(time)
+
+        self._time_slider.observe(on_time_change, names="value")
+
+        def on_reference_change(change):
+            if change["type"] == "change" and change["name"] == "value":
+                self.update_reference_system(change["new"])
+                print(change["new"])
+
+        self._reference_dropdown = Dropdown(
+            options=csm.coordinate_system_names,
+            value=root_name,
+            description="Reference system:",
+            disabled=False,
+        )
+        self._reference_dropdown.observe(on_reference_change, names="value")
+
+        plot.display()
+        display(self._time_slider)
+        display(self._reference_dropdown)
+
+    def update_time(self, time, time_ref=None):
+        for lcs_vis in self._lcs_vis:
+            lcs_vis.update_time(time, time_ref)
+
+    def update_reference_system(self, reference_system):
+        for i, lcs_vis in enumerate(self._lcs_vis):
+
+            lcs_vis.update_lcs(
+                self._csm.get_cs(self._csm.coordinate_system_names[i], reference_system)
+            )
+            lcs_vis.update_time(self._current_time)
+
+
+def plot_coordinate_cross_k3d(plot):
+    origins = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+    vectors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+    colors = [[0xFF0000, 0xFF0000], [0x00FF00, 0x00FF00], [0x0000FF, 0x0000FF]]
+    cc = k3d.vectors(origins, vectors, colors=colors, labels=[], label_size=1.5)
+    x_axis = k3d.line([[0, 0, 0], [1, 0, 0]], shader="mesh", width=0.05)
+    plot += cc
+    return cc
+
+
+def plot_coordinate_system_manager_k3d(csm):
+    pass
