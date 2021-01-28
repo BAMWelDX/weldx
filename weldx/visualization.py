@@ -343,10 +343,6 @@ class CoordinateSystemManagerVisualizerK3D:
         )
 
         # callback functions
-        def on_time_change(change):
-            self._current_time_index = change["new"]
-            self.update_time_index(self._current_time_index)
-
         def on_reference_change(change):
             """Handle events of the reference system drop down.
 
@@ -357,6 +353,18 @@ class CoordinateSystemManagerVisualizerK3D:
 
             """
             self.update_reference_system(change["new"])
+
+        def on_time_change(change):
+            """Handle events of the time slider.
+
+            Parameters
+            ----------
+            change : Dict
+                A dictionary containing the event data
+
+            """
+            self._current_time_index = change["new"]
+            self.update_time_index(self._current_time_index)
 
         # register callbacks
         self._time_slider.observe(on_time_change, names="value")
