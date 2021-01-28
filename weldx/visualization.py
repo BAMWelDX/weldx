@@ -141,15 +141,10 @@ def plot_coordinate_system_manager_matplotlib(
 
 
 class CoordinateSystemVisualizerK3D:
-    def __init__(self, lcs, plot=None):
+    def __init__(self, lcs, plot=None, name=None, color=0x000000):
+        coordinates, orientation = self._get_coordinates_and_orientation(lcs)
         self._lcs = lcs
-
-        coordinates = np.array(lcs.coordinates.values, dtype="float32")
-        orientation = np.array(lcs.orientation.values, dtype="float32")
-        if lcs.is_time_dependent:
-            coordinates = coordinates[0]
-            orientation = orientation[0]
-        orientation = orientation.transpose()
+        self._color = color
 
         self._vectors = k3d.vectors(
             origins=[coordinates for _ in range(3)],
@@ -159,32 +154,59 @@ class CoordinateSystemVisualizerK3D:
             label_size=1.5,
         )
 
+        self._label = None
+        if name is not None:
+            self._label = k3d.text(
+                text=name,
+                position=coordinates,
+                color=self._color,
+                size=1,
+                label_box=False,
+            )
+
         if plot is not None:
             plot += self._vectors
+            if self._label is not None:
+                plot += self._label
+
+    def _update_positions(self, coordinates, orientation):
+        self._vectors.origins = [coordinates for _ in range(3)]
+        self._vectors.vectors = orientation
+        if self._label is not None:
+            self._label.position = coordinates
+
+    @staticmethod
+    def _get_coordinates_and_orientation(lcs, index=0):
+        coordinates = np.array(lcs.coordinates.values, dtype="float32")
+        orientation = np.array(lcs.orientation.values, dtype="float32")
+        if lcs.is_time_dependent:
+            coordinates = coordinates[index]
+            orientation = orientation[index]
+        orientation = orientation.transpose()
+
+        return coordinates, orientation
 
     def update_time(self, time, time_ref=None):
 
         lcs = self._lcs.interp_time(time, time_ref)
+        coordinates, orientation = self._get_coordinates_and_orientation(lcs)
 
-        coordinates = np.array(lcs.coordinates.values, dtype="float32")
-        orientation = np.array(lcs.orientation.values, dtype="float32")
-        if lcs.is_time_dependent:
-            coordinates = coordinates[0]
-            orientation = orientation[0]
-        orientation = orientation.transpose()
-
-        self._vectors.origins = [coordinates for _ in range(3)]
-        self._vectors.vectors = orientation
+        self._update_positions(coordinates, orientation)
 
     def update_lcs(self, lcs):
         self._lcs = lcs
+
+    def update_time_index(self, index):
+
+        coordinates = np.array(self._lcs.coordinates.values, dtype="float32")
+        orientation = np.array(self._lcs.orientation.values, dtype="float32")
 
 
 class CoordinateSystemManagerVisualizerK3D:
     def __init__(self, csm):
         self._csm = csm
         self._current_time = None
-        plot = k3d.plot(camera_auto_fit=False)
+        plot = k3d.plot(grid_auto_fit=False, camera_auto_fit=False)
 
         time_union = csm.time_union()
 
@@ -204,7 +226,9 @@ class CoordinateSystemManagerVisualizerK3D:
 
         root_name = csm._root_system_name
         self._lcs_vis = [
-            CoordinateSystemVisualizerK3D(csm.get_cs(lcs_name, root_name), plot)
+            CoordinateSystemVisualizerK3D(
+                csm.get_cs(lcs_name, root_name), plot, lcs_name
+            )
             for lcs_name in csm.coordinate_system_names
         ]
 
@@ -235,6 +259,10 @@ class CoordinateSystemManagerVisualizerK3D:
     def update_time(self, time, time_ref=None):
         for lcs_vis in self._lcs_vis:
             lcs_vis.update_time(time, time_ref)
+
+    def update_time_index(self, index):
+        for lcs_vis in self._lcs_vis:
+            lcs_vis.update_time_index(index)
 
     def update_reference_system(self, reference_system):
         for i, lcs_vis in enumerate(self._lcs_vis):
