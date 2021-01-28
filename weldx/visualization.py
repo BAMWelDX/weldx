@@ -4,10 +4,8 @@ import k3d
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import display
-from ipywidgets import Dropdown, FloatSlider
-from pandas import TimedeltaIndex
+from ipywidgets import Dropdown, IntSlider
 
-import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
@@ -102,6 +100,32 @@ def plot_coordinate_system_manager_matplotlib(
     show_trace=True,
     show_axes=True,
 ):
+    """Plot the coordinate systems of a `CoordinateSystemManager` using matplotlib.
+
+    Parameters
+    ----------
+    csm : weldx.CoordinateSystemManager
+        The `CoordinateSystemManager` that should be plotted
+    axes :
+        The target axes object that should be drawn to. If `None` is provided, a new
+        one will be created.
+    reference_system : str
+        The name of the reference system for the plotted coordinate systems
+    time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+           LocalCoordinateSystem
+        The time steps that should be plotted
+    time_ref : pandas.Timestamp
+        A reference timestamp that can be provided if the ``time`` parameter is a
+        `pandas.TimedeltaIndex`
+    show_trace : bool
+        If `True`, the trace of time dependent coordinate systems is plotted.
+    show_axes :
+        If `True`, the coordinate cross of time dependent coordinate systems is plotted.
+
+    Returns
+    -------
+
+    """
     if time is not None:
         plot_coordinate_system_manager_matplotlib(
             csm.interp_time(time=time, time_ref=time_ref),
@@ -141,7 +165,23 @@ def plot_coordinate_system_manager_matplotlib(
 
 
 class CoordinateSystemVisualizerK3D:
+    """Visualizes a `weldx.LocalCoordinateSystem` using k3d."""
+
     def __init__(self, lcs, plot=None, name=None, color=0x000000):
+        """Create a `CoordinateSystemVisualizerK3D`
+
+        Parameters
+        ----------
+        lcs : weldx.LocalCoordinateSystem
+            Coordinate system that should be visualized
+        plot :
+            A k3d plotting widget.
+        name : str
+            Name of the coordinate system
+        color :
+            The color of the coordinate system (affects trace and label)
+
+        """
         coordinates, orientation = self._get_coordinates_and_orientation(lcs)
         self._lcs = lcs
         self._color = color
@@ -158,25 +198,61 @@ class CoordinateSystemVisualizerK3D:
         if name is not None:
             self._label = k3d.text(
                 text=name,
-                position=coordinates,
+                position=coordinates + 0.1,
                 color=self._color,
                 size=1,
                 label_box=False,
             )
 
+        self._trace = k3d.line(
+            np.array(lcs.coordinates.values, dtype="float32"),
+            shader="simple",
+            width=0.05,
+            color=color,
+        )
+
         if plot is not None:
             plot += self._vectors
+            plot += self._trace
             if self._label is not None:
                 plot += self._label
 
     def _update_positions(self, coordinates, orientation):
+        """Update the positions of the coordinate cross and label.
+
+        Parameters
+        ----------
+        coordinates : numpy.ndarray
+            The new coordinates
+        orientation : numpy.ndarray
+            The new orientation
+
+        """
         self._vectors.origins = [coordinates for _ in range(3)]
         self._vectors.vectors = orientation
         if self._label is not None:
-            self._label.position = coordinates
+            self._label.position = coordinates + 0.1
 
     @staticmethod
     def _get_coordinates_and_orientation(lcs, index=0):
+        """Get the coordinates and orientation of a coordinate system
+
+        Parameters
+        ----------
+        lcs : weldx.LocalCoordinateSystem
+            The coordinate system
+        index :
+            If the coordinate system is time dependent, the passed value is the index
+            of the values that should be returned
+
+        Returns
+        -------
+        coordinates : numpy.ndarray
+            The coordinates
+        orientation : numpy.ndarray
+            The orientation
+
+        """
         coordinates = np.array(lcs.coordinates.values, dtype="float32")
         orientation = np.array(lcs.orientation.values, dtype="float32")
         if lcs.is_time_dependent:
@@ -186,102 +262,163 @@ class CoordinateSystemVisualizerK3D:
 
         return coordinates, orientation
 
-    def update_time(self, time, time_ref=None):
+    def update_lcs(self, lcs):
+        """Pass a new coordinate system to the visualizer.
 
+        Parameters
+        ----------
+        lcs : weldx.LocalCoordinateSystem
+            The new coordinate system
+
+        """
+        self._lcs = lcs
+        self._trace.vertices = np.array(lcs.coordinates.values, dtype="float32")
+
+    def update_time(self, time, time_ref=None):
+        """Update the plotted time step.
+
+        Parameters
+        ----------
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+               LocalCoordinateSystem
+            The time steps that should be plotted
+        time_ref : pandas.Timestamp
+            A reference timestamp that can be provided if the ``time`` parameter is a
+            `pandas.TimedeltaIndex`
+
+        """
         lcs = self._lcs.interp_time(time, time_ref)
         coordinates, orientation = self._get_coordinates_and_orientation(lcs)
 
         self._update_positions(coordinates, orientation)
 
-    def update_lcs(self, lcs):
-        self._lcs = lcs
-
     def update_time_index(self, index):
+        """Update the plotted time step.
 
-        coordinates = np.array(self._lcs.coordinates.values, dtype="float32")
-        orientation = np.array(self._lcs.orientation.values, dtype="float32")
+        Parameters
+        ----------
+        index : int
+            The array index of the time step
+
+        """
+        coordinates, orientation = self._get_coordinates_and_orientation(
+            self._lcs, index
+        )
+        self._update_positions(coordinates, orientation)
 
 
 class CoordinateSystemManagerVisualizerK3D:
+    """Visualizes a `weldx.CoordinateSystemManager` using k3d."""
+
+    color_table = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF]
+
     def __init__(self, csm):
-        self._csm = csm
-        self._current_time = None
-        plot = k3d.plot(grid_auto_fit=False, camera_auto_fit=False)
+        """Create a `CoordinateSystemManagerVisualizerK3D`.
 
-        time_union = csm.time_union()
+        Parameters
+        ----------
+        csm : weldx.CoordinateSystemManager
+            The `CoordinateSystemManager` that should be visualized
 
-        if time_union is not None:
-            if isinstance(time_union, TimedeltaIndex):
-                time_union = ut.pandas_time_delta_to_quantity(time_union, "s")
-                self._current_time = time_union[0]
-            else:
-                raise Exception("Only TimedeltaIndex supported at the moment.")
+        """
+        time = csm.time_union()
+        num_times = len(time)
 
-        self._time_slider = FloatSlider(
-            min=time_union[0].magnitude,
-            max=time_union[-1].magnitude,
+        self._csm = csm.interp_time(time)
+        self._current_time_index = None
+        root_name = csm._root_system_name
+
+        # create controls
+        self._time_slider = IntSlider(
+            min=0,
+            max=num_times - 1,
             value=0,
             description="Time:",
         )
-
-        root_name = csm._root_system_name
-        self._lcs_vis = [
-            CoordinateSystemVisualizerK3D(
-                csm.get_cs(lcs_name, root_name), plot, lcs_name
-            )
-            for lcs_name in csm.coordinate_system_names
-        ]
-
-        def on_time_change(change):
-            time = Q_(change["new"], "s")
-            self._current_time = time
-            self.update_time(time)
-
-        self._time_slider.observe(on_time_change, names="value")
-
-        def on_reference_change(change):
-            if change["type"] == "change" and change["name"] == "value":
-                self.update_reference_system(change["new"])
-                print(change["new"])
-
         self._reference_dropdown = Dropdown(
             options=csm.coordinate_system_names,
             value=root_name,
             description="Reference system:",
             disabled=False,
         )
+
+        # callback functions
+        def on_time_change(change):
+            self._current_time_index = change["new"]
+            self.update_time_index(self._current_time_index)
+
+        def on_reference_change(change):
+            """Handle events of the reference system drop down.
+
+            Parameters
+            ----------
+            change : Dict
+                A dictionary containing the event data
+
+            """
+            self.update_reference_system(change["new"])
+
+        # register callbacks
+        self._time_slider.observe(on_time_change, names="value")
         self._reference_dropdown.observe(on_reference_change, names="value")
 
+        # create plot
+        plot = k3d.plot(grid_auto_fit=False, camera_auto_fit=False)
+        self._lcs_vis = [
+            CoordinateSystemVisualizerK3D(
+                csm.get_cs(lcs_name, root_name),
+                plot,
+                lcs_name,
+                color=self.color_table[i % len(self.color_table)],
+            )
+            for i, lcs_name in enumerate(csm.coordinate_system_names)
+        ]
+
+        # display everything
         plot.display()
         display(self._time_slider)
         display(self._reference_dropdown)
 
     def update_time(self, time, time_ref=None):
+        """Update the plotted time.
+
+        Parameters
+        ----------
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+            LocalCoordinateSystem
+            The time steps that should be plotted
+        time_ref : pandas.Timestamp
+            A reference timestamp that can be provided if the ``time`` parameter is a
+            `pandas.TimedeltaIndex`
+
+        """
         for lcs_vis in self._lcs_vis:
             lcs_vis.update_time(time, time_ref)
 
     def update_time_index(self, index):
+        """Update the plotted time by index.
+
+        Parameters
+        ----------
+        index : int
+            The new index
+
+        """
         for lcs_vis in self._lcs_vis:
             lcs_vis.update_time_index(index)
 
     def update_reference_system(self, reference_system):
+        """Update the reference system of the plot.
+
+        Parameters
+        ----------
+        reference_system : str
+            Name of the new reference system
+
+        """
         for i, lcs_vis in enumerate(self._lcs_vis):
 
             lcs_vis.update_lcs(
                 self._csm.get_cs(self._csm.coordinate_system_names[i], reference_system)
             )
-            lcs_vis.update_time(self._current_time)
-
-
-def plot_coordinate_cross_k3d(plot):
-    origins = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-    vectors = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-    colors = [[0xFF0000, 0xFF0000], [0x00FF00, 0x00FF00], [0x0000FF, 0x0000FF]]
-    cc = k3d.vectors(origins, vectors, colors=colors, labels=[], label_size=1.5)
-    x_axis = k3d.line([[0, 0, 0], [1, 0, 0]], shader="mesh", width=0.05)
-    plot += cc
-    return cc
-
-
-def plot_coordinate_system_manager_k3d(csm):
-    pass
+            lcs_vis.update_time_index(self._current_time_index)

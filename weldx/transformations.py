@@ -17,6 +17,7 @@ from scipy.spatial.transform import Rotation as Rot
 import weldx.utility as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.visualization import (
+    CoordinateSystemManagerVisualizerK3D,
     plot_coordinate_system,
     plot_coordinate_system_manager_matplotlib,
 )
@@ -1201,6 +1202,30 @@ class LocalCoordinateSystem:
         show_trace=True,
         show_axes=True,
     ):
+        """Plot the coordinate system.
+
+        Parameters
+        ----------
+        axes :
+            The target matplotlib axes object that should be drawn to. If `None` is
+            provided, a new one will be created.
+        color :
+            The color of the coordinate system
+        label :
+            The name of the coordinate system
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+               LocalCoordinateSystem
+            The time steps that should be plotted
+        time_ref : pandas.Timestamp
+            A reference timestamp that can be provided if the ``time`` parameter is a
+            `pandas.TimedeltaIndex`
+        show_trace : bool
+            If `True`, the trace of time dependent coordinate systems is plotted.
+        show_axes : bool
+            If `True`, the coordinate cross of time dependent coordinate systems is
+            plotted.
+
+        """
         if axes is None:
             _, axes = plt.subplots(
                 subplot_kw={"projection": "3d", "proj_type": "ortho"}
@@ -2821,6 +2846,7 @@ class CoordinateSystemManager:
 
     def plot_coordinate_systems(
         self,
+        use_k3d=False,
         axes=None,
         reference_system=None,
         time=None,
@@ -2828,16 +2854,46 @@ class CoordinateSystemManager:
         show_trace=True,
         show_axes=True,
     ):
+        """Plot the coordinate systems of the coordinate system manager.
 
-        plot_coordinate_system_manager_matplotlib(
-            csm=self,
-            axes=axes,
-            reference_system=reference_system,
-            time=time,
-            time_ref=time_ref,
-            show_trace=show_trace,
-            show_axes=show_axes,
-        )
+        Parameters
+        ----------
+        use_k3d : bool
+            If `True`, [k3d](https://k3d-jupyter.org/) is used to render the plot inside
+            of an interactive environment. This only works with jupyter notebooks. If
+            `False`, matplotlib is used.
+        axes :
+            (matplotlib only) The target axes object that should be drawn to. If `None`
+            is provided, a new one will be created.
+        reference_system : str
+            (matplotlib only) The name of the reference system for the plotted
+            coordinate systems
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+               LocalCoordinateSystem
+            (matplotlib only) The time steps that should be plotted
+        time_ref : pandas.Timestamp
+            (matplotlib only) A reference timestamp that can be provided if the ``time``
+            parameter is a `pandas.TimedeltaIndex`
+        show_trace : bool
+            (matplotlib only) If `True`, the trace of time dependent coordinate systems
+            is plotted.
+        show_axes :
+            (matplotlib only) If `True`, the coordinate cross of time dependent
+            coordinate systems is plotted.
+
+        """
+        if use_k3d:
+            CoordinateSystemManagerVisualizerK3D(csm=self)
+        else:
+            plot_coordinate_system_manager_matplotlib(
+                csm=self,
+                axes=axes,
+                reference_system=reference_system,
+                time=time,
+                time_ref=time_ref,
+                show_trace=show_trace,
+                show_axes=show_axes,
+            )
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
