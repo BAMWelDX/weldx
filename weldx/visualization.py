@@ -4,7 +4,7 @@ import k3d
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import display
-from ipywidgets import Dropdown, IntSlider
+from ipywidgets import Dropdown, HBox, IntSlider, Play, jslink
 
 from weldx.constants import WELDX_QUANTITY as Q_
 
@@ -262,17 +262,20 @@ class CoordinateSystemVisualizerK3D:
 
         return coordinates, orientation
 
-    def update_lcs(self, lcs):
+    def update_lcs(self, lcs, index: int = 0):
         """Pass a new coordinate system to the visualizer.
 
         Parameters
         ----------
         lcs : weldx.LocalCoordinateSystem
             The new coordinate system
+        index : int
+            The time index of the new coordinate system that should be visualized.
 
         """
         self._lcs = lcs
         self._trace.vertices = np.array(lcs.coordinates.values, dtype="float32")
+        self.update_time_index(index)
 
     def update_time(self, time, time_ref=None):
         """Update the plotted time step.
@@ -325,22 +328,25 @@ class CoordinateSystemManagerVisualizerK3D:
         num_times = len(time)
 
         self._csm = csm.interp_time(time)
-        self._current_time_index = None
+        self._current_time_index = 0
         root_name = csm._root_system_name
 
         # create controls
-        self._time_slider = IntSlider(
+        play = Play(min=0, max=num_times - 1, value=self._current_time_index, step=1)
+        time_slider = IntSlider(
             min=0,
             max=num_times - 1,
-            value=0,
+            value=self._current_time_index,
             description="Time:",
         )
-        self._reference_dropdown = Dropdown(
+        reference_dropdown = Dropdown(
             options=csm.coordinate_system_names,
             value=root_name,
-            description="Reference system:",
+            description="Reference:",
             disabled=False,
         )
+        jslink((play, "value"), (time_slider, "value"))
+        self._controls = HBox([time_slider, play, reference_dropdown])
 
         # callback functions
         def on_reference_change(change):
@@ -367,25 +373,24 @@ class CoordinateSystemManagerVisualizerK3D:
             self.update_time_index(self._current_time_index)
 
         # register callbacks
-        self._time_slider.observe(on_time_change, names="value")
-        self._reference_dropdown.observe(on_reference_change, names="value")
+        time_slider.observe(on_time_change, names="value")
+        reference_dropdown.observe(on_reference_change, names="value")
 
         # create plot
         plot = k3d.plot(grid_auto_fit=False, camera_auto_fit=False)
-        self._lcs_vis = [
-            CoordinateSystemVisualizerK3D(
+        self._lcs_vis = {
+            lcs_name: CoordinateSystemVisualizerK3D(
                 csm.get_cs(lcs_name, root_name),
                 plot,
                 lcs_name,
                 color=self.color_table[i % len(self.color_table)],
             )
             for i, lcs_name in enumerate(csm.coordinate_system_names)
-        ]
+        }
 
         # display everything
         plot.display()
-        display(self._time_slider)
-        display(self._reference_dropdown)
+        display(self._controls)
 
     def update_time(self, time, time_ref=None):
         """Update the plotted time.
@@ -400,7 +405,7 @@ class CoordinateSystemManagerVisualizerK3D:
             `pandas.TimedeltaIndex`
 
         """
-        for lcs_vis in self._lcs_vis:
+        for _, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_time(time, time_ref)
 
     def update_time_index(self, index):
@@ -412,7 +417,7 @@ class CoordinateSystemManagerVisualizerK3D:
             The new index
 
         """
-        for lcs_vis in self._lcs_vis:
+        for _, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_time_index(index)
 
     def update_reference_system(self, reference_system):
@@ -424,9 +429,8 @@ class CoordinateSystemManagerVisualizerK3D:
             Name of the new reference system
 
         """
-        for i, lcs_vis in enumerate(self._lcs_vis):
+        for lcs_name in self._csm.coordinate_system_names:
 
-            lcs_vis.update_lcs(
-                self._csm.get_cs(self._csm.coordinate_system_names[i], reference_system)
+            self._lcs_vis[lcs_name].update_lcs(
+                self._csm.get_cs(lcs_name, reference_system), self._current_time_index
             )
-            lcs_vis.update_time_index(self._current_time_index)
