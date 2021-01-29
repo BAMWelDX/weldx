@@ -6,7 +6,41 @@ import numpy as np
 from IPython.display import display
 from ipywidgets import Dropdown, HBox, IntSlider, Play, jslink
 
-from weldx.constants import WELDX_QUANTITY as Q_
+
+def new_3d_figure_and_axes(
+    num_subplots: int = 1, height: int = 500, width: int = 500, pixel_per_inch: int = 50
+):
+    """Get a matplotlib figure and axes for 3d plots.
+
+    Parameters
+    ----------
+    num_subplots : int
+        Number of subplots (horizontal)
+    height : int
+        Height in pixels
+    width : int
+        Width in pixels
+    pixel_per_inch :
+        Defines how many pixels an inch covers. This is only relevant fon the fallback
+        method.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        The matplotlib figure object
+    ax : matplotlib..axes.Axes
+        The matplotlib axes object
+
+    """
+    fig, ax = plt.subplots(
+        ncols=num_subplots, subplot_kw={"projection": "3d", "proj_type": "ortho"}
+    )
+    try:
+        fig.canvas.layout.height = f"{height}px"
+        fig.canvas.layout.width = f"{width}px"
+    except:
+        fig.set_size_inches(w=width / pixel_per_inch, h=height / pixel_per_inch)
+    return fig, ax
 
 
 def plot_coordinate_system(
@@ -159,6 +193,39 @@ def plot_coordinate_system_manager_matplotlib(
                 show_axes=show_axes,
             )
         axes.legend()
+
+
+def plot_coordinate_systems(
+    cs_data,
+    axes=None,
+    title: str = None,
+    limits=None,
+    time_index=None,
+    legend_pos="lower left",
+):
+    # todo Use kwargs dict instead of tuple
+    for i, data in enumerate(cs_data):
+        if len(data) == 3:
+            cs_data[i] = (*data, None)
+
+    if axes is None:
+        _, axes = new_3d_figure_and_axes()
+
+    for lcs, color, label, time_index_instance in cs_data:
+        if time_index_instance is None:
+            time_index_instance = time_index
+        lcs.plot(axes, color=color, label=label, time_index=time_index_instance)
+
+    if limits is None:
+        set_axes_equal(axes)
+    else:
+        axes.set_xlim(limits)
+        axes.set_ylim(limits)
+        axes.set_zlim(limits)
+
+    if title is not None:
+        axes.set_title(title)
+    axes.legend(loc=legend_pos)
 
 
 # k3d ----------------------------------------------------------------------------------

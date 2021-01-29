@@ -1199,6 +1199,7 @@ class LocalCoordinateSystem:
         label=None,
         time=None,
         time_ref=None,
+        time_index=None,
         show_trace=True,
         show_axes=True,
     ):
@@ -1239,17 +1240,22 @@ class LocalCoordinateSystem:
                     )
 
                 if show_axes:
-                    for i, _ in enumerate(self.time):
-                        # assure label occurs only once
-                        if i > 0:
-                            label = None
+                    if time_index is None:
+                        for i, _ in enumerate(self.time):
+                            # assure label occurs only once
+                            if i > 0:
+                                label = None
 
+                            plot_coordinate_system(
+                                self, axes, color=color, label=label, time_idx=i
+                            )
+                    else:
                         plot_coordinate_system(
-                            self, axes, color=color, label=label, time_idx=i
+                            self, axes, color=color, label=label, time_idx=time_index
                         )
 
-                if show_trace:
-                    coords = self.coordinates
+                if show_trace and self.coordinates.values.ndim > 1:
+                    coords = self.coordinates.values
                     if color is None:
                         color = "k"
                     axes.plot(
