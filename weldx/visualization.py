@@ -315,19 +315,27 @@ class CoordinateSystemManagerVisualizerK3D:
 
     color_table = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF]
 
-    def __init__(self, csm):
+    def __init__(self, csm, time=None, time_ref=None):
         """Create a `CoordinateSystemManagerVisualizerK3D`.
 
         Parameters
         ----------
         csm : weldx.CoordinateSystemManager
             The `CoordinateSystemManager` that should be visualized
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+               LocalCoordinateSystem
+            The time steps that should be plotted
+        time_ref : pandas.Timestamp
+            A reference timestamp that can be provided if the ``time`` parameter is a
+            `pandas.TimedeltaIndex`
 
         """
-        time = csm.time_union()
+        if time is None:
+            time = csm.time_union()
+
         num_times = len(time)
 
-        self._csm = csm.interp_time(time)
+        self._csm = csm.interp_time(time=time, time_ref=time_ref)
         self._current_time_index = 0
         root_name = csm._root_system_name
 

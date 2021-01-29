@@ -2870,10 +2870,10 @@ class CoordinateSystemManager:
             coordinate systems
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
                LocalCoordinateSystem
-            (matplotlib only) The time steps that should be plotted
+            The time steps that should be plotted
         time_ref : pandas.Timestamp
-            (matplotlib only) A reference timestamp that can be provided if the ``time``
-            parameter is a `pandas.TimedeltaIndex`
+            A reference timestamp that can be provided if the ``time`` parameter is a
+            `pandas.TimedeltaIndex`
         show_trace : bool
             (matplotlib only) If `True`, the trace of time dependent coordinate systems
             is plotted.
@@ -2883,7 +2883,7 @@ class CoordinateSystemManager:
 
         """
         if use_k3d:
-            CoordinateSystemManagerVisualizerK3D(csm=self)
+            CoordinateSystemManagerVisualizerK3D(csm=self, time=time, time_ref=time_ref)
         else:
             plot_coordinate_system_manager_matplotlib(
                 csm=self,
