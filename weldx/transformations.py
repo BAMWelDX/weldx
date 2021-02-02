@@ -20,6 +20,7 @@ from weldx.visualization import (
     CoordinateSystemManagerVisualizerK3D,
     plot_coordinate_system,
     plot_coordinate_system_manager_matplotlib,
+    set_axes_equal,
 )
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -2852,9 +2853,11 @@ class CoordinateSystemManager:
 
     def plot_coordinate_systems(
         self,
-        use_k3d=False,
+        backend="mpl",
         axes=None,
         reference_system=None,
+        title=None,
+        limits=None,
         time=None,
         time_ref=None,
         show_trace=True,
@@ -2864,10 +2867,13 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        use_k3d : bool
-            If `True`, [k3d](https://k3d-jupyter.org/) is used to render the plot inside
-            of an interactive environment. This only works with jupyter notebooks. If
-            `False`, matplotlib is used.
+        backend : str
+            Select the rendering backend of the plot. The options are:
+
+            - `k3d` to get an interactive plot using [k3d](https://k3d-jupyter.org/)
+            - `mpl` for static plots using [matplotlib](https://matplotlib.org/)
+
+            Note that k3d only works inside jupyter notebooks
         axes :
             (matplotlib only) The target axes object that should be drawn to. If `None`
             is provided, a new one will be created.
@@ -2888,18 +2894,25 @@ class CoordinateSystemManager:
             coordinate systems is plotted.
 
         """
-        if use_k3d:
+        if backend == "k3d":
             CoordinateSystemManagerVisualizerK3D(csm=self, time=time, time_ref=time_ref)
-        else:
-            plot_coordinate_system_manager_matplotlib(
+        elif backend == "mpl":
+            set_ax_eq = axes is None
+            axes = plot_coordinate_system_manager_matplotlib(
                 csm=self,
                 axes=axes,
                 reference_system=reference_system,
                 time=time,
                 time_ref=time_ref,
+                title=title,
+                limits=limits,
                 show_trace=show_trace,
                 show_axes=show_axes,
             )
+            if set_ax_eq:
+                set_axes_equal(axes)
+        else:
+            raise ValueError(f"Unknown rendering backend: '{backend}'")
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""

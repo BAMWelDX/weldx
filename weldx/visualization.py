@@ -1,6 +1,7 @@
 """Contains some functions to help with visualization."""
 
 import k3d
+import k3d.platonic as platonik
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import display
@@ -125,12 +126,21 @@ def set_axes_equal(axes):
     axes.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
+def _get_color_matplotlib(axes):
+    color_table = ["r", "g", "b", "y"]
+    for color in color_table:
+        yield color
+    yield next(axes._get_lines.prop_cycler)["color"]
+
+
 def plot_coordinate_system_manager_matplotlib(
     csm,
     axes=None,
     reference_system=None,
     time=None,
     time_ref=None,
+    title=None,
+    limits=None,
     show_trace=True,
     show_axes=True,
 ):
@@ -165,25 +175,27 @@ def plot_coordinate_system_manager_matplotlib(
             csm.interp_time(time=time, time_ref=time_ref),
             axes=axes,
             reference_system=reference_system,
+            title=title,
             show_trace=show_trace,
             show_axes=show_axes,
         )
     else:
         if axes is None:
-            _, axes = plt.subplots(
-                subplot_kw={"projection": "3d", "proj_type": "ortho"}
-            )
+            _, axes = new_3d_figure_and_axes()
             axes.set_xlabel("x")
             axes.set_ylabel("y")
             axes.set_zlabel("z")
 
         if reference_system is None:
             reference_system = csm._root_system_name
+        if title is not None:
+            axes.set_title(title)
 
+        color_gen = _get_color_matplotlib(axes)
         for lcs_name in csm.coordinate_system_names:
             # https://stackoverflow.com/questions/13831549/
             # get-matplotlib-color-cycle-state
-            color = next(axes._get_lines.prop_cycler)["color"]
+            color = next(color_gen)
             lcs = csm.get_cs(lcs_name, reference_system)
             lcs.plot(
                 axes=axes,
@@ -192,7 +204,14 @@ def plot_coordinate_system_manager_matplotlib(
                 show_trace=show_trace,
                 show_axes=show_axes,
             )
+        if limits is None:
+            set_axes_equal(axes)
+        else:
+            axes.set_xlim(limits)
+            axes.set_ylim(limits)
+            axes.set_zlim(limits)
         axes.legend()
+        return axes
 
 
 def plot_coordinate_systems(
@@ -255,7 +274,7 @@ class CoordinateSystemVisualizerK3D:
 
         self._vectors = k3d.vectors(
             origins=[coordinates for _ in range(3)],
-            vectors=orientation,
+            vectors=orientation.transpose(),
             colors=[[0xFF0000, 0xFF0000], [0x00FF00, 0x00FF00], [0x0000FF, 0x0000FF]],
             labels=[],
             label_size=1.5,
@@ -265,7 +284,7 @@ class CoordinateSystemVisualizerK3D:
         if name is not None:
             self._label = k3d.text(
                 text=name,
-                position=coordinates + 0.1,
+                position=coordinates + 0.05,
                 color=self._color,
                 size=1,
                 label_box=False,
@@ -277,12 +296,23 @@ class CoordinateSystemVisualizerK3D:
             width=0.05,
             color=color,
         )
+        self.origin = platonik.Octahedron(size=0.1).mesh
+        self.origin.color = color
+        self.origin.model_matrix = self._get_model_matrix(coordinates, orientation)
 
         if plot is not None:
             plot += self._vectors
             plot += self._trace
+            plot += self.origin
             if self._label is not None:
                 plot += self._label
+
+    @staticmethod
+    def _get_model_matrix(coordinates, orientation):
+        model_matrix = np.eye(4, dtype="float32")
+        model_matrix[:3, :3] = orientation
+        model_matrix[:3, 3] = coordinates
+        return model_matrix
 
     def _update_positions(self, coordinates, orientation):
         """Update the positions of the coordinate cross and label.
@@ -296,9 +326,10 @@ class CoordinateSystemVisualizerK3D:
 
         """
         self._vectors.origins = [coordinates for _ in range(3)]
-        self._vectors.vectors = orientation
+        self._vectors.vectors = orientation.transpose()
+        self.origin.model_matrix = self._get_model_matrix(coordinates, orientation)
         if self._label is not None:
-            self._label.position = coordinates + 0.1
+            self._label.position = coordinates + 0.05
 
     @staticmethod
     def _get_coordinates_and_orientation(lcs, index=0):
@@ -325,7 +356,6 @@ class CoordinateSystemVisualizerK3D:
         if lcs.is_time_dependent:
             coordinates = coordinates[index]
             orientation = orientation[index]
-        orientation = orientation.transpose()
 
         return coordinates, orientation
 
@@ -380,7 +410,7 @@ class CoordinateSystemVisualizerK3D:
 class CoordinateSystemManagerVisualizerK3D:
     """Visualizes a `weldx.CoordinateSystemManager` using k3d."""
 
-    color_table = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF]
+    color_table = [0xFF0000, 0x00FF00, 0x0000FF, 0xAAAA00, 0xFF00FF, 0x00FFFF]
 
     def __init__(self, csm, time=None, time_ref=None):
         """Create a `CoordinateSystemManagerVisualizerK3D`.
@@ -397,17 +427,27 @@ class CoordinateSystemManagerVisualizerK3D:
             `pandas.TimedeltaIndex`
 
         """
+        num_times = 1
+        disable_time_widgets = True
         if time is None:
             time = csm.time_union()
 
-        num_times = len(time)
+        if time is not None:
+            num_times = len(time)
+            disable_time_widgets = False
+            csm = csm.interp_time(time=time, time_ref=time_ref)
 
         self._csm = csm.interp_time(time=time, time_ref=time_ref)
         self._current_time_index = 0
-        root_name = csm._root_system_name
+        root_name = self._csm._root_system_name
 
         # create controls
-        play = Play(min=0, max=num_times - 1, value=self._current_time_index, step=1)
+        play = Play(
+            min=0,
+            max=num_times - 1,
+            value=self._current_time_index,
+            step=1,
+        )
         time_slider = IntSlider(
             min=0,
             max=num_times - 1,
@@ -415,12 +455,15 @@ class CoordinateSystemManagerVisualizerK3D:
             description="Time:",
         )
         reference_dropdown = Dropdown(
-            options=csm.coordinate_system_names,
+            options=self._csm.coordinate_system_names,
             value=root_name,
             description="Reference:",
             disabled=False,
         )
         jslink((play, "value"), (time_slider, "value"))
+        play.disabled = disable_time_widgets
+        time_slider.disabled = disable_time_widgets
+
         self._controls = HBox([time_slider, play, reference_dropdown])
 
         # callback functions
@@ -455,12 +498,12 @@ class CoordinateSystemManagerVisualizerK3D:
         plot = k3d.plot(grid_auto_fit=False, camera_auto_fit=False)
         self._lcs_vis = {
             lcs_name: CoordinateSystemVisualizerK3D(
-                csm.get_cs(lcs_name, root_name),
+                self._csm.get_cs(lcs_name, root_name),
                 plot,
                 lcs_name,
                 color=self.color_table[i % len(self.color_table)],
             )
-            for i, lcs_name in enumerate(csm.coordinate_system_names)
+            for i, lcs_name in enumerate(self._csm.coordinate_system_names)
         }
 
         # display everything
