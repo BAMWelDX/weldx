@@ -5,7 +5,7 @@ import k3d.platonic as platonik
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import display
-from ipywidgets import Dropdown, HBox, IntSlider, Play, jslink
+from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
 
 def new_3d_figure_and_axes(
@@ -460,11 +460,29 @@ class CoordinateSystemManagerVisualizerK3D:
             description="Reference:",
             disabled=False,
         )
+        layout = Layout(width="200px")
+        vectors_cb = Checkbox(value=True, description="show vectors", layout=layout)
+        origin_cb = Checkbox(value=True, description="show origins", layout=layout)
+        traces_cb = Checkbox(value=True, description="show traces", layout=layout)
+        labels_cb = Checkbox(value=True, description="show labels", layout=layout)
+
         jslink((play, "value"), (time_slider, "value"))
         play.disabled = disable_time_widgets
         time_slider.disabled = disable_time_widgets
 
-        self._controls = HBox([time_slider, play, reference_dropdown])
+        self._controls = VBox(
+            [
+                HBox([time_slider, play, reference_dropdown]),
+                HBox(
+                    [
+                        vectors_cb,
+                        origin_cb,
+                        traces_cb,
+                        labels_cb,
+                    ]
+                ),
+            ]
+        )
 
         # callback functions
         def on_reference_change(change):
@@ -490,9 +508,25 @@ class CoordinateSystemManagerVisualizerK3D:
             self._current_time_index = change["new"]
             self.update_time_index(self._current_time_index)
 
+        def on_vectors_change(change):
+            self.show_vectors(change["new"])
+
+        def on_origins_change(change):
+            self.show_origins(change["new"])
+
+        def on_traces_change(change):
+            self.show_traces(change["new"])
+
+        def on_labals_change(change):
+            self.show_labels(change["new"])
+
         # register callbacks
         time_slider.observe(on_time_change, names="value")
         reference_dropdown.observe(on_reference_change, names="value")
+        vectors_cb.observe(on_vectors_change, names="value")
+        origin_cb.observe(on_origins_change, names="value")
+        traces_cb.observe(on_traces_change, names="value")
+        labels_cb.observe(on_labals_change, names="value")
 
         # create plot
         plot = k3d.plot(grid_auto_fit=False, camera_auto_fit=False)
@@ -552,3 +586,19 @@ class CoordinateSystemManagerVisualizerK3D:
             self._lcs_vis[lcs_name].update_lcs(
                 self._csm.get_cs(lcs_name, reference_system), self._current_time_index
             )
+
+    def show_vectors(self, show_vectors):
+        for _, lcs_vis in self._lcs_vis.items():
+            lcs_vis._vectors.visible = show_vectors
+
+    def show_origins(self, show_origins):
+        for _, lcs_vis in self._lcs_vis.items():
+            lcs_vis.origin.visible = show_origins
+
+    def show_traces(self, show_traces):
+        for _, lcs_vis in self._lcs_vis.items():
+            lcs_vis._trace.visible = show_traces
+
+    def show_labels(self, show_labels):
+        for _, lcs_vis in self._lcs_vis.items():
+            lcs_vis._label.visible = show_labels
