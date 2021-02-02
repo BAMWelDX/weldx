@@ -1,7 +1,7 @@
 """Contains some functions to help with visualization."""
 
 import k3d
-import k3d.platonic as platonik
+import k3d.platonic as platonic
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import display
@@ -137,12 +137,13 @@ def plot_coordinate_system_manager_matplotlib(
     csm,
     axes=None,
     reference_system=None,
+    coordinate_systems=None,
     time=None,
     time_ref=None,
     title=None,
     limits=None,
     show_trace=True,
-    show_axes=True,
+    show_vectors=True,
 ):
     """Plot the coordinate systems of a `CoordinateSystemManager` using matplotlib.
 
@@ -163,7 +164,7 @@ def plot_coordinate_system_manager_matplotlib(
         `pandas.TimedeltaIndex`
     show_trace : bool
         If `True`, the trace of time dependent coordinate systems is plotted.
-    show_axes :
+    show_vectors :
         If `True`, the coordinate cross of time dependent coordinate systems is plotted.
 
     Returns
@@ -175,9 +176,10 @@ def plot_coordinate_system_manager_matplotlib(
             csm.interp_time(time=time, time_ref=time_ref),
             axes=axes,
             reference_system=reference_system,
+            coordinate_systems=coordinate_systems,
             title=title,
             show_trace=show_trace,
-            show_axes=show_axes,
+            show_vectors=show_vectors,
         )
     else:
         if axes is None:
@@ -188,11 +190,13 @@ def plot_coordinate_system_manager_matplotlib(
 
         if reference_system is None:
             reference_system = csm._root_system_name
+        if coordinate_systems is None:
+            coordinate_systems = csm.coordinate_system_names
         if title is not None:
             axes.set_title(title)
 
         color_gen = _get_color_matplotlib(axes)
-        for lcs_name in csm.coordinate_system_names:
+        for lcs_name in coordinate_systems:
             # https://stackoverflow.com/questions/13831549/
             # get-matplotlib-color-cycle-state
             color = next(color_gen)
@@ -202,7 +206,7 @@ def plot_coordinate_system_manager_matplotlib(
                 color=color,
                 label=lcs_name,
                 show_trace=show_trace,
-                show_axes=show_axes,
+                show_vectors=show_vectors,
             )
         if limits is None:
             set_axes_equal(axes)
@@ -253,7 +257,16 @@ def plot_coordinate_systems(
 class CoordinateSystemVisualizerK3D:
     """Visualizes a `weldx.LocalCoordinateSystem` using k3d."""
 
-    def __init__(self, lcs, plot=None, name=None, color=0x000000):
+    def __init__(
+        self,
+        lcs,
+        plot=None,
+        name=None,
+        color=0x000000,
+        show_origin=True,
+        show_trace=True,
+        show_vectors=True,
+    ):
         """Create a `CoordinateSystemVisualizerK3D`
 
         Parameters
@@ -279,6 +292,7 @@ class CoordinateSystemVisualizerK3D:
             labels=[],
             label_size=1.5,
         )
+        self._vectors.visible = show_vectors
 
         self._label = None
         if name is not None:
@@ -296,9 +310,12 @@ class CoordinateSystemVisualizerK3D:
             width=0.05,
             color=color,
         )
-        self.origin = platonik.Octahedron(size=0.1).mesh
+        self._trace.visible = show_trace
+
+        self.origin = platonic.Octahedron(size=0.1).mesh
         self.origin.color = color
         self.origin.model_matrix = self._get_model_matrix(coordinates, orientation)
+        self.origin.visible = show_origin
 
         if plot is not None:
             plot += self._vectors
@@ -410,9 +427,22 @@ class CoordinateSystemVisualizerK3D:
 class CoordinateSystemManagerVisualizerK3D:
     """Visualizes a `weldx.CoordinateSystemManager` using k3d."""
 
-    color_table = [0xFF0000, 0x00FF00, 0x0000FF, 0xAAAA00, 0xFF00FF, 0x00FFFF]
+    color_table = [0xFF0000, 0x00AA00, 0x0000FF, 0xAAAA00, 0xFF00FF, 0x00FFFF]
 
-    def __init__(self, csm, time=None, time_ref=None):
+    def __init__(
+        self,
+        csm,
+        coordinate_systems=None,
+        reference_system=None,
+        title=None,
+        limits=None,
+        time=None,
+        time_ref=None,
+        show_labels=True,
+        show_origins=True,
+        show_traces=True,
+        show_vectors=True,
+    ):
         """Create a `CoordinateSystemManagerVisualizerK3D`.
 
         Parameters
@@ -427,21 +457,86 @@ class CoordinateSystemManagerVisualizerK3D:
             `pandas.TimedeltaIndex`
 
         """
-        num_times = 1
-        disable_time_widgets = True
         if time is None:
             time = csm.time_union()
+        if time is not None:
+            csm = csm.interp_time(time=time, time_ref=time_ref)
+        self._csm = csm.interp_time(time=time, time_ref=time_ref)
+        self._current_time_index = 0
 
+        if coordinate_systems is None:
+            coordinate_systems = csm.coordinate_system_names
+        if reference_system is None:
+            reference_system = self._csm._root_system_name
+        if limits is None:
+            limits = [-1, 1]
+
+        # create controls
+        self._controls = self._create_controls(
+            time,
+            reference_system,
+            show_labels,
+            show_origins,
+            show_traces,
+            show_vectors,
+        )
+
+        # create plot using dict comprehension
+        plot = k3d.plot(
+            grid_auto_fit=False,
+            camera_auto_fit=False,
+            grid=(limits[0], limits[0], limits[0], limits[1], limits[1], limits[1]),
+        )
+        self._lcs_vis = {
+            lcs_name: CoordinateSystemVisualizerK3D(
+                self._csm.get_cs(lcs_name, reference_system),
+                plot,
+                lcs_name,
+                color=self.color_table[i % len(self.color_table)],
+                show_origin=show_origins,
+                show_trace=show_traces,
+                show_vectors=show_vectors,
+            )
+            for i, lcs_name in enumerate(coordinate_systems)
+        }
+
+        # add title
+        if title is not None:
+            plot += k3d.text2d(
+                f"<b>{title}</b>",
+                position=(0.5, 0),
+                color=0x000000,
+                is_html=True,
+                size=1.5,
+                reference_point="ct",
+            )
+
+        # display everything
+        plot.display()
+        display(self._controls)
+
+        # workaround since using it inside the init method of the coordinate system
+        # visualizer somehow causes the labels to be created twice with one version
+        # being always visible
+        self.show_labels(show_labels)
+
+    def _create_controls(
+        self,
+        time,
+        reference_system,
+        show_labels,
+        show_origins,
+        show_traces,
+        show_vectors,
+    ):
+        num_times = 1
+        disable_time_widgets = True
+
+        # create widgets
         if time is not None:
             num_times = len(time)
             disable_time_widgets = False
-            csm = csm.interp_time(time=time, time_ref=time_ref)
 
-        self._csm = csm.interp_time(time=time, time_ref=time_ref)
-        self._current_time_index = 0
-        root_name = self._csm._root_system_name
-
-        # create controls
         play = Play(
             min=0,
             max=num_times - 1,
@@ -456,68 +551,44 @@ class CoordinateSystemManagerVisualizerK3D:
         )
         reference_dropdown = Dropdown(
             options=self._csm.coordinate_system_names,
-            value=root_name,
+            value=reference_system,
             description="Reference:",
             disabled=False,
         )
-        layout = Layout(width="200px")
-        vectors_cb = Checkbox(value=True, description="show vectors", layout=layout)
-        origin_cb = Checkbox(value=True, description="show origins", layout=layout)
-        traces_cb = Checkbox(value=True, description="show traces", layout=layout)
-        labels_cb = Checkbox(value=True, description="show labels", layout=layout)
+        lo = Layout(width="200px")
+        vectors_cb = Checkbox(value=show_vectors, description="show vectors", layout=lo)
+        origin_cb = Checkbox(value=show_origins, description="show origins", layout=lo)
+        traces_cb = Checkbox(value=show_traces, description="show traces", layout=lo)
+        labels_cb = Checkbox(value=show_labels, description="show labels", layout=lo)
 
         jslink((play, "value"), (time_slider, "value"))
         play.disabled = disable_time_widgets
         time_slider.disabled = disable_time_widgets
 
-        self._controls = VBox(
-            [
-                HBox([time_slider, play, reference_dropdown]),
-                HBox(
-                    [
-                        vectors_cb,
-                        origin_cb,
-                        traces_cb,
-                        labels_cb,
-                    ]
-                ),
-            ]
-        )
-
         # callback functions
         def on_reference_change(change):
-            """Handle events of the reference system drop down.
-
-            Parameters
-            ----------
-            change : Dict
-                A dictionary containing the event data
-
-            """
+            """Handle events of the reference system drop down."""
             self.update_reference_system(change["new"])
 
         def on_time_change(change):
-            """Handle events of the time slider.
-
-            Parameters
-            ----------
-            change : Dict
-                A dictionary containing the event data
-
-            """
+            """Handle events of the time slider."""
             self._current_time_index = change["new"]
             self.update_time_index(self._current_time_index)
 
         def on_vectors_change(change):
+            """Handle events of the vectors checkbox."""
             self.show_vectors(change["new"])
 
         def on_origins_change(change):
+            """Handle events of the origins checkbox."""
             self.show_origins(change["new"])
 
         def on_traces_change(change):
+            """Handle events of the traces checkbox."""
             self.show_traces(change["new"])
 
-        def on_labals_change(change):
+        def on_labels_change(change):
+            """Handle events of the labels checkbox."""
             self.show_labels(change["new"])
 
         # register callbacks
@@ -526,23 +597,12 @@ class CoordinateSystemManagerVisualizerK3D:
         vectors_cb.observe(on_vectors_change, names="value")
         origin_cb.observe(on_origins_change, names="value")
         traces_cb.observe(on_traces_change, names="value")
-        labels_cb.observe(on_labals_change, names="value")
+        labels_cb.observe(on_labels_change, names="value")
 
-        # create plot
-        plot = k3d.plot(grid_auto_fit=False, camera_auto_fit=False)
-        self._lcs_vis = {
-            lcs_name: CoordinateSystemVisualizerK3D(
-                self._csm.get_cs(lcs_name, root_name),
-                plot,
-                lcs_name,
-                color=self.color_table[i % len(self.color_table)],
-            )
-            for i, lcs_name in enumerate(self._csm.coordinate_system_names)
-        }
-
-        # display everything
-        plot.display()
-        display(self._controls)
+        # create control panel
+        row_1 = HBox([time_slider, play, reference_dropdown])
+        row_2 = HBox([vectors_cb, origin_cb, traces_cb, labels_cb])
+        return VBox([row_1, row_2])
 
     def update_time(self, time, time_ref=None):
         """Update the plotted time.
@@ -581,9 +641,8 @@ class CoordinateSystemManagerVisualizerK3D:
             Name of the new reference system
 
         """
-        for lcs_name in self._csm.coordinate_system_names:
-
-            self._lcs_vis[lcs_name].update_lcs(
+        for lcs_name, lcs_vis in self._lcs_vis.items():
+            lcs_vis.update_lcs(
                 self._csm.get_cs(lcs_name, reference_system), self._current_time_index
             )
 

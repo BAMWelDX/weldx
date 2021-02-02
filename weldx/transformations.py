@@ -1202,7 +1202,7 @@ class LocalCoordinateSystem:
         time_ref=None,
         time_index=None,
         show_trace=True,
-        show_axes=True,
+        show_vectors=True,
     ):
         """Plot the coordinate system.
 
@@ -1223,7 +1223,7 @@ class LocalCoordinateSystem:
             `pandas.TimedeltaIndex`
         show_trace : bool
             If `True`, the trace of time dependent coordinate systems is plotted.
-        show_axes : bool
+        show_vectors : bool
             If `True`, the coordinate cross of time dependent coordinate systems is
             plotted.
 
@@ -1234,13 +1234,13 @@ class LocalCoordinateSystem:
             )
         if self.is_time_dependent:
             if time is None:
-                if not (show_trace or show_axes):
+                if not (show_trace or show_vectors):
                     raise ValueError(
-                        "At least one of the parameters 'show_trace' or 'show_axes' "
+                        "At least one of the parameters 'show_trace' or 'show_vectors' "
                         "must be 'True'."
                     )
 
-                if show_axes:
+                if show_vectors:
                     if time_index is None:
                         for i, _ in enumerate(self.time):
                             # assure label occurs only once
@@ -1268,7 +1268,7 @@ class LocalCoordinateSystem:
                     color=color,
                     label=label,
                     show_trace=show_trace,
-                    show_axes=show_axes,
+                    show_vectors=show_vectors,
                 )
         else:
             plot_coordinate_system(self, axes, color=color, label=label)
@@ -2856,12 +2856,15 @@ class CoordinateSystemManager:
         backend="mpl",
         axes=None,
         reference_system=None,
+        coordinate_systems=None,
         title=None,
         limits=None,
         time=None,
         time_ref=None,
-        show_trace=True,
-        show_axes=True,
+        show_labels=True,
+        show_origins=True,
+        show_traces=True,
+        show_vectors=True,
     ):
         """Plot the coordinate systems of the coordinate system manager.
 
@@ -2886,28 +2889,41 @@ class CoordinateSystemManager:
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
-        show_trace : bool
+        show_traces : bool
             (matplotlib only) If `True`, the trace of time dependent coordinate systems
             is plotted.
-        show_axes :
+        show_vectors :
             (matplotlib only) If `True`, the coordinate cross of time dependent
             coordinate systems is plotted.
 
         """
         if backend == "k3d":
-            CoordinateSystemManagerVisualizerK3D(csm=self, time=time, time_ref=time_ref)
+            CoordinateSystemManagerVisualizerK3D(
+                csm=self,
+                reference_system=reference_system,
+                coordinate_systems=coordinate_systems,
+                title=title,
+                limits=limits,
+                time=time,
+                time_ref=time_ref,
+                show_labels=show_labels,
+                show_origins=show_origins,
+                show_traces=show_traces,
+                show_vectors=show_vectors,
+            )
         elif backend == "mpl":
             set_ax_eq = axes is None
             axes = plot_coordinate_system_manager_matplotlib(
                 csm=self,
                 axes=axes,
                 reference_system=reference_system,
+                coordinate_systems=coordinate_systems,
                 time=time,
                 time_ref=time_ref,
                 title=title,
                 limits=limits,
-                show_trace=show_trace,
-                show_axes=show_axes,
+                show_trace=show_traces,
+                show_vectors=show_vectors,
             )
             if set_ax_eq:
                 set_axes_equal(axes)
