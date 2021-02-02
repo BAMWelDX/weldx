@@ -501,8 +501,9 @@ class CoordinateSystemManagerVisualizerK3D:
         }
 
         # add title
+        self.title = None
         if title is not None:
-            plot += k3d.text2d(
+            self.title = k3d.text2d(
                 f"<b>{title}</b>",
                 position=(0.5, 0),
                 color=0x000000,
@@ -510,6 +511,22 @@ class CoordinateSystemManagerVisualizerK3D:
                 size=1.5,
                 reference_point="ct",
             )
+            plot += self.title
+
+        # add time info
+        self._time = time
+        self._time_ref = time_ref
+        self._time_info = None
+        if time is not None:
+            self._time_info = k3d.text2d(
+                f"<b>time:</b> {time[0]}",
+                position=(0, 1),
+                color=0x000000,
+                is_html=True,
+                size=1.0,
+                reference_point="lb",
+            )
+            plot += self._time_info
 
         # display everything
         plot.display()
@@ -572,8 +589,7 @@ class CoordinateSystemManagerVisualizerK3D:
 
         def on_time_change(change):
             """Handle events of the time slider."""
-            self._current_time_index = change["new"]
-            self.update_time_index(self._current_time_index)
+            self.update_time_index(change["new"])
 
         def on_vectors_change(change):
             """Handle events of the vectors checkbox."""
@@ -619,6 +635,7 @@ class CoordinateSystemManagerVisualizerK3D:
         """
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_time(time, time_ref)
+        f"<b>time:</b> {time[0]}"
 
     def update_time_index(self, index):
         """Update the plotted time by index.
@@ -629,8 +646,10 @@ class CoordinateSystemManagerVisualizerK3D:
             The new index
 
         """
+        self._current_time_index = index
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_time_index(index)
+        self._time_info.text = f"<b>time:</b> {self._time[index]}"
 
     def update_reference_system(self, reference_system):
         """Update the reference system of the plot.
