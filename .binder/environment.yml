@@ -4,6 +4,8 @@ channels:
   - defaults
 dependencies:
   - python=3.7
+  - setuptools_scm
+  - pip
   - numpy>=1.18
   - pandas>=1.0
   - scipy>=1.4
@@ -27,6 +29,7 @@ dependencies:
   - pytest-cov
   # Plotting
   - ipykernel
+  - ipywidgets
   - ipympl=0.5.8
   - k3d
   - matplotlib=3.3.1
@@ -34,4 +37,5 @@ dependencies:
   - snakeviz
   - ipywidgets
   - nodejs=14
-
+  - pip:
+    - git+https://github.com/BAMWelDX/weldx.git

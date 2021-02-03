@@ -357,13 +357,13 @@ class WXRotation(Rot):
     """Wrapper for creating meta-tagged Scipy.Rotation objects."""
 
     @classmethod
-    def from_quat(cls, quat: np.ndarray, normalized=None) -> "WXRotation":
+    def from_quat(cls, quat: np.ndarray) -> "WXRotation":
         """Initialize from quaternions.
 
         scipy.spatial.transform.Rotation docs for details.
         """
-        rot = super().from_quat(quat, normalized)
-        rot.wx_meta = {"constructor": "from_quat"}
+        rot = super().from_quat(quat)
+        setattr(rot, "wx_meta", {"constructor": "from_quat"})
         return rot
 
     @classmethod
@@ -373,7 +373,7 @@ class WXRotation(Rot):
         scipy.spatial.transform.Rotation docs for details.
         """
         rot = super().from_matrix(matrix)
-        rot.wx_meta = {"constructor": "from_matrix"}
+        setattr(rot, "wx_meta", {"constructor": "from_matrix"})
         return rot
 
     @classmethod
@@ -382,8 +382,8 @@ class WXRotation(Rot):
 
         scipy.spatial.transform.Rotation docs for details.
         """
-        rot = Rot.from_rotvec(rotvec)
-        rot.wx_meta = {"constructor": "from_rotvec"}
+        rot = super().from_rotvec(rotvec)
+        setattr(rot, "wx_meta", {"constructor": "from_rotvec"})
         return rot
 
     @classmethod
@@ -392,8 +392,12 @@ class WXRotation(Rot):
 
         scipy.spatial.transform.Rotation docs for details.
         """
-        rot = Rot.from_euler(seq=seq, angles=angles, degrees=degrees)
-        rot.wx_meta = {"constructor": "from_euler", "seq": seq, "degrees": degrees}
+        rot = super().from_euler(seq=seq, angles=angles, degrees=degrees)
+        setattr(
+            rot,
+            "wx_meta",
+            {"constructor": "from_euler", "seq": seq, "degrees": degrees},
+        )
         return rot
 
 
@@ -483,11 +487,14 @@ class LocalCoordinateSystem:
                 raise ValueError("Orientation vectors must be orthogonal")
 
         # unify time axis
-        if ("time" in orientation.coords) and ("time" in coordinates.coords):
-            if not np.all(orientation.time.data == coordinates.time.data):
-                time_union = ut.get_time_union([orientation, coordinates])
-                orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
-                coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
+        if (
+            ("time" in orientation.coords)
+            and ("time" in coordinates.coords)
+            and (not np.all(orientation.time.data == coordinates.time.data))
+        ):
+            time_union = ut.get_time_union([orientation, coordinates])
+            orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
+            coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
 
         coordinates.name = "coordinates"
         orientation.name = "orientation"
@@ -1160,9 +1167,8 @@ class LocalCoordinateSystem:
                 "allowed. Also check that the reference time has the correct type."
             )
 
-        if self.has_reference_time:
-            if not isinstance(time, pd.DatetimeIndex):
-                time = time + time_ref
+        if self.has_reference_time and (not isinstance(time, pd.DatetimeIndex)):
+            time = time + time_ref
 
         orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
         coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
