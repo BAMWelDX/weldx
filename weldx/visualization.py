@@ -434,8 +434,10 @@ class CoordinateSystemVisualizerK3D:
         """
         coordinates = np.array(lcs.coordinates.values, dtype="float32")
         orientation = np.array(lcs.orientation.values, dtype="float32")
-        if lcs.is_time_dependent:
+        if coordinates.ndim > 1:
             coordinates = coordinates[index]
+
+        if orientation.ndim > 2:
             orientation = orientation[index]
 
         return coordinates, orientation
