@@ -2,6 +2,7 @@
 
 import copy
 import math
+from typing import List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -1160,28 +1161,30 @@ class Profile:
         self._shapes += shapes
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=False)
-    def rasterize(self, raster_width, insert_sep=False):
+    def rasterize(
+        self, raster_width, stack: bool = True
+    ) -> Union[np.ndarray, List[np.ndarray]]:
         """Rasterize the profile.
 
         Parameters
         ----------
         raster_width :
             Distance between points for rasterization.
-        insert_sep :
-            insert NaN values between profiles (useful for plotting)
+        stack :
+            hstack data into a single output array (default = True)
 
         Returns
         -------
-        numpy.ndarray
+        numpy.ndarray or List[numpy.ndarray]
             Raster data
 
         """
         raster_data = []
         for shape in self._shapes:
             raster_data.append(shape.rasterize(raster_width))
-            if insert_sep:
-                raster_data.append(np.full((2, 1), np.nan))
-        return np.hstack(raster_data)
+        if stack:
+            return np.hstack(raster_data)
+        return raster_data
 
     def plot(
         self,
@@ -1193,6 +1196,7 @@ class Profile:
         grid=True,
         line_style=".-",
         ax=None,
+        color="k",
     ):
         """Plot the profile.
 
@@ -1214,9 +1218,11 @@ class Profile:
             Matplotlib line style. (Default value = ".-")
         ax :
             Axis to plot to. (Default value = None)
+        color:
+            Color of plot lines
 
         """
-        raster_data = self.rasterize(raster_width, insert_sep=True)
+        raster_data = self.rasterize(raster_width, stack=False)
         if ax is None:  # pragma: no cover
             _, ax = plt.subplots()
         ax.grid(grid)
@@ -1229,7 +1235,12 @@ class Profile:
         elif "units" in self.attrs:
             ax.set_xlabel("y in " + self.attrs["units"])
             ax.set_ylabel("z in " + self.attrs["units"])
-        ax.plot(raster_data[0], raster_data[1], line_style, label=label)
+
+        if isinstance(color, str):  # single color
+            color = [color] * len(raster_data)
+
+        for segment, c in zip(raster_data, color):
+            ax.plot(segment[0], segment[1], line_style, label=label, color=c)
 
     @property
     def shapes(self):

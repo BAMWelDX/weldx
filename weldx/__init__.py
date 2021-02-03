@@ -5,7 +5,7 @@ import warnings
 
 try:
     from ._version import __version__
-except ModuleNotFoundError:
+except ModuleNotFoundError:  # pragma: no cover
     __version__ = None
     warnings.warn(
         "Using local weldx package files without version information.\n"
