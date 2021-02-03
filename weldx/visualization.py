@@ -8,6 +8,53 @@ from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
 
+def random_color_rgb():
+    return np.random.choice(range(256), size=3)
+
+
+def color_rgb_to_int(rgb_color_tuple):
+    return int("0x{:02x}{:02x}{:02x}".format(*rgb_color_tuple), 0)
+
+
+def color_int_to_rgb(integer):
+    return ((integer >> 16) & 255, (integer >> 8) & 255, integer & 255)
+
+
+def color_rgb_to_rgb_normalized(rgb):
+    return tuple([val / 255 for val in rgb])
+
+
+def color_int_to_rgb_normalized(integer):
+    rgb = color_int_to_rgb(integer)
+    return color_rgb_to_rgb_normalized(rgb)
+
+
+_color_list = [
+    0xFF0000,
+    0x00AA00,
+    0x0000FF,
+    0xAAAA00,
+    0xFF00FF,
+    0x00FFFF,
+    # todo: add colors manually or find better solution since random colors are not
+    #       guaranteed to have good visibility and to differ significantly from already
+    #       existing colors
+    *[color_rgb_to_int(random_color_rgb()) for _ in range(100)],
+]
+
+
+def color_generator_function():
+    for color in _color_list:
+        yield color
+    raise Exception("No more colors available.")
+
+
+def _get_color(lcs_name, color_dict, color_generator):
+    if color_dict is not None and lcs_name in color_dict:
+        return color_rgb_to_int(color_dict[lcs_name])
+    return next(color_generator)
+
+
 def new_3d_figure_and_axes(
     num_subplots: int = 1, height: int = 500, width: int = 500, pixel_per_inch: int = 50
 ):
@@ -45,7 +92,13 @@ def new_3d_figure_and_axes(
 
 
 def plot_coordinate_system(
-    coordinate_system, axes, color=None, label=None, time_idx=None
+    coordinate_system,
+    axes,
+    color=None,
+    label=None,
+    time_idx=None,
+    show_origin=True,
+    show_vectors=True,
 ):
     """Plot a coordinate system in a matplotlib 3d plot.
 
@@ -66,6 +119,8 @@ def plot_coordinate_system(
         a time dependency.
 
     """
+    if not (show_vectors or show_origin):
+        return
     if "time" in coordinate_system.dataset.coords:
         if time_idx is None:
             time_idx = 0
@@ -78,16 +133,18 @@ def plot_coordinate_system(
 
     p_0 = dsx.coordinates
 
-    orientation = dsx.orientation
-    p_x = p_0 + orientation[:, 0]
-    p_y = p_0 + orientation[:, 1]
-    p_z = p_0 + orientation[:, 2]
+    if show_vectors:
+        orientation = dsx.orientation
+        p_x = p_0 + orientation[:, 0]
+        p_y = p_0 + orientation[:, 1]
+        p_z = p_0 + orientation[:, 2]
 
-    axes.plot([p_0[0], p_x[0]], [p_0[1], p_x[1]], [p_0[2], p_x[2]], "r")
-    axes.plot([p_0[0], p_y[0]], [p_0[1], p_y[1]], [p_0[2], p_y[2]], "g")
-    axes.plot([p_0[0], p_z[0]], [p_0[1], p_z[1]], [p_0[2], p_z[2]], "b")
+        axes.plot([p_0[0], p_x[0]], [p_0[1], p_x[1]], [p_0[2], p_x[2]], "r")
+        axes.plot([p_0[0], p_y[0]], [p_0[1], p_y[1]], [p_0[2], p_y[2]], "g")
+        axes.plot([p_0[0], p_z[0]], [p_0[1], p_z[1]], [p_0[2], p_z[2]], "b")
     if color is not None:
-        axes.plot([p_0[0]], [p_0[1]], [p_0[2]], "o", color=color, label=label)
+        if show_origin:
+            axes.plot([p_0[0]], [p_0[1]], [p_0[2]], "o", color=color, label=label)
     elif label is not None:
         raise Exception("Labels can only be assigned if a color was specified")
 
@@ -138,10 +195,12 @@ def plot_coordinate_system_manager_matplotlib(
     axes=None,
     reference_system=None,
     coordinate_systems=None,
+    colors=None,
     time=None,
     time_ref=None,
     title=None,
     limits=None,
+    show_origins=True,
     show_trace=True,
     show_vectors=True,
 ):
@@ -172,12 +231,13 @@ def plot_coordinate_system_manager_matplotlib(
 
     """
     if time is not None:
-        plot_coordinate_system_manager_matplotlib(
+        return plot_coordinate_system_manager_matplotlib(
             csm.interp_time(time=time, time_ref=time_ref),
             axes=axes,
             reference_system=reference_system,
             coordinate_systems=coordinate_systems,
             title=title,
+            show_origins=show_origins,
             show_trace=show_trace,
             show_vectors=show_vectors,
         )
@@ -195,16 +255,17 @@ def plot_coordinate_system_manager_matplotlib(
         if title is not None:
             axes.set_title(title)
 
-        color_gen = _get_color_matplotlib(axes)
+        color_gen = color_generator_function()
         for lcs_name in coordinate_systems:
             # https://stackoverflow.com/questions/13831549/
             # get-matplotlib-color-cycle-state
-            color = next(color_gen)
+            color = color_int_to_rgb_normalized(_get_color(lcs_name, colors, color_gen))
             lcs = csm.get_cs(lcs_name, reference_system)
             lcs.plot(
                 axes=axes,
                 color=color,
                 label=lcs_name,
+                show_origin=show_origins,
                 show_trace=show_trace,
                 show_vectors=show_vectors,
             )
@@ -214,7 +275,10 @@ def plot_coordinate_system_manager_matplotlib(
             axes.set_xlim(limits)
             axes.set_ylim(limits)
             axes.set_zlim(limits)
-        axes.legend()
+        try:
+            axes.legend()
+        except:
+            pass
         return axes
 
 
@@ -433,6 +497,7 @@ class CoordinateSystemManagerVisualizerK3D:
         self,
         csm,
         coordinate_systems=None,
+        colors=None,
         reference_system=None,
         title=None,
         limits=None,
@@ -482,6 +547,7 @@ class CoordinateSystemManagerVisualizerK3D:
         )
 
         # create plot using dict comprehension
+        self._color_generator = color_generator_function()
         plot = k3d.plot(
             grid_auto_fit=False,
             camera_auto_fit=False,
@@ -492,7 +558,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 self._csm.get_cs(lcs_name, reference_system),
                 plot,
                 lcs_name,
-                color=self.color_table[i % len(self.color_table)],
+                color=self._get_color(lcs_name, colors),
                 show_origin=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,
@@ -619,6 +685,11 @@ class CoordinateSystemManagerVisualizerK3D:
         row_1 = HBox([time_slider, play, reference_dropdown])
         row_2 = HBox([vectors_cb, origin_cb, traces_cb, labels_cb])
         return VBox([row_1, row_2])
+
+    def _get_color(self, lcs_name, color_dict):
+        if color_dict is not None and lcs_name in color_dict:
+            return color_rgb_to_int(color_dict[lcs_name])
+        return next(self._color_generator)
 
     def update_time(self, time, time_ref=None):
         """Update the plotted time.

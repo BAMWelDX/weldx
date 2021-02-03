@@ -1201,6 +1201,7 @@ class LocalCoordinateSystem:
         time=None,
         time_ref=None,
         time_index=None,
+        show_origin=True,
         show_trace=True,
         show_vectors=True,
     ):
@@ -1240,20 +1241,31 @@ class LocalCoordinateSystem:
                         "must be 'True'."
                     )
 
-                if show_vectors:
-                    if time_index is None:
-                        for i, _ in enumerate(self.time):
-                            # assure label occurs only once
-                            if i > 0:
-                                label = None
+                if time_index is None:
+                    for i, _ in enumerate(self.time):
+                        # assure label occurs only once
+                        if i > 0:
+                            label = None
 
-                            plot_coordinate_system(
-                                self, axes, color=color, label=label, time_idx=i
-                            )
-                    else:
                         plot_coordinate_system(
-                            self, axes, color=color, label=label, time_idx=time_index
+                            self,
+                            axes,
+                            color=color,
+                            label=label,
+                            time_idx=i,
+                            show_origin=show_origin,
+                            show_vectors=show_vectors,
                         )
+                else:
+                    plot_coordinate_system(
+                        self,
+                        axes,
+                        color=color,
+                        label=label,
+                        time_idx=time_index,
+                        show_origin=show_origin,
+                        show_vectors=show_vectors,
+                    )
 
                 if show_trace and self.coordinates.values.ndim > 1:
                     coords = self.coordinates.values
@@ -1267,11 +1279,19 @@ class LocalCoordinateSystem:
                     axes=axes,
                     color=color,
                     label=label,
+                    show_origin=show_origin,
                     show_trace=show_trace,
                     show_vectors=show_vectors,
                 )
         else:
-            plot_coordinate_system(self, axes, color=color, label=label)
+            plot_coordinate_system(
+                self,
+                axes,
+                color=color,
+                label=label,
+                show_origin=show_origin,
+                show_vectors=show_vectors,
+            )
 
     def reset_reference_time(self, time_ref_new: pd.Timestamp):
         """Reset the reference time of the coordinate system.
@@ -2857,6 +2877,7 @@ class CoordinateSystemManager:
         axes=None,
         reference_system=None,
         coordinate_systems=None,
+        colors=None,
         title=None,
         limits=None,
         time=None,
@@ -2902,6 +2923,7 @@ class CoordinateSystemManager:
                 csm=self,
                 reference_system=reference_system,
                 coordinate_systems=coordinate_systems,
+                colors=colors,
                 title=title,
                 limits=limits,
                 time=time,
@@ -2918,10 +2940,12 @@ class CoordinateSystemManager:
                 axes=axes,
                 reference_system=reference_system,
                 coordinate_systems=coordinate_systems,
+                colors=colors,
                 time=time,
                 time_ref=time_ref,
                 title=title,
                 limits=limits,
+                show_origins=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,
             )
