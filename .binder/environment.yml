@@ -37,5 +37,3 @@ dependencies:
   - snakeviz
   - ipywidgets
   - nodejs=14
-  - pip:
-    - git+https://github.com/BAMWelDX/weldx.git
