@@ -64,5 +64,5 @@ properties:
     description: |
       General metadata container.
     type: object
-required: [equipment,geometry,measurements,coordinate_systems]
+required: [equipment,geometry,measurements,coordinate_systems,welding_current,welding_voltage]
 ...
