@@ -2030,8 +2030,8 @@ class Geometry:
         return local_data + local_cs.coordinates.data[:, np.newaxis]
 
     @staticmethod
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
-    def _profile_raster_data_3d(profile, raster_width):
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=False)
+    def _profile_raster_data_3d(profile: Profile, raster_width, stack: bool = True):
         """Get the rasterized profile in 3d.
 
         The profile is located in the x-z-plane.
@@ -2049,11 +2049,15 @@ class Geometry:
             Rasterized profile in 3d
 
         """
-        profile_data = profile.rasterize(raster_width)
-        return np.insert(profile_data, 0, 0, axis=0)
+        profile_data = profile.rasterize(raster_width, stack=stack)
+        if stack:
+            return np.insert(profile_data, 0, 0, axis=0)
+        return [np.insert(p, 0, 0, axis=0) for p in profile_data]
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
-    def _rasterize_constant_profile(self, profile_raster_width, trace_raster_width):
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=False)
+    def _rasterize_constant_profile(
+        self, profile_raster_width, trace_raster_width, stack: bool = True
+    ):
         """Rasterize the geometry with a constant profile.
 
         Parameters
@@ -2062,6 +2066,8 @@ class Geometry:
             Raster width of the profiles
         trace_raster_width :
             Distance between two profiles
+        stack :
+            hstack data into a single output array (default = True)
 
         Returns
         -------
@@ -2069,13 +2075,33 @@ class Geometry:
             Raster data
 
         """
-        profile_data = self._profile_raster_data_3d(self._profile, profile_raster_width)
-
         locations = self._rasterize_trace(trace_raster_width)
-        raster_data = np.empty([3, 0])
-        for _, location in enumerate(locations):
-            local_data = self._get_transformed_profile_data(profile_data, location)
-            raster_data = np.hstack([raster_data, local_data])
+
+        if stack:  # old behavior for 3d pointcloud
+            profile_data = self._profile_raster_data_3d(
+                self._profile, profile_raster_width, stack=True
+            )
+            raster_data = np.empty([3, 0])
+            for _, location in enumerate(locations):
+                local_data = self._get_transformed_profile_data(profile_data, location)
+                raster_data = np.hstack([raster_data, local_data])
+
+        else:
+            profile_data = self._profile_raster_data_3d(
+                self._profile, profile_raster_width, stack=False
+            )
+
+            raster_data = []
+            for i, data in enumerate(profile_data):
+                raster_data.append(
+                    np.stack(
+                        [
+                            self._get_transformed_profile_data(data, location)
+                            for location in locations
+                        ],
+                        0,
+                    )
+                )
 
         return raster_data
 
@@ -2128,8 +2154,8 @@ class Geometry:
         """
         return self._trace
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
-    def rasterize(self, profile_raster_width, trace_raster_width):
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=False)
+    def rasterize(self, profile_raster_width, trace_raster_width, stack: bool = True):
         """Rasterize the geometry.
 
         Parameters
@@ -2138,6 +2164,8 @@ class Geometry:
             Raster width of the profiles
         trace_raster_width :
             Distance between two profiles
+        stack :
+            hstack data into a single output array (default = True)
 
         Returns
         -------
@@ -2147,7 +2175,7 @@ class Geometry:
         """
         if isinstance(self._profile, Profile):
             return self._rasterize_constant_profile(
-                profile_raster_width, trace_raster_width
+                profile_raster_width, trace_raster_width, stack=stack
             )
         return self._rasterize_variable_profile(
             profile_raster_width, trace_raster_width
