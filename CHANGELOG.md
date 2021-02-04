@@ -11,6 +11,9 @@
 - Added support for serializing generic metadata and userdata attributes for weldx classes. [[#209]](https://github.com/BAMWelDX/weldx/pull/209)
   - the provisional attribute names are `wx_metadata` and `wx_user`
 - `None` values are removed from the asdf tree for all `weldx` classes. [[#212]](https://github.com/BAMWelDX/weldx/pull/212)
+- add `datamodels` directory and example `http://weldx.bam.de/schemas/weldx/datamodels/single_pass_weld-1.0.0.schema` schema [[#190]](https://github.com/BAMWelDX/weldx/pull/190)
+  - schemas in the `datamodels` directory do not define any tags and can be referenced in other schemas and as `custom_schema` when reading/writing `ASDF`-files
+  - the `single_pass_weld-1.0.0.schema` is an example schema for a simple, linear, single pass GMAW application 
 
 ### changes
 - pass variable names as tuple to `sympy.lambdify` in `MathematicalExpression` to prevent sympy deprecation [[#214]](https://github.com/BAMWelDX/weldx/pull/214)
