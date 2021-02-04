@@ -2240,5 +2240,5 @@ class PointCloud:
     def __post_init__(self):
         if not isinstance(self.coordinates, np.ndarray):
             self.coordinates = np.array(self.coordinates)
-        if not isinstance(self.triangles, np.ndarray):
+        if self.triangles and not isinstance(self.triangles, np.ndarray):
             self.triangles = np.array(self.triangles, dtype="int")

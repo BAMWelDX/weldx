@@ -51,8 +51,4 @@ class PointCloudTypeASDF(WeldxType):
             An instance of the 'weldx.geometry.point_cloud' type.
 
         """
-        return PointCloud(
-            coordinates=tree["coordinates"],
-            attributes=tree.get("attributes"),
-            triangles=tree.get("triangles"),
-        )
+        return PointCloud(**tree)
