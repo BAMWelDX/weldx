@@ -9,6 +9,26 @@ title: |
 description: |
   This schema describes a collection of points in 3d space.
 
+examples:
+  -
+    - A simple V-Groove
+    - |
+      !<tag:weldx.bam.de:weldx/core/geometry/point_cloud-1.0.0>
+        coordinates: !core/ndarray-1.0.0
+          data:
+          - [0.0, 0.0, 0.0]
+          - [1.0, 0.0, 0.0]
+          - [1.0, 1.0, 0.0]
+          - [0.0, 1.0, 0.0]
+          datatype: float64
+          shape: [4, 3]
+        triangles: !core/ndarray-1.0.0
+          data:
+          - [0, 1, 2]
+          - [2, 3, 0]
+          datatype: uint32
+          shape: [2, 3]
+
 type: object
 properties:
   coordinates:
