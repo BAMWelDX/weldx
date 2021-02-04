@@ -2,7 +2,8 @@
 
 import copy
 import math
-from typing import List, Union
+from dataclasses import dataclass
+from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -2225,3 +2226,19 @@ class Geometry:
                 vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
+
+
+# PointCloud ---------------------------------------------------------------------------
+
+
+@dataclass
+class PointCloud:
+    coordinates: np.ndarray
+    triangles: np.ndarray = None
+    attributes: Dict[str, np.ndarray] = None
+
+    def __post_init__(self):
+        if not isinstance(self.coordinates, np.ndarray):
+            self.coordinates = np.array(self.coordinates)
+        if not isinstance(self.triangles, np.ndarray):
+            self.triangles = np.array(self.triangles, dtype="int")
