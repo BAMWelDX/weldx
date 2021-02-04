@@ -565,7 +565,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 show_trace=show_traces,
                 show_vectors=show_vectors,
             )
-            for i, lcs_name in enumerate(coordinate_systems)
+            for lcs_name in coordinate_systems
         }
 
         # add title
