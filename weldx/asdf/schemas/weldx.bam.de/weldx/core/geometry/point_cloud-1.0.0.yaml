@@ -15,6 +15,7 @@ properties:
     description: |
       The coordinates of the points.
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    wx_shape: [(n), 3]
   attributes:
     description: |
       An arbitrary set of attributes. For example, normals, colors or measured point data can be stored using this
@@ -24,10 +25,9 @@ properties:
     description: |
       An array of index triplets that specify which points form a triangle
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
-
+    wx_shape: [(n), 3]
 
 propertyOrder: [coordinates, attributes, triangles]
 required: [coordinates]
-
 flowStyle: block
 ...

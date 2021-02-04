@@ -2241,4 +2241,4 @@ class PointCloud:
         if not isinstance(self.coordinates, np.ndarray):
             self.coordinates = np.array(self.coordinates)
         if self.triangles and not isinstance(self.triangles, np.ndarray):
-            self.triangles = np.array(self.triangles, dtype="int")
+            self.triangles = np.array(self.triangles, dtype="uint")
