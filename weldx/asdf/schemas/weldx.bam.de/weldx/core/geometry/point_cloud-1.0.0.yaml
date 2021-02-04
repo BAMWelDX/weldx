@@ -15,6 +15,10 @@ properties:
     description: |
       The coordinates of the points.
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    properties:
+      datatype:
+        type: string
+        enum: [float32, float64]
     wx_shape: [(n), 3]
   attributes:
     description: |
@@ -25,6 +29,10 @@ properties:
     description: |
       An array of index triplets that specify which points form a triangle
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    properties:
+      datatype:
+        type: string
+        enum: [uint32, uint64]
     wx_shape: [(n), 3]
 
 propertyOrder: [coordinates, attributes, triangles]
