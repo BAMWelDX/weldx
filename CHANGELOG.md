@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.2.3 (unreleased)
+## 0.3.0 (unreleased)
 ### added
 - add `weldx.transformations.CoordinateSystemManager.relabel` function [[#219]](https://github.com/BAMWelDX/weldx/pull/219)
 
@@ -11,6 +11,9 @@
 - Added support for serializing generic metadata and userdata attributes for weldx classes. [[#209]](https://github.com/BAMWelDX/weldx/pull/209)
   - the provisional attribute names are `wx_metadata` and `wx_user`
 - `None` values are removed from the asdf tree for all `weldx` classes. [[#212]](https://github.com/BAMWelDX/weldx/pull/212)
+- add `datamodels` directory and example `http://weldx.bam.de/schemas/weldx/datamodels/single_pass_weld-1.0.0.schema` schema [[#190]](https://github.com/BAMWelDX/weldx/pull/190)
+  - schemas in the `datamodels` directory do not define any tags and can be referenced in other schemas and as `custom_schema` when reading/writing `ASDF`-files
+  - the `single_pass_weld-1.0.0.schema` is an example schema for a simple, linear, single pass GMAW application 
 
 ### changes
 - pass variable names as tuple to `sympy.lambdify` in `MathematicalExpression` to prevent sympy deprecation [[#214]](https://github.com/BAMWelDX/weldx/pull/214)
@@ -24,9 +27,11 @@
 - don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
 - fix "datetime64" passing for "timedelta64" in `xr_check_coords` [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
 - fix `time_ref_restore` not working correctly if no `time_ref` was set [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
+- fix deprecated signature in `WXRotation` [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
 
 ### dependencies
-- Add [PyFilesystem](https://docs.pyfilesystem.org/en/latest/)(`fs`) as new dependency 
+- Add [PyFilesystem](https://docs.pyfilesystem.org/en/latest/)(`fs`) as new dependency
+- restrict `scipy<1.6` pending [ASDF #916](https://github.com/asdf-format/asdf/issues/916) [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
 
 
 ## 0.2.2 (30.11.2020)
