@@ -190,6 +190,79 @@ def _get_color_matplotlib(axes):
     yield next(axes._get_lines.prop_cycler)["color"]
 
 
+def plot_local_coordinate_system_matplotlib(
+    lcs,
+    axes=None,
+    color=None,
+    label=None,
+    time=None,
+    time_ref=None,
+    time_index=None,
+    show_origin=True,
+    show_trace=True,
+    show_vectors=True,
+):
+    if axes is None:
+        _, axes = plt.subplots(subplot_kw={"projection": "3d", "proj_type": "ortho"})
+    if lcs.is_time_dependent:
+        if time is None:
+            if not (show_trace or show_vectors):
+                raise ValueError(
+                    "At least one of the parameters 'show_trace' or 'show_vectors' "
+                    "must be 'True'."
+                )
+
+            if time_index is None:
+                for i, _ in enumerate(lcs.time):
+                    # assure label occurs only once
+                    if i > 0:
+                        label = None
+
+                    plot_coordinate_system(
+                        lcs,
+                        axes,
+                        color=color,
+                        label=label,
+                        time_idx=i,
+                        show_origin=show_origin,
+                        show_vectors=show_vectors,
+                    )
+            else:
+                plot_coordinate_system(
+                    lcs,
+                    axes,
+                    color=color,
+                    label=label,
+                    time_idx=time_index,
+                    show_origin=show_origin,
+                    show_vectors=show_vectors,
+                )
+
+            if show_trace and lcs.coordinates.values.ndim > 1:
+                coords = lcs.coordinates.values
+                if color is None:
+                    color = "k"
+                axes.plot(coords[:, 0], coords[:, 1], coords[:, 2], ":", color=color)
+        else:
+            lcs.interp_time(time, time_ref).plot(
+                axes=axes,
+                color=color,
+                label=label,
+                show_origin=show_origin,
+                show_trace=show_trace,
+                show_vectors=show_vectors,
+            )
+    else:
+        plot_coordinate_system(
+            lcs,
+            axes,
+            color=color,
+            label=label,
+            show_origin=show_origin,
+            show_vectors=show_vectors,
+        )
+
+
 def plot_coordinate_system_manager_matplotlib(
     csm,
     axes=None,

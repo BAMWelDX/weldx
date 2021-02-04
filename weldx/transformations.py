@@ -20,6 +20,7 @@ from weldx.visualization import (
     CoordinateSystemManagerVisualizerK3D,
     plot_coordinate_system,
     plot_coordinate_system_manager_matplotlib,
+    plot_local_coordinate_system_matplotlib,
     set_axes_equal,
 )
 
@@ -1235,69 +1236,18 @@ class LocalCoordinateSystem:
             plotted.
 
         """
-        if axes is None:
-            _, axes = plt.subplots(
-                subplot_kw={"projection": "3d", "proj_type": "ortho"}
-            )
-        if self.is_time_dependent:
-            if time is None:
-                if not (show_trace or show_vectors):
-                    raise ValueError(
-                        "At least one of the parameters 'show_trace' or 'show_vectors' "
-                        "must be 'True'."
-                    )
-
-                if time_index is None:
-                    for i, _ in enumerate(self.time):
-                        # assure label occurs only once
-                        if i > 0:
-                            label = None
-
-                        plot_coordinate_system(
-                            self,
-                            axes,
-                            color=color,
-                            label=label,
-                            time_idx=i,
-                            show_origin=show_origin,
-                            show_vectors=show_vectors,
-                        )
-                else:
-                    plot_coordinate_system(
-                        self,
-                        axes,
-                        color=color,
-                        label=label,
-                        time_idx=time_index,
-                        show_origin=show_origin,
-                        show_vectors=show_vectors,
-                    )
-
-                if show_trace and self.coordinates.values.ndim > 1:
-                    coords = self.coordinates.values
-                    if color is None:
-                        color = "k"
-                    axes.plot(
-                        coords[:, 0], coords[:, 1], coords[:, 2], ":", color=color
-                    )
-            else:
-                self.interp_time(time, time_ref).plot(
-                    axes=axes,
-                    color=color,
-                    label=label,
-                    show_origin=show_origin,
-                    show_trace=show_trace,
-                    show_vectors=show_vectors,
-                )
-        else:
-            plot_coordinate_system(
-                self,
-                axes,
-                color=color,
-                label=label,
-                show_origin=show_origin,
-                show_vectors=show_vectors,
-            )
+        plot_local_coordinate_system_matplotlib(
+            self,
+            axes=axes,
+            color=color,
+            label=label,
+            time=time,
+            time_ref=time_ref,
+            time_index=time_index,
+            show_origin=show_origin,
+            show_trace=show_trace,
+            show_vectors=show_vectors,
+        )
 
     def reset_reference_time(self, time_ref_new: pd.Timestamp):
         """Reset the reference time of the coordinate system.
