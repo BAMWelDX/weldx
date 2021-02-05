@@ -3,6 +3,7 @@ from . import (
     data_array,
     dataset,
     file,
+    geometry,
     mathematical_expression,
     time_series,
     transformations,
