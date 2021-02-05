@@ -3,6 +3,7 @@
 ## 0.3.0 (unreleased)
 ### added
 - add `weldx.transformations.CoordinateSystemManager.relabel` function [[#219]](https://github.com/BAMWelDX/weldx/pull/219)
+- add `PointCloud` class for storing 3D point data with optional triangulation [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
 
 ### ASDF
 - Add possibility to store meta data and content of an external file in an ASDF file [[#215]](https://github.com/BAMWelDX/weldx/pull/215)
@@ -13,7 +14,8 @@
 - `None` values are removed from the asdf tree for all `weldx` classes. [[#212]](https://github.com/BAMWelDX/weldx/pull/212)
 - add `datamodels` directory and example `http://weldx.bam.de/schemas/weldx/datamodels/single_pass_weld-1.0.0.schema` schema [[#190]](https://github.com/BAMWelDX/weldx/pull/190)
   - schemas in the `datamodels` directory do not define any tags and can be referenced in other schemas and as `custom_schema` when reading/writing `ASDF`-files
-  - the `single_pass_weld-1.0.0.schema` is an example schema for a simple, linear, single pass GMAW application 
+  - the `single_pass_weld-1.0.0.schema` is an example schema for a simple, linear, single pass GMAW application
+  - add `core/geometry/point_cloud-1.0.0.yaml` schema [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
 
 ### changes
 - pass variable names as tuple to `sympy.lambdify` in `MathematicalExpression` to prevent sympy deprecation [[#214]](https://github.com/BAMWelDX/weldx/pull/214)
@@ -22,6 +24,7 @@
 - `geometry.Profile.rasterize` can return list of rasterized shapes instead of flat ndarray (with setting `stack=False`) [[#223]](https://github.com/BAMWelDX/weldx/pull/223)
 - `geometry.Profile.plot` plots individual line objects for each shape (instead of a single line object) [[#223]](https://github.com/BAMWelDX/weldx/pull/223)
 - remove jinja templates and related code [[#228]](https://github.com/BAMWelDX/weldx/pull/228)
+- add `stack` option to most `geometry` classes for rasterization [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
 
 ### fixes
 - don't inline time dependent `LCS.coordinates` [[#222]](https://github.com/BAMWelDX/weldx/pull/222)
