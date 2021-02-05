@@ -3,6 +3,8 @@ engines:
   bandit:
     exclude_paths:
       - tests/**
+    config:
+      skips: B506
 
   duplication:
     enabled: true
