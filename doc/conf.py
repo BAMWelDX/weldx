@@ -246,6 +246,7 @@ intersphinx_mapping = {
     "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
     "asdf": ("https://asdf.readthedocs.io/en/stable/", None),
     "networkx": ("https://networkx.org/documentation/stable/", None),
+    "IPython": ("https://ipython.readthedocs.io/en/stable/", None),
 }
 
 # Disable warnings caused by a bug -----------------------------------------------------
