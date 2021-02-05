@@ -2,6 +2,7 @@ from io import BytesIO
 from pathlib import Path
 
 import asdf
+import yaml
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
@@ -96,6 +97,7 @@ def _write_read_buffer(
 
 try:  # pragma: no cover
     import IPython
+    from IPython.display import JSON
     from pygments import highlight
     from pygments.formatters import HtmlFormatter
     from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
@@ -103,31 +105,49 @@ except ImportError:  # pragma: no cover
     pass
 else:  # pragma: no cover
 
-    def notebook_fileprinter(file, style="YAML"):
-        """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
+    def _get_yaml_header(file) -> str:
+        """Read the YAML header part of an ASDF file.
 
         Parameters
         ----------
         file
-            filename or BytesIO buffer
-        style
-            Syntax style to use
+            filename or BytesIO buffer of ASDF file
+
+        Returns
+        -------
+        str
 
         """
         if isinstance(file, BytesIO):
             file.seek(0)
             code = file.read()
-            lexer = get_lexer_by_name(style)
         else:
             with open(file, "rb") as f:
                 code = f.read()
-            if Path(file).suffix == ".asdf":
-                lexer = get_lexer_by_name("YAML")
-            else:
-                lexer = get_lexer_for_filename(file)
 
         parts = code.partition(b"\n...")
         code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
+        return code
+
+    def notebook_fileprinter(file, lexer="YAML"):
+        """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
+
+        Parameters
+        ----------
+        file
+            filename or BytesIO buffer of ASDF file
+        lexer
+            Syntax style to use
+
+        """
+        if isinstance(file, BytesIO):
+            lexer = get_lexer_by_name(lexer)
+        elif Path(file).suffix == ".asdf":
+            lexer = get_lexer_by_name("YAML")
+        else:
+            lexer = get_lexer_for_filename(file)
+
+        code = _get_yaml_header(file)
 
         formatter = HtmlFormatter()
         return IPython.display.HTML(
@@ -136,3 +156,25 @@ else:  # pragma: no cover
                 highlight(code, lexer, formatter),
             )
         )
+
+    def asdf_json_repr(file, **kwargs):
+        """Display YAML header using IPython JSON display repr.
+
+        This function works in JupyterLab.
+
+        Parameters
+        ----------
+        file
+            filename or BytesIO buffer of ASDF file
+        kwargs
+            kwargs passed down to JSON constructor
+
+        Returns
+        -------
+        IPython.display.JSON
+            JSON object for rich output in JupyterLab
+
+        """
+        code = _get_yaml_header(file)
+        yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
+        return JSON(yaml_dict, **kwargs)
