@@ -998,7 +998,7 @@ def _as_valid_timestamp(value: Union[pd.Timestamp, np.datetime64, str]) -> pd.Ti
 
 # geometry --------------------------------------------------------
 def _triangulate_geometry(geo_data):
-    """
+    """Stack geometry data and add simple triangulation.
 
     Parameters
     ----------

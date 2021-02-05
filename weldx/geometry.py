@@ -2043,6 +2043,8 @@ class Geometry:
             Profile
         raster_width :
             Raster width
+        stack :
+            hstack data into a single output array, else return list (default = True)
 
         Returns
         -------
@@ -2233,15 +2235,34 @@ class Geometry:
 
 @dataclass
 class PointCloud:
+    """Represent 3D point cloud data with optional triangulation.
+
+    Parameters
+    ----------
+    coordinates
+        3D array of point data.
+    triangles
+        3D Array of triangulation connectivity
+    attributes
+        optional dictionary with additional attributes to store alongside data
+
+    """
+
     coordinates: np.ndarray
     triangles: np.ndarray = None
     attributes: Dict[str, np.ndarray] = None
 
     def __post_init__(self):
+        """Convert and check input values."""
         if not isinstance(self.coordinates, np.ndarray):
             self.coordinates = np.array(self.coordinates)
+        if not self.coordinates.shape[-1] == 3:
+            raise ValueError("PointCloud data must be 3D.")
+
         if self.triangles is not None and not isinstance(self.triangles, np.ndarray):
             self.triangles = np.array(self.triangles, dtype="uint")
+        if not self.triangles.shape[-1] == 3:
+            raise ValueError("PointCloud triangulation vertices must connect 3 points.")
 
     @staticmethod
     def from_geometry_raster(g):
