@@ -11,7 +11,7 @@ description: |
 
 examples:
   -
-    - A simple V-Groove
+    - A simple PointCloid with triangulation
     - |
       !<tag:weldx.bam.de:weldx/core/geometry/point_cloud-1.0.0>
         coordinates: !core/ndarray-1.0.0
