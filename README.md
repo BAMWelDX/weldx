@@ -34,8 +34,8 @@ conda install weldx -c conda-forge -c bamwelding
 The full documentation is published on readthedocs.org. Click on one of the following links to get to the desired
 version:
 
-- [latest](https://weldx.readthedocs.io/en/latest/)
-- [stable](https://weldx.readthedocs.io/en/stable/)
+-   [latest](https://weldx.readthedocs.io/en/latest/)
+-   [stable](https://weldx.readthedocs.io/en/stable/)
 
 ## Funding
 
