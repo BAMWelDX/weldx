@@ -2240,5 +2240,21 @@ class PointCloud:
     def __post_init__(self):
         if not isinstance(self.coordinates, np.ndarray):
             self.coordinates = np.array(self.coordinates)
-        if self.triangles and not isinstance(self.triangles, np.ndarray):
+        if self.triangles is not None and not isinstance(self.triangles, np.ndarray):
             self.triangles = np.array(self.triangles, dtype="uint")
+
+    @staticmethod
+    def from_geometry_raster(g):
+        """Triangulate rasterized Geometry Profile.
+
+        Parameters
+        ----------
+        g
+            A single unstacked geometry rasterization.
+
+        Returns
+        -------
+        PointCloud
+
+        """
+        return PointCloud(*ut._triangulate_geometry(g))
