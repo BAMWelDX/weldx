@@ -158,7 +158,9 @@ else:  # pragma: no cover
         )
 
     def asdf_json_repr(file, **kwargs):
-        """
+        """Display YAML header using IPython JSON display repr.
+
+        This function works in JupyterLab.
 
         Parameters
         ----------
