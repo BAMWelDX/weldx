@@ -2095,7 +2095,7 @@ class Geometry:
             )
 
             raster_data = []
-            for i, data in enumerate(profile_data):
+            for data in profile_data:
                 raster_data.append(
                     np.stack(
                         [
