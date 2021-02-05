@@ -996,6 +996,38 @@ def _as_valid_timestamp(value: Union[pd.Timestamp, np.datetime64, str]) -> pd.Ti
     raise TypeError("Could not create a valid pandas.Timestamp.")
 
 
+# geometry --------------------------------------------------------
+def _triangulate_geometry(geo_data):
+    """Stack geometry data and add simple triangulation.
+
+    Parameters
+    ----------
+    geo_data
+        list of rasterized profile data along trace from geometry
+
+    Returns
+    -------
+    np.ndarray, np.ndarray
+        3D pointcloud data and triangulation indexes
+
+    """
+    nx = geo_data.shape[2]  # Points per profile
+    ny = geo_data.shape[0]  # number of profiles
+
+    data = np.swapaxes(geo_data, 1, 2).reshape((-1, 3))
+    triangle_indices = np.empty((ny - 1, nx - 1, 2, 3), dtype=int)
+    r = np.arange(nx * ny).reshape(ny, nx)
+    triangle_indices[:, :, 0, 0] = r[:-1, :-1]
+    triangle_indices[:, :, 1, 0] = r[:-1, 1:]
+    triangle_indices[:, :, 0, 1] = r[:-1, 1:]
+
+    triangle_indices[:, :, 1, 1] = r[1:, 1:]
+    triangle_indices[:, :, :, 2] = r[1:, :-1, None]
+    triangle_indices.shape = (-1, 3)
+
+    return data, triangle_indices
+
+
 # weldx xarray Accessors --------------------------------------------------------
 
 

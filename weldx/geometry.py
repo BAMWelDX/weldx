@@ -2,7 +2,8 @@
 
 import copy
 import math
-from typing import List, Union
+from dataclasses import dataclass
+from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -2030,8 +2031,8 @@ class Geometry:
         return local_data + local_cs.coordinates.data[:, np.newaxis]
 
     @staticmethod
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
-    def _profile_raster_data_3d(profile, raster_width):
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=False)
+    def _profile_raster_data_3d(profile: Profile, raster_width, stack: bool = True):
         """Get the rasterized profile in 3d.
 
         The profile is located in the x-z-plane.
@@ -2042,6 +2043,8 @@ class Geometry:
             Profile
         raster_width :
             Raster width
+        stack :
+            hstack data into a single output array, else return list (default = True)
 
         Returns
         -------
@@ -2049,11 +2052,15 @@ class Geometry:
             Rasterized profile in 3d
 
         """
-        profile_data = profile.rasterize(raster_width)
-        return np.insert(profile_data, 0, 0, axis=0)
+        profile_data = profile.rasterize(raster_width, stack=stack)
+        if stack:
+            return np.insert(profile_data, 0, 0, axis=0)
+        return [np.insert(p, 0, 0, axis=0) for p in profile_data]
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
-    def _rasterize_constant_profile(self, profile_raster_width, trace_raster_width):
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=False)
+    def _rasterize_constant_profile(
+        self, profile_raster_width, trace_raster_width, stack: bool = True
+    ):
         """Rasterize the geometry with a constant profile.
 
         Parameters
@@ -2062,6 +2069,8 @@ class Geometry:
             Raster width of the profiles
         trace_raster_width :
             Distance between two profiles
+        stack :
+            hstack data into a single output array (default = True)
 
         Returns
         -------
@@ -2069,13 +2078,33 @@ class Geometry:
             Raster data
 
         """
-        profile_data = self._profile_raster_data_3d(self._profile, profile_raster_width)
-
         locations = self._rasterize_trace(trace_raster_width)
-        raster_data = np.empty([3, 0])
-        for _, location in enumerate(locations):
-            local_data = self._get_transformed_profile_data(profile_data, location)
-            raster_data = np.hstack([raster_data, local_data])
+
+        if stack:  # old behavior for 3d pointcloud
+            profile_data = self._profile_raster_data_3d(
+                self._profile, profile_raster_width, stack=True
+            )
+            raster_data = np.empty([3, 0])
+            for _, location in enumerate(locations):
+                local_data = self._get_transformed_profile_data(profile_data, location)
+                raster_data = np.hstack([raster_data, local_data])
+
+        else:
+            profile_data = self._profile_raster_data_3d(
+                self._profile, profile_raster_width, stack=False
+            )
+
+            raster_data = []
+            for data in profile_data:
+                raster_data.append(
+                    np.stack(
+                        [
+                            self._get_transformed_profile_data(data, location)
+                            for location in locations
+                        ],
+                        0,
+                    )
+                )
 
         return raster_data
 
@@ -2128,8 +2157,8 @@ class Geometry:
         """
         return self._trace
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
-    def rasterize(self, profile_raster_width, trace_raster_width):
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=False)
+    def rasterize(self, profile_raster_width, trace_raster_width, stack: bool = True):
         """Rasterize the geometry.
 
         Parameters
@@ -2138,6 +2167,8 @@ class Geometry:
             Raster width of the profiles
         trace_raster_width :
             Distance between two profiles
+        stack :
+            hstack data into a single output array (default = True)
 
         Returns
         -------
@@ -2147,7 +2178,7 @@ class Geometry:
         """
         if isinstance(self._profile, Profile):
             return self._rasterize_constant_profile(
-                profile_raster_width, trace_raster_width
+                profile_raster_width, trace_raster_width, stack=stack
             )
         return self._rasterize_variable_profile(
             profile_raster_width, trace_raster_width
@@ -2197,3 +2228,54 @@ class Geometry:
                 vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
+
+
+# PointCloud ---------------------------------------------------------------------------
+
+
+@dataclass
+class PointCloud:
+    """Represent 3D point cloud data with optional triangulation.
+
+    Parameters
+    ----------
+    coordinates
+        3D array of point data.
+    triangles
+        3D Array of triangulation connectivity
+    attributes
+        optional dictionary with additional attributes to store alongside data
+
+    """
+
+    coordinates: np.ndarray
+    triangles: np.ndarray = None
+    attributes: Dict[str, np.ndarray] = None
+
+    def __post_init__(self):
+        """Convert and check input values."""
+        if not isinstance(self.coordinates, np.ndarray):
+            self.coordinates = np.array(self.coordinates)
+        if not self.coordinates.shape[-1] == 3:
+            raise ValueError("PointCloud data must be 3D.")
+
+        if self.triangles is not None and not isinstance(self.triangles, np.ndarray):
+            self.triangles = np.array(self.triangles, dtype="uint")
+        if not self.triangles.shape[-1] == 3:
+            raise ValueError("PointCloud triangulation vertices must connect 3 points.")
+
+    @staticmethod
+    def from_geometry_raster(g):
+        """Triangulate rasterized Geometry Profile.
+
+        Parameters
+        ----------
+        g
+            A single unstacked geometry rasterization.
+
+        Returns
+        -------
+        PointCloud
+
+        """
+        return PointCloud(*ut._triangulate_geometry(g))

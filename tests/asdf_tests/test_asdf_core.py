@@ -18,6 +18,7 @@ from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
+from weldx.geometry import PointCloud
 from weldx.transformations import WXRotation
 
 # WXRotation ---------------------------------------------------------------------
@@ -605,3 +606,31 @@ class TestExternalFile:
             with MemoryFS() as file_system:
                 ef_file.write_to("", file_system)
                 assert file_system.hash("WelDX_notext.ico", "md5") == original_hash
+
+
+# --------------------------------------------------------------------------------------
+# PointCloud
+# --------------------------------------------------------------------------------------
+
+
+class TestPointCloud:
+    @staticmethod
+    @pytest.mark.parametrize("copy_arrays", [True, False])
+    @pytest.mark.parametrize("lazy_load", [True, False])
+    def test_asdf_serialization(copy_arrays, lazy_load):
+        coordinates = [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ]
+
+        triangles = [[0, 1, 2], [2, 3, 0]]
+
+        pc = PointCloud(coordinates=coordinates, triangles=triangles)
+        tree = {"point_cloud": pc}
+        pc_file = _write_read_buffer(
+            tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+        )["point_cloud"]
+
+        assert np.all(pc_file.coordinates == pc.coordinates)
