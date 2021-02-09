@@ -54,11 +54,11 @@ jobs:
 
       - name: Build from local conda recipe
         shell: bash -l {0}
-        run: conda build .
+        run: conda mambabuild .
 
       - name: set package file env
         shell: bash -l {0}
-        run: echo "PACKAGE_DIR=$(conda build . --output)" >> $GITHUB_ENV
+        run: echo "PACKAGE_DIR=$(conda mambabuild . --output)" >> $GITHUB_ENV
 
       - uses: actions/upload-artifact@v2
         with:
