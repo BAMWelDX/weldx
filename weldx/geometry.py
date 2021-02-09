@@ -2259,10 +2259,13 @@ class PointCloud:
         if not self.coordinates.shape[-1] == 3:
             raise ValueError("PointCloud data must be 3D.")
 
-        if self.triangles is not None and not isinstance(self.triangles, np.ndarray):
-            self.triangles = np.array(self.triangles, dtype="uint")
-        if not self.triangles.shape[-1] == 3:
-            raise ValueError("PointCloud triangulation vertices must connect 3 points.")
+        if self.triangles is not None:
+            if not isinstance(self.triangles, np.ndarray):
+                self.triangles = np.array(self.triangles, dtype="uint")
+            if not self.triangles.shape[-1] == 3:
+                raise ValueError(
+                    "PointCloud triangulation vertices must connect 3 points."
+                )
 
     @staticmethod
     def from_geometry_raster(g):

@@ -16,6 +16,7 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.geometry import PointCloud
 from weldx.visualization import (
     CoordinateSystemManagerVisualizerK3D,
     plot_coordinate_system,
@@ -1878,17 +1879,20 @@ class CoordinateSystemManager:
         nx.relabel_nodes(self.graph, mapping, copy=False)
 
     def assign_data(
-        self, data: xr.DataArray, data_name: str, coordinate_system_name: str
+        self,
+        data: Union[xr.DataArray, PointCloud],
+        data_name: str,
+        coordinate_system_name: str,
     ):
         """Assign spatial data to a coordinate system.
 
         Parameters
         ----------
-        data :
+        data : Union[xr.DataArray, PointCloud]
             Spatial data
-        data_name :
+        data_name : str
             Name of the data.
-        coordinate_system_name :
+        coordinate_system_name : str
             Name of the coordinate system the data should be
             assigned to.
 
