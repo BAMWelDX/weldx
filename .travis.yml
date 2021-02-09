@@ -16,7 +16,7 @@ install:
   #- hash -r
   - conda activate base
   - conda config --set always_yes yes --set changeps1 no
-  - conda config --add channel conda-forge
+  - conda config --add channels conda-forge
   - conda install -q mamba
   - conda info -a
 
