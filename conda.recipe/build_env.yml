@@ -7,6 +7,7 @@ dependencies:
   - setuptools
   - setuptools_scm
   - conda-verify
+  - conda-build
   - mamba
   - boa
   - anaconda-client
