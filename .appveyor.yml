@@ -9,7 +9,8 @@ platform: x64
 
 install:
   - set PATH=C:\Miniconda38-x64;C:\Miniconda38-x64\Scripts;%PATH%
-  - cmd: conda config --set always_yes yes --set changeps1 no --add channel conda-forge
+  - cmd: conda config --set always_yes yes --set changeps1 no
+  - cmd: conda config --add channel conda-forge
   - cmd: conda install -q mamba
   - cmd: mamba info -a
   - cmd: mamba env create -f ./environment.yml
