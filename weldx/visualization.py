@@ -7,6 +7,8 @@ import numpy as np
 from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
+import weldx.geometry as geo
+
 
 def random_color_rgb():
     return np.random.choice(range(256), size=3)
@@ -245,6 +247,7 @@ def plot_coordinate_system_manager_matplotlib(
     axes=None,
     reference_system=None,
     coordinate_systems=None,
+    data_sets=None,
     colors=None,
     time=None,
     time_ref=None,
@@ -302,9 +305,12 @@ def plot_coordinate_system_manager_matplotlib(
             reference_system = csm._root_system_name
         if coordinate_systems is None:
             coordinate_systems = csm.coordinate_system_names
+        if data_sets is None:
+            data_sets = csm.data_names
         if title is not None:
             axes.set_title(title)
 
+        # plot coordinate systems
         color_gen = color_generator_function()
         for lcs_name in coordinate_systems:
             # https://stackoverflow.com/questions/13831549/
@@ -319,6 +325,32 @@ def plot_coordinate_system_manager_matplotlib(
                 show_trace=show_trace,
                 show_vectors=show_vectors,
             )
+        # plot data
+        for data_name in data_sets:
+            color = color_int_to_rgb_normalized(_get_color(lcs_name, colors, color_gen))
+            data = csm.get_data(data_name, reference_system)
+            triangles = None
+            if isinstance(data, geo.PointCloud):
+                triangles = data.triangles
+                data = data.coordinates
+
+            data = data.data
+            while data.ndim > 2:
+                data = data[0]
+
+            axes.plot(
+                data[:, 0], data[:, 1], data[:, 2], "x", color=color, label=data_name
+            )
+            if triangles is not None:
+                for triangle in triangles:
+                    triangle_data = data[[*triangle, triangle[0]], :]
+                    axes.plot(
+                        triangle_data[:, 0],
+                        triangle_data[:, 1],
+                        triangle_data[:, 2],
+                        color=color,
+                    )
+
         if limits is None:
             set_axes_equal(axes)
         else:

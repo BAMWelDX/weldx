@@ -2313,6 +2313,10 @@ class CoordinateSystemManager:
         """
         return list(self.graph.nodes)
 
+    @property
+    def data_names(self):
+        return self._data.keys()
+
     def get_data(
         self, data_name, target_coordinate_system_name=None
     ) -> Union[np.ndarray, xr.DataArray]:
@@ -2345,6 +2349,9 @@ class CoordinateSystemManager:
             data_struct.coordinate_system_name,
             target_coordinate_system_name,
         )
+
+    def get_data_system_name(self, cs_name):
+        return self._data[cs_name].coordinate_system_name
 
     def get_cs(
         self,
