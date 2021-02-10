@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from weldx.asdf.types import WeldxType
 from weldx.geometry import PointCloud
 
@@ -29,7 +31,9 @@ class PointCloudTypeASDF(WeldxType):
             'weldx.core.ExternalFile' type to be serialized.
 
         """
-        return node.__dict__
+        tree = deepcopy(node.__dict__)
+        tree["coordinates"] = tree["coordinates"].data
+        return tree
 
     @classmethod
     def from_tree(cls, tree, ctx) -> PointCloud:

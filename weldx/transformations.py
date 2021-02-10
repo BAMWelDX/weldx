@@ -1904,7 +1904,12 @@ class CoordinateSystemManager:
         #   interpolated or not?
         if not isinstance(data_name, str):
             raise TypeError("The data name must be a string.")
+        if coordinate_system_name in self._data:
+            raise Exception(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(coordinate_system_name)
+
+        if not (isinstance(data, xr.DataArray) or isinstance(data, PointCloud)):
+            data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
         self._graph.nodes[coordinate_system_name]["data"].append(data_name)
@@ -3008,17 +3013,24 @@ class CoordinateSystemManager:
             Transformed data
 
         """
-        lcs = self.get_cs(source_coordinate_system_name, target_coordinate_system_name)
-        if isinstance(data, xr.DataArray):
-            mul = ut.xr_matmul(
-                lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
+        if isinstance(data, PointCloud):
+            return PointCloud(
+                coordinates=self.transform_data(
+                    data.coordinates,
+                    source_coordinate_system_name,
+                    target_coordinate_system_name,
+                ),
+                attributes=data.attributes,
+                triangles=data.triangles,
             )
-            return mul + lcs.coordinates
+        if not isinstance(data, xr.DataArray):
+            data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
-        data = ut.to_float_array(data)
-        rotation = lcs.orientation.data
-        translation = lcs.coordinates.data
-        return ut.mat_vec_mul(rotation, data) + translation
+        lcs = self.get_cs(source_coordinate_system_name, target_coordinate_system_name)
+        mul = ut.xr_matmul(
+            lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
+        )
+        return mul + lcs.coordinates
 
     def unmerge(self) -> List["CoordinateSystemManager"]:
         """Undo previous merges and return a list of all previously merged instances.

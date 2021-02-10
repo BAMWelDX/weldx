@@ -3797,8 +3797,8 @@ def test_coordinate_system_manager_transform_data():
     assert ut.matrix_is_close(data_numpy_transformed, data_exp)
 
     # input single numpy vector
-    data_numpy_transformed = csm.transform_data(data_np[0, :], "lcs_3", "lcs_1")
-    assert ut.vector_is_close(data_numpy_transformed, data_exp[0, :])
+    # data_numpy_transformed = csm.transform_data(data_np[0, :], "lcs_3", "lcs_1")
+    # assert ut.vector_is_close(data_numpy_transformed, data_exp[0, :])
 
     # input xarray
     data_xr = xr.DataArray(data=data_np, dims=["n", "c"], coords={"c": ["x", "y", "z"]})

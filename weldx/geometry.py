@@ -4,6 +4,7 @@ import copy
 import math
 from dataclasses import dataclass
 from typing import Dict, List, Union
+from xarray import DataArray
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -2254,10 +2255,10 @@ class PointCloud:
 
     def __post_init__(self):
         """Convert and check input values."""
-        if not isinstance(self.coordinates, np.ndarray):
-            self.coordinates = np.array(self.coordinates)
-        if not self.coordinates.shape[-1] == 3:
-            raise ValueError("PointCloud data must be 3D.")
+        if not isinstance(self.coordinates, DataArray):
+            self.coordinates = DataArray(
+                self.coordinates, dims=["n", "c"], coords={"c": ["x", "y", "z"]}
+            )
 
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
