@@ -2350,8 +2350,8 @@ class CoordinateSystemManager:
             target_coordinate_system_name,
         )
 
-    def get_data_system_name(self, cs_name):
-        return self._data[cs_name].coordinate_system_name
+    def get_data_system_name(self, data_name):
+        return self._data[data_name].coordinate_system_name
 
     def get_cs(
         self,

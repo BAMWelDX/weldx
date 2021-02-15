@@ -572,6 +572,60 @@ class CoordinateSystemVisualizerK3D:
         self._update_positions(coordinates, orientation)
 
 
+class SpatialDataVisualizer:
+    visualization_methods = ["auto", "point", "mesh", "both"]
+
+    def __init__(
+        self,
+        data,
+        cs_vis: CoordinateSystemVisualizerK3D,
+        plot=None,
+        color=0x000000,
+        visualization_method="auto",
+        show_wireframe=False,
+    ):
+        triangles = None
+        if isinstance(data, geo.PointCloud):
+            triangles = data.triangles
+            data = data.coordinates
+
+        self._cs_vis = cs_vis
+
+        self._points = k3d.points(data, point_size=0.05, color=color)
+        self._mesh = None
+        if triangles is not None:
+            self._mesh = k3d.mesh(
+                data, triangles, side="double", color=color, wireframe=show_wireframe
+            )
+        self.update_model_matrix()
+        self.set_visualization_method(visualization_method)
+
+        if plot is not None:
+            plot += self._points
+            plot += self._mesh
+
+    def set_visualization_method(self, method: str):
+        if method not in SpatialDataVisualizer.visualization_methods:
+            raise ValueError(f"Unknown visualization method: '{method}'")
+
+        if method == "auto":
+            if self._mesh is not None:
+                method = "mesh"
+            else:
+                method = "point"
+
+        self._points.visible = method == "point" or method == "both"
+        self._mesh.visible = method == "mesh" or method == "both"
+
+    def show_wireframe(self, show_wireframe):
+        if self._mesh is not None:
+            self._mesh.wireframe = show_wireframe
+
+    def update_model_matrix(self):
+        self._points.model_matrix = self._cs_vis.origin.model_matrix
+        self._mesh.model_matrix = self._cs_vis.origin.model_matrix
+
+
 class CoordinateSystemManagerVisualizerK3D:
     """Visualizes a `weldx.CoordinateSystemManager` using k3d."""
 
@@ -591,6 +645,7 @@ class CoordinateSystemManagerVisualizerK3D:
         show_origins=True,
         show_traces=True,
         show_vectors=True,
+        show_wireframe=True,
     ):
         """Create a `CoordinateSystemManagerVisualizerK3D`.
 
@@ -628,9 +683,10 @@ class CoordinateSystemManagerVisualizerK3D:
             show_origins,
             show_traces,
             show_vectors,
+            show_wireframe,
         )
 
-        # create plot using dict comprehension
+        # create plot
         self._color_generator = color_generator_function()
         plot = k3d.plot(
             grid_auto_fit=False,
@@ -648,6 +704,16 @@ class CoordinateSystemManagerVisualizerK3D:
                 show_vectors=show_vectors,
             )
             for lcs_name in coordinate_systems
+        }
+        self._data_vis = {
+            data_name: SpatialDataVisualizer(
+                self._csm.get_data(data_name=data_name),
+                self._lcs_vis[self._csm.get_data_system_name(data_name=data_name)],
+                plot,
+                color=next(self._color_generator),
+                show_wireframe=show_wireframe,
+            )
+            for data_name in self._csm.data_names
         }
 
         # add title
@@ -695,9 +761,11 @@ class CoordinateSystemManagerVisualizerK3D:
         show_origins,
         show_traces,
         show_vectors,
+        show_wireframe,
     ):
         num_times = 1
         disable_time_widgets = True
+        lo = Layout(width="200px")
 
         # create widgets
         if time is not None:
@@ -722,11 +790,20 @@ class CoordinateSystemManagerVisualizerK3D:
             description="Reference:",
             disabled=False,
         )
+        data_dropdown = Dropdown(
+            options=SpatialDataVisualizer.visualization_methods,
+            value="auto",
+            description="data repr.:",
+            disabled=False,
+            layout=lo,
+        )
+
         lo = Layout(width="200px")
         vectors_cb = Checkbox(value=show_vectors, description="show vectors", layout=lo)
         origin_cb = Checkbox(value=show_origins, description="show origins", layout=lo)
         traces_cb = Checkbox(value=show_traces, description="show traces", layout=lo)
         labels_cb = Checkbox(value=show_labels, description="show labels", layout=lo)
+        wf_cb = Checkbox(value=show_wireframe, description="show wireframe", layout=lo)
 
         jslink((play, "value"), (time_slider, "value"))
         play.disabled = disable_time_widgets
@@ -757,6 +834,12 @@ class CoordinateSystemManagerVisualizerK3D:
             """Handle events of the labels checkbox."""
             self.show_labels(change["new"])
 
+        def _on_data_change(change):
+            self.update_data_representation(change["new"])
+
+        def _on_show_wireframe(change):
+            self.show_wireframes(change["new"])
+
         # register callbacks
         time_slider.observe(on_time_change, names="value")
         reference_dropdown.observe(on_reference_change, names="value")
@@ -764,11 +847,14 @@ class CoordinateSystemManagerVisualizerK3D:
         origin_cb.observe(on_origins_change, names="value")
         traces_cb.observe(on_traces_change, names="value")
         labels_cb.observe(on_labels_change, names="value")
+        data_dropdown.observe(_on_data_change, names="value")
+        wf_cb.observe(_on_show_wireframe, names="value")
 
         # create control panel
         row_1 = HBox([time_slider, play, reference_dropdown])
         row_2 = HBox([vectors_cb, origin_cb, traces_cb, labels_cb])
-        return VBox([row_1, row_2])
+        row_3 = HBox([data_dropdown, wf_cb])
+        return VBox([row_1, row_2, row_3])
 
     def _get_color(self, lcs_name, color_dict):
         if color_dict is not None and lcs_name in color_dict:
@@ -790,6 +876,8 @@ class CoordinateSystemManagerVisualizerK3D:
         """
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_time(time, time_ref)
+        for _, data_vis in self._data_vis.items():
+            data_vis.update_model_matrix()
         f"<b>time:</b> {time[0]}"
 
     def update_time_index(self, index):
@@ -804,21 +892,9 @@ class CoordinateSystemManagerVisualizerK3D:
         self._current_time_index = index
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_time_index(index)
+        for _, data_vis in self._data_vis.items():
+            data_vis.update_model_matrix()
         self._time_info.text = f"<b>time:</b> {self._time[index]}"
-
-    def update_reference_system(self, reference_system):
-        """Update the reference system of the plot.
-
-        Parameters
-        ----------
-        reference_system : str
-            Name of the new reference system
-
-        """
-        for lcs_name, lcs_vis in self._lcs_vis.items():
-            lcs_vis.update_lcs(
-                self._csm.get_cs(lcs_name, reference_system), self._current_time_index
-            )
 
     def show_vectors(self, show_vectors):
         for _, lcs_vis in self._lcs_vis.items():
@@ -835,3 +911,27 @@ class CoordinateSystemManagerVisualizerK3D:
     def show_labels(self, show_labels):
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis._label.visible = show_labels
+
+    def show_wireframes(self, show_wireframes):
+        for _, data_vis in self._data_vis.items():
+            data_vis.show_wireframe(show_wireframes)
+
+    def update_data_representation(self, representation):
+        for _, data_vis in self._data_vis.items():
+            data_vis.set_visualization_method(representation)
+
+    def update_reference_system(self, reference_system):
+        """Update the reference system of the plot.
+
+        Parameters
+        ----------
+        reference_system : str
+            Name of the new reference system
+
+        """
+        for lcs_name, lcs_vis in self._lcs_vis.items():
+            lcs_vis.update_lcs(
+                self._csm.get_cs(lcs_name, reference_system), self._current_time_index
+            )
+        for _, data_vis in self._data_vis.items():
+            data_vis.update_model_matrix()
