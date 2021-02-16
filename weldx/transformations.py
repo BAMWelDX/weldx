@@ -19,7 +19,6 @@ from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.geometry import PointCloud
 from weldx.visualization import (
     CoordinateSystemManagerVisualizerK3D,
-    plot_coordinate_system,
     plot_coordinate_system_manager_matplotlib,
     plot_local_coordinate_system_matplotlib,
     set_axes_equal,
@@ -1203,33 +1202,47 @@ class LocalCoordinateSystem:
 
     def plot(
         self,
-        axes=None,
-        color=None,
-        label=None,
-        time=None,
-        time_ref=None,
-        time_index=None,
-        show_origin=True,
-        show_trace=True,
-        show_vectors=True,
+        axes: plt.Axes.axes = None,
+        color: str = None,
+        label: str = None,
+        time: Union[
+            pd.DatetimeIndex,
+            pd.TimedeltaIndex,
+            List[pd.Timestamp],
+            "LocalCoordinateSystem",
+        ] = None,
+        time_ref: pd.Timestamp = None,
+        time_index: int = None,
+        show_origin: bool = True,
+        show_trace: bool = True,
+        show_vectors: bool = True,
     ):
         """Plot the coordinate system.
 
         Parameters
         ----------
-        axes :
+        axes : matplotlib.pyplot.Axes.axes
             The target matplotlib axes object that should be drawn to. If `None` is
             provided, a new one will be created.
-        color :
-            The color of the coordinate system
-        label :
+        color : str
+            The color of the coordinate system. The string must be a valid matplotlib
+            color format. See:
+            https://matplotlib.org/3.1.0/api/colors_api.html#module-matplotlib.colors
+        label : str
             The name of the coordinate system
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
                LocalCoordinateSystem
-            The time steps that should be plotted
+            The time steps that should be plotted. Missing time steps in the data will
+            be interpolated.
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
+        time_index: int
+            If the coordinate system is time dependent, this parameter can be used to
+            to select a specific key frame by its index.
+        show_origin: bool
+            If `True`, a small dot with the assigned color will mark the coordinate
+            systems' origin.
         show_trace : bool
             If `True`, the trace of time dependent coordinate systems is plotted.
         show_vectors : bool
