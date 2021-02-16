@@ -2883,6 +2883,7 @@ class CoordinateSystemManager:
         axes: plt.Axes.axes = None,
         reference_system: str = None,
         coordinate_systems: List[str] = None,
+        data_sets: List[str] = None,
         colors: Dict[str, int] = None,
         title: str = None,
         limits: List[Tuple[float, float]] = None,
@@ -2898,7 +2899,7 @@ class CoordinateSystemManager:
         show_origins: bool = True,
         show_traces: bool = True,
         show_vectors: bool = True,
-        show_wireframe: bool = True,
+        show_wireframe: bool = False,
     ):
         """Plot the coordinate systems of the coordinate system manager.
 
@@ -2919,6 +2920,9 @@ class CoordinateSystemManager:
         coordinate_systems : List[str]
             Names of the coordinate systems that should be drawn. If `None` is provided,
             all systems are plotted.
+        data_sets : List[str]
+            Names of the data sets that should be drawn. If `None` is provided, all data
+            is plotted.
         colors: Dict[str, int]
             A mapping between a coordinate system name or a data set name and a color.
             The colors must be provided as 24 bit integer values that are divided into
@@ -2961,6 +2965,7 @@ class CoordinateSystemManager:
                 csm=self,
                 reference_system=reference_system,
                 coordinate_systems=coordinate_systems,
+                data_sets=data_sets,
                 colors=colors,
                 title=title,
                 limits=limits,

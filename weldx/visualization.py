@@ -1,14 +1,17 @@
 """Contains some functions to help with visualization."""
 
-from typing import Tuple
+from typing import Any, Dict, Generator, List, Tuple, Union
+
 import k3d
 import k3d.platonic as platonic
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
 import weldx.geometry as geo
+import weldx.transformations as tf
 
 
 def random_color_rgb() -> int:
@@ -41,7 +44,7 @@ def color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
 
 
 def color_int_to_rgb(integer: int) -> Tuple[int, int, int]:
-    """Convert an 24 bit integer into a RGB tuple.
+    """Convert an 24 bit integer into a RGB color tuple with the value range (0-255).
 
     Parameters
     ----------
@@ -57,11 +60,39 @@ def color_int_to_rgb(integer: int) -> Tuple[int, int, int]:
     return ((integer >> 16) & 255, (integer >> 8) & 255, integer & 255)
 
 
-def color_rgb_to_rgb_normalized(rgb):
+def color_rgb_to_rgb_normalized(
+    rgb: Tuple[int, int, int]
+) -> Tuple[float, float, float]:
+    """Normalize an RGB color tuple with the range (0-255) to the range (0.0-1.0).
+
+    Parameters
+    ----------
+    rgb : Tuple[int, int, int]
+        Color tuple with values in the range (0-255)
+
+    Returns
+    -------
+    Tuple[float, float, float] :
+        Color tuple with values in the range (0.0-1.0)
+
+    """
     return tuple([val / 255 for val in rgb])
 
 
 def color_int_to_rgb_normalized(integer):
+    """Convert an 24 bit integer into a RGB color tuple with the value range (0.0-1.0).
+
+    Parameters
+    ----------
+    integer : int
+        The value that should be converted
+
+    Returns
+    -------
+    Tuple[float, float, float]:
+        The resulting RGB tuple.
+
+    """
     rgb = color_int_to_rgb(integer)
     return color_rgb_to_rgb_normalized(rgb)
 
@@ -80,15 +111,45 @@ _color_list = [
 ]
 
 
-def color_generator_function():
-    for color in _color_list:
-        yield color
-    raise Exception("No more colors available.")
+def color_generator_function() -> int:
+    """Yield a 24 bit RGB color integer.
+
+    The returned value is taken from a predefined list.
+
+    Yields
+    ------
+    int:
+        24 bit RGB color integer
+
+    """
+    while True:
+        for color in _color_list:
+            yield color
 
 
-def _get_color(lcs_name, color_dict, color_generator):
-    if color_dict is not None and lcs_name in color_dict:
-        return color_rgb_to_int(color_dict[lcs_name])
+def _get_color(key: str, color_dict: Dict[str, int], color_generator: Generator) -> int:
+    """Get a 24 bit RGB color from a dictionary or generator function.
+
+    If the provided key is found in the dictionary, the corresponding color is returned.
+    Otherwise, the generator is used to provide a color.
+
+    Parameters
+    ----------
+    key : str
+        The key that should be searched for in the dictionary
+    color_dict : Dict[str, int]
+        A dictionary containing name to color mappings
+    color_generator : Generator
+        A generator that returns a color integer
+
+    Returns
+    -------
+    int :
+        RGB color as 24 bit integer
+
+    """
+    if color_dict is not None and key in color_dict:
+        return color_rgb_to_int(color_dict[key])
     return next(color_generator)
 
 
@@ -128,32 +189,38 @@ def new_3d_figure_and_axes(
     return fig, ax
 
 
+# todo rename to something like render_cs
 def plot_coordinate_system(
-    coordinate_system,
-    axes,
-    color=None,
-    label=None,
-    time_idx=None,
-    show_origin=True,
-    show_vectors=True,
+    coordinate_system: tf.LocalCoordinateSystem,
+    axes: plt.Axes.axes,
+    color: Any = None,
+    label: str = None,
+    time_idx: int = None,
+    show_origin: bool = True,
+    show_vectors: bool = True,
 ):
     """Plot a coordinate system in a matplotlib 3d plot.
 
     Parameters
     ----------
-    coordinate_system :
+    coordinate_system : weldx.transformations.LocalCoordinateSystem
         Coordinate system
-    axes :
-        Matplotlib axes object (output from plt.gca())
-    color :
+    axes : matplotlib.pyplot.Axes.axes
+        Target matplotlib axes object
+    color : Any
         Valid matplotlib color selection. The origin of the coordinate system
-        will be marked with this color. (Default value = None)
-    label :
+        will be marked with this color.
+    label : str
         Name that appears in the legend. Only viable if a color
-        was specified. (Default value = None)
-    time_idx :
+        was specified.
+    time_idx : int
         Selects time dependent data by index if the coordinate system has
         a time dependency.
+    show_origin : bool
+        If `True`, the origin of the coordinate system will be highlighted in the
+        color passed as another parameter
+    show_vectors : bool
+        If `True`, the the coordinate axes of the coordinate system are visualized
 
     """
     if not (show_vectors or show_origin):
@@ -220,25 +287,66 @@ def set_axes_equal(axes):
     axes.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
-def _get_color_matplotlib(axes):
-    color_table = ["r", "g", "b", "y"]
-    for color in color_table:
-        yield color
-    yield next(axes._get_lines.prop_cycler)["color"]
+# todo remove
+# def _get_color_matplotlib(axes):
+#    color_table = ["r", "g", "b", "y"]
+#    for color in color_table:
+#        yield color
+#    yield next(axes._get_lines.prop_cycler)["color"]
 
 
 def plot_local_coordinate_system_matplotlib(
-    lcs,
-    axes=None,
-    color=None,
-    label=None,
-    time=None,
-    time_ref=None,
-    time_index=None,
-    show_origin=True,
-    show_trace=True,
-    show_vectors=True,
-):
+    lcs: tf.LocalCoordinateSystem,
+    axes: plt.Axes.axes = None,
+    color: Any = None,
+    label: str = None,
+    time: Union[
+        pd.DatetimeIndex,
+        pd.TimedeltaIndex,
+        List[pd.Timestamp],
+        tf.LocalCoordinateSystem,
+    ] = None,
+    time_ref: pd.Timestamp = None,
+    time_index: int = None,
+    show_origin: bool = True,
+    show_trace: bool = True,
+    show_vectors: bool = True,
+) -> plt.Axes.axes:
+    """Visualize a `weldx.transformations.LocalCoordinateSystem` using matplotlib.
+
+    Parameters
+    ----------
+    lcs : weldx.transformations.LocalCoordinateSystem
+        The coordinate system that should be visualized
+    axes : matplotlib.pyplot.Axes.axes
+        The target matplotlib axes. If `None` is provided, a new one will be created
+    color : Any
+        An arbitrary color. The data type must be compatible with matplotlib.
+    label : str
+        Name of the coordinate system
+    time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+           LocalCoordinateSystem
+        The time steps that should be plotted
+    time_ref : pandas.Timestamp
+        A reference timestamp that can be provided if the ``time`` parameter is a
+        `pandas.TimedeltaIndex`
+    time_index : int
+        Index of a specific time step that should be plotted
+    show_origin : bool
+        If `True`, the origin of the coordinate system will be highlighted in the
+        color passed as another parameter
+    show_trace :
+        If `True`, the trace of a time dependent coordinate system will be visualized in
+        the color passed as another parameter
+    show_vectors : bool
+        If `True`, the the coordinate axes of the coordinate system are visualized
+
+    Returns
+    -------
+    matplotlib.pyplot.Axes.axes :
+        The axes object that was used as canvas for the plot
+
+    """
     if axes is None:
         _, axes = plt.subplots(subplot_kw={"projection": "3d", "proj_type": "ortho"})
 
@@ -278,44 +386,71 @@ def plot_local_coordinate_system_matplotlib(
 
 
 def plot_coordinate_system_manager_matplotlib(
-    csm,
-    axes=None,
-    reference_system=None,
-    coordinate_systems=None,
-    data_sets=None,
-    colors=None,
-    time=None,
-    time_ref=None,
-    title=None,
-    limits=None,
-    show_origins=True,
-    show_trace=True,
-    show_vectors=True,
-):
+    csm: tf.CoordinateSystemManager,
+    axes: plt.Axes.axes = None,
+    reference_system: str = None,
+    coordinate_systems: List[str] = None,
+    data_sets: List[str] = None,
+    colors: Dict[str, int] = None,
+    time: Union[
+        pd.DatetimeIndex,
+        pd.TimedeltaIndex,
+        List[pd.Timestamp],
+        tf.LocalCoordinateSystem,
+    ] = None,
+    time_ref: pd.Timestamp = None,
+    title: str = None,
+    limits: List[Tuple[float, float]] = None,
+    show_origins: bool = True,
+    show_trace: bool = True,
+    show_vectors: bool = True,
+) -> plt.Axes.axes:
     """Plot the coordinate systems of a `CoordinateSystemManager` using matplotlib.
 
     Parameters
     ----------
     csm : weldx.CoordinateSystemManager
         The `CoordinateSystemManager` that should be plotted
-    axes :
+    axes : plt.Axes.axes
         The target axes object that should be drawn to. If `None` is provided, a new
         one will be created.
     reference_system : str
         The name of the reference system for the plotted coordinate systems
+    coordinate_systems : List[str]
+        Names of the coordinate systems that should be drawn. If `None` is provided,
+        all systems are plotted.
+    data_sets : List[str]
+        Names of the data sets that should be drawn. If `None` is provided, all data
+        is plotted.
+    colors: Dict[str, int]
+        A mapping between a coordinate system name or a data set name and a color.
+        The colors must be provided as 24 bit integer values that are divided into
+        three 8 bit sections for the rgb values. For example `0xFF0000` for pure
+        red.
+        Each coordinate system or data set that does not have a mapping in this
+        dictionary will get a default color assigned to it.
     time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
            LocalCoordinateSystem
         The time steps that should be plotted
     time_ref : pandas.Timestamp
         A reference timestamp that can be provided if the ``time`` parameter is a
         `pandas.TimedeltaIndex`
+    title : str
+        The title of the plot
+    limits : List[Tuple[float, float]]
+        The limits of the plotted volume
+    show_origins : bool
+        If `True`, the origins of the coordinate system are visualized in the color
+        assigned to the coordinate system.
     show_trace : bool
         If `True`, the trace of time dependent coordinate systems is plotted.
-    show_vectors :
+    show_vectors : bool
         If `True`, the coordinate cross of time dependent coordinate systems is plotted.
 
     Returns
     -------
+    matplotlib.pyplot.Axes.axes :
+        The axes object that was used as canvas for the plot
 
     """
     if time is not None:
