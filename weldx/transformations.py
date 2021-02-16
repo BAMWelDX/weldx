@@ -4,7 +4,7 @@ import itertools
 import math
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -2327,7 +2327,15 @@ class CoordinateSystemManager:
         return list(self.graph.nodes)
 
     @property
-    def data_names(self):
+    def data_names(self) -> List[str]:
+        """Get the names of the attached data sets.
+
+        Returns
+        -------
+        List[str] :
+            Names of the attached data sets
+
+        """
         return self._data.keys()
 
     def get_data(
@@ -2363,7 +2371,20 @@ class CoordinateSystemManager:
             target_coordinate_system_name,
         )
 
-    def get_data_system_name(self, data_name):
+    def get_data_system_name(self, data_name: str) -> str:
+        """Get the name of the data's reference coordinate system.
+
+        Parameters
+        ----------
+        data_name : str
+            Name of the data
+
+        Returns
+        -------
+        str :
+            Name of the reference coordinate system
+
+        """
         return self._data[data_name].coordinate_system_name
 
     def get_cs(
@@ -2858,19 +2879,26 @@ class CoordinateSystemManager:
 
     def plot_coordinate_systems(
         self,
-        backend="mpl",
-        axes=None,
-        reference_system=None,
-        coordinate_systems=None,
-        colors=None,
-        title=None,
-        limits=None,
-        time=None,
-        time_ref=None,
-        show_labels=True,
-        show_origins=True,
-        show_traces=True,
-        show_vectors=True,
+        backend: str = "mpl",
+        axes: plt.Axes.axes = None,
+        reference_system: str = None,
+        coordinate_systems: List[str] = None,
+        colors: Dict[str, int] = None,
+        title: str = None,
+        limits: List[Tuple[float, float]] = None,
+        time: Union[
+            pd.DatetimeIndex,
+            pd.TimedeltaIndex,
+            List[pd.Timestamp],
+            "LocalCoordinateSystem",
+        ] = None,
+        time_ref: pd.Timestamp = None,
+        show_data_labels: bool = True,
+        show_labels: bool = True,
+        show_origins: bool = True,
+        show_traces: bool = True,
+        show_vectors: bool = True,
+        show_wireframe: bool = True,
     ):
         """Plot the coordinate systems of the coordinate system manager.
 
@@ -2883,24 +2911,49 @@ class CoordinateSystemManager:
             - `mpl` for static plots using [matplotlib](https://matplotlib.org/)
 
             Note that k3d only works inside jupyter notebooks
-        axes :
+        axes : matplotlib.pyplot.Axes.axes
             (matplotlib only) The target axes object that should be drawn to. If `None`
             is provided, a new one will be created.
         reference_system : str
-            (matplotlib only) The name of the reference system for the plotted
-            coordinate systems
+            The name of the reference system for the plotted coordinate systems
+        coordinate_systems : List[str]
+            Names of the coordinate systems that should be drawn. If `None` is provided,
+            all systems are plotted.
+        colors: Dict[str, int]
+            A mapping between a coordinate system name or a data set name and a color.
+            The colors must be provided as 24 bit integer values that are divided into
+            three 8 bit sections for the rgb values. For example `0xFF0000` for pure
+            red.
+            Each coordinate system or data set that does not have a mapping in this
+            dictionary will get a default color assigned to it.
+        title : str
+            The title of the plot
+        limits : List[Tuple[float,float]]
+            The coordinate limits of the plot.
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
                LocalCoordinateSystem
             The time steps that should be plotted
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
+        show_data_labels : bool
+            (k3d only) If `True`, plotted data sets get labels with their names attached
+            to them
+        show_labels : bool
+            (k3d only) If `True`, plotted coordinate systems get labels with their names
+            attached to them
+        show_origins : bool
+            If `True`, the origins of the coordinate system are visualized in the color
+            assigned to the coordinate system.
         show_traces : bool
-            (matplotlib only) If `True`, the trace of time dependent coordinate systems
-            is plotted.
-        show_vectors :
+            If `True`, the trace of time dependent coordinate systems is plotted in the
+            coordinate systems color.
+        show_vectors : bool
             (matplotlib only) If `True`, the coordinate cross of time dependent
             coordinate systems is plotted.
+        show_wireframe : bool
+            (k3d only) If `True`, data sets that contain mesh data are rendered in
+            wireframe mode. If `False`, the data
 
         """
         if backend == "k3d":
@@ -2913,10 +2966,12 @@ class CoordinateSystemManager:
                 limits=limits,
                 time=time,
                 time_ref=time_ref,
+                show_data_labels=show_data_labels,
                 show_labels=show_labels,
                 show_origins=show_origins,
                 show_traces=show_traces,
                 show_vectors=show_vectors,
+                show_wireframe=show_wireframe,
             )
         elif backend == "mpl":
             set_ax_eq = axes is None

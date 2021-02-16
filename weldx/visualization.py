@@ -1,5 +1,6 @@
 """Contains some functions to help with visualization."""
 
+from typing import Tuple
 import k3d
 import k3d.platonic as platonic
 import matplotlib.pyplot as plt
@@ -10,15 +11,49 @@ from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, 
 import weldx.geometry as geo
 
 
-def random_color_rgb():
+def random_color_rgb() -> int:
+    """Get a random RGB color as 24 bit integer.
+
+    Returns
+    -------
+    int :
+        RGB color as integer
+
+    """
     return np.random.choice(range(256), size=3)
 
 
-def color_rgb_to_int(rgb_color_tuple):
+def color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
+    """Convert an RGB color tuple to an 24 bit integer.
+
+    Parameters
+    ----------
+    rgb_color_tuple : Tuple[int, int, int]
+        The color as RGB tuple. Values must be in the range 0-255.
+
+    Returns
+    -------
+    int :
+        Color as 24 bit integer
+
+    """
     return int("0x{:02x}{:02x}{:02x}".format(*rgb_color_tuple), 0)
 
 
-def color_int_to_rgb(integer):
+def color_int_to_rgb(integer: int) -> Tuple[int, int, int]:
+    """Convert an 24 bit integer into a RGB tuple.
+
+    Parameters
+    ----------
+    integer : int
+        The value that should be converted
+
+    Returns
+    -------
+    Tuple[int, int, int]:
+        The resulting RGB tuple.
+
+    """
     return ((integer >> 16) & 255, (integer >> 8) & 255, integer & 255)
 
 
