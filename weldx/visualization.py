@@ -183,7 +183,7 @@ def new_3d_figure_and_axes(
     try:
         fig.canvas.layout.height = f"{height}px"
         fig.canvas.layout.width = f"{width}px"
-    except:
+    except Exception:
         fig.set_size_inches(w=width / pixel_per_inch, h=height / pixel_per_inch)
     return fig, ax
 
@@ -518,7 +518,7 @@ def plot_coordinate_system_manager_matplotlib(
             axes.set_zlim(limits)
         try:
             axes.legend()
-        except:
+        except Exception:
             pass
         return axes
 
