@@ -1921,7 +1921,7 @@ class CoordinateSystemManager:
             raise Exception(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(coordinate_system_name)
 
-        if not (isinstance(data, xr.DataArray) or isinstance(data, PointCloud)):
+        if not isinstance(data, (xr.DataArray, PointCloud)):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)

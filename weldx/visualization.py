@@ -453,74 +453,71 @@ def plot_coordinate_system_manager_matplotlib(
             show_trace=show_trace,
             show_vectors=show_vectors,
         )
+    if axes is None:
+        _, axes = new_3d_figure_and_axes()
+        axes.set_xlabel("x")
+        axes.set_ylabel("y")
+        axes.set_zlabel("z")
+
+    if reference_system is None:
+        reference_system = csm.root_system_name
+    if coordinate_systems is None:
+        coordinate_systems = csm.coordinate_system_names
+    if data_sets is None:
+        data_sets = csm.data_names
+    if title is not None:
+        axes.set_title(title)
+
+    # plot coordinate systems
+    color_gen = color_generator_function()
+    for lcs_name in coordinate_systems:
+        # https://stackoverflow.com/questions/13831549/
+        # get-matplotlib-color-cycle-state
+        color = color_int_to_rgb_normalized(_get_color(lcs_name, colors, color_gen))
+        lcs = csm.get_cs(lcs_name, reference_system)
+        lcs.plot(
+            axes=axes,
+            color=color,
+            label=lcs_name,
+            show_origin=show_origins,
+            show_trace=show_trace,
+            show_vectors=show_vectors,
+        )
+    # plot data
+    for data_name in data_sets:
+        color = color_int_to_rgb_normalized(_get_color(data_name, colors, color_gen))
+        data = csm.get_data(data_name, reference_system)
+        triangles = None
+        if isinstance(data, geo.PointCloud):
+            triangles = data.triangles
+            data = data.coordinates
+
+        data = data.data
+        while data.ndim > 2:
+            data = data[0]
+
+        axes.plot(data[:, 0], data[:, 1], data[:, 2], "x", color=color, label=data_name)
+        if triangles is not None:
+            for triangle in triangles:
+                triangle_data = data[[*triangle, triangle[0]], :]
+                axes.plot(
+                    triangle_data[:, 0],
+                    triangle_data[:, 1],
+                    triangle_data[:, 2],
+                    color=color,
+                )
+
+    if limits is None:
+        set_axes_equal(axes)
     else:
-        if axes is None:
-            _, axes = new_3d_figure_and_axes()
-            axes.set_xlabel("x")
-            axes.set_ylabel("y")
-            axes.set_zlabel("z")
-
-        if reference_system is None:
-            reference_system = csm._root_system_name
-        if coordinate_systems is None:
-            coordinate_systems = csm.coordinate_system_names
-        if data_sets is None:
-            data_sets = csm.data_names
-        if title is not None:
-            axes.set_title(title)
-
-        # plot coordinate systems
-        color_gen = color_generator_function()
-        for lcs_name in coordinate_systems:
-            # https://stackoverflow.com/questions/13831549/
-            # get-matplotlib-color-cycle-state
-            color = color_int_to_rgb_normalized(_get_color(lcs_name, colors, color_gen))
-            lcs = csm.get_cs(lcs_name, reference_system)
-            lcs.plot(
-                axes=axes,
-                color=color,
-                label=lcs_name,
-                show_origin=show_origins,
-                show_trace=show_trace,
-                show_vectors=show_vectors,
-            )
-        # plot data
-        for data_name in data_sets:
-            color = color_int_to_rgb_normalized(_get_color(lcs_name, colors, color_gen))
-            data = csm.get_data(data_name, reference_system)
-            triangles = None
-            if isinstance(data, geo.PointCloud):
-                triangles = data.triangles
-                data = data.coordinates
-
-            data = data.data
-            while data.ndim > 2:
-                data = data[0]
-
-            axes.plot(
-                data[:, 0], data[:, 1], data[:, 2], "x", color=color, label=data_name
-            )
-            if triangles is not None:
-                for triangle in triangles:
-                    triangle_data = data[[*triangle, triangle[0]], :]
-                    axes.plot(
-                        triangle_data[:, 0],
-                        triangle_data[:, 1],
-                        triangle_data[:, 2],
-                        color=color,
-                    )
-
-        if limits is None:
-            set_axes_equal(axes)
-        else:
-            axes.set_xlim(limits)
-            axes.set_ylim(limits)
-            axes.set_zlim(limits)
-        try:
-            axes.legend()
-        except Exception:
-            pass
-        return axes
+        axes.set_xlim(limits)
+        axes.set_ylim(limits)
+        axes.set_zlim(limits)
+    try:
+        axes.legend()
+    except Exception:
+        pass
+    return axes
 
 
 def plot_coordinate_systems(
@@ -1240,7 +1237,6 @@ class CoordinateSystemManagerVisualizerK3D:
             lcs_vis.update_time(time, time_ref)
         for _, data_vis in self._data_vis.items():
             data_vis.update_model_matrix()
-        f"<b>time:</b> {time[0]}"
 
     def update_time_index(self, index: int):
         """Update the plotted time by index.
