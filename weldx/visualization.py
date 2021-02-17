@@ -525,25 +525,37 @@ def plot_coordinate_system_manager_matplotlib(
 
 def plot_coordinate_systems(
     cs_data: Tuple[str, Dict],
-    axes=None,
+    axes: plt.Axes.axes = None,
     title: str = None,
-    limits=None,
-    time_index=None,
-    legend_pos="lower left",
-):
+    limits: List[Tuple[float, float]] = None,
+    time_index: int = None,
+    legend_pos: str = "lower left",
+) -> plt.Axes.axes:
     """Plot multiple coordinate systems.
 
     Parameters
     ----------
-    cs_data
-    axes
-    title
-    limits
-    time_index
-    legend_pos
+    cs_data : Tuple[str, Dict]
+        A tuple containing the coordinate system that should be plotted and a dictionary
+        with the key word arguments that should be passed to its plot function.
+    axes : plt.Axes.axes
+        The target axes object that should be drawn to. If `None` is provided, a new
+        one will be created.
+    title : str
+        The title of the plot
+    limits : List[Tuple[float, float]]
+        The limits of the plotted volume
+    time_index : int
+        Index of a specific time step that should be plotted if the corresponding
+        coordinate system is time dependent
+    legend_pos : str
+        A string that specifies the position of the legend. See the matplotlib
+        documentation for further details
 
     Returns
     -------
+    matplotlib.pyplot.Axes.axes :
+        The axes object that was used as canvas for the plot
 
     """
     if axes is None:
@@ -564,6 +576,8 @@ def plot_coordinate_systems(
     if title is not None:
         axes.set_title(title)
     axes.legend(loc=legend_pos)
+
+    return axes
 
 
 # k3d ----------------------------------------------------------------------------------
