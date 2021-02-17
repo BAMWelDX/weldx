@@ -596,7 +596,7 @@ class CoordinateSystemVisualizerK3D:
         show_trace=True,
         show_vectors=True,
     ):
-        """Create a `CoordinateSystemVisualizerK3D`
+        """Create a `CoordinateSystemVisualizerK3D`.
 
         Parameters
         ----------
@@ -705,7 +705,7 @@ class CoordinateSystemVisualizerK3D:
 
     @staticmethod
     def _get_coordinates_and_orientation(lcs, index: int = 0):
-        """Get the coordinates and orientation of a coordinate system
+        """Get the coordinates and orientation of a coordinate system.
 
         Parameters
         ----------
@@ -786,7 +786,7 @@ class CoordinateSystemVisualizerK3D:
 
 
 class SpatialDataVisualizer:
-    """Visualizes spatial data"""
+    """Visualizes spatial data."""
 
     visualization_methods = ["auto", "point", "mesh", "both"]
 
@@ -861,7 +861,7 @@ class SpatialDataVisualizer:
                 plot += self._label
 
     def set_visualization_method(self, method: str):
-        """Set the visualization method
+        """Set the visualization method.
 
         Parameters
         ----------
@@ -1115,9 +1115,6 @@ class CoordinateSystemManagerVisualizerK3D:
             If `True`, the coordinate systems' axis vectors will be shown initially
         show_wireframe : bool
             If `True`, spatial data containing mesh data will be drawn as wireframe
-
-        Returns
-        -------
 
         """
         num_times = 1
