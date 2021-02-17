@@ -4,10 +4,10 @@ import copy
 import math
 from dataclasses import dataclass
 from typing import Dict, List, Union
-from xarray import DataArray
 
 import matplotlib.pyplot as plt
 import numpy as np
+from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.utility as ut
