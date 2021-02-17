@@ -792,7 +792,7 @@ class SpatialDataVisualizer:
 
     def __init__(
         self,
-        data: Union[np.ndarray, geo.PointCloud],
+        data,
         name: str,
         cs_vis: CoordinateSystemVisualizerK3D,
         plot: k3d.Plot = None,
@@ -925,19 +925,20 @@ class CoordinateSystemManagerVisualizerK3D:
     def __init__(
         self,
         csm,
-        coordinate_systems=None,
-        colors=None,
-        reference_system=None,
-        title=None,
-        limits=None,
-        time=None,
-        time_ref=None,
-        show_data_labels=True,
-        show_labels=True,
-        show_origins=True,
-        show_traces=True,
-        show_vectors=True,
-        show_wireframe=True,
+        coordinate_systems: List[str] = None,
+        data_sets: List[str] = None,
+        colors: Dict[str, int] = None,
+        reference_system: str = None,
+        title: str = None,
+        limits: List[Tuple[float, float]] = None,
+        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
+        time_ref: pd.Timestamp = None,
+        show_data_labels: bool = True,
+        show_labels: bool = True,
+        show_origins: bool = True,
+        show_traces: bool = True,
+        show_vectors: bool = True,
+        show_wireframe: bool = True,
     ):
         """Create a `CoordinateSystemManagerVisualizerK3D`.
 
@@ -945,12 +946,44 @@ class CoordinateSystemManagerVisualizerK3D:
         ----------
         csm : weldx.CoordinateSystemManager
             The `CoordinateSystemManager` that should be visualized
+        coordinate_systems : List[str]
+            The names of the coordinate systems that should be visualized. If ´None´ is
+            provided, all systems are plotted
+        data_sets : List[str]
+            The names of data sets that should be visualized. If ´None´ is provided, all
+            data is plotted
+        colors : Dict[str, int]
+            A mapping between a coordinate system name or a data set name and a color.
+            The colors must be provided as 24 bit integer values that are divided into
+            three 8 bit sections for the rgb values. For example `0xFF0000` for pure
+            red.
+            Each coordinate system or data set that does not have a mapping in this
+            dictionary will get a default color assigned to it.
+        reference_system : str
+            Name of the initial reference system. If `None` is provided, the root system
+            of the `CoordinateSystemManager` instance will be used
+        title : str
+            The title of the plot
+        limits : List[Tuple[float, float]]
+            The limits of the plotted volume
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
                LocalCoordinateSystem
-            The time steps that should be plotted
+            The time steps that should be plotted initially
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
+        show_data_labels : bool
+            If `True`, the data labels will be shown initially
+        show_labels  : bool
+            If `True`, the coordinate system labels will be shown initially
+        show_origins : bool
+            If `True`, the coordinate systems' origins will be shown initially
+        show_traces : bool
+            If `True`, the coordinate systems' traces will be shown initially
+        show_vectors : bool
+            If `True`, the coordinate systems' axis vectors will be shown initially
+        show_wireframe : bool
+            If `True`, spatial data containing mesh data will be drawn as wireframe
 
         """
         if time is None:
@@ -962,6 +995,8 @@ class CoordinateSystemManagerVisualizerK3D:
 
         if coordinate_systems is None:
             coordinate_systems = csm.coordinate_system_names
+        if data_sets is None:
+            data_sets = self._csm.data_names
         if reference_system is None:
             reference_system = self._csm._root_system_name
         if limits is None:
@@ -979,7 +1014,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 self._csm.get_cs(lcs_name, reference_system),
                 plot,
                 lcs_name,
-                color=self._get_color(lcs_name, colors),
+                color=_get_color(lcs_name, colors, self._color_generator),
                 show_origin=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,
@@ -992,10 +1027,10 @@ class CoordinateSystemManagerVisualizerK3D:
                 data_name,
                 self._lcs_vis[self._csm.get_data_system_name(data_name=data_name)],
                 plot,
-                color=next(self._color_generator),
+                color=_get_color(data_name, colors, self._color_generator),
                 show_wireframe=show_wireframe,
             )
-            for data_name in self._csm.data_names
+            for data_name in data_sets
         }
 
         # create controls
@@ -1049,15 +1084,42 @@ class CoordinateSystemManagerVisualizerK3D:
 
     def _create_controls(
         self,
-        time,
-        reference_system,
-        show_data_labels,
-        show_labels,
-        show_origins,
-        show_traces,
-        show_vectors,
-        show_wireframe,
+        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
+        reference_system: str,
+        show_data_labels: bool,
+        show_labels: bool,
+        show_origins: bool,
+        show_traces: bool,
+        show_vectors: bool,
+        show_wireframe: bool,
     ):
+        """Create the control panel.
+
+        Parameters
+        ----------
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+               LocalCoordinateSystem
+            The time steps that should be plotted initially
+        reference_system : str
+            Name of the initial reference system. If `None` is provided, the root system
+            of the `CoordinateSystemManager` instance will be used
+        show_data_labels : bool
+            If `True`, the data labels will be shown initially
+        show_labels  : bool
+            If `True`, the coordinate system labels will be shown initially
+        show_origins : bool
+            If `True`, the coordinate systems' origins will be shown initially
+        show_traces : bool
+            If `True`, the coordinate systems' traces will be shown initially
+        show_vectors : bool
+            If `True`, the coordinate systems' axis vectors will be shown initially
+        show_wireframe : bool
+            If `True`, spatial data containing mesh data will be drawn as wireframe
+
+        Returns
+        -------
+
+        """
         num_times = 1
         disable_time_widgets = True
         lo = Layout(width="200px")
@@ -1133,7 +1195,7 @@ class CoordinateSystemManagerVisualizerK3D:
             self.show_labels(change["new"])
 
         def _on_data_change(change):
-            self.update_data_representation(change["new"])
+            self.set_data_visualization_method(change["new"])
 
         def _on_data_label_cb_change(change):
             self.show_data_labels(change["new"])
@@ -1160,12 +1222,11 @@ class CoordinateSystemManagerVisualizerK3D:
             return VBox([row_1, row_2, row_3])
         return VBox([row_1, row_2])
 
-    def _get_color(self, lcs_name, color_dict):
-        if color_dict is not None and lcs_name in color_dict:
-            return color_rgb_to_int(color_dict[lcs_name])
-        return next(self._color_generator)
-
-    def update_time(self, time, time_ref=None):
+    def update_time(
+        self,
+        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
+        time_ref: pd.Timestamp = None,
+    ):
         """Update the plotted time.
 
         Parameters
@@ -1184,7 +1245,7 @@ class CoordinateSystemManagerVisualizerK3D:
             data_vis.update_model_matrix()
         f"<b>time:</b> {time[0]}"
 
-    def update_time_index(self, index):
+    def update_time_index(self, index: int):
         """Update the plotted time by index.
 
         Parameters
@@ -1200,31 +1261,89 @@ class CoordinateSystemManagerVisualizerK3D:
             data_vis.update_model_matrix()
         self._time_info.text = f"<b>time:</b> {self._time[index]}"
 
-    def show_data_labels(self, show_data_labels):
+    def show_data_labels(self, show_data_labels: bool):
+        """Set the visibility of data labels.
+
+        Parameters
+        ----------
+        show_data_labels: bool
+            If `True`, labels are shown.
+
+        """
         for _, data_vis in self._data_vis.items():
             data_vis.show_label(show_data_labels)
 
-    def show_vectors(self, show_vectors):
+    def show_vectors(self, show_vectors: bool):
+        """Set the visibility of the coordinate axis vectors.
+
+        Parameters
+        ----------
+        show_vectors : bool
+            If `True`, the coordinate axis vectors are shown.
+
+        """
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis._vectors.visible = show_vectors
 
-    def show_origins(self, show_origins):
+    def show_origins(self, show_origins: bool):
+        """Set the visibility of the coordinate systems' origins.
+
+        Parameters
+        ----------
+        show_origins : bool
+            If `True`, the coordinate systems origins are shown.
+
+        """
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis.origin.visible = show_origins
 
-    def show_traces(self, show_traces):
+    def show_traces(self, show_traces: bool):
+        """Set the visibility of coordinate systems' traces.
+
+        Parameters
+        ----------
+        show_traces : bool
+            If `True`, the coordinate systems' traces are shown.
+
+        """
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis._trace.visible = show_traces
 
-    def show_labels(self, show_labels):
+    def show_labels(self, show_labels: bool):
+        """Set the visibility of the coordinate systems' labels.
+
+        Parameters
+        ----------
+        show_labels : bool
+            If `True`, the coordinate systems' labels are shown.
+
+        """
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis._label.visible = show_labels
 
-    def show_wireframes(self, show_wireframes):
+    def show_wireframes(self, show_wireframes: bool):
+        """Set if meshes should be drawn in wireframe mode.
+
+        Parameters
+        ----------
+        show_wireframes : bool
+            If `True`, meshes are rendered as wireframes
+
+        """
         for _, data_vis in self._data_vis.items():
             data_vis.show_wireframe(show_wireframes)
 
-    def update_data_representation(self, representation):
+    def set_data_visualization_method(self, representation: str):
+        """Set the data visualization method.
+
+        Parameters
+        ----------
+        representation : str
+            The data visualization method. Options are 'point', 'mesh', 'both' and
+            'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
+            available and points if not.
+
+        """
         for _, data_vis in self._data_vis.items():
             data_vis.set_visualization_method(representation)
 
