@@ -11,7 +11,6 @@ from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
 import weldx.geometry as geo
-import weldx.transformations as tf
 
 
 def random_color_rgb() -> int:
@@ -191,7 +190,7 @@ def new_3d_figure_and_axes(
 
 # todo rename to something like render_cs
 def plot_coordinate_system(
-    coordinate_system: tf.LocalCoordinateSystem,
+    coordinate_system,
     axes: plt.Axes.axes,
     color: Any = None,
     label: str = None,
@@ -296,16 +295,11 @@ def set_axes_equal(axes):
 
 
 def plot_local_coordinate_system_matplotlib(
-    lcs: tf.LocalCoordinateSystem,
+    lcs,
     axes: plt.Axes.axes = None,
     color: Any = None,
     label: str = None,
-    time: Union[
-        pd.DatetimeIndex,
-        pd.TimedeltaIndex,
-        List[pd.Timestamp],
-        tf.LocalCoordinateSystem,
-    ] = None,
+    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
     time_ref: pd.Timestamp = None,
     time_index: int = None,
     show_origin: bool = True,
@@ -386,18 +380,13 @@ def plot_local_coordinate_system_matplotlib(
 
 
 def plot_coordinate_system_manager_matplotlib(
-    csm: tf.CoordinateSystemManager,
+    csm,
     axes: plt.Axes.axes = None,
     reference_system: str = None,
     coordinate_systems: List[str] = None,
     data_sets: List[str] = None,
     colors: Dict[str, int] = None,
-    time: Union[
-        pd.DatetimeIndex,
-        pd.TimedeltaIndex,
-        List[pd.Timestamp],
-        tf.LocalCoordinateSystem,
-    ] = None,
+    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
     time_ref: pd.Timestamp = None,
     title: str = None,
     limits: List[Tuple[float, float]] = None,
@@ -535,25 +524,35 @@ def plot_coordinate_system_manager_matplotlib(
 
 
 def plot_coordinate_systems(
-    cs_data,
+    cs_data: Tuple[str, Dict],
     axes=None,
     title: str = None,
     limits=None,
     time_index=None,
     legend_pos="lower left",
 ):
-    # todo Use kwargs dict instead of tuple
-    for i, data in enumerate(cs_data):
-        if len(data) == 3:
-            cs_data[i] = (*data, None)
+    """Plot multiple coordinate systems.
 
+    Parameters
+    ----------
+    cs_data
+    axes
+    title
+    limits
+    time_index
+    legend_pos
+
+    Returns
+    -------
+
+    """
     if axes is None:
         _, axes = new_3d_figure_and_axes()
 
-    for lcs, color, label, time_index_instance in cs_data:
-        if time_index_instance is None:
-            time_index_instance = time_index
-        lcs.plot(axes, color=color, label=label, time_index=time_index_instance)
+    for lcs, kwargs in cs_data:
+        if "time_index" not in kwargs:
+            kwargs["time_index"] = time_index
+        lcs.plot(axes, **kwargs)
 
     if limits is None:
         set_axes_equal(axes)
