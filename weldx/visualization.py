@@ -183,7 +183,7 @@ def new_3d_figure_and_axes(
     try:
         fig.canvas.layout.height = f"{height}px"
         fig.canvas.layout.width = f"{width}px"
-    except NameError:
+    except Exception:  # skipcq: PYL-W0703
         fig.set_size_inches(w=width / pixel_per_inch, h=height / pixel_per_inch)
     return fig, ax
 
