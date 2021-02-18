@@ -183,7 +183,7 @@ def new_3d_figure_and_axes(
     try:
         fig.canvas.layout.height = f"{height}px"
         fig.canvas.layout.width = f"{width}px"
-    except Exception:
+    except NameError:
         fig.set_size_inches(w=width / pixel_per_inch, h=height / pixel_per_inch)
     return fig, ax
 
@@ -513,10 +513,8 @@ def plot_coordinate_system_manager_matplotlib(
         axes.set_xlim(limits)
         axes.set_ylim(limits)
         axes.set_zlim(limits)
-    try:
-        axes.legend()
-    except Exception:
-        pass
+    axes.legend()
+
     return axes
 
 
@@ -730,6 +728,50 @@ class CoordinateSystemVisualizerK3D:
 
         return coordinates, orientation
 
+    def show_label(self, show_label: bool):
+        """Set the visibility of the label.
+
+        Parameters
+        ----------
+        show_label : bool
+            If `True`, the label will be shown
+
+        """
+        self._label.visible = show_label
+
+    def show_origin(self, show_origin: bool):
+        """Set the visibility of the coordinate systems' origin.
+
+        Parameters
+        ----------
+        show_origin : bool
+            If `True`, the coordinate systems origin is shown.
+
+        """
+        self.origin.visible = show_origin
+
+    def show_trace(self, show_trace: bool):
+        """Set the visibility of coordinate systems' trace.
+
+        Parameters
+        ----------
+        show_trace : bool
+            If `True`, the coordinate systems' trace is shown.
+
+        """
+        self._trace.visible = show_trace
+
+    def show_vectors(self, show_vectors: bool):
+        """Set the visibility of the coordinate axis vectors.
+
+        Parameters
+        ----------
+        show_vectors : bool
+            If `True`, the coordinate axis vectors are shown.
+
+        """
+        self._vectors.visible = show_vectors
+
     def update_lcs(self, lcs, index: int = 0):
         """Pass a new coordinate system to the visualizer.
 
@@ -877,9 +919,9 @@ class SpatialDataVisualizer:
             else:
                 method = "point"
 
-        self._points.visible = method == "point" or method == "both"
+        self._points.visible = method in ["point", "both"]
         if self._mesh is not None:
-            self._mesh.visible = method == "mesh" or method == "both"
+            self._mesh.visible = method in ["mesh", "both"]
 
     def show_label(self, show_label: bool):
         """Set the visibility of the label.
@@ -1276,7 +1318,7 @@ class CoordinateSystemManagerVisualizerK3D:
 
         """
         for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis._vectors.visible = show_vectors
+            lcs_vis.show_vectors(show_vectors)
 
     def show_origins(self, show_origins: bool):
         """Set the visibility of the coordinate systems' origins.
@@ -1288,7 +1330,7 @@ class CoordinateSystemManagerVisualizerK3D:
 
         """
         for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis.origin.visible = show_origins
+            lcs_vis.show_origin(show_origins)
 
     def show_traces(self, show_traces: bool):
         """Set the visibility of coordinate systems' traces.
@@ -1300,7 +1342,7 @@ class CoordinateSystemManagerVisualizerK3D:
 
         """
         for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis._trace.visible = show_traces
+            lcs_vis.show_trace(show_traces)
 
     def show_labels(self, show_labels: bool):
         """Set the visibility of the coordinate systems' labels.
@@ -1312,7 +1354,7 @@ class CoordinateSystemManagerVisualizerK3D:
 
         """
         for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis._label.visible = show_labels
+            lcs_vis.show_label(show_labels)
 
     def show_wireframes(self, show_wireframes: bool):
         """Set if meshes should be drawn in wireframe mode.

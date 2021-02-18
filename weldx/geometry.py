@@ -2282,4 +2282,4 @@ class PointCloud:
         PointCloud
 
         """
-        return PointCloud(*ut._triangulate_geometry(g))
+        return PointCloud(*ut.triangulate_geometry(g))

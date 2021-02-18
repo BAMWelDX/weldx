@@ -997,7 +997,7 @@ def _as_valid_timestamp(value: Union[pd.Timestamp, np.datetime64, str]) -> pd.Ti
 
 
 # geometry --------------------------------------------------------
-def _triangulate_geometry(geo_data):
+def triangulate_geometry(geo_data):
     """Stack geometry data and add simple triangulation.
 
     Parameters
@@ -1008,7 +1008,7 @@ def _triangulate_geometry(geo_data):
     Returns
     -------
     np.ndarray, np.ndarray
-        3D pointcloud data and triangulation indexes
+        3D point cloud data and triangulation indexes
 
     """
     nx = geo_data.shape[2]  # Points per profile
