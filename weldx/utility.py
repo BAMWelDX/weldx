@@ -257,9 +257,8 @@ def to_pandas_time_index(
         if "time" in time.coords:
             time = time.time
         time_index = pd.Index(time.values)
-        if is_timedelta64_dtype(time_index):
-            if time.weldx.time_ref:
-                time_index = time_index + time.weldx.time_ref
+        if is_timedelta64_dtype(time_index) and time.weldx.time_ref:
+            time_index = time_index + time.weldx.time_ref
         return time_index
 
     if not np.iterable(time) or isinstance(time, str):
@@ -727,11 +726,12 @@ def _check_dtype(var_dtype, ref_dtype: dict) -> bool:
 
     """
     if var_dtype != np.dtype(ref_dtype):
-        if isinstance(ref_dtype, str):
-            if (
-                "timedelta64" in ref_dtype or "datetime64" in ref_dtype
-            ) and np.issubdtype(var_dtype, np.dtype(ref_dtype)):
-                return True
+        if (
+            isinstance(ref_dtype, str)
+            and ("timedelta64" in ref_dtype or "datetime64" in ref_dtype)
+            and np.issubdtype(var_dtype, np.dtype(ref_dtype))
+        ):
+            return True
 
         if not (
             np.issubdtype(var_dtype, np.dtype(ref_dtype)) and np.dtype(ref_dtype) == str
@@ -810,19 +810,17 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     for key, check in ref.items():
         # check if the optional key is set to true
-        if "optional" in check:
-            if check["optional"] and key not in coords:
-                # skip this key - it is not in dax
-                continue
+        if "optional" in check and check["optional"] and key not in coords:
+            # skip this key - it is not in dax
+            continue
 
         if key not in coords:
             # Attributes not found in coords
             raise KeyError(f"Could not find required coordinate '{key}'.")
 
         # only if the key "values" is given do the validation
-        if "values" in check:
-            if not (coords[key].values == check["values"]).all():
-                raise ValueError(f"Value mismatch in DataArray and ref['{key}']")
+        if "values" in check and not (coords[key].values == check["values"]).all():
+            raise ValueError(f"Value mismatch in DataArray and ref['{key}']")
 
         # only if the key "dtype" is given do the validation
         if "dtype" in check:
@@ -1092,9 +1090,8 @@ class WeldxAccessor:
     def time_ref(self) -> Union[pd.Timestamp, None]:
         """Get the time_ref value or `None` if not set."""
         da = self._obj
-        if "time" in da.coords:
-            if "time_ref" in da.time.attrs:
-                return da.time.attrs["time_ref"]
+        if "time" in da.coords and "time_ref" in da.time.attrs:
+            return da.time.attrs["time_ref"]
 
         return None
 
