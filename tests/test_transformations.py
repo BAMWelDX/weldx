@@ -3422,7 +3422,9 @@ class TestCoordinateSystemManager:
         csm_global.plot_graph()
 
     # test_assign_and_get_data ---------------------------------------------------------
-    def setup_csm_test_assign_data(self) -> tf.CoordinateSystemManager:
+
+    @staticmethod
+    def setup_csm_test_assign_data() -> tf.CoordinateSystemManager:
         """Get a predefined CSM instance.
 
         Returns
