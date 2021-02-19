@@ -21,7 +21,6 @@ from weldx.visualization import (
     CoordinateSystemManagerVisualizerK3D,
     plot_coordinate_system_manager_matplotlib,
     plot_local_coordinate_system_matplotlib,
-    set_axes_equal,
 )
 
 _DEFAULT_LEN_UNIT = UREG.millimeters

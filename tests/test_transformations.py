@@ -3509,9 +3509,6 @@ class TestCoordinateSystemManager:
         exp: List[List[float]]
             Expected return values
 
-        Returns
-        -------
-
         """
         csm = self.setup_csm_test_assign_data()
 
