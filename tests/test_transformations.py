@@ -3521,6 +3521,7 @@ class TestCoordinateSystemManager:
         csm.assign_data(data, data_name, lcs_ref)
 
         assert data_name in csm.data_names
+        assert csm.get_data_system_name(data_name) == lcs_ref
         for lcs in csm.coordinate_system_names:
             assert csm.has_data(lcs, data_name) == (lcs == lcs_ref)
 
@@ -3539,11 +3540,25 @@ class TestCoordinateSystemManager:
         [
             (([[1, 2, 3]], {"wrong"}, "root"), TypeError, "# invalid data name"),
             (([[1, 2, 3]], "data", "not there"), ValueError, "# system does not exist"),
+            (([[1, 2, 3]], "some data", "root"), ValueError, "# name already taken 1"),
+            (([[1, 2, 3]], "some data", "lcs_1"), ValueError, "# name already taken 2"),
         ],
     )
     def test_assign_data_exceptions(self, arguments, exception_type, test_name):
+        """Test exceptions of the `assign_data` method.
+
+        Parameters
+        ----------
+        arguments : Tuple
+            A tuple of arguments that are passed to the function
+        exception_type :
+            The expected exception type
+        test_name : str
+            A string starting with an `#` that describes the test.
+
+        """
         csm = self.setup_csm_test_assign_data()
-        csm.assign_data([[1, 2, 3], [3, 2, 1]], "some_data", "root")
+        csm.assign_data([[1, 2, 3], [3, 2, 1]], "some data", "root")
         with pytest.raises(exception_type):
             csm.assign_data(*arguments)
 
@@ -3556,6 +3571,18 @@ class TestCoordinateSystemManager:
         ],
     )
     def test_has_data_exceptions(self, arguments, exception_type, test_name):
+        """Test exceptions of the `has_data` method.
+
+        Parameters
+        ----------
+        arguments : Tuple
+            A tuple of arguments that are passed to the function
+        exception_type :
+            The expected exception type
+        test_name : str
+            A string starting with an `#` that describes the test.
+
+        """
         csm = self.setup_csm_test_assign_data()
         csm.assign_data([[1, 2, 3], [3, 2, 1]], "some_data", "root")
         with pytest.raises(exception_type):
@@ -3571,6 +3598,18 @@ class TestCoordinateSystemManager:
         ],
     )
     def test_get_data_exceptions(self, arguments, exception_type, test_name):
+        """Test exceptions of the `get_data` method.
+
+        Parameters
+        ----------
+        arguments : Tuple
+            A tuple of arguments that are passed to the function
+        exception_type :
+            The expected exception type
+        test_name : str
+            A string starting with an `#` that describes the test.
+
+        """
         csm = self.setup_csm_test_assign_data()
         csm.assign_data([[1, 2, 3], [3, 2, 1]], "some data", "root")
         with pytest.raises(exception_type):

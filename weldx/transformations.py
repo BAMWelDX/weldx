@@ -1917,8 +1917,8 @@ class CoordinateSystemManager:
         #   interpolated or not?
         if not isinstance(data_name, str):
             raise TypeError("The data name must be a string.")
-        if coordinate_system_name in self._data:
-            raise Exception(f"There already is a dataset with the name '{data_name}'.")
+        if data_name in self._data:
+            raise ValueError(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(coordinate_system_name)
 
         if not isinstance(data, (xr.DataArray, PointCloud)):
