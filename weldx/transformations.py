@@ -2979,7 +2979,6 @@ class CoordinateSystemManager:
                 show_wireframe=show_wireframe,
             )
         elif backend == "mpl":
-            set_ax_eq = axes is None
             axes = plot_coordinate_system_manager_matplotlib(
                 csm=self,
                 axes=axes,
@@ -2994,8 +2993,6 @@ class CoordinateSystemManager:
                 show_trace=show_traces,
                 show_vectors=show_vectors,
             )
-            if set_ax_eq:
-                set_axes_equal(axes)
         else:
             raise ValueError(f"Unknown rendering backend: '{backend}'")
 

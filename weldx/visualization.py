@@ -510,9 +510,11 @@ def plot_coordinate_system_manager_matplotlib(
     if limits is None:
         set_axes_equal(axes)
     else:
-        axes.set_xlim(limits)
-        axes.set_ylim(limits)
-        axes.set_zlim(limits)
+        if len(limits) == 1:
+            limits = [limits[0] for i in range(3)]
+        axes.set_xlim(limits[0])
+        axes.set_ylim(limits[1])
+        axes.set_zlim(limits[2])
     axes.legend()
 
     return axes
@@ -1038,15 +1040,22 @@ class CoordinateSystemManagerVisualizerK3D:
             data_sets = self._csm.data_names
         if reference_system is None:
             reference_system = self._csm._root_system_name
-        if limits is None:
-            limits = [-1, 1]
 
+        grid_auto_fit = True
+        grid = (-1, -1, -1, 1, 1, 1)
+        if limits is not None:
+            grid_auto_fit = False
+            if len(limits) == 1:
+                grid = [limits[0][int(i / 3)] for i in range(6)]
+                print(grid)
+            else:
+                grid = [limits[i % 3][int(i / 3)] for i in range(6)]
+                print(grid)
         # create plot
         self._color_generator = color_generator_function()
         plot = k3d.plot(
-            grid_auto_fit=False,
-            camera_auto_fit=False,
-            grid=(limits[0], limits[0], limits[0], limits[1], limits[1], limits[1]),
+            grid_auto_fit=grid_auto_fit,
+            grid=grid,
         )
         self._lcs_vis = {
             lcs_name: CoordinateSystemVisualizerK3D(
