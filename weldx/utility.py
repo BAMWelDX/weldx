@@ -3,7 +3,6 @@
 import math
 from collections.abc import Iterable
 from functools import reduce
-from operator import or_
 from typing import Any, Dict, List, Union
 
 import numpy as np
