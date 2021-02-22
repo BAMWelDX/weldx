@@ -13,7 +13,7 @@ from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, 
 import weldx.geometry as geo
 
 
-def color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
+def _color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
     """Convert an RGB color tuple to an 24 bit integer.
 
     Parameters
@@ -30,7 +30,7 @@ def color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
     return int("0x{:02x}{:02x}{:02x}".format(*rgb_color_tuple), 0)
 
 
-def color_int_to_rgb(integer: int) -> Tuple[int, int, int]:
+def _color_int_to_rgb(integer: int) -> Tuple[int, int, int]:
     """Convert an 24 bit integer into a RGB color tuple with the value range (0-255).
 
     Parameters
@@ -47,7 +47,7 @@ def color_int_to_rgb(integer: int) -> Tuple[int, int, int]:
     return ((integer >> 16) & 255, (integer >> 8) & 255, integer & 255)
 
 
-def color_rgb_to_rgb_normalized(
+def _color_rgb_to_rgb_normalized(
     rgb: Tuple[int, int, int]
 ) -> Tuple[float, float, float]:
     """Normalize an RGB color tuple with the range (0-255) to the range (0.0-1.0).
@@ -66,7 +66,7 @@ def color_rgb_to_rgb_normalized(
     return tuple([val / 255 for val in rgb])
 
 
-def color_rgb_normalized_to_rgb(
+def _color_rgb_normalized_to_rgb(
     rgb: Tuple[float, float, float]
 ) -> Tuple[int, int, int]:
     """Normalize an RGB color tuple with the range (0.0-1.0) to the range (0-255).
@@ -85,7 +85,7 @@ def color_rgb_normalized_to_rgb(
     return tuple([int(np.round(val * 255)) for val in rgb])
 
 
-def color_int_to_rgb_normalized(integer):
+def _color_int_to_rgb_normalized(integer):
     """Convert an 24 bit integer into a RGB color tuple with the value range (0.0-1.0).
 
     Parameters
@@ -99,11 +99,11 @@ def color_int_to_rgb_normalized(integer):
         The resulting RGB tuple.
 
     """
-    rgb = color_int_to_rgb(integer)
-    return color_rgb_to_rgb_normalized(rgb)
+    rgb = _color_int_to_rgb(integer)
+    return _color_rgb_to_rgb_normalized(rgb)
 
 
-def color_rgb_normalized_to_int(rgb: Tuple[float, float, float]) -> int:
+def _color_rgb_normalized_to_int(rgb: Tuple[float, float, float]) -> int:
     """Convert a normalized RGB color tuple to an 24 bit integer.
 
     Parameters
@@ -117,10 +117,10 @@ def color_rgb_normalized_to_int(rgb: Tuple[float, float, float]) -> int:
         Color as 24 bit integer
 
     """
-    return color_rgb_to_int(color_rgb_normalized_to_rgb(rgb))
+    return _color_rgb_to_int(_color_rgb_normalized_to_rgb(rgb))
 
 
-def shuffled_tab20_colors() -> List[int]:
+def _shuffled_tab20_colors() -> List[int]:
     """Get a shuffled list of matplotlib 'tab20' colors.
 
     Returns
@@ -137,7 +137,7 @@ def shuffled_tab20_colors() -> List[int]:
     np.random.seed(42)
     np.random.shuffle(colors)
 
-    return [color_rgb_normalized_to_int(color) for color in colors]
+    return [_color_rgb_normalized_to_int(color) for color in colors]
 
 
 _color_list = [
@@ -147,11 +147,11 @@ _color_list = [
     0xAAAA00,
     0xFF00FF,
     0x00FFFF,
-    *shuffled_tab20_colors(),
+    *_shuffled_tab20_colors(),
 ]
 
 
-def color_generator_function() -> int:
+def _color_generator_function() -> int:
     """Yield a 24 bit RGB color integer.
 
     The returned value is taken from a predefined list.
@@ -189,7 +189,7 @@ def _get_color(key: str, color_dict: Dict[str, int], color_generator: Generator)
 
     """
     if color_dict is not None and key in color_dict:
-        return color_rgb_to_int(color_dict[key])
+        return _color_rgb_to_int(color_dict[key])
     return next(color_generator)
 
 
@@ -510,11 +510,11 @@ def plot_coordinate_system_manager_matplotlib(
         axes.set_title(title)
 
     # plot coordinate systems
-    color_gen = color_generator_function()
+    color_gen = _color_generator_function()
     for lcs_name in coordinate_systems:
         # https://stackoverflow.com/questions/13831549/
         # get-matplotlib-color-cycle-state
-        color = color_int_to_rgb_normalized(_get_color(lcs_name, colors, color_gen))
+        color = _color_int_to_rgb_normalized(_get_color(lcs_name, colors, color_gen))
         lcs = csm.get_cs(lcs_name, reference_system)
         lcs.plot(
             axes=axes,
@@ -526,7 +526,7 @@ def plot_coordinate_system_manager_matplotlib(
         )
     # plot data
     for data_name in data_sets:
-        color = color_int_to_rgb_normalized(_get_color(data_name, colors, color_gen))
+        color = _color_int_to_rgb_normalized(_get_color(data_name, colors, color_gen))
         data = csm.get_data(data_name, reference_system)
         triangles = None
         if isinstance(data, geo.SpatialData):
@@ -1093,7 +1093,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 grid = [limits[i % 3][int(i / 3)] for i in range(6)]
                 print(grid)
         # create plot
-        self._color_generator = color_generator_function()
+        self._color_generator = _color_generator_function()
         plot = k3d.plot(
             grid_auto_fit=grid_auto_fit,
             grid=grid,
