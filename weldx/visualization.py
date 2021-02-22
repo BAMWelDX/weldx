@@ -229,8 +229,7 @@ def new_3d_figure_and_axes(
     return fig, ax
 
 
-# todo rename to something like render_cs
-def plot_coordinate_system(
+def draw_coordinate_system_matplotlib(
     coordinate_system,
     axes: plt.Axes.axes,
     color: Any = None,
@@ -239,7 +238,7 @@ def plot_coordinate_system(
     show_origin: bool = True,
     show_vectors: bool = True,
 ):
-    """Plot a coordinate system in a matplotlib 3d plot.
+    """Draw a coordinate system in a matplotlib 3d plot.
 
     Parameters
     ----------
@@ -327,14 +326,6 @@ def set_axes_equal(axes):
     axes.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
-# todo remove
-# def _get_color_matplotlib(axes):
-#    color_table = ["r", "g", "b", "y"]
-#    for color in color_table:
-#        yield color
-#    yield next(axes._get_lines.prop_cycler)["color"]
-
-
 def plot_local_coordinate_system_matplotlib(
     lcs,
     axes: plt.Axes.axes = None,
@@ -390,7 +381,7 @@ def plot_local_coordinate_system_matplotlib(
 
     if lcs.is_time_dependent and time_index is None:
         for i, _ in enumerate(lcs.time):
-            plot_coordinate_system(
+            draw_coordinate_system_matplotlib(
                 lcs,
                 axes,
                 color=color,
@@ -401,7 +392,7 @@ def plot_local_coordinate_system_matplotlib(
             )
             label = None
     else:
-        plot_coordinate_system(
+        draw_coordinate_system_matplotlib(
             lcs,
             axes,
             color=color,
@@ -512,8 +503,6 @@ def plot_coordinate_system_manager_matplotlib(
     # plot coordinate systems
     color_gen = _color_generator_function()
     for lcs_name in coordinate_systems:
-        # https://stackoverflow.com/questions/13831549/
-        # get-matplotlib-color-cycle-state
         color = _color_int_to_rgb_normalized(_get_color(lcs_name, colors, color_gen))
         lcs = csm.get_cs(lcs_name, reference_system)
         lcs.plot(
