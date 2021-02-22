@@ -33,7 +33,7 @@ from weldx.geometry import (
     Profile,
     Shape,
     Trace,
-    PointCloud,
+    SpatialData,
 )
 from weldx.transformations import (
     CoordinateSystemManager,

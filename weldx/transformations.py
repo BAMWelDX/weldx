@@ -16,7 +16,7 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.geometry import PointCloud
+from weldx.geometry import SpatialData
 from weldx.visualization import (
     CoordinateSystemManagerVisualizerK3D,
     plot_coordinate_system_manager_matplotlib,
@@ -1892,7 +1892,7 @@ class CoordinateSystemManager:
 
     def assign_data(
         self,
-        data: Union[xr.DataArray, PointCloud],
+        data: Union[xr.DataArray, SpatialData],
         data_name: str,
         coordinate_system_name: str,
     ):
@@ -1900,7 +1900,7 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        data : Union[xr.DataArray, PointCloud]
+        data : Union[xr.DataArray, SpatialData]
             Spatial data
         data_name : str
             Name of the data.
@@ -1920,7 +1920,7 @@ class CoordinateSystemManager:
             raise ValueError(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(coordinate_system_name)
 
-        if not isinstance(data, (xr.DataArray, PointCloud)):
+        if not isinstance(data, (xr.DataArray, SpatialData)):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
@@ -3089,8 +3089,8 @@ class CoordinateSystemManager:
             Transformed data
 
         """
-        if isinstance(data, PointCloud):
-            return PointCloud(
+        if isinstance(data, SpatialData):
+            return SpatialData(
                 coordinates=self.transform_data(
                     data.coordinates,
                     source_coordinate_system_name,

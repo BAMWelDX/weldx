@@ -3478,7 +3478,7 @@ class TestCoordinateSystemManager:
             (
                 "lcs_3",
                 "my_data",
-                tf.PointCloud([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]]),
+                tf.SpatialData([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]]),
                 "lcs_1",
                 [[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
             ),
@@ -3525,7 +3525,7 @@ class TestCoordinateSystemManager:
             assert csm.has_data(lcs, data_name) == (lcs == lcs_ref)
 
         transformed_data = csm.get_data(data_name, lcs_out)
-        if isinstance(transformed_data, tf.PointCloud):
+        if isinstance(transformed_data, tf.SpatialData):
             transformed_data = transformed_data.coordinates.data
         else:
             transformed_data = transformed_data.data

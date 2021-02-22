@@ -1,18 +1,20 @@
 from copy import deepcopy
 
 from weldx.asdf.types import WeldxType
-from weldx.geometry import PointCloud
+from weldx.geometry import SpatialData
 
 
-class PointCloudTypeASDF(WeldxType):
-    name = "core/geometry/point_cloud"
+class SpatialDataTypeASDF(WeldxType):
+    """ASDF serialization class for `SpatialData`."""
+
+    name = "core/geometry/spatial_data"
     version = "1.0.0"
-    types = [PointCloud]
+    types = [SpatialData]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node: PointCloud, ctx):
+    def to_tree(cls, node: SpatialData, ctx):
         """
         Convert an 'weldx.geometry.point_cloud' instance into YAML  representations.
 
@@ -36,7 +38,7 @@ class PointCloudTypeASDF(WeldxType):
         return tree
 
     @classmethod
-    def from_tree(cls, tree, ctx) -> PointCloud:
+    def from_tree(cls, tree, ctx) -> SpatialData:
         """
         Converts basic types representing YAML trees into an
         'weldx.geometry.point_cloud'.
@@ -55,4 +57,4 @@ class PointCloudTypeASDF(WeldxType):
             An instance of the 'weldx.geometry.point_cloud' type.
 
         """
-        return PointCloud(**tree)
+        return SpatialData(**tree)

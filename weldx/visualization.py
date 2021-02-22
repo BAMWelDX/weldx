@@ -529,7 +529,7 @@ def plot_coordinate_system_manager_matplotlib(
         color = color_int_to_rgb_normalized(_get_color(data_name, colors, color_gen))
         data = csm.get_data(data_name, reference_system)
         triangles = None
-        if isinstance(data, geo.PointCloud):
+        if isinstance(data, geo.SpatialData):
             triangles = data.triangles
             data = data.coordinates
 
@@ -886,7 +886,7 @@ class SpatialDataVisualizer:
 
         Parameters
         ----------
-        data : numpy.ndarray or weldx.geometry.PointCloud
+        data : numpy.ndarray or weldx.geometry.SpatialData
             The data that should be visualized
         name : str
             Name of the data
@@ -908,7 +908,7 @@ class SpatialDataVisualizer:
 
         """
         triangles = None
-        if isinstance(data, geo.PointCloud):
+        if isinstance(data, geo.SpatialData):
             triangles = data.triangles
             data = data.coordinates.data
 

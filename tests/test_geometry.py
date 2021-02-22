@@ -12,7 +12,7 @@ import tests._helpers as helpers
 import weldx.geometry as geo
 import weldx.transformations as tf
 import weldx.utility as ut
-from weldx.geometry import PointCloud
+from weldx.geometry import SpatialData
 
 # helpers ---------------------------------------------------------------------
 
@@ -2778,12 +2778,12 @@ def test_geometry_rasterization_profile_interpolation():
 
 
 # --------------------------------------------------------------------------------------
-# PointCloud
+# SpatialData
 # --------------------------------------------------------------------------------------
 
 
 class TestPointCloud:
-    """Test the functionality of the `PointCloud` class."""
+    """Test the functionality of the `SpatialData` class."""
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -2796,7 +2796,7 @@ class TestPointCloud:
         ],
     )
     def test_class_creation(arguments):
-        """Test creation of a `PointCloud` instance.
+        """Test creation of a `SpatialData` instance.
 
         Parameters
         ----------
@@ -2804,7 +2804,7 @@ class TestPointCloud:
             Tuple of arguments that are passed to the `__init__` method
 
         """
-        pc = PointCloud(*arguments)
+        pc = SpatialData(*arguments)
         assert isinstance(pc.coordinates, DataArray)
         assert np.allclose(pc.coordinates.data, arguments[0])
 
@@ -2821,7 +2821,7 @@ class TestPointCloud:
         ],
     )
     def test_class_creation_exceptions(arguments, exception_type, test_name):
-        """Test exceptions during creation of a `PointCloud` instance.
+        """Test exceptions during creation of a `SpatialData` instance.
 
         Parameters
         ----------
@@ -2834,4 +2834,4 @@ class TestPointCloud:
 
         """
         with pytest.raises(exception_type):
-            PointCloud(*arguments)
+            SpatialData(*arguments)
