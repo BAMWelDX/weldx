@@ -54,7 +54,7 @@ jobs:
 
       - name: Build from local conda recipe
         shell: bash -l {0}
-        run: conda build .
+        run: conda mambabuild .
 
       - name: set package file env
         shell: bash -l {0}
