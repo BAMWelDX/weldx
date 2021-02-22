@@ -130,8 +130,8 @@ def shuffled_tab20_colors() -> List[int]:
 
     """
     num_colors = 20
-    colors = plt.cm.get_cmap("tab20", num_colors)
-    colors = [colors(i)[:3] for i in range(num_colors)]
+    colormap = plt.cm.get_cmap("tab20", num_colors)
+    colors = [colormap(i)[:3] for i in range(num_colors)]
 
     # randomize colors
     np.random.seed(42)
