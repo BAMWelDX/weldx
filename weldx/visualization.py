@@ -728,23 +728,6 @@ class CoordinateSystemVisualizerK3D:
         model_matrix[:3, 3] = coordinates
         return model_matrix
 
-    def _update_positions(self, coordinates: np.ndarray, orientation: np.ndarray):
-        """Update the positions of the coordinate cross and label.
-
-        Parameters
-        ----------
-        coordinates : numpy.ndarray
-            The new coordinates
-        orientation : numpy.ndarray
-            The new orientation
-
-        """
-        self._vectors.origins = [coordinates for _ in range(3)]
-        self._vectors.vectors = orientation.transpose()
-        self.origin.model_matrix = self._create_model_matrix(coordinates, orientation)
-        if self._label is not None:
-            self._label.position = coordinates + 0.05
-
     @staticmethod
     def _get_coordinates_and_orientation(lcs, index: int = 0):
         """Get the coordinates and orientation of a coordinate system.
@@ -774,6 +757,23 @@ class CoordinateSystemVisualizerK3D:
             orientation = orientation[index]
 
         return coordinates, orientation
+
+    def _update_positions(self, coordinates: np.ndarray, orientation: np.ndarray):
+        """Update the positions of the coordinate cross and label.
+
+        Parameters
+        ----------
+        coordinates : numpy.ndarray
+            The new coordinates
+        orientation : numpy.ndarray
+            The new orientation
+
+        """
+        self._vectors.origins = [coordinates for _ in range(3)]
+        self._vectors.vectors = orientation.transpose()
+        self.origin.model_matrix = self._create_model_matrix(coordinates, orientation)
+        if self._label is not None:
+            self._label.position = coordinates + 0.05
 
     def show_label(self, show_label: bool):
         """Set the visibility of the label.
