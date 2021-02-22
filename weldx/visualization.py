@@ -411,16 +411,18 @@ def plot_local_coordinate_system_matplotlib(
     return axes
 
 
-def _set_limits_matplotlib(axes: plt.Axes.axes, limits: List[Tuple[float, float]]):
-    """Set the limits of an axes object
+def _set_limits_matplotlib(
+    axes: plt.Axes.axes, limits: Union[List[Tuple[float, float]], Tuple[float, float]]
+):
+    """Set the limits of an axes object.
 
     Parameters
     ----------
     axes : matplotlib.pyplot.Axes.axes
         The axes object
-    limits :  List[Tuple[float, float]]
-        Each tuple marks lower and upper boundary of the x, y and z axis. If the list
-        contains only a single tuple, the boundaries are used for all axis. If `None`
+    limits :  Tuple[float, float] or List[Tuple[float, float]]
+        Each tuple marks lower and upper boundary of the x, y and z axis. If only a
+        single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
 
     """
@@ -447,7 +449,7 @@ def plot_coordinate_system_manager_matplotlib(
     time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
     time_ref: pd.Timestamp = None,
     title: str = None,
-    limits: List[Tuple[float, float]] = None,
+    limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
     show_origins: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
@@ -484,9 +486,9 @@ def plot_coordinate_system_manager_matplotlib(
         `pandas.TimedeltaIndex`
     title : str
         The title of the plot
-    limits : List[Tuple[float, float]]
-        Each tuple marks lower and upper boundary of the x, y and z axis. If the list
-        contains only a single tuple, the boundaries are used for all axis. If `None`
+    limits :  Tuple[float, float] or List[Tuple[float, float]]
+        Each tuple marks lower and upper boundary of the x, y and z axis. If only a
+        single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
     show_origins : bool
         If `True`, the origins of the coordinate system are visualized in the color
@@ -575,7 +577,7 @@ def plot_coordinate_systems(
     cs_data: Tuple[str, Dict],
     axes: plt.Axes.axes = None,
     title: str = None,
-    limits: List[Tuple[float, float]] = None,
+    limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
     time_index: int = None,
     legend_pos: str = "lower left",
 ) -> plt.Axes.axes:
@@ -591,9 +593,9 @@ def plot_coordinate_systems(
         one will be created.
     title : str
         The title of the plot
-    limits : List[Tuple[float, float]]
-        Each tuple marks lower and upper boundary of the x, y and z axis. If the list
-        contains only a single tuple, the boundaries are used for all axis. If `None`
+    limits :  Tuple[float, float] or List[Tuple[float, float]]
+        Each tuple marks lower and upper boundary of the x, y and z axis. If only a
+        single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
     time_index : int
         Index of a specific time step that should be plotted if the corresponding
