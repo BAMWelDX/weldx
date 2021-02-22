@@ -2876,7 +2876,7 @@ class CoordinateSystemManager:
             graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
         )
 
-    def plot_coordinate_systems(
+    def plot(
         self,
         backend: str = "mpl",
         axes: plt.Axes.axes = None,
