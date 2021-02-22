@@ -427,8 +427,11 @@ def _set_limits_matplotlib(axes: plt.Axes.axes, limits: List[Tuple[float, float]
     if limits is None:
         set_axes_equal(axes)
     else:
+        if isinstance(limits, Tuple):
+            limits = [limits]
         if len(limits) == 1:
-            limits = [limits[0] for i in range(3)]
+            limits = [limits[0] for _ in range(3)]
+            print(limits)
         axes.set_xlim(limits[0])
         axes.set_ylim(limits[1])
         axes.set_zlim(limits[2])
