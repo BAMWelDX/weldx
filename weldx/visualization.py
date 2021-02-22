@@ -13,18 +13,6 @@ from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, 
 import weldx.geometry as geo
 
 
-def random_color_rgb() -> int:
-    """Get a random RGB color as 24 bit integer.
-
-    Returns
-    -------
-    int :
-        RGB color as integer
-
-    """
-    return np.random.choice(range(256), size=3)
-
-
 def color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
     """Convert an RGB color tuple to an 24 bit integer.
 
@@ -78,6 +66,25 @@ def color_rgb_to_rgb_normalized(
     return tuple([val / 255 for val in rgb])
 
 
+def color_rgb_normalized_to_rgb(
+    rgb: Tuple[float, float, float]
+) -> Tuple[int, int, int]:
+    """Normalize an RGB color tuple with the range (0.0-1.0) to the range (0-255).
+
+    Parameters
+    ----------
+    rgb : Tuple[float, float, float]
+        Color tuple with values in the range (0.0-1.0)
+
+    Returns
+    -------
+    Tuple[int, int, int] :
+        Color tuple with values in the range (0-255)
+
+    """
+    return tuple([int(np.round(val * 255)) for val in rgb])
+
+
 def color_int_to_rgb_normalized(integer):
     """Convert an 24 bit integer into a RGB color tuple with the value range (0.0-1.0).
 
@@ -96,6 +103,43 @@ def color_int_to_rgb_normalized(integer):
     return color_rgb_to_rgb_normalized(rgb)
 
 
+def color_rgb_normalized_to_int(rgb: Tuple[float, float, float]) -> int:
+    """Convert a normalized RGB color tuple to an 24 bit integer.
+
+    Parameters
+    ----------
+    rgb : Tuple[float, float, float]
+        The color as RGB tuple. Values must be in the range 0.0-1.0.
+
+    Returns
+    -------
+    int :
+        Color as 24 bit integer
+
+    """
+    return color_rgb_to_int(color_rgb_normalized_to_rgb(rgb))
+
+
+def shuffled_tab20_colors() -> List[int]:
+    """Get a shuffled list of matplotlib 'tab20' colors.
+
+    Returns
+    -------
+    List[int] :
+        List of colors
+
+    """
+    num_colors = 20
+    colors = plt.cm.get_cmap("tab20", num_colors)
+    colors = [colors(i)[:3] for i in range(num_colors)]
+
+    # randomize colors
+    np.random.seed(42)
+    np.random.shuffle(colors)
+
+    return [color_rgb_normalized_to_int(color) for color in colors]
+
+
 _color_list = [
     0xFF0000,
     0x00AA00,
@@ -103,10 +147,7 @@ _color_list = [
     0xAAAA00,
     0xFF00FF,
     0x00FFFF,
-    # todo: add colors manually or find better solution since random colors are not
-    #       guaranteed to have good visibility and to differ significantly from already
-    #       existing colors
-    *[color_rgb_to_int(random_color_rgb()) for _ in range(100)],
+    *shuffled_tab20_colors(),
 ]
 
 
