@@ -434,7 +434,9 @@ def get_time_union(
     # TODO: add tests
 
     # see https://stackoverflow.com/a/44762908/11242411
-    return reduce(or_, (to_pandas_time_index(idx) for idx in list_of_objects))
+    return reduce(
+        lambda x, y: x.union(y), (to_pandas_time_index(idx) for idx in list_of_objects)
+    )
 
 
 def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
