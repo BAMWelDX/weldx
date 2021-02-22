@@ -411,6 +411,29 @@ def plot_local_coordinate_system_matplotlib(
     return axes
 
 
+def _set_limits_matplotlib(axes: plt.Axes.axes, limits: List[Tuple[float, float]]):
+    """Set the limits of an axes object
+
+    Parameters
+    ----------
+    axes : matplotlib.pyplot.Axes.axes
+        The axes object
+    limits :  List[Tuple[float, float]]
+        Each tuple marks lower and upper boundary of the x, y and z axis. If the list
+        contains only a single tuple, the boundaries are used for all axis. If `None`
+        is provided, the axis are adjusted to be of equal length.
+
+    """
+    if limits is None:
+        set_axes_equal(axes)
+    else:
+        if len(limits) == 1:
+            limits = [limits[0] for i in range(3)]
+        axes.set_xlim(limits[0])
+        axes.set_ylim(limits[1])
+        axes.set_zlim(limits[2])
+
+
 def plot_coordinate_system_manager_matplotlib(
     csm,
     axes: plt.Axes.axes = None,
@@ -459,7 +482,9 @@ def plot_coordinate_system_manager_matplotlib(
     title : str
         The title of the plot
     limits : List[Tuple[float, float]]
-        The limits of the plotted volume
+        Each tuple marks lower and upper boundary of the x, y and z axis. If the list
+        contains only a single tuple, the boundaries are used for all axis. If `None`
+        is provided, the axis are adjusted to be of equal length.
     show_origins : bool
         If `True`, the origins of the coordinate system are visualized in the color
         assigned to the coordinate system.
@@ -537,14 +562,7 @@ def plot_coordinate_system_manager_matplotlib(
                     color=color,
                 )
 
-    if limits is None:
-        set_axes_equal(axes)
-    else:
-        if len(limits) == 1:
-            limits = [limits[0] for i in range(3)]
-        axes.set_xlim(limits[0])
-        axes.set_ylim(limits[1])
-        axes.set_zlim(limits[2])
+    _set_limits_matplotlib(axes, limits)
     axes.legend()
 
     return axes
@@ -571,7 +589,9 @@ def plot_coordinate_systems(
     title : str
         The title of the plot
     limits : List[Tuple[float, float]]
-        The limits of the plotted volume
+        Each tuple marks lower and upper boundary of the x, y and z axis. If the list
+        contains only a single tuple, the boundaries are used for all axis. If `None`
+        is provided, the axis are adjusted to be of equal length.
     time_index : int
         Index of a specific time step that should be plotted if the corresponding
         coordinate system is time dependent
@@ -593,12 +613,7 @@ def plot_coordinate_systems(
             kwargs["time_index"] = time_index
         lcs.plot(axes, **kwargs)
 
-    if limits is None:
-        set_axes_equal(axes)
-    else:
-        axes.set_xlim(limits)
-        axes.set_ylim(limits)
-        axes.set_zlim(limits)
+    _set_limits_matplotlib(axes, limits)
 
     if title is not None:
         axes.set_title(title)
