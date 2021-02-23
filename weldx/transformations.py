@@ -1238,8 +1238,6 @@ class CoordinateSystemManager:
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
         time_ref: pd.Timestamp = None,
-        # _graph: Union[nx.DiGraph, None] = None,
-        # _subsystems=None,
     ):
         """Construct a coordinate system manager.
 
