@@ -410,7 +410,7 @@ class LocalCoordinateSystem:
     Notes
     -----
     Learn how to use this class by reading the
-    :doc:`Tutorial <doc/tutorials/transformations_01_coordinate_systems>`.
+    :doc:`Tutorial <../tutorials/transformations_01_coordinate_systems>`.
 
     """
 
@@ -1288,7 +1288,7 @@ class CoordinateSystemManager:
     Notes
     -----
     Learn how to use this class by reading the
-    :doc:`Tutorial <doc/tutorials/transformations_02_coordinate_system_manager>`.
+    :doc:`Tutorial <../tutorials/transformations_02_coordinate_system_manager>`.
 
     """
 
