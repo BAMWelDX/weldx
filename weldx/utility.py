@@ -385,7 +385,7 @@ def mat_vec_mul(a, b) -> np.ndarray:
         Resulting vector [n, ]
 
     """
-    return np.matmul(a, b[..., np.newaxis]).squeeze()
+    return np.matmul(a, b[..., np.newaxis]).squeeze(axis=-1)
 
 
 def swap_list_items(arr, i1, i2) -> list:
