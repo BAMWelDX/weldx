@@ -207,7 +207,7 @@ def new_3d_figure_and_axes(
     width : int
         Width in pixels
     pixel_per_inch :
-        Defines how many pixels an inch covers. This is only relevant fon the fallback
+        Defines how many pixels an inch covers. This is only relevant for the fallback
         method.
 
     Returns
