@@ -1088,7 +1088,7 @@ class CoordinateSystemManagerVisualizerK3D:
         if data_sets is None:
             data_sets = self._csm.data_names
         if reference_system is None:
-            reference_system = self._csm._root_system_name
+            reference_system = self._csm.root_system_name
 
         grid_auto_fit = True
         grid = (-1, -1, -1, 1, 1, 1)
@@ -1142,9 +1142,9 @@ class CoordinateSystemManagerVisualizerK3D:
         )
 
         # add title
-        self.title = None
+        self._title = None
         if title is not None:
-            self.title = k3d.text2d(
+            self._title = k3d.text2d(
                 f"<b>{title}</b>",
                 position=(0.5, 0),
                 color=0x000000,
@@ -1152,7 +1152,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 size=1.5,
                 reference_point="ct",
             )
-            plot += self.title
+            plot += self._title
 
         # add time info
         self._time = time
@@ -1263,49 +1263,43 @@ class CoordinateSystemManagerVisualizerK3D:
         time_slider.disabled = disable_time_widgets
 
         # callback functions
-        def on_reference_change(change):
-            """Handle events of the reference system drop down."""
+        def _reference_callback(change):
             self.update_reference_system(change["new"])
 
-        def on_time_change(change):
-            """Handle events of the time slider."""
+        def _time_callback(change):
             self.update_time_index(change["new"])
 
-        def on_vectors_change(change):
-            """Handle events of the vectors checkbox."""
+        def _vectors_callback(change):
             self.show_vectors(change["new"])
 
-        def on_origins_change(change):
-            """Handle events of the origins checkbox."""
+        def _origins_callback(change):
             self.show_origins(change["new"])
 
-        def on_traces_change(change):
-            """Handle events of the traces checkbox."""
+        def _traces_callback(change):
             self.show_traces(change["new"])
 
-        def on_labels_change(change):
-            """Handle events of the labels checkbox."""
+        def _labels_callback(change):
             self.show_labels(change["new"])
 
-        def _on_data_change(change):
+        def _data_callback(change):
             self.set_data_visualization_method(change["new"])
 
-        def _on_data_label_cb_change(change):
+        def _data_labels_callback(change):
             self.show_data_labels(change["new"])
 
-        def _on_show_wireframe(change):
+        def _wireframe_callback(change):
             self.show_wireframes(change["new"])
 
         # register callbacks
-        time_slider.observe(on_time_change, names="value")
-        reference_dropdown.observe(on_reference_change, names="value")
-        vectors_cb.observe(on_vectors_change, names="value")
-        origin_cb.observe(on_origins_change, names="value")
-        traces_cb.observe(on_traces_change, names="value")
-        labels_cb.observe(on_labels_change, names="value")
-        data_dropdown.observe(_on_data_change, names="value")
-        data_labels_cb.observe(_on_data_label_cb_change, names="value")
-        wf_cb.observe(_on_show_wireframe, names="value")
+        time_slider.observe(_time_callback, names="value")
+        reference_dropdown.observe(_reference_callback, names="value")
+        vectors_cb.observe(_vectors_callback, names="value")
+        origin_cb.observe(_origins_callback, names="value")
+        traces_cb.observe(_traces_callback, names="value")
+        labels_cb.observe(_labels_callback, names="value")
+        data_dropdown.observe(_data_callback, names="value")
+        data_labels_cb.observe(_data_labels_callback, names="value")
+        wf_cb.observe(_wireframe_callback, names="value")
 
         # create control panel
         row_1 = HBox([time_slider, play, reference_dropdown])
