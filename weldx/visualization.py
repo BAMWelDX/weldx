@@ -1309,6 +1309,108 @@ class CoordinateSystemManagerVisualizerK3D:
             return VBox([row_1, row_2, row_3])
         return VBox([row_1, row_2])
 
+    def set_data_visualization_method(self, representation: str):
+        """Set the data visualization method.
+
+        Parameters
+        ----------
+        representation : str
+            The data visualization method. Options are 'point', 'mesh', 'both' and
+            'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
+            available and points if not.
+
+        """
+        for _, data_vis in self._data_vis.items():
+            data_vis.set_visualization_method(representation)
+
+    def show_data_labels(self, show_data_labels: bool):
+        """Set the visibility of data labels.
+
+        Parameters
+        ----------
+        show_data_labels: bool
+            If `True`, labels are shown.
+
+        """
+        for _, data_vis in self._data_vis.items():
+            data_vis.show_label(show_data_labels)
+
+    def show_labels(self, show_labels: bool):
+        """Set the visibility of the coordinate systems' labels.
+
+        Parameters
+        ----------
+        show_labels : bool
+            If `True`, the coordinate systems' labels are shown.
+
+        """
+        for _, lcs_vis in self._lcs_vis.items():
+            lcs_vis.show_label(show_labels)
+
+    def show_origins(self, show_origins: bool):
+        """Set the visibility of the coordinate systems' origins.
+
+        Parameters
+        ----------
+        show_origins : bool
+            If `True`, the coordinate systems origins are shown.
+
+        """
+        for _, lcs_vis in self._lcs_vis.items():
+            lcs_vis.show_origin(show_origins)
+
+    def show_traces(self, show_traces: bool):
+        """Set the visibility of coordinate systems' traces.
+
+        Parameters
+        ----------
+        show_traces : bool
+            If `True`, the coordinate systems' traces are shown.
+
+        """
+        for _, lcs_vis in self._lcs_vis.items():
+            lcs_vis.show_trace(show_traces)
+
+    def show_vectors(self, show_vectors: bool):
+        """Set the visibility of the coordinate axis vectors.
+
+        Parameters
+        ----------
+        show_vectors : bool
+            If `True`, the coordinate axis vectors are shown.
+
+        """
+        for _, lcs_vis in self._lcs_vis.items():
+            lcs_vis.show_vectors(show_vectors)
+
+    def show_wireframes(self, show_wireframes: bool):
+        """Set if meshes should be drawn in wireframe mode.
+
+        Parameters
+        ----------
+        show_wireframes : bool
+            If `True`, meshes are rendered as wireframes
+
+        """
+        for _, data_vis in self._data_vis.items():
+            data_vis.show_wireframe(show_wireframes)
+
+    def update_reference_system(self, reference_system):
+        """Update the reference system of the plot.
+
+        Parameters
+        ----------
+        reference_system : str
+            Name of the new reference system
+
+        """
+        for lcs_name, lcs_vis in self._lcs_vis.items():
+            lcs_vis.update_lcs(
+                self._csm.get_cs(lcs_name, reference_system), self._current_time_index
+            )
+        for _, data_vis in self._data_vis.items():
+            data_vis.update_model_matrix()
+
     def update_time(
         self,
         time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
@@ -1346,105 +1448,3 @@ class CoordinateSystemManagerVisualizerK3D:
         for _, data_vis in self._data_vis.items():
             data_vis.update_model_matrix()
         self._time_info.text = f"<b>time:</b> {self._time[index]}"
-
-    def show_data_labels(self, show_data_labels: bool):
-        """Set the visibility of data labels.
-
-        Parameters
-        ----------
-        show_data_labels: bool
-            If `True`, labels are shown.
-
-        """
-        for _, data_vis in self._data_vis.items():
-            data_vis.show_label(show_data_labels)
-
-    def show_vectors(self, show_vectors: bool):
-        """Set the visibility of the coordinate axis vectors.
-
-        Parameters
-        ----------
-        show_vectors : bool
-            If `True`, the coordinate axis vectors are shown.
-
-        """
-        for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis.show_vectors(show_vectors)
-
-    def show_origins(self, show_origins: bool):
-        """Set the visibility of the coordinate systems' origins.
-
-        Parameters
-        ----------
-        show_origins : bool
-            If `True`, the coordinate systems origins are shown.
-
-        """
-        for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis.show_origin(show_origins)
-
-    def show_traces(self, show_traces: bool):
-        """Set the visibility of coordinate systems' traces.
-
-        Parameters
-        ----------
-        show_traces : bool
-            If `True`, the coordinate systems' traces are shown.
-
-        """
-        for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis.show_trace(show_traces)
-
-    def show_labels(self, show_labels: bool):
-        """Set the visibility of the coordinate systems' labels.
-
-        Parameters
-        ----------
-        show_labels : bool
-            If `True`, the coordinate systems' labels are shown.
-
-        """
-        for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis.show_label(show_labels)
-
-    def show_wireframes(self, show_wireframes: bool):
-        """Set if meshes should be drawn in wireframe mode.
-
-        Parameters
-        ----------
-        show_wireframes : bool
-            If `True`, meshes are rendered as wireframes
-
-        """
-        for _, data_vis in self._data_vis.items():
-            data_vis.show_wireframe(show_wireframes)
-
-    def set_data_visualization_method(self, representation: str):
-        """Set the data visualization method.
-
-        Parameters
-        ----------
-        representation : str
-            The data visualization method. Options are 'point', 'mesh', 'both' and
-            'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
-            available and points if not.
-
-        """
-        for _, data_vis in self._data_vis.items():
-            data_vis.set_visualization_method(representation)
-
-    def update_reference_system(self, reference_system):
-        """Update the reference system of the plot.
-
-        Parameters
-        ----------
-        reference_system : str
-            Name of the new reference system
-
-        """
-        for lcs_name, lcs_vis in self._lcs_vis.items():
-            lcs_vis.update_lcs(
-                self._csm.get_cs(lcs_name, reference_system), self._current_time_index
-            )
-        for _, data_vis in self._data_vis.items():
-            data_vis.update_model_matrix()
