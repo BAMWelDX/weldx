@@ -433,7 +433,6 @@ def _set_limits_matplotlib(
             limits = [limits]
         if len(limits) == 1:
             limits = [limits[0] for _ in range(3)]
-            print(limits)
         axes.set_xlim(limits[0])
         axes.set_ylim(limits[1])
         axes.set_zlim(limits[2])
@@ -1097,10 +1096,9 @@ class CoordinateSystemManagerVisualizerK3D:
             grid_auto_fit = False
             if len(limits) == 1:
                 grid = [limits[0][int(i / 3)] for i in range(6)]
-                print(grid)
             else:
                 grid = [limits[i % 3][int(i / 3)] for i in range(6)]
-                print(grid)
+
         # create plot
         self._color_generator = _color_generator_function()
         plot = k3d.plot(
