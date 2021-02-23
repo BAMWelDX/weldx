@@ -1309,14 +1309,11 @@ class CoordinateSystemManager:
         """
         csm = cls(root_coordinate_system_name, coordinate_system_manager_name, time_ref)
 
-        csm._sub_system_data_dict = subsystems
-        if csm._sub_system_data_dict is None:
-            csm._sub_system_data_dict = {}
+        if subsystems is not None:
+            csm._sub_system_data_dict = subsystems
 
-        csm._graph = graph
-        if csm._graph is None:
-            csm._graph = nx.DiGraph()
-            csm._add_coordinate_system_node(root_coordinate_system_name)
+        if graph is not None:
+            csm._graph = graph
 
         return csm
 
@@ -2550,8 +2547,8 @@ class CoordinateSystemManager:
                 ext_sub_system_data["root"],
                 sub_system_name,
                 time_ref=ext_sub_system_data["time_ref"],
-                _graph=self._graph.subgraph(members).copy(),
-                _subsystems=ext_sub_system_data["sub system data"],
+                graph=self._graph.subgraph(members).copy(),
+                subsystems=ext_sub_system_data["sub system data"],
             )
             sub_system_list.append(csm_sub)
 
