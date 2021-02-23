@@ -1288,7 +1288,7 @@ class CoordinateSystemManager:
     Notes
     -----
     Learn how to use this class by reading the
-    :doc:`Tutorial <doc/tutorials/transformations_02_coordinate_system_manager>`.
+    :doc:`Tutorial <tutorials/transformations_02_coordinate_system_manager>`.
 
     """
 
