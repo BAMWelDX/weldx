@@ -459,7 +459,7 @@ def plot_coordinate_system_manager_matplotlib(
     ----------
     csm : weldx.transformations.CoordinateSystemManager
         The `weldx.transformations.CoordinateSystemManager` that should be plotted
-    axes : matplotlib.Axes.axes
+    axes : matplotlib.axes.Axes
         The target axes object that should be drawn to. If `None` is provided, a new
         one will be created.
     reference_system : str
@@ -587,7 +587,7 @@ def plot_coordinate_systems(
     cs_data : Tuple[str, Dict]
         A tuple containing the coordinate system that should be plotted and a dictionary
         with the key word arguments that should be passed to its plot function.
-    axes : matplotlip.Axes.axes
+    axes : matplotlib.axes.Axes
         The target axes object that should be drawn to. If `None` is provided, a new
         one will be created.
     title : str
