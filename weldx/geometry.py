@@ -2276,7 +2276,7 @@ class SpatialData:
 
         Parameters
         ----------
-        geometry : weldx.Geometry
+        geometry : weldx.geometry.Geometry
             A single unstacked geometry rasterization.
 
         Returns

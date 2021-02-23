@@ -244,7 +244,7 @@ def draw_coordinate_system_matplotlib(
     ----------
     coordinate_system : weldx.transformations.LocalCoordinateSystem
         Coordinate system
-    axes : matplotlib.pyplot.Axes.axes
+    axes : matplotlib.axes.Axes
         Target matplotlib axes object
     color : Any
         Valid matplotlib color selection. The origin of the coordinate system
@@ -344,7 +344,7 @@ def plot_local_coordinate_system_matplotlib(
     ----------
     lcs : weldx.transformations.LocalCoordinateSystem
         The coordinate system that should be visualized
-    axes : matplotlib.pyplot.Axes.axes
+    axes : matplotlib.axes.Axes
         The target matplotlib axes. If `None` is provided, a new one will be created
     color : Any
         An arbitrary color. The data type must be compatible with matplotlib.
@@ -369,7 +369,7 @@ def plot_local_coordinate_system_matplotlib(
 
     Returns
     -------
-    matplotlib.pyplot.Axes.axes :
+    matplotlib.axes.Axes :
         The axes object that was used as canvas for the plot
 
     """
@@ -418,7 +418,7 @@ def _set_limits_matplotlib(
 
     Parameters
     ----------
-    axes : matplotlib.pyplot.Axes.axes
+    axes : matplotlib.axes.Axes
         The axes object
     limits :  Tuple[float, float] or List[Tuple[float, float]]
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
@@ -453,13 +453,13 @@ def plot_coordinate_system_manager_matplotlib(
     show_trace: bool = True,
     show_vectors: bool = True,
 ) -> plt.Axes.axes:
-    """Plot the coordinate systems of a `CoordinateSystemManager` using matplotlib.
+    """Plot the coordinate systems of a `weldx.transformations.CoordinateSystemManager`.
 
     Parameters
     ----------
-    csm : weldx.CoordinateSystemManager
-        The `CoordinateSystemManager` that should be plotted
-    axes : plt.Axes.axes
+    csm : weldx.transformations.CoordinateSystemManager
+        The `weldx.transformations.CoordinateSystemManager` that should be plotted
+    axes : matplotlib.Axes.axes
         The target axes object that should be drawn to. If `None` is provided, a new
         one will be created.
     reference_system : str
@@ -478,7 +478,7 @@ def plot_coordinate_system_manager_matplotlib(
         Each coordinate system or data set that does not have a mapping in this
         dictionary will get a default color assigned to it.
     time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-           LocalCoordinateSystem
+           weldx.transformations.LocalCoordinateSystem
         The time steps that should be plotted
     time_ref : pandas.Timestamp
         A reference timestamp that can be provided if the ``time`` parameter is a
@@ -499,7 +499,7 @@ def plot_coordinate_system_manager_matplotlib(
 
     Returns
     -------
-    matplotlib.pyplot.Axes.axes :
+    matplotlib.axes.Axes :
         The axes object that was used as canvas for the plot
 
     """
@@ -587,7 +587,7 @@ def plot_coordinate_systems(
     cs_data : Tuple[str, Dict]
         A tuple containing the coordinate system that should be plotted and a dictionary
         with the key word arguments that should be passed to its plot function.
-    axes : plt.Axes.axes
+    axes : matplotlip.Axes.axes
         The target axes object that should be drawn to. If `None` is provided, a new
         one will be created.
     title : str
@@ -605,7 +605,7 @@ def plot_coordinate_systems(
 
     Returns
     -------
-    matplotlib.pyplot.Axes.axes :
+    matplotlib.axes.Axes :
         The axes object that was used as canvas for the plot
 
     """
@@ -630,7 +630,7 @@ def plot_coordinate_systems(
 
 
 class CoordinateSystemVisualizerK3D:
-    """Visualizes a `weldx.LocalCoordinateSystem` using k3d."""
+    """Visualizes a `weldx.transformations.LocalCoordinateSystem` using k3d."""
 
     def __init__(
         self,
@@ -646,7 +646,7 @@ class CoordinateSystemVisualizerK3D:
 
         Parameters
         ----------
-        lcs : weldx.LocalCoordinateSystem
+        lcs : weldx.transformations.LocalCoordinateSystem
             Coordinate system that should be visualized
         plot : k3d.Plot
             A k3d plotting widget.
@@ -828,7 +828,7 @@ class CoordinateSystemVisualizerK3D:
 
         Parameters
         ----------
-        lcs : weldx.LocalCoordinateSystem
+        lcs : weldx.transformations.LocalCoordinateSystem
             The new coordinate system
         index : int
             The time index of the new coordinate system that should be visualized.
@@ -1010,7 +1010,7 @@ class SpatialDataVisualizer:
 
 
 class CoordinateSystemManagerVisualizerK3D:
-    """Visualizes a `weldx.CoordinateSystemManager` using k3d."""
+    """Visualizes a `weldx.transformations.CoordinateSystemManager` using k3d."""
 
     def __init__(
         self,
@@ -1034,8 +1034,9 @@ class CoordinateSystemManagerVisualizerK3D:
 
         Parameters
         ----------
-        csm : weldx.CoordinateSystemManager
-            The `CoordinateSystemManager` that should be visualized
+        csm : weldx.transformations.CoordinateSystemManager
+            The `weldx.transformations.CoordinateSystemManager` instance that should be
+            visualized
         coordinate_systems : List[str]
             The names of the coordinate systems that should be visualized. If ´None´ is
             provided, all systems are plotted
@@ -1051,13 +1052,13 @@ class CoordinateSystemManagerVisualizerK3D:
             dictionary will get a default color assigned to it.
         reference_system : str
             Name of the initial reference system. If `None` is provided, the root system
-            of the `CoordinateSystemManager` instance will be used
+            of the `weldx.transformations.CoordinateSystemManager` instance will be used
         title : str
             The title of the plot
         limits : List[Tuple[float, float]]
             The limits of the plotted volume
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               LocalCoordinateSystem
+               weldx.transformations.LocalCoordinateSystem
             The time steps that should be plotted initially
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a

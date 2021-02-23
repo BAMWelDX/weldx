@@ -1006,7 +1006,7 @@ def triangulate_geometry(geo_data):
 
     Returns
     -------
-    np.ndarray, np.ndarray
+    numpy.ndarray, numpy.ndarray
         3D point cloud data and triangulation indexes
 
     """

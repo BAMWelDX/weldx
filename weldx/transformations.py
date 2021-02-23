@@ -1220,7 +1220,7 @@ class LocalCoordinateSystem:
 
         Parameters
         ----------
-        axes : matplotlib.pyplot.Axes.axes
+        axes : matplotlib.axes.Axes
             The target matplotlib axes object that should be drawn to. If `None` is
             provided, a new one will be created.
         color : str
@@ -1900,7 +1900,7 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        data : Union[xr.DataArray, SpatialData]
+        data : Union[xarray.DataArray, SpatialData]
             Spatial data
         data_name : str
             Name of the data.
@@ -2907,11 +2907,11 @@ class CoordinateSystemManager:
         backend : str
             Select the rendering backend of the plot. The options are:
 
-            - `k3d` to get an interactive plot using [k3d](https://k3d-jupyter.org/)
-            - `mpl` for static plots using [matplotlib](https://matplotlib.org/)
+            - 'k3d' to get an interactive plot using [k3d](https://k3d-jupyter.org/)
+            - 'mpl' for static plots using [matplotlib](https://matplotlib.org/)
 
             Note that k3d only works inside jupyter notebooks
-        axes : matplotlib.pyplot.Axes.axes
+        axes : matplotlib.axes.Axes
             (matplotlib only) The target axes object that should be drawn to. If `None`
             is provided, a new one will be created.
         reference_system : str
