@@ -1238,8 +1238,8 @@ class CoordinateSystemManager:
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
         time_ref: pd.Timestamp = None,
-        _graph: Union[nx.DiGraph, None] = None,
-        _subsystems=None,
+        # _graph: Union[nx.DiGraph, None] = None,
+        # _subsystems=None,
     ):
         """Construct a coordinate system manager.
 
@@ -1253,13 +1253,6 @@ class CoordinateSystemManager:
         time_ref : pandas.Timestamp
             A reference timestamp. If it is defined, all time dependent information
             returned by the CoordinateSystemManager will refer to it by default.
-        _graph:
-            A graph that should be used internally. Do not set this parameter. It is
-            only meant for class internal usage.
-        _subsystems:
-            A dictionary containing data about the CSMs attached subsystems. This
-            parameter should never be set manually. It is for internal usage only.
-
 
         Returns
         -------
@@ -1276,14 +1269,56 @@ class CoordinateSystemManager:
         self._data = {}
         self._root_system_name = root_coordinate_system_name
 
-        self._sub_system_data_dict = _subsystems
-        if self._sub_system_data_dict is None:
-            self._sub_system_data_dict = {}
+        self._sub_system_data_dict = {}
 
-        self._graph = _graph
-        if self._graph is None:
-            self._graph = nx.DiGraph()
-            self._add_coordinate_system_node(root_coordinate_system_name)
+        self._graph = nx.DiGraph()
+        self._add_coordinate_system_node(root_coordinate_system_name)
+
+    @classmethod
+    def _from_subsystem_graph(
+        cls,
+        root_coordinate_system_name: str,
+        coordinate_system_manager_name: Union[str, None] = None,
+        time_ref: pd.Timestamp = None,
+        graph: Union[nx.DiGraph, None] = None,
+        subsystems=None,
+    ):
+        """Construct a coordinate system manager.
+
+        Parameters
+        ----------
+        root_coordinate_system_name : str
+            Name of the root coordinate system.
+        coordinate_system_manager_name : str
+            Name of the coordinate system manager. If 'None' is passed, a default name
+            is chosen.
+        time_ref : pandas.Timestamp
+            A reference timestamp. If it is defined, all time dependent information
+            returned by the CoordinateSystemManager will refer to it by default.
+        graph:
+            Pass on an existing graph.
+        subsystems:
+            A dictionary containing data about the CSMs attached subsystems. This
+            parameter should never be set manually. It is for internal usage only.
+
+
+        Returns
+        -------
+        CoordinateSystemManager
+
+        """
+        csm = cls(root_coordinate_system_name, coordinate_system_manager_name, time_ref)
+
+        csm._sub_system_data_dict = subsystems
+        if csm._sub_system_data_dict is None:
+            csm._sub_system_data_dict = {}
+
+        csm._graph = graph
+        if csm._graph is None:
+            csm._graph = nx.DiGraph()
+            csm._add_coordinate_system_node(root_coordinate_system_name)
+
+        return csm
 
     def __repr__(self):
         """Output representation of a CoordinateSystemManager class."""
@@ -2511,7 +2546,7 @@ class CoordinateSystemManager:
                 ext_sub_system_data, ext_sub_system_data_dict
             )
 
-            csm_sub = CoordinateSystemManager(
+            csm_sub = CoordinateSystemManager._from_subsystem_graph(
                 ext_sub_system_data["root"],
                 sub_system_name,
                 time_ref=ext_sub_system_data["time_ref"],
