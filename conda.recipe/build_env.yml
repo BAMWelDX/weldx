@@ -6,7 +6,10 @@ dependencies:
   - python=3.7
   - setuptools
   - setuptools_scm
-  - conda-build
   - conda-verify
+  - conda-build
+  - mamba
+  - boa
   - anaconda-client
   - numpydoc>=0.5
+
