@@ -1281,7 +1281,9 @@ class CoordinateSystemManager:
         graph: Union[nx.DiGraph, None] = None,
         subsystems=None,
     ):
-        """Construct a coordinate system manager.
+        """Construct a coordinate system manager from existing graph and subsystems.
+
+        This function is used internally to recreate subsystem structures.
 
         Parameters
         ----------
@@ -1296,9 +1298,7 @@ class CoordinateSystemManager:
         graph:
             Pass on an existing graph.
         subsystems:
-            A dictionary containing data about the CSMs attached subsystems. This
-            parameter should never be set manually. It is for internal usage only.
-
+            A dictionary containing data about the CSMs attached subsystems.
 
         Returns
         -------
