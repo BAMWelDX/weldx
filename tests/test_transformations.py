@@ -3419,7 +3419,200 @@ class TestCoordinateSystemManager:
         csm_global.merge(csm_robot)
         csm_global.merge(csm_specimen)
 
-        csm_global.plot()
+        csm_global.plot_graph()
+
+    # test_assign_and_get_data ---------------------------------------------------------
+
+    @staticmethod
+    def setup_csm_test_assign_data() -> tf.CoordinateSystemManager:
+        """Get a predefined CSM instance.
+
+        Returns
+        -------
+        weldx.transformations.CoordinateSystemManager :
+            Predefined CSM instance.
+
+        """
+        # test setup
+        lcs1_in_root = tf.LocalCoordinateSystem(
+            tf.rotation_matrix_z(np.pi / 2), [1, 2, 3]
+        )
+        lcs2_in_root = tf.LocalCoordinateSystem(
+            tf.rotation_matrix_y(np.pi / 2), [3, -3, 1]
+        )
+        lcs3_in_lcs2 = tf.LocalCoordinateSystem(
+            tf.rotation_matrix_x(np.pi / 2), [1, -1, 3]
+        )
+
+        csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
+        csm.add_cs("lcs_1", "root", lcs1_in_root)
+        csm.add_cs("lcs_2", "root", lcs2_in_root)
+        csm.add_cs("lcs_3", "lcs_2", lcs3_in_lcs2)
+
+        return csm
+
+    @pytest.mark.parametrize(
+        "lcs_ref, data_name, data, lcs_out, exp",
+        [
+            (
+                "lcs_3",
+                "my_data",
+                [[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
+                None,
+                [[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
+            ),
+            (
+                "lcs_3",
+                "my_data",
+                [[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
+                "lcs_3",
+                [[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
+            ),
+            (
+                "lcs_3",
+                "my_data",
+                [[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
+                "lcs_1",
+                [[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
+            ),
+            (
+                "lcs_3",
+                "my_data",
+                tf.SpatialData([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]]),
+                "lcs_1",
+                [[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
+            ),
+            (
+                "lcs_3",
+                "my_data",
+                xr.DataArray(
+                    data=[[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
+                    dims=["n", "c"],
+                    coords={"c": ["x", "y", "z"]},
+                ),
+                "lcs_1",
+                [[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
+            ),
+        ],
+    )
+    def test_data_functions(self, lcs_ref, data_name, data, lcs_out, exp):
+        """Test the `assign_data`, `has_data` and `get_data` functions.
+
+        Parameters
+        ----------
+        lcs_ref : str
+            Name of the data's reference system
+        data_name : str
+            Name of the data
+        data :
+            The data that should be assigned
+        lcs_out : str
+            Name of the target coordinate system
+        exp: List[List[float]]
+            Expected return values
+
+        """
+        csm = self.setup_csm_test_assign_data()
+
+        assert csm.has_data(lcs_ref, data_name) is False
+        assert data_name not in csm.data_names
+
+        csm.assign_data(data, data_name, lcs_ref)
+
+        assert data_name in csm.data_names
+        assert csm.get_data_system_name(data_name) == lcs_ref
+        for lcs in csm.coordinate_system_names:
+            assert csm.has_data(lcs, data_name) == (lcs == lcs_ref)
+
+        transformed_data = csm.get_data(data_name, lcs_out)
+        if isinstance(transformed_data, tf.SpatialData):
+            transformed_data = transformed_data.coordinates.data
+        else:
+            transformed_data = transformed_data.data
+
+        assert ut.matrix_is_close(transformed_data, exp)
+
+    # test_assign_data_exceptions ------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "arguments, exception_type, test_name",
+        [
+            (([[1, 2, 3]], {"wrong"}, "root"), TypeError, "# invalid data name"),
+            (([[1, 2, 3]], "data", "not there"), ValueError, "# system does not exist"),
+            (([[1, 2, 3]], "some data", "root"), ValueError, "# name already taken 1"),
+            (([[1, 2, 3]], "some data", "lcs_1"), ValueError, "# name already taken 2"),
+        ],
+    )
+    def test_assign_data_exceptions(self, arguments, exception_type, test_name):
+        """Test exceptions of the `assign_data` method.
+
+        Parameters
+        ----------
+        arguments : Tuple
+            A tuple of arguments that are passed to the function
+        exception_type :
+            The expected exception type
+        test_name : str
+            A string starting with an `#` that describes the test.
+
+        """
+        csm = self.setup_csm_test_assign_data()
+        csm.assign_data([[1, 2, 3], [3, 2, 1]], "some data", "root")
+        with pytest.raises(exception_type):
+            csm.assign_data(*arguments)
+
+    # test_has_data_exceptions ---------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "arguments, exception_type, test_name",
+        [
+            (("wrong", "not there"), KeyError, "# system does not exist"),
+        ],
+    )
+    def test_has_data_exceptions(self, arguments, exception_type, test_name):
+        """Test exceptions of the `has_data` method.
+
+        Parameters
+        ----------
+        arguments : Tuple
+            A tuple of arguments that are passed to the function
+        exception_type :
+            The expected exception type
+        test_name : str
+            A string starting with an `#` that describes the test.
+
+        """
+        csm = self.setup_csm_test_assign_data()
+        csm.assign_data([[1, 2, 3], [3, 2, 1]], "some_data", "root")
+        with pytest.raises(exception_type):
+            csm.has_data(*arguments)
+
+    # test_get_data_exceptions ---------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "arguments, exception_type, test_name",
+        [
+            (("some data", "not there"), ValueError, "# system does not exist"),
+            (("not there", "root"), KeyError, "# data does not exist"),
+        ],
+    )
+    def test_get_data_exceptions(self, arguments, exception_type, test_name):
+        """Test exceptions of the `get_data` method.
+
+        Parameters
+        ----------
+        arguments : Tuple
+            A tuple of arguments that are passed to the function
+        exception_type :
+            The expected exception type
+        test_name : str
+            A string starting with an `#` that describes the test.
+
+        """
+        csm = self.setup_csm_test_assign_data()
+        csm.assign_data([[1, 2, 3], [3, 2, 1]], "some data", "root")
+        with pytest.raises(exception_type):
+            csm.get_data(*arguments)
 
 
 def test_relabel():
@@ -3825,8 +4018,8 @@ def test_coordinate_system_manager_transform_data():
     assert ut.matrix_is_close(data_numpy_transformed, data_exp)
 
     # input single numpy vector
-    data_numpy_transformed = csm.transform_data(data_np[0, :], "lcs_3", "lcs_1")
-    assert ut.vector_is_close(data_numpy_transformed, data_exp[0, :])
+    # data_numpy_transformed = csm.transform_data(data_np[0, :], "lcs_3", "lcs_1")
+    # assert ut.vector_is_close(data_numpy_transformed, data_exp[0, :])
 
     # input xarray
     data_xr = xr.DataArray(data=data_np, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
@@ -3845,60 +4038,3 @@ def test_coordinate_system_manager_transform_data():
     # data is not compatible
     with pytest.raises(Exception):
         csm.transform_data("wrong", "lcs_3", "lcs_1")
-
-
-def test_coordinate_system_manager_data_assignment_and_retrieval():
-    """Test the coordinate system managers assign_data and get_data functions."""
-    # test setup
-    lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
-    lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
-    lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_x(np.pi / 2), [1, -1, 3])
-
-    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
-    csm.add_cs("lcs_1", "root", lcs1_in_root)
-    csm.add_cs("lcs_2", "root", lcs2_in_root)
-    csm.add_cs("lcs_3", "lcs_2", lcs3_in_lcs2)
-
-    data_xr = xr.DataArray(
-        data=[[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]],
-        dims=["n", "c"],
-        coords={"c": ["x", "y", "z"]},
-    )
-
-    data_xr_exp = xr.DataArray(
-        data=[[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
-        dims=["n", "c"],
-        coords={"c": ["x", "y", "z"]},
-    )
-
-    # actual test
-    assert csm.has_data("lcs_3", "my data") is False
-    csm.assign_data(data_xr, "my data", "lcs_3")
-    assert csm.has_data("lcs_3", "my data") is True
-
-    assert csm.get_data("my data").equals(data_xr)
-    assert csm.get_data("my data", "lcs_3").equals(data_xr)
-
-    transformed_data = csm.get_data("my data", "lcs_1")
-    assert ut.matrix_is_close(transformed_data.data, data_xr_exp.data)
-    # TODO: Also check coords and dims
-
-    # exceptions --------------------------------
-    # assignment - invalid data name
-    with pytest.raises(TypeError):
-        csm.assign_data(data_xr, {"wrong"}, "root")
-    # assignment - coordinate system does not exist
-    with pytest.raises(ValueError):
-        csm.assign_data(data_xr, "some data", "not there")
-    # TODO: Unsupported data type ---> no spatial component
-
-    # has_data - coordinate system does not exist
-    with pytest.raises(Exception):
-        csm.has_data("wrong", "not there")
-
-    # get_data - data does not exist
-    with pytest.raises(Exception):
-        csm.get_data("not there", "root")
-    # get_data - coordinate system does not exist
-    with pytest.raises(Exception):
-        csm.get_data("my data", "not there")

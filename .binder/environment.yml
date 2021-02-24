@@ -6,11 +6,34 @@ dependencies:
   - python=3.7
   - setuptools_scm
   - pip
-  # Notebook + Plotting
+  - numpy>=1.18
+  - pandas>=1.0
+  - scipy>=1.4
+  - sympy>=1.6
+  - xarray>=0.15
+  - pint>=0.11
+  - bottleneck
+  - boltons
+  - asdf>=2.7
+  - openpyxl
+  - fs
+  # graph packages
+  - networkx
+  # Code quality
+  - black
+  - codecov
+  - flake8=3.7
+  - isort>=5.1
+  - pydocstyle=5
+  - pytest
+  - pytest-cov
+  # Plotting
   - ipykernel
   - ipywidgets
   - ipympl=0.5.8
+  - k3d
   - matplotlib=3.3.1
+  - seaborn
+  - snakeviz
+  - ipywidgets
   - nodejs=14
-  - pip:
-    - git+https://github.com/BAMWelDX/weldx.git

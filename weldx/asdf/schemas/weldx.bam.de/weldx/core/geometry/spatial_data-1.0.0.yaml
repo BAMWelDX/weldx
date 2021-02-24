@@ -1,19 +1,19 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/weldx/core/geometry/point_cloud-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/geometry/point_cloud-1.0.0"
+id: "http://weldx.bam.de/weldx/core/geometry/spatial_data-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/geometry/spatial_data-1.0.0"
 
 title: |
   Schema for a point cloud.
 description: |
-  This schema describes a collection of points in 3d space.
+  This schema describes a collection of data points in 3d space.
 
 examples:
   -
-    - A simple PointCloud with triangulation
+    - A simple `SpatialData` with triangulation
     - |
-      !<tag:weldx.bam.de:weldx/core/geometry/point_cloud-1.0.0>
+      !<tag:weldx.bam.de:weldx/core/geometry/spatial_data-1.0.0>
         coordinates: !core/ndarray-1.0.0
           data:
           - [0.0, 0.0, 0.0]
@@ -33,7 +33,7 @@ type: object
 properties:
   coordinates:
     description: |
-      The coordinates of the points.
+      The coordinates of the data points.
     tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
     properties:
       datatype:
