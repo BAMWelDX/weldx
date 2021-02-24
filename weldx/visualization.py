@@ -12,6 +12,14 @@ from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, 
 
 import weldx.geometry as geo
 
+RGB_BLACK = 0x000000
+RGB_BLUE = 0x0000FF
+RGB_CYAN = 0x00FFFF
+RGB_GREEN = 0x00AA00
+RGB_MAGENTA = 0xFF00FF
+RGB_RED = 0xFF0000
+RGB_YELLOW = 0xAAAA00
+
 
 def _color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
     """Convert an RGB color tuple to an 24 bit integer.
@@ -141,12 +149,12 @@ def _shuffled_tab20_colors() -> List[int]:
 
 
 _color_list = [
-    0xFF0000,
-    0x00AA00,
-    0x0000FF,
-    0xAAAA00,
-    0xFF00FF,
-    0x00FFFF,
+    RGB_RED,
+    RGB_GREEN,
+    RGB_BLUE,
+    RGB_YELLOW,
+    RGB_CYAN,
+    RGB_MAGENTA,
     *_shuffled_tab20_colors(),
 ]
 
@@ -637,7 +645,7 @@ class CoordinateSystemVisualizerK3D:
         lcs,
         plot: k3d.Plot = None,
         name: str = None,
-        color: int = 0x000000,
+        color: int = RGB_BLACK,
         show_origin=True,
         show_trace=True,
         show_vectors=True,
@@ -672,7 +680,7 @@ class CoordinateSystemVisualizerK3D:
         self._vectors = k3d.vectors(
             origins=[coordinates for _ in range(3)],
             vectors=orientation.transpose(),
-            colors=[[0xFF0000, 0xFF0000], [0x00FF00, 0x00FF00], [0x0000FF, 0x0000FF]],
+            colors=[[RGB_RED, RGB_RED], [RGB_GREEN, RGB_GREEN], [RGB_BLUE, RGB_BLUE]],
             labels=[],
             label_size=1.5,
         )
@@ -886,7 +894,7 @@ class SpatialDataVisualizer:
         name: str,
         cs_vis: CoordinateSystemVisualizerK3D,
         plot: k3d.Plot = None,
-        color: int = 0x000000,
+        color: int = RGB_BLACK,
         visualization_method: str = "auto",
         show_wireframe: bool = False,
     ):
@@ -1148,7 +1156,7 @@ class CoordinateSystemManagerVisualizerK3D:
             self._title = k3d.text2d(
                 f"<b>{title}</b>",
                 position=(0.5, 0),
-                color=0x000000,
+                color=RGB_BLACK,
                 is_html=True,
                 size=1.5,
                 reference_point="ct",
@@ -1163,7 +1171,7 @@ class CoordinateSystemManagerVisualizerK3D:
             self._time_info = k3d.text2d(
                 f"<b>time:</b> {time[0]}",
                 position=(0, 1),
-                color=0x000000,
+                color=RGB_BLACK,
                 is_html=True,
                 size=1.0,
                 reference_point="lb",
