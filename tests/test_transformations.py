@@ -3924,6 +3924,34 @@ def test_coordinate_system_manager_interp_time():
         check_coordinate_systems_close(lcs, exp)
         check_coordinate_systems_close(lcs_inv, exp_inv)
 
+    # specific coordinate system (single, scalar timestamp) -----------------
+    time_interp_lcs0 = TDI([3], "D")
+    csm_interp_single = csm.interp_time(time_interp_lcs0, None, "lcs_0")
+
+    coords_0_exp = np.array(coords_0_exp)[[0], :]  # modified in prev test !
+    orient_0_exp = np.array(orient_0_exp)[[0], :]  # modified in prev test !
+    lcs_0_in_root_exp = tf.LocalCoordinateSystem(
+        orient_0_exp, coords_0_exp, time_interp_lcs0
+    )
+
+    for cs_name in csm_interp_single.graph.nodes:
+        if cs_name == "root":
+            continue
+        ps_name = csm_interp_single.get_parent_system_name(cs_name)
+
+        if cs_name == "lcs_0":
+            exp = lcs_0_in_root_exp
+            exp_inv = lcs_0_in_root_exp.invert()
+        else:
+            exp = csm.get_cs(cs_name, ps_name)
+            exp_inv = csm.get_cs(ps_name, cs_name)
+
+        lcs = csm_interp_single.get_cs(cs_name, ps_name)
+        lcs_inv = csm_interp_single.get_cs(ps_name, cs_name)
+
+        check_coordinate_systems_close(lcs, exp)
+        check_coordinate_systems_close(lcs_inv, exp_inv)
+
     # specific coordinate systems (multiple) --------------
     time_interp_multiple = TDI([5, 7, 9], "D")
     csm_interp_multiple = csm.interp_time(

@@ -51,6 +51,8 @@
 - fix `time_ref_restore` not working correctly if no `time_ref` was
   set [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
 - fix deprecated signature in `WXRotation` [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
+- fix a bug with singleton dimensions in xarray
+  interpolation/matmul [[#243]](https://github.com/BAMWelDX/weldx/pull/243)
 
 ### dependencies
 
