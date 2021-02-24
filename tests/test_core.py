@@ -435,8 +435,3 @@ class TestTimeSeries:
         """Test the exceptions of the 'set_parameter' method."""
         with pytest.raises(exception_type):
             ts.interp_time(time)
-
-
-# --------------------------------------------------------------------------------------
-# PointCloud
-# --------------------------------------------------------------------------------------

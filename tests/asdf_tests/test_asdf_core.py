@@ -18,7 +18,7 @@ from weldx.asdf.utils import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
-from weldx.geometry import PointCloud
+from weldx.geometry import SpatialData
 from weldx.transformations import WXRotation
 
 # WXRotation ---------------------------------------------------------------------
@@ -609,7 +609,7 @@ class TestExternalFile:
 
 
 # --------------------------------------------------------------------------------------
-# PointCloud
+# SpatialData
 # --------------------------------------------------------------------------------------
 
 
@@ -627,7 +627,7 @@ class TestPointCloud:
 
         triangles = [[0, 1, 2], [2, 3, 0]]
 
-        pc = PointCloud(coordinates=coordinates, triangles=triangles)
+        pc = SpatialData(coordinates=coordinates, triangles=triangles)
         tree = {"point_cloud": pc}
         pc_file = _write_read_buffer(
             tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
