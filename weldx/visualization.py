@@ -760,13 +760,13 @@ class CoordinateSystemVisualizerK3D:
             The orientation
 
         """
-        coordinates = np.array(lcs.coordinates.values, dtype="float32")
-        orientation = np.array(lcs.orientation.values, dtype="float32")
-        if coordinates.ndim > 1:
-            coordinates = coordinates[index]
+        coordinates = lcs.coordinates.isel(
+            time=index, missing_dims="ignore"
+        ).values.astype("float32")
 
-        if orientation.ndim > 2:
-            orientation = orientation[index]
+        orientation = lcs.orientation.isel(
+            time=index, missing_dims="ignore"
+        ).values.astype("float32")
 
         return coordinates, orientation
 
