@@ -6,11 +6,13 @@ from typing import List, Union
 
 import numpy as np
 import pytest
+from xarray import DataArray
 
 import tests._helpers as helpers
 import weldx.geometry as geo
 import weldx.transformations as tf
 import weldx.utility as ut
+from weldx.geometry import SpatialData
 
 # helpers ---------------------------------------------------------------------
 
@@ -2773,3 +2775,63 @@ def test_geometry_rasterization_profile_interpolation():
                 ]
             )
             assert ut.vector_is_close(data[:, idx_0 + j], point_exp)
+
+
+# --------------------------------------------------------------------------------------
+# SpatialData
+# --------------------------------------------------------------------------------------
+
+
+class TestSpatialData:
+    """Test the functionality of the `SpatialData` class."""
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "arguments",
+        [
+            (np.ones((5, 3)),),
+            (np.ones((5, 3)), [[0, 1, 2], [0, 2, 3]]),
+            (np.ones((5, 3)), [[0, 1, 2], [0, 2, 3]], {}),
+            (np.ones((5, 3)), None, {}),
+        ],
+    )
+    def test_class_creation(arguments):
+        """Test creation of a `SpatialData` instance.
+
+        Parameters
+        ----------
+        arguments :
+            Tuple of arguments that are passed to the `__init__` method
+
+        """
+        pc = SpatialData(*arguments)
+        assert isinstance(pc.coordinates, DataArray)
+        assert np.allclose(pc.coordinates.data, arguments[0])
+
+        if len(arguments) > 1 and arguments[1] is not None:
+            np.all(arguments[1] == pc.triangles)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "arguments, exception_type, test_name",
+        [
+            ((np.ones((5, 3)), [[0, 1], [2, 3]]), ValueError, "# inv. triangulation 1"),
+            ((np.ones((5, 3)), [[0, 1, 2, 3]]), ValueError, "# inv. triangulation 2"),
+            ((np.ones((5, 3)), [0, 1, 2]), ValueError, "# inv. triangulation 3"),
+        ],
+    )
+    def test_class_creation_exceptions(arguments, exception_type, test_name):
+        """Test exceptions during creation of a `SpatialData` instance.
+
+        Parameters
+        ----------
+        arguments :
+            Tuple of arguments that are passed to the `__init__` method
+        exception_type :
+            Expected exception type
+        test_name : str
+            A string starting with an `#` that describes the test.
+
+        """
+        with pytest.raises(exception_type):
+            SpatialData(*arguments)

@@ -1,6 +1,9 @@
 # matplotlib
 py:class matplotlib.axes.Axes
 
+# k3d
+py:class k3d.Plot
+
 # networkx
 py:class networkx.DiGraph
 py:class networkx.classes.digraph.DiGraph
@@ -64,3 +67,6 @@ py:obj n
 py:obj num
 py:obj left
 py:obj right
+
+# other
+py:obj 0xFF0000
