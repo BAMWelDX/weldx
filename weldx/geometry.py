@@ -2271,12 +2271,12 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_geometry_raster(geometry: Geometry) -> "SpatialData":
+    def from_geometry_raster(geometry_raster: np.ndarray) -> "SpatialData":
         """Triangulate rasterized Geometry Profile.
 
         Parameters
         ----------
-        geometry : weldx.geometry.Geometry
+        geometry_raster : numpy.ndarray
             A single unstacked geometry rasterization.
 
         Returns
@@ -2286,4 +2286,27 @@ class SpatialData:
 
         """
         # todo: this needs a test
-        return SpatialData(*ut.triangulate_geometry(geometry))
+        # todo: workaround ... fix the real problem
+        if not isinstance(geometry_raster, np.ndarray):
+            rasterization = np.array(geometry_raster)
+        if rasterization.ndim == 3:
+            return SpatialData(*ut.triangulate_geometry(geometry_raster))
+
+        part_data = [ut.triangulate_geometry(part) for part in rasterization]
+
+        total_points = []
+        total_triangles = []
+        for points, triangulation in part_data:
+            total_triangles += (triangulation + len(total_points)).tolist()
+            total_points += points.tolist()
+        return SpatialData(total_points, total_triangles)
+
+    @staticmethod
+    def from_geometry(geometry: Geometry, profile_raster_width, trace_raster_width):
+        rasterization = geometry.rasterize(
+            profile_raster_width, trace_raster_width, stack=False
+        )
+        return SpatialData.from_geometry_raster(rasterization)
+
+        if rasterization.ndim == 3:
+            return SpatialData(ut.triangulate_geometry(rasterization))
