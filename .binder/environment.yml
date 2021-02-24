@@ -8,8 +8,8 @@ dependencies:
   - pip
   # Notebook + Plotting
   - ipykernel
-  - ipympl=0.5.8
-  - matplotlib=3.3
+  - ipympl
+  - matplotlib
   - nodejs=14
   - pip:
     - git+https://github.com/BAMWelDX/weldx.git
