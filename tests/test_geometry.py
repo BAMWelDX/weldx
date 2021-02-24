@@ -2782,7 +2782,7 @@ def test_geometry_rasterization_profile_interpolation():
 # --------------------------------------------------------------------------------------
 
 
-class TestPointCloud:
+class TestSpatialData:
     """Test the functionality of the `SpatialData` class."""
 
     @staticmethod
