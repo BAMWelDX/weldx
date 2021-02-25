@@ -2982,11 +2982,16 @@ class CoordinateSystemManager:
             If `True`, the trace of time dependent coordinate systems is plotted in the
             coordinate systems color.
         show_vectors : bool
-            (matplotlib only) If `True`, the coordinate cross of time dependent
-            coordinate systems is plotted.
+            If `True`, the coordinate cross of time dependent coordinate systems is
+            plotted.
         show_wireframe : bool
-            (k3d only) If `True`, data sets that contain mesh data are rendered in
-            wireframe mode. If `False`, the data
+            If `True`, data sets that contain mesh data are rendered in wireframe mode.
+            If `False`, the mesh is rendered normally (k3d) or isn't shown (matplotlib)
+
+        Returns
+        -------
+        matplotlib.axes.Axes :
+            The utilized matplotlib axes, if matplotlib was used as rendering backend
 
         """
         if backend == "k3d":
@@ -3008,7 +3013,7 @@ class CoordinateSystemManager:
                 show_wireframe=show_wireframe,
             )
         elif backend == "mpl":
-            axes = plot_coordinate_system_manager_matplotlib(
+            return plot_coordinate_system_manager_matplotlib(
                 csm=self,
                 axes=axes,
                 reference_system=reference_system,
@@ -3021,6 +3026,7 @@ class CoordinateSystemManager:
                 show_origins=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,
+                show_wireframe=show_wireframe,
             )
         else:
             raise ValueError(f"Unknown rendering backend: '{backend}'")

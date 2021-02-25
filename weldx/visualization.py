@@ -460,6 +460,7 @@ def plot_coordinate_system_manager_matplotlib(
     show_origins: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
+    show_wireframe: bool = True,
 ) -> plt.Axes.axes:
     """Plot the coordinate systems of a `weldx.transformations.CoordinateSystemManager`.
 
@@ -504,6 +505,8 @@ def plot_coordinate_system_manager_matplotlib(
         If `True`, the trace of time dependent coordinate systems is plotted.
     show_vectors : bool
         If `True`, the coordinate cross of time dependent coordinate systems is plotted.
+    show_wireframe : bool
+        If `True`, the mesh is visualized as wireframe. Otherwise, it is not shown.
 
     Returns
     -------
@@ -563,8 +566,8 @@ def plot_coordinate_system_manager_matplotlib(
         while data.ndim > 2:
             data = data[0]
 
-        axes.plot(data[:, 0], data[:, 1], data[:, 2], "x", color=color, label=data_name)
-        if triangles is not None:
+        axes.plot(data[:, 0], data[:, 1], data[:, 2], ".", color=color, label=data_name)
+        if triangles is not None and show_wireframe:
             for triangle in triangles:
                 triangle_data = data[[*triangle, triangle[0]], :]
                 axes.plot(
