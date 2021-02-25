@@ -9,7 +9,7 @@ dependencies:
   # Notebook + Plotting
   - jupyterlab=2
   - ipykernel
-  - matplotlib=3.3.1
+  - matplotlib=3.3.2
   - ipympl=0.5.8
   - nodejs=14
   - pip:
