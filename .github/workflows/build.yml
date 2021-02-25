@@ -83,7 +83,14 @@ jobs:
           fetch-depth: 0 # Fetch all history for all tags and branches
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: '3.9'
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ubuntu-latest-pip-${{ hashFiles('setup.cfg') }}
+          restore-keys: |
+            ubuntu-latest-pip-
 
       - name: pip installs
         run: |
@@ -108,7 +115,7 @@ jobs:
 
       - name: run pytest
         run: |
-          pip install pytest pytest-xdist
+          pip install pytest pytest-cov pytest-xdist
           pytest -n2
 
       - name: set pypi test repo defaults
