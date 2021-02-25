@@ -20,11 +20,12 @@ sphinx:
 ##  - pdf
 
 # Optionally set the version of Python and requirements required to build your docs
-
+build:
+  image: testing
 conda:
   environment: doc/rtd_environment.yml
 python:
-   version: 3.7
+   version: 3.9
    install:
       - method: pip
         path: .
