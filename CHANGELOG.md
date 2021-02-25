@@ -6,9 +6,10 @@
 
 - add `weldx.transformations.CoordinateSystemManager.relabel`
   function [[#219]](https://github.com/BAMWelDX/weldx/pull/219)
-- add `PointCloud` class for storing 3D point data with optional
+- add `SpatialDate` class for storing 3D point data with optional
   triangulation [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
-
+- add `plot` function to visualize `LocalCoordinateSystem` and `CoordinateSystemManager` instances in 3d space 
+  [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
 ### ASDF
 
 - Add possibility to store meta data and content of an external file in an ASDF
@@ -40,6 +41,8 @@
   object) [[#223]](https://github.com/BAMWelDX/weldx/pull/223)
 - remove jinja templates and related code [[#228]](https://github.com/BAMWelDX/weldx/pull/228)
 - add `stack` option to most `geometry` classes for rasterization [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
+- The graph of a `CoordinateSystemManager` is now plotted with `plot_graph` instead of `plot`.
+  [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
 
 ### fixes
 
@@ -48,10 +51,13 @@
 - fix `time_ref_restore` not working correctly if no `time_ref` was
   set [[#221]](https://github.com/BAMWelDX/weldx/pull/221)
 - fix deprecated signature in `WXRotation` [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
+- fix a bug with singleton dimensions in xarray
+  interpolation/matmul [[#243]](https://github.com/BAMWelDX/weldx/pull/243)
 
 ### dependencies
 
 - Add [PyFilesystem](https://docs.pyfilesystem.org/en/latest/)(`fs`) as new dependency
+- Add [k3d](https://github.com/K3D-tools/K3D-jupyter) as new dependency
 - restrict `scipy<1.6`
   pending [ASDF #916](https://github.com/asdf-format/asdf/issues/916) [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
 

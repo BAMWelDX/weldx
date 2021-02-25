@@ -33,4 +33,4 @@ The ``geometry`` directory contains schema implementations for the geometric bas
 
 .. asdf-autoschemas::
 
-    core/geometry/point_cloud-1.0.0
+    core/geometry/spatial_data-1.0.0

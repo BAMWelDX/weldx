@@ -29,6 +29,7 @@ dependencies:
   # Plotting
   - ipykernel
   - ipympl
+  - k3d
   - line_profiler
   - matplotlib
   - memory_profiler

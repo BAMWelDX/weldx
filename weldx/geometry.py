@@ -7,6 +7,7 @@ from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.utility as ut
@@ -2230,11 +2231,11 @@ class Geometry:
             axes.plot(data[0], data[1], data[2], fmt)
 
 
-# PointCloud ---------------------------------------------------------------------------
+# SpatialData --------------------------------------------------------------------------
 
 
 @dataclass
-class PointCloud:
+class SpatialData:
     """Represent 3D point cloud data with optional triangulation.
 
     Parameters
@@ -2254,28 +2255,35 @@ class PointCloud:
 
     def __post_init__(self):
         """Convert and check input values."""
-        if not isinstance(self.coordinates, np.ndarray):
-            self.coordinates = np.array(self.coordinates)
-        if not self.coordinates.shape[-1] == 3:
-            raise ValueError("PointCloud data must be 3D.")
+        if not isinstance(self.coordinates, DataArray):
+            self.coordinates = DataArray(
+                self.coordinates, dims=["n", "c"], coords={"c": ["x", "y", "z"]}
+            )
 
-        if self.triangles is not None and not isinstance(self.triangles, np.ndarray):
-            self.triangles = np.array(self.triangles, dtype="uint")
-        if not self.triangles.shape[-1] == 3:
-            raise ValueError("PointCloud triangulation vertices must connect 3 points.")
+        if self.triangles is not None:
+            if not isinstance(self.triangles, np.ndarray):
+                self.triangles = np.array(self.triangles, dtype="uint")
+            if not self.triangles.shape[-1] == 3:
+                raise ValueError(
+                    "SpatialData triangulation vertices must connect 3 points."
+                )
+            if not self.triangles.ndim == 2:
+                raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_geometry_raster(g):
+    def from_geometry_raster(geometry: Geometry) -> "SpatialData":
         """Triangulate rasterized Geometry Profile.
 
         Parameters
         ----------
-        g
+        geometry : weldx.geometry.Geometry
             A single unstacked geometry rasterization.
 
         Returns
         -------
-        PointCloud
+        SpatialData:
+            New `SpatialData` instance
 
         """
-        return PointCloud(*ut._triangulate_geometry(g))
+        # todo: this needs a test
+        return SpatialData(*ut.triangulate_geometry(geometry))
