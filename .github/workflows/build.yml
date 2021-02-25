@@ -99,6 +99,11 @@ jobs:
           name: dist
           path: ./dist/
 
+      - name: pytest
+        run: |
+          pip install pytest pytest-xdist ./dist
+          pytest -n2
+
       - name: set pypi test repo defaults
         run: |
           echo "pypi_repo=testpypi" >> $GITHUB_ENV
