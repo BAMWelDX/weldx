@@ -99,10 +99,16 @@ jobs:
           name: dist
           path: ./dist/
 
-      - name: pytest
+      - name: get sdist file
+        run: echo "SDIST_FILE=$(find ./dist/*.tar.gz | head -n 1)" >> $GITHUB_ENV
+
+      - name: pip dist install
+        run: |
+          pip install ${{ env.SDIST_FILE }}
+
+      - name: run pytest
         run: |
           pip install pytest pytest-xdist
-          pip install --find-links ./dist weldx
           pytest -n2
 
       - name: set pypi test repo defaults
