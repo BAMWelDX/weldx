@@ -41,7 +41,7 @@ for f in tutorial_files:
 # -- Project information -----------------------------------------------------
 
 project = "weldx"
-copyright = "2020, BAM"
+copyright = "2021, BAM"
 author = "BAM"
 
 # The full version, including alpha/beta/rc tags
