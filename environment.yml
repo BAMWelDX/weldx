@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.7
+  - python=3.9
   - setuptools_scm
   - numpy>=1.18
   - pandas>=1.0
@@ -21,7 +21,7 @@ dependencies:
   # Code quality
   - black
   - codecov
-  - flake8=3.7
+  - flake8
   - isort>=5.1
   - pydocstyle=5
   - pytest
