@@ -85,12 +85,14 @@ jobs:
         with:
           python-version: '3.9'
 
-      - uses: actions/cache@v2
+      - name: Cache pip
+        uses: actions/cache@v2
+        env:
+          # Increase this value to reset cache if ./setup.cfg has not changed
+          CACHE_NUMBER: 0
         with:
           path: ~/.cache/pip
-          key: ubuntu-latest-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ubuntu-latest-pip-
+          key: ubuntu-latest-pip-${{ env.CACHE_NUMBER }}-${{ hashFiles('setup.cfg') }}
 
       - name: pip installs
         run: |
