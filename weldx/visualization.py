@@ -128,6 +128,17 @@ def _color_rgb_normalized_to_int(rgb: Tuple[float, float, float]) -> int:
     return _color_rgb_to_int(_color_rgb_normalized_to_rgb(rgb))
 
 
+def _color_to_rgb_normalized(color):
+    if isinstance(color, Tuple) and len(color) == 3:
+        if all(isinstance(number, int) for number in color):
+            return _color_rgb_to_rgb_normalized(color)
+        if all(isinstance(number, (int, float)) for number in color):
+            return color
+    if isinstance(color, int):
+        return _color_int_to_rgb_normalized(color)
+    raise TypeError("Unsupported color format.")
+
+
 def _shuffled_tab20_colors() -> List[int]:
     """Get a shuffled list of matplotlib 'tab20' colors.
 
@@ -557,25 +568,13 @@ def plot_coordinate_system_manager_matplotlib(
     for data_name in data_sets:
         color = _color_int_to_rgb_normalized(_get_color(data_name, colors, color_gen))
         data = csm.get_data(data_name, reference_system)
-        triangles = None
-        if isinstance(data, geo.SpatialData):
-            triangles = data.triangles
-            data = data.coordinates
-
-        data = data.data
-        while data.ndim > 2:
-            data = data[0]
-
-        axes.plot(data[:, 0], data[:, 1], data[:, 2], ".", color=color, label=data_name)
-        if triangles is not None and show_wireframe:
-            for triangle in triangles:
-                triangle_data = data[[*triangle, triangle[0]], :]
-                axes.plot(
-                    triangle_data[:, 0],
-                    triangle_data[:, 1],
-                    triangle_data[:, 2],
-                    color=color,
-                )
+        plot_spatial_data_matplotlib(
+            data=data,
+            axes=axes,
+            color=color,
+            label=data_name,
+            show_wireframe=show_wireframe,
+        )
 
     _set_limits_matplotlib(axes, limits)
     axes.legend()
@@ -633,6 +632,48 @@ def plot_coordinate_systems(
     if title is not None:
         axes.set_title(title)
     axes.legend(loc=legend_pos)
+
+    return axes
+
+
+def plot_spatial_data_matplotlib(
+    data, axes=None, color=None, label=None, show_wireframe=True
+):
+    if axes is None:
+        _, axes = new_3d_figure_and_axes()
+
+    if not isinstance(data, geo.SpatialData):
+        data = geo.SpatialData(data)
+
+    if color is None:
+        color = (0.0, 0.0, 0.0)
+    else:
+        color = _color_to_rgb_normalized(color)
+
+    coordinates = data.coordinates.data
+    triangles = data.triangles
+
+    # if data is time dependent or has other extra dimensions, just take the first value
+    while coordinates.ndim > 2:
+        coordinates = coordinates[0]
+
+    axes.scatter(
+        coordinates[:, 0],
+        coordinates[:, 1],
+        coordinates[:, 2],
+        marker=".",
+        color=color,
+        label=label,
+    )
+    if triangles is not None and show_wireframe:
+        for triangle in triangles:
+            triangle_data = coordinates[[*triangle, triangle[0]], :]
+            axes.plot(
+                triangle_data[:, 0],
+                triangle_data[:, 1],
+                triangle_data[:, 2],
+                color=color,
+            )
 
     return axes
 
