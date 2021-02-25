@@ -72,6 +72,16 @@ def ureg_check_class(*args):
     return inner_decorator
 
 
+def ureg_check_method(*args):
+    from functools import wraps
+
+    @wraps
+    def decorator(method):
+        wrapped_method = ureg.wraps(*args)(method)
+        return wrapped_method
+    return decorator
+
+
 def sine(
     f: pint.Quantity,
     amp: pint.Quantity,

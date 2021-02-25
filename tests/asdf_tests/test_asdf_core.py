@@ -489,7 +489,7 @@ class TestExternalFile:
         [
             ("doc/_static", "WelDX_notext.ico"),
             ("doc/_static", "WelDX_notext.svg"),
-            ("weldx", "transformations.py"),
+            ("weldx", "__init__.py"),
         ],
     )
     def test_write_to(dir_read, file_name):

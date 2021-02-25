@@ -12,3 +12,4 @@ WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 WELDX_UNIT_REGISTRY.define("percent = 0.01*count = %")
 # swap plank constant for hour definition
 WELDX_UNIT_REGISTRY.define("hour = 60*minute = h = hr")
+#WELDX_UNIT_REGISTRY.autoconvert_offset_to_baseunit = True

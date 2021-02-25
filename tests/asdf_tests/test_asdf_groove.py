@@ -83,9 +83,6 @@ def test_asdf_groove_exceptions():
             groove_angle=Q_(50, "deg"),
         )
 
-    with pytest.raises(NotImplementedError):
-        IsoBaseGroove().to_profile()
-
     with pytest.raises(ValueError):
         get_groove(
             groove_type="FFGroove",

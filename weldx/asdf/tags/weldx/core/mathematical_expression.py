@@ -1,5 +1,3 @@
-import sympy
-
 from weldx.asdf.types import WeldxType
 from weldx.core import MathematicalExpression
 
@@ -23,6 +21,7 @@ class MathematicalExpressionType(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
+        import sympy
         obj = MathematicalExpression(
             sympy.sympify(tree["expression"]), parameters=tree["parameters"]
         )

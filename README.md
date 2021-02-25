@@ -9,7 +9,7 @@ sensors. Complex and highly specialized experimental setups at different welding
 welding research data further.
 
 The WelDX research project aims to foster the exchange of scientific data inside the welding community by developing and
-establishing a new open source file format suitable for documentation of experimental welding data and upholding
+establishing a new open source file format suitable for the documentation of experimental welding data and upholding
 associated quality standards. In addition to fostering scientific collaboration inside the national and international
 welding community an associated advisory committee will be established to oversee the future development of the file
 format. The proposed file format will be developed with regard to current needs of the community regarding
