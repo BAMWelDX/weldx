@@ -101,7 +101,8 @@ jobs:
 
       - name: pytest
         run: |
-          pip install pytest pytest-xdist ./dist
+          pip install pytest pytest-xdist
+          pip install --no-index --find-links ./dist weldx
           pytest -n2
 
       - name: set pypi test repo defaults
