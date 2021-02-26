@@ -894,28 +894,6 @@ class CoordinateSystemVisualizerK3D:
         self._trace.vertices = np.array(lcs.coordinates.values, dtype="float32")
         self.update_time_index(index)
 
-    def update_time(
-        self,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-        time_ref: pd.Timestamp = None,
-    ):
-        """Update the plotted time step.
-
-        Parameters
-        ----------
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               LocalCoordinateSystem
-            The time steps that should be plotted
-        time_ref : pandas.Timestamp
-            A reference timestamp that can be provided if the ``time`` parameter is a
-            `pandas.TimedeltaIndex`
-
-        """
-        lcs = self._lcs.interp_time(time, time_ref)
-        coordinates, orientation = _get_coordinates_and_orientation(lcs)
-
-        self._update_positions(coordinates, orientation)
-
     def update_time_index(self, index: int):
         """Update the plotted time step.
 
@@ -1480,27 +1458,6 @@ class CoordinateSystemManagerVisualizerK3D:
             lcs_vis.update_lcs(
                 self._csm.get_cs(lcs_name, reference_system), self._current_time_index
             )
-        self._update_spatial_data()
-
-    def update_time(
-        self,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-        time_ref: pd.Timestamp = None,
-    ):
-        """Update the plotted time.
-
-        Parameters
-        ----------
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-            LocalCoordinateSystem
-            The time steps that should be plotted
-        time_ref : pandas.Timestamp
-            A reference timestamp that can be provided if the ``time`` parameter is a
-            `pandas.TimedeltaIndex`
-
-        """
-        for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis.update_time(time, time_ref)
         self._update_spatial_data()
 
     def update_time_index(self, index: int):
