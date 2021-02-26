@@ -859,6 +859,7 @@ class LocalCoordinateSystem:
 
         """
         from weldx.visualization import plot_local_coordinate_system_matplotlib
+
         plot_local_coordinate_system_matplotlib(
             self,
             axes=axes,

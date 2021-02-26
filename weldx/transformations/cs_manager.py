@@ -71,6 +71,7 @@ class CoordinateSystemManager:
         self._sub_system_data_dict = {}
 
         from networkx import DiGraph
+
         self._graph = DiGraph()
         self._add_coordinate_system_node(root_coordinate_system_name)
 
@@ -656,6 +657,7 @@ class CoordinateSystemManager:
             self._root_system_name = mapping[self._root_system_name]
 
         from networkx import relabel_nodes
+
         relabel_nodes(self.graph, mapping, copy=False)
 
     def assign_data(
@@ -1027,6 +1029,7 @@ class CoordinateSystemManager:
         # update subsystems
         remove_systems = []
         from networkx import shortest_path
+
         for sub_system_name, sub_system_data in self._sub_system_data_dict.items():
             if (
                 coordinate_system_name in sub_system_data["original members"]
@@ -1298,9 +1301,8 @@ class CoordinateSystemManager:
             return LocalCoordinateSystem()
 
         from networkx import shortest_path
-        path = shortest_path(
-            self.graph, coordinate_system_name, reference_system_name
-        )
+
+        path = shortest_path(self.graph, coordinate_system_name, reference_system_name)
         path_edges = list(zip(path[:-1], path[1:]))
 
         if time is None:
@@ -1362,9 +1364,8 @@ class CoordinateSystemManager:
 
         self._check_coordinate_system_exists(coordinate_system_name)
         from networkx import shortest_path
-        path = shortest_path(
-            self.graph, coordinate_system_name, self._root_system_name
-        )
+
+        path = shortest_path(self.graph, coordinate_system_name, self._root_system_name)
 
         return path[1]
 
@@ -1553,6 +1554,7 @@ class CoordinateSystemManager:
                 f"Found the following common systems: {intersection}"
             )
         from networkx import compose
+
         self._graph = compose(self._graph, other.graph)
 
         subsystem_data = {
@@ -1635,6 +1637,7 @@ class CoordinateSystemManager:
         """Plot the graph of the coordinate system manager."""
         if ax is None:
             from matplotlib.pyplot import subplots
+
             _, ax = subplots()
         color_map = []
         pos = self._get_tree_positions_for_plot()
@@ -1644,9 +1647,8 @@ class CoordinateSystemManager:
         remove_edges = [edge for edge in graph.edges if graph.edges[edge]["defined"]]
         graph.remove_edges_from(remove_edges)
         from networkx import draw
-        draw(
-            graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
-        )
+
+        draw(graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map)
 
     def plot(
         self,
@@ -1731,27 +1733,32 @@ class CoordinateSystemManager:
             wireframe mode. If `False`, the data
 
         """
-        common_args = dict(csm=self,
-                           reference_system=reference_system,
-                           coordinate_systems=coordinate_systems,
-                           colors=colors, title=title,
-                           time=time,
-                           time_ref=time_ref,
-                           limits=limits,
-                           show_origins=show_origins,
-                           show_traces=show_traces,
-                           show_vectors=show_vectors,
-                           )
+        common_args = dict(
+            csm=self,
+            reference_system=reference_system,
+            coordinate_systems=coordinate_systems,
+            colors=colors,
+            title=title,
+            time=time,
+            time_ref=time_ref,
+            limits=limits,
+            show_origins=show_origins,
+            show_traces=show_traces,
+            show_vectors=show_vectors,
+        )
         if backend == "k3d":
             from weldx.visualization import CoordinateSystemManagerVisualizerK3D
+
             CoordinateSystemManagerVisualizerK3D(
                 data_sets=data_sets,
                 show_data_labels=show_data_labels,
                 show_labels=show_labels,
-                show_wireframe=show_wireframe, **common_args
+                show_wireframe=show_wireframe,
+                **common_args,
             )
         elif backend == "mpl":
             from weldx.visualization import plot_coordinate_system_manager_matplotlib
+
             plot_coordinate_system_manager_matplotlib(axes=axes, **common_args)
         else:
             raise ValueError(f"Unknown rendering backend: '{backend}'")

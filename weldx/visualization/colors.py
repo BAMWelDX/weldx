@@ -44,7 +44,7 @@ def _color_int_to_rgb(integer: int) -> Tuple[int, int, int]:
         The resulting RGB tuple.
 
     """
-    return ((integer >> 16) & 255, (integer >> 8) & 255, integer & 255)
+    return (integer >> 16) & 255, (integer >> 8) & 255, integer & 255
 
 
 def _color_rgb_to_rgb_normalized(

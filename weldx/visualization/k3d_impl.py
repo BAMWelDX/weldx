@@ -17,26 +17,28 @@ from ipywidgets import (
 from k3d.platonic import Octahedron
 
 from weldx import geometry as geo
-from .colors import (RGB_BLACK,
-                     RGB_RED,
-                     RGB_GREEN,
-                     RGB_BLUE,
-                     _color_generator_function,
-                     _get_color)
+from .colors import (
+    RGB_BLACK,
+    RGB_RED,
+    RGB_GREEN,
+    RGB_BLUE,
+    _color_generator_function,
+    _get_color,
+)
 
 
 class CoordinateSystemVisualizerK3D:
     """Visualizes a `weldx.transformations.LocalCoordinateSystem` using k3d."""
 
     def __init__(
-            self,
-            lcs,
-            plot: k3d.Plot = None,
-            name: str = None,
-            color: int = RGB_BLACK,
-            show_origin=True,
-            show_trace=True,
-            show_vectors=True,
+        self,
+        lcs,
+        plot: k3d.Plot = None,
+        name: str = None,
+        color: int = RGB_BLACK,
+        show_origin=True,
+        show_trace=True,
+        show_vectors=True,
     ):
         """Create a `CoordinateSystemVisualizerK3D`.
 
@@ -106,7 +108,7 @@ class CoordinateSystemVisualizerK3D:
 
     @staticmethod
     def _create_model_matrix(
-            coordinates: np.ndarray, orientation: np.ndarray
+        coordinates: np.ndarray, orientation: np.ndarray
     ) -> np.ndarray:
         """Create the model matrix from an orientation and coordinates.
 
@@ -235,9 +237,9 @@ class CoordinateSystemVisualizerK3D:
         self.update_time_index(index)
 
     def update_time(
-            self,
-            time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-            time_ref: pd.Timestamp = None,
+        self,
+        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
+        time_ref: pd.Timestamp = None,
     ):
         """Update the plotted time step.
 
@@ -275,22 +277,22 @@ class CoordinateSystemManagerVisualizerK3D:
     """Visualizes a `weldx.transformations.CoordinateSystemManager` using k3d."""
 
     def __init__(
-            self,
-            csm,
-            coordinate_systems: List[str] = None,
-            data_sets: List[str] = None,
-            colors: Dict[str, int] = None,
-            reference_system: str = None,
-            title: str = None,
-            limits: List[Tuple[float, float]] = None,
-            time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
-            time_ref: pd.Timestamp = None,
-            show_data_labels: bool = True,
-            show_labels: bool = True,
-            show_origins: bool = True,
-            show_traces: bool = True,
-            show_vectors: bool = True,
-            show_wireframe: bool = True,
+        self,
+        csm,
+        coordinate_systems: List[str] = None,
+        data_sets: List[str] = None,
+        colors: Dict[str, int] = None,
+        reference_system: str = None,
+        title: str = None,
+        limits: List[Tuple[float, float]] = None,
+        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
+        time_ref: pd.Timestamp = None,
+        show_data_labels: bool = True,
+        show_labels: bool = True,
+        show_origins: bool = True,
+        show_traces: bool = True,
+        show_vectors: bool = True,
+        show_wireframe: bool = True,
     ):
         """Create a `CoordinateSystemManagerVisualizerK3D`.
 
@@ -442,15 +444,15 @@ class CoordinateSystemManagerVisualizerK3D:
         self.show_labels(show_labels)
 
     def _create_controls(
-            self,
-            time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-            reference_system: str,
-            show_data_labels: bool,
-            show_labels: bool,
-            show_origins: bool,
-            show_traces: bool,
-            show_vectors: bool,
-            show_wireframe: bool,
+        self,
+        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
+        reference_system: str,
+        show_data_labels: bool,
+        show_labels: bool,
+        show_origins: bool,
+        show_traces: bool,
+        show_vectors: bool,
+        show_wireframe: bool,
     ):
         """Create the control panel.
 
@@ -675,9 +677,9 @@ class CoordinateSystemManagerVisualizerK3D:
             data_vis.update_model_matrix()
 
     def update_time(
-            self,
-            time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-            time_ref: pd.Timestamp = None,
+        self,
+        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
+        time_ref: pd.Timestamp = None,
     ):
         """Update the plotted time.
 
@@ -719,14 +721,14 @@ class SpatialDataVisualizer:
     visualization_methods = ["auto", "point", "mesh", "both"]
 
     def __init__(
-            self,
-            data,
-            name: str,
-            cs_vis: CoordinateSystemVisualizerK3D,
-            plot: k3d.Plot = None,
-            color: int = RGB_BLACK,
-            visualization_method: str = "auto",
-            show_wireframe: bool = False,
+        self,
+        data,
+        name: str,
+        cs_vis: CoordinateSystemVisualizerK3D,
+        plot: k3d.Plot = None,
+        color: int = RGB_BLACK,
+        visualization_method: str = "auto",
+        show_wireframe: bool = False,
     ):
         """Create a 'SpatialDataVisualizer' instance.
 
@@ -843,5 +845,5 @@ class SpatialDataVisualizer:
             self._mesh.model_matrix = model_mat
         if self._label is not None:
             self._label.position = (
-                    np.matmul(model_mat[0:3, 0:3], self._label_pos) + model_mat[0:3, 3]
+                np.matmul(model_mat[0:3, 0:3], self._label_pos) + model_mat[0:3, 3]
             )

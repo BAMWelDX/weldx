@@ -1,3 +1,5 @@
+"""Contains some functions written in matplotlib to help with visualization."""
+
 from typing import Dict
 
 from weldx.visualization.colors import (
@@ -5,8 +7,6 @@ from weldx.visualization.colors import (
     _color_int_to_rgb_normalized,
     _get_color,
 )
-
-"""Contains some functions to help with visualization."""
 
 from typing import Any, List, Tuple, Union
 
