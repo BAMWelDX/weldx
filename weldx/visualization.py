@@ -433,7 +433,9 @@ def plot_local_coordinate_system_matplotlib(
 
 
 def _set_limits_matplotlib(
-    axes: plt.Axes.axes, limits: Union[List[Tuple[float, float]], Tuple[float, float]]
+    axes: plt.Axes.axes,
+    limits: Union[List[Tuple[float, float]], Tuple[float, float]],
+    set_axes_equal: bool = False,
 ):
     """Set the limits of an axes object.
 
@@ -447,9 +449,7 @@ def _set_limits_matplotlib(
         is provided, the axis are adjusted to be of equal length.
 
     """
-    if limits is None:
-        set_axes_equal(axes)
-    else:
+    if limits is not None:
         if isinstance(limits, Tuple):
             limits = [limits]
         if len(limits) == 1:
@@ -457,6 +457,8 @@ def _set_limits_matplotlib(
         axes.set_xlim(limits[0])
         axes.set_ylim(limits[1])
         axes.set_zlim(limits[2])
+    elif set_axes_equal:
+        set_axes_equal(axes)
 
 
 def plot_coordinate_system_manager_matplotlib(
@@ -470,6 +472,7 @@ def plot_coordinate_system_manager_matplotlib(
     time_ref: pd.Timestamp = None,
     title: str = None,
     limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
+    set_axes_equal: bool = False,
     show_origins: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
