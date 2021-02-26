@@ -42,17 +42,27 @@ from weldx.transformations import (
 )
 from weldx.welding.groove.iso_9692_1 import get_groove
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    Q_([])
-
-__all__ = [
+__all__ = (
+    # major modules
     "core",
     "geometry",
     "measurement",
     "transformations",
     "utility",
     "asdf",
-    "Q_",
     "welding",
-]
+    # geometries
+    "ArcSegment",
+    "Geometry",
+    "LineSegment",
+    "Profile",
+    "Shape",
+    "Trace",
+    "SpatialData",
+    # coordinates
+    "LocalCoordinateSystem",
+    "CoordinateSystemManager",
+    "get_groove",
+    # quantities
+    "Q_",
+)
