@@ -6,19 +6,20 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
+import sympy
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
-__all__ = ['MathematicalExpression', 'TimeSeries']
+__all__ = ["MathematicalExpression", "TimeSeries"]
 
 
 class MathematicalExpression:
     """Mathematical expression using sympy syntax."""
 
     def __init__(
-        self, expression: Union["sympy.Expr", str], parameters: Union[Dict, None] = None
+        self, expression: Union[sympy.Expr, str], parameters: Union[Dict, None] = None
     ):
         """Construct a MathematicalExpression.
 
@@ -31,7 +32,6 @@ class MathematicalExpression:
             expression.
 
         """
-        import sympy
         if not isinstance(expression, sympy.Expr):
             expression = sympy.sympify(expression)
         self._expression = expression
@@ -122,6 +122,7 @@ class MathematicalExpression:
                 equality = self.expression == other.expression
             else:
                 from sympy import simplify
+
                 equality = simplify(self.expression - other.expression) == 0
 
             if check_parameters:
