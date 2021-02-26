@@ -1,13 +1,15 @@
+from importlib.util import find_spec
 from io import BytesIO
 from pathlib import Path
 
 import asdf
 import yaml
+import warnings
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
 
-# TODO: these functions be gneralized and be public
+# TODO: these functions be generalized and be public
 # asdf read/write debug tools functions ---------------------------------------
 
 
@@ -36,7 +38,7 @@ def _write_buffer(tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict =
 
     buff = BytesIO()
     with asdf.AsdfFile(
-            tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], **asdffile_kwargs
+        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], **asdffile_kwargs
     ) as ff:
         ff.write_to(buff, **write_kwargs)
         buff.seek(0)
@@ -65,16 +67,16 @@ def _read_buffer(buffer: BytesIO, open_kwargs: dict = None):
 
     buffer.seek(0)
     with asdf.open(
-            buffer,
-            extensions=[WeldxExtension(), WeldxAsdfExtension()],
-            **open_kwargs,
+        buffer,
+        extensions=[WeldxExtension(), WeldxAsdfExtension()],
+        **open_kwargs,
     ) as af:
         data = af.tree
     return data
 
 
 def _write_read_buffer(
-        tree: dict, asdffile_kwargs=None, write_kwargs=None, open_kwargs=None
+    tree: dict, asdffile_kwargs=None, write_kwargs=None, open_kwargs=None
 ):
     """Perform a buffered write/read roundtrip of a tree using default ASDF settings.
     Parameters
@@ -122,59 +124,75 @@ def _get_yaml_header(file) -> str:
     return code
 
 
-def notebook_fileprinter(file, lexer="YAML"):
-    """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
+if find_spec("pygments") and find_spec("IPython"):
 
-    Parameters
-    ----------
-    file
-        filename or BytesIO buffer of ASDF file
-    lexer
-        Syntax style to use
+    def notebook_fileprinter(file, lexer="YAML"):
+        """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
 
-    """
-    from pygments import highlight
-    from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
-    from pygments.formatters.html import HtmlFormatter
-    from IPython.display import HTML
+        Parameters
+        ----------
+        file
+            filename or BytesIO buffer of ASDF file
+        lexer
+            Syntax style to use
 
-    if isinstance(file, BytesIO):
-        lexer = get_lexer_by_name(lexer)
-    elif Path(file).suffix == ".asdf":
-        lexer = get_lexer_by_name("YAML")
-    else:
-        lexer = get_lexer_for_filename(file)
+        """
+        from pygments import highlight
+        from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
+        from pygments.formatters.html import HtmlFormatter
+        from IPython.display import HTML
 
-    code = _get_yaml_header(file)
+        if isinstance(file, BytesIO):
+            lexer = get_lexer_by_name(lexer)
+        elif Path(file).suffix == ".asdf":
+            lexer = get_lexer_by_name("YAML")
+        else:
+            lexer = get_lexer_for_filename(file)
 
-    formatter = HtmlFormatter()
-    return HTML(
-        '<style type="text/css">{}</style>{}'.format(
-            formatter.get_style_defs(".highlight"),
-            highlight(code, lexer, formatter),
+        code = _get_yaml_header(file)
+
+        formatter = HtmlFormatter()
+        return HTML(
+            '<style type="text/css">{}</style>{}'.format(
+                formatter.get_style_defs(".highlight"),
+                highlight(code, lexer, formatter),
+            )
         )
-    )
+
+    def asdf_json_repr(file, **kwargs):
+        """Display YAML header using IPython JSON display repr.
+
+        This function works in JupyterLab.
+
+        Parameters
+        ----------
+        file
+            filename or BytesIO buffer of ASDF file
+        kwargs
+            kwargs passed down to JSON constructor
+
+        Returns
+        -------
+        IPython.display.JSON
+            JSON object for rich output in JupyterLab
+
+        """
+        from IPython.core.display import JSON
+
+        code = _get_yaml_header(file)
+        yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
+        return JSON(yaml_dict, **kwargs)
 
 
-def asdf_json_repr(file, **kwargs):
-    """Display YAML header using IPython JSON display repr.
+else:
 
-    This function works in JupyterLab.
+    def notebook_fileprinter(**kwargs):
 
-    Parameters
-    ----------
-    file
-        filename or BytesIO buffer of ASDF file
-    kwargs
-        kwargs passed down to JSON constructor
+        warnings.warn(
+            "IPython and pygments not available, cannot print notebook", stacklevel=2
+        )
 
-    Returns
-    -------
-    IPython.display.JSON
-        JSON object for rich output in JupyterLab
-
-    """
-    from IPython.core.display import JSON
-    code = _get_yaml_header(file)
-    yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
-    return JSON(yaml_dict, **kwargs)
+    def asdf_json_repr(**kwargs):
+        warnings.warn(
+            "IPython and pygments not available, cannot print asdf file", stacklevel=2
+        )
