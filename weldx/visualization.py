@@ -400,24 +400,31 @@ def plot_local_coordinate_system_matplotlib(
     if lcs.is_time_dependent and time is not None:
         lcs = lcs.interp_time(time, time_ref)
 
+    if show_origin:
+        label_lcs = label
+        label_trace = None
+    else:
+        label_lcs = None
+        label_trace = label
+
     if lcs.is_time_dependent and time_index is None:
         for i, _ in enumerate(lcs.time):
             draw_coordinate_system_matplotlib(
                 lcs,
                 axes,
                 color=color,
-                label=label,
+                label=label_lcs,
                 time_idx=i,
                 show_origin=show_origin,
                 show_vectors=show_vectors,
             )
-            label = None
+            label_lcs = None
     else:
         draw_coordinate_system_matplotlib(
             lcs,
             axes,
             color=color,
-            label=label,
+            label=label_lcs,
             time_idx=time_index,
             show_origin=show_origin,
             show_vectors=show_vectors,
@@ -427,7 +434,15 @@ def plot_local_coordinate_system_matplotlib(
         coords = lcs.coordinates.values
         if color is None:
             color = "k"
-        axes.plot(coords[:, 0], coords[:, 1], coords[:, 2], ":", color=color, zorder=10)
+        axes.plot(
+            coords[:, 0],
+            coords[:, 1],
+            coords[:, 2],
+            ":",
+            color=color,
+            label=label_trace,
+            zorder=10,
+        )
 
     return axes
 
