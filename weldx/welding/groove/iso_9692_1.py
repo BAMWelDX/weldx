@@ -8,8 +8,8 @@ import numpy as np
 import pint
 
 import weldx.geometry as geo
-from weldx.constants import WELDX_QUANTITY as Q_, WELDX_UNIT_REGISTRY
-from weldx.utility import ureg_check_class, ureg_check_method
+from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.utility import ureg_check_class
 
 __all__ = [
     "IGroove",
@@ -112,27 +112,10 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         """
         pass
 
-    def compute_welding_speed(self, seam_length: pint.Quantity,
-                              wire_feed: pint.Quantity,
-                              width_default: pint.Quantity = Q_(5, "mm")
-                              ):
-        """ Computes how fast the torch has to be moved with the given seam length and feed
-        to fill the gap of the groove.
-
-        Parameters
-        ----------
-        seam_length: pint.Quantity["length"]
-            length of the seam
-        wire_feed: pint.Quantity["length/time"]
-            feed of the wire
-        width_default :
-             pint.Quantity (Default value = Q_(5, "mm"))
-
-        Returns
-        -------
-        speed: pint.Quantity["length/time"]
-        """
-        raise NotImplementedError("needs to be overridden in subclass")
+    @property
+    def cross_sect_area(self):
+        """Area of the cross-section of the two work pieces."""
+        raise NotImplementedError()
 
 
 @ureg_check_class("[length]", "[length]", None)
@@ -187,21 +170,9 @@ class IGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
-    @WELDX_UNIT_REGISTRY.check(None, '[length]', '[length]/[time]', '[length]', '[length]')
-    #TODO: extend the ckeck decorator to check on output! # ret='[length]/[time]')
-    #TODO: thinkness of wire??
-    def compute_welding_speed(self, seam_length: pint.Quantity, wire_feed: pint.Quantity,
-                              width_default: pint.Quantity = Q_(5, 'mm'),
-                              wire_thinkness=Q_(1, 'mm')):
-        # TODO: we need all lengths in same units, otherwise extending area to volume etc does not work...
-        WELDX_UNIT_REGISTRY.auto_reduce_dimensions = True
-        area = self.t * self.b
-        welding_volume = seam_length * area
-        filling_area = wire_feed * wire_thinkness
-        speed = welding_volume / filling_area
-        WELDX_UNIT_REGISTRY.auto_reduce_dimensions = False
-
-        return speed
+    @property
+    def cross_sect_area(self):
+        return self.b * self.t
 
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
