@@ -2228,25 +2228,16 @@ class Geometry:
             Set plot axes to equal scaling (Default = False).
 
         """
-        # data = self.rasterize(profile_raster_width, trace_raster_width)
-        # if fmt is None:
-        #    fmt = "."
-        # if axes is None:
-        #    fig = plt.figure()
-        #    axes = fig.gca(projection="3d", proj_type="ortho")
-        #    axes.plot(data[0], data[1], data[2], fmt)
-        #    axes.set_xlabel("x")
-        #    axes.set_ylabel("y")
-        #    axes.set_zlabel("z")
-        #    if set_axes_equal:
-        #        vs.set_axes_equal(axes)
-        # else:
-        #    axes.plot(data[0], data[1], data[2], fmt)
-        # return axes
-        data = SpatialData.from_geometry(self, profile_raster_width, trace_raster_width)
+        data = self.spatial_data(profile_raster_width, trace_raster_width)
         return data.plot(
             axes=axes, color=color, label=label, show_wireframe=show_wireframe
         )
+
+    def spatial_data(self, profile_raster_width, trace_raster_width):
+        rasterization = self.rasterize(
+            profile_raster_width, trace_raster_width, stack=False
+        )
+        return SpatialData.from_geometry_raster(rasterization)
 
 
 # SpatialData --------------------------------------------------------------------------
@@ -2306,11 +2297,11 @@ class SpatialData:
         # todo: this needs a test
         # todo: workaround ... fix the real problem
         if not isinstance(geometry_raster, np.ndarray):
-            rasterization = np.array(geometry_raster)
-        if rasterization.ndim == 3:
+            geometry_raster = np.array(geometry_raster)
+        if geometry_raster.ndim == 3:
             return SpatialData(*ut.triangulate_geometry(geometry_raster))
 
-        part_data = [ut.triangulate_geometry(part) for part in rasterization]
+        part_data = [ut.triangulate_geometry(part) for part in geometry_raster]
 
         total_points = []
         total_triangles = []
@@ -2318,16 +2309,6 @@ class SpatialData:
             total_triangles += (triangulation + len(total_points)).tolist()
             total_points += points.tolist()
         return SpatialData(total_points, total_triangles)
-
-    @staticmethod
-    def from_geometry(geometry: Geometry, profile_raster_width, trace_raster_width):
-        rasterization = geometry.rasterize(
-            profile_raster_width, trace_raster_width, stack=False
-        )
-        return SpatialData.from_geometry_raster(rasterization)
-
-        if rasterization.ndim == 3:
-            return SpatialData(ut.triangulate_geometry(rasterization))
 
     def plot(self, axes=None, color=None, label=None, show_wireframe=True):
         return vs.plot_spatial_data_matplotlib(
