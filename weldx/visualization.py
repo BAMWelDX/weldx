@@ -438,7 +438,7 @@ def plot_local_coordinate_system_matplotlib(
             coords[:, 0],
             coords[:, 1],
             coords[:, 2],
-            "solid",
+            "-",
             color=color,
             label=label_trace,
             zorder=10,
