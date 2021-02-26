@@ -1226,6 +1226,7 @@ class Profile:
         raster_data = self.rasterize(raster_width, stack=False)
         if ax is None:  # pragma: no cover
             import matplotlib.pyplot as plt
+
             _, ax = plt.subplots()
         ax.grid(grid)
         if not ax.name == "3d":
@@ -1686,6 +1687,7 @@ class Trace:
             fmt = "x-"
         if axes is None:
             import matplotlib.pyplot as plt
+
             fig = plt.figure()
             axes = fig.gca(projection="3d", proj_type="ortho")
             axes.plot(data[0], data[1], data[2], fmt)
@@ -1694,6 +1696,7 @@ class Trace:
             axes.set_zlabel("z")
             if set_axes_equal:
                 from .visualization import set_axes_equal
+
                 set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
@@ -2222,6 +2225,7 @@ class Geometry:
             fmt = "o"
         if axes is None:
             from matplotlib.pyplot import figure
+
             fig = figure()
             axes = fig.gca(projection="3d", proj_type="ortho")
             axes.plot(data[0], data[1], data[2], fmt)
