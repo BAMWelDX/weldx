@@ -1,6 +1,10 @@
 from typing import Dict
 
-from weldx.visualization.colors import _color_generator_function, _color_int_to_rgb_normalized, _get_color
+from weldx.visualization.colors import (
+    _color_generator_function,
+    _color_int_to_rgb_normalized,
+    _get_color,
+)
 
 """Contains some functions to help with visualization."""
 

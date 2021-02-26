@@ -4,9 +4,25 @@ import k3d
 import numpy as np
 import pandas as pd
 from IPython.core.display import display
+from ipywidgets import (
+    Checkbox,
+    Dropdown,
+    HBox,
+    IntSlider,
+    Layout,
+    Play,
+    VBox,
+    jslink,
+)
+from k3d.platonic import Octahedron
 
 from weldx import geometry as geo
-from .colors import RGB_BLACK, RGB_RED, RGB_GREEN, RGB_BLUE, _color_generator_function, _get_color
+from .colors import (RGB_BLACK,
+                     RGB_RED,
+                     RGB_GREEN,
+                     RGB_BLUE,
+                     _color_generator_function,
+                     _get_color)
 
 
 class CoordinateSystemVisualizerK3D:
@@ -76,8 +92,7 @@ class CoordinateSystemVisualizerK3D:
         )
         self._trace.visible = show_trace
 
-        import k3d.platonic as platonic
-        self.origin = platonic.Octahedron(size=0.1).mesh
+        self.origin = Octahedron(size=0.1).mesh
         self.origin.color = color
         self.origin.model_matrix = self._create_model_matrix(coordinates, orientation)
         self.origin.visible = show_origin
@@ -461,8 +476,6 @@ class CoordinateSystemManagerVisualizerK3D:
             If `True`, spatial data containing mesh data will be drawn as wireframe
 
         """
-        from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
-
         num_times = 1
         disable_time_widgets = True
         lo = Layout(width="200px")
