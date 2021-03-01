@@ -52,7 +52,7 @@ properties:
       Transformation describing the welding TCP movement in relation to the groove coordinates.
     tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
     wx_shape:
-      time: [2:]
+      time: [2~]
   coordinate_systems:
     tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0"
   geometry:
