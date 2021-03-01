@@ -17,6 +17,22 @@ properties:
         $ref: "http://weldx.bam.de/schemas/weldx/process/GMAW-1.0.0"
       shielding_gas:
         tag: "tag:weldx.bam.de:weldx/aws/process/shielding_gas_for_procedure-1.0.0"
+      weld_speed:
+        description: |
+          The constant weld speed of the welding TCP movement.
+        tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+        wx_unit: "m/s"
+      welding_wire:
+        type: object
+        properties:
+          wire_diameter:
+            tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            wx_unit: "m"
+          wire_class:
+            description: |
+              The filler wire classification according to DIN EN ISO 14341, DIN EN 12072 or similar standards.
+              Standard details should be stored in the wx_user property.
+            type: string
   equipment:
     type: array
     items:
@@ -31,6 +47,12 @@ properties:
   welding_voltage:
     tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
     wx_unit: "V"
+  TCP:
+    description: |
+      Transformation describing the welding TCP movement in relation to the groove coordinates.
+    tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
+    wx_shape:
+      time: [2:]
   coordinate_systems:
     tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0"
   geometry:
@@ -64,5 +86,5 @@ properties:
     description: |
       General metadata container.
     type: object
-required: [equipment,geometry,measurements,coordinate_systems,welding_current,welding_voltage]
+required: [equipment,geometry,measurements,coordinate_systems,welding_current,welding_voltage,TCP]
 ...
