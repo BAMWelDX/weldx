@@ -1,6 +1,6 @@
 environment:
   matrix:
-    - PYTHON_VERSION: 3.7
+    - PYTHON_VERSION: 3.8
       MINICONDA: "C:\\Miniconda37"
 
 image: Visual Studio 2019
