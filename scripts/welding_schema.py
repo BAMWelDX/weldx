@@ -1,27 +1,19 @@
 # Welding schema
 if __name__ == "__main__":
 
-    ## Imports
+    # Imports
     from pathlib import Path
 
-    import asdf
-    import matplotlib.pyplot as plt
-    import networkx as nx
     import numpy as np
     import pandas as pd
-    import pint
     import sympy
-    import xarray as xr
     from asdf.tags.core import Software
-    from mpl_toolkits.mplot3d import Axes3D
 
     # importing the weldx package with prevalent default abbreviations
     import weldx
     import weldx.geometry as geo
     import weldx.measurement as msm
-    import weldx.transformations as tf
     import weldx.utility as ut
-    import weldx.visualization as vis
     from weldx import Q_, GmawProcess
     from weldx import LocalCoordinateSystem as lcs
     from weldx import WXRotation, get_groove
@@ -31,10 +23,10 @@ if __name__ == "__main__":
     )
     from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
 
-    ## Timestamp
+    # Timestamp
     reference_timestamp = pd.Timestamp("2020-11-09 12:00:00")
 
-    ## Geometry
+    # Geometry
     # groove + trace = geometry
     groove = get_groove(
         groove_type="VGroove",
@@ -53,7 +45,7 @@ if __name__ == "__main__":
 
     geometry = dict(groove_shape=groove, seam_length=seam_length)
 
-    ## Setup the Coordinate System Manager (CSM)
+    # Setup the Coordinate System Manager (CSM)
     # crete a new coordinate system manager with default base coordinate system
     csm = weldx.transformations.CoordinateSystemManager("base")
 
@@ -100,13 +92,13 @@ if __name__ == "__main__":
 
     TCP_reference = csm.get_cs("tcp_contact", "workpiece")
 
-    ## Measurements
+    # Measurements
     # time
     time = pd.timedelta_range(start="0s", end="10s", freq="1ms")
 
     # current data
     I_ts = ut.sine(f=Q_(10, "1/s"), amp=Q_(20, "A"), bias=Q_(300, "A"))
-    I = I_ts.interp_time(time)
+    I = I_ts.interp_time(time)  # noqa: E741
     I["time"] = I["time"]
 
     current_data = msm.Data(name="Welding current", data=I)
@@ -227,7 +219,7 @@ if __name__ == "__main__":
         measurement_chain=welding_voltage_chain,
     )
 
-    ## GMAW Process
+    # GMAW Process
     params_pulse = dict(
         wire_feedrate=Q_(10.0, "m/min"),
         pulse_voltage=Q_(40.0, "V"),
@@ -263,7 +255,7 @@ if __name__ == "__main__":
         welding_wire={"diameter": Q_(1.2, "mm")},
     )
 
-    ## ASDF file
+    # ASDF file
     tree = dict(
         reference_timestamp=reference_timestamp,
         equipment=[HKS_sensor, BH_ELM],
@@ -278,7 +270,8 @@ if __name__ == "__main__":
     )
 
     model_path = Path(weldx.__path__[0]) / Path(
-        "./asdf/schemas/weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml"
+        "./asdf/schemas/weldx.bam.de/weldx/datamodels/"
+        "single_pass_weld-1.0.0.schema.yaml"
     )
     model_path = model_path.as_posix()
 
