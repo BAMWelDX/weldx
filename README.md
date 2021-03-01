@@ -1,6 +1,9 @@
 # WelDX - Welding Data Exchange Format
 
-[![Documentation](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/tutorials/welding_example_01_basics.ipynb) [![Anaconda-Server Badge](https://anaconda.org/bamwelding/weldx/badges/version.svg)](https://anaconda.org/bamwelding/weldx) [![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Documentation](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest) 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/tutorials/welding_example_01_basics.ipynb)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/weldx/badges/version.svg)](https://anaconda.org/conda-forge/weldx)
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 ## Overview
 
@@ -9,7 +12,7 @@ sensors. Complex and highly specialized experimental setups at different welding
 welding research data further.
 
 The WelDX research project aims to foster the exchange of scientific data inside the welding community by developing and
-establishing a new open source file format suitable for documentation of experimental welding data and upholding
+establishing a new open source file format suitable for the documentation of experimental welding data and upholding
 associated quality standards. In addition to fostering scientific collaboration inside the national and international
 welding community an associated advisory committee will be established to oversee the future development of the file
 format. The proposed file format will be developed with regard to current needs of the community regarding
@@ -22,11 +25,15 @@ division at Bundesanstalt für Materialforschung und -prüfung (BAM).
 
 ## Installation
 
-The WelDX package can be installed using conda from the `bamwelding` channel (with some required packages available on
-the `conda-forge` channel).
+The WelDX package can be installed using conda from the `conda-forge` channel.
 
 ```console
-conda install weldx -c conda-forge -c bamwelding
+conda install weldx -c conda-forge
+```
+
+The package is also available on pypi.
+```console
+pip install weldx
 ```
 
 ## Documentation
