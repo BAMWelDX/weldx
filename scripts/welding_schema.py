@@ -256,7 +256,12 @@ if __name__ == "__main__":
         torch_shielding_gas_flowrate=Q_(20, "l / min"),
     )
 
-    process = dict(welding_process=process_pulse, shielding_gas=gas_for_procedure)
+    process = dict(
+        welding_process=process_pulse,
+        shielding_gas=gas_for_procedure,
+        weld_speed=v_weld,
+        welding_wire={"diameter": Q_(1.2, "mm")},
+    )
 
     ## ASDF file
     tree = dict(

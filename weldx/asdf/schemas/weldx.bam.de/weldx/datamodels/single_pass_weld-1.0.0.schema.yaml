@@ -25,14 +25,16 @@ properties:
       welding_wire:
         type: object
         properties:
-          wire_diameter:
+          diameter:
             tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
             wx_unit: "m"
-          wire_class:
+          class:
             description: |
               The filler wire classification according to DIN EN ISO 14341, DIN EN 12072 or similar standards.
               Standard details should be stored in the wx_user property.
             type: string
+            required: [wire_diameter]
+    required: [welding_process, shielding_gas, weld_speed, welding_wire]
   equipment:
     type: array
     items:
@@ -86,5 +88,5 @@ properties:
     description: |
       General metadata container.
     type: object
-required: [equipment,geometry,measurements,coordinate_systems,welding_current,welding_voltage,TCP]
+required: [equipment,geometry,measurements,welding_current,welding_voltage,TCP]
 ...
