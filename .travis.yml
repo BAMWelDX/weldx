@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.9"      # current default Python on Travis CI
+  - "3.8"
 
 install:
   - sudo apt-get update
