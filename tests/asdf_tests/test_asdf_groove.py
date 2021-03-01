@@ -83,9 +83,6 @@ def test_asdf_groove_exceptions():
             groove_angle=Q_(50, "deg"),
         )
 
-    with pytest.raises(NotImplementedError):
-        IsoBaseGroove().to_profile()
-
     with pytest.raises(ValueError):
         get_groove(
             groove_type="FFGroove",
@@ -95,3 +92,13 @@ def test_asdf_groove_exceptions():
             root_gap=Q_(1, "mm"),
             code_number="6.1.1",
         ).to_profile()
+
+
+@pytest.mark.parametrize("groove", test_params.values(), ids=test_params.keys())
+def test_cross_section(groove):
+    groove_obj, _ = groove
+    # TODO: this is a very rough test, but currently I dont know how to improve it.
+    A = groove_obj.cross_sect_area
+    assert hasattr(A, "units")
+    assert A.units == Q_("mm²")
+    assert A > 0
