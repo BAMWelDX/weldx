@@ -60,7 +60,7 @@
 - Add [k3d](https://github.com/K3D-tools/K3D-jupyter) as new dependency
 - restrict `scipy<1.6`
   pending [ASDF #916](https://github.com/asdf-format/asdf/issues/916) [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
-- set minimum Python version to 3.8 [[#229]](https://github.com/BAMWelDX/weldx/pull/229)
+- set minimum Python version to 3.8 [[#229]](https://github.com/BAMWelDX/weldx/pull/229)[[#255]](https://github.com/BAMWelDX/weldx/pull/255)
 
 ## 0.2.2 (30.11.2020)
 
