@@ -40,6 +40,7 @@ from weldx.transformations import (
     LocalCoordinateSystem,
     WXRotation,
 )
+from weldx.welding.processes import GmawProcess
 from weldx.welding.groove.iso_9692_1 import get_groove
 
 with warnings.catch_warnings():
@@ -49,6 +50,7 @@ with warnings.catch_warnings():
 __all__ = [
     "core",
     "geometry",
+    "GmawProcess",
     "measurement",
     "transformations",
     "utility",
