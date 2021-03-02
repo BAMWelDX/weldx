@@ -128,7 +128,23 @@ def _color_rgb_normalized_to_int(rgb: Tuple[float, float, float]) -> int:
     return _color_rgb_to_int(_color_rgb_normalized_to_rgb(rgb))
 
 
-def _color_to_rgb_normalized(color):
+def _color_to_rgb_normalized(
+    color: Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+) -> Tuple[float, float, float]:
+    """Convert an arbitrary RGB color representation into a normalized RGB triplet.
+
+    Parameters
+    ----------
+    color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+        A 24 bit integer, a triplet of integers with a value range of 0-255
+        or a triplet of floats with a value range of 0.0-1.0 that represent an RGB color
+
+    Returns
+    -------
+    Tuple[float, float, float] :
+        RGB color triplet with the value range 0.0 to 1.0
+
+    """
     if isinstance(color, Tuple) and len(color) == 3:
         if all(isinstance(number, int) for number in color):
             return _color_rgb_to_rgb_normalized(color)
@@ -462,6 +478,9 @@ def _set_limits_matplotlib(
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
+    set_axes_equal : bool
+        (matplotlib only) If `True`, all axes are adjusted to cover an equally large
+         range of value. That doesn't mean, that the limits are identical
 
     """
     if limits is not None:
@@ -529,6 +548,9 @@ def plot_coordinate_system_manager_matplotlib(
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
+    set_axes_equal : bool
+        (matplotlib only) If `True`, all axes are adjusted to cover an equally large
+         range of value. That doesn't mean, that the limits are identical
     show_origins : bool
         If `True`, the origins of the coordinate system are visualized in the color
         assigned to the coordinate system.
@@ -657,8 +679,38 @@ def plot_coordinate_systems(
 
 
 def plot_spatial_data_matplotlib(
-    data, axes=None, color=None, label=None, show_wireframe=True
-):
+    data,
+    axes: plt.Axes = None,
+    color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+    label: str = None,
+    show_wireframe: bool = True,
+) -> plt.Axes:
+    """Visualize a `weldx.geometry.SpatialData` instance.
+
+    Parameters
+    ----------
+    data : weldx.geometry.SpatialData
+        The data that should be visualized
+    axes : matplotlib.axes.Axes
+        The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
+        new figure will be created
+    color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+        A 24 bit integer, a triplet of integers with a value range of 0-255
+        or a triplet of floats with a value range of 0.0-1.0 that represent an RGB
+        color
+    label : str
+        Label of the plotted geometry
+    show_wireframe : bool
+        If `True`, the mesh is plotted as wireframe. Otherwise only the raster
+        points are visualized. Currently, the wireframe can't be visualized if a
+        `VariableProfile` is used.
+
+    Returns
+    -------
+    matplotlib.axes.Axes :
+        The `Axes` instance that was used for the plot
+
+    """
     if axes is None:
         _, axes = new_3d_figure_and_axes()
 
@@ -999,7 +1051,15 @@ class SpatialDataVisualizer:
                 plot += self._label
 
     @property
-    def reference_system(self):
+    def reference_system(self) -> str:
+        """Get the name of the reference coordinate system.
+
+        Returns
+        -------
+        str :
+            Name of the reference coordinate system
+
+        """
         return self._reference_system
 
     def set_visualization_method(self, method: str):

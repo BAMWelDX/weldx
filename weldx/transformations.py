@@ -2970,6 +2970,9 @@ class CoordinateSystemManager:
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
+        set_axes_equal : bool
+            (matplotlib only) If `True`, all axes are adjusted to cover an equally large
+             range of value. That doesn't mean, that the limits are identical
         show_data_labels : bool
             (k3d only) If `True`, plotted data sets get labels with their names attached
             to them

@@ -3,10 +3,11 @@
 import copy
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pint
 from xarray import DataArray
 
 import weldx.transformations as tf
@@ -2202,24 +2203,39 @@ class Geometry:
     )
     def plot(
         self,
-        profile_raster_width,
-        trace_raster_width,
-        axes=None,
-        color=None,
-        label=None,
-        show_wireframe=True,
-    ):  # pragma: no cover
+        profile_raster_width: pint.Quantity,
+        trace_raster_width: pint.Quantity,
+        axes: plt.Axes = None,
+        color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+        label: str = None,
+        show_wireframe: bool = True,
+    ) -> plt.Axes:  # pragma: no cover
         """Plot the geometry.
 
         Parameters
         ----------
-        profile_raster_width: float, int
+        profile_raster_width : pint.Quantity
             Target distance between the individual points of a profile
-        trace_raster_width: float, int
+        trace_raster_width : pint.Quantity
             Target distance between the individual profiles on the trace
         axes : matplotlib.axes.Axes
             The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
             new figure will be created
+        color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+            A 24 bit integer, a triplet of integers with a value range of 0-255
+            or a triplet of floats with a value range of 0.0-1.0 that represent an RGB
+            color
+        label : str
+            Label of the plotted geometry
+        show_wireframe : bool
+            If `True`, the mesh is plotted as wireframe. Otherwise only the raster
+            points are visualized. Currently, the wireframe can't be visualized if a
+            `VariableProfile` is used.
+
+        Returns
+        -------
+        matplotlib.axes.Axes :
+            The utilized matplotlib axes, if matplotlib was used as rendering backend
 
         """
         data = self.spatial_data(profile_raster_width, trace_raster_width)
@@ -2227,7 +2243,31 @@ class Geometry:
             axes=axes, color=color, label=label, show_wireframe=show_wireframe
         )
 
-    def spatial_data(self, profile_raster_width, trace_raster_width):
+    @UREG.wraps(
+        None,
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT),
+        strict=False,
+    )
+    def spatial_data(
+        self, profile_raster_width: pint.Quantity, trace_raster_width: pint.Quantity
+    ):
+        """Rasterize the geometry and get it as `SpatialData` instance.
+
+        If no `VariableProfile` is used, a triangulation is added automatically.
+
+        Parameters
+        ----------
+        profile_raster_width : pint.Quantity
+            Target distance between the individual points of a profile
+        trace_raster_width : pint.Quantity
+            Target distance between the individual profiles on the trace
+
+        Returns
+        -------
+        SpatialData :
+            The rasterized geometry data
+
+        """
         # Todo: This branch is a "dirty" fix for the fact that there is no "stackable"
         #       rasterization for geometries with a VariableProfile. The stacked
         #       rasterization is needed for the triangulation performed in
@@ -2312,7 +2352,37 @@ class SpatialData:
             total_points += points.tolist()
         return SpatialData(total_points, total_triangles)
 
-    def plot(self, axes=None, color=None, label=None, show_wireframe=True):
+    def plot(
+        self,
+        axes: plt.Axes = None,
+        color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+        label: str = None,
+        show_wireframe: bool = True,
+    ) -> plt.Axes:  # pragma: no cover
+        """Plot the spatial data.
+
+        Parameters
+        ----------
+        axes : matplotlib.axes.Axes
+            The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
+            new figure will be created
+        color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+            A 24 bit integer, a triplet of integers with a value range of 0-255
+            or a triplet of floats with a value range of 0.0-1.0 that represent an RGB
+            color
+        label : str
+            Label of the plotted geometry
+        show_wireframe : bool
+            If `True`, the mesh is plotted as wireframe. Otherwise only the raster
+            points are visualized. Currently, the wireframe can't be visualized if a
+            `VariableProfile` is used.
+
+        Returns
+        -------
+        matplotlib.axes.Axes :
+            The utilized matplotlib axes, if matplotlib was used as rendering backend
+
+        """
         return vs.plot_spatial_data_matplotlib(
             data=self,
             axes=axes,
