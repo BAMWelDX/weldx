@@ -3019,7 +3019,7 @@ class CoordinateSystemManager:
                 show_vectors=show_vectors,
                 show_wireframe=show_wireframe,
             )
-        elif backend == "mpl":
+        if backend == "mpl":
             return plot_coordinate_system_manager_matplotlib(
                 csm=self,
                 axes=axes,
@@ -3036,8 +3036,7 @@ class CoordinateSystemManager:
                 show_vectors=show_vectors,
                 show_wireframe=show_wireframe,
             )
-        else:
-            raise ValueError(f"Unknown rendering backend: '{backend}'")
+        raise ValueError(f"Unknown rendering backend: '{backend}'")
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
