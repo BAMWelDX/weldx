@@ -10,7 +10,7 @@ from sympy import Polygon
 
 import weldx.geometry as geo
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.utility import ureg_check_class
+from weldx.utility import ureg_check_class, inherit_docstrings
 
 __all__ = [
     "IGroove",
@@ -112,13 +112,22 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        # TODO:
+        profile: weldx.geometry.Profile
+            The Profile object contains the shapes forming the groove.
+
         """
 
     @property
     @abc.abstractmethod
     def cross_sect_area(self):
-        """Area of the cross-section of the two work pieces."""
+        """Area of the cross-section of the two work pieces.
+
+        Returns
+        -------
+        cross_sect_area: pint.Quantity["[length]**2"]
+            The computed area.
+
+        """
 
     def _compute_cross_sect_area_from_profile(self):
         points = []
@@ -173,6 +182,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
 
 
 @ureg_check_class("[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class IGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -230,6 +240,7 @@ class IGroove(IsoBaseGroove):
 
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class VGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -323,6 +334,7 @@ class VGroove(IsoBaseGroove):
 
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class VVGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -424,6 +436,7 @@ class VVGroove(IsoBaseGroove):
 
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class UVGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -523,6 +536,7 @@ class UVGroove(IsoBaseGroove):
 
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class UGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -645,6 +659,7 @@ class UGroove(IsoBaseGroove):
 
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class HVGroove(IsoBaseGroove):
     """A HV-Groove.
@@ -731,6 +746,7 @@ class HVGroove(IsoBaseGroove):
 
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class HUGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -828,6 +844,7 @@ class HUGroove(IsoBaseGroove):
 
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", None, None, "[length]", None)
+@inherit_docstrings
 @dataclass
 class DVGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -945,6 +962,7 @@ class DVGroove(IsoBaseGroove):
     "[length]",
     None,
 )
+@inherit_docstrings
 @dataclass
 class DUGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -1065,6 +1083,7 @@ class DUGroove(IsoBaseGroove):
 
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", None, None, "[length]", None)
+@inherit_docstrings
 @dataclass
 class DHVGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -1170,6 +1189,7 @@ class DHVGroove(IsoBaseGroove):
     "[length]",
     None,
 )
+@inherit_docstrings
 @dataclass
 class DHUGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -1280,6 +1300,7 @@ class DHUGroove(IsoBaseGroove):
     None,
     None,
 )
+@inherit_docstrings
 @dataclass
 class FFGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences

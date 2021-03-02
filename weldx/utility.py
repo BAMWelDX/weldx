@@ -4,6 +4,7 @@ import math
 from collections.abc import Iterable
 from functools import reduce
 from typing import Any, Dict, List, Union
+from inspect import getmembers, isfunction
 
 import numpy as np
 import pandas as pd
@@ -70,6 +71,33 @@ def ureg_check_class(*args):
         return original_class
 
     return inner_decorator
+
+
+def inherit_docstrings(cls):
+    """Inherits (public) docstrings from parent classes.
+
+    Traverses the MRO until it finds a docstring to use, or leave it blank,
+    in case no parent has a docstring available.
+
+    Parameters
+    ----------
+    cls: class type
+        The class to decorate.
+
+    Returns
+    -------
+    cls
+
+    """
+    attrs = lambda x: isfunction(x) or isinstance(x, property)
+
+    for name, func in getmembers(cls, predicate=attrs):
+        if func.__doc__ or name.startswith("_"):
+            continue
+        for parent in cls.__mro__[1:]:
+            if hasattr(parent, name):
+                func.__doc__ = getattr(parent, name).__doc__
+    return cls
 
 
 def sine(
