@@ -2234,6 +2234,14 @@ class Geometry:
         )
 
     def spatial_data(self, profile_raster_width, trace_raster_width):
+        # Todo: This branch is a "dirty" fix for the fact that there is no "stackable"
+        #       rasterization for geometries with a VariableProfile. The stacked
+        #       rasterization is needed for the triangulation performed in
+        #       `from_geometry_raster`.
+        if isinstance(self._profile, VariableProfile):
+            rasterization = self.rasterize(profile_raster_width, trace_raster_width)
+            return SpatialData(np.swapaxes(rasterization, 0, 1))
+
         rasterization = self.rasterize(
             profile_raster_width, trace_raster_width, stack=False
         )
