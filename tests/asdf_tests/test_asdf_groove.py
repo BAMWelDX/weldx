@@ -102,3 +102,9 @@ def test_cross_section(groove):
     assert hasattr(A, "units")
     assert A.units == Q_("mm²")
     assert A > 0
+
+
+def test_igroove_area():
+    groove, _ = test_params["i_groove"]
+    A = groove.cross_sect_area
+    assert A == groove.t * groove.b

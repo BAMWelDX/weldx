@@ -115,48 +115,56 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         # TODO:
         """
 
-    @abstractmethod
+    @property
+    @abc.abstractmethod
     def cross_sect_area(self):
         """Area of the cross-section of the two work pieces."""
 
     def _compute_intersecting_area_polygonal(self):
         points = []
         profile = self.to_profile()
+
         for shape in profile.shapes:
+            shape_points = []
+            points.append(shape_points)
             for seg in shape.segments:
                 if isinstance(seg, geo.LineSegment):
-                    # TODO: tupling these is ugly, but is mandatory to have a positive area (use a numpy impl later)
-                    points.append(tuple(seg.point_start))
-                    points.append(tuple(seg.point_end))
+                    shape_points.append(tuple(seg.point_start))
+                    shape_points.append(tuple(seg.point_end))
                 else:
                     raise RuntimeError("only for line segments!")
-
         return self.__compute_cross_sect_poly(points)
 
     def _compute_intersecting_area_interpolated(self):
         # this method computes an approximation of the area by creating a big polygon out of the rasterization points
         profile = self.to_profile()
-        rasterization = profile.rasterize(0.01, stack=True)
+        # TODO: evt. we can extract individual shapes from the unstacked array???
+        rasterization = profile.rasterize(0.1, stack=False)
         points = [(x, y) for x, y in rasterization.T]
-        assert len(points) > 100, len(points)
 
         return self.__compute_cross_sect_poly(points=points)
 
     def __compute_cross_sect_poly(self, points):
-        # TODO: points needs to be sorted (numpy!) to be aligned CCW for correct Polygon area computation.
-        # TODO: we need to split left and right polygon, dont we?
-        p = Polygon(*sorted(points), evaluate=False)
-        x1, y1, x2, y2 = p.bounds
+        # TODO: split left and right polygons, reflection array [0, 0], [0, 1]
+        area_workpiece = 0
+        bounds = []
+        for shape_points in points:
+            p = Polygon(*shape_points, evaluate=False)
+            p_area = abs(p.area)  # this is negative for the reflected shape
+            assert p.is_convex()
+            area_workpiece += p_area
+            bounds.append(p.bounds)
 
-        outer_poly = Polygon((x1, y2), (x2, y1), (x2, y2), (x1, y2), evaluate=False)
-        assert outer_poly.is_convex()
-        outer_area = outer_poly.area
-        inner_area = p.area
-        assert outer_area > 0
-        assert inner_area > 0
-        assert outer_area > inner_area
+        # outer bbox
+        x1 = min(x[0] for x in bounds)
+        y1 = min(x[1] for x in bounds)
+        x2 = max(x[2] for x in bounds)
+        y2 = max(x[3] for x in bounds)
 
-        return Q_(float(outer_area - inner_area), "mm²")
+        bounding_box = Polygon((x1, y1), (x2, y1), (x2, y2), (x1, y2), evaluate=False)
+
+        area_outer = bounding_box.area
+        return Q_(float(area_outer - area_workpiece), "mm²")
 
 
 @ureg_check_class("[length]", "[length]", None)
@@ -213,13 +221,7 @@ class IGroove(IsoBaseGroove):
 
     @property
     def cross_sect_area(self):
-        from sympy.geometry import Polygon
-
-        b = float(self.b.magnitude)
-        t = float(self.t.magnitude)
-        points_cross_sect = [(0, 0), (b, 0), (b, t), (0, t)]
-        p = Polygon(*points_cross_sect)
-        return Q_(float(p.area), self.b.units * self.t.units)
+        return self._compute_intersecting_area_polygonal()
 
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
@@ -632,6 +634,7 @@ class UGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
     def cross_sect_area(self):
         return self._compute_intersecting_area_interpolated()
 
@@ -720,34 +723,6 @@ class HVGroove(IsoBaseGroove):
     @property
     def cross_sect_area(self):
         return self._compute_intersecting_area_polygonal()
-        # t = self.t.to(_DEFAULT_LEN_UNIT)
-        # beta = self.beta.to("rad").magnitude
-        # b = self.b.to(_DEFAULT_LEN_UNIT)
-        # c = self.c.to(_DEFAULT_LEN_UNIT)
-        #
-        # # Calculations
-        # x = t - c
-        # s = np.tan(beta) * x
-        #
-        # square = b * c
-        # rectangle = b * x
-        #
-        # from sympy.geometry import Triangle
-        #
-        # sas = (
-        #     float(s.magnitude),
-        #     float(self.beta.to("degree").magnitude),
-        #     float(s.magnitude),
-        # )
-        # t = Triangle(sas=sas)
-        # t.area.simplify()
-        #
-        # triangle_area = x * s * np.sin(beta)
-        # assert Q_(float(t.area), "mm**2") == triangle_area, (
-        #     Q_(float(t.area), "mm**2"),
-        #     triangle_area,
-        # )
-        # return square + rectangle + triangle_area
 
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
@@ -842,6 +817,7 @@ class HUGroove(IsoBaseGroove):
 
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
     def cross_sect_area(self):
         return self._compute_intersecting_area_interpolated()
 
@@ -947,6 +923,7 @@ class DVGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
     def cross_sect_area(self):
         return self._compute_intersecting_area_polygonal()
 
@@ -1077,6 +1054,7 @@ class DUGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
     def cross_sect_area(self):
         return self._compute_intersecting_area_interpolated()
 
@@ -1170,6 +1148,7 @@ class DHVGroove(IsoBaseGroove):
 
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
+    @property
     def cross_sect_area(self):
         return self._compute_intersecting_area_polygonal()
 
@@ -1283,6 +1262,7 @@ class DHUGroove(IsoBaseGroove):
 
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
+    @property
     def cross_sect_area(self):
         return self._compute_intersecting_area_interpolated()
 
@@ -1504,6 +1484,7 @@ class FFGroove(IsoBaseGroove):
                 ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
             )
 
+    @property
     def cross_sect_area(self):
         return self._compute_intersecting_area_polygonal()
 
