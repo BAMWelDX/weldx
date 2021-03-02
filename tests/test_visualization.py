@@ -45,8 +45,8 @@ def test_plot_coordinate_system():
         vs.draw_coordinate_system_matplotlib(lcs_constant, ax, label="label")
 
 
-def test_set_axes_equal():
+def test_axes_equal():
     """Test executing all possible code paths."""
     fig = plt.figure()
     ax = fig.gca(projection="3d")
-    vs.set_axes_equal(ax)
+    vs.axes_equal(ax)
