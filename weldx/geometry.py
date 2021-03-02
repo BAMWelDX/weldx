@@ -2081,7 +2081,7 @@ class Geometry:
         """
         locations = self._rasterize_trace(trace_raster_width)
 
-        if stack:  # old behavior for 3d pointcloud
+        if stack:  # old behavior for 3d point cloud
             profile_data = self._profile_raster_data_3d(
                 self._profile, profile_raster_width, stack=True
             )
@@ -2205,8 +2205,6 @@ class Geometry:
         profile_raster_width,
         trace_raster_width,
         axes=None,
-        fmt=None,
-        set_axes_equal=False,
         color=None,
         label=None,
         show_wireframe=True,
@@ -2222,10 +2220,6 @@ class Geometry:
         axes : matplotlib.axes.Axes
             The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
             new figure will be created
-        fmt : str
-            Format string that is passed to matplotlib.pyplot.plot.
-        set_axes_equal : bool
-            Set plot axes to equal scaling (Default = False).
 
         """
         data = self.spatial_data(profile_raster_width, trace_raster_width)
