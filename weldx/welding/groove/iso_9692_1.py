@@ -145,7 +145,8 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         return self.__compute_cross_sect_shape_points(points)
 
     def _compute_cross_sect_area_interpolated(self):
-        # this method computes an approximation of the area by creating a big polygon out of the rasterization points
+        # this method computes an approximation of the area by creating a big polygon
+        # out of the rasterization points
         profile = self.to_profile()
         # TODO: determine raster_width parameter
         rasterization = profile.rasterize(0.3, stack=False)
