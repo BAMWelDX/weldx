@@ -2196,8 +2196,6 @@ class Geometry:
             None,
             None,
             None,
-            None,
-            None,
         ),
         strict=False,
     )

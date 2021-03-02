@@ -329,7 +329,7 @@ def draw_coordinate_system_matplotlib(
         raise Exception("Labels can only be assigned if a color was specified")
 
 
-def set_axes_equal(axes):
+def axes_equal(axes):
     """Adjust axis in a 3d plot to be equally scaled.
 
     Source code taken from the stackoverflow answer of 'karlo' in the
@@ -492,7 +492,7 @@ def _set_limits_matplotlib(
         axes.set_ylim(limits[1])
         axes.set_zlim(limits[2])
     elif set_axes_equal:
-        set_axes_equal(axes)
+        axes_equal(axes)
 
 
 def plot_coordinate_system_manager_matplotlib(
@@ -618,7 +618,7 @@ def plot_coordinate_system_manager_matplotlib(
             show_wireframe=show_wireframe,
         )
 
-    _set_limits_matplotlib(axes, limits)
+    _set_limits_matplotlib(axes, limits, set_axes_equal)
     axes.legend()
 
     return axes

@@ -2994,12 +2994,15 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        matplotlib.axes.Axes :
-            The utilized matplotlib axes, if matplotlib was used as rendering backend
+        matplotlib.axes.Axes or \
+        weldx.visualization.CoordinateSystemManagerVisualizerK3D:
+            The utilized matplotlib axes, if matplotlib was used as rendering backend or
+            the created `weldx.visualization.CoordinateSystemManagerVisualizerK3D`
+            instance if k3d was used
 
         """
         if backend == "k3d":
-            CoordinateSystemManagerVisualizerK3D(
+            return CoordinateSystemManagerVisualizerK3D(
                 csm=self,
                 reference_system=reference_system,
                 coordinate_systems=coordinate_systems,
