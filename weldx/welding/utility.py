@@ -1,7 +1,7 @@
+"""Collection of welding utilities."""
 import pint
 import numpy as np
 
-from weldx import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 
@@ -12,10 +12,9 @@ def compute_welding_speed(
     groove: IsoBaseGroove,
     seam_length: pint.Quantity,
     wire_feed: pint.Quantity,
-    wire_diameter=Q_(4, "mm"),
+    wire_diameter: pint.Quantity,
 ):
-    """Computes how fast the torch has to be moved with the given seam length and feed
-    to fill the gap of the groove.
+    """Computes how fast the torch has to be moved to fill the gap of the groove.
 
     Parameters
     ----------
@@ -31,6 +30,8 @@ def compute_welding_speed(
     Returns
     -------
     speed: pint.Quantity["length/time"]
+        The computed welding speed.
+
     """
     groove_area = groove.cross_sect_area
     wire_area = np.pi / 4 * wire_diameter ** 2
