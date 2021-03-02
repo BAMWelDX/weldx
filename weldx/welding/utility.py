@@ -33,7 +33,7 @@ def compute_welding_speed(
     speed: pint.Quantity["length/time"]
     """
     groove_area = groove.cross_sect_area
-    wire_area = np.pi / 4 * wire_diameter**2
+    wire_area = np.pi / 4 * wire_diameter ** 2
     weld_speed = wire_area * wire_feed / groove_area * seam_length
 
     weld_speed.ito_reduced_units()
