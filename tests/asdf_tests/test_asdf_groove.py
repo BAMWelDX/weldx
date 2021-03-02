@@ -96,12 +96,17 @@ def test_asdf_groove_exceptions():
 
 @pytest.mark.parametrize("groove", test_params.values(), ids=test_params.keys())
 def test_cross_section(groove):
-    groove_obj, _ = groove
+    groove_obj, groove_cls = groove
     # TODO: this is a very rough test, but currently I dont know how to improve it.
     A = groove_obj.cross_sect_area
+
+    # check docstring got inherited.
+    assert groove_cls.cross_sect_area.__doc__ is not None
+
     assert hasattr(A, "units")
     assert A.units == Q_("mm²")
     assert A > 0
+    print(groove[0], A)
 
 
 def test_igroove_area():
