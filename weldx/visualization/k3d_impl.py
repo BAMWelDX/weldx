@@ -1,3 +1,5 @@
+"""Contains a k3d based visualization of coordinate systems and spatial data."""
+
 from typing import Union, List, Dict, Tuple
 
 import k3d
@@ -22,8 +24,8 @@ from .colors import (
     RGB_RED,
     RGB_GREEN,
     RGB_BLUE,
-    _color_generator_function,
-    _get_color,
+    color_generator_function,
+    get_color,
 )
 
 
@@ -365,7 +367,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 grid = [limits[i % 3][int(i / 3)] for i in range(6)]
 
         # create plot
-        self._color_generator = _color_generator_function()
+        self._color_generator = color_generator_function()
         plot = k3d.plot(
             grid_auto_fit=grid_auto_fit,
             grid=grid,
@@ -375,7 +377,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 self._csm.get_cs(lcs_name, reference_system),
                 plot,
                 lcs_name,
-                color=_get_color(lcs_name, colors, self._color_generator),
+                color=get_color(lcs_name, colors, self._color_generator),
                 show_origin=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,
@@ -388,7 +390,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 data_name,
                 self._lcs_vis[self._csm.get_data_system_name(data_name=data_name)],
                 plot,
-                color=_get_color(data_name, colors, self._color_generator),
+                color=get_color(data_name, colors, self._color_generator),
                 show_wireframe=show_wireframe,
             )
             for data_name in data_sets

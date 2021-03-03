@@ -1,3 +1,5 @@
+"""Color related tools"""
+
 from typing import Dict, Generator, Tuple, List
 import numpy as np
 
@@ -85,7 +87,7 @@ def _color_rgb_normalized_to_rgb(
     return tuple([int(np.round(val * 255)) for val in rgb])
 
 
-def _color_int_to_rgb_normalized(integer):
+def color_int_to_rgb_normalized(integer):
     """Convert an 24 bit integer into a RGB color tuple with the value range (0.0-1.0).
 
     Parameters
@@ -151,7 +153,7 @@ _color_list = [
 ]
 
 
-def _color_generator_function() -> int:
+def color_generator_function() -> int:
     """Yield a 24 bit RGB color integer.
 
     The returned value is taken from a predefined list.
@@ -167,7 +169,7 @@ def _color_generator_function() -> int:
             yield color
 
 
-def _get_color(key: str, color_dict: Dict[str, int], color_generator: Generator) -> int:
+def get_color(key: str, color_dict: Dict[str, int], color_generator: Generator) -> int:
     """Get a 24 bit RGB color from a dictionary or generator function.
 
     If the provided key is found in the dictionary, the corresponding color is returned.

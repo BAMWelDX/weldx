@@ -3,9 +3,9 @@
 from typing import Dict
 
 from weldx.visualization.colors import (
-    _color_generator_function,
-    _color_int_to_rgb_normalized,
-    _get_color,
+    color_generator_function,
+    color_int_to_rgb_normalized,
+    get_color,
 )
 
 from typing import Any, List, Tuple, Union
@@ -408,9 +408,9 @@ def plot_coordinate_system_manager_matplotlib(
         axes.set_title(title)
 
     # plot coordinate systems
-    color_gen = _color_generator_function()
+    color_gen = color_generator_function()
     for lcs_name in coordinate_systems:
-        color = _color_int_to_rgb_normalized(_get_color(lcs_name, colors, color_gen))
+        color = color_int_to_rgb_normalized(get_color(lcs_name, colors, color_gen))
         lcs = csm.get_cs(lcs_name, reference_system)
         lcs.plot(
             axes=axes,
@@ -422,7 +422,7 @@ def plot_coordinate_system_manager_matplotlib(
         )
     # plot data
     for data_name in data_sets:
-        color = _color_int_to_rgb_normalized(_get_color(data_name, colors, color_gen))
+        color = color_int_to_rgb_normalized(get_color(data_name, colors, color_gen))
         data = csm.get_data(data_name, reference_system)
         triangles = None
         if isinstance(data, geo.SpatialData):
