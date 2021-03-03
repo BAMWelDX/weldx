@@ -1,6 +1,8 @@
-"""Contains the CoordinateSystemManager
+"""Contains the CoordinateSystemManager.
+
 This important class handles hierarchical dependencies between multiple
-coordinate systems."""
+coordinate systems.
+"""
 
 import itertools
 from copy import deepcopy
@@ -17,6 +19,8 @@ from weldx import utility as ut
 from weldx.geometry import SpatialData
 from .local_cs import LocalCoordinateSystem
 from .util import _build_time_index
+
+__all__ = ("CoordinateSystemManager",)
 
 
 class CoordinateSystemManager:

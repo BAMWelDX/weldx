@@ -1,4 +1,4 @@
-"""Color related tools"""
+"""Color related tools."""
 
 from typing import Dict, Generator, Tuple, List
 import numpy as np
