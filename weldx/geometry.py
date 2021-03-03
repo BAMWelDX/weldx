@@ -1844,7 +1844,7 @@ class VariableProfile:
         return self._locations[-1]
 
     @property
-    def num_interpolation_schemes(self):
+    def num_interpolation_schemes(self) -> int:
         """Get the number of interpolation schemes.
 
         Returns
@@ -1856,7 +1856,7 @@ class VariableProfile:
         return len(self._interpolation_schemes)
 
     @property
-    def num_locations(self):
+    def num_locations(self) -> int:
         """Get the number of profile locations.
 
         Returns
@@ -1868,7 +1868,7 @@ class VariableProfile:
         return len(self._locations)
 
     @property
-    def num_profiles(self):
+    def num_profiles(self) -> int:
         """Get the number of profiles.
 
         Returns
