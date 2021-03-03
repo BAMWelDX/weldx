@@ -703,12 +703,12 @@ def plot_spatial_data_matplotlib(
     show_wireframe : bool
         If `True`, the mesh is plotted as wireframe. Otherwise only the raster
         points are visualized. Currently, the wireframe can't be visualized if a
-        `VariableProfile` is used.
+        `weldx.geometry.VariableProfile` is used.
 
     Returns
     -------
     matplotlib.axes.Axes :
-        The `Axes` instance that was used for the plot
+        The `matplotlib.axes.Axes` instance that was used for the plot
 
     """
     if axes is None:
