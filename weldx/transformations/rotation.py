@@ -1,3 +1,5 @@
+"""Contains tools to handle rotations."""
+
 import numpy as np
 from scipy.spatial.transform import Rotation as _Rotation
 

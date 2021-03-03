@@ -1,3 +1,7 @@
+"""Contains the CoordinateSystemManager
+This important class handles hierarchical dependencies between multiple
+coordinate systems."""
+
 import itertools
 from copy import deepcopy
 from dataclasses import dataclass
