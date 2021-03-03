@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Tuple, Union
 import numpy as np
 import pandas as pd
 import pint
-import xarray as xr
 import sympy
+import xarray as xr
 
 import weldx.utility as ut
 from weldx.constants import WELDX_QUANTITY as Q_
