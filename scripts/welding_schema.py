@@ -266,7 +266,7 @@ if __name__ == "__main__":
         TCP=TCP_reference,
         geometry=geometry,
         process=process,
-        meta={"welder": "A.W. Elder"},
+        wx_meta={"welder": "A.W. Elder"},
     )
 
     model_path = Path(weldx.__path__[0]) / Path(
