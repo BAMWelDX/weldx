@@ -2827,6 +2827,7 @@ def get_test_geometry_variable_profile():
 class TestGeometry:
     """Test the geometry class."""
 
+    @staticmethod
     @pytest.mark.parametrize(
         "geometry, p_rw, t_rw, exp_num_points, exp_num_triangles",
         [
@@ -2835,7 +2836,6 @@ class TestGeometry:
         ],
     )
     def test_spatial_data(
-        self,
         geometry: geo.Geometry,
         p_rw: pint.Quantity,
         t_rw: pint.Quantity,
