@@ -7,7 +7,7 @@ coordinate systems.
 import itertools
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Union, List, Dict, Tuple, Iterable
+from typing import Union, List, Dict, Tuple, Iterable, TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -19,6 +19,11 @@ from weldx import utility as ut
 from weldx.geometry import SpatialData
 from .local_cs import LocalCoordinateSystem
 from .util import _build_time_index
+
+# only import heavy-weight packages on type checking
+if TYPE_CHECKING:
+    import networkx
+    import matplotlib.axes
 
 __all__ = ("CoordinateSystemManager",)
 
@@ -89,7 +94,7 @@ class CoordinateSystemManager:
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
         time_ref: pd.Timestamp = None,
-        graph: Union["networkx.DiGraph", None] = None,
+        graph: Union[networkx.DiGraph, None] = None,
         subsystems=None,
     ):
         """Construct a coordinate system manager from existing graph and subsystems.
@@ -184,7 +189,7 @@ class CoordinateSystemManager:
         return True
 
     @property
-    def lcs(self) -> List["LocalCoordinateSystem"]:
+    def lcs(self) -> List[LocalCoordinateSystem]:
         """Get a list of all attached `LocalCoordinateSystem` instances.
 
         Only the defined systems and not the automatically generated inverse systems
@@ -203,7 +208,7 @@ class CoordinateSystemManager:
         ]
 
     @property
-    def lcs_time_dependent(self) -> List["LocalCoordinateSystem"]:
+    def lcs_time_dependent(self) -> List[LocalCoordinateSystem]:
         """Get a list of all attached time dependent `LocalCoordinateSystem` instances.
 
         Returns
@@ -456,7 +461,7 @@ class CoordinateSystemManager:
         edge_to_from["defined"] = False
 
     @property
-    def graph(self) -> "networkx.DiGraph":
+    def graph(self) -> networkx.DiGraph:
         """Get the internal graph.
 
         Returns
@@ -1446,7 +1451,7 @@ class CoordinateSystemManager:
             pd.DatetimeIndex,
             pd.TimedeltaIndex,
             List[pd.Timestamp],
-            "LocalCoordinateSystem",
+            LocalCoordinateSystem,
         ],
         time_ref: pd.Timestamp = None,
         affected_coordinate_systems: Union[str, List[str], None] = None,
@@ -1661,7 +1666,7 @@ class CoordinateSystemManager:
     def plot(
         self,
         backend: str = "mpl",
-        axes: "matplotlib.pylab.Axes.axes" = None,
+        axes: matplotlib.axes.Axes = None,
         reference_system: str = None,
         coordinate_systems: List[str] = None,
         data_sets: List[str] = None,

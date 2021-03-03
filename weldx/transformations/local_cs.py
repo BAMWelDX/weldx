@@ -1,7 +1,7 @@
 """Contains methods and classes for coordinate transformations."""
 
 from copy import deepcopy
-from typing import List, Union
+from typing import List, Union, TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -11,6 +11,11 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 from weldx.transformations.util import _build_time_index, normalize
+
+if TYPE_CHECKING:
+    import matplotlib.axes
+
+__all__ = ("LocalCoordinateSystem",)
 
 
 class LocalCoordinateSystem:
@@ -810,7 +815,7 @@ class LocalCoordinateSystem:
 
     def plot(
         self,
-        axes: "matplotlib.pyplot.Axes.axes" = None,
+        axes: matplotlib.axes.Axes = None,
         color: str = None,
         label: str = None,
         time: Union[
