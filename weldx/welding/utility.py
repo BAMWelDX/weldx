@@ -18,7 +18,7 @@ def compute_welding_speed(
 
     Parameters
     ----------
-    groove: IsoBaseGroove
+    groove
         groove definition to compute welding speed for.
     seam_length: pint.Quantity["length"]
         length of the seam
