@@ -2336,9 +2336,9 @@ class SpatialData:
         """
         # todo: this needs a test
         # todo: workaround ... fix the real problem
-        if not isinstance(geometry_raster, np.ndarray):
-            geometry_raster = np.array(geometry_raster)
-        if geometry_raster.ndim == 3:
+        # if not isinstance(geometry_raster, np.ndarray):
+        #    geometry_raster = np.array(geometry_raster)
+        if geometry_raster[0].ndim == 2:
             return SpatialData(*ut.triangulate_geometry(geometry_raster))
 
         part_data = [ut.triangulate_geometry(part) for part in geometry_raster]
