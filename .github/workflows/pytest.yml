@@ -1,5 +1,5 @@
 name: pytest
-on: [push]
+on: [push, pull_request]
 
 jobs:
   pytest:
@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        py: ['3.7', '3.8']
+        py: ['3.8', '3.9']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -42,11 +42,11 @@ jobs:
 
       - name: pip installs
         run: |
-          pip install pytest pytest-cov setuptools_scm
+          pip install pytest pytest-cov pytest-xdist setuptools_scm
           pip install -e .
       - name: run pytest
         run: |
-          pytest --runslow
+          pytest --runslow -n2
           echo "Exited with '$?'"
           coverage xml
 

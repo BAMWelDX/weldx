@@ -30,9 +30,11 @@ excluded_words:
   - shutil
   - functools
   # matplotlib ----------------------------------
-  - pyplot
   - gca
+  - mpl
+  - ncols
   - plt
+  - pyplot
   # flake8 --------------------------------------
   - noqa
   - addopts
@@ -85,6 +87,7 @@ excluded_words:
   - ipynb
   - ipywidgets
   - ipython
+  - jslink
   # scipy ---------------------------------------
   - Slerp
   - rotvec
@@ -101,6 +104,8 @@ excluded_words:
   # conda ---------------------------------------
   - conda
   - noarch
+  # deepsource ----------------------------------
+  - skipcq
   # documentation -------------------------------
   - readthedocs
   - recommonmark
@@ -118,7 +123,6 @@ excluded_words:
   - dsx
   - dtypes
   - interp
-  - isort
   - linearization
   - ureg
   - Cagtay

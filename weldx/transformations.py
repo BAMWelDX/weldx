@@ -1,11 +1,10 @@
 """Contains methods and classes for coordinate transformations."""
 
-
 import itertools
 import math
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -17,6 +16,12 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.geometry import SpatialData
+from weldx.visualization import (
+    CoordinateSystemManagerVisualizerK3D,
+    plot_coordinate_system_manager_matplotlib,
+    plot_local_coordinate_system_matplotlib,
+)
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -1082,6 +1087,40 @@ class LocalCoordinateSystem:
             return True
         return False
 
+    def as_euler(
+        self, seq: str = "xyz", degrees: bool = False
+    ) -> np.ndarray:  # pragma: no cover
+        """Return Euler angle representation of the coordinate system orientation.
+
+        Parameters
+        ----------
+        seq :
+            Euler rotation sequence as described in
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial
+            .transform.Rotation.as_euler.html
+        degrees :
+            Returned angles are in degrees if True, else they are in radians.
+            Default is False.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of euler angles.
+
+        """
+        return self.as_rotation().as_euler(seq=seq, degrees=degrees)
+
+    def as_rotation(self) -> Rot:  # pragma: no cover
+        """Get a scipy.Rotation object from the coordinate system orientation.
+
+        Returns
+        -------
+        scipy.spatial.transform.Rotation
+            Scipy rotation object representing the orientation.
+
+        """
+        return Rot.from_matrix(self.orientation.values)
+
     def interp_time(
         self,
         time: Union[
@@ -1160,39 +1199,68 @@ class LocalCoordinateSystem:
             orientation, coordinates, self.time, self.reference_time
         )
 
-    def as_rotation(self) -> Rot:  # pragma: no cover
-        """Get a scipy.Rotation object from the coordinate system orientation.
-
-        Returns
-        -------
-        scipy.spatial.transform.Rotation
-            Scipy rotation object representing the orientation.
-
-        """
-        return Rot.from_matrix(self.orientation.values)
-
-    def as_euler(
-        self, seq: str = "xyz", degrees: bool = False
-    ) -> np.ndarray:  # pragma: no cover
-        """Return Euler angle representation of the coordinate system orientation.
+    def plot(
+        self,
+        axes: plt.Axes.axes = None,
+        color: str = None,
+        label: str = None,
+        time: Union[
+            pd.DatetimeIndex,
+            pd.TimedeltaIndex,
+            List[pd.Timestamp],
+            "LocalCoordinateSystem",
+        ] = None,
+        time_ref: pd.Timestamp = None,
+        time_index: int = None,
+        show_origin: bool = True,
+        show_trace: bool = True,
+        show_vectors: bool = True,
+    ):  # pragma: no cover
+        """Plot the coordinate system.
 
         Parameters
         ----------
-        seq :
-            Euler rotation sequence as described in
-            https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial
-            .transform.Rotation.as_euler.html
-        degrees :
-            Returned angles are in degrees if True, else they are in radians.
-            Default is False.
-
-        Returns
-        -------
-        numpy.ndarray
-            Array of euler angles.
+        axes : matplotlib.axes.Axes
+            The target matplotlib axes object that should be drawn to. If `None` is
+            provided, a new one will be created.
+        color : str
+            The color of the coordinate system. The string must be a valid matplotlib
+            color format. See:
+            https://matplotlib.org/3.1.0/api/colors_api.html#module-matplotlib.colors
+        label : str
+            The name of the coordinate system
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+               LocalCoordinateSystem
+            The time steps that should be plotted. Missing time steps in the data will
+            be interpolated.
+        time_ref : pandas.Timestamp
+            A reference timestamp that can be provided if the ``time`` parameter is a
+            `pandas.TimedeltaIndex`
+        time_index: int
+            If the coordinate system is time dependent, this parameter can be used to
+            to select a specific key frame by its index.
+        show_origin: bool
+            If `True`, a small dot with the assigned color will mark the coordinate
+            systems' origin.
+        show_trace : bool
+            If `True`, the trace of time dependent coordinate systems is plotted.
+        show_vectors : bool
+            If `True`, the coordinate cross of time dependent coordinate systems is
+            plotted.
 
         """
-        return self.as_rotation().as_euler(seq=seq, degrees=degrees)
+        plot_local_coordinate_system_matplotlib(
+            self,
+            axes=axes,
+            color=color,
+            label=label,
+            time=time,
+            time_ref=time_ref,
+            time_index=time_index,
+            show_origin=show_origin,
+            show_trace=show_trace,
+            show_vectors=show_vectors,
+        )
 
     def reset_reference_time(self, time_ref_new: pd.Timestamp):
         """Reset the reference time of the coordinate system.
@@ -1238,8 +1306,6 @@ class CoordinateSystemManager:
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
         time_ref: pd.Timestamp = None,
-        _graph: Union[nx.DiGraph, None] = None,
-        _subsystems=None,
     ):
         """Construct a coordinate system manager.
 
@@ -1253,13 +1319,6 @@ class CoordinateSystemManager:
         time_ref : pandas.Timestamp
             A reference timestamp. If it is defined, all time dependent information
             returned by the CoordinateSystemManager will refer to it by default.
-        _graph:
-            A graph that should be used internally. Do not set this parameter. It is
-            only meant for class internal usage.
-        _subsystems:
-            A dictionary containing data about the CSMs attached subsystems. This
-            parameter should never be set manually. It is for internal usage only.
-
 
         Returns
         -------
@@ -1276,14 +1335,53 @@ class CoordinateSystemManager:
         self._data = {}
         self._root_system_name = root_coordinate_system_name
 
-        self._sub_system_data_dict = _subsystems
-        if self._sub_system_data_dict is None:
-            self._sub_system_data_dict = {}
+        self._sub_system_data_dict = {}
 
-        self._graph = _graph
-        if self._graph is None:
-            self._graph = nx.DiGraph()
-            self._add_coordinate_system_node(root_coordinate_system_name)
+        self._graph = nx.DiGraph()
+        self._add_coordinate_system_node(root_coordinate_system_name)
+
+    @classmethod
+    def _from_subsystem_graph(
+        cls,
+        root_coordinate_system_name: str,
+        coordinate_system_manager_name: Union[str, None] = None,
+        time_ref: pd.Timestamp = None,
+        graph: Union[nx.DiGraph, None] = None,
+        subsystems=None,
+    ):
+        """Construct a coordinate system manager from existing graph and subsystems.
+
+        This function is used internally to recreate subsystem structures.
+
+        Parameters
+        ----------
+        root_coordinate_system_name : str
+            Name of the root coordinate system.
+        coordinate_system_manager_name : str
+            Name of the coordinate system manager. If 'None' is passed, a default name
+            is chosen.
+        time_ref : pandas.Timestamp
+            A reference timestamp. If it is defined, all time dependent information
+            returned by the CoordinateSystemManager will refer to it by default.
+        graph:
+            Pass on an existing graph.
+        subsystems:
+            A dictionary containing data about the CSMs attached subsystems.
+
+        Returns
+        -------
+        CoordinateSystemManager
+
+        """
+        csm = cls(root_coordinate_system_name, coordinate_system_manager_name, time_ref)
+
+        if subsystems is not None:
+            csm._sub_system_data_dict = subsystems
+
+        if graph is not None:
+            csm._graph = graph
+
+        return csm
 
     def __repr__(self):
         """Output representation of a CoordinateSystemManager class."""
@@ -1571,7 +1669,7 @@ class CoordinateSystemManager:
 
     def _ipython_display_(self):
         """Display the coordinate system manager as plot in jupyter notebooks."""
-        self.plot()
+        self.plot_graph()
 
     @property
     def _number_of_time_dependent_lcs(self):
@@ -1823,17 +1921,20 @@ class CoordinateSystemManager:
         nx.relabel_nodes(self.graph, mapping, copy=False)
 
     def assign_data(
-        self, data: xr.DataArray, data_name: str, coordinate_system_name: str
+        self,
+        data: Union[xr.DataArray, SpatialData],
+        data_name: str,
+        coordinate_system_name: str,
     ):
         """Assign spatial data to a coordinate system.
 
         Parameters
         ----------
-        data :
+        data : Union[xarray.DataArray, SpatialData]
             Spatial data
-        data_name :
+        data_name : str
             Name of the data.
-        coordinate_system_name :
+        coordinate_system_name : str
             Name of the coordinate system the data should be
             assigned to.
 
@@ -1845,7 +1946,12 @@ class CoordinateSystemManager:
         #   interpolated or not?
         if not isinstance(data_name, str):
             raise TypeError("The data name must be a string.")
+        if data_name in self._data:
+            raise ValueError(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(coordinate_system_name)
+
+        if not isinstance(data, (xr.DataArray, SpatialData)):
+            data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
         self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
         self._graph.nodes[coordinate_system_name]["data"].append(data_name)
@@ -2249,6 +2355,18 @@ class CoordinateSystemManager:
         """
         return list(self.graph.nodes)
 
+    @property
+    def data_names(self) -> List[str]:
+        """Get the names of the attached data sets.
+
+        Returns
+        -------
+        List[str] :
+            Names of the attached data sets
+
+        """
+        return self._data.keys()
+
     def get_data(
         self, data_name, target_coordinate_system_name=None
     ) -> Union[np.ndarray, xr.DataArray]:
@@ -2281,6 +2399,22 @@ class CoordinateSystemManager:
             data_struct.coordinate_system_name,
             target_coordinate_system_name,
         )
+
+    def get_data_system_name(self, data_name: str) -> str:
+        """Get the name of the data's reference coordinate system.
+
+        Parameters
+        ----------
+        data_name : str
+            Name of the data
+
+        Returns
+        -------
+        str :
+            Name of the reference coordinate system
+
+        """
+        return self._data[data_name].coordinate_system_name
 
     def get_cs(
         self,
@@ -2511,12 +2645,12 @@ class CoordinateSystemManager:
                 ext_sub_system_data, ext_sub_system_data_dict
             )
 
-            csm_sub = CoordinateSystemManager(
+            csm_sub = CoordinateSystemManager._from_subsystem_graph(
                 ext_sub_system_data["root"],
                 sub_system_name,
                 time_ref=ext_sub_system_data["time_ref"],
-                _graph=self._graph.subgraph(members).copy(),
-                _subsystems=ext_sub_system_data["sub system data"],
+                graph=self._graph.subgraph(members).copy(),
+                subsystems=ext_sub_system_data["sub system data"],
             )
             sub_system_list.append(csm_sub)
 
@@ -2756,7 +2890,7 @@ class CoordinateSystemManager:
             pos[child] = data["position"]
         return pos
 
-    def plot(self, ax=None):
+    def plot_graph(self, ax=None):
         """Plot the graph of the coordinate system manager."""
         if ax is None:
             _, ax = plt.subplots()
@@ -2771,6 +2905,125 @@ class CoordinateSystemManager:
         nx.draw(
             graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
         )
+
+    def plot(
+        self,
+        backend: str = "mpl",
+        axes: plt.Axes.axes = None,
+        reference_system: str = None,
+        coordinate_systems: List[str] = None,
+        data_sets: List[str] = None,
+        colors: Dict[str, int] = None,
+        title: str = None,
+        limits: List[Tuple[float, float]] = None,
+        time: Union[
+            pd.DatetimeIndex,
+            pd.TimedeltaIndex,
+            List[pd.Timestamp],
+            "LocalCoordinateSystem",
+        ] = None,
+        time_ref: pd.Timestamp = None,
+        show_data_labels: bool = True,
+        show_labels: bool = True,
+        show_origins: bool = True,
+        show_traces: bool = True,
+        show_vectors: bool = True,
+        show_wireframe: bool = False,
+    ):  # pragma: no cover
+        """Plot the coordinate systems of the coordinate system manager.
+
+        Parameters
+        ----------
+        backend : str
+            Select the rendering backend of the plot. The options are:
+
+            - 'k3d' to get an interactive plot using [k3d](https://k3d-jupyter.org/)
+            - 'mpl' for static plots using [matplotlib](https://matplotlib.org/)
+
+            Note that k3d only works inside jupyter notebooks
+        axes : matplotlib.axes.Axes
+            (matplotlib only) The target axes object that should be drawn to. If `None`
+            is provided, a new one will be created.
+        reference_system : str
+            The name of the reference system for the plotted coordinate systems
+        coordinate_systems : List[str]
+            Names of the coordinate systems that should be drawn. If `None` is provided,
+            all systems are plotted.
+        data_sets : List[str]
+            Names of the data sets that should be drawn. If `None` is provided, all data
+            is plotted.
+        colors: Dict[str, int]
+            A mapping between a coordinate system name or a data set name and a color.
+            The colors must be provided as 24 bit integer values that are divided into
+            three 8 bit sections for the rgb values. For example `0xFF0000` for pure
+            red.
+            Each coordinate system or data set that does not have a mapping in this
+            dictionary will get a default color assigned to it.
+        title : str
+            The title of the plot
+        limits : List[Tuple[float,float]]
+            The coordinate limits of the plot.
+        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
+               LocalCoordinateSystem
+            The time steps that should be plotted
+        time_ref : pandas.Timestamp
+            A reference timestamp that can be provided if the ``time`` parameter is a
+            `pandas.TimedeltaIndex`
+        show_data_labels : bool
+            (k3d only) If `True`, plotted data sets get labels with their names attached
+            to them
+        show_labels : bool
+            (k3d only) If `True`, plotted coordinate systems get labels with their names
+            attached to them
+        show_origins : bool
+            If `True`, the origins of the coordinate system are visualized in the color
+            assigned to the coordinate system.
+        show_traces : bool
+            If `True`, the trace of time dependent coordinate systems is plotted in the
+            coordinate systems color.
+        show_vectors : bool
+            (matplotlib only) If `True`, the coordinate cross of time dependent
+            coordinate systems is plotted.
+        show_wireframe : bool
+            (k3d only) If `True`, data sets that contain mesh data are rendered in
+            wireframe mode. If `False`, the data
+
+        """
+        if backend == "k3d":
+            CoordinateSystemManagerVisualizerK3D(
+                csm=self,
+                reference_system=reference_system,
+                coordinate_systems=coordinate_systems,
+                data_sets=data_sets,
+                colors=colors,
+                title=title,
+                limits=limits,
+                time=time,
+                time_ref=time_ref,
+                show_data_labels=show_data_labels,
+                show_labels=show_labels,
+                show_origins=show_origins,
+                show_traces=show_traces,
+                show_vectors=show_vectors,
+                show_wireframe=show_wireframe,
+            )
+        elif backend == "mpl":
+            axes = plot_coordinate_system_manager_matplotlib(
+                csm=self,
+                axes=axes,
+                reference_system=reference_system,
+                coordinate_systems=coordinate_systems,
+                colors=colors,
+                time=time,
+                time_ref=time_ref,
+                title=title,
+                limits=limits,
+                show_origins=show_origins,
+                show_trace=show_traces,
+                show_vectors=show_vectors,
+            )
+        else:
+            raise ValueError(f"Unknown rendering backend: '{backend}'")
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
@@ -2866,17 +3119,24 @@ class CoordinateSystemManager:
             Transformed data
 
         """
-        lcs = self.get_cs(source_coordinate_system_name, target_coordinate_system_name)
-        if isinstance(data, xr.DataArray):
-            mul = ut.xr_matmul(
-                lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
+        if isinstance(data, SpatialData):
+            return SpatialData(
+                coordinates=self.transform_data(
+                    data.coordinates,
+                    source_coordinate_system_name,
+                    target_coordinate_system_name,
+                ),
+                attributes=data.attributes,
+                triangles=data.triangles,
             )
-            return mul + lcs.coordinates
+        if not isinstance(data, xr.DataArray):
+            data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
-        data = ut.to_float_array(data)
-        rotation = lcs.orientation.data
-        translation = lcs.coordinates.data
-        return ut.mat_vec_mul(rotation, data) + translation
+        lcs = self.get_cs(source_coordinate_system_name, target_coordinate_system_name)
+        mul = ut.xr_matmul(
+            lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
+        )
+        return mul + lcs.coordinates
 
     def unmerge(self) -> List["CoordinateSystemManager"]:
         """Undo previous merges and return a list of all previously merged instances.
