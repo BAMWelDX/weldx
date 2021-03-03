@@ -4,6 +4,8 @@ This important class handles hierarchical dependencies between multiple
 coordinate systems.
 """
 
+from __future__ import annotations
+
 import itertools
 from copy import deepcopy
 from dataclasses import dataclass

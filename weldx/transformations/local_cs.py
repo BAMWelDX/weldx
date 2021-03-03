@@ -1,5 +1,7 @@
 """Contains methods and classes for coordinate transformations."""
 
+from __future__ import annotations
+
 from copy import deepcopy
 from typing import List, Union, TYPE_CHECKING
 
