@@ -2923,6 +2923,7 @@ class CoordinateSystemManager:
             "LocalCoordinateSystem",
         ] = None,
         time_ref: pd.Timestamp = None,
+        set_axes_equal: bool = False,
         show_data_labels: bool = True,
         show_labels: bool = True,
         show_origins: bool = True,
@@ -2969,6 +2970,9 @@ class CoordinateSystemManager:
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
+        set_axes_equal : bool
+            (matplotlib only) If `True`, all axes are adjusted to cover an equally large
+             range of value. That doesn't mean, that the limits are identical
         show_data_labels : bool
             (k3d only) If `True`, plotted data sets get labels with their names attached
             to them
@@ -2982,15 +2986,23 @@ class CoordinateSystemManager:
             If `True`, the trace of time dependent coordinate systems is plotted in the
             coordinate systems color.
         show_vectors : bool
-            (matplotlib only) If `True`, the coordinate cross of time dependent
-            coordinate systems is plotted.
+            If `True`, the coordinate cross of time dependent coordinate systems is
+            plotted.
         show_wireframe : bool
-            (k3d only) If `True`, data sets that contain mesh data are rendered in
-            wireframe mode. If `False`, the data
+            If `True`, data sets that contain mesh data are rendered in wireframe mode.
+            If `False`, the mesh is rendered normally (k3d) or isn't shown (matplotlib)
+
+        Returns
+        -------
+        matplotlib.axes.Axes or \
+        weldx.visualization.CoordinateSystemManagerVisualizerK3D:
+            The utilized matplotlib axes, if matplotlib was used as rendering backend or
+            the created `weldx.visualization.CoordinateSystemManagerVisualizerK3D`
+            instance if k3d was used
 
         """
         if backend == "k3d":
-            CoordinateSystemManagerVisualizerK3D(
+            return CoordinateSystemManagerVisualizerK3D(
                 csm=self,
                 reference_system=reference_system,
                 coordinate_systems=coordinate_systems,
@@ -3007,8 +3019,8 @@ class CoordinateSystemManager:
                 show_vectors=show_vectors,
                 show_wireframe=show_wireframe,
             )
-        elif backend == "mpl":
-            axes = plot_coordinate_system_manager_matplotlib(
+        if backend == "mpl":
+            return plot_coordinate_system_manager_matplotlib(
                 csm=self,
                 axes=axes,
                 reference_system=reference_system,
@@ -3018,12 +3030,13 @@ class CoordinateSystemManager:
                 time_ref=time_ref,
                 title=title,
                 limits=limits,
+                set_axes_equal=set_axes_equal,
                 show_origins=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,
+                show_wireframe=show_wireframe,
             )
-        else:
-            raise ValueError(f"Unknown rendering backend: '{backend}'")
+        raise ValueError(f"Unknown rendering backend: '{backend}'")
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
