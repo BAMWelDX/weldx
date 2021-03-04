@@ -6,7 +6,6 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Union, TYPE_CHECKING
 
-import networkx as nx
 import numpy as np
 import pandas as pd
 import pint
@@ -14,15 +13,14 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
-from weldx import LocalCoordinateSystem
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.geometry import SpatialData
+from weldx.transformations.util import build_time_index
+from .local_cs import LocalCoordinateSystem
 
 # only import heavy-weight packages on type checking
-from weldx.transformations.util import build_time_index
-
 if TYPE_CHECKING:
-    import networkx
+    import networkx as nx
     import matplotlib.axes
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -544,7 +542,7 @@ class CoordinateSystemManager:
             List with subsystem names.
 
         """
-        return self._sub_system_data_dict.keys()
+        return list(self._sub_system_data_dict.keys())
 
     def add_cs(
         self,
@@ -1114,7 +1112,7 @@ class CoordinateSystemManager:
             Names of the attached data sets
 
         """
-        return self._data.keys()
+        return list(self._data.keys())
 
     def get_data(
         self, data_name, target_coordinate_system_name=None

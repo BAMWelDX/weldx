@@ -1,11 +1,11 @@
 """Provides classes to define lines and surfaces."""
+from __future__ import annotations
 
 import copy
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, TYPE_CHECKING
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pint
 from xarray import DataArray
@@ -16,6 +16,10 @@ from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
+
+# only import heavy-weight packages on type checking
+if TYPE_CHECKING:
+    import matplotlib.axes
 
 # LineSegment -----------------------------------------------------------------
 
@@ -1226,7 +1230,9 @@ class Profile:
         """
         raster_data = self.rasterize(raster_width, stack=False)
         if ax is None:  # pragma: no cover
-            _, ax = plt.subplots()
+            from matplotlib.pyplot import subplots
+
+            _, ax = subplots()
         ax.grid(grid)
         if not ax.name == "3d":
             ax.axis(axis)
@@ -1685,7 +1691,9 @@ class Trace:
         if fmt is None:
             fmt = "x-"
         if axes is None:
-            fig = plt.figure()
+            from matplotlib.pyplot import figure
+
+            fig = figure()
             axes = fig.gca(projection="3d", proj_type="ortho")
             axes.plot(data[0], data[1], data[2], fmt)
             axes.set_xlabel("x")
@@ -1694,7 +1702,7 @@ class Trace:
             if set_axes_equal:
                 import weldx.visualization as vs
 
-                vs.set_axes_equal(axes)
+                vs.axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
 
@@ -2204,11 +2212,11 @@ class Geometry:
         self,
         profile_raster_width: pint.Quantity,
         trace_raster_width: pint.Quantity,
-        axes: plt.Axes = None,
+        axes: matplotlib.axes.Axes = None,
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-    ) -> plt.Axes:  # pragma: no cover
+    ) -> matplotlib.axes.Axes:  # pragma: no cover
         """Plot the geometry.
 
         Parameters
@@ -2353,11 +2361,11 @@ class SpatialData:
 
     def plot(
         self,
-        axes: plt.Axes = None,
+        axes: matplotlib.axes.Axes = None,
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-    ) -> plt.Axes:  # pragma: no cover
+    ) -> matplotlib.axes.Axes:
         """Plot the spatial data.
 
         Parameters

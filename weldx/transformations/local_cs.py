@@ -12,7 +12,7 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
-from weldx.transformations.util import _build_time_index, normalize
+from weldx.transformations.util import build_time_index, normalize
 
 if TYPE_CHECKING:
     import matplotlib.axes
@@ -69,7 +69,7 @@ class LocalCoordinateSystem:
         if coordinates is None:
             coordinates = np.array([0, 0, 0])
 
-        time, time_ref = _build_time_index(time, time_ref)
+        time, time_ref = build_time_index(time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
