@@ -1,21 +1,18 @@
 """Contains some functions written in matplotlib to help with visualization."""
 
-from typing import Dict
-
-from weldx.visualization.colors import (
-    color_generator_function,
-    color_int_to_rgb_normalized,
-    get_color,
-    color_to_rgb_normalized,
-)
-
-from typing import Any, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 import weldx.geometry as geo
+from weldx.visualization.colors import (
+    color_generator_function,
+    color_int_to_rgb_normalized,
+    color_to_rgb_normalized,
+    get_color,
+)
 
 
 def new_3d_figure_and_axes(

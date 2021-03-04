@@ -1,13 +1,12 @@
+import warnings
 from importlib.util import find_spec
 from io import BytesIO
 from pathlib import Path
 
 import asdf
 import yaml
-import warnings
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-
 
 # TODO: these functions be generalized and be public
 # asdf read/write debug tools functions ---------------------------------------
@@ -137,10 +136,10 @@ if find_spec("pygments") and find_spec("IPython"):
             Syntax style to use
 
         """
-        from pygments import highlight
-        from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
-        from pygments.formatters.html import HtmlFormatter
         from IPython.display import HTML
+        from pygments import highlight
+        from pygments.formatters.html import HtmlFormatter
+        from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
 
         if isinstance(file, BytesIO):
             lexer = get_lexer_by_name(lexer)

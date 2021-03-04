@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import List, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Union
 
 import numpy as np
 import pandas as pd

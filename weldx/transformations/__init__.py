@@ -1,5 +1,5 @@
-from .local_cs import LocalCoordinateSystem
 from .cs_manager import CoordinateSystemManager
+from .local_cs import LocalCoordinateSystem
 from .rotation import (
     WXRotation,
     rotation_matrix_x,

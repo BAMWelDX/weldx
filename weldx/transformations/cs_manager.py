@@ -4,7 +4,7 @@ from __future__ import annotations
 import itertools
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -15,12 +15,13 @@ import weldx.utility as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.geometry import SpatialData
 from weldx.transformations.util import build_time_index
+
 from .local_cs import LocalCoordinateSystem
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:
-    import networkx as nx
     import matplotlib.axes
+    import networkx as nx
     from scipy.spatial.transform import Rotation as Rot
 
 _DEFAULT_LEN_UNIT = UREG.millimeters

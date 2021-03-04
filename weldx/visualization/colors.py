@@ -1,10 +1,9 @@
 """Color related tools."""
 
-from typing import Dict, Generator, Tuple, List, Union
-import numpy as np
+from typing import Dict, Generator, List, Tuple, Union
 
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 RGB_BLACK = 0x000000
 RGB_BLUE = 0x0000FF

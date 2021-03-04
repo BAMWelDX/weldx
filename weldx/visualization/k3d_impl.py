@@ -10,11 +10,12 @@ from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
 from weldx import geometry as geo
+
 from .colors import (
     RGB_BLACK,
-    RGB_RED,
-    RGB_GREEN,
     RGB_BLUE,
+    RGB_GREEN,
+    RGB_RED,
     color_generator_function,
     get_color,
 )

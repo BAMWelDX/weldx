@@ -4,7 +4,7 @@ from __future__ import annotations
 import copy
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import numpy as np
 import pint
