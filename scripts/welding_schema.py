@@ -158,8 +158,8 @@ if __name__ == "__main__":
         output_signal=msm.Signal("digital", "A", data=current_data),
         error=msm.Error(0.0),
         func=current_calib_func,
-        meta=twincat_scope,
     )
+    current_calib_transform.wx_metadata = dict(software=twincat_scope)
 
     welding_current_chain = msm.MeasurementChain(
         name="welding current measurement chain",
@@ -208,8 +208,8 @@ if __name__ == "__main__":
         output_signal=msm.Signal("digital", "V", data=voltage_data),
         error=msm.Error(0.0),
         func=voltage_calib_func,
-        meta=twincat_scope,
     )
+    voltage_calib_transform.wx_metadata = dict(software=twincat_scope)
 
     welding_voltage_chain = msm.MeasurementChain(
         name="welding voltage measurement chain",
