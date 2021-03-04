@@ -128,6 +128,33 @@ def _color_rgb_normalized_to_int(rgb: Tuple[float, float, float]) -> int:
     return _color_rgb_to_int(_color_rgb_normalized_to_rgb(rgb))
 
 
+def _color_to_rgb_normalized(
+    color: Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+) -> Tuple[float, float, float]:
+    """Convert an arbitrary RGB color representation into a normalized RGB triplet.
+
+    Parameters
+    ----------
+    color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+        A 24 bit integer, a triplet of integers with a value range of 0-255
+        or a triplet of floats with a value range of 0.0-1.0 that represent an RGB color
+
+    Returns
+    -------
+    Tuple[float, float, float] :
+        RGB color triplet with the value range 0.0 to 1.0
+
+    """
+    if isinstance(color, Tuple) and len(color) == 3:
+        if all(isinstance(number, int) for number in color):
+            return _color_rgb_to_rgb_normalized(color)
+        if all(isinstance(number, (int, float)) for number in color):
+            return color
+    if isinstance(color, int):
+        return _color_int_to_rgb_normalized(color)
+    raise TypeError("Unsupported color format.")
+
+
 def _shuffled_tab20_colors() -> List[int]:
     """Get a shuffled list of matplotlib 'tab20' colors.
 
@@ -290,17 +317,19 @@ def draw_coordinate_system_matplotlib(
         p_y = p_0 + orientation[:, 1]
         p_z = p_0 + orientation[:, 2]
 
-        axes.plot([p_0[0], p_x[0]], [p_0[1], p_x[1]], [p_0[2], p_x[2]], "r")
-        axes.plot([p_0[0], p_y[0]], [p_0[1], p_y[1]], [p_0[2], p_y[2]], "g")
-        axes.plot([p_0[0], p_z[0]], [p_0[1], p_z[1]], [p_0[2], p_z[2]], "b")
+        axes.plot([p_0[0], p_x[0]], [p_0[1], p_x[1]], [p_0[2], p_x[2]], "r", zorder=11)
+        axes.plot([p_0[0], p_y[0]], [p_0[1], p_y[1]], [p_0[2], p_y[2]], "g", zorder=11)
+        axes.plot([p_0[0], p_z[0]], [p_0[1], p_z[1]], [p_0[2], p_z[2]], "b", zorder=11)
     if color is not None:
         if show_origin:
-            axes.plot([p_0[0]], [p_0[1]], [p_0[2]], "o", color=color, label=label)
+            axes.plot(
+                [p_0[0]], [p_0[1]], [p_0[2]], "o", color=color, label=label, zorder=12
+            )
     elif label is not None:
         raise Exception("Labels can only be assigned if a color was specified")
 
 
-def set_axes_equal(axes):
+def axes_equal(axes):
     """Adjust axis in a 3d plot to be equally scaled.
 
     Source code taken from the stackoverflow answer of 'karlo' in the
@@ -387,24 +416,31 @@ def plot_local_coordinate_system_matplotlib(
     if lcs.is_time_dependent and time is not None:
         lcs = lcs.interp_time(time, time_ref)
 
+    if show_origin:
+        label_lcs = label
+        label_trace = None
+    else:
+        label_lcs = None
+        label_trace = label
+
     if lcs.is_time_dependent and time_index is None:
         for i, _ in enumerate(lcs.time):
             draw_coordinate_system_matplotlib(
                 lcs,
                 axes,
                 color=color,
-                label=label,
+                label=label_lcs,
                 time_idx=i,
                 show_origin=show_origin,
                 show_vectors=show_vectors,
             )
-            label = None
+            label_lcs = None
     else:
         draw_coordinate_system_matplotlib(
             lcs,
             axes,
             color=color,
-            label=label,
+            label=label_lcs,
             time_idx=time_index,
             show_origin=show_origin,
             show_vectors=show_vectors,
@@ -414,13 +450,23 @@ def plot_local_coordinate_system_matplotlib(
         coords = lcs.coordinates.values
         if color is None:
             color = "k"
-        axes.plot(coords[:, 0], coords[:, 1], coords[:, 2], ":", color=color)
+        axes.plot(
+            coords[:, 0],
+            coords[:, 1],
+            coords[:, 2],
+            "-",
+            color=color,
+            label=label_trace,
+            zorder=10,
+        )
 
     return axes
 
 
 def _set_limits_matplotlib(
-    axes: plt.Axes.axes, limits: Union[List[Tuple[float, float]], Tuple[float, float]]
+    axes: plt.Axes.axes,
+    limits: Union[List[Tuple[float, float]], Tuple[float, float]],
+    set_axes_equal: bool = False,
 ):
     """Set the limits of an axes object.
 
@@ -432,11 +478,12 @@ def _set_limits_matplotlib(
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
+    set_axes_equal : bool
+        (matplotlib only) If `True`, all axes are adjusted to cover an equally large
+         range of value. That doesn't mean, that the limits are identical
 
     """
-    if limits is None:
-        set_axes_equal(axes)
-    else:
+    if limits is not None:
         if isinstance(limits, Tuple):
             limits = [limits]
         if len(limits) == 1:
@@ -444,6 +491,8 @@ def _set_limits_matplotlib(
         axes.set_xlim(limits[0])
         axes.set_ylim(limits[1])
         axes.set_zlim(limits[2])
+    elif set_axes_equal:
+        axes_equal(axes)
 
 
 def plot_coordinate_system_manager_matplotlib(
@@ -457,9 +506,11 @@ def plot_coordinate_system_manager_matplotlib(
     time_ref: pd.Timestamp = None,
     title: str = None,
     limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
+    set_axes_equal: bool = False,
     show_origins: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
+    show_wireframe: bool = True,
 ) -> plt.Axes.axes:
     """Plot the coordinate systems of a `weldx.transformations.CoordinateSystemManager`.
 
@@ -497,6 +548,9 @@ def plot_coordinate_system_manager_matplotlib(
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
+    set_axes_equal : bool
+        (matplotlib only) If `True`, all axes are adjusted to cover an equally large
+         range of value. That doesn't mean, that the limits are identical
     show_origins : bool
         If `True`, the origins of the coordinate system are visualized in the color
         assigned to the coordinate system.
@@ -504,6 +558,8 @@ def plot_coordinate_system_manager_matplotlib(
         If `True`, the trace of time dependent coordinate systems is plotted.
     show_vectors : bool
         If `True`, the coordinate cross of time dependent coordinate systems is plotted.
+    show_wireframe : bool
+        If `True`, the mesh is visualized as wireframe. Otherwise, it is not shown.
 
     Returns
     -------
@@ -554,27 +610,15 @@ def plot_coordinate_system_manager_matplotlib(
     for data_name in data_sets:
         color = _color_int_to_rgb_normalized(_get_color(data_name, colors, color_gen))
         data = csm.get_data(data_name, reference_system)
-        triangles = None
-        if isinstance(data, geo.SpatialData):
-            triangles = data.triangles
-            data = data.coordinates
+        plot_spatial_data_matplotlib(
+            data=data,
+            axes=axes,
+            color=color,
+            label=data_name,
+            show_wireframe=show_wireframe,
+        )
 
-        data = data.data
-        while data.ndim > 2:
-            data = data[0]
-
-        axes.plot(data[:, 0], data[:, 1], data[:, 2], "x", color=color, label=data_name)
-        if triangles is not None:
-            for triangle in triangles:
-                triangle_data = data[[*triangle, triangle[0]], :]
-                axes.plot(
-                    triangle_data[:, 0],
-                    triangle_data[:, 1],
-                    triangle_data[:, 2],
-                    color=color,
-                )
-
-    _set_limits_matplotlib(axes, limits)
+    _set_limits_matplotlib(axes, limits, set_axes_equal)
     axes.legend()
 
     return axes
@@ -634,7 +678,135 @@ def plot_coordinate_systems(
     return axes
 
 
+def plot_spatial_data_matplotlib(
+    data,
+    axes: plt.Axes = None,
+    color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+    label: str = None,
+    show_wireframe: bool = True,
+) -> plt.Axes:
+    """Visualize a `weldx.geometry.SpatialData` instance.
+
+    Parameters
+    ----------
+    data : weldx.geometry.SpatialData
+        The data that should be visualized
+    axes : matplotlib.axes.Axes
+        The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
+        new figure will be created
+    color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+        A 24 bit integer, a triplet of integers with a value range of 0-255
+        or a triplet of floats with a value range of 0.0-1.0 that represent an RGB
+        color
+    label : str
+        Label of the plotted geometry
+    show_wireframe : bool
+        If `True`, the mesh is plotted as wireframe. Otherwise only the raster
+        points are visualized. Currently, the wireframe can't be visualized if a
+        `weldx.geometry.VariableProfile` is used.
+
+    Returns
+    -------
+    matplotlib.axes.Axes :
+        The `matplotlib.axes.Axes` instance that was used for the plot
+
+    """
+    if axes is None:
+        _, axes = new_3d_figure_and_axes()
+
+    if not isinstance(data, geo.SpatialData):
+        data = geo.SpatialData(data)
+
+    if color is None:
+        color = (0.0, 0.0, 0.0)
+    else:
+        color = _color_to_rgb_normalized(color)
+
+    coordinates = data.coordinates.data
+    triangles = data.triangles
+
+    # if data is time dependent or has other extra dimensions, just take the first value
+    while coordinates.ndim > 2:
+        coordinates = coordinates[0]
+
+    axes.scatter(
+        coordinates[:, 0],
+        coordinates[:, 1],
+        coordinates[:, 2],
+        marker=".",
+        color=color,
+        label=label,
+        zorder=2,
+    )
+    if triangles is not None and show_wireframe:
+        for triangle in triangles:
+            triangle_data = coordinates[[*triangle, triangle[0]], :]
+            axes.plot(
+                triangle_data[:, 0],
+                triangle_data[:, 1],
+                triangle_data[:, 2],
+                color=color,
+                zorder=1,
+            )
+
+    return axes
+
+
 # k3d ----------------------------------------------------------------------------------
+
+
+def _get_coordinates_and_orientation(lcs, index: int = 0):
+    """Get the coordinates and orientation of a coordinate system.
+
+    Parameters
+    ----------
+    lcs : weldx.LocalCoordinateSystem
+        The coordinate system
+    index : int
+        If the coordinate system is time dependent, the passed value is the index
+        of the values that should be returned
+
+    Returns
+    -------
+    coordinates : numpy.ndarray
+        The coordinates
+    orientation : numpy.ndarray
+        The orientation
+
+    """
+    coordinates = lcs.coordinates.isel(time=index, missing_dims="ignore").values.astype(
+        "float32"
+    )
+
+    orientation = lcs.orientation.isel(time=index, missing_dims="ignore").values.astype(
+        "float32"
+    )
+
+    return coordinates, orientation
+
+
+def _create_model_matrix(
+    coordinates: np.ndarray, orientation: np.ndarray
+) -> np.ndarray:
+    """Create the model matrix from an orientation and coordinates.
+
+    Parameters
+    ----------
+    coordinates : numpy.ndarray
+        The coordinates of the origin
+    orientation : numpy.ndarray
+        The orientation of the coordinate system
+
+    Returns
+    -------
+    numpy.ndarray :
+        The model matrix
+
+    """
+    model_matrix = np.eye(4, dtype="float32")
+    model_matrix[:3, :3] = orientation
+    model_matrix[:3, 3] = coordinates
+    return model_matrix
 
 
 class CoordinateSystemVisualizerK3D:
@@ -673,7 +845,7 @@ class CoordinateSystemVisualizerK3D:
             If `True`, the the coordinate axes of the coordinate system are visualized
 
         """
-        coordinates, orientation = self._get_coordinates_and_orientation(lcs)
+        coordinates, orientation = _get_coordinates_and_orientation(lcs)
         self._lcs = lcs
         self._color = color
 
@@ -706,7 +878,7 @@ class CoordinateSystemVisualizerK3D:
 
         self.origin = platonic.Octahedron(size=0.1).mesh
         self.origin.color = color
-        self.origin.model_matrix = self._create_model_matrix(coordinates, orientation)
+        self.origin.model_matrix = _create_model_matrix(coordinates, orientation)
         self.origin.visible = show_origin
 
         if plot is not None:
@@ -715,60 +887,6 @@ class CoordinateSystemVisualizerK3D:
             plot += self.origin
             if self._label is not None:
                 plot += self._label
-
-    @staticmethod
-    def _create_model_matrix(
-        coordinates: np.ndarray, orientation: np.ndarray
-    ) -> np.ndarray:
-        """Create the model matrix from an orientation and coordinates.
-
-        Parameters
-        ----------
-        coordinates : numpy.ndarray
-            The coordinates of the origin
-        orientation : numpy.ndarray
-            The orientation of the coordinate system
-
-        Returns
-        -------
-        numpy.ndarray :
-            The model matrix
-
-        """
-        model_matrix = np.eye(4, dtype="float32")
-        model_matrix[:3, :3] = orientation
-        model_matrix[:3, 3] = coordinates
-        return model_matrix
-
-    @staticmethod
-    def _get_coordinates_and_orientation(lcs, index: int = 0):
-        """Get the coordinates and orientation of a coordinate system.
-
-        Parameters
-        ----------
-        lcs : weldx.LocalCoordinateSystem
-            The coordinate system
-        index : int
-            If the coordinate system is time dependent, the passed value is the index
-            of the values that should be returned
-
-        Returns
-        -------
-        coordinates : numpy.ndarray
-            The coordinates
-        orientation : numpy.ndarray
-            The orientation
-
-        """
-        coordinates = lcs.coordinates.isel(
-            time=index, missing_dims="ignore"
-        ).values.astype("float32")
-
-        orientation = lcs.orientation.isel(
-            time=index, missing_dims="ignore"
-        ).values.astype("float32")
-
-        return coordinates, orientation
 
     def _update_positions(self, coordinates: np.ndarray, orientation: np.ndarray):
         """Update the positions of the coordinate cross and label.
@@ -783,7 +901,7 @@ class CoordinateSystemVisualizerK3D:
         """
         self._vectors.origins = [coordinates for _ in range(3)]
         self._vectors.vectors = orientation.transpose()
-        self.origin.model_matrix = self._create_model_matrix(coordinates, orientation)
+        self.origin.model_matrix = _create_model_matrix(coordinates, orientation)
         if self._label is not None:
             self._label.position = coordinates + 0.05
 
@@ -846,28 +964,6 @@ class CoordinateSystemVisualizerK3D:
         self._trace.vertices = np.array(lcs.coordinates.values, dtype="float32")
         self.update_time_index(index)
 
-    def update_time(
-        self,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-        time_ref: pd.Timestamp = None,
-    ):
-        """Update the plotted time step.
-
-        Parameters
-        ----------
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               LocalCoordinateSystem
-            The time steps that should be plotted
-        time_ref : pandas.Timestamp
-            A reference timestamp that can be provided if the ``time`` parameter is a
-            `pandas.TimedeltaIndex`
-
-        """
-        lcs = self._lcs.interp_time(time, time_ref)
-        coordinates, orientation = self._get_coordinates_and_orientation(lcs)
-
-        self._update_positions(coordinates, orientation)
-
     def update_time_index(self, index: int):
         """Update the plotted time step.
 
@@ -877,9 +973,7 @@ class CoordinateSystemVisualizerK3D:
             The array index of the time step
 
         """
-        coordinates, orientation = self._get_coordinates_and_orientation(
-            self._lcs, index
-        )
+        coordinates, orientation = _get_coordinates_and_orientation(self._lcs, index)
         self._update_positions(coordinates, orientation)
 
 
@@ -892,7 +986,7 @@ class SpatialDataVisualizer:
         self,
         data,
         name: str,
-        cs_vis: CoordinateSystemVisualizerK3D,
+        reference_system: str,
         plot: k3d.Plot = None,
         color: int = RGB_BLACK,
         visualization_method: str = "auto",
@@ -906,10 +1000,8 @@ class SpatialDataVisualizer:
             The data that should be visualized
         name : str
             Name of the data
-        cs_vis : CoordinateSystemVisualizerK3D
-            An instance of the 'CoordinateSystemVisualizerK3D'. This serves as reference
-            coordinate system for the data and is needed to calculate the correct
-            position of the data
+        reference_system : str
+            Name of the data's reference system
         plot : k3d.Plot
             A k3d plotting widget.
         color : int
@@ -928,7 +1020,7 @@ class SpatialDataVisualizer:
             triangles = data.triangles
             data = data.coordinates.data
 
-        self._cs_vis = cs_vis
+        self._reference_system = reference_system
 
         self._label_pos = np.mean(data, axis=0)
         self._label = None
@@ -941,6 +1033,7 @@ class SpatialDataVisualizer:
                 size=0.5,
                 label_box=True,
             )
+
         self._points = k3d.points(data, point_size=0.05, color=color)
         self._mesh = None
         if triangles is not None:
@@ -948,7 +1041,6 @@ class SpatialDataVisualizer:
                 data, triangles, side="double", color=color, wireframe=show_wireframe
             )
 
-        self.update_model_matrix()
         self.set_visualization_method(visualization_method)
 
         if plot is not None:
@@ -957,6 +1049,18 @@ class SpatialDataVisualizer:
                 plot += self._mesh
             if self._label is not None:
                 plot += self._label
+
+    @property
+    def reference_system(self) -> str:
+        """Get the name of the reference coordinate system.
+
+        Returns
+        -------
+        str :
+            Name of the reference coordinate system
+
+        """
+        return self._reference_system
 
     def set_visualization_method(self, method: str):
         """Set the visualization method.
@@ -1005,9 +1109,8 @@ class SpatialDataVisualizer:
         if self._mesh is not None:
             self._mesh.wireframe = show_wireframe
 
-    def update_model_matrix(self):
+    def update_model_matrix(self, model_mat):
         """Update the model matrices of the k3d objects."""
-        model_mat = self._cs_vis.origin.model_matrix
         self._points.model_matrix = model_mat
         if self._mesh is not None:
             self._mesh.model_matrix = model_mat
@@ -1089,6 +1192,7 @@ class CoordinateSystemManagerVisualizerK3D:
             time = csm.time_union()
         if time is not None:
             csm = csm.interp_time(time=time, time_ref=time_ref)
+
         self._csm = csm.interp_time(time=time, time_ref=time_ref)
         self._current_time_index = 0
 
@@ -1098,6 +1202,7 @@ class CoordinateSystemManagerVisualizerK3D:
             data_sets = self._csm.data_names
         if reference_system is None:
             reference_system = self._csm.root_system_name
+        self._current_reference_system = reference_system
 
         grid_auto_fit = True
         grid = (-1, -1, -1, 1, 1, 1)
@@ -1130,18 +1235,18 @@ class CoordinateSystemManagerVisualizerK3D:
             data_name: SpatialDataVisualizer(
                 self._csm.get_data(data_name=data_name),
                 data_name,
-                self._lcs_vis[self._csm.get_data_system_name(data_name=data_name)],
+                self._csm.get_data_system_name(data_name=data_name),
                 plot,
                 color=_get_color(data_name, colors, self._color_generator),
                 show_wireframe=show_wireframe,
             )
             for data_name in data_sets
         }
+        self._update_spatial_data()
 
         # create controls
         self._controls = self._create_controls(
             time,
-            reference_system,
             show_data_labels,
             show_labels,
             show_origins,
@@ -1185,12 +1290,12 @@ class CoordinateSystemManagerVisualizerK3D:
         # workaround since using it inside the init method of the coordinate system
         # visualizer somehow causes the labels to be created twice with one version
         # being always visible
+        self.show_data_labels(show_data_labels)
         self.show_labels(show_labels)
 
     def _create_controls(
         self,
         time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-        reference_system: str,
         show_data_labels: bool,
         show_labels: bool,
         show_origins: bool,
@@ -1205,9 +1310,6 @@ class CoordinateSystemManagerVisualizerK3D:
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
                LocalCoordinateSystem
             The time steps that should be plotted initially
-        reference_system : str
-            Name of the initial reference system. If `None` is provided, the root system
-            of the `CoordinateSystemManager` instance will be used
         show_data_labels : bool
             If `True`, the data labels will be shown initially
         show_labels  : bool
@@ -1245,7 +1347,7 @@ class CoordinateSystemManagerVisualizerK3D:
         )
         reference_dropdown = Dropdown(
             options=self._csm.coordinate_system_names,
-            value=reference_system,
+            value=self._current_reference_system,
             description="Reference:",
             disabled=False,
         )
@@ -1317,6 +1419,22 @@ class CoordinateSystemManagerVisualizerK3D:
             row_3 = HBox([data_dropdown, wf_cb, data_labels_cb])
             return VBox([row_1, row_2, row_3])
         return VBox([row_1, row_2])
+
+    def _get_model_matrix(self, lcs_name):
+        lcs_vis = self._lcs_vis.get(lcs_name)
+        if lcs_vis is not None:
+            return lcs_vis.origin.model_matrix
+
+        lcs = self._csm.get_cs(lcs_name, self._current_reference_system)
+        coordinates, orientation = _get_coordinates_and_orientation(
+            lcs, self._current_time_index
+        )
+        return _create_model_matrix(coordinates, orientation)
+
+    def _update_spatial_data(self):
+        for _, data_vis in self._data_vis.items():
+            model_matrix = self._get_model_matrix(data_vis.reference_system)
+            data_vis.update_model_matrix(model_matrix)
 
     def set_data_visualization_method(self, representation: str):
         """Set the data visualization method.
@@ -1413,34 +1531,12 @@ class CoordinateSystemManagerVisualizerK3D:
             Name of the new reference system
 
         """
+        self._current_reference_system = reference_system
         for lcs_name, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_lcs(
                 self._csm.get_cs(lcs_name, reference_system), self._current_time_index
             )
-        for _, data_vis in self._data_vis.items():
-            data_vis.update_model_matrix()
-
-    def update_time(
-        self,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-        time_ref: pd.Timestamp = None,
-    ):
-        """Update the plotted time.
-
-        Parameters
-        ----------
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-            LocalCoordinateSystem
-            The time steps that should be plotted
-        time_ref : pandas.Timestamp
-            A reference timestamp that can be provided if the ``time`` parameter is a
-            `pandas.TimedeltaIndex`
-
-        """
-        for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis.update_time(time, time_ref)
-        for _, data_vis in self._data_vis.items():
-            data_vis.update_model_matrix()
+        self._update_spatial_data()
 
     def update_time_index(self, index: int):
         """Update the plotted time by index.
@@ -1454,6 +1550,5 @@ class CoordinateSystemManagerVisualizerK3D:
         self._current_time_index = index
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_time_index(index)
-        for _, data_vis in self._data_vis.items():
-            data_vis.update_model_matrix()
+        self._update_spatial_data()
         self._time_info.text = f"<b>time:</b> {self._time[index]}"
