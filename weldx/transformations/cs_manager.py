@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
-from scipy.spatial.transform import Rotation as Rot
 
 import weldx.utility as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
@@ -22,6 +21,7 @@ from .local_cs import LocalCoordinateSystem
 if TYPE_CHECKING:
     import networkx as nx
     import matplotlib.axes
+    from scipy.spatial.transform import Rotation as Rot
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
