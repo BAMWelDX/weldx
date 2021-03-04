@@ -6,6 +6,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 import pint
@@ -21,7 +22,6 @@ from .local_cs import LocalCoordinateSystem
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:
     import matplotlib.axes
-    import networkx as nx
     from scipy.spatial.transform import Rotation as Rot
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
