@@ -7,5 +7,3 @@ from .rotation import (
     rotation_matrix_z,
 )
 from .util import *
-
-# from weldx.geometry import SpatialData
