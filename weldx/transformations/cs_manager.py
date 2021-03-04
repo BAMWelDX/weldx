@@ -1745,9 +1745,9 @@ class CoordinateSystemManager:
             wireframe mode. If `False`, the data
 
         """
-        if backend not in ("matplotlib", "k3d"):
+        if backend not in ("mpl", "k3d"):
             raise ValueError(
-                f"backend has to be one of ('matplotlib, 'k3d'), but was {backend}"
+                f"backend has to be one of ('mpl', 'k3d'), but was {backend}"
             )
 
         if backend == "k3d":
