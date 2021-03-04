@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-def _build_time_index(
+def build_time_index(
     time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
     time_ref: pd.Timestamp = None,
 ) -> pd.TimedeltaIndex:
