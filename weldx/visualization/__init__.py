@@ -2,6 +2,7 @@ from .k3d_impl import CoordinateSystemManagerVisualizerK3D, SpatialDataVisualize
 from .matplotlib_impl import (
     axes_equal,
     draw_coordinate_system_matplotlib,
+    new_3d_figure_and_axes,
     plot_coordinate_system_manager_matplotlib,
     plot_coordinate_systems,
     plot_local_coordinate_system_matplotlib,
