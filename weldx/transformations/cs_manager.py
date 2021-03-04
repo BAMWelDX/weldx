@@ -72,6 +72,8 @@ class CoordinateSystemManager:
         CoordinateSystemManager
 
         """
+        from networkx import DiGraph
+
         if coordinate_system_manager_name is None:
             coordinate_system_manager_name = self._generate_default_name()
         self._name = coordinate_system_manager_name
@@ -84,7 +86,7 @@ class CoordinateSystemManager:
 
         self._sub_system_data_dict = {}
 
-        self._graph = nx.DiGraph()
+        self._graph = DiGraph()
         self._add_coordinate_system_node(root_coordinate_system_name)
 
     @classmethod
