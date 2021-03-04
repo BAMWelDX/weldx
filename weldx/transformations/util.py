@@ -9,6 +9,18 @@ import pint
 
 import weldx.utility as ut
 
+__all__ = [
+    "scale_matrix",
+    "normalize",
+    "orientation_point_plane_containing_origin",
+    "orientation_point_plane",
+    "is_orthogonal",
+    "is_orthogonal_matrix",
+    "point_left_of_line",
+    "reflection_sign",
+    "vector_points_to_left_of_vector",
+]
+
 
 def _build_time_index(
     time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
