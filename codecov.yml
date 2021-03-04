@@ -25,4 +25,6 @@ coverage:
 ignore:
   - "tests"
   - "*__init__.py"
-  - "weldx/visualization.py"
+  - "weldx/visualization/colors.py"
+  - "weldx/visualization/k3d_impl.py"
+  - "weldx/visualization/matplotlib_impl.py"
