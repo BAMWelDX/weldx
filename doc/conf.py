@@ -271,3 +271,7 @@ default_role = "py:obj"
 
 # see:
 # https://stackoverflow.com/questions/34052582/how-do-i-refer-to-classes-and-methods-in-other-files-my-project-with-sphinx
+
+
+# enable type checking
+set_type_checking_flag=True
