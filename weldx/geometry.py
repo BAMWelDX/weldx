@@ -3,13 +3,16 @@
 import copy
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
+import matplotlib.pyplot as plt
 import numpy as np
+import pint
 from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.utility as ut
+import weldx.visualization as vs
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -1224,8 +1227,6 @@ class Profile:
         """
         raster_data = self.rasterize(raster_width, stack=False)
         if ax is None:  # pragma: no cover
-            import matplotlib.pyplot as plt
-
             _, ax = plt.subplots()
         ax.grid(grid)
         if not ax.name == "3d":
@@ -1685,8 +1686,6 @@ class Trace:
         if fmt is None:
             fmt = "x-"
         if axes is None:
-            import matplotlib.pyplot as plt
-
             fig = plt.figure()
             axes = fig.gca(projection="3d", proj_type="ortho")
             axes.plot(data[0], data[1], data[2], fmt)
@@ -1694,9 +1693,7 @@ class Trace:
             axes.set_ylabel("y")
             axes.set_zlabel("z")
             if set_axes_equal:
-                from .visualization import set_axes_equal
-
-                set_axes_equal(axes)
+                vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
 
@@ -1847,7 +1844,7 @@ class VariableProfile:
         return self._locations[-1]
 
     @property
-    def num_interpolation_schemes(self):
+    def num_interpolation_schemes(self) -> int:
         """Get the number of interpolation schemes.
 
         Returns
@@ -1859,7 +1856,7 @@ class VariableProfile:
         return len(self._interpolation_schemes)
 
     @property
-    def num_locations(self):
+    def num_locations(self) -> int:
         """Get the number of profile locations.
 
         Returns
@@ -1871,7 +1868,7 @@ class VariableProfile:
         return len(self._locations)
 
     @property
-    def num_profiles(self):
+    def num_profiles(self) -> int:
         """Get the number of profiles.
 
         Returns
@@ -2085,7 +2082,7 @@ class Geometry:
         """
         locations = self._rasterize_trace(trace_raster_width)
 
-        if stack:  # old behavior for 3d pointcloud
+        if stack:  # old behavior for 3d point cloud
             profile_data = self._profile_raster_data_3d(
                 self._profile, profile_raster_width, stack=True
             )
@@ -2191,50 +2188,96 @@ class Geometry:
 
     @UREG.wraps(
         None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None, None),
+        (
+            None,
+            _DEFAULT_LEN_UNIT,
+            _DEFAULT_LEN_UNIT,
+            None,
+            None,
+            None,
+            None,
+        ),
         strict=False,
     )
     def plot(
         self,
-        profile_raster_width,
-        trace_raster_width,
-        axes=None,
-        fmt=None,
-        set_axes_equal=False,
-    ):  # pragma: no cover
+        profile_raster_width: pint.Quantity,
+        trace_raster_width: pint.Quantity,
+        axes: plt.Axes = None,
+        color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+        label: str = None,
+        show_wireframe: bool = True,
+    ) -> plt.Axes:  # pragma: no cover
         """Plot the geometry.
 
         Parameters
         ----------
-        profile_raster_width: float, int
+        profile_raster_width : pint.Quantity
             Target distance between the individual points of a profile
-        trace_raster_width: float, int
+        trace_raster_width : pint.Quantity
             Target distance between the individual profiles on the trace
         axes : matplotlib.axes.Axes
             The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
             new figure will be created
-        fmt : str
-            Format string that is passed to matplotlib.pyplot.plot.
-        set_axes_equal : bool
-            Set plot axes to equal scaling (Default = False).
+        color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+            A 24 bit integer, a triplet of integers with a value range of 0-255
+            or a triplet of floats with a value range of 0.0-1.0 that represent an RGB
+            color
+        label : str
+            Label of the plotted geometry
+        show_wireframe : bool
+            If `True`, the mesh is plotted as wireframe. Otherwise only the raster
+            points are visualized. Currently, the wireframe can't be visualized if a
+            `VariableProfile` is used.
+
+        Returns
+        -------
+        matplotlib.axes.Axes :
+            The utilized matplotlib axes, if matplotlib was used as rendering backend
 
         """
-        data = self.rasterize(profile_raster_width, trace_raster_width)
-        if fmt is None:
-            fmt = "o"
-        if axes is None:
-            from matplotlib.pyplot import figure
+        data = self.spatial_data(profile_raster_width, trace_raster_width)
+        return data.plot(
+            axes=axes, color=color, label=label, show_wireframe=show_wireframe
+        )
 
-            fig = figure()
-            axes = fig.gca(projection="3d", proj_type="ortho")
-            axes.plot(data[0], data[1], data[2], fmt)
-            axes.set_xlabel("x")
-            axes.set_ylabel("y")
-            axes.set_zlabel("z")
-            if set_axes_equal:
-                set_axes_equal(axes)
-        else:
-            axes.plot(data[0], data[1], data[2], fmt)
+    @UREG.wraps(
+        None,
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT),
+        strict=False,
+    )
+    def spatial_data(
+        self, profile_raster_width: pint.Quantity, trace_raster_width: pint.Quantity
+    ):
+        """Rasterize the geometry and get it as `SpatialData` instance.
+
+        If no `VariableProfile` is used, a triangulation is added automatically.
+
+        Parameters
+        ----------
+        profile_raster_width : pint.Quantity
+            Target distance between the individual points of a profile
+        trace_raster_width : pint.Quantity
+            Target distance between the individual profiles on the trace
+
+        Returns
+        -------
+        SpatialData :
+            The rasterized geometry data
+
+        """
+        # Todo: This branch is a "dirty" fix for the fact that there is no "stackable"
+        #       rasterization for geometries with a VariableProfile. The stacked
+        #       rasterization is needed for the triangulation performed in
+        #       `from_geometry_raster`.
+        if isinstance(self._profile, VariableProfile):
+            rasterization = self.rasterize(profile_raster_width, trace_raster_width)
+            return SpatialData(np.swapaxes(rasterization, 0, 1))
+
+        rasterization = self.rasterize(
+            profile_raster_width, trace_raster_width, stack=False
+        )
+        return SpatialData.from_geometry_raster(rasterization)
 
 
 # SpatialData --------------------------------------------------------------------------
@@ -2277,12 +2320,12 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_geometry_raster(geometry: Geometry) -> "SpatialData":
+    def from_geometry_raster(geometry_raster: np.ndarray) -> "SpatialData":
         """Triangulate rasterized Geometry Profile.
 
         Parameters
         ----------
-        geometry : weldx.geometry.Geometry
+        geometry_raster : numpy.ndarray
             A single unstacked geometry rasterization.
 
         Returns
@@ -2292,4 +2335,56 @@ class SpatialData:
 
         """
         # todo: this needs a test
-        return SpatialData(*ut.triangulate_geometry(geometry))
+        # todo: workaround ... fix the real problem
+        # if not isinstance(geometry_raster, np.ndarray):
+        #    geometry_raster = np.array(geometry_raster)
+        if geometry_raster[0].ndim == 2:
+            return SpatialData(*ut.triangulate_geometry(geometry_raster))
+
+        part_data = [ut.triangulate_geometry(part) for part in geometry_raster]
+
+        total_points = []
+        total_triangles = []
+        for points, triangulation in part_data:
+            total_triangles += (triangulation + len(total_points)).tolist()
+            total_points += points.tolist()
+        return SpatialData(total_points, total_triangles)
+
+    def plot(
+        self,
+        axes: plt.Axes = None,
+        color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+        label: str = None,
+        show_wireframe: bool = True,
+    ) -> plt.Axes:  # pragma: no cover
+        """Plot the spatial data.
+
+        Parameters
+        ----------
+        axes : matplotlib.axes.Axes
+            The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
+            new figure will be created
+        color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+            A 24 bit integer, a triplet of integers with a value range of 0-255
+            or a triplet of floats with a value range of 0.0-1.0 that represent an RGB
+            color
+        label : str
+            Label of the plotted geometry
+        show_wireframe : bool
+            If `True`, the mesh is plotted as wireframe. Otherwise only the raster
+            points are visualized. Currently, the wireframe can't be visualized if a
+            `VariableProfile` is used.
+
+        Returns
+        -------
+        matplotlib.axes.Axes :
+            The utilized matplotlib axes, if matplotlib was used as rendering backend
+
+        """
+        return vs.plot_spatial_data_matplotlib(
+            data=self,
+            axes=axes,
+            color=color,
+            label=label,
+            show_wireframe=show_wireframe,
+        )

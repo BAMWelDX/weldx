@@ -1,22 +1,16 @@
-"""Contains a k3d based visualization of coordinate systems and spatial data."""
+"""Contains some functions to help with visualization."""
 
-from typing import Union, List, Dict, Tuple
+from typing import Any, Dict, Generator, List, Tuple, Union
 
 import k3d
+import k3d.platonic as platonic
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from IPython.core.display import display
-from ipywidgets import (
-    Checkbox,
-    Dropdown,
-    HBox,
-    IntSlider,
-    Layout,
-    Play,
-    VBox,
-    jslink,
-)
-from k3d.platonic import Octahedron
+from IPython.display import display
+from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
+
+import weldx.geometry as geo
 
 from weldx import geometry as geo
 from .colors import (
@@ -27,6 +21,60 @@ from .colors import (
     color_generator_function,
     get_color,
 )
+
+
+def _get_coordinates_and_orientation(lcs, index: int = 0):
+    """Get the coordinates and orientation of a coordinate system.
+
+    Parameters
+    ----------
+    lcs : weldx.LocalCoordinateSystem
+        The coordinate system
+    index : int
+        If the coordinate system is time dependent, the passed value is the index
+        of the values that should be returned
+
+    Returns
+    -------
+    coordinates : numpy.ndarray
+        The coordinates
+    orientation : numpy.ndarray
+        The orientation
+
+    """
+    coordinates = lcs.coordinates.isel(time=index, missing_dims="ignore").values.astype(
+        "float32"
+    )
+
+    orientation = lcs.orientation.isel(time=index, missing_dims="ignore").values.astype(
+        "float32"
+    )
+
+    return coordinates, orientation
+
+
+def _create_model_matrix(
+    coordinates: np.ndarray, orientation: np.ndarray
+) -> np.ndarray:
+    """Create the model matrix from an orientation and coordinates.
+
+    Parameters
+    ----------
+    coordinates : numpy.ndarray
+        The coordinates of the origin
+    orientation : numpy.ndarray
+        The orientation of the coordinate system
+
+    Returns
+    -------
+    numpy.ndarray :
+        The model matrix
+
+    """
+    model_matrix = np.eye(4, dtype="float32")
+    model_matrix[:3, :3] = orientation
+    model_matrix[:3, 3] = coordinates
+    return model_matrix
 
 
 class CoordinateSystemVisualizerK3D:
@@ -65,7 +113,7 @@ class CoordinateSystemVisualizerK3D:
             If `True`, the the coordinate axes of the coordinate system are visualized
 
         """
-        coordinates, orientation = self._get_coordinates_and_orientation(lcs)
+        coordinates, orientation = _get_coordinates_and_orientation(lcs)
         self._lcs = lcs
         self._color = color
 
@@ -96,9 +144,9 @@ class CoordinateSystemVisualizerK3D:
         )
         self._trace.visible = show_trace
 
-        self.origin = Octahedron(size=0.1).mesh
+        self.origin = platonic.Octahedron(size=0.1).mesh
         self.origin.color = color
-        self.origin.model_matrix = self._create_model_matrix(coordinates, orientation)
+        self.origin.model_matrix = _create_model_matrix(coordinates, orientation)
         self.origin.visible = show_origin
 
         if plot is not None:
@@ -107,60 +155,6 @@ class CoordinateSystemVisualizerK3D:
             plot += self.origin
             if self._label is not None:
                 plot += self._label
-
-    @staticmethod
-    def _create_model_matrix(
-        coordinates: np.ndarray, orientation: np.ndarray
-    ) -> np.ndarray:
-        """Create the model matrix from an orientation and coordinates.
-
-        Parameters
-        ----------
-        coordinates : numpy.ndarray
-            The coordinates of the origin
-        orientation : numpy.ndarray
-            The orientation of the coordinate system
-
-        Returns
-        -------
-        numpy.ndarray :
-            The model matrix
-
-        """
-        model_matrix = np.eye(4, dtype="float32")
-        model_matrix[:3, :3] = orientation
-        model_matrix[:3, 3] = coordinates
-        return model_matrix
-
-    @staticmethod
-    def _get_coordinates_and_orientation(lcs, index: int = 0):
-        """Get the coordinates and orientation of a coordinate system.
-
-        Parameters
-        ----------
-        lcs : weldx.LocalCoordinateSystem
-            The coordinate system
-        index : int
-            If the coordinate system is time dependent, the passed value is the index
-            of the values that should be returned
-
-        Returns
-        -------
-        coordinates : numpy.ndarray
-            The coordinates
-        orientation : numpy.ndarray
-            The orientation
-
-        """
-        coordinates = lcs.coordinates.isel(
-            time=index, missing_dims="ignore"
-        ).values.astype("float32")
-
-        orientation = lcs.orientation.isel(
-            time=index, missing_dims="ignore"
-        ).values.astype("float32")
-
-        return coordinates, orientation
 
     def _update_positions(self, coordinates: np.ndarray, orientation: np.ndarray):
         """Update the positions of the coordinate cross and label.
@@ -175,7 +169,7 @@ class CoordinateSystemVisualizerK3D:
         """
         self._vectors.origins = [coordinates for _ in range(3)]
         self._vectors.vectors = orientation.transpose()
-        self.origin.model_matrix = self._create_model_matrix(coordinates, orientation)
+        self.origin.model_matrix = _create_model_matrix(coordinates, orientation)
         if self._label is not None:
             self._label.position = coordinates + 0.05
 
@@ -238,28 +232,6 @@ class CoordinateSystemVisualizerK3D:
         self._trace.vertices = np.array(lcs.coordinates.values, dtype="float32")
         self.update_time_index(index)
 
-    def update_time(
-        self,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-        time_ref: pd.Timestamp = None,
-    ):
-        """Update the plotted time step.
-
-        Parameters
-        ----------
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               LocalCoordinateSystem
-            The time steps that should be plotted
-        time_ref : pandas.Timestamp
-            A reference timestamp that can be provided if the ``time`` parameter is a
-            `pandas.TimedeltaIndex`
-
-        """
-        lcs = self._lcs.interp_time(time, time_ref)
-        coordinates, orientation = self._get_coordinates_and_orientation(lcs)
-
-        self._update_positions(coordinates, orientation)
-
     def update_time_index(self, index: int):
         """Update the plotted time step.
 
@@ -269,10 +241,151 @@ class CoordinateSystemVisualizerK3D:
             The array index of the time step
 
         """
-        coordinates, orientation = self._get_coordinates_and_orientation(
-            self._lcs, index
-        )
+        coordinates, orientation = _get_coordinates_and_orientation(self._lcs, index)
         self._update_positions(coordinates, orientation)
+
+
+class SpatialDataVisualizer:
+    """Visualizes spatial data."""
+
+    visualization_methods = ["auto", "point", "mesh", "both"]
+
+    def __init__(
+        self,
+        data,
+        name: str,
+        reference_system: str,
+        plot: k3d.Plot = None,
+        color: int = RGB_BLACK,
+        visualization_method: str = "auto",
+        show_wireframe: bool = False,
+    ):
+        """Create a 'SpatialDataVisualizer' instance.
+
+        Parameters
+        ----------
+        data : numpy.ndarray or weldx.geometry.SpatialData
+            The data that should be visualized
+        name : str
+            Name of the data
+        reference_system : str
+            Name of the data's reference system
+        plot : k3d.Plot
+            A k3d plotting widget.
+        color : int
+            The RGB color of the coordinate system (affects trace and label) as a 24 bit
+            integer value.
+        visualization_method : str
+            The initial data visualization method. Options are 'point', 'mesh', 'both'
+            and 'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
+            available and points if not.
+        show_wireframe : bool
+            If 'True', meshes will be drawn as wireframes
+
+        """
+        triangles = None
+        if isinstance(data, geo.SpatialData):
+            triangles = data.triangles
+            data = data.coordinates.data
+
+        self._reference_system = reference_system
+
+        self._label_pos = np.mean(data, axis=0)
+        self._label = None
+        if name is not None:
+            self._label = k3d.text(
+                text=name,
+                position=self._label_pos,
+                reference_point="cc",
+                color=color,
+                size=0.5,
+                label_box=True,
+            )
+
+        self._points = k3d.points(data, point_size=0.05, color=color)
+        self._mesh = None
+        if triangles is not None:
+            self._mesh = k3d.mesh(
+                data, triangles, side="double", color=color, wireframe=show_wireframe
+            )
+
+        self.set_visualization_method(visualization_method)
+
+        if plot is not None:
+            plot += self._points
+            if self._mesh is not None:
+                plot += self._mesh
+            if self._label is not None:
+                plot += self._label
+
+    @property
+    def reference_system(self) -> str:
+        """Get the name of the reference coordinate system.
+
+        Returns
+        -------
+        str :
+            Name of the reference coordinate system
+
+        """
+        return self._reference_system
+
+    def set_visualization_method(self, method: str):
+        """Set the visualization method.
+
+        Parameters
+        ----------
+        method : str
+            The data visualization method. Options are 'point', 'mesh', 'both' and
+            'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
+            available and points if not.
+
+        """
+        if method not in SpatialDataVisualizer.visualization_methods:
+            raise ValueError(f"Unknown visualization method: '{method}'")
+
+        if method == "auto":
+            if self._mesh is not None:
+                method = "mesh"
+            else:
+                method = "point"
+
+        self._points.visible = method in ["point", "both"]
+        if self._mesh is not None:
+            self._mesh.visible = method in ["mesh", "both"]
+
+    def show_label(self, show_label: bool):
+        """Set the visibility of the label.
+
+        Parameters
+        ----------
+        show_label : bool
+            If `True`, the label will be shown
+
+        """
+        self._label.visible = show_label
+
+    def show_wireframe(self, show_wireframe: bool):
+        """Set wireframe rendering.
+
+        Parameters
+        ----------
+        show_wireframe : bool
+            If `True`, the mesh will be rendered as wireframe
+
+        """
+        if self._mesh is not None:
+            self._mesh.wireframe = show_wireframe
+
+    def update_model_matrix(self, model_mat):
+        """Update the model matrices of the k3d objects."""
+        self._points.model_matrix = model_mat
+        if self._mesh is not None:
+            self._mesh.model_matrix = model_mat
+        if self._label is not None:
+            self._label.position = (
+                np.matmul(model_mat[0:3, 0:3], self._label_pos) + model_mat[0:3, 3]
+            )
 
 
 class CoordinateSystemManagerVisualizerK3D:
@@ -347,6 +460,7 @@ class CoordinateSystemManagerVisualizerK3D:
             time = csm.time_union()
         if time is not None:
             csm = csm.interp_time(time=time, time_ref=time_ref)
+
         self._csm = csm.interp_time(time=time, time_ref=time_ref)
         self._current_time_index = 0
 
@@ -356,6 +470,7 @@ class CoordinateSystemManagerVisualizerK3D:
             data_sets = self._csm.data_names
         if reference_system is None:
             reference_system = self._csm.root_system_name
+        self._current_reference_system = reference_system
 
         grid_auto_fit = True
         grid = (-1, -1, -1, 1, 1, 1)
@@ -367,7 +482,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 grid = [limits[i % 3][int(i / 3)] for i in range(6)]
 
         # create plot
-        self._color_generator = color_generator_function()
+        self._color_generator = _color_generator_function()
         plot = k3d.plot(
             grid_auto_fit=grid_auto_fit,
             grid=grid,
@@ -377,7 +492,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 self._csm.get_cs(lcs_name, reference_system),
                 plot,
                 lcs_name,
-                color=get_color(lcs_name, colors, self._color_generator),
+                color=_get_color(lcs_name, colors, self._color_generator),
                 show_origin=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,
@@ -388,18 +503,18 @@ class CoordinateSystemManagerVisualizerK3D:
             data_name: SpatialDataVisualizer(
                 self._csm.get_data(data_name=data_name),
                 data_name,
-                self._lcs_vis[self._csm.get_data_system_name(data_name=data_name)],
+                self._csm.get_data_system_name(data_name=data_name),
                 plot,
-                color=get_color(data_name, colors, self._color_generator),
+                color=_get_color(data_name, colors, self._color_generator),
                 show_wireframe=show_wireframe,
             )
             for data_name in data_sets
         }
+        self._update_spatial_data()
 
         # create controls
         self._controls = self._create_controls(
             time,
-            reference_system,
             show_data_labels,
             show_labels,
             show_origins,
@@ -443,12 +558,12 @@ class CoordinateSystemManagerVisualizerK3D:
         # workaround since using it inside the init method of the coordinate system
         # visualizer somehow causes the labels to be created twice with one version
         # being always visible
+        self.show_data_labels(show_data_labels)
         self.show_labels(show_labels)
 
     def _create_controls(
         self,
         time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-        reference_system: str,
         show_data_labels: bool,
         show_labels: bool,
         show_origins: bool,
@@ -463,9 +578,6 @@ class CoordinateSystemManagerVisualizerK3D:
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
                LocalCoordinateSystem
             The time steps that should be plotted initially
-        reference_system : str
-            Name of the initial reference system. If `None` is provided, the root system
-            of the `CoordinateSystemManager` instance will be used
         show_data_labels : bool
             If `True`, the data labels will be shown initially
         show_labels  : bool
@@ -503,7 +615,7 @@ class CoordinateSystemManagerVisualizerK3D:
         )
         reference_dropdown = Dropdown(
             options=self._csm.coordinate_system_names,
-            value=reference_system,
+            value=self._current_reference_system,
             description="Reference:",
             disabled=False,
         )
@@ -575,6 +687,22 @@ class CoordinateSystemManagerVisualizerK3D:
             row_3 = HBox([data_dropdown, wf_cb, data_labels_cb])
             return VBox([row_1, row_2, row_3])
         return VBox([row_1, row_2])
+
+    def _get_model_matrix(self, lcs_name):
+        lcs_vis = self._lcs_vis.get(lcs_name)
+        if lcs_vis is not None:
+            return lcs_vis.origin.model_matrix
+
+        lcs = self._csm.get_cs(lcs_name, self._current_reference_system)
+        coordinates, orientation = _get_coordinates_and_orientation(
+            lcs, self._current_time_index
+        )
+        return _create_model_matrix(coordinates, orientation)
+
+    def _update_spatial_data(self):
+        for _, data_vis in self._data_vis.items():
+            model_matrix = self._get_model_matrix(data_vis.reference_system)
+            data_vis.update_model_matrix(model_matrix)
 
     def set_data_visualization_method(self, representation: str):
         """Set the data visualization method.
@@ -671,34 +799,12 @@ class CoordinateSystemManagerVisualizerK3D:
             Name of the new reference system
 
         """
+        self._current_reference_system = reference_system
         for lcs_name, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_lcs(
                 self._csm.get_cs(lcs_name, reference_system), self._current_time_index
             )
-        for _, data_vis in self._data_vis.items():
-            data_vis.update_model_matrix()
-
-    def update_time(
-        self,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
-        time_ref: pd.Timestamp = None,
-    ):
-        """Update the plotted time.
-
-        Parameters
-        ----------
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-            LocalCoordinateSystem
-            The time steps that should be plotted
-        time_ref : pandas.Timestamp
-            A reference timestamp that can be provided if the ``time`` parameter is a
-            `pandas.TimedeltaIndex`
-
-        """
-        for _, lcs_vis in self._lcs_vis.items():
-            lcs_vis.update_time(time, time_ref)
-        for _, data_vis in self._data_vis.items():
-            data_vis.update_model_matrix()
+        self._update_spatial_data()
 
     def update_time_index(self, index: int):
         """Update the plotted time by index.
@@ -712,140 +818,5 @@ class CoordinateSystemManagerVisualizerK3D:
         self._current_time_index = index
         for _, lcs_vis in self._lcs_vis.items():
             lcs_vis.update_time_index(index)
-        for _, data_vis in self._data_vis.items():
-            data_vis.update_model_matrix()
+        self._update_spatial_data()
         self._time_info.text = f"<b>time:</b> {self._time[index]}"
-
-
-class SpatialDataVisualizer:
-    """Visualizes spatial data."""
-
-    visualization_methods = ["auto", "point", "mesh", "both"]
-
-    def __init__(
-        self,
-        data,
-        name: str,
-        cs_vis: CoordinateSystemVisualizerK3D,
-        plot: k3d.Plot = None,
-        color: int = RGB_BLACK,
-        visualization_method: str = "auto",
-        show_wireframe: bool = False,
-    ):
-        """Create a 'SpatialDataVisualizer' instance.
-
-        Parameters
-        ----------
-        data : numpy.ndarray or weldx.geometry.SpatialData
-            The data that should be visualized
-        name : str
-            Name of the data
-        cs_vis : CoordinateSystemVisualizerK3D
-            An instance of the 'CoordinateSystemVisualizerK3D'. This serves as reference
-            coordinate system for the data and is needed to calculate the correct
-            position of the data
-        plot : k3d.Plot
-            A k3d plotting widget.
-        color : int
-            The RGB color of the coordinate system (affects trace and label) as a 24 bit
-            integer value.
-        visualization_method : str
-            The initial data visualization method. Options are 'point', 'mesh', 'both'
-            and 'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
-            available and points if not.
-        show_wireframe : bool
-            If 'True', meshes will be drawn as wireframes
-
-        """
-        triangles = None
-        if isinstance(data, geo.SpatialData):
-            triangles = data.triangles
-            data = data.coordinates.data
-
-        self._cs_vis = cs_vis
-
-        self._label_pos = np.mean(data, axis=0)
-        self._label = None
-        if name is not None:
-            self._label = k3d.text(
-                text=name,
-                position=self._label_pos,
-                reference_point="cc",
-                color=color,
-                size=0.5,
-                label_box=True,
-            )
-        self._points = k3d.points(data, point_size=0.05, color=color)
-        self._mesh = None
-        if triangles is not None:
-            self._mesh = k3d.mesh(
-                data, triangles, side="double", color=color, wireframe=show_wireframe
-            )
-
-        self.update_model_matrix()
-        self.set_visualization_method(visualization_method)
-
-        if plot is not None:
-            plot += self._points
-            if self._mesh is not None:
-                plot += self._mesh
-            if self._label is not None:
-                plot += self._label
-
-    def set_visualization_method(self, method: str):
-        """Set the visualization method.
-
-        Parameters
-        ----------
-        method : str
-            The data visualization method. Options are 'point', 'mesh', 'both' and
-            'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
-            available and points if not.
-
-        """
-        if method not in SpatialDataVisualizer.visualization_methods:
-            raise ValueError(f"Unknown visualization method: '{method}'")
-
-        if method == "auto":
-            if self._mesh is not None:
-                method = "mesh"
-            else:
-                method = "point"
-
-        self._points.visible = method in ["point", "both"]
-        if self._mesh is not None:
-            self._mesh.visible = method in ["mesh", "both"]
-
-    def show_label(self, show_label: bool):
-        """Set the visibility of the label.
-
-        Parameters
-        ----------
-        show_label : bool
-            If `True`, the label will be shown
-
-        """
-        self._label.visible = show_label
-
-    def show_wireframe(self, show_wireframe: bool):
-        """Set wireframe rendering.
-
-        Parameters
-        ----------
-        show_wireframe : bool
-            If `True`, the mesh will be rendered as wireframe
-
-        """
-        if self._mesh is not None:
-            self._mesh.wireframe = show_wireframe
-
-    def update_model_matrix(self):
-        """Update the model matrices of the k3d objects."""
-        model_mat = self._cs_vis.origin.model_matrix
-        self._points.model_matrix = model_mat
-        if self._mesh is not None:
-            self._mesh.model_matrix = model_mat
-        if self._label is not None:
-            self._label.position = (
-                np.matmul(model_mat[0:3, 0:3], self._label_pos) + model_mat[0:3, 3]
-            )
