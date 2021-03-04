@@ -146,15 +146,18 @@ def color_to_rgb_normalized(
     color: Union[int, Tuple[int, int, int], Tuple[float, float, float]]
 ) -> Tuple[float, float, float]:
     """Convert an arbitrary RGB color representation into a normalized RGB triplet.
+
     Parameters
     ----------
     color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
         A 24 bit integer, a triplet of integers with a value range of 0-255
-        or a triplet of floats with a value range of 0.0-1.0 that represent an RGB color
+        or a triplet of floats with a value range of 0.0-1.0 that represent an RGB color.
+
     Returns
     -------
     Tuple[float, float, float] :
         RGB color triplet with the value range 0.0 to 1.0
+
     """
     if isinstance(color, Tuple) and len(color) == 3:
         if all(isinstance(number, int) for number in color):

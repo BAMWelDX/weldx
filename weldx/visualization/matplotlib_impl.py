@@ -56,14 +56,17 @@ def new_3d_figure_and_axes(
 
 def axes_equal(axes):
     """Adjust axis in a 3d plot to be equally scaled.
+
     Source code taken from the stackoverflow answer of 'karlo' in the
     following question:
     https://stackoverflow.com/questions/13685386/matplotlib-equal-unit
     -length-with-equal-aspect-ratio-z-axis-is-not-equal-to
+
     Parameters
     ----------
     axes :
         Matplotlib axes object (output from plt.gca())
+
     """
     x_limits = axes.get_xlim3d()
     y_limits = axes.get_ylim3d()
@@ -239,6 +242,7 @@ def _set_limits_matplotlib(
     set_axes_equal: bool = False,
 ):
     """Set the limits of an axes object.
+
     Parameters
     ----------
     axes : matplotlib.axes.Axes
@@ -250,6 +254,7 @@ def _set_limits_matplotlib(
     set_axes_equal : bool
         (matplotlib only) If `True`, all axes are adjusted to cover an equally large
          range of value. That doesn't mean, that the limits are identical
+
     """
     if limits is not None:
         if isinstance(limits, Tuple):
@@ -335,6 +340,7 @@ def plot_coordinate_system_manager_matplotlib(
     show_wireframe: bool = True,
 ) -> plt.Axes.axes:
     """Plot the coordinate systems of a `weldx.transformations.CoordinateSystemManager`.
+
     Parameters
     ----------
     csm : weldx.transformations.CoordinateSystemManager
@@ -381,10 +387,12 @@ def plot_coordinate_system_manager_matplotlib(
         If `True`, the coordinate cross of time dependent coordinate systems is plotted.
     show_wireframe : bool
         If `True`, the mesh is visualized as wireframe. Otherwise, it is not shown.
+
     Returns
     -------
     matplotlib.axes.Axes :
-        The axes object that was used as canvas for the plot
+        The axes object that was used as canvas for the plot.
+
     """
     if time is not None:
         return plot_coordinate_system_manager_matplotlib(
@@ -451,6 +459,7 @@ def plot_spatial_data_matplotlib(
     show_wireframe: bool = True,
 ) -> plt.Axes:
     """Visualize a `weldx.geometry.SpatialData` instance.
+
     Parameters
     ----------
     data : weldx.geometry.SpatialData
@@ -468,10 +477,12 @@ def plot_spatial_data_matplotlib(
         If `True`, the mesh is plotted as wireframe. Otherwise only the raster
         points are visualized. Currently, the wireframe can't be visualized if a
         `weldx.geometry.VariableProfile` is used.
+
     Returns
     -------
     matplotlib.axes.Axes :
-        The `matplotlib.axes.Axes` instance that was used for the plot
+        The `matplotlib.axes.Axes` instance that was used for the plot.
+
     """
     if axes is None:
         _, axes = new_3d_figure_and_axes()
