@@ -71,36 +71,57 @@ properties:
     items:
       tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
   measurements:
+    description: |
+      List of all measurements associated with the experiment.
     type: array
     items:
       tag: "tag:weldx.bam.de:weldx/measurement/measurement-1.0.0"
-  geometry:
+  workpiece:
     description: |
-      Description of the workpiece geometry consisting of the groove shape and the total seam length.
+      The workpiece to be welded defined by the base metal and the geometric description of the weld seam.
     type: object
     properties:
-      groove_shape:
+      base_metal:
         description: |
-          Constant groove shape of the weld seam.
-        oneOf:
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DHUGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DHVGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DUGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DVGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/FFGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/HUGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/HVGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/IGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UVGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0"
-          - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VVGroove-1.0.0"
-      seam_length:
+          The base metal composition of the workpiece.
+        type: object
+        properties:
+          common_name:
+            description: |
+              The common description of the base metal composition or classification as listed in the standard.
+            type: string
+          standard:
+            description: |
+              The standard listing and describing the base metal compositions.
+        required: [common_name, standard]
+      geometry:
         description: |
-          Length of the linear weld seam.
-        tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
-        wx_unit: "m"
-    required: [groove_shape, seam_length]
+          Description of the workpiece geometry consisting of the groove shape and the total seam length.
+        type: object
+        properties:
+          groove_shape:
+            description: |
+              Constant groove shape of the weld seam.
+            oneOf:
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DHUGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DHVGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DUGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DVGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/FFGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/HUGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/HVGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/IGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UVGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VVGroove-1.0.0"
+          seam_length:
+            description: |
+              Length of the linear weld seam.
+            tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            wx_unit: "m"
+        required: [groove_shape, seam_length]
+      required: [base_metal, geometry]
   reference_timestamp:
     description: |
       An optional timestamp indicating the start of the welding process.
@@ -112,7 +133,7 @@ properties:
     description: |
       Metadata container for additional user documentation of the experiment.
     type: object
-required: [equipment,geometry,measurements,welding_current,welding_voltage,TCP]
+required: [equipment,workpiece,measurements,welding_current,welding_voltage,TCP]
 additionalProperties: false
 
 

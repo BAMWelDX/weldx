@@ -45,6 +45,10 @@ if __name__ == "__main__":
 
     geometry = dict(groove_shape=groove, seam_length=seam_length)
 
+    base_metal = dict(common_name="S355J2+N", standard="DIN EN 10225-2:2011")
+
+    workpiece = dict(base_metal=base_metal, geometry=geometry)
+
     # Setup the Coordinate System Manager (CSM)
     # crete a new coordinate system manager with default base coordinate system
     csm = weldx.transformations.CoordinateSystemManager("base")
@@ -264,7 +268,7 @@ if __name__ == "__main__":
         welding_voltage=voltage_calib_transform.output_signal,
         coordinate_systems=csm,
         TCP=TCP_reference,
-        geometry=geometry,
+        workpiece=workpiece,
         process=process,
         wx_meta={"welder": "A.W. Elder"},
     )
