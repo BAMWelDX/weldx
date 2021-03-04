@@ -10,6 +10,7 @@
   triangulation [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
 - add `plot` function to visualize `LocalCoordinateSystem` and `CoordinateSystemManager` instances in 3d space 
   [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
+
 ### ASDF
 
 - Add possibility to store meta data and content of an external file in an ASDF
@@ -27,6 +28,7 @@
       as `custom_schema` when reading/writing `ASDF`-files
     - the `single_pass_weld-1.0.0.schema` is an example schema for a simple, linear, single pass GMAW application
     - add `core/geometry/point_cloud-1.0.0.yaml` schema [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
+- add file schema describing a simple linear welding application `datamodels/single_pass_weld-1.0.0.schema` [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
 
 ### changes
 
