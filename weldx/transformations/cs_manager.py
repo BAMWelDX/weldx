@@ -22,6 +22,7 @@ from .local_cs import LocalCoordinateSystem
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:
     import matplotlib.axes
+    import matplotlib
     from scipy.spatial.transform import Rotation as Rot
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
