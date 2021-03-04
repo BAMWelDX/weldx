@@ -1,16 +1,13 @@
 """Contains some functions to help with visualization."""
 
-from typing import Any, Dict, Generator, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import k3d
 import k3d.platonic as platonic
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
-
-import weldx.geometry as geo
 
 from weldx import geometry as geo
 from .colors import (
@@ -21,6 +18,8 @@ from .colors import (
     color_generator_function,
     get_color,
 )
+
+__all__ = ["CoordinateSystemManagerVisualizerK3D", "SpatialDataVisualizer"]
 
 
 def _get_coordinates_and_orientation(lcs, index: int = 0):
@@ -482,7 +481,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 grid = [limits[i % 3][int(i / 3)] for i in range(6)]
 
         # create plot
-        self._color_generator = _color_generator_function()
+        self._color_generator = color_generator_function()
         plot = k3d.plot(
             grid_auto_fit=grid_auto_fit,
             grid=grid,
@@ -492,7 +491,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 self._csm.get_cs(lcs_name, reference_system),
                 plot,
                 lcs_name,
-                color=_get_color(lcs_name, colors, self._color_generator),
+                color=get_color(lcs_name, colors, self._color_generator),
                 show_origin=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,
@@ -505,7 +504,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 data_name,
                 self._csm.get_data_system_name(data_name=data_name),
                 plot,
-                color=_get_color(data_name, colors, self._color_generator),
+                color=get_color(data_name, colors, self._color_generator),
                 show_wireframe=show_wireframe,
             )
             for data_name in data_sets
