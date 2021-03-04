@@ -1,6 +1,6 @@
 """Color related tools."""
 
-from typing import Dict, Generator, Tuple, List
+from typing import Dict, Generator, Tuple, List, Union
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -140,6 +140,30 @@ def _shuffled_tab20_colors() -> List[int]:
     state.shuffle(colors)
 
     return [_color_rgb_normalized_to_int(color) for color in colors]
+
+
+def color_to_rgb_normalized(
+    color: Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+) -> Tuple[float, float, float]:
+    """Convert an arbitrary RGB color representation into a normalized RGB triplet.
+    Parameters
+    ----------
+    color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+        A 24 bit integer, a triplet of integers with a value range of 0-255
+        or a triplet of floats with a value range of 0.0-1.0 that represent an RGB color
+    Returns
+    -------
+    Tuple[float, float, float] :
+        RGB color triplet with the value range 0.0 to 1.0
+    """
+    if isinstance(color, Tuple) and len(color) == 3:
+        if all(isinstance(number, int) for number in color):
+            return _color_rgb_to_rgb_normalized(color)
+        if all(isinstance(number, (int, float)) for number in color):
+            return color
+    if isinstance(color, int):
+        return color_int_to_rgb_normalized(color)
+    raise TypeError("Unsupported color format.")
 
 
 _color_list = [

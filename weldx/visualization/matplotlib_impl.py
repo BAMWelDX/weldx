@@ -6,6 +6,7 @@ from weldx.visualization.colors import (
     color_generator_function,
     color_int_to_rgb_normalized,
     get_color,
+    color_to_rgb_normalized,
 )
 
 from typing import Any, List, Tuple, Union
@@ -51,6 +52,37 @@ def new_3d_figure_and_axes(
     except Exception:  # skipcq: PYL-W0703
         fig.set_size_inches(w=width / pixel_per_inch, h=height / pixel_per_inch)
     return fig, ax
+
+
+def axes_equal(axes):
+    """Adjust axis in a 3d plot to be equally scaled.
+    Source code taken from the stackoverflow answer of 'karlo' in the
+    following question:
+    https://stackoverflow.com/questions/13685386/matplotlib-equal-unit
+    -length-with-equal-aspect-ratio-z-axis-is-not-equal-to
+    Parameters
+    ----------
+    axes :
+        Matplotlib axes object (output from plt.gca())
+    """
+    x_limits = axes.get_xlim3d()
+    y_limits = axes.get_ylim3d()
+    z_limits = axes.get_zlim3d()
+
+    x_range = abs(x_limits[1] - x_limits[0])
+    x_middle = np.mean(x_limits)
+    y_range = abs(y_limits[1] - y_limits[0])
+    y_middle = np.mean(y_limits)
+    z_range = abs(z_limits[1] - z_limits[0])
+    z_middle = np.mean(z_limits)
+
+    # The plot bounding box is a sphere in the sense of the infinity
+    # norm, hence I call half the max range the plot radius.
+    plot_radius = 0.5 * max([x_range, y_range, z_range])
+
+    axes.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
+    axes.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
+    axes.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
 def draw_coordinate_system_matplotlib(
@@ -114,40 +146,6 @@ def draw_coordinate_system_matplotlib(
             axes.plot([p_0[0]], [p_0[1]], [p_0[2]], "o", color=color, label=label)
     elif label is not None:
         raise Exception("Labels can only be assigned if a color was specified")
-
-
-def set_axes_equal(axes):
-    """Adjust axis in a 3d plot to be equally scaled.
-
-    Source code taken from the stackoverflow answer of 'karlo' in the
-    following question:
-    https://stackoverflow.com/questions/13685386/matplotlib-equal-unit
-    -length-with-equal-aspect-ratio-z-axis-is-not-equal-to
-
-    Parameters
-    ----------
-    axes :
-        Matplotlib axes object (output from plt.gca())
-
-    """
-    x_limits = axes.get_xlim3d()
-    y_limits = axes.get_ylim3d()
-    z_limits = axes.get_zlim3d()
-
-    x_range = abs(x_limits[1] - x_limits[0])
-    x_middle = np.mean(x_limits)
-    y_range = abs(y_limits[1] - y_limits[0])
-    y_middle = np.mean(y_limits)
-    z_range = abs(z_limits[1] - z_limits[0])
-    z_middle = np.mean(z_limits)
-
-    # The plot bounding box is a sphere in the sense of the infinity
-    # norm, hence I call half the max range the plot radius.
-    plot_radius = 0.5 * max([x_range, y_range, z_range])
-
-    axes.set_xlim3d([x_middle - plot_radius, x_middle + plot_radius])
-    axes.set_ylim3d([y_middle - plot_radius, y_middle + plot_radius])
-    axes.set_zlim3d([z_middle - plot_radius, z_middle + plot_radius])
 
 
 def plot_local_coordinate_system_matplotlib(
@@ -236,10 +234,11 @@ def plot_local_coordinate_system_matplotlib(
 
 
 def _set_limits_matplotlib(
-    axes: plt.Axes.axes, limits: Union[List[Tuple[float, float]], Tuple[float, float]]
+    axes: plt.Axes.axes,
+    limits: Union[List[Tuple[float, float]], Tuple[float, float]],
+    set_axes_equal: bool = False,
 ):
     """Set the limits of an axes object.
-
     Parameters
     ----------
     axes : matplotlib.axes.Axes
@@ -248,11 +247,11 @@ def _set_limits_matplotlib(
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
-
+    set_axes_equal : bool
+        (matplotlib only) If `True`, all axes are adjusted to cover an equally large
+         range of value. That doesn't mean, that the limits are identical
     """
-    if limits is None:
-        set_axes_equal(axes)
-    else:
+    if limits is not None:
         if isinstance(limits, Tuple):
             limits = [limits]
         if len(limits) == 1:
@@ -260,6 +259,8 @@ def _set_limits_matplotlib(
         axes.set_xlim(limits[0])
         axes.set_ylim(limits[1])
         axes.set_zlim(limits[2])
+    elif set_axes_equal:
+        axes_equal(axes)
 
 
 def plot_coordinate_systems(
@@ -327,12 +328,13 @@ def plot_coordinate_system_manager_matplotlib(
     time_ref: pd.Timestamp = None,
     title: str = None,
     limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
+    set_axes_equal: bool = False,
     show_origins: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
+    show_wireframe: bool = True,
 ) -> plt.Axes.axes:
     """Plot the coordinate systems of a `weldx.transformations.CoordinateSystemManager`.
-
     Parameters
     ----------
     csm : weldx.transformations.CoordinateSystemManager
@@ -367,6 +369,9 @@ def plot_coordinate_system_manager_matplotlib(
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
+    set_axes_equal : bool
+        (matplotlib only) If `True`, all axes are adjusted to cover an equally large
+         range of value. That doesn't mean, that the limits are identical
     show_origins : bool
         If `True`, the origins of the coordinate system are visualized in the color
         assigned to the coordinate system.
@@ -374,12 +379,12 @@ def plot_coordinate_system_manager_matplotlib(
         If `True`, the trace of time dependent coordinate systems is plotted.
     show_vectors : bool
         If `True`, the coordinate cross of time dependent coordinate systems is plotted.
-
+    show_wireframe : bool
+        If `True`, the mesh is visualized as wireframe. Otherwise, it is not shown.
     Returns
     -------
     matplotlib.axes.Axes :
         The axes object that was used as canvas for the plot
-
     """
     if time is not None:
         return plot_coordinate_system_manager_matplotlib(
@@ -424,27 +429,86 @@ def plot_coordinate_system_manager_matplotlib(
     for data_name in data_sets:
         color = color_int_to_rgb_normalized(get_color(data_name, colors, color_gen))
         data = csm.get_data(data_name, reference_system)
-        triangles = None
-        if isinstance(data, geo.SpatialData):
-            triangles = data.triangles
-            data = data.coordinates
+        plot_spatial_data_matplotlib(
+            data=data,
+            axes=axes,
+            color=color,
+            label=data_name,
+            show_wireframe=show_wireframe,
+        )
 
-        data = data.data
-        while data.ndim > 2:
-            data = data[0]
-
-        axes.plot(data[:, 0], data[:, 1], data[:, 2], "x", color=color, label=data_name)
-        if triangles is not None:
-            for triangle in triangles:
-                triangle_data = data[[*triangle, triangle[0]], :]
-                axes.plot(
-                    triangle_data[:, 0],
-                    triangle_data[:, 1],
-                    triangle_data[:, 2],
-                    color=color,
-                )
-
-    _set_limits_matplotlib(axes, limits)
+    _set_limits_matplotlib(axes, limits, set_axes_equal)
     axes.legend()
+
+    return axes
+
+
+def plot_spatial_data_matplotlib(
+    data,
+    axes: plt.Axes = None,
+    color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+    label: str = None,
+    show_wireframe: bool = True,
+) -> plt.Axes:
+    """Visualize a `weldx.geometry.SpatialData` instance.
+    Parameters
+    ----------
+    data : weldx.geometry.SpatialData
+        The data that should be visualized
+    axes : matplotlib.axes.Axes
+        The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
+        new figure will be created
+    color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+        A 24 bit integer, a triplet of integers with a value range of 0-255
+        or a triplet of floats with a value range of 0.0-1.0 that represent an RGB
+        color
+    label : str
+        Label of the plotted geometry
+    show_wireframe : bool
+        If `True`, the mesh is plotted as wireframe. Otherwise only the raster
+        points are visualized. Currently, the wireframe can't be visualized if a
+        `weldx.geometry.VariableProfile` is used.
+    Returns
+    -------
+    matplotlib.axes.Axes :
+        The `matplotlib.axes.Axes` instance that was used for the plot
+    """
+    if axes is None:
+        _, axes = new_3d_figure_and_axes()
+
+    if not isinstance(data, geo.SpatialData):
+        data = geo.SpatialData(data)
+
+    if color is None:
+        color = (0.0, 0.0, 0.0)
+    else:
+        color = color_to_rgb_normalized(color)
+
+    coordinates = data.coordinates.data
+    triangles = data.triangles
+
+    # if data is time dependent or has other extra dimensions, just take the first value
+    while coordinates.ndim > 2:
+        coordinates = coordinates[0]
+
+    axes.scatter(
+        coordinates[:, 0],
+        coordinates[:, 1],
+        coordinates[:, 2],
+        marker=".",
+        color=color,
+        label=label,
+        zorder=2,
+    )
+    if triangles is not None and show_wireframe:
+        for triangle in triangles:
+            triangle_data = coordinates[[*triangle, triangle[0]], :]
+            axes.plot(
+                triangle_data[:, 0],
+                triangle_data[:, 1],
+                triangle_data[:, 2],
+                color=color,
+                zorder=1,
+            )
 
     return axes
