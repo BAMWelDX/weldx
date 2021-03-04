@@ -151,7 +151,8 @@ def color_to_rgb_normalized(
     ----------
     color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
         A 24 bit integer, a triplet of integers with a value range of 0-255
-        or a triplet of floats with a value range of 0.0-1.0 that represent an RGB color.
+        or a triplet of floats with a value range of 0.0-1.0
+        that represent an RGB color.
 
     Returns
     -------
