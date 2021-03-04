@@ -4,6 +4,7 @@ if __name__ == "__main__":
     # Imports
     from pathlib import Path
 
+    import asdf
     import numpy as np
     import pandas as pd
     import sympy
@@ -270,7 +271,7 @@ if __name__ == "__main__":
         TCP=TCP_reference,
         workpiece=workpiece,
         process=process,
-        wx_meta={"welder": "A.W. Elder"},
+        wx_metadata={"welder": "A.W. Elder"},
     )
 
     model_path = Path(weldx.__path__[0]) / Path(
@@ -283,3 +284,9 @@ if __name__ == "__main__":
         tree,
         asdffile_kwargs=dict(custom_schema=str(model_path)),
     )
+
+    with asdf.AsdfFile(
+        tree,
+        custom_schema=str(model_path),
+    ) as ff:
+        ff.write_to("single_pass_weld_example.asdf")
