@@ -12,7 +12,6 @@ from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.utility as ut
-import weldx.visualization as vs
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -1693,6 +1692,8 @@ class Trace:
             axes.set_ylabel("y")
             axes.set_zlabel("z")
             if set_axes_equal:
+                import weldx.visualization as vs
+
                 vs.set_axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
@@ -2381,6 +2382,8 @@ class SpatialData:
             The utilized matplotlib axes, if matplotlib was used as rendering backend
 
         """
+        import weldx.visualization as vs
+
         return vs.plot_spatial_data_matplotlib(
             data=self,
             axes=axes,
