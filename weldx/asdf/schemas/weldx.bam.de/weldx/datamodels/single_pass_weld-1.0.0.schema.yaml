@@ -129,6 +129,7 @@ properties:
   wx_metadata:
     description: |
       General metadata container.
+    type: object
   wx_user:
     description: |
       Metadata container for additional user documentation of the experiment.
