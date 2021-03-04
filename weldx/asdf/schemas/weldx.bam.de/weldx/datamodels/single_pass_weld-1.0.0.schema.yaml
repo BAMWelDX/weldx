@@ -93,6 +93,7 @@ properties:
           standard:
             description: |
               The standard listing and describing the base metal compositions.
+            type: string
         required: [common_name, standard]
       geometry:
         description: |
