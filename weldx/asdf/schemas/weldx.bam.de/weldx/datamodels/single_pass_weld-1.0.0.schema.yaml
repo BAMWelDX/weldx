@@ -4,7 +4,7 @@ $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/datamodels/single_pass_weld-1.0.0.schema"
 
 title: |
-  Single pass GMAW weldment.
+  Single pass, single wire GMAW weldment.
 description: |
   Schema describing a simple single pass welding application along a linear weld seam with constant groove shape.
 
@@ -48,14 +48,6 @@ properties:
             type: string
             required: [wire_diameter]
     required: [welding_process, shielding_gas, weld_speed, welding_wire]
-  equipment:
-    type: array
-    items:
-      tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
-  measurements:
-    type: array
-    items:
-      tag: "tag:weldx.bam.de:weldx/measurement/measurement-1.0.0"
   welding_current:
     description: |
       The signal representing the welding current measurement.
@@ -74,6 +66,14 @@ properties:
       time: [2~]
   coordinate_systems:
     tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0"
+  equipment:
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
+  measurements:
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/measurement/measurement-1.0.0"
   geometry:
     description: |
       Description of the workpiece geometry consisting of the groove shape and the total seam length.
