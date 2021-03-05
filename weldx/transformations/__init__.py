@@ -3,23 +3,23 @@
 .. currentmodule:: weldx.transformations
 
 .. rubric:: Functions
+
+.. autosummary::
    :toctree:
-   :template: function-template.rst
    :nosignatures:
 
    rotation_matrix_x
    rotation_matrix_y
    rotation_matrix_z
-   util
-   layoutscale_matrixlayout,
-   layoutnormalizelayout,
-   layoutorientation_point_plane_containing_originlayout,
-   layoutorientation_point_planelayout,
-   layoutis_orthogonallayout,
-   layoutis_orthogonal_matrixlayout,
-   layoutpoint_left_of_linelayout,
-   layoutreflection_signlayout,
-   layoutvector_points_to_left_of_vectorlayout
+   scale_matrix
+   normalize
+   orientation_point_plane_containing_origin
+   orientation_point_plane
+   is_orthogonal
+   is_orthogonal_matrix
+   point_left_of_line
+   reflection_sign
+   vector_points_to_left_of_vector
 
 
 .. rubric:: Classes
