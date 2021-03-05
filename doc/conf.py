@@ -52,8 +52,7 @@ copyright = "2020 - 2021, BAM"
 author = "BAM"
 
 # The full version, including alpha/beta/rc tags
-release = weldx.__version__
-assert release
+release = weldx.__version__ if weldx.__version__ else "undefined"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
