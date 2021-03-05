@@ -26,6 +26,7 @@ import traitlets
 sys.path.insert(0, os.path.abspath("../"))
 
 import weldx
+import weldx.visualization # load visualization
 from weldx.asdf.constants import WELDX_TAG_BASE
 
 # -- copy files to doc folder -------------------------------------------------
@@ -47,6 +48,7 @@ author = "BAM"
 
 # The full version, including alpha/beta/rc tags
 release = weldx.__version__
+assert release
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
