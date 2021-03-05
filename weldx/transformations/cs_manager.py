@@ -1749,11 +1749,11 @@ class CoordinateSystemManager:
             raise ValueError(
                 f"backend has to be one of ('mpl', 'k3d'), but was {backend}"
             )
-
+        vis = None
         if backend == "k3d":
             from weldx.visualization import CoordinateSystemManagerVisualizerK3D
 
-            return CoordinateSystemManagerVisualizerK3D(
+            vis = CoordinateSystemManagerVisualizerK3D(
                 csm=self,
                 reference_system=reference_system,
                 coordinate_systems=coordinate_systems,
@@ -1770,7 +1770,7 @@ class CoordinateSystemManager:
         if backend == "mpl":
             from weldx.visualization import plot_coordinate_system_manager_matplotlib
 
-            return plot_coordinate_system_manager_matplotlib(
+            vis = plot_coordinate_system_manager_matplotlib(
                 csm=self,
                 axes=axes,
                 reference_system=reference_system,
@@ -1786,6 +1786,7 @@ class CoordinateSystemManager:
                 show_vectors=show_vectors,
                 show_wireframe=show_wireframe,
             )
+        return vis
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
