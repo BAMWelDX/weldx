@@ -145,19 +145,23 @@ class IGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # x-values
-        x_value = [-width, 0, 0, -width]
+        x_value = np.append(-width, 0)
+        x_value = np.append(x_value, 0)
+        x_value = np.append(x_value, -width)
         # y-values
-        y_value = [0, 0, t, t]
+        y_value = Q_([0, 0], "mm")
+        y_value = np.append(y_value, t)
+        y_value = np.append(y_value, t)
         segment_list = ["line", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
@@ -194,10 +198,7 @@ class VGroove(IsoBaseGroove):
     code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
     _mapping = dict(
-        t="workpiece_thickness",
-        alpha="groove_angle",
-        b="root_gap",
-        c="root_face",
+        t="workpiece_thickness", alpha="groove_angle", b="root_gap", c="root_face",
     )
 
     def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
@@ -1169,12 +1170,7 @@ class DHUGroove(IsoBaseGroove):
 
 
 @ureg_check_class(
-    "[length]",
-    None,
-    None,
-    None,
-    None,
-    None,
+    "[length]", None, None, None, None, None,
 )
 @dataclass
 class FFGroove(IsoBaseGroove):
@@ -1909,9 +1905,7 @@ def _create_test_grooves():
         root_gap=Q_(2, "mm"),
     )
     ff_groove0 = get_groove(
-        groove_type="FFGroove",
-        workpiece_thickness=Q_(5, "mm"),
-        code_number="1.12",
+        groove_type="FFGroove", workpiece_thickness=Q_(5, "mm"), code_number="1.12",
     )
     ff_groove1 = get_groove(
         groove_type="FFGroove",
