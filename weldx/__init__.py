@@ -48,7 +48,7 @@ __all__ = (
     "geometry",
     "measurement",
     "transformations",
-    "util.py",
+    "util",
     "asdf",
     "welding",
     # geometries
