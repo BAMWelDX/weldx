@@ -22,10 +22,11 @@ import sys
 
 import traitlets
 
+# find weldx from parent path.
+sys.path.insert(0, os.path.abspath("../"))
+
 import weldx
 from weldx.asdf.constants import WELDX_TAG_BASE
-
-sys.path.insert(0, os.path.abspath(""))
 
 # -- copy files to doc folder -------------------------------------------------
 doc_dir = pathlib.Path(".")
@@ -104,7 +105,7 @@ napoleon_use_rtype = True
 napoleon_type_aliases = None
 
 # sphinx-autodoc-typehints https://github.com/agronholm/sphinx-autodoc-typehints
-set_type_checking_flag = False
+set_type_checking_flag = True
 typehints_fully_qualified = False
 always_document_param_types = False
 typehints_document_rtype = True
@@ -271,7 +272,3 @@ default_role = "py:obj"
 
 # see:
 # https://stackoverflow.com/questions/34052582/how-do-i-refer-to-classes-and-methods-in-other-files-my-project-with-sphinx
-
-
-# enable type checking
-set_type_checking_flag=True
