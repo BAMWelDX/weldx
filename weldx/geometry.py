@@ -1303,7 +1303,7 @@ class LinearHorizontalTraceSegment:
         """
         return self._length
 
-    def local_coordinate_system(self, relative_position):
+    def local_coordinate_system(self, relative_position) -> tf.LocalCoordinateSystem:
         """Calculate a local coordinate system along the trace segment.
 
         Parameters
@@ -1432,7 +1432,7 @@ class RadialHorizontalTraceSegment:
         """
         return self._sign_winding < 0
 
-    def local_coordinate_system(self, relative_position):
+    def local_coordinate_system(self, relative_position) -> tf.LocalCoordinateSystem:
         """Calculate a local coordinate system along the trace segment.
 
         Parameters
@@ -1599,7 +1599,7 @@ class Trace:
         """
         return len(self._segments)
 
-    def local_coordinate_system(self, position):
+    def local_coordinate_system(self, position) -> tf.LocalCoordinateSystem:
         """Get the local coordinate system at a specific position on the trace.
 
         Parameters
