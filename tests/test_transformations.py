@@ -2412,8 +2412,8 @@ class TestCoordinateSystemManager:
 
         # create CSM and add coordinate systems
         csm = tf.CoordinateSystemManager("root", "base", csm_time_ref)
-        for i in range(len(lcs_times)):
-            csm.add_cs(f"lcs_{i}", "root", lcs[i])
+        for i, lcs_ in enumerate(lcs):
+            csm.add_cs(f"lcs_{i}", "root", lcs_)
 
         # create expected data type
         exp_time = pd.TimedeltaIndex(exp_time, "D")
