@@ -4,6 +4,7 @@ from typing import Tuple
 
 import asdf
 import yaml
+from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
