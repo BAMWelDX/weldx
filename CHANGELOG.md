@@ -50,6 +50,7 @@
 - add `stack` option to most `geometry` classes for rasterization [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
 - The graph of a `CoordinateSystemManager` is now plotted with `plot_graph` instead of `plot`.
   [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
+- add custom `wx_shape` validation for `TimeSeries` and `Quantity` [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
 
 ### fixes
 
