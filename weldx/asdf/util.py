@@ -1,7 +1,6 @@
-import warnings
-from importlib.util import find_spec
 from io import BytesIO
 from pathlib import Path
+from typing import Tuple
 
 import asdf
 import yaml
@@ -98,32 +97,39 @@ def _write_read_buffer(
     return _read_buffer(buffer, open_kwargs)
 
 
-def _get_yaml_header(file) -> str:
-    """Read the YAML header part of an ASDF file.
+try:  # pragma: no cover
+    import IPython
+    from IPython.display import JSON
+    from pygments import highlight
+    from pygments.formatters import HtmlFormatter
+    from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
+except ImportError:  # pragma: no cover
+    pass
+else:  # pragma: no cover
 
-    Parameters
-    ----------
-    file
-        filename or BytesIO buffer of ASDF file
+    def _get_yaml_header(file) -> str:
+        """Read the YAML header part of an ASDF file.
 
-    Returns
-    -------
-    str
+        Parameters
+        ----------
+        file
+            filename or BytesIO buffer of ASDF file
 
-    """
-    if isinstance(file, BytesIO):
-        file.seek(0)
-        code = file.read()
-    else:
-        with open(file, "rb") as f:
-            code = f.read()
+        Returns
+        -------
+        str
 
-    parts = code.partition(b"\n...")
-    code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
-    return code
+        """
+        if isinstance(file, BytesIO):
+            file.seek(0)
+            code = file.read()
+        else:
+            with open(file, "rb") as f:
+                code = f.read()
 
-
-if find_spec("pygments") and find_spec("IPython"):
+        parts = code.partition(b"\n...")
+        code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
+        return code
 
     def notebook_fileprinter(file, lexer="YAML"):
         """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
@@ -136,11 +142,6 @@ if find_spec("pygments") and find_spec("IPython"):
             Syntax style to use
 
         """
-        from IPython.display import HTML
-        from pygments import highlight
-        from pygments.formatters.html import HtmlFormatter
-        from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
-
         if isinstance(file, BytesIO):
             lexer = get_lexer_by_name(lexer)
         elif Path(file).suffix == ".asdf":
@@ -151,14 +152,14 @@ if find_spec("pygments") and find_spec("IPython"):
         code = _get_yaml_header(file)
 
         formatter = HtmlFormatter()
-        return HTML(
+        return IPython.display.HTML(
             '<style type="text/css">{}</style>{}'.format(
                 formatter.get_style_defs(".highlight"),
                 highlight(code, lexer, formatter),
             )
         )
 
-    def asdf_json_repr(file, **kwargs):
+    def asdf_json_repr(file, path: Tuple = None, **kwargs):
         """Display YAML header using IPython JSON display repr.
 
         This function works in JupyterLab.
@@ -167,6 +168,8 @@ if find_spec("pygments") and find_spec("IPython"):
         ----------
         file
             filename or BytesIO buffer of ASDF file
+        path
+            tuple representing the lookup path in the yaml/asdf tree
         kwargs
             kwargs passed down to JSON constructor
 
@@ -175,23 +178,29 @@ if find_spec("pygments") and find_spec("IPython"):
         IPython.display.JSON
             JSON object for rich output in JupyterLab
 
+        Examples
+        --------
+        Visualize the full tree of an existing ASDF file::
+
+            weldx.asdf.utils.asdf_json_repr("single_pass_weld_example.asdf")
+
+        Visualize a specific element in the tree structure by proving the path::
+
+            weldx.asdf.utils.asdf_json_repr(
+                "single_pass_weld_example.asdf", path=("process", "welding_process")
+            )
+
+
         """
-        from IPython.core.display import JSON
+        if isinstance(file, str):
+            root = file + "/"
+        else:
+            root = "/"
 
         code = _get_yaml_header(file)
         yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
+        if path:
+            root = root + "/".join(path)
+            yaml_dict = get_path(yaml_dict, path)
+        kwargs["root"] = root
         return JSON(yaml_dict, **kwargs)
-
-
-else:
-
-    def notebook_fileprinter(**kwargs):
-
-        warnings.warn(
-            "IPython and pygments not available, cannot print notebook", stacklevel=2
-        )
-
-    def asdf_json_repr(**kwargs):
-        warnings.warn(
-            "IPython and pygments not available, cannot print asdf file", stacklevel=2
-        )
