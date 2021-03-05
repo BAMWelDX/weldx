@@ -236,7 +236,7 @@ def plot_local_coordinate_system_matplotlib(
 def _set_limits_matplotlib(
     axes: plt.Axes.axes,
     limits: Union[List[Tuple[float, float]], Tuple[float, float]],
-    set_axes_equal: bool = False,
+    axes_equal: bool = False,
 ):
     """Set the limits of an axes object.
 
@@ -248,7 +248,7 @@ def _set_limits_matplotlib(
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
-    set_axes_equal : bool
+    axes_equal : bool
         (matplotlib only) If `True`, all axes are adjusted to cover an equally large
          range of value. That doesn't mean, that the limits are identical
 
@@ -261,7 +261,7 @@ def _set_limits_matplotlib(
         axes.set_xlim(limits[0])
         axes.set_ylim(limits[1])
         axes.set_zlim(limits[2])
-    elif set_axes_equal:
+    elif axes_equal:
         axes_equal(axes)
 
 
@@ -330,7 +330,7 @@ def plot_coordinate_system_manager_matplotlib(
     time_ref: pd.Timestamp = None,
     title: str = None,
     limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
-    set_axes_equal: bool = False,
+    axes_equal: bool = False,
     show_origins: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
@@ -372,7 +372,7 @@ def plot_coordinate_system_manager_matplotlib(
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
-    set_axes_equal : bool
+    axes_equal : bool
         (matplotlib only) If `True`, all axes are adjusted to cover an equally large
          range of value. That doesn't mean, that the limits are identical
     show_origins : bool
@@ -442,7 +442,7 @@ def plot_coordinate_system_manager_matplotlib(
             show_wireframe=show_wireframe,
         )
 
-    _set_limits_matplotlib(axes, limits, set_axes_equal)
+    _set_limits_matplotlib(axes, limits, axes_equal)
     axes.legend()
 
     return axes

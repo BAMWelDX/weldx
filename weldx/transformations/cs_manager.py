@@ -1675,7 +1675,7 @@ class CoordinateSystemManager:
             LocalCoordinateSystem,
         ] = None,
         time_ref: pd.Timestamp = None,
-        set_axes_equal: bool = False,
+        axes_equal: bool = False,
         show_data_labels: bool = True,
         show_labels: bool = True,
         show_origins: bool = True,
@@ -1722,7 +1722,7 @@ class CoordinateSystemManager:
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
-        set_axes_equal : bool
+        axes_equal : bool
             (matplotlib only) If `True`, all axes are adjusted to cover an equally large
              range of value. That doesn't mean, that the limits are identical
         show_data_labels : bool
@@ -1780,7 +1780,7 @@ class CoordinateSystemManager:
                 time_ref=time_ref,
                 title=title,
                 limits=limits,
-                set_axes_equal=set_axes_equal,
+                axes_equal=axes_equal,
                 show_origins=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,

@@ -1670,7 +1670,7 @@ class Trace:
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None, None), strict=False)
     def plot(
-        self, raster_width=1, axes=None, fmt=None, set_axes_equal=False
+        self, raster_width=1, axes=None, fmt=None, axes_equal=False
     ):  # pragma: no cover
         """Plot the trace.
 
@@ -1683,7 +1683,7 @@ class Trace:
             new figure will be created
         fmt : str
             Format string that is passed to matplotlib.pyplot.plot.
-        set_axes_equal : bool
+        axes_equal : bool
             Set plot axes to equal scaling (Default = False).
 
         """
@@ -1699,7 +1699,7 @@ class Trace:
             axes.set_xlabel("x")
             axes.set_ylabel("y")
             axes.set_zlabel("z")
-            if set_axes_equal:
+            if axes_equal:
                 import weldx.visualization as vs
 
                 vs.axes_equal(axes)
