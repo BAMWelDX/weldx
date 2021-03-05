@@ -11,7 +11,7 @@ import pint
 from xarray import DataArray
 
 import weldx.transformations as tf
-import weldx.utility as ut
+import weldx.util as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters

@@ -1,8 +1,6 @@
-"""
-isort:skip_file
-"""
+"""This submodule contains ASDF related weldx extensions and schemas."""
 from weldx.asdf import tags  # implement tags before the asdf extensions
-from weldx.asdf import constants, utils
+from weldx.asdf import constants, util
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
 # class imports to weldx.asdf namespace

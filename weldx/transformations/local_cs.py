@@ -11,7 +11,7 @@ import pint
 import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
-import weldx.utility as ut
+import weldx.util as ut
 from weldx.transformations.util import build_time_index, normalize
 
 if TYPE_CHECKING:

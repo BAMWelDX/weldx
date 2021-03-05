@@ -8,7 +8,7 @@ import pint
 import sympy
 import xarray as xr
 
-import weldx.utility as ut
+import weldx.util as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 

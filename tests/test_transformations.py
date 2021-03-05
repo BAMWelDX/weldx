@@ -14,7 +14,7 @@ from pandas import Timestamp as TS  # noqa
 from pandas import date_range
 
 import weldx.transformations as tf
-import weldx.utility as ut
+import weldx.util as ut
 from tests._helpers import get_test_name
 from weldx import Q_, SpatialData
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa

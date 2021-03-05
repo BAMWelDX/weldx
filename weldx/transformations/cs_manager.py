@@ -12,7 +12,7 @@ import pandas as pd
 import pint
 import xarray as xr
 
-import weldx.utility as ut
+from weldx import util
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.geometry import SpatialData
 from weldx.transformations.util import build_time_index
@@ -1846,14 +1846,14 @@ class CoordinateSystemManager:
         if not lcs_list:
             return None
 
-        time_list = [ut.to_pandas_time_index(lcs) for lcs in lcs_list]
+        time_list = [util.to_pandas_time_index(lcs) for lcs in lcs_list]
         if self.has_reference_time:
             time_list = [
                 t + self.reference_time if isinstance(t, pd.TimedeltaIndex) else t
                 for t in time_list
             ]
 
-        return ut.get_time_union(time_list)
+        return util.get_time_union(time_list)
 
     def transform_data(
         self,
@@ -1896,7 +1896,7 @@ class CoordinateSystemManager:
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
         lcs = self.get_cs(source_coordinate_system_name, target_coordinate_system_name)
-        mul = ut.xr_matmul(
+        mul = util.xr_matmul(
             lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
         )
         return mul + lcs.coordinates

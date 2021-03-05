@@ -14,7 +14,7 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 # main modules
-import weldx.utility  # import this first to avoid circular dependencies
+import weldx.util  # import this first to avoid circular dependencies
 import weldx.core
 import weldx.geometry
 import weldx.transformations
@@ -48,7 +48,7 @@ __all__ = (
     "geometry",
     "measurement",
     "transformations",
-    "utility",
+    "util.py",
     "asdf",
     "welding",
     # geometries

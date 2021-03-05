@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pint
 
-import weldx.utility as ut
+import weldx.util as ut
 
 __all__ = [
     "scale_matrix",
