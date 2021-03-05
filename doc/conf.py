@@ -25,6 +25,9 @@ import traitlets
 # find weldx from parent path.
 sys.path.insert(0, os.path.abspath("../"))
 
+import pandas as _
+import typing
+typing.TYPE_CHECKING = True
 import weldx
 import weldx.visualization # load visualization
 from weldx.asdf.constants import WELDX_TAG_BASE
