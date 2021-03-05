@@ -29,9 +29,9 @@ properties:
       weld_speed:
         description: |
           The constant weld speed of the welding TCP movement.
-        tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+        tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
         wx_unit: "m/s"
-        shape: [1]
+        wx_shape: [1]
       welding_wire:
         type: object
         properties:
@@ -40,7 +40,7 @@ properties:
               The diameter of the welding wire.
             tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
             wx_unit: "m"
-            shape: [1]
+            wx_shape: [1]
           class:
             description: |
               The wire classification according to DIN EN ISO 14341, DIN EN 12072 or similar standards.

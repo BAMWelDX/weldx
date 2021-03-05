@@ -17,7 +17,7 @@ if __name__ == "__main__":
     import weldx.utility as ut
     from weldx import Q_, GmawProcess
     from weldx import LocalCoordinateSystem as lcs
-    from weldx import WXRotation, get_groove
+    from weldx import TimeSeries, WXRotation, get_groove
     from weldx.asdf.tags.weldx.aws.process.gas_component import GasComponent
     from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
         ShieldingGasForProcedure,
@@ -256,7 +256,7 @@ if __name__ == "__main__":
     process = dict(
         welding_process=process_pulse,
         shielding_gas=gas_for_procedure,
-        weld_speed=v_weld,
+        weld_speed=TimeSeries(v_weld),
         welding_wire={"diameter": Q_(1.2, "mm")},
     )
 
