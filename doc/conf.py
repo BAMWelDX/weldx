@@ -29,9 +29,10 @@ import pandas as _
 import xarray
 import ipywidgets
 import typing
+
 typing.TYPE_CHECKING = True
 import weldx
-import weldx.visualization # load visualization
+import weldx.visualization  # load visualization
 from weldx.asdf.constants import WELDX_TAG_BASE
 
 # -- copy files to doc folder -------------------------------------------------
@@ -198,9 +199,10 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["**.ipynb_checkpoints",
-                    "**/cs_manager/*",
-                    "**/local_cs/*",
+exclude_patterns = [
+    "**.ipynb_checkpoints",
+    "**/cs_manager/*",
+    "**/local_cs/*",
 ]
 
 
