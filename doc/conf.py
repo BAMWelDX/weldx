@@ -26,6 +26,8 @@ import traitlets
 sys.path.insert(0, os.path.abspath("../"))
 
 import pandas as _
+import xarray
+import ipywidgets
 import typing
 typing.TYPE_CHECKING = True
 import weldx

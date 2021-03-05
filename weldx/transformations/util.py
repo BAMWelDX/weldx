@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pint
 
-import weldx.util as ut
+from weldx import util
 
 __all__ = [
     "scale_matrix",
@@ -44,7 +44,7 @@ def build_time_index(
         # time_ref = None
         return time, time_ref
 
-    time = ut.to_pandas_time_index(time)
+    time = util.to_pandas_time_index(time)
 
     if isinstance(time, pd.DatetimeIndex):
         if time_ref is None:
