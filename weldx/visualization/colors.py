@@ -219,4 +219,7 @@ def get_color(key: str, color_dict: Dict[str, int], color_generator: Generator) 
     """
     if color_dict is not None and key in color_dict:
         return _color_rgb_to_int(color_dict[key])
-    return next(color_generator)
+    try:
+        next(color_generator)
+    except StopIteration:
+        raise RuntimeError(f"given generator {color_generator} exhausted.")
