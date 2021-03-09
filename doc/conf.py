@@ -25,10 +25,11 @@ import traitlets
 # find weldx from parent path.
 sys.path.insert(0, os.path.abspath("../"))
 
+import typing
+
+import ipywidgets
 import pandas as _
 import xarray
-import ipywidgets
-import typing
 
 typing.TYPE_CHECKING = True
 import weldx

@@ -2,6 +2,17 @@
 
 .. currentmodule:: weldx.transformations
 
+.. rubric:: Classes
+
+.. autosummary::
+  :toctree:
+  :template: class-template.rst
+  :nosignatures:
+
+  CoordinateSystemManager
+  LocalCoordinateSystem
+  WXRotation
+
 .. rubric:: Functions
 
 .. autosummary::
@@ -20,18 +31,6 @@
    point_left_of_line
    reflection_sign
    vector_points_to_left_of_vector
-
-
-.. rubric:: Classes
-
-.. autosummary::
-  :toctree:
-  :template: class-template.rst
-  :nosignatures:
-
-  CoordinateSystemManager
-  LocalCoordinateSystem
-  WXRotation
 
 """
 from .cs_manager import CoordinateSystemManager
