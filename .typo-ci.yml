@@ -29,6 +29,7 @@ excluded_words:
   - networkx
   - shutil
   - functools
+  - boltons
   # matplotlib ----------------------------------
   - gca
   - mpl
@@ -145,6 +146,7 @@ excluded_words:
   - tslibs
   - quickstart
   - nsecond
+  - iterutils
   # German ---------------------------------------
   - Bundesanstalt
   - für
