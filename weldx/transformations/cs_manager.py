@@ -62,7 +62,7 @@ class CoordinateSystemManager:
         root_coordinate_system_name
             Name of the root coordinate system.
         coordinate_system_manager_name
-            Name of the coordinate system manager. If 'None' is passed, a default name
+            Name of the coordinate system manager. If `None` is passed, a default name
             is chosen.
         time_ref
             A reference timestamp. If it is defined, all time dependent information
@@ -108,7 +108,7 @@ class CoordinateSystemManager:
         root_coordinate_system_name
             Name of the root coordinate system.
         coordinate_system_manager_name
-            Name of the coordinate system manager. If 'None' is passed, a default name
+            Name of the coordinate system manager. If `None` is passed, a default name
             is chosen.
         time_ref
             A reference timestamp. If it is defined, all time dependent information
@@ -314,7 +314,7 @@ class CoordinateSystemManager:
         Returns
         -------
         bool:
-            'True' if both dictionaries are identical, 'False' otherwise.
+            `True` if both dictionaries are identical, `False` otherwise.
 
         """
         if len(data) != len(other):
@@ -723,7 +723,8 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the '__init__' method of the 'LocalCoordinateSystem' class.
+        This function uses the ``__init__`` method of the
+        `~weldx.transformations.LocalCoordinateSystem` class.
 
         Parameters
         ----------
@@ -745,8 +746,9 @@ class CoordinateSystemManager:
         time_ref :
             Reference time for time dependent coordinate systems
         lsc_child_in_parent :
-            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
-            the new system orientation towards is parent. If 'False', it describes
+            If set to `True`, the passed
+            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
         """
@@ -768,8 +770,8 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'from_euler' method of the
-        'LocalCoordinateSystem' class.
+        This function uses the `~weldx.transformations.LocalCoordinateSystem.from_euler`
+        method of the `~weldx.transformations.LocalCoordinateSystem` class.
 
         Parameters
         ----------
@@ -779,8 +781,8 @@ class CoordinateSystemManager:
             Name of the parent system. This must have been already added.
         sequence :
             Specifies sequence of axes for rotations. Up to 3 characters
-            belonging to the set {‘X’, ‘Y’, ‘Z’} for intrinsic rotations,
-            or {‘x’, ‘y’, ‘z’} for extrinsic rotations.
+            belonging to the set {``X``, ``Y``, ``Z``} for intrinsic rotations,
+            or {``x``, ``y``, ``z``} for extrinsic rotations.
             Extrinsic and intrinsic rotations cannot be mixed in one function call.
         angles :
             Euler angles specified in radians (degrees is False) or degrees
@@ -803,8 +805,9 @@ class CoordinateSystemManager:
         time :
             Time data for time dependent coordinate systems.
         lsc_child_in_parent :
-            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
-            the new system orientation towards is parent. If 'False', it describes
+            If set to `True`, the passed
+            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
 
@@ -829,8 +832,8 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'from_xyz' method of the
-        'LocalCoordinateSystem' class.
+        This function uses the `~weldx.transformations.LocalCoordinateSystem.from_xyz`
+        method of the `~weldx.transformations.LocalCoordinateSystem` class.
 
         Parameters
         ----------
@@ -849,8 +852,9 @@ class CoordinateSystemManager:
         time :
             Time data for time dependent coordinate systems.
         lsc_child_in_parent :
-            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
-            the new system orientation towards is parent. If 'False', it describes
+            If set to `True`, the passed
+            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
         """
@@ -872,8 +876,9 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'from_xy_and_orientation' method of the
-        'LocalCoordinateSystem' class.
+        This function uses the
+        `~weldx.transformations.LocalCoordinateSystem.from_xy_and_orientation` method
+        of the `~weldx.transformations.LocalCoordinateSystem` class.
 
         Parameters
         ----------
@@ -893,8 +898,9 @@ class CoordinateSystemManager:
         time :
             Time data for time dependent coordinate systems.
         lsc_child_in_parent :
-            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
-            the new system orientation towards is parent. If 'False', it describes
+            If set to `True`, the passed
+            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
         """
@@ -918,8 +924,9 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'from_xz_and_orientation' method of the
-        'LocalCoordinateSystem' class.
+        This function uses the
+        `~weldx.transformations.LocalCoordinateSystem.from_xz_and_orientation` method
+        of the `~weldx.transformations.LocalCoordinateSystem` class.
 
         Parameters
         ----------
@@ -939,8 +946,9 @@ class CoordinateSystemManager:
         time :
             Time data for time dependent coordinate systems.
         lsc_child_in_parent :
-            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
-            the new system orientation towards is parent. If 'False', it describes
+            If set to `True`, the passed
+            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
         """
@@ -964,8 +972,9 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the 'from_yz_and_orientation' method of the
-        'LocalCoordinateSystem' class.
+        This function uses the
+        `~weldx.transformations.LocalCoordinateSystem.from_yz_and_orientation` method
+        of the `~weldx.transformations.LocalCoordinateSystem` class.
 
         Parameters
         ----------
@@ -985,8 +994,9 @@ class CoordinateSystemManager:
         time :
             Time data for time dependent coordinate systems.
         lsc_child_in_parent :
-            If set to 'True', the passed 'LocalCoordinateSystem' instance describes
-            the new system orientation towards is parent. If 'False', it describes
+            If set to `True`, the passed
+            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
         """
@@ -1019,9 +1029,9 @@ class CoordinateSystemManager:
         coordinate_system_name :
             Name of the coordinate system that should be deleted.
         delete_children :
-            If 'False', an exception is raised if the coordinate system has one or more
+            If `False`, an exception is raised if the coordinate system has one or more
             children since deletion would cause them to be disconnected to the root.
-            If 'True', all children are deleted as well.
+            If `True`, all children are deleted as well.
 
         """
         if not self.has_coordinate_system(coordinate_system_name):
@@ -1070,8 +1080,8 @@ class CoordinateSystemManager:
         coordinate_system_name :
             Name of the coordinate system
         neighbors_only :
-            If 'True', only child coordinate systems that are directly connected to the
-            specified coordinate system are included in the returned list. If 'False',
+            If `True`, only child coordinate systems that are directly connected to the
+            specified coordinate system are included in the returned list. If `False`,
             child systems of arbitrary hierarchical depth are included.
 
         Returns
@@ -1259,7 +1269,8 @@ class CoordinateSystemManager:
 
         It is important to mention that all coordinate systems that are involved in the
         transformation should be interpolated to a common time line before they are
-        combined using the 'LocalCoordinateSystem's __add__ and __sub__ functions.
+        combined using the `~weldx.transformations.LocalCoordinateSystem` 's __add__
+        and __sub__ functions.
         If this is not done before, serious interpolation errors for rotations can
         occur. The reason is, that those operators also perform time interpolations
         if the timestamps of 2 systems do not match. When chaining multiple
@@ -1278,20 +1289,20 @@ class CoordinateSystemManager:
         Additionally, if the transformed system is rotating itself, the transformation
         to the parent's reference system might cause the rotation angle between to
         time steps to exceed 180 degrees. Since the SLERP always takes the shortest
-        angle between 2 ''keyframes'', further interpolations wrongly change the
+        angle between 2 ``keyframes``, further interpolations wrongly change the
         rotation order.
 
         Parameters
         ----------
-        coordinate_system_name : str
+        coordinate_system_name :
             Name of the coordinate system
-        reference_system_name : str
+        reference_system_name :
             Name of the reference coordinate system
         time : pandas.TimedeltaIndex, pandas.DatetimeIndex, pint.Quantity or str
             Specifies the desired time of the returned coordinate system. You can also
             pass the name of another coordinate system to use its time attribute as
             reference
-        time_ref : pandas.Timestamp
+        time_ref :
             The desired reference time of the returned coordinate system
 
         Returns
@@ -1412,7 +1423,7 @@ class CoordinateSystemManager:
         return sub_system_list
 
     def has_coordinate_system(self, coordinate_system_name: str) -> bool:
-        """Return 'True' if a coordinate system with specified name already exists.
+        """Return `True` if a coordinate system with specified name already exists.
 
         Parameters
         ----------
@@ -1422,13 +1433,13 @@ class CoordinateSystemManager:
         Returns
         -------
         bool
-            'True' or 'False'
+            `True` or `False`
 
         """
         return coordinate_system_name in self._graph.nodes
 
     def has_data(self, coordinate_system_name: str, data_name: str) -> bool:
-        """Return 'True' if the desired coordinate system owns the specified data.
+        """Return `True` if the desired coordinate system owns the specified data.
 
         Parameters
         ----------
@@ -1440,7 +1451,7 @@ class CoordinateSystemManager:
         Returns
         -------
         bool
-            'True' or 'False'
+            `True` or `False`
 
         """
         return data_name in self._graph.nodes[coordinate_system_name]["data"]
@@ -1478,7 +1489,7 @@ class CoordinateSystemManager:
             should be interpolated in time. Only transformations towards the systems
             root node are affected.
         in_place :
-            If 'True' the interpolation is performed in place, otherwise a
+            If `True` the interpolation is performed in place, otherwise a
             new instance is returned. (Default value = False)
 
         Returns
@@ -1537,14 +1548,14 @@ class CoordinateSystemManager:
     def merge(self, other: "CoordinateSystemManager"):
         """Merge another coordinate system managers into the current instance.
 
-        Both 'CoordinateSystemManager' need to have exactly one common coordinate
+        Both `CoordinateSystemManager` need to have exactly one common coordinate
         system. They are merged at this node. Internally, information is kept
         to undo the merge process.
 
         Parameters
         ----------
         other:
-            CoordinateSystemManager instance that should be merged into the current
+            `CoordinateSystemManager` instance that should be merged into the current
             instance.
 
         """
@@ -1554,7 +1565,7 @@ class CoordinateSystemManager:
         ):
             raise Exception(
                 "You can only merge subsystems with time dependent coordinate systems"
-                "if the reference times of both 'CoordinateSystemManager' instances"
+                "if the reference times of both `CoordinateSystemManager` instances"
                 "are identical."
             )
 
@@ -1696,8 +1707,8 @@ class CoordinateSystemManager:
         backend :
             Select the rendering backend of the plot. The options are:
 
-            - 'k3d' to get an interactive plot using [k3d](https://k3d-jupyter.org/)
-            - 'mpl' for static plots using [matplotlib](https://matplotlib.org/)
+            - ``k3d`` to get an interactive plot using `k3d <https://k3d-jupyter.org/>`_
+            - ``mpl`` for static plots using `matplotlib <https://matplotlib.org/>`_
 
             Note that k3d only works inside jupyter notebooks
         axes : matplotlib.axes.Axes
@@ -1920,7 +1931,7 @@ class CoordinateSystemManager:
         Returns
         -------
         List[CoordinateSystemManager]:
-            A list containing previously merged 'CoordinateSystemManager' instances.
+            A list containing previously merged `CoordinateSystemManager` instances.
 
         """
         subsystems = self.subsystems
