@@ -173,7 +173,7 @@ def plot_local_coordinate_system_matplotlib(
     label : str
         Name of the coordinate system
     time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-           LocalCoordinateSystem
+           ~weldx.transformations.LocalCoordinateSystem
         The time steps that should be plotted
     time_ref : pandas.Timestamp
         A reference timestamp that can be provided if the ``time`` parameter is a
