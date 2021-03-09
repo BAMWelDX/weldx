@@ -189,7 +189,7 @@ class CoordinateSystemManager:
 
     @property
     def lcs(self) -> List[LocalCoordinateSystem]:
-        """Get a list of all attached `~weldx.transformations.LocalCoordinateSystem`
+        """Get a list of all attached `~weldx.transformations.LocalCoordinateSystem` \
         instances.
 
         Only the defined systems and not the automatically generated inverse systems
@@ -210,7 +210,7 @@ class CoordinateSystemManager:
 
     @property
     def lcs_time_dependent(self) -> List[LocalCoordinateSystem]:
-        """Get a list of all attached time dependent
+        """Get a list of all attached time dependent \
         `~weldx.transformations.LocalCoordinateSystem` instances.
 
         Returns
