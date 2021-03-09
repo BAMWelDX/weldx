@@ -351,7 +351,8 @@ class CoordinateSystemManager:
             Default name.
 
         """
-        return f"Coordinate system manager {next(CoordinateSystemManager._id_gen)}"
+        id_ = next(CoordinateSystemManager._id_gen)  # skipcq: PTC-W0063
+        return f"Coordinate system manager {id_}"
 
     @property
     def _extended_sub_system_data(self) -> Dict:
@@ -1797,7 +1798,7 @@ class CoordinateSystemManager:
                 time_ref=time_ref,
                 title=title,
                 limits=limits,
-                axes_equal=axes_equal,
+                set_axes_equal=axes_equal,
                 show_origins=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,
