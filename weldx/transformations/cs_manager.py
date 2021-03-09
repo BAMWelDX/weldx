@@ -59,12 +59,12 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        root_coordinate_system_name : str
+        root_coordinate_system_name
             Name of the root coordinate system.
-        coordinate_system_manager_name : str
+        coordinate_system_manager_name
             Name of the coordinate system manager. If 'None' is passed, a default name
             is chosen.
-        time_ref : pandas.Timestamp
+        time_ref
             A reference timestamp. If it is defined, all time dependent information
             returned by the CoordinateSystemManager will refer to it by default.
 
@@ -105,12 +105,12 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        root_coordinate_system_name : str
+        root_coordinate_system_name
             Name of the root coordinate system.
-        coordinate_system_manager_name : str
+        coordinate_system_manager_name
             Name of the coordinate system manager. If 'None' is passed, a default name
             is chosen.
-        time_ref : pandas.Timestamp
+        time_ref
             A reference timestamp. If it is defined, all time dependent information
             returned by the CoordinateSystemManager will refer to it by default.
         graph:
@@ -189,7 +189,8 @@ class CoordinateSystemManager:
 
     @property
     def lcs(self) -> List[LocalCoordinateSystem]:
-        """Get a list of all attached `~weldx.transformations.LocalCoordinateSystem` instances.
+        """Get a list of all attached `~weldx.transformations.LocalCoordinateSystem`
+        instances.
 
         Only the defined systems and not the automatically generated inverse systems
         are included.
@@ -197,7 +198,8 @@ class CoordinateSystemManager:
         Returns
         -------
         List[~weldx.transformations.LocalCoordinateSystem] :
-           List of all attached `~weldx.transformations.LocalCoordinateSystem` instances.
+           List of all attached `~weldx.transformations.LocalCoordinateSystem`
+           instances.
 
         """
         return [
@@ -208,12 +210,14 @@ class CoordinateSystemManager:
 
     @property
     def lcs_time_dependent(self) -> List[LocalCoordinateSystem]:
-        """Get a list of all attached time dependent `~weldx.transformations.LocalCoordinateSystem` instances.
+        """Get a list of all attached time dependent
+        `~weldx.transformations.LocalCoordinateSystem` instances.
 
         Returns
         -------
         List[~weldx.transformations.LocalCoordinateSystem] :
-            List of all attached time dependent `~weldx.transformations.LocalCoordinateSystem` instances
+            List of all attached time dependent
+            `~weldx.transformations.LocalCoordinateSystem` instances
 
         """
         return [lcs for lcs in self.lcs if lcs.is_time_dependent]
@@ -573,16 +577,17 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        coordinate_system_name : str
+        coordinate_system_name
             Name of the new coordinate system.
-        reference_system_name : str
+        reference_system_name
             Name of the parent system. This must have been already added.
         lcs
             An instance of
             `~weldx.transformations.LocalCoordinateSystem` that describes how the new
             coordinate system is oriented in its parent system.
-        lsc_child_in_parent: bool
-            If set to `True`, the passed `~weldx.transformations.LocalCoordinateSystem` instance describes
+        lsc_child_in_parent
+            If set to `True`, the passed
+            `~weldx.transformations.LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
@@ -739,7 +744,7 @@ class CoordinateSystemManager:
             Time data for time dependent coordinate systems.
         time_ref :
             Reference time for time dependent coordinate systems
-        lsc_child_in_parent:
+        lsc_child_in_parent :
             If set to 'True', the passed 'LocalCoordinateSystem' instance describes
             the new system orientation towards is parent. If 'False', it describes
             how the parent system is positioned in its new child system.
@@ -797,7 +802,7 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-        lsc_child_in_parent:
+        lsc_child_in_parent :
             If set to 'True', the passed 'LocalCoordinateSystem' instance describes
             the new system orientation towards is parent. If 'False', it describes
             how the parent system is positioned in its new child system.
@@ -843,7 +848,7 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-        lsc_child_in_parent:
+        lsc_child_in_parent :
             If set to 'True', the passed 'LocalCoordinateSystem' instance describes
             the new system orientation towards is parent. If 'False', it describes
             how the parent system is positioned in its new child system.
@@ -887,7 +892,7 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-        lsc_child_in_parent:
+        lsc_child_in_parent :
             If set to 'True', the passed 'LocalCoordinateSystem' instance describes
             the new system orientation towards is parent. If 'False', it describes
             how the parent system is positioned in its new child system.
@@ -933,7 +938,7 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-        lsc_child_in_parent:
+        lsc_child_in_parent :
             If set to 'True', the passed 'LocalCoordinateSystem' instance describes
             the new system orientation towards is parent. If 'False', it describes
             how the parent system is positioned in its new child system.
@@ -979,7 +984,7 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
-        lsc_child_in_parent:
+        lsc_child_in_parent :
             If set to 'True', the passed 'LocalCoordinateSystem' instance describes
             the new system orientation towards is parent. If 'False', it describes
             how the parent system is positioned in its new child system.
@@ -1011,9 +1016,9 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        coordinate_system_name:
+        coordinate_system_name :
             Name of the coordinate system that should be deleted.
-        delete_children:
+        delete_children :
             If 'False', an exception is raised if the coordinate system has one or more
             children since deletion would cause them to be disconnected to the root.
             If 'True', all children are deleted as well.
@@ -1062,9 +1067,9 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        coordinate_system_name:
+        coordinate_system_name :
             Name of the coordinate system
-        neighbors_only:
+        neighbors_only :
             If 'True', only child coordinate systems that are directly connected to the
             specified coordinate system are included in the returned list. If 'False',
             child systems of arbitrary hierarchical depth are included.
@@ -1099,7 +1104,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List:
+        List :
             List of coordinate system names.
 
         """
@@ -1155,7 +1160,7 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        data_name : str
+        data_name :
             Name of the data
 
         Returns
@@ -1383,7 +1388,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List:
+        List :
             List containing all the subsystems.
 
         """
@@ -1462,16 +1467,17 @@ class CoordinateSystemManager:
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
                ~weldx.transformations.LocalCoordinateSystem
             The target time for the interpolation. In addition to the supported
-            time formats, the function also accepts a `~weldx.transformations.LocalCoordinateSystem` as
+            time formats, the function also accepts a
+            `~weldx.transformations.LocalCoordinateSystem` as
             ``time`` source object
-        time_ref : pandas.Timestamp
+        time_ref :
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
         affected_coordinate_systems : str or List[str]
             A single coordinate system name or a list of coordinate system names that
             should be interpolated in time. Only transformations towards the systems
             root node are affected.
-        in_place : bool
+        in_place :
             If 'True' the interpolation is performed in place, otherwise a
             new instance is returned. (Default value = False)
 
@@ -1687,7 +1693,7 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        backend : str
+        backend :
             Select the rendering backend of the plot. The options are:
 
             - 'k3d' to get an interactive plot using [k3d](https://k3d-jupyter.org/)
@@ -1697,50 +1703,50 @@ class CoordinateSystemManager:
         axes : matplotlib.axes.Axes
             (matplotlib only) The target axes object that should be drawn to. If `None`
             is provided, a new one will be created.
-        reference_system : str
+        reference_system :
             The name of the reference system for the plotted coordinate systems
-        coordinate_systems : List[str]
+        coordinate_systems :
             Names of the coordinate systems that should be drawn. If `None` is provided,
             all systems are plotted.
-        data_sets : List[str]
+        data_sets :
             Names of the data sets that should be drawn. If `None` is provided, all data
             is plotted.
-        colors: Dict[str, int]
+        colors :
             A mapping between a coordinate system name or a data set name and a color.
             The colors must be provided as 24 bit integer values that are divided into
             three 8 bit sections for the rgb values. For example `0xFF0000` for pure
             red.
             Each coordinate system or data set that does not have a mapping in this
             dictionary will get a default color assigned to it.
-        title : str
+        title :
             The title of the plot
-        limits : List[Tuple[float,float]]
+        limits :
             The coordinate limits of the plot.
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
                ~weldx.transformations.LocalCoordinateSystem
             The time steps that should be plotted
-        time_ref : pandas.Timestamp
+        time_ref :
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
-        axes_equal : bool
+        axes_equal :
             (matplotlib only) If `True`, all axes are adjusted to cover an equally large
              range of value. That doesn't mean, that the limits are identical
-        show_data_labels : bool
+        show_data_labels :
             (k3d only) If `True`, plotted data sets get labels with their names attached
             to them
-        show_labels : bool
+        show_labels :
             (k3d only) If `True`, plotted coordinate systems get labels with their names
             attached to them
-        show_origins : bool
+        show_origins :
             If `True`, the origins of the coordinate system are visualized in the color
             assigned to the coordinate system.
-        show_traces : bool
+        show_traces :
             If `True`, the trace of time dependent coordinate systems is plotted in the
             coordinate systems color.
-        show_vectors : bool
+        show_vectors :
             (matplotlib only) If `True`, the coordinate cross of time dependent
             coordinate systems is plotted.
-        show_wireframe : bool
+        show_wireframe :
             (k3d only) If `True`, data sets that contain mesh data are rendered in
             wireframe mode. If `False`, the data
 
@@ -1806,7 +1812,8 @@ class CoordinateSystemManager:
         """Get the time union of all or selected local coordinate systems.
 
          If neither the `CoordinateSystemManager` nor its attached
-         `~weldx.transformations.LocalCoordinateSystem` instances possess a reference time, the function
+         `~weldx.transformations.LocalCoordinateSystem` instances possess a reference
+         time, the function
          returns a `pandas.TimedeltaIndex`. Otherwise, a `pandas.DatetimeIndex` is
          returned. The following table gives an overview of all possible reference time
          combinations and the corresponding return type:
