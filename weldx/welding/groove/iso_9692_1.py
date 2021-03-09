@@ -10,7 +10,7 @@ from sympy import Polygon
 
 import weldx.geometry as geo
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.utility import ureg_check_class, inherit_docstrings
+from weldx.utility import inherit_docstrings, ureg_check_class
 
 __all__ = [
     "IGroove",
