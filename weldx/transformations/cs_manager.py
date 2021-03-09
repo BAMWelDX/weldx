@@ -189,15 +189,15 @@ class CoordinateSystemManager:
 
     @property
     def lcs(self) -> List[LocalCoordinateSystem]:
-        """Get a list of all attached `LocalCoordinateSystem` instances.
+        """Get a list of all attached `~weldx.transformations.LocalCoordinateSystem` instances.
 
         Only the defined systems and not the automatically generated inverse systems
         are included.
 
         Returns
         -------
-        List[LocalCoordinateSystem] :
-           List of all attached `LocalCoordinateSystem` instances.
+        List[~weldx.transformations.LocalCoordinateSystem] :
+           List of all attached `~weldx.transformations.LocalCoordinateSystem` instances.
 
         """
         return [
@@ -208,12 +208,12 @@ class CoordinateSystemManager:
 
     @property
     def lcs_time_dependent(self) -> List[LocalCoordinateSystem]:
-        """Get a list of all attached time dependent `LocalCoordinateSystem` instances.
+        """Get a list of all attached time dependent `~weldx.transformations.LocalCoordinateSystem` instances.
 
         Returns
         -------
-        List[LocalCoordinateSystem] :
-            List of all attached time dependent `LocalCoordinateSystem` instances
+        List[~weldx.transformations.LocalCoordinateSystem] :
+            List of all attached time dependent `~weldx.transformations.LocalCoordinateSystem` instances
 
         """
         return [lcs for lcs in self.lcs if lcs.is_time_dependent]
@@ -224,7 +224,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        bool :[
+        bool :
             `True` if the `CoordinateSystemManager` or one of its attached coordinate
             systems possess a reference time. `False` otherwise
 
@@ -577,12 +577,12 @@ class CoordinateSystemManager:
             Name of the new coordinate system.
         reference_system_name : str
             Name of the parent system. This must have been already added.
-        lcs : LocalCoordinateSystem
+        lcs
             An instance of
             `~weldx.transformations.LocalCoordinateSystem` that describes how the new
             coordinate system is oriented in its parent system.
         lsc_child_in_parent: bool
-            If set to `True`, the passed `LocalCoordinateSystem` instance describes
+            If set to `True`, the passed `~weldx.transformations.LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
@@ -1247,7 +1247,7 @@ class CoordinateSystemManager:
            reference times. Therefore an exception is raised. If your intention is to
            add a reference time to the resulting coordinate system, you should call this
            function without a specified reference time and add it explicitly to the
-           returned `LocalCoordinateSystem`.
+           returned `~weldx.transformations.LocalCoordinateSystem`.
 
 
         **Information regarding the implementation:**
@@ -1291,7 +1291,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        LocalCoordinateSystem
+        ~weldx.transformations.LocalCoordinateSystem
             Local coordinate system
 
         """
@@ -1460,9 +1460,9 @@ class CoordinateSystemManager:
         Parameters
         ----------
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               LocalCoordinateSystem
+               ~weldx.transformations.LocalCoordinateSystem
             The target time for the interpolation. In addition to the supported
-            time formats, the function also accepts a `LocalCoordinateSystem` as
+            time formats, the function also accepts a `~weldx.transformations.LocalCoordinateSystem` as
             ``time`` source object
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a
@@ -1717,7 +1717,7 @@ class CoordinateSystemManager:
         limits : List[Tuple[float,float]]
             The coordinate limits of the plot.
         time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               LocalCoordinateSystem
+               ~weldx.transformations.LocalCoordinateSystem
             The time steps that should be plotted
         time_ref : pandas.Timestamp
             A reference timestamp that can be provided if the ``time`` parameter is a
@@ -1806,7 +1806,7 @@ class CoordinateSystemManager:
         """Get the time union of all or selected local coordinate systems.
 
          If neither the `CoordinateSystemManager` nor its attached
-         `LocalCoordinateSystem` instances possess a reference time, the function
+         `~weldx.transformations.LocalCoordinateSystem` instances possess a reference time, the function
          returns a `pandas.TimedeltaIndex`. Otherwise, a `pandas.DatetimeIndex` is
          returned. The following table gives an overview of all possible reference time
          combinations and the corresponding return type:
