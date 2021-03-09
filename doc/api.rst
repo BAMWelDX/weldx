@@ -15,7 +15,7 @@ API
     weldx.geometry
     weldx.measurement
     weldx.transformations
-    weldx.utility
+    weldx.util
     weldx.visualization
     weldx.welding
 
@@ -29,6 +29,6 @@ API
     :recursive:
 
     weldx.asdf.extension
-    weldx.asdf.utils
+    weldx.asdf.util
     weldx.asdf.validators
 

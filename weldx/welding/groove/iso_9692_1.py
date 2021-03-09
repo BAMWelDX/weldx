@@ -8,7 +8,7 @@ import pint
 
 import weldx.geometry as geo
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.utility import ureg_check_class
+from weldx.util import ureg_check_class
 
 __all__ = [
     "IGroove",

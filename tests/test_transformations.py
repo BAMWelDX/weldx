@@ -14,9 +14,9 @@ from pandas import Timestamp as TS  # noqa
 from pandas import date_range
 
 import weldx.transformations as tf
-import weldx.utility as ut
+import weldx.util as ut
 from tests._helpers import get_test_name
-from weldx import Q_
+from weldx import Q_, SpatialData
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 
 # helpers for tests -----------------------------------------------------------
@@ -2412,8 +2412,8 @@ class TestCoordinateSystemManager:
 
         # create CSM and add coordinate systems
         csm = tf.CoordinateSystemManager("root", "base", csm_time_ref)
-        for i in range(len(lcs_times)):
-            csm.add_cs(f"lcs_{i}", "root", lcs[i])
+        for i, lcs_ in enumerate(lcs):
+            csm.add_cs(f"lcs_{i}", "root", lcs_)
 
         # create expected data type
         exp_time = pd.TimedeltaIndex(exp_time, "D")
@@ -3478,7 +3478,7 @@ class TestCoordinateSystemManager:
             (
                 "lcs_3",
                 "my_data",
-                tf.SpatialData([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]]),
+                SpatialData([[1, -3, -1], [2, 4, -1], [-1, 2, 3], [3, -4, 2]]),
                 "lcs_1",
                 [[-5, -2, -4], [-5, -9, -5], [-9, -7, -2], [-8, -1, -6]],
             ),
@@ -3525,7 +3525,7 @@ class TestCoordinateSystemManager:
             assert csm.has_data(lcs, data_name) == (lcs == lcs_ref)
 
         transformed_data = csm.get_data(data_name, lcs_out)
-        if isinstance(transformed_data, tf.SpatialData):
+        if isinstance(transformed_data, SpatialData):
             transformed_data = transformed_data.coordinates.data
         else:
             transformed_data = transformed_data.data
