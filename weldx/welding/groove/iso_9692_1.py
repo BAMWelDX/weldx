@@ -10,9 +10,10 @@ from sympy import Polygon
 
 import weldx.geometry as geo
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.utility import inherit_docstrings, ureg_check_class
+from weldx.util import inherit_docstrings, ureg_check_class
 
 __all__ = [
+    "IsoBaseGroove",
     "IGroove",
     "VGroove",
     "VVGroove",
