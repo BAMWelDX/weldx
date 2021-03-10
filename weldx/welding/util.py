@@ -1,9 +1,8 @@
 """Collection of welding utilities."""
 import numpy as np
-import pint
 
 from weldx.constants import WELDX_UNIT_REGISTRY
-from weldx.core import TimeSeries
+from weldx.core import Q_, TimeSeries
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 
 
@@ -11,8 +10,8 @@ from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 # TODO: extend the ckeck decorator to check on output! # ret='[length]/[time]')
 def compute_welding_speed(
     groove: IsoBaseGroove,
-    wire_feed: pint.Quantity,
-    wire_diameter: pint.Quantity,
+    wire_feed: Q_,
+    wire_diameter: Q_,
 ) -> TimeSeries:
     """Compute how fast the torch has to be moved to fill the given groove.
 
