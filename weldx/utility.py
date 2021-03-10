@@ -89,7 +89,9 @@ def inherit_docstrings(cls):
     cls
 
     """
-    attrs = lambda x: isfunction(x) or isinstance(x, property)
+
+    def attrs(x):
+        return isfunction(x) or isinstance(x, property)
 
     for name, func in getmembers(cls, predicate=attrs):
         if func.__doc__ or name.startswith("_"):
