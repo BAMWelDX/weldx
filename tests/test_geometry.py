@@ -2,6 +2,8 @@
 
 import copy
 import math
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import List, Union
 
 import numpy as np
@@ -2927,3 +2929,37 @@ class TestSpatialData:
         """
         with pytest.raises(exception_type):
             SpatialData(*arguments)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "filename",
+        ["test.ply", "test.stl", "test.vtk", Path("test.stl")],
+    )
+    def test_read_write_file(filename: Union[str, Path]):
+        """Test the `from_file` and `write_to_file` functions.
+
+        The test simply creates a `SpatialData` instance, writes it to a file and reads
+        it back. The result is compared to the original object.
+
+        Parameters
+        ----------
+        filename :
+            Name of the file
+
+        Returns
+        -------
+
+        """
+        points = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
+        triangles = [[0, 1, 2], [2, 3, 0]]
+
+        data = SpatialData(points, triangles)
+        with TemporaryDirectory(dir=Path(__file__).parent) as tmpdirname:
+            filepath = f"{tmpdirname}/{filename}"
+            if isinstance(filename, Path):
+                filepath = Path(filepath)
+            data.write_to_file(filepath)
+            data_read = SpatialData.from_file(filepath)
+
+        assert np.allclose(data.coordinates, data_read.coordinates)
+        assert np.allclose(data.triangles, data_read.triangles)

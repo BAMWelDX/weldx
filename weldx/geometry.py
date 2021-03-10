@@ -5,6 +5,7 @@ import copy
 import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
+from pathlib import Path
 
 import meshio
 import numpy as np
@@ -2330,7 +2331,7 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_file(file_name: str) -> "SpatialData":
+    def from_file(file_name: Union[str, Path]) -> "SpatialData":
         """Create an instance from a file.
 
         Parameters
@@ -2421,16 +2422,18 @@ class SpatialData:
             show_wireframe=show_wireframe,
         )
 
-    def write_to_file(self, file_name: str):
+    def write_to_file(self, file_name: Union[str, Path]):
         """Write spatial data into a file.
 
         The extension prescribes the output format.
 
         Parameters
         ----------
-        file_name : str
+        file_name :
             Name of the file
 
         """
-        mesh = meshio.Mesh(points=self.coordinates, cells={"triangle": self.triangles})
+        mesh = meshio.Mesh(
+            points=self.coordinates.data, cells={"triangle": self.triangles}
+        )
         mesh.write(file_name)
