@@ -2,7 +2,9 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
+import pint
 
+from weldx import Q_, TimeSeries
 from weldx.asdf.types import WeldxType
 from weldx.asdf.validators import wx_shape_validator
 
@@ -18,6 +20,8 @@ class ShapeValidatorTestClass:
     prop3: np.ndarray = np.ones((2, 4, 6, 8, 10))
     prop4: np.ndarray = np.ones((1, 3, 5, 7, 9))
     prop5: float = 3.141
+    quantity: pint.Quantity = Q_(10, "m")
+    timeseries: TimeSeries = TimeSeries(Q_(10, "m"))
     nested_prop: dict = field(
         default_factory=lambda: {
             "p1": np.ones((10, 8, 6, 4, 2)),
