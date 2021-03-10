@@ -28,7 +28,7 @@ The second main component is the the ``WelDX`` file standard that is used to def
 Installation
 ############
 The WelDX package can be installed using conda or mamba package manager from the :code:`conda-forge` channel.
-These manager originate from the freely available `Anaconda Python stack <https://docs.conda.io/en/latest/miniconda.html>`_.
+These managers originate from the freely available `Anaconda Python stack <https://docs.conda.io/en/latest/miniconda.html>`_.
 If you do not have Anaconda or Miniconda installed yet, we ask you to install ``Miniconda-3``.
 Documentation for the installation procedure can be found `here <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation>`_. After this step you have access to the conda command and can proceed to installing the WeldX package.
 
@@ -36,6 +36,11 @@ Documentation for the installation procedure can be found `here <https://docs.co
 
     conda install weldx -c conda-forge
 
+
+The package is also available on pypi.
+```console
+pip install weldx
+```
 
 Funding
 #######
