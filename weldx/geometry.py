@@ -6,6 +6,7 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
+import meshio
 import numpy as np
 import pint
 from xarray import DataArray
@@ -2329,6 +2330,26 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
+    def from_file(file_name: str) -> "SpatialData":
+        """Create an instance from a file.
+
+        Parameters
+        ----------
+        file_name :
+            Name of the source file.
+
+        Returns
+        -------
+        SpatialData:
+            New `SpatialData` instance
+
+        """
+        mesh = meshio.read(file_name)
+        triangles = mesh.cells_dict.get("triangle")
+
+        return SpatialData(mesh.points, triangles)
+
+    @staticmethod
     def from_geometry_raster(geometry_raster: np.ndarray) -> "SpatialData":
         """Triangulate rasterized Geometry Profile.
 
@@ -2399,3 +2420,17 @@ class SpatialData:
             label=label,
             show_wireframe=show_wireframe,
         )
+
+    def write_to_file(self, file_name: str):
+        """Write spatial data into a file.
+
+        The extension prescribes the output format.
+
+        Parameters
+        ----------
+        file_name : str
+            Name of the file
+
+        """
+        mesh = meshio.Mesh(points=self.coordinates, cells={"triangle": self.triangles})
+        mesh.write(file_name)
