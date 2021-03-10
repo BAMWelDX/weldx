@@ -2,11 +2,11 @@
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Tuple, Union
 
 import numpy as np
 import pint
-from sympy import Polygon
+from sympy import Point2D, Polygon
 
 import weldx.geometry as geo
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -43,8 +43,38 @@ def _set_default_heights(groove):
         groove.h1 = groove.h2
 
 
+def _compute_cross_sect_shape_points(
+    points: List[List[Union[Point2D, Tuple]]]
+) -> Q_(_DEFAULT_LEN_UNIT + "**2"):  # noqa
+    # Assumes that we have two separate shapes for each workpiece
+    # 1. compute the total area of all workpieces
+    # 2. compute bounding box of all pieces (this includes the rift)
+    # 3. compute area A = A_outer - A_workpieces
+
+    area_workpiece = 0
+    bounds = []
+
+    for i, shape_points in enumerate(points):
+        p = Polygon(*shape_points, evaluate=False)
+        area_workpiece += abs(p.area)
+        bounds.append(p.bounds)
+
+    # outer bbox
+    x1 = min(x[0] for x in bounds)
+    y1 = min(x[1] for x in bounds)
+    x2 = max(x[2] for x in bounds)
+    y2 = max(x[3] for x in bounds)
+
+    bounding_box = Polygon((x1, y1), (x2, y1), (x2, y2), (x1, y2), evaluate=False)
+
+    return Q_(float(bounding_box.area - area_workpiece), "mm²")
+
+
 class IsoBaseGroove(metaclass=abc.ABCMeta):
     """Generic base class for all groove types."""
+
+    _AREA_RASTER_WIDTH = 0.1
+    """steers the area approximation of the groove in ~cross_sect_area."""
 
     def parameters(self):
         """Return groove parameters as dictionary of quantities."""
@@ -139,48 +169,20 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
             points.append(shape_points)
             for seg in shape.segments:
                 if isinstance(seg, geo.LineSegment):
-                    shape_points.append(tuple(seg.point_start))
-                    shape_points.append(tuple(seg.point_end))
+                    shape_points.append(seg.point_start)
+                    shape_points.append(seg.point_end)
                 else:
                     raise RuntimeError("only for line segments!")
-        return self.__compute_cross_sect_shape_points(points)
+        return _compute_cross_sect_shape_points(points)
 
     def _compute_cross_sect_area_interpolated(self):
         # this method computes an approximation of the area by creating a big polygon
         # out of the rasterization points
         profile = self.to_profile()
-        # TODO: determine raster_width parameter
-        rasterization = profile.rasterize(0.3, stack=False)
+        rasterization = profile.rasterize(self._AREA_RASTER_WIDTH, stack=False)
         points = [[(x, y) for x, y in shape.T] for shape in rasterization]
 
-        return self.__compute_cross_sect_shape_points(points=points)
-
-    def __compute_cross_sect_shape_points(self, points):
-        # Assumes that we have two separate shapes for each workpiece
-        # 1. compute the total area of all workpieces
-        # 2. compute bounding box of all pieces (this includes the rift)
-        # 3. compute area A = A_outer - A_workpieces
-
-        area_workpiece = 0
-        bounds = []
-
-        for i, shape_points in enumerate(points):
-            p = Polygon(*shape_points, evaluate=False)
-            # TODO: do we need a convex polygon for proper area computation?
-            # assert p.is_convex()
-            area_workpiece += abs(p.area)
-            bounds.append(p.bounds)
-
-        # outer bbox
-        x1 = min(x[0] for x in bounds)
-        y1 = min(x[1] for x in bounds)
-        x2 = max(x[2] for x in bounds)
-        y2 = max(x[3] for x in bounds)
-
-        bounding_box = Polygon((x1, y1), (x2, y1), (x2, y2), (x1, y2), evaluate=False)
-
-        area_outer = bounding_box.area
-        return Q_(float(area_outer - area_workpiece), "mm²")
+        return _compute_cross_sect_shape_points(points)
 
 
 @ureg_check_class("[length]", "[length]", None)

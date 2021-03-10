@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import pytest
+from decorator import contextmanager
 
 from weldx.asdf.util import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -96,9 +97,17 @@ def test_asdf_groove_exceptions():
 
 @pytest.mark.parametrize("groove", test_params.values(), ids=test_params.keys())
 def test_cross_section(groove):
+    @contextmanager
+    def temp_attr(obj, attr, new_value):
+        old_value = getattr(obj, attr)
+        setattr(obj, attr, new_value)
+        yield
+        setattr(obj, attr, old_value)
+
     groove_obj, groove_cls = groove
-    # TODO: this is a very rough test, but currently I dont know how to improve it.
-    A = groove_obj.cross_sect_area
+    # make rasterization for U-based grooves rather rough.
+    with temp_attr(groove_obj, "_AREA_RASTER_WIDTH", 0.75):
+        A = groove_obj.cross_sect_area
 
     # check docstring got inherited.
     assert groove_cls.cross_sect_area.__doc__ is not None
