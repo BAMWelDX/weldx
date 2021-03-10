@@ -25,4 +25,4 @@ coverage:
 ignore:
   - "tests"
   - "*__init__.py"
-  - "weldx/visualization.py"
+  - "weldx/visualization/*"

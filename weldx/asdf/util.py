@@ -1,11 +1,14 @@
 from io import BytesIO
 from pathlib import Path
+from typing import Tuple
 
 import asdf
 import yaml
+from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
+# TODO: these functions be generalized and be public
 # asdf read/write debug tools functions ---------------------------------------
 
 
@@ -157,7 +160,7 @@ else:  # pragma: no cover
             )
         )
 
-    def asdf_json_repr(file, **kwargs):
+    def asdf_json_repr(file, path: Tuple = None, **kwargs):
         """Display YAML header using IPython JSON display repr.
 
         This function works in JupyterLab.
@@ -166,6 +169,8 @@ else:  # pragma: no cover
         ----------
         file
             filename or BytesIO buffer of ASDF file
+        path
+            tuple representing the lookup path in the yaml/asdf tree
         kwargs
             kwargs passed down to JSON constructor
 
@@ -174,7 +179,29 @@ else:  # pragma: no cover
         IPython.display.JSON
             JSON object for rich output in JupyterLab
 
+        Examples
+        --------
+        Visualize the full tree of an existing ASDF file::
+
+            weldx.asdf.utils.asdf_json_repr("single_pass_weld_example.asdf")
+
+        Visualize a specific element in the tree structure by proving the path::
+
+            weldx.asdf.utils.asdf_json_repr(
+                "single_pass_weld_example.asdf", path=("process", "welding_process")
+            )
+
+
         """
+        if isinstance(file, str):
+            root = file + "/"
+        else:
+            root = "/"
+
         code = _get_yaml_header(file)
         yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
+        if path:
+            root = root + "/".join(path)
+            yaml_dict = get_path(yaml_dict, path)
+        kwargs["root"] = root
         return JSON(yaml_dict, **kwargs)

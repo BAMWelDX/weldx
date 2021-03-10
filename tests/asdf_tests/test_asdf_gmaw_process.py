@@ -3,7 +3,7 @@
 import pytest
 
 from weldx import Q_
-from weldx.asdf.utils import _write_read_buffer
+from weldx.asdf.util import _write_read_buffer
 from weldx.core import TimeSeries
 from weldx.welding.processes import GmawProcess
 

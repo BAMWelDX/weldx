@@ -4,7 +4,7 @@ from scipy.spatial.transform import Rotation
 from weldx.asdf.types import WeldxType
 from weldx.asdf.validators import wx_unit_validator
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.transformations import WXRotation
+from weldx.transformations.rotation import WXRotation
 
 
 class WXRotationTypeASDF(WeldxType):

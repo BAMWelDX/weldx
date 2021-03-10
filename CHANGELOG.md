@@ -53,6 +53,10 @@
 - The graph of a `CoordinateSystemManager` is now plotted with `plot_graph` instead of `plot`.
   [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
 - add custom `wx_shape` validation for `TimeSeries` and `Quantity` [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
+- refactor the `transformations` and `visualization` module into smaller files [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- refactor `weldx.utility` into `weldx.util` [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- refactor `weldx.asdf.utils` into `weldx.asdf.util` [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+
 
 ### fixes
 
@@ -63,6 +67,7 @@
 - fix deprecated signature in `WXRotation` [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
 - fix a bug with singleton dimensions in xarray
   interpolation/matmul [[#243]](https://github.com/BAMWelDX/weldx/pull/243)
+- update some documentation formatting and links [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
 - fix `wx_shape` validation for scalar `Quantity` and `TimeSeries`
   objects [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
 
@@ -72,8 +77,8 @@
 - Add [k3d](https://github.com/K3D-tools/K3D-jupyter) as new dependency
 - restrict `scipy<1.6`
   pending [ASDF #916](https://github.com/asdf-format/asdf/issues/916) [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
-- set minimum Python version to
-  3.8 [[#229]](https://github.com/BAMWelDX/weldx/pull/229)[[#255]](https://github.com/BAMWelDX/weldx/pull/255)
+- set minimum Python version to 3.8 [[#229]](https://github.com/BAMWelDX/weldx/pull/229)[[#255]](https://github.com/BAMWelDX/weldx/pull/255)
+- only import some packages upon first use [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
 
 ## 0.2.2 (30.11.2020)
 
