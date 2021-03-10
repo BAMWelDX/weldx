@@ -2946,9 +2946,6 @@ class TestSpatialData:
         filename :
             Name of the file
 
-        Returns
-        -------
-
         """
         points = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
         triangles = [[0, 1, 2], [2, 3, 0]]

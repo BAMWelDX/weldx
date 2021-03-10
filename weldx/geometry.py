@@ -4,8 +4,8 @@ from __future__ import annotations
 import copy
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 from pathlib import Path
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import meshio
 import numpy as np
