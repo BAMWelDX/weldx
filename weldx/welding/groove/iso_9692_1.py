@@ -236,7 +236,7 @@ class IGroove(IsoBaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_from_profile()
 
 
@@ -330,7 +330,7 @@ class VGroove(IsoBaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_from_profile()
 
 
@@ -432,7 +432,7 @@ class VVGroove(IsoBaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_from_profile()
 
 
@@ -532,7 +532,7 @@ class UVGroove(IsoBaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_interpolated()
 
 
@@ -655,7 +655,7 @@ class UGroove(IsoBaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_interpolated()
 
 
@@ -742,7 +742,7 @@ class HVGroove(IsoBaseGroove):
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_from_profile()
 
 
@@ -840,7 +840,7 @@ class HUGroove(IsoBaseGroove):
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_interpolated()
 
 
@@ -947,7 +947,7 @@ class DVGroove(IsoBaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_from_profile()
 
 
@@ -1079,7 +1079,7 @@ class DUGroove(IsoBaseGroove):
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_interpolated()
 
 
@@ -1174,7 +1174,7 @@ class DHVGroove(IsoBaseGroove):
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_from_profile()
 
 
@@ -1289,7 +1289,7 @@ class DHUGroove(IsoBaseGroove):
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_interpolated()
 
 
@@ -1512,7 +1512,7 @@ class FFGroove(IsoBaseGroove):
             )
 
     @property
-    def cross_sect_area(self):
+    def cross_sect_area(self):  # noqa
         return self._compute_cross_sect_area_from_profile()
 
 
