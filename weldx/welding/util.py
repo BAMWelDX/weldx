@@ -3,6 +3,7 @@ import numpy as np
 import pint
 
 from weldx.constants import WELDX_UNIT_REGISTRY
+from weldx.core import TimeSeries
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 
 
@@ -12,7 +13,7 @@ def compute_welding_speed(
     groove: IsoBaseGroove,
     wire_feed: pint.Quantity,
     wire_diameter: pint.Quantity,
-):
+) -> TimeSeries:
     """Compute how fast the torch has to be moved to fill the given groove.
 
     Parameters
@@ -35,4 +36,4 @@ def compute_welding_speed(
     weld_speed = wire_area * wire_feed / groove_area
 
     weld_speed.ito_reduced_units()
-    return weld_speed
+    return TimeSeries(weld_speed)

@@ -13,7 +13,8 @@ def test_welding_speed():
     wire_feed = Q_(1, "mm/s")
     result = compute_welding_speed(groove, wire_feed, wire_diameter)
     assert result.units == wire_feed.units
-    assert result > 0
+    assert result.shape == (1,)
+    assert result[0] > 0
 
 
 def test_illegal_input_dimension():
