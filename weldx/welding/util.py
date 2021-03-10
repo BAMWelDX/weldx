@@ -13,7 +13,7 @@ def compute_welding_speed(
     wire_feed: pint.Quantity,
     wire_diameter: pint.Quantity,
 ):
-    """Computes how fast the torch has to be moved to fill the gap of the groove.
+    """Compute how fast the torch has to be moved to fill the given groove.
 
     Parameters
     ----------
