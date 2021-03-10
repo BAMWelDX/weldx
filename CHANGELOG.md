@@ -8,9 +8,10 @@
   function [[#219]](https://github.com/BAMWelDX/weldx/pull/219)
 - add `SpatialDate` class for storing 3D point data with optional
   triangulation [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
-- add `plot` function to `SpatialData`[[#251]](https://github.com/BAMWelDX/weldx/pull/251) 
-- add `plot` function to visualize `LocalCoordinateSystem` and `CoordinateSystemManager` instances in 3d space 
+- add `plot` function to `SpatialData`[[#251]](https://github.com/BAMWelDX/weldx/pull/251)
+- add `plot` function to visualize `LocalCoordinateSystem` and `CoordinateSystemManager` instances in 3d space
   [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
+
 ### ASDF
 
 - Add possibility to store meta data and content of an external file in an ASDF
@@ -28,11 +29,14 @@
       as `custom_schema` when reading/writing `ASDF`-files
     - the `single_pass_weld-1.0.0.schema` is an example schema for a simple, linear, single pass GMAW application
     - add `core/geometry/point_cloud-1.0.0.yaml` schema [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
+- add file schema describing a simple linear welding
+  application `datamodels/single_pass_weld-1.0.0.schema` [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
 
 ### documentation
+
 - Simplify tutorial code and enhance plots by using newly implemented plot functions
-  [[#231]](https://github.com/BAMWelDX/weldx/pull/231) [[#251]](https://github.com/BAMWelDX/weldx/pull/251) 
-  
+  [[#231]](https://github.com/BAMWelDX/weldx/pull/231) [[#251]](https://github.com/BAMWelDX/weldx/pull/251)
+
 ### changes
 
 - pass variable names as tuple to `sympy.lambdify` in `MathematicalExpression` to prevent sympy
@@ -48,9 +52,11 @@
 - add `stack` option to most `geometry` classes for rasterization [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
 - The graph of a `CoordinateSystemManager` is now plotted with `plot_graph` instead of `plot`.
   [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
+- add custom `wx_shape` validation for `TimeSeries` and `Quantity` [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
 - refactor the `transformations` and `visualization` module into smaller files [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
 - refactor `weldx.utility` into `weldx.util` [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
 - refactor `weldx.asdf.utils` into `weldx.asdf.util` [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+
 
 ### fixes
 
@@ -62,6 +68,8 @@
 - fix a bug with singleton dimensions in xarray
   interpolation/matmul [[#243]](https://github.com/BAMWelDX/weldx/pull/243)
 - update some documentation formatting and links [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- fix `wx_shape` validation for scalar `Quantity` and `TimeSeries`
+  objects [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
 
 ### dependencies
 

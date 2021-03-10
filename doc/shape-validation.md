@@ -32,7 +32,7 @@ Each shape item follows these rules:
 
 * an ``Integer`` indicates a fix dimension for the same item
 
-* a ``~``, `:` or `None` indicates a single dimension of arbitrary length.
+* a ``~`` indicates a single dimension of arbitrary length.
 
 * a ``...`` indicates an arbitrary number of dimensions of arbitrary length, which can be optional.
 
@@ -40,7 +40,7 @@ Each shape item follows these rules:
 
 * parenthesis ``(_)`` indicate that the dimension is optional. This can be combined with the other rules.
 
-* the symbols ``~`` or `:` furthermore add the option to implement an interval. This string `4~` would be an open
+* the symbols ``~`` furthermore add the option to implement an interval. This string `4~` would be an open
   interval that accepts all dimensions that are greater or equal to 4.
 
 ### Exceptions
