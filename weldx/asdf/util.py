@@ -8,6 +8,7 @@ from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
+# TODO: these functions be generalized and be public
 # asdf read/write debug tools functions ---------------------------------------
 
 

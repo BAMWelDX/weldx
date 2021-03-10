@@ -12,7 +12,7 @@ from xarray import DataArray
 import tests._helpers as helpers
 import weldx.geometry as geo
 import weldx.transformations as tf
-import weldx.utility as ut
+import weldx.util as ut
 from weldx import Q_
 from weldx.geometry import SpatialData
 

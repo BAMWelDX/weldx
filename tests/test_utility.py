@@ -11,7 +11,7 @@ from pandas import TimedeltaIndex as TDI
 from pandas import date_range
 from pint.errors import DimensionalityError
 
-import weldx.utility as ut
+import weldx.util as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
