@@ -40,12 +40,14 @@ from weldx.transformations import (
     LocalCoordinateSystem,
     WXRotation,
 )
+from weldx.welding.processes import GmawProcess
 from weldx.welding.groove.iso_9692_1 import get_groove
 
 __all__ = (
     # major modules
     "core",
     "geometry",
+    "GmawProcess",
     "measurement",
     "transformations",
     "util",
