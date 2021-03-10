@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import pytest
 
-from weldx.asdf.utils import _write_read_buffer
+from weldx.asdf.util import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.geometry import Profile
 from weldx.welding.groove.iso_9692_1 import (

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from asdf import ValidationError
 
-from weldx.asdf.utils import _write_buffer, _write_read_buffer
+from weldx.asdf.util import _write_buffer, _write_read_buffer
 
 
 @pytest.mark.parametrize(
