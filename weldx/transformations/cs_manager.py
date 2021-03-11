@@ -1866,9 +1866,19 @@ class CoordinateSystemManager:
             return None
 
         time_list = [util.to_pandas_time_index(lcs) for lcs in lcs_list]
-        if self.has_reference_time:
+        reference_time = self.reference_time
+        if self.uses_absolute_times and not reference_time:
+            reference_time = min(
+                [
+                    lcs.reference_time
+                    for lcs in self.lcs_time_dependent
+                    if lcs.reference_time
+                ]
+            )  # there should only be one LCS with reference time in this case but still
+
+        if reference_time:
             time_list = [
-                t + self.reference_time if isinstance(t, pd.TimedeltaIndex) else t
+                t + reference_time if isinstance(t, pd.TimedeltaIndex) else t
                 for t in time_list
             ]
 
