@@ -89,16 +89,15 @@ def inherit_docstrings(cls):
     cls
 
     """
-
-    def attrs(x):
-        return isfunction(x) or isinstance(x, property)
-
-    for name, func in getmembers(cls, predicate=attrs):
+    for name, func in getmembers(
+        cls, predicate=lambda x: isfunction(x) or isinstance(x, property)
+    ):
         if func.__doc__ or name.startswith("_"):
             continue
         for parent in cls.__mro__[1:]:
             if hasattr(parent, name):
                 func.__doc__ = getattr(parent, name).__doc__
+                assert func.__doc__
     return cls
 
 
