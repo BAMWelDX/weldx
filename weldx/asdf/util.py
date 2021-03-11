@@ -30,9 +30,9 @@ def _write_buffer(
     tree:
         Tree object to serialize.
     asdffile_kwargs
-        Additional keywords to pass to asdf.AsdfFile()
+        Additional keywords to pass to `asdf.AsdfFile`
     write_kwargs
-        Additional keywords to pass to asdf.AsdfFile.write_to()
+        Additional keywords to pass to `asdf.AsdfFile.write_to`
         Weldx-Extensions are always set.
 
     Returns
@@ -95,13 +95,13 @@ def _write_read_buffer(
     tree
         Tree object to serialize.
     asdffile_kwargs
-        Additional keywords to pass to asdf.AsdfFile()
+        Additional keywords to pass to `asdf.AsdfFile`
     write_kwargs
-        Additional keywords to pass to asdf.AsdfFile.write_to()
+        Additional keywords to pass to `asdf.AsdfFile.write_to`
         Extensions are always set.
     open_kwargs
-        Additional keywords to pass to asdf.AsdfFile.open()
-        Extensions are always set, copy_arrays=True is set by default.
+        Additional keywords to pass to `asdf.AsdfFile.open`
+        Extensions are always set, ``copy_arrays=True`` is set by default.
 
     Returns
     -------
@@ -157,7 +157,7 @@ else:  # pragma: no cover
         Parameters
         ----------
         file
-            filename or BytesIO buffer of ASDF file
+            filename or ``BytesIO`` buffer of ASDF file
         lexer
             Syntax style to use
 
