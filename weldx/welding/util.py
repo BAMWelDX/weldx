@@ -1,17 +1,18 @@
 """Collection of welding utilities."""
 import numpy as np
+import pint
 
 from weldx.constants import WELDX_UNIT_REGISTRY
-from weldx.core import Q_, TimeSeries
+from weldx.core import Q_
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 
 
 @WELDX_UNIT_REGISTRY.check(None, "[length]/[time]", "[length]")
 def compute_welding_speed(
     groove: IsoBaseGroove,
-    wire_feed: Q_,
-    wire_diameter: Q_,
-) -> TimeSeries:
+    wire_feed: pint.Quantity,
+    wire_diameter: pint.Quantity,
+) -> Q_:
     """Compute how fast the torch has to be moved to fill the given groove.
 
     Parameters
@@ -25,7 +26,7 @@ def compute_welding_speed(
 
     Returns
     -------
-    speed: TimeSeries
+    speed: pint.Quantity
         The computed welding speed, given in dimensionality "length/time".
 
     """
@@ -34,4 +35,4 @@ def compute_welding_speed(
     weld_speed = wire_area * wire_feed / groove_area
 
     weld_speed.ito_reduced_units()
-    return TimeSeries(weld_speed)
+    return weld_speed
