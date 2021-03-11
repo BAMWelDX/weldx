@@ -30,6 +30,7 @@ excluded_words:
   - shutil
   - functools
   - boltons
+  - meshio
   # matplotlib ----------------------------------
   - gca
   - mpl
@@ -118,6 +119,9 @@ excluded_words:
   - numpydoc
   # markdown / latex ----------------------------
   - cdot
+  # file extensions -----------------------------
+  - vtk
+  - stl
   # other ---------------------------------------
   - addopts
   - csm

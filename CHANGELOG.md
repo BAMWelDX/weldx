@@ -82,6 +82,7 @@
   pending [ASDF #916](https://github.com/asdf-format/asdf/issues/916) [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
 - set minimum Python version to 3.8 [[#229]](https://github.com/BAMWelDX/weldx/pull/229)[[#255]](https://github.com/BAMWelDX/weldx/pull/255)
 - only import some packages upon first use [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- Add [meshio](https://pypi.org/project/meshio/) as new dependency [#265](https://github.com/BAMWelDX/weldx/pull/265)
 
 ## 0.2.2 (30.11.2020)
 
