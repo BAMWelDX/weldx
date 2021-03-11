@@ -103,6 +103,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         grid=True,
         line_style=".-",
         ax=None,
+        show_area: bool = True,
     ):
         """Plot a 2D-Profile.
 
@@ -129,6 +130,10 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         profile = self.to_profile()
         if title is None:
             title = _groove_type_to_name[self.__class__]
+
+        if show_area:
+            ca = self.cross_sect_area
+            title = title + f" ({np.around(ca,1):~.3P})"
 
         if show_params:
             title = title + "\n" + ", ".join(self.param_strings())
