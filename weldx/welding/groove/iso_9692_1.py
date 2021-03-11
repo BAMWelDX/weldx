@@ -43,6 +43,12 @@ def _set_default_heights(groove):
         groove.h1 = groove.h2
 
 
+def _get_bounds(points):
+    xs = [p[0] for p in points]
+    ys = [p[1] for p in points]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
 def _compute_cross_sect_shape_points(
     points: List[List[Union[Point2D, Tuple]]]
 ) -> Q_(_DEFAULT_LEN_UNIT + "**2"):  # noqa
@@ -54,16 +60,15 @@ def _compute_cross_sect_shape_points(
     area_workpiece = 0
     bounds = []
 
-    for i, shape_points in enumerate(points):
+    for shape_points in points:
         p = Polygon(*shape_points, evaluate=False)
         area_workpiece += abs(p.area)
-        bounds.append(p.bounds)
+        x1, y1, x2, y2 = p.bounds
+        bounds.append((x1, y1))
+        bounds.append((x2, y2))
 
     # outer bbox
-    x1 = min(x[0] for x in bounds)
-    y1 = min(x[1] for x in bounds)
-    x2 = max(x[2] for x in bounds)
-    y2 = max(x[3] for x in bounds)
+    x1, y1, x2, y2 = _get_bounds(bounds)
 
     bounding_box = Polygon((x1, y1), (x2, y1), (x2, y2), (x1, y2), evaluate=False)
 
@@ -148,15 +153,18 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
 
         """
 
+    # TODO: there is some effort going on to define dimensionality as type annotation.
+    # https://github.com/hgrecco/pint/pull/1259 with this we can can annotate something
+    # like -> Q(['length**2'])
     @property
     @abc.abstractmethod
-    def cross_sect_area(self):
+    def cross_sect_area(self) -> Q_:
         """Area of the cross-section of the two work pieces.
 
         Returns
         -------
-        cross_sect_area: pint.Quantity["[length]**2"]
-            The computed area.
+        cross_sect_area:
+            The computed area in mm².
 
         """
 
