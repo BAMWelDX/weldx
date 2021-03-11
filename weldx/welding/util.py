@@ -6,6 +6,8 @@ from weldx.constants import WELDX_UNIT_REGISTRY
 from weldx.core import Q_
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 
+__all__ = ["compute_welding_speed"]
+
 
 @WELDX_UNIT_REGISTRY.check(None, "[length]/[time]", "[length]")
 def compute_welding_speed(
