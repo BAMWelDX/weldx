@@ -132,8 +132,13 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
             title = _groove_type_to_name[self.__class__]
 
         if show_area:
-            ca = self.cross_sect_area
-            title = title + f" ({np.around(ca,1):~.3P})"
+            try:
+                ca = self.cross_sect_area
+                title = title + f" ({np.around(ca,1):~.3P})"
+            except NotImplementedError:
+                pass
+            except e:
+                raise (e)
 
         if show_params:
             title = title + "\n" + ", ".join(self.param_strings())
@@ -1529,7 +1534,7 @@ class FFGroove(IsoBaseGroove):
 
     @property
     def cross_sect_area(self):  # noqa
-        return self._compute_cross_sect_area_from_profile()
+        raise NotImplementedError("Cannot determine FFGroove cross sectional area")
 
 
 def _helperfunction(segment, array) -> geo.Shape:
