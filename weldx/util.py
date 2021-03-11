@@ -1,10 +1,11 @@
 """Contains package internal utility functions."""
 
 import math
+import warnings
 from collections.abc import Iterable
 from functools import reduce
 from inspect import getmembers, isfunction
-from typing import Any, ClassVar, Dict, List, Type, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -81,12 +82,12 @@ def inherit_docstrings(cls):
 
     Parameters
     ----------
-    cls : class
+    cls
         The class to decorate.
 
     Returns
     -------
-    cls : class
+    cls
         The class with updated doc strings.
 
     """
@@ -98,7 +99,10 @@ def inherit_docstrings(cls):
         for parent in cls.__mro__[1:]:
             if hasattr(parent, name):
                 func.__doc__ = getattr(parent, name).__doc__
-                assert func.__doc__
+                if not func.__doc__:
+                    warnings.warn(
+                        f"could not derive docstring for {cls}.{name}", stacklevel=1
+                    )
     return cls
 
 
