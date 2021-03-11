@@ -56,6 +56,7 @@
 - refactor the `transformations` and `visualization` module into smaller files [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
 - refactor `weldx.utility` into `weldx.util` [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
 - refactor `weldx.asdf.utils` into `weldx.asdf.util` [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- it is now allowed to merge a time-dependent `timedelta` subsystem into another `CSM` instance if the parent instance has set an explicit reference time [[#268]](https://github.com/BAMWelDX/weldx/pull/268)
 
 
 ### fixes
@@ -70,6 +71,7 @@
 - update some documentation formatting and links [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
 - fix `wx_shape` validation for scalar `Quantity` and `TimeSeries`
   objects [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
+- fix a case where `CSM.time_union()` would return with mixed `DateTimeIndex` and `TimeDeltaIndex` types [[#268]](https://github.com/BAMWelDX/weldx/pull/268)
 
 ### dependencies
 
