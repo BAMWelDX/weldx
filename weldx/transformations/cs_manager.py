@@ -1560,13 +1560,20 @@ class CoordinateSystemManager:
             instance.
 
         """
-        if (
-            other._number_of_time_dependent_lcs > 0
-            and self.reference_time != other.reference_time
+        if other._number_of_time_dependent_lcs > 0 and (
+            (not self.uses_absolute_times and other.uses_absolute_times)
+            or (
+                (self.uses_absolute_times and not self.has_reference_time)
+                and not other.uses_absolute_times
+            )
+            or (
+                (self.has_reference_time and other.uses_absolute_times)
+                and (self.reference_time != other.reference_time)
+            )
         ):
             raise Exception(
-                "You can only merge subsystems with time dependent coordinate systems"
-                "if the reference times of both `CoordinateSystemManager` instances"
+                "You can only merge subsystems with time dependent coordinate systems "
+                "if the reference times of both `CoordinateSystemManager` instances "
                 "are identical."
             )
 
@@ -1866,9 +1873,19 @@ class CoordinateSystemManager:
             return None
 
         time_list = [util.to_pandas_time_index(lcs) for lcs in lcs_list]
-        if self.has_reference_time:
+        reference_time = self.reference_time
+        if self.uses_absolute_times and not reference_time:
+            reference_time = min(
+                [
+                    lcs.reference_time
+                    for lcs in self.lcs_time_dependent
+                    if lcs.reference_time
+                ]
+            )
+
+        if reference_time:
             time_list = [
-                t + self.reference_time if isinstance(t, pd.TimedeltaIndex) else t
+                t + reference_time if isinstance(t, pd.TimedeltaIndex) else t
                 for t in time_list
             ]
 
