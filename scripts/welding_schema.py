@@ -14,7 +14,7 @@ if __name__ == "__main__":
     import weldx
     import weldx.geometry as geo
     import weldx.measurement as msm
-    import weldx.utility as ut
+    import weldx.util as ut
     from weldx import Q_, GmawProcess
     from weldx import LocalCoordinateSystem as lcs
     from weldx import TimeSeries, WXRotation, get_groove
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     )
     model_path = model_path.as_posix()
 
-    res = weldx.asdf.utils._write_read_buffer(
+    res = weldx.asdf.util._write_read_buffer(
         tree,
         asdffile_kwargs=dict(custom_schema=str(model_path)),
     )
