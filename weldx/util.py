@@ -82,12 +82,12 @@ def inherit_docstrings(cls):
 
     Parameters
     ----------
-    cls
+    cls: type
         The class to decorate.
 
     Returns
     -------
-    cls
+    cls: type
         The class with updated doc strings.
 
     """
