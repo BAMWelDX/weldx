@@ -18,15 +18,15 @@ def compute_welding_speed(
     ----------
     groove
         groove definition to compute welding speed for.
-    wire_feed: pint.Quantity["length/time"]
-        feed of the wire
-    wire_diameter: pint.Quantity["length"]
-        diameter of welding wire
+    wire_feed: pint.Quantity
+        feed of the wire, given in dimensionality "length/time".
+    wire_diameter: pint.Quantity
+        diameter of welding wire, given in dimensionality "length".
 
     Returns
     -------
-    speed: pint.Quantity["length/time"]
-        The computed welding speed.
+    speed: TimeSeries
+        The computed welding speed, given in dimensionality "length/time".
 
     """
     groove_area = groove.cross_sect_area

@@ -143,7 +143,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        width_default : pint.Quantity['length']
+        width_default : pint.Quantity
              optional width to extend each side of the profile (Default value = None)
 
         Returns
@@ -158,12 +158,12 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
     # like -> Q(['length**2'])
     @property
     @abc.abstractmethod
-    def cross_sect_area(self) -> Q_:
+    def cross_sect_area(self) -> pint.Quantity:
         """Area of the cross-section of the two work pieces.
 
         Returns
         -------
-        cross_sect_area:
+        area : pint.Quantity
             The computed area in mm².
 
         """

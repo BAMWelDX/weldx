@@ -4,7 +4,7 @@ import math
 from collections.abc import Iterable
 from functools import reduce
 from inspect import getmembers, isfunction
-from typing import Any, Dict, List, Union
+from typing import Any, ClassVar, Dict, List, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -81,12 +81,13 @@ def inherit_docstrings(cls):
 
     Parameters
     ----------
-    cls: class type
+    cls : class
         The class to decorate.
 
     Returns
     -------
-    cls
+    cls : class
+        The class with updated doc strings.
 
     """
     for name, func in getmembers(
