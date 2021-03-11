@@ -1,3 +1,4 @@
+"""Utilities for asdf files."""
 from io import BytesIO
 from pathlib import Path
 from typing import Tuple
@@ -8,7 +9,6 @@ from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 
-# TODO: these functions be generalized and be public
 # asdf read/write debug tools functions ---------------------------------------
 
 
@@ -97,6 +97,11 @@ def _write_read_buffer(
     buffer = _write_buffer(tree, asdffile_kwargs, write_kwargs)
     return _read_buffer(buffer, open_kwargs)
 
+
+# make read/write buffer functions public
+write_buffer = _write_buffer
+read_buffer = _read_buffer
+write_read_buffer = _write_read_buffer
 
 try:  # pragma: no cover
     import IPython
