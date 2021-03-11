@@ -14,7 +14,7 @@ def compute_welding_speed(
     groove: IsoBaseGroove,
     wire_feed: pint.Quantity,
     wire_diameter: pint.Quantity,
-) -> Q_:
+) -> pint.Quantity:
     """Compute how fast the torch has to be moved to fill the given groove.
 
     Parameters
