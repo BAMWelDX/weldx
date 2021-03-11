@@ -7,7 +7,6 @@ from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 
 
 @WELDX_UNIT_REGISTRY.check(None, "[length]/[time]", "[length]")
-# TODO: extend the ckeck decorator to check on output! # ret='[length]/[time]')
 def compute_welding_speed(
     groove: IsoBaseGroove,
     wire_feed: Q_,
