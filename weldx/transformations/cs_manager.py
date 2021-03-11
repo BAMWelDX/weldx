@@ -1560,9 +1560,12 @@ class CoordinateSystemManager:
             instance.
 
         """
-        if (
-            other._number_of_time_dependent_lcs > 0
-            and self.reference_time != other.reference_time
+        if other._number_of_time_dependent_lcs > 0 and (
+            (not self.has_reference_time and other.uses_absolute_times)
+            or (
+                (self.has_reference_time and other.has_reference_time)
+                and (self.reference_time != other.reference_time)
+            )
         ):
             raise Exception(
                 "You can only merge subsystems with time dependent coordinate systems"
