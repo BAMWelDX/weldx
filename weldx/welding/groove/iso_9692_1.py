@@ -105,26 +105,28 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         ax=None,
         show_area: bool = True,
     ):
-        """Plot a 2D-Profile.
+        """Plot a 2D groove profile.
 
         Parameters
         ----------
         title :
-             (Default value = None)
+             custom plot title
         axis_label :
             label string to pass onto matplotlib (Default value = None)
         raster_width :
-             (Default value = 0.1)
+             rasterization distance
         show_params :
-             (Default value = True)
+             list groove parameters in plot title
         axis :
-             (Default value = "equal")
+             axis scaling style
         grid :
-             (Default value = True)
+             matplotlib grid setting
         line_style :
-             (Default value = ".")
+             matplotlib linestyle
         ax :
-             (Default value = None)
+             Axis to plot to
+        show_area
+            Calculate and show the groove cross section area in the plot title.
 
         """
         profile = self.to_profile()
@@ -137,8 +139,8 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
                 title = title + f" ({np.around(ca,1):~.3P})"
             except NotImplementedError:
                 pass
-            except e:
-                raise (e)
+            except Exception as ex:
+                raise ex
 
         if show_params:
             title = title + "\n" + ", ".join(self.param_strings())
