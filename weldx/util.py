@@ -1,8 +1,10 @@
 """Contains package internal utility functions."""
 
 import math
+import warnings
 from collections.abc import Iterable
 from functools import reduce
+from inspect import getmembers, isfunction
 from typing import Any, Dict, List, Union
 
 import numpy as np
@@ -70,6 +72,38 @@ def ureg_check_class(*args):
         return original_class
 
     return inner_decorator
+
+
+def inherit_docstrings(cls):
+    """Inherits (public) docstrings from parent classes.
+
+    Traverses the MRO until it finds a docstring to use, or leave it blank,
+    in case no parent has a docstring available.
+
+    Parameters
+    ----------
+    cls: type
+        The class to decorate.
+
+    Returns
+    -------
+    cls: type
+        The class with updated doc strings.
+
+    """
+    for name, func in getmembers(
+        cls, predicate=lambda x: isfunction(x) or isinstance(x, property)
+    ):
+        if func.__doc__ or name.startswith("_"):
+            continue
+        for parent in cls.__mro__[1:]:
+            if hasattr(parent, name):
+                func.__doc__ = getattr(parent, name).__doc__
+                if not func.__doc__:
+                    warnings.warn(
+                        f"could not derive docstring for {cls}.{name}", stacklevel=1
+                    )
+    return cls
 
 
 def sine(

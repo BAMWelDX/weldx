@@ -1,16 +1,19 @@
 """ISO 9692-1 welding groove type definitions."""
-
+import abc
+from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Tuple, Union
 
 import numpy as np
 import pint
+from sympy import Point2D, Polygon
 
 import weldx.geometry as geo
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.util import ureg_check_class
+from weldx.util import inherit_docstrings, ureg_check_class
 
 __all__ = [
+    "IsoBaseGroove",
     "IGroove",
     "VGroove",
     "VVGroove",
@@ -40,8 +43,43 @@ def _set_default_heights(groove):
         groove.h1 = groove.h2
 
 
-class IsoBaseGroove:
+def _get_bounds(points):
+    xs = [p[0] for p in points]
+    ys = [p[1] for p in points]
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _compute_cross_sect_shape_points(
+    points: List[List[Union[Point2D, Tuple]]]
+) -> pint.Quantity:  # noqa
+    # Assumes that we have two separate shapes for each workpiece
+    # 1. compute the total area of all workpieces
+    # 2. compute bounding box of all pieces (this includes the rift)
+    # 3. compute area A = A_outer - A_workpieces
+
+    area_workpiece = 0
+    bounds = []
+
+    for shape_points in points:
+        p = Polygon(*shape_points, evaluate=False)
+        area_workpiece += abs(p.area)
+        x1, y1, x2, y2 = p.bounds
+        bounds.append((x1, y1))
+        bounds.append((x2, y2))
+
+    # outer bbox
+    x1, y1, x2, y2 = _get_bounds(bounds)
+
+    bounding_box = Polygon((x1, y1), (x2, y1), (x2, y2), (x1, y2), evaluate=False)
+
+    return Q_(float(bounding_box.area - area_workpiece), "mm²")
+
+
+class IsoBaseGroove(metaclass=abc.ABCMeta):
     """Generic base class for all groove types."""
+
+    _AREA_RASTER_WIDTH = 0.1
+    """steers the area approximation of the groove in ~cross_sect_area."""
 
     def parameters(self):
         """Return groove parameters as dictionary of quantities."""
@@ -65,32 +103,44 @@ class IsoBaseGroove:
         grid=True,
         line_style=".-",
         ax=None,
+        show_area: bool = True,
     ):
-        """Plot a 2D-Profile.
+        """Plot a 2D groove profile.
 
         Parameters
         ----------
         title :
-             (Default value = None)
+             custom plot title
         axis_label :
             label string to pass onto matplotlib (Default value = None)
         raster_width :
-             (Default value = 0.1)
+             rasterization distance
         show_params :
-             (Default value = True)
+             list groove parameters in plot title
         axis :
-             (Default value = "equal")
+             axis scaling style
         grid :
-             (Default value = True)
+             matplotlib grid setting
         line_style :
-             (Default value = ".")
+             matplotlib linestyle
         ax :
-             (Default value = None)
+             Axis to plot to
+        show_area
+            Calculate and show the groove cross section area in the plot title.
 
         """
         profile = self.to_profile()
         if title is None:
             title = _groove_type_to_name[self.__class__]
+
+        if show_area:
+            try:
+                ca = self.cross_sect_area
+                title = title + f" ({np.around(ca,1):~.3P})"
+            except NotImplementedError:
+                pass
+            except Exception as ex:
+                raise ex
 
         if show_params:
             title = title + "\n" + ", ".join(self.param_strings())
@@ -99,19 +149,64 @@ class IsoBaseGroove:
             title, raster_width, None, axis, axis_label, grid, line_style, ax=ax
         )
 
+    @abstractmethod
     def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Implement profile generation.
 
         Parameters
         ----------
-        width_default :
+        width_default : pint.Quantity
              optional width to extend each side of the profile (Default value = None)
 
+        Returns
+        -------
+        profile: weldx.geometry.Profile
+            The Profile object contains the shapes forming the groove.
+
         """
-        raise NotImplementedError("to_profile() must be defined in subclass.")
+
+    # TODO: there is some effort going on to define dimensionality as type annotation.
+    # https://github.com/hgrecco/pint/pull/1259 with this we can can annotate something
+    # like -> Q(['length**2'])
+    @property
+    @abc.abstractmethod
+    def cross_sect_area(self) -> pint.Quantity:
+        """Area of the cross-section of the two work pieces.
+
+        Returns
+        -------
+        area : pint.Quantity
+            The computed area in mm².
+
+        """
+
+    def _compute_cross_sect_area_from_profile(self):
+        points = []
+        profile = self.to_profile()
+
+        for shape in profile.shapes:
+            shape_points = []
+            points.append(shape_points)
+            for seg in shape.segments:
+                if isinstance(seg, geo.LineSegment):
+                    shape_points.append(seg.point_start)
+                    shape_points.append(seg.point_end)
+                else:
+                    raise RuntimeError("only for line segments!")
+        return _compute_cross_sect_shape_points(points)
+
+    def _compute_cross_sect_area_interpolated(self):
+        # this method computes an approximation of the area by creating a big polygon
+        # out of the rasterization points
+        profile = self.to_profile()
+        rasterization = profile.rasterize(self._AREA_RASTER_WIDTH, stack=False)
+        points = [[(x, y) for x, y in shape.T] for shape in rasterization]
+
+        return _compute_cross_sect_shape_points(points)
 
 
 @ureg_check_class("[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class IGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -163,8 +258,13 @@ class IGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_from_profile()
+
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class VGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -252,8 +352,13 @@ class VGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_from_profile()
+
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class VVGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -349,8 +454,13 @@ class VVGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_from_profile()
+
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class UVGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -444,8 +554,13 @@ class UVGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_interpolated()
+
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class UGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -562,11 +677,15 @@ class UGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_interpolated()
+
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class HVGroove(IsoBaseGroove):
-    # noinspection PyUnresolvedReferences
     """A HV-Groove.
 
     For a detailed description of the execution look in get_groove.
@@ -645,8 +764,13 @@ class HVGroove(IsoBaseGroove):
 
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_from_profile()
+
 
 @ureg_check_class("[length]", "[]", "[length]", "[length]", "[length]", None)
+@inherit_docstrings
 @dataclass
 class HUGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -738,8 +862,13 @@ class HUGroove(IsoBaseGroove):
 
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_interpolated()
+
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", None, None, "[length]", None)
+@inherit_docstrings
 @dataclass
 class DVGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -840,6 +969,10 @@ class DVGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_from_profile()
+
 
 @ureg_check_class(
     "[length]",
@@ -853,6 +986,7 @@ class DVGroove(IsoBaseGroove):
     "[length]",
     None,
 )
+@inherit_docstrings
 @dataclass
 class DUGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -967,8 +1101,13 @@ class DUGroove(IsoBaseGroove):
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_interpolated()
+
 
 @ureg_check_class("[length]", "[]", "[]", "[length]", None, None, "[length]", None)
+@inherit_docstrings
 @dataclass
 class DHVGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -1057,6 +1196,10 @@ class DHVGroove(IsoBaseGroove):
 
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_from_profile()
+
 
 @ureg_check_class(
     "[length]",
@@ -1070,6 +1213,7 @@ class DHVGroove(IsoBaseGroove):
     "[length]",
     None,
 )
+@inherit_docstrings
 @dataclass
 class DHUGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -1167,6 +1311,10 @@ class DHUGroove(IsoBaseGroove):
 
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
+    @property
+    def cross_sect_area(self):  # noqa
+        return self._compute_cross_sect_area_interpolated()
+
 
 @ureg_check_class(
     "[length]",
@@ -1176,6 +1324,7 @@ class DHUGroove(IsoBaseGroove):
     None,
     None,
 )
+@inherit_docstrings
 @dataclass
 class FFGroove(IsoBaseGroove):
     # noinspection PyUnresolvedReferences
@@ -1384,6 +1533,10 @@ class FFGroove(IsoBaseGroove):
                 '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
                 ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
             )
+
+    @property
+    def cross_sect_area(self):  # noqa
+        raise NotImplementedError("Cannot determine FFGroove cross sectional area")
 
 
 def _helperfunction(segment, array) -> geo.Shape:

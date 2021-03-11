@@ -11,6 +11,9 @@
 - add `plot` function to `SpatialData`[[#251]](https://github.com/BAMWelDX/weldx/pull/251)
 - add `plot` function to visualize `LocalCoordinateSystem` and `CoordinateSystemManager` instances in 3d space
   [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
+- add `weldx.welding.groove.iso_9692_1.IsoBaseGroove.cross_sect_area` property to compute
+  cross sectional area between the workpieces [[#248]](https://github.com/BAMWelDX/weldx/pull/248).
+- add `weldx.welding.util.compute_welding_speed` function [[#248]](https://github.com/BAMWelDX/weldx/pull/248).
 
 ### ASDF
 
