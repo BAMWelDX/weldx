@@ -2962,13 +2962,13 @@ class TestCoordinateSystemManager:
             (None, "01", False, True, False),
             # parent static
             (None, None, True, False, False),
-            ("01", None, True, False, True),
+            ("01", None, True, False, False),
             ("01", "01", True, False, False),
             ("01", "03", True, False, True),
             (None, "01", True, False, True),
             # both dynamic
             (None, None, False, False, False),
-            ("01", None, False, False, True),
+            ("01", None, False, False, False),
             ("01", "01", False, False, False),
             ("01", "03", False, False, True),
             (None, "01", False, False, True),

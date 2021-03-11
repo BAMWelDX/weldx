@@ -1561,9 +1561,13 @@ class CoordinateSystemManager:
 
         """
         if other._number_of_time_dependent_lcs > 0 and (
-            (not self.has_reference_time and other.uses_absolute_times)
+            (not self.uses_absolute_times and other.uses_absolute_times)
             or (
-                (self.has_reference_time and other.has_reference_time)
+                (self.uses_absolute_times and not self.has_reference_time)
+                and not other.uses_absolute_times
+            )
+            or (
+                (self.has_reference_time and other.uses_absolute_times)
                 and (self.reference_time != other.reference_time)
             )
         ):
