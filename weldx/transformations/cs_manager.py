@@ -1572,8 +1572,8 @@ class CoordinateSystemManager:
             )
         ):
             raise Exception(
-                "You can only merge subsystems with time dependent coordinate systems"
-                "if the reference times of both `CoordinateSystemManager` instances"
+                "You can only merge subsystems with time dependent coordinate systems "
+                "if the reference times of both `CoordinateSystemManager` instances "
                 "are identical."
             )
 
