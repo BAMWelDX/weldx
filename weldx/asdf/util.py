@@ -20,7 +20,9 @@ __all__ = [
 # asdf read/write debug tools functions ---------------------------------------
 
 
-def _write_buffer(tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict = None):
+def _write_buffer(
+    tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict = None
+) -> BytesIO:
     """Write ASDF file into buffer.
 
     Parameters
@@ -35,8 +37,9 @@ def _write_buffer(tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict =
 
     Returns
     -------
-    BytesIO
+    io.BytesIO
         Bytes buffer of the ASDF file.
+
     """
     if asdffile_kwargs is None:
         asdffile_kwargs = {}
@@ -57,11 +60,11 @@ def _read_buffer(buffer: BytesIO, open_kwargs: dict = None):
 
     Parameters
     ----------
-    buffer
+    buffer : io.BytesIO
         Buffer containing ASDF file contents
     open_kwargs
-        Additional keywords to pass to asdf.AsdfFile.open()
-        Extensions are always set, copy_arrays=True is set by default.
+        Additional keywords to pass to `asdf.AsdfFile.open`
+        Extensions are always set, ``copy_arrays=True`` is set by default.
 
     Returns
     -------
@@ -86,6 +89,7 @@ def _write_read_buffer(
     tree: dict, asdffile_kwargs=None, write_kwargs=None, open_kwargs=None
 ):
     """Perform a buffered write/read roundtrip of a tree using default ASDF settings.
+
     Parameters
     ----------
     tree
@@ -98,9 +102,11 @@ def _write_read_buffer(
     open_kwargs
         Additional keywords to pass to asdf.AsdfFile.open()
         Extensions are always set, copy_arrays=True is set by default.
+
     Returns
     -------
     dict
+
     """
     buffer = _write_buffer(tree, asdffile_kwargs, write_kwargs)
     return _read_buffer(buffer, open_kwargs)
