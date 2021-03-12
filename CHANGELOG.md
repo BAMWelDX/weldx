@@ -39,6 +39,7 @@
 
 - Simplify tutorial code and enhance plots by using newly implemented plot functions
   [[#231]](https://github.com/BAMWelDX/weldx/pull/231) [[#251]](https://github.com/BAMWelDX/weldx/pull/251)
+- add AWS shielding gas descriptions to documentation [[#270]](https://github.com/BAMWelDX/weldx/pull/270)
 
 ### changes
 
