@@ -145,9 +145,9 @@ class IGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t
+        b = self.b
+        width = width_default
 
         # x-values
         x_value = np.stack((-width, 0, 0, -width))
@@ -212,11 +212,11 @@ class VGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha  # .to("rad").magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t
+        alpha = self.alpha
+        b = self.b
+        c = self.c
+        width = width_default
 
         # Calculations:
         s = np.tan(alpha / 2) * (t - c)
@@ -309,13 +309,13 @@ class VVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha  # .to("rad").magnitude
-        beta = self.beta  # .to("rad").magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
-        h = self.h  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t
+        alpha = self.alpha
+        beta = self.beta
+        b = self.b
+        c = self.c
+        h = self.h
+        width = width_default
 
         # Calculations
         h_lower = h - c
@@ -406,13 +406,13 @@ class UVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t
         alpha = self.alpha.to("rad").magnitude
         beta = self.beta.to("rad").magnitude
-        R = self.R  # .to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        h = self.h  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        R = self.R
+        b = self.b
+        h = self.h
+        width = width_default
 
         # calculations:
         x_1 = np.tan(alpha / 2) * h
@@ -497,12 +497,12 @@ class UGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(3, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t
         beta = self.beta.to("rad").magnitude
-        R = self.R  # .to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        R = self.R
+        b = self.b
+        c = self.c
+        width = width_default
 
         # calculations:
         # From next point to circle center is the vector (x,y)
@@ -606,11 +606,11 @@ class HVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t
         beta = self.beta.to("rad").magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b
+        c = self.c
+        width = width_default
 
         # Calculations
         s = np.tan(beta) * (t - c)
@@ -704,12 +704,12 @@ class HUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t
         beta = self.beta.to("rad").magnitude
-        R = self.R  # .to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        R = self.R
+        b = self.b
+        c = self.c
+        width = width_default
 
         # Calculations
         x = R * np.cos(beta)
@@ -812,14 +812,14 @@ class DVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t
         alpha_1 = self.alpha_1.to("rad").magnitude
         alpha_2 = self.alpha_2.to("rad").magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
-        h1 = self.h1  # .to(_DEFAULT_LEN_UNIT).magnitude
-        h2 = self.h2  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b
+        c = self.c
+        h1 = self.h1
+        h2 = self.h2
+        width = width_default
 
         # Calculations
         s_upper = np.tan(alpha_1 / 2) * h1
@@ -932,16 +932,16 @@ class DUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t
         beta_1 = self.beta_1.to("rad").magnitude
         beta_2 = self.beta_2.to("rad").magnitude
-        R = self.R  # .to(_DEFAULT_LEN_UNIT).magnitude
-        R2 = self.R2  # .to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
-        h1 = self.h1  # .to(_DEFAULT_LEN_UNIT).magnitude
-        h2 = self.h2  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        R = self.R
+        R2 = self.R2
+        b = self.b
+        c = self.c
+        h1 = self.h1
+        h2 = self.h2
+        width = width_default
 
         # Calculations
         x_upper = R * np.cos(beta_1)
