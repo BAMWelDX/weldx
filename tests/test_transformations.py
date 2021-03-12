@@ -3992,7 +3992,7 @@ def test_coordinate_system_manager_interp_time():
         check_coordinate_systems_close(lcs, exp)
         check_coordinate_systems_close(lcs_inv, exp_inv)
 
-        # Related to pull request #INSERT_NUMBER. This assures that interp time works
+        # Related to pull request #275. This assures that interp time works
         # correctly if some coordinate systems have no own reference time, but the CSM
         # does.
         lcs1 = tf.LocalCoordinateSystem(
