@@ -7,7 +7,6 @@ import asdf
 import fs
 import pkg_resources
 import yaml
-from asdf import generic_io
 from asdf.config import ResourceMappingProxy
 from asdf.versioning import AsdfVersion, split_tag_version
 from fs.osfs import OSFS
@@ -19,7 +18,7 @@ class QualityStandard:
     def __init__(
         self, resource_root_dir: Path, filesystem: fs.opener.base.Opener = None
     ):
-        """Create a `QualityStandard` instance
+        """Create a ``QualityStandard`` instance.
 
         Parameters
         ----------
@@ -105,8 +104,9 @@ class QualityStandard:
 
         Returns
         -------
-        str :
+        str
             Name of the quality standard
+
         """
         return self._name
 
