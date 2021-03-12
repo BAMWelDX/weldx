@@ -924,17 +924,16 @@ class DUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
         beta_1 = self.beta_1.to("rad").magnitude
         beta_2 = self.beta_2.to("rad").magnitude
-        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
-        R2 = self.R2.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
-        h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
-
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        R = self.R  # .to(_DEFAULT_LEN_UNIT).magnitude
+        R2 = self.R2  # .to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
+        h1 = self.h1  # .to(_DEFAULT_LEN_UNIT).magnitude
+        h2 = self.h2  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
         x_upper = R * np.cos(beta_1)
@@ -945,26 +944,26 @@ class DUGroove(IsoBaseGroove):
         s_lower = np.tan(beta_2) * (h2 - (R2 - y_lower))
 
         # Scaling
-        edge = np.max([x_upper + s_upper, x_lower + s_lower, 0])
-        if width <= edge + 1:
+        edge = np.stack((x_upper + s_upper, x_lower + s_lower, 0)).max()
+        if width <= edge + Q_(1, "mm"):
             # adjustment of the width
             width = width + edge
 
-        x_value = [-width, -(s_lower + x_lower), -x_lower, 0, 0]
-        y_value = [0, 0, h2 - (R2 - y_lower), h2 - R2, h2]
+        x_value = np.stack((-width, -(s_lower + x_lower), -x_lower, 0, 0))
+        y_value = np.stack((0, 0, h2 - (R2 - y_lower), h2 - R2, h2))
         segment_list = ["line", "line", "arc"]
 
         if c != 0:
-            x_value.append(0)
-            y_value.append(h1 + c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, h1 + c)
             segment_list.append("line")
 
-        x_value += [0, -x_upper, -(s_upper + x_upper), -width]
-        y_value += [h2 + c + R, t - (h1 - (R - y_upper)), t, t]
+        x_value = np.append(x_value, (0, -x_upper, -(s_upper + x_upper), -width))
+        y_value = np.append(y_value, (h2 + c + R, t - (h1 - (R - y_upper)), t, t))
         segment_list += ["arc", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
