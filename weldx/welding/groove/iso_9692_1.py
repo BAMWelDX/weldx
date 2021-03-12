@@ -804,41 +804,40 @@ class DVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
         alpha_1 = self.alpha_1.to("rad").magnitude
         alpha_2 = self.alpha_2.to("rad").magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
-        h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
-
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
+        h1 = self.h1  # .to(_DEFAULT_LEN_UNIT).magnitude
+        h2 = self.h2  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
         s_upper = np.tan(alpha_1 / 2) * h1
         s_lower = np.tan(alpha_2 / 2) * h2
 
         # Scaling
-        edge = np.min([-s_upper, -s_lower, 0])
-        if width <= -edge + 1:
+        edge = np.stack((-s_upper, -s_lower, 0)).min()
+        if width <= -edge + Q_(1, "mm"):
             # adjustment of the width
             width = width - edge
 
-        x_value = [-width, -s_lower, 0]
-        y_value = [0, 0, h2]
+        x_value = np.stack((-width, -s_lower, 0))
+        y_value = np.stack((0, 0, h2))
         segment_list = ["line", "line"]
 
         if c != 0:
-            x_value.append(0)
-            y_value.append(h2 + c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, h2 + c)
             segment_list.append("line")
 
-        x_value += [-s_upper, -width]
-        y_value += [t, t]
+        x_value = np.append(x_value, (-s_upper, -width))
+        y_value = np.append(y_value, (t, t))
         segment_list += ["line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
