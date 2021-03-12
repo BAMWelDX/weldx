@@ -27,7 +27,15 @@ import weldx.asdf
 # class imports to weldx namespace
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression, TimeSeries
-from weldx.geometry import ArcSegment, Geometry, LineSegment, Profile, Shape, Trace
+from weldx.geometry import (
+    ArcSegment,
+    Geometry,
+    LineSegment,
+    Profile,
+    Shape,
+    Trace,
+    SpatialData,
+)
 from weldx.transformations import (
     CoordinateSystemManager,
     LocalCoordinateSystem,

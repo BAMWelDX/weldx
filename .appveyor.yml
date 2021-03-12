@@ -1,6 +1,6 @@
 environment:
   matrix:
-    - PYTHON_VERSION: 3.7
+    - PYTHON_VERSION: 3.8
       MINICONDA: "C:\\Miniconda37"
 
 image: Visual Studio 2019
@@ -10,9 +10,12 @@ platform: x64
 install:
   - set PATH=C:\Miniconda38-x64;C:\Miniconda38-x64\Scripts;%PATH%
   - cmd: conda config --set always_yes yes --set changeps1 no
-  - cmd: conda update -q conda
-  - cmd: conda info -a
-  - cmd: conda env create -f ./environment.yml
+  - cmd: conda config --add channels conda-forge
+  - cmd: conda init cmd.exe
+  - cmd: conda activate
+  - cmd: conda install -q mamba
+  - cmd: mamba info -a
+  - cmd: mamba env create -f ./environment.yml
   - activate weldx
 
 build: false
