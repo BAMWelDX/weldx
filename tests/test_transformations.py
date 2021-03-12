@@ -3824,7 +3824,6 @@ def test_coordinate_system_manager_interp_time():
 
     # interp_time -------------------------------
     time_interp = TDI([1, 3, 5, 7, 9], "D")
-    print(csm._reference_time)
     csm_interp = csm.interp_time(time_interp)
 
     assert np.all(csm_interp.time_union() == time_interp)
