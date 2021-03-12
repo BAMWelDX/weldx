@@ -43,6 +43,7 @@ jobs:
       - name: pip installs
         run: |
           pip install pytest pytest-cov pytest-xdist setuptools_scm
+          pip install git+https://github.com/asdf-format/asdf
           pip install -e .
       - name: run pytest
         run: |
