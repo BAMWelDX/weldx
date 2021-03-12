@@ -17,6 +17,7 @@ jobs:
       - name: pip installs
         run: |
           pip install pytest pytest-cov setuptools_scm
+          pip install git+https://github.com/asdf-format/asdf
           pip install .
       - name: run pytest
         run: |
