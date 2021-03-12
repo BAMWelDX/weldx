@@ -126,13 +126,13 @@ def get_yaml_header(file) -> str:  # pragma: no cover
     str
         The YAML header the ASDF file
 
-        """
-        if isinstance(file, BytesIO):
-            file.seek(0)
-            code = file.read()
-        else:
-            with open(file, "rb") as f:
-                code = f.read()
+    """
+    if isinstance(file, BytesIO):
+        file.seek(0)
+        code = file.read()
+    else:
+        with open(file, "rb") as f:
+            code = f.read()
 
     parts = code.partition(b"\n...")
     code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
