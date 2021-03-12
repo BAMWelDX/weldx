@@ -1514,9 +1514,13 @@ class CoordinateSystemManager:
 
             for edge in affected_edges:
                 if self._graph.edges[edge]["defined"]:
-                    self._graph.edges[edge]["lcs"] = self._graph.edges[edge][
-                        "lcs"
-                    ].interp_time(time, time_ref)
+                    lcs = self._graph.edges[edge]["lcs"]
+                    # this prevents failures when calling lcs.interp_time with reference
+                    # times or DatetimeIndex.
+                    if lcs.reference_time is None and self._reference_time is not None:
+                        lcs.reset_reference_time(self._reference_time)
+                    self._graph.edges[edge]["lcs"] = lcs.interp_time(time, time_ref)
+
             for edge in affected_edges:
                 if not self._graph.edges[edge]["defined"]:
                     self._graph.edges[edge]["lcs"] = self._graph.edges[

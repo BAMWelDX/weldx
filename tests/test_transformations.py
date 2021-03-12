@@ -3991,6 +3991,28 @@ def test_coordinate_system_manager_interp_time():
         check_coordinate_systems_close(lcs, exp)
         check_coordinate_systems_close(lcs_inv, exp_inv)
 
+        # Related to pull request #275. This assures that interp time works
+        # correctly if some coordinate systems have no own reference time, but the CSM
+        # does.
+        lcs1 = tf.LocalCoordinateSystem(
+            coordinates=[[1, 0, 0], [2, 0, 0]], time=pd.TimedeltaIndex([1, 2])
+        )
+
+        lcs2 = tf.LocalCoordinateSystem(
+            coordinates=[[1, 0, 0], [2, 0, 0]],
+            time=pd.TimedeltaIndex([1, 2]) + pd.Timestamp("2000-01-03"),
+        )
+
+        csm_1 = tf.CoordinateSystemManager("root", time_ref=pd.Timestamp("2000-01-01"))
+        csm_1.add_cs("lcs2", "root", lcs2)
+
+        csm_2 = tf.CoordinateSystemManager("root")
+        csm_2.add_cs("lcs1", "root", lcs1)
+
+        csm_1.merge(csm_2)
+
+        csm_1.interp_time(csm_1.time_union())
+
 
 def test_coordinate_system_manager_transform_data():
     """Test the coordinate system managers transform_data function."""
