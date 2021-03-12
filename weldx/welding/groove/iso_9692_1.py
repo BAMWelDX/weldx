@@ -404,8 +404,8 @@ class UVGroove(IsoBaseGroove):
 
         """
         t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha  # .to("rad").magnitude
-        beta = self.beta  # .to("rad").magnitude
+        alpha = self.alpha.to("rad").magnitude
+        beta = self.beta.to("rad").magnitude
         R = self.R  # .to(_DEFAULT_LEN_UNIT).magnitude
         b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
         h = self.h  # .to(_DEFAULT_LEN_UNIT).magnitude
@@ -494,12 +494,12 @@ class UGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(3, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
-        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        R = self.R  # .to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # calculations:
         # From next point to circle center is the vector (x,y)
@@ -511,8 +511,8 @@ class UGroove(IsoBaseGroove):
         s = np.tan(beta) * (t - (c + R - y))
 
         # Scaling
-        edge = np.max([x + s, 0])
-        if width <= edge + 1:
+        edge = np.append(x + s, 0).max()
+        if width <= edge + Q_(1, "mm"):
             # adjustment of the width
             width = width + edge
 
@@ -523,40 +523,38 @@ class UGroove(IsoBaseGroove):
         segment_list = []
 
         # bottom segment
-        x_value.append(-width)
-        y_value.append(0)
-        x_value.append(0)
-        y_value.append(0)
+        x_value = np.append(-width, 0)
+        y_value = Q_([0, 0], "mm")
         segment_list.append("line")
 
         # root face
         if c != 0:
-            x_value.append(0)
-            y_value.append(c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
             segment_list.append("line")
 
         # groove face arc (circle center)
-        x_value.append(0)
-        y_value.append(c + R)
+        x_value = np.append(x_value, 0)
+        y_value = np.append(y_value, c + R)
 
         # groove face arc
-        x_value.append(-x)
-        y_value.append(c + R - y)
+        x_value = np.append(x_value, -x)
+        y_value = np.append(y_value, c + R - y)
         segment_list.append("arc")
 
         # groove face line
-        x_value.append(-x - s)
-        y_value.append(t)
+        x_value = np.append(x_value, -x - s)
+        y_value = np.append(y_value, t)
         segment_list.append("line")
 
         # top segment
-        x_value.append(-width)
-        y_value.append(t)
+        x_value = np.append(x_value, -width)
+        y_value = np.append(y_value, t)
         segment_list.append("line")
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
