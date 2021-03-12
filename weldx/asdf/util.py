@@ -13,6 +13,7 @@ __all__ = [
     "read_buffer",
     "write_buffer",
     "write_read_buffer",
+    "get_yaml_header",
     "asdf_json_repr",
     "notebook_fileprinter",
 ]
@@ -112,6 +113,32 @@ def _write_read_buffer(
     return _read_buffer(buffer, open_kwargs)
 
 
+def get_yaml_header(file) -> str:
+    """Read the YAML header part (excluding binary sections) of an ASDF file.
+
+    Parameters
+    ----------
+    file
+        filename or ``BytesIO`` buffer of ASDF file
+
+    Returns
+    -------
+    str
+        The YAML header the ASDF file
+
+    """
+    if isinstance(file, BytesIO):
+        file.seek(0)
+        code = file.read()
+    else:
+        with open(file, "rb") as f:
+            code = f.read()
+
+    parts = code.partition(b"\n...")
+    code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
+    return code
+
+
 # make read/write buffer functions public
 write_buffer = _write_buffer
 read_buffer = _read_buffer
@@ -126,30 +153,6 @@ try:  # pragma: no cover
 except ImportError:  # pragma: no cover
     pass
 else:  # pragma: no cover
-
-    def _get_yaml_header(file) -> str:
-        """Read the YAML header part of an ASDF file.
-
-        Parameters
-        ----------
-        file
-            filename or BytesIO buffer of ASDF file
-
-        Returns
-        -------
-        str
-
-        """
-        if isinstance(file, BytesIO):
-            file.seek(0)
-            code = file.read()
-        else:
-            with open(file, "rb") as f:
-                code = f.read()
-
-        parts = code.partition(b"\n...")
-        code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
-        return code
 
     def notebook_fileprinter(file, lexer="YAML"):
         """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
@@ -169,7 +172,7 @@ else:  # pragma: no cover
         else:
             lexer = get_lexer_for_filename(file)
 
-        code = _get_yaml_header(file)
+        code = get_yaml_header(file)
 
         formatter = HtmlFormatter()
         return IPython.display.HTML(
@@ -217,7 +220,7 @@ else:  # pragma: no cover
         else:
             root = "/"
 
-        code = _get_yaml_header(file)
+        code = get_yaml_header(file)
         yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
         if path:
             root = root + "/".join(path)
