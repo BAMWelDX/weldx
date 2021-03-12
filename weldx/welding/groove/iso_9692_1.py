@@ -150,9 +150,8 @@ class IGroove(IsoBaseGroove):
         width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # x-values
-        x_value = np.append(-width, 0)
-        x_value = np.append(x_value, 0)
-        x_value = np.append(x_value, -width)
+        x_value = np.stack((-width, 0, 0, -width))
+
         # y-values
         y_value = Q_([0, 0], "mm")
         y_value = np.append(y_value, t)
@@ -307,13 +306,13 @@ class VVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha.to("rad").magnitude
-        beta = self.beta.to("rad").magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        h = self.h.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        alpha = self.alpha  # .to("rad").magnitude
+        beta = self.beta  # .to("rad").magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
+        h = self.h  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
         h_lower = h - c
@@ -322,29 +321,29 @@ class VVGroove(IsoBaseGroove):
         s_2 = np.tan(beta) * h_upper
 
         # Scaling
-        edge = np.min([-(s_1 + s_2), 0])
-        if width <= -edge + 1:
+        edge = np.append(-(s_1 + s_2), 0).min()
+        if width <= -edge + Q_(1, "mm"):
             # adjustment of the width
             width = width - edge
 
         # x-values
-        x_value = [-width, 0]
+        x_value = np.append(-width, 0)
         # y-values
-        y_value = [0, 0]
+        y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
         if c != 0:
-            x_value.append(0)
-            y_value.append(c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value += [-s_1, -s_1 - s_2, -width]
-        y_value += [h + c, t, t]
+        x_value = np.append(x_value, (-s_1, -s_1 - s_2, -width))
+        y_value = np.append(y_value, (h + c, t, t))
         segment_list += ["line", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
