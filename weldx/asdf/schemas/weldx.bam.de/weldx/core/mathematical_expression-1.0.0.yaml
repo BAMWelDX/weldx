@@ -11,6 +11,17 @@ description: |
   https://docs.sympy.org/latest/modules/core.html#module-sympy.core.sympify
 
   Also contains any predefined (constant) parameters used in the expression.
+
+examples:
+  -
+    - A linear mathematical expression
+    - |
+        !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+          expression: a*x + b
+          parameters:
+            a: !unit/quantity-1.1.0 {unit: volt, value: 1.2}
+            b: !unit/quantity-1.1.0 {unit: volt, value: 3.4}
+
 type: object
 properties:
   expression:
