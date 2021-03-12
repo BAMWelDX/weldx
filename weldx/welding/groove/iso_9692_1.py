@@ -603,42 +603,45 @@ class HVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
         beta = self.beta.to("rad").magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # Calculations
         s = np.tan(beta) * (t - c)
 
         # Scaling
-        edge = np.min([-s, 0])
-        if width <= -edge + 1:
+        edge = np.append(-s, 0).min()
+        if width <= -edge + Q_(1, "mm"):
             # adjustment of the width
             width = width - edge
 
-        x_value = [-width, 0]
-        y_value = [0, 0]
+        x_value = np.append(-width, 0)
+        y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
         if c != 0:
-            x_value.append(0)
-            y_value.append(c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value += [-s, -width]
-        y_value += [t, t]
+        x_value = np.append(x_value, (-s, -width))
+        y_value = np.append(y_value, (t, t))
         segment_list += ["line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
+        b = b.to(_DEFAULT_LEN_UNIT).magnitude
+        t = t.to(_DEFAULT_LEN_UNIT).magnitude
+        width = width.to(_DEFAULT_LEN_UNIT).magnitude
         shape_h = geo.Shape()
         shape_h.add_line_segments(
-            [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
+            [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t],]
         )
 
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
@@ -1415,19 +1418,19 @@ def _helperfunction(segment, array) -> geo.Shape:
         if elem == "arc":
             arr0 = [
                 # begin
-                array[0][counter],
+                array[0][counter].to(_DEFAULT_LEN_UNIT).magnitude,
                 # end
-                array[0][counter + 2],
+                array[0][counter + 2].to(_DEFAULT_LEN_UNIT).magnitude,
                 # circle center
-                array[0][counter + 1],
+                array[0][counter + 1].to(_DEFAULT_LEN_UNIT).magnitude,
             ]
             arr1 = [
                 # begin
-                array[1][counter],
+                array[1][counter].to(_DEFAULT_LEN_UNIT).magnitude,
                 # end
-                array[1][counter + 2],
+                array[1][counter + 2].to(_DEFAULT_LEN_UNIT).magnitude,
                 # circle center
-                array[1][counter + 1],
+                array[1][counter + 1].to(_DEFAULT_LEN_UNIT).magnitude,
             ]
             seg = geo.ArcSegment([arr0, arr1], False)
             segment_list.append(seg)
