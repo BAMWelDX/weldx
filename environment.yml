@@ -16,6 +16,7 @@ dependencies:
   # - asdf>=2.7
   - openpyxl
   - fs
+  - meshio
   # graph packages
   - networkx
   # Code quality

@@ -1,15 +1,29 @@
+"""Utilities for asdf files."""
 from io import BytesIO
 from pathlib import Path
+from typing import Tuple
 
 import asdf
 import yaml
+from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+
+__all__ = [
+    "read_buffer",
+    "write_buffer",
+    "write_read_buffer",
+    "get_yaml_header",
+    "asdf_json_repr",
+    "notebook_fileprinter",
+]
 
 # asdf read/write debug tools functions ---------------------------------------
 
 
-def _write_buffer(tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict = None):
+def _write_buffer(
+    tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict = None
+) -> BytesIO:
     """Write ASDF file into buffer.
 
     Parameters
@@ -17,15 +31,16 @@ def _write_buffer(tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict =
     tree:
         Tree object to serialize.
     asdffile_kwargs
-        Additional keywords to pass to asdf.AsdfFile()
+        Additional keywords to pass to `asdf.AsdfFile`
     write_kwargs
-        Additional keywords to pass to asdf.AsdfFile.write_to()
+        Additional keywords to pass to `asdf.AsdfFile.write_to`
         Weldx-Extensions are always set.
 
     Returns
     -------
-    BytesIO
+    io.BytesIO
         Bytes buffer of the ASDF file.
+
     """
     if asdffile_kwargs is None:
         asdffile_kwargs = {}
@@ -46,11 +61,11 @@ def _read_buffer(buffer: BytesIO, open_kwargs: dict = None):
 
     Parameters
     ----------
-    buffer
+    buffer : io.BytesIO
         Buffer containing ASDF file contents
     open_kwargs
-        Additional keywords to pass to asdf.AsdfFile.open()
-        Extensions are always set, copy_arrays=True is set by default.
+        Additional keywords to pass to `asdf.AsdfFile.open`
+        Extensions are always set, ``copy_arrays=True`` is set by default.
 
     Returns
     -------
@@ -75,25 +90,59 @@ def _write_read_buffer(
     tree: dict, asdffile_kwargs=None, write_kwargs=None, open_kwargs=None
 ):
     """Perform a buffered write/read roundtrip of a tree using default ASDF settings.
+
     Parameters
     ----------
     tree
         Tree object to serialize.
     asdffile_kwargs
-        Additional keywords to pass to asdf.AsdfFile()
+        Additional keywords to pass to `asdf.AsdfFile`
     write_kwargs
-        Additional keywords to pass to asdf.AsdfFile.write_to()
+        Additional keywords to pass to `asdf.AsdfFile.write_to`
         Extensions are always set.
     open_kwargs
-        Additional keywords to pass to asdf.AsdfFile.open()
-        Extensions are always set, copy_arrays=True is set by default.
+        Additional keywords to pass to `asdf.AsdfFile.open`
+        Extensions are always set, ``copy_arrays=True`` is set by default.
+
     Returns
     -------
     dict
+
     """
     buffer = _write_buffer(tree, asdffile_kwargs, write_kwargs)
     return _read_buffer(buffer, open_kwargs)
 
+
+def get_yaml_header(file) -> str:  # pragma: no cover
+    """Read the YAML header part (excluding binary sections) of an ASDF file.
+
+    Parameters
+    ----------
+    file
+        filename, ``pathlib.Path`` or ``BytesIO`` buffer of ASDF file
+
+    Returns
+    -------
+    str
+        The YAML header the ASDF file
+
+    """
+    if isinstance(file, BytesIO):
+        file.seek(0)
+        code = file.read()
+    else:
+        with open(file, "rb") as f:
+            code = f.read()
+
+    parts = code.partition(b"\n...")
+    code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
+    return code
+
+
+# make read/write buffer functions public
+write_buffer = _write_buffer
+read_buffer = _read_buffer
+write_read_buffer = _write_read_buffer
 
 try:  # pragma: no cover
     import IPython
@@ -105,37 +154,13 @@ except ImportError:  # pragma: no cover
     pass
 else:  # pragma: no cover
 
-    def _get_yaml_header(file) -> str:
-        """Read the YAML header part of an ASDF file.
-
-        Parameters
-        ----------
-        file
-            filename or BytesIO buffer of ASDF file
-
-        Returns
-        -------
-        str
-
-        """
-        if isinstance(file, BytesIO):
-            file.seek(0)
-            code = file.read()
-        else:
-            with open(file, "rb") as f:
-                code = f.read()
-
-        parts = code.partition(b"\n...")
-        code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
-        return code
-
     def notebook_fileprinter(file, lexer="YAML"):
         """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
 
         Parameters
         ----------
         file
-            filename or BytesIO buffer of ASDF file
+            filename or ``BytesIO`` buffer of ASDF file
         lexer
             Syntax style to use
 
@@ -147,7 +172,7 @@ else:  # pragma: no cover
         else:
             lexer = get_lexer_for_filename(file)
 
-        code = _get_yaml_header(file)
+        code = get_yaml_header(file)
 
         formatter = HtmlFormatter()
         return IPython.display.HTML(
@@ -157,7 +182,7 @@ else:  # pragma: no cover
             )
         )
 
-    def asdf_json_repr(file, **kwargs):
+    def asdf_json_repr(file, path: Tuple = None, **kwargs):
         """Display YAML header using IPython JSON display repr.
 
         This function works in JupyterLab.
@@ -166,6 +191,8 @@ else:  # pragma: no cover
         ----------
         file
             filename or BytesIO buffer of ASDF file
+        path
+            tuple representing the lookup path in the yaml/asdf tree
         kwargs
             kwargs passed down to JSON constructor
 
@@ -174,7 +201,29 @@ else:  # pragma: no cover
         IPython.display.JSON
             JSON object for rich output in JupyterLab
 
+        Examples
+        --------
+        Visualize the full tree of an existing ASDF file::
+
+            weldx.asdf.utils.asdf_json_repr("single_pass_weld_example.asdf")
+
+        Visualize a specific element in the tree structure by proving the path::
+
+            weldx.asdf.utils.asdf_json_repr(
+                "single_pass_weld_example.asdf", path=("process", "welding_process")
+            )
+
+
         """
-        code = _get_yaml_header(file)
+        if isinstance(file, str):
+            root = file + "/"
+        else:
+            root = "/"
+
+        code = get_yaml_header(file)
         yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
+        if path:
+            root = root + "/".join(path)
+            yaml_dict = get_path(yaml_dict, path)
+        kwargs["root"] = root
         return JSON(yaml_dict, **kwargs)

@@ -6,7 +6,7 @@ import pandas as pd
 import pint
 import pytest
 
-import weldx.utility as ut
+import weldx.util as ut
 from tests._helpers import get_test_name
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG

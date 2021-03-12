@@ -2,16 +2,20 @@
 
 import copy
 import math
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import List, Union
 
 import numpy as np
+import pint
 import pytest
 from xarray import DataArray
 
 import tests._helpers as helpers
 import weldx.geometry as geo
 import weldx.transformations as tf
-import weldx.utility as ut
+import weldx.util as ut
+from weldx import Q_
 from weldx.geometry import SpatialData
 
 # helpers ---------------------------------------------------------------------
@@ -2777,6 +2781,96 @@ def test_geometry_rasterization_profile_interpolation():
             assert ut.vector_is_close(data[:, idx_0 + j], point_exp)
 
 
+def get_test_profile() -> geo.Profile:
+    """Create a `weldx.geometry.Profile` for tests.
+
+    Returns
+    -------
+    weldx.geometry.Profile :
+        `weldx.geometry.Profile` for tests.
+
+    """
+    shape_0 = geo.Shape().add_line_segments(Q_([[1, 0], [1, 1], [3, 1]], "cm"))
+    shape_1 = geo.Shape().add_line_segments(Q_([[-1, 0], [-1, 1]], "cm"))
+    return geo.Profile([shape_0, shape_1])
+
+
+def get_test_geometry_constant_profile() -> geo.Geometry:
+    """Create a `weldx.geometry.Geometry` with constant profile for tests.
+
+    Returns
+    -------
+    weldx.geometry.Geometry :
+        `weldx.geometry.Geometry` with constant profile for tests.
+
+    """
+    profile = get_test_profile()
+    trace = geo.Trace([geo.LinearHorizontalTraceSegment(Q_(1, "cm"))])
+    return geo.Geometry(profile=profile, trace=trace)
+
+
+def get_test_geometry_variable_profile():
+    """Create a `weldx.geometry.Geometry` with variable profile for tests.
+
+    Returns
+    -------
+    weldx.geometry.Geometry :
+        `weldx.geometry.Geometry` with constant profile for tests.
+
+    """
+    profile = get_test_profile()
+    variable_profile = geo.VariableProfile(
+        [profile, profile], [0, 1], [geo.linear_profile_interpolation_sbs]
+    )
+    trace = geo.Trace([geo.LinearHorizontalTraceSegment(Q_(1, "cm"))])
+    return geo.Geometry(profile=variable_profile, trace=trace)
+
+
+class TestGeometry:
+    """Test the geometry class."""
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "geometry, p_rw, t_rw, exp_num_points, exp_num_triangles",
+        [
+            (get_test_geometry_constant_profile(), Q_(1, "cm"), Q_(1, "cm"), 12, 8),
+            (get_test_geometry_variable_profile(), Q_(1, "cm"), Q_(1, "cm"), 12, 0),
+        ],
+    )
+    def test_spatial_data(
+        geometry: geo.Geometry,
+        p_rw: pint.Quantity,
+        t_rw: pint.Quantity,
+        exp_num_points: int,
+        exp_num_triangles: int,
+    ):
+        """Test the `spatial_data` function.
+
+        Parameters
+        ----------
+        geometry : weldx.geometry.Geometry
+            Geometry that should be tested
+        p_rw : pint.Quantity
+            Profile raster width that is passed to the function
+        t_rw : pint.Quantity
+            Trace raster width that is passed to the function
+        exp_num_points : int
+            Expected number of points of the returned `weldx.geometry.SpatialData`
+            instance
+        exp_num_triangles : int
+            Expected number of triangles of the returned `weldx.geometry.SpatialData`
+            instance
+
+        """
+        spatial_data = geometry.spatial_data(p_rw, t_rw)
+        assert len(spatial_data.coordinates.data) == exp_num_points
+
+        num_triangles = 0
+        if spatial_data.triangles is not None:
+            num_triangles = len(spatial_data.triangles)
+        assert num_triangles == exp_num_triangles
+
+
 # --------------------------------------------------------------------------------------
 # SpatialData
 # --------------------------------------------------------------------------------------
@@ -2835,3 +2929,34 @@ class TestSpatialData:
         """
         with pytest.raises(exception_type):
             SpatialData(*arguments)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "filename",
+        ["test.ply", "test.stl", "test.vtk", Path("test.stl")],
+    )
+    def test_read_write_file(filename: Union[str, Path]):
+        """Test the `from_file` and `write_to_file` functions.
+
+        The test simply creates a `SpatialData` instance, writes it to a file and reads
+        it back. The result is compared to the original object.
+
+        Parameters
+        ----------
+        filename :
+            Name of the file
+
+        """
+        points = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
+        triangles = [[0, 1, 2], [2, 3, 0]]
+
+        data = SpatialData(points, triangles)
+        with TemporaryDirectory(dir=Path(__file__).parent) as tmpdirname:
+            filepath = f"{tmpdirname}/{filename}"
+            if isinstance(filename, Path):
+                filepath = Path(filepath)
+            data.write_to_file(filepath)
+            data_read = SpatialData.from_file(filepath)
+
+        assert np.allclose(data.coordinates, data_read.coordinates)
+        assert np.allclose(data.triangles, data_read.triangles)
