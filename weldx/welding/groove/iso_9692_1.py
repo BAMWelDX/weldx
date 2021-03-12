@@ -403,13 +403,13 @@ class UVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha.to("rad").magnitude
-        beta = self.beta.to("rad").magnitude
-        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        h = self.h.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
+        alpha = self.alpha  # .to("rad").magnitude
+        beta = self.beta  # .to("rad").magnitude
+        R = self.R  # .to(_DEFAULT_LEN_UNIT).magnitude
+        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
+        h = self.h  # .to(_DEFAULT_LEN_UNIT).magnitude
+        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
 
         # calculations:
         x_1 = np.tan(alpha / 2) * h
@@ -425,20 +425,20 @@ class UVGroove(IsoBaseGroove):
         x_end = x_arc - (t - y_arc) * np.tan(beta)
 
         # Scaling
-        edge = np.max([-x_end, 0])
-        if width <= edge + 1:
+        edge = np.append(-x_end, 0).max()
+        if width <= edge + Q_(1, "mm"):
             # adjustment of the width
             width = width + edge
 
         # x-values
-        x_value = [-width, 0, -x_1, 0, x_arc, x_end, -width]
+        x_value = np.stack((-width, 0, -x_1, 0, x_arc, x_end, -width))
         # y-values
-        y_value = [0, 0, h, y_m, y_arc, t, t]
+        y_value = np.stack((0, 0, h, y_m, y_arc, t, t))
         segment_list = ["line", "line", "arc", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
