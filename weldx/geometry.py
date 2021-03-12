@@ -1,22 +1,27 @@
 """Provides classes to define lines and surfaces."""
+from __future__ import annotations
 
 import copy
 import math
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Union
+from pathlib import Path
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
-import matplotlib.pyplot as plt
+import meshio
 import numpy as np
 import pint
 from xarray import DataArray
 
 import weldx.transformations as tf
-import weldx.utility as ut
-import weldx.visualization as vs
+import weldx.util as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
+
+# only import heavy-weight packages on type checking
+if TYPE_CHECKING:
+    import matplotlib.axes
 
 # LineSegment -----------------------------------------------------------------
 
@@ -1227,7 +1232,9 @@ class Profile:
         """
         raster_data = self.rasterize(raster_width, stack=False)
         if ax is None:  # pragma: no cover
-            _, ax = plt.subplots()
+            from matplotlib.pyplot import subplots
+
+            _, ax = subplots()
         ax.grid(grid)
         if not ax.name == "3d":
             ax.axis(axis)
@@ -1298,7 +1305,7 @@ class LinearHorizontalTraceSegment:
         """
         return self._length
 
-    def local_coordinate_system(self, relative_position):
+    def local_coordinate_system(self, relative_position) -> tf.LocalCoordinateSystem:
         """Calculate a local coordinate system along the trace segment.
 
         Parameters
@@ -1427,7 +1434,7 @@ class RadialHorizontalTraceSegment:
         """
         return self._sign_winding < 0
 
-    def local_coordinate_system(self, relative_position):
+    def local_coordinate_system(self, relative_position) -> tf.LocalCoordinateSystem:
         """Calculate a local coordinate system along the trace segment.
 
         Parameters
@@ -1594,7 +1601,7 @@ class Trace:
         """
         return len(self._segments)
 
-    def local_coordinate_system(self, position):
+    def local_coordinate_system(self, position) -> tf.LocalCoordinateSystem:
         """Get the local coordinate system at a specific position on the trace.
 
         Parameters
@@ -1665,7 +1672,7 @@ class Trace:
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None, None), strict=False)
     def plot(
-        self, raster_width=1, axes=None, fmt=None, set_axes_equal=False
+        self, raster_width=1, axes=None, fmt=None, axes_equal=False
     ):  # pragma: no cover
         """Plot the trace.
 
@@ -1678,7 +1685,7 @@ class Trace:
             new figure will be created
         fmt : str
             Format string that is passed to matplotlib.pyplot.plot.
-        set_axes_equal : bool
+        axes_equal : bool
             Set plot axes to equal scaling (Default = False).
 
         """
@@ -1686,14 +1693,18 @@ class Trace:
         if fmt is None:
             fmt = "x-"
         if axes is None:
-            fig = plt.figure()
+            from matplotlib.pyplot import figure
+
+            fig = figure()
             axes = fig.gca(projection="3d", proj_type="ortho")
             axes.plot(data[0], data[1], data[2], fmt)
             axes.set_xlabel("x")
             axes.set_ylabel("y")
             axes.set_zlabel("z")
-            if set_axes_equal:
-                vs.set_axes_equal(axes)
+            if axes_equal:
+                import weldx.visualization as vs
+
+                vs.axes_equal(axes)
         else:
             axes.plot(data[0], data[1], data[2], fmt)
 
@@ -2203,11 +2214,11 @@ class Geometry:
         self,
         profile_raster_width: pint.Quantity,
         trace_raster_width: pint.Quantity,
-        axes: plt.Axes = None,
+        axes: matplotlib.axes.Axes = None,
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-    ) -> plt.Axes:  # pragma: no cover
+    ) -> matplotlib.axes.Axes:  # pragma: no cover
         """Plot the geometry.
 
         Parameters
@@ -2320,6 +2331,26 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
+    def from_file(file_name: Union[str, Path]) -> "SpatialData":
+        """Create an instance from a file.
+
+        Parameters
+        ----------
+        file_name :
+            Name of the source file.
+
+        Returns
+        -------
+        SpatialData:
+            New `SpatialData` instance
+
+        """
+        mesh = meshio.read(file_name)
+        triangles = mesh.cells_dict.get("triangle")
+
+        return SpatialData(mesh.points, triangles)
+
+    @staticmethod
     def from_geometry_raster(geometry_raster: np.ndarray) -> "SpatialData":
         """Triangulate rasterized Geometry Profile.
 
@@ -2352,11 +2383,11 @@ class SpatialData:
 
     def plot(
         self,
-        axes: plt.Axes = None,
+        axes: matplotlib.axes.Axes = None,
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-    ) -> plt.Axes:  # pragma: no cover
+    ) -> matplotlib.axes.Axes:
         """Plot the spatial data.
 
         Parameters
@@ -2381,6 +2412,8 @@ class SpatialData:
             The utilized matplotlib axes, if matplotlib was used as rendering backend
 
         """
+        import weldx.visualization as vs
+
         return vs.plot_spatial_data_matplotlib(
             data=self,
             axes=axes,
@@ -2388,3 +2421,19 @@ class SpatialData:
             label=label,
             show_wireframe=show_wireframe,
         )
+
+    def write_to_file(self, file_name: Union[str, Path]):
+        """Write spatial data into a file.
+
+        The extension prescribes the output format.
+
+        Parameters
+        ----------
+        file_name :
+            Name of the file
+
+        """
+        mesh = meshio.Mesh(
+            points=self.coordinates.data, cells={"triangle": self.triangles}
+        )
+        mesh.write(file_name)

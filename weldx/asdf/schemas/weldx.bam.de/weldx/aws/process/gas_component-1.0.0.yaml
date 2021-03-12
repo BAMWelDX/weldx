@@ -5,7 +5,7 @@ id: "http://weldx.bam.de/schemas/weldx/aws/process/gas_component-1.0.0"
 tag: "tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0"
 
 title: |
-  <TODO DESCRIPTION>
+  Shielding gas component
 description: |
   A single gas element of a mixture and its percentage of the mixture by weight.
 type: object
