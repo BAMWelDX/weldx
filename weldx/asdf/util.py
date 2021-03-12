@@ -113,13 +113,13 @@ def _write_read_buffer(
     return _read_buffer(buffer, open_kwargs)
 
 
-def get_yaml_header(file) -> str:
+def get_yaml_header(file) -> str:  # pragma: no cover
     """Read the YAML header part (excluding binary sections) of an ASDF file.
 
     Parameters
     ----------
     file
-        filename or ``BytesIO`` buffer of ASDF file
+        filename, ``pathlib.Path`` or ``BytesIO`` buffer of ASDF file
 
     Returns
     -------
