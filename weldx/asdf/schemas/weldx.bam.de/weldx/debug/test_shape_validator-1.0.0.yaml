@@ -28,6 +28,14 @@ properties:
     type: number
     wx_shape: [1]
 
+  quantity:
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+    wx_shape: [1]
+
+  timeseries:
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_shape: [1]
+
   nested_prop:
     type: object
     properties:
@@ -49,7 +57,7 @@ properties:
 
 
 
-required: [prop1, prop2, prop3, prop4, nested_prop, time_prop]
+required: [prop1, prop2, prop3, prop4, quantity, timeseries, nested_prop, time_prop]
 propertyOrder: [prop1,prop2,prop3,prop4,nested_prop,optional_prop]
 flowStyle: block
 additionalProperties: true

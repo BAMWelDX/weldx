@@ -8,9 +8,11 @@ import pint
 import sympy
 import xarray as xr
 
-import weldx.utility as ut
+import weldx.util as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+
+__all__ = ["MathematicalExpression", "TimeSeries"]
 
 
 class MathematicalExpression:
@@ -119,7 +121,9 @@ class MathematicalExpression:
             if check_structural_equality:
                 equality = self.expression == other.expression
             else:
-                equality = sympy.simplify(self.expression - other.expression) == 0
+                from sympy import simplify
+
+                equality = simplify(self.expression - other.expression) == 0
 
             if check_parameters:
                 equality = equality and self._parameters == other.parameters

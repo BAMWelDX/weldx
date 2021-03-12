@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.3.0 (unreleased)
+## 0.3.0 (12.03.2021)
 
 ### added
 
@@ -8,8 +8,13 @@
   function [[#219]](https://github.com/BAMWelDX/weldx/pull/219)
 - add `SpatialDate` class for storing 3D point data with optional
   triangulation [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
-- add `plot` function to visualize `LocalCoordinateSystem` and `CoordinateSystemManager` instances in 3d space 
+- add `plot` function to `SpatialData`[[#251]](https://github.com/BAMWelDX/weldx/pull/251)
+- add `plot` function to visualize `LocalCoordinateSystem` and `CoordinateSystemManager` instances in 3d space
   [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
+- add `weldx.welding.groove.iso_9692_1.IsoBaseGroove.cross_sect_area` property to compute cross sectional area between
+  the workpieces [[#248]](https://github.com/BAMWelDX/weldx/pull/248).
+- add `weldx.welding.util.compute_welding_speed` function [[#248]](https://github.com/BAMWelDX/weldx/pull/248).
+
 ### ASDF
 
 - Add possibility to store meta data and content of an external file in an ASDF
@@ -27,6 +32,14 @@
       as `custom_schema` when reading/writing `ASDF`-files
     - the `single_pass_weld-1.0.0.schema` is an example schema for a simple, linear, single pass GMAW application
     - add `core/geometry/point_cloud-1.0.0.yaml` schema [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
+- add file schema describing a simple linear welding
+  application `datamodels/single_pass_weld-1.0.0.schema` [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
+
+### documentation
+
+- Simplify tutorial code and enhance plots by using newly implemented plot functions
+  [[#231]](https://github.com/BAMWelDX/weldx/pull/231) [[#251]](https://github.com/BAMWelDX/weldx/pull/251)
+- add AWS shielding gas descriptions to documentation [[#270]](https://github.com/BAMWelDX/weldx/pull/270)
 
 ### changes
 
@@ -43,6 +56,13 @@
 - add `stack` option to most `geometry` classes for rasterization [[#234]](https://github.com/BAMWelDX/weldx/pull/234)
 - The graph of a `CoordinateSystemManager` is now plotted with `plot_graph` instead of `plot`.
   [[#231]](https://github.com/BAMWelDX/weldx/pull/231)
+- add custom `wx_shape` validation for `TimeSeries` and `Quantity` [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
+- refactor the `transformations` and `visualization` module into smaller
+  files [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- refactor `weldx.utility` into `weldx.util` [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- refactor `weldx.asdf.utils` into `weldx.asdf.util` [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- it is now allowed to merge a time-dependent `timedelta` subsystem into another `CSM` instance if the parent instance
+  has set an explicit reference time [[#268]](https://github.com/BAMWelDX/weldx/pull/268)
 
 ### fixes
 
@@ -53,6 +73,11 @@
 - fix deprecated signature in `WXRotation` [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
 - fix a bug with singleton dimensions in xarray
   interpolation/matmul [[#243]](https://github.com/BAMWelDX/weldx/pull/243)
+- update some documentation formatting and links [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- fix `wx_shape` validation for scalar `Quantity` and `TimeSeries`
+  objects [[#256]](https://github.com/BAMWelDX/weldx/pull/256)
+- fix a case where `CSM.time_union()` would return with mixed `DateTimeIndex` and `TimeDeltaIndex`
+  types [[#268]](https://github.com/BAMWelDX/weldx/pull/268)
 
 ### dependencies
 
@@ -60,7 +85,10 @@
 - Add [k3d](https://github.com/K3D-tools/K3D-jupyter) as new dependency
 - restrict `scipy<1.6`
   pending [ASDF #916](https://github.com/asdf-format/asdf/issues/916) [[#224]](https://github.com/BAMWelDX/weldx/pull/224)
-- set minimum Python version to 3.8 [[#229]](https://github.com/BAMWelDX/weldx/pull/229)[[#255]](https://github.com/BAMWelDX/weldx/pull/255)
+- set minimum Python version to
+  3.8 [[#229]](https://github.com/BAMWelDX/weldx/pull/229)[[#255]](https://github.com/BAMWelDX/weldx/pull/255)
+- only import some packages upon first use [[#247]](https://github.com/BAMWelDX/weldx/pull/247)
+- Add [meshio](https://pypi.org/project/meshio/) as new dependency [#265](https://github.com/BAMWelDX/weldx/pull/265)
 
 ## 0.2.2 (30.11.2020)
 

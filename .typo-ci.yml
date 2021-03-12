@@ -30,12 +30,15 @@ excluded_words:
   - networkx
   - shutil
   - functools
+  - boltons
+  - meshio
   # matplotlib ----------------------------------
   - gca
   - mpl
   - ncols
   - plt
   - pyplot
+  - zorder
   # flake8 --------------------------------------
   - noqa
   - addopts
@@ -56,6 +59,7 @@ excluded_words:
   - ndarray
   - ndim
   - newaxis
+  - tolist
   - vstack
   # pandas / xarray -----------------------------
   - bfill
@@ -116,6 +120,9 @@ excluded_words:
   - numpydoc
   # markdown / latex ----------------------------
   - cdot
+  # file extensions -----------------------------
+  - vtk
+  - stl
   # other ---------------------------------------
   - addopts
   - csm
@@ -144,6 +151,7 @@ excluded_words:
   - tslibs
   - quickstart
   - nsecond
+  - iterutils
   # German ---------------------------------------
   - Bundesanstalt
   - für

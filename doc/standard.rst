@@ -17,6 +17,7 @@ The WelDX standard consists of the following schema definitions:
     schemas/process.rst
     schemas/time.rst
     schemas/groove.rst
+    schemas/aws.rst
     schemas/datamodels.rst
 
 ASDF Extension

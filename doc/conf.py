@@ -22,10 +22,19 @@ import sys
 
 import traitlets
 
-import weldx
-from weldx.asdf.constants import WELDX_TAG_BASE
+# find weldx from parent path.
+sys.path.insert(0, os.path.abspath("../"))
 
-sys.path.insert(0, os.path.abspath(""))
+import typing
+
+import ipywidgets
+import pandas as _
+import xarray
+
+typing.TYPE_CHECKING = True
+import weldx
+import weldx.visualization  # load visualization
+from weldx.asdf.constants import WELDX_TAG_BASE
 
 # -- copy files to doc folder -------------------------------------------------
 doc_dir = pathlib.Path(".")
@@ -45,7 +54,7 @@ copyright = "2020 - 2021, BAM"
 author = "BAM"
 
 # The full version, including alpha/beta/rc tags
-release = weldx.__version__
+release = weldx.__version__ if weldx.__version__ else "undefined"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -104,7 +113,7 @@ napoleon_use_rtype = True
 napoleon_type_aliases = None
 
 # sphinx-autodoc-typehints https://github.com/agronholm/sphinx-autodoc-typehints
-set_type_checking_flag = False
+set_type_checking_flag = True
 typehints_fully_qualified = False
 always_document_param_types = False
 typehints_document_rtype = True
@@ -191,7 +200,9 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["**.ipynb_checkpoints"]
+exclude_patterns = [
+    "**.ipynb_checkpoints",
+]
 
 
 # -- Options for HTML output -------------------------------------------------

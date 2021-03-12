@@ -364,7 +364,7 @@ def _compare_lists(_list, list_expected):
 
 def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> List[int]:
     """Get the shape of an ASDF instance from its tagged dict form."""
-    if isinstance(instance_dict, (float, int)):  # test against [1] for single values
+    if isinstance(instance_dict, (float, int)):  # test against [1] for scalar values
         return [1]
     elif "shape" in instance_dict:
         return instance_dict["shape"]
@@ -374,6 +374,14 @@ def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> Lis
             return TimedeltaIndexType.shape_from_tagged(instance_dict)
         elif "weldx/time/datetimeindex" in instance_dict._tag:
             return DatetimeIndexType.shape_from_tagged(instance_dict)
+        elif "weldx/core/time_series" in instance_dict._tag:
+            if isinstance(instance_dict["value"], dict):  # ndarray
+                return _get_instance_shape(instance_dict["value"])
+            return [1]  # scalar
+        elif "asdf/unit/quantity" in instance_dict._tag:
+            if isinstance(instance_dict["value"], dict):  # ndarray
+                return _get_instance_shape(instance_dict["value"])
+            return [1]  # scalar
 
     return None
 
