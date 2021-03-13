@@ -8,6 +8,15 @@ title: |
   Shielding gas component
 description: |
   A single gas element of a mixture and its percentage of the mixture by weight.
+
+examples:
+  -
+    - A single argon gas component
+    - |
+        !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
+          gas_chemical_name: argon
+          gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
+
 type: object
 properties:
   gas_chemical_name:
