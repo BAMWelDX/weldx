@@ -145,6 +145,8 @@ class VariableTypeASDF(WeldxType):
             data = node.data
         dtype = node.data.dtype.str
         data = cls.convert_time_dtypes(data=data)
+        if not data.shape:  # scalar
+            data = np.asscalar(data)
         tree = {
             "name": node.name,
             "dimensions": node.dimensions,
@@ -176,9 +178,8 @@ class VariableTypeASDF(WeldxType):
 
         """
         dtype = np.dtype(tree["dtype"])
+        data = np.array(tree["data"], dtype=dtype)
         if "unit" in tree:  # convert to pint.Quantity
-            data = Q_(tree["data"].astype(dtype), tree["unit"])
-        else:
-            data = tree["data"].astype(dtype)
+            data = Q_(data, tree["unit"])
 
         return Variable(tree["name"], tree["dimensions"], data)
