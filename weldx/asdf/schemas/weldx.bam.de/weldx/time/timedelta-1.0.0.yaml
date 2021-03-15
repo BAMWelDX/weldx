@@ -6,6 +6,13 @@ tag: "tag:weldx.bam.de:weldx/time/timedelta-1.0.0"
 
 title: |
   Represents an instance in time.
+
+examples:
+  -
+    - A timedelta of 10 s
+    - |
+        !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+
 type: object
 properties:
   value:

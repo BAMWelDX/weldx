@@ -7,6 +7,29 @@ tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
 title: |
   Represents an array of timedeltas following pandas.TimedeltaIndex.
 
+examples:
+  -
+    - A regular spaced timedeltaindex ranging from 0 s to 10 s with a 2 s frequency
+    - |
+        !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
+          start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+          end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+          freq: 2S
+          min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+          max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+  -
+    - An irregular timedeltaindex respresenting timestamps at 0 s, 4 s, 6 s and 10 s
+    - |
+        !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
+          values: !core/ndarray-1.0.0
+            data: [0, 4000000000, 6000000000, 10000000000]
+            datatype: int64
+            shape: [4]
+          start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+          end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+          min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+          max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+
 definitions:
   values:
     description: |
