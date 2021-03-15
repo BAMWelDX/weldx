@@ -18,7 +18,7 @@ examples:
           min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
           max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
   -
-    - An irregular timedeltaindex respresenting timestamps at 0 s, 4 s, 6 s and 10 s
+    - An irregular timedeltaindex representing timestamps at 0 s, 4 s, 6 s and 10 s
     - |
         !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
           values: !core/ndarray-1.0.0

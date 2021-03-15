@@ -9,7 +9,7 @@ title: |
 
 examples:
   -
-    - A regular datetimeindex starting at 2020-01-01 and a 1 day intervall till 2020-01-06
+    - A regular datetimeindex starting at 2020-01-01 and a 1 day interval till 2020-01-06
     - |
         !<tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0>
           start: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T00:00:00'}
