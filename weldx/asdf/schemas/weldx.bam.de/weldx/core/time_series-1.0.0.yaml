@@ -17,7 +17,7 @@ examples:
           unit: millimeter / second
           value: 10.0
   -
-    - A time_series describing a sine oscillation in 3d space along the y-axis
+    - A time_series describing a sine oscillation in 3d space along the z-axis
     - |
         !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
           expression: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
