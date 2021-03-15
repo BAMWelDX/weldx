@@ -15,14 +15,22 @@ import xarray as xr
 from weldx import util
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.geometry import SpatialData
-from weldx.transformations.util import build_time_index
 
 from .local_cs import LocalCoordinateSystem
+
+# shared type aliases
+from .util import (
+    build_time_index,
+    coordinate_types,
+    time_types,
+    types_orientation,
+    types_time_and_lcs,
+)
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:
     import matplotlib.axes
-    from scipy.spatial.transform import Rotation as Rot
+
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -716,8 +724,8 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: str,
-        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        orientation: types_orientation = None,
+        coordinates: coordinate_types = None,
         time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = None,
         time_ref: pd.Timestamp = None,
         lsc_child_in_parent: bool = True,
@@ -765,7 +773,7 @@ class CoordinateSystemManager:
         sequence,
         angles,
         degrees=False,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        coordinates: coordinate_types = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -827,7 +835,7 @@ class CoordinateSystemManager:
         vec_x,
         vec_y,
         vec_z,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        coordinates: coordinate_types = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -871,7 +879,7 @@ class CoordinateSystemManager:
         vec_x,
         vec_y,
         positive_orientation=True,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        coordinates: coordinate_types = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -919,7 +927,7 @@ class CoordinateSystemManager:
         vec_x,
         vec_z,
         positive_orientation=True,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        coordinates: coordinate_types = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -967,7 +975,7 @@ class CoordinateSystemManager:
         vec_y,
         vec_z,
         positive_orientation=True,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        coordinates: coordinate_types = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -1186,7 +1194,7 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: Union[str, None] = None,
-        time: Union[pd.TimedeltaIndex, pd.DatetimeIndex, pint.Quantity, str] = None,
+        time: [time_types, str] = None,
         time_ref: pd.Timestamp = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
@@ -1459,12 +1467,7 @@ class CoordinateSystemManager:
 
     def interp_time(
         self,
-        time: Union[
-            pd.DatetimeIndex,
-            pd.TimedeltaIndex,
-            List[pd.Timestamp],
-            LocalCoordinateSystem,
-        ],
+        time: types_time_and_lcs,
         time_ref: pd.Timestamp = None,
         affected_coordinate_systems: Union[str, List[str], None] = None,
         in_place: bool = False,
@@ -1697,12 +1700,7 @@ class CoordinateSystemManager:
         colors: Dict[str, int] = None,
         title: str = None,
         limits: List[Tuple[float, float]] = None,
-        time: Union[
-            pd.DatetimeIndex,
-            pd.TimedeltaIndex,
-            List[pd.Timestamp],
-            LocalCoordinateSystem,
-        ] = None,
+        time: types_time_and_lcs = None,
         time_ref: pd.Timestamp = None,
         axes_equal: bool = False,
         show_data_labels: bool = True,
@@ -1897,7 +1895,7 @@ class CoordinateSystemManager:
 
     def transform_data(
         self,
-        data: Union[xr.DataArray, np.ndarray, List],
+        data: coordinate_types,
         source_coordinate_system_name: str,
         target_coordinate_system_name: str,
     ):
