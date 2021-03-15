@@ -42,7 +42,7 @@ examples:
           parameters:
             characteristic: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
               unit: volt / ampere
-              value: 5
+              value: 5.0
             impedance: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
               unit: percent
               value: 10.0
