@@ -44,8 +44,9 @@ oneOf:
       value:
         description: |
           Number or n-dimensional array that is constant in time.
-        oneOf:
+        anyOf:
           - type: number
+          - type: integer
           - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
       unit:
         description: |
