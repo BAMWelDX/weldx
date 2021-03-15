@@ -1,5 +1,9 @@
 # Release Notes
 
+## ASDF 2.8
+
+- fix inline array serialization for new 64bit inline limit
+
 ## 0.3.0 (12.03.2021)
 
 ### added

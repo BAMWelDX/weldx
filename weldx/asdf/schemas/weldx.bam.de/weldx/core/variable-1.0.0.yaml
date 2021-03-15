@@ -27,7 +27,9 @@ properties:
   data:
     description: |
       An n-dimensional array that contains the data.
-    $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    oneOf:
+      - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+      - type: number
   unit:
     description: |
       Optional field describing the unit of the data as valid string representation.
