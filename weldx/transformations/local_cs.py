@@ -13,14 +13,8 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
 
-from .util import (
-    build_time_index,
-    normalize,
-    types_coordinates,
-    types_orientation,
-    types_time,
-    types_time_and_lcs,
-)
+from .types import types_coordinates, types_orientation, types_time, types_time_and_lcs
+from .util import build_time_index, normalize
 
 if TYPE_CHECKING:
     import matplotlib.axes

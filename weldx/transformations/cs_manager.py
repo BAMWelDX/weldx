@@ -17,15 +17,10 @@ from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.geometry import SpatialData
 
 from .local_cs import LocalCoordinateSystem
+from .types import types_coordinates, types_orientation, types_time, types_time_and_lcs
 
 # shared type aliases
-from .util import (
-    build_time_index,
-    types_coordinates,
-    types_orientation,
-    types_time,
-    types_time_and_lcs,
-)
+from .util import build_time_index
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:

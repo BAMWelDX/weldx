@@ -1,36 +1,29 @@
 """Contains functions for coordinate transformations."""
 
 import math
-from typing import List, Union
 
 import numpy as np
 import pandas as pd
-import pint
-import xarray as xr
-from scipy.spatial.transform import Rotation as Rot
 
 from weldx import util
+from weldx.transformations.types import types_time
 
 __all__ = [
     "build_time_index",
-    "types_coordinates",
     "is_orthogonal",
     "is_orthogonal_matrix",
     "normalize",
     "orientation_point_plane",
     "orientation_point_plane_containing_origin",
-    "types_orientation",
     "point_left_of_line",
     "reflection_sign",
     "scale_matrix",
-    "types_time",
-    "types_time_and_lcs",
     "vector_points_to_left_of_vector",
 ]
 
 
 def build_time_index(
-    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
+    time: types_time = None,
     time_ref: pd.Timestamp = None,
 ) -> pd.TimedeltaIndex:
     """Build time index used for xarray objects.
@@ -292,9 +285,3 @@ def vector_points_to_left_of_vector(vector, vector_reference):
 
     """
     return int(np.sign(np.linalg.det([vector_reference, vector])))
-
-
-types_coordinates = Union[xr.DataArray, np.ndarray, List]
-types_orientation = Union[xr.DataArray, np.ndarray, List[List], Rot]
-types_time = Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity]
-types_time_and_lcs = Union[types_time, "LocalCoordinateSystem"]
