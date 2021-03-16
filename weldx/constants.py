@@ -15,6 +15,6 @@ WELDX_UNIT_REGISTRY.define("percent = 0.01*count = %")
 WELDX_UNIT_REGISTRY.define("hour = 60*minute = h = hr")
 
 __all__ = (
-    WELDX_UNIT_REGISTRY,
-    WELDX_QUANTITY,
+    "WELDX_UNIT_REGISTRY",
+    "WELDX_QUANTITY",
 )
