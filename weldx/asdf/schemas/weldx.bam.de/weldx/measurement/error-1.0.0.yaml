@@ -13,8 +13,8 @@ examples:
   -
     - An error representing a deviation of 0.1%.
     - |
-        !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
-          deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
+      !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+        deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
 
 type: object
 properties:

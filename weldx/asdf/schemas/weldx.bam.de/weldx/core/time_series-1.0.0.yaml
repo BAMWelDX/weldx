@@ -13,28 +13,28 @@ examples:
   -
     - A time_series describing a constant value in time.
     - |
-        !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
-          unit: millimeter / second
-          value: 10.0
+      !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+        unit: millimeter / second
+        value: 10.0
   -
     - A time_series describing a sine oscillation in 3d space along the z-axis
     - |
-        !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
-          expression: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
-            expression: a*sin(o*t + p) + b
-            parameters:
-              a: !unit/quantity-1.1.0
-                unit: millimeter
-                value: !core/ndarray-1.0.0
-                  data:
-                  - [0, 0, 1]
-                  datatype: int32
-                  shape: [1, 3]
-              b: !unit/quantity-1.1.0 {unit: millimeter, value: 0.0}
-              o: !unit/quantity-1.1.0 {unit: hertz * radian, value: 4.934802200544679}
-              p: !unit/quantity-1.1.0 {unit: radian, value: 0}
-          unit: millimeter
-          shape: [1, 3]
+      !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+        expression: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+          expression: a*sin(o*t + p) + b
+          parameters:
+            a: !unit/quantity-1.1.0
+              unit: millimeter
+              value: !core/ndarray-1.0.0
+                data:
+                - [0, 0, 1]
+                datatype: int32
+                shape: [1, 3]
+            b: !unit/quantity-1.1.0 {unit: millimeter, value: 0.0}
+            o: !unit/quantity-1.1.0 {unit: hertz * radian, value: 4.934802200544679}
+            p: !unit/quantity-1.1.0 {unit: radian, value: 0}
+        unit: millimeter
+        shape: [1, 3]
 
 oneOf:
   - type: object

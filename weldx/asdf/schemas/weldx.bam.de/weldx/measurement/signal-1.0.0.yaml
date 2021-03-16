@@ -12,15 +12,15 @@ examples:
   -
     - A signal representing an analog voltage measurement without data.
     - |
-        !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
-          signal_type: analog
-          unit: V
+      !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+        signal_type: analog
+        unit: V
   -
     - A digital dimensionless signal.
     - |
-        !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
-          signal_type: digital
-          unit: ''
+      !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+        signal_type: digital
+        unit: ''
 
 properties:
   signal_type:
