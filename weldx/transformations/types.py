@@ -1,3 +1,4 @@
+"""shared type definitions"""
 from abc import abstractmethod
 from typing import List, Protocol, Union, runtime_checkable
 
@@ -20,7 +21,7 @@ class SupportsTime(Protocol):
     __slots__ = ()
 
     @abstractmethod
-    def time(self):
+    def time(self):  # noqa
         pass
 
 
