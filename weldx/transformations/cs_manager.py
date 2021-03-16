@@ -1804,6 +1804,7 @@ class CoordinateSystemManager:
                 axes=axes,
                 reference_system=reference_system,
                 coordinate_systems=coordinate_systems,
+                data_sets=data_sets,
                 colors=colors,
                 time=time,
                 time_ref=time_ref,
