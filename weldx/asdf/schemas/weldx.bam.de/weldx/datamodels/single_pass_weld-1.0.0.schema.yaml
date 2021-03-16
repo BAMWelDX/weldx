@@ -136,8 +136,6 @@ properties:
       Metadata container for additional user documentation of the experiment.
     type: object
 required: [equipment,workpiece,measurements,welding_current,welding_voltage,TCP]
-additionalProperties: false
-
 
 examples:
   -
