@@ -13,7 +13,7 @@ from weldx.visualization.colors import (
     color_to_rgb_normalized,
     get_color,
 )
-from weldx.visualization.types import types_time
+from weldx.visualization.types import types_limits, types_time
 
 
 def new_3d_figure_and_axes(
@@ -236,7 +236,7 @@ def plot_local_coordinate_system_matplotlib(
 
 def _set_limits_matplotlib(
     axes: plt.Axes.axes,
-    limits: Union[List[Tuple[float, float]], Tuple[float, float]],
+    limits: types_limits,
     set_axes_equal: bool = False,
 ):
     """Set the limits of an axes object.
@@ -270,7 +270,7 @@ def plot_coordinate_systems(
     cs_data: Tuple[str, Dict],
     axes: plt.Axes.axes = None,
     title: str = None,
-    limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
+    limits: types_limits = None,
     time_index: int = None,
     legend_pos: str = "lower left",
 ) -> plt.Axes.axes:
@@ -330,7 +330,7 @@ def plot_coordinate_system_manager_matplotlib(
     time: types_time = None,
     time_ref: pd.Timestamp = None,
     title: str = None,
-    limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
+    limits: types_limits = None,
     set_axes_equal: bool = False,
     show_origins: bool = True,
     show_trace: bool = True,
