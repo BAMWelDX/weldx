@@ -15,7 +15,7 @@ types_time_and_lcs = Union[types_time, "weldx.transformations.LocalCoordinateSys
 
 @runtime_checkable
 class SupportsTime(Protocol):
-    """An ABC with one abstract method __int__."""
+    """An ABC with one abstract method time."""
 
     __slots__ = ()
 
