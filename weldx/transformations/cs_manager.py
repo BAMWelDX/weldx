@@ -6,7 +6,6 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
-import networkx as nx
 import numpy as np
 import pandas as pd
 import pint
@@ -25,6 +24,7 @@ from .util import build_time_index
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:
     import matplotlib.axes
+    import networkx as nx
 
     import weldx  # noqa
 
@@ -517,12 +517,12 @@ class CoordinateSystemManager:
         return len(self._sub_system_data_dict)
 
     @property
-    def reference_time(self):
+    def reference_time(self) -> pd.Timestamp:
         """Get the reference time of the `CoordinateSystemManager`.
 
         Returns
         -------
-        pandas.Timestamp :
+        reference_time :
             Reference time of the `CoordinateSystemManager`
 
         """
@@ -691,11 +691,11 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        data : Union[xarray.DataArray, SpatialData]
+        data :
             Spatial data
-        data_name : str
+        data_name :
             Name of the data.
-        coordinate_system_name : str
+        coordinate_system_name :
             Name of the coordinate system the data should be
             assigned to.
 
@@ -1058,11 +1058,13 @@ class CoordinateSystemManager:
             )
 
         # update subsystems
+        from networkx import shortest_path
+
         remove_systems = []
         for sub_system_name, sub_system_data in self._sub_system_data_dict.items():
             if (
                 coordinate_system_name in sub_system_data["original members"]
-            ) or coordinate_system_name in nx.shortest_path(
+            ) or coordinate_system_name in shortest_path(
                 self.graph, sub_system_data["root"], self._root_system_name
             ):
                 remove_systems += [sub_system_name]
@@ -1330,9 +1332,9 @@ class CoordinateSystemManager:
         if coordinate_system_name == reference_system_name:
             return LocalCoordinateSystem()
 
-        path = nx.shortest_path(
-            self.graph, coordinate_system_name, reference_system_name
-        )
+        from networkx import shortest_path
+
+        path = shortest_path(self.graph, coordinate_system_name, reference_system_name)
         path_edges = list(zip(path[:-1], path[1:]))
 
         if time is None:
@@ -1589,7 +1591,9 @@ class CoordinateSystemManager:
                 f"Found the following common systems: {intersection}"
             )
 
-        self._graph = nx.compose(self._graph, other.graph)
+        from networkx import compose
+
+        self._graph = compose(self._graph, other.graph)
 
         subsystem_data = {
             "common node": intersection[0],
@@ -1680,10 +1684,9 @@ class CoordinateSystemManager:
         # only plot inverted directional arrows
         remove_edges = [edge for edge in graph.edges if graph.edges[edge]["defined"]]
         graph.remove_edges_from(remove_edges)
+        from networkx import draw
 
-        nx.draw(
-            graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
-        )
+        draw(graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map)
 
     def plot(
         self,
