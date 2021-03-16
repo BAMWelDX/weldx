@@ -11,7 +11,7 @@ description: |
 
 examples:
   -
-    - A subsytem assignment of the coordinate systems workpiece, user_frame, T1 and T2.
+    - A subsystem assignment of the coordinate systems workpiece, user_frame, T1 and T2.
     - |
       !<tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0>
         name: Subsystem T
