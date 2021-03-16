@@ -53,7 +53,7 @@ def new_3d_figure_and_axes(
     return fig, ax
 
 
-def axes_equal(axes):
+def axes_equal(axes: plt.Axes):
     """Adjust axis in a 3d plot to be equally scaled.
 
     Source code taken from the stackoverflow answer of 'karlo' in the
@@ -89,7 +89,7 @@ def axes_equal(axes):
 
 def draw_coordinate_system_matplotlib(
     coordinate_system: LocalCoordinateSystem,
-    axes: plt.Axes.axes,
+    axes: plt.Axes,
     color: Any = None,
     label: str = None,
     time_idx: int = None,
@@ -152,7 +152,7 @@ def draw_coordinate_system_matplotlib(
 
 def plot_local_coordinate_system_matplotlib(
     lcs: LocalCoordinateSystem,
-    axes: plt.Axes.axes = None,
+    axes: plt.Axes = None,
     color: Any = None,
     label: str = None,
     time: types_time = None,
@@ -161,7 +161,7 @@ def plot_local_coordinate_system_matplotlib(
     show_origin: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
-) -> plt.Axes.axes:
+) -> plt.Axes:
     """Visualize a `weldx.transformations.LocalCoordinateSystem` using matplotlib.
 
     Parameters
@@ -235,7 +235,7 @@ def plot_local_coordinate_system_matplotlib(
 
 
 def _set_limits_matplotlib(
-    axes: plt.Axes.axes,
+    axes: plt.Axes,
     limits: types_limits,
     set_axes_equal: bool = False,
 ):
@@ -268,12 +268,12 @@ def _set_limits_matplotlib(
 
 def plot_coordinate_systems(
     cs_data: Tuple[str, Dict],
-    axes: plt.Axes.axes = None,
+    axes: plt.Axes = None,
     title: str = None,
     limits: types_limits = None,
     time_index: int = None,
     legend_pos: str = "lower left",
-) -> plt.Axes.axes:
+) -> plt.Axes:
     """Plot multiple coordinate systems.
 
     Parameters
@@ -322,7 +322,7 @@ def plot_coordinate_systems(
 
 def plot_coordinate_system_manager_matplotlib(
     csm: CoordinateSystemManager,
-    axes: plt.Axes.axes = None,
+    axes: plt.Axes = None,
     reference_system: str = None,
     coordinate_systems: List[str] = None,
     data_sets: List[str] = None,
@@ -336,7 +336,7 @@ def plot_coordinate_system_manager_matplotlib(
     show_trace: bool = True,
     show_vectors: bool = True,
     show_wireframe: bool = True,
-) -> plt.Axes.axes:
+) -> plt.Axes:
     """Plot the coordinate systems of a `weldx.transformations.CoordinateSystemManager`.
 
     Parameters
