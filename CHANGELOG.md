@@ -7,6 +7,12 @@
 - remove the `additionalProperties` restriction
   from `single_pass_weld-1.0.0.schema.yaml` [[#283]](https://github.com/BAMWelDX/weldx/pull/283)
 
+### fixes
+
+- A warning is now emitted if a `LocalCoordinateSystem` drops a provided time during construction. This usually happens 
+  if the coordinates and orientation only contain a single data point. 
+  [[#285]](https://github.com/BAMWelDX/weldx/pull/285)
+
 ## 0.3.0 (12.03.2021)
 
 ### added
