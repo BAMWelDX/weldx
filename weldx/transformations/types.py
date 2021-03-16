@@ -25,9 +25,9 @@ class SupportsTime(Protocol):
 
 
 __all__ = [
+    "SupportsTime",
     "types_coordinates",
     "types_orientation",
     "types_time",
     "types_time_and_lcs",
-    "SupportsTime",
 ]
