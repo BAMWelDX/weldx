@@ -21,8 +21,8 @@ class SupportsTime(Protocol):
     __slots__ = ()
 
     @abstractmethod
-    def time(self):  # noqa
-        pass
+    def time(self):
+        raise NotImplementedError
 
 
 __all__ = [
