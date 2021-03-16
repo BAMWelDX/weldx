@@ -1,6 +1,6 @@
 """Contains some functions to help with visualization."""
 
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 
 import k3d
 import k3d.platonic as platonic
@@ -19,6 +19,7 @@ from .colors import (
     color_generator_function,
     get_color,
 )
+from .types import types_time
 
 __all__ = ["CoordinateSystemManagerVisualizerK3D", "SpatialDataVisualizer"]
 
@@ -400,7 +401,7 @@ class CoordinateSystemManagerVisualizerK3D:
         reference_system: str = None,
         title: str = None,
         limits: List[Tuple[float, float]] = None,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
+        time: types_time = None,
         time_ref: pd.Timestamp = None,
         show_data_labels: bool = True,
         show_labels: bool = True,
@@ -563,7 +564,7 @@ class CoordinateSystemManagerVisualizerK3D:
 
     def _create_controls(
         self,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
+        time: types_time,
         show_data_labels: bool,
         show_labels: bool,
         show_origins: bool,

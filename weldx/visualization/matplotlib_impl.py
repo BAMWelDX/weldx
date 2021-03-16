@@ -13,6 +13,7 @@ from weldx.visualization.colors import (
     color_to_rgb_normalized,
     get_color,
 )
+from weldx.visualization.types import types_time
 
 
 def new_3d_figure_and_axes(
@@ -153,7 +154,7 @@ def plot_local_coordinate_system_matplotlib(
     axes: plt.Axes.axes = None,
     color: Any = None,
     label: str = None,
-    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
+    time: types_time = None,
     time_ref: pd.Timestamp = None,
     time_index: int = None,
     show_origin: bool = True,
@@ -326,7 +327,7 @@ def plot_coordinate_system_manager_matplotlib(
     coordinate_systems: List[str] = None,
     data_sets: List[str] = None,
     colors: Dict[str, int] = None,
-    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
+    time: types_time = None,
     time_ref: pd.Timestamp = None,
     title: str = None,
     limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
