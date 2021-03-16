@@ -238,7 +238,7 @@ class CoordinateSystemManager:
             systems possess a reference time. `False` otherwise
 
         """
-        return self._has_lcs_with_time_ref or (self.has_reference_time)
+        return self._has_lcs_with_time_ref or self.has_reference_time
 
     @property
     def has_reference_time(self) -> bool:
@@ -679,7 +679,9 @@ class CoordinateSystemManager:
         if self.root_system_name in mapping:
             self._root_system_name = mapping[self._root_system_name]
 
-        nx.relabel_nodes(self.graph, mapping, copy=False)
+        from networkx import relabel_nodes
+
+        relabel_nodes(self.graph, mapping, copy=False)
 
     def assign_data(
         self,
@@ -1394,10 +1396,10 @@ class CoordinateSystemManager:
         if coordinate_system_name == self._root_system_name:
             return None
 
+        from networkx import shortest_path
+
         self._check_coordinate_system_exists(coordinate_system_name)
-        path = nx.shortest_path(
-            self.graph, coordinate_system_name, self._root_system_name
-        )
+        path = shortest_path(self.graph, coordinate_system_name, self._root_system_name)
 
         return path[1]
 
