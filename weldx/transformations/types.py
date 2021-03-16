@@ -1,12 +1,15 @@
-"""shared type definitions"""
+"""shared type definitions."""
 from abc import abstractmethod
-from typing import List, Protocol, Union, runtime_checkable
+from typing import TYPE_CHECKING, List, Protocol, Union, runtime_checkable
 
 import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
 from scipy.spatial.transform import Rotation
+
+if TYPE_CHECKING:
+    import weldx
 
 types_coordinates = Union[xr.DataArray, np.ndarray, List]
 types_orientation = Union[xr.DataArray, np.ndarray, List[List], Rotation]
@@ -21,7 +24,7 @@ class SupportsTime(Protocol):
     __slots__ = ()
 
     @abstractmethod
-    def time(self):
+    def time(self):  # noqa
         raise NotImplementedError
 
 
