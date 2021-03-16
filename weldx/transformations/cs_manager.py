@@ -26,6 +26,8 @@ from .util import build_time_index
 if TYPE_CHECKING:
     import matplotlib.axes
 
+    import weldx  # noqa
+
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -1299,20 +1301,20 @@ class CoordinateSystemManager:
         Parameters
         ----------
         coordinate_system_name :
-            Name of the coordinate system
+            Name of the coordinate system.
         reference_system_name :
-            Name of the reference coordinate system
-        time : pandas.TimedeltaIndex, pandas.DatetimeIndex, pint.Quantity or str
+            Name of the reference coordinate system.
+        time :
             Specifies the desired time of the returned coordinate system. You can also
             pass the name of another coordinate system to use its time attribute as
-            reference
+            reference.
         time_ref :
-            The desired reference time of the returned coordinate system
+            The desired reference time of the returned coordinate system.
 
         Returns
         -------
-        ~weldx.transformations.LocalCoordinateSystem
-            Local coordinate system
+        lcs :
+            The requested coordinate system.
 
         """
         if reference_system_name is None:
@@ -1474,16 +1476,14 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               ~weldx.transformations.LocalCoordinateSystem
+        time :
             The target time for the interpolation. In addition to the supported
-            time formats, the function also accepts a
-            `~weldx.transformations.LocalCoordinateSystem` as
-            ``time`` source object
+            time formats, the function also accepts a LocalCoordinateSystem as
+            ``time`` source object.
         time_ref :
             A reference timestamp that can be provided if the ``time`` parameter is a
-            `pandas.TimedeltaIndex`
-        affected_coordinate_systems : str or List[str]
+            `~pandas.TimedeltaIndex`.
+        affected_coordinate_systems :
             A single coordinate system name or a list of coordinate system names that
             should be interpolated in time. Only transformations towards the systems
             root node are affected.
@@ -1738,8 +1738,7 @@ class CoordinateSystemManager:
             The title of the plot
         limits :
             The coordinate limits of the plot.
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               ~weldx.transformations.LocalCoordinateSystem
+        time :
             The time steps that should be plotted
         time_ref :
             A reference timestamp that can be provided if the ``time`` parameter is a
@@ -1945,7 +1944,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[CoordinateSystemManager]:
+        subsystems :
             A list containing previously merged `CoordinateSystemManager` instances.
 
         """
