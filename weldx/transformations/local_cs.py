@@ -53,7 +53,10 @@ class LocalCoordinateSystem:
         coordinates :
             Coordinates of the origin
         time :
-            Time data for time dependent coordinate systems
+            Time data for time dependent coordinate systems. If the provided coordinates
+            and orientations contain only a single value, the coordinate system is
+            considered to be static and the provided value won't be stored. If this
+            happens, a warning will be emitted.
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
         construction_checks :
