@@ -6,6 +6,7 @@
 
 - remove the `additionalProperties` restriction
   from `single_pass_weld-1.0.0.schema.yaml` [[#283]](https://github.com/BAMWelDX/weldx/pull/283)
+- add examples to schema files [[#274]](https://github.com/BAMWelDX/weldx/pull/274)
 
 ## 0.3.0 (12.03.2021)
 
