@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from copy import deepcopy
 from typing import TYPE_CHECKING, List, Union
 
@@ -72,6 +73,14 @@ class LocalCoordinateSystem:
         time, time_ref = build_time_index(time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
+
+        if time is not None and not (
+            "time" in coordinates.coords or "time" in orientation.coords
+        ):
+            warnings.warn(
+                "Neither the coordinates nor the orientation are time dependent. "
+                "Provided time is dropped"
+            )
 
         if construction_checks:
             ut.xr_check_coords(
