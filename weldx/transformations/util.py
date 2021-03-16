@@ -13,7 +13,7 @@ from weldx import util
 
 __all__ = [
     "build_time_index",
-    "coordinate_types",
+    "types_coordinates",
     "is_orthogonal",
     "is_orthogonal_matrix",
     "normalize",
@@ -23,7 +23,7 @@ __all__ = [
     "point_left_of_line",
     "reflection_sign",
     "scale_matrix",
-    "time_types",
+    "types_time",
     "types_time_and_lcs",
     "vector_points_to_left_of_vector",
 ]
@@ -294,7 +294,7 @@ def vector_points_to_left_of_vector(vector, vector_reference):
     return int(np.sign(np.linalg.det([vector_reference, vector])))
 
 
-coordinate_types = Union[xr.DataArray, np.ndarray, List]
+types_coordinates = Union[xr.DataArray, np.ndarray, List]
 types_orientation = Union[xr.DataArray, np.ndarray, List[List], Rot]
-time_types = Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity]
-types_time_and_lcs = Union[time_types, "weldx.transformations.LocalCoordinateSystem"]
+types_time = Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity]
+types_time_and_lcs = Union[types_time, "LocalCoordinateSystem"]

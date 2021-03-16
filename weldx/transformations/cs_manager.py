@@ -21,9 +21,9 @@ from .local_cs import LocalCoordinateSystem
 # shared type aliases
 from .util import (
     build_time_index,
-    coordinate_types,
-    time_types,
+    types_coordinates,
     types_orientation,
+    types_time,
     types_time_and_lcs,
 )
 
@@ -725,7 +725,7 @@ class CoordinateSystemManager:
         coordinate_system_name: str,
         reference_system_name: str,
         orientation: types_orientation = None,
-        coordinates: coordinate_types = None,
+        coordinates: types_coordinates = None,
         time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = None,
         time_ref: pd.Timestamp = None,
         lsc_child_in_parent: bool = True,
@@ -773,7 +773,7 @@ class CoordinateSystemManager:
         sequence,
         angles,
         degrees=False,
-        coordinates: coordinate_types = None,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -835,7 +835,7 @@ class CoordinateSystemManager:
         vec_x,
         vec_y,
         vec_z,
-        coordinates: coordinate_types = None,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -879,7 +879,7 @@ class CoordinateSystemManager:
         vec_x,
         vec_y,
         positive_orientation=True,
-        coordinates: coordinate_types = None,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -927,7 +927,7 @@ class CoordinateSystemManager:
         vec_x,
         vec_z,
         positive_orientation=True,
-        coordinates: coordinate_types = None,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -975,7 +975,7 @@ class CoordinateSystemManager:
         vec_y,
         vec_z,
         positive_orientation=True,
-        coordinates: coordinate_types = None,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -1194,7 +1194,7 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: Union[str, None] = None,
-        time: [time_types, str] = None,
+        time: [types_time, str] = None,
         time_ref: pd.Timestamp = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
@@ -1895,7 +1895,7 @@ class CoordinateSystemManager:
 
     def transform_data(
         self,
-        data: coordinate_types,
+        data: types_coordinates,
         source_coordinate_system_name: str,
         target_coordinate_system_name: str,
     ):

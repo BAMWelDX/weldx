@@ -15,10 +15,10 @@ import weldx.util as ut
 
 from .util import (
     build_time_index,
-    coordinate_types,
     normalize,
-    time_types,
+    types_coordinates,
     types_orientation,
+    types_time,
     types_time_and_lcs,
 )
 
@@ -41,8 +41,8 @@ class LocalCoordinateSystem:
     def __init__(
         self,
         orientation: types_orientation = None,
-        coordinates: coordinate_types = None,
-        time: time_types = None,
+        coordinates: types_coordinates = None,
+        time: types_time = None,
         time_ref: pd.Timestamp = None,
         construction_checks: bool = True,
     ):
