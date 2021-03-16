@@ -18,6 +18,7 @@ oneOf:
           Number or n-dimensional array that is constant in time.
         anyOf:
           - type: number
+          - type: integer
           - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
       unit:
         description: |
