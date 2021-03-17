@@ -8,6 +8,7 @@
   from `single_pass_weld-1.0.0.schema.yaml` [[#283]](https://github.com/BAMWelDX/weldx/pull/283)
 - allow scalar `integer` value in `anyOf` of `time_series-1.0.0.yaml` to
   fix [#282](https://github.com/BAMWelDX/weldx/pull/282) [[#286]](https://github.com/BAMWelDX/weldx/pull/286)
+- add examples to schema files [[#274]](https://github.com/BAMWelDX/weldx/pull/274)
 
 ## 0.3.0 (12.03.2021)
 

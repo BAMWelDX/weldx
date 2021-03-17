@@ -8,6 +8,33 @@ title: |
   Schema that describes the transformation between 2 coordinate systems.
 description: |
   TODO
+
+examples:
+  -
+    - A uniform coordinate transformation between a "base" and a "workpiece" system.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
+        name: workpiece
+        reference_system: base
+        transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0> {}
+  -
+    - |
+      A coordinate transformation describing a constant offset of -10 mm in z-direction between
+      the "tcp_wire" and "tcp_contact" systems
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
+        name: tcp_contact
+        reference_system: tcp_wire
+        transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
+          coordinates: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
+            name: coordinates
+            dimensions: [c]
+            dtype: <f8
+            data: !core/ndarray-1.0.0
+              data: [0.0, 0.0, -10.0]
+              datatype: float64
+              shape: [3]
+
 type: object
 properties:
   name:

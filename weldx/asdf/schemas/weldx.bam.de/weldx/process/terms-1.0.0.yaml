@@ -53,13 +53,13 @@ process:
             wire_feedrate:
               $ref: "#/parameters/wire_feedrate"
             pulse_voltage:
-               $ref: "#/parameters/pulse_voltage"
+              $ref: "#/parameters/pulse_voltage"
             pulse_duration:
-               $ref: "#/parameters/pulse_duration"
+              $ref: "#/parameters/pulse_duration"
             pulse_frequency:
-               $ref: "#/parameters/pulse_frequency"
+              $ref: "#/parameters/pulse_frequency"
             base_current:
-               $ref: "#/parameters/base_current"
+              $ref: "#/parameters/base_current"
           required: [wire_feedrate, pulse_voltage, pulse_duration, pulse_frequency, base_current]
         meta:
           type: object
@@ -81,13 +81,13 @@ process:
             wire_feedrate:
               $ref: "#/parameters/wire_feedrate"
             pulse_current:
-               $ref: "#/parameters/pulse_current"
+              $ref: "#/parameters/pulse_current"
             pulse_duration:
-               $ref: "#/parameters/pulse_duration"
+              $ref: "#/parameters/pulse_duration"
             pulse_frequency:
-               $ref: "#/parameters/pulse_frequency"
+              $ref: "#/parameters/pulse_frequency"
             base_current:
-               $ref: "#/parameters/base_current"
+              $ref: "#/parameters/base_current"
           required: [wire_feedrate, pulse_current, pulse_duration, pulse_frequency, base_current]
         meta:
           type: object

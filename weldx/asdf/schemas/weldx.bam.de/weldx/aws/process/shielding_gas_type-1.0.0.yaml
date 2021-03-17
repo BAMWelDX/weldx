@@ -9,6 +9,21 @@ title: |
 description: |
   Description of a gas or gas mixture used for shielding in arc welding.
 type: object
+
+examples:
+  -
+    - A shielding gas mixture of 82% argon and 18% CO2.
+    - |
+      !<tag:weldx.bam.de:weldx/aws/process/shielding_gas_type-1.0.0>
+        gas_component:
+        - !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
+          gas_chemical_name: argon
+          gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
+        - !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
+          gas_chemical_name: carbon dioxide
+          gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
+        common_name: SG
+
 properties:
   gas_component:
     description: |
