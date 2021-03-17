@@ -11,15 +11,15 @@ examples:
   -
     - A simple DHV-Groove
     - |
-        !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DHVGroove-1.0.0>
-          t: !unit/quantity-1.1.0 {unit: millimeter, value: 11}
-          beta_1: !unit/quantity-1.1.0 {unit: degree, value: 35}
-          beta_2: !unit/quantity-1.1.0 {unit: degree, value: 60}
-          b: !unit/quantity-1.1.0 {unit: millimeter, value: 3}
-          c: !unit/quantity-1.1.0 {unit: millimeter, value: 1}
-          h1: !unit/quantity-1.1.0 {unit: millimeter, value: 5}
-          h2: !unit/quantity-1.1.0 {unit: millimeter, value: 5}
-          code_number: [2.9.1, 2.9.2]
+      !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DHVGroove-1.0.0>
+        t: !unit/quantity-1.1.0 {unit: millimeter, value: 11}
+        beta_1: !unit/quantity-1.1.0 {unit: degree, value: 35}
+        beta_2: !unit/quantity-1.1.0 {unit: degree, value: 60}
+        b: !unit/quantity-1.1.0 {unit: millimeter, value: 3}
+        c: !unit/quantity-1.1.0 {unit: millimeter, value: 1}
+        h1: !unit/quantity-1.1.0 {unit: millimeter, value: 5}
+        h2: !unit/quantity-1.1.0 {unit: millimeter, value: 5}
+        code_number: [2.9.1, 2.9.2]
 
 type: object
 properties:
