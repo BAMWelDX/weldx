@@ -1699,7 +1699,7 @@ class CoordinateSystemManager:
             edgelist=stc_edges,
         )
         nx.draw_networkx_edges(
-            self._graph, pos, edgelist=tdp_edges, ax=ax, style="dashed"
+            self._graph, pos, edgelist=tdp_edges, ax=ax, edge_color="b"
         )
 
     def plot(
