@@ -156,6 +156,8 @@ class MeasurementChain:
             edge_label_text = processor.name
             if processor.func:
                 edge_label_text += f"\n{processor.func.expression}"
+            if processor.error and processor.error.deviation != 0.0:
+                edge_label_text += f"\nerr: {processor.error.deviation}"
 
             edge_labels[(p_node, c_node)] = edge_label_text
 
