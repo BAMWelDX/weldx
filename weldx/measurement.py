@@ -14,7 +14,7 @@ class Data:
     """Simple dataclass implementation for measurement data."""
 
     name: str
-    data: xr.DataArray  # skipcq: PYL-W0052
+    data: xr.DataArray  # skipcq: PTC-W0052
 
 
 @dataclass
