@@ -151,9 +151,7 @@ class IGroove(IsoBaseGroove):
         x_value = np.stack((-width, 0, 0, -width))
 
         # y-values
-        y_value = Q_([0, 0], "mm")
-        y_value = np.append(y_value, t)
-        y_value = np.append(y_value, t)
+        y_value = np.stack((0, 0, t, t))
         segment_list = ["line", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
