@@ -4,7 +4,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation as _Rotation
 
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.util import inherit_docstrings
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
