@@ -169,9 +169,10 @@ class MeasurementChain:
             with_labels=True,
             labels=signal_labels,
             font_weight="bold",
-            font_color="w",
+            font_color="k",
             node_size=3000,
-            node_color="#000000",
+            node_shape="s",
+            node_color="#bbbbbb",
         )
 
         # draw data nodes
@@ -186,7 +187,6 @@ class MeasurementChain:
             font_color="k",
             edgelist=[],
             node_size=3000,
-            node_shape="s",
             node_color="#bbbbbb",
         )
 
