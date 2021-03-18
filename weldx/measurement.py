@@ -1,7 +1,7 @@
 """Contains measurement related classes and functions."""
 
 from dataclasses import dataclass, field
-from typing import List, Union  # noqa: F401
+from typing import Dict, List, Tuple, Union  # noqa: F401
 
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -62,7 +62,55 @@ class MeasurementChain:
     data_source: Source
     data_processors: List = field(default_factory=lambda: [])
 
-    def plot(self, axes=None):
+    @staticmethod
+    def _add_node(
+        node: str,
+        parent_node: str,
+        node_label: str,
+        position: Tuple[float, float],
+        container: Tuple[DiGraph, List, Dict, Dict],
+    ):  # pragma: no cover
+        """Add a new node to several containers.
+
+        This is a helper for the plot function.
+
+        Parameters
+        ----------
+        node :
+            Name of the new node
+        parent_node :
+            Name of the parent node
+        node_label :
+            Displayed name of the node
+        position :
+            Position of the node
+        container :
+            Tuple of containers that should be updated.
+
+        """
+        [graph, node_list, labels, positions] = container
+        graph.add_node(node)
+        node_list.append(node)
+        labels[node] = node_label
+        positions[node] = position
+        if parent_node is not None:
+            graph.add_edge(parent_node, node)
+
+    def plot(self, axes: plt.Axes = None) -> plt.Axes:  # pragma: no cover
+        """Plot the measurement chain.
+
+        Parameters
+        ----------
+        axes :
+            Matplotlib axes object that should be drawn to. If None is provided, this
+            function will create one.
+
+        Returns
+        -------
+        The matplotlib axes object the graph has been drawn to
+
+        """
+
         def _signal_label(signal):
             return f"{signal.signal_type}\n[{signal.unit}]"
 
@@ -72,60 +120,76 @@ class MeasurementChain:
         axes.set_ylim(0, 1)
         axes.set_title(self.name, fontsize=20, fontweight="bold")
 
+        # create necessary containers
         graph = DiGraph()
-
-        num_nodes = len(self.data_processors) + 1
-        delta_pos = 2 / num_nodes
-        current_pos = delta_pos / 2
-
-        current_node = "node_0"
-        previous_node = current_node
-        graph.add_node(previous_node)
-
-        node_list = [current_node]
-        node_color_list = ["#55ff55"]
-        labels = {current_node: _signal_label(self.data_source.output_signal)}
-        positions = {current_node: (current_pos, 0.75)}
-
+        signal_node_list = []
+        data_node_list = []
+        signal_node_edge_list = []
+        labels = {}
+        positions = {}
         edge_labels = {}
 
+        # gather containers in tuples
+        signal_container = (graph, signal_node_list, labels, positions)
+        data_container = (graph, data_node_list, labels, positions)
+
+        # Add source signal
+        c_node = "node_0"
+        p_node = None
+        delta_pos = 2 / (len(self.data_processors) + 1)
+        x_pos = delta_pos / 2
+        label = _signal_label(self.data_source.output_signal)
+
+        self._add_node(c_node, p_node, label, (x_pos, 0.75), signal_container)
+
         for i, processor in enumerate(self.data_processors):
-            current_pos += delta_pos
-            current_node = f"node_{i+1}"
-            node_list.append(current_node)
-            node_color_list.append("#55ff55")
-            graph.add_node(current_node)
-            labels[current_node] = _signal_label(processor.output_signal)
-            positions[current_node] = (current_pos, 0.75)
+            # update node data
+            x_pos += delta_pos
+            p_node = c_node
+            c_node = f"node_{i+1}"
+            label = _signal_label(processor.output_signal)
 
-            edge = (previous_node, current_node)
-            graph.add_edge(*edge)
-            edge_labels[edge] = f"{processor.name}"
+            # add signal node and edge
+            self._add_node(c_node, p_node, label, (x_pos, 0.75), signal_container)
+            signal_node_edge_list.append((p_node, c_node))
+            edge_labels[(p_node, c_node)] = f"{processor.name}"
 
+            # add data node and edge
             if processor.output_signal.data is not None:
-                data_name = processor.output_signal.data.name
-                graph.add_node(data_name)
-                node_list.append(data_name)
-                node_color_list.append("#ffff55")
-                labels[data_name] = data_name
-                positions[data_name] = (current_pos, 0.25)
-                graph.add_edge(current_node, data_name)
+                d_name = processor.output_signal.data.name
+                self._add_node(d_name, c_node, d_name, (x_pos, 0.25), data_container)
 
-            previous_node = current_node
-
+        # draw signal nodes and all edges
         draw(
             graph,
             positions,
             axes,
-            nodelist=node_list,
+            nodelist=signal_node_list,
             with_labels=True,
             font_weight="bold",
             font_color="k",
             labels=labels,
             node_size=3000,
-            node_color=node_color_list,
+            node_color="#55ff55",
         )
+
+        # draw data nodes
+        draw(
+            graph,
+            positions,
+            axes,
+            nodelist=data_node_list,
+            with_labels=False,
+            edgelist=[],
+            node_size=3000,
+            node_shape="s",
+            node_color="#ffff55",
+        )
+
+        # draw edge labels
         draw_networkx_edge_labels(graph, positions, edge_labels, ax=axes)
+
+        return axes
 
 
 @dataclass
