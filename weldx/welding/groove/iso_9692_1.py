@@ -1429,23 +1429,10 @@ def _helperfunction(segment, array) -> geo.Shape:
             segment_list.append(seg)
             counter += 1
         if elem == "arc":
-            arr0 = [
-                # begin
-                array[0][counter].to(_DEFAULT_LEN_UNIT).magnitude,
-                # end
-                array[0][counter + 2].to(_DEFAULT_LEN_UNIT).magnitude,
-                # circle center
-                array[0][counter + 1].to(_DEFAULT_LEN_UNIT).magnitude,
-            ]
-            arr1 = [
-                # begin
-                array[1][counter].to(_DEFAULT_LEN_UNIT).magnitude,
-                # end
-                array[1][counter + 2].to(_DEFAULT_LEN_UNIT).magnitude,
-                # circle center
-                array[1][counter + 1].to(_DEFAULT_LEN_UNIT).magnitude,
-            ]
-            seg = geo.ArcSegment([arr0, arr1], False)
+            arr0 = array[0][[counter, counter + 2, counter + 1]]
+            arr1 = array[1][[counter, counter + 2, counter + 1]]
+            arr = np.vstack((arr0, arr1))
+            seg = geo.ArcSegment(arr, False)
             segment_list.append(seg)
             counter += 2
 
