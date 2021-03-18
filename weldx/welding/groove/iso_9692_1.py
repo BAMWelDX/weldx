@@ -393,8 +393,15 @@ class UVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
-        t, R, b, h, width = self.t, self.R, self.b, self.h, width_default
-        alpha, beta = self.alpha.to("rad").magnitude, self.beta.to("rad").magnitude
+        t, alpha, beta, R, b, h, width = (
+            self.t,
+            self.alpha,
+            self.beta,
+            self.R,
+            self.b,
+            self.h,
+            width_default,
+        )
 
         # calculations:
         x_1 = np.tan(alpha / 2) * h
@@ -481,7 +488,7 @@ class UGroove(IsoBaseGroove):
         """
         t, beta, R, b, c, width = (
             self.t,
-            self.beta.to("rad").magnitude,
+            self.beta,
             self.R,
             self.b,
             self.c,
@@ -592,7 +599,7 @@ class HVGroove(IsoBaseGroove):
         """
         t, beta, b, c, width = (
             self.t,
-            self.beta.to("rad").magnitude,
+            self.beta,
             self.b,
             self.c,
             width_default,
@@ -692,7 +699,7 @@ class HUGroove(IsoBaseGroove):
         """
         t, beta, R, b, c, width = (
             self.t,
-            self.beta.to("rad").magnitude,
+            self.beta,
             self.R,
             self.b,
             self.c,
@@ -800,10 +807,15 @@ class DVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t, b, c, h1, h2, width = self.t, self.b, self.c, self.h1, self.h2, width_default
-        alpha_1, alpha_2 = (
-            self.alpha_1.to("rad").magnitude,
-            self.alpha_2.to("rad").magnitude,
+        t, alpha_1, alpha_2, b, c, h1, h2, width = (
+            self.t,
+            self.alpha_1,
+            self.alpha_2,
+            self.b,
+            self.c,
+            self.h1,
+            self.h2,
+            width_default,
         )
 
         # Calculations
@@ -917,8 +929,10 @@ class DUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t, R, R2, b, c, h1, h2, width = (
+        t, beta_1, beta_2, R, R2, b, c, h1, h2, width = (
             self.t,
+            self.beta_1,
+            self.beta_2,
             self.R,
             self.R2,
             self.b,
@@ -926,10 +940,6 @@ class DUGroove(IsoBaseGroove):
             self.h1,
             self.h2,
             width_default,
-        )
-        beta_1, beta_2 = (
-            self.beta_1.to("rad").magnitude,
-            self.beta_2.to("rad").magnitude,
         )
 
         # Calculations
@@ -1257,7 +1267,7 @@ class FFGroove(IsoBaseGroove):
         elif self.code_number == "3.1.1":
             t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
             t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            alpha = self.alpha.to("rad").magnitude
+            alpha = self.alpha
             b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
             width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
@@ -1307,7 +1317,7 @@ class FFGroove(IsoBaseGroove):
         elif self.code_number == "3.1.3" or self.code_number == "4.1.1":
             t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
             t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            alpha = self.alpha.to("rad").magnitude
+            alpha = self.alpha
             b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
             width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
@@ -1333,7 +1343,7 @@ class FFGroove(IsoBaseGroove):
         elif self.code_number == "4.1.2":
             t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
             t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            alpha = self.alpha.to("rad").magnitude
+            alpha = self.alpha
             e = self.e.to(_DEFAULT_LEN_UNIT).magnitude
             width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
 
