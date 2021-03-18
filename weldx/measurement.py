@@ -153,7 +153,11 @@ class MeasurementChain:
             # add signal node and edge
             self._add_node(c_node, p_node, label, (x_pos, 0.75), signal_container)
             signal_node_edge_list.append((p_node, c_node))
-            edge_labels[(p_node, c_node)] = f"{processor.name}"
+            edge_label_text = processor.name
+            if processor.func:
+                edge_label_text += f"\n{processor.func.expression}"
+
+            edge_labels[(p_node, c_node)] = edge_label_text
 
             # add data node and edge
             if processor.output_signal.data is not None:
