@@ -1679,12 +1679,27 @@ class CoordinateSystemManager:
         pos = self._get_tree_positions_for_plot()
 
         graph = deepcopy(self._graph)  # TODO: Check if deepcopy is necessary
+
         # only plot inverted directional arrows
-        remove_edges = [edge for edge in graph.edges if graph.edges[edge]["defined"]]
-        graph.remove_edges_from(remove_edges)
+        all_edges = [edge for edge in graph.edges if not graph.edges[edge]["defined"]]
+        tdp_edges = [
+            edge
+            for edge in all_edges
+            if self.get_cs(edge[0], edge[1]).is_time_dependent
+        ]
+        stc_edges = [edge for edge in all_edges if edge not in tdp_edges]
 
         nx.draw(
-            graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
+            self._graph,
+            pos,
+            ax,
+            with_labels=True,
+            font_weight="bold",
+            node_color=color_map,
+            edgelist=stc_edges,
+        )
+        nx.draw_networkx_edges(
+            self._graph, pos, edgelist=tdp_edges, ax=ax, style="dashed"
         )
 
     def plot(
