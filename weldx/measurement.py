@@ -1,9 +1,12 @@
 """Contains measurement related classes and functions."""
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Union  # noqa: F401
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 
 import xarray as xr
+
+if TYPE_CHECKING:
+    from networkx import DiGraph
 
 
 # measurement --------------------------------------------------------------------------
@@ -66,7 +69,7 @@ class MeasurementChain:
         parent_node: str,
         node_label: str,
         position: Tuple[float, float],
-        container,
+        container: Tuple[DiGraph, List, Dict, Dict],
     ):  # pragma: no cover
         """Add a new node to several containers.
 
@@ -82,7 +85,7 @@ class MeasurementChain:
             Displayed name of the node
         position :
             Position of the node
-        container : Tuple[DiGraph, List, Dict, Dict]
+        container :
             Tuple of containers that should be updated.
 
         """
@@ -105,7 +108,8 @@ class MeasurementChain:
 
         Returns
         -------
-        The matplotlib axes object the graph has been drawn to
+        matplotlib.axes.Axes
+            The matplotlib axes object the graph has been drawn to
 
         """
         import matplotlib.pyplot as plt
