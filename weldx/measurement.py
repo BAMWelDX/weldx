@@ -69,7 +69,7 @@ class MeasurementChain:
         parent_node: str,
         node_label: str,
         position: Tuple[float, float],
-        container: Tuple[DiGraph, List, Dict, Dict],
+        container: Tuple["DiGraph", List, Dict, Dict],
     ):  # pragma: no cover
         """Add a new node to several containers.
 
