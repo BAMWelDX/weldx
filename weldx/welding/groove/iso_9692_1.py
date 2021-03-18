@@ -631,19 +631,16 @@ class HVGroove(IsoBaseGroove):
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
-
-        b = b.to(_DEFAULT_LEN_UNIT).magnitude
-        t = t.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width.to(_DEFAULT_LEN_UNIT).magnitude
         shape_h = geo.Shape()
-        shape_h.add_line_segments(
-            [
-                [-width - (b / 2), 0],
-                [-b / 2, 0],
-                [-b / 2, t],
-                [-width - (b / 2), t],
-            ]
+        arr = np.stack(
+            (
+                np.append(-width - (b / 2), 0),
+                np.append(-b / 2, 0),
+                np.append(-b / 2, t),
+                np.append(-width - (b / 2), t),
+            )
         )
+        shape_h.add_line_segments(arr)
 
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -734,14 +731,16 @@ class HUGroove(IsoBaseGroove):
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
-
         shape_h = geo.Shape()
-        width = width.to(_DEFAULT_LEN_UNIT).magnitude
-        b = b.to(_DEFAULT_LEN_UNIT).magnitude
-        t = t.to(_DEFAULT_LEN_UNIT).magnitude
-        shape_h.add_line_segments(
-            [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
+        arr = np.stack(
+            (
+                np.append(-width - (b / 2), 0),
+                np.append(-b / 2, 0),
+                np.append(-b / 2, t),
+                np.append(-width - (b / 2), t),
+            )
         )
+        shape_h.add_line_segments(arr)
 
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -1050,19 +1049,16 @@ class DHVGroove(IsoBaseGroove):
         )
         dv_profile = dv_groove.to_profile(width_default)
         right_shape = dv_profile.shapes[1]
-
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
         left_shape = geo.Shape()
-        left_shape.add_line_segments(
-            [
-                [-width_default - (b / 2), 0],
-                [-b / 2, 0],
-                [-b / 2, t],
-                [-width_default - (b / 2), t],
-            ]
+        arr = np.stack(
+            (
+                np.append(-width_default - (self.b / 2), 0),
+                np.append(-self.b / 2, 0),
+                np.append(-self.b / 2, self.t),
+                np.append(-width_default - (self.b / 2), self.t),
+            )
         )
+        left_shape.add_line_segments(arr)
 
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
@@ -1160,19 +1156,16 @@ class DHUGroove(IsoBaseGroove):
             code_number=self.code_number,
         ).to_profile(width_default)
         right_shape = du_profile.shapes[1]
-
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
         left_shape = geo.Shape()
-        left_shape.add_line_segments(
-            [
-                [-width_default - (b / 2), 0],
-                [-b / 2, 0],
-                [-b / 2, t],
-                [-width_default - (b / 2), t],
-            ]
+        arr = np.stack(
+            (
+                np.append(-width_default - (self.b / 2), 0),
+                np.append(-self.b / 2, 0),
+                np.append(-self.b / 2, self.t),
+                np.append(-width_default - (self.b / 2), self.t),
+            )
         )
+        left_shape.add_line_segments(arr)
 
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
@@ -1241,37 +1234,33 @@ class FFGroove(IsoBaseGroove):
             or self.code_number == "1.13"
             or self.code_number == "2.12"
         ):
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [
-                    [0, 0],
-                    [2 * width_default + t_1, 0],
-                    [2 * width_default + t_1, t_1],
-                    [0, t_1],
-                    [0, 0],
-                ]
+            arr1 = np.stack(
+                (
+                    np.append(0, 0),
+                    np.append(2 * width_default + self.t_1, 0),
+                    np.append(2 * width_default + self.t_1, self.t_1),
+                    np.append(0, self.t_1),
+                    np.append(0, 0),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments(
-                [
-                    [width_default, 0],
-                    [width_default + t_1, 0],
-                    [width_default + t_1, -width_default],
-                    [width_default, -width_default],
-                    [width_default, 0],
-                ]
+            arr2 = np.stack(
+                (
+                    np.append(width_default, 0),
+                    np.append(width_default + self.t_1, 0),
+                    np.append(width_default + self.t_1, -width_default),
+                    np.append(width_default, -width_default),
+                    np.append(width_default, 0),
+                )
             )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "3.1.1":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            alpha = self.alpha
-            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
-            if width_default < t_1 + 1:
+            if width_default < t_1 + Q_(1, "mm"):
                 width_default = t_1 + width_default
 
             # x = t_1
@@ -1287,39 +1276,51 @@ class FFGroove(IsoBaseGroove):
             y_3 = y_1 + y_2
 
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[t_1 + x_1, y_1], [t_1, 0], [t_1 + x_2, y_2], [t_1 + x_3, y_3]]
+            arr1 = np.stack(
+                (
+                    np.append(t_1 + x_1, y_1),
+                    np.append(t_1, 0),
+                    np.append(t_1 + x_2, y_2),
+                    np.append(t_1 + x_3, y_3),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments(
-                [[width_default, -b], [0, -b], [0, -t_2 - b], [width_default, -t_2 - b]]
+            arr2 = np.stack(
+                (
+                    np.append(width_default, -b),
+                    np.append(0, -b),
+                    np.append(0, -t_2 - b),
+                    np.append(width_default, -t_2 - b),
+                )
             )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "3.1.2":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[0, 0], [width_default, 0], [width_default, t_1], [0, t_1]]
+            arr1 = np.stack(
+                (
+                    np.append(0, 0),
+                    np.append(width_default, 0),
+                    np.append(width_default, t_1),
+                    np.append(0, t_1),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments(
-                [
-                    [0, -b],
-                    [2 * width_default, -b],
-                    [2 * width_default, -t_2 - b],
-                    [0, -t_2 - b],
-                ]
+            arr2 = np.stack(
+                (
+                    np.append(0, -b),
+                    np.append(2 * width_default, -b),
+                    np.append(2 * width_default, -t_2 - b),
+                    np.append(0, -t_2 - b),
+                )
             )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "3.1.3" or self.code_number == "4.1.1":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            alpha = self.alpha
-            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
             x = np.sin(alpha + np.pi / 2) * b + b
             y = np.cos(alpha + np.pi / 2) * b
@@ -1334,18 +1335,28 @@ class FFGroove(IsoBaseGroove):
             y_3 = y_1 + y_2 - y
 
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[-width_default, 0], [0, 0], [0, t_1], [-width_default, t_1]]
+            arr1 = np.stack(
+                (
+                    np.append(-width_default, 0),
+                    np.append(0, 0),
+                    np.append(0, t_1),
+                    np.append(-width_default, t_1),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments([[x_3, y_3], [x_1, y_1], [x, y], [x_2, y_2]])
+            arr2 = np.stack(
+                (
+                    np.append(x_3, y_3),
+                    np.append(x_1, y_1),
+                    np.append(x, y),
+                    np.append(x_2, y_2),
+                )
+            )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "4.1.2":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            alpha = self.alpha
-            e = self.e.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, alpha, e = self.t_1, self.t_2, self.alpha, self.e
 
             x_1 = np.sin(alpha) * e
             y_1 = np.cos(alpha) * e
@@ -1360,31 +1371,49 @@ class FFGroove(IsoBaseGroove):
             y_4 = y_1 + np.cos(alpha + np.pi / 2) * width_default
 
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[-width_default, 0], [0, 0], [0, t_1], [-width_default, t_1]]
+            arr1 = np.stack(
+                (
+                    np.append(-width_default, 0),
+                    np.append(0, 0),
+                    np.append(0, t_1),
+                    np.append(-width_default, t_1),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments([[x_4, y_4], [x_1, y_1], [x_2, y_2], [x_3, y_3]])
+            arr2 = np.stack(
+                (
+                    np.append(x_4, y_4),
+                    np.append(x_1, y_1),
+                    np.append(x_2, y_2),
+                    np.append(x_3, y_3),
+                )
+            )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "4.1.3":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[0, width_default], [0, 0], [t_1, 0], [t_1, width_default]]
+            arr1 = np.stack(
+                (
+                    np.append(0, width_default),
+                    np.append(0, 0),
+                    np.append(t_1, 0),
+                    np.append(t_1, width_default),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments(
-                [
-                    [-width_default, -b],
-                    [t_1 + width_default, -b],
-                    [t_1 + width_default, -t_2 - b],
-                    [-width_default, -t_2 - b],
-                    [-width_default, -b],
-                ]
+            arr2 = np.stack(
+                (
+                    np.append(-width_default, -b),
+                    np.append(t_1 + width_default, -b),
+                    np.append(t_1 + width_default, -t_2 - b),
+                    np.append(-width_default, -t_2 - b),
+                    np.append(-width_default, -b),
+                )
             )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         else:
             raise ValueError(
