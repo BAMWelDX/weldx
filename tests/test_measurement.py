@@ -4,7 +4,7 @@ import sympy
 import xarray as xr
 
 import weldx.measurement as msm
-from weldx.asdf.utils import _write_read_buffer
+from weldx.asdf.util import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression
 

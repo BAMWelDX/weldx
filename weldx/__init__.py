@@ -14,7 +14,7 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 # main modules
-import weldx.utility  # import this first to avoid circular dependencies
+import weldx.util  # import this first to avoid circular dependencies
 import weldx.core
 import weldx.geometry
 import weldx.transformations
@@ -40,19 +40,31 @@ from weldx.transformations import (
     LocalCoordinateSystem,
     WXRotation,
 )
+from weldx.welding.processes import GmawProcess
 from weldx.welding.groove.iso_9692_1 import get_groove
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    Q_([])
-
-__all__ = [
+__all__ = (
+    # major modules
     "core",
     "geometry",
+    "GmawProcess",
     "measurement",
     "transformations",
-    "utility",
+    "util",
     "asdf",
-    "Q_",
     "welding",
-]
+    # geometries
+    "ArcSegment",
+    "Geometry",
+    "LineSegment",
+    "Profile",
+    "Shape",
+    "Trace",
+    "SpatialData",
+    # coordinates
+    "LocalCoordinateSystem",
+    "CoordinateSystemManager",
+    "get_groove",
+    # quantities
+    "Q_",
+)

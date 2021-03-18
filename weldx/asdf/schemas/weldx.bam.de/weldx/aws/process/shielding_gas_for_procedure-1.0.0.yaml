@@ -5,7 +5,7 @@ id: "http://weldx.bam.de/schemas/weldx/aws/process/shielding_gas_for_procedure-1
 tag: "tag:weldx.bam.de:weldx/aws/process/shielding_gas_for_procedure-1.0.0"
 
 title: |
-  <TODO DESCRIPTION>
+  GMAW process shielding gas
 description: |
   Description of applicable gas composition and flowrates, including torch gas shielding, backing gas, and trailing gas.
 type: object

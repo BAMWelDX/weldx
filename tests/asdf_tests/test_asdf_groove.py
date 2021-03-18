@@ -2,8 +2,9 @@
 
 import matplotlib.pyplot as plt
 import pytest
+from decorator import contextmanager
 
-from weldx.asdf.utils import _write_read_buffer
+from weldx.asdf.util import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.geometry import Profile
 from weldx.welding.groove.iso_9692_1 import (
@@ -83,9 +84,6 @@ def test_asdf_groove_exceptions():
             groove_angle=Q_(50, "deg"),
         )
 
-    with pytest.raises(NotImplementedError):
-        IsoBaseGroove().to_profile()
-
     with pytest.raises(ValueError):
         get_groove(
             groove_type="FFGroove",
@@ -95,3 +93,36 @@ def test_asdf_groove_exceptions():
             root_gap=Q_(1, "mm"),
             code_number="6.1.1",
         ).to_profile()
+
+
+@pytest.mark.parametrize("groove", test_params.values(), ids=test_params.keys())
+def test_cross_section(groove):  # noqa
+    @contextmanager
+    def temp_attr(obj, attr, new_value):
+        old_value = getattr(obj, attr)
+        setattr(obj, attr, new_value)
+        yield
+        setattr(obj, attr, old_value)
+
+    groove_obj, groove_cls = groove
+    # make rasterization for U-based grooves rather rough.
+    with temp_attr(groove_obj, "_AREA_RASTER_WIDTH", 0.75):  # skipcq: PYL-E1129
+        try:
+            A = groove_obj.cross_sect_area
+        except NotImplementedError:
+            return
+        except Exception as ex:
+            raise ex
+
+    # check docstring got inherited.
+    assert groove_cls.cross_sect_area.__doc__ is not None
+
+    assert hasattr(A, "units")
+    assert A.units == Q_("mm²")
+    assert A > 0
+
+
+def test_igroove_area():  # noqa
+    groove, _ = test_params["i_groove"]
+    A = groove.cross_sect_area
+    assert A == groove.t * groove.b
