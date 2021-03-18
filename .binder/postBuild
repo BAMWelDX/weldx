@@ -3,3 +3,5 @@
 # Install required matplotlib JupyterLab extensions
 jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager k3d --debug
 jupyter lab build --minimize=False --debug
+
+python setup.py --version
