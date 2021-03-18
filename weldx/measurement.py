@@ -3,9 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Union  # noqa: F401
 
-import matplotlib.pyplot as plt
 import xarray as xr
-from networkx import DiGraph, draw, draw_networkx_edge_labels
 
 
 # measurement --------------------------------------------------------------------------
@@ -68,7 +66,7 @@ class MeasurementChain:
         parent_node: str,
         node_label: str,
         position: Tuple[float, float],
-        container: Tuple[DiGraph, List, Dict, Dict],
+        container,
     ):  # pragma: no cover
         """Add a new node to several containers.
 
@@ -84,7 +82,7 @@ class MeasurementChain:
             Displayed name of the node
         position :
             Position of the node
-        container :
+        container : Tuple[DiGraph, List, Dict, Dict]
             Tuple of containers that should be updated.
 
         """
@@ -96,7 +94,7 @@ class MeasurementChain:
         if parent_node is not None:
             graph.add_edge(parent_node, node)
 
-    def plot(self, axes: plt.Axes = None) -> plt.Axes:  # pragma: no cover
+    def plot(self, axes=None):  # pragma: no cover
         """Plot the measurement chain.
 
         Parameters
@@ -110,6 +108,8 @@ class MeasurementChain:
         The matplotlib axes object the graph has been drawn to
 
         """
+        import matplotlib.pyplot as plt
+        from networkx import DiGraph, draw, draw_networkx_edge_labels
 
         def _signal_label(signal):
             return f"{signal.signal_type}\n[{signal.unit}]"
