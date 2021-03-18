@@ -124,14 +124,15 @@ class MeasurementChain:
         graph = DiGraph()
         signal_node_list = []
         data_node_list = []
+        data_labels = {}
         signal_node_edge_list = []
-        labels = {}
+        signal_labels = {}
         positions = {}
         edge_labels = {}
 
         # gather containers in tuples
-        signal_container = (graph, signal_node_list, labels, positions)
-        data_container = (graph, data_node_list, labels, positions)
+        signal_container = (graph, signal_node_list, signal_labels, positions)
+        data_container = (graph, data_node_list, data_labels, positions)
 
         # Add source signal
         c_node = "node_0"
@@ -166,11 +167,11 @@ class MeasurementChain:
             axes,
             nodelist=signal_node_list,
             with_labels=True,
+            labels=signal_labels,
             font_weight="bold",
-            font_color="k",
-            labels=labels,
+            font_color="w",
             node_size=3000,
-            node_color="#55ff55",
+            node_color="#000000",
         )
 
         # draw data nodes
@@ -179,11 +180,14 @@ class MeasurementChain:
             positions,
             axes,
             nodelist=data_node_list,
-            with_labels=False,
+            with_labels=True,
+            labels=data_labels,
+            font_weight="bold",
+            font_color="k",
             edgelist=[],
             node_size=3000,
             node_shape="s",
-            node_color="#ffff55",
+            node_color="#bbbbbb",
         )
 
         # draw edge labels
