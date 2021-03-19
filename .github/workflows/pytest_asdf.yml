@@ -20,4 +20,4 @@ jobs:
           pip install .
       - name: run pytest
         run: |
-          pytest --asdf-tests --ignore=tests/
+          pytest --asdf-tests --ignore=tests/ --no-cov

@@ -8,6 +8,18 @@ title: |
   Schema that describes a subsystem of a local coordinate system hierarchy
 description: |
   It contains the data that is necessary to describe a subsystem.
+
+examples:
+  -
+    - A subsystem assignment of the coordinate systems workpiece, user_frame, T1 and T2.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0>
+        name: Subsystem T
+        parent_system: Base CSM
+        root_cs: workpiece
+        members: [workpiece, user_frame, T1, T2]
+        subsystem_names: []
+
 type: object
 properties:
   name:

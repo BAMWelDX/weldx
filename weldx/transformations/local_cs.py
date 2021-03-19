@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from copy import deepcopy
 from typing import TYPE_CHECKING, Union
 
@@ -59,7 +60,10 @@ class LocalCoordinateSystem:
         coordinates :
             Coordinates of the origin
         time :
-            Time data for time dependent coordinate systems
+            Time data for time dependent coordinate systems. If the provided coordinates
+            and orientations contain only a single value, the coordinate system is
+            considered to be static and the provided value won't be stored. If this
+            happens, a warning will be emitted.
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
         construction_checks :
@@ -79,6 +83,14 @@ class LocalCoordinateSystem:
         time, time_ref = build_time_index(time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
+
+        if time is not None and not (
+            "time" in coordinates.coords or "time" in orientation.coords
+        ):
+            warnings.warn(
+                "Neither the coordinates nor the orientation are time dependent. "
+                "Provided time is dropped"
+            )
 
         if construction_checks:
             ut.xr_check_coords(
