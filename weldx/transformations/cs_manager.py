@@ -1715,7 +1715,7 @@ class CoordinateSystemManager:
         ]
         stc_edges = [edge for edge in all_edges if edge not in tdp_edges]
 
-        from networkx import draw
+        from networkx import draw, draw_networkx_edges
 
         draw(
             self._graph,
@@ -1726,7 +1726,7 @@ class CoordinateSystemManager:
             node_color=color_map,
             edgelist=stc_edges,
         )
-        nx.draw_networkx_edges(
+        draw_networkx_edges(
             self._graph, pos, edgelist=tdp_edges, ax=ax, edge_color=(0.9, 0.6, 0)
         )
 
