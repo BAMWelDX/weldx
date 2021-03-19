@@ -1682,7 +1682,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        matplotlib.axes.Axes
+        matplotlib.axes.Axes :
             The matplotlib axes object the graph has been drawn to
 
         """
