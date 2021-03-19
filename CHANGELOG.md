@@ -18,11 +18,13 @@
 
 - `plot_graph` of the CSM now renders static and time-dependent edges differently
   [[#291]](https://github.com/BAMWelDX/weldx/pull/291)
+- use `pint` compatible array syntax in `IsoBaseGroove.to_profile()`
+  methods [[#189]](https://github.com/BAMWelDX/weldx/pull/189)
 
 ### fixes
 
-- A warning is now emitted if a `LocalCoordinateSystem` drops a provided time during construction. This usually happens 
-  if the coordinates and orientation only contain a single data point. 
+- A warning is now emitted if a `LocalCoordinateSystem` drops a provided time during construction. This usually happens
+  if the coordinates and orientation only contain a single data point.
   [[#285]](https://github.com/BAMWelDX/weldx/pull/285)
 
 ## 0.3.0 (12.03.2021)
