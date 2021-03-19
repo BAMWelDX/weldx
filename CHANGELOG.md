@@ -14,6 +14,11 @@
   fix [#282](https://github.com/BAMWelDX/weldx/pull/282) [[#286]](https://github.com/BAMWelDX/weldx/pull/286)
 - add examples to schema files [[#274]](https://github.com/BAMWelDX/weldx/pull/274)
 
+### changes
+
+- `plot_graph` of the CSM now renders static and time-dependent edges differently
+  [[#291]](https://github.com/BAMWelDX/weldx/pull/291)
+
 ### fixes
 
 - A warning is now emitted if a `LocalCoordinateSystem` drops a provided time during construction. This usually happens 

@@ -1670,7 +1670,22 @@ class CoordinateSystemManager:
         return pos
 
     def plot_graph(self, ax=None):
-        """Plot the graph of the coordinate system manager."""
+        """Plot the graph of the coordinate system manager.
+
+        Time dependent (orange) and static (black) edges will be rendered differently.
+
+        Parameters
+        ----------
+        ax :
+            Matplotlib axes object that should be drawn to. If None is provided, this
+            function will create one.
+
+        Returns
+        -------
+        matplotlib.axes.Axes :
+            The matplotlib axes object the graph has been drawn to
+
+        """
         if ax is None:
             from matplotlib import pylab as plt
 
@@ -1678,14 +1693,33 @@ class CoordinateSystemManager:
         color_map = []
         pos = self._get_tree_positions_for_plot()
 
-        graph = deepcopy(self._graph)  # TODO: Check if deepcopy is necessary
         # only plot inverted directional arrows
-        remove_edges = [edge for edge in graph.edges if graph.edges[edge]["defined"]]
-        graph.remove_edges_from(remove_edges)
+        all_edges = [
+            edge for edge in self._graph.edges if not self._graph.edges[edge]["defined"]
+        ]
+
+        # separate time dependent and static edges
+        tdp_edges = [
+            edge
+            for edge in all_edges
+            if self.get_cs(edge[0], edge[1]).is_time_dependent
+        ]
+        stc_edges = [edge for edge in all_edges if edge not in tdp_edges]
 
         nx.draw(
-            graph, pos, ax, with_labels=True, font_weight="bold", node_color=color_map
+            self._graph,
+            pos,
+            ax,
+            with_labels=True,
+            font_weight="bold",
+            node_color=color_map,
+            edgelist=stc_edges,
         )
+        nx.draw_networkx_edges(
+            self._graph, pos, edgelist=tdp_edges, ax=ax, edge_color=(0.9, 0.6, 0)
+        )
+
+        return ax
 
     def plot(
         self,
