@@ -1672,7 +1672,7 @@ class CoordinateSystemManager:
     def plot_graph(self, ax=None):
         """Plot the graph of the coordinate system manager.
 
-        Time dependent and static edges will be rendered differently.
+        Time dependent (orange) and static (black) edges will be rendered differently.
 
         Parameters
         ----------
@@ -1716,7 +1716,7 @@ class CoordinateSystemManager:
             edgelist=stc_edges,
         )
         nx.draw_networkx_edges(
-            self._graph, pos, edgelist=tdp_edges, ax=ax, edge_color="b"
+            self._graph, pos, edgelist=tdp_edges, ax=ax, edge_color=(0.9, 0.6, 0)
         )
 
         return ax
