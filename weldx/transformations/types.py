@@ -8,7 +8,7 @@ import pint
 import xarray as xr
 from scipy.spatial.transform import Rotation
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import weldx
 
 types_coordinates = Union[xr.DataArray, np.ndarray, List]

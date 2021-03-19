@@ -21,7 +21,7 @@ from .types import (
 )
 from .util import build_time_index, normalize
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
 __all__ = ("LocalCoordinateSystem",)

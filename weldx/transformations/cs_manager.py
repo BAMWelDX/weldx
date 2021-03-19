@@ -4,7 +4,7 @@ from __future__ import annotations
 import itertools
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union, Optional
 
 import numpy as np
 import pandas as pd
@@ -27,7 +27,7 @@ from .types import (
 from .util import build_time_index
 
 # only import heavy-weight packages on type checking
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
     import networkx as nx
 
@@ -776,7 +776,7 @@ class CoordinateSystemManager:
         reference_system_name: str,
         sequence,
         angles,
-        degrees=False,
+        degrees: bool = False,
         coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
@@ -882,7 +882,7 @@ class CoordinateSystemManager:
         reference_system_name: str,
         vec_x,
         vec_y,
-        positive_orientation=True,
+        positive_orientation: bool =True,
         coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
@@ -978,7 +978,7 @@ class CoordinateSystemManager:
         reference_system_name: str,
         vec_y,
         vec_z,
-        positive_orientation=True,
+        positive_orientation: bool = True,
         coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
@@ -1199,8 +1199,8 @@ class CoordinateSystemManager:
     def get_cs(
         self,
         coordinate_system_name: str,
-        reference_system_name: Union[str, None] = None,
-        time: [types_timeindex, str] = None,
+        reference_system_name: Optional[str] = None,
+        time: Optional[Union[types_timeindex, str]] = None,
         time_ref: pd.Timestamp = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.

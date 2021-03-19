@@ -19,7 +19,7 @@ from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import weldx.transformations as tf
 
 
