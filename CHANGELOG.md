@@ -2,6 +2,10 @@
 
 ## 0.3.1 (unreleased)
 
+### added
+
+- plot function for `MeasurementChain` [[#288]](https://github.com/BAMWelDX/weldx/pull/288)
+
 ### ASDF
 
 - remove the `additionalProperties` restriction
