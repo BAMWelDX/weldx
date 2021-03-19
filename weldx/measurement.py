@@ -1,9 +1,13 @@
 """Contains measurement related classes and functions."""
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Union  # noqa: F401
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
+
 
 import xarray as xr
+
+if TYPE_CHECKING:  # pragma: no cover
+    from networkx import DiGraph
 
 
 # measurement --------------------------------------------------------------------------
@@ -66,7 +70,7 @@ class MeasurementChain:
         parent_node: str,
         node_label: str,
         position: Tuple[float, float],
-        container,
+        container: Tuple["DiGraph", List, Dict, Dict],
     ):  # pragma: no cover
         """Add a new node to several containers.
 
@@ -82,7 +86,7 @@ class MeasurementChain:
             Displayed name of the node
         position :
             Position of the node
-        container : Tuple[DiGraph, List, Dict, Dict]
+        container :
             Tuple of containers that should be updated.
 
         """
@@ -105,7 +109,8 @@ class MeasurementChain:
 
         Returns
         -------
-        The matplotlib axes object the graph has been drawn to
+        matplotlib.axes.Axes
+            The matplotlib axes object the graph has been drawn to
 
         """
         import matplotlib.pyplot as plt
@@ -153,7 +158,13 @@ class MeasurementChain:
             # add signal node and edge
             self._add_node(c_node, p_node, label, (x_pos, 0.75), signal_container)
             signal_node_edge_list.append((p_node, c_node))
-            edge_labels[(p_node, c_node)] = f"{processor.name}"
+            edge_label_text = processor.name
+            if processor.func:
+                edge_label_text += f"\n{processor.func.expression}"
+            if processor.error and processor.error.deviation != 0.0:
+                edge_label_text += f"\nerr: {processor.error.deviation}"
+
+            edge_labels[(p_node, c_node)] = edge_label_text
 
             # add data node and edge
             if processor.output_signal.data is not None:
@@ -169,9 +180,10 @@ class MeasurementChain:
             with_labels=True,
             labels=signal_labels,
             font_weight="bold",
-            font_color="w",
+            font_color="k",
             node_size=3000,
-            node_color="#000000",
+            node_shape="s",
+            node_color="#bbbbbb",
         )
 
         # draw data nodes
@@ -186,7 +198,6 @@ class MeasurementChain:
             font_color="k",
             edgelist=[],
             node_size=3000,
-            node_shape="s",
             node_color="#bbbbbb",
         )
 
