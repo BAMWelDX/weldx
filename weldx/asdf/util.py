@@ -21,7 +21,7 @@ __all__ = [
 # asdf read/write debug tools functions ---------------------------------------
 
 
-def _write_buffer(
+def write_buffer(
     tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict = None
 ) -> BytesIO:
     """Write ASDF file into buffer.
@@ -56,7 +56,7 @@ def _write_buffer(
     return buff
 
 
-def _read_buffer(buffer: BytesIO, open_kwargs: dict = None):
+def read_buffer(buffer: BytesIO, open_kwargs: dict = None):
     """Read ASDF file contents from buffer instance.
 
     Parameters
@@ -86,7 +86,7 @@ def _read_buffer(buffer: BytesIO, open_kwargs: dict = None):
     return data
 
 
-def _write_read_buffer(
+def write_read_buffer(
     tree: dict, asdffile_kwargs=None, write_kwargs=None, open_kwargs=None
 ):
     """Perform a buffered write/read roundtrip of a tree using default ASDF settings.
@@ -109,8 +109,8 @@ def _write_read_buffer(
     dict
 
     """
-    buffer = _write_buffer(tree, asdffile_kwargs, write_kwargs)
-    return _read_buffer(buffer, open_kwargs)
+    buffer = write_buffer(tree, asdffile_kwargs, write_kwargs)
+    return read_buffer(buffer, open_kwargs)
 
 
 def get_yaml_header(file) -> str:  # pragma: no cover
@@ -139,10 +139,10 @@ def get_yaml_header(file) -> str:  # pragma: no cover
     return code
 
 
-# make read/write buffer functions public
-write_buffer = _write_buffer
-read_buffer = _read_buffer
-write_read_buffer = _write_read_buffer
+# backward compatibility, remove when adopted to public funcs in notebooks etc.
+_write_buffer = write_buffer
+_read_buffer = read_buffer
+_write_read_buffer = write_read_buffer
 
 
 def notebook_fileprinter(file, lexer="YAML"):  # pragma: no cover
