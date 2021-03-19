@@ -145,7 +145,7 @@ read_buffer = _read_buffer
 write_read_buffer = _write_read_buffer
 
 
-def notebook_fileprinter(file, lexer="YAML"):
+def notebook_fileprinter(file, lexer="YAML"):  # pragma: no cover
     """Print the code from file/BytesIO  to notebook cell with syntax highlighting.
 
     Parameters
@@ -178,7 +178,7 @@ def notebook_fileprinter(file, lexer="YAML"):
     )
 
 
-def asdf_json_repr(file, path: Tuple = None, **kwargs):
+def asdf_json_repr(file, path: Tuple = None, **kwargs):  # pragma: no cover
     """Display YAML header using IPython JSON display repr.
 
     This function works in JupyterLab.
