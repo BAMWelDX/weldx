@@ -3,7 +3,6 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 
-
 import xarray as xr
 
 if TYPE_CHECKING:  # pragma: no cover
