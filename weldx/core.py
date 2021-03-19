@@ -371,8 +371,8 @@ class TimeSeries:
             else:
                 representation += (
                     f"\nTime:\n\t{self.time}\n"
-                    + f"Values:\n\t{self.data.magnitude}\n"
-                    + f'Interpolation:\n\t{self._data.attrs["interpolation"]}\n'
+                    f"Values:\n\t{self.data.magnitude}\n"
+                    f'Interpolation:\n\t{self._data.attrs["interpolation"]}\n'
                 )
         else:
             representation += self.data.__repr__().replace(

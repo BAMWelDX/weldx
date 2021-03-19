@@ -5,7 +5,7 @@ import warnings
 from collections.abc import Iterable
 from functools import reduce
 from inspect import getmembers, isfunction
-from typing import Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -15,10 +15,12 @@ from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta6
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
-import weldx.transformations as tf
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
+
+if TYPE_CHECKING:  # pragma: no cover
+    import weldx.transformations as tf
 
 
 def ureg_check_class(*args):
@@ -268,16 +270,18 @@ def to_pandas_time_index(
 
     Returns
     -------
-    pandas.TimedeltaIndex or pandas.DatetimeIndex
+    Union[pandas.TimedeltaIndex, pandas.DatetimeIndex] :
         Time union of all input objects
 
     """
+    from weldx.transformations import LocalCoordinateSystem
+
     _input_type = type(time)
 
     if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
         return time
 
-    if isinstance(time, tf.LocalCoordinateSystem):
+    if isinstance(time, LocalCoordinateSystem):
         return to_pandas_time_index(time.time)
 
     if isinstance(time, pint.Quantity):
