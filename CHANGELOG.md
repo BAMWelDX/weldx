@@ -14,6 +14,12 @@
   fix [#282](https://github.com/BAMWelDX/weldx/pull/282) [[#286]](https://github.com/BAMWelDX/weldx/pull/286)
 - add examples to schema files [[#274]](https://github.com/BAMWelDX/weldx/pull/274)
 
+### fixes
+
+- A warning is now emitted if a `LocalCoordinateSystem` drops a provided time during construction. This usually happens 
+  if the coordinates and orientation only contain a single data point. 
+  [[#285]](https://github.com/BAMWelDX/weldx/pull/285)
+
 ## 0.3.0 (12.03.2021)
 
 ### added
