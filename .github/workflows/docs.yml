@@ -62,6 +62,7 @@ jobs:
         run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
 
       - uses: actions/upload-artifact@v1
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'release' && github.event.action == 'created')
         with:
           name: weldx-docs
           path: build/html
