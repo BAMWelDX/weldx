@@ -18,6 +18,8 @@
 
 - `plot_graph` of the CSM now renders static and time-dependent edges differently
   [[#291]](https://github.com/BAMWelDX/weldx/pull/291)
+- CSM and LCS plot function get a `scale_vectors` parameter. It scales the plotted coordinate system vectors 
+  when using matplotlib as backend [[#293]](https://github.com/BAMWelDX/weldx/pull/293)
 
 ### fixes
 
