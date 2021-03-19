@@ -20,7 +20,7 @@ _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
 
 # only import heavy-weight packages on type checking
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
 # LineSegment -----------------------------------------------------------------

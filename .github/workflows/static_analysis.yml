@@ -35,7 +35,7 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       - name: pip installs
-        run: pip install flake8==3.7.*
+        run: pip install flake8==3.8.*
       - name: run flake8
         run: |
           flake8

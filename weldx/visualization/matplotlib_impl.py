@@ -5,28 +5,32 @@ from typing import Any, Dict, List, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.axes._axes import Axes
+from matplotlib.figure import Figure
 
 import weldx.geometry as geo
+from weldx import CoordinateSystemManager, LocalCoordinateSystem
 from weldx.visualization.colors import (
     color_generator_function,
     color_int_to_rgb_normalized,
     color_to_rgb_normalized,
     get_color,
 )
+from weldx.visualization.types import types_limits, types_timeindex
 
 
 def new_3d_figure_and_axes(
     num_subplots: int = 1, height: int = 500, width: int = 500, pixel_per_inch: int = 50
-):
+) -> Tuple[Figure, Axes]:
     """Get a matplotlib figure and axes for 3d plots.
 
     Parameters
     ----------
-    num_subplots : int
+    num_subplots :
         Number of subplots (horizontal)
-    height : int
+    height :
         Height in pixels
-    width : int
+    width :
         Width in pixels
     pixel_per_inch :
         Defines how many pixels an inch covers. This is only relevant for the fallback
@@ -34,9 +38,9 @@ def new_3d_figure_and_axes(
 
     Returns
     -------
-    fig : matplotlib.figure.Figure
+    fig :
         The matplotlib figure object
-    ax : matplotlib..axes.Axes
+    matplotlib.axes.Axes :
         The matplotlib axes object
 
     """
@@ -51,7 +55,7 @@ def new_3d_figure_and_axes(
     return fig, ax
 
 
-def axes_equal(axes):
+def axes_equal(axes: Axes):
     """Adjust axis in a 3d plot to be equally scaled.
 
     Source code taken from the stackoverflow answer of 'karlo' in the
@@ -86,8 +90,8 @@ def axes_equal(axes):
 
 
 def draw_coordinate_system_matplotlib(
-    coordinate_system,
-    axes: plt.Axes.axes,
+    coordinate_system: LocalCoordinateSystem,
+    axes: Axes,
     color: Any = None,
     label: str = None,
     time_idx: int = None,
@@ -98,23 +102,23 @@ def draw_coordinate_system_matplotlib(
 
     Parameters
     ----------
-    coordinate_system : weldx.transformations.LocalCoordinateSystem
+    coordinate_system :
         Coordinate system
-    axes : matplotlib.axes.Axes
+    axes :
         Target matplotlib axes object
-    color : Any
+    color :
         Valid matplotlib color selection. The origin of the coordinate system
         will be marked with this color.
-    label : str
+    label :
         Name that appears in the legend. Only viable if a color
         was specified.
-    time_idx : int
+    time_idx :
         Selects time dependent data by index if the coordinate system has
         a time dependency.
-    show_origin : bool
+    show_origin :
         If `True`, the origin of the coordinate system will be highlighted in the
         color passed as another parameter
-    show_vectors : bool
+    show_vectors :
         If `True`, the the coordinate axes of the coordinate system are visualized
 
     """
@@ -149,50 +153,49 @@ def draw_coordinate_system_matplotlib(
 
 
 def plot_local_coordinate_system_matplotlib(
-    lcs,
-    axes: plt.Axes.axes = None,
+    lcs: LocalCoordinateSystem,
+    axes: Axes = None,
     color: Any = None,
     label: str = None,
-    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
+    time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
     time_index: int = None,
     show_origin: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
-) -> plt.Axes.axes:
+) -> Axes:
     """Visualize a `weldx.transformations.LocalCoordinateSystem` using matplotlib.
 
     Parameters
     ----------
-    lcs : weldx.transformations.LocalCoordinateSystem
+    lcs :
         The coordinate system that should be visualized
-    axes : matplotlib.axes.Axes
+    axes :
         The target matplotlib axes. If `None` is provided, a new one will be created
-    color : Any
+    color :
         An arbitrary color. The data type must be compatible with matplotlib.
-    label : str
+    label :
         Name of the coordinate system
-    time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-           ~weldx.transformations.LocalCoordinateSystem
+    time :
         The time steps that should be plotted
-    time_ref : pandas.Timestamp
+    time_ref :
         A reference timestamp that can be provided if the ``time`` parameter is a
         `pandas.TimedeltaIndex`
-    time_index : int
+    time_index :
         Index of a specific time step that should be plotted
-    show_origin : bool
+    show_origin :
         If `True`, the origin of the coordinate system will be highlighted in the
         color passed as another parameter
     show_trace :
         If `True`, the trace of a time dependent coordinate system will be visualized in
         the color passed as another parameter
-    show_vectors : bool
+    show_vectors :
         If `True`, the the coordinate axes of the coordinate system are visualized
 
     Returns
     -------
     matplotlib.axes.Axes :
-        The axes object that was used as canvas for the plot
+        The axes object that was used as canvas for the plot.
 
     """
     if axes is None:
@@ -234,21 +237,21 @@ def plot_local_coordinate_system_matplotlib(
 
 
 def _set_limits_matplotlib(
-    axes: plt.Axes.axes,
-    limits: Union[List[Tuple[float, float]], Tuple[float, float]],
+    axes: Axes,
+    limits: types_limits,
     set_axes_equal: bool = False,
 ):
     """Set the limits of an axes object.
 
     Parameters
     ----------
-    axes : matplotlib.axes.Axes
+    axes :
         The axes object
-    limits :  Tuple[float, float] or List[Tuple[float, float]]
+    limits :
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
-    set_axes_equal : bool
+    set_axes_equal :
         (matplotlib only) If `True`, all axes are adjusted to cover an equally large
          range of value. That doesn't mean, that the limits are identical
 
@@ -267,32 +270,32 @@ def _set_limits_matplotlib(
 
 def plot_coordinate_systems(
     cs_data: Tuple[str, Dict],
-    axes: plt.Axes.axes = None,
+    axes: Axes = None,
     title: str = None,
-    limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
+    limits: types_limits = None,
     time_index: int = None,
     legend_pos: str = "lower left",
-) -> plt.Axes.axes:
+) -> Axes:
     """Plot multiple coordinate systems.
 
     Parameters
     ----------
-    cs_data : Tuple[str, Dict]
+    cs_data :
         A tuple containing the coordinate system that should be plotted and a dictionary
         with the key word arguments that should be passed to its plot function.
-    axes : matplotlib.axes.Axes
+    axes :
         The target axes object that should be drawn to. If `None` is provided, a new
         one will be created.
-    title : str
+    title :
         The title of the plot
-    limits :  Tuple[float, float] or List[Tuple[float, float]]
+    limits :
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
-    time_index : int
+    time_index :
         Index of a specific time step that should be plotted if the corresponding
         coordinate system is time dependent
-    legend_pos : str
+    legend_pos :
         A string that specifies the position of the legend. See the matplotlib
         documentation for further details
 
@@ -320,69 +323,68 @@ def plot_coordinate_systems(
 
 
 def plot_coordinate_system_manager_matplotlib(
-    csm,
-    axes: plt.Axes.axes = None,
+    csm: CoordinateSystemManager,
+    axes: Axes = None,
     reference_system: str = None,
     coordinate_systems: List[str] = None,
     data_sets: List[str] = None,
     colors: Dict[str, int] = None,
-    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
+    time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
     title: str = None,
-    limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
+    limits: types_limits = None,
     set_axes_equal: bool = False,
     show_origins: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
     show_wireframe: bool = True,
-) -> plt.Axes.axes:
+) -> Axes:
     """Plot the coordinate systems of a `weldx.transformations.CoordinateSystemManager`.
 
     Parameters
     ----------
-    csm : weldx.transformations.CoordinateSystemManager
-        The `weldx.transformations.CoordinateSystemManager` that should be plotted
-    axes : matplotlib.axes.Axes
+    csm :
+        The coordinate system manager instance that should be plotted.
+    axes :
         The target axes object that should be drawn to. If `None` is provided, a new
         one will be created.
-    reference_system : str
+    reference_system :
         The name of the reference system for the plotted coordinate systems
-    coordinate_systems : List[str]
+    coordinate_systems :
         Names of the coordinate systems that should be drawn. If `None` is provided,
         all systems are plotted.
-    data_sets : List[str]
+    data_sets :
         Names of the data sets that should be drawn. If `None` is provided, all data
         is plotted.
-    colors: Dict[str, int]
+    colors :
         A mapping between a coordinate system name or a data set name and a color.
         The colors must be provided as 24 bit integer values that are divided into
         three 8 bit sections for the rgb values. For example `0xFF0000` for pure
         red.
         Each coordinate system or data set that does not have a mapping in this
         dictionary will get a default color assigned to it.
-    time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-           weldx.transformations.LocalCoordinateSystem
+    time :
         The time steps that should be plotted
-    time_ref : pandas.Timestamp
+    time_ref :
         A reference timestamp that can be provided if the ``time`` parameter is a
         `pandas.TimedeltaIndex`
-    title : str
+    title :
         The title of the plot
-    limits :  Tuple[float, float] or List[Tuple[float, float]]
+    limits :
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
-    set_axes_equal : bool
+    set_axes_equal :
         (matplotlib only) If `True`, all axes are adjusted to cover an equally large
          range of value. That doesn't mean, that the limits are identical
-    show_origins : bool
+    show_origins :
         If `True`, the origins of the coordinate system are visualized in the color
         assigned to the coordinate system.
-    show_trace : bool
+    show_trace :
         If `True`, the trace of time dependent coordinate systems is plotted.
-    show_vectors : bool
+    show_vectors :
         If `True`, the coordinate cross of time dependent coordinate systems is plotted.
-    show_wireframe : bool
+    show_wireframe :
         If `True`, the mesh is visualized as wireframe. Otherwise, it is not shown.
 
     Returns
@@ -449,28 +451,28 @@ def plot_coordinate_system_manager_matplotlib(
 
 
 def plot_spatial_data_matplotlib(
-    data,
-    axes: plt.Axes = None,
+    data: geo.SpatialData,
+    axes: Axes = None,
     color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
     label: str = None,
     show_wireframe: bool = True,
-) -> plt.Axes:
+) -> Axes:
     """Visualize a `weldx.geometry.SpatialData` instance.
 
     Parameters
     ----------
-    data : weldx.geometry.SpatialData
+    data :
         The data that should be visualized
-    axes : matplotlib.axes.Axes
+    axes :
         The target `matplotlib.axes.Axes` object of the plot. If 'None' is passed, a
         new figure will be created
-    color : Union[int, Tuple[int, int, int], Tuple[float, float, float]]
+    color :
         A 24 bit integer, a triplet of integers with a value range of 0-255
         or a triplet of floats with a value range of 0.0-1.0 that represent an RGB
         color
-    label : str
+    label :
         Label of the plotted geometry
-    show_wireframe : bool
+    show_wireframe :
         If `True`, the mesh is plotted as wireframe. Otherwise only the raster
         points are visualized. Currently, the wireframe can't be visualized if a
         `weldx.geometry.VariableProfile` is used.

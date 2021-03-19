@@ -38,9 +38,11 @@ Documentation for the installation procedure can be found `here <https://docs.co
 
 
 The package is also available on pypi.
-```console
-pip install weldx
-```
+
+::
+
+    pip install weldx
+
 
 Funding
 #######
