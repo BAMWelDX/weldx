@@ -278,9 +278,9 @@ class SpatialDataVisualizer:
             The RGB color of the coordinate system (affects trace and label) as a 24 bit
             integer value.
         visualization_method :
-            The initial data visualization method. Options are ``point``, ``mesh``, ``both``
-            and ``auto``. If ``auto`` is selected, a mesh will be drawn if triangle data is
-            available and points if not.
+            The initial data visualization method. Options are ``point``, ``mesh``,
+            ``both``and ``auto``. If ``auto`` is selected, a mesh will be drawn if
+            triangle data is available and points if not.
         show_wireframe :
             If `True`, meshes will be drawn as wireframes
 

@@ -1,6 +1,6 @@
 """Contains some functions written in matplotlib to help with visualization."""
 
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,8 +18,6 @@ from weldx.visualization.colors import (
 )
 from weldx.visualization.types import types_limits, types_timeindex
 
-if TYPE_CHECKING:
-    import matplotlib
 
 def new_3d_figure_and_axes(
     num_subplots: int = 1, height: int = 500, width: int = 500, pixel_per_inch: int = 50
