@@ -4,7 +4,7 @@ from __future__ import annotations
 import itertools
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union, Optional
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -19,8 +19,8 @@ from .local_cs import LocalCoordinateSystem
 from .types import (
     types_coordinates,
     types_orientation,
-    types_timeindex,
     types_time_and_lcs,
+    types_timeindex,
 )
 
 # shared type aliases
@@ -1199,8 +1199,8 @@ class CoordinateSystemManager:
     def get_cs(
         self,
         coordinate_system_name: str,
-        reference_system_name: Optional[str] = None,
-        time: Optional[Union[types_timeindex, str]] = None,
+        reference_system_name: str = None,
+        time: Union[types_timeindex, str] = None,
         time_ref: pd.Timestamp = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
