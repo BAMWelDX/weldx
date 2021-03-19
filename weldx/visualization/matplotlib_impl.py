@@ -119,7 +119,6 @@ def draw_coordinate_system_matplotlib(
     scale_vectors :
         A scaling factor or array to adjust the vector length
     show_origin :
-
         If `True`, the origin of the coordinate system will be highlighted in the
         color passed as another parameter
     show_vectors :
