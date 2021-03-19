@@ -522,7 +522,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        reference_time :
+        pandas.Timestamp :
             Reference time of the `CoordinateSystemManager`
 
         """
@@ -1209,6 +1209,24 @@ class CoordinateSystemManager:
         The timestamps of the returned system depend on the functions time parameter.
         By default, the time union of all involved coordinate systems is taken.
 
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system.
+        reference_system_name :
+            Name of the reference coordinate system.
+        time :
+            Specifies the desired time of the returned coordinate system. You can also
+            pass the name of another coordinate system to use its time attribute as
+            reference.
+        time_ref :
+            The desired reference time of the returned coordinate system.
+
+        Returns
+        -------
+        `~weldx.transformations.LocalCoordinateSystem` :
+            The requested coordinate system.
+
         Notes
         -----
         **Reference time of the returned system**
@@ -1301,24 +1319,6 @@ class CoordinateSystemManager:
         time steps to exceed 180 degrees. Since the SLERP always takes the shortest
         angle between 2 ``keyframes``, further interpolations wrongly change the
         rotation order.
-
-        Parameters
-        ----------
-        coordinate_system_name :
-            Name of the coordinate system.
-        reference_system_name :
-            Name of the reference coordinate system.
-        time :
-            Specifies the desired time of the returned coordinate system. You can also
-            pass the name of another coordinate system to use its time attribute as
-            reference.
-        time_ref :
-            The desired reference time of the returned coordinate system.
-
-        Returns
-        -------
-        lcs :
-            The requested coordinate system.
 
         """
         if reference_system_name is None:
@@ -1949,7 +1949,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        subsystems :
+        List[`~weldx.transformations.CoordinateSystemManager`] :
             A list containing previously merged `CoordinateSystemManager` instances.
 
         """
