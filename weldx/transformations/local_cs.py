@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 import pandas as pd
@@ -13,9 +13,16 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
-from weldx.transformations.util import build_time_index, normalize
 
-if TYPE_CHECKING:
+from .types import (
+    types_coordinates,
+    types_orientation,
+    types_time_and_lcs,
+    types_timeindex,
+)
+from .util import build_time_index, normalize
+
+if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
 __all__ = ("LocalCoordinateSystem",)
@@ -33,9 +40,9 @@ class LocalCoordinateSystem:
 
     def __init__(
         self,
-        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
+        orientation: types_orientation = None,
+        coordinates: types_coordinates = None,
+        time: types_timeindex = None,
         time_ref: pd.Timestamp = None,
         construction_checks: bool = True,
     ):
@@ -247,7 +254,7 @@ class LocalCoordinateSystem:
 
     @staticmethod
     def _build_orientation(
-        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot],
+        orientation: types_orientation,
         time: pd.DatetimeIndex = None,
     ):
         """Create xarray orientation from different formats and time-inputs.
@@ -751,13 +758,7 @@ class LocalCoordinateSystem:
 
     def interp_time(
         self,
-        time: Union[
-            pd.DatetimeIndex,
-            pd.TimedeltaIndex,
-            List[pd.Timestamp],
-            "LocalCoordinateSystem",
-            None,
-        ],
+        time: types_time_and_lcs,
         time_ref: Union[pd.Timestamp, None] = None,
     ) -> "LocalCoordinateSystem":
         """Interpolates the data in time.
@@ -832,12 +833,7 @@ class LocalCoordinateSystem:
         axes: matplotlib.axes.Axes = None,
         color: str = None,
         label: str = None,
-        time: Union[
-            pd.DatetimeIndex,
-            pd.TimedeltaIndex,
-            List[pd.Timestamp],
-            "LocalCoordinateSystem",
-        ] = None,
+        time: types_time_and_lcs = None,
         time_ref: pd.Timestamp = None,
         time_index: int = None,
         show_origin: bool = True,

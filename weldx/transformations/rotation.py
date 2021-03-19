@@ -64,43 +64,48 @@ def rotation_matrix_z(angle) -> np.ndarray:
 
 
 class WXRotation(_Rotation):
-    """Wrapper for creating meta-tagged Scipy.Rotation objects."""
+    """Wrapper for creating meta-tagged `~scipy.spatial.transform.Rotation` objects.
+
+    See `scipy.spatial.transform.Rotation` docs for details.
+    """
 
     @classmethod
-    def from_quat(cls, quat: np.ndarray) -> "WXRotation":
+    def from_quat(cls, quat: np.ndarray) -> "WXRotation":  # noqa
         """Initialize from quaternions.
 
-        scipy.spatial.transform.Rotation docs for details.
+        See `scipy.spatial.transform.Rotation.from_quat` docs for details.
         """
         rot = super().from_quat(quat)
         setattr(rot, "wx_meta", {"constructor": "from_quat"})
         return rot
 
     @classmethod
-    def from_matrix(cls, matrix: np.ndarray) -> "WXRotation":
+    def from_matrix(cls, matrix: np.ndarray) -> "WXRotation":  # noqa
         """Initialize from matrix.
 
-        scipy.spatial.transform.Rotation docs for details.
+        See `scipy.spatial.transform.Rotation.from_matrix` docs for details.
         """
         rot = super().from_matrix(matrix)
         setattr(rot, "wx_meta", {"constructor": "from_matrix"})
         return rot
 
     @classmethod
-    def from_rotvec(cls, rotvec: np.ndarray) -> "WXRotation":
+    def from_rotvec(cls, rotvec: np.ndarray) -> "WXRotation":  # noqa
         """Initialize from rotation vector.
 
-        scipy.spatial.transform.Rotation docs for details.
+        See `scipy.spatial.transform.Rotation.from_rotvec` docs for details.
         """
         rot = super().from_rotvec(rotvec)
         setattr(rot, "wx_meta", {"constructor": "from_rotvec"})
         return rot
 
     @classmethod
-    def from_euler(cls, seq: str, angles, degrees: bool = False) -> "WXRotation":
+    def from_euler(
+        cls, seq: str, angles, degrees: bool = False
+    ) -> "WXRotation":  # noqa
         """Initialize from euler angles.
 
-        scipy.spatial.transform.Rotation docs for details.
+        See `scipy.spatial.transform.Rotation.from_euler` docs for details.
         """
         rot = super().from_euler(seq=seq, angles=angles, degrees=degrees)
         setattr(

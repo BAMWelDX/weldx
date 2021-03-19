@@ -6,7 +6,6 @@ from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
-import networkx as nx
 import numpy as np
 import pandas as pd
 import pint
@@ -15,14 +14,25 @@ import xarray as xr
 from weldx import util
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.geometry import SpatialData
-from weldx.transformations.util import build_time_index
 
 from .local_cs import LocalCoordinateSystem
+from .types import (
+    types_coordinates,
+    types_orientation,
+    types_time_and_lcs,
+    types_timeindex,
+)
+
+# shared type aliases
+from .util import build_time_index
 
 # only import heavy-weight packages on type checking
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
-    from scipy.spatial.transform import Rotation as Rot
+    import networkx as nx
+
+    import weldx  # noqa
+
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -233,7 +243,7 @@ class CoordinateSystemManager:
             systems possess a reference time. `False` otherwise
 
         """
-        return self._has_lcs_with_time_ref or (self.has_reference_time)
+        return self._has_lcs_with_time_ref or self.has_reference_time
 
     @property
     def has_reference_time(self) -> bool:
@@ -512,7 +522,7 @@ class CoordinateSystemManager:
         return len(self._sub_system_data_dict)
 
     @property
-    def reference_time(self):
+    def reference_time(self) -> pd.Timestamp:
         """Get the reference time of the `CoordinateSystemManager`.
 
         Returns
@@ -674,7 +684,9 @@ class CoordinateSystemManager:
         if self.root_system_name in mapping:
             self._root_system_name = mapping[self._root_system_name]
 
-        nx.relabel_nodes(self.graph, mapping, copy=False)
+        from networkx import relabel_nodes
+
+        relabel_nodes(self.graph, mapping, copy=False)
 
     def assign_data(
         self,
@@ -686,11 +698,11 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        data : Union[xarray.DataArray, SpatialData]
+        data :
             Spatial data
-        data_name : str
+        data_name :
             Name of the data.
-        coordinate_system_name : str
+        coordinate_system_name :
             Name of the coordinate system the data should be
             assigned to.
 
@@ -716,8 +728,8 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: str,
-        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        orientation: types_orientation = None,
+        coordinates: types_coordinates = None,
         time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = None,
         time_ref: pd.Timestamp = None,
         lsc_child_in_parent: bool = True,
@@ -764,8 +776,8 @@ class CoordinateSystemManager:
         reference_system_name: str,
         sequence,
         angles,
-        degrees=False,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        degrees: bool = False,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -827,7 +839,7 @@ class CoordinateSystemManager:
         vec_x,
         vec_y,
         vec_z,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -870,8 +882,8 @@ class CoordinateSystemManager:
         reference_system_name: str,
         vec_x,
         vec_y,
-        positive_orientation=True,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        positive_orientation: bool = True,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -919,7 +931,7 @@ class CoordinateSystemManager:
         vec_x,
         vec_z,
         positive_orientation=True,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -966,8 +978,8 @@ class CoordinateSystemManager:
         reference_system_name: str,
         vec_y,
         vec_z,
-        positive_orientation=True,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
+        positive_orientation: bool = True,
+        coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -1053,11 +1065,13 @@ class CoordinateSystemManager:
             )
 
         # update subsystems
+        from networkx import shortest_path
+
         remove_systems = []
         for sub_system_name, sub_system_data in self._sub_system_data_dict.items():
             if (
                 coordinate_system_name in sub_system_data["original members"]
-            ) or coordinate_system_name in nx.shortest_path(
+            ) or coordinate_system_name in shortest_path(
                 self.graph, sub_system_data["root"], self._root_system_name
             ):
                 remove_systems += [sub_system_name]
@@ -1185,8 +1199,8 @@ class CoordinateSystemManager:
     def get_cs(
         self,
         coordinate_system_name: str,
-        reference_system_name: Union[str, None] = None,
-        time: Union[pd.TimedeltaIndex, pd.DatetimeIndex, pint.Quantity, str] = None,
+        reference_system_name: str = None,
+        time: Union[types_timeindex, str] = None,
         time_ref: pd.Timestamp = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
@@ -1199,6 +1213,24 @@ class CoordinateSystemManager:
 
         The timestamps of the returned system depend on the functions time parameter.
         By default, the time union of all involved coordinate systems is taken.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the coordinate system.
+        reference_system_name :
+            Name of the reference coordinate system.
+        time :
+            Specifies the desired time of the returned coordinate system. You can also
+            pass the name of another coordinate system to use its time attribute as
+            reference.
+        time_ref :
+            The desired reference time of the returned coordinate system.
+
+        Returns
+        -------
+        `~weldx.transformations.LocalCoordinateSystem` :
+            The requested coordinate system.
 
         Notes
         -----
@@ -1293,24 +1325,6 @@ class CoordinateSystemManager:
         angle between 2 ``keyframes``, further interpolations wrongly change the
         rotation order.
 
-        Parameters
-        ----------
-        coordinate_system_name :
-            Name of the coordinate system
-        reference_system_name :
-            Name of the reference coordinate system
-        time : pandas.TimedeltaIndex, pandas.DatetimeIndex, pint.Quantity or str
-            Specifies the desired time of the returned coordinate system. You can also
-            pass the name of another coordinate system to use its time attribute as
-            reference
-        time_ref :
-            The desired reference time of the returned coordinate system
-
-        Returns
-        -------
-        ~weldx.transformations.LocalCoordinateSystem
-            Local coordinate system
-
         """
         if reference_system_name is None:
             reference_system_name = self.get_parent_system_name(coordinate_system_name)
@@ -1325,9 +1339,9 @@ class CoordinateSystemManager:
         if coordinate_system_name == reference_system_name:
             return LocalCoordinateSystem()
 
-        path = nx.shortest_path(
-            self.graph, coordinate_system_name, reference_system_name
-        )
+        from networkx import shortest_path
+
+        path = shortest_path(self.graph, coordinate_system_name, reference_system_name)
         path_edges = list(zip(path[:-1], path[1:]))
 
         if time is None:
@@ -1387,10 +1401,10 @@ class CoordinateSystemManager:
         if coordinate_system_name == self._root_system_name:
             return None
 
+        from networkx import shortest_path
+
         self._check_coordinate_system_exists(coordinate_system_name)
-        path = nx.shortest_path(
-            self.graph, coordinate_system_name, self._root_system_name
-        )
+        path = shortest_path(self.graph, coordinate_system_name, self._root_system_name)
 
         return path[1]
 
@@ -1459,12 +1473,7 @@ class CoordinateSystemManager:
 
     def interp_time(
         self,
-        time: Union[
-            pd.DatetimeIndex,
-            pd.TimedeltaIndex,
-            List[pd.Timestamp],
-            LocalCoordinateSystem,
-        ],
+        time: types_time_and_lcs,
         time_ref: pd.Timestamp = None,
         affected_coordinate_systems: Union[str, List[str], None] = None,
         in_place: bool = False,
@@ -1476,16 +1485,14 @@ class CoordinateSystemManager:
 
         Parameters
         ----------
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               ~weldx.transformations.LocalCoordinateSystem
+        time :
             The target time for the interpolation. In addition to the supported
-            time formats, the function also accepts a
-            `~weldx.transformations.LocalCoordinateSystem` as
-            ``time`` source object
+            time formats, the function also accepts a LocalCoordinateSystem as
+            ``time`` source object.
         time_ref :
             A reference timestamp that can be provided if the ``time`` parameter is a
-            `pandas.TimedeltaIndex`
-        affected_coordinate_systems : str or List[str]
+            `~pandas.TimedeltaIndex`.
+        affected_coordinate_systems :
             A single coordinate system name or a list of coordinate system names that
             should be interpolated in time. Only transformations towards the systems
             root node are affected.
@@ -1591,7 +1598,9 @@ class CoordinateSystemManager:
                 f"Found the following common systems: {intersection}"
             )
 
-        self._graph = nx.compose(self._graph, other.graph)
+        from networkx import compose
+
+        self._graph = compose(self._graph, other.graph)
 
         subsystem_data = {
             "common node": intersection[0],
@@ -1706,7 +1715,9 @@ class CoordinateSystemManager:
         ]
         stc_edges = [edge for edge in all_edges if edge not in tdp_edges]
 
-        nx.draw(
+        from networkx import draw, draw_networkx_edges
+
+        draw(
             self._graph,
             pos,
             ax,
@@ -1715,7 +1726,7 @@ class CoordinateSystemManager:
             node_color=color_map,
             edgelist=stc_edges,
         )
-        nx.draw_networkx_edges(
+        draw_networkx_edges(
             self._graph, pos, edgelist=tdp_edges, ax=ax, edge_color=(0.9, 0.6, 0)
         )
 
@@ -1731,12 +1742,7 @@ class CoordinateSystemManager:
         colors: Dict[str, int] = None,
         title: str = None,
         limits: List[Tuple[float, float]] = None,
-        time: Union[
-            pd.DatetimeIndex,
-            pd.TimedeltaIndex,
-            List[pd.Timestamp],
-            LocalCoordinateSystem,
-        ] = None,
+        time: types_time_and_lcs = None,
         time_ref: pd.Timestamp = None,
         axes_equal: bool = False,
         show_data_labels: bool = True,
@@ -1779,8 +1785,7 @@ class CoordinateSystemManager:
             The title of the plot
         limits :
             The coordinate limits of the plot.
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               ~weldx.transformations.LocalCoordinateSystem
+        time :
             The time steps that should be plotted
         time_ref :
             A reference timestamp that can be provided if the ``time`` parameter is a
@@ -1932,7 +1937,7 @@ class CoordinateSystemManager:
 
     def transform_data(
         self,
-        data: Union[xr.DataArray, np.ndarray, List],
+        data: types_coordinates,
         source_coordinate_system_name: str,
         target_coordinate_system_name: str,
     ):
@@ -1987,7 +1992,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[CoordinateSystemManager]:
+        List[`~weldx.transformations.CoordinateSystemManager`] :
             A list containing previously merged `CoordinateSystemManager` instances.
 
         """

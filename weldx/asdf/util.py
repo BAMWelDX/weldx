@@ -21,7 +21,7 @@ __all__ = [
 # asdf read/write debug tools functions ---------------------------------------
 
 
-def _write_buffer(
+def write_buffer(
     tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict = None
 ) -> BytesIO:
     """Write ASDF file into buffer.
@@ -56,7 +56,7 @@ def _write_buffer(
     return buff
 
 
-def _read_buffer(buffer: BytesIO, open_kwargs: dict = None):
+def read_buffer(buffer: BytesIO, open_kwargs: dict = None):
     """Read ASDF file contents from buffer instance.
 
     Parameters
@@ -86,7 +86,7 @@ def _read_buffer(buffer: BytesIO, open_kwargs: dict = None):
     return data
 
 
-def _write_read_buffer(
+def write_read_buffer(
     tree: dict, asdffile_kwargs=None, write_kwargs=None, open_kwargs=None
 ):
     """Perform a buffered write/read roundtrip of a tree using default ASDF settings.
@@ -109,8 +109,8 @@ def _write_read_buffer(
     dict
 
     """
-    buffer = _write_buffer(tree, asdffile_kwargs, write_kwargs)
-    return _read_buffer(buffer, open_kwargs)
+    buffer = write_buffer(tree, asdffile_kwargs, write_kwargs)
+    return read_buffer(buffer, open_kwargs)
 
 
 def get_yaml_header(file) -> str:  # pragma: no cover
@@ -139,91 +139,89 @@ def get_yaml_header(file) -> str:  # pragma: no cover
     return code
 
 
-# make read/write buffer functions public
-write_buffer = _write_buffer
-read_buffer = _read_buffer
-write_read_buffer = _write_read_buffer
+# backward compatibility, remove when adopted to public funcs in notebooks etc.
+_write_buffer = write_buffer
+_read_buffer = read_buffer
+_write_read_buffer = write_read_buffer
 
-try:  # pragma: no cover
-    import IPython
-    from IPython.display import JSON
+
+def notebook_fileprinter(file, lexer="YAML"):  # pragma: no cover
+    """Print the code from file/BytesIO  to notebook cell with syntax highlighting.
+
+    Parameters
+    ----------
+    file
+        filename or ``BytesIO`` buffer of ASDF file
+    lexer
+        Syntax style to use
+
+    """
+    from IPython.display import HTML
     from pygments import highlight
-    from pygments.formatters import HtmlFormatter
+    from pygments.formatters.html import HtmlFormatter
     from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
-except ImportError:  # pragma: no cover
-    pass
-else:  # pragma: no cover
 
-    def notebook_fileprinter(file, lexer="YAML"):
-        """Prints the code from file/BytesIO  to notebook cell with syntax highlighting.
+    if isinstance(file, BytesIO):
+        lexer = get_lexer_by_name(lexer)
+    elif Path(file).suffix == ".asdf":
+        lexer = get_lexer_by_name("YAML")
+    else:
+        lexer = get_lexer_for_filename(file)
 
-        Parameters
-        ----------
-        file
-            filename or ``BytesIO`` buffer of ASDF file
-        lexer
-            Syntax style to use
+    code = get_yaml_header(file)
+    formatter = HtmlFormatter()
+    return HTML(
+        '<style type="text/css">{}</style>{}'.format(
+            formatter.get_style_defs(".highlight"),
+            highlight(code, lexer, formatter),
+        )
+    )
 
-        """
-        if isinstance(file, BytesIO):
-            lexer = get_lexer_by_name(lexer)
-        elif Path(file).suffix == ".asdf":
-            lexer = get_lexer_by_name("YAML")
-        else:
-            lexer = get_lexer_for_filename(file)
 
-        code = get_yaml_header(file)
+def asdf_json_repr(file, path: Tuple = None, **kwargs):  # pragma: no cover
+    """Display YAML header using IPython JSON display repr.
 
-        formatter = HtmlFormatter()
-        return IPython.display.HTML(
-            '<style type="text/css">{}</style>{}'.format(
-                formatter.get_style_defs(".highlight"),
-                highlight(code, lexer, formatter),
-            )
+    This function works in JupyterLab.
+
+    Parameters
+    ----------
+    file
+        filename or BytesIO buffer of ASDF file
+    path
+        tuple representing the lookup path in the yaml/asdf tree
+    kwargs
+        kwargs passed down to JSON constructor
+
+    Returns
+    -------
+    IPython.display.JSON
+        JSON object for rich output in JupyterLab
+
+    Examples
+    --------
+    Visualize the full tree of an existing ASDF file::
+
+        weldx.asdf.utils.asdf_json_repr("single_pass_weld_example.asdf")
+
+    Visualize a specific element in the tree structure by proving the path::
+
+        weldx.asdf.utils.asdf_json_repr(
+            "single_pass_weld_example.asdf", path=("process", "welding_process")
         )
 
-    def asdf_json_repr(file, path: Tuple = None, **kwargs):
-        """Display YAML header using IPython JSON display repr.
 
-        This function works in JupyterLab.
+    """
+    from IPython.display import JSON
 
-        Parameters
-        ----------
-        file
-            filename or BytesIO buffer of ASDF file
-        path
-            tuple representing the lookup path in the yaml/asdf tree
-        kwargs
-            kwargs passed down to JSON constructor
+    if isinstance(file, str):
+        root = file + "/"
+    else:
+        root = "/"
 
-        Returns
-        -------
-        IPython.display.JSON
-            JSON object for rich output in JupyterLab
-
-        Examples
-        --------
-        Visualize the full tree of an existing ASDF file::
-
-            weldx.asdf.utils.asdf_json_repr("single_pass_weld_example.asdf")
-
-        Visualize a specific element in the tree structure by proving the path::
-
-            weldx.asdf.utils.asdf_json_repr(
-                "single_pass_weld_example.asdf", path=("process", "welding_process")
-            )
-
-
-        """
-        if isinstance(file, str):
-            root = file + "/"
-        else:
-            root = "/"
-
-        code = get_yaml_header(file)
-        yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
-        if path:
-            root = root + "/".join(path)
-            yaml_dict = get_path(yaml_dict, path)
-        kwargs["root"] = root
-        return JSON(yaml_dict, **kwargs)
+    code = get_yaml_header(file)
+    yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
+    if path:
+        root = root + "/".join(path)
+        yaml_dict = get_path(yaml_dict, path)
+    kwargs["root"] = root
+    return JSON(yaml_dict, **kwargs)

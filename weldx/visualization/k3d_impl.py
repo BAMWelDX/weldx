@@ -1,6 +1,6 @@
 """Contains some functions to help with visualization."""
 
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Union
 
 import k3d
 import k3d.platonic as platonic
@@ -9,6 +9,7 @@ import pandas as pd
 from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
+from weldx import LocalCoordinateSystem, SpatialData
 from weldx import geometry as geo
 
 from .colors import (
@@ -19,18 +20,19 @@ from .colors import (
     color_generator_function,
     get_color,
 )
+from .types import types_limits, types_timeindex
 
 __all__ = ["CoordinateSystemManagerVisualizerK3D", "SpatialDataVisualizer"]
 
 
-def _get_coordinates_and_orientation(lcs, index: int = 0):
+def _get_coordinates_and_orientation(lcs: LocalCoordinateSystem, index: int = 0):
     """Get the coordinates and orientation of a coordinate system.
 
     Parameters
     ----------
-    lcs : weldx.LocalCoordinateSystem
+    lcs :
         The coordinate system
-    index : int
+    index :
         If the coordinate system is time dependent, the passed value is the index
         of the values that should be returned
 
@@ -60,14 +62,14 @@ def _create_model_matrix(
 
     Parameters
     ----------
-    coordinates : numpy.ndarray
+    coordinates :
         The coordinates of the origin
-    orientation : numpy.ndarray
+    orientation :
         The orientation of the coordinate system
 
     Returns
     -------
-    numpy.ndarray :
+    np.ndarray:
         The model matrix
 
     """
@@ -82,7 +84,7 @@ class CoordinateSystemVisualizerK3D:
 
     def __init__(
         self,
-        lcs,
+        lcs: LocalCoordinateSystem,
         plot: k3d.Plot = None,
         name: str = None,
         color: int = RGB_BLACK,
@@ -94,22 +96,22 @@ class CoordinateSystemVisualizerK3D:
 
         Parameters
         ----------
-        lcs : weldx.transformations.LocalCoordinateSystem
+        lcs :
             Coordinate system that should be visualized
-        plot : k3d.Plot
+        plot :
             A k3d plotting widget.
-        name : str
+        name :
             Name of the coordinate system
-        color : int
+        color :
             The RGB color of the coordinate system (affects trace and label) as a 24 bit
             integer value.
-        show_origin : bool
+        show_origin :
             If `True`, the origin of the coordinate system will be highlighted in the
             color passed as another parameter
         show_trace :
             If `True`, the trace of a time dependent coordinate system will be
             visualized in the color passed as another parameter
-        show_vectors : bool
+        show_vectors :
             If `True`, the the coordinate axes of the coordinate system are visualized
 
         """
@@ -161,9 +163,9 @@ class CoordinateSystemVisualizerK3D:
 
         Parameters
         ----------
-        coordinates : numpy.ndarray
+        coordinates :
             The new coordinates
-        orientation : numpy.ndarray
+        orientation :
             The new orientation
 
         """
@@ -178,7 +180,7 @@ class CoordinateSystemVisualizerK3D:
 
         Parameters
         ----------
-        show_label : bool
+        show_label :
             If `True`, the label will be shown
 
         """
@@ -189,7 +191,7 @@ class CoordinateSystemVisualizerK3D:
 
         Parameters
         ----------
-        show_origin : bool
+        show_origin :
             If `True`, the coordinate systems origin is shown.
 
         """
@@ -200,7 +202,7 @@ class CoordinateSystemVisualizerK3D:
 
         Parameters
         ----------
-        show_trace : bool
+        show_trace :
             If `True`, the coordinate systems' trace is shown.
 
         """
@@ -211,20 +213,20 @@ class CoordinateSystemVisualizerK3D:
 
         Parameters
         ----------
-        show_vectors : bool
+        show_vectors :
             If `True`, the coordinate axis vectors are shown.
 
         """
         self._vectors.visible = show_vectors
 
-    def update_lcs(self, lcs, index: int = 0):
+    def update_lcs(self, lcs: LocalCoordinateSystem, index: int = 0):
         """Pass a new coordinate system to the visualizer.
 
         Parameters
         ----------
-        lcs : weldx.transformations.LocalCoordinateSystem
+        lcs :
             The new coordinate system
-        index : int
+        index :
             The time index of the new coordinate system that should be visualized.
 
         """
@@ -252,7 +254,7 @@ class SpatialDataVisualizer:
 
     def __init__(
         self,
-        data,
+        data: Union[np.ndarray, SpatialData],
         name: str,
         reference_system: str,
         plot: k3d.Plot = None,
@@ -260,27 +262,27 @@ class SpatialDataVisualizer:
         visualization_method: str = "auto",
         show_wireframe: bool = False,
     ):
-        """Create a 'SpatialDataVisualizer' instance.
+        """Create a ``SpatialDataVisualizer`` instance.
 
         Parameters
         ----------
-        data : numpy.ndarray or weldx.geometry.SpatialData
+        data :
             The data that should be visualized
-        name : str
+        name :
             Name of the data
-        reference_system : str
+        reference_system :
             Name of the data's reference system
-        plot : k3d.Plot
+        plot :
             A k3d plotting widget.
-        color : int
+        color :
             The RGB color of the coordinate system (affects trace and label) as a 24 bit
             integer value.
-        visualization_method : str
-            The initial data visualization method. Options are 'point', 'mesh', 'both'
-            and 'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
-            available and points if not.
-        show_wireframe : bool
-            If 'True', meshes will be drawn as wireframes
+        visualization_method :
+            The initial data visualization method. Options are ``point``, ``mesh``,
+            ``both``and ``auto``. If ``auto`` is selected, a mesh will be drawn if
+            triangle data is available and points if not.
+        show_wireframe :
+            If `True`, meshes will be drawn as wireframes
 
         """
         triangles = None
@@ -336,8 +338,8 @@ class SpatialDataVisualizer:
         Parameters
         ----------
         method : str
-            The data visualization method. Options are 'point', 'mesh', 'both' and
-            'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
+            The data visualization method. Options are ``point``, ``mesh``, ``both`` and
+            ``auto``. If ``auto`` is selected, a mesh will be drawn if triangle data is
             available and points if not.
 
         """
@@ -399,8 +401,8 @@ class CoordinateSystemManagerVisualizerK3D:
         colors: Dict[str, int] = None,
         reference_system: str = None,
         title: str = None,
-        limits: List[Tuple[float, float]] = None,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
+        limits: types_limits = None,
+        time: types_timeindex = None,
         time_ref: pd.Timestamp = None,
         show_data_labels: bool = True,
         show_labels: bool = True,
@@ -416,43 +418,42 @@ class CoordinateSystemManagerVisualizerK3D:
         csm : weldx.transformations.CoordinateSystemManager
             The `weldx.transformations.CoordinateSystemManager` instance that should be
             visualized
-        coordinate_systems : List[str]
+        coordinate_systems :
             The names of the coordinate systems that should be visualized. If ´None´ is
             provided, all systems are plotted
-        data_sets : List[str]
+        data_sets :
             The names of data sets that should be visualized. If ´None´ is provided, all
             data is plotted
-        colors : Dict[str, int]
+        colors :
             A mapping between a coordinate system name or a data set name and a color.
             The colors must be provided as 24 bit integer values that are divided into
             three 8 bit sections for the rgb values. For example `0xFF0000` for pure
             red.
             Each coordinate system or data set that does not have a mapping in this
             dictionary will get a default color assigned to it.
-        reference_system : str
+        reference_system :
             Name of the initial reference system. If `None` is provided, the root system
             of the `weldx.transformations.CoordinateSystemManager` instance will be used
-        title : str
+        title :
             The title of the plot
-        limits : List[Tuple[float, float]]
+        limits :
             The limits of the plotted volume
-        time : pandas.DatetimeIndex, pandas.TimedeltaIndex, List[pandas.Timestamp], or \
-               weldx.transformations.LocalCoordinateSystem
+        time :
             The time steps that should be plotted initially
-        time_ref : pandas.Timestamp
+        time_ref :
             A reference timestamp that can be provided if the ``time`` parameter is a
             `pandas.TimedeltaIndex`
-        show_data_labels : bool
+        show_data_labels :
             If `True`, the data labels will be shown initially
-        show_labels  : bool
+        show_labels  :
             If `True`, the coordinate system labels will be shown initially
-        show_origins : bool
+        show_origins :
             If `True`, the coordinate systems' origins will be shown initially
-        show_traces : bool
+        show_traces :
             If `True`, the coordinate systems' traces will be shown initially
-        show_vectors : bool
+        show_vectors :
             If `True`, the coordinate systems' axis vectors will be shown initially
-        show_wireframe : bool
+        show_wireframe :
             If `True`, spatial data containing mesh data will be drawn as wireframe
 
         """
@@ -563,7 +564,7 @@ class CoordinateSystemManagerVisualizerK3D:
 
     def _create_controls(
         self,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]],
+        time: types_timeindex,
         show_data_labels: bool,
         show_labels: bool,
         show_origins: bool,
@@ -710,8 +711,8 @@ class CoordinateSystemManagerVisualizerK3D:
         Parameters
         ----------
         representation : str
-            The data visualization method. Options are 'point', 'mesh', 'both' and
-            'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
+            The data visualization method. Options are ``point``, ``mesh``, ``both`` and
+            ``auto``. If ``auto`` is selected, a mesh will be drawn if triangle data is
             available and points if not.
 
         """

@@ -1,8 +1,6 @@
 # matplotlib
 py:class matplotlib.axes.Axes
-
-# k3d
-py:class k3d.Plot
+py:class matplotlib.axes._axes.Axes
 
 # networkx
 py:class networkx.DiGraph
