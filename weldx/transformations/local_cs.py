@@ -16,8 +16,8 @@ import weldx.util as ut
 from .types import (
     types_coordinates,
     types_orientation,
-    types_timeindex,
     types_time_and_lcs,
+    types_timeindex,
 )
 from .util import build_time_index, normalize
 

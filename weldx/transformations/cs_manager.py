@@ -882,7 +882,7 @@ class CoordinateSystemManager:
         reference_system_name: str,
         vec_x,
         vec_y,
-        positive_orientation: bool =True,
+        positive_orientation: bool = True,
         coordinates: types_coordinates = None,
         time: pd.DatetimeIndex = None,
         lsc_child_in_parent: bool = True,
