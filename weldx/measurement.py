@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 
 import xarray as xr
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
+    from matplotlib.pyplot import Axes
     from networkx import DiGraph
 
 
@@ -97,7 +98,7 @@ class MeasurementChain:
         if parent_node is not None:
             graph.add_edge(parent_node, node)
 
-    def plot(self, axes=None):  # pragma: no cover
+    def plot(self, axes: "Axes" = None):  # pragma: no cover
         """Plot the measurement chain.
 
         Parameters
