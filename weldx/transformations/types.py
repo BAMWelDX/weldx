@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 
 types_coordinates = Union[xr.DataArray, np.ndarray, List]
 types_orientation = Union[xr.DataArray, np.ndarray, List[List], Rotation]
-types_time = Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity]
-types_time_and_lcs = Union[types_time, "weldx.transformations.LocalCoordinateSystem"]
+types_timeindex = Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity]
+types_time_and_lcs = Union[types_timeindex, "weldx.transformations.LocalCoordinateSystem"]
 
 
 @runtime_checkable
@@ -32,6 +32,6 @@ __all__ = [
     "SupportsTime",
     "types_coordinates",
     "types_orientation",
-    "types_time",
+    "types_timeindex",
     "types_time_and_lcs",
 ]

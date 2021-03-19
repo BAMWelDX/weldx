@@ -270,7 +270,7 @@ def to_pandas_time_index(
 
     Returns
     -------
-    union :
+    Union[pandas.TimedeltaIndex, pandas.DatetimeIndex] :
         Time union of all input objects
 
     """

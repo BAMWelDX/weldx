@@ -16,7 +16,7 @@ from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.geometry import SpatialData
 
 from .local_cs import LocalCoordinateSystem
-from .types import types_coordinates, types_orientation, types_time, types_time_and_lcs
+from .types import types_coordinates, types_orientation, types_timeindex, types_time_and_lcs
 
 # shared type aliases
 from .util import build_time_index
@@ -1195,7 +1195,7 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: Union[str, None] = None,
-        time: [types_time, str] = None,
+        time: [types_timeindex, str] = None,
         time_ref: pd.Timestamp = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.

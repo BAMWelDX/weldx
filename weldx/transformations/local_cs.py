@@ -13,7 +13,7 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
 
-from .types import types_coordinates, types_orientation, types_time, types_time_and_lcs
+from .types import types_coordinates, types_orientation, types_timeindex, types_time_and_lcs
 from .util import build_time_index, normalize
 
 if TYPE_CHECKING:
@@ -36,7 +36,7 @@ class LocalCoordinateSystem:
         self,
         orientation: types_orientation = None,
         coordinates: types_coordinates = None,
-        time: types_time = None,
+        time: types_timeindex = None,
         time_ref: pd.Timestamp = None,
         construction_checks: bool = True,
     ):

@@ -258,6 +258,7 @@ intersphinx_mapping = {
     "asdf": ("https://asdf.readthedocs.io/en/stable/", None),
     "networkx": ("https://networkx.org/documentation/stable/", None),
     "IPython": ("https://ipython.readthedocs.io/en/stable/", None),
+    "k3d": ("https://k3d-jupyter.org/",None),
 }
 
 # Disable warnings caused by a bug -----------------------------------------------------

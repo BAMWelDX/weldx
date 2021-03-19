@@ -1,11 +1,11 @@
 """Contains some functions written in matplotlib to help with visualization."""
 
-from typing import Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.axes import Axes
+from matplotlib.axes._axes import Axes
 from matplotlib.figure import Figure
 
 import weldx.geometry as geo
@@ -16,8 +16,10 @@ from weldx.visualization.colors import (
     color_to_rgb_normalized,
     get_color,
 )
-from weldx.visualization.types import types_limits, types_time
+from weldx.visualization.types import types_limits, types_timeindex
 
+if TYPE_CHECKING:
+    import matplotlib
 
 def new_3d_figure_and_axes(
     num_subplots: int = 1, height: int = 500, width: int = 500, pixel_per_inch: int = 50
@@ -40,7 +42,7 @@ def new_3d_figure_and_axes(
     -------
     fig :
         The matplotlib figure object
-    ax :
+    matplotlib.axes.Axes :
         The matplotlib axes object
 
     """
@@ -157,7 +159,7 @@ def plot_local_coordinate_system_matplotlib(
     axes: Axes = None,
     color: Any = None,
     label: str = None,
-    time: types_time = None,
+    time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
     time_index: int = None,
     show_origin: bool = True,
@@ -194,7 +196,7 @@ def plot_local_coordinate_system_matplotlib(
 
     Returns
     -------
-    ax :
+    matplotlib.axes.Axes :
         The axes object that was used as canvas for the plot.
 
     """
@@ -301,7 +303,7 @@ def plot_coordinate_systems(
 
     Returns
     -------
-    ax :
+    matplotlib.axes.Axes :
         The axes object that was used as canvas for the plot
 
     """
@@ -329,7 +331,7 @@ def plot_coordinate_system_manager_matplotlib(
     coordinate_systems: List[str] = None,
     data_sets: List[str] = None,
     colors: Dict[str, int] = None,
-    time: types_time = None,
+    time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
     title: str = None,
     limits: types_limits = None,
@@ -389,7 +391,7 @@ def plot_coordinate_system_manager_matplotlib(
 
     Returns
     -------
-    ax :
+    matplotlib.axes.Axes :
         The axes object that was used as canvas for the plot.
 
     """
@@ -479,7 +481,7 @@ def plot_spatial_data_matplotlib(
 
     Returns
     -------
-    ax :
+    matplotlib.axes.Axes :
         The `matplotlib.axes.Axes` instance that was used for the plot.
 
     """

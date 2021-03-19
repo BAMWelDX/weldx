@@ -20,7 +20,7 @@ from .colors import (
     color_generator_function,
     get_color,
 )
-from .types import types_limits, types_time
+from .types import types_limits, types_timeindex
 
 __all__ = ["CoordinateSystemManagerVisualizerK3D", "SpatialDataVisualizer"]
 
@@ -84,7 +84,7 @@ class CoordinateSystemVisualizerK3D:
 
     def __init__(
         self,
-        lcs,
+        lcs: LocalCoordinateSystem,
         plot: k3d.Plot = None,
         name: str = None,
         color: int = RGB_BLACK,
@@ -96,22 +96,22 @@ class CoordinateSystemVisualizerK3D:
 
         Parameters
         ----------
-        lcs : weldx.transformations.LocalCoordinateSystem
+        lcs :
             Coordinate system that should be visualized
-        plot : k3d.Plot
+        plot :
             A k3d plotting widget.
-        name : str
+        name :
             Name of the coordinate system
-        color : int
+        color :
             The RGB color of the coordinate system (affects trace and label) as a 24 bit
             integer value.
-        show_origin : bool
+        show_origin :
             If `True`, the origin of the coordinate system will be highlighted in the
             color passed as another parameter
         show_trace :
             If `True`, the trace of a time dependent coordinate system will be
             visualized in the color passed as another parameter
-        show_vectors : bool
+        show_vectors :
             If `True`, the the coordinate axes of the coordinate system are visualized
 
         """
@@ -262,7 +262,7 @@ class SpatialDataVisualizer:
         visualization_method: str = "auto",
         show_wireframe: bool = False,
     ):
-        """Create a 'SpatialDataVisualizer' instance.
+        """Create a ``SpatialDataVisualizer`` instance.
 
         Parameters
         ----------
@@ -278,11 +278,11 @@ class SpatialDataVisualizer:
             The RGB color of the coordinate system (affects trace and label) as a 24 bit
             integer value.
         visualization_method :
-            The initial data visualization method. Options are 'point', 'mesh', 'both'
-            and 'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
+            The initial data visualization method. Options are ``point``, ``mesh``, ``both``
+            and ``auto``. If ``auto`` is selected, a mesh will be drawn if triangle data is
             available and points if not.
         show_wireframe :
-            If 'True', meshes will be drawn as wireframes
+            If `True`, meshes will be drawn as wireframes
 
         """
         triangles = None
@@ -326,7 +326,7 @@ class SpatialDataVisualizer:
 
         Returns
         -------
-        reference_system_name :
+        str :
             Name of the reference coordinate system
 
         """
@@ -338,8 +338,8 @@ class SpatialDataVisualizer:
         Parameters
         ----------
         method : str
-            The data visualization method. Options are 'point', 'mesh', 'both' and
-            'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
+            The data visualization method. Options are ``point``, ``mesh``, ``both`` and
+            ``auto``. If ``auto`` is selected, a mesh will be drawn if triangle data is
             available and points if not.
 
         """
@@ -402,7 +402,7 @@ class CoordinateSystemManagerVisualizerK3D:
         reference_system: str = None,
         title: str = None,
         limits: types_limits = None,
-        time: types_time = None,
+        time: types_timeindex = None,
         time_ref: pd.Timestamp = None,
         show_data_labels: bool = True,
         show_labels: bool = True,
@@ -564,7 +564,7 @@ class CoordinateSystemManagerVisualizerK3D:
 
     def _create_controls(
         self,
-        time: types_time,
+        time: types_timeindex,
         show_data_labels: bool,
         show_labels: bool,
         show_origins: bool,
@@ -711,8 +711,8 @@ class CoordinateSystemManagerVisualizerK3D:
         Parameters
         ----------
         representation : str
-            The data visualization method. Options are 'point', 'mesh', 'both' and
-            'auto'. If 'auto' is selected, a mesh will be drawn if triangle data is
+            The data visualization method. Options are ``point``, ``mesh``, ``both`` and
+            ``auto``. If ``auto`` is selected, a mesh will be drawn if triangle data is
             available and points if not.
 
         """

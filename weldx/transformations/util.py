@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from weldx import util
-from weldx.transformations.types import types_time
+from weldx.transformations.types import types_timeindex
 
 __all__ = [
     "build_time_index",
@@ -23,7 +23,7 @@ __all__ = [
 
 
 def build_time_index(
-    time: types_time = None,
+    time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
 ) -> pd.TimedeltaIndex:
     """Build time index used for xarray objects.
