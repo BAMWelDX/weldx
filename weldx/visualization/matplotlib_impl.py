@@ -91,6 +91,7 @@ def draw_coordinate_system_matplotlib(
     color: Any = None,
     label: str = None,
     time_idx: int = None,
+    scale_vectors: Union[float, List, np.ndarray] = None,
     show_origin: bool = True,
     show_vectors: bool = True,
 ):
@@ -111,6 +112,8 @@ def draw_coordinate_system_matplotlib(
     time_idx : int
         Selects time dependent data by index if the coordinate system has
         a time dependency.
+    scale_vectors :
+        A scaling factor or array to adjust the vector length
     show_origin : bool
         If `True`, the origin of the coordinate system will be highlighted in the
         color passed as another parameter
@@ -133,10 +136,23 @@ def draw_coordinate_system_matplotlib(
     p_0 = dsx.coordinates
 
     if show_vectors:
-        orientation = dsx.orientation
-        p_x = p_0 + orientation[:, 0]
-        p_y = p_0 + orientation[:, 1]
-        p_z = p_0 + orientation[:, 2]
+        if scale_vectors is None:
+            tips = dsx.orientation
+        else:
+            if not isinstance(scale_vectors, np.ndarray):
+                if isinstance(scale_vectors, List):
+                    scale_vectors = np.array(scale_vectors)
+                else:
+                    scale_vectors = np.array([scale_vectors for _ in range(3)])
+
+            scale_mat = np.eye(3, 3)
+            for i in range(3):
+                scale_mat[i, i] = scale_vectors[i]
+            tips = np.matmul(scale_mat, dsx.orientation.data)
+
+        p_x = p_0 + tips[:, 0]
+        p_y = p_0 + tips[:, 1]
+        p_z = p_0 + tips[:, 2]
 
         axes.plot([p_0[0], p_x[0]], [p_0[1], p_x[1]], [p_0[2], p_x[2]], "r")
         axes.plot([p_0[0], p_y[0]], [p_0[1], p_y[1]], [p_0[2], p_y[2]], "g")
@@ -156,6 +172,7 @@ def plot_local_coordinate_system_matplotlib(
     time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, List[pd.Timestamp]] = None,
     time_ref: pd.Timestamp = None,
     time_index: int = None,
+    scale_vectors: Union[float, List, np.ndarray] = None,
     show_origin: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
@@ -180,6 +197,8 @@ def plot_local_coordinate_system_matplotlib(
         `pandas.TimedeltaIndex`
     time_index : int
         Index of a specific time step that should be plotted
+    scale_vectors :
+        A scaling factor or array to adjust the vector length
     show_origin : bool
         If `True`, the origin of the coordinate system will be highlighted in the
         color passed as another parameter
@@ -209,6 +228,7 @@ def plot_local_coordinate_system_matplotlib(
                 color=color,
                 label=label,
                 time_idx=i,
+                scale_vectors=scale_vectors,
                 show_origin=show_origin,
                 show_vectors=show_vectors,
             )
@@ -220,6 +240,7 @@ def plot_local_coordinate_system_matplotlib(
             color=color,
             label=label,
             time_idx=time_index,
+            scale_vectors=scale_vectors,
             show_origin=show_origin,
             show_vectors=show_vectors,
         )
@@ -330,6 +351,7 @@ def plot_coordinate_system_manager_matplotlib(
     time_ref: pd.Timestamp = None,
     title: str = None,
     limits: Union[List[Tuple[float, float]], Tuple[float, float]] = None,
+    scale_vectors: Union[float, List, np.ndarray] = None,
     set_axes_equal: bool = False,
     show_origins: bool = True,
     show_trace: bool = True,
@@ -372,6 +394,8 @@ def plot_coordinate_system_manager_matplotlib(
         Each tuple marks lower and upper boundary of the x, y and z axis. If only a
         single tuple is passed, the boundaries are used for all axis. If `None`
         is provided, the axis are adjusted to be of equal length.
+    scale_vectors :
+        A scaling factor or array to adjust the length of the coordinate system vectors
     set_axes_equal : bool
         (matplotlib only) If `True`, all axes are adjusted to cover an equally large
          range of value. That doesn't mean, that the limits are identical
@@ -426,6 +450,7 @@ def plot_coordinate_system_manager_matplotlib(
             axes=axes,
             color=color,
             label=lcs_name,
+            scale_vectors=scale_vectors,
             show_origin=show_origins,
             show_trace=show_trace,
             show_vectors=show_vectors,
