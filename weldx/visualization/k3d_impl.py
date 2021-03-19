@@ -69,7 +69,7 @@ def _create_model_matrix(
 
     Returns
     -------
-    matrix :
+    np.ndarray:
         The model matrix
 
     """
