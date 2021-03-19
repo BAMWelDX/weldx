@@ -1717,7 +1717,6 @@ class CoordinateSystemManager:
 
         from networkx import draw
 
-
         draw(
             self._graph,
             pos,
