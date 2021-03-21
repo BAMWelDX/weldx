@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.3.1 (unreleased)
+## 0.3.1 (21.03.2021)
 
 ### added
 
@@ -20,8 +20,8 @@
   [[#291]](https://github.com/BAMWelDX/weldx/pull/291)
 - use `pint` compatible array syntax in `IsoBaseGroove.to_profile()`
   methods [[#189]](https://github.com/BAMWelDX/weldx/pull/189)
-- CSM and LCS plot function get a `scale_vectors` parameter. It scales the plotted coordinate system vectors 
-  when using matplotlib as backend [[#293]](https://github.com/BAMWelDX/weldx/pull/293)
+- CSM and LCS plot function get a `scale_vectors` parameter. It scales the plotted coordinate system vectors when using
+  matplotlib as backend [[#293]](https://github.com/BAMWelDX/weldx/pull/293)
 
 ### fixes
 
