@@ -1745,6 +1745,7 @@ class CoordinateSystemManager:
         time: types_time_and_lcs = None,
         time_ref: pd.Timestamp = None,
         axes_equal: bool = False,
+        scale_vectors: Union[float, List, np.ndarray] = None,
         show_data_labels: bool = True,
         show_labels: bool = True,
         show_origins: bool = True,
@@ -1793,6 +1794,9 @@ class CoordinateSystemManager:
         axes_equal :
             (matplotlib only) If `True`, all axes are adjusted to cover an equally large
              range of value. That doesn't mean, that the limits are identical
+        scale_vectors :
+            (matplotlib only) A scaling factor or array to adjust the length of the
+            coordinate system vectors
         show_data_labels :
             (k3d only) If `True`, plotted data sets get labels with their names attached
             to them
@@ -1850,6 +1854,7 @@ class CoordinateSystemManager:
                 title=title,
                 limits=limits,
                 set_axes_equal=axes_equal,
+                scale_vectors=scale_vectors,
                 show_origins=show_origins,
                 show_trace=show_traces,
                 show_vectors=show_vectors,

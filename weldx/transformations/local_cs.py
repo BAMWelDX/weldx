@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, List, Union
 
 import numpy as np
 import pandas as pd
@@ -836,6 +836,7 @@ class LocalCoordinateSystem:
         time: types_time_and_lcs = None,
         time_ref: pd.Timestamp = None,
         time_index: int = None,
+        scale_vectors: Union[float, List, np.ndarray] = None,
         show_origin: bool = True,
         show_trace: bool = True,
         show_vectors: bool = True,
@@ -863,6 +864,8 @@ class LocalCoordinateSystem:
         time_index: int
             If the coordinate system is time dependent, this parameter can be used to
             to select a specific key frame by its index.
+        scale_vectors :
+            A scaling factor or array to adjust the vector length
         show_origin: bool
             If `True`, a small dot with the assigned color will mark the coordinate
             systems' origin.
@@ -883,6 +886,7 @@ class LocalCoordinateSystem:
             time=time,
             time_ref=time_ref,
             time_index=time_index,
+            scale_vectors=scale_vectors,
             show_origin=show_origin,
             show_trace=show_trace,
             show_vectors=show_vectors,
