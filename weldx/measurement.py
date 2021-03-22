@@ -8,6 +8,8 @@ import xarray as xr
 if TYPE_CHECKING:  # pragma: no cover
     from networkx import DiGraph
 
+    from weldx.core import TimeSeries
+
 
 # measurement --------------------------------------------------------------------------
 @dataclass
@@ -53,6 +55,62 @@ class Source:
     name: str
     output_signal: Signal
     error: Error
+
+
+# DRAFT SECTION START ##################################################################
+
+# todo: - remove data from signal
+#       - factory for transformations?
+#       - remove signals from transformation? -> defined by edge
+#       - which classes can be removed? -> Data
+#       - tutorial
+
+
+class MeasurementChainGraph:
+    def __init__(self, name: str, source: Source, data_processors=None):
+        from networkx import DiGraph
+
+        self._name = name
+        self._source = source
+        self._prev_added_signal = None
+
+        self._graph = DiGraph()
+        self._add_signal(node_id=source.name, signal=source.output_signal)
+
+    def _add_signal(self, node_id: str, signal: Signal):
+        self._check_node_exist(node_id)
+        self._graph.add_node(node_id, signal=signal)
+        self._prev_added_signal = node_id
+
+    def _check_node_exist(self, node_id: str):
+        if node_id in self._graph.nodes:
+            raise KeyError(
+                f"The internal graph already contains a node with the id {node_id}"
+            )
+
+    def add_transformation(
+        self, name: str, transformation: DataTransformation, input_signal_id: str = None
+    ):
+        if input_signal_id is None:
+            input_signal_id = self._prev_added_signal
+
+        if self._graph.nodes[input_signal_id]["signal"] != transformation.input_signal:
+            raise ValueError(
+                "Input signal of transformation is not compatible to signal with the "
+                f"ID '{input_signal_id}'"
+            )
+        self._add_signal(node_id=name, signal=transformation.output_signal)
+        self._graph.add_edge(input_signal_id, name, transformation=transformation)
+
+    def add_signal_data(self, name: str, data: "TimeSeries", signal_id: str = None):
+        if signal_id is None:
+            signal_id = self._prev_added_signal
+        self._check_node_exist(name)
+        self._graph.add_node(name, data=data)
+        self._graph.add_edge(signal_id, name)
+
+
+# DRAFT SECTION END ####################################################################
 
 
 @dataclass
