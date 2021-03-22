@@ -20,7 +20,7 @@ def test_deprecation_decorator():
 
     @ut.deprecated
     def _deprecated_function():
-        pass
+        return "nothing"
 
     with pytest.warns(DeprecationWarning):
         _deprecated_function()
