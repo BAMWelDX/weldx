@@ -15,6 +15,17 @@ import weldx.util as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
+def test_deprecation_decorator():
+    """Test that the deprecation decorator emits a warning as expected."""
+
+    @ut.deprecated
+    def _deprecated_function():
+        pass
+
+    with pytest.warns(DeprecationWarning):
+        _deprecated_function()
+
+
 def test_is_column_in_matrix():
     """Test the is_column_in_matrix function.
 

@@ -5,7 +5,7 @@ import warnings
 from collections.abc import Iterable
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
-from typing import TYPE_CHECKING, Any, Dict, List, Union, Callable
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -24,9 +24,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 def deprecated(func: Callable):
-    """This is a decorator which can be used to mark functions as deprecated.
+    """Mark a functions as deprecated.
 
-    It will result in a warning being emitted when the function is used.
+    This decorator emits a warning when the function is used.
 
     Notes
     -----
