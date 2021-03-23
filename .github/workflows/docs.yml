@@ -51,7 +51,7 @@ jobs:
 
       - name: install weldx kernel
         shell: bash -l {0}
-        run: ipython kernel install --user --name=weldx
+        run: jupyter kernelspec install --user tutorials/.kernels/weldx_cov --name=weldx
 
       - name: develop install
         shell: bash -l {0}
@@ -66,3 +66,6 @@ jobs:
         with:
           name: weldx-docs
           path: build/html
+
+      - name: codecov.io
+        uses: codecov/codecov-action@v1
