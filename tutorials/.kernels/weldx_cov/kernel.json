@@ -6,7 +6,7 @@
   "--concurrency=multiprocessing",
   "-p",
   "--rcfile",
-  "../setup.cfg",
+  "setup.cfg",
   "-m",
   "ipykernel_launcher",
   "-f",
