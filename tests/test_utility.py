@@ -18,7 +18,7 @@ from weldx.constants import WELDX_QUANTITY as Q_
 def test_deprecation_decorator():
     """Test that the deprecation decorator emits a warning as expected."""
 
-    @ut.deprecated
+    @ut.deprecated(since="3.1.0", removed="4.0.0", message="Use something else")
     def _deprecated_function():
         return "nothing"
 

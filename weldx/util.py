@@ -23,15 +23,19 @@ if TYPE_CHECKING:  # pragma: no cover
     import weldx.transformations as tf
 
 
-def deprecated(func: Callable) -> Callable:
+def deprecated(since: str = None, removed: str = None, message: str = None) -> Callable:
     """Mark a functions as deprecated.
 
     This decorator emits a warning when the function is used.
 
     Parameters
     ----------
-    func :
-        The wrapped function
+    since :
+        The version that marked the function as deprecated
+    removed :
+        The version that will remove the function
+    message :
+        Additional information that should be added to the warning
 
     Returns
     -------
@@ -44,18 +48,29 @@ def deprecated(func: Callable) -> Callable:
 
     """
 
-    @wraps(func)
-    def _new_func(*args, **kwargs):
-        warnings.simplefilter("always", DeprecationWarning)  # turn off filter
-        warnings.warn(
-            "Call to deprecated function {}.".format(func.__name__),
-            category=DeprecationWarning,
-            stacklevel=2,
-        )
-        warnings.simplefilter("default", DeprecationWarning)  # reset filter
-        return func(*args, **kwargs)
+    def _decorator(func):
+        @wraps(func)
+        def _new_func(*args, **kwargs):
+            wm = f"Call to deprecated function {func.__name__}.\n"
+            if since is not None:
+                wm += f"Deprecated since: {since}\n"
+            if removed is not None:
+                wm += f"Removed in: {removed}\n"
+            if message is not None:
+                wm += message
 
-    return _new_func
+            warnings.simplefilter("always", DeprecationWarning)  # turn off filter
+            warnings.warn(
+                wm,
+                category=DeprecationWarning,
+                stacklevel=2,
+            )
+            warnings.simplefilter("default", DeprecationWarning)  # reset filter
+            return func(*args, **kwargs)
+
+        return _new_func
+
+    return _decorator
 
 
 def ureg_check_class(*args):
