@@ -1,0 +1,17 @@
+{
+ "argv": [
+  "python",
+  "-m",
+  "coverage", "run",
+  "--concurrency=multiprocessing",
+  "-p",
+  "--rcfile",
+  "../setup.cfg",
+  "-m",
+  "ipykernel_launcher",
+  "-f",
+  "{connection_file}"
+ ],
+ "display_name": "weldx_cov",
+ "language": "python"
+}
