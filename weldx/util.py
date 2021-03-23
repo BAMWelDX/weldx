@@ -23,19 +23,24 @@ if TYPE_CHECKING:  # pragma: no cover
     import weldx.transformations as tf
 
 
-def deprecated(func: Callable):
+def deprecated(func: Callable) -> Callable:
     """Mark a functions as deprecated.
 
     This decorator emits a warning when the function is used.
-
-    Notes
-    -----
-    Original source: https://stackoverflow.com/a/30253848/6700329
 
     Parameters
     ----------
     func :
         The wrapped function
+
+    Returns
+    -------
+    Callable :
+        Wrapped function
+
+    Notes
+    -----
+    Original source: https://stackoverflow.com/a/30253848/6700329
 
     """
 
