@@ -8,7 +8,7 @@ import xarray as xr
 if TYPE_CHECKING:  # pragma: no cover
     from networkx import DiGraph
 
-    from weldx.core import TimeSeries
+    from weldx.core import MathematicalExpression, TimeSeries
 
 
 # measurement --------------------------------------------------------------------------
@@ -67,19 +67,30 @@ class Source:
 
 
 class MeasurementChainGraph:
-    def __init__(self, name: str, source: Source, data_processors=None):
+    def __init__(
+        self,
+        name: str,
+        source_name: str,
+        source_error: Error,
+        output_signal_type: str,
+        output_signal_unit: str,
+    ):
         from networkx import DiGraph
 
         self._name = name
-        self._source = source
+        self._source = {"name": source_name, "error": source_error}
         self._prev_added_signal = None
 
         self._graph = DiGraph()
-        self._add_signal(node_id=source.name, signal=source.output_signal)
+        self._add_signal(
+            node_id=source_name, signal_type=output_signal_type, unit=output_signal_unit
+        )
 
-    def _add_signal(self, node_id: str, signal: Signal):
+    def _add_signal(self, node_id: str, signal_type: str, unit: str):
         self._check_node_exist(node_id)
-        self._graph.add_node(node_id, signal=signal)
+        if signal_type not in ["analog", "digital"]:
+            raise ValueError(f"{signal_type} is an invalid signal type.")
+        self._graph.add_node(node_id, signal_type=signal_type, unit=unit)
         self._prev_added_signal = node_id
 
     def _check_node_exist(self, node_id: str):
@@ -89,18 +100,21 @@ class MeasurementChainGraph:
             )
 
     def add_transformation(
-        self, name: str, transformation: DataTransformation, input_signal_id: str = None
+        self,
+        name: str,
+        error: Error,
+        output_signal_type: str,
+        output_signal_unit: str,
+        function: "MathematicalExpression" = None,
+        input_signal_id: str = None,
     ):
         if input_signal_id is None:
             input_signal_id = self._prev_added_signal
 
-        if self._graph.nodes[input_signal_id]["signal"] != transformation.input_signal:
-            raise ValueError(
-                "Input signal of transformation is not compatible to signal with the "
-                f"ID '{input_signal_id}'"
-            )
-        self._add_signal(node_id=name, signal=transformation.output_signal)
-        self._graph.add_edge(input_signal_id, name, transformation=transformation)
+        self._add_signal(
+            node_id=name, signal_type=output_signal_type, unit=output_signal_unit
+        )
+        self._graph.add_edge(input_signal_id, name, error=error, function=function)
 
     def add_signal_data(self, name: str, data: "TimeSeries", signal_id: str = None):
         if signal_id is None:
