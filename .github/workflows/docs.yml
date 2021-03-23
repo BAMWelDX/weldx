@@ -60,8 +60,8 @@ jobs:
       - name: Build docs
         shell: bash -l {0}
         run: |
-          mkdir build
-          cp setup.cfg build/
+          mkdir doc/build/doctrees/nbsphinx/tutorials
+          cp setup.cfg doc/build/doctrees/nbsphinx/tutorials/
           sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
 
       - uses: actions/upload-artifact@v1
