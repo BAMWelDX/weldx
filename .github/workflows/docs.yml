@@ -59,10 +59,7 @@ jobs:
 
       - name: Build docs
         shell: bash -l {0}
-        run: |
-          mkdir doc/build/doctrees/nbsphinx/tutorials
-          cp setup.cfg doc/build/doctrees/nbsphinx/tutorials/
-          sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
+        run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
 
       - uses: actions/upload-artifact@v1
         if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'release' && github.event.action == 'created')

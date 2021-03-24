@@ -39,12 +39,14 @@ from weldx.asdf.constants import WELDX_TAG_BASE
 # -- copy files to doc folder -------------------------------------------------
 doc_dir = pathlib.Path(".")
 changelog_file = pathlib.Path("./../CHANGELOG.md")
+setup_cfg = pathlib.Path("./../setup.cfg")
 shutil.copy(changelog_file, doc_dir)
 
 tutorials_dir = pathlib.Path("./tutorials")
 tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
 for f in tutorial_files:
     shutil.copy(f, tutorials_dir)
+shutil.copy(setup_cfg, tutorials_dir)
 
 
 # -- Project information -----------------------------------------------------
@@ -69,9 +71,9 @@ extensions = [
     "recommonmark",
     "sphinxcontrib.napoleon",
     "nbsphinx",
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.intersphinx",
+   # "sphinx.ext.autodoc",
+   # "sphinx.ext.autosummary",
+    #"sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
     "sphinx_asdf",
