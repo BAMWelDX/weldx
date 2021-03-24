@@ -42,11 +42,11 @@ jobs:
 
       - name: pip installs
         run: |
-          pip install pytest pytest-cov pytest-xdist setuptools_scm
+          pip install pytest pytest-cov pytest-xdist setuptools_scm nbval
           pip install -e .
       - name: run pytest
         run: |
-          pytest --runslow -n2
+          pytest --runslow -n2 --dist loadscope --nbval --nb-coverage
           echo "Exited with '$?'"
           coverage xml
 
