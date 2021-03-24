@@ -51,29 +51,18 @@ jobs:
 
       - name: install weldx kernel
         shell: bash -l {0}
-        run: jupyter kernelspec install --user tutorials/.kernels/weldx_cov --name=weldx_cov
+        run: ipython kernel install --user --name=weldx
 
       - name: develop install
         shell: bash -l {0}
         run: pip install -e .
 
-      - name: install coverage
-        shell: bash -l {0}
-        run: mamba install coverage
-
       - name: Build docs
         shell: bash -l {0}
-        run: |
-          sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -D nbsphinx_kernel_name="weldx_cov"
-          ls -alhR doc/
+        run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
 
       - uses: actions/upload-artifact@v1
         if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'release' && github.event.action == 'created')
         with:
           name: weldx-docs
           path: build/html
-
-      - name: codecov.io
-        uses: codecov/codecov-action@v1
-        with:
-          directory: doc/tutorials
