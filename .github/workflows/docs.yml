@@ -57,6 +57,10 @@ jobs:
         shell: bash -l {0}
         run: pip install -e .
 
+      - name: install coverage
+        shell: bash -l {0}
+        run: mamba install coverage
+
       - name: Build docs
         shell: bash -l {0}
         run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -D nbsphinx_kernel_name="weldx_cov"
