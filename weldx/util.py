@@ -23,6 +23,10 @@ if TYPE_CHECKING:  # pragma: no cover
     import weldx.transformations as tf
 
 
+class WeldxDeprecationWarning(DeprecationWarning):
+    """Deprecation warning type."""
+
+
 def deprecated(since: str = None, removed: str = None, message: str = None) -> Callable:
     """Mark a functions as deprecated.
 
@@ -59,13 +63,7 @@ def deprecated(since: str = None, removed: str = None, message: str = None) -> C
             if message is not None:
                 wm += message
 
-            warnings.simplefilter("always", DeprecationWarning)  # turn off filter
-            warnings.warn(
-                wm,
-                category=DeprecationWarning,
-                stacklevel=2,
-            )
-            warnings.simplefilter("default", DeprecationWarning)  # reset filter
+            warnings.warn(wm, category=WeldxDeprecationWarning, stacklevel=2)
             return func(*args, **kwargs)
 
         return _new_func

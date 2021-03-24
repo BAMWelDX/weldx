@@ -22,7 +22,7 @@ def test_deprecation_decorator():
     def _deprecated_function():
         return "nothing"
 
-    with pytest.warns(DeprecationWarning):
+    with pytest.warns(ut.WeldxDeprecationWarning):
         _deprecated_function()
 
 
