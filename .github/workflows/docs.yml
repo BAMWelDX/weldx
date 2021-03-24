@@ -64,7 +64,7 @@ jobs:
       - name: Build docs
         shell: bash -l {0}
         run: |
-          sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -D nbsphinx_kernel_name="weldx_cov"
+          sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -D nbsphinx_kernel_name="weldx_cov" -j2
           ls -alhR doc/
 
       - uses: actions/upload-artifact@v1
