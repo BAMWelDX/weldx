@@ -47,7 +47,9 @@ jobs:
           pip install -e .
       - name: run pytest
         run: |
-          pytest --runslow -n2 --dist loadscope --nbval --nb-coverage
+          pytest -n2 --dist loadscope --nbval --nb-coverage tutorials/
+          pytest --runslow -n2 --cov-append tests/
+
           echo "Exited with '$?'"
           coverage xml
 
