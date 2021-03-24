@@ -69,3 +69,5 @@ jobs:
 
       - name: codecov.io
         uses: codecov/codecov-action@v1
+        with:
+          directory: doc/tutorials
