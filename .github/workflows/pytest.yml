@@ -47,7 +47,7 @@ jobs:
           pip install -e .
       - name: run pytest
         run: |
-          pytest -n2 --dist loadscope --nbval --cov=weldx tutorials/
+          pytest -n2 --dist loadscope --nbval --cov=weldx --current-env tutorials/
           pytest --runslow -n2 --cov-append --cov=weldx tests/
 
           echo "Exited with '$?'"
