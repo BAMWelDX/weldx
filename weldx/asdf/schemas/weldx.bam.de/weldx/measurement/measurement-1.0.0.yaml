@@ -13,9 +13,9 @@ properties:
   data:
     type: array
     items:
-      $ref: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
+      tag: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
   measurement_chain:
-    $ref: "tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0"
+    tag: "tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0"
 
 
 propertyOrder: [name, data, measurement_chain]

@@ -57,7 +57,7 @@ properties:
   content:
     description: |
       The content of the file. It is stored in the binary block of the file.
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
   content_hash:
     description: |
       Hash data for the files content.
