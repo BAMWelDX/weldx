@@ -1,0 +1,21 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/weldx/core/graph/edge-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/graph/edge-1.0.0"
+
+title: |
+  Graph edge.
+description: |
+  A graph edge.
+
+type: object
+properties:
+  inverted:
+    type: boolean
+  target_node:
+    tag: "tag:weldx.bam.de:weldx/core/graph/node-1.0.0"
+
+required: [target_node]
+propertyOrder: [inverted, target_node]
+...
