@@ -46,9 +46,7 @@ jobs:
       - name: pip installs
         if: steps.cache_${{ runner.os }}.outputs.cache-hit != 'true'
         run: |
-          pip install wheel
-          pip install pytest-cov pytest-xdist setuptools_scm nbval
-          pip install -e .
+          pip install -e .[test]
       - name: run pytest
         run: |
           pytest -n2 --dist loadscope --nbval --current-env tutorials/
