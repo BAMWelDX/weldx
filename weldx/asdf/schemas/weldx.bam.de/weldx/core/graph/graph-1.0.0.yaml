@@ -9,30 +9,6 @@ title: |
 description: |
   A directed graph.
 
-
-definitions:
-  node:
-    type: object
-    properties:
-      name:
-        type: string
-      edges:
-        type: array
-        items:
-          $ref: "#/definitions/edge"
-    required: [name, edges]
-
-  edge:
-    type: object
-    properties:
-      inverted:
-        type: boolean
-      target_node:
-        type: object
-        $ref: "#/definitions/node"
-    required: [target_node]
-
-
 type: object
 properties:
   name:

@@ -192,33 +192,6 @@ class GraphTypeASDF(WeldxType):
     types = [nx.DiGraph]
     requires = ["weldx"]
 
-    # @classmethod
-    # def build_node(cls, graph, name, parent=None):
-    #     """Recursively build a tree structure starting from node ``name``."""
-    #     node = Node(name=name, edges=[])
-    #     for n in graph.neighbors(name):
-    #         if not n == parent:
-    #             child_node = cls.build_node(graph, n, parent=name)
-    #             edge = Edge(child_node)
-    #             node.edges.append(edge)
-    #     for n in graph.predecessors(name):
-    #         if not n == parent:
-    #             child_node = cls.build_node(graph, n, parent=name)
-    #             edge = Edge(child_node, inverted=True)
-    #             node.edges.append(edge)
-    #     node.attributes = graph.nodes[name]  # add node attributes
-    #     return node
-
-    # @classmethod
-    # def add_nodes(cls, graph: nx.DiGraph, current_node: Node):
-    #     """Doc."""
-    #     for edge in current_node.edges:
-    #         if edge.inverted:
-    #             graph.add_edge(edge.target_node.name, current_node.name)
-    #         else:
-    #             graph.add_edge(current_node.name, edge.target_node.name)
-    #         cls.add_nodes(graph, edge.target_node)
-
     @classmethod
     def to_tree(cls, node: nx.DiGraph, ctx):
         """Doc."""
