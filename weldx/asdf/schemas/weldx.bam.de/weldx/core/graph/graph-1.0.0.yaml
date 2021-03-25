@@ -1,20 +1,44 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/weldx/core/graph/graph-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/core/graph/graph-1.0.0"
 tag: "tag:weldx.bam.de:weldx/core/graph/graph-1.0.0"
 
 title: |
   Graph edge.
 description: |
-  A graph edge.
+  A directed graph.
+
+
+definitions:
+  node:
+    type: object
+    properties:
+      name:
+        type: string
+      edges:
+        type: array
+        items:
+          $ref: "#/definitions/edge"
+    required: [name, edges]
+
+  edge:
+    type: object
+    properties:
+      inverted:
+        type: boolean
+      target_node:
+        type: object
+        $ref: "#/definitions/node"
+    required: [target_node]
+
 
 type: object
 properties:
   name:
     type: string
   root_node:
-    tag: "tag:weldx.bam.de:weldx/core/graph/node-1.0.0"
+    $ref: "#/definitions/node"
 
 required: [root_node]
 propertyOrder: [name, root_node]
