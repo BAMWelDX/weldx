@@ -6,6 +6,9 @@
 
 - `weldx.util.deprecated` decorator [[#295]](https://github.com/BAMWelDX/weldx/pull/295)
 
+### dependencies
+
+- restrict `scipy!=1.6.0,scipy!=1.6.1`  [[#300]](https://github.com/BAMWelDX/weldx/pull/300)
 
 ## 0.3.1 (21.03.2021)
 
