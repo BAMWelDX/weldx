@@ -100,7 +100,7 @@ class Edge:
 
     target_node: "Node"
     attributes: dict = field(default_factory=dict)
-    inverted: bool = None
+    direction: str = "fwd"
 
 
 class EdgeTypeASDF(WeldxType):
@@ -165,7 +165,7 @@ def build_node(graph, name, parent=None):
     for n in graph.predecessors(name):
         if not n == parent:
             child_node = build_node(graph, n, parent=name)
-            edge = Edge(child_node, attributes=graph.edges[n, name], inverted=True)
+            edge = Edge(child_node, attributes=graph.edges[n, name], direction="bwd")
             node.edges.append(edge)
     node.attributes = graph.nodes[name]  # add node attributes
     return node
@@ -177,7 +177,7 @@ def add_nodes(graph: nx.DiGraph, current_node: Node):
     graph.add_node(name, **current_node.attributes)
     for edge in current_node.edges:
         attr = edge.attributes
-        if edge.inverted:
+        if edge.direction == "bwd":
             graph.add_edge(edge.target_node.name, name, **attr)
         else:
             graph.add_edge(name, edge.target_node.name, **attr)

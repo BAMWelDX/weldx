@@ -11,8 +11,9 @@ description: |
 
 type: object
 properties:
-  inverted:
-    type: boolean
+  direction:
+    type: string
+    enum: [fwd, bwd]
   target_node:
     tag: "tag:weldx.bam.de:weldx/core/graph/node-1.0.0"
   attributes:

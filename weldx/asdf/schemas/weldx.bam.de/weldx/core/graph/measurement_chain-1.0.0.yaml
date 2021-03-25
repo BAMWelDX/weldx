@@ -38,6 +38,8 @@ definitions:
             required: [signal_transform]
           target_node:
             $ref: "#/definitions/signal_node"
+          direction:
+            enum: [fwd]
         required: [attributes]
 
 type: object
