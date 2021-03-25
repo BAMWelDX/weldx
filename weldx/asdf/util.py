@@ -113,7 +113,7 @@ def write_read_buffer(
     return read_buffer(buffer, open_kwargs)
 
 
-def get_yaml_header(file) -> str:  # pragma: no cover
+def get_yaml_header(file) -> str:
     """Read the YAML header part (excluding binary sections) of an ASDF file.
 
     Parameters
@@ -145,7 +145,7 @@ _read_buffer = read_buffer
 _write_read_buffer = write_read_buffer
 
 
-def notebook_fileprinter(file, lexer="YAML"):  # pragma: no cover
+def notebook_fileprinter(file, lexer="YAML"):
     """Print the code from file/BytesIO  to notebook cell with syntax highlighting.
 
     Parameters
@@ -178,7 +178,7 @@ def notebook_fileprinter(file, lexer="YAML"):  # pragma: no cover
     )
 
 
-def asdf_json_repr(file, path: Tuple = None, **kwargs):  # pragma: no cover
+def asdf_json_repr(file, path: Tuple = None, **kwargs):
     """Display YAML header using IPython JSON display repr.
 
     This function works in JupyterLab.
