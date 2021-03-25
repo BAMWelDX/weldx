@@ -18,7 +18,7 @@ jobs:
 
       - uses: actions/cache@v2
         if: startsWith(runner.os, 'Linux')
-        id: cache_linux
+        id: cache_Linux
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/cache@v2
         if: startsWith(runner.os, 'macOS')
-        id: cache_osx
+        id: cache_macOS
         with:
           path: ~/Library/Caches/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
@@ -36,7 +36,7 @@ jobs:
 
       - uses: actions/cache@v2
         if: startsWith(runner.os, 'Windows')
-        id: cache_win
+        id: cache_Windows
         with:
           path: ~\AppData\Local\pip\Cache
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: pip installs
-        if: ${{ (steps.cache_linux.outputs.cache-hit != 'true') || (steps.cache_osx.outputs.cache-hit != 'true') || (steps.cache_win.outputs.cache_hit != 'true') }}
+        if: ${{ (steps.cache_{{runner.os}}.outputs.cache-hit != 'true') }} 
         run: |
           pip install wheel
           pip install pytest-cov pytest-xdist setuptools_scm nbval
