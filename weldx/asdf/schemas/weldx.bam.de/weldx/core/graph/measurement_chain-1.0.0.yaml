@@ -23,6 +23,7 @@ definitions:
             type: array
             items:
               $ref: "#/definitions/signal_transform_edge"
+#            maxItems: 1
         required: [attributes]
 
   signal_transform_edge:
@@ -38,8 +39,8 @@ definitions:
             required: [signal_transform]
           target_node:
             $ref: "#/definitions/signal_node"
-          direction:
-            enum: [fwd]
+#          direction:
+#            enum: [fwd]
         required: [attributes]
 
 type: object
