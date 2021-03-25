@@ -1,0 +1,49 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/graph/measurement_chain-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/graph/measurement_chain-1.0.0"
+
+title: |
+  measurement_chain
+
+definitions:
+  signal_node:
+    allOf:
+      - tag: "tag:weldx.bam.de:weldx/core/graph/node-1.0.0"
+      - type: object
+        properties:
+          attributes:
+            type: object
+            properties:
+              signal:
+                tag: "tag:weldx.bam.de:weldx/core/graph/signal-1.0.0"
+            required: [signal]
+          edges:
+            type: array
+            items:
+              $ref: "#/definitions/signal_transform_edge"
+        required: [attributes]
+
+  signal_transform_edge:
+    allOf:
+      - tag: "tag:weldx.bam.de:weldx/core/graph/edge-1.0.0"
+      - type: object
+        properties:
+          attributes:
+            type: object
+            properties:
+              signal_transform:
+                tag: "tag:weldx.bam.de:weldx/core/graph/signal_transform-1.0.0"
+            required: [signal_transform]
+          target_node:
+            $ref: "#/definitions/signal_node"
+        required: [attributes]
+
+type: object
+properties:
+  root_node:
+    $ref: "#/definitions/signal_node"
+
+required: [root_node]
+...

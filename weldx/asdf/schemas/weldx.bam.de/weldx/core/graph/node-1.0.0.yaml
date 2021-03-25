@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/weldx/core/graph/node-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/core/graph/node-1.0.0"
 tag: "tag:weldx.bam.de:weldx/core/graph/node-1.0.0"
 
 title: |
@@ -17,7 +17,9 @@ properties:
     type: array
     items:
       tag: "tag:weldx.bam.de:weldx/core/graph/edge-1.0.0"
+  attributes:
+    type: object
 
 required: [name, edges]
-propertyOrder: [name, edges]
+propertyOrder: [name, attributes, edges]
 ...
