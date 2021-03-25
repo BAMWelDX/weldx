@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: pip installs
-        if: ${{ (steps.cache_{{runner.os}}.outputs.cache-hit != 'true') }} 
+        if: steps.cache_${{ runner.os }}.outputs.cache-hit != 'true'
         run: |
           pip install wheel
           pip install pytest-cov pytest-xdist setuptools_scm nbval
