@@ -3,9 +3,9 @@
 import math
 import warnings
 from collections.abc import Iterable
-from functools import reduce
+from functools import reduce, wraps
 from inspect import getmembers, isfunction
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -21,6 +21,54 @@ from weldx.core import MathematicalExpression, TimeSeries
 
 if TYPE_CHECKING:  # pragma: no cover
     import weldx.transformations as tf
+
+
+class WeldxDeprecationWarning(DeprecationWarning):
+    """Deprecation warning type."""
+
+
+def deprecated(since: str = None, removed: str = None, message: str = None) -> Callable:
+    """Mark a functions as deprecated.
+
+    This decorator emits a warning when the function is used.
+
+    Parameters
+    ----------
+    since :
+        The version that marked the function as deprecated
+    removed :
+        The version that will remove the function
+    message :
+        Additional information that should be added to the warning
+
+    Returns
+    -------
+    Callable :
+        Wrapped function
+
+    Notes
+    -----
+    Original source: https://stackoverflow.com/a/30253848/6700329
+
+    """
+
+    def _decorator(func):
+        @wraps(func)
+        def _new_func(*args, **kwargs):
+            wm = f"Call to deprecated function {func.__name__}.\n"
+            if since is not None:
+                wm += f"Deprecated since: {since}\n"
+            if removed is not None:
+                wm += f"Removed in: {removed}\n"
+            if message is not None:
+                wm += message
+
+            warnings.warn(wm, category=WeldxDeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+
+        return _new_func
+
+    return _decorator
 
 
 def ureg_check_class(*args):

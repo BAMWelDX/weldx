@@ -1,5 +1,12 @@
 # Release Notes
 
+## 0.3.2 (unreleased)
+
+### added
+
+- `weldx.util.deprecated` decorator [[#295]](https://github.com/BAMWelDX/weldx/pull/295)
+
+
 ## 0.3.1 (21.03.2021)
 
 ### added
