@@ -34,6 +34,7 @@ properties:
     description: |
       Percentage by weight this gas occupies of the total gas mixture.
     tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+    wx_unit: "percent"
 
 
 
