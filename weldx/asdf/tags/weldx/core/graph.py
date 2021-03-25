@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Dict, List
 
 import networkx as nx
 
@@ -22,42 +22,6 @@ class Node:
     edges: List["Edge"]
 
 
-class EdgeTypeASDF(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "core/graph/edge"
-    version = "1.0.0"
-    types = [Edge]
-    requires = ["weldx"]
-
-    @classmethod
-    def to_tree(cls, node: Edge, ctx):
-        """convert to python dict"""
-        return node.__dict__
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        return Edge(**tree)
-
-
-class NodeTypeASDF(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "core/graph/node"
-    version = "1.0.0"
-    types = [Node]
-    requires = ["weldx"]
-
-    @classmethod
-    def to_tree(cls, node: Node, ctx):
-        """convert to python dict"""
-        return node.__dict__
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        return Node(**tree)
-
-
 class GraphTypeASDF(WeldxType):
     """Serialization class for `networkx.DiGraph`."""
 
@@ -73,21 +37,21 @@ class GraphTypeASDF(WeldxType):
         for n in graph.neighbors(name):
             if not n == parent:
                 child_node = cls.build_node(graph, n, parent=name)
-                node.edges.append(Edge(child_node))
+                node.edges.append(Edge(child_node).__dict__)
         for n in graph.predecessors(name):
             if not n == parent:
                 child_node = cls.build_node(graph, n, parent=name)
-                node.edges.append(Edge(child_node, inverted=True))
-        return node
+                node.edges.append(Edge(child_node, inverted=True).__dict__)
+        return node.__dict__
 
     @classmethod
-    def add_nodes(cls, graph: nx.DiGraph, current_node: Node):
-        for edge in current_node.edges:
-            if edge.inverted:
-                graph.add_edge(edge.target_node.name, current_node.name)
+    def add_nodes(cls, graph: nx.DiGraph, current_node: Dict[str, List]):
+        for edge in current_node["edges"]:
+            if edge.get("inverted", None):
+                graph.add_edge(edge["target_node"]["name"], current_node["name"])
             else:
-                graph.add_edge(current_node.name, edge.target_node.name)
-            cls.add_nodes(graph, edge.target_node)
+                graph.add_edge(current_node["name"], edge["target_node"]["name"])
+            cls.add_nodes(graph, edge["target_node"])
 
     @classmethod
     def to_tree(cls, node: nx.DiGraph, ctx):
