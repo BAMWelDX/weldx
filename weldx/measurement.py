@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 
 import xarray as xr
+from numpy import signedinteger
 
 if TYPE_CHECKING:  # pragma: no cover
     from networkx import DiGraph
@@ -33,7 +34,8 @@ class Signal:
 
     signal_type: str
     unit: str
-    data: Union[Data, None]
+    data_name: str = None
+    data: Union[Data, None] = None
 
 
 @dataclass
@@ -46,6 +48,17 @@ class DataTransformation:
     error: Error
     func: str = None
     meta: str = None
+
+
+@dataclass
+class SignalTransformation:
+    name: str
+    error: Error
+    input_unit: str
+    output_unit: str
+    func: "MathematicalExpression" = None
+    input_shape: Tuple = None
+    output_shape: Tuple = None
 
 
 @dataclass
@@ -86,6 +99,17 @@ class MeasurementChainGraph:
             node_id=source_name, signal_type=output_signal_type, unit=output_signal_unit
         )
 
+    @staticmethod
+    def construct_from_tree(tree: Dict) -> "MeasurementChainGraph":
+        mc = MeasurementChainGraph(
+            name=tree["name"],
+            source_name="source",
+            source_error=Error(1),
+            output_signal_type="analog",
+            output_signal_unit="V",
+        )
+        return mc
+
     def _add_signal(self, node_id: str, signal_type: str, unit: str):
         self._check_node_exist(node_id)
         if signal_type not in ["analog", "digital"]:
@@ -105,23 +129,64 @@ class MeasurementChainGraph:
         error: Error,
         output_signal_type: str,
         output_signal_unit: str,
-        function: "MathematicalExpression" = None,
-        input_signal_id: str = None,
+        func: "MathematicalExpression" = None,
+        input_signal_source: str = None,
     ):
-        if input_signal_id is None:
-            input_signal_id = self._prev_added_signal
+        if input_signal_source is None:
+            input_signal_source = self._prev_added_signal
 
         self._add_signal(
             node_id=name, signal_type=output_signal_type, unit=output_signal_unit
         )
-        self._graph.add_edge(input_signal_id, name, error=error, function=function)
+        self._graph.add_edge(input_signal_source, name, error=error, func=func)
 
-    def add_signal_data(self, name: str, data: "TimeSeries", signal_id: str = None):
-        if signal_id is None:
-            signal_id = self._prev_added_signal
-        self._check_node_exist(name)
-        self._graph.add_node(name, data=data)
-        self._graph.add_edge(signal_id, name)
+    def add_signal_data(self, name: str, data: "TimeSeries", signal_source: str = None):
+        if signal_source is None:
+            signal_source = self._prev_added_signal
+        elif signal_source not in self._graph.nodes:
+            raise ValueError(f"No signal with source '{signal_source}' found")
+        signal = self._graph.nodes[signal_source]
+        # todo check if data already exists
+        # todo chech data name unique
+        signal["data_name"] = name
+        signal["data"] = data
+
+    def get_data(self, name):
+        for _, attr in self._graph.nodes.items():
+            data_name = attr.get("data_name")
+            if data_name is not None and data_name == name:
+                return attr["data"]
+        raise ValueError(f"No data with name {name} found")
+
+    @property
+    def data_names(self):
+        return [
+            attr["data_name"]
+            for _, attr in self._graph.nodes.items()
+            if "data_name" in attr
+        ]
+
+    def get_signal(self, signal_source: str) -> Signal:
+        if signal_source not in self._graph.nodes:
+            raise ValueError(f"No signal with source '{signal_source}' found")
+        return Signal(**self._graph.nodes[signal_source])
+
+    def get_transformation(self, name: str) -> SignalTransformation:
+        if name not in self._graph.nodes:
+            raise ValueError(f"No transformation with name '{name}' found")
+
+        for edge in self._graph.edges:
+            if edge[1] == name:
+                return SignalTransformation(
+                    name=name,
+                    input_unit=self._graph.nodes[edge[0]]["unit"],
+                    output_unit=self._graph.nodes[edge[1]]["unit"],
+                    **self._graph.edges[edge],
+                )
+
+    def attach_transformation(self, transformation: SignalTransformation):
+        # todo continue
+        pass
 
 
 # DRAFT SECTION END ####################################################################

@@ -1,5 +1,6 @@
 """Test the measurement package."""
 
+import asdf
 import sympy
 import xarray as xr
 
@@ -7,6 +8,7 @@ import weldx.measurement as msm
 from weldx.asdf.util import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression
+from weldx.measurement import Error, MeasurementChainGraph
 
 
 def test_generic_measurement():
@@ -110,3 +112,38 @@ def test_generic_measurement():
     }
 
     _write_read_buffer(tree)
+
+
+def test_measurement_chain_graph():
+    mc = MeasurementChainGraph(
+        name="Current measurement chain",
+        source_name="Current Sensor",
+        source_error=Error(13.37),
+        output_signal_type="analog",
+        output_signal_unit="V",
+    )
+
+    mc.add_transformation(
+        "AD conversion current measurement",
+        error=Error(0.97),
+        output_signal_type="digital",
+        output_signal_unit="",
+    )
+
+    mc.add_transformation(
+        "Calibration",
+        error=Error(1.23),
+        output_signal_type="digital",
+        output_signal_unit="A",
+    )
+    print(mc.get_signal("Calibration"))
+    print(mc.get_transformation("Calibration"))
+    mc.add_signal_data("Current data", [1, 2, 3])
+    print(mc.get_signal("Calibration"))
+    print(mc.get_data("Current data"))
+    print(mc.data_names)
+    tree = {"measurement_chain": mc}
+    # _write_read_buffer(tree)
+
+    with asdf.AsdfFile(tree) as af:
+        af.write_to("test.asdf")
