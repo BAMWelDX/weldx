@@ -8,14 +8,14 @@ source:
     path: ..
 
 build:
-  script: python setup.py install --single-version-externally-managed --record=record.txt
+  script: pip install . -v
   number: 0
   noarch: python
 
 requirements:
-    build:
+    host:
         - python
-        - setuptools
+        - pip
         - setuptools_scm
     run:
         - python
@@ -27,6 +27,7 @@ requirements:
 test:
     imports:
         - weldx
+        - weldx.visualization
 
 about:
     home: www.bam.de/weldx
