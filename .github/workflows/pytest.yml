@@ -53,6 +53,11 @@ jobs:
         run: |
           pytest -n2 --dist loadscope --nbval --current-env --cov=weldx tutorials/
           echo "Exited with '$?'"
+          ls -alh
+
+      - name: coverage merge/xml
+        run: |
+          coverage combine
           coverage xml
 
       - name: codecov.io
