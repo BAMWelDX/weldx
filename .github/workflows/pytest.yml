@@ -45,15 +45,15 @@ jobs:
 
       - name: run pytest
         run: |
-          pytest --runslow -n2 --junit-xml=tests.xml tests/
+          pytest --runslow -n2 tests/
           echo "Exited with '$?'"
+          mv .coverage .coverage.tests
 
       - name: run pytest on notebooks
         run: |
-          pytest -n2 --dist loadscope --nbval --current-env --cov=weldx --junit-xml=tests_nb.xml tutorials/
+          pytest -n2 --dist loadscope --nbval --current-env --cov=weldx tutorials/
           echo "Exited with '$?'"
+          coverage xml
 
       - name: codecov.io
         uses: codecov/codecov-action@v1
-        with:
-          files: tests.xml,tests_nb.xml
