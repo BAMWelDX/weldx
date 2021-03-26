@@ -18,7 +18,6 @@ jobs:
 
       - uses: actions/cache@v2
         if: startsWith(runner.os, 'Linux')
-        id: cache_Linux
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
@@ -27,7 +26,6 @@ jobs:
 
       - uses: actions/cache@v2
         if: startsWith(runner.os, 'macOS')
-        id: cache_macOS
         with:
           path: ~/Library/Caches/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
@@ -36,7 +34,6 @@ jobs:
 
       - uses: actions/cache@v2
         if: startsWith(runner.os, 'Windows')
-        id: cache_Windows
         with:
           path: ~\AppData\Local\pip\Cache
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
@@ -44,16 +41,19 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: pip installs
-        if: steps.cache_${{ runner.os }}.outputs.cache-hit != 'true'
-        run: |
-          pip install -e .[test]
+        run: pip install -e .[test]
+
       - name: run pytest
         run: |
-          pytest -n2 --dist loadscope --nbval --current-env tutorials/
-          pytest --runslow -n2 --cov-append tests/
-
+          pytest --runslow -n2 --junit-xml=tests.xml tests/
           echo "Exited with '$?'"
-          coverage xml
+
+      - name: run pytest on notebooks
+        run: |
+          pytest -n2 --dist loadscope --nbval --current-env --cov=weldx --junit-xml=tests_nb.xml tutorials/
+          echo "Exited with '$?'"
 
       - name: codecov.io
         uses: codecov/codecov-action@v1
+        with:
+          files: tests.xml,tests_nb.xml
