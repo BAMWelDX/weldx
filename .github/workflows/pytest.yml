@@ -52,7 +52,6 @@ jobs:
         run: |
           pytest -n2 --dist loadscope --nbval --current-env --cov=weldx --cov-append tutorials/
           echo "Exited with '$?'"
-          ls -alh
 
       - name: coverage xml (combination is performed by pytest-cov)
         run: coverage xml
