@@ -14,11 +14,11 @@ build:
 
 requirements:
     host:
-        - python
+        - python >=3.8
         - pip
         - setuptools_scm
     run:
-        - python
+        - python >=3.8
         # dependencies are defined in setup.py
         {% for dep in data['install_requires'] %}
         - {{ dep.lower() }}
