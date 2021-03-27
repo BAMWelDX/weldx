@@ -82,10 +82,10 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
     """steers the area approximation of the groove in ~cross_sect_area."""
 
     def __post_init__(self):
+        """Make sure all parameters are valid after class init."""
         for key, value in self.parameters().items():
-            if value<0.0:
+            if value < 0.0:
                 raise ValueError(f"Invalid value for parameter {key}={value:~}")
-
 
     def parameters(self):
         """Return groove parameters as dictionary of quantities."""
