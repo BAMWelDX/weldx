@@ -11,11 +11,11 @@ properties:
   name:
     type: string
   data_source:
-    $ref: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
+    tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
   data_processors:
     type: array
     items:
-      $ref: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
+      tag: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
 
 
 propertyOrder: [name, data_source, data_processors]
