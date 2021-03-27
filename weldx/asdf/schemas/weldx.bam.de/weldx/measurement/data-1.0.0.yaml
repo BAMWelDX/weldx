@@ -14,7 +14,7 @@ properties:
   name:
     type: string
   data:
-    $ref: "tag:weldx.bam.de:weldx/core/data_array-1.0.0"
+    tag: "tag:weldx.bam.de:weldx/core/data_array-1.0.0"
 
 propertyOrder: [name, data]
 required: [data]

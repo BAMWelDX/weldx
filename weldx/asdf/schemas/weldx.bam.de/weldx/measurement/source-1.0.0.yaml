@@ -24,9 +24,9 @@ properties:
   name:
     type: string
   output_signal:
-    $ref: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
+    tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
   error:
-    $ref: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
+    tag: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
 
 required: [name, output_signal]
 propertyOrder: [name, output_signal, error]

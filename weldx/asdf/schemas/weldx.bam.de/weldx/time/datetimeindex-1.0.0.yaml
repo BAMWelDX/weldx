@@ -22,7 +22,7 @@ definitions:
   values:
     description: |
       Integer representation of a pandas DatetimeIndex in nanoseconds precision.
-    $ref: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
 
   start:
     description: |

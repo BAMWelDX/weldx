@@ -28,7 +28,7 @@ properties:
   unit:
     type: string
   data:
-    $ref: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
+    tag: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
 
 
 propertyOrder: [signal_type, unit, data]
