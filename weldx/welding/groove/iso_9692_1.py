@@ -1725,6 +1725,11 @@ def get_groove(
                    root_face=Q_(3, "mm"),
                    root_gap=Q_(1, "mm"))
 
+    Raises
+    ------
+    ValueError
+        When passing negative parameter values.
+
     Notes
     -----
     Each groove type has a different set of attributes which are required. Only
