@@ -49,12 +49,15 @@ jobs:
           echo "Exited with '$?'"
 
       - name: run pytest on notebooks (append coverage)
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         run: |
           pytest -n2 --dist loadscope --nbval --current-env --cov=weldx --cov-append tutorials/
           echo "Exited with '$?'"
 
       - name: coverage xml (combination is performed by pytest-cov)
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         run: coverage xml
 
       - name: codecov.io
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         uses: codecov/codecov-action@v1
