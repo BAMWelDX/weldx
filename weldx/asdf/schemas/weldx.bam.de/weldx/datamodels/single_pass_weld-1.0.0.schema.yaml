@@ -40,7 +40,7 @@ description: |
   The welding_current and welding_voltage entries refer to signals containing the final measurement data of corresponding dimensions [current] and [voltage].
   Additional details of the measurements can be attached via user fields here or in the respective measurement-chain.
 
-  The measurements entriy contains the full informaiton about all measurements and their associated measurement chains.
+  The measurements entry contains the full information about all measurements and their associated measurement chains.
 
   The equipment property provides a list of the measurement equipment used.
 
