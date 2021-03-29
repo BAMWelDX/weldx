@@ -46,7 +46,7 @@ jobs:
       - name: setup matplotlib
         if: startsWith(runner.os, 'Windows')
         run: |
-            if not exist %userprofile%\.matplotlib\ mkdir %userprofile%\.matplotlib\
+            if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
             echo "backend: Agg" > %userprofile%\.matplotlib\matplotlibrc
         shell: cmd
 
