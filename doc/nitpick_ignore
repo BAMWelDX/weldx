@@ -28,7 +28,6 @@ py:class scipy.spatial.transform.Rotation
 # derived from scipy
 py:method weldx.transformations.WXRotation.from_mrp
 py:method weldx.transformations.WXRotation.random
-py:obj weldx.transformations.WXRotation.from_mrp
 py:meth weldx.transformations.WXRotation.random
 
 # sympy
