@@ -16,6 +16,9 @@
 - add validators to `rotation-1.0.0.yaml`
   & `gas_component-1.0.0.yaml` [[#303]](https://github.com/BAMWelDX/weldx/pull/303)
 
+### fixes
+
+- prevent creation of `IsoBaseGroove` with negative parameters [[#306]](https://github.com/BAMWelDX/weldx/pull/306)
 
 ## 0.3.1 (21.03.2021)
 
