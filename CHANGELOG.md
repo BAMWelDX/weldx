@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.3.2 (unreleased)
+## 0.3.2 (29.03.2021)
 
 ### added
 
