@@ -21,7 +21,10 @@ import shutil
 import sys
 import typing
 
+import ipywidgets
+import pandas as _
 import traitlets
+import xarray
 
 typing.TYPE_CHECKING = True
 try:
