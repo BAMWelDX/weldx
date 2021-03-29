@@ -41,7 +41,9 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: pip installs
-        run: pip install -e .[test]
+        run: |
+          pip install setuptools_scm
+          pip install -e .[test]
 
       - name: run pytest
         run: |
