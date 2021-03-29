@@ -56,6 +56,7 @@ oneOf:
     properties:
       quaternions:
         tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+        wx_shape: [...,4]
     required: [quaternions]
     flowStyle: block
     additionalProperties: false
@@ -66,6 +67,7 @@ oneOf:
     properties:
       matrix:
         tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+        wx_shape: [...,3,3]
     required: [matrix]
     flowStyle: block
     additionalProperties: false
@@ -76,6 +78,7 @@ oneOf:
     properties:
       rotvec:
         tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+        wx_shape: [...,3]
     required: [rotvec]
     flowStyle: block
     additionalProperties: false

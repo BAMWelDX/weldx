@@ -161,7 +161,7 @@ def sine(
     amp: pint.Quantity,
     bias: pint.Quantity = None,
     phase: pint.Quantity = Q_(0, "rad"),
-) -> TimeSeries:  # pragma: no cover
+) -> TimeSeries:
     """Create a simple sine TimeSeries from quantity parameters.
 
     f(t) = amp*sin(f*t+phase)+bias
@@ -192,7 +192,7 @@ def sine(
 
 def lcs_coords_from_ts(
     ts: TimeSeries, time: Union[pd.DatetimeIndex, pint.Quantity]
-) -> xr.DataArray:  # pragma: no cover
+) -> xr.DataArray:
     """Create translation coordinates from a TimeSeries at specific timesteps.
 
     Parameters
@@ -1128,7 +1128,7 @@ class WeldxAccessor:
         """Construct a WeldX xarray object."""
         self._obj = xarray_obj
 
-    def interp_like(self, da, *args, **kwargs) -> xr.DataArray:  # pragma: no cover
+    def interp_like(self, da, *args, **kwargs) -> xr.DataArray:
         """Interpolate DataArray along dimensions of another DataArray.
 
         Provides some utility options for handling out of range values and broadcasting.

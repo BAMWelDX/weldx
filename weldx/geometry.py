@@ -1671,9 +1671,7 @@ class Trace:
         return np.hstack([raster_data, last_point])
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None, None), strict=False)
-    def plot(
-        self, raster_width=1, axes=None, fmt=None, axes_equal=False
-    ):  # pragma: no cover
+    def plot(self, raster_width=1, axes=None, fmt=None, axes_equal=False):
         """Plot the trace.
 
         Parameters
@@ -2218,7 +2216,7 @@ class Geometry:
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-    ) -> matplotlib.axes.Axes:  # pragma: no cover
+    ) -> matplotlib.axes.Axes:
         """Plot the geometry.
 
         Parameters
