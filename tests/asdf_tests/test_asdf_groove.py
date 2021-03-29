@@ -94,6 +94,16 @@ def test_asdf_groove_exceptions():
             code_number="6.1.1",
         ).to_profile()
 
+    # negative parameter value
+    with pytest.raises(ValueError):
+        get_groove(
+            groove_type="VGroove",
+            workpiece_thickness=Q_(9, "mm"),
+            groove_angle=Q_(50, "deg"),
+            root_face=Q_(-4, "mm"),
+            root_gap=Q_(2, "mm"),
+        )
+
 
 @pytest.mark.parametrize("groove", test_params.values(), ids=test_params.keys())
 def test_cross_section(groove):  # noqa

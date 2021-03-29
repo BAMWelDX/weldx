@@ -81,6 +81,12 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
     _AREA_RASTER_WIDTH = 0.1
     """steers the area approximation of the groove in ~cross_sect_area."""
 
+    def __post_init__(self):
+        """Make sure all parameters are valid after class init."""
+        for key, value in self.parameters().items():
+            if value < 0.0:
+                raise ValueError(f"Invalid value for parameter {key}={value:~}")
+
     def parameters(self):
         """Return groove parameters as dictionary of quantities."""
         return {k: v for k, v in self.__dict__.items() if isinstance(v, pint.Quantity)}
@@ -1718,6 +1724,11 @@ def get_groove(
                    bevel_radius=Q_(6, "mm"),
                    root_face=Q_(3, "mm"),
                    root_gap=Q_(1, "mm"))
+
+    Raises
+    ------
+    ValueError
+        When passing negative parameter values.
 
     Notes
     -----
