@@ -34,21 +34,9 @@ except ModuleNotFoundError:  # fallback for local use
     import weldx
 except Exception as ex:
     raise
-import sphinx_asdf
-from sphinx_asdf import setup as _setup
 
 import weldx.visualization  # load visualization
 from weldx.asdf.constants import WELDX_TAG_BASE
-
-
-def setup_patched(*args, **kwargs):
-
-    result = _setup(*args, **kwargs)
-    result.update(dict(parallel_read_safe=True, parallel_write_safe=True))
-    return result
-
-
-sphinx_asdf.setup = setup_patched
 
 # -- copy files to doc folder -------------------------------------------------
 doc_dir = pathlib.Path(".")
