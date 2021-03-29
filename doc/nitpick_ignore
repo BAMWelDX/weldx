@@ -28,6 +28,7 @@ py:class scipy.spatial.transform.Rotation
 # derived from scipy
 py:method weldx.transformations.WXRotation.from_mrp
 py:method weldx.transformations.WXRotation.random
+py:meth weldx.transformations.WXRotation.random
 
 # sympy
 py:class sympy.core.expr.Expr
@@ -69,6 +70,8 @@ py:obj n
 py:obj num
 py:obj left
 py:obj right
+py:meth scipy.stats.special_ortho_group
 
 # other
 py:obj 0xFF0000
+py:obj mrp[i]

@@ -6,10 +6,16 @@
 
 - `weldx.util.deprecated` decorator [[#295]](https://github.com/BAMWelDX/weldx/pull/295)
 
+
+### dependencies
+
+- restrict `scipy!=1.6.0,scipy!=1.6.1`  [[#300]](https://github.com/BAMWelDX/weldx/pull/300)
+
 ### ASDF
 
 - add validators to `rotation-1.0.0.yaml`
   & `gas_component-1.0.0.yaml` [[#303]](https://github.com/BAMWelDX/weldx/pull/303)
+
 
 ## 0.3.1 (21.03.2021)
 
