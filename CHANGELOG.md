@@ -6,11 +6,20 @@
 
 - `weldx.util.deprecated` decorator [[#295]](https://github.com/BAMWelDX/weldx/pull/295)
 
+
+### dependencies
+
+- restrict `scipy!=1.6.0,scipy!=1.6.1`  [[#300]](https://github.com/BAMWelDX/weldx/pull/300)
+
 ### ASDF
 
 - add validators to `rotation-1.0.0.yaml`
   & `gas_component-1.0.0.yaml` [[#303]](https://github.com/BAMWelDX/weldx/pull/303)
 - update descriptions in `single-pass-weldx.1.0.0.schema` [[#308]](https://github.com/BAMWelDX/weldx/pull/308)
+
+### fixes
+
+- prevent creation of `IsoBaseGroove` with negative parameters [[#306]](https://github.com/BAMWelDX/weldx/pull/306)
 
 ## 0.3.1 (21.03.2021)
 
