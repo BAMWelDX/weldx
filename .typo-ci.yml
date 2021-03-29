@@ -31,6 +31,8 @@ excluded_words:
   - functools
   - boltons
   - meshio
+  - pytest-xdist
+  - nbval
   # matplotlib ----------------------------------
   - gca
   - mpl
@@ -151,6 +153,7 @@ excluded_words:
   - quickstart
   - nsecond
   - iterutils
+  - pyproject
   # German ---------------------------------------
   - Bundesanstalt
   - für
