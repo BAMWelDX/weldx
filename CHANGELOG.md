@@ -15,6 +15,7 @@
 
 - add validators to `rotation-1.0.0.yaml`
   & `gas_component-1.0.0.yaml` [[#303]](https://github.com/BAMWelDX/weldx/pull/303)
+- update descriptions in `single-pass-weldx.1.0.0.schema` [[#308]](https://github.com/BAMWelDX/weldx/pull/308)
 
 ### fixes
 
