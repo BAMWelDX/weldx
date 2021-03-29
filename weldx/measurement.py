@@ -97,7 +97,7 @@ class MeasurementChain:
         if parent_node is not None:
             graph.add_edge(parent_node, node)
 
-    def plot(self, axes=None):  # pragma: no cover
+    def plot(self, axes=None):
         """Plot the measurement chain.
 
         Parameters
