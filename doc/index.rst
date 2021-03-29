@@ -20,6 +20,7 @@ The proposed file format will be developed with regards to current needs of the 
 By using the file format objectivity, comparability and reproducibility across different experimental setups can be improved.
 
 The project is under active development by the `Welding Technology <https://www.bam.de/Navigation/EN/About-us/Organisation/Organisation-Chart/President/Department-9/Division-93/division93.html>`_ division at Bundesanstalt für Materialforschung und -prüfung (BAM).
+Visit the projects site `here <https://www.bam.de/Content/EN/Projects/WelDX/weldx.html>`_.
 
 Python API
 ##########
@@ -55,7 +56,6 @@ The package is also available on pypi.
 Funding
 #######
 This research is funded by the Federal Ministry of Education and Research of Germany under project number 16QK12.
-Visit the projects site `here <https://www.bam.de/Content/EN/Projects/WelDX/weldx.html>`.
 
 .. toctree::
     :hidden:
