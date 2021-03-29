@@ -43,6 +43,12 @@ jobs:
       - name: pip installs
         run: pip install -e .[test]
 
+      - name: setup matplotlib
+        - if: startsWith(runner.os, 'Windows')
+          - run: |
+            if not exist %userprofile%\.matplotlib\ mkdir %userprofile%\.matplotlib\
+            echo "backend: Agg" > %userprofile%\.matplotlib\matplotlibrc
+
       - name: run pytest
         run: |
           pytest -n 2 --runslow tests/
