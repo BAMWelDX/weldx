@@ -1,6 +1,5 @@
-"""
-isort:skip_file
-"""
+"""WeldX data format and analysis package."""
+# isort:skip_file
 import warnings
 
 try:
@@ -10,15 +9,16 @@ except ModuleNotFoundError:  # pragma: no cover
     warnings.warn(
         "Using local weldx package files without version information.\n"
         "Consider running 'python setup.py --version' or 'pip install -e .' "
-        "in the weldx root repository"
+        "in the weldx root repository",
+        category=UserWarning,
     )
 
 # main modules
+import weldx.transformations  # import this first to avoid circular dependencies
 import weldx.util  # import this first to avoid circular dependencies
 import weldx.config
 import weldx.core
 import weldx.geometry
-import weldx.transformations
 import weldx.welding
 
 # asdf extensions and tags
@@ -45,29 +45,26 @@ from weldx.welding.processes import GmawProcess
 from weldx.welding.groove.iso_9692_1 import get_groove
 
 __all__ = (
-    # major modules
+    "ArcSegment",
+    "CoordinateSystemManager",
+    "Geometry",
+    "GmawProcess",
+    "LineSegment",
+    "LocalCoordinateSystem",
+    "Profile",
+    "Q_",
+    "Shape",
+    "SpatialData",
+    "Trace",
+    "asdf",
     "core",
     "geometry",
-    "GmawProcess",
+    "get_groove",
+    "get_groove",
     "measurement",
     "transformations",
     "util",
-    "asdf",
     "welding",
-    # geometries
-    "ArcSegment",
-    "Geometry",
-    "LineSegment",
-    "Profile",
-    "Shape",
-    "Trace",
-    "SpatialData",
-    # coordinates
-    "LocalCoordinateSystem",
-    "CoordinateSystemManager",
-    "get_groove",
-    # quantities
-    "Q_",
 )
 
 config.Config.load_installed_standards()

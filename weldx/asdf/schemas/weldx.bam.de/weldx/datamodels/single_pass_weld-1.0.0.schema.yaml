@@ -8,18 +8,47 @@ title: |
 description: |
   Schema describing a simple single pass welding application along a linear weld seam with constant groove shape.
 
-  The workpiece is defined by two constant properties:
-  - the groove shape as defined by ISO 9692-1
-  - the total seam length
+  The idea of the schema is to define an abstract welding experiment with actual current and voltage measurements attached.
+
+  This schema requires the following entries to be present:
+  - workpiece
+  - TCP
+  - welding_current
+  - welding_voltage
+  - measurements
+  - equipment
+
+  Other entries are optional as listed in the schema description.
+
+  The workpiece is defined by two properties:
+  - the base metal type
+  - the workpiece geometry defined by the combination of
+    - the groove shape (following ISO 9692-1)
+    - the total seam length
+
   It is assumed that the complete workpiece length is equal to the seam length.
-  Outside of the welding groove shape, no information is given regarding the outer shape of the workpiece.
+  Outside the welding groove shape, no information is given regarding the outer shape of the workpiece.
+  Additional information about the workpiece should be stored in the `wx_user` entries of the appropriate properties.
   More complex workpiece data can be attached as custom data to the associated coordinate system.
 
-  The TCP movement coordinates along the workpiece x-axis should fall into the range between 0 and the seam length to be plausible.
+  The TCP property is used to describe the path of the welding TCP along the weld seam.
+  For this schema, the TCP information is expected to be a linear movement between two points at a constant weld speed.
+  The TCP reference frame is the workpiece base coordinate system, starting at the beginning of the weld seam.
+  The x-axis coordinates will indicate the start- and end-point of the welding process along the workpiece length.
+  The y- and z-coordinates determine the position of the TCP in relation to the cross-sectional groove plane.
+
+  The welding_current and welding_voltage entries refer to signals containing the final measurement data of corresponding dimensions [current] and [voltage].
+  Additional details of the measurements can be attached via user fields here or in the respective measurement-chain.
+
+  The measurements entry contains the full information about all measurements and their associated measurement chains.
+
+  The equipment property provides a list of the measurement equipment used.
 
 type: object
 properties:
   process:
+    description: |
+      Metadata describing the GMAW process.
     type: object
     properties:
       welding_process:
@@ -33,6 +62,8 @@ properties:
         wx_unit: "m/s"
         wx_shape: [1]
       welding_wire:
+        description: |
+          Object describing the welding wire used.
         type: object
         properties:
           diameter:
@@ -46,7 +77,7 @@ properties:
               The wire classification according to DIN EN ISO 14341, DIN EN 12072 or similar standards.
               Addition standard details should be stored in the wx_user property.
             type: string
-            required: [wire_diameter]
+        required: [diameter]
     required: [welding_process, shielding_gas, weld_speed, welding_wire]
   welding_current:
     description: |
@@ -61,12 +92,18 @@ properties:
   TCP:
     description: |
       Transformation describing the welding TCP movement in relation to the groove coordinates.
+
+      The movement describes a linear motion between two points along the weld seam at constant velocity.
     tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
     wx_shape:
       time: [2~]
   coordinate_systems:
+    description: |
+      The expanded coordinate system setup describing the welding experiment and associated coordinate systems in detail.
     tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0"
   equipment:
+    description: |
+      A list of equipments used for measurements and describing the weld seam.
     type: array
     items:
       tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
@@ -136,8 +173,6 @@ properties:
       Metadata container for additional user documentation of the experiment.
     type: object
 required: [equipment,workpiece,measurements,welding_current,welding_voltage,TCP]
-additionalProperties: false
-
 
 examples:
   -

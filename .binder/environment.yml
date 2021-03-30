@@ -7,10 +7,10 @@ dependencies:
   - setuptools_scm
   - pip
   # Notebook + Plotting
-  - jupyterlab=2
+  - jupyterlab=3
   - ipykernel
-  - matplotlib=3.3.2
-  - ipympl=0.5.8
-  - nodejs=14
+  - matplotlib
+  - ipympl
+  - nodejs
   - pip:
     - git+https://github.com/BAMWelDX/weldx.git

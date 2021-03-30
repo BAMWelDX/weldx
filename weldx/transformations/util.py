@@ -1,29 +1,29 @@
 """Contains functions for coordinate transformations."""
 
 import math
-from typing import Union
 
 import numpy as np
 import pandas as pd
-import pint
 
 from weldx import util
+from weldx.transformations.types import types_timeindex
 
 __all__ = [
-    "scale_matrix",
-    "normalize",
-    "orientation_point_plane_containing_origin",
-    "orientation_point_plane",
+    "build_time_index",
     "is_orthogonal",
     "is_orthogonal_matrix",
+    "normalize",
+    "orientation_point_plane",
+    "orientation_point_plane_containing_origin",
     "point_left_of_line",
     "reflection_sign",
+    "scale_matrix",
     "vector_points_to_left_of_vector",
 ]
 
 
 def build_time_index(
-    time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
+    time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
 ) -> pd.TimedeltaIndex:
     """Build time index used for xarray objects.
@@ -41,7 +41,6 @@ def build_time_index(
 
     """
     if time is None:
-        # time_ref = None
         return time, time_ref
 
     time = util.to_pandas_time_index(time)

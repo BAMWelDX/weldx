@@ -19,20 +19,22 @@ import os
 import pathlib
 import shutil
 import sys
-
-import traitlets
-
-# find weldx from parent path.
-sys.path.insert(0, os.path.abspath("../"))
-
 import typing
 
 import ipywidgets
 import pandas as _
+import traitlets
 import xarray
 
 typing.TYPE_CHECKING = True
-import weldx
+try:
+    import weldx
+except ModuleNotFoundError:  # fallback for local use
+    sys.path.insert(0, os.path.abspath("../"))
+    import weldx
+except Exception as ex:
+    raise
+
 import weldx.visualization  # load visualization
 from weldx.asdf.constants import WELDX_TAG_BASE
 
@@ -258,6 +260,7 @@ intersphinx_mapping = {
     "asdf": ("https://asdf.readthedocs.io/en/stable/", None),
     "networkx": ("https://networkx.org/documentation/stable/", None),
     "IPython": ("https://ipython.readthedocs.io/en/stable/", None),
+    "k3d": ("https://k3d-jupyter.org/", None),
 }
 
 # Disable warnings caused by a bug -----------------------------------------------------

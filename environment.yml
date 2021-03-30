@@ -28,6 +28,8 @@ dependencies:
   - pydocstyle=5
   - pytest
   - pytest-cov
+  - pytest-xdist
+  - nbval
   # Plotting
   - ipykernel
   - ipympl

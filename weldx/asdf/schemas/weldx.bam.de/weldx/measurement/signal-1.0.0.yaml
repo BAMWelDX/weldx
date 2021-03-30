@@ -7,13 +7,28 @@ tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
 title: |
   Representation of a measurement signal with optional data attached.
 type: object
+
+examples:
+  -
+    - A signal representing an analog voltage measurement without data.
+    - |
+      !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+        signal_type: analog
+        unit: V
+  -
+    - A digital dimensionless signal.
+    - |
+      !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+        signal_type: digital
+        unit: ''
+
 properties:
   signal_type:
     type: string
   unit:
     type: string
   data:
-    $ref: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
+    tag: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
 
 
 propertyOrder: [signal_type, unit, data]

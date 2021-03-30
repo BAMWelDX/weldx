@@ -3,9 +3,9 @@
 import math
 import warnings
 from collections.abc import Iterable
-from functools import reduce
+from functools import reduce, wraps
 from inspect import getmembers, isfunction
-from typing import Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -15,10 +15,60 @@ from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta6
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
-import weldx.transformations as tf
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
+
+if TYPE_CHECKING:  # pragma: no cover
+    import weldx.transformations as tf
+
+
+class WeldxDeprecationWarning(DeprecationWarning):
+    """Deprecation warning type."""
+
+
+def deprecated(since: str = None, removed: str = None, message: str = None) -> Callable:
+    """Mark a functions as deprecated.
+
+    This decorator emits a warning when the function is used.
+
+    Parameters
+    ----------
+    since :
+        The version that marked the function as deprecated
+    removed :
+        The version that will remove the function
+    message :
+        Additional information that should be added to the warning
+
+    Returns
+    -------
+    Callable :
+        Wrapped function
+
+    Notes
+    -----
+    Original source: https://stackoverflow.com/a/30253848/6700329
+
+    """
+
+    def _decorator(func):
+        @wraps(func)
+        def _new_func(*args, **kwargs):
+            wm = f"Call to deprecated function {func.__name__}.\n"
+            if since is not None:
+                wm += f"Deprecated since: {since}\n"
+            if removed is not None:
+                wm += f"Removed in: {removed}\n"
+            if message is not None:
+                wm += message
+
+            warnings.warn(wm, category=WeldxDeprecationWarning, stacklevel=2)
+            return func(*args, **kwargs)
+
+        return _new_func
+
+    return _decorator
 
 
 def ureg_check_class(*args):
@@ -111,7 +161,7 @@ def sine(
     amp: pint.Quantity,
     bias: pint.Quantity = None,
     phase: pint.Quantity = Q_(0, "rad"),
-) -> TimeSeries:  # pragma: no cover
+) -> TimeSeries:
     """Create a simple sine TimeSeries from quantity parameters.
 
     f(t) = amp*sin(f*t+phase)+bias
@@ -142,7 +192,7 @@ def sine(
 
 def lcs_coords_from_ts(
     ts: TimeSeries, time: Union[pd.DatetimeIndex, pint.Quantity]
-) -> xr.DataArray:  # pragma: no cover
+) -> xr.DataArray:
     """Create translation coordinates from a TimeSeries at specific timesteps.
 
     Parameters
@@ -268,16 +318,18 @@ def to_pandas_time_index(
 
     Returns
     -------
-    pandas.TimedeltaIndex or pandas.DatetimeIndex
+    Union[pandas.TimedeltaIndex, pandas.DatetimeIndex] :
         Time union of all input objects
 
     """
+    from weldx.transformations import LocalCoordinateSystem
+
     _input_type = type(time)
 
     if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
         return time
 
-    if isinstance(time, tf.LocalCoordinateSystem):
+    if isinstance(time, LocalCoordinateSystem):
         return to_pandas_time_index(time.time)
 
     if isinstance(time, pint.Quantity):
@@ -1076,7 +1128,7 @@ class WeldxAccessor:
         """Construct a WeldX xarray object."""
         self._obj = xarray_obj
 
-    def interp_like(self, da, *args, **kwargs) -> xr.DataArray:  # pragma: no cover
+    def interp_like(self, da, *args, **kwargs) -> xr.DataArray:
         """Interpolate DataArray along dimensions of another DataArray.
 
         Provides some utility options for handling out of range values and broadcasting.
