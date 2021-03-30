@@ -1,5 +1,7 @@
 """Contains tools to handle rotations."""
 
+from typing import List, Union
+
 import numpy as np
 import pint
 from scipy.spatial.transform import Rotation as _Rotation
@@ -103,7 +105,10 @@ class WXRotation(_Rotation):
     @classmethod
     @UREG.check(None, None, "[]", None)
     def from_euler(
-        cls, seq: str, angles: np.ndarray, degrees: bool = False
+        cls,
+        seq: str,
+        angles: Union[pint.Quantity, np.ndarray, List[float], List[List[float]]],
+        degrees: bool = False,
     ) -> "WXRotation":  # noqa
         """Initialize from euler angles.
 

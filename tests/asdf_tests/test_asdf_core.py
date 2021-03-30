@@ -36,11 +36,16 @@ _base_rotation = Rotation.from_euler(
         WXRotation.from_rotvec(_base_rotation.as_rotvec()),
         WXRotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True),
         WXRotation.from_euler(seq="xyz", angles=[0.2, 1.3, 3.14], degrees=False),
+        WXRotation.from_euler(seq="xyz", angles=Q_([10, 20, 60], "degree")),
+        WXRotation.from_euler(seq="xyz", angles=Q_([0.2, 1.3, 3.14], "rad")),
         WXRotation.from_euler(seq="XYZ", angles=[10, 20, 60], degrees=True),
         WXRotation.from_euler(seq="y", angles=[10, 60, 40, 90], degrees=True),
         WXRotation.from_euler(seq="Z", angles=[10, 60, 40, 90], degrees=True),
         WXRotation.from_euler(
             seq="xy", angles=[[10, 10], [60, 60], [40, 40], [70, 75]], degrees=True
+        ),
+        WXRotation.from_euler(
+            seq="xy", angles=Q_([[10, 10], [60, 60], [40, 40], [70, 75]], "degree")
         ),
     ],
 )
