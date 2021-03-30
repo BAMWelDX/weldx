@@ -8,14 +8,14 @@ source:
     path: ..
 
 build:
-  script: pip install . -v
+  script: python setup.py install --single-version-externally-managed --record=record.txt
   number: 0
   noarch: python
 
 requirements:
     host:
         - python >=3.8
-        - pip
+        - setuptools
         - setuptools_scm
     run:
         - python >=3.8
