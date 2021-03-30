@@ -4,7 +4,7 @@ WelDX - data and quality standards for welding research data
 
 .. meta::
     :description lang=en: Scientific data format and Python API for welding research data. Setup your experiment and capture data in a single file.
-    :keywords: welding, weld, data format, archive, scientific data, experiment, visualization, GMAW, quality standard, objectivity, comparability, reproducibility, measurement chain
+    :keywords: welding, weld, data format, archive, scientific data, experiment, visualization, GMAW, quality standard, objectivity, comparability, reproducibility, measurement chain, research data management
 
 .. meta::
    :google-site-verification: YvWuHWCE9tERkKT7KQejAwHM2cJVSfDewd5IzGZxDsU
