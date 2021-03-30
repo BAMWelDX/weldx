@@ -16,7 +16,6 @@ import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
-
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
 
