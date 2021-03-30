@@ -8,17 +8,17 @@ source:
     path: ..
 
 build:
-  script: python setup.py install --single-version-externally-managed --record=record.txt
+  script: pip install . -v
   number: 0
   noarch: python
 
 requirements:
-    build:
-        - python
-        - setuptools
+    host:
+        - python >=3.8
+        - pip
         - setuptools_scm
     run:
-        - python
+        - python >=3.8
         # dependencies are defined in setup.py
         {% for dep in data['install_requires'] %}
         - {{ dep.lower() }}
@@ -27,6 +27,7 @@ requirements:
 test:
     imports:
         - weldx
+        - weldx.visualization
 
 about:
     home: www.bam.de/weldx

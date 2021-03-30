@@ -14,15 +14,15 @@ examples:
   -
     - Full description of a pdf-file without its content
     - |
-        !<tag:weldx.bam.de:weldx/core/file-1.0.0>
-          filename: file.pdf
-          suffix: pdf
-          hostname: my_computer
-          directory: C:/Users/some_user/my_files
-          size: 90571
-          created: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-12-09T12:51:20.653744500'}
-          modified: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-12-10T13:14:17.362481500'}
-          content_hash: {algorithm: SHA-256, value: 5a6270ea5e2662c6489ee9e9c2201645e1b3cdadf0e3a621cca213a29ff4ae32}
+      !<tag:weldx.bam.de:weldx/core/file-1.0.0>
+        filename: file.pdf
+        suffix: pdf
+        hostname: my_computer
+        directory: C:/Users/some_user/my_files
+        size: 90571
+        created: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-12-09T12:51:20.653744500'}
+        modified: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-12-10T13:14:17.362481500'}
+        content_hash: {algorithm: SHA-256, value: 5a6270ea5e2662c6489ee9e9c2201645e1b3cdadf0e3a621cca213a29ff4ae32}
 
 type: object
 properties:
@@ -57,7 +57,7 @@ properties:
   content:
     description: |
       The content of the file. It is stored in the binary block of the file.
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
   content_hash:
     description: |
       Hash data for the files content.

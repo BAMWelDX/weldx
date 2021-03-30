@@ -42,14 +42,31 @@ jobs:
 
       - name: pip installs
         run: |
-          pip install pytest pytest-cov pytest-xdist setuptools_scm
           pip install git+https://github.com/asdf-format/asdf
-          pip install -e .
+          pip install -e .[test]
+
+      - name: setup matplotlib
+        if: startsWith(runner.os, 'Windows')
+        run: |
+            if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
+            echo "backend: Agg" > %userprofile%\.matplotlib\matplotlibrc
+        shell: cmd
+
       - name: run pytest
         run: |
-          pytest --runslow -n2
+          pytest -n 2 --runslow tests/
           echo "Exited with '$?'"
-          coverage xml
+
+      - name: run pytest on notebooks (append coverage)
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
+        run: |
+          pytest -n 2 --dist loadscope --nbval --current-env --cov=weldx --cov-append tutorials/
+          echo "Exited with '$?'"
+
+      - name: coverage xml (combination is performed by pytest-cov)
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
+        run: coverage xml
 
       - name: codecov.io
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         uses: codecov/codecov-action@v1

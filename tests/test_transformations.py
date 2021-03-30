@@ -601,6 +601,35 @@ class TestLocalCoordinateSystem:
         assert np.all(lcs.datetimeindex == datetime_exp)
         assert np.all(lcs.time_quantity == quantity_exp)
 
+    # test_time_warning ----------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "coordinates, orientation, time, warning",
+        [
+            (np.zeros(3), np.eye(3, 3), TDI([0, 2], "s"), UserWarning),
+            (np.zeros((2, 3)), np.eye(3, 3), TDI([0, 2], "s"), None),
+            (np.zeros(3), np.eye(3, 3), None, None),
+        ],
+    )
+    def test_time_warning(coordinates, orientation, time, warning):
+        """Test that warning is emitted when time is provided to a static CS.
+
+        Parameters
+        ----------
+        coordinates :
+            Coordinates of the CS
+        orientation :
+            Orientation of the CS
+        time :
+            Provided time
+        warning :
+            Expected warning
+
+        """
+        with pytest.warns(warning):
+            LCS(coordinates=coordinates, orientation=orientation, time=time)
+
     # test_init_time_dsx ---------------------------------------------------------------
 
     @staticmethod

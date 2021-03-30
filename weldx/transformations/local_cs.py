@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from copy import deepcopy
 from typing import TYPE_CHECKING, List, Union
 
@@ -12,9 +13,16 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
-from weldx.transformations.util import build_time_index, normalize
 
-if TYPE_CHECKING:
+from .types import (
+    types_coordinates,
+    types_orientation,
+    types_time_and_lcs,
+    types_timeindex,
+)
+from .util import build_time_index, normalize
+
+if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
 __all__ = ("LocalCoordinateSystem",)
@@ -32,9 +40,9 @@ class LocalCoordinateSystem:
 
     def __init__(
         self,
-        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot] = None,
-        coordinates: Union[xr.DataArray, np.ndarray, List] = None,
-        time: Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity] = None,
+        orientation: types_orientation = None,
+        coordinates: types_coordinates = None,
+        time: types_timeindex = None,
         time_ref: pd.Timestamp = None,
         construction_checks: bool = True,
     ):
@@ -52,7 +60,10 @@ class LocalCoordinateSystem:
         coordinates :
             Coordinates of the origin
         time :
-            Time data for time dependent coordinate systems
+            Time data for time dependent coordinate systems. If the provided coordinates
+            and orientations contain only a single value, the coordinate system is
+            considered to be static and the provided value won't be stored. If this
+            happens, a warning will be emitted.
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
         construction_checks :
@@ -72,6 +83,14 @@ class LocalCoordinateSystem:
         time, time_ref = build_time_index(time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
+
+        if time is not None and not (
+            "time" in coordinates.coords or "time" in orientation.coords
+        ):
+            warnings.warn(
+                "Neither the coordinates nor the orientation are time dependent. "
+                "Provided time is dropped"
+            )
 
         if construction_checks:
             ut.xr_check_coords(
@@ -235,7 +254,7 @@ class LocalCoordinateSystem:
 
     @staticmethod
     def _build_orientation(
-        orientation: Union[xr.DataArray, np.ndarray, List[List], Rot],
+        orientation: types_orientation,
         time: pd.DatetimeIndex = None,
     ):
         """Create xarray orientation from different formats and time-inputs.
@@ -739,13 +758,7 @@ class LocalCoordinateSystem:
 
     def interp_time(
         self,
-        time: Union[
-            pd.DatetimeIndex,
-            pd.TimedeltaIndex,
-            List[pd.Timestamp],
-            "LocalCoordinateSystem",
-            None,
-        ],
+        time: types_time_and_lcs,
         time_ref: Union[pd.Timestamp, None] = None,
     ) -> "LocalCoordinateSystem":
         """Interpolates the data in time.
@@ -820,18 +833,14 @@ class LocalCoordinateSystem:
         axes: matplotlib.axes.Axes = None,
         color: str = None,
         label: str = None,
-        time: Union[
-            pd.DatetimeIndex,
-            pd.TimedeltaIndex,
-            List[pd.Timestamp],
-            "LocalCoordinateSystem",
-        ] = None,
+        time: types_time_and_lcs = None,
         time_ref: pd.Timestamp = None,
         time_index: int = None,
+        scale_vectors: Union[float, List, np.ndarray] = None,
         show_origin: bool = True,
         show_trace: bool = True,
         show_vectors: bool = True,
-    ):  # pragma: no cover
+    ):
         """Plot the coordinate system.
 
         Parameters
@@ -855,6 +864,8 @@ class LocalCoordinateSystem:
         time_index: int
             If the coordinate system is time dependent, this parameter can be used to
             to select a specific key frame by its index.
+        scale_vectors :
+            A scaling factor or array to adjust the vector length
         show_origin: bool
             If `True`, a small dot with the assigned color will mark the coordinate
             systems' origin.
@@ -875,6 +886,7 @@ class LocalCoordinateSystem:
             time=time,
             time_ref=time_ref,
             time_index=time_index,
+            scale_vectors=scale_vectors,
             show_origin=show_origin,
             show_trace=show_trace,
             show_vectors=show_vectors,

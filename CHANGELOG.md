@@ -4,6 +4,66 @@
 
 - fix inline array serialization for new 64bit inline limit
 
+## 0.3.3 (30.03.2021)
+
+This is a bugfix release to correctly include the asdf schema files in conda
+builds. [[#314]](https://github.com/BAMWelDX/weldx/pull/314)
+
+### ASDF
+
+- fix required welding wire metadata in `single-pass-weldx.1.0.0.schema`
+  [[#316]](https://github.com/BAMWelDX/weldx/pull/316)
+
+## 0.3.2 (29.03.2021)
+
+### added
+
+- `weldx.util.deprecated` decorator [[#295]](https://github.com/BAMWelDX/weldx/pull/295)
+
+
+### dependencies
+
+- restrict `scipy!=1.6.0,scipy!=1.6.1`  [[#300]](https://github.com/BAMWelDX/weldx/pull/300)
+
+### ASDF
+
+- add validators to `rotation-1.0.0.yaml`
+  & `gas_component-1.0.0.yaml` [[#303]](https://github.com/BAMWelDX/weldx/pull/303)
+- update descriptions in `single-pass-weldx.1.0.0.schema` [[#308]](https://github.com/BAMWelDX/weldx/pull/308)
+
+### fixes
+
+- prevent creation of `IsoBaseGroove` with negative parameters [[#306]](https://github.com/BAMWelDX/weldx/pull/306)
+
+## 0.3.1 (21.03.2021)
+
+### added
+
+- plot function for `MeasurementChain` [[#288]](https://github.com/BAMWelDX/weldx/pull/288)
+
+### ASDF
+
+- remove the `additionalProperties` restriction
+  from `single_pass_weld-1.0.0.schema.yaml` [[#283]](https://github.com/BAMWelDX/weldx/pull/283)
+- allow scalar `integer` value in `anyOf` of `time_series-1.0.0.yaml` to
+  fix [#282](https://github.com/BAMWelDX/weldx/pull/282) [[#286]](https://github.com/BAMWelDX/weldx/pull/286)
+- add examples to schema files [[#274]](https://github.com/BAMWelDX/weldx/pull/274)
+
+### changes
+
+- `plot_graph` of the CSM now renders static and time-dependent edges differently
+  [[#291]](https://github.com/BAMWelDX/weldx/pull/291)
+- use `pint` compatible array syntax in `IsoBaseGroove.to_profile()`
+  methods [[#189]](https://github.com/BAMWelDX/weldx/pull/189)
+- CSM and LCS plot function get a `scale_vectors` parameter. It scales the plotted coordinate system vectors when using
+  matplotlib as backend [[#293]](https://github.com/BAMWelDX/weldx/pull/293)
+
+### fixes
+
+- A warning is now emitted if a `LocalCoordinateSystem` drops a provided time during construction. This usually happens
+  if the coordinates and orientation only contain a single data point.
+  [[#285]](https://github.com/BAMWelDX/weldx/pull/285)
+
 ## 0.3.0 (12.03.2021)
 
 ### added

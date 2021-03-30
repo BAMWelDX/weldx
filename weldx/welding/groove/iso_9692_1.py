@@ -81,6 +81,12 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
     _AREA_RASTER_WIDTH = 0.1
     """steers the area approximation of the groove in ~cross_sect_area."""
 
+    def __post_init__(self):
+        """Make sure all parameters are valid after class init."""
+        for key, value in self.parameters().items():
+            if value < 0.0:
+                raise ValueError(f"Invalid value for parameter {key}={value:~}")
+
     def parameters(self):
         """Return groove parameters as dictionary of quantities."""
         return {k: v for k, v in self.__dict__.items() if isinstance(v, pint.Quantity)}
@@ -240,19 +246,18 @@ class IGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t, b, width = self.t, self.b, width_default
 
         # x-values
-        x_value = [-width, 0, 0, -width]
+        x_value = np.stack((-width, 0, 0, -width))
+
         # y-values
-        y_value = [0, 0, t, t]
+        y_value = np.stack((0, 0, t, t))
         segment_list = ["line", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
@@ -309,11 +314,7 @@ class VGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
-        t = self.t  # .to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha  # .to("rad").magnitude
-        b = self.b  # .to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c  # .to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default  # .to(_DEFAULT_LEN_UNIT).magnitude
+        t, alpha, b, c, width = self.t, self.alpha, self.b, self.c, width_default
 
         # Calculations:
         s = np.tan(alpha / 2) * (t - c)
@@ -411,13 +412,8 @@ class VVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha.to("rad").magnitude
-        beta = self.beta.to("rad").magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        h = self.h.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t, b, c, h, width = self.t, self.b, self.c, self.h, width_default
+        alpha, beta = self.alpha, self.beta
 
         # Calculations
         h_lower = h - c
@@ -426,29 +422,29 @@ class VVGroove(IsoBaseGroove):
         s_2 = np.tan(beta) * h_upper
 
         # Scaling
-        edge = np.min([-(s_1 + s_2), 0])
-        if width <= -edge + 1:
+        edge = np.append(-(s_1 + s_2), 0).min()
+        if width <= -edge + Q_(1, "mm"):
             # adjustment of the width
             width = width - edge
 
         # x-values
-        x_value = [-width, 0]
+        x_value = np.append(-width, 0)
         # y-values
-        y_value = [0, 0]
+        y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
         if c != 0:
-            x_value.append(0)
-            y_value.append(c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value += [-s_1, -s_1 - s_2, -width]
-        y_value += [h + c, t, t]
+        x_value = np.append(x_value, (-s_1, -s_1 - s_2, -width))
+        y_value = np.append(y_value, (h + c, t, t))
         segment_list += ["line", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
@@ -513,13 +509,15 @@ class UVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        alpha = self.alpha.to("rad").magnitude
-        beta = self.beta.to("rad").magnitude
-        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        h = self.h.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t, alpha, beta, R, b, h, width = (
+            self.t,
+            self.alpha,
+            self.beta,
+            self.R,
+            self.b,
+            self.h,
+            width_default,
+        )
 
         # calculations:
         x_1 = np.tan(alpha / 2) * h
@@ -535,20 +533,20 @@ class UVGroove(IsoBaseGroove):
         x_end = x_arc - (t - y_arc) * np.tan(beta)
 
         # Scaling
-        edge = np.max([-x_end, 0])
-        if width <= edge + 1:
+        edge = np.append(-x_end, 0).max()
+        if width <= edge + Q_(1, "mm"):
             # adjustment of the width
             width = width + edge
 
         # x-values
-        x_value = [-width, 0, -x_1, 0, x_arc, x_end, -width]
+        x_value = np.stack((-width, 0, -x_1, 0, x_arc, x_end, -width))
         # y-values
-        y_value = [0, 0, h, y_m, y_arc, t, t]
+        y_value = np.stack((0, 0, h, y_m, y_arc, t, t))
         segment_list = ["line", "line", "arc", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
@@ -609,12 +607,14 @@ class UGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(3, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        beta = self.beta.to("rad").magnitude
-        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t, beta, R, b, c, width = (
+            self.t,
+            self.beta,
+            self.R,
+            self.b,
+            self.c,
+            width_default,
+        )
 
         # calculations:
         # From next point to circle center is the vector (x,y)
@@ -626,8 +626,8 @@ class UGroove(IsoBaseGroove):
         s = np.tan(beta) * (t - (c + R - y))
 
         # Scaling
-        edge = np.max([x + s, 0])
-        if width <= edge + 1:
+        edge = np.append(x + s, 0).max()
+        if width <= edge + Q_(1, "mm"):
             # adjustment of the width
             width = width + edge
 
@@ -638,40 +638,38 @@ class UGroove(IsoBaseGroove):
         segment_list = []
 
         # bottom segment
-        x_value.append(-width)
-        y_value.append(0)
-        x_value.append(0)
-        y_value.append(0)
+        x_value = np.append(-width, 0)
+        y_value = Q_([0, 0], "mm")
         segment_list.append("line")
 
         # root face
         if c != 0:
-            x_value.append(0)
-            y_value.append(c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
             segment_list.append("line")
 
         # groove face arc (circle center)
-        x_value.append(0)
-        y_value.append(c + R)
+        x_value = np.append(x_value, 0)
+        y_value = np.append(y_value, c + R)
 
         # groove face arc
-        x_value.append(-x)
-        y_value.append(c + R - y)
+        x_value = np.append(x_value, -x)
+        y_value = np.append(y_value, c + R - y)
         segment_list.append("arc")
 
         # groove face line
-        x_value.append(-x - s)
-        y_value.append(t)
+        x_value = np.append(x_value, -x - s)
+        y_value = np.append(y_value, t)
         segment_list.append("line")
 
         # top segment
-        x_value.append(-width)
-        y_value.append(t)
+        x_value = np.append(x_value, -width)
+        y_value = np.append(y_value, t)
         segment_list.append("line")
 
         shape = _helperfunction(segment_list, [x_value, y_value])
 
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
@@ -724,43 +722,50 @@ class HVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        beta = self.beta.to("rad").magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t, beta, b, c, width = (
+            self.t,
+            self.beta,
+            self.b,
+            self.c,
+            width_default,
+        )
 
         # Calculations
         s = np.tan(beta) * (t - c)
 
         # Scaling
-        edge = np.min([-s, 0])
-        if width <= -edge + 1:
+        edge = np.append(-s, 0).min()
+        if width <= -edge + Q_(1, "mm"):
             # adjustment of the width
             width = width - edge
 
-        x_value = [-width, 0]
-        y_value = [0, 0]
+        x_value = np.append(-width, 0)
+        y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
         if c != 0:
-            x_value.append(0)
-            y_value.append(c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value += [-s, -width]
-        y_value += [t, t]
+        x_value = np.append(x_value, (-s, -width))
+        y_value = np.append(y_value, (t, t))
         segment_list += ["line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
-
         shape_h = geo.Shape()
-        shape_h.add_line_segments(
-            [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
+        arr = np.stack(
+            (
+                np.append(-width - (b / 2), 0),
+                np.append(-b / 2, 0),
+                np.append(-b / 2, t),
+                np.append(-width - (b / 2), t),
+            )
         )
+        shape_h.add_line_segments(arr)
 
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -819,12 +824,14 @@ class HUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        beta = self.beta.to("rad").magnitude
-        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t, beta, R, b, c, width = (
+            self.t,
+            self.beta,
+            self.R,
+            self.b,
+            self.c,
+            width_default,
+        )
 
         # Calculations
         x = R * np.cos(beta)
@@ -832,33 +839,38 @@ class HUGroove(IsoBaseGroove):
         s = np.tan(beta) * (t - (c + R - y))
 
         # Scaling
-        edge = np.max([x + s, 0])
-        if width <= edge + 1:
+        edge = np.append(x + s, 0).max()
+        if width <= edge + Q_(1, "mm"):
             # adjustment of the width
             width = width + edge
 
-        x_value = [-width, 0]
-        y_value = [0, 0]
+        x_value = np.append(-width, 0)
+        y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
         if c != 0:
-            x_value.append(0)
-            y_value.append(c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value += [0, -x, -x - s, -width]
-        y_value += [c + R, c + R - y, t, t]
+        x_value = np.append(x_value, (0, -x, -x - s, -width))
+        y_value = np.append(y_value, (c + R, c + R - y, t, t))
         segment_list += ["arc", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
-
         shape_h = geo.Shape()
-        shape_h.add_line_segments(
-            [[-width - (b / 2), 0], [-b / 2, 0], [-b / 2, t], [-width - (b / 2), t]]
+        arr = np.stack(
+            (
+                np.append(-width - (b / 2), 0),
+                np.append(-b / 2, 0),
+                np.append(-b / 2, t),
+                np.append(-width - (b / 2), t),
+            )
         )
+        shape_h.add_line_segments(arr)
 
         return geo.Profile([shape_h, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -929,41 +941,42 @@ class DVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        alpha_1 = self.alpha_1.to("rad").magnitude
-        alpha_2 = self.alpha_2.to("rad").magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
-        h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
-
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t, alpha_1, alpha_2, b, c, h1, h2, width = (
+            self.t,
+            self.alpha_1,
+            self.alpha_2,
+            self.b,
+            self.c,
+            self.h1,
+            self.h2,
+            width_default,
+        )
 
         # Calculations
         s_upper = np.tan(alpha_1 / 2) * h1
         s_lower = np.tan(alpha_2 / 2) * h2
 
         # Scaling
-        edge = np.min([-s_upper, -s_lower, 0])
-        if width <= -edge + 1:
+        edge = np.stack((-s_upper, -s_lower, 0)).min()
+        if width <= -edge + Q_(1, "mm"):
             # adjustment of the width
             width = width - edge
 
-        x_value = [-width, -s_lower, 0]
-        y_value = [0, 0, h2]
+        x_value = np.stack((-width, -s_lower, 0))
+        y_value = np.stack((0, 0, h2))
         segment_list = ["line", "line"]
 
         if c != 0:
-            x_value.append(0)
-            y_value.append(h2 + c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, h2 + c)
             segment_list.append("line")
 
-        x_value += [-s_upper, -width]
-        y_value += [t, t]
+        x_value = np.append(x_value, (-s_upper, -width))
+        y_value = np.append(y_value, (t, t))
         segment_list += ["line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
@@ -1055,17 +1068,18 @@ class DUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        beta_1 = self.beta_1.to("rad").magnitude
-        beta_2 = self.beta_2.to("rad").magnitude
-        R = self.R.to(_DEFAULT_LEN_UNIT).magnitude
-        R2 = self.R2.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        c = self.c.to(_DEFAULT_LEN_UNIT).magnitude
-        h1 = self.h1.to(_DEFAULT_LEN_UNIT).magnitude
-        h2 = self.h2.to(_DEFAULT_LEN_UNIT).magnitude
-
-        width = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+        t, beta_1, beta_2, R, R2, b, c, h1, h2, width = (
+            self.t,
+            self.beta_1,
+            self.beta_2,
+            self.R,
+            self.R2,
+            self.b,
+            self.c,
+            self.h1,
+            self.h2,
+            width_default,
+        )
 
         # Calculations
         x_upper = R * np.cos(beta_1)
@@ -1076,26 +1090,26 @@ class DUGroove(IsoBaseGroove):
         s_lower = np.tan(beta_2) * (h2 - (R2 - y_lower))
 
         # Scaling
-        edge = np.max([x_upper + s_upper, x_lower + s_lower, 0])
-        if width <= edge + 1:
+        edge = np.stack((x_upper + s_upper, x_lower + s_lower, 0)).max()
+        if width <= edge + Q_(1, "mm"):
             # adjustment of the width
             width = width + edge
 
-        x_value = [-width, -(s_lower + x_lower), -x_lower, 0, 0]
-        y_value = [0, 0, h2 - (R2 - y_lower), h2 - R2, h2]
+        x_value = np.stack((-width, -(s_lower + x_lower), -x_lower, 0, 0))
+        y_value = np.stack((0, 0, h2 - (R2 - y_lower), h2 - R2, h2))
         segment_list = ["line", "line", "arc"]
 
         if c != 0:
-            x_value.append(0)
-            y_value.append(h1 + c)
+            x_value = np.append(x_value, 0)
+            y_value = np.append(y_value, h1 + c)
             segment_list.append("line")
 
-        x_value += [0, -x_upper, -(s_upper + x_upper), -width]
-        y_value += [h2 + c + R, t - (h1 - (R - y_upper)), t, t]
+        x_value = np.append(x_value, (0, -x_upper, -(s_upper + x_upper), -width))
+        y_value = np.append(y_value, (h2 + c + R, t - (h1 - (R - y_upper)), t, t))
         segment_list += ["arc", "line", "line"]
 
         shape = _helperfunction(segment_list, [x_value, y_value])
-        shape = shape.translate([-b / 2, 0])
+        shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
         shape_r = shape.reflect_across_line([0, 0], [0, 1])
 
@@ -1180,19 +1194,16 @@ class DHVGroove(IsoBaseGroove):
         )
         dv_profile = dv_groove.to_profile(width_default)
         right_shape = dv_profile.shapes[1]
-
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
         left_shape = geo.Shape()
-        left_shape.add_line_segments(
-            [
-                [-width_default - (b / 2), 0],
-                [-b / 2, 0],
-                [-b / 2, t],
-                [-width_default - (b / 2), t],
-            ]
+        arr = np.stack(
+            (
+                np.append(-width_default - (self.b / 2), 0),
+                np.append(-self.b / 2, 0),
+                np.append(-self.b / 2, self.t),
+                np.append(-width_default - (self.b / 2), self.t),
+            )
         )
+        left_shape.add_line_segments(arr)
 
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
@@ -1295,19 +1306,16 @@ class DHUGroove(IsoBaseGroove):
             code_number=self.code_number,
         ).to_profile(width_default)
         right_shape = du_profile.shapes[1]
-
-        t = self.t.to(_DEFAULT_LEN_UNIT).magnitude
-        b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-        width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
         left_shape = geo.Shape()
-        left_shape.add_line_segments(
-            [
-                [-width_default - (b / 2), 0],
-                [-b / 2, 0],
-                [-b / 2, t],
-                [-width_default - (b / 2), t],
-            ]
+        arr = np.stack(
+            (
+                np.append(-width_default - (self.b / 2), 0),
+                np.append(-self.b / 2, 0),
+                np.append(-self.b / 2, self.t),
+                np.append(-width_default - (self.b / 2), self.t),
+            )
         )
+        left_shape.add_line_segments(arr)
 
         return geo.Profile([left_shape, right_shape], units=_DEFAULT_LEN_UNIT)
 
@@ -1381,37 +1389,33 @@ class FFGroove(IsoBaseGroove):
             or self.code_number == "1.13"
             or self.code_number == "2.12"
         ):
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [
-                    [0, 0],
-                    [2 * width_default + t_1, 0],
-                    [2 * width_default + t_1, t_1],
-                    [0, t_1],
-                    [0, 0],
-                ]
+            arr1 = np.stack(
+                (
+                    np.append(0, 0),
+                    np.append(2 * width_default + self.t_1, 0),
+                    np.append(2 * width_default + self.t_1, self.t_1),
+                    np.append(0, self.t_1),
+                    np.append(0, 0),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments(
-                [
-                    [width_default, 0],
-                    [width_default + t_1, 0],
-                    [width_default + t_1, -width_default],
-                    [width_default, -width_default],
-                    [width_default, 0],
-                ]
+            arr2 = np.stack(
+                (
+                    np.append(width_default, 0),
+                    np.append(width_default + self.t_1, 0),
+                    np.append(width_default + self.t_1, -width_default),
+                    np.append(width_default, -width_default),
+                    np.append(width_default, 0),
+                )
             )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "3.1.1":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            alpha = self.alpha.to("rad").magnitude
-            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
-            if width_default < t_1 + 1:
+            if width_default < t_1 + Q_(1, "mm"):
                 width_default = t_1 + width_default
 
             # x = t_1
@@ -1427,39 +1431,51 @@ class FFGroove(IsoBaseGroove):
             y_3 = y_1 + y_2
 
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[t_1 + x_1, y_1], [t_1, 0], [t_1 + x_2, y_2], [t_1 + x_3, y_3]]
+            arr1 = np.stack(
+                (
+                    np.append(t_1 + x_1, y_1),
+                    np.append(t_1, 0),
+                    np.append(t_1 + x_2, y_2),
+                    np.append(t_1 + x_3, y_3),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments(
-                [[width_default, -b], [0, -b], [0, -t_2 - b], [width_default, -t_2 - b]]
+            arr2 = np.stack(
+                (
+                    np.append(width_default, -b),
+                    np.append(0, -b),
+                    np.append(0, -t_2 - b),
+                    np.append(width_default, -t_2 - b),
+                )
             )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "3.1.2":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[0, 0], [width_default, 0], [width_default, t_1], [0, t_1]]
+            arr1 = np.stack(
+                (
+                    np.append(0, 0),
+                    np.append(width_default, 0),
+                    np.append(width_default, t_1),
+                    np.append(0, t_1),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments(
-                [
-                    [0, -b],
-                    [2 * width_default, -b],
-                    [2 * width_default, -t_2 - b],
-                    [0, -t_2 - b],
-                ]
+            arr2 = np.stack(
+                (
+                    np.append(0, -b),
+                    np.append(2 * width_default, -b),
+                    np.append(2 * width_default, -t_2 - b),
+                    np.append(0, -t_2 - b),
+                )
             )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "3.1.3" or self.code_number == "4.1.1":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            alpha = self.alpha.to("rad").magnitude
-            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
             x = np.sin(alpha + np.pi / 2) * b + b
             y = np.cos(alpha + np.pi / 2) * b
@@ -1474,18 +1490,28 @@ class FFGroove(IsoBaseGroove):
             y_3 = y_1 + y_2 - y
 
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[-width_default, 0], [0, 0], [0, t_1], [-width_default, t_1]]
+            arr1 = np.stack(
+                (
+                    np.append(-width_default, 0),
+                    np.append(0, 0),
+                    np.append(0, t_1),
+                    np.append(-width_default, t_1),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments([[x_3, y_3], [x_1, y_1], [x, y], [x_2, y_2]])
+            arr2 = np.stack(
+                (
+                    np.append(x_3, y_3),
+                    np.append(x_1, y_1),
+                    np.append(x, y),
+                    np.append(x_2, y_2),
+                )
+            )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "4.1.2":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            alpha = self.alpha.to("rad").magnitude
-            e = self.e.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, alpha, e = self.t_1, self.t_2, self.alpha, self.e
 
             x_1 = np.sin(alpha) * e
             y_1 = np.cos(alpha) * e
@@ -1500,31 +1526,49 @@ class FFGroove(IsoBaseGroove):
             y_4 = y_1 + np.cos(alpha + np.pi / 2) * width_default
 
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[-width_default, 0], [0, 0], [0, t_1], [-width_default, t_1]]
+            arr1 = np.stack(
+                (
+                    np.append(-width_default, 0),
+                    np.append(0, 0),
+                    np.append(0, t_1),
+                    np.append(-width_default, t_1),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments([[x_4, y_4], [x_1, y_1], [x_2, y_2], [x_3, y_3]])
+            arr2 = np.stack(
+                (
+                    np.append(x_4, y_4),
+                    np.append(x_1, y_1),
+                    np.append(x_2, y_2),
+                    np.append(x_3, y_3),
+                )
+            )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         elif self.code_number == "4.1.3":
-            t_1 = self.t_1.to(_DEFAULT_LEN_UNIT).magnitude
-            t_2 = self.t_2.to(_DEFAULT_LEN_UNIT).magnitude
-            b = self.b.to(_DEFAULT_LEN_UNIT).magnitude
-            width_default = width_default.to(_DEFAULT_LEN_UNIT).magnitude
+            t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
-            shape1.add_line_segments(
-                [[0, width_default], [0, 0], [t_1, 0], [t_1, width_default]]
+            arr1 = np.stack(
+                (
+                    np.append(0, width_default),
+                    np.append(0, 0),
+                    np.append(t_1, 0),
+                    np.append(t_1, width_default),
+                )
             )
+            shape1.add_line_segments(arr1)
             shape2 = geo.Shape()
-            shape2.add_line_segments(
-                [
-                    [-width_default, -b],
-                    [t_1 + width_default, -b],
-                    [t_1 + width_default, -t_2 - b],
-                    [-width_default, -t_2 - b],
-                    [-width_default, -b],
-                ]
+            arr2 = np.stack(
+                (
+                    np.append(-width_default, -b),
+                    np.append(t_1 + width_default, -b),
+                    np.append(t_1 + width_default, -t_2 - b),
+                    np.append(-width_default, -t_2 - b),
+                    np.append(-width_default, -b),
+                )
             )
+            shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
         else:
             raise ValueError(
@@ -1573,23 +1617,10 @@ def _helperfunction(segment, array) -> geo.Shape:
             segment_list.append(seg)
             counter += 1
         if elem == "arc":
-            arr0 = [
-                # begin
-                array[0][counter],
-                # end
-                array[0][counter + 2],
-                # circle center
-                array[0][counter + 1],
-            ]
-            arr1 = [
-                # begin
-                array[1][counter],
-                # end
-                array[1][counter + 2],
-                # circle center
-                array[1][counter + 1],
-            ]
-            seg = geo.ArcSegment([arr0, arr1], False)
+            arr0 = array[0][[counter, counter + 2, counter + 1]]
+            arr1 = array[1][[counter, counter + 2, counter + 1]]
+            arr = np.vstack((arr0, arr1))
+            seg = geo.ArcSegment(arr, False)
             segment_list.append(seg)
             counter += 2
 
@@ -1693,6 +1724,11 @@ def get_groove(
                    bevel_radius=Q_(6, "mm"),
                    root_face=Q_(3, "mm"),
                    root_gap=Q_(1, "mm"))
+
+    Raises
+    ------
+    ValueError
+        When passing negative parameter values.
 
     Notes
     -----
