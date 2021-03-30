@@ -77,7 +77,7 @@ properties:
               The wire classification according to DIN EN ISO 14341, DIN EN 12072 or similar standards.
               Addition standard details should be stored in the wx_user property.
             type: string
-            required: [wire_diameter]
+        required: [diameter]
     required: [welding_process, shielding_gas, weld_speed, welding_wire]
   welding_current:
     description: |
