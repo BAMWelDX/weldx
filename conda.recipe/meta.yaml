@@ -31,6 +31,8 @@ test:
   source_files:
     - tests/*.py
     - tests/asdf_tests/*.py
+    - doc/_static/WelDX_notext.ico
+    - doc/_static/WelDX_notext.svg
   imports:
     - weldx
     - weldx.visualization
