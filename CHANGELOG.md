@@ -16,6 +16,10 @@ builds. [[#314]](https://github.com/BAMWelDX/weldx/pull/314)
 
 - `weldx.util.deprecated` decorator [[#295]](https://github.com/BAMWelDX/weldx/pull/295)
 
+### removed
+
+- `rotation_matrix_x`, `rotation_matrix_y` and `rotation_matrix_z`
+  [[#317]](https://github.com/BAMWelDX/weldx/pull/317)
 
 ### dependencies
 
