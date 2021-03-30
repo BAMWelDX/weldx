@@ -34,6 +34,7 @@ except ModuleNotFoundError:  # fallback for local use
     import weldx
 except Exception as ex:
     raise
+
 import weldx.visualization  # load visualization
 from weldx.asdf.constants import WELDX_TAG_BASE
 
