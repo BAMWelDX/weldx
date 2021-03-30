@@ -9,60 +9,6 @@ _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
 
 
-@UREG.wraps(None, _DEFAULT_ANG_UNIT, strict=False)
-def rotation_matrix_x(angle):
-    """Create a rotation matrix that rotates around the x-axis.
-
-    Parameters
-    ----------
-    angle :
-        Rotation angle
-
-    Returns
-    -------
-    numpy.ndarray
-        Rotation matrix
-
-    """
-    return _Rotation.from_euler("x", angle).as_matrix()
-
-
-@UREG.wraps(None, _DEFAULT_ANG_UNIT, strict=False)
-def rotation_matrix_y(angle):
-    """Create a rotation matrix that rotates around the y-axis.
-
-    Parameters
-    ----------
-    angle :
-        Rotation angle
-
-    Returns
-    -------
-    numpy.ndarray
-        Rotation matrix
-
-    """
-    return _Rotation.from_euler("y", angle).as_matrix()
-
-
-@UREG.wraps(None, _DEFAULT_ANG_UNIT, strict=False)
-def rotation_matrix_z(angle) -> np.ndarray:
-    """Create a rotation matrix that rotates around the z-axis.
-
-    Parameters
-    ----------
-    angle :
-        Rotation angle
-
-    Returns
-    -------
-    numpy.ndarray
-        Rotation matrix
-
-    """
-    return _Rotation.from_euler("z", angle).as_matrix()
-
-
 class WXRotation(_Rotation):
     """Wrapper for creating meta-tagged `~scipy.spatial.transform.Rotation` objects.
 
