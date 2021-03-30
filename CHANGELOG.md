@@ -5,6 +5,11 @@
 This is a bugfix release to correctly include the asdf schema files in conda
 builds. [[#314]](https://github.com/BAMWelDX/weldx/pull/314)
 
+### ASDF
+
+- fix required welding wire metadata in `single-pass-weldx.1.0.0.schema`
+  [[#316]](https://github.com/BAMWelDX/weldx/pull/316)
+
 ## 0.3.2 (29.03.2021)
 
 ### added
