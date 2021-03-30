@@ -42,8 +42,8 @@ jobs:
 
       - name: pip installs
         run: |
-          pip install setuptools_scm
-          pip install -e .[test]
+          pip install pytest pytest-cov pytest-xdist setuptools_scm
+          pip install -e .
 
       - name: run pytest
         run: |
