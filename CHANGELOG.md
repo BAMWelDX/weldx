@@ -1,11 +1,15 @@
 # Release Notes
 
+## 0.3.2 (30.03.2021)
+
+This is a bugfix release to correctly include the asdf schema files in conda
+builds. [[#313]](https://github.com/BAMWelDX/weldx/pull/313)
+
 ## 0.3.2 (29.03.2021)
 
 ### added
 
 - `weldx.util.deprecated` decorator [[#295]](https://github.com/BAMWelDX/weldx/pull/295)
-
 
 ### dependencies
 
