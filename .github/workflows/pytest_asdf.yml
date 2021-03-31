@@ -19,4 +19,4 @@ jobs:
           pip install -e .[test]
       - name: run pytest
         run: |
-          pytest --asdf-tests --ignore=tests/ --no-cov
+          pytest --asdf-tests --ignore=weldx/tests/ --no-cov
