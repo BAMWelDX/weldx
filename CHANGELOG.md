@@ -1,5 +1,11 @@
 # Release Notes
 
+
+## 0.4.0 (unreleased)
+
+### changes
+- `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
+
 ## 0.3.3 (30.03.2021)
 
 This is a bugfix release to correctly include the asdf schema files in conda
