@@ -181,9 +181,11 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
         )
 
     if not time_dep_orientation:
-        orientation = tf.rotation_matrix_z(np.pi / 3)
+        orientation = WXRotation.from_euler("z", np.pi / 3).as_matrix()
     else:
-        orientation = tf.rotation_matrix_z(np.pi / 2 * np.array([1, 2, 3, 4]))
+        orientation = WXRotation.from_euler(
+            "z", np.pi / 2 * np.array([1, 2, 3, 4])
+        ).as_matrix()
 
     if not time_dep_orientation and not time_dep_coordinates:
         return tf.LocalCoordinateSystem(orientation=orientation, coordinates=coords)
@@ -258,13 +260,13 @@ def get_example_coordinate_system_manager():
     csm.create_cs(
         "lcs_02",
         "root",
-        orientation=tf.rotation_matrix_z(np.pi / 3),
+        orientation=WXRotation.from_euler("z", np.pi / 3).as_matrix(),
         coordinates=[4, -7, 8],
     )
     csm.create_cs(
         "lcs_03",
         "lcs_02",
-        orientation=tf.rotation_matrix_y(np.pi / 11),
+        orientation=WXRotation.from_euler("y", np.pi / 11),
         coordinates=[4, -7, 8],
     )
     return csm
