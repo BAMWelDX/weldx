@@ -52,7 +52,7 @@ jobs:
 
       - name: run pytest
         run: |
-          pytest -n 2 --runslow tests/
+          pytest -n 2 --runslow
           echo "Exited with '$?'"
 
       - name: run pytest on notebooks (append coverage)
