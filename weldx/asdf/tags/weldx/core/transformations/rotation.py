@@ -99,8 +99,4 @@ class WXRotationTypeASDF(WeldxType):
         elif "rotvec" in tree:
             return WXRotation.from_rotvec(tree["rotvec"])
         elif "angles" in tree:
-            if "degree" in str(tree["angles"].units):
-                angles = tree["angles"].to("degree")
-            else:
-                angles = tree["angles"].to("rad")
-            return WXRotation.from_euler(seq=tree["sequence"], angles=angles)
+            return WXRotation.from_euler(seq=tree["sequence"], angles=tree["angles"])
