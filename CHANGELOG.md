@@ -5,6 +5,7 @@
 
 ### changes
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
+- move tests folder to `weldx/tests` [[#323]](https://github.com/BAMWelDX/weldx/pull/323)
 
 ## 0.3.3 (30.03.2021)
 
