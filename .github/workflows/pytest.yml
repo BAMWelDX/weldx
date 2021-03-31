@@ -41,7 +41,9 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: pip installs
-        run: pip install -e .[test]
+        run: |
+          pip install wheel
+          pip install -e .[test]
 
       - name: setup matplotlib
         if: startsWith(runner.os, 'Windows')
@@ -49,6 +51,7 @@ jobs:
             if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
             echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
             python -c "import matplotlib as m; print(m.matplotlib_fname())"
+            python -c "import matplotlib as m; print(m.rc_params()['backend'])"
         shell: cmd
 
       - name: run pytest
