@@ -48,6 +48,7 @@ jobs:
         run: |
             if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
             echo "backend: Agg" > %userprofile%\.matplotlib\matplotlibrc
+            python -c "import matplotlib as m; print(m.matplotlib_fname())"
         shell: cmd
 
       - name: run pytest
