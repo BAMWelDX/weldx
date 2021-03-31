@@ -17,6 +17,7 @@ import weldx.transformations as tf
 import weldx.util as ut
 from weldx import Q_
 from weldx.geometry import SpatialData
+from weldx.transformations import WXRotation
 
 # helpers ---------------------------------------------------------------------
 
@@ -2257,7 +2258,7 @@ def test_trace_local_coordinate_system():
         check_coordinate_systems_identical(cs_trace, cs_expected)
 
     # check with arbitrary coordinate system --------------
-    orientation = tf.rotation_matrix_x(np.pi / 2)
+    orientation = WXRotation.from_euler("x", np.pi / 2).as_matrix()
     coordinates = np.array([-3, 2.5, 5])
     cs_base = tf.LocalCoordinateSystem(orientation, coordinates)
 
@@ -2320,7 +2321,7 @@ def test_trace_rasterization():
             assert ut.vector_is_close([x, y, 0], data[:, i])
 
     # check with arbitrary coordinate system --------------
-    orientation = tf.rotation_matrix_y(np.pi / 2)
+    orientation = WXRotation.from_euler("y", np.pi / 2).as_matrix()
     coordinates = np.array([-3, 2.5, 5])
     cs_base = tf.LocalCoordinateSystem(orientation, coordinates)
 
