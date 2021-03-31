@@ -54,7 +54,7 @@ def test_rotation(inputs):
     data = _write_read_buffer({"rot": inputs})
     r = data["rot"]
     assert np.allclose(r.as_quat(), inputs.as_quat())
-    if hasattr(inputs,"wx_meta"):
+    if hasattr(inputs, "wx_meta"):
         assert r.wx_meta == inputs.wx_meta
 
 
