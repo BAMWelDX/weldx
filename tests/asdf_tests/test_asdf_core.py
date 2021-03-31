@@ -52,7 +52,10 @@ _base_rotation = Rotation.from_euler(
 )
 def test_rotation(inputs):
     data = _write_read_buffer({"rot": inputs})
-    assert np.allclose(data["rot"].as_quat(), inputs.as_quat())
+    r = data["rot"]
+    assert np.allclose(r.as_quat(), inputs.as_quat())
+    if hasattr(inputs,"wx_meta"):
+        assert r.wx_meta == inputs.wx_meta
 
 
 def test_rotation_euler_exception():
