@@ -15,9 +15,10 @@ from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.util as ut
-from tests._helpers import get_test_name
 from weldx import Q_, SpatialData
+from weldx.tests._helpers import get_test_name
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
+from weldx.transformations import WXRotation
 
 # helpers for tests -----------------------------------------------------------
 
@@ -106,12 +107,7 @@ def rotated_positive_orthogonal_basis(
 
     """
     # rotate axes to produce a more general test case
-    r_x = tf.rotation_matrix_x(angle_x)
-    r_y = tf.rotation_matrix_y(angle_y)
-    r_z = tf.rotation_matrix_z(angle_z)
-
-    r_tot = np.matmul(r_z, np.matmul(r_y, r_x))
-    return r_tot
+    return WXRotation.from_euler("xyz", [angle_x, angle_y, angle_z]).as_matrix()
 
 
 def check_coordinate_system_orientation(
@@ -205,43 +201,6 @@ def check_coordinate_systems_close(lcs_0, lcs_1):
 
 
 # test functions --------------------------------------------------------------
-
-
-def test_coordinate_axis_rotation_matrices():
-    """Test the rotation matrices that rotate around one coordinate axis.
-
-    This test creates the rotation matrices using 10 degree steps and
-    multiplies them with a given vector. The result is compared to the
-    expected values, which are determined using the sine and cosine.
-    Additionally, some matrix properties are checked.
-
-    """
-    matrix_funcs = [tf.rotation_matrix_x, tf.rotation_matrix_y, tf.rotation_matrix_z]
-    vec = np.array([1, 1, 1])
-
-    for i in range(3):
-        for j in range(36):
-            angle = j / 18 * np.pi
-            matrix = matrix_funcs[i](angle)
-
-            # rotation matrices are orthogonal
-            check_matrix_orthogonal(matrix)
-
-            # matrix should not reflect
-            check_matrix_does_not_reflect(matrix)
-
-            # rotate vector
-            res = np.matmul(matrix, vec)
-
-            i_1 = (i + 1) % 3
-            i_2 = (i + 2) % 3
-
-            exp_1 = np.cos(angle) - np.sin(angle)
-            exp_2 = np.cos(angle) + np.sin(angle)
-
-            assert math.isclose(res[i], 1)
-            assert math.isclose(res[i_1], exp_1)
-            assert math.isclose(res[i_2], exp_2)
 
 
 def test_scaling_matrix():
@@ -496,7 +455,7 @@ def r_mat_x(factors) -> np.ndarray:
         An array of rotation matrices
 
     """
-    return tf.rotation_matrix_x(np.array(factors) * np.pi)
+    return WXRotation.from_euler("x", np.array(factors) * np.pi).as_matrix()
 
 
 def r_mat_y(factors) -> np.ndarray:
@@ -515,7 +474,7 @@ def r_mat_y(factors) -> np.ndarray:
         An array of rotation matrices
 
     """
-    return tf.rotation_matrix_y(np.array(factors) * np.pi)
+    return WXRotation.from_euler("y", np.array(factors) * np.pi).as_matrix()
 
 
 def r_mat_z(factors) -> np.ndarray:
@@ -534,7 +493,7 @@ def r_mat_z(factors) -> np.ndarray:
         An array of rotation matrices
 
     """
-    return tf.rotation_matrix_z(np.array(factors) * np.pi)
+    return WXRotation.from_euler("z", np.array(factors) * np.pi).as_matrix()
 
 
 class TestLocalCoordinateSystem:
@@ -588,7 +547,7 @@ class TestLocalCoordinateSystem:
 
         """
         # setup
-        orientation = tf.rotation_matrix_z(np.array([0.5, 1.0, 1.5]) * np.pi)
+        orientation = r_mat_z([0.5, 1.0, 1.5])
         coordinates = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
         lcs = tf.LocalCoordinateSystem(
             orientation, coordinates, time, time_ref=time_ref
@@ -660,7 +619,7 @@ class TestLocalCoordinateSystem:
             The coordinate systems reference time
 
         """
-        orientations = tf.rotation_matrix_z(np.array(range(len(time_o))))
+        orientations = WXRotation.from_euler("z", range(len(time_o))).as_matrix()
         coordinates = [[i, i, i] for i in range(len(time_o))]
 
         dax_o = ut.xr_3d_matrix(orientations, time_o)
@@ -714,7 +673,7 @@ class TestLocalCoordinateSystem:
             Expected time of the LCS after the reset
 
         """
-        orientation = tf.rotation_matrix_z([1, 2, 3])
+        orientation = WXRotation.from_euler("z", [1, 2, 3]).as_matrix()
         coordinates = [[i, i, i] for i in range(3)]
         lcs = tf.LocalCoordinateSystem(
             orientation, coordinates, time, time_ref=time_ref
@@ -753,7 +712,7 @@ class TestLocalCoordinateSystem:
             Name of the test
 
         """
-        orientation = tf.rotation_matrix_z([1, 2, 3])
+        orientation = WXRotation.from_euler("z", [1, 2, 3]).as_matrix()
         coordinates = [[i, i, i] for i in range(3)]
         time = TDI([1, 2, 3], "D")
 
@@ -774,21 +733,21 @@ class TestLocalCoordinateSystem:
                 TS("2020-02-10"),
                 TDI([1, 2], "D"),
                 TS("2020-02-10"),
-                tf.rotation_matrix_z(np.array([0, 0]) * np.pi),
+                r_mat_z([0, 0]),
                 np.array([[2, 8, 7], [2, 8, 7]]),
             ),
             (  # broadcast right
                 TS("2020-02-10"),
                 TDI([29, 30], "D"),
                 TS("2020-02-10"),
-                tf.rotation_matrix_z(np.array([0.5, 0.5]) * np.pi),
+                r_mat_z([0.5, 0.5]),
                 np.array([[3, 1, 2], [3, 1, 2]]),
             ),
             (  # pure interpolation
                 TS("2020-02-10"),
                 TDI([11, 14, 17, 20], "D"),
                 TS("2020-02-10"),
-                tf.rotation_matrix_z(np.array([0.125, 0.5, 0.875, 0.75]) * np.pi),
+                r_mat_z([0.125, 0.5, 0.875, 0.75]),
                 np.array(
                     [[2.5, 8.25, 5.75], [4, 9, 2], [1, 3.75, 1.25], [1.5, 1.5, 1.5]]
                 ),
@@ -797,21 +756,21 @@ class TestLocalCoordinateSystem:
                 TS("2020-02-10"),
                 TDI([6, 12, 18, 24, 32], "D"),
                 TS("2020-02-10"),
-                tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi),
+                r_mat_z([0, 0.25, 1, 0.5, 0.5]),
                 np.array([[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]),
             ),
             (  # different reference times
                 TS("2020-02-10"),
                 TDI([8, 14, 20, 26, 34], "D"),
                 TS("2020-02-08"),
-                tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi),
+                r_mat_z([0, 0.25, 1, 0.5, 0.5]),
                 np.array([[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]),
             ),
             (  # no reference time
                 None,
                 TDI([6, 12, 18, 24, 32], "D"),
                 None,
-                tf.rotation_matrix_z(np.array([0, 0.25, 1, 0.5, 0.5]) * np.pi),
+                r_mat_z([0, 0.25, 1, 0.5, 0.5]),
                 np.array([[2, 8, 7], [3, 8.5, 4.5], [0, 2, 1], [3, 1, 2], [3, 1, 2]]),
             ),
         ],
@@ -837,7 +796,7 @@ class TestLocalCoordinateSystem:
         """
         # setup
         lcs = tf.LocalCoordinateSystem(
-            orientation=tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi),
+            orientation=r_mat_z([0, 0.5, 1, 0.5]),
             coordinates=np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]]),
             time=TDI([10, 14, 18, 22], "D"),
             time_ref=time_ref_lcs,
@@ -1271,8 +1230,8 @@ def test_coordinate_system_init():
     time_0 = TDI([1, 3, 5], "s")
     time_1 = TDI([2, 4, 6], "s")
 
-    orientation_fix = tf.rotation_matrix_z(np.pi)
-    orientation_tdp = tf.rotation_matrix_z(np.pi * np.array([0, 0.25, 0.5]))
+    orientation_fix = r_mat_z(1)
+    orientation_tdp = r_mat_z([0, 0.25, 0.5])
     coordinates_fix = ut.to_float_array([3, 7, 1])
     coordinates_tdp = ut.to_float_array([[3, 7, 1], [4, -2, 8], [-5, 3, -1]])
 
@@ -1356,15 +1315,13 @@ def test_coordinate_system_init():
             [-5, 3, -1],
         ]
     )
-    orientation_exp = tf.rotation_matrix_z(
-        np.pi * np.array([0, 0.125, 0.25, 0.375, 0.5, 0.5])
-    )
+    orientation_exp = r_mat_z([0, 0.125, 0.25, 0.375, 0.5, 0.5])
     check_coordinate_system(lcs, orientation_exp, coordinates_exp, True, time_exp)
 
     # matrix normalization ----------------------
 
     # no time dependency
-    orientation_exp = tf.rotation_matrix_z(np.pi / 3)
+    orientation_exp = r_mat_z(1 / 3)
     orientation_fix_2 = deepcopy(orientation_exp)
     orientation_fix_2[:, 0] *= 10
     orientation_fix_2[:, 1] *= 3
@@ -1377,7 +1334,7 @@ def test_coordinate_system_init():
     check_coordinate_system(lcs, orientation_exp, coordinates_fix, True)
 
     # time dependent
-    orientation_exp = tf.rotation_matrix_z(np.pi / 3 * ut.to_float_array([1, 2, 4]))
+    orientation_exp = r_mat_z(1 / 3 * ut.to_float_array([1, 2, 4]))
     orientation_tdp_2 = deepcopy(orientation_exp)
     orientation_tdp_2[:, :, 0] *= 10
     orientation_tdp_2[:, :, 1] *= 3
@@ -1505,8 +1462,8 @@ def test_coordinate_system_factories_time_dependent():
     angles_y = np.array([1.5, 0, 1, 0.5]) * np.pi / 2
     angles = np.array([[*angles_y], [*angles_x]]).transpose()
 
-    rot_mat_x = tf.rotation_matrix_x(angles_x)
-    rot_mat_y = tf.rotation_matrix_y(angles_y)
+    rot_mat_x = WXRotation.from_euler("x", angles_x).as_matrix()
+    rot_mat_y = WXRotation.from_euler("y", angles_y).as_matrix()
 
     time = TDI([0, 6, 12, 18], "H")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
@@ -1597,7 +1554,7 @@ def test_coordinate_system_invert():
     )
     lcs1_in_lcs0 = lcs0_in_lcs1.invert()
 
-    exp_orientation = tf.rotation_matrix_z(-np.pi / 4)
+    exp_orientation = r_mat_z(-1 / 4)
     exp_coordinates = [-np.sqrt(2), np.sqrt(2), -2]
 
     check_coordinate_system(lcs1_in_lcs0, exp_orientation, exp_coordinates, True)
@@ -1610,7 +1567,7 @@ def test_coordinate_system_invert():
 
     # time dependent ----------------------------
     time = TDI([1, 2, 3, 4], "s")
-    orientation = tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi)
+    orientation = r_mat_z([0, 0.5, 1, 0.5])
     coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
 
     lcs0_in_lcs1 = tf.LocalCoordinateSystem(
@@ -1618,7 +1575,7 @@ def test_coordinate_system_invert():
     )
 
     lcs1_in_lcs0 = lcs0_in_lcs1.invert()
-    orientation_exp = tf.rotation_matrix_z(np.array([0, 1.5, 1, 1.5]) * np.pi)
+    orientation_exp = r_mat_z([0, 1.5, 1, 1.5])
     coordinates_exp = np.array([[-2, -8, -7], [-9, 4, -2], [0, 2, -1], [-1, 3, -2]])
 
     check_coordinate_system(lcs1_in_lcs0, orientation_exp, coordinates_exp, True, time)
@@ -1665,7 +1622,7 @@ def coordinate_system_time_interpolation_test_case(
 def test_coordinate_system_time_interpolation():
     """Test the local coordinate systems interp_time and interp_like functions."""
     time_0 = TDI([10, 14, 18, 22], "D")
-    orientation = tf.rotation_matrix_z(np.array([0, 0.5, 1, 0.5]) * np.pi)
+    orientation = r_mat_z([0, 0.5, 1, 0.5])
     coordinates = np.array([[2, 8, 7], [4, 9, 2], [0, 2, 1], [3, 1, 2]])
 
     lcs = tf.LocalCoordinateSystem(
@@ -1706,9 +1663,9 @@ class TestCoordinateSystemManager:
         csm_default = self.CSM("root")
         lcs_1 = self.LCS(coordinates=[0, 1, 2])
         lcs_2 = self.LCS(coordinates=[0, -1, -2])
-        lcs_3 = self.LCS(tf.rotation_matrix_y(0), [-1, -2, -3])
-        lcs_4 = self.LCS(tf.rotation_matrix_y(np.pi / 2), [1, 2, 3])
-        lcs_5 = self.LCS(tf.rotation_matrix_y(np.pi * 3 / 2), [2, 3, 1])
+        lcs_3 = self.LCS(coordinates=[-1, -2, -3])
+        lcs_4 = self.LCS(r_mat_y(1 / 2), [1, 2, 3])
+        lcs_5 = self.LCS(r_mat_y(3 / 2), [2, 3, 1])
         csm_default.add_cs("lcs1", "root", lcs_1)
         csm_default.add_cs("lcs2", "root", lcs_2)
         csm_default.add_cs("lcs3", "lcs1", lcs_3)
@@ -1759,9 +1716,9 @@ class TestCoordinateSystemManager:
     lcs_1_acs = LCS(coordinates=[0, 1, 2])
     # lcs_2_acs = LCS(coordinates=[[0, -1, -2], [8, 2, 7]], time=time)
     lcs_2_acs = LCS(coordinates=[0, -1, -2])
-    lcs_3_acs = LCS(tf.rotation_matrix_y(0), [-1, -2, -3])
-    lcs_4_acs = LCS(tf.rotation_matrix_y(np.pi / 2), [1, 2, 3])
-    lcs_5_acs = LCS(tf.rotation_matrix_y(np.pi * 3 / 2), [2, 3, 1])
+    lcs_3_acs = LCS(coordinates=[-1, -2, -3])
+    lcs_4_acs = LCS(r_mat_y(1 / 2), [1, 2, 3])
+    lcs_5_acs = LCS(r_mat_y(3 / 2), [2, 3, 1])
 
     @pytest.mark.parametrize(
         "name , parent, lcs, child_in_parent, exp_num_cs",
@@ -3464,14 +3421,10 @@ class TestCoordinateSystemManager:
         """
         # test setup
         lcs1_in_root = tf.LocalCoordinateSystem(
-            tf.rotation_matrix_z(np.pi / 2), [1, 2, 3]
+            tf.WXRotation.from_euler("z", np.pi / 2).as_matrix(), [1, 2, 3]
         )
-        lcs2_in_root = tf.LocalCoordinateSystem(
-            tf.rotation_matrix_y(np.pi / 2), [3, -3, 1]
-        )
-        lcs3_in_lcs2 = tf.LocalCoordinateSystem(
-            tf.rotation_matrix_x(np.pi / 2), [1, -1, 3]
-        )
+        lcs2_in_root = tf.LocalCoordinateSystem(r_mat_y(0.5), [3, -3, 1])
+        lcs3_in_lcs2 = tf.LocalCoordinateSystem(r_mat_x(0.5), [1, -1, 3])
 
         csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
         csm.add_cs("lcs_1", "root", lcs1_in_root)
@@ -3699,8 +3652,8 @@ def test_coordinate_system_manager_create_coordinate_system():
     angles = np.array([[*angles_y], [*angles_x]]).transpose()
     angles_deg = 180 / np.pi * angles
 
-    rot_mat_x = tf.rotation_matrix_x(angles_x)
-    rot_mat_y = tf.rotation_matrix_y(angles_y)
+    rot_mat_x = WXRotation.from_euler("x", angles_x).as_matrix()
+    rot_mat_y = WXRotation.from_euler("y", angles_y).as_matrix()
 
     time = TDI([0, 6, 12, 18], "H")
     orientations = np.matmul(rot_mat_x, rot_mat_y)
@@ -3834,7 +3787,7 @@ def test_coordinate_system_manager_interp_time():
     """Test the coordinate system managers interp_time functions."""
     # Setup -------------------------------------
     angles = ut.to_float_array([0, np.pi / 2, np.pi])
-    orientation = tf.rotation_matrix_z(angles)
+    orientation = WXRotation.from_euler("z", angles).as_matrix()
     coordinates = ut.to_float_array([[5, 0, 0], [1, 0, 0], [1, 4, 4]])
 
     time_0 = TDI([1, 4, 7], "D")
@@ -3842,14 +3795,16 @@ def test_coordinate_system_manager_interp_time():
     time_2 = TDI([1, 6, 11], "D")
 
     lcs_3_in_lcs_2 = tf.LocalCoordinateSystem(
-        orientation=tf.rotation_matrix_y(1), coordinates=[4, 2, 0]
+        orientation=WXRotation.from_euler("y", 1).as_matrix(), coordinates=[4, 2, 0]
     )
 
     csm = tf.CoordinateSystemManager("root")
     csm.create_cs("lcs_0", "root", orientation, coordinates, time_0)
     csm.create_cs("lcs_1", "lcs_0", orientation, coordinates, time_1)
     csm.create_cs("lcs_2", "root", orientation, coordinates, time_2)
-    csm.create_cs("lcs_3", "lcs_2", tf.rotation_matrix_y(1), [4, 2, 0])
+    csm.create_cs(
+        "lcs_3", "lcs_2", WXRotation.from_euler("y", 1).as_matrix(), [4, 2, 0]
+    )
 
     # interp_time -------------------------------
     time_interp = TDI([1, 3, 5, 7, 9], "D")
@@ -3869,13 +3824,13 @@ def test_coordinate_system_manager_interp_time():
         [1, 4, 4],
         [1, 4, 4],
     ]
-    orient_0_exp = tf.rotation_matrix_z([0, np.pi / 3, 2 * np.pi / 3, np.pi, np.pi])
+    orient_0_exp = r_mat_z([0, 1 / 3, 2 / 3, 1, 1])
     lcs_0_in_root_exp = tf.LocalCoordinateSystem(
         orient_0_exp, coords_0_exp, time_interp
     )
 
     coords_1_exp = [[5, 0, 0], [3, 0, 0], [1, 0, 0], [1, 2, 2], [1, 4, 4]]
-    orient_1_exp = tf.rotation_matrix_z([0, np.pi / 4, np.pi / 2, 3 * np.pi / 4, np.pi])
+    orient_1_exp = r_mat_z([0, 1 / 4, 1 / 2, 3 / 4, 1])
     lcs_1_in_lcs_0_exp = tf.LocalCoordinateSystem(
         orient_1_exp, coords_1_exp, time_interp
     )
@@ -3887,9 +3842,7 @@ def test_coordinate_system_manager_interp_time():
         [1, 4 / 5, 4 / 5],
         [1, 12 / 5, 12 / 5],
     ]
-    orient_2_exp = tf.rotation_matrix_z(
-        [0, np.pi / 5, 2 * np.pi / 5, 3 * np.pi / 5, 4 * np.pi / 5]
-    )
+    orient_2_exp = r_mat_z([0, 1 / 5, 2 / 5, 3 / 5, 4 / 5])
     lcs_2_in_root_exp = tf.LocalCoordinateSystem(
         orient_2_exp, coords_2_exp, time_interp
     )
@@ -4047,9 +4000,9 @@ def test_coordinate_system_manager_transform_data():
     """Test the coordinate system managers transform_data function."""
     # define some coordinate systems
     # TODO: test more unique rotations - not 90°
-    lcs1_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_z(np.pi / 2), [1, 2, 3])
-    lcs2_in_root = tf.LocalCoordinateSystem(tf.rotation_matrix_y(np.pi / 2), [3, -3, 1])
-    lcs3_in_lcs2 = tf.LocalCoordinateSystem(tf.rotation_matrix_x(np.pi / 2), [1, -1, 3])
+    lcs1_in_root = tf.LocalCoordinateSystem(r_mat_z(0.5), [1, 2, 3])
+    lcs2_in_root = tf.LocalCoordinateSystem(r_mat_y(0.5), [3, -3, 1])
+    lcs3_in_lcs2 = tf.LocalCoordinateSystem(r_mat_x(0.5), [1, -1, 3])
 
     csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
     csm.add_cs("lcs_1", "root", lcs1_in_root)

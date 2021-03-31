@@ -1,8 +1,15 @@
 # Release Notes
 
+
 ## ASDF 2.8
 
 - fix inline array serialization for new 64bit inline limit
+
+## 0.4.0 (unreleased)
+
+### changes
+- `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
+- move tests folder to `weldx/tests` [[#323]](https://github.com/BAMWelDX/weldx/pull/323)
 
 ## 0.3.3 (30.03.2021)
 
@@ -20,6 +27,10 @@ builds. [[#314]](https://github.com/BAMWelDX/weldx/pull/314)
 
 - `weldx.util.deprecated` decorator [[#295]](https://github.com/BAMWelDX/weldx/pull/295)
 
+### removed
+
+- `rotation_matrix_x`, `rotation_matrix_y` and `rotation_matrix_z`
+  [[#317]](https://github.com/BAMWelDX/weldx/pull/317)
 
 ### dependencies
 

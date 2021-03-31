@@ -42,6 +42,7 @@ jobs:
 
       - name: pip installs
         run: |
+          pip install wheel
           pip install git+https://github.com/asdf-format/asdf
           pip install -e .[test]
 
@@ -49,18 +50,20 @@ jobs:
         if: startsWith(runner.os, 'Windows')
         run: |
             if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
-            echo "backend: Agg" > %userprofile%\.matplotlib\matplotlibrc
+            echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
+            python -c "import matplotlib as m; print(m.matplotlib_fname())"
+            python -c "import matplotlib as m; print(m.rc_params()['backend'])"
         shell: cmd
 
       - name: run pytest
         run: |
-          pytest -n 2 --runslow tests/
+          pytest -n 2 --runslow
           echo "Exited with '$?'"
 
       - name: run pytest on notebooks (append coverage)
         if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         run: |
-          pytest -n 2 --dist loadscope --nbval --current-env --cov=weldx --cov-append tutorials/
+          pytest -n 2 --dist loadscope --nbval --current-env --cov-append tutorials/
           echo "Exited with '$?'"
 
       - name: coverage xml (combination is performed by pytest-cov)
