@@ -12,13 +12,13 @@ from fs.osfs import OSFS
 from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
-from tests._helpers import get_test_name
 from weldx.asdf.tags.weldx.core.file import ExternalFile
 from weldx.asdf.util import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
+from weldx.tests._helpers import get_test_name
 from weldx.transformations import WXRotation
 
 # WXRotation ---------------------------------------------------------------------

@@ -15,8 +15,8 @@ from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.util as ut
-from tests._helpers import get_test_name
 from weldx import Q_, SpatialData
+from weldx.tests._helpers import get_test_name
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 
 # helpers for tests -----------------------------------------------------------

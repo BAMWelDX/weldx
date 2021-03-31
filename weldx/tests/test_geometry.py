@@ -11,8 +11,8 @@ import pint
 import pytest
 from xarray import DataArray
 
-import tests._helpers as helpers
 import weldx.geometry as geo
+import weldx.tests._helpers as helpers
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx import Q_
