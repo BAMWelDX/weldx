@@ -410,7 +410,7 @@ def test_time_series_discrete(ts, copy_arrays, lazy_load):
 # ExternalFile
 # --------------------------------------------------------------------------------------
 
-weldx_root_dir = Path(__file__).parent.parent.parent.absolute().as_posix()
+weldx_root_dir = Path(__file__).parent.parent.absolute().as_posix()
 
 
 class TestExternalFile:
@@ -422,10 +422,10 @@ class TestExternalFile:
     @pytest.mark.parametrize(
         "file_path, save_content, hostname",
         [
-            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", True, "a host"),
-            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, "a host"),
-            (Path(f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"), False, "a host"),
-            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, None),
+            (f"{weldx_root_dir}/data/WelDX_notext.svg", True, "a host"),
+            (f"{weldx_root_dir}/data/WelDX_notext.svg", False, "a host"),
+            (Path(f"{weldx_root_dir}/data/WelDX_notext.svg"), False, "a host"),
+            (f"{weldx_root_dir}/data/WelDX_notext.svg", False, None),
         ],
     )
     def test_init(file_path, save_content, hostname):
@@ -443,8 +443,8 @@ class TestExternalFile:
         """
         ef = ExternalFile(file_path, asdf_save_content=save_content, hostname=hostname)
         assert save_content == ef.asdf_save_content
-        assert ef.filename == "WelDX_notext.ico"
-        assert ef.suffix == "ico"
+        assert ef.filename == "WelDX_notext.svg"
+        assert ef.suffix == "svg"
 
         if hostname is not None:
             assert hostname == ef.hostname
@@ -477,7 +477,7 @@ class TestExternalFile:
 
         """
         if "path" not in kwargs:
-            kwargs["path"] = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
+            kwargs["path"] = f"{weldx_root_dir}/data/WelDX_notext.svg"
 
         with pytest.raises(exception_type):
             ExternalFile(**kwargs)
@@ -487,9 +487,8 @@ class TestExternalFile:
     @pytest.mark.parametrize(
         "dir_read, file_name",
         [
-            ("doc/_static", "WelDX_notext.ico"),
-            ("doc/_static", "WelDX_notext.svg"),
-            ("weldx", "__init__.py"),
+            ("data", "WelDX_notext.svg"),
+            ("", "__init__.py"),
         ],
     )
     def test_write_to(dir_read, file_name):
@@ -550,7 +549,7 @@ class TestExternalFile:
             The size of the buffer that is used by the `calculate_hash` method.
 
         """
-        file_path = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
+        file_path = f"{weldx_root_dir}/data/WelDX_notext.svg"
         ef = ExternalFile(file_path, hashing_algorithm=algorithm)
         buffer = ef.get_file_content()
 
@@ -580,7 +579,7 @@ class TestExternalFile:
 
         """
         ef = ExternalFile(
-            f"{weldx_root_dir}/doc/_static/WelDX_notext.ico",
+            f"{weldx_root_dir}/data/WelDX_notext.svg",
             asdf_save_content=store_content,
         )
         tree = {"file": ef}
@@ -601,11 +600,11 @@ class TestExternalFile:
 
         if store_content:
             with OSFS(weldx_root_dir) as file_system:
-                original_hash = file_system.hash("doc/_static/WelDX_notext.ico", "md5")
+                original_hash = file_system.hash("data/WelDX_notext.svg", "md5")
 
             with MemoryFS() as file_system:
                 ef_file.write_to("", file_system)
-                assert file_system.hash("WelDX_notext.ico", "md5") == original_hash
+                assert file_system.hash("WelDX_notext.svg", "md5") == original_hash
 
 
 # --------------------------------------------------------------------------------------
