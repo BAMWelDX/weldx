@@ -36,17 +36,26 @@ _base_rotation = Rotation.from_euler(
         WXRotation.from_rotvec(_base_rotation.as_rotvec()),
         WXRotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True),
         WXRotation.from_euler(seq="xyz", angles=[0.2, 1.3, 3.14], degrees=False),
+        WXRotation.from_euler(seq="xyz", angles=Q_([10, 20, 60], "degree")),
+        WXRotation.from_euler(seq="xyz", angles=Q_([0.2, 1.3, 3.14], "rad")),
+        WXRotation.from_euler(seq="xyz", angles=Q_([0.2, 1.3, 3.14], "")),
         WXRotation.from_euler(seq="XYZ", angles=[10, 20, 60], degrees=True),
         WXRotation.from_euler(seq="y", angles=[10, 60, 40, 90], degrees=True),
         WXRotation.from_euler(seq="Z", angles=[10, 60, 40, 90], degrees=True),
         WXRotation.from_euler(
             seq="xy", angles=[[10, 10], [60, 60], [40, 40], [70, 75]], degrees=True
         ),
+        WXRotation.from_euler(
+            seq="xy", angles=Q_([[10, 10], [60, 60], [40, 40], [70, 75]], "degree")
+        ),
     ],
 )
 def test_rotation(inputs):
     data = _write_read_buffer({"rot": inputs})
-    assert np.allclose(data["rot"].as_quat(), inputs.as_quat())
+    r = data["rot"]
+    assert np.allclose(r.as_quat(), inputs.as_quat())
+    if hasattr(inputs, "wx_meta"):
+        assert r.wx_meta == inputs.wx_meta
 
 
 def test_rotation_euler_exception():
@@ -172,9 +181,11 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
         )
 
     if not time_dep_orientation:
-        orientation = tf.rotation_matrix_z(np.pi / 3)
+        orientation = WXRotation.from_euler("z", np.pi / 3).as_matrix()
     else:
-        orientation = tf.rotation_matrix_z(np.pi / 2 * np.array([1, 2, 3, 4]))
+        orientation = WXRotation.from_euler(
+            "z", np.pi / 2 * np.array([1, 2, 3, 4])
+        ).as_matrix()
 
     if not time_dep_orientation and not time_dep_coordinates:
         return tf.LocalCoordinateSystem(orientation=orientation, coordinates=coords)
@@ -249,13 +260,13 @@ def get_example_coordinate_system_manager():
     csm.create_cs(
         "lcs_02",
         "root",
-        orientation=tf.rotation_matrix_z(np.pi / 3),
+        orientation=WXRotation.from_euler("z", np.pi / 3).as_matrix(),
         coordinates=[4, -7, 8],
     )
     csm.create_cs(
         "lcs_03",
         "lcs_02",
-        orientation=tf.rotation_matrix_y(np.pi / 11),
+        orientation=WXRotation.from_euler("y", np.pi / 11),
         coordinates=[4, -7, 8],
     )
     return csm

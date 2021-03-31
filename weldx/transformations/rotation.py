@@ -1,66 +1,15 @@
 """Contains tools to handle rotations."""
 
+from typing import List, Union
+
 import numpy as np
+import pint
 from scipy.spatial.transform import Rotation as _Rotation
 
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
-
-
-@UREG.wraps(None, _DEFAULT_ANG_UNIT, strict=False)
-def rotation_matrix_x(angle):
-    """Create a rotation matrix that rotates around the x-axis.
-
-    Parameters
-    ----------
-    angle :
-        Rotation angle
-
-    Returns
-    -------
-    numpy.ndarray
-        Rotation matrix
-
-    """
-    return _Rotation.from_euler("x", angle).as_matrix()
-
-
-@UREG.wraps(None, _DEFAULT_ANG_UNIT, strict=False)
-def rotation_matrix_y(angle):
-    """Create a rotation matrix that rotates around the y-axis.
-
-    Parameters
-    ----------
-    angle :
-        Rotation angle
-
-    Returns
-    -------
-    numpy.ndarray
-        Rotation matrix
-
-    """
-    return _Rotation.from_euler("y", angle).as_matrix()
-
-
-@UREG.wraps(None, _DEFAULT_ANG_UNIT, strict=False)
-def rotation_matrix_z(angle) -> np.ndarray:
-    """Create a rotation matrix that rotates around the z-axis.
-
-    Parameters
-    ----------
-    angle :
-        Rotation angle
-
-    Returns
-    -------
-    numpy.ndarray
-        Rotation matrix
-
-    """
-    return _Rotation.from_euler("z", angle).as_matrix()
 
 
 class WXRotation(_Rotation):
@@ -100,13 +49,24 @@ class WXRotation(_Rotation):
         return rot
 
     @classmethod
+    @UREG.check(None, None, "[]", None)
     def from_euler(
-        cls, seq: str, angles, degrees: bool = False
+        cls,
+        seq: str,
+        angles: Union[pint.Quantity, np.ndarray, List[float], List[List[float]]],
+        degrees: bool = False,
     ) -> "WXRotation":  # noqa
         """Initialize from euler angles.
 
         See `scipy.spatial.transform.Rotation.from_euler` docs for details.
         """
+
+        if isinstance(angles, pint.Quantity):
+            if str(angles.u) == "dimensionless":
+                angles = angles.to("rad")
+            degrees = "rad" not in str(angles.u)
+            angles = angles.m
+
         rot = super().from_euler(seq=seq, angles=angles, degrees=degrees)
         setattr(
             rot,
