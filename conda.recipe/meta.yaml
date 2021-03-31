@@ -1,34 +1,69 @@
 {% set data = load_setup_py_data() %}
 
 package:
-    name: weldx
-    version: {{ data["version"] }}
+  name: weldx
+  version: {{ data["version"] }}
 
 source:
     path: ..
 
 build:
-  script: pip install . -v
   number: 0
   noarch: python
+  script: pip install . -v
 
 requirements:
-    host:
-        - python >=3.8
-        - pip
-        - setuptools_scm
-    run:
-        - python >=3.8
-        # dependencies are defined in setup.py
-        {% for dep in data['install_requires'] %}
-        - {{ dep.lower() }}
-        {% endfor %}
+  host:
+    - pip
+    - setuptools_scm
+    - python >=3.8
+  run:
+    - python >=3.8
+    # dependencies are defined in setup.py
+    {% for dep in data['install_requires'] %}
+    - {{ dep.lower() }}
+    {% endfor %}
 
 test:
-    imports:
-        - weldx
-        - weldx.visualization
+  requires:
+    - pytest
+    - pytest-xdist
+  imports:
+    - weldx
+    - weldx.visualization
+  commands:
+    - pytest --pyargs weldx.tests -n auto
 
 about:
-    home: www.bam.de/weldx
-    license: BSD
+  home: https://www.bam.de/Content/EN/Projects/WelDX/weldx.html
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: Python API for the WelDX file format and standard
+  description: |
+    Scientific welding data covers a wide range of physical domains and
+    timescales and are measured using various different sensors. Complex and
+    highly specialized experimental setups at different welding institutes
+    complicate the exchange of welding research data further.
+
+    The WelDX research project aims to foster the exchange of scientific data
+    inside the welding community by developing and establishing a new open
+    source file format suitable for documentation of experimental welding data
+    and upholding associated quality standards. In addition to fostering
+    scientific collaboration inside the national and international welding
+    community an associated advisory committee will be established to oversee
+    the future development of the file format. The proposed file format will be
+    developed with regard to current needs of the community regarding
+    interoperability, data quality and performance and will be published under
+    an appropriate open source license. By using the file format objectivity,
+    comparability and reproducibility across different experimental setups can
+    be improved.
+  doc_url: https://weldx.readthedocs.io
+  dev_url: https://github.com/BAMWelDX/weldx/
+
+extra:
+  recipe-maintainers:
+    - marscher
+    - vhirtham
+    - CagtayFabry
+
