@@ -12,13 +12,13 @@ from fs.osfs import OSFS
 from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
-from tests._helpers import get_test_name
 from weldx.asdf.tags.weldx.core.file import ExternalFile
 from weldx.asdf.util import _write_buffer, _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
+from weldx.tests._helpers import get_test_name
 from weldx.transformations import WXRotation
 
 # WXRotation ---------------------------------------------------------------------
@@ -36,17 +36,26 @@ _base_rotation = Rotation.from_euler(
         WXRotation.from_rotvec(_base_rotation.as_rotvec()),
         WXRotation.from_euler(seq="xyz", angles=[10, 20, 60], degrees=True),
         WXRotation.from_euler(seq="xyz", angles=[0.2, 1.3, 3.14], degrees=False),
+        WXRotation.from_euler(seq="xyz", angles=Q_([10, 20, 60], "degree")),
+        WXRotation.from_euler(seq="xyz", angles=Q_([0.2, 1.3, 3.14], "rad")),
+        WXRotation.from_euler(seq="xyz", angles=Q_([0.2, 1.3, 3.14], "")),
         WXRotation.from_euler(seq="XYZ", angles=[10, 20, 60], degrees=True),
         WXRotation.from_euler(seq="y", angles=[10, 60, 40, 90], degrees=True),
         WXRotation.from_euler(seq="Z", angles=[10, 60, 40, 90], degrees=True),
         WXRotation.from_euler(
             seq="xy", angles=[[10, 10], [60, 60], [40, 40], [70, 75]], degrees=True
         ),
+        WXRotation.from_euler(
+            seq="xy", angles=Q_([[10, 10], [60, 60], [40, 40], [70, 75]], "degree")
+        ),
     ],
 )
 def test_rotation(inputs):
     data = _write_read_buffer({"rot": inputs})
-    assert np.allclose(data["rot"].as_quat(), inputs.as_quat())
+    r = data["rot"]
+    assert np.allclose(r.as_quat(), inputs.as_quat())
+    if hasattr(inputs, "wx_meta"):
+        assert r.wx_meta == inputs.wx_meta
 
 
 def test_rotation_euler_exception():
@@ -172,9 +181,11 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
         )
 
     if not time_dep_orientation:
-        orientation = tf.rotation_matrix_z(np.pi / 3)
+        orientation = WXRotation.from_euler("z", np.pi / 3).as_matrix()
     else:
-        orientation = tf.rotation_matrix_z(np.pi / 2 * np.array([1, 2, 3, 4]))
+        orientation = WXRotation.from_euler(
+            "z", np.pi / 2 * np.array([1, 2, 3, 4])
+        ).as_matrix()
 
     if not time_dep_orientation and not time_dep_coordinates:
         return tf.LocalCoordinateSystem(orientation=orientation, coordinates=coords)
@@ -249,13 +260,13 @@ def get_example_coordinate_system_manager():
     csm.create_cs(
         "lcs_02",
         "root",
-        orientation=tf.rotation_matrix_z(np.pi / 3),
+        orientation=WXRotation.from_euler("z", np.pi / 3).as_matrix(),
         coordinates=[4, -7, 8],
     )
     csm.create_cs(
         "lcs_03",
         "lcs_02",
-        orientation=tf.rotation_matrix_y(np.pi / 11),
+        orientation=WXRotation.from_euler("y", np.pi / 11),
         coordinates=[4, -7, 8],
     )
     return csm
@@ -410,7 +421,7 @@ def test_time_series_discrete(ts, copy_arrays, lazy_load):
 # ExternalFile
 # --------------------------------------------------------------------------------------
 
-weldx_root_dir = Path(__file__).parent.parent.parent.absolute().as_posix()
+weldx_root_dir = Path(__file__).parent.parent.absolute().as_posix()
 
 
 class TestExternalFile:
@@ -422,10 +433,10 @@ class TestExternalFile:
     @pytest.mark.parametrize(
         "file_path, save_content, hostname",
         [
-            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", True, "a host"),
-            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, "a host"),
-            (Path(f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"), False, "a host"),
-            (f"{weldx_root_dir}/doc/_static/WelDX_notext.ico", False, None),
+            (f"{weldx_root_dir}/data/WelDX_notext.svg", True, "a host"),
+            (f"{weldx_root_dir}/data/WelDX_notext.svg", False, "a host"),
+            (Path(f"{weldx_root_dir}/data/WelDX_notext.svg"), False, "a host"),
+            (f"{weldx_root_dir}/data/WelDX_notext.svg", False, None),
         ],
     )
     def test_init(file_path, save_content, hostname):
@@ -443,8 +454,8 @@ class TestExternalFile:
         """
         ef = ExternalFile(file_path, asdf_save_content=save_content, hostname=hostname)
         assert save_content == ef.asdf_save_content
-        assert ef.filename == "WelDX_notext.ico"
-        assert ef.suffix == "ico"
+        assert ef.filename == "WelDX_notext.svg"
+        assert ef.suffix == "svg"
 
         if hostname is not None:
             assert hostname == ef.hostname
@@ -477,7 +488,7 @@ class TestExternalFile:
 
         """
         if "path" not in kwargs:
-            kwargs["path"] = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
+            kwargs["path"] = f"{weldx_root_dir}/data/WelDX_notext.svg"
 
         with pytest.raises(exception_type):
             ExternalFile(**kwargs)
@@ -487,9 +498,8 @@ class TestExternalFile:
     @pytest.mark.parametrize(
         "dir_read, file_name",
         [
-            ("doc/_static", "WelDX_notext.ico"),
-            ("doc/_static", "WelDX_notext.svg"),
-            ("weldx", "__init__.py"),
+            ("data", "WelDX_notext.svg"),
+            ("", "__init__.py"),
         ],
     )
     def test_write_to(dir_read, file_name):
@@ -550,7 +560,7 @@ class TestExternalFile:
             The size of the buffer that is used by the `calculate_hash` method.
 
         """
-        file_path = f"{weldx_root_dir}/doc/_static/WelDX_notext.ico"
+        file_path = f"{weldx_root_dir}/data/WelDX_notext.svg"
         ef = ExternalFile(file_path, hashing_algorithm=algorithm)
         buffer = ef.get_file_content()
 
@@ -580,7 +590,7 @@ class TestExternalFile:
 
         """
         ef = ExternalFile(
-            f"{weldx_root_dir}/doc/_static/WelDX_notext.ico",
+            f"{weldx_root_dir}/data/WelDX_notext.svg",
             asdf_save_content=store_content,
         )
         tree = {"file": ef}
@@ -601,11 +611,11 @@ class TestExternalFile:
 
         if store_content:
             with OSFS(weldx_root_dir) as file_system:
-                original_hash = file_system.hash("doc/_static/WelDX_notext.ico", "md5")
+                original_hash = file_system.hash("data/WelDX_notext.svg", "md5")
 
             with MemoryFS() as file_system:
                 ef_file.write_to("", file_system)
-                assert file_system.hash("WelDX_notext.ico", "md5") == original_hash
+                assert file_system.hash("WelDX_notext.svg", "md5") == original_hash
 
 
 # --------------------------------------------------------------------------------------

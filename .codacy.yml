@@ -2,12 +2,12 @@
 engines:
   bandit:
     exclude_paths:
-      - tests/**
+      - weldx/tests/**
 
   duplication:
     enabled: true
     exclude_paths:
-      - tests/**
+      - weldx/tests/**
 
 exclude_paths:
   - 'doc/**'

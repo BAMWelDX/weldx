@@ -42,13 +42,33 @@ jobs:
 
       - name: pip installs
         run: |
-          pip install pytest pytest-cov pytest-xdist setuptools_scm
-          pip install -e .
+          pip install wheel
+          pip install -e .[test]
+
+      - name: setup matplotlib
+        if: startsWith(runner.os, 'Windows')
+        run: |
+            if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
+            echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
+            python -c "import matplotlib as m; print(m.matplotlib_fname())"
+            python -c "import matplotlib as m; print(m.rc_params()['backend'])"
+        shell: cmd
+
       - name: run pytest
         run: |
-          pytest --runslow -n2
+          pytest -n 2 --runslow
           echo "Exited with '$?'"
-          coverage xml
+
+      - name: run pytest on notebooks (append coverage)
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
+        run: |
+          pytest -n 2 --dist loadscope --nbval --current-env --cov-append tutorials/
+          echo "Exited with '$?'"
+
+      - name: coverage xml (combination is performed by pytest-cov)
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
+        run: coverage xml
 
       - name: codecov.io
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         uses: codecov/codecov-action@v1
