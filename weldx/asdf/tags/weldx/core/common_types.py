@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List
+from uuid import UUID
 
 import numpy as np
 import pint
@@ -10,6 +11,27 @@ from weldx.asdf.types import WeldxType
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
+# UUID ---------------------------------------------------------------------------------
+class UuidTypeASDF(WeldxType):
+    """Implements a version 4 UUID."""
+
+    name = "core/uuid"
+    version = "1.0.0"
+    types = [UUID]
+    requires = ["weldx"]
+
+    @classmethod
+    def to_tree(cls, node: UUID, ctx):
+        """convert to python dict"""
+        return dict(uuid=str(node))
+
+    @classmethod
+    def from_tree(cls, tree, ctx):
+        """Reconstruct form tree."""
+        return UUID(tree["uuid"])
+
+
+# Dimension ----------------------------------------------------------------------------
 @dataclass
 class Dimension:
     """
@@ -75,6 +97,7 @@ class DimensionTypeASDF(WeldxType):
         return Dimension(tree["name"], tree["length"])
 
 
+# Variable -----------------------------------------------------------------------------
 @dataclass
 class Variable:
     """Represents an n-dimensional piece of data."""

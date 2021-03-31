@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict, List
+from uuid import UUID, uuid4
 
 import networkx as nx
 
@@ -8,7 +9,7 @@ from weldx.asdf.types import WeldxType
 
 # Signal -------------------------------------------------------------------------------
 @dataclass
-class SignalClass:
+class SignalClass(object):
     """Doc."""
 
     name: str
@@ -127,8 +128,8 @@ class EdgeTypeASDF(WeldxType):
 class Node:
     """Generic graph node type."""
 
-    name: str
     edges: List["Edge"]
+    name: str = field(default_factory=uuid4)
     attributes: dict = field(default_factory=dict)
 
 
