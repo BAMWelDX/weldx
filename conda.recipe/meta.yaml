@@ -28,16 +28,11 @@ test:
   requires:
     - pytest
     - pytest-xdist
-  source_files:
-    - tests/*.py
-    - tests/asdf_tests/*.py
-    - doc/_static/WelDX_notext.ico
-    - doc/_static/WelDX_notext.svg
   imports:
     - weldx
     - weldx.visualization
   commands:
-    - pytest -n auto
+    - pytest --pyargs weldx.tests -n auto
 
 about:
   home: https://www.bam.de/Content/EN/Projects/WelDX/weldx.html

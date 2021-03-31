@@ -1,1 +1,0 @@
-"""WelDX unit test module."""
