@@ -4,6 +4,7 @@
 ## ASDF 2.8
 
 - fix inline array serialization for new 64bit inline limit
+- add `yaml_tag_handles` to `WeldxExtension`
 
 ## 0.4.0 (unreleased)
 
