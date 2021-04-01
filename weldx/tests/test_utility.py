@@ -1,6 +1,8 @@
 """Test the internal utility functions."""
-
+import copy
 import math
+import unittest
+from io import BytesIO
 
 import numpy as np
 import pandas as pd
@@ -12,6 +14,7 @@ from pandas import date_range
 from pint.errors import DimensionalityError
 
 import weldx.util as ut
+from weldx.asdf.util import read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
@@ -498,3 +501,133 @@ def test_xr_time_ref():
 
     da2.weldx.time_ref = t0
     assert da2.time.attrs["time_ref"] == t0
+
+
+def test_non_sense():
+    with pytest.raises(TypeError):
+        ut.compare_nested("asdf", "foo")
+
+    with pytest.raises(TypeError):
+        ut.compare_nested((1, 2, 3), "bar")
+
+
+def test_flat():
+    a = (1, 2, 3)
+    b = list(a)
+    assert ut.compare_nested(a, b)
+    b[-1] = 0
+    assert not ut.compare_nested(a, b)
+
+
+def test_compare_nested_diff_keys():
+    a = {
+        "blah": np.arange(3),
+    }
+    b = {
+        "blub": np.arange(3),
+    }
+    assert not ut.compare_nested(a, b)
+
+
+def test_compare_nested_dicts_same_elements_diff_content():
+    a = {
+        "blah": np.arange(3),
+        "x": {
+            0: [1, 2, 3],
+        },
+        "blub": False,
+    }
+    b = {
+        "blah": np.arange(3),
+        "x": {
+            0: [1, 2, 3, 4],
+        },
+        "blub": False,
+    }
+    assert not ut.compare_nested(a, b)
+
+
+def test_compare_nested_dicts_diff_content():
+    a = {
+        "blah": np.arange(3),
+        "x": {
+            0: [1, 2, 3],
+        },
+        "blub": False,
+    }
+    b = {
+        "blah": np.arange(3),
+        "x": {
+            0: [1, 2, 3],
+        },
+        "blub": True,  # DIFF!
+    }
+    assert not ut.compare_nested(a, b)
+
+
+def test_compare_nested_dicts_same_content():
+    a = {
+        "blah": np.arange(3),
+        "x": {
+            0: [1, 2, 3],
+        },
+        "blub": True,
+    }
+    b = dict(a)
+    assert ut.compare_nested(a, b)
+
+
+class TestWeldxExampleCompareNested(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        import pathlib
+
+        # TODO: i'd prefer using the example from the single pass weld schema, but the data is missing, right?
+        # import weldx
+        #
+        # f = (
+        #     pathlib.Path(weldx.__file__).parent
+        #     / "asdf/schemas/weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml"
+        # )
+        # import yaml
+        #
+        # parsed = yaml.safe_load(open(f))
+        # example = parsed["examples"][0]
+        # import asdf
+        #
+        # asdf.AsdfFile(example)
+        #
+        f = pathlib.Path(__file__).parent / "./data/asdf_ref_00000.asdf"
+        fx = read_buffer(BytesIO(open(f, "rb").read()))
+        cls.fx = fx
+
+    def setUp(self) -> None:
+        self.a = self.fx
+        self.b = copy.deepcopy(self.a)
+
+    def test_equal(self):
+        assert ut.compare_nested(self.a, self.b)
+
+    def test_metadata_modified(self):
+        self.b["wx_metadata"]["welder"] = "anonymous"
+        assert not ut.compare_nested(self.a, self.b)
+
+    def test_measurements_modified(self):
+        from weldx import Q_
+
+        self.b["welding_current"].data.data.data[-1] = Q_(500, "A")
+        assert not ut.compare_nested(self.a, self.b)
+
+    def test_equip_modified(self):
+        self.b["equipment"][0].name = "broken device"
+        assert not ut.compare_nested(self.a, self.b)
+
+    def test_coordinate_systems_modified(self):
+        """manipulate one CSM and check if it gets picked up by comparison"""
+        from weldx import CoordinateSystemManager
+
+        csm: CoordinateSystemManager = self.b["coordinate_systems"]
+        csm.delete_cs("tcp")
+        assert id(csm) != id(self.a["coordinate_systems"])
+        assert csm != self.b["coordinate_systems"]
+        assert not ut.compare_nested(self.a, self.b)

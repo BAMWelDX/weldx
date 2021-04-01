@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
+from boltons import iterutils
 from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta64_dtype
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
@@ -1201,3 +1202,53 @@ class WeldxAccessor:
                 self._obj.time.attrs["time_ref"] = value  # set new time_ref value
             else:
                 self._obj.time.attrs["time_ref"] = value
+
+
+def _compare(x, y):
+    if isinstance(x, np.ndarray):
+        if not isinstance(y, np.ndarray):
+            return False
+        return np.all(x == y)
+
+    elif isinstance(x, xr.DataArray):
+        if not isinstance(y, xr.DataArray):
+            return False
+        return x.identical(y)
+
+    else:
+        return x == y
+
+
+def compare_nested(a, b):
+    """Deeply compares nested data structures combined of tuples, lists, dictionaries etc.
+
+    Arrays are compared using np.all and xr.DataArray.identical
+
+    Parameters
+    ----------
+    a
+    b
+
+    Returns
+    -------
+
+    """
+
+    def visit(p, k, v):
+        if isinstance(k, (dict, list, tuple)):
+            print("k is a dict, list or tuple")
+            pass
+        else:
+            other_value = iterutils.get_path(b, p)[k]
+            if not _compare(v, other_value):
+                raise ValueError
+        return True
+
+    try:
+        iterutils.remap(a, visit=visit, reraise_visit=True)
+    except (KeyError, ValueError) as e:
+        return False
+    except TypeError:
+        raise TypeError("either a or b are not a nested data structure.")
+
+    return True
