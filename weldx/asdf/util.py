@@ -2,14 +2,17 @@
 from io import BytesIO
 from pathlib import Path
 from typing import Tuple
+from warnings import warn
 
 import asdf
 import yaml
 from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.constants import WELDX_PATH
 
 __all__ = [
+    "get_schema_path",
     "read_buffer",
     "write_buffer",
     "write_read_buffer",
@@ -17,6 +20,21 @@ __all__ = [
     "asdf_json_repr",
     "notebook_fileprinter",
 ]
+
+
+def get_schema_path(schema: str) -> Path:
+    """Get the path to a weldx schema file."""
+    schema = schema.split(".yaml")[0]
+
+    p = WELDX_PATH / "asdf" / "schemas"
+    print(p)
+    schemas = list(p.glob(f"**/{schema}.yaml"))
+    if len(schemas) == 0:
+        raise ValueError(f"No matching schema for filename '{schema}'.")
+    elif len(schemas) > 1:
+        warn(f"Found more than one matching schema for filename '{schema}'.")
+    return schemas[0]
+
 
 # asdf read/write debug tools functions ---------------------------------------
 
