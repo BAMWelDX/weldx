@@ -54,8 +54,8 @@ class DataTransformation:
 class SignalTransformation:
     name: str
     error: Error
-    input_unit: str
-    output_unit: str
+    input_signal: Signal
+    output_signal: Signal
     func: "MathematicalExpression" = None
     input_shape: Tuple = None
     output_shape: Tuple = None
@@ -108,6 +108,7 @@ class MeasurementChainGraph:
             output_signal_type="analog",
             output_signal_unit="V",
         )
+        # todo: implement correct version, when schema is ready
         return mc
 
     def _add_signal(self, node_id: str, signal_type: str, unit: str):
@@ -123,6 +124,21 @@ class MeasurementChainGraph:
                 f"The internal graph already contains a node with the id {node_id}"
             )
 
+    def _check_data_exist(self, name):
+        for _, attr in self._graph.nodes.items():
+            if "data_name" in attr and attr["data_name"] == name:
+                raise ValueError(
+                    "The measurement chain already contains a data set with the name "
+                    f"'{name}'."
+                )
+
+    def _check_and_get_signal_source(self, signal_source_name):
+        if signal_source_name is None:
+            return self._prev_added_signal
+        elif signal_source_name not in self._graph.nodes:
+            raise ValueError(f"No signal with source '{signal_source_name}' found")
+        return signal_source_name
+
     def add_transformation(
         self,
         name: str,
@@ -132,8 +148,7 @@ class MeasurementChainGraph:
         func: "MathematicalExpression" = None,
         input_signal_source: str = None,
     ):
-        if input_signal_source is None:
-            input_signal_source = self._prev_added_signal
+        input_signal_source = self._check_and_get_signal_source(input_signal_source)
 
         self._add_signal(
             node_id=name, signal_type=output_signal_type, unit=output_signal_unit
@@ -141,13 +156,11 @@ class MeasurementChainGraph:
         self._graph.add_edge(input_signal_source, name, error=error, func=func)
 
     def add_signal_data(self, name: str, data: "TimeSeries", signal_source: str = None):
-        if signal_source is None:
-            signal_source = self._prev_added_signal
-        elif signal_source not in self._graph.nodes:
-            raise ValueError(f"No signal with source '{signal_source}' found")
+        self._check_data_exist(name)
+
+        signal_source = self._check_and_get_signal_source(signal_source)
         signal = self._graph.nodes[signal_source]
-        # todo check if data already exists
-        # todo chech data name unique
+
         signal["data_name"] = name
         signal["data"] = data
 
@@ -177,16 +190,44 @@ class MeasurementChainGraph:
 
         for edge in self._graph.edges:
             if edge[1] == name:
+                node_in = self._graph.nodes[edge[0]]
+                node_out = self._graph.nodes[edge[1]]
+
                 return SignalTransformation(
                     name=name,
-                    input_unit=self._graph.nodes[edge[0]]["unit"],
-                    output_unit=self._graph.nodes[edge[1]]["unit"],
+                    input_signal=Signal(node_in["signal_type"], node_in["unit"]),
+                    output_signal=Signal(node_out["signal_type"], node_out["unit"]),
                     **self._graph.edges[edge],
                 )
 
-    def attach_transformation(self, transformation: SignalTransformation):
-        # todo continue
-        pass
+    def attach_transformation(
+        self, transformation: SignalTransformation, input_signal_source: str = None
+    ):
+        if input_signal_source is None:
+            input_signal_source = self._prev_added_signal
+
+        source_node = self._graph.nodes[input_signal_source]
+        if (
+            transformation.input_signal.signal_type != source_node["signal_type"]
+            or transformation.input_signal.unit != source_node["unit"]
+        ):
+            raise ValueError(
+                f"The provided transformations input signal is incompatible to the "
+                f"output signal of {input_signal_source}:\n"
+                f"transformation: {transformation.input_signal.signal_type} in ["
+                f"{transformation.input_signal.unit}]\n"
+                f"output signal : {source_node['signal_type']} in ["
+                f"{source_node['unit']}]"
+            )
+
+        self.add_transformation(
+            transformation.name,
+            transformation.error,
+            transformation.output_signal.signal_type,
+            transformation.output_signal.unit,
+            transformation.func,
+            input_signal_source,
+        )
 
 
 # DRAFT SECTION END ####################################################################
