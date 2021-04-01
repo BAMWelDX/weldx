@@ -80,6 +80,8 @@ class Source:
 
 
 class MeasurementChainGraph:
+    """Simple dataclass implementation for measurement chains."""
+
     def __init__(
         self,
         name: str,
@@ -88,7 +90,25 @@ class MeasurementChainGraph:
         output_signal_type: str,
         output_signal_unit: str,
     ):
+        """Create a new measurement chain.
+
+        Parameters
+        ----------
+        name:
+            Name of the measurement chain
+        source_name :
+            Name of the source
+        source_error :
+            The error of the source
+        output_signal_type :
+            Type of the source's output signal (analog or digital)
+        output_signal_unit :
+            The unit of the source's output signal
+
+        """
         from networkx import DiGraph
+
+        self._raise_if_invalid_signal_type(output_signal_type)
 
         self._name = name
         self._source = {"name": source_name, "error": source_error}
@@ -112,19 +132,60 @@ class MeasurementChainGraph:
         return mc
 
     def _add_signal(self, node_id: str, signal_type: str, unit: str):
-        self._check_node_exist(node_id)
-        if signal_type not in ["analog", "digital"]:
-            raise ValueError(f"{signal_type} is an invalid signal type.")
+        """Add a new signal node to internal graph.
+
+        Parameters
+        ----------
+        node_id :
+            The name that will be used for the internal graphs' node. This is identical
+            to the name of the signals source.
+        signal_type :
+            Type of the signal (analog or digital)
+        unit :
+            Unit of the signal
+
+        """
+        self._raise_if_node_exist(node_id)
+        self._raise_if_invalid_signal_type(signal_type)
+
         self._graph.add_node(node_id, signal_type=signal_type, unit=unit)
         self._prev_added_signal = node_id
 
-    def _check_node_exist(self, node_id: str):
+    def _raise_if_node_exist(self, node_id: str):
+        """Raise en error if the graph already contains a node with the passed id.
+
+        Parameters
+        ----------
+        node_id :
+            Name that should be checked
+
+        """
         if node_id in self._graph.nodes:
             raise KeyError(
                 f"The internal graph already contains a node with the id {node_id}"
             )
 
-    def _check_data_exist(self, name):
+    def _raise_if_invalid_signal_type(self, signal_type: str):
+        """Raise an error if the passed signal type is invalid.
+
+        Parameters
+        ----------
+        signal_type :
+            The signal type
+
+        """
+        if signal_type not in ["analog", "digital"]:
+            raise ValueError(f"{signal_type} is an invalid signal type.")
+
+    def _raise_if_data_exist(self, name: str):
+        """Raise an error if a data set with the passed name already exists
+
+        Parameters
+        ----------
+        name :
+            Name that should be searched for
+
+        """
         for _, attr in self._graph.nodes.items():
             if "data_name" in attr and attr["data_name"] == name:
                 raise ValueError(
@@ -132,12 +193,22 @@ class MeasurementChainGraph:
                     f"'{name}'."
                 )
 
-    def _check_and_get_signal_source(self, signal_source_name):
-        if signal_source_name is None:
+    def _check_and_get_node_name(self, node_name: str) -> str:
+        """Check if a node is part of the internal graph and return its name.
+
+        If no name is provided, the name of the last added node is returned.
+
+        Parameters
+        ----------
+        node_name :
+            Name of the node that should be checked.
+
+        """
+        if node_name is None:
             return self._prev_added_signal
-        elif signal_source_name not in self._graph.nodes:
-            raise ValueError(f"No signal with source '{signal_source_name}' found")
-        return signal_source_name
+        elif node_name not in self._graph.nodes:
+            raise ValueError(f"No signal with source '{node_name}' found")
+        return node_name
 
     def add_transformation(
         self,
@@ -148,7 +219,27 @@ class MeasurementChainGraph:
         func: "MathematicalExpression" = None,
         input_signal_source: str = None,
     ):
-        input_signal_source = self._check_and_get_signal_source(input_signal_source)
+        """Add transformation to the measurement chain.
+
+        Parameters
+        ----------
+        name :
+            Name of the transformation
+        error :
+            The error of the transformation
+        output_signal_type :
+            Type of the output signal (analog or digital)
+        output_signal_unit :
+            Unit of the output signal
+        func :
+            A function describing the transformation
+        input_signal_source :
+            The source of the signal that should be used as input of the transformation.
+            If `None` is provided, the name of the last added transformation (or the
+            source, if no transformation was added to the chain) is used.
+
+        """
+        input_signal_source = self._check_and_get_node_name(input_signal_source)
 
         self._add_signal(
             node_id=name, signal_type=output_signal_type, unit=output_signal_unit
@@ -156,53 +247,43 @@ class MeasurementChainGraph:
         self._graph.add_edge(input_signal_source, name, error=error, func=func)
 
     def add_signal_data(self, name: str, data: "TimeSeries", signal_source: str = None):
-        self._check_data_exist(name)
+        """Add data to a signal.
 
-        signal_source = self._check_and_get_signal_source(signal_source)
+        Parameters
+        ----------
+        name :
+            Name of the data
+        data :
+            The data that should be added
+        signal_source :
+            The source of the signal that the data should be attached to.
+            If `None` is provided, the name of the last added transformation (or the
+            source, if no transformation was added to the chain) is used.
+
+        """
+        self._raise_if_data_exist(name)
+
+        signal_source = self._check_and_get_node_name(signal_source)
         signal = self._graph.nodes[signal_source]
 
         signal["data_name"] = name
         signal["data"] = data
 
-    def get_data(self, name):
-        for _, attr in self._graph.nodes.items():
-            data_name = attr.get("data_name")
-            if data_name is not None and data_name == name:
-                return attr["data"]
-        raise ValueError(f"No data with name {name} found")
-
-    @property
-    def data_names(self):
-        return [
-            attr["data_name"]
-            for _, attr in self._graph.nodes.items()
-            if "data_name" in attr
-        ]
-
-    def get_signal(self, signal_source: str) -> Signal:
-        if signal_source not in self._graph.nodes:
-            raise ValueError(f"No signal with source '{signal_source}' found")
-        return Signal(**self._graph.nodes[signal_source])
-
-    def get_transformation(self, name: str) -> SignalTransformation:
-        if name not in self._graph.nodes:
-            raise ValueError(f"No transformation with name '{name}' found")
-
-        for edge in self._graph.edges:
-            if edge[1] == name:
-                node_in = self._graph.nodes[edge[0]]
-                node_out = self._graph.nodes[edge[1]]
-
-                return SignalTransformation(
-                    name=name,
-                    input_signal=Signal(node_in["signal_type"], node_in["unit"]),
-                    output_signal=Signal(node_out["signal_type"], node_out["unit"]),
-                    **self._graph.edges[edge],
-                )
-
     def attach_transformation(
         self, transformation: SignalTransformation, input_signal_source: str = None
     ):
+        """Add a transformation from an `SignalTransformation` instance.
+
+        Parameters
+        ----------
+        transformation :
+            The class containing the transformation data.
+        input_signal_source :
+            The source of the signal that should be used as input of the transformation.
+            If `None` is provided, the name of the last added transformation (or the
+            source, if no transformation was added to the chain) is used.
+
+        """
         if input_signal_source is None:
             input_signal_source = self._prev_added_signal
 
@@ -228,6 +309,88 @@ class MeasurementChainGraph:
             transformation.func,
             input_signal_source,
         )
+
+    def get_data(self, name: str) -> xr.DataArray:
+        """
+
+        Parameters
+        ----------
+        name :
+            Name of the data that should be returned
+
+        Returns
+        -------
+        xarray.DataArray :
+            The requested data
+
+        """
+        for _, attr in self._graph.nodes.items():
+            data_name = attr.get("data_name")
+            if data_name is not None and data_name == name:
+                return attr["data"]
+        raise ValueError(f"No data with name {name} found")
+
+    @property
+    def data_names(self) -> List[str]:
+        """Get the names of all attached data sets.
+
+        Returns
+        -------
+        List[str] :
+            List of the names from all attached data sets
+
+        """
+        return [
+            attr["data_name"]
+            for _, attr in self._graph.nodes.items()
+            if "data_name" in attr
+        ]
+
+    def get_signal(self, signal_source: str) -> Signal:
+        """Get a signal.
+
+        Parameters
+        ----------
+        signal_source :
+            Name of the signals source.
+
+        Returns
+        -------
+        Signal :
+            The requested signal
+
+        """
+        if signal_source not in self._graph.nodes:
+            raise ValueError(f"No signal with source '{signal_source}' found")
+        return Signal(**self._graph.nodes[signal_source])
+
+    def get_transformation(self, name: str) -> SignalTransformation:
+        """Get a transformation.
+
+        Parameters
+        ----------
+        name :
+            Name of the transformation
+
+        Returns
+        -------
+        SignalTransformation :
+            The requested transformation
+
+        """
+        for edge in self._graph.edges:
+            if edge[1] == name:
+                node_in = self._graph.nodes[edge[0]]
+                node_out = self._graph.nodes[edge[1]]
+
+                return SignalTransformation(
+                    name=name,
+                    input_signal=Signal(node_in["signal_type"], node_in["unit"]),
+                    output_signal=Signal(node_out["signal_type"], node_out["unit"]),
+                    **self._graph.edges[edge],
+                )
+
+        raise ValueError(f"No transformation with name '{name}' found")
 
 
 # DRAFT SECTION END ####################################################################
