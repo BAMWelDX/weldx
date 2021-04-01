@@ -508,7 +508,11 @@ def test_non_sense():
         ut.compare_nested("asdf", "foo")
 
     with pytest.raises(TypeError):
-        ut.compare_nested((1, 2, 3), "bar")
+        ut.compare_nested(b"asdf", b"foo")
+
+    assert not ut.compare_nested((1, 2, 3), {"f": 0})
+
+    assert not ut.compare_nested((1, 2, 3), "bar")
 
 
 def test_flat():
@@ -623,7 +627,7 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         assert not ut.compare_nested(self.a, self.b)
 
     def test_coordinate_systems_modified(self):
-        """manipulate one CSM and check if it gets picked up by comparison"""
+        """Manipulate one CSM and check if it gets picked up by comparison."""
         from weldx import CoordinateSystemManager
 
         csm: CoordinateSystemManager = self.b["coordinate_systems"]

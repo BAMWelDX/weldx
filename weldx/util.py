@@ -1220,33 +1220,38 @@ def _compare(x, y):
 
 
 def compare_nested(a, b):
-    """Deeply compares nested data structures combined of tuples, lists, dictionaries etc.
+    """Deeply compares [nested] data structures combined of tuples, lists, dictionaries etc.
 
+    Also compares non-nested data-structures.
     Arrays are compared using np.all and xr.DataArray.identical
 
     Parameters
     ----------
-    a
-    b
+    a :
+        a [nested] data structure to compare to `b`.
+    b :
+        a [nested] data structure to compare to `a`.
 
     Returns
     -------
+    bool :
+        True, if all elements (including dict keys) of a and b are equal.
 
+    Raises
+    ------
+    TypeError
+        When a or b is not a nested structure.
     """
 
     def visit(p, k, v):
-        if isinstance(k, (dict, list, tuple)):
-            print("k is a dict, list or tuple")
-            pass
-        else:
-            other_value = iterutils.get_path(b, p)[k]
-            if not _compare(v, other_value):
-                raise ValueError
+        other_value = iterutils.get_path(b, p)[k]
+        if not _compare(v, other_value):
+            raise ValueError
         return True
 
     try:
         iterutils.remap(a, visit=visit, reraise_visit=True)
-    except (KeyError, ValueError) as e:
+    except (KeyError, ValueError):
         return False
     except TypeError:
         raise TypeError("either a or b are not a nested data structure.")
