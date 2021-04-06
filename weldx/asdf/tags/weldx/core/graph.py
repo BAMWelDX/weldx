@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import Dict, List
 from uuid import uuid4
 
 import networkx as nx
@@ -159,7 +159,9 @@ class NodeTypeASDF(WeldxType):
 # Graph --------------------------------------------------------------------------------
 
 
-def build_tree(graph: nx.DiGraph, name: str, parent: str = None):
+def build_tree(
+    graph: nx.DiGraph, name: str, parent: str = None, nodes: Dict(str, Node) = None
+):
     """Recursively build a tree structure of the graph starting from node ``name``.
 
     Parameters
@@ -177,15 +179,23 @@ def build_tree(graph: nx.DiGraph, name: str, parent: str = None):
         The root node object of the graph.
 
     """
+    if nodes is None:
+        nodes = {}
+
+    if node := nodes.get(name, None):
+        return node
+
     node = Node(name=name, edges=[])
+    nodes[name] = node
+
     for n in graph.neighbors(name):
         if not n == parent:
-            child_node = build_tree(graph, n, parent=name)
+            child_node = build_tree(graph, n, parent=name, nodes=nodes)
             edge = Edge(child_node, attributes=graph.edges[name, n])
             node.edges.append(edge)
     for n in graph.predecessors(name):
         if not n == parent:
-            child_node = build_tree(graph, n, parent=name)
+            child_node = build_tree(graph, n, parent=name, nodes=nodes)
             edge = Edge(child_node, attributes=graph.edges[n, name], direction="bwd")
             node.edges.append(edge)
     node.attributes = graph.nodes[name]  # add node attributes
@@ -228,8 +238,8 @@ class GraphTypeASDF(WeldxType):
     @classmethod
     def to_tree(cls, node: nx.DiGraph, ctx):
         """Doc."""
-        if not nx.is_tree(node):  # no cycles, single tree
-            raise ValueError("Graph must represent a tree.")
+        # if not nx.is_tree(node):  # no cycles, single tree
+        #     raise ValueError("Graph must represent a tree.")
 
         root = build_tree(node, tuple(node.nodes)[0])
         return dict(root_node=root)
