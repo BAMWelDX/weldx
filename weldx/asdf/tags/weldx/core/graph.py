@@ -10,14 +10,14 @@ from weldx.asdf.types import WeldxType
 # Signal -------------------------------------------------------------------------------
 @dataclass
 class SignalClass(object):
-    """Doc."""
+    """Dummy class representing a signal."""
 
     name: str
     value: float = 3.14
 
 
 class SignalClassTypeASDF(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
+    """ASDF type for dummy signal"""
 
     name = "core/graph/signal"
     version = "1.0.0"
@@ -38,13 +38,13 @@ class SignalClassTypeASDF(WeldxType):
 # SignalTransform ----------------------------------------------------------------------
 @dataclass
 class SignalTransform:
-    """Doc."""
+    """Dummy class representing a transformation between signals."""
 
     func: str = "a*b"
 
 
 class SignalTransformTypeASDF(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
+    """ASDF type for dummy signal transform."""
 
     name = "core/graph/signal_transform"
     version = "1.0.0"
@@ -62,7 +62,7 @@ class SignalTransformTypeASDF(WeldxType):
         return cls.types[0](**tree)
 
 
-# Edge ---------------------------------------------------------------------------------
+# MeasurementChain ---------------------------------------------------------------------------------
 
 
 @dataclass
@@ -73,7 +73,7 @@ class MeasurementChain:
 
 
 class MeasurementChainTypeASDF(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
+    """ASDF type for dummy Measurement Chain."""
 
     name = "core/graph/measurement_chain"
     version = "1.0.0"
@@ -83,14 +83,14 @@ class MeasurementChainTypeASDF(WeldxType):
     @classmethod
     def to_tree(cls, node: MeasurementChain, ctx):
         """convert to python dict"""
-        root_node = build_node(node.graph, tuple(node.graph.nodes)[0])
+        root_node = build_tree(node.graph, tuple(node.graph.nodes)[0])  # set root node
         return dict(root_node=root_node)
 
     @classmethod
     def from_tree(cls, tree, ctx):
         """Reconstruct form tree."""
         graph = nx.DiGraph()
-        add_nodes(graph, tree["root_node"])
+        build_graph(graph, tree["root_node"])
         return cls.types[0](graph=graph)
 
 
@@ -120,7 +120,7 @@ class EdgeTypeASDF(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """Reconstruct form tree."""
-        return cls.types[0](**tree)
+        return Edge(**tree)
 
 
 # Node ---------------------------------------------------------------------------------
@@ -149,31 +149,59 @@ class NodeTypeASDF(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """Reconstruct form tree."""
-        return cls.types[0](**tree)
+        return Node(**tree)
 
 
 # Graph --------------------------------------------------------------------------------
 
 
-def build_node(graph, name, parent=None):
-    """Recursively build a tree structure starting from node ``name``."""
+def build_tree(graph: nx.DiGraph, name: str, parent: str = None):
+    """Recursively build a tree structure of the graph starting from node ``name``.
+
+    Parameters
+    ----------
+    graph :
+        Complete graph to build.
+    name :
+        Name (or key) of the current node.
+    parent :
+        Key of the node
+
+    Returns
+    -------
+    Node
+        The root node object of the graph.
+
+    """
     node = Node(name=name, edges=[])
     for n in graph.neighbors(name):
         if not n == parent:
-            child_node = build_node(graph, n, parent=name)
+            child_node = build_tree(graph, n, parent=name)
             edge = Edge(child_node, attributes=graph.edges[name, n])
             node.edges.append(edge)
     for n in graph.predecessors(name):
         if not n == parent:
-            child_node = build_node(graph, n, parent=name)
+            child_node = build_tree(graph, n, parent=name)
             edge = Edge(child_node, attributes=graph.edges[n, name], direction="bwd")
             node.edges.append(edge)
     node.attributes = graph.nodes[name]  # add node attributes
     return node
 
 
-def add_nodes(graph: nx.DiGraph, current_node: Node):
-    """Doc."""
+def build_graph(graph: nx.DiGraph, current_node: Node):
+    """Recursively rebuild a (partial) graph from a Node object.
+
+    Parameters
+    ----------
+    graph :
+        The graph object that is being built.
+    current_node :
+        The current Node to be added to the graph.
+
+    Returns
+    -------
+
+    """
     name = current_node.name
     graph.add_node(name, **current_node.attributes)
     for edge in current_node.edges:
@@ -182,7 +210,7 @@ def add_nodes(graph: nx.DiGraph, current_node: Node):
             graph.add_edge(edge.target_node.name, name, **attr)
         else:
             graph.add_edge(name, edge.target_node.name, **attr)
-        add_nodes(graph, edge.target_node)
+        build_graph(graph, edge.target_node)
 
 
 class GraphTypeASDF(WeldxType):
@@ -196,12 +224,15 @@ class GraphTypeASDF(WeldxType):
     @classmethod
     def to_tree(cls, node: nx.DiGraph, ctx):
         """Doc."""
-        root = build_node(node, tuple(node.nodes)[0])
+        if not nx.is_tree(node):  # no cycles, single tree
+            raise ValueError("Graph must represent a tree.")
+
+        root = build_tree(node, tuple(node.nodes)[0])
         return dict(root_node=root)
 
     @classmethod
     def from_tree(cls, tree, ctx):
         """Doc."""
         graph = nx.DiGraph()
-        add_nodes(graph, tree["root_node"])
+        build_graph(graph, tree["root_node"])
         return graph
