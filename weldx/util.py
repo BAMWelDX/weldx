@@ -1,10 +1,12 @@
 """Contains package internal utility functions."""
 
+import json
 import math
 import warnings
 from collections.abc import Iterable
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
 
 import numpy as np
@@ -122,6 +124,27 @@ def ureg_check_class(*args):
         return original_class
 
     return inner_decorator
+
+
+def _clean_notebook_ids(file: Union[str, Path]):
+    """Clean ID metadata from jupyter notebook cells.
+
+    This function overrides the existing notebook file, use with caution!
+
+    Parameters
+    ----------
+    file :
+        The jupyter notebook filename to clean.
+
+    """
+    with open(file, "r") as f:
+        data = json.load(f)
+
+    for cell in data["cells"]:
+        cell.pop("id", None)
+
+    with open(file, "w") as f:
+        json.dump(data, f, indent=1)
 
 
 def inherit_docstrings(cls):
