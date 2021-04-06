@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Dict, List
-from uuid import UUID, uuid4
+from typing import List
+from uuid import uuid4
 
 import networkx as nx
 
@@ -62,7 +62,7 @@ class SignalTransformTypeASDF(WeldxType):
         return cls.types[0](**tree)
 
 
-# MeasurementChain ---------------------------------------------------------------------------------
+# MeasurementChain ---------------------------------------------------------------------
 
 
 @dataclass
