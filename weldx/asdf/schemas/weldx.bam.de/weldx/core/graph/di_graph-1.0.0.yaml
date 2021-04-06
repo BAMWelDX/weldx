@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/core/graph/graph-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/graph/graph-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/core/graph/di_graph-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0"
 
 title: |
   Directed Graph.
@@ -14,7 +14,7 @@ properties:
   name:
     type: string
   root_node:
-    tag: "tag:weldx.bam.de:weldx/core/graph/node-1.0.0"
+    tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
 
 required: [root_node]
 propertyOrder: [name, root_node]

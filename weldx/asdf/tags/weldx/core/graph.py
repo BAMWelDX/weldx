@@ -94,12 +94,12 @@ class MeasurementChainTypeASDF(WeldxType):
         return MeasurementChain(graph=graph)
 
 
-# Edge ---------------------------------------------------------------------------------
+# DiEdge -------------------------------------------------------------------------------
 @dataclass
-class Edge:
-    """Generic graph edge type."""
+class DiEdge:
+    """Generic directed edge type."""
 
-    target_node: "Node"
+    target_node: "DiNode"
     attributes: dict = field(default_factory=dict)
     direction: str = "fwd"
 
@@ -107,13 +107,13 @@ class Edge:
 class EdgeTypeASDF(WeldxType):
     """<ASDF TYPE DOCSTRING>"""
 
-    name = "core/graph/edge"
+    name = "core/graph/di_edge"
     version = "1.0.0"
-    types = [Edge]
+    types = [DiEdge]
     requires = ["weldx"]
 
     @classmethod
-    def to_tree(cls, node: Edge, ctx):
+    def to_tree(cls, node: DiEdge, ctx):
         """convert to python dict"""
         if not node.attributes:
             node.attributes = None
@@ -122,15 +122,15 @@ class EdgeTypeASDF(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """Reconstruct form tree."""
-        return Edge(**tree)
+        return DiEdge(**tree)
 
 
-# Node ---------------------------------------------------------------------------------
+# DiNode -------------------------------------------------------------------------------
 @dataclass
-class Node:
-    """Generic graph node type."""
+class DiNode:
+    """Generic directed graph node type."""
 
-    edges: List["Edge"]
+    edges: List["DiEdge"]
     name: str = field(default_factory=uuid4)
     attributes: dict = field(default_factory=dict)
 
@@ -138,13 +138,13 @@ class Node:
 class NodeTypeASDF(WeldxType):
     """<ASDF TYPE DOCSTRING>"""
 
-    name = "core/graph/node"
+    name = "core/graph/di_node"
     version = "1.0.0"
-    types = [Node]
+    types = [DiNode]
     requires = ["weldx"]
 
     @classmethod
-    def to_tree(cls, node: Node, ctx):
+    def to_tree(cls, node: DiNode, ctx):
         """convert to python dict"""
         if not node.attributes:
             node.attributes = None
@@ -153,14 +153,14 @@ class NodeTypeASDF(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """Reconstruct form tree."""
-        return Node(**tree)
+        return DiNode(**tree)
 
 
 # Graph --------------------------------------------------------------------------------
 
 
 def build_tree(
-    graph: nx.DiGraph, name: str, parent: str = None, nodes: Dict[str, Node] = None
+    graph: nx.DiGraph, name: str, parent: str = None, nodes: Dict[str, DiNode] = None
 ):
     """Recursively build a tree structure of the graph starting from node ``name``.
 
@@ -177,7 +177,7 @@ def build_tree(
 
     Returns
     -------
-    Node
+    DiNode
         The root node object of the graph.
 
     """
@@ -187,32 +187,32 @@ def build_tree(
     if node := nodes.get(name, None):
         return node
 
-    node = Node(name=name, edges=[])
+    node = DiNode(name=name, edges=[])
     nodes[name] = node
 
     for n in graph.neighbors(name):
         if not n == parent:
             child_node = build_tree(graph, n, parent=name, nodes=nodes)
-            edge = Edge(child_node, attributes=graph.edges[name, n])
+            edge = DiEdge(child_node, attributes=graph.edges[name, n])
             node.edges.append(edge)
     for n in graph.predecessors(name):
         if not n == parent:
             child_node = build_tree(graph, n, parent=name, nodes=nodes)
-            edge = Edge(child_node, attributes=graph.edges[n, name], direction="bwd")
+            edge = DiEdge(child_node, attributes=graph.edges[n, name], direction="bwd")
             node.edges.append(edge)
     node.attributes = graph.nodes[name]  # add node attributes
     return node
 
 
-def build_graph(graph: nx.DiGraph, current_node: Node):
-    """Recursively rebuild a (partial) graph from a Node object.
+def build_graph(graph: nx.DiGraph, current_node: DiNode):
+    """Recursively rebuild a (partial) graph from a DiNode object.
 
     Parameters
     ----------
     graph :
         The graph object that is being built.
     current_node :
-        The current Node to be added to the graph.
+        The current DiNode to be added to the graph.
 
     Returns
     -------
@@ -229,10 +229,10 @@ def build_graph(graph: nx.DiGraph, current_node: Node):
         build_graph(graph, edge.target_node)
 
 
-class GraphTypeASDF(WeldxType):
+class DiGraphTypeASDF(WeldxType):
     """Serialization class for `networkx.DiGraph`."""
 
-    name = "core/graph/graph"
+    name = "core/graph/di_graph"
     version = "1.0.0"
     types = [nx.DiGraph]
     requires = ["weldx"]

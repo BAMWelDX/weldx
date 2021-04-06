@@ -10,7 +10,7 @@ title: |
 definitions:
   signal_node:
     allOf:
-      - tag: "tag:weldx.bam.de:weldx/core/graph/node-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
       - type: object
         properties:
           attributes:
@@ -28,7 +28,7 @@ definitions:
 
   signal_transform_edge:
     allOf:
-      - tag: "tag:weldx.bam.de:weldx/core/graph/edge-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0"
       - type: object
         properties:
           attributes:
