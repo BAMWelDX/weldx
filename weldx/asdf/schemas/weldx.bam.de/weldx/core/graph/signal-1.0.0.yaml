@@ -5,7 +5,7 @@ id: "http://weldx.bam.de/schemas/weldx/core/graph/signal-1.0.0"
 tag: "tag:weldx.bam.de:weldx/core/graph/signal-1.0.0"
 
 title: |
-  signal_transform
+  signal
 
 type: object
 properties:
