@@ -8,4 +8,4 @@ from . import (
     time_series,
     transformations,
 )
-from .graph import DiEdge, DiGraphTypeASDF, DiNode, EdgeTypeASDF
+from .graph import DiEdge, DiEdgeTypeASDF, DiGraphTypeASDF, DiNode

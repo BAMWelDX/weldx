@@ -104,8 +104,8 @@ class DiEdge:
     direction: str = "fwd"
 
 
-class EdgeTypeASDF(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
+class DiEdgeTypeASDF(WeldxType):
+    """ASDF type for `DiEdge`."""
 
     name = "core/graph/di_edge"
     version = "1.0.0"
@@ -135,8 +135,8 @@ class DiNode:
     attributes: dict = field(default_factory=dict)
 
 
-class NodeTypeASDF(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
+class DiNodeTypeASDF(WeldxType):
+    """ASDF type for `DiNode`."""
 
     name = "core/graph/di_node"
     version = "1.0.0"
