@@ -631,7 +631,7 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         from weldx import CoordinateSystemManager
 
         csm: CoordinateSystemManager = self.b["coordinate_systems"]
-        csm.delete_cs("tcp")
+        csm.delete_cs("tcp_contact")
         assert id(csm) != id(self.a["coordinate_systems"])
-        assert csm != self.b["coordinate_systems"]
+        assert csm != self.a["coordinate_systems"]
         assert not ut.compare_nested(self.a, self.b)
