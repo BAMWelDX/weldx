@@ -160,7 +160,7 @@ class NodeTypeASDF(WeldxType):
 
 
 def build_tree(
-    graph: nx.DiGraph, name: str, parent: str = None, nodes: Dict(str, Node) = None
+    graph: nx.DiGraph, name: str, parent: str = None, nodes: Dict[str, Node] = None
 ):
     """Recursively build a tree structure of the graph starting from node ``name``.
 
@@ -172,6 +172,8 @@ def build_tree(
         Name (or key) of the current node.
     parent :
         Key of the node
+    nodes:
+        List of nodes already generated
 
     Returns
     -------
