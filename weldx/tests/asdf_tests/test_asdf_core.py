@@ -659,5 +659,5 @@ class TestGraph:
         )
         g2 = _write_read_buffer({"graph": g})["graph"]
 
-        assert all([e in g.edges for e in g2.edges])
-        assert all([n in g.nodes for n in g2.nodes])
+        assert all(e in g.edges for e in g2.edges)
+        assert all(n in g.nodes for n in g2.nodes)
