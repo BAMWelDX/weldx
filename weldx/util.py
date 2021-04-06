@@ -1204,18 +1204,20 @@ class WeldxAccessor:
                 self._obj.time.attrs["time_ref"] = value
 
 
+import numpy as np
+
+_compare_funcs = {
+    (np.ndarray, pint.Quantity): lambda x, y: np.all(x == y),
+    (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
+}
+
+
 def _compare(x, y):
-    if isinstance(x, np.ndarray):
-        if not isinstance(y, np.ndarray):
-            return False
-        return np.all(x == y)
-
-    elif isinstance(x, xr.DataArray):
-        if not isinstance(y, xr.DataArray):
-            return False
-        return x.identical(y)
-
-    else:
+    if not (type(x) == type(y)):
+        return False
+    for types, func in _compare_funcs.items():
+        if isinstance(x, types):
+            return func(x, y)
         return x == y
 
 
