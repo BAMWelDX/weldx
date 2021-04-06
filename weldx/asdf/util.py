@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-def get_schema_path(schema: str) -> Path:
+def get_schema_path(schema: str) -> Path:  # pragma: no cover
     """Get the path to a weldx schema file.
 
     Parameters
