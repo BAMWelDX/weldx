@@ -1205,7 +1205,7 @@ class WeldxAccessor:
 
 
 class _Eq_compare_nested:
-    """Compares nested data structures like lists, sets, tuples, arrays, etc. """
+    """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
     compare_funcs = {
         (np.ndarray, pint.Quantity): lambda x, y: np.all(x == y),
@@ -1223,8 +1223,9 @@ class _Eq_compare_nested:
 
     @staticmethod
     def _visit(p, k, v, b):
-        """This function traverses all elements in `compare_nested` argument a and
-        tries to obtain the path `p` in `b`. If the path does not exist in `b` a
+        """Traverses all elements in `compare_nested` argument a and b...
+
+        and tries to obtain the path `p` in `b`. If the path does not exist in `b` a
         KeyError will be raised.
         If the other path exists, a comparison will be made using `_compare`.
         When the elements are not equal traversing `a` will be stopped
@@ -1258,6 +1259,7 @@ class _Eq_compare_nested:
         ------
         TypeError
             When a or b is not a nested structure.
+
         """
         visit = functools.partial(_Eq_compare_nested._visit, b=b)
 
