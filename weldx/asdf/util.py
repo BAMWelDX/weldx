@@ -23,7 +23,18 @@ __all__ = [
 
 
 def get_schema_path(schema: str) -> Path:
-    """Get the path to a weldx schema file."""
+    """Get the path to a weldx schema file.
+
+    Parameters
+    ----------
+    schema :
+        Name of the schema file
+    Returns
+    -------
+    Path
+        Path to the requested schema file in the current filesystem.
+
+    """
     schema = schema.split(".yaml")[0]
 
     p = WELDX_PATH / "asdf" / "schemas"
