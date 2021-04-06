@@ -7,12 +7,12 @@ dependencies:
   - ipykernel
   - ipywidgets
   # documentation
-  - sphinx
+  - sphinx=3.5.2
   - recommonmark
   - sphinxcontrib-napoleon
-  - nbsphinx
+  - nbsphinx=0.8.1
   - sphinx-copybutton
-  - pydata-sphinx-theme
+  - pydata-sphinx-theme=0.5.0
   - numpydoc>=0.5
   - sphinx-autodoc-typehints
   # pip packages
