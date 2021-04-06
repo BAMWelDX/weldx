@@ -5,7 +5,7 @@ id: "http://weldx.bam.de/schemas/weldx/core/graph/graph-1.0.0"
 tag: "tag:weldx.bam.de:weldx/core/graph/graph-1.0.0"
 
 title: |
-  Graph edge.
+  Directed Graph.
 description: |
   A directed graph.
 
