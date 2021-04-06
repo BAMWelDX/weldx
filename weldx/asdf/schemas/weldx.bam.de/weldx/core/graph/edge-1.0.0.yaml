@@ -20,5 +20,5 @@ properties:
     type: object
 
 required: [target_node]
-propertyOrder: [inverted, attributes, target_node]
+propertyOrder: [direction, attributes, target_node]
 ...
