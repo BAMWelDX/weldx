@@ -115,6 +115,8 @@ class EdgeTypeASDF(WeldxType):
     @classmethod
     def to_tree(cls, node: Edge, ctx):
         """convert to python dict"""
+        if not node.attributes:
+            node.attributes = None
         return node.__dict__
 
     @classmethod
@@ -144,6 +146,8 @@ class NodeTypeASDF(WeldxType):
     @classmethod
     def to_tree(cls, node: Node, ctx):
         """convert to python dict"""
+        if not node.attributes:
+            node.attributes = None
         return node.__dict__
 
     @classmethod
