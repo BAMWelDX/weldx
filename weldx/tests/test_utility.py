@@ -14,6 +14,7 @@ from pandas import date_range
 from pint.errors import DimensionalityError
 
 import weldx.util as ut
+from weldx import CoordinateSystemManager
 from weldx.asdf.util import read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 
@@ -586,23 +587,9 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
     def setUpClass(cls) -> None:
         import pathlib
 
-        # TODO: i'd prefer using the example from the single pass weld schema, but the data is missing, right?
-        # import weldx
-        #
-        # f = (
-        #     pathlib.Path(weldx.__file__).parent
-        #     / "asdf/schemas/weldx.bam.de/weldx/datamodels/single_pass_weld-1.0.0.schema.yaml"
-        # )
-        # import yaml
-        #
-        # parsed = yaml.safe_load(open(f))
-        # example = parsed["examples"][0]
-        # import asdf
-        #
-        # asdf.AsdfFile(example)
-        #
         f = pathlib.Path(__file__).parent / "./data/asdf_ref_00000.asdf"
-        fx = read_buffer(BytesIO(open(f, "rb").read()))
+        with open(f, "rb") as fh:
+            fx = read_buffer(fh, open_kwargs=dict(lazy_load=False))
         cls.fx = fx
 
     def setUp(self) -> None:
