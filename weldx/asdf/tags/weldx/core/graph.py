@@ -91,7 +91,7 @@ class MeasurementChainTypeASDF(WeldxType):
         """Reconstruct form tree."""
         graph = nx.DiGraph()
         build_graph(graph, tree["root_node"])
-        return cls.types[0](graph=graph)
+        return MeasurementChain(graph=graph)
 
 
 # Edge ---------------------------------------------------------------------------------
