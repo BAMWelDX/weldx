@@ -1,5 +1,5 @@
 """Contains package internal utility functions."""
-
+import functools
 import math
 import warnings
 from collections.abc import Iterable
@@ -1204,58 +1204,71 @@ class WeldxAccessor:
                 self._obj.time.attrs["time_ref"] = value
 
 
-import numpy as np
+class _Eq_compare_nested:
+    """Compares nested data structures like lists, sets, tuples, arrays, etc. """
 
-_compare_funcs = {
-    (np.ndarray, pint.Quantity): lambda x, y: np.all(x == y),
-    (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
-}
+    compare_funcs = {
+        (np.ndarray, pint.Quantity): lambda x, y: np.all(x == y),
+        (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
+    }
 
+    @staticmethod
+    def _compare(x, y):
+        if not (type(x) == type(y)):
+            return False
+        for types, func in _Eq_compare_nested.compare_funcs.items():
+            if isinstance(x, types):
+                return func(x, y)
+            return x == y
 
-def _compare(x, y):
-    if not (type(x) == type(y)):
-        return False
-    for types, func in _compare_funcs.items():
-        if isinstance(x, types):
-            return func(x, y)
-        return x == y
-
-
-def compare_nested(a, b):
-    """Deeply compares [nested] data structures combined of tuples, lists, dictionaries etc.
-
-    Also compares non-nested data-structures.
-    Arrays are compared using np.all and xr.DataArray.identical
-
-    Parameters
-    ----------
-    a :
-        a [nested] data structure to compare to `b`.
-    b :
-        a [nested] data structure to compare to `a`.
-
-    Returns
-    -------
-    bool :
-        True, if all elements (including dict keys) of a and b are equal.
-
-    Raises
-    ------
-    TypeError
-        When a or b is not a nested structure.
-    """
-
-    def visit(p, k, v):
+    @staticmethod
+    def _visit(p, k, v, b):
+        """This function traverses all elements in `compare_nested` argument a and
+        tries to obtain the path `p` in `b`. If the path does not exist in `b` a
+        KeyError will be raised.
+        If the other path exists, a comparison will be made using `_compare`.
+        When the elements are not equal traversing `a` will be stopped
+        by raising a ValueError.
+        """
         other_value = iterutils.get_path(b, p)[k]
-        if not _compare(v, other_value):
+        if not _Eq_compare_nested._compare(v, other_value):
             raise ValueError
         return True
 
-    try:
-        iterutils.remap(a, visit=visit, reraise_visit=True)
-    except (KeyError, ValueError):
-        return False
-    except TypeError:
-        raise TypeError("either a or b are not a nested data structure.")
+    @staticmethod
+    def compare_nested(a, b):
+        """Deeply compares [nested] data structures combined of tuples, lists, dicts...
 
-    return True
+        Also compares non-nested data-structures.
+        Arrays are compared using np.all and xr.DataArray.identical
+
+        Parameters
+        ----------
+        a :
+            a [nested] data structure to compare to `b`.
+        b :
+            a [nested] data structure to compare to `a`.
+
+        Returns
+        -------
+        bool :
+            True, if all elements (including dict keys) of a and b are equal.
+
+        Raises
+        ------
+        TypeError
+            When a or b is not a nested structure.
+        """
+        visit = functools.partial(_Eq_compare_nested._visit, b=b)
+
+        try:
+            iterutils.remap(a, visit=visit, reraise_visit=True)
+        except (KeyError, ValueError):
+            return False
+        except TypeError:
+            raise TypeError("either a or b are not a nested data structure.")
+
+        return True
+
+
+compare_nested = _Eq_compare_nested.compare_nested
