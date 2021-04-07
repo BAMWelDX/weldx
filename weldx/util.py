@@ -126,7 +126,7 @@ def ureg_check_class(*args):
     return inner_decorator
 
 
-def _clean_notebook_ids(file: Union[str, Path]):
+def _clean_notebook_ids(file: Union[str, Path]):  # pragma: no cover
     """Clean ID metadata from jupyter notebook cells.
 
     This function overrides the existing notebook file, use with caution!
