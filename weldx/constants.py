@@ -1,6 +1,9 @@
 """Define constants for global library use."""
+from pathlib import Path
 
 from pint import UnitRegistry
+
+WELDX_PATH = Path(__file__).parent.resolve()
 
 WELDX_UNIT_REGISTRY = UnitRegistry(
     preprocessors=[lambda string: string.replace("%", "percent")],  # allow %-sign
