@@ -31,7 +31,7 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
         Name of the schema file
     Returns
     -------
-    Path
+    pathlib.Path
         Path to the requested schema file in the current filesystem.
 
     """
