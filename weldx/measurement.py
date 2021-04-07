@@ -74,7 +74,6 @@ class Source:
 
 # todo: - remove data from signal
 #       - factory for transformations?
-#       - remove signals from transformation? -> defined by edge
 #       - which classes can be removed? -> Data
 #       - tutorial
 
@@ -391,6 +390,120 @@ class MeasurementChainGraph:
                 )
 
         raise ValueError(f"No transformation with name '{name}' found")
+
+    def plot(self, axes=None):  # pragma: no cover
+        """Plot the measurement chain.
+
+        Parameters
+        ----------
+        axes :
+            Matplotlib axes object that should be drawn to. If None is provided, this
+            function will create one.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+            The matplotlib axes object the graph has been drawn to
+
+        """
+        import matplotlib.pyplot as plt
+        from networkx import DiGraph, draw, draw_networkx_edge_labels
+
+        def _signal_label(signal_type, unit):
+            return f"{signal_type}\n[{unit}]"
+
+        def _transformation_label(name, data_dict: Dict) -> str:
+            text = name
+            func = data_dict.get("func")
+            error = data_dict.get("error")
+            if func is not None:
+                text += f"\n{func.expression}"
+            if error is not None and error.deviation != 0.0:
+                text += f"\nerr: {error.deviation}"
+            return text
+
+        if axes is None:
+            _, axes = plt.subplots(nrows=1, figsize=(12, 6))
+
+        axes.set_ylim(0, 1)
+        axes.set_title(self._name, fontsize=20, fontweight="bold")
+
+        graph = self._graph.copy()
+
+        data_labels = {}
+        signal_labels = {}
+        positions = {}
+
+        c_node = self._source["name"]
+        delta_pos = 2 / (len(graph.nodes) + 1)
+        x_pos = delta_pos / 2
+
+        # walk over the graphs nodes and collect necessary data for plotting
+        while True:
+            signal = graph.nodes[c_node]
+            signal_labels[c_node] = _signal_label(signal["signal_type"], signal["unit"])
+            positions[c_node] = (x_pos, 0.75)
+
+            if "data" in signal:
+                data_name = signal["data_name"]
+                graph.add_edge(c_node, data_name)
+                data_labels[data_name] = data_name
+                positions[data_name] = (x_pos, 0.25)
+
+            successors = list(self._graph.successors(c_node))
+            if len(successors) == 0:
+                break
+            if len(successors) > 1:
+                raise ValueError(
+                    "Signals with multiple transformations are currently "
+                    "not supported by the plot function."
+                )
+            c_node = successors[0]
+            x_pos += delta_pos
+
+        # draw signal nodes and all edges
+        draw(
+            graph,
+            positions,
+            ax=axes,
+            nodelist=self._graph.nodes(),
+            with_labels=True,
+            labels=signal_labels,
+            font_weight="bold",
+            font_color="k",
+            node_size=3000,
+            node_shape="s",
+            node_color="#bbbbbb",
+        )
+
+        # draw data nodes
+        data_node_list = [
+            node for node in graph.nodes if node not in self._graph.nodes()
+        ]
+
+        draw(
+            graph,
+            positions,
+            axes,
+            nodelist=data_node_list,
+            with_labels=True,
+            labels=data_labels,
+            font_weight="bold",
+            font_color="k",
+            edgelist=[],
+            node_size=3000,
+            node_color="#bbbbbb",
+        )
+
+        # draw edge labels
+        edge_labels = {
+            edge: _transformation_label(edge[1], self._graph.edges[edge])
+            for edge in self._graph.edges
+        }
+
+        draw_networkx_edge_labels(graph, positions, edge_labels, ax=axes)
+
+        return axes
 
 
 # DRAFT SECTION END ####################################################################
