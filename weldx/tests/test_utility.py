@@ -2,7 +2,6 @@
 import copy
 import math
 import unittest
-from io import BytesIO
 
 import numpy as np
 import pandas as pd
@@ -14,10 +13,7 @@ from pandas import date_range
 from pint.errors import DimensionalityError
 
 import weldx.util as ut
-from weldx import CoordinateSystemManager
-from weldx.asdf.util import read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.tests.conftest import single_pass_weld_asdf
 
 
 def test_deprecation_decorator():
@@ -512,63 +508,62 @@ def test_non_sense():
     with pytest.raises(TypeError):
         ut.compare_nested(b"asdf", b"foo")
 
-    assert not ut.compare_nested((1, 2, 3), {"f": 0})
 
-    assert not ut.compare_nested((1, 2, 3), "bar")
-
-
-def test_flat():
-    a = (1, 2, 3)
-    b = list(a)
-    assert ut.compare_nested(a, b)
-    b[-1] = 0
-    assert not ut.compare_nested(a, b)
-
-
-def test_compare_nested_diff_keys():
-    a = {
-        "blah": np.arange(3),
-    }
-    b = {
-        "blub": np.arange(3),
-    }
-    assert not ut.compare_nested(a, b)
-
-
-def test_compare_nested_dicts_same_elements_diff_content():
-    a = {
-        "blah": np.arange(3),
-        "x": {
-            0: [1, 2, 3],
-        },
-        "blub": False,
-    }
-    b = {
-        "blah": np.arange(3),
-        "x": {
-            0: [1, 2, 3, 4],
-        },
-        "blub": False,
-    }
-    assert not ut.compare_nested(a, b)
-
-
-def test_compare_nested_dicts_diff_content():
-    a = {
-        "blah": np.arange(3),
-        "x": {
-            0: [1, 2, 3],
-        },
-        "blub": False,
-    }
-    b = {
-        "blah": np.arange(3),
-        "x": {
-            0: [1, 2, 3],
-        },
-        "blub": True,  # DIFF!
-    }
-    assert not ut.compare_nested(a, b)
+@pytest.mark.parametrize(
+    argnames="a, b, expected",
+    argvalues=[
+        ((1, 2, 3), [1, 2, 3], True),
+        ((1, 2, 3), [1, 2, 0], False),
+        ((1, 2, 3), {"f": 0}, False),
+        ((1, 2, 3), "bar", False),
+        (
+            {
+                "blah": np.arange(3),
+                "x": {
+                    0: [1, 2, 3],
+                },
+                "blub": False,
+            },
+            {
+                "blah": np.arange(3),
+                "x": {
+                    0: [1, 2, 3, 4],
+                },
+                "blub": False,
+            },
+            False,
+        ),
+        (
+            {
+                "blah": np.arange(3),
+            },
+            {
+                "blub": np.arange(3),
+            },
+            False,
+        ),
+        (
+            {
+                "blah": np.arange(3),
+                "x": {
+                    0: [1, 2, 3],
+                },
+                "blub": False,
+            },
+            {
+                "blah": np.arange(3),
+                "x": {
+                    0: [1, 2, 3],
+                },
+                "blub": True,  # DIFF!
+            },
+            False,
+        ),
+        (),
+    ],
+)
+def test_compare_nested_diff_keys(a, b, expected):
+    assert ut.compare_nested(a, b) == expected
 
 
 def test_compare_nested_dicts_same_content():

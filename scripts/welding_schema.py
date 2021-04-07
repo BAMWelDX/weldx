@@ -1,9 +1,8 @@
 # Welding schema
-if __name__ == "__main__":
 
+
+def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
     # Imports
-    from pathlib import Path
-
     import asdf
     import numpy as np
     import pandas as pd
@@ -23,6 +22,7 @@ if __name__ == "__main__":
         ShieldingGasForProcedure,
     )
     from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
+    from weldx.asdf.util import get_schema_path, write_buffer
 
     # Timestamp
     reference_timestamp = pd.Timestamp("2020-11-09 12:00:00")
@@ -274,19 +274,22 @@ if __name__ == "__main__":
         wx_metadata={"welder": "A.W. Elder"},
     )
 
-    model_path = Path(weldx.__path__[0]) / Path(
-        "./asdf/schemas/weldx.bam.de/weldx/datamodels/"
-        "single_pass_weld-1.0.0.schema.yaml"
-    )
-    model_path = model_path.as_posix()
+    model_path = get_schema_path("single_pass_weld-1.0.0.schema.yaml")
 
-    res = weldx.asdf.util._write_read_buffer(
+    # pre-validate?
+    weldx.asdf.util.write_read_buffer(
         tree,
         asdffile_kwargs=dict(custom_schema=str(model_path)),
     )
 
-    with asdf.AsdfFile(
-        tree,
-        custom_schema=str(model_path),
-    ) as ff:
-        ff.write_to("single_pass_weld_example.asdf")
+    if out_file:
+        with asdf.AsdfFile(
+            tree,
+            custom_schema=str(model_path),
+        ) as ff:
+            ff.write_to(out_file)
+    else:
+        return (
+            write_buffer(tree, asdffile_kwargs=dict(custom_schema=str(model_path))),
+            tree,
+        )
