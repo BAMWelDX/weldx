@@ -17,6 +17,7 @@ import weldx.util as ut
 from weldx import CoordinateSystemManager
 from weldx.asdf.util import read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.tests.conftest import single_pass_weld_asdf
 
 
 def test_deprecation_decorator():
@@ -582,18 +583,10 @@ def test_compare_nested_dicts_same_content():
     assert ut.compare_nested(a, b)
 
 
+@pytest.mark.usefixtures("single_pass_weld_asdf")
 class TestWeldxExampleCompareNested(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        import pathlib
-
-        f = pathlib.Path(__file__).parent / "./data/asdf_ref_00000.asdf"
-        with open(f, "rb") as fh:
-            fx = read_buffer(fh, open_kwargs=dict(lazy_load=False))
-        cls.fx = fx
-
-    def setUp(self) -> None:
-        self.a = self.fx
+    def setUp(self):
+        self.a = self.single_pass_weld_tree
         self.b = copy.deepcopy(self.a)
 
     def test_equal(self):
