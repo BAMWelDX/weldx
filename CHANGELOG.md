@@ -8,6 +8,9 @@
 
 ## 0.4.0 (unreleased)
 
+### added
+- added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
+
 ### changes
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
 - move tests folder to `weldx/tests` [[#323]](https://github.com/BAMWelDX/weldx/pull/323)
