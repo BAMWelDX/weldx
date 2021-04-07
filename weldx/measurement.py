@@ -206,7 +206,7 @@ class MeasurementChainGraph:
         if node_name is None:
             return self._prev_added_signal
         elif node_name not in self._graph.nodes:
-            raise ValueError(f"No signal with source '{node_name}' found")
+            raise KeyError(f"No signal with source '{node_name}' found")
         return node_name
 
     def add_transformation(
@@ -238,6 +238,7 @@ class MeasurementChainGraph:
             source, if no transformation was added to the chain) is used.
 
         """
+        # todo evaluate units if function is provided
         input_signal_source = self._check_and_get_node_name(input_signal_source)
 
         self._add_signal(
