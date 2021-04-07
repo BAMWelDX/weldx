@@ -1,12 +1,13 @@
+"""pytest configuration."""
 import pytest
 
 
 @pytest.fixture(scope="class")
 def single_pass_weld_asdf(request):
-    """creates an example of a single pass weld fulfilling the single_pass_weld schema.
+    """Create an example of a single pass weld fulfilling the single_pass_weld schema.
 
     Notes
-    -------
+    -----
     attaches the tree and a io.BytesIO instance containing the binary output of
     the ASDF serialization to requests as following:
 
