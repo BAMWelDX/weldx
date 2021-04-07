@@ -65,6 +65,10 @@ class WXRotation(_Rotation):
             if str(angles.u) == "dimensionless":
                 angles = angles.to("rad")
             degrees = "rad" not in str(angles.u)
+            if degrees:
+                angles = angles.to("degree")
+            else:
+                angles = angles.to("rad")
             angles = angles.m
 
         rot = super().from_euler(seq=seq, angles=angles, degrees=degrees)
