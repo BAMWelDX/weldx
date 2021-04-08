@@ -1,370 +1,0 @@
-#ASDF 1.0.0
-#ASDF_STANDARD 1.5.0
-%YAML 1.1
-%TAG ! tag:stsci.edu:asdf/
---- !core/asdf-1.1.0
-asdf_library: !core/software-1.0.0 {author: Space Telescope Science Institute, homepage: 'http://github.com/spacetelescope/asdf',
-  name: asdf, version: 2.7.3}
-history:
-  extensions:
-  - !core/extension_metadata-1.0.0
-    extension_class: weldx.asdf.extension.WeldxExtension
-    software: !core/software-1.0.0 {name: weldx, version: 0.2.3.dev80+g414c267.d20210311}
-  - !core/extension_metadata-1.0.0
-    extension_class: asdf.extension.BuiltinExtension
-    software: !core/software-1.0.0 {name: asdf, version: 2.7.3}
-  - !core/extension_metadata-1.0.0
-    extension_class: weldx.asdf.extension.WeldxAsdfExtension
-    software: !core/software-1.0.0 {name: weldx, version: 0.2.3.dev80+g414c267.d20210311}
-TCP: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
-  time: !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
-    values: !core/ndarray-1.0.0
-      source: 7
-      datatype: int64
-      byteorder: little
-      shape: [2]
-    start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-    end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M9S}
-    min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-    max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M9S}
-  orientations: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
-    name: orientations
-    dimensions: [c, v]
-    dtype: <f8
-    data: !core/ndarray-1.0.0
-      data:
-      - [1.0, 0.0, 0.0]
-      - [0.0, -1.0, -1.2246467991473532e-16]
-      - [0.0, 1.2246467991473532e-16, -1.0]
-      datatype: float64
-      shape: [3, 3]
-  coordinates: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
-    name: coordinates
-    dimensions: [time, c]
-    dtype: <f8
-    data: !core/ndarray-1.0.0
-      source: 6
-      datatype: float64
-      byteorder: little
-      shape: [2, 3]
-coordinate_systems: !<tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0>
-  name: Coordinate system manager 0
-  root_system_name: base
-  subsystems: []
-  coordinate_systems:
-  - !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
-    name: workpiece
-    reference_system: base
-    transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0> {}
-  - !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
-    name: tcp_wire
-    reference_system: workpiece
-    transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
-      time: !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
-        values: !core/ndarray-1.0.0
-          source: 5
-          datatype: int64
-          byteorder: little
-          shape: [2]
-        start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-        end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M9S}
-        min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-        max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M9S}
-      orientations: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
-        name: orientations
-        dimensions: [c, v]
-        dtype: <f8
-        data: !core/ndarray-1.0.0
-          data:
-          - [1.0, 0.0, 0.0]
-          - [0.0, -1.0, -1.2246467991473532e-16]
-          - [0.0, 1.2246467991473532e-16, -1.0]
-          datatype: float64
-          shape: [3, 3]
-      coordinates: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
-        name: coordinates
-        dimensions: [time, c]
-        dtype: <f8
-        data: !core/ndarray-1.0.0
-          source: 4
-          datatype: float64
-          byteorder: little
-          shape: [2, 3]
-  - !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
-    name: tcp_contact
-    reference_system: tcp_wire
-    transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
-      coordinates: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
-        name: coordinates
-        dimensions: [c]
-        dtype: <f8
-        data: !core/ndarray-1.0.0
-          data: [0.0, 0.0, -10.0]
-          datatype: float64
-          shape: [3]
-  subsystem_names: []
-equipment:
-- !<tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0>
-  data_transformations:
-  - &id007 !<tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0>
-    error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
-      deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
-    func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
-      expression: a*x + b
-      parameters:
-        a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
-        b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
-    input_signal: &id001 !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0> {signal_type: analog,
-      unit: V}
-    name: AD conversion voltage measurement
-    output_signal: &id008 !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0> {signal_type: digital,
-      unit: ''}
-  name: HKS P1000-S3
-  sources:
-  - &id006 !<tag:weldx.bam.de:weldx/measurement/source-1.0.0>
-    error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
-      deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
-    name: Current Sensor
-    output_signal: &id002 !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0> {signal_type: analog,
-      unit: V}
-  - &id011 !<tag:weldx.bam.de:weldx/measurement/source-1.0.0>
-    error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
-      deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
-    name: Voltage Sensor
-    output_signal: *id001
-- !<tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0>
-  data_transformations:
-  - &id003 !<tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0>
-    error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
-      deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
-    func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
-      expression: a*x + b
-      parameters:
-        a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
-        b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
-    input_signal: *id002
-    name: AD conversion current measurement
-    output_signal: &id004 !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0> {signal_type: digital,
-      unit: ''}
-  name: Beckhoff ELM3002-0000
-  sources: []
-measurements:
-- !<tag:weldx.bam.de:weldx/measurement/measurement-1.0.0>
-  data:
-  - &id005 !<tag:weldx.bam.de:weldx/measurement/data-1.0.0>
-    name: Welding current
-    data: !<tag:weldx.bam.de:weldx/core/data_array-1.0.0>
-      attributes: {}
-      coordinates:
-      - !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
-        name: time
-        dimensions: [time]
-        dtype: <m8[ns]
-        data: !core/ndarray-1.0.0
-          source: 0
-          datatype: int64
-          byteorder: little
-          shape: [2001]
-      data: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
-        name: data
-        dimensions: [time]
-        dtype: <f8
-        unit: ampere
-        data: !core/ndarray-1.0.0
-          source: 1
-          datatype: float64
-          byteorder: little
-          shape: [2001]
-  measurement_chain: !<tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0>
-    data_processors:
-    - *id003
-    - !<tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0>
-      error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0> {deviation: 0.0}
-      func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
-        expression: a*x + b
-        parameters:
-          a: !unit/quantity-1.1.0 {unit: ampere, value: 0.030517578125}
-          b: !unit/quantity-1.1.0 {unit: ampere, value: 0.0}
-      input_signal: *id004
-      name: Calibration current measurement
-      output_signal: &id015 !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
-        signal_type: digital
-        unit: A
-        data: *id005
-      wx_metadata:
-        software: &id010 !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView, version: 3.4.3143}
-    data_source: *id006
-    name: welding current measurement chain
-  name: welding current measurement
-- !<tag:weldx.bam.de:weldx/measurement/measurement-1.0.0>
-  data:
-  - &id009 !<tag:weldx.bam.de:weldx/measurement/data-1.0.0>
-    name: Welding voltage
-    data: !<tag:weldx.bam.de:weldx/core/data_array-1.0.0>
-      attributes: {}
-      coordinates:
-      - !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
-        name: time
-        dimensions: [time]
-        dtype: <m8[ns]
-        data: !core/ndarray-1.0.0
-          source: 2
-          datatype: int64
-          byteorder: little
-          shape: [2001]
-      data: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
-        name: data
-        dimensions: [time]
-        dtype: <f8
-        unit: volt
-        data: !core/ndarray-1.0.0
-          source: 3
-          datatype: float64
-          byteorder: little
-          shape: [2001]
-  measurement_chain: !<tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0>
-    data_processors:
-    - *id007
-    - !<tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0>
-      error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0> {deviation: 0.0}
-      func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
-        expression: a*x + b
-        parameters:
-          a: !unit/quantity-1.1.0 {unit: volt, value: 0.0030517578125}
-          b: !unit/quantity-1.1.0 {unit: volt, value: 0.0}
-      input_signal: *id008
-      name: Calibration voltage measurement
-      output_signal: &id016 !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
-        signal_type: digital
-        unit: V
-        data: *id009
-      wx_metadata:
-        software: *id010
-    data_source: *id011
-    name: welding voltage measurement chain
-  name: welding voltage measurement
-process:
-  shielding_gas: !<tag:weldx.bam.de:weldx/aws/process/shielding_gas_for_procedure-1.0.0>
-    use_torch_shielding_gas: true
-    torch_shielding_gas: !<tag:weldx.bam.de:weldx/aws/process/shielding_gas_type-1.0.0>
-      gas_component:
-      - !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
-        gas_chemical_name: argon
-        gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
-      - !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
-        gas_chemical_name: carbon dioxide
-        gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
-      common_name: SG
-    torch_shielding_gas_flowrate: !unit/quantity-1.1.0 {unit: liter / minute, value: 10}
-  weld_speed: &id014 !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
-    unit: centimeter / second
-    value: 1.5
-  welding_process: !<tag:weldx.bam.de:weldx/process/CLOOS/spray_arc-1.0.0>
-    base_process: spray
-    manufacturer: CLOOS
-    parameters:
-      characteristic: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
-        unit: volt / ampere
-        value: 5
-      impedance: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
-        unit: percent
-        value: 10.0
-      voltage: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
-        &id012 values: &id013 !core/ndarray-1.0.0
-          source: 9
-          datatype: float64
-          byteorder: little
-          shape: [2]
-        time: !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
-          values: !core/ndarray-1.0.0
-            source: 8
-            datatype: int64
-            byteorder: little
-            shape: [2]
-          start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-          end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
-          min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-          max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
-        unit: volt
-        shape: [2]
-        interpolation: linear
-        *id012 : *id013
-      weld_speed: *id014
-      wire_feedrate: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
-        unit: meter / minute
-        value: 10.0
-    power_source: Quinto
-    tag: CLOOS/spray_arc
-  welding_wire:
-    diameter: !unit/quantity-1.1.0 {unit: millimeter, value: 1.2}
-reference_timestamp: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T12:00:00'}
-welding_current: *id015
-welding_voltage: *id016
-workpiece:
-  base_metal: {common_name: S355J2+N, standard: 'DIN EN 10225-2:2011'}
-  geometry:
-    groove_shape: !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/IGroove-1.0.0>
-      t: !unit/quantity-1.1.0 {unit: millimeter, value: 4}
-      b: !unit/quantity-1.1.0 {unit: millimeter, value: 4}
-      code_number: [1.2.1, 1.2.2, '2.1']
-    seam_length: !unit/quantity-1.1.0 {unit: millimeter, value: 100}
-wx_metadata: {welder: A.W. Elder}
-...
-ÓBLK 0    zlib      Ù      Ù      >ˆëQ¥$Vú oœĞxœ5ÛcÛÑÒ€áÉxr=Ù¶ÍÉ¶mÛ®É¶mÛ®É¶mÛ®wï«ıŞ_Î×¸Yk–È¿OK—A›:ış£!]¦ ô}ÑG=(½V#Ô%kÑŞı@ÏS<}Ø$ÔwÑâ¥NoÑeó!Ô¿‘BĞKÕEŸ²åşgÔ´…BÒ»E?p%BŠPôšÑïCš§êĞÅhçß¡ÇÍ†Şbê¦Ëh…¥—l‡2e'ê½ô4•Ñ»ÍC9ğ5|ÎpôƒÑCy7<=wK´![ĞÏ‰@[µùL´OĞgH/ÙuòI´»1"ÑS7Aé¶uÿ/´p%#Ó«OAYtõMº(ô\½ĞA9%*=N}´f«Ğ7|Eù]8½Äx´I·Ğï¤¤§îŠÚu?š‡N¨…R})êÂh¯óÇ ç…2ø*êÙ$1é±; 7İ²!t,ú¯*hÅ O|r'Wlzª¡h]. ï‹‡ĞµÚ6´ÁâÒ_•GÉ9uĞ3´3YãÑc@izu}¬øôŸMÑ‹mD™øõv©ô”ÓĞ;?DÙ—!!=l´ªÇĞçGKDÕ 5Ç´ßÑOML5µÉ´u©“ĞtC)vuBÄ¤ô[µÑS,Géü	u¯&£‡ƒ^å:ÊüdÉé/;¢eß‹> l
-úéj¨1¡5~‹¾6OJúa¨E/¡O˜Š~³JŠ¨B¤¦ï©ˆz.J•¨ó²§¡¿ˆí,Ê€8ié§š£ÅØŒŞHÒÑ×–Aı>­Ècôq™ÒÓoöEM~­côôİPB¯C­ümnñŒôç“P²İCµ´™è'{ G?ŒÒ(rfúšºhßV ş‚2®Pú±hÉn¢wH‘•¾»3j(G«.}N”ç‹Q³¾GëŸ/;ıÄ”èWP&ÎA_İıëN”Â¡rÒÇVF»>=é+”9sÑwFy½b¼Üô9-QŸmAË4½_9”3QŸ¢5È’—¾ª?Ê×“¨…bæ£i‚~m=JÒß¨íKæ§ïœ‚âJÅôè³{¡==‚9ªÒûÕG=¾
--Ú7ôúE
-ÒWGır­`ªBôÑ]Q®íGM¡0½]-ôKQB|D­P }Ö(ô'WQ2'-JïÛíØnô¨aŠÑëWE]¹ íóktÍ]œ>z(êÕh‰” ·m²cjğà%éå+ Ïœòäj¦l¥è} =5viz½fh+6¢úƒÿÿã×QÓĞ®<DO”±,½mÔíÇĞ‚–£—kˆ2sêãïh‹•§÷ˆrôj”4èu»£/?ˆò)bEz:h#—£_ş„’¨`%z›1hÛ®£M^™^®êŒ½hÂV¡g¨Ò{ê‘·h‘óV¥×²üêÇ„ÕèùÛ¢Ør9DuzÂJh­ç¢o}4GzÙAhÓÏ¢?ŒS“¡j¯Íh‡¥=RY”:3P—=Fû©6=_?”'P/E¯COĞ½Õ:”­?Qƒ”¨K/3}Ú=”‡iëÑÓ÷DëyıPäúôHõPk¯D[úı}¡ô|ãP‡ßD»˜¢!=~”Vº%\#ºÔD/½eÚ{ÔùÓÓDïqåPâ&ôˆíÑjíB_ª)ı}eÔ¼óÑ†½B¿³=şÔ–çÑ6ÇkNÿÛ¥ôVÔ©A[Ğï—CO;¥ÇSÔƒYZÒ#zÍS(Kb¶¢¿k‚–gúĞß(J¶¦Ç›ŠÖâú¦ômè{¡–:Š6%j[ú½ú(iW£vÿ†v H;zø	(5o£.NÕş¶+zî(C#t Ÿ¯…wzó(›
-t¤ÿ…Vòúä¤è÷: ¦ÙƒÖ-Lgúşª(á¢Öxƒ¶(wú›¡(¹/¢IĞ•~®5zœí(Íƒw£o¬€ö{6z‰ç(“³u§ß€–úz×Ø=èû›¡†Û„Vı/úÂÒ=éo¦¡æz„68c/úÙ>(q£6ìMßĞı×”?P'ëC¿3=Õ]”®iúÒ½;ZÀ!ôj‘úÑÖA}½-çgôAûÓÏA}­ir£¯ï„òk/jñ€ô‰ÕÑo/BIõµKŞô}ÃÑÃ^F©–h}A[´W;Ğs„LT	õÌ\´X/Ñ›äB_?õçY´bq‡Ò'´@¹½5eaôÎeÑ÷Î@	ûµjæáôùıĞ_@Éc}`c´ÓëĞcşBiRb$}İd´÷Ğ‹¦EŸĞõÖa´QFÓ;ÕCÙ»5ÌW´*…ÇĞçCyy5{Ê±ô]ĞO9JÌğãèk¢­]‚şı=JÑüãéãG¢İ¼‚<Éz§ö¨{v¡…=‘^¹
-Ê¼ù¨/^¡eË5‰nCPNG2½Q+ô5[Q¾B/RmÜ,ôOQ’gJïhh»O¡‡Š5^¹)êÜhÏ£g-õoĞÿßÀ¯' EÏ0ƒŞ°7Êš£¨ß¢Î¤n€>v5Êo¨ÉŠÎ¢w˜€¾ë6J¨Ô³é•º¡Í9€ş,ÂzÖÚ¨ı—¡øˆ¨séG£®¾†ö5é<z¡(c÷ ^3Ÿ´zû…(»Ş †Ì³€^qúì‹(Ï,¤giƒÖo;úñà‹èQÌA[õıK¶ÅôBQÇœA»{	=Is”ö›PwşEQf)½Ât”ÙPŸf\FÏÜ½ïq”ãËéÑ¡Õ_‹¾òÊ—b+è'¡¾‹~5ÍJz’¨í¡íˆ´Š¼.J…¨³>£=)¸ši,Jß¨Ç’¯¡GíŒ^oÊÊ€µôÏÕÑt1ú¨w(Wó®£'Öö2úöDëéÁÛ¡–ß‰63äúãJ(™æ¡öy‰v4ÇFz”Á(õÎ¡®ˆ»‰ş©z-(£‚l¦_)‹–h&z›'(Û3o¡ëVî$úŒ[é£f\Öûú‘ÛèQ¦ Ö½¶<İvúÇ( Œ²ƒ~¹zÂU(m¾¢n+¼“t<zÙ[(3Rî¢?ê‚–a?z¯ğ»éGj¢F^ŠVçú²ü{èG¢æ¿Š6"É^ú¥ö(	w£¶½¾µ
-z(e_£NÏåô‡CĞÓ_@é?ıp+´HÛĞk;@_VõÃ,´|ÏĞ‡g=H¿d¨	N£µŠuˆ¾¥)J¨eş M+u˜ş`*Jú‡¨=3¡êñJíhGéK ½_÷;Êğ¢Çè' Å¿ƒŞ2õqú–n¨r­tÄô©µQ,CM÷	­‡¤ñ:j­d§èK:¢¿Ûƒ’7ìiú°jh¢Ç{‹Ò2Ïúæah/¢—Jx–>µêıíhiCœ£w¯ˆrpj„h5³Ÿ§/ˆòîj8èC›£Ÿß„O.Ò[”AÛ4ıÏ#”R™.Ñ§ôE»w=MôËôîP¬Eÿ½Fñ+ôÅ“PßŞEËö*}H”ó‡PãF¾Fo^}ã
-”?ŸQKºNŸ<ıî”4)nĞ»uFÛ¿=\¸›ô5P-F{ó=W¾[ô!#PÏ]F‹“ø6½Y;”;Q‡¼C/Q}Ò<”»/QSç¼Kï:İÏ¡„‹w^½%ÚÂ-è¯ƒÜ§ç*‡:x&ÚÙ'è±³< 7ëºá$Ú¯éÅ› LZzçZª’ì{—)ÿøÿwĞ¯éÓ«õB_påu”'ôœõÑ­B?ó%v‘§ô¦ãÑÖßBÿ™ò½xWÔ‰ûÑn‡NOY¥ËRÔ}ĞÂxA¯:
-eÁUÔWI^Òst@¸åLèWôXUÑš,@_÷åg®×ôbCÑ&\@¿ÿ=ekÔÎÛĞö{KS¥êlÔùÏĞ^f}GÏ> eàiÔÓ±ŞÓc6Co¼eİÔ¥>Ğ‹NCÿåV†ô}Ğ:Cßí=LCÔ*kĞæ}GQô3=ûDÔwĞN¥şBÑ¥ñAÔµ¿Ò¿×F/²eü'Ô›ú|zÇë({’}§‡î„Vy/úÜ°?è/ª¡f[„foÑOæùI1µÑ%´5	Ñ¿µA)²u\ˆßôÑ“ÍEéøuwö?ôPƒĞ+E™ç/ıys´¬›Ñÿ3mqQu²jôh£¯Î„ş­/jáhc£¥_o„’lj‡Ÿh»Š£‡œŒRéêœ´ÁéÏz g9ŒÒ?rú‰ºh+Ñ|AY]($ıëX´B7ÑÇ¤E¿Ş5©£µš¾³JÈ%¨ß£ÍÎ†ştJ–+¨ı‡¥o‡mJƒPôU•Ñ¾ÌC/ø
-eLÎpôkƒÑ’œGo/<}gKÔ[Ñ*@ŸUåéLÔÌOÑúf‰H?Ö%Ú)Ôú1#ÑW6Aÿ¼¥àoÔÑ%#Ó¯NAOü ¥]ú(ô½Ğ‚E/5*}V}Ô'«Ğ2}CïS$ıØxÔ¨·Ñê¥
-¤¯èŠòy?ªFˆNUıÊR”ÄQÛˆAß>
-=Ø5”òIcÒgv@{¼=c˜Xô>UQ.@‹ò½nîØôCQ?]@+ }dk”+ÛPKoS}Ûl”`ÏQËe‹GŸ1 ıÑi”Œ±ãÓ{7C;²=ò_”º¥Ğ—OCûø=Æ„ô‘}P/CK˜ˆŞº!Ê¶5¨A •-–˜>}"Ê£;¨Ò$¡÷ê~ø JäHIéuê -[şáJş‚Éè#Æ ]º yrzëN¨[÷¢	HA/Seú"Ô‡oÑÒçMIï9åğ%ÔH‰RÑk·E_ºåCˆÔô|•Ğ†ÏE¿ø%A4ôVƒĞ¶œE—¸iéeZ NÛŒö@ÒÑÓ•Eé9õĞc´ˆ™ÓÓkõCYzõ}ôô¼Ñ‡­C¹ø5~‰Œô–“Ñ7ßÃÿ¿à×Ò=Ñ¦F¿93=]=Ô+Ñ~AP8½Ö8Ô%7ÑŞ¥ÈJÏÓe˜£^—¯&z‹%(›ß£şÍ—^j$ú”+(÷ç §mÖ}úP9éª Öœ¶øúÛœ¹èy† =v>^nzÜV(-¶¢n
-š‡ş§zÉY(S¢ŞË’—ÆĞ»B93=|S´ĞıFy[2?=÷T´!ĞÏ¥/@ÛµùQ´Q•ş»>JÉÕ¨“¿¡İ-RzJ·Û¨ûS¢‡ë†^ı Ê¢…éoj¡åZ†>ø#Ê¹EèqF£5»†¾!iQúï¨%ö M
-SŒ~§*Jê…¨]ß yîâô€a(Õ/¢.LP‚şº5zÎí(ƒƒ—¤Ÿ­€{zÓç(²•¢ÿ€VüúÄØ¥éwš¡¦Ú„Öå/ú¾ÒeèÓQ«=B[±,ıU”œÇQ–£Ÿiˆk-JÓ¨ë‹•§ÿœˆ^ì.ÊÄ4è·»£¥<„Ş9REú¾:¨aW UıŒ>¿`%ú«1¨9n L^™~ºJ¬}¨MªĞ×UGÿ±¥Ø;Ô	y«ÒoGOq¥s¢jô½mÑÂìD¯²:}~%Ô—sÑ²¿D£ıô Ô˜çĞÇ­I_ÛåÇfÔ¢AjÑÇ—E¿9%ÅÔN™kÓ÷ôC}¥JŒ:ôyÑ^¬CÏöe@‰ºôS“ÑbÜGo”®}mOÔï‡ÑŠD©OWåæJÔä_Ñ:n@ß=%ô-ÔÊ)ÒçvAî(ÙÂ7¢[M´“KĞ£@i”¿1}ÍH´oWĞ'iB×õÆ.´d¡›Ò;TAÙ=5Ôk´J¹šÑçAy~5küæôş­ĞOlE‰¬½ay´Õ³Ğ¿>E)œµ%}¬¡]?…4V+z‡¦¨»6 …üƒ^±Tkúœ©¨Ï eÉĞ†Ş¯7Ê‰£¨ÑÚÒ4@_µåë7ÔBEÛÑÇL@¿v%iêöôöİĞv@±½bmÔÙËĞ~DÏ¬éıF£¿†-Y'zı(«ö ~	Ó™^°úè…(×Ş &ÉÓ…Şnú‹(!v¥Whƒ6k;ú“àİè™+¢öƒvì9zÔìİéõ¢®<ƒö9vº6G½	õê_´ÄezÒÛNGÙñ5x¦^ôò}ÑgGyØ›©ZŸµèG D-Ş‡^oÚŠ»èŸÒü[èûßbŸ:„v%R?z¢º(mW nÿŒ¬Pz¹±(3o >NnôŒÑ{ïC90€¥ZİÅèËß¡|Ê;^`ÚÈËè—¢'j‡Úf'Ú¶ƒéA+£”›‡:ã%Ú£Cè£ô>‡z$îPzä–èu¶ ,2Œş±,Zş™è# \Î<œ°?Zë“è[cŒ m‚Zv=Úô_èKŒ¤g˜‚Úë>Úát£è‘z¡Ô9‚º,Êhú‡zèùV¡ŒøŠz©ğz‚ñè­n¡lM9–¤+Z™ıèÓÂ£?¬‰š~)ZÏè‡ò§G…Zû*ÚÒ$èïÛ£äÛ:<ôDúÅ*èñ ´zº%×$ºE/}eZüÉô­ĞÒmCïl
-ıPyÔˆ³Ñj=C_’u*ı½¡æ=6,Ö4ú…¦(ñ7¢¶üƒ¶¹Ôtúß©(¥¢NÍ0ƒ~¿7zÚc(=¢Í¤l€azÍï(KŠÎ¢¿›€–çúĞÔ³éº¡Æ;ˆÖ"âú¦Ú(—¡–ú„6EçÒïFI{µ{²yôÑÃïE©v>}q5´·Ñs¿Ešgıü0´¸—Ğ›'\HßÔõÏv´’!Ñ'WD¹75Í´nÙÓ÷D	µFœ%ôEÍÑßlBÉ-KéCÊ ›ç1JóLËèû¢ı>^"úrúäF¨w×¢¥ş‰Şµø
-úşI¨áî¡UO»’¾°Ê›C¨¹"¯¢®‹~vJœ/¨Í
-­¦o‹şëJ‰kè“:£İÙ‡*ÜZz×¨¾-à=zµ|ëèG ¾¾Œ–3ñzú v(gw¢ÆµŞ´2úúy(¿^¢Ï¹‘>q0úís(©âm¢wi‰¶ozØ ›éÕÊ¡.˜‰öê	z,[èƒú£9‰+æVz“&(ë×£şü…V¬ä6ú„)(·ï£¦L¿Ş¹úŞ#(a£î W­6úË¯(9Šì¤vúzÌT»èMº¢®Ûö#ünzÑZ(–¢Şú€–¢Àz§Q({¯¢†Iº—^¥ú¼İ(/Cï£g¯Š6`ú©×(1s;½ñP´µĞ¿ÇßO/Úuü6´›ÁĞ“W@é4uÏ3´ĞÙÒ+@™wõE¬CôlÍĞm#Ê©?¨1J¦7š†¾æ!Ê÷GèEú ;†~#ÚQzò†¨× íşªØ1zå‰¨sï =OÍ¿gíşo‘ÿız2â	zô:è—£¬ù„úMOÒA{åF²SôdĞ:ìEßö4=TuÔJ‹Ğæ¼E–ç=ëpÔş—ĞN$<Kl‹Òpêêçè_+¢š‹2öêõìçéI¡·?‹²+ÎzÈh7£Ï–‹ôgeP³Ì@ë÷ıx¦KôÀ~¨N ­Š~™ş¥J¡u¨c~¢]+~…d2Jû{¨;Ó^¥‡è‰^á0ÊìÈ×èOë¢e^‰Ş÷ÊñB×éÑÆ¡Õ¿‰¾2Åú—Î¨mt¸›ô«5P’,Am÷mG¾[ôà#Q*\A•ø6ıI;ôL»Pú†ºC?V-ê|ôz¯PVæ¼Kÿ<MÏ£Šw~µ%jâ­hmƒŞ§o/‡|jù§h3³< ?î’éjŸ˜éG› GÙ€Rï7êŠ’èŸ¦ x€2*ıcú•^h‰¢·‰ú„¾½>j°Õhå¾¡Ï(ò”şx<jÆÛh½S=£éŠå jİÏéËk¡\ŠRà#êÈ/è—G¡'¼†Ò&éKú¶hA÷ —óŠ>£*ê£hŞ ÷Êıš~d(jä‹hu¼¡/kòqjşàoé#* _š’ğ9jëlïè[ 9ƒR6ö{úôfh7¢§ÿ‹Ò«ôúáih‘¡×Îø‘¾¬ê‡chù?Ñ‡7D¹´5Á´VÅ>Ó·LD	rµLš/ôiİÑDIé+½g´CËÑ#~F©]ğ}é´÷×Ñó&ÿNŞ	õâ^´ø?è-«£lY„*ïĞJçıIŸ:åÁ%Ôt‰~Ñ{´E?¸%bÈßôZ•Ğ–ÌE÷%o?ôaƒĞ.œE÷/½eÔÍ›Ñşşgäøo/UeêÔûÑÒfBïŞåà	Ô1‚Òk6F_¼åİOÔ<%‚Ñ‡NF?%^ºàô=Ñ6Fÿ9½T=Ô)+Ñî}AOS8$½û8Ô7ÑÂ§E¯Ñe±£¾š»&ú%(çß£ÆÍ†Ş|$úÆ+(‡¥—l6yúİPô4UP»ÍGÛÿ
-=\®pôCPG{/<=W+”![QÏ@S½Ù,”OQg‰H/aè“N¡Ü‰º)Z×èş%\©ÈôêSÑ>@>
-=WoÔÁGÑÎFJİ ¥ÙjÔßĞ~‰F/>eÒmÔ;©é©º¡w9øï¡Ş¿‡|P­Ú2ôÿ=ğ{] =çh´A×ĞÏ$Iİµé´õabÑVE)¾uâ´Û¹cÓSCéru_‚8ô°mĞ«nGY<.ıU´sĞ>G9“-=Ö@´&gĞ×ÅOÿÙµØ&´	Ño•N@O9µó#´½ÒÃôE©zu~`"úË†èÙ×¢üzºXbzÌIèï¢¬K“„ş£;ZÑCèã#%¥ßªƒšbZ§Ïè{
-&£‡‹ZåÚ¼äÉé/:¡dß‡:  ıTuô‹Q¿C]›7%ıûpô"—QÆ'JE¿Ù-ùNô!SÓ÷TB=­òKô¹9ÒĞ_BÍvÍâ¦¥Ÿlcj£ éèkÊ¢›Rä	ê¸Ìéé7ú¡';‰Ò1FúîÆh¡Ö£Wú…2·DFúóÉhYï£÷O—‰~²'jô#h£d¦¯®‡òm%já¯hcg¡_‡’ìj‡”Yé»º ‡ÜR)|6úœšhÏ– gù€Ò?vú‰‘hWÑ$ÉA_İõë.´B¡sÒÇTA¹>5ék´ö¹rÑwA	yµbüÜôÙ­ĞŸnEÉ,½_y´ã³Ğ£=Ci5/}•¡}9…^0V>ú˜¦¨×6 %ùƒŞ®T~úÎ©¨!¢UÈP€>«7ÊÓ£¨™£)½oôc«Q¢}G­_´ }åôÏ·Q
-¦.DİíêôÄÓÛÕFİ±-ø'ôòZ„>k4ê“kh™’¥÷éˆrljÔ°Åèõª¡¯Xˆòùªæ)N5ıÊE”Ä	KĞÛ¶AÛ¾=Xˆ’ôòQgÎA{ü=cöRô>QA‹§4½ns”›P?ıE+P¦}ät”+Pe*KoÓ}Ûq”`ÑËÑË5B›±ıÑ”ŒÅËÓ{OB;r=rÚ
-ôº=P—Bû©"=]”‘+P/FKX¨½õX”m7Pƒ¦¨L/Û}ú>”GUşëÿëC(ÓBLK 0    zlib       4       4      >ˆÒ+š©Üï4N¼t¡L/wxœíÅ1   E3“	æ‚ÀCR·Û¶mÛ¶mÛ¶mÛ¶mÛ¶mÛ¶mÛ¶mÛ¶û£ôL¸ÓBLK 0    zlib      Ù      Ù      >ˆëQ¥$Vú oœĞxœ5ÛcÛÑÒ€áÉxr=Ù¶ÍÉ¶mÛ®É¶mÛ®É¶mÛ®wï«ıŞ_Î×¸Yk–È¿OK—A›:ış£!]¦ ô}ÑG=(½V#Ô%kÑŞı@ÏS<}Ø$ÔwÑâ¥NoÑeó!Ô¿‘BĞKÕEŸ²åşgÔ´…BÒ»E?p%BŠPôšÑïCš§êĞÅhçß¡ÇÍ†Şbê¦Ëh…¥—l‡2e'ê½ô4•Ñ»ÍC9ğ5|ÎpôƒÑCy7<=wK´![ĞÏ‰@[µùL´OĞgH/ÙuòI´»1"ÑS7Aé¶uÿ/´p%#Ó«OAYtõMº(ô\½ĞA9%*=N}´f«Ğ7|Eù]8½Äx´I·Ğï¤¤§îŠÚu?š‡N¨…R})êÂh¯óÇ ç…2ø*êÙ$1é±; 7İ²!t,ú¯*hÅ O|r'Wlzª¡h]. ï‹‡ĞµÚ6´ÁâÒ_•GÉ9uĞ3´3YãÑc@izu}¬øôŸMÑ‹mD™øõv©ô”ÓĞ;?DÙ—!!=l´ªÇĞçGKDÕ 5Ç´ßÑOML5µÉ´u©“ĞtC)vuBÄ¤ô[µÑS,Géü	u¯&£‡ƒ^å:ÊüdÉé/;¢eß‹> l
-úéj¨1¡5~‹¾6OJúa¨E/¡O˜Š~³JŠ¨B¤¦ï©ˆz.J•¨ó²§¡¿ˆí,Ê€8ié§š£ÅØŒŞHÒÑ×–Aı>­Ècôq™ÒÓoöEM~­côôİPB¯C­ümnñŒôç“P²İCµ´™è'{ G?ŒÒ(rfúšºhßV ş‚2®Pú±hÉn¢wH‘•¾»3j(G«.}N”ç‹Q³¾GëŸ/;ıÄ”èWP&ÎA_İıëN”Â¡rÒÇVF»>=é+”9sÑwFy½b¼Üô9-QŸmAË4½_9”3QŸ¢5È’—¾ª?Ê×“¨…bæ£i‚~m=JÒß¨íKæ§ïœ‚âJÅôè³{¡==‚9ªÒûÕG=¾
--Ú7ôúE
-ÒWGır­`ªBôÑ]Q®íGM¡0½]-ôKQB|D­P }Ö(ô'WQ2'-JïÛíØnô¨aŠÑëWE]¹ íóktÍ]œ>z(êÕh‰” ·m²cjğà%éå+ Ïœòäj¦l¥è} =5viz½fh+6¢úƒÿÿã×QÓĞ®<DO”±,½mÔíÇĞ‚–£—kˆ2sêãïh‹•§÷ˆrôj”4èu»£/?ˆò)bEz:h#—£_ş„’¨`%z›1hÛ®£M^™^®êŒ½hÂV¡g¨Ò{ê‘·h‘óV¥×²üêÇ„ÕèùÛ¢Ør9DuzÂJh­ç¢o}4GzÙAhÓÏ¢?ŒS“¡j¯Íh‡¥=RY”:3P—=Fû©6=_?”'P/E¯COĞ½Õ:”­?Qƒ”¨K/3}Ú=”‡iëÑÓ÷DëyıPäúôHõPk¯D[úı}¡ô|ãP‡ßD»˜¢!=~”Vº%\#ºÔD/½eÚ{ÔùÓÓDïqåPâ&ôˆíÑjíB_ª)ı}eÔ¼óÑ†½B¿³=şÔ–çÑ6ÇkNÿÛ¥ôVÔ©A[Ğï—CO;¥ÇSÔƒYZÒ#zÍS(Kb¶¢¿k‚–gúĞß(J¶¦Ç›ŠÖâú¦ômè{¡–:Š6%j[ú½ú(iW£vÿ†v H;zø	(5o£.NÕş¶+zî(C#t Ÿ¯…wzó(›
-t¤ÿ…Vòúä¤è÷: ¦ÙƒÖ-Lgúşª(á¢Öxƒ¶(wú›¡(¹/¢IĞ•~®5zœí(Íƒw£o¬€ö{6z‰ç(“³u§ß€–úz×Ø=èû›¡†Û„Vı/úÂÒ=éo¦¡æz„68c/úÙ>(q£6ìMßĞı×”?P'ëC¿3=Õ]”®iúÒ½;ZÀ!ôj‘úÑÖA}½-çgôAûÓÏA}­ir£¯ï„òk/jñ€ô‰ÕÑo/BIõµKŞô}ÃÑÃ^F©–h}A[´W;Ğs„LT	õÌ\´X/Ñ›äB_?õçY´bq‡Ò'´@¹½5eaôÎeÑ÷Î@	ûµjæáôùıĞ_@Éc}`c´ÓëĞcşBiRb$}İd´÷Ğ‹¦EŸĞõÖa´QFÓ;ÕCÙ»5ÌW´*…ÇĞçCyy5{Ê±ô]ĞO9JÌğãèk¢­]‚şı=JÑüãéãG¢İ¼‚<Éz§ö¨{v¡…=‘^¹
-Ê¼ù¨/^¡eË5‰nCPNG2½Q+ô5[Q¾B/RmÜ,ôOQ’gJïhh»O¡‡Š5^¹)êÜhÏ£g-õoĞÿßÀ¯' EÏ0ƒŞ°7Êš£¨ß¢Î¤n€>v5Êo¨ÉŠÎ¢w˜€¾ë6J¨Ô³é•º¡Í9€ş,ÂzÖÚ¨ı—¡øˆ¨séG£®¾†ö5é<z¡(c÷ ^3Ÿ´zû…(»Ş †Ì³€^qúì‹(Ï,¤giƒÖo;úñà‹èQÌA[õıK¶ÅôBQÇœA»{	=Is”ö›PwşEQf)½Ât”ÙPŸf\FÏÜ½ïq”ãËéÑ¡Õ_‹¾òÊ—b+è'¡¾‹~5ÍJz’¨í¡íˆ´Š¼.J…¨³>£=)¸ši,Jß¨Ç’¯¡GíŒ^oÊÊ€µôÏÕÑt1ú¨w(Wó®£'Öö2úöDëéÁÛ¡–ß‰63äúãJ(™æ¡öy‰v4ÇFz”Á(õÎ¡®ˆ»‰ş©z-(£‚l¦_)‹–h&z›'(Û3o¡ëVî$úŒ[é£f\Öûú‘ÛèQ¦ Ö½¶<İvúÇ( Œ²ƒ~¹zÂU(m¾¢n+¼“t<zÙ[(3Rî¢?ê‚–a?z¯ğ»éGj¢F^ŠVçú²ü{èG¢æ¿Š6"É^ú¥ö(	w£¶½¾µ
-z(e_£NÏåô‡CĞÓ_@é?ıp+´HÛĞk;@_VõÃ,´|ÏĞ‡g=H¿d¨	N£µŠuˆ¾¥)J¨eş M+u˜ş`*Jú‡¨=3¡êñJíhGéK ½_÷;Êğ¢Çè' Å¿ƒŞ2õqú–n¨r­tÄô©µQ,CM÷	­‡¤ñ:j­d§èK:¢¿Ûƒ’7ìiú°jh¢Ç{‹Ò2Ïúæah/¢—Jx–>µêıíhiCœ£w¯ˆrpj„h5³Ÿ§/ˆòîj8èC›£Ÿß„O.Ò[”AÛ4ıÏ#”R™.Ñ§ôE»w=MôËôîP¬Eÿ½Fñ+ôÅ“PßŞEËö*}H”ó‡PãF¾Fo^}ã
-”?ŸQKºNŸ<ıî”4)nĞ»uFÛ¿=\¸›ô5P-F{ó=W¾[ô!#PÏ]F‹“ø6½Y;”;Q‡¼C/Q}Ò<”»/QSç¼Kï:İÏ¡„‹w^½%ÚÂ-è¯ƒÜ§ç*‡:x&ÚÙ'è±³< 7ëºá$Ú¯éÅ› LZzçZª’ì{—)ÿøÿwĞ¯éÓ«õB_påu”'ôœõÑ­B?ó%v‘§ô¦ãÑÖßBÿ™ò½xWÔ‰ûÑn‡NOY¥ËRÔ}ĞÂxA¯:
-eÁUÔWI^Òst@¸åLèWôXUÑš,@_÷åg®×ôbCÑ&\@¿ÿ=ekÔÎÛĞö{KS¥êlÔùÏĞ^f}GÏ> eàiÔÓ±ŞÓc6Co¼eİÔ¥>Ğ‹NCÿåV†ô}Ğ:Cßí=LCÔ*kĞæ}GQô3=ûDÔwĞN¥şBÑ¥ñAÔµ¿Ò¿×F/²eü'Ô›ú|zÇë({’}§‡î„Vy/úÜ°?è/ª¡f[„foÑOæùI1µÑ%´5	Ñ¿µA)²u\ˆßôÑ“ÍEéøuwö?ôPƒĞ+E™ç/ıys´¬›Ñÿ3mqQu²jôh£¯Î„ş­/jáhc£¥_o„’lj‡Ÿh»Š£‡œŒRéêœ´ÁéÏz g9ŒÒ?rú‰ºh+Ñ|AY]($ıëX´B7ÑÇ¤E¿Ş5©£µš¾³JÈ%¨ß£ÍÎ†ştJ–+¨ı‡¥o‡mJƒPôU•Ñ¾ÌC/ø
-eLÎpôkƒÑ’œGo/<}gKÔ[Ñ*@ŸUåéLÔÌOÑúf‰H?Ö%Ú)Ôú1#ÑW6Aÿ¼¥àoÔÑ%#Ó¯NAOü ¥]ú(ô½Ğ‚E/5*}V}Ô'«Ğ2}CïS$ıØxÔ¨·Ñê¥
-¤¯èŠòy?ªFˆNUıÊR”ÄQÛˆAß>
-=Ø5”òIcÒgv@{¼=c˜Xô>UQ.@‹ò½nîØôCQ?]@+ }dk”+ÛPKoS}Ûl”`ÏQËe‹GŸ1 ıÑi”Œ±ãÓ{7C;²=ò_”º¥Ğ—OCûø=Æ„ô‘}P/CK˜ˆŞº!Ê¶5¨A •-–˜>}"Ê£;¨Ò$¡÷ê~ø JäHIéuê -[şáJş‚Éè#Æ ]º yrzëN¨[÷¢	HA/Seú"Ô‡oÑÒçMIï9åğ%ÔH‰RÑk·E_ºåCˆÔô|•Ğ†ÏE¿ø%A4ôVƒĞ¶œE—¸iéeZ NÛŒö@ÒÑÓ•Eé9õĞc´ˆ™ÓÓkõCYzõ}ôô¼Ñ‡­C¹ø5~‰Œô–“Ñ7ßÃÿ¿à×Ò=Ñ¦F¿93=]=Ô+Ñ~AP8½Ö8Ô%7ÑŞ¥ÈJÏÓe˜£^—¯&z‹%(›ß£şÍ—^j$ú”+(÷ç §mÖ}úP9éª Öœ¶øúÛœ¹èy† =v>^nzÜV(-¶¢n
-š‡ş§zÉY(S¢ŞË’—ÆĞ»B93=|S´ĞıFy[2?=÷T´!ĞÏ¥/@ÛµùQ´Q•ş»>JÉÕ¨“¿¡İ-RzJ·Û¨ûS¢‡ë†^ı Ê¢…éoj¡åZ†>ø#Ê¹EèqF£5»†¾!iQúï¨%ö M
-SŒ~§*Jê…¨]ß yîâô€a(Õ/¢.LP‚şº5zÎí(ƒƒ—¤Ÿ­€{zÓç(²•¢ÿ€VüúÄØ¥éwš¡¦Ú„Öå/ú¾ÒeèÓQ«=B[±,ıU”œÇQ–£Ÿiˆk-JÓ¨ë‹•§ÿœˆ^ì.ÊÄ4è·»£¥<„Ş9REú¾:¨aW UıŒ>¿`%ú«1¨9n L^™~ºJ¬}¨MªĞ×UGÿ±¥Ø;Ô	y«ÒoGOq¥s¢jô½mÑÂìD¯²:}~%Ô—sÑ²¿D£ıô Ô˜çĞÇ­I_ÛåÇfÔ¢AjÑÇ—E¿9%ÅÔN™kÓ÷ôC}¥JŒ:ôyÑ^¬CÏöe@‰ºôS“ÑbÜGo”®}mOÔï‡ÑŠD©OWåæJÔä_Ñ:n@ß=%ô-ÔÊ)ÒçvAî(ÙÂ7¢[M´“KĞ£@i”¿1}ÍH´oWĞ'iB×õÆ.´d¡›Ò;TAÙ=5Ôk´J¹šÑçAy~5küæôş­ĞOlE‰¬½ay´Õ³Ğ¿>E)œµ%}¬¡]?…4V+z‡¦¨»6 …üƒ^±Tkúœ©¨Ï eÉĞ†Ş¯7Ê‰£¨ÑÚÒ4@_µåë7ÔBEÛÑÇL@¿v%iêöôöİĞv@±½bmÔÙËĞ~DÏ¬éıF£¿†-Y'zı(«ö ~	Ó™^°úè…(×Ş &ÉÓ…Şnú‹(!v¥Whƒ6k;ú“àİè™+¢öƒvì9zÔìİéõ¢®<ƒö9vº6G½	õê_´ÄezÒÛNGÙñ5x¦^ôò}ÑgGyØ›©ZŸµèG D-Ş‡^oÚŠ»èŸÒü[èûßbŸ:„v%R?z¢º(mW nÿŒ¬Pz¹±(3o >NnôŒÑ{ïC90€¥ZİÅèËß¡|Ê;^`ÚÈËè—¢'j‡Úf'Ú¶ƒéA+£”›‡:ã%Ú£Cè£ô>‡z$îPzä–èu¶ ,2Œş±,Zş™è# \Î<œ°?Zë“è[cŒ m‚Zv=Úô_èKŒ¤g˜‚Úë>Úát£è‘z¡Ô9‚º,Êhú‡zèùV¡ŒøŠz©ğz‚ñè­n¡lM9–¤+Z™ıèÓÂ£?¬‰š~)ZÏè‡ò§G…Zû*ÚÒ$èïÛ£äÛ:<ôDúÅ*èñ ´zº%×$ºE/}eZüÉô­ĞÒmCïl
-ıPyÔˆ³Ñj=C_’u*ı½¡æ=6,Ö4ú…¦(ñ7¢¶üƒ¶¹Ôtúß©(¥¢NÍ0ƒ~¿7zÚc(=¢Í¤l€azÍï(KŠÎ¢¿›€–çúĞÔ³éº¡Æ;ˆÖ"âú¦Ú(—¡–ú„6EçÒïFI{µ{²yôÑÃïE©v>}q5´·Ñs¿Ešgıü0´¸—Ğ›'\HßÔõÏv´’!Ñ'WD¹75Í´nÙÓ÷D	µFœ%ôEÍÑßlBÉ-KéCÊ ›ç1JóLËèû¢ı>^"úrúäF¨w×¢¥ş‰Şµø
-úşI¨áî¡UO»’¾°Ê›C¨¹"¯¢®‹~vJœ/¨Í
-­¦o‹şëJ‰kè“:£İÙ‡*ÜZz×¨¾-à=zµ|ëèG ¾¾Œ–3ñzú v(gw¢ÆµŞ´2úúy(¿^¢Ï¹‘>q0úís(©âm¢wi‰¶ozØ ›éÕÊ¡.˜‰öê	z,[èƒú£9‰+æVz“&(ë×£şü…V¬ä6ú„)(·ï£¦L¿Ş¹úŞ#(a£î W­6úË¯(9Šì¤vúzÌT»èMº¢®Ûö#ünzÑZ(–¢Şú€–¢Àz§Q({¯¢†Iº—^¥ú¼İ(/Cï£g¯Š6`ú©×(1s;½ñP´µĞ¿ÇßO/Úuü6´›ÁĞ“W@é4uÏ3´ĞÙÒ+@™wõE¬CôlÍĞm#Ê©?¨1J¦7š†¾æ!Ê÷GèEú ;†~#ÚQzò†¨× íşªØ1zå‰¨sï =OÍ¿gíşo‘ÿız2â	zô:è—£¬ù„úMOÒA{åF²SôdĞ:ìEßö4=TuÔJ‹Ğæ¼E–ç=ëpÔş—ĞN$<Kl‹Òpêêçè_+¢š‹2öêõìçéI¡·?‹²+ÎzÈh7£Ï–‹ôgeP³Ì@ë÷ıx¦KôÀ~¨N ­Š~™ş¥J¡u¨c~¢]+~…d2Jû{¨;Ó^¥‡è‰^á0ÊìÈ×èOë¢e^‰Ş÷ÊñB×éÑÆ¡Õ¿‰¾2Åú—Î¨mt¸›ô«5P’,Am÷mG¾[ôà#Q*\A•ø6ıI;ôL»Pú†ºC?V-ê|ôz¯PVæ¼Kÿ<MÏ£Šw~µ%jâ­hmƒŞ§o/‡|jù§h3³< ?î’éjŸ˜éG› GÙ€Rï7êŠ’èŸ¦ x€2*ıcú•^h‰¢·‰ú„¾½>j°Õhå¾¡Ï(ò”şx<jÆÛh½S=£éŠå jİÏéËk¡\ŠRà#êÈ/è—G¡'¼†Ò&éKú¶hA÷ —óŠ>£*ê£hŞ ÷Êıš~d(jä‹hu¼¡/kòqjşàoé#* _š’ğ9jëlïè[ 9ƒR6ö{úôfh7¢§ÿ‹Ò«ôúáih‘¡×Îø‘¾¬ê‡chù?Ñ‡7D¹´5Á´VÅ>Ó·LD	rµLš/ôiİÑDIé+½g´CËÑ#~F©]ğ}é´÷×Ñó&ÿNŞ	õâ^´ø?è-«£lY„*ïĞJçıIŸ:åÁ%Ôt‰~Ñ{´E?¸%bÈßôZ•Ğ–ÌE÷%o?ôaƒĞ.œE÷/½eÔÍ›Ñşşgäøo/UeêÔûÑÒfBïŞåà	Ô1‚Òk6F_¼åİOÔ<%‚Ñ‡NF?%^ºàô=Ñ6Fÿ9½T=Ô)+Ñî}AOS8$½û8Ô7ÑÂ§E¯Ñe±£¾š»&ú%(çß£ÆÍ†Ş|$úÆ+(‡¥—l6yúİPô4UP»ÍGÛÿ
-=\®pôCPG{/<=W+”![QÏ@S½Ù,”OQg‰H/aè“N¡Ü‰º)Z×èş%\©ÈôêSÑ>@>
-=WoÔÁGÑÎFJİ ¥ÙjÔßĞ~‰F/>eÒmÔ;©é©º¡w9øï¡Ş¿‡|P­Ú2ôÿ=ğ{] =çh´A×ĞÏ$Iİµé´õabÑVE)¾uâ´Û¹cÓSCéru_‚8ô°mĞ«nGY<.ıU´sĞ>G9“-=Ö@´&gĞ×ÅOÿÙµØ&´	Ño•N@O9µó#´½ÒÃôE©zu~`"úË†èÙ×¢üzºXbzÌIèï¢¬K“„ş£;ZÑCèã#%¥ßªƒšbZ§Ïè{
-&£‡‹ZåÚ¼äÉé/:¡dß‡:  ıTuô‹Q¿C]›7%ıûpô"—QÆ'JE¿Ù-ùNô!SÓ÷TB=­òKô¹9ÒĞ_BÍvÍâ¦¥Ÿlcj£ éèkÊ¢›Rä	ê¸Ìéé7ú¡';‰Ò1FúîÆh¡Ö£Wú…2·DFúóÉhYï£÷O—‰~²'jô#h£d¦¯®‡òm%já¯hcg¡_‡’ìj‡”Yé»º ‡ÜR)|6úœšhÏ– gù€Ò?vú‰‘hWÑ$ÉA_İõë.´B¡sÒÇTA¹>5ék´ö¹rÑwA	yµbüÜôÙ­ĞŸnEÉ,½_y´ã³Ğ£=Ci5/}•¡}9…^0V>ú˜¦¨×6 %ùƒŞ®T~úÎ©¨!¢UÈP€>«7ÊÓ£¨™£)½oôc«Q¢}G­_´ }åôÏ·Q
-¦.DİíêôÄÓÛÕFİ±-ø'ôòZ„>k4ê“kh™’¥÷éˆrljÔ°Åèõª¡¯Xˆòùªæ)N5ıÊE”Ä	KĞÛ¶AÛ¾=Xˆ’ôòQgÎA{ü=cöRô>QA‹§4½ns”›P?ıE+P¦}ät”+Pe*KoÓ}Ûq”`ÑËÑË5B›±ıÑ”ŒÅËÓ{OB;r=rÚ
-ôº=P—Bû©"=]”‘+P/FKX¨½õX”m7Pƒ¦¨L/Û}ú>”GUşëÿëC(ÓBLK 0    zlib       ;       ;      >ˆÓÁ¿@æ²*½H5ÑøKÓ…xœíÅ1   °R°)èEÁ§A¶gÓ›·âŒmÛ¶mÛ¶mÛ¶mÛ¶mÛ¶mÛ¶mÛ¶mÛÿÖŸüÓBLK 0    zlib                     0LØòÚ®Èr×Y†¾Éxœc` T áÇ ,Ö,ÓBLK 0    zlib                     øÎåºÒOƒ¯>¤M¾ÊD3xœc`€©B	&  ì ¦ÓBLK 0    zlib                       0êş®JÍ¤#‘‚B*Jš‡xœc` Îâ›û×ó_³s4ÀÔpq îô
-DÓBLK 0    zlib                     øÎåºÒOƒ¯>¤M¾ÊD3xœc`€©B	&  ì ¦ÓBLK 0    zlib                     ¿>'Læ²U¬Qo³îT¡vxœc`€‚'Ü!L@
- :FÓBLK 0    zlib                     áØvõ/oMæ$Û®£ÕÂxœc` 0Å`â    ù#ASDF BLOCK INDEX
-%YAML 1.1
----
-- 12729
-- 19912
-- 20018
-- 27201
-- 27314
-- 27390
-- 27461
-- 27547
-- 27618
-- 27689
-...
