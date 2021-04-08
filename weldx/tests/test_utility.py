@@ -585,7 +585,7 @@ def test_compare_nested(a, b, expected):
 
 @pytest.mark.usefixtures("single_pass_weld_asdf")
 class TestWeldxExampleCompareNested(unittest.TestCase):
-    """This case uses a real world example as it compares two nested ASDF trees.
+    """Test case of a real world example as it compares two nested ASDF trees.
 
     This includes cases of xarray.DataArrays, np.ndarrays and so forth.
     """
@@ -613,10 +613,10 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
 
     def test_coordinate_systems_modified(self):
         """Manipulate one CSM and check if it gets picked up by comparison."""
-        from weldx import CoordinateSystemManager
+        csm_org = self.a["coordinate_systems"]
+        csm_copy = self.b["coordinate_systems"]
 
-        csm: CoordinateSystemManager = self.b["coordinate_systems"]
-        csm.delete_cs("tcp_contact")
-        assert id(csm) != id(self.a["coordinate_systems"])
-        assert csm != self.a["coordinate_systems"]
+        csm_copy.delete_cs("tcp_contact")
+
+        assert csm_copy != csm_org
         assert not ut.compare_nested(self.a, self.b)
