@@ -5,8 +5,6 @@
 
 ### added
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
-- added `util.compare_nested` function to compare nested data structures [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
-
 - added `util.compare_nested` to check equality of two nested data structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
 
 ### changes
