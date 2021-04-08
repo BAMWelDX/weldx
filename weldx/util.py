@@ -1226,7 +1226,7 @@ class _Eq_compare_nested:
         """Traverses all elements in `compare_nested` argument a and b...
 
         and tries to obtain the path `p` in `b`. If the path does not exist in `b` a
-        KeyError will be raised.
+        KeyError will be raised. If the index `k` does not exist an IndexError is raised.
         If the other path exists, a comparison will be made using `_compare`.
         When the elements are not equal traversing `a` will be stopped
         by raising a ValueError.
@@ -1265,7 +1265,8 @@ class _Eq_compare_nested:
 
         try:
             iterutils.remap(a, visit=visit, reraise_visit=True)
-        except (KeyError, ValueError):
+        # Key not found in b, values not equal, more elements in a than in b
+        except (KeyError, ValueError, IndexError):
             return False
         except TypeError:
             raise TypeError("either a or b are not a nested data structure.")

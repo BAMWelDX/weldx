@@ -576,6 +576,7 @@ def test_non_sense():
             },
             True,
         ),
+        ({"x": [1, 2, 3, 4]}, {"x": [1, 2]}, False),
     ],
 )
 def test_compare_nested(a, b, expected):
