@@ -56,7 +56,7 @@ jobs:
 
       - name: run pytest
         run: |
-          pytest -n 2 --runslow
+          pytest -n 2 --runslow --dist=loadfile
           echo "Exited with '$?'"
 
       - name: run pytest on notebooks (append coverage)
