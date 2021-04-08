@@ -5,6 +5,8 @@
 
 ### added
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
+- added `util.compare_nested` function to compare nested data structures [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
+
 
 ### changes
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
