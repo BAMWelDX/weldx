@@ -1225,11 +1225,13 @@ class _Eq_compare_nested:
     def _visit(p, k, v, b):
         """Traverses all elements in `compare_nested` argument a and b...
 
-        and tries to obtain the path `p` in `b`. If the path does not exist in `b` a
-        KeyError will be raised. If the index `k` does not exist an IndexError is raised.
-        If the other path exists, a comparison will be made using `_compare`.
-        When the elements are not equal traversing `a` will be stopped
-        by raising a ValueError.
+        and tries to obtain the path `p` in `b` using boltons.iterutils.get_path.
+        The following cases can occur:
+        1. If the path does not exist in `b` a KeyError will be raised.
+        2. If the index `k` does not exist an IndexError is raised.
+        3. If the other path exists, a comparison will be made using `_compare`.
+           When the elements are not equal traversing `a` will be stopped
+           by raising a ValueError.
         """
         other_value = iterutils.get_path(b, p)[k]
         if not _Eq_compare_nested._compare(v, other_value):
