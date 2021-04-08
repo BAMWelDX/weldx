@@ -1214,7 +1214,7 @@ class _Eq_compare_nested:
 
     @staticmethod
     def _compare(x, y):
-        if not (type(x) == type(y)):
+        if type(x) is not type(y):
             return False
         for types, func in _Eq_compare_nested.compare_funcs.items():
             if isinstance(x, types):
