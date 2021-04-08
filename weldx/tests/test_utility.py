@@ -616,6 +616,8 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         csm_org = self.a["coordinate_systems"]
         csm_copy = self.b["coordinate_systems"]
 
+        # first ensure, that the cs exists, as delete_cs won't tell us.
+        assert csm_copy.get_cs("tcp_contact")
         csm_copy.delete_cs("tcp_contact")
 
         assert csm_copy != csm_org
