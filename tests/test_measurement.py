@@ -159,59 +159,59 @@ class TestMeasurementChain:
     # helper functions -----------------------------------------------------------------
 
     @staticmethod
-    def _add_missing_init_kwargs(kwargs: Dict) -> Dict:
-        """Add all missing keyword arguments that are required by the `__init__` method.
+    def _default_init_kwargs(kwargs: Dict = None) -> Dict:
+        """Return a dictionary of keyword arguments required by the `__init__` method.
 
         Parameters
         ----------
         kwargs :
-            A dictionary containing some key word arguments that should be passed to the
-            `__init__` method
+            A dictionary containing some key word arguments that should replace the
+            default ones.
+
+        Returns
+        -------
+        Dict :
+            Dictionary with keyword arguments for the `__init__` method
 
         """
-        default_init_kwargs = dict(
+        default_kwargs = dict(
             name="name",
             source_name="source",
             source_error=Error(0.01),
             output_signal_type="analog",
             output_signal_unit="V",
         )
-        for key, value in default_init_kwargs.items():
-            if key not in kwargs:
-                kwargs[key] = value
+        if kwargs is not None:
+            default_kwargs.update(kwargs)
+
+        return default_kwargs
 
     @staticmethod
-    def _add_missing_add_transformation_kwargs(kwargs: Dict) -> Dict:
-        """Add all missing keyword arguments that are required by `add_transformation`.
+    def _default_transformation_kwargs(kwargs: Dict = None) -> Dict:
+        """Return a dictionary of keyword arguments required by `add_transformation`.
 
         Parameters
         ----------
         kwargs :
-            A dictionary containing some key word arguments that should be passed to the
-            `add_transformation` method
+            A dictionary containing some key word arguments that should replace the
+            default ones.
+
+        Returns
+        -------
+        Dict :
+            Dictionary with keyword arguments for the `__init__` method
 
         """
-        default_add_transformation_kwargs = dict(
+        default_kwargs = dict(
             name="transformation",
             error=Error(0.02),
             output_signal_type="digital",
             output_signal_unit="",
         )
-        for key, value in default_add_transformation_kwargs.items():
-            if key not in kwargs:
-                kwargs[key] = value
+        if kwargs is not None:
+            default_kwargs.update(kwargs)
 
-    @staticmethod
-    def _default_measurement_chain():
-        init_kwargs = {}
-        TestMeasurementChain._add_missing_init_kwargs(init_kwargs)
-        tf_kwargs = {}
-        TestMeasurementChain._add_missing_add_transformation_kwargs(tf_kwargs)
-
-        mc = MeasurementChainGraph(**init_kwargs)
-        mc.add_transformation(**tf_kwargs)
-
-        return mc
+        return default_kwargs
 
     # test_init ------------------------------------------------------------------------
 
@@ -236,7 +236,7 @@ class TestMeasurementChain:
 
         """
 
-        TestMeasurementChain._add_missing_init_kwargs(kwargs)
+        kwargs = TestMeasurementChain._default_init_kwargs(kwargs)
         MeasurementChainGraph(**kwargs)
 
     # test_init_exceptions -------------------------------------------------------------
@@ -261,7 +261,7 @@ class TestMeasurementChain:
             Name of the test
 
         """
-        TestMeasurementChain._add_missing_init_kwargs(kwargs)
+        kwargs = TestMeasurementChain._default_init_kwargs(kwargs)
         with pytest.raises(exception_type):
             MeasurementChainGraph(**kwargs)
 
@@ -287,12 +287,13 @@ class TestMeasurementChain:
             `add_transformation` method. Missing arguments are added.
 
         """
-        init_kwargs = {}
-        TestMeasurementChain._add_missing_init_kwargs(init_kwargs)
-        TestMeasurementChain._add_missing_add_transformation_kwargs(kwargs)
+        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
 
-        mc = MeasurementChainGraph(**init_kwargs)
+        kwargs = TestMeasurementChain._default_transformation_kwargs(kwargs)
+
         mc.add_transformation(**kwargs)
+
+        # todo: add assertions
 
     # test_add_transformation_exceptions -----------------------------------------------
 
@@ -321,11 +322,9 @@ class TestMeasurementChain:
             Name of the test
 
         """
-        init_kwargs = {}
-        TestMeasurementChain._add_missing_init_kwargs(init_kwargs)
-        TestMeasurementChain._add_missing_add_transformation_kwargs(kwargs)
+        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
 
-        mc = MeasurementChainGraph(**init_kwargs)
+        kwargs = TestMeasurementChain._default_transformation_kwargs(kwargs)
 
         with pytest.raises(exception_type):
             mc.add_transformation(**kwargs)
@@ -335,7 +334,10 @@ class TestMeasurementChain:
     @staticmethod
     @pytest.mark.parametrize(
         "kwargs",
-        [dict(data=xr.DataArray([2, 3]))],
+        [
+            dict(data=xr.DataArray([2, 3])),
+            dict(signal_source="source"),
+        ],
     )
     def test_add_signal_data(kwargs):
         """Test the `add_signal_data` method of the `MeasurementChain`.
@@ -348,14 +350,15 @@ class TestMeasurementChain:
             added.
 
         """
-        mc = TestMeasurementChain._default_measurement_chain()
+        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
-        if "name" not in kwargs:
-            kwargs["name"] = "my data"
+        full_kwargs = dict(name="my_data", data=xr.DataArray([1, 2]))
+        full_kwargs.update(kwargs)
 
-        mc.add_signal_data(**kwargs)
+        mc.add_signal_data(**full_kwargs)
 
-    # test_add_signal_data -----------------------------------------------------------------
+    # test_add_signal_data_exceptions --------------------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -379,12 +382,11 @@ class TestMeasurementChain:
             Name of the test
 
         """
-        mc = TestMeasurementChain._default_measurement_chain()
+        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
-        if "name" not in kwargs:
-            kwargs["name"] = "my data"
-        if "data" not in kwargs:
-            kwargs["data"] = xr.DataArray([1, 2])
+        full_kwargs = dict(name="my_data", data=xr.DataArray([1, 2]))
+        full_kwargs.update(kwargs)
 
         with pytest.raises(exception_type):
-            mc.add_signal_data(**kwargs)
+            mc.add_signal_data(**full_kwargs)
