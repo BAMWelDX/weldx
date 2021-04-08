@@ -99,7 +99,7 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
 
     # Measurements
     # time
-    time = pd.timedelta_range(start="0s", end="10s", freq="1ms")
+    time = pd.timedelta_range(start="0s", end="10s", freq="2s")
 
     # current data
     I_ts = ut.sine(f=Q_(10, "1/s"), amp=Q_(20, "A"), bias=Q_(300, "A"))
@@ -287,9 +287,13 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
             tree,
             custom_schema=str(model_path),
         ) as ff:
-            ff.write_to(out_file)
+            ff.write_to(out_file, all_array_storage="inline")
     else:
         return (
-            write_buffer(tree, asdffile_kwargs=dict(custom_schema=str(model_path))),
+            write_buffer(
+                tree,
+                asdffile_kwargs=dict(custom_schema=str(model_path)),
+                write_kwargs=dict(all_array_storage="inline"),
+            ),
             tree,
         )
