@@ -516,71 +516,62 @@ def test_non_sense():
         ((1, 2, 3), [1, 2, 0], False),
         ((1, 2, 3), {"f": 0}, False),
         ((1, 2, 3), "bar", False),
-        (
-            {
-                "foo": np.arange(3),
-                "x": {
-                    0: [1, 2, 3],
-                },
-                "bar": False,
-            },
-            {
-                "foo": np.arange(3),
-                "x": {
-                    0: [1, 2, 3, 4],
-                },
-                "bar": False,
-            },
-            False,
-        ),
-        (
-            {
-                "foo": np.arange(3),
-            },
-            {
-                "bar": np.arange(3),
-            },
-            False,
-        ),
-        (
-            {
-                "foo": np.arange(3),
-                "x": {
-                    0: [1, 2, 3],
-                },
-                "bar": False,
-            },
-            {
-                "foo": np.arange(3),
-                "x": {
-                    0: [1, 2, 3],
-                },
-                "bar": True,  # DIFF!
-            },
-            False,
-        ),
-        (
-            {
-                "foo": np.arange(3),
-                "x": {
-                    0: [1, 2, 3],
-                },
-                "bar": True,
-            },
-            {
-                "foo": np.arange(3),
-                "x": {
-                    0: [1, 2, 3],
-                },
-                "bar": True,
-            },
-            True,
-        ),
         ({"x": [1, 2, 3, 4]}, {"x": [1, 2]}, False),
+        ({"x": [1, 2]}, {"y": [1, 2]}, False),
     ],
 )
 def test_compare_nested(a, b, expected):
     assert ut.compare_nested(a, b) == expected
+
+
+@pytest.fixture()
+def _default_dicts():
+    """Return two equivalent more deeply nested structures to be modified by tests."""
+    a = {
+        "foo": np.arange(3),
+        "x": {
+            0: [1, 2, 3],
+        },
+        "bar": True,
+    }
+    b = copy.deepcopy(a)
+    return a, b
+
+
+def test_eq_(_default_dicts):
+    a, b = _default_dicts
+    assert ut.compare_nested(a, b)
+
+
+def test_missing_values(_default_dicts):
+    a, b = _default_dicts
+    b["x"][0].pop(-1)
+    assert not ut.compare_nested(a, b)
+
+
+def test_added_value(_default_dicts):
+    a, b = _default_dicts
+    b["x"][0].append(5)
+    assert not ut.compare_nested(a, b)
+
+
+def test_value_changed(_default_dicts):
+    a, b = _default_dicts
+    b["bar"] = False
+    assert not ut.compare_nested(a, b)
+
+
+def test_key_changed1(_default_dicts):
+    a, b = _default_dicts
+    del b["x"]
+    assert not ut.compare_nested(a, b)
+
+
+def test_key_changed2(_default_dicts):
+    a, b = _default_dicts
+    x = b.pop("x")
+    b["y"] = x
+    assert not ut.compare_nested(a, b)
 
 
 @pytest.mark.usefixtures("single_pass_weld_asdf")
