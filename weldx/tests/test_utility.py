@@ -518,68 +518,77 @@ def test_non_sense():
         ((1, 2, 3), "bar", False),
         (
             {
-                "blah": np.arange(3),
+                "foo": np.arange(3),
                 "x": {
                     0: [1, 2, 3],
                 },
-                "blub": False,
+                "bar": False,
             },
             {
-                "blah": np.arange(3),
+                "foo": np.arange(3),
                 "x": {
                     0: [1, 2, 3, 4],
                 },
-                "blub": False,
+                "bar": False,
             },
             False,
         ),
         (
             {
-                "blah": np.arange(3),
+                "foo": np.arange(3),
             },
             {
-                "blub": np.arange(3),
+                "bar": np.arange(3),
             },
             False,
         ),
         (
             {
-                "blah": np.arange(3),
+                "foo": np.arange(3),
                 "x": {
                     0: [1, 2, 3],
                 },
-                "blub": False,
+                "bar": False,
             },
             {
-                "blah": np.arange(3),
+                "foo": np.arange(3),
                 "x": {
                     0: [1, 2, 3],
                 },
-                "blub": True,  # DIFF!
+                "bar": True,  # DIFF!
             },
             False,
         ),
-        (),
+        (
+            {
+                "foo": np.arange(3),
+                "x": {
+                    0: [1, 2, 3],
+                },
+                "bar": True,
+            },
+            {
+                "foo": np.arange(3),
+                "x": {
+                    0: [1, 2, 3],
+                },
+                "bar": True,
+            },
+            True,
+        ),
     ],
 )
-def test_compare_nested_diff_keys(a, b, expected):
+def test_compare_nested(a, b, expected):
     assert ut.compare_nested(a, b) == expected
-
-
-def test_compare_nested_dicts_same_content():
-    a = {
-        "blah": np.arange(3),
-        "x": {
-            0: [1, 2, 3],
-        },
-        "blub": True,
-    }
-    b = dict(a)
-    assert ut.compare_nested(a, b)
 
 
 @pytest.mark.usefixtures("single_pass_weld_asdf")
 class TestWeldxExampleCompareNested(unittest.TestCase):
+    """This case uses a real world example as it compares two nested ASDF trees.
+
+    This includes cases of xarray.DataArrays, np.ndarrays and so forth.
+    """
+
     def setUp(self):
         self.a = self.single_pass_weld_tree
         self.b = copy.deepcopy(self.a)
