@@ -227,9 +227,10 @@ def build_graph(
 
     """
     if nodes is None:
-        nodes = {}
+        nodes = []
 
     name = current_node.name
+    nodes.append(name)
     graph.add_node(name, **current_node.attributes)
     for edge in current_node.edges:
         attr = edge.attributes
