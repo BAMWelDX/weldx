@@ -310,13 +310,13 @@ class MeasurementChainGraph:
             input_signal_source,
         )
 
-    def get_data(self, name: str) -> xr.DataArray:
+    def get_signal_data(self, name: str) -> xr.DataArray:
         """
 
         Parameters
         ----------
         name :
-            Name of the data that should be returned
+            Name of the signal data that should be returned
 
         Returns
         -------
@@ -328,7 +328,7 @@ class MeasurementChainGraph:
             data_name = attr.get("data_name")
             if data_name is not None and data_name == name:
                 return attr["data"]
-        raise ValueError(f"No data with name {name} found")
+        raise KeyError(f"No data with name {name} found")
 
     @property
     def data_names(self) -> List[str]:
@@ -361,7 +361,7 @@ class MeasurementChainGraph:
 
         """
         if signal_source not in self._graph.nodes:
-            raise ValueError(f"No signal with source '{signal_source}' found")
+            raise KeyError(f"No signal with source '{signal_source}' found")
         return Signal(**self._graph.nodes[signal_source])
 
     def get_transformation(self, name: str) -> SignalTransformation:
@@ -390,7 +390,7 @@ class MeasurementChainGraph:
                     **self._graph.edges[edge],
                 )
 
-        raise ValueError(f"No transformation with name '{name}' found")
+        raise KeyError(f"No transformation with name '{name}' found")
 
     def plot(self, axes=None):  # pragma: no cover
         """Plot the measurement chain.

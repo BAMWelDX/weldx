@@ -3,6 +3,7 @@
 from typing import Dict
 
 import asdf
+import numpy as np
 import pytest
 import sympy
 import xarray as xr
@@ -12,7 +13,7 @@ from tests._helpers import get_test_name
 from weldx.asdf.util import _write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression
-from weldx.measurement import Error, MeasurementChainGraph
+from weldx.measurement import Error, MeasurementChainGraph, Signal, SignalTransformation
 
 
 def test_generic_measurement():
@@ -329,6 +330,34 @@ class TestMeasurementChain:
         with pytest.raises(exception_type):
             mc.add_transformation(**kwargs)
 
+    # test_get_signal ------------------------------------------------------------------
+
+    @staticmethod
+    def test_get_signal():
+        """Test the `get_signal` method.
+
+        This test assures that the returned signal is identical to the one passed
+        to the measurement chain and that a key error is raised if the specified signal
+        source is not present.
+
+        """
+        init_kwargs = TestMeasurementChain._default_init_kwargs()
+        mc = MeasurementChainGraph(**init_kwargs)
+
+        transformation_kwargs = TestMeasurementChain._default_transformation_kwargs()
+        mc.add_transformation(**transformation_kwargs)
+
+        source_signal = mc.get_signal(init_kwargs["source_name"])
+        assert source_signal.signal_type == init_kwargs["output_signal_type"]
+        assert source_signal.unit == init_kwargs["output_signal_unit"]
+
+        tf_signal = mc.get_signal(transformation_kwargs["name"])
+        assert tf_signal.signal_type == transformation_kwargs["output_signal_type"]
+        assert tf_signal.unit == transformation_kwargs["output_signal_unit"]
+
+        with pytest.raises(KeyError):
+            mc.get_signal("not found")
+
     # test_add_signal_data -------------------------------------------------------------
 
     @staticmethod
@@ -390,3 +419,113 @@ class TestMeasurementChain:
 
         with pytest.raises(exception_type):
             mc.add_signal_data(**full_kwargs)
+
+    # test_get_signal_data
+    # -------------------------------------------------------------
+
+    @staticmethod
+    def test_get_signal_data():
+        """Test the `get_signal_data` method.
+
+        This test assures that the returned data is identical to the one passed
+        to the
+        measurement chain and that a key error is raised if the requested data is
+        not
+        present.
+
+        """
+        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
+
+        data_name = "data"
+        data = xr.DataArray([1, 2, 3])
+        mc.add_signal_data(data_name, data)
+
+        assert mc.get_signal_data(data_name).identical(data)
+
+        with pytest.raises(KeyError):
+            mc.get_signal_data("not found")
+
+    # test_get_and_attach_transformation -----------------------------------------------
+
+    @staticmethod
+    def test_get_and_attach_transformation():
+        """Test the `get_transformation` and `attach_transformation` methods."""
+        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
+
+        transformation = mc.get_transformation("transformation")
+
+        mc_2 = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc_2.attach_transformation(transformation)
+
+        transformation_2 = mc_2.get_transformation("transformation")
+
+        assert transformation == transformation_2
+
+    # test_get_transformation_exception ------------------------------------------------
+
+    @staticmethod
+    def test_get_transformation_exception():
+        """Test that a `KeyError` is raised if the transformation does not exist."""
+        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
+
+        with pytest.raises(KeyError):
+            mc.get_transformation("not found")
+
+    # test_attach_transformation_exceptions --------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "tf_kwargs, signal_source, exception_type, test_name",
+        [
+            ({}, "not present", KeyError, "# invalid signal source"),
+            (
+                dict(input_signal=Signal("analog", "")),
+                None,
+                ValueError,
+                "# invalid input signal #1",
+            ),
+            (
+                dict(input_signal=Signal("digital", "2")),
+                None,
+                ValueError,
+                "# invalid input signal #2",
+            ),
+        ],
+        ids=get_test_name,
+    )
+    def test_attach_transformation_exceptions(
+        tf_kwargs: Dict, signal_source: str, exception_type, test_name: str
+    ):
+        """Test the exceptions of the `attach_transformation` method.
+
+        Parameters
+        ----------
+        tf_kwargs :
+            A dictionary with keyword arguments that are passed to the `__init__`
+            method of the `SignalTransformation` class. Missing arguments are added.
+        signal_source :
+            The source of the signal that should be transformed
+        exception_type :
+            The expected exception type
+        test_name :
+            Name of the test
+
+        """
+        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
+
+        kwargs = dict(
+            name="transformation 2",
+            error=Error(0.12),
+            input_signal=Signal("digital", ""),
+            output_signal=Signal("digital", "A"),
+        )
+        kwargs.update(tf_kwargs)
+
+        transformation = SignalTransformation(**kwargs)
+
+        with pytest.raises(exception_type):
+            mc.attach_transformation(transformation, signal_source)
