@@ -6,7 +6,7 @@ import pytest
 import xarray as xr
 
 from tests._helpers import get_test_name
-from weldx.measurement import Error, MeasurementChainGraph, Signal, SignalTransformation
+from weldx.measurement import Error, MeasurementChain, Signal, SignalTransformation
 
 
 class TestMeasurementChain:
@@ -93,7 +93,7 @@ class TestMeasurementChain:
         """
 
         kwargs = TestMeasurementChain._default_init_kwargs(kwargs)
-        MeasurementChainGraph(**kwargs)
+        MeasurementChain(**kwargs)
 
     # test_init_exceptions -------------------------------------------------------------
 
@@ -119,7 +119,7 @@ class TestMeasurementChain:
         """
         kwargs = TestMeasurementChain._default_init_kwargs(kwargs)
         with pytest.raises(exception_type):
-            MeasurementChainGraph(**kwargs)
+            MeasurementChain(**kwargs)
 
     # test_add_transformations ---------------------------------------------------------
 
@@ -143,7 +143,7 @@ class TestMeasurementChain:
             `add_transformation` method. Missing arguments are added.
 
         """
-        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
 
         kwargs = TestMeasurementChain._default_transformation_kwargs(kwargs)
 
@@ -178,7 +178,7 @@ class TestMeasurementChain:
             Name of the test
 
         """
-        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
 
         kwargs = TestMeasurementChain._default_transformation_kwargs(kwargs)
 
@@ -197,7 +197,7 @@ class TestMeasurementChain:
 
         """
         init_kwargs = TestMeasurementChain._default_init_kwargs()
-        mc = MeasurementChainGraph(**init_kwargs)
+        mc = MeasurementChain(**init_kwargs)
 
         transformation_kwargs = TestMeasurementChain._default_transformation_kwargs()
         mc.add_transformation(**transformation_kwargs)
@@ -234,7 +234,7 @@ class TestMeasurementChain:
             added.
 
         """
-        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
         full_kwargs = dict(name="my_data", data=xr.DataArray([1, 2]))
@@ -266,7 +266,7 @@ class TestMeasurementChain:
             Name of the test
 
         """
-        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
         full_kwargs = dict(name="my_data", data=xr.DataArray([1, 2]))
@@ -289,7 +289,7 @@ class TestMeasurementChain:
         present.
 
         """
-        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
         data_name = "data"
@@ -306,12 +306,12 @@ class TestMeasurementChain:
     @staticmethod
     def test_get_and_attach_transformation():
         """Test the `get_transformation` and `attach_transformation` methods."""
-        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
         transformation = mc.get_transformation("transformation")
 
-        mc_2 = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc_2 = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc_2.attach_transformation(transformation)
 
         transformation_2 = mc_2.get_transformation("transformation")
@@ -323,7 +323,7 @@ class TestMeasurementChain:
     @staticmethod
     def test_get_transformation_exception():
         """Test that a `KeyError` is raised if the transformation does not exist."""
-        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
         with pytest.raises(KeyError):
@@ -369,7 +369,7 @@ class TestMeasurementChain:
             Name of the test
 
         """
-        mc = MeasurementChainGraph(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
         kwargs = dict(
