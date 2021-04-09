@@ -1,6 +1,5 @@
 """Contains package internal utility functions."""
 import functools
-import math
 import warnings
 from collections.abc import Iterable
 from functools import reduce, wraps
@@ -415,13 +414,9 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
     mat_a = to_float_array(mat_a)
     mat_b = to_float_array(mat_b)
 
-    if not mat_a.shape == mat_b.shape:
+    if mat_a.shape != mat_b.shape:
         return False
-    for i in range(mat_a.shape[0]):
-        for j in range(mat_a.shape[1]):
-            if not math.isclose(mat_a[i, j], mat_b[i, j], abs_tol=abs_tol):
-                return False
-    return True
+    return np.all(np.isclose(mat_a, mat_b, atol=abs_tol))
 
 
 def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
@@ -445,13 +440,9 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
     vec_a = to_float_array(vec_a)
     vec_b = to_float_array(vec_b)
 
-    if not vec_a.size == vec_b.size:
+    if vec_a.size != vec_b.size:
         return False
-    for i in range(vec_a.size):
-        if not math.isclose(vec_a[i], vec_b[i], abs_tol=abs_tol):
-            return False
-
-    return True
+    return np.all(np.isclose(vec_a, vec_b, atol=abs_tol))
 
 
 def mat_vec_mul(a, b) -> np.ndarray:
