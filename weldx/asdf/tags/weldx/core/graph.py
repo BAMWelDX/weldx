@@ -185,6 +185,8 @@ def build_tree(
         nodes = {}
 
     if node := nodes.get(name, None):
+        if any(e.target_node.name in nodes for e in node.edges):
+            return None
         return node
 
     node = DiNode(name=name, edges=[])
@@ -193,18 +195,24 @@ def build_tree(
     for n in graph.neighbors(name):
         if not n == parent:
             child_node = build_tree(graph, n, parent=name, nodes=nodes)
-            edge = DiEdge(child_node, attributes=graph.edges[name, n])
-            node.edges.append(edge)
+            if child_node:
+                edge = DiEdge(child_node, attributes=graph.edges[name, n])
+                node.edges.append(edge)
     for n in graph.predecessors(name):
         if not n == parent:
             child_node = build_tree(graph, n, parent=name, nodes=nodes)
-            edge = DiEdge(child_node, attributes=graph.edges[n, name], direction="bwd")
-            node.edges.append(edge)
+            if child_node:
+                edge = DiEdge(
+                    child_node, attributes=graph.edges[n, name], direction="bwd"
+                )
+                node.edges.append(edge)
     node.attributes = graph.nodes[name]  # add node attributes
     return node
 
 
-def build_graph(graph: nx.DiGraph, current_node: DiNode):
+def build_graph(
+    graph: nx.DiGraph, current_node: DiNode, nodes: Dict[str, DiNode] = None, ctx=None
+):
     """Recursively rebuild a (partial) graph from a DiNode object.
 
     Parameters
@@ -218,6 +226,9 @@ def build_graph(graph: nx.DiGraph, current_node: DiNode):
     -------
 
     """
+    if nodes is None:
+        nodes = {}
+
     name = current_node.name
     graph.add_node(name, **current_node.attributes)
     for edge in current_node.edges:
@@ -226,7 +237,7 @@ def build_graph(graph: nx.DiGraph, current_node: DiNode):
             graph.add_edge(edge.target_node.name, name, **attr)
         else:
             graph.add_edge(name, edge.target_node.name, **attr)
-        build_graph(graph, edge.target_node)
+        build_graph(graph, edge.target_node, nodes=nodes, ctx=ctx)
 
 
 class DiGraphTypeASDF(WeldxType):
@@ -250,5 +261,5 @@ class DiGraphTypeASDF(WeldxType):
     def from_tree(cls, tree, ctx):
         """Doc."""
         graph = nx.DiGraph()
-        build_graph(graph, tree["root_node"])
+        build_graph(graph, tree["root_node"], ctx=ctx)
         return graph
