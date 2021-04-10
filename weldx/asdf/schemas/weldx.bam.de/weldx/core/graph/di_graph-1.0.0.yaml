@@ -11,11 +11,8 @@ description: |
 
 type: object
 properties:
-  name:
-    type: string
   root_node:
     tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
 
 required: [root_node]
-propertyOrder: [name, root_node]
 ...
