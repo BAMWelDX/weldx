@@ -12,7 +12,7 @@ properties:
   name:
     oneOf:
       - type: string
-      - tag: "tag:weldx.bam.de:weldx/core/uuid-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/uuid-1.0.0"
   edges:
     type: array
     items:
