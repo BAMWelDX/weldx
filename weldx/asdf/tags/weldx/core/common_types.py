@@ -15,7 +15,7 @@ from weldx.constants import WELDX_QUANTITY as Q_
 class UuidTypeASDF(WeldxType):
     """Implements a version 4 UUID."""
 
-    name = "core/uuid"
+    name = "uuid"
     version = "1.0.0"
     types = [UUID]
     requires = ["weldx"]
