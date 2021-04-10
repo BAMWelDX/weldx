@@ -9,6 +9,13 @@ title: |
 description: |
   A version 4 UUID as specified by RFC 4122.
 
+examples:
+  -
+    - A version 4 UUID string
+    - |
+      !<tag:weldx.bam.de:weldx/uuid-1.0.0>
+        uuid: 448414c4-da7a-4832-9219-5e6042c2e96e
+
 type: object
 properties:
   uuid:
