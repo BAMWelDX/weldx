@@ -2,6 +2,7 @@
 import unittest
 
 import networkx as nx
+import pytest
 
 from weldx.asdf.util import write_read_buffer
 
@@ -32,3 +33,13 @@ class TestDiGraph(unittest.TestCase):
 
         for edge in g.edges:
             assert g.edges[edge] == g2.edges[edge]
+
+    def test_graph_exceptions(self):
+        self.graph.remove_edge("A", "C")  # two trees in graph
+        with pytest.raises(ValueError):
+            write_read_buffer(dict(graph=self.graph))
+        self.graph.remove_nodes_from(("C", "D"))  # cleanup
+
+        self.graph.add_edge("H", "A")  # create loop
+        with pytest.raises(ValueError):
+            write_read_buffer(dict(graph=self.graph))
