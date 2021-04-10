@@ -72,9 +72,7 @@ class DiNodeTypeASDF(WeldxType):
 # Graph --------------------------------------------------------------------------------
 
 
-def build_tree(
-    graph: nx.DiGraph, name: str, parent: str = None, nodes: Dict[str, DiNode] = None
-):
+def build_tree(graph: nx.DiGraph, name: str, parent: str = None):
     """Recursively build a tree structure of the graph starting from node ``name``.
 
     Parameters
@@ -85,8 +83,6 @@ def build_tree(
         Name (or key) of the current node.
     parent :
         Key of the node
-    nodes:
-        List of nodes already generated
 
     Returns
     -------
@@ -94,26 +90,17 @@ def build_tree(
         The root node object of the graph.
 
     """
-    if nodes is None:
-        nodes = {}
-
-    if node := nodes.get(name, None):
-        if any(e.target_node.name in nodes for e in node.edges):
-            return None
-        return node
-
     node = DiNode(name=name, edges=[])
-    nodes[name] = node
 
     for n in graph.neighbors(name):
         if not n == parent:
-            child_node = build_tree(graph, n, parent=name, nodes=nodes)
+            child_node = build_tree(graph, n, parent=name)
             if child_node:
                 edge = DiEdge(child_node, attributes=graph.edges[name, n])
                 node.edges.append(edge)
     for n in graph.predecessors(name):
         if not n == parent:
-            child_node = build_tree(graph, n, parent=name, nodes=nodes)
+            child_node = build_tree(graph, n, parent=name)
             if child_node:
                 edge = DiEdge(
                     child_node, attributes=graph.edges[n, name], direction="bwd"
@@ -123,20 +110,25 @@ def build_tree(
     return node
 
 
-def build_graph(graph: nx.DiGraph, current_node: DiNode):
+def build_graph(current_node: DiNode, graph: nx.DiGraph = None):
     """Recursively rebuild a (partial) graph from a DiNode object.
 
     Parameters
     ----------
-    graph :
-        The graph object that is being built.
     current_node :
         The current DiNode to be added to the graph.
+    graph :
+        The graph object that is being built.
 
     Returns
     -------
+    networkx.DiGraph
+        The constructed graph.
 
     """
+    if graph is None:
+        graph = nx.DiGraph()
+
     name = current_node.name
     graph.add_node(name, **current_node.attributes)
     for edge in current_node.edges:
@@ -145,7 +137,8 @@ def build_graph(graph: nx.DiGraph, current_node: DiNode):
             graph.add_edge(edge.target_node.name, name, **attr)
         else:
             graph.add_edge(name, edge.target_node.name, **attr)
-        build_graph(graph, edge.target_node)
+        build_graph(edge.target_node, graph)
+    return graph
 
 
 class DiGraphTypeASDF(WeldxType):
@@ -158,7 +151,7 @@ class DiGraphTypeASDF(WeldxType):
 
     @classmethod
     def to_tree(cls, node: nx.DiGraph, ctx):
-        """Doc."""
+        """Check graph structure and build nested dictionary."""
         if not nx.is_tree(node):  # no cycles, single tree
             raise ValueError("Graph must represent a tree.")
 
@@ -167,7 +160,5 @@ class DiGraphTypeASDF(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Doc."""
-        graph = nx.DiGraph()
-        build_graph(graph, tree["root_node"])
-        return graph
+        """Rebuild directed graph from nested dictionary structure."""
+        return build_graph(tree["root_node"])
