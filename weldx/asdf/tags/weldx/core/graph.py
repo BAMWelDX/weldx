@@ -27,7 +27,7 @@ class DiEdgeTypeASDF(WeldxType):
 
     @classmethod
     def to_tree(cls, node: DiEdge, ctx):
-        """convert to python dict"""
+        """Convert to python dict."""
         if not node.attributes:
             node.attributes = None
         return node.__dict__
@@ -58,14 +58,14 @@ class DiNodeTypeASDF(WeldxType):
 
     @classmethod
     def to_tree(cls, node: DiNode, ctx):
-        """convert to python dict"""
+        """Convert to python dict."""
         if not node.attributes:
             node.attributes = None
         return node.__dict__
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """Reconstruct form tree."""
+        """Reconstruct from tree."""
         return DiNode(**tree)
 
 
