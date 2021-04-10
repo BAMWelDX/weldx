@@ -1199,7 +1199,7 @@ class _Eq_compare_nested:
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
     compare_funcs = {
-        (np.ndarray, pint.Quantity): lambda x, y: np.all(x == y),
+        (np.ndarray, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
     }
 
