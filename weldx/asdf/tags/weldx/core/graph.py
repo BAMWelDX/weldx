@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import List
 from uuid import uuid4
 
 import networkx as nx
