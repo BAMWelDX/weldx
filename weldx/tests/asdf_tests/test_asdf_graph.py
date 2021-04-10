@@ -13,12 +13,13 @@ from weldx.asdf.util import write_read_buffer
 
 class TestDiGraph(unittest.TestCase):
     def setUp(self) -> None:
-        self.graph = nx.DiGraph()
-        self.graph.add_edges_from(
+        g = nx.DiGraph()
+        g.add_edges_from(
             [("A", "B"), ("A", "C"), ("A", "F"), ("D", "C"), ("B", "H"), ("X", "A")]
         )
-        nx.set_node_attributes(self.graph, 3.14, "node_attr")
-        nx.set_edge_attributes(self.graph, 42, "edge_attr")
+        nx.set_node_attributes(g, 3.14, "node_attr")
+        nx.set_edge_attributes(g, 42, "edge_attr")
+        self.graph = g
 
     def test_graph_roundtrip(self):
         g = self.graph
