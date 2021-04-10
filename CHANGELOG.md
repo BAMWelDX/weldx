@@ -1,14 +1,22 @@
 # Release Notes
 
-
 ## 0.4.0 (unreleased)
 
 ### added
+
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
 
 ### changes
+
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
 - move tests folder to `weldx/tests` [[#323]](https://github.com/BAMWelDX/weldx/pull/323)
+
+### ASDF
+
+- add `uuid-1.0.0.yaml` schema as basic version 4 UUID
+  implementation [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
+- add `core/graph/di_node`, `core/graph/di_edge` & `core/graph/di_graph` for implementing a
+  generic `networkx.DiGraph` [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
 
 ## 0.3.3 (30.03.2021)
 
