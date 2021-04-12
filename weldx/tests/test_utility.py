@@ -578,6 +578,12 @@ def test_traverse():
     assert ut.compare_nested(a, b)
 
 
+def test_arrays_in_lists():
+    a = {"l1": [np.arange(1), "foo"]}
+    b = {"l1": [np.arange(2), "foo"]}
+    assert not ut.compare_nested(a, b)
+
+
 @pytest.mark.usefixtures("single_pass_weld_asdf")
 class TestWeldxExampleCompareNested(unittest.TestCase):
     """Test case of a real world example as it compares two nested ASDF trees.
