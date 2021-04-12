@@ -501,12 +501,10 @@ def test_xr_time_ref():
     assert da2.time.attrs["time_ref"] == t0
 
 
-def test_non_sense():
+@pytest.mark.parametrize(["a", "b"], [("asdf", "foo"), (b"asdf", b"foo")])
+def test_compare_nested_raise(a, b):
     with pytest.raises(TypeError):
-        ut.compare_nested("asdf", "foo")
-
-    with pytest.raises(TypeError):
-        ut.compare_nested(b"asdf", b"foo")
+        ut.compare_nested(a, b)
 
 
 @pytest.mark.parametrize(
@@ -572,6 +570,12 @@ def test_key_changed2(_default_dicts):
     x = b.pop("x")
     b["y"] = x
     assert not ut.compare_nested(a, b)
+
+
+def test_traverse():
+    a = {"l1": {"l2": np.arange(5)}}
+    b = {"l1": {"l2": np.arange(5)}}
+    assert ut.compare_nested(a, b)
 
 
 @pytest.mark.usefixtures("single_pass_weld_asdf")
