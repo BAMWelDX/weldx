@@ -1,7 +1,7 @@
 """Contains package internal utility functions."""
 import functools
 import warnings
-from collections.abc import ItemsView, Iterable, Mapping, Sequence, Set
+from collections.abc import Iterable, Sequence
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
@@ -1202,12 +1202,9 @@ class _Eq_compare_nested:
         (np.ndarray, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
     }
-    compared_types = set()
 
     @staticmethod
     def _compare(x, y):
-        _Eq_compare_nested.compared_types.add(type(x))
-        _Eq_compare_nested.compared_types.add(type(y))
         # 1. treat special cases first
         # 2. rely upon the fact, that comparison would fail,
         #    if y is of an incompatible type.
@@ -1219,21 +1216,11 @@ class _Eq_compare_nested:
         return x == y
 
     @staticmethod
-    def _enter(_, key, value):
-        if isinstance(value, (str, bytes)):
+    def _enter(path, key, value):
+        if any(isinstance(value, t) for t in _Eq_compare_nested.compare_funcs.keys()):
             return value, False
-        elif isinstance(value, Mapping):
-            return value.__class__(), ItemsView(value)
-        elif isinstance(value, Sequence):
-            return value.__class__(), enumerate(value)
-        elif isinstance(value, Set):
-            return value.__class__(), enumerate(value)
-        elif any(isinstance(value, t) for t in _Eq_compare_nested.compare_funcs.keys()):
-            return value, False
-        else:
-            # files, strings, other iterables, and scalars are not
-            # traversed
-            return value, False
+
+        return iterutils.default_enter(path, key, value)
 
     @staticmethod
     def _visit(path, key, value, a, b):
