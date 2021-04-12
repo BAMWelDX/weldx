@@ -13,7 +13,7 @@ install:
   - cmd: conda config --add channels conda-forge
   - cmd: conda init cmd.exe
   - cmd: conda activate
-  - cmd: conda install -q mamba boa
+  - cmd: conda install -q mamba boa setuptools_scm
   - cmd: mamba info -a
 
 build: false
