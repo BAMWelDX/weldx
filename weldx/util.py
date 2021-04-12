@@ -1202,11 +1202,15 @@ class _Eq_compare_nested:
         (np.ndarray, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
     }
+    compared_types = set()
 
     @staticmethod
     def _compare(x, y):
-        # treat special cases first
-        # rely upon the fact, that comparison would fail, if y is of an incompatible type.
+        _Eq_compare_nested.compared_types.add(type(x))
+        _Eq_compare_nested.compared_types.add(type(y))
+        # 1. treat special cases first
+        # 2. rely upon the fact, that comparison would fail,
+        #    if y is of an incompatible type.
         for types, func in _Eq_compare_nested.compare_funcs.items():
             if isinstance(x, types):
                 return func(x, y)
@@ -1246,7 +1250,8 @@ class _Eq_compare_nested:
         other_data_structure = iterutils.get_path(b, path)
         other_value = other_data_structure[key]
         if not _Eq_compare_nested._enter(None, key, value)[1]:
-            # check lengths of Sequence types first and raise prior starting a more expensive comparison!
+            # check lengths of Sequence types first and raise
+            # prior starting a more expensive comparison!
             if isinstance(other_data_structure, Sequence) and len(
                 other_data_structure
             ) != len(iterutils.get_path(a, path)):

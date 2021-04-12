@@ -505,7 +505,7 @@ class TestCompareNested:
     @staticmethod
     @pytest.fixture()
     def _default_dicts():
-        """Return two equivalent more deeply nested structures to be modified by tests."""
+        """Return two equivalent deeply nested structures to be modified by tests."""
         a = {
             "foo": np.arange(3),
             "x": {
