@@ -501,87 +501,85 @@ def test_xr_time_ref():
     assert da2.time.attrs["time_ref"] == t0
 
 
-@pytest.mark.parametrize(["a", "b"], [("asdf", "foo"), (b"asdf", b"foo")])
-def test_compare_nested_raise(a, b):
-    with pytest.raises(TypeError):
-        ut.compare_nested(a, b)
+class TestCompareNested:
+    @pytest.mark.parametrize(["a", "b"], [("asdf", "foo"), (b"asdf", b"foo"), (1, 2)])
+    def test_compare_nested_raise(self, a, b):
+        """non-nested types should raise TypeError."""
+        with pytest.raises(TypeError):
+            ut.compare_nested(a, b)
 
+    @pytest.mark.parametrize(
+        argnames="a, b, expected",
+        argvalues=[
+            ((1, 2, 3), [1, 2, 3], True),
+            ((1, 2, 3), [1, 2, 0], False),
+            ((1, 2, 3), {"f": 0}, False),
+            ((1, 2, 3), "bar", False),
+            ({"x": [1, 2, 3, 4]}, {"x": [1, 2]}, False),
+            ({"x": [1, 2]}, {"y": [1, 2]}, False),
+        ],
+    )
+    def test_compare_nested(self, a, b, expected):
+        assert ut.compare_nested(a, b) == expected
 
-@pytest.mark.parametrize(
-    argnames="a, b, expected",
-    argvalues=[
-        ((1, 2, 3), [1, 2, 3], True),
-        ((1, 2, 3), [1, 2, 0], False),
-        ((1, 2, 3), {"f": 0}, False),
-        ((1, 2, 3), "bar", False),
-        ({"x": [1, 2, 3, 4]}, {"x": [1, 2]}, False),
-        ({"x": [1, 2]}, {"y": [1, 2]}, False),
-    ],
-)
-def test_compare_nested(a, b, expected):
-    assert ut.compare_nested(a, b) == expected
+    @staticmethod
+    @pytest.fixture()
+    def _default_dicts():
+        """Return two equivalent more deeply nested structures to be modified by tests."""
+        a = {
+            "foo": np.arange(3),
+            "x": {
+                0: [1, 2, 3],
+            },
+            "bar": True,
+        }
+        b = copy.deepcopy(a)
+        return a, b
 
+    def test_eq_(self, _default_dicts):
+        a, b = _default_dicts
+        assert ut.compare_nested(a, b)
 
-@pytest.fixture()
-def _default_dicts():
-    """Return two equivalent more deeply nested structures to be modified by tests."""
-    a = {
-        "foo": np.arange(3),
-        "x": {
-            0: [1, 2, 3],
-        },
-        "bar": True,
-    }
-    b = copy.deepcopy(a)
-    return a, b
+    def test_missing_values(self, _default_dicts):
+        a, b = _default_dicts
+        b["x"][0].pop(-1)
+        assert not ut.compare_nested(a, b)
 
+    def test_added_value(self, _default_dicts):
+        a, b = _default_dicts
+        b["x"][0].append(4)
+        assert not ut.compare_nested(a, b)
 
-def test_eq_(_default_dicts):
-    a, b = _default_dicts
-    assert ut.compare_nested(a, b)
+    def test_added_value_left(self, _default_dicts):
+        a, b = _default_dicts
+        a["x"][0].append(4)
+        assert not ut.compare_nested(a, b)
 
+    def test_value_changed(self, _default_dicts):
+        a, b = _default_dicts
+        b["bar"] = False
+        assert not ut.compare_nested(a, b)
 
-def test_missing_values(_default_dicts):
-    a, b = _default_dicts
-    b["x"][0].pop(-1)
-    assert not ut.compare_nested(a, b)
+    def test_key_changed1(self, _default_dicts):
+        a, b = _default_dicts
+        del b["x"]
+        assert not ut.compare_nested(a, b)
 
+    def test_key_changed2(self, _default_dicts):
+        a, b = _default_dicts
+        x = b.pop("x")
+        b["y"] = x
+        assert not ut.compare_nested(a, b)
 
-def test_added_value(_default_dicts):
-    a, b = _default_dicts
-    b["x"][0].append(5)
-    assert not ut.compare_nested(a, b)
+    def test_array_accessible_by_two_roots(self):
+        a = {"l1": {"l2": np.arange(5)}}
+        b = {"l1": {"l2": np.arange(5)}}
+        assert ut.compare_nested(a, b)
 
-
-def test_value_changed(_default_dicts):
-    a, b = _default_dicts
-    b["bar"] = False
-    assert not ut.compare_nested(a, b)
-
-
-def test_key_changed1(_default_dicts):
-    a, b = _default_dicts
-    del b["x"]
-    assert not ut.compare_nested(a, b)
-
-
-def test_key_changed2(_default_dicts):
-    a, b = _default_dicts
-    x = b.pop("x")
-    b["y"] = x
-    assert not ut.compare_nested(a, b)
-
-
-def test_traverse():
-    a = {"l1": {"l2": np.arange(5)}}
-    b = {"l1": {"l2": np.arange(5)}}
-    assert ut.compare_nested(a, b)
-
-
-def test_arrays_in_lists():
-    a = {"l1": [np.arange(1), "foo"]}
-    b = {"l1": [np.arange(2), "foo"]}
-    assert not ut.compare_nested(a, b)
+    def test_arrays_in_lists(self):
+        a = {"l1": [np.arange(1), "foo"]}
+        b = {"l1": [np.arange(2), "foo"]}
+        assert not ut.compare_nested(a, b)
 
 
 @pytest.mark.usefixtures("single_pass_weld_asdf")
