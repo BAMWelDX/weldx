@@ -5,8 +5,9 @@ from typing import Dict
 import pytest
 import xarray as xr
 
-from tests._helpers import get_test_name
 from weldx.measurement import Error, MeasurementChain, Signal, SignalTransformation
+
+from ._helpers import get_test_name
 
 
 class TestMeasurementChain:
