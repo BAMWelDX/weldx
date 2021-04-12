@@ -1217,7 +1217,7 @@ class _Eq_compare_nested:
 
     @staticmethod
     def _enter(path, key, value):
-        if any(isinstance(value, t) for t in _Eq_compare_nested.compare_funcs.keys()):
+        if any(isinstance(value, t) for t in _Eq_compare_nested.compare_funcs):
             return value, False
 
         return iterutils.default_enter(path, key, value)
