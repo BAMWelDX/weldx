@@ -1225,8 +1225,9 @@ class _Eq_compare_nested:
            by raising a ValueError.
         """
         other_value = iterutils.get_path(b, p)[k]
-        if not _Eq_compare_nested._compare(v, other_value):
-            raise ValueError
+        if not iterutils.default_enter(p, k, v)[1]:
+            if not _Eq_compare_nested._compare(v, other_value):
+                raise ValueError(f"{v=}\n{other_value=}")
         return True
 
     @staticmethod
