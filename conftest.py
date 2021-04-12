@@ -15,14 +15,3 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
-
-
-@pytest.fixture(autouse=True, scope="session")
-def my_fixture():
-    yield
-
-    from pprint import pprint as print
-    from weldx.util import _Eq_compare_nested as impl
-
-    print(len(impl.compared_types))
-    print(impl.compared_types)
