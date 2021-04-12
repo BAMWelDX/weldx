@@ -1199,7 +1199,7 @@ class _Eq_compare_nested:
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
     compare_funcs = {
-        (np.ndarray, pint.Quantity): lambda x, y: np.all(x == y),
+        (np.ndarray, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
     }
 
@@ -1225,8 +1225,9 @@ class _Eq_compare_nested:
            by raising a ValueError.
         """
         other_value = iterutils.get_path(b, p)[k]
-        if not _Eq_compare_nested._compare(v, other_value):
-            raise ValueError
+        if not iterutils.default_enter(p, k, v)[1]:
+            if not _Eq_compare_nested._compare(v, other_value):
+                raise ValueError(f"{v=}\n{other_value=}")
         return True
 
     @staticmethod
