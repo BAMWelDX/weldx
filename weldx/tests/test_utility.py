@@ -502,6 +502,20 @@ def test_xr_time_ref():
 
 
 class TestCompareNested:
+    @staticmethod
+    @pytest.fixture()
+    def _default_dicts():
+        """Return two equivalent more deeply nested structures to be modified by tests."""
+        a = {
+            "foo": np.arange(3),
+            "x": {
+                0: [1, 2, 3],
+            },
+            "bar": True,
+        }
+        b = copy.deepcopy(a)
+        return a, b
+
     @pytest.mark.parametrize(["a", "b"], [("asdf", "foo"), (b"asdf", b"foo"), (1, 2)])
     def test_compare_nested_raise(self, a, b):
         """non-nested types should raise TypeError."""
@@ -521,20 +535,6 @@ class TestCompareNested:
     )
     def test_compare_nested(self, a, b, expected):
         assert ut.compare_nested(a, b) == expected
-
-    @staticmethod
-    @pytest.fixture()
-    def _default_dicts():
-        """Return two equivalent more deeply nested structures to be modified by tests."""
-        a = {
-            "foo": np.arange(3),
-            "x": {
-                0: [1, 2, 3],
-            },
-            "bar": True,
-        }
-        b = copy.deepcopy(a)
-        return a, b
 
     def test_eq_(self, _default_dicts):
         a, b = _default_dicts
