@@ -1,7 +1,7 @@
 """Contains package internal utility functions."""
 import functools
 import warnings
-from collections.abc import Iterable
+from collections.abc import ItemsView, Iterable, Mapping, Sequence, Set
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
@@ -1205,15 +1205,34 @@ class _Eq_compare_nested:
 
     @staticmethod
     def _compare(x, y):
-        if type(x) is not type(y):
-            return False
+        # treat special cases first
+        # rely upon the fact, that comparison would fail, if y is of an incompatible type.
         for types, func in _Eq_compare_nested.compare_funcs.items():
             if isinstance(x, types):
                 return func(x, y)
             return x == y
 
+        return x == y
+
     @staticmethod
-    def _visit(p, k, v, b):
+    def _enter(_, key, value):
+        if isinstance(value, (str, bytes)):
+            return value, False
+        elif isinstance(value, Mapping):
+            return value.__class__(), ItemsView(value)
+        elif isinstance(value, Sequence):
+            return value.__class__(), enumerate(value)
+        elif isinstance(value, Set):
+            return value.__class__(), enumerate(value)
+        elif any(isinstance(value, t) for t in _Eq_compare_nested.compare_funcs.keys()):
+            return value, False
+        else:
+            # files, strings, other iterables, and scalars are not
+            # traversed
+            return value, False
+
+    @staticmethod
+    def _visit(path, key, value, a, b):
         """Traverses all elements in `compare_nested` argument a and b...
 
         and tries to obtain the path `p` in `b` using boltons.iterutils.get_path.
@@ -1222,12 +1241,19 @@ class _Eq_compare_nested:
         2. If the index `k` does not exist an IndexError is raised.
         3. If the other path exists, a comparison will be made using `_compare`.
            When the elements are not equal traversing `a` will be stopped
-           by raising a ValueError.
+           by raising a RuntimeError.
         """
-        other_value = iterutils.get_path(b, p)[k]
-        if not iterutils.default_enter(p, k, v)[1]:
-            if not _Eq_compare_nested._compare(v, other_value):
-                raise ValueError(f"{v=}\n{other_value=}")
+        other_data_structure = iterutils.get_path(b, path)
+        other_value = other_data_structure[key]
+        if not _Eq_compare_nested._enter(None, key, value)[1]:
+            # check lengths of Sequence types first and raise prior starting a more expensive comparison!
+            if isinstance(other_data_structure, Sequence) and len(
+                other_data_structure
+            ) != len(iterutils.get_path(a, path)):
+                raise RuntimeError
+
+            if not _Eq_compare_nested._compare(value, other_value):
+                raise RuntimeError
         return True
 
     @staticmethod
@@ -1255,12 +1281,12 @@ class _Eq_compare_nested:
             When a or b is not a nested structure.
 
         """
-        visit = functools.partial(_Eq_compare_nested._visit, b=b)
+        visit = functools.partial(_Eq_compare_nested._visit, a=a, b=b)
 
         try:
             iterutils.remap(a, visit=visit, reraise_visit=True)
         # Key not found in b, values not equal, more elements in a than in b
-        except (KeyError, ValueError, IndexError):
+        except (KeyError, RuntimeError, IndexError):
             return False
         except TypeError:
             raise TypeError("either a or b are not a nested data structure.")
