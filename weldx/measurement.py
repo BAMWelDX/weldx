@@ -392,7 +392,7 @@ class MeasurementChain:
 
         raise KeyError(f"No transformation with name '{name}' found")
 
-    def plot(self, axes=None):  # pragma: no cover
+    def plot(self, axes=None):
         """Plot the measurement chain.
 
         Parameters

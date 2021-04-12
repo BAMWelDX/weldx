@@ -16,8 +16,7 @@ jobs:
           python-version: ${{ matrix.py }}
       - name: pip installs
         run: |
-          pip install pytest pytest-cov setuptools_scm
-          pip install .
+          pip install -e .[test]
       - name: run pytest
         run: |
-          pytest --asdf-tests --ignore=tests/ --no-cov
+          pytest --asdf-tests --ignore=weldx/tests/ --no-cov

@@ -23,6 +23,5 @@ coverage:
         threshold: 5%
 
 ignore:
-  - "tests"
+  - "weldx/tests"
   - "*__init__.py"
-  - "weldx/visualization/*"

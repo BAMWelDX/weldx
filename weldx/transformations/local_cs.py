@@ -840,7 +840,7 @@ class LocalCoordinateSystem:
         show_origin: bool = True,
         show_trace: bool = True,
         show_vectors: bool = True,
-    ):  # pragma: no cover
+    ):
         """Plot the coordinate system.
 
         Parameters

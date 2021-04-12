@@ -658,7 +658,9 @@ class ArcSegment:
         max_angle = self._sign_arc_winding * (self._arc_angle + 0.5 * delta_angle)
         angles = np.arange(0, max_angle, self._sign_arc_winding * delta_angle)
 
-        rotation_matrices = tf.rotation_matrix_z(angles)[:, 0:2, 0:2]
+        rotation_matrices = tf.WXRotation.from_euler("z", angles).as_matrix()[
+            :, 0:2, 0:2
+        ]
 
         data = np.matmul(rotation_matrices, vec_center_start) + point_center
 
@@ -1450,9 +1452,9 @@ class RadialHorizontalTraceSegment:
         """
         relative_position = np.clip(relative_position, 0, 1)
 
-        orientation = tf.rotation_matrix_z(
-            self._angle * relative_position * self._sign_winding
-        )
+        orientation = tf.WXRotation.from_euler(
+            "z", self._angle * relative_position * self._sign_winding
+        ).as_matrix()
         translation = np.array([0, -1, 0]) * self._radius * self._sign_winding
 
         coordinates = np.matmul(orientation, translation) - translation
@@ -1671,9 +1673,7 @@ class Trace:
         return np.hstack([raster_data, last_point])
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None, None), strict=False)
-    def plot(
-        self, raster_width=1, axes=None, fmt=None, axes_equal=False
-    ):  # pragma: no cover
+    def plot(self, raster_width=1, axes=None, fmt=None, axes_equal=False):
         """Plot the trace.
 
         Parameters
@@ -2218,7 +2218,7 @@ class Geometry:
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-    ) -> matplotlib.axes.Axes:  # pragma: no cover
+    ) -> matplotlib.axes.Axes:
         """Plot the geometry.
 
         Parameters

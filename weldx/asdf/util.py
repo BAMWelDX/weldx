@@ -2,14 +2,17 @@
 from io import BytesIO
 from pathlib import Path
 from typing import Tuple
+from warnings import warn
 
 import asdf
 import yaml
 from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.constants import WELDX_PATH
 
 __all__ = [
+    "get_schema_path",
     "read_buffer",
     "write_buffer",
     "write_read_buffer",
@@ -17,6 +20,31 @@ __all__ = [
     "asdf_json_repr",
     "notebook_fileprinter",
 ]
+
+
+def get_schema_path(schema: str) -> Path:  # pragma: no cover
+    """Get the path to a weldx schema file.
+
+    Parameters
+    ----------
+    schema :
+        Name of the schema file
+    Returns
+    -------
+    pathlib.Path
+        Path to the requested schema file in the current filesystem.
+
+    """
+    schema = schema.split(".yaml")[0]
+
+    p = WELDX_PATH / "asdf" / "schemas"
+    schemas = list(p.glob(f"**/{schema}.yaml"))
+    if len(schemas) == 0:
+        raise ValueError(f"No matching schema for filename '{schema}'.")
+    elif len(schemas) > 1:
+        warn(f"Found more than one matching schema for filename '{schema}'.")
+    return schemas[0]
+
 
 # asdf read/write debug tools functions ---------------------------------------
 
@@ -113,7 +141,7 @@ def write_read_buffer(
     return read_buffer(buffer, open_kwargs)
 
 
-def get_yaml_header(file) -> str:  # pragma: no cover
+def get_yaml_header(file) -> str:
     """Read the YAML header part (excluding binary sections) of an ASDF file.
 
     Parameters
@@ -145,7 +173,7 @@ _read_buffer = read_buffer
 _write_read_buffer = write_read_buffer
 
 
-def notebook_fileprinter(file, lexer="YAML"):  # pragma: no cover
+def notebook_fileprinter(file, lexer="YAML"):
     """Print the code from file/BytesIO  to notebook cell with syntax highlighting.
 
     Parameters
@@ -178,7 +206,7 @@ def notebook_fileprinter(file, lexer="YAML"):  # pragma: no cover
     )
 
 
-def asdf_json_repr(file, path: Tuple = None, **kwargs):  # pragma: no cover
+def asdf_json_repr(file, path: Tuple = None, **kwargs):
     """Display YAML header using IPython JSON display repr.
 
     This function works in JupyterLab.

@@ -4,7 +4,7 @@ from typing import Any
 
 import numpy as np
 
-import weldx.transformations as tf
+from weldx.transformations import LocalCoordinateSystem, WXRotation
 
 
 def rotated_coordinate_system(
@@ -12,7 +12,7 @@ def rotated_coordinate_system(
     angle_y=np.pi / 4,
     angle_z=np.pi / 5,
     coordinates=np.array([0, 0, 0]),
-) -> tf.LocalCoordinateSystem:
+) -> LocalCoordinateSystem:
     """Get a coordinate system with rotated orientation.
 
     The transformation order is x-y-z
@@ -38,15 +38,15 @@ def rotated_coordinate_system(
     orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
     # rotate axes to produce a more general test case
-    r_x = tf.rotation_matrix_x(angle_x)
-    r_y = tf.rotation_matrix_y(angle_y)
-    r_z = tf.rotation_matrix_z(angle_z)
+    r_x = WXRotation.from_euler("x", angle_x).as_matrix()
+    r_y = WXRotation.from_euler("y", angle_y).as_matrix()
+    r_z = WXRotation.from_euler("z", angle_z).as_matrix()
 
     r_tot = np.matmul(r_z, np.matmul(r_y, r_x))
 
     rotated_orientation = np.matmul(r_tot, orientation)
 
-    return tf.LocalCoordinateSystem(rotated_orientation, np.array(coordinates))
+    return LocalCoordinateSystem(rotated_orientation, np.array(coordinates))
 
 
 def are_all_columns_unique(matrix, decimals=3):

@@ -1752,7 +1752,7 @@ class CoordinateSystemManager:
         show_traces: bool = True,
         show_vectors: bool = True,
         show_wireframe: bool = False,
-    ):  # pragma: no cover
+    ):
         """Plot the coordinate systems of the coordinate system manager.
 
         Parameters

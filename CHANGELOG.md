@@ -1,5 +1,50 @@
 # Release Notes
 
+
+## 0.4.0 (unreleased)
+
+### added
+- added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
+
+### changes
+- `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
+- move tests folder to `weldx/tests` [[#323]](https://github.com/BAMWelDX/weldx/pull/323)
+
+## 0.3.3 (30.03.2021)
+
+This is a bugfix release to correctly include the asdf schema files in conda
+builds. [[#314]](https://github.com/BAMWelDX/weldx/pull/314)
+
+### ASDF
+
+- fix required welding wire metadata in `single-pass-weldx.1.0.0.schema`
+  [[#316]](https://github.com/BAMWelDX/weldx/pull/316)
+
+## 0.3.2 (29.03.2021)
+
+### added
+
+- `weldx.util.deprecated` decorator [[#295]](https://github.com/BAMWelDX/weldx/pull/295)
+
+### removed
+
+- `rotation_matrix_x`, `rotation_matrix_y` and `rotation_matrix_z`
+  [[#317]](https://github.com/BAMWelDX/weldx/pull/317)
+
+### dependencies
+
+- restrict `scipy!=1.6.0,scipy!=1.6.1`  [[#300]](https://github.com/BAMWelDX/weldx/pull/300)
+
+### ASDF
+
+- add validators to `rotation-1.0.0.yaml`
+  & `gas_component-1.0.0.yaml` [[#303]](https://github.com/BAMWelDX/weldx/pull/303)
+- update descriptions in `single-pass-weldx.1.0.0.schema` [[#308]](https://github.com/BAMWelDX/weldx/pull/308)
+
+### fixes
+
+- prevent creation of `IsoBaseGroove` with negative parameters [[#306]](https://github.com/BAMWelDX/weldx/pull/306)
+
 ## 0.3.1 (21.03.2021)
 
 ### added
