@@ -63,6 +63,27 @@ def test_rotation_euler_exception():
         WXRotation.from_euler(seq="XyZ", angles=[10, 20, 60], degrees=True)
 
 
+@pytest.mark.parametrize(
+    "inputs",
+    [
+        Q_(10, "degree"),
+        Q_(0.01, "kdegree"),
+        Q_(10, "mdegree"),
+        Q_(2, "rad"),
+        Q_(0.002, "krad"),
+        Q_(2, "mrad"),
+    ],
+)
+def test_rotation_euler_prefix(inputs):
+    """Test unit prefix handling."""
+    degrees = "degree" in str(inputs.u)
+    rot = WXRotation.from_euler(seq="x", angles=inputs)
+    data = _write_read_buffer({"rot": rot})
+    r = data["rot"].as_euler("xyz", degrees=degrees)[0]
+    r = Q_(r, "degree") if degrees else Q_(r, "rad")
+    assert np.allclose(inputs, r)
+
+
 # xarray.DataArray ---------------------------------------------------------------------
 def get_xarray_example_data_array():
     """
