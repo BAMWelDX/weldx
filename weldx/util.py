@@ -1211,7 +1211,6 @@ class _Eq_compare_nested:
         for types, func in _Eq_compare_nested.compare_funcs.items():
             if isinstance(x, types):
                 return func(x, y)
-            return x == y
 
         return x == y
 
