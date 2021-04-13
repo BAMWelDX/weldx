@@ -189,6 +189,7 @@ def test_shape_validator(test_input, copy_arrays, lazy_load):
         open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load},
     )["root"]
     assert compare_nested(test_input.__dict__, result.__dict__)
+    assert compare_nested(result.__dict__, test_input.__dict__)
 
 
 @pytest.mark.parametrize(
