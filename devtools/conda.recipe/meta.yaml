@@ -28,6 +28,8 @@ test:
   requires:
     - pytest
     - pytest-xdist
+  files:
+    - ../../conftest.py
   imports:
     - weldx
     - weldx.visualization
