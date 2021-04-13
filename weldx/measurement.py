@@ -214,9 +214,7 @@ class MeasurementChain:
         self._raise_if_node_exist(node_id)
         self._raise_if_invalid_signal_type(signal_type)
 
-        self._graph.add_node(
-            node_id, signal_type=signal_type, unit=unit, equipment=None
-        )
+        self._graph.add_node(node_id, signal_type=signal_type, unit=unit)
         self._prev_added_signal = node_id
 
     def _raise_if_node_exist(self, node_id: str):
