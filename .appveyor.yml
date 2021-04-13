@@ -13,10 +13,12 @@ install:
   - cmd: conda config --add channels conda-forge
   - cmd: conda init cmd.exe
   - cmd: conda activate
-  - cmd: conda install -q mamba boa
+  - cmd: conda install -q mamba
   - cmd: mamba info -a
+  - cmd: mamba env create -f ./environment.yml
+  - activate weldx
 
 build: false
 
 test_script:
-  - conda mambabuild conda.recipe
+  - pytest
