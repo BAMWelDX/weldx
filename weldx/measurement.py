@@ -34,7 +34,6 @@ class Signal:
 
     signal_type: str
     unit: str
-    data_name: str = None
     data: Union[Data, None] = None
 
 
@@ -59,15 +58,46 @@ class SignalTransformation:
     func: "MathematicalExpression" = None
     input_shape: Tuple = None
     output_shape: Tuple = None
+    data: Union[List, xr.DataArray] = None
 
 
 @dataclass
-class Source:
+class SignalSource:
     """Simple dataclass implementation for signal sources."""
 
     name: str
     output_signal: Signal
     error: Error
+
+
+# equipment ----------------------------------------------------------------------------
+@dataclass
+class GenericEquipment:
+    """Simple dataclass implementation for generic equipment."""
+
+    name: str
+    sources: List = field(default_factory=lambda: [])
+    data_transformations: List = field(default_factory=lambda: [])
+
+    def get_source(self, name):
+        for source in self.sources:
+            if source.name == name:
+                return source
+        raise KeyError(f"No source with name '{name}' found.")
+
+    @property
+    def source_names(self):
+        return [source.name for source in self.sources]
+
+    def get_transformation(self, name):
+        for transformation in self.data_transformations:
+            if transformation.name == name:
+                return transformation
+        raise KeyError(f"No transformation with name '{name}' found.")
+
+    @property
+    def transformation_names(self):
+        return [transformation.name for transformation in self.data_transformations]
 
 
 # DRAFT SECTION START ##################################################################
@@ -88,12 +118,13 @@ class MeasurementChain:
         source_error: Error,
         output_signal_type: str,
         output_signal_unit: str,
+        signal_data: xr.DataArray = None,
     ):
         """Create a new measurement chain.
 
         Parameters
         ----------
-        name:
+        name :
             Name of the measurement chain
         source_name :
             Name of the source
@@ -110,13 +141,49 @@ class MeasurementChain:
         self._raise_if_invalid_signal_type(output_signal_type)
 
         self._name = name
-        self._source = {"name": source_name, "error": source_error}
+        self._source = {
+            "name": source_name,
+            "error": source_error,
+            "equipment": None,  # This is set in a different method
+        }
         self._prev_added_signal = None
 
         self._graph = DiGraph()
         self._add_signal(
             node_id=source_name, signal_type=output_signal_type, unit=output_signal_unit
         )
+        if signal_data is not None:
+            self.add_signal_data(signal_data)  # todo : test
+
+    @staticmethod
+    def construct_from_source(name, source: SignalSource):
+
+        return MeasurementChain(
+            name,
+            source.name,
+            source.error,
+            source.output_signal.signal_type,
+            source.output_signal.unit,
+            source.output_signal.data,
+        )
+
+    @staticmethod
+    def construct_from_equipment(name, equipment: GenericEquipment, source_name=None):
+        if len(equipment.sources) > 1:
+            if source_name is None:
+                raise ValueError(
+                    "The equipment has multiple sources. Specify the "
+                    "desired one by providing a 'source_name'."
+                )
+            source = equipment.get_source(source_name)
+        elif len(equipment.sources) == 1:
+            source = equipment.sources[0]
+        else:
+            raise ValueError("The equipment does not have a source.")
+
+        mc = MeasurementChain.construct_from_source(name, source)
+        mc._source["equipment"] = equipment
+        return mc
 
     @staticmethod
     def construct_from_tree(tree: Dict) -> "MeasurementChain":
@@ -147,7 +214,9 @@ class MeasurementChain:
         self._raise_if_node_exist(node_id)
         self._raise_if_invalid_signal_type(signal_type)
 
-        self._graph.add_node(node_id, signal_type=signal_type, unit=unit)
+        self._graph.add_node(
+            node_id, signal_type=signal_type, unit=unit, equipment=None
+        )
         self._prev_added_signal = node_id
 
     def _raise_if_node_exist(self, node_id: str):
@@ -189,7 +258,7 @@ class MeasurementChain:
             raise ValueError(f"{signal_type} is an invalid signal type.")
 
     def _raise_if_data_exist(self, source_name: str):
-        """Raise an error if a data set with the passed name already exists
+        """Raise an error if a data set with the passed name already exists.
 
         Parameters
         ----------
@@ -227,6 +296,7 @@ class MeasurementChain:
         output_signal_unit: str,
         func: "MathematicalExpression" = None,
         input_signal_source: str = None,
+        data=None,
     ):
         """Add transformation to the measurement chain.
 
@@ -255,6 +325,32 @@ class MeasurementChain:
             node_id=name, signal_type=output_signal_type, unit=output_signal_unit
         )
         self._graph.add_edge(input_signal_source, name, error=error, func=func)
+        if data is not None:
+            self.add_signal_data(data, name)
+
+    def add_transformation_from_equipment(
+        self,
+        equipment: GenericEquipment,
+        input_signal_source: str = None,
+        transformation_name=None,
+    ):
+        if len(equipment.data_transformations) > 1:
+            if transformation_name is None:
+                raise ValueError(
+                    "The equipment has multiple transformations. Specify the "
+                    "desired one by providing a 'transformation_name'."
+                )
+            transformation = equipment.get_transformation(transformation_name)
+        elif len(equipment.data_transformations) == 1:
+            transformation = equipment.data_transformations[0]
+        else:
+            raise ValueError("The equipment does not have a transformation.")
+
+        input_signal_source = self._check_and_get_node_name(input_signal_source)
+        self.attach_transformation(transformation, input_signal_source)
+        self._graph.edges[(input_signal_source, self._prev_added_signal)][
+            "equipment"
+        ] = equipment
 
     def add_signal_data(self, data: "TimeSeries", signal_source: str = None):
         """Add data to a signal.
@@ -312,6 +408,7 @@ class MeasurementChain:
             transformation.output_signal.unit,
             transformation.func,
             input_signal_source,
+            transformation.data,
         )
 
     def get_signal_data(self, source_name: str) -> xr.DataArray:
@@ -412,7 +509,7 @@ class MeasurementChain:
 
         """
         import matplotlib.pyplot as plt
-        from networkx import DiGraph, draw, draw_networkx_edge_labels
+        from networkx import draw, draw_networkx_edge_labels
 
         def _signal_label(signal_type, unit):
             return f"{signal_type}\n[{unit}]"
@@ -450,7 +547,7 @@ class MeasurementChain:
             positions[c_node] = (x_pos, 0.75)
 
             if "data" in signal:
-                data_name = signal["data_name"]
+                data_name = f"{c_node}\ndata"
                 graph.add_edge(c_node, data_name)
                 data_labels[data_name] = data_name
                 positions[data_name] = (x_pos, 0.25)
@@ -521,13 +618,3 @@ class Measurement:
     name: str
     data: Data
     measurement_chain: MeasurementChain
-
-
-# equipment ----------------------------------------------------------------------------
-@dataclass
-class GenericEquipment:
-    """Simple dataclass implementation for generic equipment."""
-
-    name: str
-    sources: List = field(default_factory=lambda: [])
-    data_transformations: List = field(default_factory=lambda: [])
