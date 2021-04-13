@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
+from asdf.tags.core import NDArrayType
 from boltons import iterutils
 from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta64_dtype
 from scipy.spatial.transform import Rotation as Rot
@@ -1199,7 +1200,7 @@ class _Eq_compare_nested:
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
     compare_funcs = {
-        (np.ndarray, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
+        (np.ndarray, NDArrayType, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
     }
 
@@ -1242,9 +1243,11 @@ class _Eq_compare_nested:
                 other_data_structure
             ) != len(iterutils.get_path(a, path)):
                 raise RuntimeError("len does not match")
-
-            if not _Eq_compare_nested._compare(value, other_value):
-                raise RuntimeError("not equal")
+            try:
+                if not _Eq_compare_nested._compare(value, other_value):
+                    raise RuntimeError("not equal")
+            except ValueError as ve:
+                raise
         return True
 
     @staticmethod
