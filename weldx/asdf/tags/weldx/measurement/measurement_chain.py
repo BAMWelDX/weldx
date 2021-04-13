@@ -4,7 +4,6 @@ from weldx.measurement import Error, MeasurementChain
 __all__ = [
     "MeasurementChain",
     "MeasurementChainType",
-    "MeasurementChainGraphType",
 ]
 
 

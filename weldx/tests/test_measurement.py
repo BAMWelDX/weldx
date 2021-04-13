@@ -238,7 +238,7 @@ class TestMeasurementChain:
         mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
-        full_kwargs = dict(name="my_data", data=xr.DataArray([1, 2]))
+        full_kwargs = dict(data=xr.DataArray([1, 2]))
         full_kwargs.update(kwargs)
 
         mc.add_signal_data(**full_kwargs)
@@ -270,14 +270,13 @@ class TestMeasurementChain:
         mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
-        full_kwargs = dict(name="my_data", data=xr.DataArray([1, 2]))
+        full_kwargs = dict(data=xr.DataArray([1, 2]))
         full_kwargs.update(kwargs)
 
         with pytest.raises(exception_type):
             mc.add_signal_data(**full_kwargs)
 
-    # test_get_signal_data
-    # -------------------------------------------------------------
+    # test_get_signal_data -------------------------------------------------------------
 
     @staticmethod
     def test_get_signal_data():
@@ -293,11 +292,11 @@ class TestMeasurementChain:
         mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
         mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
 
-        data_name = "data"
+        source_name = "transformation"
         data = xr.DataArray([1, 2, 3])
-        mc.add_signal_data(data_name, data)
+        mc.add_signal_data(data, source_name)
 
-        assert mc.get_signal_data(data_name).identical(data)
+        assert mc.get_signal_data(source_name).identical(data)
 
         with pytest.raises(KeyError):
             mc.get_signal_data("not found")

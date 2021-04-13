@@ -164,6 +164,18 @@ class MeasurementChain:
                 f"The internal graph already contains a node with the id {node_id}"
             )
 
+    def _raise_if_node_does_not_exist(self, node: str):
+        """Raise a `KeyError` if the specified node does not exist.
+
+        Parameters
+        ----------
+        node :
+            Name of the node that should be searched for
+
+        """
+        if node not in self._graph.nodes:
+            raise KeyError(f"No signal with source '{node}' found")
+
     def _raise_if_invalid_signal_type(self, signal_type: str):
         """Raise an error if the passed signal type is invalid.
 
@@ -176,21 +188,19 @@ class MeasurementChain:
         if signal_type not in ["analog", "digital"]:
             raise ValueError(f"{signal_type} is an invalid signal type.")
 
-    def _raise_if_data_exist(self, name: str):
+    def _raise_if_data_exist(self, source_name: str):
         """Raise an error if a data set with the passed name already exists
 
         Parameters
         ----------
-        name :
-            Name that should be searched for
+        source_name :
+            Name of the data's source, e.g. a transformation or the source of the
+            measurement chain
 
         """
-        for _, attr in self._graph.nodes.items():
-            if "data_name" in attr and attr["data_name"] == name:
-                raise ValueError(
-                    "The measurement chain already contains a data set with the name "
-                    f"'{name}'."
-                )
+        self._raise_if_node_does_not_exist(source_name)
+        if "data" in self._graph.nodes[source_name]:
+            raise KeyError("The measurement chain already contains data for '{name}'.")
 
     def _check_and_get_node_name(self, node_name: str) -> str:
         """Check if a node is part of the internal graph and return its name.
@@ -205,8 +215,8 @@ class MeasurementChain:
         """
         if node_name is None:
             return self._prev_added_signal
-        elif node_name not in self._graph.nodes:
-            raise KeyError(f"No signal with source '{node_name}' found")
+        else:
+            self._raise_if_node_does_not_exist(node_name)
         return node_name
 
     def add_transformation(
@@ -246,13 +256,11 @@ class MeasurementChain:
         )
         self._graph.add_edge(input_signal_source, name, error=error, func=func)
 
-    def add_signal_data(self, name: str, data: "TimeSeries", signal_source: str = None):
+    def add_signal_data(self, data: "TimeSeries", signal_source: str = None):
         """Add data to a signal.
 
         Parameters
         ----------
-        name :
-            Name of the data
         data :
             The data that should be added
         signal_source :
@@ -261,13 +269,9 @@ class MeasurementChain:
             source, if no transformation was added to the chain) is used.
 
         """
-        self._raise_if_data_exist(name)
-
         signal_source = self._check_and_get_node_name(signal_source)
-        signal = self._graph.nodes[signal_source]
-
-        signal["data_name"] = name
-        signal["data"] = data
+        self._raise_if_data_exist(signal_source)
+        self._graph.nodes[signal_source]["data"] = data
 
     def attach_transformation(
         self, transformation: SignalTransformation, input_signal_source: str = None
@@ -310,13 +314,14 @@ class MeasurementChain:
             input_signal_source,
         )
 
-    def get_signal_data(self, name: str) -> xr.DataArray:
+    def get_signal_data(self, source_name: str) -> xr.DataArray:
         """
 
         Parameters
         ----------
-        name :
-            Name of the signal data that should be returned
+        source_name :
+            Name of the data's source, e.g. a transformation or the source of the
+            measurement chain
 
         Returns
         -------
@@ -324,11 +329,11 @@ class MeasurementChain:
             The requested data
 
         """
-        for _, attr in self._graph.nodes.items():
-            data_name = attr.get("data_name")
-            if data_name is not None and data_name == name:
-                return attr["data"]
-        raise KeyError(f"No data with name {name} found")
+        self._raise_if_node_does_not_exist(source_name)
+        data = self._graph.nodes[source_name].get("data")
+        if data is None:
+            raise KeyError(f"There is no data for the source: '{source_name}'")
+        return data
 
     @property
     def data_names(self) -> List[str]:
@@ -360,8 +365,7 @@ class MeasurementChain:
             The requested signal
 
         """
-        if signal_source not in self._graph.nodes:
-            raise KeyError(f"No signal with source '{signal_source}' found")
+        self._raise_if_node_does_not_exist(signal_source)
         return Signal(**self._graph.nodes[signal_source])
 
     def get_transformation(self, name: str) -> SignalTransformation:
