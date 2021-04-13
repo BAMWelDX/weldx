@@ -516,7 +516,14 @@ class TestCompareNested:
         b = copy.deepcopy(a)
         return a, b
 
-    @pytest.mark.parametrize(["a", "b"], [("asdf", "foo"), (b"asdf", b"foo"), (1, 2)])
+    @pytest.mark.parametrize(
+        argnames=["a", "b"],
+        argvalues=[
+            ("asdf", "foo"),
+            (b"asdf", b"foo"),
+            (1, 2),
+        ],
+    )
     def test_compare_nested_raise(self, a, b):
         """non-nested types should raise TypeError."""
         with pytest.raises(TypeError):
