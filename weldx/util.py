@@ -4,7 +4,7 @@ import warnings
 from collections.abc import Iterable, Sequence
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Union
+from typing import TYPE_CHECKING, Any, Callable, Collection, Dict, List, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -1199,23 +1199,26 @@ class WeldxAccessor:
 _eq_compare_nested_input_types = Union[
     Sequence,
     Mapping,
+    Collection,
 ]
 
 
 class _Eq_compare_nested:
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
+    # some types need special comparison handling.
     compare_funcs = {
         (np.ndarray, NDArrayType, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
     }
+    # these types will be treated as equivalent.
     _type_equalities = [
         (np.ndarray, NDArrayType),
     ]
 
     @staticmethod
     def _compare(x, y) -> bool:
-        # 1. strict type comparison (exceptions defined in _type_equalities
+        # 1. strict type comparison (exceptions defined in _type_equalities).
         # 2. handle special comparison cases
         if not any(
             (type(x) in e and type(y) in e) for e in _Eq_compare_nested._type_equalities
@@ -1230,7 +1233,8 @@ class _Eq_compare_nested:
 
     @staticmethod
     def _enter(path, key, value):
-        # Do not traverse types defined in compare_funcs.
+        # Do not traverse types defined in compare_funcs. All other types are handled
+        # like in boltons.iterutils.default_enter (e.g. descend into nested structures).
         # See `boltons.iterutils.remap` for details.
         if any(isinstance(value, t) for t in _Eq_compare_nested.compare_funcs):
             return value, False
