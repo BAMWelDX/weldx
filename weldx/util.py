@@ -1203,12 +1203,19 @@ class _Eq_compare_nested:
         (np.ndarray, NDArrayType, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
     }
+    _type_equalities = [
+        (np.ndarray, NDArrayType),
+    ]
 
     @staticmethod
     def _compare(x, y):
-        # 1. treat special cases first
-        # 2. rely upon the fact, that comparison would fail,
-        #    if y is of an incompatible type.
+        # 1. strict type comparison (exceptions defined in _type_equalities
+        # 2. handle special comparison cases
+        if not any(type(x) in e for e in _Eq_compare_nested._type_equalities) and type(
+            x
+        ) is not type(y):
+            return False
+
         for types, func in _Eq_compare_nested.compare_funcs.items():
             if isinstance(x, types):
                 return func(x, y)
