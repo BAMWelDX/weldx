@@ -181,10 +181,9 @@ def test_shape_validation_error_exception(shape, exp, err):
         ),
     ],
 )
-def test_shape_validator(test_input, copy_arrays, lazy_load):
+def test_shape_validator(test_input):
     result = _write_read_buffer(
         {"root": test_input},
-        open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load},
     )["root"]
     assert compare_nested(test_input.__dict__, result.__dict__)
     assert compare_nested(result.__dict__, test_input.__dict__)
