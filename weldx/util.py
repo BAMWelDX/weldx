@@ -1242,10 +1242,10 @@ class _Eq_compare_nested:
             if isinstance(other_data_structure, Sequence) and len(
                 other_data_structure
             ) != len(iterutils.get_path(a, path)):
-                raise RuntimeError
+                raise RuntimeError("len does not match")
 
             if not _Eq_compare_nested._compare(value, other_value):
-                raise RuntimeError
+                raise RuntimeError("not equal")
         return True
 
     @staticmethod
