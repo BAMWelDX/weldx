@@ -4,7 +4,7 @@ import warnings
 from collections.abc import Iterable, Sequence
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -1196,6 +1196,12 @@ class WeldxAccessor:
                 self._obj.time.attrs["time_ref"] = value
 
 
+_eq_compare_nested_input_types = Union[
+    Sequence,
+    Mapping,
+]
+
+
 class _Eq_compare_nested:
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
@@ -1208,12 +1214,12 @@ class _Eq_compare_nested:
     ]
 
     @staticmethod
-    def _compare(x, y):
+    def _compare(x, y) -> bool:
         # 1. strict type comparison (exceptions defined in _type_equalities
         # 2. handle special comparison cases
-        if not any(type(x) in e for e in _Eq_compare_nested._type_equalities) and type(
-            x
-        ) is not type(y):
+        if not any(
+            (type(x) in e and type(y) in e) for e in _Eq_compare_nested._type_equalities
+        ) and type(x) is not type(y):
             return False
 
         for types, func in _Eq_compare_nested.compare_funcs.items():
@@ -1224,13 +1230,15 @@ class _Eq_compare_nested:
 
     @staticmethod
     def _enter(path, key, value):
+        # Do not traverse types defined in compare_funcs.
+        # See `boltons.iterutils.remap` for details.
         if any(isinstance(value, t) for t in _Eq_compare_nested.compare_funcs):
             return value, False
 
         return iterutils.default_enter(path, key, value)
 
     @staticmethod
-    def _visit(path, key, value, a, b):
+    def _visit(path, key, value, a, b) -> bool:
         """Traverses all elements in `compare_nested` argument a and b...
 
         and tries to obtain the path `p` in `b` using boltons.iterutils.get_path.
@@ -1258,7 +1266,9 @@ class _Eq_compare_nested:
         return True
 
     @staticmethod
-    def compare_nested(a, b):
+    def compare_nested(
+        a: _eq_compare_nested_input_types, b: _eq_compare_nested_input_types
+    ) -> bool:
         """Deeply compares [nested] data structures combined of tuples, lists, dicts...
 
         Also compares non-nested data-structures.
@@ -1282,6 +1292,7 @@ class _Eq_compare_nested:
             When a or b is not a nested structure.
 
         """
+        # we bind the input structures a, b to the visit function.
         visit = functools.partial(_Eq_compare_nested._visit, a=a, b=b)
 
         try:
