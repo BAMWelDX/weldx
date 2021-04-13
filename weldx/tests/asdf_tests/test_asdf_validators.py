@@ -164,8 +164,6 @@ def test_shape_validation_error_exception(shape, exp, err):
         assert _val(shape, exp)
 
 
-@pytest.mark.parametrize("copy_arrays", [True, False])
-@pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize(
     "test_input",
     [
