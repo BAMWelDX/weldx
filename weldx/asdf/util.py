@@ -1,7 +1,7 @@
 """Utilities for asdf files."""
 from io import BytesIO
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Union
 from warnings import warn
 
 import asdf
@@ -141,30 +141,38 @@ def write_read_buffer(
     return read_buffer(buffer, open_kwargs)
 
 
-def get_yaml_header(file) -> str:
+def get_yaml_header(file, parse=False) -> Union[str, dict]:
     """Read the YAML header part (excluding binary sections) of an ASDF file.
 
     Parameters
     ----------
-    file
+    file :
         filename, ``pathlib.Path`` or ``BytesIO`` buffer of ASDF file
 
+    parse :
+        if True, returns the interpreted YAML header as dict
     Returns
     -------
-    str
-        The YAML header the ASDF file
+    str, dict
+        The YAML header as string the ASDF file, if parse is False. Or if parse is True,
+        return the parsed header.
 
     """
+    def read_header(handle):
+        # reads lines until the byte string "...\n" is approached.
+        lines = (line for line in iter(lambda: handle.readline(), b"...\n"))
+        return b"".join(lines)
+
     if isinstance(file, BytesIO):
         file.seek(0)
-        code = file.read()
+        code = read_header(file)
     else:
         with open(file, "rb") as f:
-            code = f.read()
+            code = read_header(f)
 
-    parts = code.partition(b"\n...")
-    code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
-    return code
+    if parse:
+        return yaml.load(code, yaml.BaseLoader)
+    return code.decode("utf-8")
 
 
 # backward compatibility, remove when adopted to public funcs in notebooks etc.
