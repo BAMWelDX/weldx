@@ -37,6 +37,10 @@ class Signal:
     unit: str
     data: Union[Data, None] = None
 
+    def __post_init__(self):
+        if self.signal_type not in ["analog", "digital"]:
+            raise ValueError(f"{self.signal_type} is an invalid signal type.")
+
 
 @dataclass
 class DataTransformation:
@@ -246,19 +250,6 @@ class MeasurementChain:
         if node not in self._graph.nodes:
             raise KeyError(f"No signal with source '{node}' found")
 
-    @staticmethod
-    def _raise_if_invalid_signal_type(signal_type: str):
-        """Raise an error if the passed signal type is invalid.
-
-        Parameters
-        ----------
-        signal_type :
-            The signal type
-
-        """
-        if signal_type not in ["analog", "digital"]:
-            raise ValueError(f"{signal_type} is an invalid signal type.")
-
     def _raise_if_data_exist(self, source_name: str):
         """Raise an error if a data set with the passed name already exists.
 
@@ -298,7 +289,6 @@ class MeasurementChain:
                     "You need to provide a signal type AND unit. Alternatively, an "
                     "already existing Signal can be passed."
                 )
-            MeasurementChain._raise_if_invalid_signal_type(signal_type)
             return Signal(signal_type, unit)
         else:
             if signal_type is not None and unit is not None:
