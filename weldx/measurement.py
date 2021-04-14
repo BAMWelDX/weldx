@@ -1,5 +1,6 @@
 """Contains measurement related classes and functions."""
 
+import warnings
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 
@@ -58,7 +59,6 @@ class SignalTransformation:
     func: "MathematicalExpression" = None
     input_shape: Tuple = None
     output_shape: Tuple = None
-    data: Union[List, xr.DataArray] = None
 
 
 @dataclass
@@ -116,8 +116,9 @@ class MeasurementChain:
         name: str,
         source_name: str,
         source_error: Error,
-        output_signal_type: str,
-        output_signal_unit: str,
+        output_signal_type: str = None,
+        output_signal_unit: str = None,
+        output_signal: Signal = None,
         signal_data: xr.DataArray = None,
     ):
         """Create a new measurement chain.
@@ -138,8 +139,6 @@ class MeasurementChain:
         """
         from networkx import DiGraph
 
-        self._raise_if_invalid_signal_type(output_signal_type)
-
         self._name = name
         self._source = {
             "name": source_name,
@@ -150,7 +149,10 @@ class MeasurementChain:
 
         self._graph = DiGraph()
         self._add_signal(
-            node_id=source_name, signal_type=output_signal_type, unit=output_signal_unit
+            node_id=source_name,
+            signal_type=output_signal_type,
+            unit=output_signal_unit,
+            signal=output_signal,
         )
         if signal_data is not None:
             self.add_signal_data(signal_data)  # todo : test
@@ -159,12 +161,13 @@ class MeasurementChain:
     def construct_from_source(name, source: SignalSource):
 
         return MeasurementChain(
-            name,
-            source.name,
-            source.error,
-            source.output_signal.signal_type,
-            source.output_signal.unit,
-            source.output_signal.data,
+            name=name,
+            source_name=source.name,
+            source_error=source.error,
+            output_signal_type=None,
+            output_signal_unit=None,
+            output_signal=source.output_signal,
+            signal_data=None,
         )
 
     @staticmethod
@@ -197,7 +200,7 @@ class MeasurementChain:
         # todo: implement correct version, when schema is ready
         return mc
 
-    def _add_signal(self, node_id: str, signal_type: str, unit: str):
+    def _add_signal(self, node_id: str, signal_type: str, unit: str, signal: Signal):
         """Add a new signal node to internal graph.
 
         Parameters
@@ -212,9 +215,9 @@ class MeasurementChain:
 
         """
         self._raise_if_node_exist(node_id)
-        self._raise_if_invalid_signal_type(signal_type)
+        signal = self._create_signal(signal_type, unit, signal)
 
-        self._graph.add_node(node_id, signal_type=signal_type, unit=unit)
+        self._graph.add_node(node_id, signal=signal)
         self._prev_added_signal = node_id
 
     def _raise_if_node_exist(self, node_id: str):
@@ -243,7 +246,8 @@ class MeasurementChain:
         if node not in self._graph.nodes:
             raise KeyError(f"No signal with source '{node}' found")
 
-    def _raise_if_invalid_signal_type(self, signal_type: str):
+    @staticmethod
+    def _raise_if_invalid_signal_type(signal_type: str):
         """Raise an error if the passed signal type is invalid.
 
         Parameters
@@ -286,12 +290,31 @@ class MeasurementChain:
             self._raise_if_node_does_not_exist(node_name)
         return node_name
 
+    @staticmethod
+    def _create_signal(signal_type: str, unit: str, signal: Signal) -> Signal:
+        if signal is None:
+            if signal_type is None or unit is None:
+                raise ValueError(
+                    "You need to provide a signal type AND unit. Alternatively, an "
+                    "already existing Signal can be passed."
+                )
+            MeasurementChain._raise_if_invalid_signal_type(signal_type)
+            return Signal(signal_type, unit)
+        else:
+            if signal_type is not None and unit is not None:
+                warnings.warn(
+                    "Provided signal type and/or unit is ignored because an existing "
+                    "signal was passed."
+                )
+            return signal
+
     def add_transformation(
         self,
         name: str,
         error: Error,
-        output_signal_type: str,
-        output_signal_unit: str,
+        output_signal_type: str = None,
+        output_signal_unit: str = None,
+        output_signal: Signal = None,
         func: "MathematicalExpression" = None,
         input_signal_source: str = None,
         data=None,
@@ -320,7 +343,10 @@ class MeasurementChain:
         input_signal_source = self._check_and_get_node_name(input_signal_source)
 
         self._add_signal(
-            node_id=name, signal_type=output_signal_type, unit=output_signal_unit
+            node_id=name,
+            signal_type=output_signal_type,
+            unit=output_signal_unit,
+            signal=output_signal,
         )
         self._graph.add_edge(input_signal_source, name, error=error, func=func)
         if data is not None:
@@ -365,7 +391,8 @@ class MeasurementChain:
         """
         signal_source = self._check_and_get_node_name(signal_source)
         self._raise_if_data_exist(signal_source)
-        self._graph.nodes[signal_source]["data"] = data
+        signal = self._graph.nodes[signal_source]["signal"]
+        signal.data = data
 
     def attach_transformation(
         self, transformation: SignalTransformation, input_signal_source: str = None
@@ -385,38 +412,39 @@ class MeasurementChain:
         if input_signal_source is None:
             input_signal_source = self._prev_added_signal
 
-        source_node = self._graph.nodes[input_signal_source]
+        stored_signal = self._graph.nodes[input_signal_source]["signal"]
         if (
-            transformation.input_signal.signal_type != source_node["signal_type"]
-            or transformation.input_signal.unit != source_node["unit"]
+            transformation.input_signal.signal_type != stored_signal.signal_type
+            or transformation.input_signal.unit != stored_signal.unit
         ):
             raise ValueError(
                 f"The provided transformations input signal is incompatible to the "
                 f"output signal of {input_signal_source}:\n"
                 f"transformation: {transformation.input_signal.signal_type} in ["
                 f"{transformation.input_signal.unit}]\n"
-                f"output signal : {source_node['signal_type']} in ["
-                f"{source_node['unit']}]"
+                f"output signal : {stored_signal.signal_type} in [{stored_signal.unit}]"
             )
+        print(transformation.output_signal)
 
         self.add_transformation(
-            transformation.name,
-            transformation.error,
-            transformation.output_signal.signal_type,
-            transformation.output_signal.unit,
-            transformation.func,
-            input_signal_source,
-            transformation.data,
+            name=transformation.name,
+            error=transformation.error,
+            output_signal_type=None,
+            output_signal_unit=None,
+            output_signal=transformation.output_signal,
+            func=transformation.func,
+            input_signal_source=input_signal_source,
         )
 
-    def get_signal_data(self, source_name: str) -> xr.DataArray:
+    def get_signal_data(self, source_name: str = None) -> xr.DataArray:
         """
 
         Parameters
         ----------
         source_name :
             Name of the data's source, e.g. a transformation or the source of the
-            measurement chain
+            measurement chain. If `None` is provided, the data of the last added
+            transformation is returned, if there is one.
 
         Returns
         -------
@@ -424,11 +452,11 @@ class MeasurementChain:
             The requested data
 
         """
-        self._raise_if_node_does_not_exist(source_name)
-        data = self._graph.nodes[source_name].get("data")
-        if data is None:
+        source_name = self._check_and_get_node_name(source_name)
+        signal = self._graph.nodes[source_name]["signal"]
+        if signal.data is None:
             raise KeyError(f"There is no data for the source: '{source_name}'")
-        return data
+        return signal.data
 
     @property
     def data_names(self) -> List[str]:
@@ -461,7 +489,7 @@ class MeasurementChain:
 
         """
         self._raise_if_node_does_not_exist(signal_source)
-        return Signal(**self._graph.nodes[signal_source])
+        return self._graph.nodes[signal_source]["signal"]
 
     def get_transformation(self, name: str) -> SignalTransformation:
         """Get a transformation.
@@ -484,8 +512,8 @@ class MeasurementChain:
 
                 return SignalTransformation(
                     name=name,
-                    input_signal=Signal(node_in["signal_type"], node_in["unit"]),
-                    output_signal=Signal(node_out["signal_type"], node_out["unit"]),
+                    input_signal=node_in["signal"],
+                    output_signal=node_out["signal"],
                     **self._graph.edges[edge],
                 )
 
@@ -508,9 +536,6 @@ class MeasurementChain:
         """
         import matplotlib.pyplot as plt
         from networkx import draw, draw_networkx_edge_labels
-
-        def _signal_label(signal_type, unit):
-            return f"{signal_type}\n[{unit}]"
 
         def _transformation_label(name, data_dict: Dict) -> str:
             text = name
@@ -540,11 +565,11 @@ class MeasurementChain:
 
         # walk over the graphs nodes and collect necessary data for plotting
         while True:
-            signal = graph.nodes[c_node]
-            signal_labels[c_node] = _signal_label(signal["signal_type"], signal["unit"])
+            signal = graph.nodes[c_node]["signal"]
+            signal_labels[c_node] = f"{signal.signal_type}\n[{signal.unit}]"
             positions[c_node] = (x_pos, 0.75)
 
-            if "data" in signal:
+            if signal.data is not None:
                 data_name = f"{c_node}\ndata"
                 graph.add_edge(c_node, data_name)
                 data_labels[data_name] = data_name
