@@ -74,7 +74,7 @@ class DiNodeTypeASDF(WeldxType):
 
 def build_tree(
     graph: nx.DiGraph, name: str, parent: str = None, keep_uuid: bool = False
-):
+) -> DiNode:
     """Recursively build a tree structure of the graph starting from node ``name``.
 
     Parameters
@@ -96,7 +96,7 @@ def build_tree(
     """
     node = DiNode(edges=[], name=name)
 
-    for n in graph.neighbors(name):
+    for n in graph.successors(name):
         if not n == parent:
             child_node = build_tree(graph, n, parent=name, keep_uuid=keep_uuid)
             if child_node:
@@ -118,7 +118,7 @@ def build_tree(
     return node
 
 
-def build_graph(current_node: DiNode, graph: nx.DiGraph = None):
+def build_graph(current_node: DiNode, graph: nx.DiGraph = None) -> nx.DiGraph:
     """Recursively rebuild a (partial) graph from a DiNode object.
 
     Parameters
