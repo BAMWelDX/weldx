@@ -22,11 +22,8 @@ class TestDiGraph(unittest.TestCase):
         nx.set_edge_attributes(g, 42, "edge_attr")
         self.graph = g
 
-        a, c = uuid4(), uuid4()
-        g2 = nx.DiGraph()
-        g2.add_edges_from([(a, "B"), (a, c), (a, "F"), ("D", c), ("B", "H"), ("X", a)])
-        nx.set_node_attributes(g2, 3.14, "node_attr")
-        nx.set_edge_attributes(g2, 42, "edge_attr")
+        id_a, id_c = uuid4(), uuid4()
+        g2 = nx.relabel.relabel_nodes(g, {"A": id_a, "C": id_c}, copy=True)
         setattr(g2, "_wx_keep_uuid_name", True)
         self.graph_uuid = g2
 
