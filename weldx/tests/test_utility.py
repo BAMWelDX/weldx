@@ -518,6 +518,7 @@ class TestCompareNested:
         b = copy.deepcopy(a)
         return a, b
 
+    @staticmethod
     @pytest.mark.parametrize(
         argnames=["a", "b"],
         argvalues=[
@@ -526,11 +527,12 @@ class TestCompareNested:
             (1, 2),
         ],
     )
-    def test_compare_nested_raise(self, a, b):  # noqa: D102
+    def test_compare_nested_raise(a, b):  # noqa: D102
         """non-nested types should raise TypeError."""
         with pytest.raises(TypeError):
             ut.compare_nested(a, b)
 
+    @staticmethod
     @pytest.mark.parametrize(
         argnames="a, b, expected",
         argvalues=[
@@ -542,50 +544,59 @@ class TestCompareNested:
             ({"x": [1, 2]}, {"y": [1, 2]}, False),
         ],
     )
-    def test_compare_nested(self, a, b, expected):  # noqa: D102
+    def test_compare_nested(a, b, expected):  # noqa: D102
         assert ut.compare_nested(a, b) == expected
 
-    def test_eq_(self, _default_dicts):  # noqa: D102
+    @staticmethod
+    def test_eq_(_default_dicts):  # noqa: D102
         a, b = _default_dicts
         assert ut.compare_nested(a, b)
 
-    def test_missing_values(self, _default_dicts):  # noqa: D102
+    @staticmethod
+    def test_missing_values(_default_dicts):  # noqa: D102
         a, b = _default_dicts
         b["x"][0].pop(-1)
         assert not ut.compare_nested(a, b)
 
-    def test_added_value(self, _default_dicts):  # noqa: D102
+    @staticmethod
+    def test_added_value(_default_dicts):  # noqa: D102
         a, b = _default_dicts
         b["x"][0].append(4)
         assert not ut.compare_nested(a, b)
 
-    def test_added_value_left(self, _default_dicts):  # noqa: D102
+    @staticmethod
+    def test_added_value_left(_default_dicts):  # noqa: D102
         a, b = _default_dicts
         a["x"][0].append(4)
         assert not ut.compare_nested(a, b)
 
-    def test_value_changed(self, _default_dicts):  # noqa: D102
+    @staticmethod
+    def test_value_changed(_default_dicts):  # noqa: D102
         a, b = _default_dicts
         b["bar"] = False
         assert not ut.compare_nested(a, b)
 
-    def test_key_changed1(self, _default_dicts):  # noqa: D102
+    @staticmethod
+    def test_key_changed1(_default_dicts):  # noqa: D102
         a, b = _default_dicts
         del b["x"]
         assert not ut.compare_nested(a, b)
 
-    def test_key_changed2(self, _default_dicts):  # noqa: D102
+    @staticmethod
+    def test_key_changed2(_default_dicts):  # noqa: D102
         a, b = _default_dicts
         x = b.pop("x")
         b["y"] = x
         assert not ut.compare_nested(a, b)
 
-    def test_array_accessible_by_two_roots(self):  # noqa: D102
+    @staticmethod
+    def test_array_accessible_by_two_roots():  # noqa: D102
         a = {"l1": {"l2": np.arange(5)}}
         b = {"l1": {"l2": np.arange(5)}}
         assert ut.compare_nested(a, b)
 
-    def test_arrays_in_lists(self):  # noqa: D102
+    @staticmethod
+    def test_arrays_in_lists():  # noqa: D102
         a = {"l1": [np.arange(1), "foo"]}
         b = {"l1": [np.arange(2), "foo"]}
         assert not ut.compare_nested(a, b)
