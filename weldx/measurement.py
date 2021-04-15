@@ -133,9 +133,7 @@ class GenericEquipment:
 
 # DRAFT SECTION START ##################################################################
 
-# todo: - remove data from signal
-#       - factory for transformations?
-#       - which classes can be removed? -> Data
+# todo: - which classes can be removed?
 #       - tutorial
 
 
@@ -325,6 +323,7 @@ class MeasurementChain:
                 )
             return signal
 
+    # todo: rename to create_transformation
     def add_transformation(
         self,
         name: str,
@@ -356,7 +355,6 @@ class MeasurementChain:
             source, if no transformation was added to the chain) is used.
 
         """
-        # todo evaluate units if function is provided
         input_signal_source = self._check_and_get_node_name(input_signal_source)
 
         self._add_signal(
@@ -411,6 +409,7 @@ class MeasurementChain:
         signal = self._graph.nodes[signal_source]["signal"]
         signal.data = data
 
+    # todo: rename to add_transformation
     def attach_transformation(
         self, transformation: SignalTransformation, input_signal_source: str = None
     ):
@@ -490,6 +489,27 @@ class MeasurementChain:
             for _, attr in self._graph.nodes.items()
             if "data_name" in attr
         ]
+
+    def get_equipment(self, signal_source: str) -> GenericEquipment:
+        """Get the equipment that produced a signal.
+
+        Parameters
+        ----------
+        signal_source :
+            Source of the signal.
+
+        Returns
+        -------
+        GenericEquipment :
+            The requested equipment
+
+        """
+        if signal_source == self._source["name"]:
+            return self._source.get("equipment")
+        for edge in self._graph.edges:
+            if edge[1] == signal_source:
+                return self._graph.edges[edge].get("equipment")
+        raise KeyError(f"No transformation with name '{signal_source}' found")
 
     def get_signal(self, signal_source: str) -> Signal:
         """Get a signal.
