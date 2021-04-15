@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import networkx as nx
 
@@ -72,7 +72,9 @@ class DiNodeTypeASDF(WeldxType):
 # Graph --------------------------------------------------------------------------------
 
 
-def build_tree(graph: nx.DiGraph, name: str, parent: str = None):
+def build_tree(
+    graph: nx.DiGraph, name: str, parent: str = None, keep_uuid: bool = False
+):
     """Recursively build a tree structure of the graph starting from node ``name``.
 
     Parameters
@@ -83,6 +85,8 @@ def build_tree(graph: nx.DiGraph, name: str, parent: str = None):
         Name (or key) of the current node.
     parent :
         Key of the node
+    keep_uuid :
+        store unique id node names
 
     Returns
     -------
@@ -90,23 +94,27 @@ def build_tree(graph: nx.DiGraph, name: str, parent: str = None):
         The root node object of the graph.
 
     """
-    node = DiNode(name=name, edges=[])
+    node = DiNode(edges=[], name=name)
 
     for n in graph.neighbors(name):
         if not n == parent:
-            child_node = build_tree(graph, n, parent=name)
+            child_node = build_tree(graph, n, parent=name, keep_uuid=keep_uuid)
             if child_node:
                 edge = DiEdge(child_node, attributes=graph.edges[name, n])
                 node.edges.append(edge)
     for n in graph.predecessors(name):
         if not n == parent:
-            child_node = build_tree(graph, n, parent=name)
+            child_node = build_tree(graph, n, parent=name, keep_uuid=keep_uuid)
             if child_node:
                 edge = DiEdge(
                     child_node, attributes=graph.edges[n, name], direction="bwd"
                 )
                 node.edges.append(edge)
     node.attributes = graph.nodes[name]  # add node attributes
+
+    if isinstance(node.name, UUID) and not keep_uuid:
+        node.name = None
+
     return node
 
 
@@ -155,7 +163,9 @@ class DiGraphTypeASDF(WeldxType):
         if not nx.is_tree(node):  # no cycles, single tree
             raise ValueError("Graph must represent a tree.")
 
-        root = build_tree(node, tuple(node.nodes)[0])
+        keep_uuid = getattr(node, "_wx_keep_uuid_name", False)
+
+        root = build_tree(node, tuple(node.nodes)[0], keep_uuid=keep_uuid)
         return dict(root_node=root)
 
     @classmethod

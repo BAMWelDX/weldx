@@ -1,5 +1,6 @@
 """Test graph serializations."""
 import unittest
+from uuid import uuid4
 
 import networkx as nx
 import pytest
@@ -21,19 +22,32 @@ class TestDiGraph(unittest.TestCase):
         nx.set_edge_attributes(g, 42, "edge_attr")
         self.graph = g
 
-    def test_graph_roundtrip(self):
-        g = self.graph
+        a = uuid4()
+        c = uuid4()
+        g2 = nx.DiGraph()
+        g2.add_edges_from([(a, "B"), (a, c), (a, "F"), ("D", c), ("B", "H"), ("X", a)])
+        nx.set_node_attributes(g2, 3.14, "node_attr")
+        nx.set_edge_attributes(g2, 42, "edge_attr")
+        setattr(g2, "_wx_keep_uuid_name", True)
+        self.graph_uuid = g2
+
+    @staticmethod
+    def _assert_roundtrip(g):
         data = write_read_buffer(dict(graph=g))
         g2 = data["graph"]
-
-        assert sorted(g2.edges) == sorted(g.edges)
-        assert sorted(g2.nodes) == sorted(g.nodes)
 
         for node in g:
             assert g.nodes[node] == g2.nodes[node]
 
         for edge in g.edges:
             assert g.edges[edge] == g2.edges[edge]
+
+        assert set(g.nodes) == set(g2.nodes)
+        assert set(g.edges) == set(g2.edges)
+
+    def test_graph_roundtrip(self):
+        for g in [self.graph, self.graph_uuid]:
+            self._assert_roundtrip(g)
 
     def test_graph_exceptions(self):
         self.graph.remove_edge("A", "C")  # two trees in graph
@@ -44,3 +58,8 @@ class TestDiGraph(unittest.TestCase):
         self.graph.add_edge("H", "A")  # create loop
         with pytest.raises(ValueError):
             write_read_buffer(dict(graph=self.graph))
+
+        with pytest.raises(KeyError):
+            setattr(self.graph_uuid, "_wx_keep_uuid_name", False)
+            g = self.graph_uuid
+            self._assert_roundtrip(g)
