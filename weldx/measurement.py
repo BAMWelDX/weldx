@@ -17,6 +17,12 @@ class Data:
     name: str
     data: xr.DataArray  # skipcq: PTC-W0052
 
+    def __eq__(self, other):
+        """Check for equality with other object."""
+        if not isinstance(other, Data):
+            return False
+        return self.name == other.name and self.data.identical(other.data)
+
 
 @dataclass
 class Error:

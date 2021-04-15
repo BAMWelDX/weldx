@@ -301,3 +301,4 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
 
 if __name__ == "__main__":
     single_pass_weld_example()
+

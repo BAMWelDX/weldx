@@ -1,6 +1,7 @@
 """Test the internal utility functions."""
-
+import copy
 import math
+import unittest
 
 import numpy as np
 import pandas as pd
@@ -498,3 +499,145 @@ def test_xr_time_ref():
 
     da2.weldx.time_ref = t0
     assert da2.time.attrs["time_ref"] == t0
+
+
+class TestCompareNested:
+    """Test utility.compare_nested function on different objects."""
+
+    @staticmethod
+    @pytest.fixture()
+    def _default_dicts():
+        """Return two equivalent deeply nested structures to be modified by tests."""
+        a = {
+            "foo": np.arange(3),
+            "x": {
+                0: [1, 2, 3],
+            },
+            "bar": True,
+        }
+        b = copy.deepcopy(a)
+        return a, b
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        argnames=["a", "b"],
+        argvalues=[
+            ("asdf", "foo"),
+            (b"asdf", b"foo"),
+            (1, 2),
+        ],
+    )
+    def test_compare_nested_raise(a, b):  # noqa: D102
+        """non-nested types should raise TypeError."""
+        with pytest.raises(TypeError):
+            ut.compare_nested(a, b)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        argnames="a, b, expected",
+        argvalues=[
+            ((1, 2, 3), [1, 2, 3], True),
+            ((1, 2, 3), [1, 2, 0], False),
+            ((1, 2, 3), {"f": 0}, False),
+            ((1, 2, 3), "bar", False),
+            ({"x": [1, 2, 3, 4]}, {"x": [1, 2]}, False),
+            ({"x": [1, 2]}, {"y": [1, 2]}, False),
+        ],
+    )
+    def test_compare_nested(a, b, expected):  # noqa: D102
+        assert ut.compare_nested(a, b) == expected
+
+    @staticmethod
+    def test_eq_(_default_dicts):  # noqa: D102
+        a, b = _default_dicts
+        assert ut.compare_nested(a, b)
+
+    @staticmethod
+    def test_missing_values(_default_dicts):  # noqa: D102
+        a, b = _default_dicts
+        b["x"][0].pop(-1)
+        assert not ut.compare_nested(a, b)
+
+    @staticmethod
+    def test_added_value(_default_dicts):  # noqa: D102
+        a, b = _default_dicts
+        b["x"][0].append(4)
+        assert not ut.compare_nested(a, b)
+
+    @staticmethod
+    def test_added_value_left(_default_dicts):  # noqa: D102
+        a, b = _default_dicts
+        a["x"][0].append(4)
+        assert not ut.compare_nested(a, b)
+
+    @staticmethod
+    def test_value_changed(_default_dicts):  # noqa: D102
+        a, b = _default_dicts
+        b["bar"] = False
+        assert not ut.compare_nested(a, b)
+
+    @staticmethod
+    def test_key_changed1(_default_dicts):  # noqa: D102
+        a, b = _default_dicts
+        del b["x"]
+        assert not ut.compare_nested(a, b)
+
+    @staticmethod
+    def test_key_changed2(_default_dicts):  # noqa: D102
+        a, b = _default_dicts
+        x = b.pop("x")
+        b["y"] = x
+        assert not ut.compare_nested(a, b)
+
+    @staticmethod
+    def test_array_accessible_by_two_roots():  # noqa: D102
+        a = {"l1": {"l2": np.arange(5)}}
+        b = {"l1": {"l2": np.arange(5)}}
+        assert ut.compare_nested(a, b)
+
+    @staticmethod
+    def test_arrays_in_lists():  # noqa: D102
+        a = {"l1": [np.arange(1), "foo"]}
+        b = {"l1": [np.arange(2), "foo"]}
+        assert not ut.compare_nested(a, b)
+
+
+@pytest.mark.usefixtures("single_pass_weld_asdf")
+class TestWeldxExampleCompareNested(unittest.TestCase):
+    """Test case of a real world example as it compares two nested ASDF trees.
+
+    This includes cases of xarray.DataArrays, np.ndarrays and so forth.
+    """
+
+    def setUp(self):  # noqa: D102
+        self.a = self.single_pass_weld_tree
+        self.b = copy.deepcopy(self.a)
+
+    def test_equal(self):  # noqa: D102
+        assert ut.compare_nested(self.a, self.b)
+
+    def test_metadata_modified(self):  # noqa: D102
+        self.b["wx_metadata"]["welder"] = "anonymous"
+        assert not ut.compare_nested(self.a, self.b)
+
+    def test_measurements_modified(self):  # noqa: D102
+        from weldx import Q_
+
+        self.b["welding_current"].data.data.data[-1] = Q_(500, "A")
+        assert not ut.compare_nested(self.a, self.b)
+
+    def test_equip_modified(self):  # noqa: D102
+        self.b["equipment"][0].name = "broken device"
+        assert not ut.compare_nested(self.a, self.b)
+
+    def test_coordinate_systems_modified(self):  # noqa: D102
+        """Manipulate one CSM and check if it gets picked up by comparison."""
+        csm_org = self.a["coordinate_systems"]
+        csm_copy = self.b["coordinate_systems"]
+
+        # first ensure, that the cs exists, as delete_cs won't tell us.
+        assert csm_copy.get_cs("tcp_contact")
+        csm_copy.delete_cs("tcp_contact")
+
+        assert csm_copy != csm_org
+        assert not ut.compare_nested(self.a, self.b)
