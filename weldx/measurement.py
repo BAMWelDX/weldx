@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 
 import xarray as xr
-from numpy import signedinteger
 
 if TYPE_CHECKING:  # pragma: no cover
     from networkx import DiGraph
@@ -63,6 +62,34 @@ class SignalTransformation:
     func: "MathematicalExpression" = None
     input_shape: Tuple = None
     output_shape: Tuple = None
+
+    def _evaluate_function(self):
+        from weldx import Q_
+
+        variables = self.func.get_variable_names()
+        if len(variables) != 1:
+            raise ValueError("The provided function must have exactly one parameter")
+        variable_name = variables[0]
+
+        test_input = Q_(1, self.input_signal.unit)
+        try:
+            test_output = self.func.evaluate(**{variable_name: test_input})
+        except Exception as e:
+            raise ValueError(
+                "The provided function is incompatible with the input signals unit. \n"
+                f"The test raised the following exception:\n{e}"
+            )
+        if Q_(1, self.output_signal.unit).units != test_output.units:
+            raise ValueError(
+                "The test result of the provided function has a different unit than "
+                "the specified output signal.\n"
+                f"output_signal: {self.output_signal.unit}\n"
+                f"test_result  : {test_output.units}\n"
+            )
+
+    def __post_init__(self):
+        if self.func is not None:
+            self._evaluate_function()
 
 
 @dataclass
