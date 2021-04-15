@@ -1,11 +1,11 @@
 """Contains package internal utility functions."""
-
+import functools
 import json
-import math
 import warnings
 from collections.abc import Iterable, Sequence
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Collection, Dict, List, Mapping, Union
 
 import numpy as np
