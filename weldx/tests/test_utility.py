@@ -502,6 +502,8 @@ def test_xr_time_ref():
 
 
 class TestCompareNested:
+    """Test utility.compare_nested function on different objects."""
+
     @staticmethod
     @pytest.fixture()
     def _default_dicts():
@@ -524,7 +526,7 @@ class TestCompareNested:
             (1, 2),
         ],
     )
-    def test_compare_nested_raise(self, a, b):
+    def test_compare_nested_raise(self, a, b):  # noqa: D102
         """non-nested types should raise TypeError."""
         with pytest.raises(TypeError):
             ut.compare_nested(a, b)
@@ -540,50 +542,50 @@ class TestCompareNested:
             ({"x": [1, 2]}, {"y": [1, 2]}, False),
         ],
     )
-    def test_compare_nested(self, a, b, expected):
+    def test_compare_nested(self, a, b, expected):  # noqa: D102
         assert ut.compare_nested(a, b) == expected
 
-    def test_eq_(self, _default_dicts):
+    def test_eq_(self, _default_dicts):  # noqa: D102
         a, b = _default_dicts
         assert ut.compare_nested(a, b)
 
-    def test_missing_values(self, _default_dicts):
+    def test_missing_values(self, _default_dicts):  # noqa: D102
         a, b = _default_dicts
         b["x"][0].pop(-1)
         assert not ut.compare_nested(a, b)
 
-    def test_added_value(self, _default_dicts):
+    def test_added_value(self, _default_dicts):  # noqa: D102
         a, b = _default_dicts
         b["x"][0].append(4)
         assert not ut.compare_nested(a, b)
 
-    def test_added_value_left(self, _default_dicts):
+    def test_added_value_left(self, _default_dicts):  # noqa: D102
         a, b = _default_dicts
         a["x"][0].append(4)
         assert not ut.compare_nested(a, b)
 
-    def test_value_changed(self, _default_dicts):
+    def test_value_changed(self, _default_dicts):  # noqa: D102
         a, b = _default_dicts
         b["bar"] = False
         assert not ut.compare_nested(a, b)
 
-    def test_key_changed1(self, _default_dicts):
+    def test_key_changed1(self, _default_dicts):  # noqa: D102
         a, b = _default_dicts
         del b["x"]
         assert not ut.compare_nested(a, b)
 
-    def test_key_changed2(self, _default_dicts):
+    def test_key_changed2(self, _default_dicts):  # noqa: D102
         a, b = _default_dicts
         x = b.pop("x")
         b["y"] = x
         assert not ut.compare_nested(a, b)
 
-    def test_array_accessible_by_two_roots(self):
+    def test_array_accessible_by_two_roots(self):  # noqa: D102
         a = {"l1": {"l2": np.arange(5)}}
         b = {"l1": {"l2": np.arange(5)}}
         assert ut.compare_nested(a, b)
 
-    def test_arrays_in_lists(self):
+    def test_arrays_in_lists(self):  # noqa: D102
         a = {"l1": [np.arange(1), "foo"]}
         b = {"l1": [np.arange(2), "foo"]}
         assert not ut.compare_nested(a, b)
@@ -596,28 +598,28 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
     This includes cases of xarray.DataArrays, np.ndarrays and so forth.
     """
 
-    def setUp(self):
+    def setUp(self):  # noqa: D102
         self.a = self.single_pass_weld_tree
         self.b = copy.deepcopy(self.a)
 
-    def test_equal(self):
+    def test_equal(self):  # noqa: D102
         assert ut.compare_nested(self.a, self.b)
 
-    def test_metadata_modified(self):
+    def test_metadata_modified(self):  # noqa: D102
         self.b["wx_metadata"]["welder"] = "anonymous"
         assert not ut.compare_nested(self.a, self.b)
 
-    def test_measurements_modified(self):
+    def test_measurements_modified(self):  # noqa: D102
         from weldx import Q_
 
         self.b["welding_current"].data.data.data[-1] = Q_(500, "A")
         assert not ut.compare_nested(self.a, self.b)
 
-    def test_equip_modified(self):
+    def test_equip_modified(self):  # noqa: D102
         self.b["equipment"][0].name = "broken device"
         assert not ut.compare_nested(self.a, self.b)
 
-    def test_coordinate_systems_modified(self):
+    def test_coordinate_systems_modified(self):  # noqa: D102
         """Manipulate one CSM and check if it gets picked up by comparison."""
         csm_org = self.a["coordinate_systems"]
         csm_copy = self.b["coordinate_systems"]
