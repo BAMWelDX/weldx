@@ -17,6 +17,7 @@ def create_file_and_buffer():
     import tempfile
 
     with tempfile.NamedTemporaryFile(suffix=".asdf", delete=False) as ntf:
+        ntf.close()
         single_pass_weld_example(out_file=ntf.name)
         with open(ntf.name, "rb") as fh:
             buffer = io.BytesIO(fh.read())
