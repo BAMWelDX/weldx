@@ -13,14 +13,12 @@ examples:
     - |
       !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
         name: A
-        edges: []
   -
     - A simple node without any child edges and a simple attribute.
     - |
       !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
         name: A
         attributes: {node_attr: 3.14}
-        edges: []
   -
     - A node with one child node.
     - |
@@ -31,7 +29,6 @@ examples:
           direction: fwd
           target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
             name: B
-            edges: []
 
 type: object
 properties:
