@@ -171,7 +171,7 @@ def get_yaml_header(file, parse=False) -> Union[str, dict]:
             code = read_header(f)
 
     if parse:
-        return yaml.load(code, yaml.BaseLoader)
+        return asdf.yamlutil.load_tree(code)
     return code.decode("utf-8")
 
 
