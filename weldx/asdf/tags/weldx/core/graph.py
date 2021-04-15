@@ -43,7 +43,7 @@ class DiEdgeTypeASDF(WeldxType):
 class DiNode:
     """Generic directed graph node type."""
 
-    edges: List["DiEdge"]
+    edges: List["DiEdge"] = field(default_factory=list)
     name: str = field(default_factory=uuid4)
     attributes: dict = field(default_factory=dict)
 
@@ -94,7 +94,7 @@ def build_tree(
         The root node object of the graph.
 
     """
-    node = DiNode(edges=[], name=name)
+    node = DiNode(name=name)
 
     for n in graph.successors(name):
         if not n == parent:
@@ -114,6 +114,9 @@ def build_tree(
 
     if isinstance(node.name, UUID) and not keep_uuid:
         node.name = None
+
+    if not node.edges:
+        node.edges = None
 
     return node
 

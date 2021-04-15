@@ -46,6 +46,6 @@ properties:
   attributes:
     type: object
 
-required: [edges]
+required: []
 propertyOrder: [name, attributes, edges]
 ...
