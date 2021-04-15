@@ -28,16 +28,16 @@ jobs:
       - name: Cache conda
         uses: actions/cache@v2
         env:
-          # Increase this value to reset cache if ./conda.recipe/build_env.yml has not changed
+          # Increase this value to reset cache if ./devtools/conda.recipe/build_env.yml has not changed
           CACHE_NUMBER: 1
         with:
           path: ~/conda_pkgs_dir
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./conda.recipe/build_env.yml') }}
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./devtools/conda.recipe/build_env.yml') }}
 
       - name: Setup Conda Environment
         uses: conda-incubator/setup-miniconda@v2
         with:
-          environment-file: ./conda.recipe/build_env.yml
+          environment-file: ./devtools/conda.recipe/build_env.yml
           activate-environment: build_env
           auto-activate-base: false
           use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
@@ -118,7 +118,7 @@ jobs:
       - name: run pytest
         run: |
           pip install pytest pytest-cov pytest-xdist
-          pytest -n2
+          pytest -n2 --dist=loadfile
 
       - name: set pypi test repo defaults
         run: |
