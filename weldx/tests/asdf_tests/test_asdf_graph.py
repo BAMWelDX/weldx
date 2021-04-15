@@ -22,8 +22,7 @@ class TestDiGraph(unittest.TestCase):
         nx.set_edge_attributes(g, 42, "edge_attr")
         self.graph = g
 
-        a = uuid4()
-        c = uuid4()
+        a, c = uuid4(), uuid4()
         g2 = nx.DiGraph()
         g2.add_edges_from([(a, "B"), (a, c), (a, "F"), ("D", c), ("B", "H"), ("X", a)])
         nx.set_node_attributes(g2, 3.14, "node_attr")
