@@ -19,4 +19,5 @@ install:
 build: false
 
 test_script:
-  - conda mambabuild conda.recipe
+  - conda mambabuild devtools\conda.recipe
+
