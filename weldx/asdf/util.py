@@ -160,8 +160,7 @@ def get_yaml_header(file, parse=False) -> Union[str, dict]:
     """
     def read_header(handle):
         # reads lines until the byte string "...\n" is approached.
-        lines = (line for line in iter(lambda: handle.readline(), b"...\n"))
-        return b"".join(lines)
+        return b"".join(iter(lambda: handle.readline(), b"...\n"))
 
     if isinstance(file, BytesIO):
         file.seek(0)
