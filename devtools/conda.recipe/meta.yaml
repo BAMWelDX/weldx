@@ -34,7 +34,7 @@ test:
     - weldx
     - weldx.visualization
   commands:
-    - pytest --pyargs weldx.tests -n auto
+    - pytest --pyargs weldx.tests -n auto --dist=loadfile
 
 about:
   home: https://www.bam.de/Content/EN/Projects/WelDX/weldx.html

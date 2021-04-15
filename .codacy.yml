@@ -11,7 +11,6 @@ engines:
 
 exclude_paths:
   - 'doc/**'
-  - 'versioneer.py'
   - 'weldx/_version.py'
   - 'scripts/**'
   - 'CHANGELOG.md'
