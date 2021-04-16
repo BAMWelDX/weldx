@@ -72,3 +72,7 @@ jobs:
       - name: codecov.io
         if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         uses: codecov/codecov-action@v1
+
+      - name: codecov.io
+        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
+        run: echo $env
