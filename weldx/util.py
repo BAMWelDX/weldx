@@ -1,18 +1,19 @@
 """Contains package internal utility functions."""
-
+import functools
 import json
-import math
 import warnings
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Callable, Collection, Dict, List, Mapping, Union
 
 import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
+from asdf.tags.core import NDArrayType
+from boltons import iterutils
 from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta64_dtype
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
@@ -441,13 +442,9 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
     mat_a = to_float_array(mat_a)
     mat_b = to_float_array(mat_b)
 
-    if not mat_a.shape == mat_b.shape:
+    if mat_a.shape != mat_b.shape:
         return False
-    for i in range(mat_a.shape[0]):
-        for j in range(mat_a.shape[1]):
-            if not math.isclose(mat_a[i, j], mat_b[i, j], abs_tol=abs_tol):
-                return False
-    return True
+    return np.all(np.isclose(mat_a, mat_b, atol=abs_tol))
 
 
 def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
@@ -471,13 +468,9 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
     vec_a = to_float_array(vec_a)
     vec_b = to_float_array(vec_b)
 
-    if not vec_a.size == vec_b.size:
+    if vec_a.size != vec_b.size:
         return False
-    for i in range(vec_a.size):
-        if not math.isclose(vec_a[i], vec_b[i], abs_tol=abs_tol):
-            return False
-
-    return True
+    return np.all(np.isclose(vec_a, vec_b, atol=abs_tol))
 
 
 def mat_vec_mul(a, b) -> np.ndarray:
@@ -1228,3 +1221,117 @@ class WeldxAccessor:
                 self._obj.time.attrs["time_ref"] = value  # set new time_ref value
             else:
                 self._obj.time.attrs["time_ref"] = value
+
+
+_eq_compare_nested_input_types = Union[
+    Sequence,
+    Mapping,
+    Collection,
+]
+
+
+class _Eq_compare_nested:
+    """Compares nested data structures like lists, sets, tuples, arrays, etc."""
+
+    # some types need special comparison handling.
+    compare_funcs = {
+        (np.ndarray, NDArrayType, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
+        (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
+    }
+    # these types will be treated as equivalent.
+    _type_equalities = [
+        (np.ndarray, NDArrayType),
+    ]
+
+    @staticmethod
+    def _compare(x, y) -> bool:
+        # 1. strict type comparison (exceptions defined in _type_equalities).
+        # 2. handle special comparison cases
+        if not any(
+            (type(x) in e and type(y) in e) for e in _Eq_compare_nested._type_equalities
+        ) and type(x) is not type(y):
+            return False
+
+        for types, func in _Eq_compare_nested.compare_funcs.items():
+            if isinstance(x, types):
+                return func(x, y)
+
+        return x == y
+
+    @staticmethod
+    def _enter(path, key, value):
+        # Do not traverse types defined in compare_funcs. All other types are handled
+        # like in boltons.iterutils.default_enter (e.g. descend into nested structures).
+        # See `boltons.iterutils.remap` for details.
+        if any(isinstance(value, t) for t in _Eq_compare_nested.compare_funcs):
+            return value, False
+
+        return iterutils.default_enter(path, key, value)
+
+    @staticmethod
+    def _visit(path, key, value, a, b) -> bool:
+        """Traverses all elements in `compare_nested` argument a and b...
+
+        and tries to obtain the path `p` in `b` using boltons.iterutils.get_path.
+        The following cases can occur:
+        1. If the path does not exist in `b` a KeyError will be raised.
+        2. If the index `k` does not exist an IndexError is raised.
+        3. If the other path exists, a comparison will be made using `_compare`.
+           When the elements are not equal traversing `a` will be stopped
+           by raising a RuntimeError.
+        """
+        other_data_structure = iterutils.get_path(b, path)
+        other_value = other_data_structure[key]
+        if not _Eq_compare_nested._enter(None, key, value)[1]:
+            # check lengths of Sequence types first and raise
+            # prior starting a more expensive comparison!
+            if isinstance(other_data_structure, Sequence) and len(
+                other_data_structure
+            ) != len(iterutils.get_path(a, path)):
+                raise RuntimeError("len does not match")
+            if not _Eq_compare_nested._compare(value, other_value):
+                raise RuntimeError("not equal")
+        return True
+
+    @staticmethod
+    def compare_nested(
+        a: _eq_compare_nested_input_types, b: _eq_compare_nested_input_types
+    ) -> bool:
+        """Deeply compares [nested] data structures combined of tuples, lists, dicts...
+
+        Also compares non-nested data-structures.
+        Arrays are compared using np.all and xr.DataArray.identical
+
+        Parameters
+        ----------
+        a :
+            a [nested] data structure to compare to `b`.
+        b :
+            a [nested] data structure to compare to `a`.
+
+        Returns
+        -------
+        bool :
+            True, if all elements (including dict keys) of a and b are equal.
+
+        Raises
+        ------
+        TypeError
+            When a or b is not a nested structure.
+
+        """
+        # we bind the input structures a, b to the visit function.
+        visit = functools.partial(_Eq_compare_nested._visit, a=a, b=b)
+
+        try:
+            iterutils.remap(a, visit=visit, reraise_visit=True)
+        # Key not found in b, values not equal, more elements in a than in b
+        except (KeyError, RuntimeError, IndexError):
+            return False
+        except TypeError:
+            raise TypeError("either a or b are not a nested data structure.")
+
+        return True
+
+
+compare_nested = _Eq_compare_nested.compare_nested

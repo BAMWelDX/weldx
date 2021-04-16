@@ -118,7 +118,7 @@ jobs:
       - name: run pytest
         run: |
           pip install pytest pytest-cov pytest-xdist
-          pytest -n2
+          pytest -n2 --dist=loadfile
 
       - name: set pypi test repo defaults
         run: |

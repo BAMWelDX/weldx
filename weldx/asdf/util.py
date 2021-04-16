@@ -154,20 +154,26 @@ def get_yaml_header(file: Union[str, Path, BytesIO], parse=False) -> Union[str, 
         if `True`, returns the interpreted YAML header as dict
     Returns
     -------
-    str
-        The YAML header the ASDF file
+    str, dict
+        The YAML header as string the ASDF file, if parse is False. Or if parse is True,
+        return the parsed header.
 
     """
+
+    def read_header(handle):
+        # reads lines until the byte string "...\n" is approached.
+        return b"".join(iter(handle.readline, b"...\n"))
+
     if isinstance(file, BytesIO):
         file.seek(0)
-        code = file.read()
+        code = read_header(file)
     else:
         with open(file, "rb") as f:
-            code = f.read()
+            code = read_header(f)
 
-    parts = code.partition(b"\n...")
-    code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
-    return code
+    if parse:
+        return asdf.yamlutil.load_tree(code)
+    return code.decode("utf-8")
 
 
 # backward compatibility, remove when adopted to public funcs in notebooks etc.
