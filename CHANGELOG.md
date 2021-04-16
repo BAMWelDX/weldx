@@ -19,6 +19,7 @@
 - move tests folder to `weldx/tests` [[#323]](https://github.com/BAMWelDX/weldx/pull/323)
 - `get_yaml_header` received a new option parse, which optionally returns the parsed YAML header
   as `asdf.tagged.TaggedDict`. [[#338]](https://github.com/BAMWelDX/weldx/pull/338)
+- refactor `asdf_json_repr` into `view_tree` [[#339]](https://github.com/BAMWelDX/weldx/pull/339)
 
 ### ASDF
 

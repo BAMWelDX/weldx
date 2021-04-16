@@ -10,6 +10,7 @@ from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.constants import WELDX_PATH
+from weldx.util import deprecated
 
 __all__ = [
     "get_schema_path",
@@ -17,7 +18,7 @@ __all__ = [
     "write_buffer",
     "write_read_buffer",
     "get_yaml_header",
-    "asdf_json_repr",
+    "view_tree",
     "notebook_fileprinter",
 ]
 
@@ -141,16 +142,16 @@ def write_read_buffer(
     return read_buffer(buffer, open_kwargs)
 
 
-def get_yaml_header(file, parse=False) -> Union[str, dict]:
+def get_yaml_header(file: Union[str, Path, BytesIO], parse=False) -> Union[str, dict]:
     """Read the YAML header part (excluding binary sections) of an ASDF file.
 
     Parameters
     ----------
-    file :
-        filename, ``pathlib.Path`` or ``BytesIO`` buffer of ASDF file
+    file : str, pathlib.Path or io.BytesIO
+        filename, `pathlib.Path` or `io.BytesIO` buffer of ASDF file
 
     parse :
-        if True, returns the interpreted YAML header as dict
+        if `True`, returns the interpreted YAML header as dict
     Returns
     -------
     str, dict
@@ -214,15 +215,15 @@ def notebook_fileprinter(file, lexer="YAML"):
     )
 
 
-def asdf_json_repr(file, path: Tuple = None, **kwargs):
+def view_tree(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
     """Display YAML header using IPython JSON display repr.
 
     This function works in JupyterLab.
 
     Parameters
     ----------
-    file
-        filename or BytesIO buffer of ASDF file
+    file: str, pathlib.Path or io.BytesIO
+        filename, `pathlib.Path` or `io.BytesIO` buffer of ASDF file
     path
         tuple representing the lookup path in the yaml/asdf tree
     kwargs
@@ -237,11 +238,15 @@ def asdf_json_repr(file, path: Tuple = None, **kwargs):
     --------
     Visualize the full tree of an existing ASDF file::
 
-        weldx.asdf.utils.asdf_json_repr("single_pass_weld_example.asdf")
+        weldx.asdf.utils.view_tree("single_pass_weld_example.asdf")
 
     Visualize a specific element in the tree structure by proving the path::
 
-        weldx.asdf.utils.asdf_json_repr(
+        weldx.asdf.utils.view_tree(
+            "single_pass_weld_example.asdf", path=("process",)
+        )
+
+        weldx.asdf.utils.view_tree(
             "single_pass_weld_example.asdf", path=("process", "welding_process")
         )
 
@@ -261,3 +266,9 @@ def asdf_json_repr(file, path: Tuple = None, **kwargs):
         yaml_dict = get_path(yaml_dict, path)
     kwargs["root"] = root
     return JSON(yaml_dict, **kwargs)
+
+
+@deprecated("0.4.0", "0.5.0", " asdf_json_repr was renamed to view_tree")
+def asdf_json_repr(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
+    """See `view_tree` function."""
+    return view_tree(file, path, **kwargs)
