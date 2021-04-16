@@ -142,6 +142,9 @@ class GenericEquipment:
 # todo: - which classes can be removed?
 #       - tutorial
 
+#       - transformation -> only units
+#       - source -> signal
+
 
 class MeasurementChain:
     """Simple dataclass implementation for measurement chains."""
