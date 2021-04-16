@@ -2,6 +2,7 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 import pytest
@@ -61,6 +62,27 @@ def test_rotation(inputs):
 def test_rotation_euler_exception():
     with pytest.raises(ValueError):
         WXRotation.from_euler(seq="XyZ", angles=[10, 20, 60], degrees=True)
+
+
+@pytest.mark.parametrize(
+    "inputs",
+    [
+        Q_(10, "degree"),
+        Q_(0.01, "kdegree"),
+        Q_(10, "mdegree"),
+        Q_(2, "rad"),
+        Q_(0.002, "krad"),
+        Q_(2, "mrad"),
+    ],
+)
+def test_rotation_euler_prefix(inputs):
+    """Test unit prefix handling."""
+    degrees = "degree" in str(inputs.u)
+    rot = WXRotation.from_euler(seq="x", angles=inputs)
+    data = _write_read_buffer({"rot": rot})
+    r = data["rot"].as_euler("xyz", degrees=degrees)[0]
+    r = Q_(r, "degree") if degrees else Q_(r, "rad")
+    assert np.allclose(inputs, r)
 
 
 # xarray.DataArray ---------------------------------------------------------------------
@@ -644,3 +666,19 @@ class TestPointCloud:
         )["point_cloud"]
 
         assert np.all(pc_file.coordinates == pc.coordinates)
+
+
+# --------------------------------------------------------------------------------------
+# Graph
+# --------------------------------------------------------------------------------------
+class TestGraph:
+    @staticmethod
+    def test_graph_serialization():
+        g = nx.DiGraph()
+        g.add_edges_from(
+            [("A", "B"), ("A", "C"), ("A", "F"), ("D", "C"), ("B", "H"), ("X", "A")]
+        )
+        g2 = _write_read_buffer({"graph": g})["graph"]
+
+        assert all(e in g.edges for e in g2.edges)
+        assert all(n in g.nodes for n in g2.nodes)

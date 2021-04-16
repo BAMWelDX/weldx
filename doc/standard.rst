@@ -19,6 +19,7 @@ The WelDX standard consists of the following schema definitions:
     schemas/groove.rst
     schemas/aws.rst
     schemas/datamodels.rst
+    schemas/generic.rst
 
 ASDF Extension
 ##############

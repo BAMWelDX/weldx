@@ -27,10 +27,21 @@ The ``transformations`` directory contains schema implementations for the base c
     core/transformations/rotation-1.0.0
 
 Geometry
-===============
+========
 
 The ``geometry`` directory contains schema implementations for the geometric base classes.
 
 .. asdf-autoschemas::
 
     core/geometry/spatial_data-1.0.0
+
+Graph
+========
+
+The ``graph`` directory contains schema implementations for basic graph types.
+
+.. asdf-autoschemas::
+
+    core/graph/di_node-1.0.0
+    core/graph/di_edge-1.0.0
+    core/graph/di_graph-1.0.0

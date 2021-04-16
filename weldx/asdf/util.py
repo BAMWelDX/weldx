@@ -1,15 +1,18 @@
 """Utilities for asdf files."""
 from io import BytesIO
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Union
+from warnings import warn
 
 import asdf
 import yaml
 from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.constants import WELDX_PATH
 
 __all__ = [
+    "get_schema_path",
     "read_buffer",
     "write_buffer",
     "write_read_buffer",
@@ -17,6 +20,31 @@ __all__ = [
     "asdf_json_repr",
     "notebook_fileprinter",
 ]
+
+
+def get_schema_path(schema: str) -> Path:  # pragma: no cover
+    """Get the path to a weldx schema file.
+
+    Parameters
+    ----------
+    schema :
+        Name of the schema file
+    Returns
+    -------
+    pathlib.Path
+        Path to the requested schema file in the current filesystem.
+
+    """
+    schema = schema.split(".yaml")[0]
+
+    p = WELDX_PATH / "asdf" / "schemas"
+    schemas = list(p.glob(f"**/{schema}.yaml"))
+    if len(schemas) == 0:
+        raise ValueError(f"No matching schema for filename '{schema}'.")
+    elif len(schemas) > 1:
+        warn(f"Found more than one matching schema for filename '{schema}'.")
+    return schemas[0]
+
 
 # asdf read/write debug tools functions ---------------------------------------
 
@@ -113,30 +141,38 @@ def write_read_buffer(
     return read_buffer(buffer, open_kwargs)
 
 
-def get_yaml_header(file) -> str:
+def get_yaml_header(file, parse=False) -> Union[str, dict]:
     """Read the YAML header part (excluding binary sections) of an ASDF file.
 
     Parameters
     ----------
-    file
+    file :
         filename, ``pathlib.Path`` or ``BytesIO`` buffer of ASDF file
 
+    parse :
+        if True, returns the interpreted YAML header as dict
     Returns
     -------
-    str
-        The YAML header the ASDF file
+    str, dict
+        The YAML header as string the ASDF file, if parse is False. Or if parse is True,
+        return the parsed header.
 
     """
+
+    def read_header(handle):
+        # reads lines until the byte string "...\n" is approached.
+        return b"".join(iter(handle.readline, b"...\n"))
+
     if isinstance(file, BytesIO):
         file.seek(0)
-        code = file.read()
+        code = read_header(file)
     else:
         with open(file, "rb") as f:
-            code = f.read()
+            code = read_header(f)
 
-    parts = code.partition(b"\n...")
-    code = parts[0].decode("utf-8") + parts[1].decode("utf-8")
-    return code
+    if parse:
+        return asdf.yamlutil.load_tree(code)
+    return code.decode("utf-8")
 
 
 # backward compatibility, remove when adopted to public funcs in notebooks etc.

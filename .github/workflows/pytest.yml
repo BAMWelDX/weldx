@@ -57,13 +57,13 @@ jobs:
 
       - name: run pytest
         run: |
-          pytest -n 2 --runslow
+          pytest -n 2 --runslow --dist=loadfile
           echo "Exited with '$?'"
 
       - name: run pytest on notebooks (append coverage)
         if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         run: |
-          pytest -n 2 --dist loadscope --nbval --current-env --cov-append tutorials/
+          pytest -n 2 --dist loadfile --nbval --current-env --cov-append tutorials/
           echo "Exited with '$?'"
 
       - name: coverage xml (combination is performed by pytest-cov)

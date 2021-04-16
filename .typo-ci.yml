@@ -59,6 +59,7 @@ excluded_words:
   - linalg
   - matmul
   - ndarray
+  - ndarrays
   - ndim
   - newaxis
   - tolist
@@ -155,6 +156,9 @@ excluded_words:
   - nsecond
   - iterutils
   - pyproject
+  - pyargs
+  - argnames
+  - argvalues
   # German ---------------------------------------
   - Bundesanstalt
   - für
