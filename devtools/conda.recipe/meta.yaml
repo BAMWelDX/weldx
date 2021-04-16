@@ -2,10 +2,10 @@
 
 package:
   name: weldx
-  version: {{ data["version"] }}
+  version: {{ data.get("version") }}
 
 source:
-    path: ..
+    path: ../..
 
 build:
   number: 0
@@ -13,7 +13,7 @@ build:
   script: pip install . -v
 
 requirements:
-  host:
+  build:
     - pip
     - setuptools_scm
     - python >=3.8
@@ -28,11 +28,13 @@ test:
   requires:
     - pytest
     - pytest-xdist
+  files:
+    - conftest.py
   imports:
     - weldx
     - weldx.visualization
   commands:
-    - pytest --pyargs weldx.tests -n auto
+    - pytest --pyargs weldx.tests -n auto --dist=loadfile
 
 about:
   home: https://www.bam.de/Content/EN/Projects/WelDX/weldx.html

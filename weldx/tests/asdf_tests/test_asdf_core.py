@@ -2,6 +2,7 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 import pytest
@@ -665,3 +666,19 @@ class TestPointCloud:
         )["point_cloud"]
 
         assert np.all(pc_file.coordinates == pc.coordinates)
+
+
+# --------------------------------------------------------------------------------------
+# Graph
+# --------------------------------------------------------------------------------------
+class TestGraph:
+    @staticmethod
+    def test_graph_serialization():
+        g = nx.DiGraph()
+        g.add_edges_from(
+            [("A", "B"), ("A", "C"), ("A", "F"), ("D", "C"), ("B", "H"), ("X", "A")]
+        )
+        g2 = _write_read_buffer({"graph": g})["graph"]
+
+        assert all(e in g.edges for e in g2.edges)
+        assert all(n in g.nodes for n in g2.nodes)

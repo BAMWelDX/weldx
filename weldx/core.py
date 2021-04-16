@@ -1,16 +1,19 @@
 """Collection of common classes and functions."""
+from __future__ import annotations
 
-from typing import Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import pint
-import sympy
 import xarray as xr
 
 import weldx.util as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+
+if TYPE_CHECKING:
+    import sympy
 
 __all__ = ["MathematicalExpression", "TimeSeries"]
 
@@ -32,6 +35,8 @@ class MathematicalExpression:
             expression.
 
         """
+        import sympy
+
         if not isinstance(expression, sympy.Expr):
             expression = sympy.sympify(expression)
         self._expression = expression

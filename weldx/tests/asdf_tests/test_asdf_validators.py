@@ -11,6 +11,7 @@ from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestC
 from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass
 from weldx.asdf.util import _write_read_buffer
 from weldx.asdf.validators import _compare_tag_version, _custom_shape_validator
+from weldx.util import compare_nested
 
 
 @pytest.mark.parametrize(
@@ -181,7 +182,11 @@ def test_shape_validation_error_exception(shape, exp, err):
     ],
 )
 def test_shape_validator(test_input):
-    _write_read_buffer({"root": test_input})
+    result = _write_read_buffer(
+        {"root": test_input},
+    )["root"]
+    assert compare_nested(test_input.__dict__, result.__dict__)
+    assert compare_nested(result.__dict__, test_input.__dict__)
 
 
 @pytest.mark.parametrize(

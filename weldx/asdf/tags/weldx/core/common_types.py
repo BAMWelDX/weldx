@@ -10,6 +10,7 @@ from weldx.asdf.types import WeldxType
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
+# Dimension ----------------------------------------------------------------------------
 @dataclass
 class Dimension:
     """
@@ -75,6 +76,7 @@ class DimensionTypeASDF(WeldxType):
         return Dimension(tree["name"], tree["length"])
 
 
+# Variable -----------------------------------------------------------------------------
 @dataclass
 class Variable:
     """Represents an n-dimensional piece of data."""
