@@ -17,7 +17,6 @@ examples:
         direction: fwd
         target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
           name: A
-          edges: []
   -
     - An edge pointing from node B.
     - |
@@ -25,7 +24,6 @@ examples:
         direction: bwd
         target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
           name: B
-          edges: []
 
 type: object
 properties:

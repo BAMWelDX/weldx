@@ -34,7 +34,6 @@ examples:
                 target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
                   name: H
                   attributes: {node_attr: 3.14}
-                  edges: []
           - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
             direction: fwd
             attributes: {edge_attr: 42}
@@ -48,7 +47,6 @@ examples:
                 target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
                   name: D
                   attributes: {node_attr: 3.14}
-                  edges: []
 
 
 type: object
