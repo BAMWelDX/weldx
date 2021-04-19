@@ -1,71 +1,180 @@
-import unittest
+import os
+import pathlib
 from io import BytesIO
-from pathlib import Path
+import tempfile
+import pytest
 
-from kisa.weldx_file import WeldxFile
+
+from weldx import WeldxFile
+from weldx.asdf.file import SupportsFileReadWrite
 
 
-# TODO: parameterize with physical file and BytesIO
-class TestWeldXFile(unittest.TestCase):
-    def setUp(self) -> None:
-        self.filename = Path("..", "scripts", "data", "asdf_ref_00000.asdf")
-        self.software = dict(
-            software="weldx_file_test", author="me", homepage="no", version="1"
-        )
-        self.fh = WeldxFile(self.filename)
+class WritableFile:
+    """example of a class implementing SupportsFileReadWrite"""
 
-    def test_from_buffer(self):
-        with open(self.filename, "rb") as fh:
-            buff = BytesIO(fh.read())
-        WeldxFile(buff)
+    def __init__(self):
+        self.to_wrap = BytesIO()
+
+    def read(self, *args, **kwargs):
+        return self.to_wrap.read(*args, **kwargs)
+
+    def write(self, *args, **kwargs):
+        return self.to_wrap.write(*args, **kwargs)
+
+    def tell(self, *args, **kwargs):
+        return self.to_wrap.tell(*args, **kwargs)
+
+    def seek(self, *args, **kwargs):
+        return self.to_wrap.seek(*args, **kwargs)
+
+    def flush(self):
+        """Simulate flush by rewinding to the beginning of the buffer."""
+        self.seek(0)
+
+
+def test_protocol_check(tmpdir):
+    assert isinstance(WritableFile(), SupportsFileReadWrite)
+    assert isinstance(BytesIO(), SupportsFileReadWrite)
+
+    # real file:
+    f = tempfile.mktemp(dir=tmpdir)
+    assert isinstance(open(f, "w"), SupportsFileReadWrite)
+
+
+@pytest.mark.usefixtures("single_pass_weld_asdf")
+class TestWeldXFile:
+    @pytest.fixture(autouse=True)
+    def setUp(self, *args, **kwargs):
+        copy_for_test = self.make_copy(self.single_pass_weld_file)
+        self.fh = WeldxFile(copy_for_test, *args, **kwargs)
+
+    # TODO: test all ctor arg combinations for file arg: Union[None, types_file_like]
+
+    def test_from_physical_file(self, tmpdir):
+        """tests WeldxFile() for str and pathlib.Path"""
+        fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+        self.fh.write_to(fn)
+        assert WeldxFile(fn)["history"]
+        path = pathlib.Path(fn)
+        assert WeldxFile(path)["history"]
+
+    def test_create_from_tree_create_buff(self):
+        """tests wrapper creation from a dictionary."""
+        tree = dict(foo="bar")
+        # creates a buffer
+        self.fh = WeldxFile(filename_or_file_like=None, tree=tree)
+        new_file = self.make_copy(self.fh)
+        assert WeldxFile(new_file)["foo"] == "bar"
+
+    def test_create_from_tree_given_output_fn(self, tmpdir):
+        """tests wrapper creation from a dictionary."""
+        tree = dict(foo="bar")
+        # should write to file
+        fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+        self.fh = WeldxFile(filename_or_file_like=fn, tree=tree)
+        new_file = self.make_copy(self.fh)
+        assert WeldxFile(new_file)["foo"] == "bar"
+
+    def test_create_from_tree(self, tmpdir):
+        """tests wrapper creation from a dictionary."""
+        tree = dict(foo="bar")
+        # TODO: actually this would be a case for pytests parameterization, but...
+        # it doesn't support fixtures in parameterization yet.
+        for fd in [BytesIO(), tempfile.mktemp(suffix=".asdf", dir=tmpdir)]:
+            fh = WeldxFile(fd, tree=tree)
+            fh["another"] = "entry"
+            # sync to new file.
+            new_file = self.make_copy(fh)
+            # check tree changes have been written.
+            fh2 = WeldxFile(new_file)
+            assert fh2["foo"] == "bar"
+            assert fh["another"] == "entry"
+
+    def test_create_writable_protocol(self):
+        f = WritableFile()
+        w = WeldxFile(f, tree=dict(test="yes"))
+        new_file = self.make_copy(f.to_wrap)
+        assert WeldxFile(new_file)["test"] == "yes"
 
     def make_copy(self, fh):
         buff = BytesIO()
-        fh.write_to(buff)
+        if isinstance(fh, WeldxFile):
+            fh.write_to(buff)
+        elif isinstance(fh, BytesIO):
+            fh.seek(0)
+            buff.write(fh.read())
         buff.seek(0)
         return buff
 
-    def test_raise_operation_on_closed(self):
+    def test_operation_on_closed(self):
         self.fh.close()
-        with self.assertRaises(IOError):
-            _ = self.fh["process"]
+        assert self.fh["process"]
+
+        # cannot access closed handles
+        with pytest.raises(RuntimeError):
+            self.fh.file_handle
+
+    def test_operation_on_closed_mem_mapped(self):
+        self.single_pass_weld_file.seek(0)
+        fh = WeldxFile(
+            self.single_pass_weld_file,
+            asdf_args=dict(copy_arrays=False, lazy_load=True),
+        )
+        fh.close()
+        # FIXME: why is the tree still valid, after closing the file?
+        assert fh["process"]
 
     def test_update_on_close(self):
-        """ A Weldxfile with mode="rw" should write changes on close."""
+        """A WeldxFile with mode="rw" should write changes on close."""
         buff = self.make_copy(self.fh)
-        fh2 = WeldxFile(buff, mode="rw")
+        fh2 = WeldxFile(buff, mode="rw", sync=True)
         fh2["test"] = True
         fh2.close()
         buff.seek(0)
         fh3 = WeldxFile(buff, mode="r")
         assert fh3["test"]
 
-    def test_context_manageable(self):
-        """check the file handle gets closed."""
+    @pytest.mark.parametrize("sync", [True, False])
+    def test_context_manageable(self, sync):
+        """Check the file handle gets closed."""
         copy = self.fh.write_to()
-        with WeldxFile(copy, mode="rw", asdf_args=dict()) as fh:
+        with WeldxFile(copy, mode="rw", asdf_args=dict(), sync=sync) as fh:
+            assert "something" not in fh["wx_metadata"]
             fh["wx_metadata"]["something"] = True
-            # prior closing in the context, we take another copy
-            copy2 = fh.write_to()
 
-        fh2 = WeldxFile(copy2)
-        assert fh2["wx_metadata"]["something"]
+        copy.seek(0)
+        with WeldxFile(copy, mode="r") as fh2:
+            if sync:
+                assert fh2["wx_metadata"]["something"]
+            else:
+                assert "something" not in fh2["wx_metadata"]
 
     def test_history(self):
+        """test custom software specs for history entries."""
+        buff = BytesIO()
+        software = dict(
+            name="weldx_file_test", author="marscher", homepage="http://no", version="1"
+        )
+        self.fh = WeldxFile(
+            buff,
+            tree=self.single_pass_weld_tree,
+            software_history_entry=software,
+            mode="rw",
+        )
         self.fh["wx_metadata"]["something"] = True
         desc = "added some metadata"
-        with self.fh:
-            self.fh.add_history_entry(desc)
+        self.fh.add_history_entry(desc)
+        self.fh.sync()
         buff = self.make_copy(self.fh)
 
         new_fh = WeldxFile(buff)
         assert new_fh["wx_metadata"]["something"]
         assert new_fh.history[-1]["description"] == desc
-        assert new_fh.history[-1]["software"] == self.software
+        assert new_fh.history[-1]["software"] == software
 
         del new_fh["wx_metadata"]["something"]
         other_software = dict(
-            software="name", version="42", homepage="no", author="anon"
+            name="software name", version="42", homepage="no", author="anon"
         )
         new_fh.add_history_entry("removed some metadata", software=other_software)
         buff2 = self.make_copy(new_fh)

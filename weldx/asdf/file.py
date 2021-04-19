@@ -1,6 +1,5 @@
 import pathlib
 from collections import UserDict
-from collections.abc import MutableMapping
 from io import BytesIO, IOBase
 from typing import Optional, Protocol, Union, runtime_checkable, Mapping
 
@@ -49,7 +48,8 @@ class WeldxFile(UserDict):
     Parameters
     ----------
     filename_or_file_like :
-        a path to a weldx file or file handle like to read data from.
+        a path to a weldx file or file handle like to read/write data from.
+        If None is passed, an in-memory file will be created.
     mode :
         reading or reading/writing mode: "r" or "rw"
     asdf_args :
@@ -68,18 +68,17 @@ class WeldxFile(UserDict):
 
     def __init__(
         self,
-        filename_or_file_like: Union[str, pathlib.Path, types_file_like],
+        filename_or_file_like: Union[None, str, pathlib.Path, types_file_like],
         mode: str = "r",
         asdf_args: Mapping = None,
         tree: Mapping = None,
         sync: bool = True,
         software_history_entry: Mapping = None,
     ):
+        # TODO: default asdf_args?
+        # e.g: asdf_args = {"copy_arrays": True}
         if asdf_args is None:
             asdf_args = {}
-
-        # default asdf_kwargs?
-        # TODO: open_kwargs = {"copy_arrays": True}
 
         self._quality_standard = (
             asdf_args["custom_schema"] if "custom_schema" in asdf_args else None
@@ -89,22 +88,29 @@ class WeldxFile(UserDict):
             raise ValueError("mode not allowed in asdf_args, but only mode")
         self.mode = mode
 
-        self.sync = bool(sync)
+        self.sync_upon_close = bool(sync)
 
         # let asdf.open handle/raise exceptions
+        extensions = [WeldxExtension(), WeldxAsdfExtension()]
+
+        # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree:
-            asdf_file = AsdfFile(tree=tree)
+            asdf_file = AsdfFile(tree=tree, extensions=extensions)
+            if filename_or_file_like is None:
+                filename_or_file_like = BytesIO()
             asdf_file.write_to(filename_or_file_like, **asdf_args)
-        else:
-            asdf_file = asdf.open(
-                filename_or_file_like,
-                mode=mode,
-                extensions=[WeldxExtension(), WeldxAsdfExtension()],
-                **asdf_args,
-            )
+            if isinstance(filename_or_file_like, SupportsFileReadWrite):
+                filename_or_file_like.seek(0)
+
+        asdf_file = asdf.open(
+            filename_or_file_like,
+            mode=mode,
+            extensions=extensions,
+            **asdf_args,
+        )
         self._asdf_handle: asdf.AsdfFile = asdf_file
 
-        # UserDict interface, we want to store a reference to the tree, but the ctor
+        # UserDict interface: we want to store a reference to the tree, but the ctor
         # of UserDict takes a copy, so we do it manually here.
         super(WeldxFile, self).__init__()
         self.data = self._asdf_handle.tree
@@ -122,9 +128,20 @@ class WeldxFile(UserDict):
             self._DEFAULT_SOFTWARE_ENTRY = software_history_entry
 
     @classmethod
-    def from_tree(cls, tree: dict, **asdf_kwargs):
+    def from_tree(cls, tree: Mapping, **asdf_kwargs):
+        """creates a new WeldxFile from given dictionary backed by a memory file.
+
+        Parameters
+        ----------
+        tree :
+            a dictionary like object to write to the new WeldxFile.
+
+        asdf_kwargs :
+            additional ASDF keywords to pass to the WeldxFile file creation.
+
+        """
         buff = BytesIO()
-        asdf_file = AsdfFile(tree, **asdf_kwargs)
+        asdf_file = AsdfFile(tree=tree, **asdf_kwargs)
         asdf_file.write_to(buff)
         buff.seek(0)
         return cls(
@@ -140,7 +157,7 @@ class WeldxFile(UserDict):
 
     def close(self):
         """Close this file and sync it, if mode is read/write."""
-        if self.mode == "rw" and self.sync:
+        if self.mode == "rw" and self.sync_upon_close:
             self._asdf_handle.update()
         self._asdf_handle.close()
 
