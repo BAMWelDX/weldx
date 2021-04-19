@@ -1,12 +1,28 @@
-import os
 import pathlib
-from io import BytesIO
 import tempfile
-import pytest
+from io import BytesIO, IOBase
 
+import asdf
+import pytest
 
 from weldx import WeldxFile
 from weldx.asdf.file import SupportsFileReadWrite
+
+
+class ReadOnlyFile(IOBase):
+    def __init__(self, tmpdir):
+        fn = tempfile.mktemp(suffix='.asdf', dir=tmpdir)
+        with open(fn, 'wb') as fh:
+            asdf.AsdfFile(tree=dict(hi="there")).write_to(fh)
+        self.file_read_only = open(fn, mode='rb')
+        self.mode = "r"
+        assert not self.closed
+
+    def read(self, *args, **kwargs):
+        return self.file_read_only.read(*args, **kwargs)
+
+    def readable(self):
+        return True
 
 
 class WritableFile:
@@ -41,6 +57,7 @@ def test_protocol_check(tmpdir):
     assert isinstance(open(f, "w"), SupportsFileReadWrite)
 
 
+# TODO: we do not need such a large test setup here!
 @pytest.mark.usefixtures("single_pass_weld_asdf")
 class TestWeldXFile:
     @pytest.fixture(autouse=True)
@@ -92,9 +109,13 @@ class TestWeldXFile:
 
     def test_create_writable_protocol(self):
         f = WritableFile()
-        w = WeldxFile(f, tree=dict(test="yes"))
+        WeldxFile(f, tree=dict(test="yes"))  # this should write the tree to f.
         new_file = self.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
+
+    def test_create_readonly_protocol(self, tmpdir):
+        f = ReadOnlyFile(tmpdir)
+        WeldxFile(f)
 
     def make_copy(self, fh):
         buff = BytesIO()
@@ -105,6 +126,11 @@ class TestWeldXFile:
             buff.write(fh.read())
         buff.seek(0)
         return buff
+
+    def test_write_to(self):
+        buff = self.fh.write_to()
+        buff2 = self.make_copy(self.fh)
+        assert buff.getvalue() == buff2.getvalue()
 
     def test_operation_on_closed(self):
         self.fh.close()
@@ -143,6 +169,7 @@ class TestWeldXFile:
             fh["wx_metadata"]["something"] = True
 
         copy.seek(0)
+        # check if changes have been written back according to sync flag.
         with WeldxFile(copy, mode="r") as fh2:
             if sync:
                 assert fh2["wx_metadata"]["something"]

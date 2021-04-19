@@ -8,7 +8,8 @@ from asdf import AsdfFile
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
 
-
+#TODO: asdf internally checks interfaces sometimes by attribute, sometimes if it is an instance of io.IOBase etc.
+# so this is actually too broad!
 @runtime_checkable
 class SupportsFileReadOnly(Protocol):
     """Type interface for read()."""
@@ -277,17 +278,17 @@ class WeldxFile(UserDict):
     def quality_standard(self) -> Optional[str]:
         return self._quality_standard
 
-    def __setitem__(self, key, value):
-        # FIXME: this only handles top level write access! So we got to wrap the ASDFEntries?
-        # FIXME: is not called upon weldxfile['foo'] = 'bar' ...#
-        # so better make it explicit, if users change something, they are responsible
-        # to add a proper history entry.
-        import textwrap
-
-        short_value_str = textwrap.shorten(str(value), 30)
-        change_desc = f"set '{key}' to '{short_value_str}'"
-        self.add_history_entry(change_desc)
-        self._asdf_handle[key] = value
+    # def __setitem__(self, key, value):
+    #     # FIXME: this only handles top level write access! So we got to wrap the ASDFEntries?
+    #     # FIXME: is not called upon weldxfile['foo'] = 'bar' ...#
+    #     # so better make it explicit, if users change something, they are responsible
+    #     # to add a proper history entry.
+    #     import textwrap
+    #
+    #     short_value_str = textwrap.shorten(str(value), 30)
+    #     change_desc = f"set '{key}' to '{short_value_str}'"
+    #     self.add_history_entry(change_desc)
+    #     self._asdf_handle[key] = value
 
     def __delitem__(self, item):
         del self._asdf_handle.tree[item]
@@ -349,7 +350,6 @@ class WeldxFile(UserDict):
 
     def _repr_json_(self):
         # fake this to be an instance of dict for json repr
-        from unittest.mock import patch
 
         from weldx.asdf.util import asdf_json_repr
 
