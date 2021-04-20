@@ -151,6 +151,7 @@ class GenericEquipment:
 
 # todo: - which classes can be removed?
 #       - tutorial
+#       - define union of data types that can be stored as signal data
 
 #       - transformation -> only units
 #       - source -> signal
@@ -173,6 +174,8 @@ class MeasurementChain:
             Name of the measurement chain
         source :
             The source of the measurement chain
+        signal_data :
+            Measured data of the sources' signal
 
         """
         from networkx import DiGraph
@@ -181,12 +184,9 @@ class MeasurementChain:
         self._source = source
         self._source_equipment = None
         self._prev_added_signal = None
-
         self._graph = DiGraph()
-        self._add_signal(
-            node_id=source.name,
-            signal=source.output_signal,
-        )
+
+        self._add_signal(node_id=source.name, signal=source.output_signal)
         if signal_data is not None:
             self.add_signal_data(signal_data)  # todo : test
 
@@ -198,31 +198,61 @@ class MeasurementChain:
         source_error: Error,
         output_signal_type: str = None,
         output_signal_unit: str = None,
-        output_signal: Signal = None,
         signal_data: xr.DataArray = None,
-    ):
+    ) -> "MeasurementChain":
+        """Create a new measurement chain without providing a `SignalSource` instance.
+
+        Parameters
+        ----------
+        name :
+            Name of the measurement chain
+        source_name :
+            Name of the source
+        source_error :
+            Error of the source
+        output_signal_type :
+            Type of the output signal ('analog' or 'digital')
+        output_signal_unit :
+            Unit of the output signal
+        signal_data :
+            Measured data of the sources' signal
+
+        Returns
+        -------
+        MeasurementChain :
+            New measurement chain
+
+        """
         source = SignalSource(
             source_name,
             Signal(output_signal_type, output_signal_unit, signal_data),
             source_error,
         )
-        return MeasurementChain(name, source)
+        return cls(name, source)
 
-    @staticmethod
-    def construct_from_source(name, source: SignalSource):
+    @classmethod
+    def from_equipment(
+        cls, name, equipment: GenericEquipment, source_name=None
+    ) -> "MeasurementChain":
+        """Create a measurement chain from a piece of equipment that contains a source.
 
-        return MeasurementChain(
-            name=name,
-            source_name=source.name,
-            source_error=source.error,
-            output_signal_type=None,
-            output_signal_unit=None,
-            output_signal=source.output_signal,
-            signal_data=None,
-        )
+        Parameters
+        ----------
+        name :
+            Name of the measurement chain
+        equipment :
+            A piece of equipment that contains one or more sources
+        source_name :
+            In case the provided equipment has more than one source, the desired one can
+            be selected by name. If it only has a single source, this parameter can be
+            set to `None` (default)
 
-    @staticmethod
-    def construct_from_equipment(name, equipment: GenericEquipment, source_name=None):
+        Returns
+        -------
+        MeasurementChain :
+            New measurement chain
+
+        """
         if len(equipment.sources) > 1:
             if source_name is None:
                 raise ValueError(
@@ -235,7 +265,7 @@ class MeasurementChain:
         else:
             raise ValueError("The equipment does not have a source.")
 
-        mc = MeasurementChain(name, source)
+        mc = cls(name, source)
         mc._source_equipment = equipment
         return mc
 
@@ -254,25 +284,20 @@ class MeasurementChain:
     def _add_signal(
         self,
         node_id: str,
-        signal_type: str = None,
-        unit: str = None,
         signal: Signal = None,
     ):
-        """Add a new signal node to internal graph.
+        """Add a new signal node to the internal graph.
 
         Parameters
         ----------
         node_id :
             The name that will be used for the internal graphs' node. This is identical
             to the name of the signals source.
-        signal_type :
-            Type of the signal (analog or digital)
-        unit :
-            Unit of the signal
+        signal :
+            The signal that should be added
 
         """
         self._raise_if_node_exist(node_id)
-        signal = self._create_signal(signal_type, unit, signal)
 
         self._graph.add_node(node_id, signal=signal)
         self._prev_added_signal = node_id
@@ -304,7 +329,7 @@ class MeasurementChain:
             raise KeyError(f"No signal with source '{node}' found")
 
     def _raise_if_data_exist(self, source_name: str):
-        """Raise an error if a data set with the passed name already exists.
+        """Raise an error if the signal from the passed source already has data.
 
         Parameters
         ----------
@@ -314,8 +339,10 @@ class MeasurementChain:
 
         """
         self._raise_if_node_does_not_exist(source_name)
-        if "data" in self._graph.nodes[source_name]:
-            raise KeyError("The measurement chain already contains data for '{name}'.")
+        if self._graph.nodes[source_name]["signal"].data is not None:
+            raise KeyError(
+                f"The measurement chain already contains data for '{source_name}'."
+            )
 
     def _check_and_get_node_name(self, node_name: str) -> str:
         """Check if a node is part of the internal graph and return its name.
@@ -334,24 +361,27 @@ class MeasurementChain:
             self._raise_if_node_does_not_exist(node_name)
         return node_name
 
-    @staticmethod
-    def _create_signal(signal_type: str, unit: str, signal: Signal) -> Signal:
-        if signal is None:
-            if signal_type is None or unit is None:
-                raise ValueError(
-                    "You need to provide a signal type AND unit. Alternatively, an "
-                    "already existing Signal can be passed."
-                )
-            return Signal(signal_type, unit)
-        else:
-            if signal_type is not None and unit is not None:
-                warnings.warn(
-                    "Provided signal type and/or unit is ignored because an existing "
-                    "signal was passed."
-                )
-            return signal
+    def _signal_after_transformation(
+        self, transformation: SignalTransformation, input_signal: Signal, data
+    ) -> Signal:
+        """Get the signal that is produced by the provided transformation.
 
-    def _signal_after_transformation(self, transformation, input_signal, data):
+        Parameters
+        ----------
+        transformation :
+            A transformation
+        input_signal :
+            The input signal to the transformation
+        data :
+            A set of data that is measured after the transformation was applied. It is
+            added to the returned signal
+
+        Returns
+        -------
+        Signal :
+            The resulting signal
+
+        """
         from weldx import Q_
 
         if transformation.func is not None:
@@ -388,18 +418,18 @@ class MeasurementChain:
 
         return Signal(signal_type=output_type, unit=output_unit, data=data)
 
-    # todo: rename to create_transformation
     def create_transformation(
         self,
         name: str,
         error: Error,
         output_signal_type: str = None,
+        output_signal_unit: str = None,
         func: "MathematicalExpression" = None,
         input_signal_source: str = None,
         data=None,
         # expected output unit as optional safety parameter?
     ):
-        """Add transformation to the measurement chain.
+        """Create and add a transformation to the measurement chain.
 
         Parameters
         ----------
@@ -410,9 +440,14 @@ class MeasurementChain:
         output_signal_type :
             Type of the output signal (analog or digital)
         output_signal_unit :
-            Unit of the output signal
+            Unit of the output signal. If a function is provided, it is not necessary to
+            provide this parameter since it can be derived from the function. In case
+            both, the function and the unit are provided, an exception is raised if a
+            mismatch is detected. This functionality may be used as extra safety layer.
+            If no function is provided, a simple unit conversion function is created.
         func :
-            A function describing the transformation
+            A function describing the transformation. The provided value interacts
+            with the 'output_signal_unit' parameter as described in its documentation
         input_signal_source :
             The source of the signal that should be used as input of the transformation.
             If `None` is provided, the name of the last added transformation (or the
@@ -435,6 +470,25 @@ class MeasurementChain:
         input_signal_source: str = None,
         transformation_name=None,
     ):
+        """Add a transformation from a piece of equipment.
+
+        Parameters
+        ----------
+        equipment :
+            The equipment that contains the transformation
+        data :
+            A set of measurement data that is associated with the output signal of the
+            transformation
+        input_signal_source :
+            The source of the signal that should be used as input of the transformation.
+            If `None` is provided, the name of the last added transformation (or the
+            source, if no transformation was added to the chain) is used.
+        transformation_name :
+            In case the provided piece of equipment contains multiple transformations,
+            this parameter can be used to select one by name. If it only contains a
+            single transformation, this parameter can be set to ´None´ (default)
+
+        """
         if len(equipment.data_transformations) > 1:
             if transformation_name is None:
                 raise ValueError(
@@ -483,6 +537,9 @@ class MeasurementChain:
         ----------
         transformation :
             The class containing the transformation data.
+        data :
+            A set of measurement data that is associated with the output signal of the
+            transformation
         input_signal_source :
             The source of the signal that should be used as input of the transformation.
             If `None` is provided, the name of the last added transformation (or the
@@ -504,7 +561,7 @@ class MeasurementChain:
         )
 
     def get_signal_data(self, source_name: str = None) -> xr.DataArray:
-        """
+        """Get the data from a signal
 
         Parameters
         ----------
