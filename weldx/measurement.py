@@ -13,18 +13,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 # measurement --------------------------------------------------------------------------
-@dataclass
-class Data:
-    """Simple dataclass implementation for measurement data."""
-
-    name: str
-    data: xr.DataArray  # skipcq: PTC-W0052
-
-    def __eq__(self, other):
-        """Check for equality with other object."""
-        if not isinstance(other, Data):
-            return False
-        return self.name == other.name and self.data.identical(other.data)
 
 
 @dataclass
@@ -40,23 +28,11 @@ class Signal:
 
     signal_type: str
     unit: str
-    data: Union[Data, None] = None
+    data: xr.DataArray = None
 
     def __post_init__(self):
         if self.signal_type not in ["analog", "digital"]:
             raise ValueError(f"{self.signal_type} is an invalid signal type.")
-
-
-@dataclass
-class DataTransformation:
-    """Simple dataclass implementation for signal transformations."""
-
-    name: str
-    input_signal: Signal
-    output_signal: Signal
-    error: Error
-    func: str = None
-    meta: str = None
 
 
 @dataclass
@@ -778,5 +754,5 @@ class Measurement:
     """Simple dataclass implementation for generic measurements."""
 
     name: str
-    data: Data
+    data: xr.DataArray
     measurement_chain: MeasurementChain
