@@ -5,7 +5,6 @@ from typing import Tuple, Union
 from warnings import warn
 
 import asdf
-import yaml
 from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
@@ -183,7 +182,7 @@ _write_read_buffer = write_read_buffer
 
 
 def notebook_fileprinter(file, lexer="YAML"):
-    """Print the code from file/BytesIO  to notebook cell with syntax highlighting.
+    """Print the code from file/BytesIO to notebook cell with syntax highlighting.
 
     Parameters
     ----------
@@ -259,8 +258,7 @@ def view_tree(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
     else:
         root = "/"
 
-    code = get_yaml_header(file)
-    yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
+    yaml_dict = get_yaml_header(file, parse=True)
     if path:
         root = root + "/".join(path)
         yaml_dict = get_path(yaml_dict, path)
