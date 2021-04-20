@@ -1,0 +1,40 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/graph/di_edge-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0"
+
+title: |
+  Graph edge.
+description: |
+  A directed graph edge.
+
+examples:
+  -
+    - An edge pointing to node A.
+    - |
+      !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+        direction: fwd
+        target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+          name: A
+  -
+    - An edge pointing from node B.
+    - |
+      !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+        direction: bwd
+        target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+          name: B
+
+type: object
+properties:
+  direction:
+    type: string
+    enum: [fwd, bwd]
+  target_node:
+    tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
+  attributes:
+    type: object
+
+required: [target_node]
+propertyOrder: [direction, attributes, target_node]
+...

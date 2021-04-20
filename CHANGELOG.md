@@ -1,18 +1,27 @@
 # Release Notes
 
-
 ## 0.4.0 (unreleased)
 
 ### added
+
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
-- added `util.compare_nested` to check equality of two nested data structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
+- added `util.compare_nested` to check equality of two nested data
+  structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
 
 ### changes
+
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
 - move tests folder to `weldx/tests` [[#323]](https://github.com/BAMWelDX/weldx/pull/323)
-- `get_yaml_header` received a new option parse, which optionally returns the parsed YAML
-  header as `asdf.tagged.TaggedDict`. [[#338]](https://github.com/BAMWelDX/weldx/pull/338)
+- `get_yaml_header` received a new option parse, which optionally returns the parsed YAML header
+  as `asdf.tagged.TaggedDict`. [[#338]](https://github.com/BAMWelDX/weldx/pull/338)
+- refactor `asdf_json_repr` into `view_tree` [[#339]](https://github.com/BAMWelDX/weldx/pull/339)
 
+### ASDF
+
+- add `uuid-1.0.0.yaml` schema as basic version 4 UUID
+  implementation [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
+- add `core/graph/di_node`, `core/graph/di_edge` & `core/graph/di_graph` for implementing a
+  generic `networkx.DiGraph` [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
 
 ## 0.3.3 (30.03.2021)
 
