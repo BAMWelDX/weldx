@@ -1,3 +1,4 @@
+import io
 import pathlib
 import tempfile
 from io import BytesIO, IOBase
@@ -9,14 +10,13 @@ from weldx import WeldxFile
 from weldx.asdf.file import SupportsFileReadWrite
 
 
-class ReadOnlyFile(IOBase):
+class ReadOnlyFile(io.IOBase):
     def __init__(self, tmpdir):
         fn = tempfile.mktemp(suffix='.asdf', dir=tmpdir)
         with open(fn, 'wb') as fh:
             asdf.AsdfFile(tree=dict(hi="there")).write_to(fh)
         self.file_read_only = open(fn, mode='rb')
-        self.mode = "r"
-        assert not self.closed
+        self.mode = 'rb'
 
     def read(self, *args, **kwargs):
         return self.file_read_only.read(*args, **kwargs)
@@ -113,9 +113,15 @@ class TestWeldXFile:
         new_file = self.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
 
+    @pytest.mark.skip("https://github.com/asdf-format/asdf/issues/975")
     def test_create_readonly_protocol(self, tmpdir):
         f = ReadOnlyFile(tmpdir)
         WeldxFile(f)
+
+    def test_read_only_raise_on_write(self, tmpdir):
+        f = ReadOnlyFile(tmpdir)
+        with pytest.raises(ValueError):
+            WeldxFile(f, mode='rw')
 
     def make_copy(self, fh):
         buff = BytesIO()
