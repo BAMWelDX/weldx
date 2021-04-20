@@ -8,7 +8,7 @@ from asdf import AsdfFile
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
 
-#TODO: asdf internally checks interfaces sometimes by attribute, sometimes if it is an instance of io.IOBase etc.
+# TODO: asdf internally checks interfaces sometimes by attribute, sometimes if it is an instance of io.IOBase etc.
 # so this is actually too broad!
 @runtime_checkable
 class SupportsFileReadOnly(Protocol):
@@ -49,19 +49,19 @@ class WeldxFile(UserDict):
     Parameters
     ----------
     filename_or_file_like :
-        a path to a weldx file or file handle like to read/write data from.
+        A path to a weldx file or file handle like to read/write data from.
         If None is passed, an in-memory file will be created.
     mode :
-        reading or reading/writing mode: "r" or "rw"
+        Reading or reading/writing mode: "r" or "rw".
     asdf_args :
-        see `asdf.open` for reference.
+        See `asdf.open` for reference.
     tree :
-        an optional dictionary to write to the file.
+        An optional dictionary to write to the file.
     sync :
         If True, the changes to file will be written upon closing this. This is only
         relevant, if the file has been opened in write mode.
     software_history_entry :
-        a optional dictionary which will be used to add history entries upon
+        An optional dictionary which will be used to add history entries upon
         modification of the file. It has to provide the following keys:
         ("name", "author", "homepage", "version")
 
@@ -69,7 +69,9 @@ class WeldxFile(UserDict):
 
     def __init__(
         self,
-        filename_or_file_like: Union[None, str, pathlib.Path, types_file_like],
+        filename_or_file_like: Optional[
+            Union[str, pathlib.Path, types_file_like]
+        ] = None,
         mode: str = "r",
         asdf_args: Mapping = None,
         tree: Mapping = None,
@@ -78,6 +80,7 @@ class WeldxFile(UserDict):
     ):
         # TODO: default asdf_args?
         # e.g: asdf_args = {"copy_arrays": True}
+        # TODO: shall we store the ctor asdf args for later usage? (e.g. to pass them to methods like update, write_to etc.
         if asdf_args is None:
             asdf_args = {}
 
@@ -94,11 +97,12 @@ class WeldxFile(UserDict):
         # let asdf.open handle/raise exceptions
         extensions = [WeldxExtension(), WeldxAsdfExtension()]
 
+        if filename_or_file_like is None:
+            filename_or_file_like = BytesIO()
+
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree:
             asdf_file = AsdfFile(tree=tree, extensions=extensions)
-            if filename_or_file_like is None:
-                filename_or_file_like = BytesIO()
             asdf_file.write_to(filename_or_file_like, **asdf_args)
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
                 filename_or_file_like.seek(0)
@@ -344,14 +348,15 @@ class WeldxFile(UserDict):
             fd.seek(0)
         return fd
 
-    # def _repr_html_(self) -> Optional[str]:
-    #    from weldx.asdf.util import notebook_fileprinter
-    #    return notebook_fileprinter(self.copy_to_buffer()).__html__()
+    def _repr_html_(self) -> Optional[str]:
+        from weldx.asdf.util import notebook_fileprinter
 
-    def _repr_json_(self):
-        # fake this to be an instance of dict for json repr
+        return notebook_fileprinter(self.c).__html__()
 
-        from weldx.asdf.util import asdf_json_repr
+    # def _repr_json_(self):
+    #    # jupyter visualization of the serialized tree
 
-        # with patch("kisa.weldx_file.WeldxFile.__class__", dict):
-        return asdf_json_repr(self.copy_to_buffer())  # ._repr_json_()
+
+#     from weldx.asdf.util import view_tree
+
+#    return view_tree(self.file_handle)
