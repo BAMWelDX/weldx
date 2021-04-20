@@ -92,7 +92,6 @@ class TestMeasurementChain:
             method. Missing arguments are added.
 
         """
-
         kwargs = TestMeasurementChain._default_init_kwargs(kwargs)
         MeasurementChain(**kwargs)
 

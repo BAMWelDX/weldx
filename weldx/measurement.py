@@ -1,13 +1,11 @@
 """Contains measurement related classes and functions."""
 
-import warnings
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 
 import xarray as xr
 
 if TYPE_CHECKING:  # pragma: no cover
-    from networkx import DiGraph
 
     from weldx.core import MathematicalExpression, TimeSeries
 
@@ -31,12 +29,15 @@ class Signal:
     data: xr.DataArray = None
 
     def __post_init__(self):
+        """Perform some checks after construction."""
         if self.signal_type not in ["analog", "digital"]:
             raise ValueError(f"{self.signal_type} is an invalid signal type.")
 
 
 @dataclass
 class SignalTransformation:
+    """Describes the transformation of a signal."""
+
     name: str
     error: Error
     func: "MathematicalExpression" = None
@@ -45,6 +46,7 @@ class SignalTransformation:
     io_types: str = None
 
     def __post_init__(self):
+        """Perform some tests after construction."""
         if self.io_types is not None:
             self.io_types = self.io_types.upper()
             if self.io_types not in ["AA", "AD", "DA", "DD"]:
@@ -60,12 +62,11 @@ class SignalTransformation:
             self._evaluate_function()
 
     def _evaluate_function(self):
-        from weldx import Q_
-
+        """Evaluate the internal function."""
         variables = self.func.get_variable_names()
         if len(variables) != 1:
             raise ValueError("The provided function must have exactly one parameter")
-        variable_name = variables[0]
+        # variable_name = variables[0]
 
         # test_input = Q_(1, self.input_signal.unit)
         # try:
@@ -102,24 +103,66 @@ class GenericEquipment:
     sources: List = field(default_factory=lambda: [])
     data_transformations: List = field(default_factory=lambda: [])
 
-    def get_source(self, name):
+    def get_source(self, name: str) -> SignalSource:
+        """Get a source by its name.
+
+        Parameters
+        ----------
+        name :
+            Name of
+
+        Returns
+        -------
+        SignalSource :
+            The requested source
+
+        """
         for source in self.sources:
             if source.name == name:
                 return source
         raise KeyError(f"No source with name '{name}' found.")
 
     @property
-    def source_names(self):
+    def source_names(self) -> List[str]:
+        """Get the names of all sources.
+
+        Returns
+        -------
+        List[str] :
+            Names of all sources
+
+        """
         return [source.name for source in self.sources]
 
-    def get_transformation(self, name):
+    def get_transformation(self, name: str) -> SignalTransformation:
+        """Get a transformation by its name.
+
+        Parameters
+        ----------
+        name :
+            Name of the transformation
+
+        Returns
+        -------
+        SignalTransformation :
+            The requested transformation
+
+        """
         for transformation in self.data_transformations:
             if transformation.name == name:
                 return transformation
         raise KeyError(f"No transformation with name '{name}' found.")
 
     @property
-    def transformation_names(self):
+    def transformation_names(self) -> List[str]:
+        """Get the names of all transformations.
+
+        Returns
+        -------
+        List[str] :
+            Names of all transformations
+
+        """
         return [transformation.name for transformation in self.data_transformations]
 
 
@@ -245,17 +288,18 @@ class MeasurementChain:
         mc._source_equipment = equipment
         return mc
 
-    @staticmethod
-    def construct_from_tree(tree: Dict) -> "MeasurementChain":
-        mc = MeasurementChain(
-            name=tree["name"],
-            source_name="source",
-            source_error=Error(1),
-            output_signal_type="analog",
-            output_signal_unit="V",
-        )
+    @classmethod
+    def from_dict(cls, dictionary: Dict) -> "MeasurementChain":
+        """Create a measurement chain from a dictionary.
+
+        Parameters
+        ----------
+        dictionary :
+            A dictionary containing all relevant data
+
+        """
+        pass
         # todo: implement correct version, when schema is ready
-        return mc
 
     def _add_signal(
         self,
@@ -401,8 +445,8 @@ class MeasurementChain:
         output_signal_type: str = None,
         output_signal_unit: str = None,
         func: "MathematicalExpression" = None,
-        input_signal_source: str = None,
         data=None,
+        input_signal_source: str = None,
         # expected output unit as optional safety parameter?
     ):
         """Create and add a transformation to the measurement chain.
@@ -424,12 +468,16 @@ class MeasurementChain:
         func :
             A function describing the transformation. The provided value interacts
             with the 'output_signal_unit' parameter as described in its documentation
+        data :
+            A set of measurement data that is associated with the output signal of the
+            transformation
         input_signal_source :
             The source of the signal that should be used as input of the transformation.
             If `None` is provided, the name of the last added transformation (or the
             source, if no transformation was added to the chain) is used.
 
         """
+        # todo: implement output_signal_unit features as described in docstring
         input_signal_source = self._check_and_get_node_name(input_signal_source)
         input_signal = self._graph.nodes[input_signal_source]["signal"]
 
@@ -537,7 +585,7 @@ class MeasurementChain:
         )
 
     def get_signal_data(self, source_name: str = None) -> xr.DataArray:
-        """Get the data from a signal
+        """Get the data from a signal.
 
         Parameters
         ----------

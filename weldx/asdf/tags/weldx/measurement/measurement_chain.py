@@ -1,5 +1,5 @@
 from weldx.asdf.types import WeldxType
-from weldx.measurement import Error, MeasurementChain
+from weldx.measurement import MeasurementChain
 
 __all__ = [
     "MeasurementChain",
