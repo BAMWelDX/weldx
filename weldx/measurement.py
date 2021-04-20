@@ -63,11 +63,25 @@ class DataTransformation:
 class SignalTransformation:
     name: str
     error: Error
-    input_signal: Signal
-    output_signal: Signal
     func: "MathematicalExpression" = None
     input_shape: Tuple = None
     output_shape: Tuple = None
+    io_types: str = None
+
+    def __post_init__(self):
+        if self.io_types is not None:
+            self.io_types = self.io_types.upper()
+            if self.io_types not in ["AA", "AD", "DA", "DD"]:
+                raise ValueError(
+                    f"Invalid type transformation: {self.io_types}\n"
+                    "Valid values are 'AA', 'AD', 'DA' and 'DD'."
+                )
+
+        if self.func is None and self.io_types is None:
+            raise ValueError("No transformation specified")
+
+        if self.func is not None:
+            self._evaluate_function()
 
     def _evaluate_function(self):
         from weldx import Q_
@@ -77,25 +91,21 @@ class SignalTransformation:
             raise ValueError("The provided function must have exactly one parameter")
         variable_name = variables[0]
 
-        test_input = Q_(1, self.input_signal.unit)
-        try:
-            test_output = self.func.evaluate(**{variable_name: test_input})
-        except Exception as e:
-            raise ValueError(
-                "The provided function is incompatible with the input signals unit. \n"
-                f"The test raised the following exception:\n{e}"
-            )
-        if Q_(1, self.output_signal.unit).units != test_output.units:
-            raise ValueError(
-                "The test result of the provided function has a different unit than "
-                "the specified output signal.\n"
-                f"output_signal: {self.output_signal.unit}\n"
-                f"test_result  : {test_output.units}\n"
-            )
-
-    def __post_init__(self):
-        if self.func is not None:
-            self._evaluate_function()
+        # test_input = Q_(1, self.input_signal.unit)
+        # try:
+        #    test_output = self.func.evaluate(**{variable_name: test_input})
+        # except Exception as e:
+        #    raise ValueError(
+        #        "The provided function is incompatible with the input signals unit. \n"
+        #        f"The test raised the following exception:\n{e}"
+        #    )
+        # if Q_(1, self.output_signal.unit).units != test_output.units:
+        #    raise ValueError(
+        #        "The test result of the provided function has a different unit than "
+        #        "the specified output signal.\n"
+        #        f"output_signal: {self.output_signal.unit}\n"
+        #        f"test_result  : {test_output.units}\n"
+        #    )
 
 
 @dataclass
@@ -152,11 +162,7 @@ class MeasurementChain:
     def __init__(
         self,
         name: str,
-        source_name: str,
-        source_error: Error,
-        output_signal_type: str = None,
-        output_signal_unit: str = None,
-        output_signal: Signal = None,
+        source: SignalSource,
         signal_data: xr.DataArray = None,
     ):
         """Create a new measurement chain.
@@ -165,35 +171,42 @@ class MeasurementChain:
         ----------
         name :
             Name of the measurement chain
-        source_name :
-            Name of the source
-        source_error :
-            The error of the source
-        output_signal_type :
-            Type of the source's output signal (analog or digital)
-        output_signal_unit :
-            The unit of the source's output signal
+        source :
+            The source of the measurement chain
 
         """
         from networkx import DiGraph
 
         self._name = name
-        self._source = {
-            "name": source_name,
-            "error": source_error,
-            "equipment": None,  # This is set in a different method
-        }
+        self._source = source
+        self._source_equipment = None
         self._prev_added_signal = None
 
         self._graph = DiGraph()
         self._add_signal(
-            node_id=source_name,
-            signal_type=output_signal_type,
-            unit=output_signal_unit,
-            signal=output_signal,
+            node_id=source.name,
+            signal=source.output_signal,
         )
         if signal_data is not None:
             self.add_signal_data(signal_data)  # todo : test
+
+    @classmethod
+    def from_parameters(
+        cls,
+        name: str,
+        source_name: str,
+        source_error: Error,
+        output_signal_type: str = None,
+        output_signal_unit: str = None,
+        output_signal: Signal = None,
+        signal_data: xr.DataArray = None,
+    ):
+        source = SignalSource(
+            source_name,
+            Signal(output_signal_type, output_signal_unit, signal_data),
+            source_error,
+        )
+        return MeasurementChain(name, source)
 
     @staticmethod
     def construct_from_source(name, source: SignalSource):
@@ -222,8 +235,8 @@ class MeasurementChain:
         else:
             raise ValueError("The equipment does not have a source.")
 
-        mc = MeasurementChain.construct_from_source(name, source)
-        mc._source["equipment"] = equipment
+        mc = MeasurementChain(name, source)
+        mc._source_equipment = equipment
         return mc
 
     @staticmethod
@@ -238,7 +251,13 @@ class MeasurementChain:
         # todo: implement correct version, when schema is ready
         return mc
 
-    def _add_signal(self, node_id: str, signal_type: str, unit: str, signal: Signal):
+    def _add_signal(
+        self,
+        node_id: str,
+        signal_type: str = None,
+        unit: str = None,
+        signal: Signal = None,
+    ):
         """Add a new signal node to internal graph.
 
         Parameters
@@ -332,17 +351,53 @@ class MeasurementChain:
                 )
             return signal
 
+    def _signal_after_transformation(self, transformation, input_signal, data):
+        from weldx import Q_
+
+        if transformation.func is not None:
+            variables = transformation.func.get_variable_names()
+            if len(variables) != 1:
+                raise ValueError(
+                    "The provided function must have exactly one parameter"
+                )
+            variable_name = variables[0]
+
+            test_input = Q_(1, input_signal.unit)
+            try:
+                test_output = transformation.func.evaluate(
+                    **{variable_name: test_input}
+                )
+            except Exception as e:
+                raise ValueError(
+                    "The provided function is incompatible with the input signals unit."
+                    f" \nThe test raised the following exception:\n{e}"
+                )
+            output_unit = str(
+                test_output.units
+            )  # just pass pint unit without string conversion?
+        else:
+            output_unit = input_signal.unit
+
+        if transformation.io_types is not None:
+            if transformation.io_types[1] == "A":
+                output_type = "analog"
+            else:
+                output_type = "digital"
+        else:
+            output_type = input_signal.signal_type
+
+        return Signal(signal_type=output_type, unit=output_unit, data=data)
+
     # todo: rename to create_transformation
-    def add_transformation(
+    def create_transformation(
         self,
         name: str,
         error: Error,
         output_signal_type: str = None,
-        output_signal_unit: str = None,
-        output_signal: Signal = None,
         func: "MathematicalExpression" = None,
         input_signal_source: str = None,
         data=None,
+        # expected output unit as optional safety parameter?
     ):
         """Add transformation to the measurement chain.
 
@@ -365,20 +420,18 @@ class MeasurementChain:
 
         """
         input_signal_source = self._check_and_get_node_name(input_signal_source)
+        input_signal = self._graph.nodes[input_signal_source]["signal"]
 
-        self._add_signal(
-            node_id=name,
-            signal_type=output_signal_type,
-            unit=output_signal_unit,
-            signal=output_signal,
-        )
-        self._graph.add_edge(input_signal_source, name, error=error, func=func)
-        if data is not None:
-            self.add_signal_data(data, name)
+        type_tf = f"{input_signal.signal_type[0]}{output_signal_type[0]}".upper()
+
+        transformation = SignalTransformation(name, error, func, io_types=type_tf)
+
+        self.add_transformation(transformation, data, input_signal_source)
 
     def add_transformation_from_equipment(
         self,
         equipment: GenericEquipment,
+        data=None,
         input_signal_source: str = None,
         transformation_name=None,
     ):
@@ -395,7 +448,7 @@ class MeasurementChain:
             raise ValueError("The equipment does not have a transformation.")
 
         input_signal_source = self._check_and_get_node_name(input_signal_source)
-        self.attach_transformation(transformation, input_signal_source)
+        self.add_transformation(transformation, data, input_signal_source)
         self._graph.edges[(input_signal_source, self._prev_added_signal)][
             "equipment"
         ] = equipment
@@ -418,9 +471,11 @@ class MeasurementChain:
         signal = self._graph.nodes[signal_source]["signal"]
         signal.data = data
 
-    # todo: rename to add_transformation
-    def attach_transformation(
-        self, transformation: SignalTransformation, input_signal_source: str = None
+    def add_transformation(
+        self,
+        transformation: SignalTransformation,
+        data=None,
+        input_signal_source: str = None,
     ):
         """Add a transformation from an `SignalTransformation` instance.
 
@@ -434,31 +489,18 @@ class MeasurementChain:
             source, if no transformation was added to the chain) is used.
 
         """
-        if input_signal_source is None:
-            input_signal_source = self._prev_added_signal
+        input_signal_source = self._check_and_get_node_name(input_signal_source)
+        input_signal = self._graph.nodes[input_signal_source]["signal"]
+        output_signal = self._signal_after_transformation(
+            transformation, input_signal, data
+        )
 
-        stored_signal = self._graph.nodes[input_signal_source]["signal"]
-        if (
-            transformation.input_signal.signal_type != stored_signal.signal_type
-            or transformation.input_signal.unit != stored_signal.unit
-        ):
-            raise ValueError(
-                f"The provided transformations input signal is incompatible to the "
-                f"output signal of {input_signal_source}:\n"
-                f"transformation: {transformation.input_signal.signal_type} in ["
-                f"{transformation.input_signal.unit}]\n"
-                f"output signal : {stored_signal.signal_type} in [{stored_signal.unit}]"
-            )
-        print(transformation.output_signal)
-
-        self.add_transformation(
-            name=transformation.name,
-            error=transformation.error,
-            output_signal_type=None,
-            output_signal_unit=None,
-            output_signal=transformation.output_signal,
-            func=transformation.func,
-            input_signal_source=input_signal_source,
+        self._add_signal(
+            node_id=transformation.name,
+            signal=output_signal,
+        )
+        self._graph.add_edge(
+            input_signal_source, transformation.name, transformation=transformation
         )
 
     def get_signal_data(self, source_name: str = None) -> xr.DataArray:
@@ -513,8 +555,8 @@ class MeasurementChain:
             The requested equipment
 
         """
-        if signal_source == self._source["name"]:
-            return self._source.get("equipment")
+        if signal_source == self._source.name:
+            return self._source_equipment
         for edge in self._graph.edges:
             if edge[1] == signal_source:
                 return self._graph.edges[edge].get("equipment")
@@ -553,15 +595,7 @@ class MeasurementChain:
         """
         for edge in self._graph.edges:
             if edge[1] == name:
-                node_in = self._graph.nodes[edge[0]]
-                node_out = self._graph.nodes[edge[1]]
-
-                return SignalTransformation(
-                    name=name,
-                    input_signal=node_in["signal"],
-                    output_signal=node_out["signal"],
-                    **self._graph.edges[edge],
-                )
+                return self._graph.edges[edge]["transformation"]
 
         raise KeyError(f"No transformation with name '{name}' found")
 
@@ -583,10 +617,10 @@ class MeasurementChain:
         import matplotlib.pyplot as plt
         from networkx import draw, draw_networkx_edge_labels
 
-        def _transformation_label(name, data_dict: Dict) -> str:
+        def _transformation_label(name, transformation: SignalTransformation) -> str:
             text = name
-            func = data_dict.get("func")
-            error = data_dict.get("error")
+            func = transformation.func
+            error = transformation.error
             if func is not None:
                 text += f"\n{func.expression}"
             if error is not None and error.deviation != 0.0:
@@ -605,7 +639,7 @@ class MeasurementChain:
         signal_labels = {}
         positions = {}
 
-        c_node = self._source["name"]
+        c_node = self._source.name
         delta_pos = 2 / (len(graph.nodes) + 1)
         x_pos = delta_pos / 2
 
@@ -668,7 +702,9 @@ class MeasurementChain:
 
         # draw edge labels
         edge_labels = {
-            edge: _transformation_label(edge[1], self._graph.edges[edge])
+            edge: _transformation_label(
+                edge[1], self._graph.edges[edge]["transformation"]
+            )
             for edge in self._graph.edges
         }
 
