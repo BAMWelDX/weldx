@@ -1,27 +1,28 @@
-import io
 import pathlib
 import tempfile
-from io import BytesIO, IOBase
+from io import BytesIO
 
 import asdf
 import pytest
 
 from weldx import WeldxFile
 from weldx.asdf.file import SupportsFileReadWrite
+from weldx.asdf.util import get_schema_path
 
 
-class ReadOnlyFile(io.IOBase):
+class ReadOnlyFile:
     def __init__(self, tmpdir):
-        fn = tempfile.mktemp(suffix='.asdf', dir=tmpdir)
-        with open(fn, 'wb') as fh:
+        fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+        with open(fn, "wb") as fh:
             asdf.AsdfFile(tree=dict(hi="there")).write_to(fh)
-        self.file_read_only = open(fn, mode='rb')
-        self.mode = 'rb'
+        self.file_read_only = open(fn, mode="rb")
+        self.mode = "rb"
 
     def read(self, *args, **kwargs):
         return self.file_read_only.read(*args, **kwargs)
 
-    def readable(self):
+    @staticmethod
+    def readable():
         return True
 
 
@@ -37,8 +38,8 @@ class WritableFile:
     def write(self, *args, **kwargs):
         return self.to_wrap.write(*args, **kwargs)
 
-    def tell(self, *args, **kwargs):
-        return self.to_wrap.tell(*args, **kwargs)
+    def tell(self):
+        return self.to_wrap.tell()
 
     def seek(self, *args, **kwargs):
         return self.to_wrap.seek(*args, **kwargs)
@@ -65,10 +66,17 @@ class TestWeldXFile:
         copy_for_test = self.make_copy(self.single_pass_weld_file)
         self.fh = WeldxFile(copy_for_test, *args, **kwargs)
 
-    # TODO: test all ctor arg combinations for file arg: Union[None, types_file_like]
+    @pytest.mark.parametrize("mode", ["rb", "wb", "a"])
+    def test_invalid_mode(self, mode):
+        with pytest.raises(ValueError):
+            WeldxFile(None, mode=mode)
 
     def test_from_physical_file(self, tmpdir):
-        """tests WeldxFile() for str and pathlib.Path"""
+        fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+        WeldxFile(fn, tree=dict(), mode="rw")
+
+    def test_write_to(self, tmpdir):
+        """tests WeldxFile.write_to for str and pathlib.Path"""
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
         self.fh.write_to(fn)
         assert WeldxFile(fn)["history"]
@@ -88,7 +96,7 @@ class TestWeldXFile:
         tree = dict(foo="bar")
         # should write to file
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
-        self.fh = WeldxFile(filename_or_file_like=fn, tree=tree)
+        self.fh = WeldxFile(filename_or_file_like=fn, tree=tree, mode='rw')
         new_file = self.make_copy(self.fh)
         assert WeldxFile(new_file)["foo"] == "bar"
 
@@ -121,7 +129,20 @@ class TestWeldXFile:
     def test_read_only_raise_on_write(self, tmpdir):
         f = ReadOnlyFile(tmpdir)
         with pytest.raises(ValueError):
-            WeldxFile(f, mode='rw')
+            WeldxFile(f, mode="rw")
+
+    def test_create_but_no_overwrite_existing(self, tmpdir):
+        """never (accidentally) overwrite existing files!"""
+        f = tempfile.mktemp(dir=tmpdir)
+        with open(f, "w") as fh:
+            fh.write("something")
+        with pytest.raises(FileExistsError) as e:
+            WeldxFile(f, mode="rw")
+
+    def test_update_existing_asdf_file(self, tmpdir):
+        f = tempfile.mktemp(dir=tmpdir)
+        self.fh.write_to(f)
+        WeldxFile(f, mode="rw")
 
     def make_copy(self, fh):
         buff = BytesIO()
@@ -146,15 +167,19 @@ class TestWeldXFile:
         with pytest.raises(RuntimeError):
             self.fh.file_handle
 
-    def test_operation_on_closed_mem_mapped(self):
-        self.single_pass_weld_file.seek(0)
+    def test_operation_on_closed_mem_mapped(self, tmpdir):
+        import numpy as np
+
+        x = np.random.random(100)
         fh = WeldxFile(
-            self.single_pass_weld_file,
-            asdf_args=dict(copy_arrays=False, lazy_load=True),
+            filename_or_file_like=tmpdir / "test_map",
+            tree=dict(x=x),
+            asdffile_kwargs=dict(copy_arrays=False, lazy_load=True),
         )
         fh.close()
-        # FIXME: why is the tree still valid, after closing the file?
-        assert fh["process"]
+        fh["x"]
+        # # FIXME: why is the tree still valid, after closing the file?
+        # assert fh["process"]
 
     def test_update_on_close(self):
         """A WeldxFile with mode="rw" should write changes on close."""
@@ -170,7 +195,7 @@ class TestWeldXFile:
     def test_context_manageable(self, sync):
         """Check the file handle gets closed."""
         copy = self.fh.write_to()
-        with WeldxFile(copy, mode="rw", asdf_args=dict(), sync=sync) as fh:
+        with WeldxFile(copy, mode="rw", sync=sync) as fh:
             assert "something" not in fh["wx_metadata"]
             fh["wx_metadata"]["something"] = True
 
@@ -188,17 +213,17 @@ class TestWeldXFile:
         software = dict(
             name="weldx_file_test", author="marscher", homepage="http://no", version="1"
         )
-        self.fh = WeldxFile(
+        fh = WeldxFile(
             buff,
             tree=self.single_pass_weld_tree,
             software_history_entry=software,
             mode="rw",
         )
-        self.fh["wx_metadata"]["something"] = True
+        fh["wx_metadata"]["something"] = True
         desc = "added some metadata"
-        self.fh.add_history_entry(desc)
-        self.fh.sync()
-        buff = self.make_copy(self.fh)
+        fh.add_history_entry(desc)
+        fh.sync()
+        buff = self.make_copy(fh)
 
         new_fh = WeldxFile(buff)
         assert new_fh["wx_metadata"]["something"]
@@ -212,3 +237,12 @@ class TestWeldXFile:
         new_fh.add_history_entry("removed some metadata", software=other_software)
         buff2 = self.make_copy(new_fh)
         fh3 = WeldxFile(buff2)
+
+    def test_custom_schema(self):
+        schema = get_schema_path("single_pass_weld-1.0.0.schema")
+        w = WeldxFile(tree={"foo": "bar"}, asdffile_kwargs=dict(custom_schema=schema))
+        assert w.custom_schema == schema
+
+    def test_jupyter_repr(self):
+        pass
+        # TODO: should be tested using weldxfile in notebooks, right?

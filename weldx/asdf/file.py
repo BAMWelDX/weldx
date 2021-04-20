@@ -1,7 +1,11 @@
 import pathlib
-from collections import UserDict
+from collections import UserDict, MutableMapping
 from io import BytesIO, IOBase
-from typing import Optional, Protocol, Union, runtime_checkable, Mapping
+from typing import Optional, Protocol, Union, runtime_checkable, Mapping, Tuple
+
+from asdf.asdf import is_asdf_file
+
+from weldx.asdf.util import get_yaml_header
 
 import asdf
 from asdf import AsdfFile
@@ -53,13 +57,19 @@ class WeldxFile(UserDict):
         If None is passed, an in-memory file will be created.
     mode :
         Reading or reading/writing mode: "r" or "rw".
-    asdf_args :
+    open_kwargs :
+        Keyword arguments to pass to asdf.open.
         See `asdf.open` for reference.
+    write_kwargs :
+        Keyword arguments to pass to AsdfFile.write_to.
+        See `asdf.AsdfFile.open` for reference.
     tree :
         An optional dictionary to write to the file.
     sync :
         If True, the changes to file will be written upon closing this. This is only
         relevant, if the file has been opened in write mode.
+    custom_schema :
+        a path-like object to a custom schema which validates the tree.
     software_history_entry :
         An optional dictionary which will be used to add history entries upon
         modification of the file. It has to provide the following keys:
@@ -73,37 +83,65 @@ class WeldxFile(UserDict):
             Union[str, pathlib.Path, types_file_like]
         ] = None,
         mode: str = "r",
-        asdf_args: Mapping = None,
+        asdffile_kwargs: Mapping = None,
+        write_kwargs: Mapping = None,
         tree: Mapping = None,
         sync: bool = True,
+        custom_schema: Union[str, pathlib.Path] = None,
         software_history_entry: Mapping = None,
     ):
         # TODO: default asdf_args?
         # e.g: asdf_args = {"copy_arrays": True}
-        # TODO: shall we store the ctor asdf args for later usage? (e.g. to pass them to methods like update, write_to etc.
-        if asdf_args is None:
-            asdf_args = {}
+        if write_kwargs is None:
+            write_kwargs = {}
+        self._write_kwargs = write_kwargs
 
-        self._custom_schema = (
-            asdf_args["custom_schema"] if "custom_schema" in asdf_args else None
-        )
+        if asdffile_kwargs is None:
+            asdffile_kwargs = {}
 
-        if "mode" in asdf_args:
-            raise ValueError("mode not allowed in asdf_args, but only mode")
+        self._asdffile_kwargs = asdffile_kwargs
+        self._custom_schema = custom_schema
+
+        if mode not in ("r", "rw"):
+            raise ValueError(
+                f'invalid mode "{mode}" given. Should be one of "r", "rw".'
+            )
         self.mode = mode
-
         self.sync_upon_close = bool(sync)
+        self.software_history_entry = software_history_entry
 
-        # let asdf.open handle/raise exceptions
-        extensions = [WeldxExtension(), WeldxAsdfExtension()]
-
+        new_file_created = False
         if filename_or_file_like is None:
             filename_or_file_like = BytesIO()
+            new_file_created = True
+        elif isinstance(filename_or_file_like, (str, pathlib.Path)):
+            if mode == "rw":
+                if not pathlib.Path(filename_or_file_like).exists():
+                    new_file_created = True
+                    _real_mode = (
+                        "bx+"  # binary, exclusive creation, e.g. raise if exists.
+                    )
+                else:
+                    if not is_asdf_file(filename_or_file_like):
+                        raise FileExistsError(
+                            f"given file {filename_or_file_like}"
+                            " is not an ASDF file and could be overwritten."
+                        )
+                    _real_mode = 'br+'
+            else:
+                _real_mode = "rb"
+            try:
+                filename_or_file_like = open(filename_or_file_like, mode=_real_mode)
+            except FileExistsError as e:
+                raise FileExistsError(
+                    f"Refused to open existing file in write mode. {e}"
+                )
 
+        extensions = [WeldxExtension(), WeldxAsdfExtension()]
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
-        if tree:
+        if tree or new_file_created:
             asdf_file = AsdfFile(tree=tree, extensions=extensions)
-            asdf_file.write_to(filename_or_file_like, **asdf_args)
+            asdf_file.write_to(filename_or_file_like, **write_kwargs)
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
                 filename_or_file_like.seek(0)
 
@@ -111,7 +149,7 @@ class WeldxFile(UserDict):
             filename_or_file_like,
             mode=mode,
             extensions=extensions,
-            **asdf_args,
+            **asdffile_kwargs,
         )
         self._asdf_handle: asdf.AsdfFile = asdf_file
 
@@ -120,7 +158,13 @@ class WeldxFile(UserDict):
         super(WeldxFile, self).__init__()
         self.data = self._asdf_handle.tree
 
-        if software_history_entry is None:
+    @property
+    def software_history_entry(self):
+        return self._DEFAULT_SOFTWARE_ENTRY
+
+    @software_history_entry.setter
+    def software_history_entry(self, value):
+        if value is None:
             from weldx import __version__ as version
 
             self._DEFAULT_SOFTWARE_ENTRY = {
@@ -130,27 +174,29 @@ class WeldxFile(UserDict):
                 "version": version,
             }
         else:
-            self._DEFAULT_SOFTWARE_ENTRY = software_history_entry
+            # TODO: validate it here, or let asdf fail?
+            self._DEFAULT_SOFTWARE_ENTRY = value
 
     @classmethod
-    def from_tree(cls, tree: Mapping, **asdf_kwargs):
+    def from_tree(
+        cls,
+        tree: Mapping,
+        asdffile_kwargs: Mapping = None,
+        write_kwargs: Mapping = None,
+    ):
         """creates a new WeldxFile from given dictionary backed by a memory file.
 
         Parameters
         ----------
         tree :
-            a dictionary like object to write to the new WeldxFile.
+            A dictionary like object to write to the new WeldxFile.
+        asdffile_kwargs :
 
-        asdf_kwargs :
-            additional ASDF keywords to pass to the WeldxFile file creation.
-
+        write_kwargs :
+            Additional keywords to pass .
         """
-        buff = BytesIO()
-        asdf_file = AsdfFile(tree=tree, **asdf_kwargs)
-        asdf_file.write_to(buff)
-        buff.seek(0)
         return cls(
-            buff,
+            tree=tree, asdffile_kwargs=asdffile_kwargs, write_kwargs=write_kwargs
         )
 
     def __enter__(self):
@@ -301,13 +347,30 @@ class WeldxFile(UserDict):
 
     @property
     # TODO: should we actually expose this? It allows advanced operations for adults.
+    # TODO: return type is also not guaranteed to be IOBase, right?
     def file_handle(self) -> IOBase:
         if self._asdf_handle._closed:
             raise RuntimeError("closed file, cannot access file handle.")
         return self._asdf_handle._fd._fd
 
-    @property
-    def as_attr(self):
+    def as_attr(self) -> MutableMapping:
+        """Return the Weldx dictionary as an attributed object.
+
+        Returns
+        -------
+        attrdict :
+            This dictionary wrapped such, that all of its keys can be accessed as
+            properties.
+
+        Examples
+        --------
+        >>> tree = dict(wx_meta={"welder": "Nikolai Nikolajewitsch Benardos"})
+        >>> wf = WeldxFile(tree=tree)
+        >>> wfa = wf.as_attr()
+        >>> wfa.wx_meta.welder
+        'Nikolai Nikolajewitsch Benardos'
+
+        """
         import attrdict
 
         return attrdict.AttrDict(self)
@@ -348,15 +411,61 @@ class WeldxFile(UserDict):
             fd.seek(0)
         return fd
 
-    def _repr_html_(self) -> Optional[str]:
-        from weldx.asdf.util import notebook_fileprinter
+    def view_tree(self, path: Tuple = None):
+        """Display YAML header
 
-        return notebook_fileprinter(self.c).__html__()
+        Parameters
+        ----------
+        path :
+            tuple representing the lookup path in the YAML/ASDF tree.
 
-    # def _repr_json_(self):
-    #    # jupyter visualization of the serialized tree
+        Returns
+        -------
 
+        """
+        from weldx.asdf.util import view_tree
 
-#     from weldx.asdf.util import view_tree
+        return view_tree(self.file_handle, path=path)
 
-#    return view_tree(self.file_handle)
+    def _header_as_tree(self):
+        from ipytree import Tree, Node
+
+        header = get_yaml_header(self.file_handle, parse=True)
+        tree = Tree()
+        for x in header:
+            node = Node(x)
+            tree.add_node(node)
+            for child in x:
+                child_node = Node(child)
+                node.add_node(child_node)
+        return tree
+
+    def show_asdf_header(self, _interactive=None):
+        # TODO: what if the file is out of sync? shall we enforce sync or write to temp file (which could be huge?)
+        def _interactive():
+            from weldx.asdf.util import notebook_fileprinter
+
+            return notebook_fileprinter(self.file_handle)
+
+        def _non_interactive():
+            return get_yaml_header(self.file_handle, parse=True)
+
+        # automatically determine if this runs in an interactive sesseion.
+        if _interactive is None:
+
+            def is_interactive():
+                import __main__ as main
+
+                return not hasattr(main, "__file__")
+
+            if is_interactive():
+                return _interactive()
+            else:
+                return self.show_asdf_header(_interactive=False)
+        elif _interactive is False:
+            return _non_interactive()
+        else:
+            return _interactive()
+
+    def _repr_json_(self):
+        self.show_asdf_header(_interactive=False)
