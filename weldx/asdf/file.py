@@ -81,7 +81,7 @@ class WeldxFile(UserDict):
         if asdf_args is None:
             asdf_args = {}
 
-        self._quality_standard = (
+        self._custom_schema = (
             asdf_args["custom_schema"] if "custom_schema" in asdf_args else None
         )
 
@@ -275,8 +275,8 @@ class WeldxFile(UserDict):
         return self._asdf_handle.get_history_entries()
 
     @property
-    def quality_standard(self) -> Optional[str]:
-        return self._quality_standard
+    def custom_schema(self) -> Optional[str]:
+        return self._custom_schema
 
     # def __setitem__(self, key, value):
     #     # FIXME: this only handles top level write access! So we got to wrap the ASDFEntries?
