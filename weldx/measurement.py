@@ -2,8 +2,10 @@
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
-from weldx.asdf.tags.weldx.core.graph import build_tree
+
 import xarray as xr
+
+from weldx.asdf.tags.weldx.core.graph import build_graph, build_tree
 
 if TYPE_CHECKING:  # pragma: no cover
 
@@ -298,7 +300,15 @@ class MeasurementChain:
             A dictionary containing all relevant data
 
         """
-        pass
+        mc = MeasurementChain(name=dictionary["name"], source=dictionary["data_source"])
+        mc._graph = build_graph(dictionary["source_signal"])
+        for node in mc._graph.nodes:
+            if len(list(mc._graph.successors(node))) == 0:
+                mc._prev_added_signal = node
+                break
+
+        return mc
+
         # todo: implement correct version, when schema is ready
 
     def _add_signal(

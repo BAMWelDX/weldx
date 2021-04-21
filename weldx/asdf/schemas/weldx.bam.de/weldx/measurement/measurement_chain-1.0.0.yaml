@@ -7,10 +7,10 @@ tag: "tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0"
 title: |
   Schema that describes a measurement_chain
 description: |
-  A measurement chain describes the differed steps that are performed to acquire experimental data. It collects all
+  A measurement chain describes the different steps that are performed to acquire experimental data. It collects all
   relevant information about the initial source signal and the involved transformations. In this schema, the fundamental
   data representation of the measurement chain is a directed graph with the signals being the nodes and the
-  transformations being the edges
+  transformations being the edges.
 
 #example: Add when schema is accepted
 

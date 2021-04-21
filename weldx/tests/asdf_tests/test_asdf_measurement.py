@@ -44,8 +44,8 @@ def test_coordinate_system_manager(copy_arrays, lazy_load):
     tree = {"m_chain": mc}
     with asdf.AsdfFile(tree) as ff:
         ff.write_to("test.yaml")
-    # data = _write_read_buffer(
-    #    tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
-    # )
-    # mc_file = data["m_chain"]
+    data = _write_read_buffer(
+        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )
+    mc_file = data["m_chain"]
     # assert mc == mc_file
