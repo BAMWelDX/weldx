@@ -6,19 +6,64 @@ tag: "tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0"
 
 title: |
   Schema that describes a measurement_chain
+description: |
+  A measurement chain describes the differed steps that are performed to acquire experimental data. It collects all
+  relevant information about the initial source signal and the involved transformations. In this schema, the fundamental
+  data representation of the measurement chain is a directed graph with the signals being the nodes and the
+  transformations being the edges
+
+#example: Add when schema is accepted
+
+definitions:
+  signal_node:
+    allOf:
+      - tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
+      - type: object
+        properties:
+          attributes:
+            type: object
+            properties:
+              signal:
+                tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
+            required: [signal]
+          edges:
+            type: array
+            items:
+              $ref: "#/definitions/signal_transform_edge"
+            maxItems: 1
+        required: [attributes]
+
+  signal_transform_edge:
+    allOf:
+      - tag: "tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0"
+      - type: object
+        properties:
+          attributes:
+            type: object
+            properties:
+              transformation:
+                tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0"
+              #equipment: -> equipment that provides the transformation
+            required: [transformation]
+          target_node:
+            $ref: "#/definitions/signal_node"
+          direction:
+            enum: [fwd]
+        required: [attributes]
+
+
 type: object
 properties:
   name:
     type: string
   data_source:
     tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
-  data_processors:
-    type: array
-    items:
-      tag: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
+  # source_equipment -> equipment that provides the source
+  source_signal:
+     $ref: "#/definitions/signal_node"
 
 
-propertyOrder: [name, data_source, data_processors]
-required: [name, data_source]
+propertyOrder: [name, data_source, source_signal]
+required: [name, data_source, source_signal]
 flowStyle: block
 ...

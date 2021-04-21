@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
-
+from weldx.asdf.tags.weldx.core.graph import build_tree
 import xarray as xr
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -43,19 +43,19 @@ class SignalTransformation:
     func: "MathematicalExpression" = None
     input_shape: Tuple = None
     output_shape: Tuple = None
-    type_tf: str = None
+    type_transformation: str = None
 
     def __post_init__(self):
         """Perform some tests after construction."""
-        if self.type_tf is not None:
-            self.type_tf = self.type_tf.upper()
-            if self.type_tf not in ["AA", "AD", "DA", "DD"]:
+        if self.type_transformation is not None:
+            self.type_transformation = self.type_transformation.upper()
+            if self.type_transformation not in ["AA", "AD", "DA", "DD"]:
                 raise ValueError(
-                    f"Invalid type transformation: {self.type_tf}\n"
+                    f"Invalid type transformation: {self.type_transformation}\n"
                     "Valid values are 'AA', 'AD', 'DA' and 'DD'."
                 )
 
-        if self.func is None and self.type_tf is None:
+        if self.func is None and self.type_transformation is None:
             raise ValueError("No transformation specified")
 
         if self.func is not None:
@@ -437,15 +437,19 @@ class MeasurementChain:
         else:
             output_unit = input_signal.unit
 
-        if transformation.type_tf is not None:
-            exp_signal_type = self._letter_to_signal_type(transformation.type_tf[0])
+        if transformation.type_transformation is not None:
+            exp_signal_type = self._letter_to_signal_type(
+                transformation.type_transformation[0]
+            )
             if input_signal.signal_type != exp_signal_type:
                 raise ValueError(
                     f"The transformation expects an {exp_signal_type} as input signal, "
                     f"but the current signal is {input_signal.signal_type}."
                 )
 
-            output_type = self._letter_to_signal_type(transformation.type_tf[1])
+            output_type = self._letter_to_signal_type(
+                transformation.type_transformation[1]
+            )
         else:
             output_type = input_signal.signal_type
 
@@ -805,6 +809,13 @@ class MeasurementChain:
         draw_networkx_edge_labels(graph, positions, edge_labels, ax=axes)
 
         return axes
+
+    def to_tree(self) -> Dict:
+        return dict(
+            name=self._name,
+            data_source=self._source,
+            source_signal=build_tree(self._graph, self._source.name),
+        )
 
 
 # DRAFT SECTION END ####################################################################
