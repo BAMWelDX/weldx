@@ -43,19 +43,19 @@ class SignalTransformation:
     func: "MathematicalExpression" = None
     input_shape: Tuple = None
     output_shape: Tuple = None
-    io_types: str = None
+    type_tf: str = None
 
     def __post_init__(self):
         """Perform some tests after construction."""
-        if self.io_types is not None:
-            self.io_types = self.io_types.upper()
-            if self.io_types not in ["AA", "AD", "DA", "DD"]:
+        if self.type_tf is not None:
+            self.type_tf = self.type_tf.upper()
+            if self.type_tf not in ["AA", "AD", "DA", "DD"]:
                 raise ValueError(
-                    f"Invalid type transformation: {self.io_types}\n"
+                    f"Invalid type transformation: {self.type_tf}\n"
                     "Valid values are 'AA', 'AD', 'DA' and 'DD'."
                 )
 
-        if self.func is None and self.io_types is None:
+        if self.func is None and self.type_tf is None:
             raise ValueError("No transformation specified")
 
         if self.func is not None:
@@ -381,6 +381,15 @@ class MeasurementChain:
             self._raise_if_node_does_not_exist(node_name)
         return node_name
 
+    @staticmethod
+    def _letter_to_signal_type(letter):
+        """Convert a single letter to the corresponding signal type."""
+        if letter == "A":
+            return "analog"
+        elif letter == "D":
+            return "digital"
+        raise ValueError(f"Can't convert '{letter}' to a signal type.")
+
     def _signal_after_transformation(
         self, transformation: SignalTransformation, input_signal: Signal, data
     ) -> Signal:
@@ -428,11 +437,15 @@ class MeasurementChain:
         else:
             output_unit = input_signal.unit
 
-        if transformation.io_types is not None:
-            if transformation.io_types[1] == "A":
-                output_type = "analog"
-            else:
-                output_type = "digital"
+        if transformation.type_tf is not None:
+            exp_signal_type = self._letter_to_signal_type(transformation.type_tf[0])
+            if input_signal.signal_type != exp_signal_type:
+                raise ValueError(
+                    f"The transformation expects an {exp_signal_type} as input signal, "
+                    f"but the current signal is {input_signal.signal_type}."
+                )
+
+            output_type = self._letter_to_signal_type(transformation.type_tf[1])
         else:
             output_type = input_signal.signal_type
 

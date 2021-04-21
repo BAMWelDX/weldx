@@ -5,7 +5,15 @@ from typing import Dict
 import pytest
 import xarray as xr
 
-from weldx.measurement import Error, MeasurementChain, Signal, SignalTransformation
+from weldx import Q_
+from weldx.core import MathematicalExpression
+from weldx.measurement import (
+    Error,
+    MeasurementChain,
+    Signal,
+    SignalSource,
+    SignalTransformation,
+)
 
 from ._helpers import get_test_name
 
@@ -16,7 +24,34 @@ class TestMeasurementChain:
     # helper functions -----------------------------------------------------------------
 
     @staticmethod
-    def _default_init_kwargs(kwargs: Dict = None) -> Dict:
+    def _default_source_kwargs(kwargs: Dict = None) -> Dict:
+        """Return a dictionary of keyword arguments required to create a `SignalSource`.
+
+        Parameters
+        ----------
+        kwargs :
+            A dictionary containing some key word arguments that should replace the
+            default ones.
+
+        Returns
+        -------
+        Dict :
+            Dictionary with keyword arguments required to create a `SignalSource`
+
+        """
+        default_kwargs = dict(
+            name="source", output_signal=Signal("analog", "V"), error=Error(0.01)
+        )
+
+        if kwargs is not None:
+            default_kwargs.update(kwargs)
+
+        return default_kwargs
+
+    @classmethod
+    def _default_init_kwargs(
+        cls, kwargs: Dict = None, source_kwargs: Dict = None
+    ) -> Dict:
         """Return a dictionary of keyword arguments required by the `__init__` method.
 
         Parameters
@@ -31,12 +66,12 @@ class TestMeasurementChain:
             Dictionary with keyword arguments for the `__init__` method
 
         """
+        source_kwargs = cls._default_source_kwargs(source_kwargs)
+
         default_kwargs = dict(
             name="name",
-            source_name="source",
-            source_error=Error(0.01),
-            output_signal_type="analog",
-            output_signal_unit="V",
+            source=SignalSource(**source_kwargs),
+            signal_data=[1, 3, 5],
         )
         if kwargs is not None:
             default_kwargs.update(kwargs)
@@ -44,8 +79,8 @@ class TestMeasurementChain:
         return default_kwargs
 
     @staticmethod
-    def _default_transformation_kwargs(kwargs: Dict = None) -> Dict:
-        """Return a dictionary of keyword arguments required by `add_transformation`.
+    def _default_transformation(kwargs: Dict = None) -> SignalTransformation:
+        """Return a default `SignalTransformation`.
 
         Parameters
         ----------
@@ -56,11 +91,39 @@ class TestMeasurementChain:
         Returns
         -------
         Dict :
-            Dictionary with keyword arguments for the `__init__` method
+            Default `SignalTransformation`
 
         """
         default_kwargs = dict(
             name="transformation",
+            error=Error(0.1),
+            func=MathematicalExpression("a*x", parameters={"a": Q_(1, "1/V")}),
+            type_tf="AD",
+        )
+        if kwargs is not None:
+            default_kwargs.update(kwargs)
+
+        return SignalTransformation(**default_kwargs)
+
+    @classmethod
+    def _default_add_transformation_kwargs(cls, kwargs: Dict = None) -> Dict:
+        """Return a dictionary of keyword arguments required by `add_transformation`.
+
+        Parameters
+        ----------
+        kwargs :
+            A dictionary containing some keyword arguments that should replace the
+            default ones.
+
+        Returns
+        -------
+        Dict :
+            Dictionary with keyword arguments for the `add_transformation` method
+
+        """
+
+        default_kwargs = dict(
+            transformation=cls._default_transformation(),
             error=Error(0.02),
             output_signal_type="digital",
             output_signal_unit="",
@@ -74,15 +137,13 @@ class TestMeasurementChain:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "kwargs",
+        "kwargs, source_kwargs",
         [
-            dict(output_signal_type="analog"),
-            dict(output_signal_type="digital"),
-            dict(output_signal_unit="V"),
-            dict(output_signal_unit="m"),
+            ({}, {}),
+            (dict(signal_data=None), dict(output_signal=Signal("analog", "V", [1]))),
         ],
     )
-    def test_init(kwargs: Dict):
+    def test_init(kwargs: Dict, source_kwargs: Dict):
         """Test the `__init__` method of the `MeasurementChain`.
 
         Parameters
@@ -90,20 +151,26 @@ class TestMeasurementChain:
         kwargs:
             A dictionary with keyword arguments that are passed to the `__init__`
             method. Missing arguments are added.
+        source_kwargs :
+            A dictionary with keyword arguments that are used to construct the
+            `SignalSource` that is passed to the `__init__` method. Missing arguments
+            are added.
 
         """
-        kwargs = TestMeasurementChain._default_init_kwargs(kwargs)
+        kwargs = TestMeasurementChain._default_init_kwargs(kwargs, source_kwargs)
         MeasurementChain(**kwargs)
 
     # test_init_exceptions -------------------------------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize(
-        "kwargs,  exception_type, test_name",
-        [(dict(output_signal_type="some type"), ValueError, "# invalid signal type")],
+        "kwargs, source_kwargs,  exception_type, test_name",
+        [({}, {"output_signal": Signal("analog", "V", [1])}, KeyError, "# 2x data")],
         ids=get_test_name,
     )
-    def test_init_exceptions(kwargs: Dict, exception_type, test_name: str):
+    def test_init_exceptions(
+        kwargs: Dict, source_kwargs: Dict, exception_type, test_name: str
+    ):
         """Test the exceptions of the `__init__` method.
 
         Parameters
@@ -111,111 +178,87 @@ class TestMeasurementChain:
         kwargs :
             A dictionary with keyword arguments that are passed to the `__init__`
             method. Missing arguments are added.
+        source_kwargs :
+            A dictionary with keyword arguments that are used to construct the
+            `SignalSource` that is passed to the `__init__` method. Missing arguments
+            are added.
         exception_type :
             The expected exception type
         test_name :
             Name of the test
 
         """
-        kwargs = TestMeasurementChain._default_init_kwargs(kwargs)
+        kwargs = TestMeasurementChain._default_init_kwargs(kwargs, source_kwargs)
         with pytest.raises(exception_type):
             MeasurementChain(**kwargs)
 
     # test_add_transformations ---------------------------------------------------------
 
-    @staticmethod
     @pytest.mark.parametrize(
-        "kwargs",
+        "tf_kwargs",
         [
-            dict(output_signal_type="analog"),
-            dict(output_signal_type="digital"),
-            dict(output_signal_unit="V"),
-            dict(output_signal_unit="m"),
+            {},
+            dict(type_tf="AA"),
+            dict(type_tf=None),
+            dict(func=None),
         ],
     )
-    def test_add_transformation(kwargs):
+    def test_add_transformation(self, tf_kwargs):
         """Test the `add_transformation` method of the `MeasurementChain`.
 
         Parameters
         ----------
-        kwargs:
-            A dictionary with keyword arguments that are passed to the
-            `add_transformation` method. Missing arguments are added.
+        tf_kwargs:
+            A dictionary with keyword arguments that are used to construct the
+            `SignalTransformation` that is passed to the `add_transformation` method.
+            Missing arguments are added.
 
         """
-        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**self._default_init_kwargs())
 
-        kwargs = TestMeasurementChain._default_transformation_kwargs(kwargs)
+        mc.add_transformation(self._default_transformation(tf_kwargs))
 
-        mc.add_transformation(**kwargs)
-
-        # todo: add assertions
+        # todo: add assertions (check returned signal)
 
     # test_add_transformation_exceptions -----------------------------------------------
 
-    @staticmethod
     @pytest.mark.parametrize(
-        "kwargs,  exception_type, test_name",
+        "tf_kwargs, input_signal_source, exception_type, test_name",
         [
-            (dict(output_signal_type="some type"), ValueError, "# invalid signal type"),
-            (dict(input_signal_source="what"), KeyError, "# invalid signal source"),
+            (dict(type_tf="DA"), None, ValueError, "# invalid input signal type #1"),
+            (dict(type_tf="DD"), None, ValueError, "# invalid input signal type #2"),
+            ({}, "not found", KeyError, "# invalid input signal source"),
         ],
         ids=get_test_name,
     )
     def test_add_transformation_exceptions(
-        kwargs: Dict, exception_type, test_name: str
+        self, tf_kwargs: Dict, input_signal_source: str, exception_type, test_name: str
     ):
         """Test the exceptions of the `add_transformation` method.
 
         Parameters
         ----------
-        kwargs :
-            A dictionary with keyword arguments that are passed to the
-            `add_transformation` method. Missing arguments are added.
+        tf_kwargs:
+            A dictionary with keyword arguments that are used to construct the
+            `SignalTransformation` that is passed to the `add_transformation` method.
+            Missing arguments are added.
+        input_signal_source :
+            The value of the corresponding parameter of 'add_transformation'
         exception_type :
             The expected exception type
         test_name :
             Name of the test
 
         """
-        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
+        mc = MeasurementChain(**self._default_init_kwargs())
 
-        kwargs = TestMeasurementChain._default_transformation_kwargs(kwargs)
+        tf = self._default_transformation(tf_kwargs)
 
         with pytest.raises(exception_type):
-            mc.add_transformation(**kwargs)
-
-    # test_get_signal ------------------------------------------------------------------
-
-    @staticmethod
-    def test_get_signal():
-        """Test the `get_signal` method.
-
-        This test assures that the returned signal is identical to the one passed
-        to the measurement chain and that a key error is raised if the specified signal
-        source is not present.
-
-        """
-        init_kwargs = TestMeasurementChain._default_init_kwargs()
-        mc = MeasurementChain(**init_kwargs)
-
-        transformation_kwargs = TestMeasurementChain._default_transformation_kwargs()
-        mc.add_transformation(**transformation_kwargs)
-
-        source_signal = mc.get_signal(init_kwargs["source_name"])
-        assert source_signal.signal_type == init_kwargs["output_signal_type"]
-        assert source_signal.unit == init_kwargs["output_signal_unit"]
-
-        tf_signal = mc.get_signal(transformation_kwargs["name"])
-        assert tf_signal.signal_type == transformation_kwargs["output_signal_type"]
-        assert tf_signal.unit == transformation_kwargs["output_signal_unit"]
-
-        with pytest.raises(KeyError):
-            mc.get_signal("not found")
+            mc.add_transformation(tf, input_signal_source=input_signal_source)
 
     # test_add_signal_data -------------------------------------------------------------
 
-    @staticmethod
     @pytest.mark.parametrize(
         "kwargs",
         [
@@ -223,7 +266,7 @@ class TestMeasurementChain:
             dict(signal_source="source"),
         ],
     )
-    def test_add_signal_data(kwargs):
+    def test_add_signal_data(self, kwargs):
         """Test the `add_signal_data` method of the `MeasurementChain`.
 
         Parameters
@@ -234,8 +277,8 @@ class TestMeasurementChain:
             added.
 
         """
-        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
-        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
+        mc = MeasurementChain(**self._default_init_kwargs({"signal_data": None}))
+        mc.add_transformation(self._default_transformation())
 
         full_kwargs = dict(data=xr.DataArray([1, 2]))
         full_kwargs.update(kwargs)
@@ -244,15 +287,18 @@ class TestMeasurementChain:
 
     # test_add_signal_data_exceptions --------------------------------------------------
 
-    @staticmethod
     @pytest.mark.parametrize(
         "kwargs,  exception_type, test_name",
         [
             (dict(signal_source="what"), KeyError, "# invalid signal source"),
+            (dict(signal_source="source"), KeyError, "# already has data #1"),
+            (dict(signal_source="transformation"), KeyError, "# already has data #2"),
         ],
         ids=get_test_name,
     )
-    def test_add_signal_data_exceptions(kwargs: Dict, exception_type, test_name: str):
+    def test_add_signal_data_exceptions(
+        self, kwargs: Dict, exception_type, test_name: str
+    ):
         """Test the exceptions of the `add_signal_data` method.
 
         Parameters
@@ -266,8 +312,11 @@ class TestMeasurementChain:
             Name of the test
 
         """
-        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
-        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
+        mc = MeasurementChain(**self._default_init_kwargs())
+        mc.add_transformation(self._default_transformation(), data=[1, 2, 3])
+        mc.add_transformation(
+            self._default_transformation(dict(name="transformation 2", type_tf="DA"))
+        )
 
         full_kwargs = dict(data=xr.DataArray([1, 2]))
         full_kwargs.update(kwargs)
@@ -277,8 +326,7 @@ class TestMeasurementChain:
 
     # test_get_signal_data -------------------------------------------------------------
 
-    @staticmethod
-    def test_get_signal_data():
+    def test_get_signal_data(self):
         """Test the `get_signal_data` method.
 
         This test assures that the returned data is identical to the one passed
@@ -288,98 +336,34 @@ class TestMeasurementChain:
         present.
 
         """
-        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
-        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
-
-        source_name = "transformation"
         data = xr.DataArray([1, 2, 3])
-        mc.add_signal_data(data, source_name)
 
-        assert mc.get_signal_data(source_name).identical(data)
+        mc = MeasurementChain(**self._default_init_kwargs())
+        mc.add_transformation(self._default_transformation(), data=data)
+
+        assert mc.get_signal_data("transformation").identical(data)
 
         with pytest.raises(KeyError):
             mc.get_signal_data("not found")
 
-    # test_get_and_attach_transformation -----------------------------------------------
+    # test_get_transformation ----------------------------------------------------------
 
-    @staticmethod
-    def test_get_and_attach_transformation():
-        """Test the `get_transformation` and `attach_transformation` methods."""
-        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
-        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
+    def test_get_transformation(self):
+        """Test the `get_transformation` method."""
+
+        mc = MeasurementChain(**self._default_init_kwargs())
+        mc.add_transformation(self._default_transformation())
 
         transformation = mc.get_transformation("transformation")
 
-        mc_2 = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
-        mc_2.attach_transformation(transformation)
-
-        transformation_2 = mc_2.get_transformation("transformation")
-
-        assert transformation == transformation_2
+        assert transformation == self._default_transformation()
 
     # test_get_transformation_exception ------------------------------------------------
 
-    @staticmethod
-    def test_get_transformation_exception():
+    def test_get_transformation_exception(self):
         """Test that a `KeyError` is raised if the transformation does not exist."""
-        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
-        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
+        mc = MeasurementChain(**self._default_init_kwargs())
+        mc.add_transformation(self._default_transformation())
 
         with pytest.raises(KeyError):
             mc.get_transformation("not found")
-
-    # test_attach_transformation_exceptions --------------------------------------------
-
-    @staticmethod
-    @pytest.mark.parametrize(
-        "tf_kwargs, signal_source, exception_type, test_name",
-        [
-            ({}, "not present", KeyError, "# invalid signal source"),
-            (
-                dict(input_signal=Signal("analog", "")),
-                None,
-                ValueError,
-                "# invalid input signal #1",
-            ),
-            (
-                dict(input_signal=Signal("digital", "2")),
-                None,
-                ValueError,
-                "# invalid input signal #2",
-            ),
-        ],
-        ids=get_test_name,
-    )
-    def test_attach_transformation_exceptions(
-        tf_kwargs: Dict, signal_source: str, exception_type, test_name: str
-    ):
-        """Test the exceptions of the `attach_transformation` method.
-
-        Parameters
-        ----------
-        tf_kwargs :
-            A dictionary with keyword arguments that are passed to the `__init__`
-            method of the `SignalTransformation` class. Missing arguments are added.
-        signal_source :
-            The source of the signal that should be transformed
-        exception_type :
-            The expected exception type
-        test_name :
-            Name of the test
-
-        """
-        mc = MeasurementChain(**TestMeasurementChain._default_init_kwargs())
-        mc.add_transformation(**TestMeasurementChain._default_transformation_kwargs())
-
-        kwargs = dict(
-            name="transformation 2",
-            error=Error(0.12),
-            input_signal=Signal("digital", ""),
-            output_signal=Signal("digital", "A"),
-        )
-        kwargs.update(tf_kwargs)
-
-        transformation = SignalTransformation(**kwargs)
-
-        with pytest.raises(exception_type):
-            mc.attach_transformation(transformation, signal_source)
