@@ -168,7 +168,7 @@ class TestWeldXFile:
         f = tempfile.mktemp(dir=tmpdir)
         with open(f, "w") as fh:
             fh.write("something")
-        with pytest.raises(FileExistsError) as e:
+        with pytest.raises(FileExistsError):
             WeldxFile(f, mode="rw")
 
     def test_update_existing_asdf_file(self, tmpdir):
@@ -269,6 +269,8 @@ class TestWeldXFile:
         new_fh.add_history_entry("removed some metadata", software=other_software)
         buff2 = self.make_copy(new_fh)
         fh3 = WeldxFile(buff2)
+        assert "removed" in fh3.history[-1]["description"]
+        assert len(fh3.history) == 2
 
     def test_custom_schema(self):
         from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
