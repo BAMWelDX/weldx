@@ -421,7 +421,7 @@ def pandas_time_delta_to_quantity(
     return Q_(nanoseconds, "ns").to(unit)
 
 
-def equal_unit_dimensionality(unit_1, unit_2):
+def equal_unit_dimensionality(unit_1, unit_2) -> bool:
     """Return `True` if two units have the same dimensionality and `False` otherwise.
 
     Parameters
