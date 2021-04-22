@@ -43,7 +43,8 @@ definitions:
             properties:
               transformation:
                 tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0"
-              #equipment: -> equipment that provides the transformation
+              equipment:
+                tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
             required: [transformation]
           target_node:
             $ref: "#/definitions/signal_node"
@@ -58,12 +59,13 @@ properties:
     type: string
   data_source:
     tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
-  # source_equipment -> equipment that provides the source
+  source_equipment:
+    tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
   source_signal:
      $ref: "#/definitions/signal_node"
 
 
-propertyOrder: [name, data_source, source_signal]
+propertyOrder: [name, data_source, source_signal, source_equipment]
 required: [name, data_source, source_signal]
 flowStyle: block
 ...

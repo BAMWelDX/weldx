@@ -211,6 +211,15 @@ class MeasurementChain:
         if signal_data is not None:
             self.add_signal_data(signal_data)  # todo : test
 
+    def __eq__(self, other: "MeasurementChain"):
+        return (
+            self._name == other._name
+            and self._source == other._source
+            and self._source_equipment == other._source_equipment
+            and self._graph.nodes == other._graph.nodes
+            and self._graph.edges == other._graph.edges
+        )
+
     @classmethod
     def from_parameters(
         cls,
@@ -302,14 +311,13 @@ class MeasurementChain:
         """
         mc = MeasurementChain(name=dictionary["name"], source=dictionary["data_source"])
         mc._graph = build_graph(dictionary["source_signal"])
+        mc._source_equipment = dictionary.get("source_equipment")
         for node in mc._graph.nodes:
             if len(list(mc._graph.successors(node))) == 0:
                 mc._prev_added_signal = node
                 break
 
         return mc
-
-        # todo: implement correct version, when schema is ready
 
     def _add_signal(
         self,
@@ -824,6 +832,7 @@ class MeasurementChain:
         return dict(
             name=self._name,
             data_source=self._source,
+            source_equipment=self._source_equipment,
             source_signal=build_tree(self._graph, self._source.name),
         )
 
