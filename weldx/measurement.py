@@ -3,8 +3,6 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 
-import xarray as xr
-
 from weldx.asdf.tags.weldx.core.graph import build_graph, build_tree
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -43,9 +41,9 @@ class SignalTransformation:
     name: str
     error: Error
     func: "MathematicalExpression" = None
+    type_transformation: str = None
     input_shape: Tuple = None
     output_shape: Tuple = None
-    type_transformation: str = None
 
     def __post_init__(self):
         """Perform some tests after construction."""
@@ -163,7 +161,7 @@ class MeasurementChain:
         self,
         name: str,
         source: SignalSource,
-        signal_data: xr.DataArray = None,
+        signal_data: "TimeSeries" = None,
     ):
         """Create a new measurement chain.
 
@@ -219,7 +217,7 @@ class MeasurementChain:
         source_error: Error,
         output_signal_type: str = None,
         output_signal_unit: str = None,
-        signal_data: xr.DataArray = None,
+        signal_data: "TimeSeries" = None,
     ) -> "MeasurementChain":
         """Create a new measurement chain without providing a `SignalSource` instance.
 
@@ -482,9 +480,8 @@ class MeasurementChain:
         output_signal_type: str = None,
         output_signal_unit: str = None,
         func: "MathematicalExpression" = None,
-        data=None,
+        data: "TimeSeries" = None,
         input_signal_source: str = None,
-        # expected output unit as optional safety parameter?
     ):
         """Create and add a transformation to the measurement chain.
 
@@ -500,8 +497,9 @@ class MeasurementChain:
             Unit of the output signal. If a function is provided, it is not necessary to
             provide this parameter since it can be derived from the function. In case
             both, the function and the unit are provided, an exception is raised if a
-            mismatch is detected. This functionality may be used as extra safety layer.
-            If no function is provided, a simple unit conversion function is created.
+            mismatch is dimensionality is detected. This functionality may be used as
+            extra safety layer. If no function is provided, a simple unit conversion
+            function is created.
         func :
             A function describing the transformation. The provided value interacts
             with the 'output_signal_unit' parameter as described in its documentation
@@ -514,14 +512,30 @@ class MeasurementChain:
             source, if no transformation was added to the chain) is used.
 
         """
-        # todo: implement output_signal_unit features as described in docstring
         input_signal_source = self._check_and_get_node_name(input_signal_source)
         input_signal = self._graph.nodes[input_signal_source]["signal"]
 
         type_tf = f"{input_signal.signal_type[0]}{output_signal_type[0]}".upper()
+        if output_signal_unit is not None:
+            if func is not None:
+                from weldx.util import equal_unit_dimensionality
 
-        transformation = SignalTransformation(name, error, func, io_types=type_tf)
+                if not equal_unit_dimensionality(
+                    output_signal_unit,
+                    self._determine_output_signal_unit(func, input_signal.unit),
+                ):
+                    raise ValueError(
+                        "The unit of the provided functions output has not the same "
+                        f"dimensionality as {output_signal_unit}"
+                    )
+            else:
+                unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
+                func = MathematicalExpression(
+                    "a*x",
+                    parameters={"a": Q_(1, unit_conversion)},
+                )
 
+        transformation = SignalTransformation(name, error, func, type_tf)
         self.add_transformation(transformation, data, input_signal_source)
 
     def add_transformation_from_equipment(
@@ -564,9 +578,9 @@ class MeasurementChain:
 
         input_signal_source = self._check_and_get_node_name(input_signal_source)
         self.add_transformation(transformation, data, input_signal_source)
-        self._graph.edges[(input_signal_source, self._prev_added_signal)][
-            "equipment"
-        ] = equipment
+
+        edge = (input_signal_source, self._prev_added_signal)
+        self._graph.edges[edge]["equipment"] = equipment
 
     def add_signal_data(self, data: "TimeSeries", signal_source: str = None):
         """Add data to a signal.
@@ -589,7 +603,7 @@ class MeasurementChain:
     def add_transformation(
         self,
         transformation: SignalTransformation,
-        data=None,
+        data: "TimeSeries" = None,
         input_signal_source: str = None,
     ):
         """Add a transformation from an `SignalTransformation` instance.
@@ -621,7 +635,7 @@ class MeasurementChain:
             input_signal_source, transformation.name, transformation=transformation
         )
 
-    def get_signal_data(self, source_name: str = None) -> xr.DataArray:
+    def get_signal_data(self, source_name: str = None) -> "TimeSeries":
         """Get the data from a signal.
 
         Parameters
@@ -633,7 +647,7 @@ class MeasurementChain:
 
         Returns
         -------
-        xarray.DataArray :
+        TimeSeries :
             The requested data
 
         """
@@ -839,13 +853,10 @@ class MeasurementChain:
         )
 
 
-# DRAFT SECTION END ####################################################################
-
-
 @dataclass
 class Measurement:
     """Simple dataclass implementation for generic measurements."""
 
     name: str
-    data: xr.DataArray
+    data: "TimeSeries"
     measurement_chain: MeasurementChain
