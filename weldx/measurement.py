@@ -8,7 +8,7 @@ import xarray as xr
 from weldx.asdf.tags.weldx.core.graph import build_graph, build_tree
 
 if TYPE_CHECKING:  # pragma: no cover
-
+    from weldx import Q_
     from weldx.core import MathematicalExpression, TimeSeries
 
 
@@ -19,7 +19,7 @@ if TYPE_CHECKING:  # pragma: no cover
 class Error:
     """Simple dataclass implementation for signal transformation errors."""
 
-    deviation: float
+    deviation: "Q_"
 
 
 @dataclass
@@ -28,7 +28,7 @@ class Signal:
 
     signal_type: str
     unit: str
-    data: xr.DataArray = None
+    data: "TimeSeries" = None
 
     def __post_init__(self):
         """Perform some checks after construction."""
@@ -68,23 +68,6 @@ class SignalTransformation:
         variables = self.func.get_variable_names()
         if len(variables) != 1:
             raise ValueError("The provided function must have exactly one parameter")
-        # variable_name = variables[0]
-
-        # test_input = Q_(1, self.input_signal.unit)
-        # try:
-        #    test_output = self.func.evaluate(**{variable_name: test_input})
-        # except Exception as e:
-        #    raise ValueError(
-        #        "The provided function is incompatible with the input signals unit. \n"
-        #        f"The test raised the following exception:\n{e}"
-        #    )
-        # if Q_(1, self.output_signal.unit).units != test_output.units:
-        #    raise ValueError(
-        #        "The test result of the provided function has a different unit than "
-        #        "the specified output signal.\n"
-        #        f"output_signal: {self.output_signal.unit}\n"
-        #        f"test_result  : {test_output.units}\n"
-        #    )
 
 
 @dataclass
@@ -111,7 +94,7 @@ class GenericEquipment:
         Parameters
         ----------
         name :
-            Name of
+            Name of the source
 
         Returns
         -------
@@ -168,14 +151,9 @@ class GenericEquipment:
         return [transformation.name for transformation in self.data_transformations]
 
 
-# DRAFT SECTION START ##################################################################
-
 # todo: - which classes can be removed?
 #       - tutorial
 #       - define union of data types that can be stored as signal data
-
-#       - transformation -> only units
-#       - source -> signal
 
 
 class MeasurementChain:
@@ -211,7 +189,20 @@ class MeasurementChain:
         if signal_data is not None:
             self.add_signal_data(signal_data)  # todo : test
 
-    def __eq__(self, other: "MeasurementChain"):
+    def __eq__(self, other: "MeasurementChain") -> bool:
+        """Return `True` if 2 measurement chains are equal and `False` otherwise.
+
+        Parameters
+        ----------
+        other :
+            The measurement chain that should be campared.
+
+        Returns
+        -------
+        bool :
+            `True` if 2 measurement chains are equal and `False` otherwise.
+
+        """
         return (
             self._name == other._name
             and self._source == other._source
@@ -341,56 +332,30 @@ class MeasurementChain:
         self._prev_added_signal = node_id
 
     def _raise_if_node_exist(self, node_id: str):
-        """Raise en error if the graph already contains a node with the passed id.
-
-        Parameters
-        ----------
-        node_id :
-            Name that should be checked
-
-        """
+        """Raise en error if the graph already contains a node with the passed id."""
         if node_id in self._graph.nodes:
             raise KeyError(
                 f"The internal graph already contains a node with the id {node_id}"
             )
 
     def _raise_if_node_does_not_exist(self, node: str):
-        """Raise a `KeyError` if the specified node does not exist.
-
-        Parameters
-        ----------
-        node :
-            Name of the node that should be searched for
-
-        """
+        """Raise a `KeyError` if the specified node does not exist."""
         if node not in self._graph.nodes:
             raise KeyError(f"No signal with source '{node}' found")
 
-    def _raise_if_data_exist(self, source_name: str):
-        """Raise an error if the signal from the passed source already has data.
-
-        Parameters
-        ----------
-        source_name :
-            Name of the data's source, e.g. a transformation or the source of the
-            measurement chain
-
-        """
-        self._raise_if_node_does_not_exist(source_name)
-        if self._graph.nodes[source_name]["signal"].data is not None:
+    def _raise_if_data_exist(self, signal_source_name: str):
+        """Raise an error if the signal from the passed source already has data."""
+        self._raise_if_node_does_not_exist(signal_source_name)
+        if self._graph.nodes[signal_source_name]["signal"].data is not None:
             raise KeyError(
-                f"The measurement chain already contains data for '{source_name}'."
+                "The measurement chain already contains data for "
+                f"'{signal_source_name}'."
             )
 
     def _check_and_get_node_name(self, node_name: str) -> str:
         """Check if a node is part of the internal graph and return its name.
 
         If no name is provided, the name of the last added node is returned.
-
-        Parameters
-        ----------
-        node_name :
-            Name of the node that should be checked.
 
         """
         if node_name is None:
@@ -408,8 +373,79 @@ class MeasurementChain:
             return "digital"
         raise ValueError(f"Can't convert '{letter}' to a signal type.")
 
-    def _signal_after_transformation(
-        self, transformation: SignalTransformation, input_signal: Signal, data
+    @staticmethod
+    def _determine_output_signal_unit(
+        func: "MathematicalExpression", input_unit: str
+    ) -> str:
+        """Determine the unit of a transformations' output signal.
+
+        Parameters
+        ----------
+        func :
+            The function describing the transformation
+        input_unit :
+            The unit of the input signal
+
+        Returns
+        -------
+        str:
+            Unit of the transformations' output signal
+
+        """
+        from weldx import Q_
+
+        if func is not None:
+            variables = func.get_variable_names()
+            if len(variables) != 1:
+                raise ValueError("The provided function must have exactly 1 parameter")
+
+            try:
+                test_output = func.evaluate(**{variables[0]: Q_(1, input_unit)})
+            except Exception as e:
+                raise ValueError(
+                    "The provided function is incompatible with the input signals unit."
+                    f" \nThe test raised the following exception:\n{e}"
+                )
+            return str(test_output.units)
+
+        return input_unit
+
+    @staticmethod
+    def _determine_output_signal_type(type_transformation: str, input_type: str) -> str:
+        """Determine the type of a transformations' output signal.
+
+        Parameters
+        ----------
+        type_transformation :
+            The string describing the type transformation
+        input_type :
+            The type of the input signal
+
+        Returns
+        -------
+        str :
+            The type of the output signal
+
+        """
+        if type_transformation is not None:
+            lookup = dict(A="analog", D="digital")
+            exp_input_type = lookup.get(type_transformation[0])
+
+            if input_type != exp_input_type:
+                raise ValueError(
+                    f"The transformation expects an {exp_input_type} as input signal, "
+                    f"but the current signal is {input_type}."
+                )
+            return lookup.get(type_transformation[1])
+
+        return input_type
+
+    @classmethod
+    def _determine_output_signal(
+        cls,
+        transformation: SignalTransformation,
+        input_signal: Signal,
+        data: "TimeSeries",
     ) -> Signal:
         """Get the signal that is produced by the provided transformation.
 
@@ -429,49 +465,15 @@ class MeasurementChain:
             The resulting signal
 
         """
-        from weldx import Q_
-
-        if transformation.func is not None:
-            variables = transformation.func.get_variable_names()
-            if len(variables) != 1:
-                raise ValueError(
-                    "The provided function must have exactly one parameter"
-                )
-            variable_name = variables[0]
-
-            test_input = Q_(1, input_signal.unit)
-            try:
-                test_output = transformation.func.evaluate(
-                    **{variable_name: test_input}
-                )
-            except Exception as e:
-                raise ValueError(
-                    "The provided function is incompatible with the input signals unit."
-                    f" \nThe test raised the following exception:\n{e}"
-                )
-            output_unit = str(
-                test_output.units
-            )  # just pass pint unit without string conversion?
-        else:
-            output_unit = input_signal.unit
-
-        if transformation.type_transformation is not None:
-            exp_signal_type = self._letter_to_signal_type(
-                transformation.type_transformation[0]
-            )
-            if input_signal.signal_type != exp_signal_type:
-                raise ValueError(
-                    f"The transformation expects an {exp_signal_type} as input signal, "
-                    f"but the current signal is {input_signal.signal_type}."
-                )
-
-            output_type = self._letter_to_signal_type(
-                transformation.type_transformation[1]
-            )
-        else:
-            output_type = input_signal.signal_type
-
-        return Signal(signal_type=output_type, unit=output_unit, data=data)
+        return Signal(
+            signal_type=cls._determine_output_signal_type(
+                transformation.type_transformation, input_signal.signal_type
+            ),
+            unit=cls._determine_output_signal_unit(
+                transformation.func, input_signal.unit
+            ),
+            data=data,
+        )
 
     def create_transformation(
         self,
@@ -607,7 +609,7 @@ class MeasurementChain:
         """
         input_signal_source = self._check_and_get_node_name(input_signal_source)
         input_signal = self._graph.nodes[input_signal_source]["signal"]
-        output_signal = self._signal_after_transformation(
+        output_signal = self._determine_output_signal(
             transformation, input_signal, data
         )
 

@@ -98,7 +98,7 @@ class TestMeasurementChain:
             name="transformation",
             error=Error(0.1),
             func=MathematicalExpression("a*x", parameters={"a": Q_(1, "1/V")}),
-            type_tf="AD",
+            type_transformation="AD",
         )
         if kwargs is not None:
             default_kwargs.update(kwargs)
@@ -198,8 +198,8 @@ class TestMeasurementChain:
         "tf_kwargs",
         [
             {},
-            dict(type_tf="AA"),
-            dict(type_tf=None),
+            dict(type_transformation="AA"),
+            dict(type_transformation=None),
             dict(func=None),
         ],
     )
@@ -225,8 +225,8 @@ class TestMeasurementChain:
     @pytest.mark.parametrize(
         "tf_kwargs, input_signal_source, exception_type, test_name",
         [
-            (dict(type_tf="DA"), None, ValueError, "# invalid input signal type #1"),
-            (dict(type_tf="DD"), None, ValueError, "# invalid input signal type #2"),
+            (dict(type_transformation="DA"), None, ValueError, "# inv. signal type #1"),
+            (dict(type_transformation="DD"), None, ValueError, "# inv. signal type #2"),
             ({}, "not found", KeyError, "# invalid input signal source"),
         ],
         ids=get_test_name,
@@ -315,7 +315,9 @@ class TestMeasurementChain:
         mc = MeasurementChain(**self._default_init_kwargs())
         mc.add_transformation(self._default_transformation(), data=[1, 2, 3])
         mc.add_transformation(
-            self._default_transformation(dict(name="transformation 2", type_tf="DA"))
+            self._default_transformation(
+                dict(name="transformation 2", type_transformation="DA")
+            )
         )
 
         full_kwargs = dict(data=xr.DataArray([1, 2]))
