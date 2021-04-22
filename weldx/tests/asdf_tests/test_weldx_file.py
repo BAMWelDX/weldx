@@ -1,3 +1,4 @@
+import io
 import pathlib
 import tempfile
 from io import BytesIO
@@ -58,12 +59,19 @@ def test_protocol_check(tmpdir):
     assert isinstance(open(f, "w"), SupportsFileReadWrite)
 
 
-# TODO: we do not need such a large test setup here!
-@pytest.mark.usefixtures("single_pass_weld_asdf")
+@pytest.fixture(scope="class")
+def simple_asdf_file(request):
+    f = asdf.AsdfFile(tree=dict(wx_metadata=dict(welder="anonymous")))
+    buff = io.BytesIO()
+    f.write_to(buff)
+    request.cls.simple_asdf_file = buff
+
+
+@pytest.mark.usefixtures("simple_asdf_file")
 class TestWeldXFile:
     @pytest.fixture(autouse=True)
     def setUp(self, *args, **kwargs):
-        copy_for_test = self.make_copy(self.single_pass_weld_file)
+        copy_for_test = self.make_copy(self.simple_asdf_file)
         self.fh = WeldxFile(copy_for_test, *args, **kwargs)
 
     @pytest.mark.parametrize("mode", ["rb", "wb", "a"])
@@ -71,17 +79,35 @@ class TestWeldXFile:
         with pytest.raises(ValueError):
             WeldxFile(None, mode=mode)
 
-    def test_from_physical_file(self, tmpdir):
-        fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
-        WeldxFile(fn, tree=dict(), mode="rw")
+    @pytest.mark.parametrize(
+        "file",
+        [
+            b"no",
+            [
+                "no",
+            ],
+        ],
+    )
+    def test_invalid_file_like_types(self, file):
+        with pytest.raises(ValueError):
+            WeldxFile(file)
 
-    def test_write_to(self, tmpdir):
+    @pytest.mark.parametrize("dest_wrap", [str, pathlib.Path])
+    def test_write_to_path_like(self, tmpdir, dest_wrap):
         """tests WeldxFile.write_to for str and pathlib.Path"""
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
-        self.fh.write_to(fn)
-        assert WeldxFile(fn)["history"]
-        path = pathlib.Path(fn)
-        assert WeldxFile(path)["history"]
+        wrapped = dest_wrap(fn)
+        self.fh.write_to(wrapped)
+        # compare
+        with open(fn, "rb") as fh:
+            self.fh.file_handle.seek(0)
+            assert fh.read() == self.fh.file_handle.read()
+
+    def test_write_to_buffer(self):
+        """tests WeldxFile.write_to with implicit buffer creation."""
+        buff = self.fh.write_to()
+        buff2 = self.make_copy(self.fh)
+        assert buff.getvalue() == buff2.getvalue()
 
     def test_create_from_tree_create_buff(self):
         """tests wrapper creation from a dictionary."""
@@ -96,9 +122,15 @@ class TestWeldXFile:
         tree = dict(foo="bar")
         # should write to file
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
-        self.fh = WeldxFile(filename_or_file_like=fn, tree=tree, mode='rw')
+        self.fh = WeldxFile(filename_or_file_like=fn, tree=tree, mode="rw")
         new_file = self.make_copy(self.fh)
         assert WeldxFile(new_file)["foo"] == "bar"
+
+    def test_create_from_tree_given_output_fn_wrong_mode(self, tmpdir):
+        fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+
+        with pytest.raises(RuntimeError):
+            WeldxFile(fn, tree=dict(foo="bar"), mode="r")
 
     def test_create_from_tree(self, tmpdir):
         """tests wrapper creation from a dictionary."""
@@ -106,7 +138,7 @@ class TestWeldXFile:
         # TODO: actually this would be a case for pytests parameterization, but...
         # it doesn't support fixtures in parameterization yet.
         for fd in [BytesIO(), tempfile.mktemp(suffix=".asdf", dir=tmpdir)]:
-            fh = WeldxFile(fd, tree=tree)
+            fh = WeldxFile(fd, tree=tree, mode="rw")
             fh["another"] = "entry"
             # sync to new file.
             new_file = self.make_copy(fh)
@@ -142,9 +174,14 @@ class TestWeldXFile:
     def test_update_existing_asdf_file(self, tmpdir):
         f = tempfile.mktemp(dir=tmpdir)
         self.fh.write_to(f)
-        WeldxFile(f, mode="rw")
+        with WeldxFile(f, mode="rw") as fh:
+            fh["wx_metadata"]["key"] = True
 
-    def make_copy(self, fh):
+        with WeldxFile(f, mode="r") as fh:
+            assert fh["wx_metadata"]["key"]
+
+    @staticmethod
+    def make_copy(fh):
         buff = BytesIO()
         if isinstance(fh, WeldxFile):
             fh.write_to(buff)
@@ -154,14 +191,9 @@ class TestWeldXFile:
         buff.seek(0)
         return buff
 
-    def test_write_to(self):
-        buff = self.fh.write_to()
-        buff2 = self.make_copy(self.fh)
-        assert buff.getvalue() == buff2.getvalue()
-
     def test_operation_on_closed(self):
         self.fh.close()
-        assert self.fh["process"]
+        assert self.fh["wx_metadata"]
 
         # cannot access closed handles
         with pytest.raises(RuntimeError):
@@ -172,14 +204,14 @@ class TestWeldXFile:
 
         x = np.random.random(100)
         fh = WeldxFile(
-            filename_or_file_like=tmpdir / "test_map",
+            filename_or_file_like=pathlib.Path(tmpdir / "test_map"),
             tree=dict(x=x),
             asdffile_kwargs=dict(copy_arrays=False, lazy_load=True),
+            mode="rw",
         )
         fh.close()
-        fh["x"]
-        # # FIXME: why is the tree still valid, after closing the file?
-        # assert fh["process"]
+        # FIXME: why is the array still accessible, after closing the file?
+        assert np.all(fh["x"] == x)
 
     def test_update_on_close(self):
         """A WeldxFile with mode="rw" should write changes on close."""
@@ -215,7 +247,7 @@ class TestWeldXFile:
         )
         fh = WeldxFile(
             buff,
-            tree=self.single_pass_weld_tree,
+            tree=dict(wx_metadata={}),
             software_history_entry=software,
             mode="rw",
         )
@@ -239,8 +271,13 @@ class TestWeldXFile:
         fh3 = WeldxFile(buff2)
 
     def test_custom_schema(self):
-        schema = get_schema_path("single_pass_weld-1.0.0.schema")
-        w = WeldxFile(tree={"foo": "bar"}, asdffile_kwargs=dict(custom_schema=schema))
+        from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
+
+        schema = get_schema_path("test_property_tag-1.0.0")
+        w = WeldxFile(
+            tree={"root_node": PropertyTagTestClass()},
+            asdffile_kwargs=dict(custom_schema=schema),
+        )
         assert w.custom_schema == schema
 
     def test_jupyter_repr(self):

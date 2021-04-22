@@ -115,27 +115,16 @@ class WeldxFile(UserDict):
             filename_or_file_like = BytesIO()
             new_file_created = True
         elif isinstance(filename_or_file_like, (str, pathlib.Path)):
-            if mode == "rw":
-                if not pathlib.Path(filename_or_file_like).exists():
-                    new_file_created = True
-                    _real_mode = (
-                        "bx+"  # binary, exclusive creation, e.g. raise if exists.
-                    )
-                else:
-                    if not is_asdf_file(filename_or_file_like):
-                        raise FileExistsError(
-                            f"given file {filename_or_file_like}"
-                            " is not an ASDF file and could be overwritten."
-                        )
-                    _real_mode = 'br+'
-            else:
-                _real_mode = "rb"
-            try:
-                filename_or_file_like = open(filename_or_file_like, mode=_real_mode)
-            except FileExistsError as e:
-                raise FileExistsError(
-                    f"Refused to open existing file in write mode. {e}"
-                )
+            filename_or_file_like, new_file_created = self._handle_path(
+                filename_or_file_like, mode
+            )
+        elif isinstance(filename_or_file_like, types_file_like.__args__):
+            pass
+        else:
+            raise ValueError(
+                f"Unsupported input type '{type(filename_or_file_like)}'."
+                f" Should be one of {WeldxFile.__annotations__}"
+            )
 
         extensions = [WeldxExtension(), WeldxAsdfExtension()]
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
@@ -158,6 +147,34 @@ class WeldxFile(UserDict):
         super(WeldxFile, self).__init__()
         self.data = self._asdf_handle.tree
 
+    @staticmethod
+    def _handle_path(filename_or_file_like, mode):
+        new_file_created = False
+        # TODO: simplify
+        exists = pathlib.Path(filename_or_file_like).exists()
+        if not exists and mode == "r":
+            raise RuntimeError(
+                f"file {filename_or_file_like} has be created," " but mode is 'r'."
+            )
+
+        if mode == "rw":
+            if not exists:
+                new_file_created = True
+                real_mode = "bx+"  # binary, exclusive creation, e.g. raise if exists.
+            else:
+                if not is_asdf_file(filename_or_file_like):
+                    raise FileExistsError(
+                        f"given file {filename_or_file_like}"
+                        " is not an ASDF file and could be overwritten."
+                    )
+                real_mode = "br+"
+        else:
+            real_mode = "rb"
+
+        # create file handle
+        filename_or_file_like = open(filename_or_file_like, mode=real_mode)
+        return filename_or_file_like, new_file_created
+
     @property
     def software_history_entry(self):
         return self._DEFAULT_SOFTWARE_ENTRY
@@ -177,28 +194,6 @@ class WeldxFile(UserDict):
             # TODO: validate it here, or let asdf fail?
             self._DEFAULT_SOFTWARE_ENTRY = value
 
-    @classmethod
-    def from_tree(
-        cls,
-        tree: Mapping,
-        asdffile_kwargs: Mapping = None,
-        write_kwargs: Mapping = None,
-    ):
-        """creates a new WeldxFile from given dictionary backed by a memory file.
-
-        Parameters
-        ----------
-        tree :
-            A dictionary like object to write to the new WeldxFile.
-        asdffile_kwargs :
-
-        write_kwargs :
-            Additional keywords to pass .
-        """
-        return cls(
-            tree=tree, asdffile_kwargs=asdffile_kwargs, write_kwargs=write_kwargs
-        )
-
     def __enter__(self):
         self._asdf_handle.__enter__()
         return self
@@ -209,10 +204,10 @@ class WeldxFile(UserDict):
     def close(self):
         """Close this file and sync it, if mode is read/write."""
         if self.mode == "rw" and self.sync_upon_close:
-            self._asdf_handle.update()
+            self._asdf_handle.update(**self._write_kwargs)
         self._asdf_handle.close()
 
-    # TODO: this updates the tree, but should it also be synched to disk directly?
+    # TODO: this updates the tree, but should it also be synced to disk directly?
     # this could be inefficient if lots of updates are performed,
     # but also adds more safety.
     #    def update(self, __m: Mapping[_KT, _VT], **kwargs: _VT) -> None: ...
@@ -328,18 +323,6 @@ class WeldxFile(UserDict):
     def custom_schema(self) -> Optional[str]:
         return self._custom_schema
 
-    # def __setitem__(self, key, value):
-    #     # FIXME: this only handles top level write access! So we got to wrap the ASDFEntries?
-    #     # FIXME: is not called upon weldxfile['foo'] = 'bar' ...#
-    #     # so better make it explicit, if users change something, they are responsible
-    #     # to add a proper history entry.
-    #     import textwrap
-    #
-    #     short_value_str = textwrap.shorten(str(value), 30)
-    #     change_desc = f"set '{key}' to '{short_value_str}'"
-    #     self.add_history_entry(change_desc)
-    #     self._asdf_handle[key] = value
-
     def __delitem__(self, item):
         del self._asdf_handle.tree[item]
         self.add_history_entry(f"deleted key {item}")
@@ -375,7 +358,7 @@ class WeldxFile(UserDict):
 
         return attrdict.AttrDict(self)
 
-    def write_to(self, fd: Optional[types_path_and_file_like] = None, **asdf_args):
+    def write_to(self, fd: Optional[types_path_and_file_like] = None, **write_args):
         """write current weldx file to given file name.
 
         Parameters
@@ -385,7 +368,7 @@ class WeldxFile(UserDict):
             object.  If a string path, the file is automatically
             closed after writing.
 
-        asdf_args :
+        write_args :
             Allowed parameters:
 
             * all_array_storage=None
@@ -405,7 +388,7 @@ class WeldxFile(UserDict):
             created = True
 
         # TODO: if no args are given, should we use the args given in ctor?
-        self._asdf_handle.write_to(fd, **asdf_args)
+        self._asdf_handle.write_to(fd, **write_args)
 
         if created:
             fd.seek(0)
@@ -468,4 +451,4 @@ class WeldxFile(UserDict):
             return _interactive()
 
     def _repr_json_(self):
-        self.show_asdf_header(_interactive=False)
+        return self.view_tree()
