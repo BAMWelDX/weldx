@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
+from warnings import warn
 
 from weldx.asdf.tags.weldx.core.graph import build_graph, build_tree
 
@@ -149,11 +150,6 @@ class GenericEquipment:
         return [transformation.name for transformation in self.data_transformations]
 
 
-# todo: - which classes can be removed?
-#       - tutorial
-#       - define union of data types that can be stored as signal data
-
-
 class MeasurementChain:
     """Simple dataclass implementation for measurement chains."""
 
@@ -193,7 +189,7 @@ class MeasurementChain:
         Parameters
         ----------
         other :
-            The measurement chain that should be campared.
+            The measurement chain that should be compared.
 
         Returns
         -------
@@ -215,8 +211,8 @@ class MeasurementChain:
         name: str,
         source_name: str,
         source_error: Error,
-        output_signal_type: str = None,
-        output_signal_unit: str = None,
+        output_signal_type: str,
+        output_signal_unit: str,
         signal_data: "TimeSeries" = None,
     ) -> "MeasurementChain":
         """Create a new measurement chain without providing a `SignalSource` instance.
@@ -512,9 +508,13 @@ class MeasurementChain:
             source, if no transformation was added to the chain) is used.
 
         """
+        if output_signal_type is None and output_signal_unit is None and func is None:
+            warn("The created transformation does not perform any transformations.")
+
         input_signal_source = self._check_and_get_node_name(input_signal_source)
         input_signal = self._graph.nodes[input_signal_source]["signal"]
-
+        if output_signal_type is None:
+            output_signal_type = input_signal.signal_type
         type_tf = f"{input_signal.signal_type[0]}{output_signal_type[0]}".upper()
         if output_signal_unit is not None:
             if func is not None:
@@ -529,6 +529,11 @@ class MeasurementChain:
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
+                from weldx import Q_
+                from weldx.core import MathematicalExpression
+
+                if output_signal_unit == "":
+                    output_signal_unit = 1
                 unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
                 func = MathematicalExpression(
                     "a*x",
@@ -844,7 +849,27 @@ class MeasurementChain:
 
         return axes
 
+    @property
+    def source(self) -> SignalSource:
+        """Return the source of the measurement chain.
+
+        Returns
+        -------
+        SignalSource :
+            The source of the measurement chain
+
+        """
+        return self._source
+
     def to_tree(self) -> Dict:
+        """Get the content of the measurement chain as dictionary.
+
+        Returns
+        -------
+        Dict:
+            Content of the measurement chain as dictionary.
+
+        """
         return dict(
             name=self._name,
             data_source=self._source,
