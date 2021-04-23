@@ -83,14 +83,14 @@ class TestWeldXFile:
         "file",
         [
             b"no",
-            [
-                "no",
-            ],
+            ["no"],
+            True
         ],
     )
     def test_invalid_file_like_types(self, file):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError) as e:
             WeldxFile(file)
+        assert "path" in e.value.args[0]
 
     @pytest.mark.parametrize("dest_wrap", [str, pathlib.Path])
     def test_write_to_path_like(self, tmpdir, dest_wrap):

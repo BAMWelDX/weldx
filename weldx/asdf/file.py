@@ -1,5 +1,4 @@
 """The WeldxFile class wraps creation and updating of ASDF files."""
-from __future__ import annotations
 
 import pathlib
 from collections import MutableMapping, UserDict
@@ -17,8 +16,7 @@ __all__ = [
     "WeldxFile",
 ]
 
-# TODO: asdf internally checks interfaces sometimes by attribute, sometimes if it is an instance of io.IOBase etc.
-# so this is actually too broad!
+
 @runtime_checkable
 class SupportsFileReadOnly(Protocol):
     """Type interface for read()."""
@@ -126,9 +124,10 @@ class WeldxFile(UserDict):
         elif isinstance(filename_or_file_like, types_file_like.__args__):
             pass
         else:
+            _supported = WeldxFile.__init__.__annotations__["filename_or_file_like"]
             raise ValueError(
                 f"Unsupported input type '{type(filename_or_file_like)}'."
-                f" Should be one of {WeldxFile.__annotations__}"
+                f" Should be one of {_supported}."
             )
 
         extensions = [WeldxExtension(), WeldxAsdfExtension()]
