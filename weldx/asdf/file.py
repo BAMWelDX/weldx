@@ -1,16 +1,21 @@
+"""The WeldxFile class wraps creation and updating of ASDF files."""
+from __future__ import annotations
+
 import pathlib
-from collections import UserDict, MutableMapping
+from collections import MutableMapping, UserDict
 from io import BytesIO, IOBase
-from typing import Optional, Protocol, Union, runtime_checkable, Mapping, Tuple
-
-from asdf.asdf import is_asdf_file
-
-from weldx.asdf.util import get_yaml_header
+from typing import Mapping, Optional, Protocol, Tuple, Union, runtime_checkable
 
 import asdf
 from asdf import AsdfFile
+from asdf.asdf import is_asdf_file
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
+from weldx.asdf.util import get_yaml_header
+
+__all__ = [
+    "WeldxFile",
+]
 
 # TODO: asdf internally checks interfaces sometimes by attribute, sometimes if it is an instance of io.IOBase etc.
 # so this is actually too broad!
@@ -411,7 +416,7 @@ class WeldxFile(UserDict):
         return view_tree(self.file_handle, path=path)
 
     def _header_as_tree(self):
-        from ipytree import Tree, Node
+        from ipytree import Node, Tree
 
         header = get_yaml_header(self.file_handle, parse=True)
         tree = Tree()
