@@ -1,11 +1,11 @@
 """The WeldxFile class wraps creation and updating of ASDF files."""
 import pathlib
-from collections import MutableMapping, UserDict
+from collections.abc import MutableMapping
+from collections import UserDict
 from io import BytesIO, IOBase
 from typing import Mapping, Optional, Union, List
 
-import asdf
-from asdf import AsdfFile
+from asdf import AsdfFile, open as open_asdf
 from asdf.asdf import is_asdf_file
 
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
@@ -108,13 +108,13 @@ class WeldxFile(UserDict):
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
                 filename_or_file_like.seek(0)
 
-        asdf_file = asdf.open(
+        asdf_file = open_asdf(
             filename_or_file_like,
             mode=mode,
             extensions=extensions,
             **asdffile_kwargs,
         )
-        self._asdf_handle: asdf.AsdfFile = asdf_file
+        self._asdf_handle: AsdfFile = asdf_file
 
         # UserDict interface: we want to store a reference to the tree, but the ctor
         # of UserDict takes a copy, so we do it manually here.
