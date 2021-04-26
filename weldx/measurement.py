@@ -87,6 +87,20 @@ class GenericEquipment:
     sources: List = field(default_factory=lambda: [])
     data_transformations: List = field(default_factory=lambda: [])
 
+    def __post_init__(self):
+        """Perform some data consistency checks."""
+        sources = self.source_names
+        if len(sources) != len(set(sources)):
+            raise ValueError(
+                "Two or more of the provided sources have identical names."
+            )
+
+        transformations = self.transformation_names
+        if len(transformations) != len(set(transformations)):
+            raise ValueError(
+                "Two or more of the provided transformations have identical names"
+            )
+
     def get_source(self, name: str) -> SignalSource:
         """Get a source by its name.
 
@@ -468,6 +482,32 @@ class MeasurementChain:
             ),
             data=data,
         )
+
+    @property
+    def source_name(self) -> str:
+        """Get the name of the source.
+
+        Returns
+        -------
+        str :
+            Name of the source
+
+        """
+        return self._source.name
+
+    @property
+    def transformation_names(self) -> List:
+        """Get the names of all transformations.
+
+        Returns
+        -------
+        List :
+            A list containing all transformation names
+
+        """
+        return [
+            self._graph.edges[edge]["transformation"].name for edge in self._graph.edges
+        ]
 
     def create_transformation(
         self,
