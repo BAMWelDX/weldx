@@ -164,6 +164,9 @@ class GenericEquipment:
         return [transformation.name for transformation in self.data_transformations]
 
 
+# MeasurementChain ---------------------------------------------------------------------
+
+
 class MeasurementChain:
     """Simple dataclass implementation for measurement chains."""
 
@@ -645,6 +648,7 @@ class MeasurementChain:
         signal = self._graph.nodes[signal_source]["signal"]
         signal.data = data
 
+    # todo: add possibility to use a List of transformations
     def add_transformation(
         self,
         transformation: SignalTransformation,

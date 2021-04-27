@@ -13,7 +13,9 @@ properties:
   data:
     type: array
     items:
-      tag: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
+      tag: "tag:weldx.bam.de:weldx/core/data_array-1.0.0"
+      #tag: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
+
   measurement_chain:
     tag: "tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0"
 
