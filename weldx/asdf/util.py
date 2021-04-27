@@ -9,6 +9,7 @@ from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.constants import WELDX_PATH
+from weldx.types import types_path_and_file_like
 from weldx.util import deprecated
 
 __all__ = [
@@ -141,16 +142,16 @@ def write_read_buffer(
     return read_buffer(buffer, open_kwargs)
 
 
-def get_yaml_header(file: Union[str, Path, BytesIO], parse=False) -> Union[str, dict]:
+def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, dict]:
     """Read the YAML header part (excluding binary sections) of an ASDF file.
 
     Parameters
     ----------
-    file : str, pathlib.Path or io.BytesIO
-        filename, `pathlib.Path` or `io.BytesIO` buffer of ASDF file
+    file :
+        a path or file-like type pointing to a ASDF file.
 
     parse :
-        if `True`, returns the interpreted YAML header as dict
+        if `True`, returns the interpreted YAML header as dict.
     Returns
     -------
     str, dict
@@ -181,14 +182,14 @@ _read_buffer = read_buffer
 _write_read_buffer = write_read_buffer
 
 
-def notebook_fileprinter(file, lexer="YAML"):
+def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
     """Print the code from file/BytesIO to notebook cell with syntax highlighting.
 
     Parameters
     ----------
-    file
+    file :
         filename or ``BytesIO`` buffer of ASDF file
-    lexer
+    lexer :
         Syntax style to use
 
     """
