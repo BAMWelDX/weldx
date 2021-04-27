@@ -34,6 +34,9 @@ class Signal:
         if self.signal_type not in ["analog", "digital"]:
             raise ValueError(f"{self.signal_type} is an invalid signal type.")
 
+    def __eq__(self, other):
+        return (self.signal_type == other.signal_type and
+            self.unit == other.unit and self.data == other.data)
 
 @dataclass
 class SignalTransformation:
@@ -166,7 +169,7 @@ class GenericEquipment:
 
 # MeasurementChain ---------------------------------------------------------------------
 
-
+# TODO: docstring says it is a dataclass, but it isnt
 class MeasurementChain:
     """Simple dataclass implementation for measurement chains."""
 
