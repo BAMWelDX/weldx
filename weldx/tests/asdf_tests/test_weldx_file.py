@@ -4,8 +4,10 @@ import tempfile
 from io import BytesIO
 
 import asdf
+import pandas as pd
 import pytest
 
+from scripts import welding_schema
 from weldx import WeldxFile
 from weldx.types import SupportsFileReadWrite
 from weldx.asdf.util import get_schema_path
@@ -268,14 +270,14 @@ class TestWeldXFile:
         assert "removed" in fh3.history[-1]["description"]
         assert len(fh3.history) == 2
 
-    def test_custom_schema(self):
-        from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
-
-        schema = get_schema_path("test_property_tag-1.0.0")
-        w = WeldxFile(
-            tree={"root_node": PropertyTagTestClass()},
-            asdffile_kwargs=dict(custom_schema=schema),
-        )
+    @pytest.mark.parametrize("schema_arg", ["custom_schema", "asdffile_kwargs"])
+    def test_custom_schema(self, schema_arg):
+        buff, tree = welding_schema.single_pass_weld_example(None)
+        schema = get_schema_path("datamodels/single_pass_weld-1.0.0.schema.yaml")
+        kwargs = {schema_arg: schema}
+        if schema_arg == "asdffile_kwargs":
+            kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
+        w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
 
     def test_jupyter_repr(self):

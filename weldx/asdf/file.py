@@ -71,7 +71,8 @@ class WeldxFile(UserDict):
             asdffile_kwargs = {}
 
         self._asdffile_kwargs = asdffile_kwargs
-        self._custom_schema = custom_schema
+        if custom_schema is not None:
+            asdffile_kwargs["custom_schema"] = custom_schema
 
         if mode not in ("r", "rw"):
             raise ValueError(
@@ -101,7 +102,9 @@ class WeldxFile(UserDict):
         extensions = [WeldxExtension(), WeldxAsdfExtension()]
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree or new_file_created:
-            asdf_file = AsdfFile(tree=tree, extensions=extensions)
+            asdf_file = AsdfFile(
+                tree=tree, extensions=extensions, custom_schema=self.custom_schema
+            )
             asdf_file.write_to(filename_or_file_like, **write_kwargs)
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
                 filename_or_file_like.seek(0)
@@ -293,7 +296,7 @@ class WeldxFile(UserDict):
 
     @property
     def custom_schema(self) -> Optional[str]:
-        return self._custom_schema
+        return self._asdffile_kwargs.get("custom_schema", None)
 
     def __delitem__(self, item):
         del self._asdf_handle.tree[item]
