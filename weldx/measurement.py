@@ -371,8 +371,7 @@ class MeasurementChain:
         """
         if node_name is None:
             return self._prev_added_signal
-        else:
-            self._raise_if_node_does_not_exist(node_name)
+        self._raise_if_node_does_not_exist(node_name)
         return node_name
 
     @staticmethod
