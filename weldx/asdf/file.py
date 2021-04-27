@@ -3,51 +3,19 @@
 import pathlib
 from collections import MutableMapping, UserDict
 from io import BytesIO, IOBase
-from typing import Mapping, Optional, Protocol, Tuple, Union, runtime_checkable
+from typing import Mapping, Optional, Tuple, Union
 
 import asdf
 from asdf import AsdfFile
 from asdf.asdf import is_asdf_file
 
+from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.util import get_yaml_header
 
 __all__ = [
     "WeldxFile",
 ]
-
-
-@runtime_checkable
-class SupportsFileReadOnly(Protocol):
-    """Type interface for read()."""
-
-    __slots__ = ()
-
-    def read(self):
-        raise NotImplementedError
-
-
-@runtime_checkable
-class SupportsFileReadWrite(Protocol):
-    """Type interface for read, write and seeking."""
-
-    __slots__ = ()
-
-    def read(self):
-        raise NotImplementedError
-
-    def write(self, *args):
-        raise NotImplementedError
-
-    def tell(self):
-        raise NotImplementedError
-
-    def seek(self, *args):
-        raise NotImplementedError
-
-
-types_file_like = Union[IOBase, SupportsFileReadOnly, SupportsFileReadWrite]
-types_path_and_file_like = Union[str, pathlib.Path, types_file_like]
 
 
 class WeldxFile(UserDict):

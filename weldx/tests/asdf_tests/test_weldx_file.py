@@ -7,7 +7,7 @@ import asdf
 import pytest
 
 from weldx import WeldxFile
-from weldx.asdf.file import SupportsFileReadWrite
+from weldx.types import SupportsFileReadWrite
 from weldx.asdf.util import get_schema_path
 
 
@@ -81,11 +81,7 @@ class TestWeldXFile:
 
     @pytest.mark.parametrize(
         "file",
-        [
-            b"no",
-            ["no"],
-            True
-        ],
+        [b"no", ["no"], True],
     )
     def test_invalid_file_like_types(self, file):
         with pytest.raises(ValueError) as e:
