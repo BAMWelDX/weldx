@@ -59,6 +59,9 @@ class TestMeasurementChain:
         kwargs :
             A dictionary containing some key word arguments that should replace the
             default ones.
+        source_kwargs :
+            A dictionary of key word arguments that should replace the arguments used
+            for the default source.
 
         Returns
         -------
@@ -121,7 +124,6 @@ class TestMeasurementChain:
             Dictionary with keyword arguments for the `add_transformation` method
 
         """
-
         default_kwargs = dict(
             transformation=cls._default_transformation(),
             error=Error(0.02),
@@ -352,7 +354,6 @@ class TestMeasurementChain:
 
     def test_get_transformation(self):
         """Test the `get_transformation` method."""
-
         mc = MeasurementChain(**self._default_init_kwargs())
         mc.add_transformation(self._default_transformation())
 
