@@ -362,7 +362,10 @@ class WeldxFile(UserDict):
             fd = BytesIO()
             created = True
 
-        # TODO: if no args are given, should we use the args given in ctor?
+        # if no args are given, we use the specifications given in the constructor.
+        if not write_args:
+            write_args = self._write_kwargs
+
         self._asdf_handle.write_to(fd, **write_args)
 
         if created:
