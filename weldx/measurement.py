@@ -376,15 +376,6 @@ class MeasurementChain:
         return node_name
 
     @staticmethod
-    def _letter_to_signal_type(letter):
-        """Convert a single letter to the corresponding signal type."""
-        if letter == "A":
-            return "analog"
-        elif letter == "D":
-            return "digital"
-        raise ValueError(f"Can't convert '{letter}' to a signal type.")
-
-    @staticmethod
     def _determine_output_signal_unit(
         func: "MathematicalExpression", input_unit: str
     ) -> str:
