@@ -1,13 +1,12 @@
 """Contains measurement related classes and functions."""
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union, Any  # noqa: F401
 from warnings import warn
 
 from weldx.asdf.tags.weldx.core.graph import build_graph, build_tree
 
 if TYPE_CHECKING:  # pragma: no cover
-    from weldx import Q_
     from weldx.core import MathematicalExpression, TimeSeries
 
 
@@ -18,7 +17,7 @@ if TYPE_CHECKING:  # pragma: no cover
 class Error:
     """Simple dataclass implementation for signal transformation errors."""
 
-    deviation: "Q_"
+    deviation: Any = None
 
 
 @dataclass
