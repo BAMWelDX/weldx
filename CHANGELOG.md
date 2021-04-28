@@ -7,6 +7,8 @@
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
 - added `util.compare_nested` to check equality of two nested data
   structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
+- added `equal_unit_dimensionality` to compare the dimensionality of two quantities
+  [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
 
 ### changes
 
@@ -15,6 +17,20 @@
 - `get_yaml_header` received a new option parse, which optionally returns the parsed YAML header
   as `asdf.tagged.TaggedDict`. [[#338]](https://github.com/BAMWelDX/weldx/pull/338)
 - refactor `asdf_json_repr` into `view_tree` [[#339]](https://github.com/BAMWelDX/weldx/pull/339)
+- The `MeasurementChain` is now internally based on a `notworkx.DiGraph`. New functions are also added to the class to 
+  simplify its usage. [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
+  The following additional changes were applied during the update of the `MeasurementChain`:
+   - renamed `DataTransformation` class to `SignalTransformation`
+   - renamed `Source` to `SignalSource`
+   - Added additional functionality to `Signal`, `SignalTransformation` and `GenericEquipment`
+   - Removed `Data` class
+   - Updated asdf schemas of all modified classes and the ones that contained references to those classes
+   
+
+### documentation
+
+- Add new tutorial about the `MeasurementChain` [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
+- Updated the measurement tutorial [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
 
 ### ASDF
 
