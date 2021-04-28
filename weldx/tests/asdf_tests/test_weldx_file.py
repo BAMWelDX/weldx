@@ -239,12 +239,10 @@ class TestWeldXFile:
 
     def test_history(self):
         """test custom software specs for history entries."""
-        buff = BytesIO()
         software = dict(
             name="weldx_file_test", author="marscher", homepage="http://no", version="1"
         )
         fh = WeldxFile(
-            buff,
             tree=dict(wx_metadata={}),
             software_history_entry=software,
             mode="rw",
@@ -279,7 +277,3 @@ class TestWeldXFile:
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
-
-    def test_jupyter_repr(self):
-        pass
-        # TODO: should be tested using weldxfile in notebooks, right?

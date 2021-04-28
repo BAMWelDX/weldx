@@ -1,9 +1,8 @@
 """The WeldxFile class wraps creation and updating of ASDF files."""
-
 import pathlib
 from collections import MutableMapping, UserDict
 from io import BytesIO, IOBase
-from typing import Mapping, Optional, Tuple, Union
+from typing import Mapping, Optional, Union, List
 
 import asdf
 from asdf import AsdfFile
@@ -19,7 +18,7 @@ __all__ = [
 
 
 class WeldxFile(UserDict):
-    """This exposes an ASDF file as a dictionary like object.
+    """Expose an ASDF file as a dictionary like object.
 
     Parameters
     ----------
@@ -78,7 +77,7 @@ class WeldxFile(UserDict):
             raise ValueError(
                 f'invalid mode "{mode}" given. Should be one of "r", "rw".'
             )
-        self.mode = mode
+        self._mode = mode
         self.sync_upon_close = bool(sync)
         self.software_history_entry = software_history_entry
 
@@ -122,24 +121,27 @@ class WeldxFile(UserDict):
         super(WeldxFile, self).__init__()
         self.data = self._asdf_handle.tree
 
+    @property
+    def mode(self) -> str:
+        """open mode of file, one of read or read/write."""
+        return self._mode
+
     @staticmethod
-    def _handle_path(filename_or_file_like, mode):
+    def _handle_path(filename, mode):
         new_file_created = False
         # TODO: simplify
-        exists = pathlib.Path(filename_or_file_like).exists()
+        exists = pathlib.Path(filename).exists()
         if not exists and mode == "r":
-            raise RuntimeError(
-                f"file {filename_or_file_like} has be created," " but mode is 'r'."
-            )
+            raise RuntimeError(f"file {filename} has be created," " but mode is 'r'.")
 
         if mode == "rw":
             if not exists:
                 new_file_created = True
                 real_mode = "bx+"  # binary, exclusive creation, e.g. raise if exists.
             else:
-                if not is_asdf_file(filename_or_file_like):
+                if not is_asdf_file(filename):
                     raise FileExistsError(
-                        f"given file {filename_or_file_like}"
+                        f"given file {filename}"
                         " is not an ASDF file and could be overwritten."
                     )
                 real_mode = "br+"
@@ -147,8 +149,8 @@ class WeldxFile(UserDict):
             real_mode = "rb"
 
         # create file handle
-        filename_or_file_like = open(filename_or_file_like, mode=real_mode)
-        return filename_or_file_like, new_file_created
+        filename = open(filename, mode=real_mode)
+        return filename, new_file_created
 
     @property
     def software_history_entry(self):
@@ -181,27 +183,6 @@ class WeldxFile(UserDict):
         if self.mode == "rw" and self.sync_upon_close:
             self._asdf_handle.update(**self._write_kwargs)
         self._asdf_handle.close()
-
-    # TODO: this updates the tree, but should it also be synced to disk directly?
-    # this could be inefficient if lots of updates are performed,
-    # but also adds more safety.
-    #    def update(self, __m: Mapping[_KT, _VT], **kwargs: _VT) -> None: ...
-    def update(
-        self,
-        data: Mapping = None,
-        change_desc: str = None,
-        software: dict = None,
-    ):
-        if data is None:
-            return
-        # first update the tree (this could fail, right?!)
-        # then write the history entry
-        # then update the asdf handle
-        try:
-            self._asdf_handle.tree.update(data)
-        except BaseException as e:
-            print(e)
-            self.add_history_entry(change_desc, software=software)
 
     def sync(
         self,
@@ -290,18 +271,14 @@ class WeldxFile(UserDict):
         self._asdf_handle.add_history_entry(change_desc, software)
 
     @property
-    def history(self) -> list:
+    def history(self) -> List:
         """Return a list of all history entries in this file."""
         return self._asdf_handle.get_history_entries()
 
     @property
     def custom_schema(self) -> Optional[str]:
+        """schema used to validate the structure and types of the tree."""
         return self._asdffile_kwargs.get("custom_schema", None)
-
-    def __delitem__(self, item):
-        del self._asdf_handle.tree[item]
-        self.add_history_entry(f"deleted key {item}")
-        self._asdf_handle.update()
 
     @property
     # TODO: should we actually expose this? It allows advanced operations for adults.
@@ -372,43 +349,14 @@ class WeldxFile(UserDict):
             fd.seek(0)
         return fd
 
-    def view_tree(self, path: Tuple = None):
-        """Display YAML header
-
-        Parameters
-        ----------
-        path :
-            tuple representing the lookup path in the YAML/ASDF tree.
-
-        Returns
-        -------
-
-        """
-        from weldx.asdf.util import view_tree
-
-        return view_tree(self.file_handle, path=path)
-
-    def _header_as_tree(self):
-        from ipytree import Node, Tree
-
-        header = get_yaml_header(self.file_handle, parse=True)
-        tree = Tree()
-        for x in header:
-            node = Node(x)
-            tree.add_node(node)
-            for child in x:
-                child_node = Node(child)
-                node.add_node(child_node)
-        return tree
-
-    def show_asdf_header(self, _interactive=None):
+    def show_asdf_header(self, _interactive: Optional[bool] = None):
         # TODO: what if the file is out of sync? shall we enforce sync or write to temp file (which could be huge?)
-        def _interactive():
+        def _impl_interactive():
             from weldx.asdf.util import notebook_fileprinter
 
             return notebook_fileprinter(self.file_handle)
 
-        def _non_interactive():
+        def _impl_non_interactive():
             return get_yaml_header(self.file_handle, parse=True)
 
         # automatically determine if this runs in an interactive sesseion.
@@ -420,13 +368,15 @@ class WeldxFile(UserDict):
                 return not hasattr(main, "__file__")
 
             if is_interactive():
-                return _interactive()
+                return _impl_interactive()
             else:
                 return self.show_asdf_header(_interactive=False)
         elif _interactive is False:
-            return _non_interactive()
-        else:
-            return _interactive()
+            return _impl_non_interactive()
+        elif _interactive is True:
+            return _impl_interactive()
 
-    def _repr_json_(self):
-        return self.view_tree()
+    def _repr_json_(self) -> dict:
+        """Return the headers a plain dict, so Jupyter can format it
+        as an interactive widget."""
+        return self.show_asdf_header(_interactive=False)
