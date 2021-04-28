@@ -19,7 +19,7 @@ if TYPE_CHECKING:  # pragma: no cover
 class Error:
     """Simple dataclass implementation for signal transformation errors."""
 
-    deviation: Quantity = None
+    deviation: "Quantity" = None
 
 
 @dataclass
