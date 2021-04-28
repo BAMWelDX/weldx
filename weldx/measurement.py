@@ -924,5 +924,5 @@ class Measurement:
     """Simple dataclass implementation for generic measurements."""
 
     name: str
-    data: "TimeSeries"
+    data: List["TimeSeries"]
     measurement_chain: MeasurementChain

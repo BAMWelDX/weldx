@@ -23,6 +23,7 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
     )
     from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
     from weldx.asdf.util import get_schema_path, write_buffer
+    from weldx.core import MathematicalExpression
 
     # Timestamp
     reference_timestamp = pd.Timestamp("2020-11-09 12:00:00")
@@ -103,25 +104,15 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
 
     # current data
     I_ts = ut.sine(f=Q_(10, "1/s"), amp=Q_(20, "A"), bias=Q_(300, "A"))
-    I = I_ts.interp_time(time)  # noqa: E741
-    I = TimeSeries(I.data, time)
-    # I["time"] = I["time"]
-
-    current_data = I  # msm.Data(name="Welding current", data=I)
+    current_data = TimeSeries(I_ts.interp_time(time).data, time)
 
     # voltage data
     U_ts = ut.sine(
         f=Q_(10, "1/s"), amp=Q_(3, "V"), bias=Q_(40, "V"), phase=Q_(0.1, "rad")
     )
-    U = U_ts.interp_time(time)
-    U = TimeSeries(U.data, time)
-    # U["time"] = U["time"]
+    voltage_data = TimeSeries(U_ts.interp_time(time).data, time)
 
-    voltage_data = U  # msm.Data(name="Welding voltage", data=U)
-
-    HKS_sensor = msm.GenericEquipment(name="HKS P1000-S3")
-    BH_ELM = msm.GenericEquipment(name="Beckhoff ELM3002-0000")
-    twincat_scope = Software(name="Beckhoff TwinCAT ScopeView", version="3.4.3143")
+    # define current source and transformations
 
     src_current = msm.SignalSource(
         name="Current Sensor",
@@ -129,50 +120,24 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
         error=msm.Error(Q_(0.1, "percent")),
     )
 
-    HKS_sensor.sources = []
-    HKS_sensor.sources.append(src_current)
-
-    from weldx.core import MathematicalExpression
-
-    [a, x, b] = sympy.symbols("a x b")
-    current_AD_func = MathematicalExpression(a * x + b)
-    current_AD_func.set_parameter("a", Q_(32768.0 / 10.0, "1/V"))
-    current_AD_func.set_parameter("b", Q_(0.0, ""))
-
     current_AD_transform = msm.SignalTransformation(
         name="AD conversion current measurement",
         error=msm.Error(Q_(0.01, "percent")),
-        func=current_AD_func,
+        func=MathematicalExpression(
+            "a * x + b", dict(a=Q_(32768.0 / 10.0, "1/V"), b=Q_(0.0, ""))
+        ),
         type_transformation="AD",
     )
-
-    BH_ELM.data_transformations = []
-    BH_ELM.data_transformations.append(current_AD_transform)
-
-    # define current output calibration expression and transformation
-    current_calib_func = MathematicalExpression(a * x + b)
-    current_calib_func.set_parameter("a", Q_(1000.0 / 32768.0, "A"))
-    current_calib_func.set_parameter("b", Q_(0.0, "A"))
 
     current_calib_transform = msm.SignalTransformation(
         name="Calibration current measurement",
         error=msm.Error(0.0),
-        func=current_calib_func,
+        func=MathematicalExpression(
+            "a * x + b", dict(a=Q_(1000.0 / 32768.0, "A"), b=Q_(0.0, "A"))
+        ),
     )
-    current_calib_transform.wx_metadata = dict(software=twincat_scope)
 
-    welding_current_chain = msm.MeasurementChain(
-        name="welding current measurement chain", source=src_current
-    )
-    welding_current_chain.add_transformation(current_AD_transform)
-    welding_current_chain.add_transformation(current_calib_transform)
-    welding_current_chain.add_signal_data(current_data)
-
-    welding_current = msm.Measurement(
-        name="welding current measurement",
-        data=[current_data],
-        measurement_chain=welding_current_chain,
-    )
+    # define voltage source and transformations
 
     src_voltage = msm.SignalSource(
         name="Voltage Sensor",
@@ -180,42 +145,78 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
         error=msm.Error(Q_(0.1, "percent")),
     )
 
-    HKS_sensor.sources.append(src_voltage)
-
-    # define AD conversion expression and transformation step
-    [a, x, b] = sympy.symbols("a x b")
-    voltage_ad_func = MathematicalExpression(a * x + b)
-    voltage_ad_func.set_parameter("a", Q_(32768.0 / 10.0, "1/V"))
-    voltage_ad_func.set_parameter("b", Q_(0.0, ""))
-
     voltage_AD_transform = msm.SignalTransformation(
         name="AD conversion voltage measurement",
         error=msm.Error(Q_(0.01, "percent")),
-        func=voltage_ad_func,
+        func=MathematicalExpression(
+            "a * x + b", dict(a=Q_(32768.0 / 10.0, "1/V"), b=Q_(0.0, ""))
+        ),
         type_transformation="AD",
     )
-
-    HKS_sensor.data_transformations.append(voltage_AD_transform)
-
-    # define voltage output calibration expression and transformation
-    voltage_calib_func = MathematicalExpression(a * x + b)
-    voltage_calib_func.set_parameter("a", Q_(100.0 / 32768.0, "V"))
-    voltage_calib_func.set_parameter("b", Q_(0.0, "V"))
 
     voltage_calib_transform = msm.SignalTransformation(
         name="Calibration voltage measurement",
         error=msm.Error(0.0),
-        func=voltage_calib_func,
+        func=MathematicalExpression(
+            "a * x + b", dict(a=Q_(100.0 / 32768.0, "V"), b=Q_(0.0, "V"))
+        ),
     )
+
+    # Define lab equipment
+
+    HKS_sensor = msm.GenericEquipment(
+        name="HKS P1000-S3",
+        sources=[src_current, src_voltage],
+        data_transformations=[voltage_AD_transform],  # Is this really done by this eq.?
+    )
+    BH_ELM = msm.GenericEquipment(
+        name="Beckhoff ELM3002-0000",
+        data_transformations=[current_AD_transform],
+    )
+
+    twincat_scope = Software(name="Beckhoff TwinCAT ScopeView", version="3.4.3143")
+    current_calib_transform.wx_metadata = dict(software=twincat_scope)
     voltage_calib_transform.wx_metadata = dict(software=twincat_scope)
 
-    welding_voltage_chain = msm.MeasurementChain(
-        name="welding voltage measurement chain",
-        source=src_voltage,
+    # Define current measurement chain
+
+    welding_current_chain = msm.MeasurementChain.from_equipment(
+        name="welding current measurement chain",
+        equipment=HKS_sensor,
+        source_name="Current Sensor",
     )
-    welding_voltage_chain.add_transformation(voltage_AD_transform)
-    welding_voltage_chain.add_transformation(voltage_calib_transform)
-    welding_voltage_chain.add_signal_data(voltage_data)
+    welding_current_chain.add_transformation_from_equipment(
+        equipment=BH_ELM,
+        transformation_name="AD conversion current measurement",
+    )
+    welding_current_chain.add_transformation(
+        transformation=current_calib_transform,
+        data=current_data,
+    )
+
+    # Define voltage measurement chain
+
+    welding_voltage_chain = msm.MeasurementChain.from_equipment(
+        name="welding voltage measurement chain",
+        equipment=HKS_sensor,
+        source_name="Voltage Sensor",
+    )
+    welding_voltage_chain.add_transformation_from_equipment(
+        equipment=HKS_sensor,
+        transformation_name="AD conversion voltage measurement",
+    )
+    welding_voltage_chain.add_transformation(
+        transformation=voltage_calib_transform,
+        data=voltage_data,
+    )
+
+    # Define measurements
+
+    welding_current = msm.Measurement(
+        name="welding current measurement",
+        data=[current_data],
+        measurement_chain=welding_current_chain,
+    )
 
     welding_voltage = msm.Measurement(
         name="welding voltage measurement",
