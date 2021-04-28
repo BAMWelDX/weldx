@@ -1,7 +1,7 @@
 """Contains measurement related classes and functions."""
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union, Any  # noqa: F401
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union  # noqa: F401
 from warnings import warn
 
 from weldx.asdf.tags.weldx.core.graph import build_graph, build_tree
