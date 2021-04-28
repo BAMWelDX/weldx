@@ -104,7 +104,8 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
     # current data
     I_ts = ut.sine(f=Q_(10, "1/s"), amp=Q_(20, "A"), bias=Q_(300, "A"))
     I = I_ts.interp_time(time)  # noqa: E741
-    I["time"] = I["time"]
+    I = TimeSeries(I.data, time)
+    # I["time"] = I["time"]
 
     current_data = I  # msm.Data(name="Welding current", data=I)
 
@@ -113,7 +114,8 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
         f=Q_(10, "1/s"), amp=Q_(3, "V"), bias=Q_(40, "V"), phase=Q_(0.1, "rad")
     )
     U = U_ts.interp_time(time)
-    U["time"] = U["time"]
+    U = TimeSeries(U.data, time)
+    # U["time"] = U["time"]
 
     voltage_data = U  # msm.Data(name="Welding voltage", data=U)
 

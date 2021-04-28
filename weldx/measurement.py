@@ -35,8 +35,12 @@ class Signal:
             raise ValueError(f"{self.signal_type} is an invalid signal type.")
 
     def __eq__(self, other):
-        return (self.signal_type == other.signal_type and
-            self.unit == other.unit and self.data == other.data)
+        return (
+            self.signal_type == other.signal_type
+            and self.unit == other.unit
+            and self.data == other.data
+        )
+
 
 @dataclass
 class SignalTransformation:
