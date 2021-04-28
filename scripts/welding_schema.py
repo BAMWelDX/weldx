@@ -6,7 +6,6 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
     import asdf
     import numpy as np
     import pandas as pd
-    import sympy
     from asdf.tags.core import Software
 
     # importing the weldx package with prevalent default abbreviations
