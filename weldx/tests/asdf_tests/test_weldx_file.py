@@ -133,7 +133,7 @@ class TestWeldXFile:
     def test_create_from_tree(self, tmpdir):
         """tests wrapper creation from a dictionary."""
         tree = dict(foo="bar")
-        # TODO: actually this would be a case for pytests parameterization, but...
+        # actually this would be a case for pytests parameterization, but...
         # it doesn't support fixtures in parameterization yet.
         for fd in [BytesIO(), tempfile.mktemp(suffix=".asdf", dir=tmpdir)]:
             fh = WeldxFile(fd, tree=tree, mode="rw")
@@ -197,20 +197,6 @@ class TestWeldXFile:
         with pytest.raises(RuntimeError):
             self.fh.file_handle
 
-    def test_operation_on_closed_mem_mapped(self, tmpdir):
-        import numpy as np
-
-        x = np.random.random(100)
-        fh = WeldxFile(
-            filename_or_file_like=pathlib.Path(tmpdir / "test_map"),
-            tree=dict(x=x),
-            asdffile_kwargs=dict(copy_arrays=False, lazy_load=True),
-            mode="rw",
-        )
-        fh.close()
-        # FIXME: why is the array still accessible, after closing the file?
-        assert np.all(fh["x"] == x)
-
     def test_update_on_close(self):
         """A WeldxFile with mode="rw" should write changes on close."""
         buff = self.make_copy(self.fh)
@@ -269,8 +255,8 @@ class TestWeldXFile:
         assert len(fh3.history) == 2
 
     @pytest.mark.parametrize("schema_arg", ["custom_schema", "asdffile_kwargs"])
-    def test_custom_schema(self, schema_arg):
-        buff, tree = welding_schema.single_pass_weld_example(None)
+    def test_custom_schema(_, schema_arg):
+        buff, _ = welding_schema.single_pass_weld_example(None)
         schema = get_schema_path("datamodels/single_pass_weld-1.0.0.schema.yaml")
         kwargs = {schema_arg: schema}
         if schema_arg == "asdffile_kwargs":
