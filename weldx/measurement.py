@@ -167,9 +167,9 @@ class GenericEquipment:
 
 # MeasurementChain ---------------------------------------------------------------------
 
-# TODO: docstring says it is a dataclass, but it isnt
+
 class MeasurementChain:
-    """Simple dataclass implementation for measurement chains."""
+    """Class that represents a measurement chain."""
 
     def __init__(
         self,
@@ -495,7 +495,6 @@ class MeasurementChain:
         signal = self._graph.nodes[signal_source]["signal"]
         signal.data = data
 
-    # todo: add possibility to use a List of transformations
     def add_transformation(
         self,
         transformation: SignalTransformation,

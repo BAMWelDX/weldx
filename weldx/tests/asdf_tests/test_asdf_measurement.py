@@ -14,6 +14,7 @@ from weldx.measurement import (
 
 
 def measurement_chain_without_equipment() -> MeasurementChain:
+    """Get a default measurement chain without attached equipment."""
     mc = MeasurementChain(
         "Current measurement chain",
         SignalSource(
@@ -43,6 +44,7 @@ def measurement_chain_without_equipment() -> MeasurementChain:
 
 
 def measurement_chain_with_equipment() -> MeasurementChain:
+    """Get a default measurement chain with attached equipment."""
     source = SignalSource(
         "Current measurement",
         output_signal=Signal(signal_type="analog", unit="V"),
@@ -85,6 +87,7 @@ def measurement_chain_with_equipment() -> MeasurementChain:
     [measurement_chain_without_equipment(), measurement_chain_with_equipment()],
 )
 def test_measurement_chain(copy_arrays, lazy_load, measurement_chain):
+    """Test the asdf serialization of the measurement chain."""
     tree = {"m_chain": measurement_chain}
     data = _write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
