@@ -1,6 +1,7 @@
 """Contains package internal utility functions."""
 import functools
 import json
+import sys
 import warnings
 from collections.abc import Iterable, Sequence
 from functools import reduce, wraps
@@ -1339,6 +1340,14 @@ compare_nested = _Eq_compare_nested.compare_nested
 
 def is_interactive_session() -> bool:
     """Check whether this Python session is interactive, e.g. Jupyter/IPython."""
-    import __main__ as main
 
-    return not hasattr(main, "__file__")
+    try:
+        get_ipython = sys.modules["IPython"].get_ipython
+        if not get_ipython():
+            return False
+        if "IPKernelApp" not in get_ipython().config:  # pragma: no cover
+            return False
+    except KeyError:
+        return False
+    else:
+        return True

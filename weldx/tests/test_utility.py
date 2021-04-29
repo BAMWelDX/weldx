@@ -641,3 +641,10 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
 
         assert csm_copy != csm_org
         assert not ut.compare_nested(self.a, self.b)
+
+
+def test_is_interactive():
+    """doctest ftw.
+    >>> assert not ut.is_interactive_session()
+    """
+    assert not ut.is_interactive_session()
