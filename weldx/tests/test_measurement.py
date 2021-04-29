@@ -315,7 +315,7 @@ class TestMeasurementChain:
             (2, None, ValueError),
         ],
     )
-    def test_from_equipment(
+    def test_add_transformation_from_equipment(
         self, num_transformations: int, transformation_name: str, exception
     ):
         """Test `add_transformation_from_equipment` and its exceptions.
