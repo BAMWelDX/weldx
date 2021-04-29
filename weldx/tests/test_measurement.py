@@ -428,6 +428,16 @@ class TestMeasurementChain:
         ],
     )
     def test_get_equipment(self, signal_source, exception):
+        """Test the `get_equipment` function and their exceptions.
+
+        Parameters
+        ----------
+        signal_source :
+            Corresponding function parameter
+        exception :
+            Expected exception
+
+        """
         src_eq = GenericEquipment(
             "Source Eq", sources=[SignalSource(**self._default_source_kwargs())]
         )
