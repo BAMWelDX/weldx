@@ -1,5 +1,6 @@
 """The WeldxFile class wraps creation and updating of ASDF files."""
 import pathlib
+import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
 from io import BytesIO, IOBase
@@ -81,12 +82,19 @@ class WeldxFile(UserDict):
                 f'invalid mode "{mode}" given. Should be one of "r", "rw".'
             )
         self._mode = mode
-        self.sync_upon_close = bool(sync)
+        self.sync_upon_close = bool(sync) & (self.mode == "rw")
         self.software_history_entry = software_history_entry
 
         new_file_created = False
         if filename_or_file_like is None:
             filename_or_file_like = BytesIO()
+            if self.mode == "r":
+                self._mode = "rw"
+                warnings.warn(
+                    "mode set to 'rw' for memory file",
+                    category=UserWarning,
+                    stacklevel=1,
+                )
             new_file_created = True
         elif isinstance(filename_or_file_like, (str, pathlib.Path)):
             filename_or_file_like, new_file_created = self._handle_path(
@@ -113,7 +121,7 @@ class WeldxFile(UserDict):
 
         asdf_file = open_asdf(
             filename_or_file_like,
-            mode=mode,
+            mode=self.mode,
             extensions=extensions,
             **asdffile_kwargs,
         )

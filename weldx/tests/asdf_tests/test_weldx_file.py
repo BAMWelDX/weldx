@@ -151,6 +151,13 @@ class TestWeldXFile:
         with pytest.raises(RuntimeError):
             WeldxFile(fn, tree=dict(foo="bar"), mode="r")
 
+    @staticmethod
+    def test_create_from_tree_internal_buffer_mode_change():
+        """Implicitly creating a buffer sets mode to 'rw'."""
+        with pytest.warns(UserWarning, match="mode set to 'rw'"):
+            f = WeldxFile(tree=dict(some="thing"), mode="r")
+            assert f.mode == "rw"
+
     def test_create_from_tree(self, tmpdir):
         """Test wrapper creation from a dictionary."""
         tree = dict(foo="bar")
@@ -295,3 +302,7 @@ class TestWeldXFile:
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
+
+    def test_show_header(self):
+        file = WeldxFile(tree={"sensor": "HKS_sensor"})
+        file.show_asdf_header()
