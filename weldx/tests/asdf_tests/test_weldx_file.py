@@ -1,20 +1,23 @@
+"""Tests for the WeldxFile class."""
 import io
 import pathlib
 import tempfile
 from io import BytesIO
 
 import asdf
-import pandas as pd
 import pytest
 
 from scripts import welding_schema
 from weldx import WeldxFile
-from weldx.types import SupportsFileReadWrite
 from weldx.asdf.util import get_schema_path
+from weldx.types import SupportsFileReadWrite
 
 
 class ReadOnlyFile:
+    """Simulate a read-only file."""
+
     def __init__(self, tmpdir):
+        """."""
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
         with open(fn, "wb") as fh:
             asdf.AsdfFile(tree=dict(hi="there")).write_to(fh)
@@ -22,29 +25,36 @@ class ReadOnlyFile:
         self.mode = "rb"
 
     def read(self, *args, **kwargs):
+        """."""
         return self.file_read_only.read(*args, **kwargs)
 
     @staticmethod
     def readable():
+        """."""
         return True
 
 
 class WritableFile:
-    """example of a class implementing SupportsFileReadWrite"""
+    """Example of a class implementing SupportsFileReadWrite."""
 
     def __init__(self):
+        """."""
         self.to_wrap = BytesIO()
 
     def read(self, *args, **kwargs):
+        """."""
         return self.to_wrap.read(*args, **kwargs)
 
     def write(self, *args, **kwargs):
+        """."""
         return self.to_wrap.write(*args, **kwargs)
 
     def tell(self):
+        """."""
         return self.to_wrap.tell()
 
     def seek(self, *args, **kwargs):
+        """."""
         return self.to_wrap.seek(*args, **kwargs)
 
     def flush(self):
@@ -53,6 +63,7 @@ class WritableFile:
 
 
 def test_protocol_check(tmpdir):
+    """Instance checks."""
     assert isinstance(WritableFile(), SupportsFileReadWrite)
     assert isinstance(BytesIO(), SupportsFileReadWrite)
 
@@ -63,6 +74,7 @@ def test_protocol_check(tmpdir):
 
 @pytest.fixture(scope="class")
 def simple_asdf_file(request):
+    """Create an ASDF file with a very simple tree and attaches it to cls."""
     f = asdf.AsdfFile(tree=dict(wx_metadata=dict(welder="anonymous")))
     buff = io.BytesIO()
     f.write_to(buff)
@@ -71,13 +83,17 @@ def simple_asdf_file(request):
 
 @pytest.mark.usefixtures("simple_asdf_file")
 class TestWeldXFile:
+    """Docstring."""
+
     @pytest.fixture(autouse=True)
     def setUp(self, *args, **kwargs):
+        """Being called for every test. Creates a fresh copy of `simple_asdf_file`."""
         copy_for_test = self.make_copy(self.simple_asdf_file)
         self.fh = WeldxFile(copy_for_test, *args, **kwargs)
 
     @pytest.mark.parametrize("mode", ["rb", "wb", "a"])
     def test_invalid_mode(self, mode):
+        """Raises on invalid modes."""
         with pytest.raises(ValueError):
             WeldxFile(None, mode=mode)
 
@@ -86,13 +102,14 @@ class TestWeldXFile:
         [b"no", ["no"], True],
     )
     def test_invalid_file_like_types(self, file):
+        """Illegal file types should raise."""
         with pytest.raises(ValueError) as e:
             WeldxFile(file)
         assert "path" in e.value.args[0]
 
     @pytest.mark.parametrize("dest_wrap", [str, pathlib.Path])
     def test_write_to_path_like(self, tmpdir, dest_wrap):
-        """tests WeldxFile.write_to for str and pathlib.Path"""
+        """Test WeldxFile.write_to for str and pathlib.Path."""
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
         wrapped = dest_wrap(fn)
         self.fh.write_to(wrapped)
@@ -102,13 +119,13 @@ class TestWeldXFile:
             assert fh.read() == self.fh.file_handle.read()
 
     def test_write_to_buffer(self):
-        """tests WeldxFile.write_to with implicit buffer creation."""
+        """Test write_to with implicit buffer creation."""
         buff = self.fh.write_to()
         buff2 = self.make_copy(self.fh)
         assert buff.getvalue() == buff2.getvalue()
 
     def test_create_from_tree_create_buff(self):
-        """tests wrapper creation from a dictionary."""
+        """Test wrapper creation from a dictionary."""
         tree = dict(foo="bar")
         # creates a buffer
         self.fh = WeldxFile(filename_or_file_like=None, tree=tree)
@@ -116,7 +133,7 @@ class TestWeldXFile:
         assert WeldxFile(new_file)["foo"] == "bar"
 
     def test_create_from_tree_given_output_fn(self, tmpdir):
-        """tests wrapper creation from a dictionary."""
+        """Test wrapper creation from a dictionary."""
         tree = dict(foo="bar")
         # should write to file
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
@@ -125,13 +142,14 @@ class TestWeldXFile:
         assert WeldxFile(new_file)["foo"] == "bar"
 
     def test_create_from_tree_given_output_fn_wrong_mode(self, tmpdir):
+        """Passing data to be written in read-only mode should raise."""
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
 
         with pytest.raises(RuntimeError):
             WeldxFile(fn, tree=dict(foo="bar"), mode="r")
 
     def test_create_from_tree(self, tmpdir):
-        """tests wrapper creation from a dictionary."""
+        """Test wrapper creation from a dictionary."""
         tree = dict(foo="bar")
         # actually this would be a case for pytests parameterization, but...
         # it doesn't support fixtures in parameterization yet.
@@ -146,6 +164,7 @@ class TestWeldXFile:
             assert fh["another"] == "entry"
 
     def test_create_writable_protocol(self):
+        """Interface test for writable files."""
         f = WritableFile()
         WeldxFile(f, tree=dict(test="yes"))  # this should write the tree to f.
         new_file = self.make_copy(f.to_wrap)
@@ -153,16 +172,18 @@ class TestWeldXFile:
 
     @pytest.mark.skip("https://github.com/asdf-format/asdf/issues/975")
     def test_create_readonly_protocol(self, tmpdir):
+        """A read-only file should be supported by ASDF."""
         f = ReadOnlyFile(tmpdir)
         WeldxFile(f)
 
     def test_read_only_raise_on_write(self, tmpdir):
+        """Read-only files cannot be written to."""
         f = ReadOnlyFile(tmpdir)
         with pytest.raises(ValueError):
             WeldxFile(f, mode="rw")
 
     def test_create_but_no_overwrite_existing(self, tmpdir):
-        """never (accidentally) overwrite existing files!"""
+        """Never (accidentally) overwrite existing files."""
         f = tempfile.mktemp(dir=tmpdir)
         with open(f, "w") as fh:
             fh.write("something")
@@ -170,6 +191,7 @@ class TestWeldXFile:
             WeldxFile(f, mode="rw")
 
     def test_update_existing_asdf_file(self, tmpdir):
+        """Check existing files are updated."""
         f = tempfile.mktemp(dir=tmpdir)
         self.fh.write_to(f)
         with WeldxFile(f, mode="rw") as fh:
@@ -180,6 +202,7 @@ class TestWeldXFile:
 
     @staticmethod
     def make_copy(fh):
+        """Guess what, creates a copy of fh."""
         buff = BytesIO()
         if isinstance(fh, WeldxFile):
             fh.write_to(buff)
@@ -190,6 +213,7 @@ class TestWeldXFile:
         return buff
 
     def test_operation_on_closed(self):
+        """Accessing the file_handle after closing is illegal."""
         self.fh.close()
         assert self.fh["wx_metadata"]
 
@@ -224,7 +248,7 @@ class TestWeldXFile:
                 assert "something" not in fh2["wx_metadata"]
 
     def test_history(self):
-        """test custom software specs for history entries."""
+        """Test custom software specs for history entries."""
         software = dict(
             name="weldx_file_test", author="marscher", homepage="http://no", version="1"
         )
@@ -256,6 +280,7 @@ class TestWeldXFile:
 
     @pytest.mark.parametrize("schema_arg", ["custom_schema", "asdffile_kwargs"])
     def test_custom_schema(_, schema_arg):
+        """Check the property complex_schema is being set."""
         buff, _ = welding_schema.single_pass_weld_example(None)
         schema = get_schema_path("datamodels/single_pass_weld-1.0.0.schema.yaml")
         kwargs = {schema_arg: schema}
