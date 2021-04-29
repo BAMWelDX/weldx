@@ -67,10 +67,10 @@ def measurement_chain_with_equipment() -> MeasurementChain:
         sources=[source],
     )
     eq_ad_conversion = GenericEquipment(
-        name="AD Equipment", data_transformations=[ad_conversion]
+        name="AD Equipment", transformations=[ad_conversion]
     )
     eq_calibration = GenericEquipment(
-        name="Calibration Equipment", data_transformations=[calibration]
+        name="Calibration Equipment", transformations=[calibration]
     )
     mc = MeasurementChain.from_equipment("Measurement chain", eq_source)
     mc.add_transformation_from_equipment(eq_ad_conversion)
@@ -84,7 +84,7 @@ def measurement_chain_with_equipment() -> MeasurementChain:
     "measurement_chain",
     [measurement_chain_without_equipment(), measurement_chain_with_equipment()],
 )
-def test_coordinate_system_manager(copy_arrays, lazy_load, measurement_chain):
+def test_measurement_chain(copy_arrays, lazy_load, measurement_chain):
     tree = {"m_chain": measurement_chain}
     # todo: remove
     # with asdf.AsdfFile(tree) as ff:

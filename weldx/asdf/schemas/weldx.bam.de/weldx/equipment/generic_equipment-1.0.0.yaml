@@ -42,7 +42,7 @@ properties:
     items:
       tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0"
 
-propertyOrder: [name, sources, data_transformations]
+propertyOrder: [name, sources, transformations]
 required: [name]
 
 flowStyle: block

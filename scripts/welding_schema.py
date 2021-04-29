@@ -166,11 +166,11 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
     HKS_sensor = msm.GenericEquipment(
         name="HKS P1000-S3",
         sources=[src_current, src_voltage],
-        data_transformations=[voltage_AD_transform],  # Is this really done by this eq.?
+        transformations=[voltage_AD_transform],  # Is this really done by this eq.?
     )
     BH_ELM = msm.GenericEquipment(
         name="Beckhoff ELM3002-0000",
-        data_transformations=[current_AD_transform],
+        transformations=[current_AD_transform],
     )
 
     twincat_scope = Software(name="Beckhoff TwinCAT ScopeView", version="3.4.3143")

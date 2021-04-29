@@ -335,7 +335,7 @@ class TestMeasurementChain:
             self._default_transformation({"name": f"transformation_{i}"})
             for i in range(num_transformations)
         ]
-        equipment = GenericEquipment(name="name", data_transformations=transformations)
+        equipment = GenericEquipment(name="name", transformations=transformations)
 
         if exception is not None:
             with pytest.raises(exception):
@@ -443,7 +443,7 @@ class TestMeasurementChain:
         )
         tf_eq = GenericEquipment(
             "Transformation_eq",
-            data_transformations=[
+            transformations=[
                 self._default_transformation({"name": "transformation_1"})
             ],
         )

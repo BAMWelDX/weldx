@@ -86,7 +86,7 @@ class GenericEquipment:
 
     name: str
     sources: List = field(default_factory=lambda: [])
-    data_transformations: List = field(default_factory=lambda: [])
+    transformations: List = field(default_factory=lambda: [])
 
     def __post_init__(self):
         """Perform some data consistency checks."""
@@ -147,7 +147,7 @@ class GenericEquipment:
             The requested transformation
 
         """
-        for transformation in self.data_transformations:
+        for transformation in self.transformations:
             if transformation.name == name:
                 return transformation
         raise KeyError(f"No transformation with name '{name}' found.")
@@ -162,7 +162,7 @@ class GenericEquipment:
             Names of all transformations
 
         """
-        return [transformation.name for transformation in self.data_transformations]
+        return [transformation.name for transformation in self.transformations]
 
 
 # MeasurementChain ---------------------------------------------------------------------
@@ -557,15 +557,15 @@ class MeasurementChain:
             single transformation, this parameter can be set to ´None´ (default)
 
         """
-        if len(equipment.data_transformations) > 1:
+        if len(equipment.transformations) > 1:
             if transformation_name is None:
                 raise ValueError(
                     "The equipment has multiple transformations. Specify the "
                     "desired one by providing a 'transformation_name'."
                 )
             transformation = equipment.get_transformation(transformation_name)
-        elif len(equipment.data_transformations) == 1:
-            transformation = equipment.data_transformations[0]
+        elif len(equipment.transformations) == 1:
+            transformation = equipment.transformations[0]
         else:
             raise ValueError("The equipment does not have a transformation.")
 
