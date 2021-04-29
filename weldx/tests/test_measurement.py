@@ -274,6 +274,13 @@ class TestMeasurementChain:
             (dict(type_transformation="DA"), None, ValueError, "# inv. signal type #1"),
             (dict(type_transformation="DD"), None, ValueError, "# inv. signal type #2"),
             ({}, "not found", KeyError, "# invalid input signal source"),
+            (dict(name="source"), None, KeyError, "# Name does already exist"),
+            (
+                dict(func=MathematicalExpression("x+a", parameters={"a": Q_(1, "A")})),
+                None,
+                ValueError,
+                "# incompatible function",
+            ),
         ],
         ids=get_test_name,
     )
@@ -474,9 +481,15 @@ class TestMeasurementChain:
 
         mc = MeasurementChain(**self._default_init_kwargs())
         mc.add_transformation(self._default_transformation(), data=data)
+        mc.create_transformation("transformation_2", None, output_signal_unit="A")
 
         assert mc.get_signal_data("transformation").identical(data)
 
+        # no data
+        with pytest.raises(KeyError):
+            mc.get_signal_data("transformation_2")
+
+        # source not present
         with pytest.raises(KeyError):
             mc.get_signal_data("not found")
 
