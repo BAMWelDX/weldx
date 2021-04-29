@@ -206,15 +206,15 @@ class TestMeasurementChain:
     # test_add_transformations ---------------------------------------------------------
 
     @pytest.mark.parametrize(
-        "tf_kwargs",
+        "tf_kwargs, exp_signal_type, exp_signal_unit",
         [
-            {},
-            dict(type_transformation="AA"),
-            dict(type_transformation=None),
-            dict(func=None),
+            ({}, "digital", "dimensionless"),
+            (dict(type_transformation="AA"), "analog", "dimensionless"),
+            (dict(type_transformation=None), "analog", "dimensionless"),
+            (dict(func=None), "digital", "V"),
         ],
     )
-    def test_add_transformation(self, tf_kwargs):
+    def test_add_transformation(self, tf_kwargs, exp_signal_type, exp_signal_unit):
         """Test the `add_transformation` method of the `MeasurementChain`.
 
         Parameters
@@ -229,7 +229,9 @@ class TestMeasurementChain:
 
         mc.add_transformation(self._default_transformation(tf_kwargs))
 
-        # todo: add assertions (check returned signal)
+        signal = mc.get_signal("transformation")
+        assert signal.signal_type == exp_signal_type
+        assert signal.unit == exp_signal_unit
 
     # test_add_transformation_exceptions -----------------------------------------------
 
