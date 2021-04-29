@@ -1,4 +1,5 @@
 """Utilities for asdf files."""
+import typing
 from io import BytesIO
 from pathlib import Path
 from typing import Tuple, Union
@@ -11,6 +12,9 @@ from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.constants import WELDX_PATH
 from weldx.types import types_path_and_file_like
 from weldx.util import deprecated
+
+if typing.TYPE_CHECKING:  # pragma: no cover
+    from weldx.types import SupportsFileReadOnly, SupportsFileReadWrite  # noqa
 
 __all__ = [
     "get_schema_path",
@@ -152,6 +156,7 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
 
     parse :
         if `True`, returns the interpreted YAML header as dict.
+
     Returns
     -------
     str, dict
