@@ -897,7 +897,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     ...     },
     ...     d3={"values": ["x", "y", "z"], "dtype": "<U1"},
     ... )
-    >>> wx.utility.xr_check_coords(dax, ref)
+    >>> wx.util.xr_check_coords(dax, ref)
     True
 
     """
