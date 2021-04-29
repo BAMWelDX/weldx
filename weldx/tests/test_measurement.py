@@ -223,6 +223,10 @@ class TestMeasurementChain:
             A dictionary with keyword arguments that are used to construct the
             `SignalTransformation` that is passed to the `add_transformation` method.
             Missing arguments are added.
+        exp_signal_type :
+            The expected signal type after the transformation
+        exp_signal_unit :
+            The expected unit after the transformation
 
         """
         mc = MeasurementChain(**self._default_init_kwargs())
