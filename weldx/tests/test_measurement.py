@@ -26,20 +26,7 @@ class TestMeasurementChain:
 
     @staticmethod
     def _default_source_kwargs(kwargs: Dict = None) -> Dict:
-        """Return a dictionary of keyword arguments required to create a `SignalSource`.
-
-        Parameters
-        ----------
-        kwargs :
-            A dictionary containing some key word arguments that should replace the
-            default ones.
-
-        Returns
-        -------
-        Dict :
-            Dictionary with keyword arguments required to create a `SignalSource`
-
-        """
+        """Update a dict with default keyword arguments to create a `SignalSource`."""
         default_kwargs = dict(
             name="source", output_signal=Signal("analog", "V"), error=Error(0.01)
         )
@@ -86,16 +73,7 @@ class TestMeasurementChain:
     def _default_transformation(kwargs: Dict = None) -> SignalTransformation:
         """Return a default `SignalTransformation`.
 
-        Parameters
-        ----------
-        kwargs :
-            A dictionary containing some key word arguments that should replace the
-            default ones.
-
-        Returns
-        -------
-        Dict :
-            Default `SignalTransformation`
+        Use the kwargs parameter to modify the default values.
 
         """
         default_kwargs = dict(
@@ -111,20 +89,7 @@ class TestMeasurementChain:
 
     @classmethod
     def _default_add_transformation_kwargs(cls, kwargs: Dict = None) -> Dict:
-        """Return a dictionary of keyword arguments required by `add_transformation`.
-
-        Parameters
-        ----------
-        kwargs :
-            A dictionary containing some keyword arguments that should replace the
-            default ones.
-
-        Returns
-        -------
-        Dict :
-            Dictionary with keyword arguments for the `add_transformation` method
-
-        """
+        """Update a dict with default keyword arguments to call `add_transformation`."""
         default_kwargs = dict(
             transformation=cls._default_transformation(),
             error=Error(0.02),
