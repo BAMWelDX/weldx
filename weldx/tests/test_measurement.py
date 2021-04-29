@@ -9,6 +9,7 @@ from weldx import Q_
 from weldx.core import MathematicalExpression
 from weldx.measurement import (
     Error,
+    GenericEquipment,
     MeasurementChain,
     Signal,
     SignalSource,
@@ -194,6 +195,49 @@ class TestMeasurementChain:
         with pytest.raises(exception_type):
             MeasurementChain(**kwargs)
 
+    # test_from_equipment --------------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "num_sources, source_name, exception",
+        [
+            (0, None, ValueError),
+            (1, None, None),
+            (2, "source_1", None),
+            (2, "wrong name", KeyError),
+            (2, None, ValueError),
+        ],
+    )
+    def test_from_equipment(
+        self, num_sources: int, source_name: str, exception: Exception
+    ):
+        """Test the `from_equipment` factory and its exceptions.
+
+        Parameters
+        ----------
+        num_sources :
+            Number of sources of the generated equipment
+        source_name :
+            Corresponding parameter of `from_equipment`
+        exception :
+            Expected exception
+
+        """
+        sources = [
+            SignalSource(**self._default_source_kwargs({"name": f"source_{i}"}))
+            for i in range(num_sources)
+        ]
+        equipment = GenericEquipment("Equipment", sources=sources)
+
+        if exception is not None:
+            with pytest.raises(exception):
+                MeasurementChain.from_equipment(
+                    name="name", equipment=equipment, source_name=source_name
+                )
+        else:
+            MeasurementChain.from_equipment(
+                name="name", equipment=equipment, source_name=source_name
+            )
+
     # test_add_transformations ---------------------------------------------------------
 
     @pytest.mark.parametrize(
@@ -258,6 +302,50 @@ class TestMeasurementChain:
 
         with pytest.raises(exception_type):
             mc.add_transformation(tf, input_signal_source=input_signal_source)
+
+    # test_add_transformation_from_equipment -------------------------------------------
+
+    @pytest.mark.parametrize(
+        "num_transformations, transformation_name, exception",
+        [
+            (0, None, ValueError),
+            (1, None, None),
+            (2, "transformation_1", None),
+            (2, "wrong name", KeyError),
+            (2, None, ValueError),
+        ],
+    )
+    def test_from_equipment(
+        self, num_transformations: int, transformation_name: str, exception
+    ):
+        """Test `add_transformation_from_equipment` and its exceptions.
+
+        Parameters
+        ----------
+        num_transformations :
+            Number of transformations of the generated equipment
+        transformation_name :
+            Corresponding parameter of `add_transformation_from_equipment`
+        exception :
+            Expected exception
+
+        """
+        mc = MeasurementChain(**self._default_init_kwargs())
+        transformations = [
+            self._default_transformation({"name": f"transformation_{i}"})
+            for i in range(num_transformations)
+        ]
+        equipment = GenericEquipment(name="name", data_transformations=transformations)
+
+        if exception is not None:
+            with pytest.raises(exception):
+                mc.add_transformation_from_equipment(
+                    equipment=equipment, transformation_name=transformation_name
+                )
+        else:
+            mc.add_transformation_from_equipment(
+                equipment=equipment, transformation_name=transformation_name
+            )
 
     # test_add_signal_data -------------------------------------------------------------
 
@@ -327,6 +415,38 @@ class TestMeasurementChain:
 
         with pytest.raises(exception_type):
             mc.add_signal_data(**full_kwargs)
+
+    # test_get_equipment ---------------------------------------------------------------
+
+    @pytest.mark.parametrize(
+        "signal_source, exception",
+        [
+            ("source", None),
+            ("transformation_1", None),
+            ("transformation_2", None),
+            ("transformation_3", KeyError),
+        ],
+    )
+    def test_get_equipment(self, signal_source, exception):
+        src_eq = GenericEquipment(
+            "Source Eq", sources=[SignalSource(**self._default_source_kwargs())]
+        )
+        tf_eq = GenericEquipment(
+            "Transformation_eq",
+            data_transformations=[
+                self._default_transformation({"name": "transformation_1"})
+            ],
+        )
+
+        mc = MeasurementChain.from_equipment("Chain", src_eq)
+        mc.add_transformation_from_equipment(tf_eq)
+        mc.create_transformation("transformation_2", None, output_signal_unit="A")
+
+        if exception is not None:
+            with pytest.raises(exception):
+                mc.get_equipment(signal_source=signal_source)
+        else:
+            mc.get_equipment(signal_source=signal_source)
 
     # test_get_signal_data -------------------------------------------------------------
 
