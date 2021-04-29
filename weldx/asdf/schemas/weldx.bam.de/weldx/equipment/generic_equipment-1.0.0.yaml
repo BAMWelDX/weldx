@@ -17,7 +17,7 @@ examples:
       !<tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0>
         name: Beckhoff ELM3002-0000
         sources: []
-        data_transformations:
+        transformations:
         - &id004 !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
           name: AD conversion current measurement
           type_transformation: AD
@@ -37,7 +37,7 @@ properties:
     type: array
     items:
       tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
-  data_transformations:
+  transformations:
     type: array
     items:
       tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0"
