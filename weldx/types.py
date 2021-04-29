@@ -1,7 +1,7 @@
-"""Common type definitions"""
+"""Common type definitions."""
 import pathlib
 from io import IOBase
-from typing import runtime_checkable, Protocol, Union
+from typing import Protocol, Union, runtime_checkable
 
 
 @runtime_checkable
@@ -11,7 +11,7 @@ class SupportsFileReadOnly(Protocol):
     __slots__ = ()
 
     def read(self):
-        raise NotImplementedError
+        """Read content."""
 
 
 @runtime_checkable
@@ -21,16 +21,16 @@ class SupportsFileReadWrite(Protocol):
     __slots__ = ()
 
     def read(self):
-        raise NotImplementedError
+        """Read content."""
 
     def write(self, *args):
-        raise NotImplementedError
+        """Write content."""
 
     def tell(self):
-        raise NotImplementedError
+        """Get position."""
 
     def seek(self, *args):
-        raise NotImplementedError
+        """Go to position."""
 
 
 types_file_like = Union[IOBase, SupportsFileReadOnly, SupportsFileReadWrite]
