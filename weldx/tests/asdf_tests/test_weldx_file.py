@@ -91,17 +91,19 @@ class TestWeldXFile:
         copy_for_test = self.make_copy(self.simple_asdf_file)
         self.fh = WeldxFile(copy_for_test, *args, **kwargs)
 
+    @staticmethod
     @pytest.mark.parametrize("mode", ["rb", "wb", "a"])
-    def test_invalid_mode(self, mode):
+    def test_invalid_mode(mode):
         """Raises on invalid modes."""
         with pytest.raises(ValueError):
             WeldxFile(None, mode=mode)
 
+    @staticmethod
     @pytest.mark.parametrize(
         "file",
         [b"no", ["no"], True],
     )
-    def test_invalid_file_like_types(self, file):
+    def test_invalid_file_like_types(file):
         """Illegal file types should raise."""
         with pytest.raises(ValueError) as e:
             WeldxFile(file)
@@ -141,7 +143,8 @@ class TestWeldXFile:
         new_file = self.make_copy(self.fh)
         assert WeldxFile(new_file)["foo"] == "bar"
 
-    def test_create_from_tree_given_output_fn_wrong_mode(self, tmpdir):
+    @staticmethod
+    def test_create_from_tree_given_output_fn_wrong_mode(tmpdir):
         """Passing data to be written in read-only mode should raise."""
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
 
@@ -170,19 +173,22 @@ class TestWeldXFile:
         new_file = self.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
 
+    @staticmethod
     @pytest.mark.skip("https://github.com/asdf-format/asdf/issues/975")
-    def test_create_readonly_protocol(self, tmpdir):
+    def test_create_readonly_protocol(tmpdir):
         """A read-only file should be supported by ASDF."""
         f = ReadOnlyFile(tmpdir)
         WeldxFile(f)
 
-    def test_read_only_raise_on_write(self, tmpdir):
+    @staticmethod
+    def test_read_only_raise_on_write(tmpdir):
         """Read-only files cannot be written to."""
         f = ReadOnlyFile(tmpdir)
         with pytest.raises(ValueError):
             WeldxFile(f, mode="rw")
 
-    def test_create_but_no_overwrite_existing(self, tmpdir):
+    @staticmethod
+    def test_create_but_no_overwrite_existing(tmpdir):
         """Never (accidentally) overwrite existing files."""
         f = tempfile.mktemp(dir=tmpdir)
         with open(f, "w") as fh:
@@ -278,8 +284,9 @@ class TestWeldXFile:
         assert "removed" in fh3.history[-1]["description"]
         assert len(fh3.history) == 2
 
+    @staticmethod
     @pytest.mark.parametrize("schema_arg", ["custom_schema", "asdffile_kwargs"])
-    def test_custom_schema(_, schema_arg):
+    def test_custom_schema(schema_arg):
         """Check the property complex_schema is being set."""
         buff, _ = welding_schema.single_pass_weld_example(None)
         schema = get_schema_path("datamodels/single_pass_weld-1.0.0.schema.yaml")
