@@ -11,7 +11,7 @@ from asdf import open as open_asdf
 from asdf.asdf import is_asdf_file
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.util import get_yaml_header
+from weldx.asdf.util import get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
 __all__ = [
@@ -416,8 +416,18 @@ class WeldxFile(UserDict):
             fd.seek(0)
         return fd
 
-    def show_asdf_header(self, _interactive: Optional[bool] = None):
+    def show_asdf_header(
+        self, use_widgets: bool = True, _interactive: Optional[bool] = None
+    ):
         """Show the header of the ASDF serialization.
+
+        Parameters
+        ----------
+        use_widgets :
+            When in an interactive session, use widgets to traverse the header or show
+            a static syntax highlighted string?
+        _interactive :
+            Should not be set.
 
         Notes
         -----
@@ -456,21 +466,24 @@ class WeldxFile(UserDict):
             )
             buff = self.write_to(**self._write_kwargs)
             return WeldxFile(buff, mode="rw").show_asdf_header(
-                _interactive=_interactive
+                use_widgets=use_widgets, _interactive=_interactive
             )
         else:
             # in write-mode, we sync to file first prior obtaining the header.
             self._asdf_handle.update(**self._write_kwargs)
 
-        def _impl_interactive():
-            assert self.mode == "rw"
+        def _impl_interactive() -> Union[
+            "IPython.display.HTML", "IPython.display.JSON"
+        ]:
             from weldx.asdf.util import notebook_fileprinter
 
             with reset_file_position(self.file_handle):
-                return notebook_fileprinter(self.file_handle)
+                if use_widgets:
+                    return view_tree(self.file_handle)
+                else:
+                    return notebook_fileprinter(self.file_handle)
 
-        def _impl_non_interactive():
-            assert self.mode == "rw"
+        def _impl_non_interactive() -> dict:
             with reset_file_position(self.file_handle):
                 return get_yaml_header(self.file_handle, parse=True)
 
@@ -486,8 +499,11 @@ class WeldxFile(UserDict):
             return _impl_interactive()
 
     def _repr_json_(self) -> dict:
-        """Return the headers a plain dict.
+        """Return the headers a plain dict."""
+        return self.show_asdf_header(use_widgets=False, _interactive=False)
 
-        So Jupyter can format it as an interactive widget.
-        """
-        return self.show_asdf_header(_interactive=False)
+    def _ipython_display(self):
+        # this will be called in Jupyter Lab, but not in a plain notebook.
+        from IPython.display import JSON
+
+        return JSON(self._repr_json_())
