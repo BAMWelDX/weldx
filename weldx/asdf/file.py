@@ -1,20 +1,23 @@
 """The WeldxFile class wraps creation and updating of ASDF files."""
 import pathlib
-from collections.abc import MutableMapping
 from collections import UserDict
+from collections.abc import MutableMapping
 from io import BytesIO, IOBase
-from typing import Mapping, Optional, Union, List
+from typing import List, Mapping, Optional, Union
 
-from asdf import AsdfFile, open as open_asdf
+from asdf import AsdfFile
+from asdf import open as open_asdf
 from asdf.asdf import is_asdf_file
 
-from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.util import get_yaml_header
+from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
 __all__ = [
     "WeldxFile",
 ]
+
+from weldx.util import is_interactive_session
 
 
 class WeldxFile(UserDict):
@@ -27,7 +30,7 @@ class WeldxFile(UserDict):
         If None is passed, an in-memory file will be created.
     mode :
         Reading or reading/writing mode: "r" or "rw".
-    open_kwargs :
+    asdffile_kwargs :
         Keyword arguments to pass to asdf.open.
         See `asdf.open` for reference.
     write_kwargs :
@@ -123,7 +126,7 @@ class WeldxFile(UserDict):
 
     @property
     def mode(self) -> str:
-        """open mode of file, one of read or read/write."""
+        """Open mode of file, one of read or read/write."""
         return self._mode
 
     @staticmethod
@@ -154,6 +157,38 @@ class WeldxFile(UserDict):
 
     @property
     def software_history_entry(self):
+        """History entries will use this software.
+
+        Examples
+        --------
+        >>> import weldx
+
+        Define a custom softare entry:
+
+        >>> software = dict(name="MyFancyPackage", author="Me", \
+                homepage="https://startpage.com", version="1.0")
+        >>> f = weldx.WeldxFile(software_history_entry=software)
+        >>> f.add_history_entry("we made some change")
+        >>> f.history #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+         [{'description': 'we made some change', \
+           'time': datetime.datetime(...), \
+           'software': {'name': 'MyFancyPackage', 'author': 'Me', \
+           'homepage': 'https://startpage.com', 'version': '1.0'}}]
+
+        We can also change the software on the fly:
+        >>> software_new = dict(name="MyTool", author="MeSoft", \
+                homepage="https://startpage.com", version="1.0")
+        >>> f.add_history_entry("another change using mytool", software_new)
+
+        Lets inspect the last history entry:
+
+        >>> f.history[-1] #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        {'description': 'another change using mytool', \
+         'time': datetime.datetime(...), \
+         'software': {'name': 'MyTool', 'author': 'MeSoft', \
+         'homepage': 'https://startpage.com', 'version': '1.0'}}
+
+        """
         return self._DEFAULT_SOFTWARE_ENTRY
 
     @software_history_entry.setter
@@ -172,10 +207,12 @@ class WeldxFile(UserDict):
             self._DEFAULT_SOFTWARE_ENTRY = value
 
     def __enter__(self):
+        """Enter the context."""
         self._asdf_handle.__enter__()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit the context."""
         self.close()
 
     def close(self):
@@ -193,8 +230,7 @@ class WeldxFile(UserDict):
         include_block_index=True,
         version=None,
     ):
-        """
-        Update the file on disk in place.
+        """Update the file on disk in place.
 
         Parameters
         ----------
@@ -246,6 +282,11 @@ class WeldxFile(UserDict):
         version : str, optional
             The ASDF version to write out.  If not provided, it will
             write out in the latest version supported by asdf.
+
+        Notes
+        -----
+        This calls `asdf.AsdfFile.update`.
+
         """
         self._asdf_handle.update(
             all_array_storage=all_array_storage,
@@ -257,17 +298,23 @@ class WeldxFile(UserDict):
         )
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
-        """adds an history_entry to the file.
+        """Add an history_entry to the file.
 
         Parameters
         ----------
         change_desc :
-            description of the change made.
+            Description of the change made.
         software :
-            software used to make the change. See `WeldxFile.__init__` software.
+            Optional software used to make the change.
+
+        See Also
+        --------
+        The software entry will be inferred from the constructor or, if not defined,
+        from `software_history_entry`.
+
         """
         if software is None:
-            software = self._DEFAULT_SOFTWARE_ENTRY
+            software = self.software_history_entry
         self._asdf_handle.add_history_entry(change_desc, software)
 
     @property
@@ -277,13 +324,14 @@ class WeldxFile(UserDict):
 
     @property
     def custom_schema(self) -> Optional[str]:
-        """schema used to validate the structure and types of the tree."""
+        """Return schema used to validate the structure and types of the tree."""
         return self._asdffile_kwargs.get("custom_schema", None)
 
     @property
     # TODO: should we actually expose this? It allows advanced operations for adults.
     # TODO: return type is also not guaranteed to be IOBase, right?
     def file_handle(self) -> IOBase:
+        """Return the underlying file handle, use with CARE."""
         if self._asdf_handle._closed:
             raise RuntimeError("closed file, cannot access file handle.")
         return self._asdf_handle._fd._fd
@@ -310,15 +358,17 @@ class WeldxFile(UserDict):
 
         return attrdict.AttrDict(self)
 
-    def write_to(self, fd: Optional[types_path_and_file_like] = None, **write_args):
-        """write current weldx file to given file name.
+    def write_to(
+        self, fd: Optional[types_path_and_file_like] = None, **write_args
+    ) -> Optional[BytesIO]:
+        """Write current weldx file to given file name or file type.
 
         Parameters
         ----------
-        fd : str, pathlib.Path or file-like object
+        fd :
             May be a string path to a file, or a Python file-like
-            object.  If a string path, the file is automatically
-            closed after writing.
+            object. If a string path, the file is automatically
+            closed after writing. If None is given, write to a new buffer.
 
         write_args :
             Allowed parameters:
@@ -333,6 +383,7 @@ class WeldxFile(UserDict):
         Returns
         -------
         The given input file name or a buffer, in case the input was omitted.
+
         """
         created = False
         if fd is None:
@@ -350,7 +401,11 @@ class WeldxFile(UserDict):
         return fd
 
     def show_asdf_header(self, _interactive: Optional[bool] = None):
-        # TODO: what if the file is out of sync? shall we enforce sync or write to temp file (which could be huge?)
+        """Show the ASDF header."""
+        # We need to synchronize the file contents here to make sure the header is in
+        # place.
+        self._asdf_handle.update(**self._write_kwargs)
+
         def _impl_interactive():
             from weldx.asdf.util import notebook_fileprinter
 
@@ -361,13 +416,7 @@ class WeldxFile(UserDict):
 
         # automatically determine if this runs in an interactive sesseion.
         if _interactive is None:
-
-            def is_interactive():
-                import __main__ as main
-
-                return not hasattr(main, "__file__")
-
-            if is_interactive():
+            if is_interactive_session():
                 return _impl_interactive()
             else:
                 return self.show_asdf_header(_interactive=False)
@@ -377,6 +426,8 @@ class WeldxFile(UserDict):
             return _impl_interactive()
 
     def _repr_json_(self) -> dict:
-        """Return the headers a plain dict, so Jupyter can format it
-        as an interactive widget."""
+        """Return the headers a plain dict.
+
+        So Jupyter can format it as an interactive widget.
+        """
         return self.show_asdf_header(_interactive=False)
