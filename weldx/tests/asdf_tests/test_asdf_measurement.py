@@ -86,9 +86,6 @@ def measurement_chain_with_equipment() -> MeasurementChain:
 )
 def test_measurement_chain(copy_arrays, lazy_load, measurement_chain):
     tree = {"m_chain": measurement_chain}
-    # todo: remove
-    # with asdf.AsdfFile(tree) as ff:
-    #    ff.write_to("test.yaml")
     data = _write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )

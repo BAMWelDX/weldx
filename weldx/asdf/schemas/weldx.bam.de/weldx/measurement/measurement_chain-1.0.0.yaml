@@ -12,7 +12,42 @@ description: |
   data representation of the measurement chain is a directed graph with the signals being the nodes and the
   transformations being the edges.
 
-#example: Add when schema is accepted
+example:
+  -
+    - A measurement chain consisting with a single transformation that performs an AD conversion.
+    - |
+      !<tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0>
+        name: Measurement Chain
+        data_source: !<tag:weldx.bam.de:weldx/measurement/source-1.0.0>
+          name: Source
+          output_signal: &id001 !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+            signal_type: analog
+            unit: V
+          error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+            deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.2}
+        source_signal: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+          name: Source
+          attributes:
+            signal: *id001
+          edges:
+          - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+            direction: fwd
+            attributes:
+              transformation: !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
+                name: AD conversion
+                error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+                  deviation: !unit/quantity-1.1.0 {unit: percent, value: 1}
+                func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+                  expression: a*x
+                  parameters:
+                    a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 1}
+                type_transformation: AD
+            target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+              name: AD conversion
+              attributes:
+                signal: !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+                  signal_type: digital
+                  unit: dimensionless
 
 definitions:
   signal_node:
