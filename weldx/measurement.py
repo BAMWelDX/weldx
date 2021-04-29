@@ -859,22 +859,6 @@ class MeasurementChain:
         )
 
     @property
-    def data_names(self) -> List[str]:
-        """Get the names of all attached data sets.
-
-        Returns
-        -------
-        List[str] :
-            List of the names from all attached data sets
-
-        """
-        return [
-            attr["data_name"]
-            for _, attr in self._graph.nodes.items()
-            if "data_name" in attr
-        ]
-
-    @property
     def source(self) -> SignalSource:
         """Return the source of the measurement chain.
 
