@@ -1,8 +1,8 @@
 """The WeldxFile class wraps creation and updating of ASDF files."""
 import pathlib
-import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
+from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import List, Mapping, Optional, Union
 
@@ -19,6 +19,21 @@ __all__ = [
 ]
 
 from weldx.util import is_interactive_session
+
+
+@contextmanager
+def reset_file_position(fh: SupportsFileReadWrite):
+    """Reset the internal position of the given file after leaving the context.
+
+    Parameters
+    ----------
+    fh :
+        file handle
+
+    """
+    old_pos = fh.tell()
+    yield
+    fh.seek(old_pos)
 
 
 class WeldxFile(UserDict):
@@ -88,13 +103,6 @@ class WeldxFile(UserDict):
         new_file_created = False
         if filename_or_file_like is None:
             filename_or_file_like = BytesIO()
-            if self.mode == "r":
-                self._mode = "rw"
-                warnings.warn(
-                    "mode set to 'rw' for memory file",
-                    category=UserWarning,
-                    stacklevel=1,
-                )
             new_file_created = True
         elif isinstance(filename_or_file_like, (str, pathlib.Path)):
             filename_or_file_like, new_file_created = self._handle_path(
@@ -409,20 +417,64 @@ class WeldxFile(UserDict):
         return fd
 
     def show_asdf_header(self, _interactive: Optional[bool] = None):
-        """Show the ASDF header."""
+        """Show the header of the ASDF serialization.
+
+        Notes
+        -----
+        Since the ASDF header will be created while writing the file, it is recommended
+        to call this method only with mode='rw', e.g. read-write mode. When mode is
+        read-only, a temporary file will be created, which can cause in-efficiencies.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> tree = dict(my_var=(1, 2, 3), some_str="foobar", array=np.arange(5))
+        >>> f = WeldxFile(tree=tree, mode='rw')
+        >>> f.show_asdf_header()  #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        {'asdf_library': {'author': 'Space Telescope Science Institute', \
+        'homepage': 'http://github.com/spacetelescope/asdf', 'name': 'asdf',\
+         'version': '...'},
+         'history': {'extensions': [{'extension_class': \
+            'asdf.extension.BuiltinExtension', \
+            'software': {'name': 'asdf', 'version': '...'}}]}, \
+         'array': {'source': 0, 'datatype': 'int64', 'byteorder': 'little', \
+                   'shape': [5]}, \
+         'my_var': [1, 2, 3], 'some_str': 'foobar'}
+
+        """
         # We need to synchronize the file contents here to make sure the header is in
         # place.
-        self._asdf_handle.update(**self._write_kwargs)
+        if self.mode == "r":
+            import warnings
+
+            warnings.warn(
+                "mode read-only, creating a temporary (in-memory) file"
+                " to display header. Your changes will be lost! "
+                "Use write_to(file_name) to save on disk.",
+                stacklevel=1,
+                category=UserWarning,
+            )
+            buff = self.write_to(**self._write_kwargs)
+            return WeldxFile(buff, mode="rw").show_asdf_header(
+                _interactive=_interactive
+            )
+        else:
+            # in write-mode, we sync to file first prior obtaining the header.
+            self._asdf_handle.update(**self._write_kwargs)
 
         def _impl_interactive():
+            assert self.mode == "rw"
             from weldx.asdf.util import notebook_fileprinter
 
-            return notebook_fileprinter(self.file_handle)
+            with reset_file_position(self.file_handle):
+                return notebook_fileprinter(self.file_handle)
 
         def _impl_non_interactive():
-            return get_yaml_header(self.file_handle, parse=True)
+            assert self.mode == "rw"
+            with reset_file_position(self.file_handle):
+                return get_yaml_header(self.file_handle, parse=True)
 
-        # automatically determine if this runs in an interactive sesseion.
+        # automatically determine if this runs in an interactive session.
         if _interactive is None:
             if is_interactive_session():
                 return _impl_interactive()

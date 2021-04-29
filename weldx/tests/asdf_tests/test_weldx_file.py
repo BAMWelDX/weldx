@@ -19,10 +19,11 @@ class ReadOnlyFile:
     def __init__(self, tmpdir):
         """."""
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+        print("fn", fn)
         with open(fn, "wb") as fh:
             asdf.AsdfFile(tree=dict(hi="there")).write_to(fh)
-        self.file_read_only = open(fn, mode="rb")
         self.mode = "rb"
+        self.file_read_only = open(fn, mode=self.mode)
 
     def read(self, *args, **kwargs):
         """."""
@@ -150,13 +151,6 @@ class TestWeldXFile:
 
         with pytest.raises(RuntimeError):
             WeldxFile(fn, tree=dict(foo="bar"), mode="r")
-
-    @staticmethod
-    def test_create_from_tree_internal_buffer_mode_change():
-        """Implicitly creating a buffer sets mode to 'rw'."""
-        with pytest.warns(UserWarning, match="mode set to 'rw'"):
-            f = WeldxFile(tree=dict(some="thing"), mode="r")
-            assert f.mode == "rw"
 
     def test_create_from_tree(self, tmpdir):
         """Test wrapper creation from a dictionary."""
@@ -304,5 +298,9 @@ class TestWeldXFile:
         assert w.custom_schema == schema
 
     def test_show_header(self):
-        file = WeldxFile(tree={"sensor": "HKS_sensor"})
+        """Check displaying the header."""
+        file = WeldxFile(tree={"sensor": "HKS_sensor"}, mode="rw")
+        old_pos = file.file_handle.tell()
         file.show_asdf_header()
+        after_pos = file.file_handle.tell()
+        assert old_pos == after_pos
