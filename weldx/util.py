@@ -1335,3 +1335,10 @@ class _Eq_compare_nested:
 
 
 compare_nested = _Eq_compare_nested.compare_nested
+
+
+def is_interactive_session() -> bool:
+    """Check whether this Python session is interactive, e.g. Jupyter/IPython."""
+    import __main__ as main
+
+    return not hasattr(main, "__file__")
