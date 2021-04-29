@@ -14,7 +14,7 @@ description: |
 
 example:
   -
-    - A measurement chain consisting with a single transformation that performs an AD conversion.
+    - A measurement chain containing a single transformation that performs an AD conversion.
     - |
       !<tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0>
         name: Measurement Chain

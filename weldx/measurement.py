@@ -199,7 +199,7 @@ class MeasurementChain:
 
         self._add_signal(node_id=source.name, signal=source.output_signal)
         if signal_data is not None:
-            self.add_signal_data(signal_data)  # todo : test
+            self.add_signal_data(signal_data)
 
     def __eq__(self, other: "MeasurementChain") -> bool:
         """Return `True` if 2 measurement chains are equal and `False` otherwise.
