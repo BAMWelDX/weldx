@@ -1,5 +1,4 @@
-# Welding schema
-
+"""Creates ASDF file containing all required fields of the single_pass_weld schema."""
 
 def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
     # Imports
@@ -299,5 +298,21 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
         )
 
 
+def main():
+    import sys
+    import argparse
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-o", "--output",
+                        default="single_pass_weld_example.asdf", type=Path)
+    args = parser.parse_args()
+    if args.output.exists():
+        print(f"Destination {args.output} already exists. Quitting.")
+        sys.exit(1)
+
+    single_pass_weld_example(args.output)
+
+
 if __name__ == "__main__":
-    single_pass_weld_example()
+    main()
