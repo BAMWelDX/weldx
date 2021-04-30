@@ -447,7 +447,7 @@ class WeldxFile(UserDict):
          'history': {'extensions': [{'extension_class': \
             'asdf.extension.BuiltinExtension', \
             'software': {'name': 'asdf', 'version': '...'}}]}, \
-         'array': {'source': 0, 'datatype': 'int64', 'byteorder': 'little', \
+         'array': {'source': 0, 'datatype': 'int...', 'byteorder': 'little', \
                    'shape': [5]}, \
          'my_var': [1, 2, 3], 'some_str': 'foobar'}
 
