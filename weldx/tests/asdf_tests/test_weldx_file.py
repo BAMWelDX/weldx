@@ -297,7 +297,8 @@ class TestWeldXFile:
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
 
-    def test_show_header(self):
+    @staticmethod
+    def test_show_header_file_pos_unchanged():
         """Check displaying the header."""
         file = WeldxFile(tree={"sensor": "HKS_sensor"}, mode="rw")
         old_pos = file.file_handle.tell()
