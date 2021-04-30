@@ -1340,7 +1340,6 @@ compare_nested = _Eq_compare_nested.compare_nested
 
 def is_interactive_session() -> bool:
     """Check whether this Python session is interactive, e.g. Jupyter/IPython."""
-
     try:
         get_ipython = sys.modules["IPython"].get_ipython
         if not get_ipython():
