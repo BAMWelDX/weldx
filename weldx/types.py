@@ -1,7 +1,14 @@
 """Common type definitions."""
-import pathlib
 from io import IOBase
+from pathlib import Path
 from typing import Protocol, Union, runtime_checkable
+
+__all__ = [
+    "SupportsFileReadOnly",
+    "SupportsFileReadWrite",
+    "types_file_like",
+    "types_path_and_file_like",
+]
 
 
 @runtime_checkable
@@ -34,4 +41,7 @@ class SupportsFileReadWrite(Protocol):
 
 
 types_file_like = Union[IOBase, SupportsFileReadOnly, SupportsFileReadWrite]
-types_path_and_file_like = Union[str, pathlib.Path, types_file_like]
+"""types which support reading, writing, and seeking."""
+
+types_path_and_file_like = Union[str, Path, types_file_like]
+"""types which can be passed to `open`"""
