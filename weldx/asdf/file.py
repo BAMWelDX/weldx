@@ -421,6 +421,11 @@ class WeldxFile(UserDict):
     ):
         """Show the header of the ASDF serialization.
 
+        Depending on the execution environment (plain Python interpreter, Jupyter Lab)
+        and the use_widgets parameter the header will be displayed in different styles.
+        By default, the display will be interactive (using widgets), but can be disabled
+        if undesired.
+
         Parameters
         ----------
         use_widgets :
@@ -473,7 +478,7 @@ class WeldxFile(UserDict):
             self._asdf_handle.update(**self._write_kwargs)
 
         def _impl_interactive() -> Union[
-            "IPython.display.HTML", "IPython.display.JSON"
+            "IPython.display.HTML", "IPython.display.JSON"  # noqa: F821
         ]:
             from weldx.asdf.util import notebook_fileprinter
 
