@@ -644,7 +644,8 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
 
 
 def test_is_interactive():
-    """doctest ftw.
+    """Assert that the Pytest session is not recognized as interactive.
+
     >>> assert not ut.is_interactive_session()
     """
     assert not ut.is_interactive_session()
