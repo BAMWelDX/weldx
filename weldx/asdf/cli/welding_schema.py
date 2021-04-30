@@ -1,12 +1,12 @@
 """single_pass_weld schema."""
 import sys
 from io import BytesIO
-from typing import Optional
+from typing import Optional, Tuple
 
 
 def single_pass_weld_example(
     out_file: str = "single_pass_weld_example.asdf",
-) -> Optional[tuple[BytesIO, dict]]:
+) -> Optional[Tuple[BytesIO, dict]]:
     """Create ASDF file containing all required fields of the single_pass_weld schema.
 
     Parameters
