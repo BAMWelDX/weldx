@@ -449,7 +449,7 @@ class TimeSeries:
 
     def interp_time(
         self, time: Union[pd.TimedeltaIndex, pint.Quantity], time_unit: str = "s"
-    ) -> xr.DataArray:
+    ) -> "TimeSeries":
         """Interpolate the TimeSeries in time.
 
         If the internal data consists of discrete values, an interpolation with the
@@ -470,7 +470,7 @@ class TimeSeries:
 
         Returns
         -------
-        xarray.DataArray:
+        TimeSeries :
             A data array containing the interpolated data.
 
         """
