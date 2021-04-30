@@ -10,7 +10,7 @@ from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.constants import WELDX_PATH
-from weldx.types import types_path_and_file_like
+from weldx.types import types_path_and_file_like, types_file_like
 from weldx.util import deprecated
 
 if typing.TYPE_CHECKING:  # pragma: no cover
@@ -181,10 +181,19 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     return code.decode("utf-8")
 
 
-# backward compatibility, remove when adopted to public funcs in notebooks etc.
-_write_buffer = write_buffer
-_read_buffer = read_buffer
-_write_read_buffer = write_read_buffer
+@deprecated("0.4.0", "0.5.0", " _write_buffer was renamed to write_buffer")
+def _write_buffer(*args, **kwargs):
+    return write_buffer(*args, **kwargs)
+
+
+@deprecated("0.4.0", "0.5.0", " _read_buffer was renamed to read_buffer")
+def _read_buffer(*args, **kwargs):
+    return read_buffer(*args, **kwargs)
+
+
+@deprecated("0.4.0", "0.5.0", " _write_read_buffer was renamed to write_read_buffer")
+def _write_read_buffer(*args, **kwargs):
+    return write_read_buffer(*args, **kwargs)
 
 
 def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
@@ -193,7 +202,7 @@ def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
     Parameters
     ----------
     file :
-        filename or ``BytesIO`` buffer of ASDF file
+        filename or file-like object pointing towards / containing an ASDF file.
     lexer :
         Syntax style to use
 
@@ -203,7 +212,7 @@ def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
     from pygments.formatters.html import HtmlFormatter
     from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
 
-    if isinstance(file, BytesIO):
+    if isinstance(file, types_file_like):
         lexer = get_lexer_by_name(lexer)
     elif Path(file).suffix == ".asdf":
         lexer = get_lexer_by_name("YAML")
@@ -220,16 +229,16 @@ def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
     )
 
 
-def view_tree(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
+def view_tree(file: types_path_and_file_like, path: Tuple = None, **kwargs):
     """Display YAML header using IPython JSON display repr.
 
     This function works in JupyterLab.
 
     Parameters
     ----------
-    file: str, pathlib.Path or io.BytesIO
-        filename, `pathlib.Path` or `io.BytesIO` buffer of ASDF file
-    path
+    file :
+        filename or file-like object pointing towards / containing an ASDF file.
+    path :
         tuple representing the lookup path in the yaml/asdf tree
     kwargs
         kwargs passed down to JSON constructor
@@ -254,7 +263,6 @@ def view_tree(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
         weldx.asdf.utils.view_tree(
             "single_pass_weld_example.asdf", path=("process", "welding_process")
         )
-
 
     """
     from IPython.display import JSON
