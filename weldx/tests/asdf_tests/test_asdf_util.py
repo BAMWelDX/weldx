@@ -3,7 +3,7 @@ import io
 
 import pytest
 
-from scripts.welding_schema import single_pass_weld_example
+from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.util import get_yaml_header
 
 
