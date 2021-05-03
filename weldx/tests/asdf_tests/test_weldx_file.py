@@ -41,6 +41,9 @@ class WritableFile:
     def read(self, *args, **kwargs):  # noqa: D102
         return self.to_wrap.read(*args, **kwargs)
 
+    def readline(self, *args, **kwargs):  # noqa: D102
+        return self.to_wrap.readline(*args, **kwargs)
+
     def write(self, *args, **kwargs):  # noqa: D102
         return self.to_wrap.write(*args, **kwargs)
 
