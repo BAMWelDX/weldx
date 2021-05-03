@@ -163,11 +163,11 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
 
     # Define lab equipment
 
-    HKS_sensor = msm.GenericEquipment(
+    HKS_sensor = msm.MeasurementEquipment(
         name="HKS P1000-S3",
         sources=[src_current, src_voltage],
     )
-    BH_ELM = msm.GenericEquipment(
+    BH_ELM = msm.MeasurementEquipment(
         name="Beckhoff ELM3002-0000",
         transformations=[current_AD_transform, voltage_AD_transform],
     )

@@ -1,20 +1,20 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/equipment/generic_equipment-1.0.0"
-tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/equipment/measurement_equipment-1.0.0"
+tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
 
 title: |
-  A generic piece of equipment.
+  A piece of measurement equipment.
 description: |
-  Generic placeholder class do describe any kind of equipment with additional metadata.
+  This schema describes a piece of measurement equipment that is part of a measurement chain.
   Equipments can be associated with signal sources and data transformations.
 
 examples:
   -
     - A analog to digital conversion equipment with a linear signal transformation.
     - |
-      !<tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0>
+      !<tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0>
         name: Beckhoff ELM3002-0000
         sources: []
         transformations:

@@ -9,8 +9,8 @@ from weldx import Q_
 from weldx.core import MathematicalExpression
 from weldx.measurement import (
     Error,
-    GenericEquipment,
     MeasurementChain,
+    MeasurementEquipment,
     Signal,
     SignalSource,
     SignalTransformation,
@@ -191,7 +191,7 @@ class TestMeasurementChain:
             SignalSource(**self._default_source_kwargs({"name": f"source_{i}"}))
             for i in range(num_sources)
         ]
-        equipment = GenericEquipment("Equipment", sources=sources)
+        equipment = MeasurementEquipment("Equipment", sources=sources)
 
         if exception is not None:
             with pytest.raises(exception):
@@ -313,7 +313,7 @@ class TestMeasurementChain:
             self._default_transformation({"name": f"transformation_{i}"})
             for i in range(num_transformations)
         ]
-        equipment = GenericEquipment(name="name", transformations=transformations)
+        equipment = MeasurementEquipment(name="name", transformations=transformations)
 
         if exception is not None:
             with pytest.raises(exception):
@@ -416,10 +416,10 @@ class TestMeasurementChain:
             Expected exception
 
         """
-        src_eq = GenericEquipment(
+        src_eq = MeasurementEquipment(
             "Source Eq", sources=[SignalSource(**self._default_source_kwargs())]
         )
-        tf_eq = GenericEquipment(
+        tf_eq = MeasurementEquipment(
             "Transformation_eq",
             transformations=[
                 self._default_transformation({"name": "transformation_1"})

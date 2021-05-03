@@ -82,7 +82,7 @@ class SignalSource:
 
 # equipment ----------------------------------------------------------------------------
 @dataclass
-class GenericEquipment:
+class MeasurementEquipment:
     """Simple dataclass implementation for generic equipment."""
 
     name: str
@@ -246,7 +246,7 @@ class MeasurementChain:
 
     @classmethod
     def from_equipment(
-        cls, name, equipment: GenericEquipment, source_name=None
+        cls, name, equipment: MeasurementEquipment, source_name=None
     ) -> "MeasurementChain":
         """Create a measurement chain from a piece of equipment that contains a source.
 
@@ -533,7 +533,7 @@ class MeasurementChain:
 
     def add_transformation_from_equipment(
         self,
-        equipment: GenericEquipment,
+        equipment: MeasurementEquipment,
         data=None,
         input_signal_source: str = None,
         transformation_name=None,
@@ -647,7 +647,7 @@ class MeasurementChain:
         transformation = SignalTransformation(name, error, func, type_tf)
         self.add_transformation(transformation, data, input_signal_source)
 
-    def get_equipment(self, signal_source: str) -> GenericEquipment:
+    def get_equipment(self, signal_source: str) -> MeasurementEquipment:
         """Get the equipment that produced a signal.
 
         Parameters
@@ -657,7 +657,7 @@ class MeasurementChain:
 
         Returns
         -------
-        GenericEquipment :
+        MeasurementEquipment :
             The requested equipment
 
         """

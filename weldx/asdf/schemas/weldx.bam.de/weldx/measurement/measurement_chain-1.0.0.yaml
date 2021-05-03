@@ -89,7 +89,7 @@ definitions:
               equipment:
                 description: |
                   The equipment that performs the transformation
-                tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
+                tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
             required: [transformation]
           target_node:
             $ref: "#/definitions/signal_node"
@@ -115,7 +115,7 @@ properties:
   source_equipment:
     description: |
             The equipment that produces the source signal.
-    tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
+    tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
 
 
 propertyOrder: [name, data_source, source_node, source_equipment]

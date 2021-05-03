@@ -5,8 +5,8 @@ from weldx.asdf.util import _write_read_buffer
 from weldx.core import MathematicalExpression
 from weldx.measurement import (
     Error,
-    GenericEquipment,
     MeasurementChain,
+    MeasurementEquipment,
     Signal,
     SignalSource,
     SignalTransformation,
@@ -64,14 +64,14 @@ def measurement_chain_with_equipment() -> MeasurementChain:
             expression="a*x+b", parameters=dict(a=Q_(1, "A"), b=Q_(1, "A"))
         ),
     )
-    eq_source = GenericEquipment(
+    eq_source = MeasurementEquipment(
         name="Source Equipment",
         sources=[source],
     )
-    eq_ad_conversion = GenericEquipment(
+    eq_ad_conversion = MeasurementEquipment(
         name="AD Equipment", transformations=[ad_conversion]
     )
-    eq_calibration = GenericEquipment(
+    eq_calibration = MeasurementEquipment(
         name="Calibration Equipment", transformations=[calibration]
     )
     mc = MeasurementChain.from_equipment("Measurement chain", eq_source)
