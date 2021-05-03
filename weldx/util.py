@@ -421,24 +421,6 @@ def pandas_time_delta_to_quantity(
     return Q_(nanoseconds, "ns").to(unit)
 
 
-def equal_unit_dimensionality(unit_1, unit_2) -> bool:
-    """Return `True` if two units have the same dimensionality and `False` otherwise.
-
-    Parameters
-    ----------
-    unit_1 :
-        First unit
-    unit_2 :
-        Second unit
-
-    Returns
-    -------
-        `True` if both units have the same dimensionality and `False` otherwise.
-
-    """
-    return Q_(1, unit_1).dimensionality == Q_(1, unit_2).dimensionality
-
-
 def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
     """Check if a matrix is close or equal to another matrix.
 

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Dict, List, Tuple  # noqa: F401
 from warnings import warn
 
 from weldx.asdf.tags.weldx.core.graph import build_graph, build_tree
+from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 
 if TYPE_CHECKING:  # pragma: no cover
     from pint import Quantity
@@ -623,9 +624,7 @@ class MeasurementChain:
         type_tf = f"{input_signal.signal_type[0]}{output_signal_type[0]}".upper()
         if output_signal_unit is not None:
             if func is not None:
-                from weldx.util import equal_unit_dimensionality
-
-                if not equal_unit_dimensionality(
+                if not ureg.is_compatible_with(
                     output_signal_unit,
                     self._determine_output_signal_unit(func, input_signal.unit),
                 ):

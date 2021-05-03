@@ -186,22 +186,6 @@ def test_pandas_time_delta_to_quantity():
     )
 
 
-@pytest.mark.parametrize(
-    "unit_1, unit_2, exp_result",
-    [
-        ("m*m", "inch*inch", True),
-        ("m*m", "inch", False),
-        ("V*A/V", "A", True),
-        ("V*A", "A", False),
-        ("s", "h", True),
-        ("", "", True),
-    ],
-)
-def test_equal_unit_dimensionality(unit_1, unit_2, exp_result):
-    """Test if the dimensionality comparison works as expected."""
-    assert ut.equal_unit_dimensionality(unit_1, unit_2) == exp_result
-
-
 def test_xr_interp_like():
     """Test behaviour of custom interpolation method for xarray Objects."""
     # basic interpolation behavior on a single coordinate
