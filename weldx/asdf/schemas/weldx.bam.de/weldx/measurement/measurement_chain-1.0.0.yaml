@@ -108,7 +108,7 @@ properties:
     description: |
       The source that generates the first signal and is the first element of the chain.
     tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
-  source_signal:
+  source_node:
     description: |
       The initial signal of the measurement chain.
     $ref: "#/definitions/signal_node"
@@ -118,7 +118,7 @@ properties:
     tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
 
 
-propertyOrder: [name, data_source, source_signal, source_equipment]
-required: [name, data_source, source_signal]
+propertyOrder: [name, data_source, source_node, source_equipment]
+required: [name, data_source, source_node]
 flowStyle: block
 ...
