@@ -7,7 +7,7 @@ from io import BytesIO
 import asdf
 import pytest
 
-from scripts import welding_schema
+from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx import WeldxFile
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
@@ -282,7 +282,7 @@ class TestWeldXFile:
     @pytest.mark.parametrize("schema_arg", ["custom_schema", "asdffile_kwargs"])
     def test_custom_schema(schema_arg):
         """Check the property complex_schema is being set."""
-        buff, _ = welding_schema.single_pass_weld_example(None)
+        buff, _ = single_pass_weld_example(None)
         schema = get_schema_path("datamodels/single_pass_weld-1.0.0.schema.yaml")
         kwargs = {schema_arg: schema}
         if schema_arg == "asdffile_kwargs":
