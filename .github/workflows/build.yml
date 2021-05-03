@@ -118,7 +118,9 @@ jobs:
       - name: run pytest
         run: |
           pip install pytest pytest-cov pytest-xdist
-          pytest -n2 --dist=loadfile
+          cd /tmp
+          pytest -n2 --dist=loadfile --pyargs weldx
+          cd -
 
       - name: set pypi test repo defaults
         run: |
