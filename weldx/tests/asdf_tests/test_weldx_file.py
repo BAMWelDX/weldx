@@ -16,8 +16,7 @@ from weldx.types import SupportsFileReadWrite
 class ReadOnlyFile:
     """Simulate a read-only file."""
 
-    def __init__(self, tmpdir):
-        """."""
+    def __init__(self, tmpdir):  # noqa: D107
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
         print("fn", fn)
         with open(fn, "wb") as fh:
@@ -25,37 +24,30 @@ class ReadOnlyFile:
         self.mode = "rb"
         self.file_read_only = open(fn, mode=self.mode)
 
-    def read(self, *args, **kwargs):
-        """."""
+    def read(self, *args, **kwargs):  # noqa: D102
         return self.file_read_only.read(*args, **kwargs)
 
     @staticmethod
-    def readable():
-        """."""
+    def readable():  # noqa: D102
         return True
 
 
 class WritableFile:
     """Example of a class implementing SupportsFileReadWrite."""
 
-    def __init__(self):
-        """."""
+    def __init__(self):  # noqa: D107
         self.to_wrap = BytesIO()
 
-    def read(self, *args, **kwargs):
-        """."""
+    def read(self, *args, **kwargs):  # noqa: D102
         return self.to_wrap.read(*args, **kwargs)
 
-    def write(self, *args, **kwargs):
-        """."""
+    def write(self, *args, **kwargs):  # noqa: D102
         return self.to_wrap.write(*args, **kwargs)
 
-    def tell(self):
-        """."""
+    def tell(self):  # noqa: D102
         return self.to_wrap.tell()
 
-    def seek(self, *args, **kwargs):
-        """."""
+    def seek(self, *args, **kwargs):  # noqa: D102
         return self.to_wrap.seek(*args, **kwargs)
 
     def flush(self):
@@ -70,7 +62,8 @@ def test_protocol_check(tmpdir):
 
     # real file:
     f = tempfile.mktemp(dir=tmpdir)
-    assert isinstance(open(f, "w"), SupportsFileReadWrite)
+    with open(f, "w") as fh:
+        assert isinstance(fh, SupportsFileReadWrite)
 
 
 @pytest.fixture(scope="class")
