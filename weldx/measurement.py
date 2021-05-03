@@ -350,7 +350,7 @@ class MeasurementChain:
         input_signal: Signal,
         data: "TimeSeries",
     ) -> Signal:
-        """Get the signal that is produced by the provided transformation.
+        """Create a signal that is produced by the provided transformation.
 
         Parameters
         ----------
