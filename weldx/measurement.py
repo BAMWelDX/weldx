@@ -203,19 +203,7 @@ class MeasurementChain:
             self.add_signal_data(signal_data)
 
     def __eq__(self, other: "MeasurementChain") -> bool:
-        """Return `True` if 2 measurement chains are equal and `False` otherwise.
-
-        Parameters
-        ----------
-        other :
-            The measurement chain that should be compared.
-
-        Returns
-        -------
-        bool :
-            `True` if 2 measurement chains are equal and `False` otherwise.
-
-        """
+        """Return `True` if two measurement chains are equal and `False` otherwise."""
         return (
             self._name == other._name
             and self._source == other._source
