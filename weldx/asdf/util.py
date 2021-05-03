@@ -10,11 +10,15 @@ from boltons.iterutils import get_path
 
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.constants import WELDX_PATH
-from weldx.types import types_path_and_file_like, types_file_like
+from weldx.types import (
+    types_path_and_file_like,
+    types_file_like,
+    SupportsFileReadWrite,
+    types_path_like,
+    SupportsFileReadOnly,
+)
 from weldx.util import deprecated
 
-if typing.TYPE_CHECKING:  # pragma: no cover
-    from weldx.types import SupportsFileReadOnly, SupportsFileReadWrite  # noqa
 
 __all__ = [
     "get_schema_path",
@@ -169,10 +173,12 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
         # reads lines until the byte string "...\n" is approached.
         return b"".join(iter(handle.readline, b"...\n"))
 
-    if isinstance(file, BytesIO):
+    if isinstance(file, SupportsFileReadWrite):
         file.seek(0)
         code = read_header(file)
-    else:
+    elif isinstance(file, SupportsFileReadOnly):
+        code = read_header(file)
+    elif isinstance(file, types_path_like.__args__):
         with open(file, "rb") as f:
             code = read_header(f)
 
@@ -212,14 +218,14 @@ def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
     from pygments.formatters.html import HtmlFormatter
     from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
 
-    if isinstance(file, types_file_like):
+    if isinstance(file, types_file_like.__args__):
         lexer = get_lexer_by_name(lexer)
     elif Path(file).suffix == ".asdf":
         lexer = get_lexer_by_name("YAML")
     else:
         lexer = get_lexer_for_filename(file)
 
-    code = get_yaml_header(file)
+    code = get_yaml_header(file, parse=False)
     formatter = HtmlFormatter()
     return HTML(
         '<style type="text/css">{}</style>{}'.format(
