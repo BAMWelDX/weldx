@@ -857,6 +857,11 @@ class MeasurementChain:
         )
 
     @property
+    def signals(self):
+        """Get a list of all signals."""
+        return [self._graph.nodes[node]["signal"] for node in self._graph.nodes]
+
+    @property
     def source(self) -> SignalSource:
         """Return the source of the measurement chain.
 
@@ -879,6 +884,11 @@ class MeasurementChain:
 
         """
         return self._source.name
+
+    @property
+    def transformations(self):
+        """Get a list of all transformations."""
+        return [self._graph.edges[edge]["transformation"] for edge in self._graph.edges]
 
     @property
     def transformation_names(self) -> List:
