@@ -1,5 +1,6 @@
 """pytest configuration."""
 import pytest
+
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
 
 
