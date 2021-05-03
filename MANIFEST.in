@@ -4,7 +4,6 @@ prune .binder
 prune .github
 prune devtools
 prune doc
-prune scripts
 prune tutorials
 
 global-exclude .*

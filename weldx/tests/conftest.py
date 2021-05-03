@@ -1,5 +1,6 @@
 """pytest configuration."""
 import pytest
+from weldx.asdf.cli.welding_schema import single_pass_weld_example
 
 
 @pytest.fixture(scope="class")
@@ -23,8 +24,6 @@ def single_pass_weld_asdf(request):
             ...
 
     """
-    from scripts.welding_schema import single_pass_weld_example
-
     buff, tree = single_pass_weld_example(out_file=None)
     request.cls.single_pass_weld_tree = tree
     request.cls.single_pass_weld_file = buff

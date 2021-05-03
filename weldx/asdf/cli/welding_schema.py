@@ -1,7 +1,25 @@
-# Welding schema
+"""single_pass_weld schema."""
+import sys
+from io import BytesIO
+from typing import Optional, Tuple
 
 
-def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
+def single_pass_weld_example(
+    out_file: str = "single_pass_weld_example.asdf",
+) -> Optional[Tuple[BytesIO, dict]]:
+    """Create ASDF file containing all required fields of the single_pass_weld schema.
+
+    Parameters
+    ----------
+    out_file :
+        destination file, if None returns a BytesIO buffer.
+
+    Returns
+    -------
+    buff, tree
+        When writing to memory, return the buffer and the tree (as dictionary).
+
+    """
     # Imports
     import asdf
     import numpy as np
@@ -301,5 +319,39 @@ def single_pass_weld_example(out_file="single_pass_weld_example.asdf"):
         )
 
 
+def parse_args(argv):
+    """Parse args."""
+    import argparse
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-o", "--output", default="single_pass_weld_example.asdf", type=Path
+    )
+
+    args = parser.parse_args(argv if argv is not None else sys.argv)
+    return args
+
+
+def main(argv=None):
+    """Invoke single_pass_weld_example.
+
+    Examples
+    --------
+    >>> import tempfile
+    >>> f = tempfile.NamedTemporaryFile(delete=True)
+    >>> with f:
+    ...     main(['-o', f.name])
+
+    """
+    args = parse_args(argv)
+    out = args.output
+    if out.exists() and out.stat().st_size > 0:
+        print(f"Destination {out} already exists. Quitting.")
+        sys.exit(1)
+
+    single_pass_weld_example(out)
+
+
 if __name__ == "__main__":
-    single_pass_weld_example()
+    main()
