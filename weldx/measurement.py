@@ -24,7 +24,7 @@ if TYPE_CHECKING:  # pragma: no cover
 class Error:
     """Simple dataclass implementation for signal transformation errors."""
 
-    deviation: "Quantity" = None
+    deviation: Quantity = None
 
 
 @dataclass
@@ -33,7 +33,7 @@ class Signal:
 
     signal_type: str
     unit: str
-    data: "TimeSeries" = None
+    data: TimeSeries = None
 
     def __post_init__(self):
         """Perform some checks after construction."""
@@ -47,7 +47,7 @@ class SignalTransformation:
 
     name: str
     error: Error
-    func: "MathematicalExpression" = None
+    func: MathematicalExpression = None
     type_transformation: str = None
     input_shape: Tuple = None
     output_shape: Tuple = None
