@@ -9,6 +9,7 @@ from warnings import warn
 from networkx import draw, draw_networkx_edge_labels
 
 from weldx.asdf.tags.weldx.core.graph import build_graph, build_tree
+from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -16,6 +17,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from weldx.core import MathematicalExpression, TimeSeries
 
+# todo add examples to docstrings
 
 # measurement --------------------------------------------------------------------------
 
@@ -431,8 +433,6 @@ class MeasurementChain:
             Unit of the transformations' output signal
 
         """
-        from weldx import Q_
-
         if func is not None:
             variables = func.get_variable_names()
             if len(variables) != 1:
@@ -625,7 +625,6 @@ class MeasurementChain:
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
-                from weldx import Q_
                 from weldx.core import MathematicalExpression
 
                 if output_signal_unit == "":
