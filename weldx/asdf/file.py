@@ -1,10 +1,11 @@
 """The WeldxFile class wraps creation and updating of ASDF files."""
 import pathlib
+import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import List, Mapping, Optional, Union
+from typing import List, Mapping, Optional, Union, IO
 
 from asdf import AsdfFile
 from asdf import open as open_asdf
@@ -146,9 +147,8 @@ class WeldxFile(UserDict):
         return self._mode
 
     @staticmethod
-    def _handle_path(filename, mode):
+    def _handle_path(filename, mode) -> (IO, bool):
         new_file_created = False
-        # TODO: simplify
         exists = pathlib.Path(filename).exists()
         if not exists and mode == "r":
             raise RuntimeError(f"file {filename} has be created," " but mode is 'r'.")
@@ -461,22 +461,21 @@ class WeldxFile(UserDict):
         # We need to synchronize the file contents here to make sure the header is in
         # place.
         if self.mode == "r":
-            import warnings
-
-            warnings.warn(
-                "mode read-only, creating a temporary (in-memory) file"
-                " to display header. Your changes will be lost! "
-                "Use write_to(file_name) to save on disk.",
-                stacklevel=1,
-                category=UserWarning,
-            )
+            with warnings.catch_warnings():
+                warnings.warn(
+                    "mode read-only, creating a temporary (in-memory) file"
+                    " to display header. Your changes will be lost! "
+                    "Use write_to(file_name) to save on disk.",
+                    stacklevel=1,
+                    category=UserWarning,
+                )
             buff = self.write_to(**self._write_kwargs)
             return WeldxFile(buff, mode="rw").show_asdf_header(
                 use_widgets=use_widgets, _interactive=_interactive
             )
         else:
             # in write-mode, we sync to file first prior obtaining the header.
-            self._asdf_handle.update(**self._write_kwargs)
+            self.sync(**self._write_kwargs)
 
         def _impl_interactive() -> Union[
             "IPython.display.HTML", "IPython.display.JSON"  # noqa: F821
