@@ -15,7 +15,6 @@ class SignalTransformationType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: SignalTransformation, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
         tree = node.__dict__
         return tree
 
