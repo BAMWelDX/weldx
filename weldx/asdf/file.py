@@ -43,7 +43,7 @@ class WeldxFile(UserDict):
     ----------
     filename_or_file_like :
         A path to a weldx file or file handle like to read/write data from.
-        If None is passed, an in-memory file will be created.
+        If `None` is passed, an in-memory file will be created.
     mode :
         Reading or reading/writing mode: "r" or "rw".
     asdffile_kwargs :
