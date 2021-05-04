@@ -6,6 +6,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple  # noqa: F401
 from warnings import warn
 
+from networkx import draw, draw_networkx_edge_labels
+
 from weldx.asdf.tags.weldx.core.graph import build_graph, build_tree
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 
@@ -733,7 +735,6 @@ class MeasurementChain:
 
         """
         import matplotlib.pyplot as plt
-        from networkx import draw, draw_networkx_edge_labels
 
         def _transformation_label(name, transformation: SignalTransformation) -> str:
             text = name
