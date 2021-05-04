@@ -385,7 +385,7 @@ class WeldxFile(UserDict):
         fd :
             May be a string path to a file, or a Python file-like
             object. If a string path, the file is automatically
-            closed after writing. If None is given, write to a new buffer.
+            closed after writing. If `None` is given, write to a new buffer.
 
         write_args :
             Allowed parameters:
