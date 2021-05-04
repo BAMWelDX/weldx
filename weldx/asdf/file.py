@@ -1,15 +1,17 @@
-"""The WeldxFile class wraps creation and updating of ASDF files."""
+"""`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
 import pathlib
 import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import List, Mapping, Optional, Union, IO
+from typing import IO, Dict, List, Mapping, Optional, Union
 
 from asdf import AsdfFile
 from asdf import open as open_asdf
 from asdf.asdf import is_asdf_file
+from asdf.tags.core import Software
+from jsonschema import ValidationError
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.util import get_yaml_header, view_tree
@@ -38,7 +40,7 @@ def reset_file_position(fh: SupportsFileReadWrite):
 
 
 class WeldxFile(UserDict):
-    """Expose an ASDF file as a dictionary like object.
+    """Expose an ASDF file as a dictionary like object and handle underlying files.
 
     Parameters
     ----------
@@ -208,8 +210,8 @@ class WeldxFile(UserDict):
         return self._DEFAULT_SOFTWARE_ENTRY
 
     @software_history_entry.setter
-    def software_history_entry(self, value: str):
-    """Add a new software history entry."""
+    def software_history_entry(self, value: dict):
+        """Add a new software history entry."""
         if value is None:
             from weldx import __version__ as version
 
@@ -220,7 +222,13 @@ class WeldxFile(UserDict):
                 "version": version,
             }
         else:
-            # TODO: validate it here, or let asdf fail?
+            if not isinstance(value, Dict):
+                raise ValueError("expected a dictionary type")
+            try:
+                test = AsdfFile(tree=dict(software=Software(value)))
+                test.validate()
+            except ValidationError as ve:
+                raise ValueError(f"Given value has invalid format: {ve}")
             self._DEFAULT_SOFTWARE_ENTRY = value
 
     def __enter__(self):

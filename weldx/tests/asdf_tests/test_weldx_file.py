@@ -7,8 +7,8 @@ from io import BytesIO
 import asdf
 import pytest
 
-from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx import WeldxFile
+from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
 
@@ -301,3 +301,11 @@ class TestWeldXFile:
         file.show_asdf_header()
         after_pos = file.file_handle.tell()
         assert old_pos == after_pos
+
+    def test_invalid_software_entry(self):
+        """Invalid software entries should raise."""
+        with pytest.raises(ValueError):
+            self.fh.software_history_entry = {"invalid": None}
+
+        with pytest.raises(ValueError):
+            self.fh.software_history_entry = {"name": None}
