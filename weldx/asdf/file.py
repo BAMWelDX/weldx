@@ -427,7 +427,7 @@ class WeldxFile(UserDict):
         return fd
 
     def show_asdf_header(
-        self, use_widgets: bool = True, _interactive: Optional[bool] = None
+        self, use_widgets: bool = False, _interactive: Optional[bool] = None
     ):
         """Show the header of the ASDF serialization.
 
@@ -441,6 +441,8 @@ class WeldxFile(UserDict):
         use_widgets :
             When in an interactive session, use widgets to traverse the header or show
             a static syntax highlighted string?
+            Currently widgets are disabled by default, as jupyter notebook lacks the
+            capability to render the header nicely.
         _interactive :
             Should not be set.
 
@@ -514,10 +516,9 @@ class WeldxFile(UserDict):
 
     def _repr_json_(self) -> dict:
         """Return the headers a plain dict."""
+        # set _interactive false, to enforce a dict.
         return self.show_asdf_header(use_widgets=False, _interactive=False)
 
     def _ipython_display(self):
         # this will be called in Jupyter Lab, but not in a plain notebook.
-        from IPython.display import JSON
-
-        return JSON(self._repr_json_())
+        return self.show_asdf_header(use_widgets=False, _interactive=True)
