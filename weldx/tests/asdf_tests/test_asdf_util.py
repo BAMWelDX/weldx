@@ -1,10 +1,7 @@
 """tests for asdf utility functions."""
-import io
-
 import pytest
 
 from weldx import WeldxFile
-from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.util import get_yaml_header
 
 
