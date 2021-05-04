@@ -149,6 +149,8 @@ class WeldxFile(UserDict):
 
     @staticmethod
     def _handle_path(filename, mode) -> (IO, bool):
+        # opens a file handle with given mode,
+        # and returns it + if a new file has been created.
         new_file_created = False
         exists = pathlib.Path(filename).exists()
         if not exists and mode == "r":
