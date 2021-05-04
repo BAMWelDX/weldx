@@ -851,14 +851,7 @@ class MeasurementChain:
 
     @property
     def source(self) -> SignalSource:
-        """Return the source of the measurement chain.
-
-        Returns
-        -------
-        SignalSource :
-            The source of the measurement chain
-
-        """
+        """Return the source of the measurement chain."""
         return self._source
 
     @property
