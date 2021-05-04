@@ -1,5 +1,4 @@
 """Utilities for asdf files."""
-import typing
 from io import BytesIO
 from pathlib import Path
 from typing import Tuple, Union
@@ -11,14 +10,13 @@ from boltons.iterutils import get_path
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
 from weldx.constants import WELDX_PATH
 from weldx.types import (
-    types_path_and_file_like,
-    types_file_like,
-    SupportsFileReadWrite,
-    types_path_like,
     SupportsFileReadOnly,
+    SupportsFileReadWrite,
+    types_file_like,
+    types_path_and_file_like,
+    types_path_like,
 )
 from weldx.util import deprecated
-
 
 __all__ = [
     "get_schema_path",

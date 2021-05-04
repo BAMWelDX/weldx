@@ -65,7 +65,8 @@ class WeldxFile(UserDict):
     software_history_entry :
         An optional dictionary which will be used to add history entries upon
         modification of the file. It has to provide the following keys:
-        ("name", "author", "homepage", "version")
+        "name", "author", "homepage", "version"
+        These should be set to string typed values. The homepage should be a URL.
 
     """
 
@@ -82,8 +83,6 @@ class WeldxFile(UserDict):
         custom_schema: Union[str, pathlib.Path] = None,
         software_history_entry: Mapping = None,
     ):
-        # TODO: default asdf_args?
-        # e.g: asdf_args = {"copy_arrays": True}
         if write_kwargs is None:
             write_kwargs = {}
         self._write_kwargs = write_kwargs
@@ -211,7 +210,7 @@ class WeldxFile(UserDict):
 
     @software_history_entry.setter
     def software_history_entry(self, value: dict):
-        """Add a new software history entry."""
+        """Set the software used for making history entries."""
         if value is None:
             from weldx import __version__ as version
 
@@ -248,18 +247,18 @@ class WeldxFile(UserDict):
 
     def sync(
         self,
-        all_array_storage=None,
-        all_array_compression="input",
-        auto_inline=None,
-        pad_blocks=False,
-        include_block_index=True,
-        version=None,
+        all_array_storage: str = None,
+        all_array_compression: str = "input",
+        auto_inline: int = None,
+        pad_blocks: Union[float, bool] = False,
+        include_block_index: bool = True,
+        version: str = None,
     ):
         """Update the file on disk in place.
 
         Parameters
         ----------
-        all_array_storage : string, optional
+        all_array_storage :
             If provided, override the array storage type of all blocks
             in the file immediately before writing.  Must be one of:
 
@@ -271,7 +270,7 @@ class WeldxFile(UserDict):
 
             - ``inline``: Store the data as YAML inline in the tree.
 
-        all_array_compression : string, optional
+        all_array_compression :
             If provided, set the compression type on all binary blocks
             in the file.  Must be one of:
 
@@ -286,25 +285,25 @@ class WeldxFile(UserDict):
             - ``input``: Use the same compression as in the file read.
               If there is no prior file, acts as None
 
-        auto_inline : int, optional
+        auto_inline :
             When the number of elements in an array is less than this
             threshold, store the array as inline YAML, rather than a
             binary block.  This only works on arrays that do not share
             data with other arrays.  Default is 0.
 
-        pad_blocks : float or bool, optional
+        pad_blocks :
             Add extra space between blocks to allow for updating of
             the file.  If `False` (default), add no padding (always
             return 0).  If `True`, add a default amount of padding of
             10% If a float, it is a factor to multiple content_size by
             to get the new total size.
 
-        include_block_index : bool, optional
+        include_block_index :
             If `False`, don't include a block index at the end of the
             file.  (Default: `True`)  A block index is never written
             if the file has a streamed block.
 
-        version : str, optional
+        version :
             The ASDF version to write out.  If not provided, it will
             write out in the latest version supported by asdf.
 
