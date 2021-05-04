@@ -1,5 +1,7 @@
 """Contains measurement related classes and functions."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple  # noqa: F401
 from warnings import warn
@@ -466,7 +468,7 @@ class MeasurementChain:
         if node not in self._graph.nodes:
             raise KeyError(f"No signal with source '{node}' found")
 
-    def add_signal_data(self, data: "TimeSeries", signal_source: str = None):
+    def add_signal_data(self, data: TimeSeries, signal_source: str = None):
         """Add data to a signal.
 
         Parameters
