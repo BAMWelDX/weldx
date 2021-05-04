@@ -50,7 +50,7 @@ class WeldxFile(UserDict):
         Keyword arguments to pass to asdf.open.
         See `asdf.open` for reference.
     write_kwargs :
-        Keyword arguments to pass to AsdfFile.write_to.
+        Keyword arguments to pass to `asdf.AsdfFile.write_to`.
         See `asdf.AsdfFile.open` for reference.
     tree :
         An optional dictionary to write to the file.
