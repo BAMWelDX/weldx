@@ -7,6 +7,8 @@
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
 - added `util.compare_nested` to check equality of two nested data
   structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
+- added `WeldxFile` wrapper to handle asdf files with 
+  history and schemas more easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).  
 
 ### changes
 
