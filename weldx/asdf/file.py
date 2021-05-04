@@ -208,7 +208,8 @@ class WeldxFile(UserDict):
         return self._DEFAULT_SOFTWARE_ENTRY
 
     @software_history_entry.setter
-    def software_history_entry(self, value):
+    def software_history_entry(self, value: str):
+    """Add a new software history entry."""
         if value is None:
             from weldx import __version__ as version
 
