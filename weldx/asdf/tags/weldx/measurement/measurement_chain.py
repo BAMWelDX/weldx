@@ -18,7 +18,7 @@ class MeasurementChainType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: MeasurementChain, ctx):
-        return node.to_tree()
+        return node.to_dict()
 
     @classmethod
     def from_tree(cls, tree, ctx) -> MeasurementChain:

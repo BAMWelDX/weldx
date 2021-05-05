@@ -830,7 +830,7 @@ class MeasurementChain:
 
         return axes
 
-    def to_tree(self) -> Dict:
+    def to_dict(self) -> Dict:
         """Get the content of the measurement chain as dictionary.
 
         Returns
