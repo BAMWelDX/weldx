@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple  # noqa: F401
 from warnings import warn
 
+
 from networkx import draw, draw_networkx_edge_labels
 
 
@@ -179,7 +180,10 @@ class MeasurementChain:
     """Class that represents a measurement chain."""
 
     def __init__(
-        self, name: str, source: SignalSource, signal_data: "TimeSeries" = None,
+        self,
+        name: str,
+        source: SignalSource,
+        signal_data: "TimeSeries" = None,
     ):
         """Create a new measurement chain.
 
@@ -315,7 +319,9 @@ class MeasurementChain:
         return cls(name, source)
 
     def _add_signal(
-        self, node_id: str, signal: Signal = None,
+        self,
+        node_id: str,
+        signal: Signal = None,
     ):
         """Add a new signal node to the internal graph.
 
@@ -511,7 +517,8 @@ class MeasurementChain:
         )
 
         self._add_signal(
-            node_id=transformation.name, signal=output_signal,
+            node_id=transformation.name,
+            signal=output_signal,
         )
         self._graph.add_edge(
             input_signal_source, transformation.name, transformation=transformation
@@ -625,7 +632,8 @@ class MeasurementChain:
                     output_signal_unit = 1
                 unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
                 func = MathematicalExpression(
-                    "a*x", parameters={"a": Q_(1, unit_conversion)},
+                    "a*x",
+                    parameters={"a": Q_(1, unit_conversion)},
                 )
 
         transformation = SignalTransformation(name, error, func, type_tf)
