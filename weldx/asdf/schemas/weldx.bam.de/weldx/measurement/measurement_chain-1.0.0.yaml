@@ -14,40 +14,63 @@ description: |
 
 example:
   -
-    - A measurement chain containing a single transformation that performs an AD conversion.
+    - |
+      A measurement chain representing a current measurement. It consists of 2 transformations, an AD conversion and
+      subsequent application of the calibration data.
     - |
       !<tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0>
-        name: Measurement Chain
+        name: Welding current measurement chain
         data_source: !<tag:weldx.bam.de:weldx/measurement/source-1.0.0>
-          name: Source
+          name: Current sensor
           output_signal: &id001 !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
             signal_type: analog
             unit: V
           error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
             deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.2}
-        source_signal: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
-          name: Source
-          attributes:
-            signal: *id001
-          edges:
-          - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
-            direction: fwd
+        graph: !<tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0>
+          root_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+            name: Current sensor
             attributes:
-              transformation: !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
-                name: AD conversion
-                error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
-                  deviation: !unit/quantity-1.1.0 {unit: percent, value: 1}
-                func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
-                  expression: a*x
-                  parameters:
-                    a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 1}
-                type_transformation: AD
-            target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
-              name: AD conversion
+              signal: *id001
+            edges:
+            - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+              direction: fwd
               attributes:
-                signal: !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
-                  signal_type: digital
-                  unit: dimensionless
+                transformation: !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
+                  name: AD conversion
+                  error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+                    deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.025}
+                  func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+                    expression: a*x
+                    parameters:
+                      a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 1}
+                  type_transformation: AD
+              target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+                name: AD conversion
+                attributes:
+                  signal: !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+                    signal_type: digital
+                    unit: dimensionless
+                edges:
+                - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+                  direction: fwd
+                  attributes:
+                    transformation: !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
+                      name: Calibration
+                      error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+                        deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
+                      func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+                        expression: a*x + b
+                        parameters:
+                          a: !unit/quantity-1.1.0 {unit: ampere, value: 75}
+                          b: !unit/quantity-1.1.0 {unit: ampere, value: 25}
+                      type_transformation: DD
+                  target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+                    name: Calibration
+                    attributes:
+                      signal: !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+                        signal_type: digital
+                        unit: ampere
 
 definitions:
   signal_node:
@@ -112,7 +135,7 @@ properties:
 
   graph:
     description: |
-      The initial signal of the measurement chain.
+      The measurement chain depicted by a graph. Signals are represented by the nodes and transformations by the edges.
     allOf:
       - tag: "tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0"
       - type: object
