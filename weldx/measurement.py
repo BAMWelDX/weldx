@@ -52,6 +52,7 @@ class SignalTransformation:
     type_transformation: str = None
     input_shape: Tuple = None
     output_shape: Tuple = None
+    meta: str = None
 
     def __post_init__(self):
         """Perform some tests after construction."""
