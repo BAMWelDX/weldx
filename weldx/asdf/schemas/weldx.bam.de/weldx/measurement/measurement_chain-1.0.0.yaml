@@ -104,21 +104,29 @@ properties:
     description: |
       The name of the measurement chain.
     type: string
+
   data_source:
     description: |
       The source that generates the first signal and is the first element of the chain.
     tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
-  source_node:
+
+  graph:
     description: |
       The initial signal of the measurement chain.
-    $ref: "#/definitions/signal_node"
+    allOf:
+      - tag: "tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0"
+      - type: object
+        properties:
+          root_node:
+            $ref: "#/definitions/signal_node"
+
   source_equipment:
     description: |
             The equipment that produces the source signal.
     tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
 
 
-propertyOrder: [name, data_source, source_node, source_equipment]
-required: [name, data_source, source_node]
+propertyOrder: [name, data_source, graph, source_equipment]
+required: [name, data_source, graph]
 flowStyle: block
 ...

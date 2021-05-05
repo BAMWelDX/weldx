@@ -229,7 +229,7 @@ class MeasurementChain:
 
         """
         mc = MeasurementChain(name=dictionary["name"], source=dictionary["data_source"])
-        mc._graph = build_graph(dictionary["source_node"])
+        mc._graph = dictionary["graph"]
         mc._source_equipment = dictionary.get("source_equipment")
         for node in mc._graph.nodes:
             if len(list(mc._graph.successors(node))) == 0:
@@ -843,7 +843,7 @@ class MeasurementChain:
             name=self._name,
             data_source=self._source,
             source_equipment=self._source_equipment,
-            source_node=build_tree(self._graph, self._source.name),
+            graph=self._graph,
         )
 
     @property
