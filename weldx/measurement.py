@@ -6,9 +6,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple  # noqa: F401
 from warnings import warn
 
-
 from networkx import draw, draw_networkx_edge_labels
-
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
