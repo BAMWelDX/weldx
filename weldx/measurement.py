@@ -356,7 +356,6 @@ class MeasurementChain:
 
         Examples
         --------
-
         >>> from weldx import Q_
         >>> from weldx.measurement import Error, MeasurementChain
 
@@ -569,7 +568,6 @@ class MeasurementChain:
 
         Examples
         --------
-
         >>> from weldx import Q_
         >>> from weldx.core import MathematicalExpression
         >>> from weldx.measurement import Error, MeasurementChain, SignalTransformation
@@ -646,7 +644,6 @@ class MeasurementChain:
 
         Examples
         --------
-
         >>> from weldx import Q_
         >>> from weldx.core import MathematicalExpression
         >>> from weldx.measurement import Error, MeasurementChain,\
@@ -747,7 +744,6 @@ class MeasurementChain:
 
         Examples
         --------
-
         >>> from weldx import Q_
         >>> from weldx.core import MathematicalExpression
         >>> from weldx.measurement import Error, MeasurementChain, SignalTransformation
