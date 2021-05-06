@@ -16,7 +16,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from weldx.core import MathematicalExpression, TimeSeries
 
-# todo add examples to docstrings
 
 # measurement --------------------------------------------------------------------------
 
