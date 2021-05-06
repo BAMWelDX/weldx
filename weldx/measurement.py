@@ -282,27 +282,27 @@ class MeasurementChain:
         --------
         >>> from weldx import Q_
         >>> from weldx.measurement import Error, MeasurementChain,\
-                MeasurementEquipment, Signal, SignalSource
+        MeasurementEquipment, Signal, SignalSource
 
         Create a signal source
 
-        >>> current_source = SignalSource(name="Current sensor", \
-                                          error=Error(Q_(0.1, "percent")), \
-                                          output_signal=Signal(signal_type="analog",\
-                                                               unit="V")\
-                                          )
+        >>> current_source = SignalSource(name="Current sensor",
+        ...                               error=Error(Q_(0.1, "percent")),
+        ...                               output_signal=Signal(signal_type="analog",
+        ...                                                    unit="V")
+        ...                               )
 
         Create the equipment
 
-        >>> current_sensor = MeasurementEquipment(name="Current Sensor",\
-                                                  sources=[current_source]\
-                                                  )
+        >>> current_sensor = MeasurementEquipment(name="Current Sensor",
+        ...                                       sources=[current_source]
+        ...                                       )
 
         Create a measurement chain using the equipment
 
-        >>> mc = MeasurementChain.from_equipment(name="Current measurement chain",\
-                                                 equipment=current_sensor\
-                 )
+        >>> mc = MeasurementChain.from_equipment(name="Current measurement chain",
+        ...                                      equipment=current_sensor
+        ...                                      )
 
         """
         if len(equipment.sources) > 1:
@@ -358,13 +358,13 @@ class MeasurementChain:
         >>> from weldx import Q_
         >>> from weldx.measurement import Error, MeasurementChain
 
-        >>> mc = MeasurementChain.from_parameters(\
-                     name="Current measurement chain",\
-                     source_error=Error(deviation=Q_(0.5, "percent")),\
-                     source_name="Current sensor",\
-                     output_signal_type="analog",\
-                     output_signal_unit="V"\
-                 )
+        >>> mc = MeasurementChain.from_parameters(
+        ...          name="Current measurement chain",
+        ...          source_error=Error(deviation=Q_(0.5, "percent")),
+        ...          source_name="Current sensor",
+        ...          output_signal_type="analog",
+        ...          output_signal_unit="V"
+        ...      )
 
         """
         source = SignalSource(
@@ -571,30 +571,30 @@ class MeasurementChain:
         >>> from weldx.core import MathematicalExpression
         >>> from weldx.measurement import Error, MeasurementChain, SignalTransformation
 
-        >>> mc = MeasurementChain.from_parameters(\
-                     name="Current measurement chain",\
-                     source_error=Error(deviation=Q_(0.5, "percent")),\
-                     source_name="Current sensor",\
-                     output_signal_type="analog",\
-                     output_signal_unit="V"\
-                 )
+        >>> mc = MeasurementChain.from_parameters(
+        ...          name="Current measurement chain",
+        ...          source_error=Error(deviation=Q_(0.5, "percent")),
+        ...          source_name="Current sensor",
+        ...          output_signal_type="analog",
+        ...          output_signal_unit="V"
+        ...      )
 
         Create a mathematical expression that accepts a quantity with volts as unit and
         that returns a dimentsionless quantity.
 
-        >>> func = MathematicalExpression(expression="a*x + b",\
-                                          parameters=dict(a=Q_(5, "1/V"), b=Q_(1, ""))\
-                                          )
+        >>> func = MathematicalExpression(expression="a*x + b",
+        ...                               parameters=dict(a=Q_(5, "1/V"), b=Q_(1, ""))
+        ...                               )
 
         Use the mathematical expression to create a signal transformation which also
         performs a analog-digital conversion.
 
-        >>> current_ad_transform = SignalTransformation(\
-                                       name="Current AD conversion",\
-                                       error=Error(deviation=Q_(1,"percent")),\
-                                       func=func,\
-                                       type_transformation="AD"\
-                                       )
+        >>> current_ad_transform = SignalTransformation(
+        ...                            name="Current AD conversion",
+        ...                            error=Error(deviation=Q_(1,"percent")),
+        ...                            func=func,
+        ...                            type_transformation="AD"
+        ...                            )
 
         Add the transformation to the measurement chain.
 
@@ -646,39 +646,39 @@ class MeasurementChain:
         >>> from weldx import Q_
         >>> from weldx.core import MathematicalExpression
         >>> from weldx.measurement import Error, MeasurementChain,\
-                MeasurementEquipment, SignalTransformation
+        MeasurementEquipment, SignalTransformation
 
-        >>> mc = MeasurementChain.from_parameters(\
-                     name="Current measurement chain",\
-                     source_error=Error(deviation=Q_(0.5, "percent")),\
-                     source_name="Current sensor",\
-                     output_signal_type="analog",\
-                     output_signal_unit="V"\
-                 )
+        >>> mc = MeasurementChain.from_parameters(
+        ...          name="Current measurement chain",
+        ...          source_error=Error(deviation=Q_(0.5, "percent")),
+        ...          source_name="Current sensor",
+        ...          output_signal_type="analog",
+        ...          output_signal_unit="V"
+        ...      )
 
         Create a mathematical expression that accepts a quantity with volts as unit and
         that returns a dimentsionless quantity.
 
-        >>> func = MathematicalExpression(expression="a*x + b",\
-                                          parameters=dict(a=Q_(5, "1/V"), b=Q_(1, ""))\
-                                          )
+        >>> func = MathematicalExpression(expression="a*x + b",
+        ...                               parameters=dict(a=Q_(5, "1/V"), b=Q_(1, ""))
+        ...                               )
 
         Use the mathematical expression to create a signal transformation which also
         performs a analog-digital conversion.
 
-        >>> current_ad_transform = SignalTransformation(\
-                                       name="Current AD conversion",\
-                                       error=Error(deviation=Q_(1,"percent")),\
-                                       func=func,\
-                                       type_transformation="AD"\
-                                       )
+        >>> current_ad_transform = SignalTransformation(
+        ...                            name="Current AD conversion",
+        ...                            error=Error(deviation=Q_(1,"percent")),
+        ...                            func=func,
+        ...                            type_transformation="AD"
+        ...                            )
 
         Create a new equipment that performs the transformation
 
-        >>> current_ad_converter = MeasurementEquipment(\
-                                       name="Current AD converter",\
-                                       transformations=[current_ad_transform]\
-                                   )
+        >>> current_ad_converter = MeasurementEquipment(
+        ...                            name="Current AD converter",
+        ...                            transformations=[current_ad_transform]
+        ...                        )
 
         Use the equipment to add the transformation to the measurement chain.
 
@@ -747,29 +747,29 @@ class MeasurementChain:
         >>> from weldx.core import MathematicalExpression
         >>> from weldx.measurement import Error, MeasurementChain, SignalTransformation
 
-        >>> mc = MeasurementChain.from_parameters(\
-                     name="Current measurement chain",\
-                     source_error=Error(deviation=Q_(0.5, "percent")),\
-                     source_name="Current sensor",\
-                     output_signal_type="analog",\
-                     output_signal_unit="V"\
-                 )
+        >>> mc = MeasurementChain.from_parameters(
+        ...          name="Current measurement chain",
+        ...          source_error=Error(deviation=Q_(0.5, "percent")),
+        ...          source_name="Current sensor",
+        ...          output_signal_type="analog",
+        ...          output_signal_unit="V"
+        ...      )
 
         Create a mathematical expression that accepts a quantity with volts as unit and
         that returns a dimentsionless quantity.
 
-        >>> func = MathematicalExpression(expression="a*x + b",\
-                                          parameters=dict(a=Q_(5, "1/V"), b=Q_(1, ""))\
-                                          )
+        >>> func = MathematicalExpression(expression="a*x + b",
+        ...                               parameters=dict(a=Q_(5, "1/V"), b=Q_(1, ""))
+        ...                               )
 
         Use the mathematical expression to create a new transformation which also
         performs a analog-digital conversion.
 
-        >>> mc.create_transformation(name="Current AD conversion",\
-                                     error=Error(deviation=Q_(1,"percent")),\
-                                     func=func,\
-                                     output_signal_type="digital"\
-                                     )
+        >>> mc.create_transformation(name="Current AD conversion",
+        ...                          error=Error(deviation=Q_(1,"percent")),
+        ...                          func=func,
+        ...                          output_signal_type="digital"
+        ...                          )
 
         """
         if output_signal_type is None and output_signal_unit is None and func is None:
