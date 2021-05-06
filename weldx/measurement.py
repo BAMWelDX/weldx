@@ -195,6 +195,10 @@ class MeasurementChain:
         signal_data :
             Measured data of the sources' signal
 
+        Examples
+        --------
+        >>> garbage
+
         """
         from networkx import DiGraph
 
