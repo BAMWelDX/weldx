@@ -201,17 +201,17 @@ class MeasurementChain:
 
         Create a signal source
 
-        >>> current_source = SignalSource(name="Current sensor", \
-                                          error=Error(Q_(0.1, "percent")), \
-                                          output_signal=Signal(signal_type="analog",\
-                                                               unit="V")\
-                                          )
+        >>> current_source = SignalSource(name="Current sensor",
+        ...                               error=Error(Q_(0.1, "percent")),
+        ...                               output_signal=Signal(signal_type="analog",
+        ...                                                    unit="V")
+        ...                               )
 
         Create a measurement chain using the source
 
-        >>> mc = MeasurementChain(name="Current measurement chain",\
-                                  source=current_source\
-                 )
+        >>> mc = MeasurementChain(name="Current measurement chain",
+        ...                       source=current_source
+        ...      )
 
         """
         from networkx import DiGraph
