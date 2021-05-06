@@ -7,8 +7,8 @@ from warnings import warn
 import asdf
 from boltons.iterutils import get_path
 
+from weldx.asdf.constants import SCHEMA_PATH
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-from weldx.constants import WELDX_PATH
 from weldx.types import (
     SupportsFileReadOnly,
     SupportsFileReadWrite,
@@ -44,7 +44,7 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
     """
     schema = schema.split(".yaml")[0]
 
-    p = WELDX_PATH / "asdf" / "schemas"
+    p = SCHEMA_PATH
     schemas = list(p.glob(f"**/{schema}.yaml"))
     if len(schemas) == 0:
         raise ValueError(f"No matching schema for filename '{schema}'.")
