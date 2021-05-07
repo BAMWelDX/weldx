@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: ${{ matrix.py }}
       - name: pip installs
-        run: pip install pydocstyle==5.*
+        run: pip install pydocstyle
       - name: run pydocstyle
         run: |
           pydocstyle
