@@ -11,7 +11,10 @@ build:
   number: 0
   noarch: python
   script: pip install . -v
-
+  entry_points:
+  {% for e in data['entry_points']['console_scripts'] %}
+    - {{ e }}
+  {% endfor %}
 requirements:
   build:
     - pip
