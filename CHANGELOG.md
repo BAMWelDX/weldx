@@ -17,6 +17,9 @@
 - `get_yaml_header` received a new option parse, which optionally returns the parsed YAML header
   as `asdf.tagged.TaggedDict`. [[#338]](https://github.com/BAMWelDX/weldx/pull/338)
 - refactor `asdf_json_repr` into `view_tree` [[#339]](https://github.com/BAMWelDX/weldx/pull/339)
+- `TimeSeries.interp_time` [[#353]](https://github.com/BAMWelDX/weldx/pull/353)
+    - now returns a new `TimeSeries` instead of a `xarray.DataArray`
+    - if the data has already been interpolated before, a warning is emitted
 
 ### ASDF
 
