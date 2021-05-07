@@ -385,6 +385,68 @@ class TimeSeries:
             )
         return representation + f"Units:\n\t{self.units}\n"
 
+    def _interp_time_discrete(
+        self, time: Union[pd.TimedeltaIndex, pint.Quantity]
+    ) -> xr.DataArray:
+        """Interpolate the time series if its data is composed of discrete values.
+
+        See `interp_time` for interface description.
+
+        """
+        if isinstance(self._data, xr.DataArray):
+            if isinstance(time, pint.Quantity):
+                time = ut.to_pandas_time_index(time)
+            if not isinstance(time, pd.TimedeltaIndex):
+                raise ValueError(
+                    '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
+                )
+            # constant values are also treated by this branch
+            if self._data.attrs["interpolation"] == "linear" or self.shape[0] == 1:
+                return ut.xr_interp_like(
+                    self._data,
+                    {"time": time},
+                    assume_sorted=False,
+                    broadcast_missing=False,
+                )
+
+            dax = self._data.reindex({"time": time}, method="ffill")
+            return dax.fillna(self._data[0])
+
+    def _interp_time_expression(
+        self, time: Union[pd.TimedeltaIndex, pint.Quantity], time_unit: str
+    ) -> xr.DataArray:
+        """Interpolate the time series if its data is a mathematical expression.
+
+        See `interp_time` for interface description.
+
+        """
+        # Transform time to both formats
+        if isinstance(time, pint.Quantity) and time.check(UREG.get_dimensionality("s")):
+            time_q = time
+            time_pd = ut.to_pandas_time_index(time)
+        elif isinstance(time, pd.TimedeltaIndex):
+            time_q = ut.pandas_time_delta_to_quantity(time, time_unit)
+            time_pd = time
+        else:
+            raise ValueError(
+                '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
+            )
+
+        if len(self.shape) > 1 and np.iterable(time_q):
+            while len(time_q.shape) < len(self.shape):
+                time_q = time_q[:, np.newaxis]
+
+        # evaluate expression
+        data = self._data.evaluate(**{self._time_var_name: time_q})
+        data = data.astype(float).to_reduced_units()  # float conversion before reduce!
+
+        # create data array
+        if not np.iterable(data):  # make sure quantity is not scalar value
+            data = np.expand_dims(data, 0)
+
+        dax = xr.DataArray(data=data)  # don't know exact dimensions so far
+        return dax.rename({"dim_0": "time"}).assign_coords({"time": time_pd})
+
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
         """Return the data of the TimeSeries.
@@ -475,50 +537,16 @@ class TimeSeries:
 
         """
         if isinstance(self._data, xr.DataArray):
-            if isinstance(time, pint.Quantity):
-                time = ut.to_pandas_time_index(time)
-            if not isinstance(time, pd.TimedeltaIndex):
-                raise ValueError(
-                    '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-                )
-            # constant values are also treated by this branch
-            if self._data.attrs["interpolation"] == "linear" or self.shape[0] == 1:
-                return ut.xr_interp_like(
-                    self._data,
-                    {"time": time},
-                    assume_sorted=False,
-                    broadcast_missing=False,
-                )
-
-            dax = self._data.reindex({"time": time}, method="ffill")
-            return dax.fillna(self._data[0])
-
-        # Transform time to both formats
-        if isinstance(time, pint.Quantity) and time.check(UREG.get_dimensionality("s")):
-            time_q = time
-            time_pd = ut.to_pandas_time_index(time)
-        elif isinstance(time, pd.TimedeltaIndex):
-            time_q = ut.pandas_time_delta_to_quantity(time, time_unit)
-            time_pd = time
+            dax = self._interp_time_discrete(time)
         else:
-            raise ValueError(
-                '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-            )
+            dax = self._interp_time_expression(time, time_unit)
 
-        if len(self.shape) > 1 and np.iterable(time_q):
-            while len(time_q.shape) < len(self.shape):
-                time_q = time_q[:, np.newaxis]
+        interpolation = self.interpolation
+        if interpolation is None:
+            interpolation = "linear"
 
-        # evaluate expression
-        data = self._data.evaluate(**{self._time_var_name: time_q})
-        data = data.astype(float).to_reduced_units()  # float conversion before reduce!
-
-        # create data array
-        if not np.iterable(data):  # make sure quantity is not scalar value
-            data = np.expand_dims(data, 0)
-
-        dax = xr.DataArray(data=data)  # don't know exact dimensions so far
-        return dax.rename({"dim_0": "time"}).assign_coords({"time": time_pd})
+        ts = TimeSeries(data=dax.data, time=time, interpolation=interpolation)
+        return ts
 
     @property
     def shape(self) -> Tuple:
