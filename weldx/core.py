@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from warnings import warn
 
 import numpy as np
 import pandas as pd
@@ -276,6 +277,7 @@ class TimeSeries:
         self._time_var_name = None
         self._shape = None
         self._units = None
+        self._interp_counter = 0
 
         if isinstance(data, pint.Quantity):
             if not np.iterable(data):  # expand dim for scalar input
@@ -536,6 +538,12 @@ class TimeSeries:
             A data array containing the interpolated data.
 
         """
+        if self._interp_counter > 0:
+            warn(
+                "The data of the time series has already been interpolated "
+                f"{self._interp_counter} time(s)."
+            )
+
         if isinstance(self._data, xr.DataArray):
             dax = self._interp_time_discrete(time)
         else:
@@ -546,6 +554,7 @@ class TimeSeries:
             interpolation = "linear"
 
         ts = TimeSeries(data=dax.data, time=time, interpolation=interpolation)
+        ts._interp_counter = self._interp_counter + 1
         return ts
 
     @property

@@ -418,6 +418,19 @@ class TestTimeSeries:
         else:
             assert np.all(result.data_array.time == time)
 
+    # test_interp_time_warning ---------------------------------------------------------
+
+    @staticmethod
+    def test_interp_time_warning():
+        """Test if a warning is emitted when interpolating already interpolated data."""
+        ts = TimeSeries(data=Q_([1, 2, 3], "m"), time=Q_([0, 1, 2], "s"))
+        with pytest.warns(None) as recorded_warnings:
+            ts_interp = ts.interp_time(Q_([0.25, 0.5, 0.75, 1], "s"))
+        assert len(recorded_warnings) == 0
+
+        with pytest.warns(UserWarning):
+            ts_interp.interp_time(Q_([0.4, 0.6], "s"))
+
     # test_interp_time_exceptions ------------------------------------------------------
 
     @staticmethod
