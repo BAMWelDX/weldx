@@ -234,6 +234,15 @@ class TestWeldXFile:
         fh3 = WeldxFile(buff, mode="r")
         assert fh3["test"]
 
+    def test_underlying_filehandle_closed(self, tmpdir):
+        fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+
+        with WeldxFile(fn, mode="rw") as wfile:
+            wfile["updated"] = True
+            fh = wfile.file_handle
+            # now the context ends, and the file is being saved to disk again.
+        assert fh.closed
+
     @pytest.mark.parametrize("sync", [True, False])
     def test_context_manageable(self, sync):
         """Check the file handle gets closed."""

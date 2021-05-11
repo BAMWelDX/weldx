@@ -1,4 +1,5 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
+import io
 import pathlib
 import warnings
 from collections import UserDict
@@ -106,18 +107,29 @@ class WeldxFile(UserDict):
         if filename_or_file_like is None:
             filename_or_file_like = BytesIO()
             new_file_created = True
+            self._in_memory = True
         elif isinstance(filename_or_file_like, (str, pathlib.Path)):
             filename_or_file_like, new_file_created = self._handle_path(
                 filename_or_file_like, mode
             )
+            self._in_memory = False
         elif isinstance(filename_or_file_like, types_file_like.__args__):
-            pass
+            if isinstance(filename_or_file_like, io.BytesIO):
+                self._in_memory = True
+            else:
+                self._in_memory = False
         else:
             _supported = WeldxFile.__init__.__annotations__["filename_or_file_like"]
             raise ValueError(
                 f"Unsupported input type '{type(filename_or_file_like)}'."
                 f" Should be one of {_supported}."
             )
+
+        # when we opened a handle, we have close it later in close() method.
+        if new_file_created and not self.in_memory:
+            self._close = True
+        else:
+            self._close = False
 
         extensions = [WeldxExtension(), WeldxAsdfExtension()]
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
@@ -146,6 +158,18 @@ class WeldxFile(UserDict):
     def mode(self) -> str:
         """Open mode of file, one of read or read/write."""
         return self._mode
+
+    @property
+    def in_memory(self) -> bool:
+        """Is the underlying file an in-memory buffer.
+
+        Returns
+        -------
+        True, if this file is backed by an in-memory buffer,
+        False otherwise.
+
+        """
+        return self._in_memory
 
     @staticmethod
     def _handle_path(filename, mode) -> (IO, bool):
@@ -246,6 +270,11 @@ class WeldxFile(UserDict):
         if self.mode == "rw" and self.sync_upon_close:
             self._asdf_handle.update(**self._write_kwargs)
         self._asdf_handle.close()
+
+        # close underlying file handle
+        fh = self.file_handle
+        if self._close and not fh.closed:
+            fh.close()
 
     def sync(
         self,
