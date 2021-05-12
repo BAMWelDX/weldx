@@ -108,28 +108,26 @@ class WeldxFile(UserDict):
             filename_or_file_like = BytesIO()
             new_file_created = True
             self._in_memory = True
+            self._close = False  # we want buffers to be usable later on.
         elif isinstance(filename_or_file_like, (str, pathlib.Path)):
             filename_or_file_like, new_file_created = self._handle_path(
                 filename_or_file_like, mode
             )
             self._in_memory = False
+            self._close = True
         elif isinstance(filename_or_file_like, types_file_like.__args__):
             if isinstance(filename_or_file_like, io.BytesIO):
                 self._in_memory = True
             else:
                 self._in_memory = False
+            # the user passed a raw file handle, its their responsibility to close it.
+            self._close = False
         else:
             _supported = WeldxFile.__init__.__annotations__["filename_or_file_like"]
             raise ValueError(
                 f"Unsupported input type '{type(filename_or_file_like)}'."
                 f" Should be one of {_supported}."
             )
-
-        # when we opened a handle, we have close it later in close() method.
-        if new_file_created and not self.in_memory:
-            self._close = True
-        else:
-            self._close = False
 
         extensions = [WeldxExtension(), WeldxAsdfExtension()]
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
@@ -269,10 +267,10 @@ class WeldxFile(UserDict):
         """Close this file and sync it, if mode is read/write."""
         if self.mode == "rw" and self.sync_upon_close:
             self._asdf_handle.update(**self._write_kwargs)
+        fh = self.file_handle
         self._asdf_handle.close()
 
-        # close underlying file handle
-        fh = self.file_handle
+        # close underlying file handle, if not already done by ASDF.
         if self._close and not fh.closed:
             fh.close()
 
