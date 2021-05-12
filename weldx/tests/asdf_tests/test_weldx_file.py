@@ -234,7 +234,8 @@ class TestWeldXFile:
         fh3 = WeldxFile(buff, mode="r")
         assert fh3["test"]
 
-    def test_underlying_filehandle_closed(self, tmpdir):
+    @staticmethod
+    def test_underlying_filehandle_closed(tmpdir):
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
 
         with WeldxFile(fn, mode="rw") as wfile:
