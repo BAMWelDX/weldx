@@ -15,6 +15,7 @@ API
     weldx.measurement
     weldx.transformations
     weldx.util
+    weldx.types
     weldx.visualization
     weldx.welding
 
