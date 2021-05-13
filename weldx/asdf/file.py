@@ -488,8 +488,8 @@ class WeldxFile(UserDict):
         >>> tree = dict(my_var=(1, 2, 3), some_str="foobar", array=np.arange(5))
         >>> f = WeldxFile(tree=tree, mode='rw')
         >>> f.show_asdf_header()  #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'asdf_library': {'author': 'Space Telescope Science Institute', \
-        'homepage': 'http://github.com/spacetelescope/asdf', 'name': 'asdf',\
+        {'asdf_library': {'author': 'The ASDF Developers', \
+        'homepage': 'http://github.com/asdf-format/asdf', 'name': 'asdf',\
          'version': '...'},
          'history': {'extensions': [{'extension_class': \
             'asdf.extension.BuiltinExtension', \
