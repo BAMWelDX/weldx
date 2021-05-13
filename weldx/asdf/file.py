@@ -8,10 +8,11 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
-from asdf import AsdfFile
+from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
-from asdf.asdf import is_asdf_file
+from asdf import util
 from asdf.tags.core import Software
+from asdf.util import get_file_type
 from jsonschema import ValidationError
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
@@ -183,10 +184,12 @@ class WeldxFile(UserDict):
                 new_file_created = True
                 real_mode = "bx+"  # binary, exclusive creation, e.g. raise if exists.
             else:
-                if not is_asdf_file(filename):
+                generic_file = generic_io.get_file(filename, mode="r")
+                file_type = get_file_type(generic_file)
+                if not file_type == util.FileType.ASDF:
                     raise FileExistsError(
-                        f"given file {filename}"
-                        " is not an ASDF file and could be overwritten."
+                        f"given file {filename} is not an ASDF file and "
+                        "could be overwritten because of read/write mode!"
                     )
                 real_mode = "br+"
         else:
