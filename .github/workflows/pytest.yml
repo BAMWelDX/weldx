@@ -43,7 +43,6 @@ jobs:
       - name: pip installs
         run: |
           pip install wheel
-          pip install git+https://github.com/asdf-format/asdf
           pip install -e .[test]
 
       - name: setup matplotlib
