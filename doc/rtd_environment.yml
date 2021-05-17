@@ -8,6 +8,7 @@ dependencies:
   - ipywidgets
   # documentation
   - sphinx
+  - jinja =2
   - recommonmark
   - sphinxcontrib-napoleon
   - nbsphinx>=0.8.5
