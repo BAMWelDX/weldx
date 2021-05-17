@@ -15,6 +15,7 @@ dependencies:
   - pydata-sphinx-theme
   - numpydoc>=0.5
   - sphinx-autodoc-typehints
+  - typing_extensions
   # GH332
   - docutils=0.16
   # pip packages
