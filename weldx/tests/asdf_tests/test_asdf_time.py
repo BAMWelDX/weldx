@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from weldx.asdf.util import _write_buffer, _write_read_buffer
+from weldx.asdf.util import write_read_buffer
 
 
 @pytest.mark.parametrize(
@@ -22,7 +22,7 @@ from weldx.asdf.util import _write_buffer, _write_read_buffer
     ],
 )
 def test_time_classes(inputs):
-    data = _write_read_buffer({"root": inputs})
+    data = write_read_buffer({"root": inputs})
     assert np.all(data["root"] == inputs)
 
 

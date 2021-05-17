@@ -18,7 +18,6 @@ class ReadOnlyFile:
 
     def __init__(self, tmpdir):  # noqa: D107
         fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
-        print("fn", fn)
         with open(fn, "wb") as fh:
             asdf.AsdfFile(tree=dict(hi="there")).write_to(fh)
         self.mode = "rb"
@@ -26,6 +25,9 @@ class ReadOnlyFile:
 
     def read(self, *args, **kwargs):  # noqa: D102
         return self.file_read_only.read(*args, **kwargs)
+
+    def readline(self, limit=-1):
+        return self.file_read_only.readline(limit)
 
     @staticmethod
     def readable():  # noqa: D102
@@ -171,7 +173,6 @@ class TestWeldXFile:
         assert WeldxFile(new_file)["test"] == "yes"
 
     @staticmethod
-    @pytest.mark.skip("https://github.com/asdf-format/asdf/issues/975")
     def test_create_readonly_protocol(tmpdir):
         """A read-only file should be supported by ASDF."""
         f = ReadOnlyFile(tmpdir)
@@ -233,6 +234,17 @@ class TestWeldXFile:
         buff.seek(0)
         fh3 = WeldxFile(buff, mode="r")
         assert fh3["test"]
+
+    @staticmethod
+    def test_underlying_filehandle_closed(tmpdir):
+        """Ensure file handles are being closed."""
+        fn = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+
+        with WeldxFile(fn, mode="rw") as wfile:
+            wfile["updated"] = True
+            fh = wfile.file_handle
+            # now the context ends, and the file is being saved to disk again.
+        assert fh.closed
 
     @pytest.mark.parametrize("sync", [True, False])
     def test_context_manageable(self, sync):
