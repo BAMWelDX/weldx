@@ -1,10 +1,5 @@
 # Release Notes
 
-## ASDF 2.8
-
-- fix inline array serialization for new 64bit inline limit [[#218]](https://github.com/BAMWelDX/weldx/pull/218)
-- add `yaml_tag_handles` to `WeldxExtension` [[#218]](https://github.com/BAMWelDX/weldx/pull/218)
-
 ## 0.4.0 (unreleased)
 
 ### added
@@ -25,6 +20,8 @@
 
 ### ASDF
 
+- fix inline array serialization for new 64bit inline limit [[#218]](https://github.com/BAMWelDX/weldx/pull/218)
+- add `yaml_tag_handles` to `WeldxExtension` [[#218]](https://github.com/BAMWelDX/weldx/pull/218)
 - add `uuid-1.0.0.yaml` schema as basic version 4 UUID
   implementation [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
 - add `core/graph/di_node`, `core/graph/di_edge` & `core/graph/di_graph` for implementing a
