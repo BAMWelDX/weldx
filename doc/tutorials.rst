@@ -29,6 +29,7 @@ The API tutorials provide more detailed usages and examples of core ``WelDX`` co
     tutorials/geometry_01_profiles
     tutorials/geometry_02_geometry
     tutorials/timeseries_01
+    tutorials/weldxfile
     tutorials/quality_standards
 
 Analysis Tutorials

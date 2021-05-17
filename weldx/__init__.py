@@ -23,6 +23,7 @@ import weldx.welding
 
 # asdf extensions and tags
 import weldx.asdf
+from weldx.asdf.file import WeldxFile
 
 # class imports to weldx namespace
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -56,6 +57,7 @@ __all__ = (
     "Shape",
     "SpatialData",
     "Trace",
+    "WeldxFile",
     "asdf",
     "core",
     "geometry",

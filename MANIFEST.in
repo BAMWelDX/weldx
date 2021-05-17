@@ -2,9 +2,8 @@ recursive-include weldx/asdf/schemas *.yaml
 
 prune .binder
 prune .github
-prune conda.recipe
+prune devtools
 prune doc
-prune scripts
 prune tutorials
 
 global-exclude .*

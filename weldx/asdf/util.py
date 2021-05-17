@@ -5,11 +5,18 @@ from typing import Tuple, Union
 from warnings import warn
 
 import asdf
-import yaml
 from boltons.iterutils import get_path
 
+from weldx.asdf.constants import SCHEMA_PATH
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-from weldx.constants import WELDX_PATH
+from weldx.types import (
+    SupportsFileReadOnly,
+    SupportsFileReadWrite,
+    types_file_like,
+    types_path_and_file_like,
+    types_path_like,
+)
+from weldx.util import deprecated
 
 __all__ = [
     "get_schema_path",
@@ -17,7 +24,7 @@ __all__ = [
     "write_buffer",
     "write_read_buffer",
     "get_yaml_header",
-    "asdf_json_repr",
+    "view_tree",
     "notebook_fileprinter",
 ]
 
@@ -37,7 +44,7 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
     """
     schema = schema.split(".yaml")[0]
 
-    p = WELDX_PATH / "asdf" / "schemas"
+    p = Path(SCHEMA_PATH)
     schemas = list(p.glob(f"**/{schema}.yaml"))
     if len(schemas) == 0:
         raise ValueError(f"No matching schema for filename '{schema}'.")
@@ -141,16 +148,17 @@ def write_read_buffer(
     return read_buffer(buffer, open_kwargs)
 
 
-def get_yaml_header(file, parse=False) -> Union[str, dict]:
+def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, dict]:
     """Read the YAML header part (excluding binary sections) of an ASDF file.
 
     Parameters
     ----------
     file :
-        filename, ``pathlib.Path`` or ``BytesIO`` buffer of ASDF file
+        a path or file-like type pointing to a ASDF file.
 
     parse :
-        if True, returns the interpreted YAML header as dict
+        if `True`, returns the interpreted YAML header as dict.
+
     Returns
     -------
     str, dict
@@ -163,10 +171,12 @@ def get_yaml_header(file, parse=False) -> Union[str, dict]:
         # reads lines until the byte string "...\n" is approached.
         return b"".join(iter(handle.readline, b"...\n"))
 
-    if isinstance(file, BytesIO):
+    if isinstance(file, SupportsFileReadWrite):
         file.seek(0)
         code = read_header(file)
-    else:
+    elif isinstance(file, SupportsFileReadOnly):
+        code = read_header(file)
+    elif isinstance(file, types_path_like.__args__):
         with open(file, "rb") as f:
             code = read_header(f)
 
@@ -175,20 +185,29 @@ def get_yaml_header(file, parse=False) -> Union[str, dict]:
     return code.decode("utf-8")
 
 
-# backward compatibility, remove when adopted to public funcs in notebooks etc.
-_write_buffer = write_buffer
-_read_buffer = read_buffer
-_write_read_buffer = write_read_buffer
+@deprecated("0.4.0", "0.5.0", " _write_buffer was renamed to write_buffer")
+def _write_buffer(*args, **kwargs):
+    return write_buffer(*args, **kwargs)
 
 
-def notebook_fileprinter(file, lexer="YAML"):
-    """Print the code from file/BytesIO  to notebook cell with syntax highlighting.
+@deprecated("0.4.0", "0.5.0", " _read_buffer was renamed to read_buffer")
+def _read_buffer(*args, **kwargs):
+    return read_buffer(*args, **kwargs)
+
+
+@deprecated("0.4.0", "0.5.0", " _write_read_buffer was renamed to write_read_buffer")
+def _write_read_buffer(*args, **kwargs):
+    return write_read_buffer(*args, **kwargs)
+
+
+def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
+    """Print the code from file/BytesIO to notebook cell with syntax highlighting.
 
     Parameters
     ----------
-    file
-        filename or ``BytesIO`` buffer of ASDF file
-    lexer
+    file :
+        filename or file-like object pointing towards / containing an ASDF file.
+    lexer :
         Syntax style to use
 
     """
@@ -197,14 +216,14 @@ def notebook_fileprinter(file, lexer="YAML"):
     from pygments.formatters.html import HtmlFormatter
     from pygments.lexers import get_lexer_by_name, get_lexer_for_filename
 
-    if isinstance(file, BytesIO):
+    if isinstance(file, types_file_like.__args__):
         lexer = get_lexer_by_name(lexer)
     elif Path(file).suffix == ".asdf":
         lexer = get_lexer_by_name("YAML")
     else:
         lexer = get_lexer_for_filename(file)
 
-    code = get_yaml_header(file)
+    code = get_yaml_header(file, parse=False)
     formatter = HtmlFormatter()
     return HTML(
         '<style type="text/css">{}</style>{}'.format(
@@ -214,16 +233,16 @@ def notebook_fileprinter(file, lexer="YAML"):
     )
 
 
-def asdf_json_repr(file, path: Tuple = None, **kwargs):
+def view_tree(file: types_path_and_file_like, path: Tuple = None, **kwargs):
     """Display YAML header using IPython JSON display repr.
 
     This function works in JupyterLab.
 
     Parameters
     ----------
-    file
-        filename or BytesIO buffer of ASDF file
-    path
+    file :
+        filename or file-like object pointing towards / containing an ASDF file.
+    path :
         tuple representing the lookup path in the yaml/asdf tree
     kwargs
         kwargs passed down to JSON constructor
@@ -237,14 +256,17 @@ def asdf_json_repr(file, path: Tuple = None, **kwargs):
     --------
     Visualize the full tree of an existing ASDF file::
 
-        weldx.asdf.utils.asdf_json_repr("single_pass_weld_example.asdf")
+        weldx.asdf.utils.view_tree("single_pass_weld_example.asdf")
 
     Visualize a specific element in the tree structure by proving the path::
 
-        weldx.asdf.utils.asdf_json_repr(
-            "single_pass_weld_example.asdf", path=("process", "welding_process")
+        weldx.asdf.utils.view_tree(
+            "single_pass_weld_example.asdf", path=("process",)
         )
 
+        weldx.asdf.utils.view_tree(
+            "single_pass_weld_example.asdf", path=("process", "welding_process")
+        )
 
     """
     from IPython.display import JSON
@@ -254,10 +276,15 @@ def asdf_json_repr(file, path: Tuple = None, **kwargs):
     else:
         root = "/"
 
-    code = get_yaml_header(file)
-    yaml_dict = yaml.load(code, Loader=yaml.BaseLoader)
+    yaml_dict = get_yaml_header(file, parse=True)
     if path:
         root = root + "/".join(path)
         yaml_dict = get_path(yaml_dict, path)
     kwargs["root"] = root
     return JSON(yaml_dict, **kwargs)
+
+
+@deprecated("0.4.0", "0.5.0", " asdf_json_repr was renamed to view_tree")
+def asdf_json_repr(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
+    """See `view_tree` function."""
+    return view_tree(file, path, **kwargs)

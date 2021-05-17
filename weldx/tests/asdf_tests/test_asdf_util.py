@@ -1,30 +1,21 @@
 """tests for asdf utility functions."""
-import io
-
 import pytest
 
-from scripts.welding_schema import single_pass_weld_example
+from weldx import WeldxFile
 from weldx.asdf.util import get_yaml_header
 
 
 @pytest.fixture(scope="function")
-def create_file_and_buffer():
-    """Create a temporary named file AND a buffer of its contents.
-
-    For single pass welding example
-    """
-    import os
+def create_file_and_buffer(tmpdir):
+    """Create a temporary named file AND a buffer of its contents."""
     import tempfile
 
-    with tempfile.NamedTemporaryFile(suffix=".asdf", delete=False) as ntf:
-        ntf.close()
-        single_pass_weld_example(out_file=ntf.name)
-        with open(ntf.name, "rb") as fh:
-            buffer = io.BytesIO(fh.read())
-        # now run tests
-        yield ntf.name, buffer
-        # remove real file
-        os.remove(ntf.name)
+    name = tempfile.mktemp(suffix=".asdf", dir=tmpdir)
+    with WeldxFile(name, mode="rw") as fh:
+        fh["some_attr"] = True
+        buffer = fh.write_to()
+    # now run tests
+    yield name, buffer
 
 
 @pytest.mark.parametrize(
