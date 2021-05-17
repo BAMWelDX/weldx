@@ -16,7 +16,6 @@ jobs:
           python-version: ${{ matrix.py }}
       - name: pip installs
         run: |
-          pip install git+https://github.com/asdf-format/asdf
           pip install -e .[test]
       - name: run pytest
         run: |
