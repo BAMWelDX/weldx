@@ -1,4 +1,5 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
+import io
 import pathlib
 import warnings
 from collections import UserDict
@@ -7,10 +8,11 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
-from asdf import AsdfFile
+from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
-from asdf.asdf import is_asdf_file
+from asdf import util
 from asdf.tags.core import Software
+from asdf.util import get_file_type
 from jsonschema import ValidationError
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
@@ -106,12 +108,21 @@ class WeldxFile(UserDict):
         if filename_or_file_like is None:
             filename_or_file_like = BytesIO()
             new_file_created = True
+            self._in_memory = True
+            self._close = False  # we want buffers to be usable later on.
         elif isinstance(filename_or_file_like, (str, pathlib.Path)):
             filename_or_file_like, new_file_created = self._handle_path(
                 filename_or_file_like, mode
             )
+            self._in_memory = False
+            self._close = True
         elif isinstance(filename_or_file_like, types_file_like.__args__):
-            pass
+            if isinstance(filename_or_file_like, io.BytesIO):
+                self._in_memory = True
+            else:
+                self._in_memory = False
+            # the user passed a raw file handle, its their responsibility to close it.
+            self._close = False
         else:
             _supported = WeldxFile.__init__.__annotations__["filename_or_file_like"]
             raise ValueError(
@@ -147,6 +158,18 @@ class WeldxFile(UserDict):
         """Open mode of file, one of read or read/write."""
         return self._mode
 
+    @property
+    def in_memory(self) -> bool:
+        """Is the underlying file an in-memory buffer.
+
+        Returns
+        -------
+        True, if this file is backed by an in-memory buffer,
+        False otherwise.
+
+        """
+        return self._in_memory
+
     @staticmethod
     def _handle_path(filename, mode) -> (IO, bool):
         # opens a file handle with given mode,
@@ -161,10 +184,12 @@ class WeldxFile(UserDict):
                 new_file_created = True
                 real_mode = "bx+"  # binary, exclusive creation, e.g. raise if exists.
             else:
-                if not is_asdf_file(filename):
+                generic_file = generic_io.get_file(filename, mode="r")
+                file_type = get_file_type(generic_file)
+                if not file_type == util.FileType.ASDF:
                     raise FileExistsError(
-                        f"given file {filename}"
-                        " is not an ASDF file and could be overwritten."
+                        f"given file {filename} is not an ASDF file and "
+                        "could be overwritten because of read/write mode!"
                     )
                 real_mode = "br+"
         else:
@@ -245,7 +270,12 @@ class WeldxFile(UserDict):
         """Close this file and sync it, if mode is read/write."""
         if self.mode == "rw" and self.sync_upon_close:
             self._asdf_handle.update(**self._write_kwargs)
+        fh = self.file_handle
         self._asdf_handle.close()
+
+        # close underlying file handle, if not already done by ASDF.
+        if self._close and not fh.closed:
+            fh.close()
 
     def sync(
         self,
@@ -458,8 +488,8 @@ class WeldxFile(UserDict):
         >>> tree = dict(my_var=(1, 2, 3), some_str="foobar", array=np.arange(5))
         >>> f = WeldxFile(tree=tree, mode='rw')
         >>> f.show_asdf_header()  #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'asdf_library': {'author': 'Space Telescope Science Institute', \
-        'homepage': 'http://github.com/spacetelescope/asdf', 'name': 'asdf',\
+        {'asdf_library': {'author': 'The ASDF Developers', \
+        'homepage': 'http://github.com/asdf-format/asdf', 'name': 'asdf',\
          'version': '...'},
          'history': {'extensions': [{'extension_class': \
             'asdf.extension.BuiltinExtension', \
