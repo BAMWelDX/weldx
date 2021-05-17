@@ -1,7 +1,7 @@
 name: weldx
 channels:
-  - conda-forge
   - defaults
+  - conda-forge
 dependencies:
   - python=3.8
   - setuptools_scm
@@ -13,7 +13,7 @@ dependencies:
   - pint>=0.11
   - bottleneck
   - boltons
-  - asdf>=2.7
+  - asdf>=2.8
   - openpyxl
   - fs
   - meshio
