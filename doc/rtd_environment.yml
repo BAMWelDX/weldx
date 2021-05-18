@@ -7,11 +7,10 @@ dependencies:
   - ipykernel
   - ipywidgets
   # documentation
-  - sphinx
-  - jinja2=2
+  - sphinx=3
   - recommonmark
   - sphinxcontrib-napoleon
-  - nbsphinx>=0.8.5
+  - nbsphinx
   - sphinx-copybutton
   - pydata-sphinx-theme
   - numpydoc>=0.5
