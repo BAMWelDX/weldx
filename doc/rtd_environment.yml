@@ -11,7 +11,7 @@ dependencies:
   - jinja2=2
   - recommonmark
   - sphinxcontrib-napoleon
-  - nbsphinx>=0.8.5
+  - nbsphinx
   - sphinx-copybutton
   - pydata-sphinx-theme
   - numpydoc>=0.5
@@ -23,3 +23,4 @@ dependencies:
   - pip
   - pip:
     - git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx
+    - -e ../
