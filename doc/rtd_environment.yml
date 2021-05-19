@@ -23,3 +23,4 @@ dependencies:
   - pip
   - pip:
     - git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx
+    - -e ../
