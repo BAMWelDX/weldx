@@ -40,7 +40,7 @@ WeldX provides several Python API to perform standard tasks like experiment desi
 The ultimate goal of this project is to store all information about the experiment in a single file.
 We choose the popular [ASDF](https://en.wikipedia.org/wiki/Advanced_Scientific_Data_Format) format for this task.
 This enables us to store arbitrary binary data, while maintaining a human readable text based header. All information is stored
-in a tree like structure, which makes it convienient to structure the data in arbitrary complex ways.
+in a tree like structure, which makes it convenient to structure the data in arbitrary complex ways.
 
 The ASDF format and the provided extensions for WeldX types like
 * workpiece information (used alloys, geometries)
@@ -48,12 +48,12 @@ The ASDF format and the provided extensions for WeldX types like
 * measurement data
 * coordinate systems (robot movement, sensors)
 
-enables us to store the whole experimental pipeline performed in a modern labratory.
+enables us to store the whole experimental pipeline performed in a modern laboratory.
 
 ## Design goals
 
 We seek to provide a user-friendly, well documented programming interface. All functions and classes in WeldX have attached
-documentation about the involved parameters (types and explaination), see [API docs](https://weldx.readthedocs.io/en/stable/api.html).
+documentation about the involved parameters (types and explanation), see [API docs](https://weldx.readthedocs.io/en/stable/api.html).
 Further we provide rich [Jupyter notebook tutorials](https://weldx.readthedocs.io/en/stable/tutorials.htm) about the handling of the basic workflows.
 
 All involved physical quantities used in weldX (lengths, angles, voltages, currents, etc.) should be attached
