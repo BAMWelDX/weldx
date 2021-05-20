@@ -23,9 +23,48 @@ The project is under active development by
 the [Welding Technology](https://www.bam.de/Navigation/EN/About-us/Organisation/Organisation-Chart/President/Department-9/Division-93/division93.html)
 division at Bundesanstalt für Materialforschung und -prüfung (BAM).
 
+## Features
+WeldX provides several Python API to perform standard tasks like experiment design, data analysis, and experimental data archiving.
+
+### Planning
+- Define measurement chains with all involved devices, error sources, and meta data annotations.
+- Handle complex coordinate transformations needed to describe the movement of welding robots, workpieces, and sensors.
+- Planing of welding experiments.
+- convenient creation of [ISO 9692-1](https://www.iso.org/standard/62520.html) welding groove types.
+
+### Data analysis
+- Plotting routines to inspect measurement chains, workpieces (planned and welded).
+- Analysis functions for standard measurements like track energy, welding speed to fill an ISO groove, and more to come.
+
+### Data archiving
+The ultimate goal of this project is to store all information about the experiment in a single file.
+We choose the popular [ASDF](https://en.wikipedia.org/wiki/Advanced_Scientific_Data_Format) format for this task.
+This enables us to store arbitrary binary data, while maintaining a human readable text based header. All information is stored
+in a tree like structure, which makes it convienient to structure the data in arbitrary complex ways.
+
+The ASDF format and the provided extensions for WeldX types like
+* workpiece information (used alloys, geometries)
+* welding process parameters (GMAW parameters
+* measurement data
+* coordinate systems (robot movement, sensors)
+
+enables us to store the whole experimental pipeline performed in a modern labratory.
+
+## Design goals
+
+We seek to provide a user-friendly, well documented programming interface. All functions and classes in WeldX have attached
+documentation about the involved parameters (types and explaination), see [API docs](https://weldx.readthedocs.io/en/stable/api.html).
+Further we provide rich [Jupyter notebook tutorials](https://weldx.readthedocs.io/en/stable/tutorials.htm) about the handling of the basic workflows.
+
+All involved physical quantities used in weldX (lengths, angles, voltages, currents, etc.) should be attached
+with a unit to ensure automatic conversion and correct mathematical handling. Units are being used in all standard features
+of WeldX and are also archived in the ASDF files. This is implemented by the popular Python library
+[Pint](https://pint.readthedocs.io/en/stable/), which flawlessly handles the creation and conversion of units and dimensions.
+
+
 ## Installation
 
-The WelDX package can be installed using conda or mamba package manager from the :code:`conda-forge` channel.
+The WeldX package can be installed using conda or mamba package manager from the :code:`conda-forge` channel.
 These managers originate from the freely available [Anaconda Python stack](https://docs.conda.io/en/latest/miniconda.html>).
 If you do not have Anaconda or Miniconda installed yet, we ask you to install ``Miniconda-3``.
 Documentation for the installation procedure can be found [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation).
