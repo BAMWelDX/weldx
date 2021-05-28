@@ -29,15 +29,15 @@ WeldX provides several Python API to perform standard tasks like experiment desi
 
 ### Planning
 
-  - Define measurement chains with all involved devices, error sources, and meta data annotations.
-  - Handle complex coordinate transformations needed to describe the movement of welding robots, workpieces, and sensors.
-  - Planing of welding experiments.
-  - convenient creation of [ISO 9692-1](https://www.iso.org/standard/62520.html) welding groove types.
+- Define measurement chains with all involved devices, error sources, and meta data annotations.
+- Handle complex coordinate transformations needed to describe the movement of welding robots, workpieces, and sensors.
+- Planing of welding experiments.
+- convenient creation of [ISO 9692-1](https://www.iso.org/standard/62520.html) welding groove types.
 
 ### Data analysis
 
-  - Plotting routines to inspect measurement chains, workpieces (planned and welded).
-  - Analysis functions for standard measurements like track energy, welding speed to fill an ISO groove, and more to come.
+- Plotting routines to inspect measurement chains, workpieces (planned and welded).
+- Analysis functions for standard measurements like track energy, welding speed to fill an ISO groove, and more to come.
 
 ### Data archiving
 
@@ -48,10 +48,10 @@ in a tree like structure, which makes it convenient to structure the data in arb
 
 The ASDF format and the provided extensions for WeldX types like
 
-  - workpiece information (used alloys, geometries)
-  - welding process parameters (GMAW parameters
-  - measurement data
-  - coordinate systems (robot movement, sensors)
+- workpiece information (used alloys, geometries)
+- welding process parameters (GMAW parameters
+- measurement data
+- coordinate systems (robot movement, sensors)
 
 enables us to store the whole experimental pipeline performed in a modern laboratory.
 
