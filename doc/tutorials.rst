@@ -7,6 +7,7 @@ Welding Examples
 The welding example tutorials provide an overview of common welding related tasks.
 
 .. toctree::
+    :numbered:
     :maxdepth: 1
 
     tutorials/welding_example_01_basics
@@ -22,6 +23,7 @@ API Tutorials
 The API tutorials provide more detailed usages and examples of core ``WelDX`` components for advanced use cases.
 
 .. toctree::
+    :numbered:
     :maxdepth: 1
 
     tutorials/transformations_01_coordinate_systems
