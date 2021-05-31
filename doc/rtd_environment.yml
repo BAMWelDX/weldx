@@ -8,6 +8,7 @@ dependencies:
   - ipywidgets
   # documentation
   - sphinx
+  - jinja2=2
   - recommonmark
   - sphinxcontrib-napoleon
   - nbsphinx
@@ -15,9 +16,11 @@ dependencies:
   - pydata-sphinx-theme
   - numpydoc>=0.5
   - sphinx-autodoc-typehints
+  - typing_extensions
   # GH332
   - docutils=0.16
   # pip packages
   - pip
   - pip:
     - git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx
+    - -e ../
