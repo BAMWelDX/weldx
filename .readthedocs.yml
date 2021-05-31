@@ -24,8 +24,4 @@ sphinx:
 #  image: testing
 conda:
   environment: doc/rtd_environment.yml
-python:
-   version: 3.8
-   install:
-      - method: pip
-        path: .
+

@@ -21,10 +21,27 @@ import shutil
 import sys
 import typing
 
-import ipywidgets
-import pandas as _
 import traitlets
-import xarray
+
+
+def _workaround_imports_typechecking():
+    """Load some packages needed for type annotations."""
+    import ipywidgets
+    import pandas as _
+    import xarray
+
+
+def _prevent_sphinx_circular_imports_bug():
+    # https://github.com/sphinx-doc/sphinx/issues/9243
+    import sphinx.builders.html
+    import sphinx.builders.latex
+    import sphinx.builders.texinfo
+    import sphinx.builders.text
+    import sphinx.ext.autodoc
+
+
+_prevent_sphinx_circular_imports_bug()
+_workaround_imports_typechecking()
 
 typing.TYPE_CHECKING = True
 try:

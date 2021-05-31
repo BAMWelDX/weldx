@@ -7,8 +7,8 @@
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
 - added `util.compare_nested` to check equality of two nested data
   structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
-- added `WeldxFile` wrapper to handle asdf files with 
-  history and schemas more easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).  
+- added `WeldxFile` wrapper to handle asdf files with
+  history and schemas more easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
 
 ### changes
 
@@ -23,10 +23,14 @@
 
 ### ASDF
 
+- fix inline array serialization for new 64bit inline limit [[#218]](https://github.com/BAMWelDX/weldx/pull/218)
+- add `yaml_tag_handles` to `WeldxExtension` [[#218]](https://github.com/BAMWelDX/weldx/pull/218)
 - add `uuid-1.0.0.yaml` schema as basic version 4 UUID
   implementation [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
 - add `core/graph/di_node`, `core/graph/di_edge` & `core/graph/di_graph` for implementing a
   generic `networkx.DiGraph` [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
+- compatibility with ASDF-2.8 [[#355]](https://github.com/BAMWelDX/weldx/pull/355)
+
 
 ## 0.3.3 (30.03.2021)
 

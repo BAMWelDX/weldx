@@ -34,6 +34,10 @@ class WeldxExtension(AsdfExtension):
     def url_mapping(self):
         return WELDX_URL_MAPPING
 
+    @property
+    def yaml_tag_handles(self):
+        return {"!weldx!": "tag:weldx.bam.de:weldx/"}
+
 
 class WeldxAsdfExtension(BuiltinExtension):
     """This extension is used to register custom tag types that have schemas defined
