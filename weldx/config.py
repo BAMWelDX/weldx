@@ -4,30 +4,26 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 import asdf
-import fs
 import pkg_resources
 import yaml
 from asdf.config import ResourceMappingProxy
 from asdf.versioning import AsdfVersion, split_tag_version
-from fs.osfs import OSFS
 
 
 class QualityStandard:
     """Stores information about a quality standard."""
 
-    def __init__(
-        self, resource_root_dir: Path, filesystem: fs.opener.base.Opener = None
-    ):
+    def __init__(self, resource_root_dir: Path):
         """Create a ``QualityStandard`` instance.
 
         Parameters
         ----------
-        resource_root_dir : Path
+        resource_root_dir :
             The path to the resource root directory of the standard
-        filesystem : fs.opener.base.Opener
-            An `Opener` instance of tha `fs` package
 
         """
+        from fs.osfs import OSFS
+
         self._name = None
         self._max_version = None
         self._versions = {}
