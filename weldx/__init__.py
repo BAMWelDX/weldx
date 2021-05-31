@@ -16,6 +16,7 @@ except ModuleNotFoundError:  # pragma: no cover
 # main modules
 import weldx.transformations  # import this first to avoid circular dependencies
 import weldx.util  # import this first to avoid circular dependencies
+import weldx.config
 import weldx.core
 import weldx.geometry
 import weldx.welding
@@ -68,6 +69,4 @@ __all__ = (
     "welding",
 )
 
-from weldx.config import Config
-
-Config.load_installed_standards()
+weldx.config.Config.load_installed_standards()
