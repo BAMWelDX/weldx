@@ -137,12 +137,12 @@ class Config:
     _standards = {}
 
     @staticmethod
-    def _add_quality_standard(standard: QualityStandard):
+    def add_quality_standard(standard: QualityStandard):
         """Register a quality standard.
 
         Parameters
         ----------
-        standard : QualityStandard
+        standard :
             Quality standard that should be added
 
         """
@@ -157,9 +157,9 @@ class Config:
 
         Parameters
         ----------
-        name : str
+        name :
             Name of the quality standard
-        version : Union[AsdfVersion, str]
+        version :
             Requested standard version. If `None` is provided, the latest will be used.
 
         """
@@ -183,8 +183,29 @@ class Config:
 
 
 def add_quality_standard(standard: QualityStandard):
-    Config._add_quality_standard(standard)
+    """Register a quality standard.
+
+    Parameters
+    ----------
+    standard :
+        Quality standard that should be added
+
+    """
+    Config.add_quality_standard(standard)
 
 
 def enable_quality_standard(name: str, version: Union[AsdfVersion, str] = None):
+    """Enable a quality standard.
+
+    All corresponding schemas will be used for validation during serialization and
+    deserialization of a weldx file.
+
+    Parameters
+    ----------
+    name :
+        Name of the quality standard
+    version :
+        Requested standard version. If `None` is provided, the latest will be used.
+
+    """
     Config.enable_quality_standard(name, version)

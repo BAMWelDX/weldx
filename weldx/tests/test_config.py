@@ -1,3 +1,4 @@
+"""Test the `config` module."""
 from pathlib import Path
 
 import asdf
@@ -11,6 +12,8 @@ qs_dir = f"{current_dir}/data/quality_standard/resources/test_organization"
 
 
 class TestQualityStandard:
+    """Test the quality standard class."""
+
     @staticmethod
     @pytest.mark.parametrize(
         "resource_dir",
@@ -20,10 +23,20 @@ class TestQualityStandard:
         ],
     )
     def test_init(resource_dir):
+        """Test the class creation.
+
+        Parameters
+        ----------
+        resource_dir:
+            The resource directory of the quality standard
+
+        """
         QualityStandard(resource_dir)
 
 
 class TestConfig:
+    """Test the weldx configuration object."""
+
     @staticmethod
     @pytest.mark.parametrize(
         "standard, expect_validation_error",
@@ -34,7 +47,23 @@ class TestConfig:
             # ("test_standard", True),
         ],
     )
-    def test_enable_quality_standard(standard, expect_validation_error):
+    def test_enable_quality_standard(standard: str, expect_validation_error: bool):
+        """Test enabling quality standards.
+
+        The test uses the `GenericEquipment` class for test purposes. The standard
+        created for the tests expects it to have a `wx_metadata` property with a
+        `serial_number` field.
+
+        Parameters
+        ----------
+        standard :
+            Name of the standard that should be enabled. If `None` is provided, no
+            standard is enabled.
+        expect_validation_error :
+            `True` if an unmodified instance of the `GenericEquipment` class should
+            yield a `ValidationError` when validated against the specified standard.
+
+        """
         if standard is not None:
             add_quality_standard(QualityStandard(qs_dir))
             enable_quality_standard(name=standard)
