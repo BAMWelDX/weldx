@@ -96,14 +96,7 @@ class QualityStandard:
 
     @property
     def name(self) -> str:
-        """Get the quality standards name.
-
-        Returns
-        -------
-        str
-            Name of the quality standard
-
-        """
+        """Get the quality standards name."""
         return self._name
 
     def get_mappings(self, version: Union[AsdfVersion, str] = None):
@@ -119,7 +112,7 @@ class QualityStandard:
         ResourceMappingProxy :
             Manifest mapping
         ResourceMappingProxy :
-            Scheme mapping
+            Schema mapping
 
         """
         if version is None:
@@ -187,3 +180,11 @@ class Config:
                 if not isinstance(standard, QualityStandard):
                     raise TypeError("Invalid quality standard.")
                 Config._add_quality_standard(standard)
+
+
+def add_quality_standard(standard: QualityStandard):
+    Config._add_quality_standard(standard)
+
+
+def enable_quality_standard(name: str, version: Union[AsdfVersion, str] = None):
+    Config.enable_quality_standard(name, version)
