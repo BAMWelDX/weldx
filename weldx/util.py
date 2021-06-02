@@ -688,6 +688,39 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     return da
 
 
+def _modified_coords(
+    original_coords: np.ndarray, ref_coords: np.ndarray, assume_sorted: bool
+) -> np.ndarray:
+    pass
+
+
+def _xr_interp_like_step(
+    da1: xr.DataArray, da2: xr.DataArray, assume_sorted: bool
+) -> xr.DataArray:
+    from copy import deepcopy
+
+    da_tmp = deepcopy(da2)
+    for coord, v in da_tmp.coords.items():
+        if coord in da1.coords:
+            coord_data = da1.coords[coord].data
+            coord_data_min = coord_data.min()
+            for i, num in enumerate(v.data):
+                if num < coord_data_min:
+                    v.data[i] = coord_data_min
+                else:
+                    v.data[i] = coord_data[coord_data <= num].max()
+
+    # interpolate
+    da_interp = da1.interp_like(da_tmp, method="nearest", assume_sorted=assume_sorted)
+
+    # restore original coordinates
+    for coord, v in da_interp.coords.items():
+        if coord in da1.coords:
+            v.data[:] = da2.coords[coord].data[:]
+
+    return da_interp
+
+
 def xr_interp_like(
     da1: xr.DataArray,
     da2: Union[xr.DataArray, Dict[str, Any]],
@@ -790,7 +823,10 @@ def xr_interp_like(
                 del da_temp.coords[dim]
 
     # default interp_like will not add dimensions and fill out of range indexes with NaN
-    da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
+    if method == "step":
+        da = _xr_interp_like_step(da1, da_temp, assume_sorted=assume_sorted)
+    else:
+        da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
     # copy original variable and coord attributes
     da.attrs = da1.attrs
