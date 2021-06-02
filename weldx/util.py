@@ -688,27 +688,58 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     return da
 
 
-def _modified_coords(
+def _mod_coords(
     original_coords: np.ndarray, ref_coords: np.ndarray, assume_sorted: bool
-) -> np.ndarray:
-    pass
+) -> List:
+    """Get a list of modified coordinates for the step interpolation.
+
+    The modified coordinates are always the biggest value of the reference coordinates
+    that is smaller than the corresponding original coordinate.
+
+    """
+    if assume_sorted:
+        pass  # todo: implement faster version for sorted arrays
+
+    ref_min = ref_coords.min()
+    return [
+        ref_min if num < ref_min else ref_coords[ref_coords <= num].max()
+        for num in original_coords
+    ]
 
 
 def _xr_interp_like_step(
     da1: xr.DataArray, da2: xr.DataArray, assume_sorted: bool
 ) -> xr.DataArray:
+    """Perform step interpolation on a `DataArray` using another one as reference.
+
+    The implementation abuses the xarray 'nearest' interpolation. Therefore, the
+    coordinates are adjusted in a way that the desired result for the step interpolation
+    is achieved. Afterwards the original coordinates are restored.
+
+    Parameters
+    ----------
+    da1 :
+        xarray object with data to interpolate
+    da2 :
+        xarray or dict-like object along which dimensions to interpolate
+    assume_sorted :
+        Is `True`, the dimensions are assumed to be sorted and some faster algorithms
+        can be applied.
+
+    Returns
+    -------
+    xarray.DataArray :
+        The interpolated array
+
+    """
     from copy import deepcopy
 
     da_tmp = deepcopy(da2)
+
+    # replace original coords with modified ones
     for coord, v in da_tmp.coords.items():
         if coord in da1.coords:
-            coord_data = da1.coords[coord].data
-            coord_data_min = coord_data.min()
-            for i, num in enumerate(v.data):
-                if num < coord_data_min:
-                    v.data[i] = coord_data_min
-                else:
-                    v.data[i] = coord_data[coord_data <= num].max()
+            v.data[:] = _mod_coords(v.data, da1.coords[coord].data, assume_sorted)[:]
 
     # interpolate
     da_interp = da1.interp_like(da_tmp, method="nearest", assume_sorted=assume_sorted)
