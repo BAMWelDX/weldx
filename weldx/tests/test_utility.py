@@ -254,14 +254,17 @@ class TestXarrayInterpolation:
             used
 
         """
+        # set default values for missing data
         if data is None:
             data = range(6)
         if coords is None:
             coords = dict(d1=data)
         dims = list(coords.keys())
 
+        # create source data array
         da_data = DataArray(data=data, dims=dims, coords=coords)
 
+        # create reference
         dims_ref = list(coords_ref.keys())
         all_dims = set(dims + dims_ref)
         if use_dict_ref:
@@ -270,13 +273,18 @@ class TestXarrayInterpolation:
             data_ref = np.zeros([len(coords_ref[dim]) for dim in dims_ref])
             ref = DataArray(data=data_ref, dims=dims_ref, coords=coords_ref)
 
+        # perform interpolation
         da_interp = ut.xr_interp_like(da_data, ref, **kwargs)
 
+        # check coordinates
         broadcast_missing = kwargs.get("broadcast_missing", False)
         for dim in all_dims:
             if dim in dims_ref and (dim in dims or broadcast_missing):
                 assert np.allclose(da_interp.coords[dim], coords_ref[dim])
+            elif dim in dims:
+                assert np.allclose(da_interp.coords[dim], coords[dim])
 
+        # check data
         assert da_interp.values.shape == np.array(exp_values).shape
         assert np.allclose(da_interp.values, exp_values, equal_nan=True)
 
