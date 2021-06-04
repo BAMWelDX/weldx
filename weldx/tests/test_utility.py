@@ -2,15 +2,18 @@
 import copy
 import math
 import unittest
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from numpy import NaN
 from pandas import DatetimeIndex as DTI
 from pandas import TimedeltaIndex as TDI
 from pandas import date_range
 from pint.errors import DimensionalityError
+from xarray import DataArray
 
 import weldx.util as ut
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -186,6 +189,98 @@ def test_pandas_time_delta_to_quantity():
     )
 
 
+class TestXarrayInterpolation:
+    """Tests all custom xarray interpolation functions."""
+
+    @pytest.mark.parametrize("use_dict_ref", [True, False])
+    @pytest.mark.parametrize(
+        "data, coords, coords_ref, exp_values, kwargs",
+        [
+            # linear interpolation
+            (None, None, dict(d1=[3.3, 4.1]), [3.3, 4.1], dict(method="linear")),
+            # step interpolation
+            (None, None, dict(d1=[1.3, 3.9, 4.1]), [1, 3, 4], dict(method="step")),
+            # interp from subset inside original data
+            (None, None, dict(d1=[1, 3]), [1, 3], {}),
+            # overlapping coordinates
+            (None, None, dict(d1=[4, 5, 7, 8]), [4, 5, 5, 5], {}),
+            # overlapping coordinates without fill
+            (None, None, dict(d1=[4, 5, 7, 8]), [4, 5, NaN, NaN], dict(fillna=False)),
+            # no overlapping coordinates
+            (None, None, dict(d1=[-2, -1]), [0, 0], {}),
+            # single coordinate interpolation
+            ([3], dict(d1=[2]), dict(d1=[4, 5, 7]), [3, 3, 3], {}),
+            # single coordinate interpolation with single reference coord (identical)
+            ([3], dict(d1=[2]), dict(d1=[2]), [3], {}),
+            # single coordinate interpolation with single reference coord (different)
+            ([3], dict(d1=[2]), dict(d1=[7]), [3], {}),
+            # different dimensions without broadcasting of missing dimensions
+            (None, None, dict(d2=[-2, -1]), range(6), {}),
+            # different dimensions with broadcasting of missing dimensions
+            (
+                None,
+                None,
+                dict(d2=[-2, -1]),
+                [range(6), range(6)],
+                dict(broadcast_missing=True),
+            ),
+        ],
+    )
+    def test_xr_interp_like(
+        self,
+        data: List,
+        coords: Dict,
+        coords_ref: Dict,
+        exp_values: List,
+        kwargs: Dict,
+        use_dict_ref: bool,
+    ):
+        """Test the ‘xr_interp_like‘ function.
+
+        Parameters
+        ----------
+        data :
+            The data of the source `DataArray`
+        coords :
+            The coordinates of the source `DataArray`
+        coords_ref :
+            The coordinates of the reference
+        exp_values :
+            Expected values of the interpolated `DataArray`
+        kwargs :
+            Key word arguments that should be passed to `xr_interp_like`
+        use_dict_ref :
+            If `True`, a dictionary will serve as reference. Otherwise, a `DataArray` is
+            used
+
+        """
+        if data is None:
+            data = range(6)
+        if coords is None:
+            coords = dict(d1=data)
+        dims = list(coords.keys())
+
+        da_data = DataArray(data=data, dims=dims, coords=coords)
+
+        dims_ref = list(coords_ref.keys())
+        all_dims = set(dims + dims_ref)
+        if use_dict_ref:
+            ref = coords_ref
+        else:
+            data_ref = np.zeros([len(coords_ref[dim]) for dim in dims_ref])
+            ref = DataArray(data=data_ref, dims=dims_ref, coords=coords_ref)
+
+        da_interp = ut.xr_interp_like(da_data, ref, **kwargs)
+
+        broadcast_missing = kwargs.get("broadcast_missing", False)
+        for dim in all_dims:
+            if dim in dims_ref and (dim in dims or broadcast_missing):
+                assert np.allclose(da_interp.coords[dim], coords_ref[dim])
+
+        assert da_interp.values.shape == np.array(exp_values).shape
+        assert np.allclose(da_interp.values, exp_values, equal_nan=True)
+
+
 def test_xr_interp_like():
     """Test behaviour of custom interpolation method for xarray Objects."""
     # basic interpolation behavior on a single coordinate
@@ -197,78 +292,10 @@ def test_xr_interp_like():
         coords={"a": np.arange(0, n_a + s_a, s_a)},
     )
 
-    # interp from subset inside original data
-    test = ut.xr_interp_like(da_a.loc[2:4:2], da_a)
-    assert test.a[0] == da_a.a[0]
-    assert test.a[-1] == da_a.a[-1]
-    assert test[0] == da_a.loc[2]
-    assert test[-1] == da_a.loc[4]
-
-    # interp with overlap
-    test = ut.xr_interp_like(da_a.loc[1:3], da_a.loc[2:4])
-    assert test.a[0] == da_a.a.loc[2]
-    assert test.a[-1] == da_a.a.loc[4]
-    assert test[0] == da_a.loc[2]
-    assert test[-1] == da_a.loc[3]
-    assert np.all(test.loc[3:4] == da_a.loc[3])
-
-    # overlap without fill (expecting nan values for out of range indexes)
-    test = ut.xr_interp_like(da_a.loc[1:3], da_a.loc[2:4], fillna=False)
-    assert test.a[0] == da_a.a.loc[2]
-    assert test.a[-1] == da_a.a.loc[4]
-    assert test[0] == da_a.loc[2]
-    assert np.isnan(test[-1])
-    assert np.all(np.isnan(test.where(test.a > 3, drop=True)))
-
-    # outside interpolation without overlap
-    test = ut.xr_interp_like(da_a.loc[0:3], da_a.loc[4:5])
-    assert test.a[0] == da_a.a.loc[4]
-    assert test.a[-1] == da_a.a.loc[5]
-    assert np.all(test.loc[4:5] == da_a.loc[3])
-
     # single point to array interpolation
     # important: da_a.loc[5] for indexing would drop coordinates (unsure why)
-    test = ut.xr_interp_like(da_a.loc[2:2], da_a)
-    assert np.all(test.a == da_a.a)
-    assert np.all(test == da_a.loc[2:2])
     with pytest.raises(ValueError):
         ut.xr_interp_like(da_a.loc[2:2], da_a, fillna=False)
-
-    # single point to single point interpolation (different points)
-    test = ut.xr_interp_like(da_a.loc[2:2], da_a.loc[3:3])
-    assert np.all(test.a == da_a.a)
-    assert np.all(test == da_a.loc[2:2])
-
-    # single point to single point interpolation (matching points)
-    test = ut.xr_interp_like(da_a.loc[2:2], da_a.loc[2:2])
-    assert np.all(test.a == da_a.a)
-    assert np.all(test == da_a.loc[2:2])
-
-    # dict-like inputs on existing coordinate
-    test = ut.xr_interp_like(da_a, {"a": np.arange(-5, 15, 0.5)})
-    assert np.all(test.where(test.a < da_a.a.min(), drop=True) == da_a.min())
-    assert np.all(test.where(test.a > da_a.a.max(), drop=True) == da_a[-1])
-    assert np.all(test.where(test.a.isin(da_a.a), drop=True) == da_a)
-
-    da = da_a.loc[3:3]
-    test = ut.xr_interp_like(da, {"a": np.arange(-5, 15, 0.5)})
-    assert np.all(test.where(test.a < da.a.min(), drop=True) == da.min())
-    assert np.all(test.where(test.a > da.a.max(), drop=True) == da[-1])
-    assert np.all(test.where(test.a.isin(da.a), drop=True) == da)
-
-    test = ut.xr_interp_like(da_a, {"a": np.arange(-5, 15, 0.5)}, fillna=False)
-    assert np.all(np.isnan((test.where(test.a < 0, drop=True))))
-    assert np.all(np.isnan(test.where(test.a > da_a.a.max(), drop=True)))
-    assert np.all(test.where(test.a.isin(da_a.a), drop=True) == da_a)
-
-    # dict-like inputs on new coordinate with/without broadcasting
-    da1 = da_a
-    test = ut.xr_interp_like(da1, {"b": np.arange(3)})
-    assert test.equals(da_a)
-
-    da1 = da_a
-    test = ut.xr_interp_like(da1, {"b": np.arange(3)}, broadcast_missing=True)
-    assert test.equals(da1.broadcast_like(test))
 
     # test coordinate selection with interp_coords
     da1 = da_a
@@ -644,8 +671,5 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
 
 
 def test_is_interactive():
-    """Assert that the Pytest session is not recognized as interactive.
-
-    >>> assert not ut.is_interactive_session()
-    """
+    """Assert that the Pytest session is not recognized as interactive."""
     assert not ut.is_interactive_session()
