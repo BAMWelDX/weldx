@@ -192,6 +192,8 @@ def test_pandas_time_delta_to_quantity():
 class TestXarrayInterpolation:
     """Tests all custom xarray interpolation functions."""
 
+    @staticmethod
+    @pytest.mark.parametrize("assume_sorted", [True, False])
     @pytest.mark.parametrize("use_dict_ref", [True, False])
     @pytest.mark.parametrize(
         "data, coords, coords_ref, exp_values, kwargs",
@@ -227,13 +229,13 @@ class TestXarrayInterpolation:
         ],
     )
     def test_xr_interp_like(
-        self,
         data: List,
         coords: Dict,
         coords_ref: Dict,
         exp_values: List,
         kwargs: Dict,
         use_dict_ref: bool,
+        assume_sorted: bool,
     ):
         """Test the ‘xr_interp_like‘ function.
 
@@ -252,6 +254,8 @@ class TestXarrayInterpolation:
         use_dict_ref :
             If `True`, a dictionary will serve as reference. Otherwise, a `DataArray` is
             used
+        assume_sorted :
+            Sets the corresponding parameter of ´xr_interp_like´
 
         """
         # set default values for missing data
@@ -274,7 +278,9 @@ class TestXarrayInterpolation:
             ref = DataArray(data=data_ref, dims=dims_ref, coords=coords_ref)
 
         # perform interpolation
-        da_interp = ut.xr_interp_like(da_data, ref, **kwargs)
+        da_interp = ut.xr_interp_like(
+            da_data, ref, assume_sorted=assume_sorted, **kwargs
+        )
 
         # check coordinates
         broadcast_missing = kwargs.get("broadcast_missing", False)

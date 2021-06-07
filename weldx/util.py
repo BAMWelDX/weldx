@@ -698,7 +698,31 @@ def _mod_coords(
 
     """
     if assume_sorted:
-        pass  # todo: implement faster version for sorted arrays
+        # initialize with all values set to last reference coordinate
+        mod_coords = np.ones(len(original_coords)) * ref_coords[-1]
+        num_ref_coords = len(ref_coords)
+
+        # if only one coordinate exist, we can return
+        if num_ref_coords == 1:
+            return mod_coords
+
+        # set modified coordinates
+        ref_index = 0
+        for i, val in enumerate(original_coords):
+            if val < ref_coords[ref_index + 1]:
+                mod_coords[i] = ref_coords[ref_index]
+            else:
+                while (
+                    ref_index + 1 != num_ref_coords and val >= ref_coords[ref_index + 1]
+                ):
+                    ref_index += 1
+                mod_coords[i] = ref_coords[ref_index]
+
+                # end the for loop early, since the mod coords were initialized with
+                # the last value of the reference coordinates
+                if ref_index + 1 == num_ref_coords:
+                    break
+        return mod_coords
 
     ref_min = ref_coords.min()
     return [
