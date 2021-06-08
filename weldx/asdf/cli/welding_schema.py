@@ -337,9 +337,8 @@ def main(argv=None):
     Examples
     --------
     >>> import tempfile
-    >>> f = tempfile.NamedTemporaryFile(delete=True)
-    >>> with f:
-    ...     main(['-o', f.name])
+    >>> with tempfile.NamedTemporaryFile(delete=True) as ntf:
+    ...     main(['-o', ntf.name])
 
     """
     args = parse_args(argv)
