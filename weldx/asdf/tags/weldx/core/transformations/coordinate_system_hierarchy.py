@@ -406,6 +406,13 @@ class CoordinateSystemManagerASDF(WeldxType):
             if subsystem.parent_system == node.name
         ]
 
+        spatial_data = None
+        if len(node._data) > 0:
+            spatial_data = [
+                dict(name=k, coordinate_system=v.coordinate_system_name, data=v.data)
+                for k, v in node._data.items()
+            ]
+
         tree = {
             "name": node.name,
             "reference_time": node.reference_time,
@@ -413,6 +420,7 @@ class CoordinateSystemManagerASDF(WeldxType):
             "subsystems": subsystem_data,
             "root_system_name": node.root_system_name,
             "coordinate_systems": coordinate_system_data,
+            "spatial_data": spatial_data,
         }
         return tree
 
@@ -457,5 +465,10 @@ class CoordinateSystemManagerASDF(WeldxType):
 
         cls._add_coordinate_systems_to_subsystems(tree, csm, subsystem_data_list)
         cls._merge_subsystems(tree, csm, subsystem_data_list)
+
+        spatial_data = tree.get("spatial_data")
+        if spatial_data is not None:
+            for item in spatial_data:
+                csm.assign_data(item["data"], item["name"], item["coordinate_system"])
 
         return csm
