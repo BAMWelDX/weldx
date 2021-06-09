@@ -413,20 +413,23 @@ def test_coordinate_system_manager_time_dependencies(
 @pytest.mark.parametrize("copy_arrays", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
+    """Test if data attached to a CSM is stored and read correctly."""
     csm = tf.CoordinateSystemManager("root", "csm")
     csm.create_cs("cs_1", "root", coordinates=[1, 1, 1])
     csm.create_cs("cs_2", "root", coordinates=[-1, -1, -1])
     csm.create_cs("cs_11", "cs_1", coordinates=[1, 1, 1])
 
-    data_11 = SpatialData(coordinates=[[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]])
+    data_11 = SpatialData(coordinates=np.array([[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]]))
     data_2 = SpatialData(
-        coordinates=[
-            [0.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0],
-            [1.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0],
-        ],
-        triangles=[[0, 1, 2], [0, 2, 3]],
+        coordinates=np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ]
+        ),
+        triangles=np.array([[0, 1, 2], [0, 2, 3]], dtype="uint32"),
     )
 
     csm.assign_data(data_11, "data_11", "cs_11")
