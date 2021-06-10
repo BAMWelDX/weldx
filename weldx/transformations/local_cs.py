@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -41,7 +41,7 @@ class LocalCoordinateSystem:
     def __init__(
         self,
         orientation: types_orientation = None,
-        coordinates: types_coordinates = None,
+        coordinates: Union[types_coordinates, TimeSeries] = None,
         time: types_timeindex = None,
         time_ref: pd.Timestamp = None,
         construction_checks: bool = True,
@@ -75,11 +75,6 @@ class LocalCoordinateSystem:
             Cartesian coordinate system
 
         """
-        if orientation is None:
-            orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        if coordinates is None:
-            coordinates = np.array([0, 0, 0])
-
         time, time_ref = build_time_index(time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
@@ -93,48 +88,10 @@ class LocalCoordinateSystem:
             )
 
         if construction_checks:
-            if isinstance(coordinates, xr.DataArray):
-                ut.xr_check_coords(
-                    coordinates,
-                    dict(
-                        c={"values": ["x", "y", "z"]},
-                        time={"dtype": "timedelta64", "optional": True},
-                    ),
-                )
-            else:
-                # todo: check time series shape
-                pass
+            self._check_coordinates(coordinates)
+            orientation = self._check_and_normalize_orientation(orientation)
 
-            ut.xr_check_coords(
-                orientation,
-                dict(
-                    c={"values": ["x", "y", "z"]},
-                    v={"values": [0, 1, 2]},
-                    time={"dtype": "timedelta64", "optional": True},
-                ),
-            )
-
-            orientation = xr.apply_ufunc(
-                normalize,
-                orientation,
-                input_core_dims=[["c"]],
-                output_core_dims=[["c"]],
-            )
-
-            # vectorize test if orthogonal
-            if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
-                raise ValueError("Orientation vectors must be orthogonal")
-
-        # unify time axis
-        if (
-            not isinstance(coordinates, TimeSeries)
-            and ("time" in orientation.coords)
-            and ("time" in coordinates.coords)
-            and (not np.all(orientation.time.data == coordinates.time.data))
-        ):
-            time_union = ut.get_time_union([orientation, coordinates])
-            orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
-            coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
+        orientation, coordinates = self._unify_time_axis(orientation, coordinates)
 
         orientation.name = "orientation"
         dataset_items = [orientation]
@@ -283,6 +240,8 @@ class LocalCoordinateSystem:
         xarray.DataArray
 
         """
+        if orientation is None:
+            orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
         if not isinstance(orientation, xr.DataArray):
             time_orientation = None
             if isinstance(orientation, Rot):
@@ -317,6 +276,8 @@ class LocalCoordinateSystem:
         """
         if isinstance(coordinates, TimeSeries):
             return coordinates
+        if coordinates is None:
+            coordinates = np.array([0, 0, 0])
         if not isinstance(coordinates, xr.DataArray):
             time_coordinates = None
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
@@ -329,6 +290,63 @@ class LocalCoordinateSystem:
         coordinates = coordinates.weldx.time_ref_restore()
 
         return coordinates
+
+    @staticmethod
+    def _check_and_normalize_orientation(orientation: xr.DataArray) -> xr.DataArray:
+        """Check if the orientation has the correct format and normalize it."""
+        ut.xr_check_coords(
+            orientation,
+            dict(
+                c={"values": ["x", "y", "z"]},
+                v={"values": [0, 1, 2]},
+                time={"dtype": "timedelta64", "optional": True},
+            ),
+        )
+
+        orientation = xr.apply_ufunc(
+            normalize,
+            orientation,
+            input_core_dims=[["c"]],
+            output_core_dims=[["c"]],
+        )
+
+        # vectorize test if orthogonal
+        if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
+            raise ValueError("Orientation vectors must be orthogonal")
+
+        return orientation
+
+    @staticmethod
+    def _check_coordinates(coordinates: Union[xr.DataArray, TimeSeries]):
+        """Check if the coordinates have the correct format."""
+        if isinstance(coordinates, xr.DataArray):
+            ut.xr_check_coords(
+                coordinates,
+                dict(
+                    c={"values": ["x", "y", "z"]},
+                    time={"dtype": "timedelta64", "optional": True},
+                ),
+            )
+        else:
+            # todo: check time series shape
+            pass
+
+    @staticmethod
+    def _unify_time_axis(
+        orientation: xr.DataArray, coordinates: Union[xr.DataArray, TimeSeries]
+    ) -> Tuple:
+        """Unify time axis of orientation and coordinates if both are DataArrays."""
+        if (
+            not isinstance(coordinates, TimeSeries)
+            and ("time" in orientation.coords)
+            and ("time" in coordinates.coords)
+            and (not np.all(orientation.time.data == coordinates.time.data))
+        ):
+            time_union = ut.get_time_union([orientation, coordinates])
+            orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
+            coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
+
+        return (orientation, coordinates)
 
     @classmethod
     def from_euler(
