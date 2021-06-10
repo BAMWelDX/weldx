@@ -109,6 +109,7 @@ class LocalCoordinateSystem:
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
+        # todo: rewrite
         return self._dataset.__repr__().replace(
             "<xarray.Dataset", "<LocalCoordinateSystem"
         )
@@ -644,6 +645,8 @@ class LocalCoordinateSystem:
             Coordinates of the coordinate system
 
         """
+        if self._coord_ts is not None:
+            return self._coord_ts
         return self.dataset.coordinates
 
     @property
@@ -656,7 +659,7 @@ class LocalCoordinateSystem:
             `True` if the coordinate system is time dependent, `False` otherwise.
 
         """
-        return self.time is not None
+        return self.time is not None or self._coord_ts is not None
 
     @property
     def has_reference_time(self) -> bool:
@@ -832,9 +835,14 @@ class LocalCoordinateSystem:
             time = time + time_ref
 
         orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
-        coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
+        if isinstance(self.coordinates, TimeSeries):
+            coordinates = self.coordinates.interp_time(time).data.m
+        else:
+            coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
-        return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
+        return LocalCoordinateSystem(
+            orientation, coordinates, time=time, time_ref=time_ref
+        )
 
     def invert(self) -> "LocalCoordinateSystem":
         """Get a local coordinate system defining the parent in the child system.

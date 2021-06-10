@@ -16,6 +16,7 @@ from pandas import date_range
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx import Q_, SpatialData
+from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
@@ -632,6 +633,18 @@ class TestLocalCoordinateSystem:
         assert np.all(lcs.time == time_exp)
         assert lcs.reference_time == time_ref
 
+    # test_init_time_series_as_coord ---------------------------------------------------
+
+    @staticmethod
+    def test_init_time_series_as_coord():
+        """Test if a fitting `TimeSeries` can be used as coordinates"""
+        coordinates = MathematicalExpression(
+            expression="a*t+b", parameters=dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 2, 3])
+        )
+        ts_coord = TimeSeries(data=coordinates)
+
+        LCS(coordinates=ts_coord)
+
     # test_reset_reference_time --------------------------------------------------------
 
     @staticmethod
@@ -775,10 +788,10 @@ class TestLocalCoordinateSystem:
             ),
         ],
     )
-    def test_interp_time(
+    def test_interp_time_discrete(
         time_ref_lcs, time, time_ref, orientation_exp, coordinates_exp
     ):
-        """Test the interp_time function.
+        """Test the interp_time function with discrete coordinates and orientations.
 
         Parameters
         ----------
@@ -813,6 +826,20 @@ class TestLocalCoordinateSystem:
         check_coordinate_system(
             lcs_interp_like, orientation_exp, coordinates_exp, True, time, time_ref
         )
+
+    # test_interp_time_time_series_as_coords -------------------------------------------
+
+    @staticmethod
+    def test_interp_time_time_series_as_coords():
+        expr = "a*t+b"
+        param = dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 1, 1])
+        me = MathematicalExpression(expression=expr, parameters=param)
+
+        lcs = LCS(coordinates=TimeSeries(data=me))
+        lcs_interp = lcs.interp_time(Q_([1, 2, 3, 4, 5], "s"))
+
+        assert isinstance(lcs_interp.coordinates, xr.DataArray)
+        assert np.allclose(lcs_interp.coordinates, [[i + 2, 1, 1] for i in range(5)])
 
     # test_interp_time_exceptions ------------------------------------------------------
 
