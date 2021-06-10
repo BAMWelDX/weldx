@@ -13,14 +13,14 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
-
-from .types import (
+from weldx.core import TimeSeries
+from weldx.transformations.types import (
     types_coordinates,
     types_orientation,
     types_time_and_lcs,
     types_timeindex,
 )
-from .util import build_time_index, normalize
+from weldx.transformations.util import build_time_index, normalize
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
@@ -93,13 +93,17 @@ class LocalCoordinateSystem:
             )
 
         if construction_checks:
-            ut.xr_check_coords(
-                coordinates,
-                dict(
-                    c={"values": ["x", "y", "z"]},
-                    time={"dtype": "timedelta64", "optional": True},
-                ),
-            )
+            if isinstance(coordinates, xr.DataArray):
+                ut.xr_check_coords(
+                    coordinates,
+                    dict(
+                        c={"values": ["x", "y", "z"]},
+                        time={"dtype": "timedelta64", "optional": True},
+                    ),
+                )
+            else:
+                # todo: check time series shape
+                pass
 
             ut.xr_check_coords(
                 orientation,
@@ -123,7 +127,8 @@ class LocalCoordinateSystem:
 
         # unify time axis
         if (
-            ("time" in orientation.coords)
+            not isinstance(coordinates, TimeSeries)
+            and ("time" in orientation.coords)
             and ("time" in coordinates.coords)
             and (not np.all(orientation.time.data == coordinates.time.data))
         ):
@@ -131,10 +136,17 @@ class LocalCoordinateSystem:
             orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
             coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
 
-        coordinates.name = "coordinates"
         orientation.name = "orientation"
+        dataset_items = [orientation]
 
-        self._dataset = xr.merge([coordinates, orientation], join="exact")
+        self._coord_ts = None
+        if isinstance(coordinates, TimeSeries):
+            self._coord_ts = coordinates
+        else:
+            coordinates.name = "coordinates"
+            dataset_items.append(coordinates)
+
+        self._dataset = xr.merge(dataset_items, join="exact")
         if "time" in self._dataset and time_ref is not None:
             self._dataset.weldx.time_ref = time_ref
 
@@ -303,6 +315,8 @@ class LocalCoordinateSystem:
         xarray.DataArray
 
         """
+        if isinstance(coordinates, TimeSeries):
+            return coordinates
         if not isinstance(coordinates, xr.DataArray):
             time_coordinates = None
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
