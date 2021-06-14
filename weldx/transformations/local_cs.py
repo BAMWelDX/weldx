@@ -79,12 +79,16 @@ class LocalCoordinateSystem:
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
-        if time is not None and not (
-            "time" in coordinates.coords or "time" in orientation.coords
+        if (
+            time is not None
+            and "time" not in orientation.coords
+            and (
+                isinstance(coordinates, TimeSeries) or "time" not in coordinates.coords
+            )
         ):
             warnings.warn(
-                "Neither the coordinates nor the orientation are time dependent. "
-                "Provided time is dropped"
+                "Provided time is dropped because of the given coordinates and "
+                "orientation."
             )
 
         if construction_checks:
@@ -103,6 +107,7 @@ class LocalCoordinateSystem:
             coordinates.name = "coordinates"
             dataset_items.append(coordinates)
 
+        self._time_ref = time_ref
         self._dataset = xr.merge(dataset_items, join="exact")
         if "time" in self._dataset and time_ref is not None:
             self._dataset.weldx.time_ref = time_ref
@@ -683,6 +688,8 @@ class LocalCoordinateSystem:
             The coordinate systems reference time
 
         """
+        if isinstance(self.coordinates, TimeSeries):
+            return self._time_ref
         return self._dataset.weldx.time_ref
 
     @property
@@ -836,7 +843,12 @@ class LocalCoordinateSystem:
 
         orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
         if isinstance(self.coordinates, TimeSeries):
-            coordinates = self.coordinates.interp_time(time).data.m
+            time_interp = time
+            if isinstance(time_interp, pd.DatetimeIndex):
+                time_interp = time - self.reference_time
+            coordinates = self.coordinates.interp_time(time_interp).data.m
+            coordinates = self._build_coordinates(coordinates, time_interp)
+            coordinates.time.attrs["time_ref"] = self.reference_time
         else:
             coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 

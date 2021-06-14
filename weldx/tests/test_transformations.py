@@ -636,14 +636,42 @@ class TestLocalCoordinateSystem:
     # test_init_time_series_as_coord ---------------------------------------------------
 
     @staticmethod
-    def test_init_time_series_as_coord():
-        """Test if a fitting `TimeSeries` can be used as coordinates"""
+    @pytest.mark.parametrize("time_ref", [None, TS("2020-01-01")])
+    @pytest.mark.parametrize(
+        "time, angles",
+        [
+            (None, None),
+            (Q_([1, 2, 3], "s"), None),
+            (Q_([1, 2, 3], "s"), [1, 2, 3]),
+        ],
+    )
+    def test_init_time_series_as_coord(time, time_ref, angles):
+        """Test if a fitting `TimeSeries` can be used as coordinates
+
+        Parameters
+        ----------
+        time :
+            The time that should be passed to the `__init__` method of the LCS
+        time_ref :
+            The reference time that should be passed to the `__init__` method of the LCS
+        angles :
+            A set of angles that should be used to calculate the orientation matrices.
+            Values are irrelevant, just make sure it has the same length as the `time`
+            parameter
+
+        """
         coordinates = MathematicalExpression(
             expression="a*t+b", parameters=dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 2, 3])
         )
-        ts_coord = TimeSeries(data=coordinates)
 
-        LCS(coordinates=ts_coord)
+        ts_coord = TimeSeries(data=coordinates)
+        orientation = None
+        if angles is not None:
+            orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
+        lcs = LCS(
+            orientation=orientation, coordinates=ts_coord, time=time, time_ref=time_ref
+        )
+        assert lcs.has_reference_time == (time_ref is not None)
 
     # test_reset_reference_time --------------------------------------------------------
 
@@ -697,7 +725,7 @@ class TestLocalCoordinateSystem:
         # check results
         assert np.all(lcs.time == time_exp)
 
-    # test_reset_reference_time exceptions ---------------------------------------------
+    # test_reset_reference_time_exceptions ---------------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -736,7 +764,7 @@ class TestLocalCoordinateSystem:
         with pytest.raises(exception_type):
             lcs.reset_reference_time(time_ref_new)
 
-    # test_interp_time -----------------------------------------------------------------
+    # test_interp_time_discrete --------------------------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -827,19 +855,113 @@ class TestLocalCoordinateSystem:
             lcs_interp_like, orientation_exp, coordinates_exp, True, time, time_ref
         )
 
-    # test_interp_time_time_series_as_coords -------------------------------------------
+    # test_interp_time_timeseries_as_coords --------------------------------------------
 
     @staticmethod
-    def test_interp_time_time_series_as_coords():
+    @pytest.mark.parametrize(
+        "seconds, lcs_ref_sec, ref_sec, time_dep_orientation",
+        (
+            [
+                ([1, 2, 3, 4, 5], None, None, False),
+                ([1, 3, 5], 1, 1, False),
+                ([1, 3, 5], 1, 1, True),
+                ([1, 3, 5], 3, 1, False),
+                ([1, 3, 5], 3, 1, True),
+                ([1, 3, 5], 1, 3, False),
+                ([1, 3, 5], 1, 3, True),
+            ]
+        ),
+    )
+    def test_interp_time_timeseries_as_coords(
+        seconds: List[float],
+        lcs_ref_sec: float,
+        ref_sec: float,
+        time_dep_orientation: bool,
+    ):
+        """Test if the `interp_time` method works with a TimeSeries as coordinates.
+
+        The test creates a reference LCS where the coordinates x-values increase
+        linearly in time.
+
+        Parameters
+        ----------
+        seconds :
+            The seconds (time delta) that should be interpolated
+        lcs_ref_sec :
+            The seconds of the reference time, that will passed to the created LCS. If
+            `None`, no reference time will be passed
+        ref_sec :
+            The seconds of the reference time, that will passed to `interp_time`. If
+            `None`, no reference time will be passed
+        time_dep_orientation :
+            If `True` a time dependent orientation will be passed to the LCS.
+            The orientation is a rotation around the x axis. The rotation angle is 0
+            degrees at t=0 seconds and increases linearly to 90 degrees over the next
+            4 seconds. Before and after this period, the angle is kept constant.
+
+        """
+        # create timestamps
+        lcs_ref_time = None
+        ref_time = None
+        time_offset = 0
+        if lcs_ref_sec is not None:
+            lcs_ref_time = TS(year=2017, month=1, day=1, hour=12, second=lcs_ref_sec)
+        if ref_sec is not None:
+            ref_time = TS(year=2017, month=1, day=1, hour=12, second=ref_sec)
+            if lcs_ref_sec is not None:
+                time_offset += ref_sec - lcs_ref_sec
+
+        # create expression
         expr = "a*t+b"
         param = dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 1, 1])
         me = MathematicalExpression(expression=expr, parameters=param)
 
-        lcs = LCS(coordinates=TimeSeries(data=me))
-        lcs_interp = lcs.interp_time(Q_([1, 2, 3, 4, 5], "s"))
+        # create orientation and time of LCS
+        orientation = None
+        lcs_time = None
+        if time_dep_orientation:
+            lcs_time = Q_([0, 4], "s")
+            orientation = WXRotation.from_euler(
+                "x", lcs_time.m * 22.5, degrees=True
+            ).as_matrix()
 
+        # create LCS
+        lcs = LCS(
+            orientation=orientation,
+            coordinates=TimeSeries(data=me),
+            time=lcs_time,
+            time_ref=lcs_ref_time,
+        )
+
+        # interpolate
+        time = Q_(seconds, "s")
+        lcs_interp = lcs.interp_time(time, time_ref=ref_time)
+
+        # check time
+        assert lcs_interp.reference_time == ref_time
+        assert np.allclose(lcs_interp.time_quantity, time)
+
+        # check coordinates
+        exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
         assert isinstance(lcs_interp.coordinates, xr.DataArray)
-        assert np.allclose(lcs_interp.coordinates, [[i + 2, 1, 1] for i in range(5)])
+        assert np.allclose(lcs_interp.coordinates, exp_vals)
+
+        # check orientation
+        seconds_offset = np.array(seconds) + time_offset
+
+        if lcs_time is not None:
+            angles = []
+            for sec in seconds_offset:
+                if sec <= lcs_time[0].m:
+                    angles.append(0)
+                elif sec >= lcs_time[1].m:
+                    angles.append(90)
+                else:
+                    angles.append(22.5 * sec)
+        else:
+            angles = 0
+        exp_orientations = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
+        assert np.allclose(exp_orientations, lcs_interp.orientation)
 
     # test_interp_time_exceptions ------------------------------------------------------
 
