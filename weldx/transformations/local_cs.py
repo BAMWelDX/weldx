@@ -154,6 +154,10 @@ class LocalCoordinateSystem:
 
         """
         lhs_cs = self
+
+        # handle reference times
+        lhs_reset_ref = False
+        rhs_reset_ref = False
         if (
             lhs_cs.reference_time != rhs_cs.reference_time
             and lhs_cs.has_reference_time
@@ -161,18 +165,34 @@ class LocalCoordinateSystem:
         ):
             if lhs_cs.reference_time < rhs_cs.reference_time:
                 time_ref = lhs_cs.reference_time
-                rhs_cs = deepcopy(rhs_cs)
-                rhs_cs.reset_reference_time(time_ref)
+                rhs_reset_ref = True
             else:
                 time_ref = rhs_cs.reference_time
-                lhs_cs = deepcopy(lhs_cs)
-                lhs_cs.reset_reference_time(time_ref)
+                lhs_reset_ref = True
         elif not lhs_cs.has_reference_time:
             time_ref = rhs_cs.reference_time
         else:
             time_ref = lhs_cs.reference_time
 
-        rhs_cs = rhs_cs.interp_time(lhs_cs.time, time_ref)
+        # interpolate one of the LCS to match the times of the other
+        if isinstance(lhs_cs._coord_ts, TimeSeries) and lhs_cs.time is None:
+            if rhs_cs.time is None:
+                raise Exception(
+                    "The left-hand coordinate system uses a TimeSeries as "
+                    "coordinates but has no own timestamps stored, nor does the"
+                    "right-hand side LCS. Use 'interp_time' to create an LCS with"
+                    "explicit values."
+                )
+            else:
+                lhs_cs = lhs_cs.interp_time(rhs_cs.time, time_ref)
+                if rhs_reset_ref:
+                    rhs_cs = deepcopy(rhs_cs)
+                    rhs_cs.reset_reference_time(time_ref)
+        else:
+            rhs_cs = rhs_cs.interp_time(lhs_cs.time, time_ref)
+            if lhs_reset_ref:
+                lhs_cs = deepcopy(lhs_cs)
+                lhs_cs.reset_reference_time(time_ref)
 
         orientation = ut.xr_matmul(
             rhs_cs.orientation, lhs_cs.orientation, dims_a=["c", "v"]

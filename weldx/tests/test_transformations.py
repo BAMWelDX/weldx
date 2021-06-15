@@ -1189,6 +1189,21 @@ class TestLocalCoordinateSystem:
             time_ref_exp,
         )
 
+    # test_addition_timeseries_as_coords -----------------------------------------------
+
+    @staticmethod
+    def test_addition_timeseries_as_coords():
+        # create expression
+        expr = "a*t+b"
+        param = dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 1, 1])
+        me = MathematicalExpression(expression=expr, parameters=param)
+
+        lcs_ts = LCS(coordinates=TimeSeries(me))
+
+        lcs_dis = LCS(coordinates=[1, 1, 1])
+
+        lcs_dis + lcs_ts
+
     # test_subtraction -----------------------------------------------------------------
 
     @staticmethod
