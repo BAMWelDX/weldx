@@ -1209,6 +1209,7 @@ class TestLocalCoordinateSystem:
             (True, False, True, "tdp", [0, 180], [[2, 2, 2], [0, 6, 6]]),
             (False, True, True, "ts", [0, 90], [[2, 2, 2], [4, 6, 2]]),
             (False, False, True, "ts", [0, 90], [[2, 2, 2], [10, 2, 2]]),
+            (True, False, True, "ts", [0, 180], [[2, 2, 2], [4, 6, 2]]),
         ],
     )
     def test_addition_timeseries_as_coords(
