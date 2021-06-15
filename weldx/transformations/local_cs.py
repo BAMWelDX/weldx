@@ -194,6 +194,8 @@ class LocalCoordinateSystem:
         # interpolate one of the LCS to match the times of the other
         if isinstance(lhs_cs._coord_ts, TimeSeries) and lhs_cs.time is None:
             lhs_cs = lhs_cs.interp_time(rhs_cs.time, time_ref)
+            if isinstance(rhs_cs.coordinates, TimeSeries):
+                rhs_cs = rhs_cs.interp_time(rhs_cs.time, time_ref)
             if rhs_reset_ref:
                 rhs_cs = deepcopy(rhs_cs)
                 rhs_cs.reset_reference_time(time_ref)

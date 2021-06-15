@@ -1193,29 +1193,32 @@ class TestLocalCoordinateSystem:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "tdp_o, other_rhs, other_tdp_o, other_tdp_c, exp_angles, exp_coords",
+        "tdp_o, other_rhs, other_tdp_o, other_c_type, exp_angles, exp_coords",
         [
-            (False, True, False, True, [0, 0], [[2, 2, 2], [10, 6, 6]]),
-            (False, False, False, True, [0, 0], [[2, 2, 2], [10, 6, 6]]),
-            (False, True, True, False, [0, 90], [[2, 2, 2], [0, 6, 2]]),
-            (False, False, True, False, [0, 90], [[2, 2, 2], [6, 2, 2]]),
-            (False, True, True, True, [0, 90], [[2, 2, 2], [4, 10, 6]]),
-            (False, False, True, True, [0, 90], [[2, 2, 2], [10, 6, 6]]),
-            (True, True, False, True, [0, 90], [[2, 2, 2], [10, 6, 6]]),
-            (True, False, False, True, [0, 90], [[2, 2, 2], [0, 6, 6]]),
-            (True, True, True, False, [0, 180], [[2, 2, 2], [0, 6, 2]]),
-            (True, False, True, False, [0, 180], [[2, 2, 2], [4, 2, 2]]),
-            (True, True, True, True, [0, 180], [[2, 2, 2], [4, 10, 6]]),
-            (True, False, True, True, [0, 180], [[2, 2, 2], [0, 6, 6]]),
+            (False, True, False, "tdp", [0, 0], [[2, 2, 2], [10, 6, 6]]),
+            (False, False, False, "tdp", [0, 0], [[2, 2, 2], [10, 6, 6]]),
+            (False, True, True, "", [0, 90], [[2, 2, 2], [0, 6, 2]]),
+            (False, False, True, "", [0, 90], [[2, 2, 2], [6, 2, 2]]),
+            (False, True, True, "tdp", [0, 90], [[2, 2, 2], [4, 10, 6]]),
+            (False, False, True, "tdp", [0, 90], [[2, 2, 2], [10, 6, 6]]),
+            (True, True, False, "tdp", [0, 90], [[2, 2, 2], [10, 6, 6]]),
+            (True, False, False, "tdp", [0, 90], [[2, 2, 2], [0, 6, 6]]),
+            (True, True, True, "", [0, 180], [[2, 2, 2], [0, 6, 2]]),
+            (True, False, True, "", [0, 180], [[2, 2, 2], [4, 2, 2]]),
+            (True, True, True, "tdp", [0, 180], [[2, 2, 2], [4, 10, 6]]),
+            (True, False, True, "tdp", [0, 180], [[2, 2, 2], [0, 6, 6]]),
+            (False, True, True, "ts", [0, 90], [[2, 2, 2], [4, 6, 2]]),
+            (False, False, True, "ts", [0, 90], [[2, 2, 2], [10, 2, 2]]),
         ],
     )
     def test_addition_timeseries_as_coords(
-        tdp_o, other_rhs, other_tdp_c, other_tdp_o, exp_angles, exp_coords
+        tdp_o, other_rhs, other_c_type, other_tdp_o, exp_angles, exp_coords
     ):
         # create expression
         expr = "a*t+b"
         param = dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 1, 1])
         me = MathematicalExpression(expression=expr, parameters=param)
+        ts = TimeSeries(me)
 
         # create time dependent orientation
         time = Q_([0, 4], "s")
@@ -1226,16 +1229,16 @@ class TestLocalCoordinateSystem:
         if tdp_o:
             time_ts = time
             orientation_ts = orientation_tdp
-        lcs_ts = LCS(
-            orientation=orientation_ts, coordinates=TimeSeries(me), time=time_ts
-        )
+        lcs_ts = LCS(orientation=orientation_ts, coordinates=ts, time=time_ts)
 
         orientation_other = None
         coordinates_other = [1, 1, 1]
         time_other = None
-        if other_tdp_c:
+        if other_c_type == "tdp":
             time_other = time
             coordinates_other = [[1, 1, 1], [5, 5, 5]]
+        elif other_c_type == "ts":
+            coordinates_other = ts
         if other_tdp_o:
             time_other = time
             orientation_other = orientation_tdp
