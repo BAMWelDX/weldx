@@ -1192,17 +1192,71 @@ class TestLocalCoordinateSystem:
     # test_addition_timeseries_as_coords -----------------------------------------------
 
     @staticmethod
-    def test_addition_timeseries_as_coords():
+    @pytest.mark.parametrize(
+        "tdp_o, other_rhs, other_tdp_o, other_tdp_c, exp_angles, exp_coords",
+        [
+            (False, True, False, True, [0, 0], [[2, 2, 2], [10, 6, 6]]),
+            (False, False, False, True, [0, 0], [[2, 2, 2], [10, 6, 6]]),
+            (False, True, True, False, [0, 90], [[2, 2, 2], [0, 6, 2]]),
+            (False, False, True, False, [0, 90], [[2, 2, 2], [6, 2, 2]]),
+            (False, True, True, True, [0, 90], [[2, 2, 2], [4, 10, 6]]),
+            (False, False, True, True, [0, 90], [[2, 2, 2], [10, 6, 6]]),
+            (True, True, False, True, [0, 90], [[2, 2, 2], [10, 6, 6]]),
+            (True, False, False, True, [0, 90], [[2, 2, 2], [0, 6, 6]]),
+            (True, True, True, False, [0, 180], [[2, 2, 2], [0, 6, 2]]),
+            (True, False, True, False, [0, 180], [[2, 2, 2], [4, 2, 2]]),
+            (True, True, True, True, [0, 180], [[2, 2, 2], [4, 10, 6]]),
+            (True, False, True, True, [0, 180], [[2, 2, 2], [0, 6, 6]]),
+        ],
+    )
+    def test_addition_timeseries_as_coords(
+        tdp_o, other_rhs, other_tdp_c, other_tdp_o, exp_angles, exp_coords
+    ):
         # create expression
         expr = "a*t+b"
         param = dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 1, 1])
         me = MathematicalExpression(expression=expr, parameters=param)
 
-        lcs_ts = LCS(coordinates=TimeSeries(me))
+        # create time dependent orientation
+        time = Q_([0, 4], "s")
+        orientation_tdp = WXRotation.from_euler("z", [0, 90], True).as_matrix()
 
-        lcs_dis = LCS(coordinates=[1, 1, 1])
+        time_ts = None
+        orientation_ts = None
+        if tdp_o:
+            time_ts = time
+            orientation_ts = orientation_tdp
+        lcs_ts = LCS(
+            orientation=orientation_ts, coordinates=TimeSeries(me), time=time_ts
+        )
 
-        lcs_dis + lcs_ts
+        orientation_other = None
+        coordinates_other = [1, 1, 1]
+        time_other = None
+        if other_tdp_c:
+            time_other = time
+            coordinates_other = [[1, 1, 1], [5, 5, 5]]
+        if other_tdp_o:
+            time_other = time
+            orientation_other = orientation_tdp
+
+        lcs_other = LCS(
+            orientation=orientation_other,
+            coordinates=coordinates_other,
+            time=time_other,
+        )
+
+        if other_rhs:
+            result = lcs_ts + lcs_other
+        else:
+            result = lcs_other + lcs_ts
+
+        exp_orientation = WXRotation.from_euler("z", exp_angles, True).as_matrix()
+        # check orientation
+        assert np.allclose(result.orientation, exp_orientation)
+
+        # check coordinates
+        assert np.allclose(result.coordinates, exp_coords)
 
     # test_subtraction -----------------------------------------------------------------
 

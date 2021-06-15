@@ -155,6 +155,23 @@ class LocalCoordinateSystem:
         """
         lhs_cs = self
 
+        # todo: this is only the case for static systems. We can simply add a new
+        #  parameter to the expression that contains the vector that is added. Should
+        #  be included later once the more simple cases are covered
+        if (
+            (
+                isinstance(lhs_cs.coordinates, TimeSeries)
+                or isinstance(rhs_cs.coordinates, TimeSeries)
+            )
+            and lhs_cs.time is None
+            and rhs_cs.time is None
+        ):
+            raise Exception(
+                "One or both coordinate systems use a TimeSeries as coordinates but "
+                "neither of them has a list of timestamps stored. Use 'interp_time' on "
+                "one or both to specify the times you are interested in."
+            )
+
         # handle reference times
         lhs_reset_ref = False
         rhs_reset_ref = False
@@ -176,20 +193,14 @@ class LocalCoordinateSystem:
 
         # interpolate one of the LCS to match the times of the other
         if isinstance(lhs_cs._coord_ts, TimeSeries) and lhs_cs.time is None:
-            if rhs_cs.time is None:
-                raise Exception(
-                    "The left-hand coordinate system uses a TimeSeries as "
-                    "coordinates but has no own timestamps stored, nor does the"
-                    "right-hand side LCS. Use 'interp_time' to create an LCS with"
-                    "explicit values."
-                )
-            else:
-                lhs_cs = lhs_cs.interp_time(rhs_cs.time, time_ref)
-                if rhs_reset_ref:
-                    rhs_cs = deepcopy(rhs_cs)
-                    rhs_cs.reset_reference_time(time_ref)
+            lhs_cs = lhs_cs.interp_time(rhs_cs.time, time_ref)
+            if rhs_reset_ref:
+                rhs_cs = deepcopy(rhs_cs)
+                rhs_cs.reset_reference_time(time_ref)
         else:
             rhs_cs = rhs_cs.interp_time(lhs_cs.time, time_ref)
+            if isinstance(lhs_cs.coordinates, TimeSeries):
+                lhs_cs = lhs_cs.interp_time(rhs_cs.time, time_ref)
             if lhs_reset_ref:
                 lhs_cs = deepcopy(lhs_cs)
                 lhs_cs.reset_reference_time(time_ref)
