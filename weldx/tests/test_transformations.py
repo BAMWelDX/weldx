@@ -1193,28 +1193,86 @@ class TestLocalCoordinateSystem:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "tdp_o, other_rhs, other_tdp_o, other_c_type, exp_angles, exp_coords",
+        "tdp_o, other_rhs, other_tdp_o, other_c_type, sec_ts, sec_other,"
+        " exp_angles, exp_coords",
         [
-            (False, True, False, "tdp", [0, 0], [[2, 2, 2], [10, 6, 6]]),
-            (False, False, False, "tdp", [0, 0], [[2, 2, 2], [10, 6, 6]]),
-            (False, True, True, "", [0, 90], [[2, 2, 2], [0, 6, 2]]),
-            (False, False, True, "", [0, 90], [[2, 2, 2], [6, 2, 2]]),
-            (False, True, True, "tdp", [0, 90], [[2, 2, 2], [4, 10, 6]]),
-            (False, False, True, "tdp", [0, 90], [[2, 2, 2], [10, 6, 6]]),
-            (True, True, False, "tdp", [0, 90], [[2, 2, 2], [10, 6, 6]]),
-            (True, False, False, "tdp", [0, 90], [[2, 2, 2], [0, 6, 6]]),
-            (True, True, True, "", [0, 180], [[2, 2, 2], [0, 6, 2]]),
-            (True, False, True, "", [0, 180], [[2, 2, 2], [4, 2, 2]]),
-            (True, True, True, "tdp", [0, 180], [[2, 2, 2], [4, 10, 6]]),
-            (True, False, True, "tdp", [0, 180], [[2, 2, 2], [0, 6, 6]]),
-            (False, True, True, "ts", [0, 90], [[2, 2, 2], [4, 6, 2]]),
-            (False, False, True, "ts", [0, 90], [[2, 2, 2], [10, 2, 2]]),
-            (True, False, True, "ts", [0, 180], [[2, 2, 2], [4, 6, 2]]),
+            # NOTE: Between each comment block only the reference times (none, same,
+            # different) and the order (lhs and rhs) are varied
+            # other has time dependent coordinates
+            (False, True, False, "tdp", None, None, [0, 0], [[2, 2, 2], [10, 6, 6]]),
+            (False, False, False, "tdp", None, None, [0, 0], [[2, 2, 2], [10, 6, 6]]),
+            (False, True, False, "tdp", 3, 3, [0, 0], [[2, 2, 2], [10, 6, 6]]),
+            (False, False, False, "tdp", 3, 3, [0, 0], [[2, 2, 2], [10, 6, 6]]),
+            (False, True, False, "tdp", 2, 0, [0, 0], [[0, 2, 2], [8, 6, 6]]),
+            (False, False, False, "tdp", 2, 0, [0, 0], [[0, 2, 2], [8, 6, 6]]),
+            # other has time dependent orientation
+            (False, True, True, "", None, None, [0, 90], [[2, 2, 2], [0, 6, 2]]),
+            (False, False, True, "", None, None, [0, 90], [[2, 2, 2], [6, 2, 2]]),
+            (False, True, True, "", 3, 3, [0, 90], [[2, 2, 2], [0, 6, 2]]),
+            (False, False, True, "", 3, 3, [0, 90], [[2, 2, 2], [6, 2, 2]]),
+            (False, True, True, "", 2, 0, [0, 90], [[0, 2, 2], [0, 4, 2]]),
+            (False, False, True, "", 2, 0, [0, 90], [[0, 2, 2], [4, 2, 2]]),
+            # other has time dependent coordinates and orientation
+            (False, True, True, "tdp", None, None, [0, 90], [[2, 2, 2], [4, 10, 6]]),
+            (False, False, True, "tdp", None, None, [0, 90], [[2, 2, 2], [10, 6, 6]]),
+            (False, True, True, "tdp", 3, 3, [0, 90], [[2, 2, 2], [4, 10, 6]]),
+            (False, False, True, "tdp", 3, 3, [0, 90], [[2, 2, 2], [10, 6, 6]]),
+            (False, True, True, "tdp", 2, 0, [0, 90], [[0, 2, 2], [4, 8, 6]]),
+            (False, False, True, "tdp", 2, 0, [0, 90], [[0, 2, 2], [8, 6, 6]]),
+            # The system with the TimeSeries has time dependent orientation and the
+            # other has time dependent coordinates
+            (True, True, False, "tdp", None, None, [0, 90], [[2, 2, 2], [10, 6, 6]]),
+            (True, False, False, "tdp", None, None, [0, 90], [[2, 2, 2], [0, 6, 6]]),
+            (True, True, False, "tdp", 3, 3, [0, 90], [[2, 2, 2], [10, 6, 6]]),
+            (True, False, False, "tdp", 3, 3, [0, 90], [[2, 2, 2], [0, 6, 6]]),
+            (True, True, False, "tdp", 2, 0, [0, 90], [[4, 4, 4], [10, 6, 6]]),
+            (True, False, False, "tdp", 4, 0, [0, 0], [[-2, 2, 2], [6, 6, 6]]),
+            # Both systems have a time dependent orientation
+            (True, True, True, "", None, None, [0, 180], [[2, 2, 2], [0, 6, 2]]),
+            (True, False, True, "", None, None, [0, 180], [[2, 2, 2], [4, 2, 2]]),
+            (True, True, True, "", 3, 3, [0, 180], [[2, 2, 2], [0, 6, 2]]),
+            (True, False, True, "", 3, 3, [0, 180], [[2, 2, 2], [4, 2, 2]]),
+            (True, True, True, "", 4, 0, [90, 180], [[0, 2, 2], [0, 6, 2]]),
+            (True, False, True, "", 4, 0, [0, 90], [[-2, 2, 2], [2, 2, 2]]),
+            # Both systems have a time dependent orientation and the other has also time
+            # dependent coordinates
+            (True, True, True, "tdp", None, None, [0, 180], [[2, 2, 2], [4, 10, 6]]),
+            (True, False, True, "tdp", None, None, [0, 180], [[2, 2, 2], [0, 6, 6]]),
+            (True, True, True, "tdp", 3, 3, [0, 180], [[2, 2, 2], [4, 10, 6]]),
+            (True, False, True, "tdp", 3, 3, [0, 180], [[2, 2, 2], [0, 6, 6]]),
+            (True, True, True, "tdp", 4, 0, [90, 180], [[4, 6, 6], [4, 10, 6]]),
+            (True, False, True, "tdp", 4, 0, [0, 90], [[-2, 2, 2], [6, 6, 6]]),
+            # Both systems use TimeSeries, one has a time dependent orientation
+            (False, True, True, "ts", None, None, [0, 90], [[2, 2, 2], [4, 6, 2]]),
+            (False, False, True, "ts", None, None, [0, 90], [[2, 2, 2], [10, 2, 2]]),
+            (False, True, True, "ts", 3, 3, [0, 90], [[2, 2, 2], [4, 6, 2]]),
+            (False, False, True, "ts", 3, 3, [0, 90], [[2, 2, 2], [10, 2, 2]]),
+            (False, True, True, "ts", 4, 0, [0, 90], [[-2, 2, 2], [4, 2, 2]]),
+            (False, False, True, "ts", 4, 0, [0, 90], [[-2, 2, 2], [6, 2, 2]]),
+            # Both systems use TimeSeries and have time dependent orientations
+            (True, False, True, "ts", None, None, [0, 180], [[2, 2, 2], [4, 6, 2]]),
+            (True, False, True, "ts", 3, 3, [0, 180], [[2, 2, 2], [4, 6, 2]]),
+            (True, True, True, "ts", 4, 0, [90, 180], [[4, 2, 2], [8, 6, 2]]),
+            (True, False, True, "ts", 4, 0, [0, 90], [[-2, 2, 2], [6, 2, 2]]),
         ],
     )
     def test_addition_timeseries_as_coords(
-        tdp_o, other_rhs, other_c_type, other_tdp_o, exp_angles, exp_coords
+        tdp_o,
+        other_rhs,
+        other_c_type,
+        other_tdp_o,
+        sec_ts,
+        sec_other,
+        exp_angles,
+        exp_coords,
     ):
+        # create reference times
+        time_ref_ts = time_ref_other = None
+        if sec_ts is not None:
+            time_ref_ts = TS(year=2017, month=1, day=1, hour=12, second=sec_ts)
+        if sec_other is not None:
+            time_ref_other = TS(year=2017, month=1, day=1, hour=12, second=sec_other)
+
         # create expression
         expr = "a*t+b"
         param = dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 1, 1])
@@ -1230,7 +1288,12 @@ class TestLocalCoordinateSystem:
         if tdp_o:
             time_ts = time
             orientation_ts = orientation_tdp
-        lcs_ts = LCS(orientation=orientation_ts, coordinates=ts, time=time_ts)
+        lcs_ts = LCS(
+            orientation=orientation_ts,
+            coordinates=ts,
+            time=time_ts,
+            time_ref=time_ref_ts,
+        )
 
         orientation_other = None
         coordinates_other = [1, 1, 1]
@@ -1248,12 +1311,15 @@ class TestLocalCoordinateSystem:
             orientation=orientation_other,
             coordinates=coordinates_other,
             time=time_other,
+            time_ref=time_ref_other,
         )
 
         if other_rhs:
             result = lcs_ts + lcs_other
         else:
             result = lcs_other + lcs_ts
+        print(result.time)
+        print(result.time)
 
         exp_orientation = WXRotation.from_euler("z", exp_angles, True).as_matrix()
         # check orientation
