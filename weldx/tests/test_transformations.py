@@ -1257,15 +1257,45 @@ class TestLocalCoordinateSystem:
         ],
     )
     def test_addition_timeseries_as_coords(
-        tdp_o,
-        other_rhs,
-        other_c_type,
-        other_tdp_o,
-        sec_ts,
-        sec_other,
-        exp_angles,
-        exp_coords,
+        tdp_o: bool,
+        other_rhs: bool,
+        other_tdp_o: bool,
+        other_c_type: str,
+        sec_ts: int,
+        sec_other: int,
+        exp_angles: List[float, float],
+        exp_coords: List,
     ):
+        """Test the addition of two LCS with one having a `TimeSeries` as coordinates.
+
+        Parameters
+        ----------
+        tdp_o:
+            Set to `True` if the coordinate system with the `TimeSeries` should have
+            time dependent coordinates
+        other_rhs :
+            Set to `True` if the second coordinate system should be on the right hand
+            side of the + operator
+        other_tdp_o :
+            Set to `True` if the other coordinate system should have time dependent
+            coordinates
+        other_c_type :
+            Set the coordinate type of the other coordinate system.
+              - 'tdp' for time dependent
+              - 'ts' for `TimeSeries`
+              - everything else for constant
+        sec_ts :
+            The seconds of the reference time, that will passed to the LCS with the
+            `TimeSeries`. If `None`, no reference time will be passed
+        sec_other :
+            The seconds of the reference time, that will passed to the other LCS.
+            `TimeSeries`.If `None`, no reference time will be passed
+        exp_angles :
+            The expected rotation angles of the result LCS's orientation
+        exp_coords :
+            The expected coordinates of resulting LCS
+
+        """
         # create reference times
         time_ref_ts = time_ref_other = None
         if sec_ts is not None:
