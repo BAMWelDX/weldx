@@ -1263,7 +1263,7 @@ class TestLocalCoordinateSystem:
         other_c_type: str,
         sec_ts: int,
         sec_other: int,
-        exp_angles: List[float, float],
+        exp_angles: List[float],
         exp_coords: List,
     ):
         """Test the addition of two LCS with one having a `TimeSeries` as coordinates.
