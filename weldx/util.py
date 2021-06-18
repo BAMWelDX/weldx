@@ -791,7 +791,8 @@ def xr_interp_like(
 
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     if method == "step":
-        da = da1.reindex_like(da_temp, method="ffill")
+        fill_method = "ffill" if fillna else None
+        da = da1.reindex_like(da_temp, method=fill_method)
     else:
         da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
