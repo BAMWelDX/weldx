@@ -9,6 +9,7 @@
   structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
 - added `WeldxFile` wrapper to handle asdf files with
   history and schemas more easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
+- add `"step"` as additional method to `util.xr_interp_like` [[#363]](https://github.com/BAMWelDX/weldx/pull/363)
 
 ### changes
 
