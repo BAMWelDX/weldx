@@ -140,7 +140,7 @@ properties:
           groove_shape:
             description: |
               Constant groove shape of the weld seam.
-            tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/*-1.0.0"
+            tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/*-1.*"
           seam_length:
             description: |
               Length of the linear weld seam.
