@@ -55,7 +55,7 @@ oneOf:
       Quaternion rotation representation.
     properties:
       quaternions:
-        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
         wx_shape: [...,4]
     required: [quaternions]
     flowStyle: block
@@ -66,7 +66,7 @@ oneOf:
       Matrix rotation representation.
     properties:
       matrix:
-        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
         wx_shape: [...,3,3]
     required: [matrix]
     flowStyle: block
@@ -77,7 +77,7 @@ oneOf:
       Rotation vector representation.
     properties:
       rotvec:
-        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
         wx_shape: [...,3]
     required: [rotvec]
     flowStyle: block

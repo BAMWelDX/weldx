@@ -47,7 +47,7 @@ oneOf:
         anyOf:
           - type: number
           - type: integer
-          - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+          - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
       unit:
         description: |
           Unit of the data.
@@ -96,7 +96,7 @@ oneOf:
       values:
         description: |
           Set of discrete n-dimensional data.
-        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape:
       #description: |
       #  The outer dimension of the data needs to be identical to the times dimension.

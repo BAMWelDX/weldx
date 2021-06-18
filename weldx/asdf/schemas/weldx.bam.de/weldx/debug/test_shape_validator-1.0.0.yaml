@@ -9,19 +9,19 @@ title: |
 type: object
 properties:
   prop1:
-    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [1,2,(3),(4)]
 
   prop2:
-    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [~,2,1]
 
   prop3:
-    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [2,4,6,8,...]
 
   prop4:
-    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [~,3,5,7,9]
 
   prop5:
@@ -40,10 +40,10 @@ properties:
     type: object
     properties:
       p1:
-        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
         wx_shape: [10,8,6,4,2]
       p2:
-        tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
         wx_shape: [9,7,5,3,1]
 
   time_prop:
@@ -52,7 +52,7 @@ properties:
       - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0"
 
   optional_prop:
-    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [1,2,(3),(4)]
 
 
