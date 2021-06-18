@@ -151,6 +151,7 @@ def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
 
     with open(file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=1, ensure_ascii=False)
+        f.write("\n")
 
 
 def inherit_docstrings(cls):
@@ -1150,7 +1151,7 @@ class WeldxAccessor:
     """
 
     def __init__(self, xarray_obj):
-        """Construct a WeldX xarray object."""
+        """Construct a WelDX xarray object."""
         self._obj = xarray_obj
 
     def interp_like(self, da, *args, **kwargs) -> xr.DataArray:

@@ -106,7 +106,7 @@ properties:
       A list of equipments used for measurements and describing the weld seam.
     type: array
     items:
-      tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
+      tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
   measurements:
     description: |
       List of all measurements associated with the experiment.
@@ -266,7 +266,7 @@ examples:
                 shape: [3]
         subsystem_names: []
       equipment:
-      - !<tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0>
+      - !<tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0>
         name: HKS P1000-S3
         sources:
         - &id003 !<tag:weldx.bam.de:weldx/measurement/source-1.0.0>
@@ -297,7 +297,7 @@ examples:
             parameters:
               a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
               b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
-      - !<tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0>
+      - !<tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0>
         name: Beckhoff ELM3002-0000
         sources: []
         data_transformations:

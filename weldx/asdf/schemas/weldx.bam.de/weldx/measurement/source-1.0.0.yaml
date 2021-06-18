@@ -22,10 +22,16 @@ examples:
 type: object
 properties:
   name:
+    description: |
+      The name of the source.
     type: string
   output_signal:
+    description: |
+      The signal that is produced by the source.
     tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
   error:
+    description: |
+      The error of the source.
     tag: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
 
 required: [name, output_signal]
