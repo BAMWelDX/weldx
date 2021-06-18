@@ -1146,7 +1146,7 @@ class WeldxAccessor:
     """
 
     def __init__(self, xarray_obj):
-        """Construct a WeldX xarray object."""
+        """Construct a WelDX xarray object."""
         self._obj = xarray_obj
 
     def interp_like(self, da, *args, **kwargs) -> xr.DataArray:
