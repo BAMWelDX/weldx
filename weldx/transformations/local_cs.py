@@ -32,12 +32,10 @@ __all__ = ("LocalCoordinateSystem",)
 
 class LocalCoordinateSystem:
     """Defines a local cartesian coordinate system in 3d.
-
     Notes
     -----
     Learn how to use this class by reading the
     :doc:`Tutorial <../tutorials/transformations_01_coordinate_systems>`.
-
     """
 
     def __init__(
@@ -154,7 +152,6 @@ class LocalCoordinateSystem:
             Coordinates data.
         time:
             Valid time index formatted with `_build_time_index`.
-
         Returns
         -------
         xarray.DataArray
@@ -241,37 +238,30 @@ class LocalCoordinateSystem:
 
     def __add__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
         """Add 2 coordinate systems.
-
         Generates a new coordinate system by treating the left-hand side
         coordinate system as being defined in the right hand-side coordinate
         system.
         The transformations from the base coordinate system to the new
         coordinate system are equivalent to the combination of the
         transformations from both added coordinate systems:
-
         R_n = R_r * R_l
         T_n = R_r * T_l + T_r
-
         R_r and T_r are rotation matrix and translation vector of the
         right-hand side coordinate system, R_l and T_l of the left-hand side
         coordinate system and R_n and T_n of the resulting coordinate system.
-
         If the left-hand side system has a time component, the data of the right-hand
         side system will be interpolated to the same times, before the previously shown
         operations are performed per point in time. In case, that the left-hand side
         system has no time component, but the right-hand side does, the resulting system
         has the same time components as the right-hand side system.
-
         Parameters
         ----------
         rhs_cs :
             Right-hand side coordinate system
-
         Returns
         -------
         LocalCoordinateSystem
             Resulting coordinate system.
-
         """
         lhs_cs = self
         if (
@@ -305,36 +295,29 @@ class LocalCoordinateSystem:
 
     def __sub__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
         """Subtract 2 coordinate systems.
-
         Generates a new coordinate system from two local coordinate systems
         with the same reference coordinate system. The resulting system is
         equivalent to the left-hand side system but with the right-hand side
         as reference coordinate system.
         This is achieved by the following transformations:
-
         R_n = R_r^(-1) * R_l
         T_n = R_r^(-1) * (T_l - T_r)
-
         R_r and T_r are rotation matrix and translation vector of the
         right-hand side coordinate system, R_l and T_l of the left-hand side
         coordinate system and R_n and T_n of the resulting coordinate system.
-
         If the left-hand side system has a time component, the data of the right-hand
         side system will be interpolated to the same times, before the previously shown
         operations are performed per point in time. In case, that the left-hand side
         system has no time component, but the right-hand side does, the resulting system
         has the same time components as the right-hand side system.
-
         Parameters
         ----------
         rhs_cs :
             Right-hand side coordinate system
-
         Returns
         -------
         LocalCoordinateSystem
             Resulting coordinate system.
-
         """
         rhs_cs_inv = rhs_cs.invert()
         return self + rhs_cs_inv
@@ -352,12 +335,10 @@ class LocalCoordinateSystem:
         cls, sequence, angles, degrees=False, coordinates=None, time=None, time_ref=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
-
         This function uses scipy.spatial.transform.Rotation.from_euler method to define
         the coordinate systems orientation. Take a look at it's documentation, if some
         information is missing here. The related parameter docs are a copy of the scipy
         documentation.
-
         Parameters
         ----------
         sequence :
@@ -387,12 +368,10 @@ class LocalCoordinateSystem:
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
-
         Returns
         -------
         LocalCoordinateSystem
             Local coordinate system
-
         """
         orientation = Rot.from_euler(sequence, angles, degrees)
         return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
@@ -402,7 +381,6 @@ class LocalCoordinateSystem:
         cls, orientation, coordinates=None, time=None, time_ref=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from orientation matrix.
-
         Parameters
         ----------
         orientation :
@@ -413,12 +391,10 @@ class LocalCoordinateSystem:
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
-
         Returns
         -------
         LocalCoordinateSystem
             Local coordinate system
-
         """
         return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
@@ -427,7 +403,6 @@ class LocalCoordinateSystem:
         cls, vec_x, vec_y, vec_z, coordinates=None, time=None, time_ref=None
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from 3 vectors defining the orientation.
-
         Parameters
         ----------
         vec_x :
@@ -442,12 +417,10 @@ class LocalCoordinateSystem:
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
-
         Returns
         -------
         LocalCoordinateSystem
             Local coordinate system
-
         """
         vec_x = ut.to_float_array(vec_x)
         vec_y = ut.to_float_array(vec_y)
@@ -469,7 +442,6 @@ class LocalCoordinateSystem:
         time_ref=None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
-
         Parameters
         ----------
         vec_x :
@@ -485,12 +457,10 @@ class LocalCoordinateSystem:
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
-
         Returns
         -------
         LocalCoordinateSystem
             Local coordinate system
-
         """
         vec_z = cls._calculate_orthogonal_axis(vec_x, vec_y) * cls._sign_orientation(
             positive_orientation
@@ -509,7 +479,6 @@ class LocalCoordinateSystem:
         time_ref=None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
-
         Parameters
         ----------
         vec_y :
@@ -525,12 +494,10 @@ class LocalCoordinateSystem:
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
-
         Returns
         -------
         LocalCoordinateSystem
             Local coordinate system
-
         """
         vec_x = cls._calculate_orthogonal_axis(vec_y, vec_z) * cls._sign_orientation(
             positive_orientation
@@ -549,7 +516,6 @@ class LocalCoordinateSystem:
         time_ref=None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
-
         Parameters
         ----------
         vec_x :
@@ -565,12 +531,10 @@ class LocalCoordinateSystem:
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
             Reference Timestamp to use if time is Timedelta or pint.Quantity.
-
         Returns
         -------
         LocalCoordinateSystem
             Local coordinate system
-
         """
         vec_y = cls._calculate_orthogonal_axis(vec_z, vec_x) * cls._sign_orientation(
             positive_orientation
@@ -581,19 +545,16 @@ class LocalCoordinateSystem:
     @staticmethod
     def _sign_orientation(positive_orientation):
         """Get -1 or 1 depending on the coordinate systems orientation.
-
         Parameters
         ----------
         positive_orientation :
             Set to True if the orientation should
             be positive and to False if not
-
         Returns
         -------
         int
             1 if the coordinate system has positive orientation,
             -1 otherwise
-
         """
         if positive_orientation:
             return 1
@@ -602,96 +563,79 @@ class LocalCoordinateSystem:
     @staticmethod
     def _calculate_orthogonal_axis(a_0, a_1):
         """Calculate an axis which is orthogonal to two other axes.
-
         The calculated axis has a positive orientation towards the other 2
         axes.
-
         Parameters
         ----------
         a_0 :
             First axis
         a_1 :
             Second axis
-
         Returns
         -------
         numpy.ndarray
             Orthogonal axis
-
         """
         return np.cross(a_0, a_1)
 
     @property
     def orientation(self) -> xr.DataArray:
         """Get the coordinate systems orientation matrix.
-
         Returns
         -------
         xarray.DataArray
             Orientation matrix
-
         """
         return self.dataset.orientation
 
     @property
     def coordinates(self) -> xr.DataArray:
         """Get the coordinate systems coordinates.
-
         Returns
         -------
         xarray.DataArray
             Coordinates of the coordinate system
-
         """
         return self.dataset.coordinates
 
     @property
     def is_time_dependent(self) -> bool:
         """Return `True` if the coordinate system is time dependent.
-
         Returns
         -------
         bool :
             `True` if the coordinate system is time dependent, `False` otherwise.
-
         """
         return self.time is not None
 
     @property
     def has_reference_time(self) -> bool:
         """Return `True` if the coordinate system has a reference time.
-
         Returns
         -------
         bool :
             `True` if the coordinate system has a reference time, `False` otherwise.
-
         """
         return self.reference_time is not None
 
     @property
     def reference_time(self) -> Union[pd.Timestamp, None]:
         """Get the coordinate systems reference time.
-
         Returns
         -------
         pandas.Timestamp:
             The coordinate systems reference time
-
         """
         return self._dataset.weldx.time_ref
 
     @property
     def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
         """Get the time as 'pandas.DatetimeIndex'.
-
         If the coordinate system has no reference time, 'None' is returned.
-
         Returns
         -------
         Union[pandas.DatetimeIndex, None]:
             The coordinate systems time as 'pandas.DatetimeIndex'
-
         """
         if not self.has_reference_time:
             return None
@@ -700,12 +644,10 @@ class LocalCoordinateSystem:
     @property
     def time(self) -> Union[pd.TimedeltaIndex, None]:
         """Get the time union of the local coordinate system (None if system is static).
-
         Returns
         -------
         pandas.TimedeltaIndex
             DateTimeIndex-like time union
-
         """
         if "time" in self._dataset.coords:
             return self._dataset.time
@@ -714,24 +656,20 @@ class LocalCoordinateSystem:
     @property
     def time_quantity(self) -> pint.Quantity:
         """Get the time as 'pint.Quantity'.
-
         Returns
         -------
         pint.Quantity:
             The coordinate systems time as 'pint.Quantity'
-
         """
         return ut.pandas_time_delta_to_quantity(self.time)
 
     @property
     def dataset(self) -> xr.Dataset:
         """Get the underlying xarray.Dataset with ordered dimensions.
-
         Returns
         -------
         xarray.Dataset
             xarray Dataset with coordinates and orientation as DataVariables.
-
         """
         return self._dataset.transpose(..., "c", "v")
 
@@ -757,7 +695,6 @@ class LocalCoordinateSystem:
         self, seq: str = "xyz", degrees: bool = False
     ) -> np.ndarray:  # pragma: no cover
         """Return Euler angle representation of the coordinate system orientation.
-
         Parameters
         ----------
         seq :
@@ -767,23 +704,19 @@ class LocalCoordinateSystem:
         degrees :
             Returned angles are in degrees if True, else they are in radians.
             Default is False.
-
         Returns
         -------
         numpy.ndarray
             Array of euler angles.
-
         """
         return self.as_rotation().as_euler(seq=seq, degrees=degrees)
 
     def as_rotation(self) -> Rot:  # pragma: no cover
         """Get a scipy.Rotation object from the coordinate system orientation.
-
         Returns
         -------
         scipy.spatial.transform.Rotation
             Scipy rotation object representing the orientation.
-
         """
         return Rot.from_matrix(self.orientation.values)
 
@@ -793,7 +726,6 @@ class LocalCoordinateSystem:
         time_ref: Union[pd.Timestamp, None] = None,
     ) -> "LocalCoordinateSystem":
         """Interpolates the data in time.
-
         Parameters
         ----------
         time :
@@ -801,12 +733,10 @@ class LocalCoordinateSystem:
             If passing "None" no interpolation will be performed.
         time_ref:
             The reference timestamp
-
         Returns
         -------
         LocalCoordinateSystem
             Coordinate system with interpolated data
-
         """
         if (not self.is_time_dependent) or (time is None):
             return self
@@ -844,15 +774,12 @@ class LocalCoordinateSystem:
 
     def invert(self) -> "LocalCoordinateSystem":
         """Get a local coordinate system defining the parent in the child system.
-
         Inverse is defined as orientation_new=orientation.T,
         coordinates_new=orientation.T*(-coordinates)
-
         Returns
         -------
         LocalCoordinateSystem
             Inverted coordinate system.
-
         """
         orientation = ut.xr_transpose_matrix_data(self.orientation, dim1="c", dim2="v")
         coordinates = ut.xr_matmul(
@@ -880,7 +807,6 @@ class LocalCoordinateSystem:
         show_vectors: bool = True,
     ):
         """Plot the coordinate system.
-
         Parameters
         ----------
         axes : matplotlib.axes.Axes
@@ -912,7 +838,6 @@ class LocalCoordinateSystem:
         show_vectors : bool
             If `True`, the coordinate cross of time dependent coordinate systems is
             plotted.
-
         """
         from weldx.visualization import plot_local_coordinate_system_matplotlib
 
@@ -932,16 +857,13 @@ class LocalCoordinateSystem:
 
     def reset_reference_time(self, time_ref_new: pd.Timestamp):
         """Reset the reference time of the coordinate system.
-
         The time values of the coordinate system are adjusted to the new reference time.
         If no reference time has been set before, the time values will remain
         unmodified. This assumes that the current time delta values are already
         referring to the new reference time.
-
         Parameters
         ----------
         time_ref_new: pandas.Timestamp
             The new reference time
-
         """
         self._dataset.weldx.time_ref = time_ref_new
