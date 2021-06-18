@@ -466,8 +466,7 @@ class CoordinateSystemManagerASDF(WeldxType):
         cls._add_coordinate_systems_to_subsystems(tree, csm, subsystem_data_list)
         cls._merge_subsystems(tree, csm, subsystem_data_list)
 
-        spatial_data = tree.get("spatial_data")
-        if spatial_data is not None:
+        if (spatial_data := tree.get("spatial_data")) is not None:
             for item in spatial_data:
                 csm.assign_data(item["data"], item["name"], item["coordinate_system"])
 
