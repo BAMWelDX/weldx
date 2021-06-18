@@ -1,4 +1,4 @@
-"""WeldX data format and analysis package."""
+"""WelDX data format and analysis package."""
 # isort:skip_file
 import warnings
 
