@@ -688,94 +688,6 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     return da
 
 
-def _mod_coords(
-    original_coords: np.ndarray, ref_coords: np.ndarray, assume_sorted: bool
-) -> List:
-    """Get a list of modified coordinates for the step interpolation.
-
-    The modified coordinates are always the biggest value of the reference coordinates
-    that is smaller than the corresponding original coordinate.
-
-    """
-    if assume_sorted:
-        # initialize with all values set to last reference coordinate
-        mod_coords = np.ones(len(original_coords)) * ref_coords[-1]
-        num_ref_coords = len(ref_coords)
-
-        # if only one coordinate exist, we can return
-        if num_ref_coords == 1:
-            return mod_coords
-
-        # set modified coordinates
-        ref_index = 0
-        for i, val in enumerate(original_coords):
-            if val < ref_coords[ref_index + 1]:
-                mod_coords[i] = ref_coords[ref_index]
-            else:
-                while (
-                    ref_index + 1 != num_ref_coords and val >= ref_coords[ref_index + 1]
-                ):
-                    ref_index += 1
-                mod_coords[i] = ref_coords[ref_index]
-
-                # end the for loop early, since the mod coords were initialized with
-                # the last value of the reference coordinates
-                if ref_index + 1 == num_ref_coords:
-                    break
-        return mod_coords
-
-    ref_min = ref_coords.min()
-    return [
-        ref_min if num < ref_min else ref_coords[ref_coords <= num].max()
-        for num in original_coords
-    ]
-
-
-def _xr_interp_like_step(
-    da1: xr.DataArray, da2: xr.DataArray, assume_sorted: bool
-) -> xr.DataArray:
-    """Perform step interpolation on a `DataArray` using another one as reference.
-
-    The implementation abuses the xarray 'nearest' interpolation. Therefore, the
-    coordinates are adjusted in a way that the desired result for the step interpolation
-    is achieved. Afterwards the original coordinates are restored.
-
-    Parameters
-    ----------
-    da1 :
-        xarray object with data to interpolate
-    da2 :
-        xarray or dict-like object along which dimensions to interpolate
-    assume_sorted :
-        Is `True`, the dimensions are assumed to be sorted and some faster algorithms
-        can be applied.
-
-    Returns
-    -------
-    xarray.DataArray :
-        The interpolated array
-
-    """
-    from copy import deepcopy
-
-    da_tmp = deepcopy(da2)
-
-    # replace original coords with modified ones
-    for coord, v in da_tmp.coords.items():
-        if coord in da1.coords:
-            v.data[:] = _mod_coords(v.data, da1.coords[coord].data, assume_sorted)[:]
-
-    # interpolate
-    da_interp = da1.interp_like(da_tmp, method="nearest", assume_sorted=assume_sorted)
-
-    # restore original coordinates
-    for coord, v in da_interp.coords.items():
-        if coord in da1.coords:
-            v.data[:] = da2.coords[coord].data[:]
-
-    return da_interp
-
-
 def xr_interp_like(
     da1: xr.DataArray,
     da2: Union[xr.DataArray, Dict[str, Any]],
@@ -879,7 +791,7 @@ def xr_interp_like(
 
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     if method == "step":
-        da = _xr_interp_like_step(da1, da_temp, assume_sorted=assume_sorted)
+        da = da1.reindex_like(da_temp, method="ffill")
     else:
         da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
