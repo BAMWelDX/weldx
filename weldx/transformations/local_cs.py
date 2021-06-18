@@ -154,6 +154,7 @@ class LocalCoordinateSystem:
             Coordinates data.
         time:
             Valid time index formatted with `_build_time_index`.
+
         Returns
         -------
         xarray.DataArray
