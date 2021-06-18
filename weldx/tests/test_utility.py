@@ -208,8 +208,18 @@ class TestXarrayInterpolation:
             (None, None, dict(d1=[4, 5, 7, 8]), [4, 5, 5, 5], {}),
             # overlapping coordinates without fill
             (None, None, dict(d1=[4, 5, 7, 8]), [4, 5, NaN, NaN], dict(fillna=False)),
+            # overlapping coordinates without fill
+            (
+                None,
+                None,
+                dict(d1=[4, 5, 7, 8]),
+                [4, 5, NaN, NaN],
+                dict(fillna=False, method="step"),
+            ),
             # no overlapping coordinates
             (None, None, dict(d1=[-2, -1]), [0, 0], {}),
+            # no overlapping coordinates
+            (None, None, dict(d1=[-2, 7]), [0, 5], dict(method="step")),
             # single coordinate interpolation
             ([3], dict(d1=[2]), dict(d1=[4, 5, 7]), [3, 3, 3], {}),
             # single coordinate interpolation with single reference coord (identical)
