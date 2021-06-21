@@ -535,7 +535,7 @@ class TimeSeries:
         Returns
         -------
         TimeSeries :
-            A data array containing the interpolated data.
+            A new `TimeSeries` object containing the interpolated data.
 
         """
         if self._interp_counter > 0:
