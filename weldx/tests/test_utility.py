@@ -641,6 +641,12 @@ class TestCompareNested:
         assert not ut.compare_nested(a, b)
 
     @staticmethod
+    def test_key_added(_default_dicts):  # noqa: D102
+        a, b = (dict(a=1), dict(a=1, b=1))
+        assert not ut.compare_nested(a, b)
+        assert not ut.compare_nested(b, a)
+
+    @staticmethod
     def test_array_accessible_by_two_roots():  # noqa: D102
         a = {"l1": {"l2": np.arange(5)}}
         b = {"l1": {"l2": np.arange(5)}}
