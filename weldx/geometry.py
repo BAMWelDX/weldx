@@ -2330,15 +2330,14 @@ class SpatialData:
             if not self.triangles.ndim == 2:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
-    # def __eq__(self, other):
-    # """Compare to another object."""
-    # if not isinstance(other, SpatialData):
-    #    return False
-    # if not self.coordinates.data == other.coordinates.data:
-    #    return False
-    # if self.triangles and not self.triangles == other.triangles:
-    #    return False
-    # if not self.attributes ==
+    def __eq__(self, other: SpatialData):
+        """Compare to another object."""
+        from weldx.util import compare_nested
+
+        if not isinstance(other, SpatialData):
+            return False
+
+        return compare_nested(self.__dict__, other.__dict__)
 
     @staticmethod
     def from_file(file_name: Union[str, Path]) -> "SpatialData":
