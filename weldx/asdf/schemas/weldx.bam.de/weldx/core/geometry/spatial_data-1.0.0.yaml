@@ -34,7 +34,7 @@ properties:
   coordinates:
     description: |
       The coordinates of the data points.
-    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     properties:
       datatype:
         type: string
@@ -48,7 +48,7 @@ properties:
   triangles:
     description: |
       An array of index triplets that specify which points form a triangle
-    tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     properties:
       datatype:
         type: string

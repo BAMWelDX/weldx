@@ -1,7 +1,10 @@
 from weldx.asdf.types import WeldxType
 from weldx.measurement import MeasurementChain
 
-__all__ = ["MeasurementChain", "MeasurementChainType"]
+__all__ = [
+    "MeasurementChain",
+    "MeasurementChainType",
+]
 
 
 class MeasurementChainType(WeldxType):
@@ -15,11 +18,8 @@ class MeasurementChainType(WeldxType):
 
     @classmethod
     def to_tree(cls, node: MeasurementChain, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
+        return node.to_dict()
 
     @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = MeasurementChain(**tree)
-        return obj
+    def from_tree(cls, tree, ctx) -> MeasurementChain:
+        return MeasurementChain.from_dict(tree)

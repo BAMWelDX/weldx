@@ -7,8 +7,12 @@
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
 - added `util.compare_nested` to check equality of two nested data
   structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
+- added `WeldxFile` wrapper to handle asdf files with history and schemas more
+  easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
 - added `WeldxFile` wrapper to handle asdf files with
   history and schemas more easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
+- add `"step"` as additional method to `util.xr_interp_like` [[#363]](https://github.com/BAMWelDX/weldx/pull/363)
+
 
 ### changes
 
@@ -20,6 +24,21 @@
 - `TimeSeries.interp_time` [[#353]](https://github.com/BAMWelDX/weldx/pull/353)
     - now returns a new `TimeSeries` instead of a `xarray.DataArray`
     - if the data has already been interpolated before, a warning is emitted
+- The `MeasurementChain` is now internally based on a `networkx.DiGraph`. New functions are also added to the class to 
+  simplify its usage. [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
+  The following additional changes were applied during the update of the `MeasurementChain`:
+   - renamed `DataTransformation` class to `SignalTransformation`
+   - renamed `Source` to `SignalSource`
+   - Added additional functionality to `Signal`, `SignalTransformation` and `GenericEquipment`
+   - Removed `Data` class
+   - Updated asdf schemas of all modified classes and the ones that contained references to those classes
+   
+
+### documentation
+
+- Add new tutorial about the `MeasurementChain` [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
+- Updated the measurement tutorial [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
+
 
 ### ASDF
 
@@ -30,7 +49,9 @@
 - add `core/graph/di_node`, `core/graph/di_edge` & `core/graph/di_graph` for implementing a
   generic `networkx.DiGraph` [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
 - compatibility with ASDF-2.8 [[#355]](https://github.com/BAMWelDX/weldx/pull/355)
-
+- replace references to base asdf tags with `-1.*` version wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
+- update `single-pass-weldx.1.0.0.schema` to allow groove types by
+  wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
 
 ## 0.3.3 (30.03.2021)
 
