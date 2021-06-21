@@ -1,20 +1,20 @@
 from weldx.asdf.types import WeldxType
-from weldx.measurement import GenericEquipment
+from weldx.measurement import MeasurementEquipment
 
-__all__ = ["GenericEquipment", "GenericEquipmentType"]
+__all__ = ["MeasurementEquipment", "MeasurementEquipmentType"]
 
 
-class GenericEquipmentType(WeldxType):
+class MeasurementEquipmentType(WeldxType):
     """Serialization class for generic-equipment."""
 
-    name = "equipment/generic_equipment"
+    name = "equipment/measurement_equipment"
     version = "1.0.0"
-    types = [GenericEquipment]
+    types = [MeasurementEquipment]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
 
     @classmethod
-    def to_tree(cls, node: GenericEquipment, ctx):
+    def to_tree(cls, node: MeasurementEquipment, ctx):
         """convert to tagged tree and remove all None entries from node dictionary"""
         tree = node.__dict__
         return tree
@@ -23,5 +23,5 @@ class GenericEquipmentType(WeldxType):
     def from_tree(cls, tree, ctx):
         if "sources" not in tree:
             tree["sources"] = None
-        obj = GenericEquipment(**tree)
+        obj = MeasurementEquipment(**tree)
         return obj

@@ -151,6 +151,7 @@ def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
 
     with open(file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=1, ensure_ascii=False)
+        f.write("\n")
 
 
 def inherit_docstrings(cls):
@@ -790,7 +791,11 @@ def xr_interp_like(
                 del da_temp.coords[dim]
 
     # default interp_like will not add dimensions and fill out of range indexes with NaN
-    da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
+    if method == "step":
+        fill_method = "ffill" if fillna else None
+        da = da1.reindex_like(da_temp, method=fill_method)
+    else:
+        da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
     # copy original variable and coord attributes
     da.attrs = da1.attrs
