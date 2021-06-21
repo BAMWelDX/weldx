@@ -129,7 +129,7 @@ def ureg_check_class(*args):
 
 
 def dataclass_nested_eq(original_class):
-    """Set class :code:`__eq__` using `util.compare_nested` on :code:`__dict__`.
+    """Set class :code:`__eq__` using :code:`util.compare_nested` on :code:`__dict__`.
 
     Useful for implementing :code:`__eq__` on classes
     created with :code:`@dataclass` decorator.
