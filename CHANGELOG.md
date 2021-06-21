@@ -9,10 +9,9 @@
   structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
 - added `WeldxFile` wrapper to handle asdf files with history and schemas more
   easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
-- added `WeldxFile` wrapper to handle asdf files with
-  history and schemas more easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
+- added `WeldxFile` wrapper to handle asdf files with history and schemas more
+  easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
 - add `"step"` as additional method to `util.xr_interp_like` [[#363]](https://github.com/BAMWelDX/weldx/pull/363)
-
 
 ### changes
 
@@ -21,15 +20,14 @@
 - `get_yaml_header` received a new option parse, which optionally returns the parsed YAML header
   as `asdf.tagged.TaggedDict`. [[#338]](https://github.com/BAMWelDX/weldx/pull/338)
 - refactor `asdf_json_repr` into `view_tree` [[#339]](https://github.com/BAMWelDX/weldx/pull/339)
-- The `MeasurementChain` is now internally based on a `networkx.DiGraph`. New functions are also added to the class to 
+- The `MeasurementChain` is now internally based on a `networkx.DiGraph`. New functions are also added to the class to
   simplify its usage. [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
   The following additional changes were applied during the update of the `MeasurementChain`:
-   - renamed `DataTransformation` class to `SignalTransformation`
-   - renamed `Source` to `SignalSource`
-   - Added additional functionality to `Signal`, `SignalTransformation` and `GenericEquipment`
-   - Removed `Data` class
-   - Updated asdf schemas of all modified classes and the ones that contained references to those classes
-   
+    - renamed `DataTransformation` class to `SignalTransformation`
+    - renamed `Source` to `SignalSource`
+    - Added additional functionality to `Signal`, `SignalTransformation` and `GenericEquipment`
+    - Removed `Data` class
+    - Updated asdf schemas of all modified classes and the ones that contained references to those classes
 
 ### documentation
 
@@ -48,6 +46,11 @@
 - replace references to base asdf tags with `-1.*` version wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
 - update `single-pass-weldx.1.0.0.schema` to allow groove types by
   wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
+
+### fixes
+
+- added check for symmetric key difference for mappings
+  with `util.compare_nested` [[#377]](https://github.com/BAMWelDX/weldx/pull/377)
 
 ## 0.3.3 (30.03.2021)
 
