@@ -69,7 +69,7 @@ properties:
           diameter:
             description: |
               The diameter of the welding wire.
-            tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
             wx_unit: "m"
             wx_shape: [1]
           class:
@@ -140,23 +140,11 @@ properties:
           groove_shape:
             description: |
               Constant groove shape of the weld seam.
-            oneOf:
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DHUGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DHVGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DUGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DVGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/FFGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/HUGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/HVGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/IGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UVGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VVGroove-1.0.0"
+            tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/*-1.*"
           seam_length:
             description: |
               Length of the linear weld seam.
-            tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+            tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
             wx_unit: "m"
         required: [groove_shape, seam_length]
     required: [base_metal, geometry]

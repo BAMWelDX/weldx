@@ -21,7 +21,7 @@ properties:
   root_penetration:
     description: |
       The distance the weld metal extends into the root joint
-    tag: "tag:stsci.edu:asdf/unit/quantity-1.1.0"
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
 
   groove_weld_size:
     description: |

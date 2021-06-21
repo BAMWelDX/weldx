@@ -15,7 +15,7 @@ schema
 type: object
 properties:
   length_prop:
-    tag: tag:stsci.edu:asdf/unit/quantity-1.1.0
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
     wx_unit: "m"
 ```
 
@@ -49,21 +49,21 @@ properties:
   length_prop:
     description: |
       a simple length quantity with unit validator
-    tag: tag:stsci.edu:asdf/unit/quantity-1.1.0
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
     wx_unit: "m"
 
   velocity_prop:
     description: |
       a simple velocity quantity
     allOf:
-      - $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
       - type: object
         wx_unit: "m/s"
 
   current_prop:
     description: |
       a current quantity of shape [2,2]
-    $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
 
   nested_prop:
     description: |
@@ -72,10 +72,10 @@ properties:
     properties:
       q1:
         description: a nested length of shape [3,3]
-        $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+        tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
       q2:
         description: a volume
-        $ref: tag:stsci.edu:asdf/unit/quantity-1.1.0
+        tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
     wx_unit:
       q1: "m"
 
