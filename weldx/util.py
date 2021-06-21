@@ -1295,7 +1295,7 @@ class _Eq_compare_nested:
                 other_data_structure
             ) != len(iterutils.get_path(a, path)):
                 raise RuntimeError("len does not match")
-            elif isinstance(other_data_structure, Mapping) and any(
+            if isinstance(other_data_structure, Mapping) and any(
                 other_data_structure.keys() ^ iterutils.get_path(a, path).keys()
             ):
                 raise RuntimeError("keys do not match")
