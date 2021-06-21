@@ -2939,7 +2939,7 @@ class TestSpatialData:
     @pytest.mark.parametrize(
         "kwargs_mod, expected_result",
         [
-            (dict(), True),
+            ({}, True),
             (dict(coordinates=[[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 1]]), False),
             (dict(coordinates=[[0, 0, 0], [1, 0, 0], [1, 1, 0]]), False),
             (dict(triangles=[[0, 1, 2], [2, 3, 1]]), False),
@@ -2949,7 +2949,7 @@ class TestSpatialData:
             (dict(attributes=dict(dat=[1, 2, 3])), False),
             # uncomment once issue #376 is resolved
             # (dict(attributes=dict(data=[1, 2, 3], more=[1, 2, 5])), False),
-            (dict(attributes=dict()), False),
+            (dict(attributes={}), False),
         ],
     )
     def test_comparison(kwargs_mod: Dict, expected_result: bool):
