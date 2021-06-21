@@ -2294,6 +2294,7 @@ class Geometry:
 # SpatialData --------------------------------------------------------------------------
 
 
+@ut.dataclass_nested_eq
 @dataclass
 class SpatialData:
     """Represent 3D point cloud data with optional triangulation.
