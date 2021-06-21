@@ -1,1 +1,1 @@
-from . import generic_equipment
+from . import measurement_equipment

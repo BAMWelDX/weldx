@@ -28,7 +28,7 @@ properties:
     description: |
       An n-dimensional array that contains the data.
     oneOf:
-      - tag: "tag:stsci.edu:asdf/core/ndarray-1.0.0"
+      - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
       - type: number
   unit:
     description: |
