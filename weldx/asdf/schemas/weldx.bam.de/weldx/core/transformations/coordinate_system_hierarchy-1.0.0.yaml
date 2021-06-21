@@ -107,7 +107,7 @@ properties:
         name:
           type: string
         data:
-          tag: "tag:weldx.bam.de:weldx/core/geometry/spatial_data-1.0.0"
+          tag: "tag:weldx.bam.de:weldx/core/geometry/spatial_data-1.*"
       required: [coordinate_system, name, data]
 
 propertyOrder: [name, root_system_name, reference_time, subsystems, subsystem_data, coordinate_systems, spatial_data]
