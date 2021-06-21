@@ -2945,11 +2945,13 @@ class TestSpatialData:
             (dict(triangles=[[0, 1, 2], [2, 3, 1]]), False),
             (dict(triangles=[[0, 1, 2], [2, 3, 1], [2, 3, 1]]), False),
             (dict(triangles=[[0, 1, 2]]), False),
+            (dict(triangles=None), False),
             (dict(attributes=dict(data=[2, 2, 3])), False),
             (dict(attributes=dict(dat=[1, 2, 3])), False),
             # uncomment once issue #376 is resolved
             # (dict(attributes=dict(data=[1, 2, 3], more=[1, 2, 5])), False),
             (dict(attributes={}), False),
+            (dict(attributes=None), False),
         ],
     )
     def test_comparison(kwargs_mod: Dict, expected_result: bool):
