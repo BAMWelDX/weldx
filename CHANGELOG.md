@@ -15,6 +15,7 @@
 - add `util.compare_nested_eq` decorator for dataclasses with array-like
   fields [[#378]](https://github.com/BAMWelDX/weldx/pull/378)
 
+
 ### changes
 
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
@@ -48,6 +49,11 @@
 - replace references to base asdf tags with `-1.*` version wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
 - update `single-pass-weldx.1.0.0.schema` to allow groove types by
   wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
+
+### fixes
+
+- added check for symmetric key difference for mappings
+  with `util.compare_nested` [[#377]](https://github.com/BAMWelDX/weldx/pull/377)
 
 ## 0.3.3 (30.03.2021)
 
