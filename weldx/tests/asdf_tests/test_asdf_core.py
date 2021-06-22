@@ -444,9 +444,7 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
     for data_name in csm.data_names:
         sd = csm.get_data(data_name)
         sd_buffer = csm_buffer.get_data(data_name)
-        assert np.allclose(sd.coordinates.data, sd_buffer.coordinates.data)
-        if sd.triangles is not None:
-            assert np.allclose(np.array(sd.triangles), np.array(sd_buffer.triangles))
+        assert sd == sd_buffer
 
 
 # --------------------------------------------------------------------------------------
