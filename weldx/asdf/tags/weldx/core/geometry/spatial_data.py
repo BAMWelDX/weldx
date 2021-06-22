@@ -1,6 +1,3 @@
-from copy import deepcopy
-
-from weldx.asdf.types import WeldxType
 from weldx.asdf.util import dataclass_serialization_class
 from weldx.geometry import SpatialData
 
