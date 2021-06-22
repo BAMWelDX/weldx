@@ -128,6 +128,48 @@ def ureg_check_class(*args):
     return inner_decorator
 
 
+def dataclass_nested_eq(original_class):
+    """Set class :code:`__eq__` using :code:`util.compare_nested` on :code:`__dict__`.
+
+    Useful for implementing :code:`__eq__` on classes
+    created with :code:`@dataclass` decorator.
+
+    Parameters
+    ----------
+    original_class:
+        original class to decorate
+
+    Returns
+    -------
+    type
+        The class with overridden :code:`__eq__` function.
+
+    Examples
+    --------
+    A simple dataclass could look like this::
+
+        @dataclass_nested_eq
+        @dataclass
+        class A:
+            a: np.ndarray
+
+        a = A(np.arange(3))
+        b = A(np.arange(3))
+        assert a==b
+
+    """
+
+    def new_eq(self, other):
+        if not isinstance(other, type(self)):
+            return False
+
+        return compare_nested(self.__dict__, other.__dict__)
+
+    # set new eq function
+    original_class.__eq__ = new_eq  # Set the class' __eq__ to the new one
+    return original_class
+
+
 def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
     """Clean ID metadata, output and execution count from jupyter notebook cells.
 

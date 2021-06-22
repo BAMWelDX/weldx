@@ -12,6 +12,8 @@
 - added `WeldxFile` wrapper to handle asdf files with history and schemas more
   easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
 - add `"step"` as additional method to `util.xr_interp_like` [[#363]](https://github.com/BAMWelDX/weldx/pull/363)
+- add `util.compare_nested_eq` decorator for dataclasses with array-like
+  fields [[#378]](https://github.com/BAMWelDX/weldx/pull/378)
 
 ### changes
 
