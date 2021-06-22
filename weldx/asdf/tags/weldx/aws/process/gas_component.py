@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import pint
 
 from weldx.asdf.types import WeldxType
+from weldx.asdf.util import asdf_dataclass_serialization
 
 __all__ = ["GasComponent", "GasComponentType"]
 
@@ -15,6 +16,7 @@ class GasComponent:
     gas_percentage: pint.Quantity
 
 
+@asdf_dataclass_serialization
 class GasComponentType(WeldxType):
     """<ASDF TYPE DOCSTRING>"""
 

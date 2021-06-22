@@ -1,9 +1,11 @@
 from weldx.asdf.types import WeldxType
+from weldx.asdf.util import asdf_dataclass_serialization
 from weldx.measurement import SignalTransformation
 
 __all__ = ["SignalTransformation", "SignalTransformationType"]
 
 
+@asdf_dataclass_serialization
 class SignalTransformationType(WeldxType):
     """Serialization class for data transformations."""
 
@@ -12,12 +14,3 @@ class SignalTransformationType(WeldxType):
     types = [SignalTransformation]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node: SignalTransformation, ctx):
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx) -> SignalTransformation:
-        return SignalTransformation(**tree)

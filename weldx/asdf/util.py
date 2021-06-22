@@ -288,3 +288,61 @@ def view_tree(file: types_path_and_file_like, path: Tuple = None, **kwargs):
 def asdf_json_repr(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
     """See `view_tree` function."""
     return view_tree(file, path, **kwargs)
+
+
+def asdf_dataclass_serialization(original_class):
+    """Add :code:`to_tree` and :code:`from_tree` methods for dataclass serialization.
+
+    Parameters
+    ----------
+    original_class:
+        Original data class to decorate
+
+    Returns
+    -------
+    type :
+        The class with added :code:`to_tree` and `from_tree` function.
+
+    Examples
+    --------
+    Here is an example how to generate a simple serialization class for a given
+    dataclass::
+
+        @dataclass
+        class MyClass:
+            a: np.ndarray
+
+        @asdf_dataclass_serialization
+        class MyClassTypeASDF(WeldxType):
+            name = "my_class"
+            version = "1.0.0"
+            types = [MyClass]
+            requires = ["weldx"]
+            handle_dynamic_subclasses = True
+
+    """
+    from copy import deepcopy
+
+    from weldx.asdf.types import from_tree_metadata, to_tree_metadata
+
+    def _default_to_tree(node, ctx):
+        from xarray import DataArray
+
+        tree = deepcopy(node.__dict__)
+        for k, v in tree.items():
+            if isinstance(v, DataArray):
+                tree[k] = v.data
+        return tree
+
+    def _default_from_tree(tree, ctx):
+        import numpy as np
+
+        for k, v in tree.items():
+            if isinstance(v, np.ndarray):
+                tree[k] = np.asarray(v)
+        return original_class.types[0](**tree)
+
+    original_class.to_tree = classmethod(to_tree_metadata(_default_to_tree))
+    original_class.from_tree = classmethod(from_tree_metadata(_default_from_tree))
+
+    return original_class

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List
 
 from weldx.asdf.types import WeldxType
+from weldx.asdf.util import asdf_dataclass_serialization
 
 from .gas_component import GasComponent
 
@@ -17,6 +18,7 @@ class ShieldingGasType:
     designation: str = None
 
 
+@asdf_dataclass_serialization
 class ShieldingGasTypeType(WeldxType):
     """<ASDF TYPE DOCSTRING>"""
 
@@ -25,14 +27,3 @@ class ShieldingGasTypeType(WeldxType):
     types = [ShieldingGasType]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = ShieldingGasType(**tree)
-        return obj

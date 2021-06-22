@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import pint
 
 from weldx.asdf.types import WeldxType
+from weldx.asdf.util import asdf_dataclass_serialization
 
 __all__ = ["BaseMetal", "BaseMetalType"]
 
@@ -29,6 +30,7 @@ class BaseMetal:
     applied_coating_specification: str = None
 
 
+@asdf_dataclass_serialization
 class BaseMetalType(WeldxType):
     """<ASDF TYPE DOCSTRING>"""
 
@@ -37,14 +39,3 @@ class BaseMetalType(WeldxType):
     types = [BaseMetal]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node: BaseMetal, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = BaseMetal(**tree)
-        return obj
