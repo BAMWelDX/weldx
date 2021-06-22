@@ -2,8 +2,7 @@ from dataclasses import dataclass
 
 import pint
 
-from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 
 from .shielding_gas_type import ShieldingGasType
 
@@ -25,12 +24,8 @@ class ShieldingGasForProcedure:
     trailing_shielding_gas_flowrate: pint.Quantity = None
 
 
-@asdf_dataclass_serialization
-class ShieldingGasForProcedureType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/process/shielding_gas_for_procedure"
-    version = "1.0.0"
-    types = [ShieldingGasForProcedure]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
+ShieldingGasForProcedureType = dataclass_serialization_class(
+    class_type=ShieldingGasForProcedure,
+    class_name="aws/process/shielding_gas_for_procedure",
+    version="1.0.0",
+)

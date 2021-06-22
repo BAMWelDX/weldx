@@ -2,8 +2,7 @@ from dataclasses import dataclass
 
 import pint
 
-from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["GasComponent", "GasComponentType"]
 
@@ -16,23 +15,6 @@ class GasComponent:
     gas_percentage: pint.Quantity
 
 
-@asdf_dataclass_serialization
-class GasComponentType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/process/gas_component"
-    version = "1.0.0"
-    types = [GasComponent]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = GasComponent(**tree)
-        return obj
+GasComponentType = dataclass_serialization_class(
+    class_type=GasComponent, class_name="aws/process/gas_component", version="1.0.0"
+)

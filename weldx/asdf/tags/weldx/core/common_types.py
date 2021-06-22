@@ -7,7 +7,7 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_timedelta64_dtype as is_timedelta
 
 from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
@@ -22,15 +22,9 @@ class Dimension:
     length: int
 
 
-@asdf_dataclass_serialization
-class DimensionTypeASDF(WeldxType):
-    """Serialization class for the 'Dimension' type"""
-
-    name = "core/dimension"
-    version = "1.0.0"
-    types = [Dimension]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
+DimensionTypeASDF = dataclass_serialization_class(
+    class_type=Dimension, class_name="core/dimension", version="1.0.0"
+)
 
 
 # Variable -----------------------------------------------------------------------------

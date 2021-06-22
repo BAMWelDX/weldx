@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
-from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["ArcWeldingProcess", "ArcWeldingProcessType"]
 
@@ -60,12 +59,8 @@ class ArcWeldingProcess:
             )
 
 
-@asdf_dataclass_serialization
-class ArcWeldingProcessType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/process/arc_welding_process"
-    version = "1.0.0"
-    types = [ArcWeldingProcess]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
+ArcWeldingProcessType = dataclass_serialization_class(
+    class_type=ArcWeldingProcess,
+    class_name="aws/process/arc_welding_process",
+    version="1.0.0",
+)

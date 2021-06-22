@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 
 from .gas_component import GasComponent
 
@@ -18,12 +17,8 @@ class ShieldingGasType:
     designation: str = None
 
 
-@asdf_dataclass_serialization
-class ShieldingGasTypeType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/process/shielding_gas_type"
-    version = "1.0.0"
-    types = [ShieldingGasType]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
+ShieldingGasTypeType = dataclass_serialization_class(
+    class_type=ShieldingGasType,
+    class_name="aws/process/shielding_gas_type",
+    version="1.0.0",
+)
