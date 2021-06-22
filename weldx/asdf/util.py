@@ -5,7 +5,6 @@ from typing import Callable, Tuple, Type, Union
 from warnings import warn
 
 import asdf
-import numpy as np
 from boltons.iterutils import get_path
 
 from weldx.asdf.constants import SCHEMA_PATH
@@ -344,10 +343,6 @@ def dataclass_serialization_class(
 
         @classmethod
         def from_tree(cls, tree, ctx):
-            for k, v in tree.items():
-                if isinstance(v, np.ndarray):
-                    tree[k] = np.asarray(v)
-            tree = from_tree_mod(tree)
-            return class_type(**tree)
+            return class_type(**from_tree_mod(tree))
 
     return _SerializationClass
