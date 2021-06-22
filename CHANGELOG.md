@@ -15,7 +15,6 @@
 - add `util.compare_nested_eq` decorator for dataclasses with array-like
   fields [[#378]](https://github.com/BAMWelDX/weldx/pull/378)
 
-
 ### changes
 
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
