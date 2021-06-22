@@ -2,8 +2,7 @@ from dataclasses import dataclass
 
 import pint
 
-from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["JointPenetration", "JointPenetrationType"]
 
@@ -22,12 +21,8 @@ class JointPenetration:
     depth_of_fusion: float = None
 
 
-@asdf_dataclass_serialization
-class JointPenetrationType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/design/joint_penetration"
-    version = "1.0.0"
-    types = [JointPenetration]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
+JointPenetrationType = dataclass_serialization_class(
+    class_type=JointPenetration,
+    class_name="aws/design/joint_penetration",
+    version="1.0.0",
+)

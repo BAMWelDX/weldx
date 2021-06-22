@@ -2,8 +2,7 @@ from dataclasses import dataclass
 
 import pint
 
-from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["WeldDetails", "WeldDetailsType"]
 
@@ -17,12 +16,6 @@ class WeldDetails:
     number_of_passes: int
 
 
-@asdf_dataclass_serialization
-class WeldDetailsType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/design/weld_details"
-    version = "1.0.0"
-    types = [WeldDetails]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
+WeldDetailsType = dataclass_serialization_class(
+    class_type=WeldDetails, class_name="aws/design/weld_details", version="1.0.0"
+)

@@ -2,8 +2,7 @@ from dataclasses import dataclass
 
 import pint
 
-from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["BaseMetal", "BaseMetalType"]
 
@@ -30,12 +29,8 @@ class BaseMetal:
     applied_coating_specification: str = None
 
 
-@asdf_dataclass_serialization
-class BaseMetalType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/design/base_metal"
-    version = "1.0.0"
-    types = [BaseMetal]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
+BaseMetalType = dataclass_serialization_class(
+    class_type=BaseMetal,
+    class_name="aws/design/base_metal",
+    version="1.0.0",
+)

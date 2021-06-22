@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 
 from .sub_assembly import SubAssembly
 
@@ -16,12 +15,6 @@ class Weldment:
     sub_assembly: List[SubAssembly]
 
 
-@asdf_dataclass_serialization
-class WeldmentType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/design/weldment"
-    version = "1.0.0"
-    types = [Weldment]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
+WeldmentType = dataclass_serialization_class(
+    class_type=Weldment, class_name="aws/design/weldment", version="1.0.0"
+)

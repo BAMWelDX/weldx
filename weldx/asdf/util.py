@@ -346,3 +346,42 @@ def asdf_dataclass_serialization(original_class):
     original_class.from_tree = classmethod(from_tree_metadata(_default_from_tree))
 
     return original_class
+
+
+def dataclass_serialization_class(
+    class_type, class_name: str, version: str, to_tree_mod=None, from_tree_mod=None
+):
+    from copy import deepcopy
+
+    import numpy as np
+
+    from weldx.asdf.types import WeldxType
+
+    def noop(tree):
+        return tree
+
+    if to_tree_mod is None:
+        to_tree_mod = noop
+    if from_tree_mod is None:
+        from_tree_mod = noop
+
+    class SerializationClass(WeldxType):
+        name = class_name
+        version = "1.0.0"
+        types = [class_type]
+        requires = ["weldx"]
+        handle_dynamic_subclasses = True
+
+        @classmethod
+        def to_tree(cls, node, ctx):
+            return to_tree_mod(deepcopy(node.__dict__))
+
+        @classmethod
+        def from_tree(cls, tree, ctx):
+            for k, v in tree.items():
+                if isinstance(v, np.ndarray):
+                    tree[k] = np.asarray(v)
+            tree = from_tree_mod(tree)
+            return class_type(**tree)
+
+    return SerializationClass

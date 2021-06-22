@@ -1,16 +1,18 @@
 from copy import deepcopy
 
 from weldx.asdf.types import WeldxType
-from weldx.asdf.util import asdf_dataclass_serialization
+from weldx.asdf.util import dataclass_serialization_class
 from weldx.geometry import SpatialData
 
 
-@asdf_dataclass_serialization
-class SpatialDataTypeASDF(WeldxType):
-    """ASDF serialization class for `SpatialData`."""
+def to_tree_mod(tree):
+    tree["coordinates"] = tree["coordinates"].data
+    return tree
 
-    name = "core/geometry/spatial_data"
-    version = "1.0.0"
-    types = [SpatialData]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
+
+SpatialDataTypeASDF = dataclass_serialization_class(
+    class_type=SpatialData,
+    class_name="core/geometry/spatial_data",
+    version="1.0.0",
+    to_tree_mod=to_tree_mod,
+)
