@@ -1,5 +1,4 @@
 """Utilities for asdf files."""
-from copy import deepcopy
 from io import BytesIO
 from pathlib import Path
 from typing import Callable, Tuple, Type, Union
@@ -341,7 +340,7 @@ def dataclass_serialization_class(
 
         @classmethod
         def to_tree(cls, node, ctx):
-            return to_tree_mod(deepcopy(node.__dict__))
+            return to_tree_mod(node.__dict__)
 
         @classmethod
         def from_tree(cls, tree, ctx):
