@@ -97,7 +97,20 @@ properties:
     items:
       tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
 
-propertyOrder: [name, root_system_name, reference_time, subsystems, subsystem_data,  coordinate_systems]
+  spatial_data:
+    type: array
+    items:
+      type: object
+      properties:
+        coordinate_system:
+          type: string
+        name:
+          type: string
+        data:
+          tag: "tag:weldx.bam.de:weldx/core/geometry/spatial_data-1.*"
+      required: [coordinate_system, name, data]
+
+propertyOrder: [name, root_system_name, reference_time, subsystems, subsystem_data, coordinate_systems, spatial_data]
 required: [name, root_system_name, coordinate_systems]
 flowStyle: block
 ...
