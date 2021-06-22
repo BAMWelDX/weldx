@@ -1,14 +1,17 @@
 """Utilities for asdf files."""
+from copy import deepcopy
 from io import BytesIO
 from pathlib import Path
 from typing import Callable, Tuple, Type, Union
 from warnings import warn
 
 import asdf
+import numpy as np
 from boltons.iterutils import get_path
 
 from weldx.asdf.constants import SCHEMA_PATH
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.asdf.types import WeldxType
 from weldx.types import (
     SupportsFileReadOnly,
     SupportsFileReadWrite,
@@ -320,11 +323,6 @@ def dataclass_serialization_class(
         A new asdf serialization class.
 
     """
-    from copy import deepcopy
-
-    import numpy as np
-
-    from weldx.asdf.types import WeldxType
 
     def _noop(tree):
         return tree
