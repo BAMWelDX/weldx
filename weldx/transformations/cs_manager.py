@@ -1149,7 +1149,7 @@ class CoordinateSystemManager:
 
     def get_data(
         self, data_name, target_coordinate_system_name=None
-    ) -> Union[np.ndarray, xr.DataArray]:
+    ) -> Union[np.ndarray, SpatialData]:
         """Get the specified data, optionally transformed into any coordinate system.
 
         Parameters

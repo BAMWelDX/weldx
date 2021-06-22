@@ -45,6 +45,8 @@
 - add `core/graph/di_node`, `core/graph/di_edge` & `core/graph/di_graph` for implementing a
   generic `networkx.DiGraph` [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
 - compatibility with ASDF-2.8 [[#355]](https://github.com/BAMWelDX/weldx/pull/355)
+- data attached to an instance of the `CoordinateSystemManger` is now also stored in a WelDX file 
+  [[#364]](https://github.com/BAMWelDX/weldx/pull/339)
 - replace references to base asdf tags with `-1.*` version wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
 - update `single-pass-weldx.1.0.0.schema` to allow groove types by
   wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)

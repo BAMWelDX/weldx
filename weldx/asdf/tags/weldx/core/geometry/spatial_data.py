@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+import numpy as np
+
 from weldx.asdf.types import WeldxType
 from weldx.geometry import SpatialData
 
@@ -57,4 +59,6 @@ class SpatialDataTypeASDF(WeldxType):
             An instance of the 'weldx.geometry.point_cloud' type.
 
         """
+        if "coordinates" in tree:
+            tree["coordinates"] = np.asarray(tree["coordinates"])
         return SpatialData(**tree)
