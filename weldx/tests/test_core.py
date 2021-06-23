@@ -413,12 +413,13 @@ class TestTimeSeries:
         assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
         assert Q_(1, str(result.units)) == Q_(1, unit_exp)
 
-        print(result.time)
+        exp_time = time
+        if isinstance(exp_time, pint.Quantity):
+            exp_time = ut.to_pandas_time_index(time)
+        if len(exp_time) == 1:
+            exp_time = None
 
-        if isinstance(time, pint.Quantity):
-            assert np.all(result.data_array.time == ut.to_pandas_time_index(time))
-        else:
-            assert np.all(result.data_array.time == time)
+        assert np.all(result.time == exp_time)
 
     # test_interp_time_warning ---------------------------------------------------------
 
