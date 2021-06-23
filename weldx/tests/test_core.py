@@ -242,10 +242,13 @@ class TestTimeSeries:
     def test_construction_discrete(data, time, interpolation, shape_exp):
         """Test the construction of the TimeSeries class."""
         # set expected values
-        if isinstance(time, pint.Quantity):
-            time_exp = pd.TimedeltaIndex(time.magnitude, unit="s")
-        else:
-            time_exp = time
+        time_exp = time
+        if isinstance(time_exp, pint.Quantity):
+            time_exp = pd.TimedeltaIndex(time_exp.m, unit="s")
+
+        exp_interpolation = interpolation
+        if len(data.m.shape) == 0 and interpolation is None:
+            exp_interpolation = "step"
 
         # create instance
         ts = TimeSeries(data=data, time=time, interpolation=interpolation)
@@ -253,12 +256,12 @@ class TestTimeSeries:
         # check
         assert np.all(ts.data == data)
         assert np.all(ts.time == time_exp)
-        assert ts.interpolation == interpolation
+        assert ts.interpolation == exp_interpolation
         assert ts.shape == shape_exp
         assert data.check(UREG.get_dimensionality(ts.units))
 
         assert np.all(ts.data_array.data == data)
-        assert ts.data_array.attrs["interpolation"] == interpolation
+        assert ts.data_array.attrs["interpolation"] == exp_interpolation
         if time_exp is None:
             assert "time" not in ts.data_array
         else:
@@ -302,7 +305,6 @@ class TestTimeSeries:
         "data, time, interpolation, exception_type, test_name",
         [
             (values_def, time_def, "int", ValueError, "# unknown interpolation"),
-            (values_def, time_def, None, ValueError, "# wrong interp. parameter type"),
             (values_def, time_def.magnitude, "step", ValueError, "# invalid time type"),
             (me_too_many_vars, None, None, Exception, "# too many free variables"),
             (me_param_units, None, None, Exception, "# incompatible parameter units"),

@@ -254,7 +254,7 @@ class TimeSeries:
         self,
         data: Union[pint.Quantity, MathematicalExpression],
         time: Union[None, pd.TimedeltaIndex, pint.Quantity] = None,
-        interpolation: str = "linear",
+        interpolation: str = None,
     ):
         """Construct a TimSeries.
 
@@ -280,11 +280,19 @@ class TimeSeries:
         self._interp_counter = 0
 
         if isinstance(data, pint.Quantity):
-            if not np.iterable(data):  # expand dim for scalar input
+            # set default interpolation
+            if interpolation is None:
+                interpolation = "step"
+
+            # expand dim for scalar input
+            if not np.iterable(data):
                 data = np.expand_dims(data, 0)
-            if time is None:  # constant value case
+
+            # constant value case
+            if time is None:
                 time = pd.TimedeltaIndex([0])
-                interpolation = None
+                interpolation = "step"
+            # check intreplolation is valid for non constant case
             elif interpolation not in self._valid_interpolations:
                 raise ValueError(
                     "A valid interpolation method must be specified if discrete "
@@ -395,24 +403,21 @@ class TimeSeries:
         See `interp_time` for interface description.
 
         """
-        if isinstance(self._data, xr.DataArray):
-            if isinstance(time, pint.Quantity):
-                time = ut.to_pandas_time_index(time)
-            if not isinstance(time, pd.TimedeltaIndex):
-                raise ValueError(
-                    '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-                )
-            # constant values are also treated by this branch
-            if self._data.attrs["interpolation"] == "linear" or self.shape[0] == 1:
-                return ut.xr_interp_like(
-                    self._data,
-                    {"time": time},
-                    assume_sorted=False,
-                    broadcast_missing=False,
-                )
 
-            dax = self._data.reindex({"time": time}, method="ffill")
-            return dax.fillna(self._data[0])
+        if isinstance(time, pint.Quantity):
+            time = ut.to_pandas_time_index(time)
+        if not isinstance(time, pd.TimedeltaIndex):
+            raise ValueError(
+                '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
+            )
+
+        return ut.xr_interp_like(
+            self._data,
+            {"time": time},
+            method=self.interpolation,
+            assume_sorted=False,
+            broadcast_missing=False,
+        )
 
     def _interp_time_expression(
         self, time: Union[pd.TimedeltaIndex, pint.Quantity], time_unit: str
@@ -549,11 +554,7 @@ class TimeSeries:
         else:
             dax = self._interp_time_expression(time, time_unit)
 
-        interpolation = self.interpolation
-        if interpolation is None:
-            interpolation = "linear"
-
-        ts = TimeSeries(data=dax.data, time=time, interpolation=interpolation)
+        ts = TimeSeries(data=dax.data, time=time, interpolation=self.interpolation)
         ts._interp_counter = self._interp_counter + 1
         return ts
 
