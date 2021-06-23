@@ -68,9 +68,9 @@ class TestConfig:
             add_quality_standard(QualityStandard(qs_dir))
             enable_quality_standard(name=standard)
 
-        from weldx.measurement import GenericEquipment
+        from weldx.measurement import MeasurementEquipment
 
-        ge = GenericEquipment(name="GE")
+        ge = MeasurementEquipment(name="GE")
         if expect_validation_error:
             with pytest.raises(asdf.ValidationError):
                 WeldxFile(tree={"equipment": ge}, mode="rw")
