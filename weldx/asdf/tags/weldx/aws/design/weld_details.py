@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import pint
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["WeldDetails", "WeldDetailsType"]
 
@@ -16,22 +16,6 @@ class WeldDetails:
     number_of_passes: int
 
 
-class WeldDetailsType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/design/weld_details"
-    version = "1.0.0"
-    types = [WeldDetails]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node: WeldDetails, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = WeldDetails(**tree)
-        return obj
+WeldDetailsType = dataclass_serialization_class(
+    class_type=WeldDetails, class_name="aws/design/weld_details", version="1.0.0"
+)

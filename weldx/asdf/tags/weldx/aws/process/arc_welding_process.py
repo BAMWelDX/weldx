@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["ArcWeldingProcess", "ArcWeldingProcessType"]
 
@@ -59,22 +59,8 @@ class ArcWeldingProcess:
             )
 
 
-class ArcWeldingProcessType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/process/arc_welding_process"
-    version = "1.0.0"
-    types = [ArcWeldingProcess]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = ArcWeldingProcess(tree["name"])
-        return obj
+ArcWeldingProcessType = dataclass_serialization_class(
+    class_type=ArcWeldingProcess,
+    class_name="aws/process/arc_welding_process",
+    version="1.0.0",
+)

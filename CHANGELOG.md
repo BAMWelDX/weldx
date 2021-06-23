@@ -14,6 +14,8 @@
 - add `"step"` as additional method to `util.xr_interp_like` [[#363]](https://github.com/BAMWelDX/weldx/pull/363)
 - add `util.compare_nested_eq` decorator for dataclasses with array-like
   fields [[#378]](https://github.com/BAMWelDX/weldx/pull/378)
+- adds a `dataclass_serialization_class` utility function that automatically generates the asdf serialization class for 
+  python dataclasses. [[#380]](https://github.com/BAMWelDX/weldx/pull/380)
 
 ### changes
 
