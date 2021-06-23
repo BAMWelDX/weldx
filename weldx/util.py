@@ -128,6 +128,48 @@ def ureg_check_class(*args):
     return inner_decorator
 
 
+def dataclass_nested_eq(original_class):
+    """Set class :code:`__eq__` using :code:`util.compare_nested` on :code:`__dict__`.
+
+    Useful for implementing :code:`__eq__` on classes
+    created with :code:`@dataclass` decorator.
+
+    Parameters
+    ----------
+    original_class:
+        original class to decorate
+
+    Returns
+    -------
+    type
+        The class with overridden :code:`__eq__` function.
+
+    Examples
+    --------
+    A simple dataclass could look like this::
+
+        @dataclass_nested_eq
+        @dataclass
+        class A:
+            a: np.ndarray
+
+        a = A(np.arange(3))
+        b = A(np.arange(3))
+        assert a==b
+
+    """
+
+    def new_eq(self, other):
+        if not isinstance(other, type(self)):
+            return False
+
+        return compare_nested(self.__dict__, other.__dict__)
+
+    # set new eq function
+    original_class.__eq__ = new_eq  # Set the class' __eq__ to the new one
+    return original_class
+
+
 def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
     """Clean ID metadata, output and execution count from jupyter notebook cells.
 
@@ -151,6 +193,7 @@ def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
 
     with open(file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=1, ensure_ascii=False)
+        f.write("\n")
 
 
 def inherit_docstrings(cls):
@@ -790,7 +833,11 @@ def xr_interp_like(
                 del da_temp.coords[dim]
 
     # default interp_like will not add dimensions and fill out of range indexes with NaN
-    da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
+    if method == "step":
+        fill_method = "ffill" if fillna else None
+        da = da1.reindex_like(da_temp, method=fill_method)
+    else:
+        da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
     # copy original variable and coord attributes
     da.attrs = da1.attrs
@@ -1290,6 +1337,10 @@ class _Eq_compare_nested:
                 other_data_structure
             ) != len(iterutils.get_path(a, path)):
                 raise RuntimeError("len does not match")
+            if isinstance(other_data_structure, Mapping) and any(
+                other_data_structure.keys() ^ iterutils.get_path(a, path).keys()
+            ):
+                raise RuntimeError("keys do not match")
             if not _Eq_compare_nested._compare(value, other_value):
                 raise RuntimeError("not equal")
         return True

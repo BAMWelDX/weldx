@@ -1,31 +1,26 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/equipment/generic_equipment-1.0.0"
-tag: "tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/equipment/measurement_equipment-1.0.0"
+tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
 
 title: |
-  A generic piece of equipment.
+  A piece of measurement equipment.
 description: |
-  Generic placeholder class do describe any kind of equipment with additional metadata.
+  This schema describes a piece of measurement equipment that is part of a measurement chain.
   Equipments can be associated with signal sources and data transformations.
 
 examples:
   -
     - A analog to digital conversion equipment with a linear signal transformation.
     - |
-      !<tag:weldx.bam.de:weldx/equipment/generic_equipment-1.0.0>
+      !<tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0>
         name: Beckhoff ELM3002-0000
         sources: []
-        data_transformations:
-        - &id004 !<tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0>
+        transformations:
+        - &id004 !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
           name: AD conversion current measurement
-          input_signal: !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
-              signal_type: analog
-              unit: V
-          output_signal: !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
-            signal_type: digital
-            unit: ''
+          type_transformation: AD
           error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
             deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
           func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
@@ -42,12 +37,12 @@ properties:
     type: array
     items:
       tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
-  data_transformations:
+  transformations:
     type: array
     items:
-      tag: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
+      tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0"
 
-propertyOrder: [name, sources, data_transformations]
+propertyOrder: [name, sources, transformations]
 required: [name]
 
 flowStyle: block

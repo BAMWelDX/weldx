@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import pint
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["JointPenetration", "JointPenetrationType"]
 
@@ -21,22 +21,8 @@ class JointPenetration:
     depth_of_fusion: float = None
 
 
-class JointPenetrationType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/design/joint_penetration"
-    version = "1.0.0"
-    types = [JointPenetration]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node: JointPenetration, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = JointPenetration(**tree)
-        return obj
+JointPenetrationType = dataclass_serialization_class(
+    class_type=JointPenetration,
+    class_name="aws/design/joint_penetration",
+    version="1.0.0",
+)

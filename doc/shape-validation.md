@@ -94,7 +94,7 @@ Take an `ndarray` property for example:
 # ASDF schema
 properties:
   array_prop:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
 ```
 
 ```yaml
@@ -111,7 +111,7 @@ We would validate this to always have shape `[5]` by adding the `wx_shape` keywo
 # ASDF schema
 properties:
   array_prop:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [5]
 ```
 
@@ -126,10 +126,10 @@ For example, following schema would validate and file would validate:
 # ASDF schema
 properties:
   array_prop:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [n]
   array_prop2:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [n]
 ```
 
@@ -152,9 +152,9 @@ properties in its scope. To assure `array_prop` and `array_prop2` have the same 
 # ASDF schema
 properties:
   array_prop:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
   array_prop2:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
 wx_shape:
   array_prop: [n]
   array_prop2: [n]
@@ -174,9 +174,9 @@ name in brackets. In this example, both `optional_prop` will only get validated 
 # ASDF schema
 properties:
   required_prop:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
   optional_prop:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
 wx_shape:
   required_prop: [n]
   (optional_prop): [n]
@@ -208,19 +208,19 @@ title: |
 type: object
 properties:
   prop1:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [1,2,(3),(4)]
 
   prop2:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [~,2,1]
 
   prop3:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [2,4,6,8,...]
 
   prop4:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [~,3,5,7,9]
 
   prop5:
@@ -231,14 +231,14 @@ properties:
     type: object
     properties:
       p1:
-        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
         wx_shape: [10,8,6,4,2]
       p2:
-        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
         wx_shape: [9,7,5,3,1]
 
   optional_prop:
-    tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [1,2,(3),(4)]
 
 
