@@ -280,66 +280,9 @@ class TimeSeries:
         self._interp_counter = 0
 
         if isinstance(data, pint.Quantity):
-            # set default interpolation
-            if interpolation is None:
-                interpolation = "step"
-
-            # expand dim for scalar input
-            if not np.iterable(data):
-                data = np.expand_dims(data, 0)
-
-            # constant value case
-            if time is None:
-                time = pd.TimedeltaIndex([0])
-
-            if isinstance(time, pint.Quantity):
-                time = ut.to_pandas_time_index(time)
-            if not isinstance(time, pd.TimedeltaIndex):
-                raise ValueError(
-                    '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-                )
-
-            dax = xr.DataArray(data=data)
-            self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
-            self.interpolation = interpolation
-
+            self._initialize_discrete(data, time, interpolation)
         elif isinstance(data, MathematicalExpression):
-
-            if data.num_variables != 1:
-                raise Exception(
-                    "The mathematical expression must have exactly 1 free "
-                    "variable that represents time."
-                )
-            time_var_name = data.get_variable_names()[0]
-            try:
-                eval_data = data.evaluate(**{time_var_name: Q_(1, "second")})
-                self._units = eval_data.units
-                if np.iterable(eval_data):
-                    self._shape = eval_data.shape
-                else:
-                    self._shape = (1,)
-            except pint.errors.DimensionalityError:
-                raise Exception(
-                    "Expression can not be evaluated with "
-                    '"weldx.Quantity(1, "seconds")"'
-                    ". Ensure that every parameter posses the correct unit."
-                )
-
-            self._data = data
-            self._time_var_name = time_var_name
-
-            try:
-                self.interp_time(Q_([1, 2], "second"))
-                self.interp_time(Q_([1, 2, 3], "second"))
-            except Exception as e:
-                raise Exception(
-                    "The expression can not be evaluated with arrays of time deltas. "
-                    "Ensure that all parameters that are multiplied with the time "
-                    "variable have an outer dimension of size 1. This dimension is "
-                    "broadcasted during multiplication. The original error message was:"
-                    f' "{str(e)}"'
-                )
-
+            self._init_expression(data)
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
@@ -387,6 +330,77 @@ class TimeSeries:
             )
         return representation + f"Units:\n\t{self.units}\n"
 
+    def _initialize_discrete(
+        self,
+        data: pint.Quantity,
+        time: Union[None, pd.TimedeltaIndex, pint.Quantity],
+        interpolation: str,
+    ):
+        """Initialize the internal data with discrete values."""
+        # set default interpolation
+        if interpolation is None:
+            interpolation = "step"
+
+        # expand dim for scalar input
+        if not np.iterable(data):
+            data = np.expand_dims(data, 0)
+
+        # constant value case
+        if time is None:
+            time = pd.TimedeltaIndex([0])
+
+        if isinstance(time, pint.Quantity):
+            time = ut.to_pandas_time_index(time)
+        if not isinstance(time, pd.TimedeltaIndex):
+            raise ValueError(
+                '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
+            )
+
+        dax = xr.DataArray(data=data)
+        self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
+        self.interpolation = interpolation
+
+    def _init_expression(self, data):
+        """Initialize the internal data with a mathematical expression."""
+        if data.num_variables != 1:
+            raise Exception(
+                "The mathematical expression must have exactly 1 free "
+                "variable that represents time."
+            )
+
+        # check that the expression can be evaluated with a time quantity
+        time_var_name = data.get_variable_names()[0]
+        try:
+            eval_data = data.evaluate(**{time_var_name: Q_(1, "second")})
+            self._units = eval_data.units
+            if np.iterable(eval_data):
+                self._shape = eval_data.shape
+            else:
+                self._shape = (1,)
+        except pint.errors.DimensionalityError:
+            raise Exception(
+                "Expression can not be evaluated with "
+                '"weldx.Quantity(1, "seconds")"'
+                ". Ensure that every parameter posses the correct unit."
+            )
+
+        # assign internal variables
+        self._data = data
+        self._time_var_name = time_var_name
+
+        # check that all parameters of the expression support time arrays
+        try:
+            self.interp_time(Q_([1, 2], "second"))
+            self.interp_time(Q_([1, 2, 3], "second"))
+        except Exception as e:
+            raise Exception(
+                "The expression can not be evaluated with arrays of time deltas. "
+                "Ensure that all parameters that are multiplied with the time "
+                "variable have an outer dimension of size 1. This dimension is "
+                "broadcasted during multiplication. The original error message was:"
+                f' "{str(e)}"'
+            )
+
     def _interp_time_discrete(
         self, time: Union[pd.TimedeltaIndex, pint.Quantity]
     ) -> xr.DataArray:
@@ -395,7 +409,6 @@ class TimeSeries:
         See `interp_time` for interface description.
 
         """
-
         if isinstance(time, pint.Quantity):
             time = ut.to_pandas_time_index(time)
         if not isinstance(time, pd.TimedeltaIndex):
