@@ -281,7 +281,7 @@ def lcs_coords_from_ts(
         A DataArray with correctly labeled dimensions to be used for LCS creation.
 
     """
-    ts_data = ts.interp_time(time=time)
+    ts_data = ts.interp_time(time=time).data_array
     # assign vector coordinates and convert to mm
     ts_data = ts_data.rename({"dim_1": "c"}).assign_coords({"c": ["x", "y", "z"]})
     ts_data.data = ts_data.data.to("mm").magnitude
