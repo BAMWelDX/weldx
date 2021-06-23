@@ -309,7 +309,7 @@ def dataclass_serialization_class(
     version :
         The version number
     to_tree_mod :
-        A method that applies additional modifications to the tree during the `to_tree`
+        A method that applies additional modifications to the tree during the ``to_tree``
         function call
     from_tree_mod :
         A method that applies additional modifications to the tree during the
