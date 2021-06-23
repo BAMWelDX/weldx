@@ -291,13 +291,7 @@ class TimeSeries:
             # constant value case
             if time is None:
                 time = pd.TimedeltaIndex([0])
-                interpolation = "step"
-            # check intreplolation is valid for non constant case
-            elif interpolation not in self._valid_interpolations:
-                raise ValueError(
-                    "A valid interpolation method must be specified if discrete "
-                    f'values are used. "{interpolation}" is not supported'
-                )
+
             if isinstance(time, pint.Quantity):
                 time = ut.to_pandas_time_index(time)
             if not isinstance(time, pd.TimedeltaIndex):
@@ -305,11 +299,9 @@ class TimeSeries:
                     '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
                 )
 
-            dax = xr.DataArray(
-                data=data,
-                attrs={"interpolation": interpolation},
-            )
+            dax = xr.DataArray(data=data)
             self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
+            self.interpolation = interpolation
 
         elif isinstance(data, MathematicalExpression):
 
@@ -501,6 +493,18 @@ class TimeSeries:
         if isinstance(self._data, xr.DataArray):
             return self._data.attrs["interpolation"]
         return None
+
+    @interpolation.setter
+    def interpolation(self, interpolation):
+        if isinstance(self._data, xr.DataArray):
+            if interpolation not in self._valid_interpolations:
+                raise ValueError(
+                    "A valid interpolation method must be specified if discrete "
+                    f'values are used. "{interpolation}" is not supported'
+                )
+            if self.time is None and interpolation != "step":
+                interpolation = "step"
+            self.data_array.attrs["interpolation"] = interpolation
 
     @property
     def time(self) -> Union[None, pd.TimedeltaIndex]:
