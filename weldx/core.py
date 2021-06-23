@@ -248,7 +248,15 @@ class MathematicalExpression:
 class TimeSeries:
     """Describes the behaviour of a quantity in time."""
 
-    _valid_interpolations = ["step", "linear"]
+    _valid_interpolations = [
+        "step",
+        "linear",
+        "nearest",
+        "zero",
+        "slinear",
+        "quadratic",
+        "cubic",
+    ]
 
     def __init__(
         self,
