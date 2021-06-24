@@ -99,7 +99,7 @@ class VariableTypeASDF(WeldxType):
         dtype = node.data.dtype.str
         data = cls.convert_time_dtypes(data=data)
         if not data.shape:  # scalar
-            data = np.asscalar(data)
+            data = data.item()
         tree = {
             "name": node.name,
             "dimensions": node.dimensions,
