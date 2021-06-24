@@ -1,7 +1,7 @@
 import pandas as pd
 
 from weldx.asdf.types import META_ATTR, USER_ATTR
-from weldx.asdf.util import _write_read_buffer
+from weldx.asdf.util import write_read_buffer
 from weldx.measurement import Error
 
 
@@ -16,7 +16,7 @@ def test_meta_attr():
 
     tree = {"Error": e}
 
-    data = _write_read_buffer(tree)
+    data = write_read_buffer(tree)
 
     e2 = data["Error"]
 

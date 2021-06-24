@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pytest
 from decorator import contextmanager
 
-from weldx.asdf.util import _write_read_buffer
+from weldx.asdf.util import write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.geometry import Profile
 from weldx.welding.groove.iso_9692_1 import (
@@ -34,7 +34,7 @@ def test_asdf_groove(groove: IsoBaseGroove, expected_dtype):
     k = "groove"
     tree = {k: groove}
 
-    data = _write_read_buffer(tree)
+    data = write_read_buffer(tree)
     assert isinstance(
         data[k], expected_dtype
     ), f"Did not match expected type {expected_dtype} on item {data[k]}"
