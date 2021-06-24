@@ -1278,12 +1278,18 @@ _eq_compare_nested_input_types = Union[
 ]
 
 
+def _array_equal(a, b):
+    if a.shape != b.shape:
+        return False
+    return np.all(a == b)
+
+
 class _Eq_compare_nested:
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
     # some types need special comparison handling.
     compare_funcs = {
-        (np.ndarray, NDArrayType, pint.Quantity, pd.Index): lambda x, y: np.all(x == y),
+        (np.ndarray, NDArrayType, pint.Quantity, pd.Index): _array_equal,
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
     }
     # these types will be treated as equivalent.
