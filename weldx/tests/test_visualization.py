@@ -28,8 +28,7 @@ def test_plot_coordinate_system():
         orientation=orientation_tdp, coordinates=coordinates_tdp, time=time
     )
 
-    fig = plt.figure()
-    ax = fig.gca(projection="3d")
+    fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
 
     vs.draw_coordinate_system_matplotlib(lcs_constant, ax, "g")
     vs.draw_coordinate_system_matplotlib(lcs_tdp, ax, "r", "2016-01-10")
@@ -47,6 +46,5 @@ def test_plot_coordinate_system():
 
 def test_axes_equal():
     """Test executing all possible code paths."""
-    fig = plt.figure()
-    ax = fig.gca(projection="3d")
+    fig, ax = plt.subplots(subplot_kw=dict(projection="3d"))
     vs.axes_equal(ax)
