@@ -9,7 +9,7 @@ from weldx.asdf.extension import WxSyntaxError
 from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass
-from weldx.asdf.util import _write_read_buffer
+from weldx.asdf.util import write_read_buffer
 from weldx.asdf.validators import _compare_tag_version, _custom_shape_validator
 from weldx.util import compare_nested
 
@@ -56,7 +56,7 @@ def test_wx_tag_syntax_exceptions(instance_tag, tagname, err):
 )
 def test_property_tag_validator(test_input):
     """Test custom ASDF shape validators."""
-    _write_read_buffer({"root_node": test_input})
+    write_read_buffer({"root_node": test_input})
 
 
 @pytest.mark.parametrize(
@@ -69,7 +69,7 @@ def test_property_tag_validator(test_input):
 def test_property_tag_validator_exceptions(test_input, err):
     """Test custom ASDF shape validators."""
     with pytest.raises(err):
-        _write_read_buffer({"root_node": test_input})
+        write_read_buffer({"root_node": test_input})
 
 
 def _val(list_test, list_expected):
@@ -182,7 +182,7 @@ def test_shape_validation_error_exception(shape, exp, err):
     ],
 )
 def test_shape_validator(test_input):
-    result = _write_read_buffer(
+    result = write_read_buffer(
         {"root": test_input},
     )["root"]
     assert compare_nested(test_input.__dict__, result.__dict__)
@@ -217,7 +217,7 @@ def test_shape_validator(test_input):
 )
 def test_shape_validator_exceptions(test_input):
     with pytest.raises(ValidationError):
-        _write_read_buffer({"root": test_input})
+        write_read_buffer({"root": test_input})
 
 
 @pytest.mark.parametrize(
@@ -283,7 +283,7 @@ def test_shape_validator_exceptions(test_input):
     ],
 )
 def test_unit_validator(test):
-    data = _write_read_buffer({"root_node": test})
+    data = write_read_buffer({"root_node": test})
     test_read = data["root_node"]
     assert isinstance(data, dict)
     assert test_read.length_prop == test.length_prop
