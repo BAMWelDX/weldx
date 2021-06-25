@@ -1,7 +1,6 @@
 dictionaries:
   - en
   - en_GB
-  - de_de
 
 excluded_files:
   - ".*"
