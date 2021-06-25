@@ -242,10 +242,13 @@ class TestTimeSeries:
     def test_construction_discrete(data, time, interpolation, shape_exp):
         """Test the construction of the TimeSeries class."""
         # set expected values
-        if isinstance(time, pint.Quantity):
-            time_exp = pd.TimedeltaIndex(time.magnitude, unit="s")
-        else:
-            time_exp = time
+        time_exp = time
+        if isinstance(time_exp, pint.Quantity):
+            time_exp = pd.TimedeltaIndex(time_exp.m, unit="s")
+
+        exp_interpolation = interpolation
+        if len(data.m.shape) == 0 and interpolation is None:
+            exp_interpolation = "step"
 
         # create instance
         ts = TimeSeries(data=data, time=time, interpolation=interpolation)
@@ -253,12 +256,12 @@ class TestTimeSeries:
         # check
         assert np.all(ts.data == data)
         assert np.all(ts.time == time_exp)
-        assert ts.interpolation == interpolation
+        assert ts.interpolation == exp_interpolation
         assert ts.shape == shape_exp
         assert data.check(UREG.get_dimensionality(ts.units))
 
         assert np.all(ts.data_array.data == data)
-        assert ts.data_array.attrs["interpolation"] == interpolation
+        assert ts.data_array.attrs["interpolation"] == exp_interpolation
         if time_exp is None:
             assert "time" not in ts.data_array
         else:
@@ -302,7 +305,6 @@ class TestTimeSeries:
         "data, time, interpolation, exception_type, test_name",
         [
             (values_def, time_def, "int", ValueError, "# unknown interpolation"),
-            (values_def, time_def, None, ValueError, "# wrong interp. parameter type"),
             (values_def, time_def.magnitude, "step", ValueError, "# invalid time type"),
             (me_too_many_vars, None, None, Exception, "# too many free variables"),
             (me_param_units, None, None, Exception, "# incompatible parameter units"),
@@ -409,12 +411,28 @@ class TestTimeSeries:
         result = ts.interp_time(time)
 
         assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
-        assert Q_(1, str(result.data.units)) == Q_(1, unit_exp)
+        assert Q_(1, str(result.units)) == Q_(1, unit_exp)
 
-        if isinstance(time, pint.Quantity):
-            assert np.all(result.time == ut.to_pandas_time_index(time))
-        else:
-            assert np.all(result.time == time)
+        exp_time = time
+        if isinstance(exp_time, pint.Quantity):
+            exp_time = ut.to_pandas_time_index(time)
+        if len(exp_time) == 1:
+            exp_time = None
+
+        assert np.all(result.time == exp_time)
+
+    # test_interp_time_warning ---------------------------------------------------------
+
+    @staticmethod
+    def test_interp_time_warning():
+        """Test if a warning is emitted when interpolating already interpolated data."""
+        ts = TimeSeries(data=Q_([1, 2, 3], "m"), time=Q_([0, 1, 2], "s"))
+        with pytest.warns(None) as recorded_warnings:
+            ts_interp = ts.interp_time(Q_([0.25, 0.5, 0.75, 1], "s"))
+        assert len(recorded_warnings) == 0
+
+        with pytest.warns(UserWarning):
+            ts_interp.interp_time(Q_([0.4, 0.6], "s"))
 
     # test_interp_time_exceptions ------------------------------------------------------
 
