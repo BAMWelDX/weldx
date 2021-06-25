@@ -18,6 +18,7 @@
   fields [[#378]](https://github.com/BAMWelDX/weldx/pull/378)
 - adds a `dataclass_serialization_class` utility function that automatically generates the asdf serialization class for 
   python dataclasses. [[#380]](https://github.com/BAMWelDX/weldx/pull/380)
+- Added method to set the interpolation method to the `TimeSeries` [[#353]](https://github.com/BAMWelDX/weldx/pull/353)
 
 ### changes
 
