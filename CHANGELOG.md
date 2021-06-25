@@ -9,13 +9,12 @@
   structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
 - added `WeldxFile` wrapper to handle asdf files with history and schemas more
   easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
-- added `WeldxFile` wrapper to handle asdf files with history and schemas more
-  easily. [[#341]](https://github.com/BAMWelDX/weldx/pull/341).
 - add `"step"` as additional method to `util.xr_interp_like` [[#363]](https://github.com/BAMWelDX/weldx/pull/363)
 - add `util.compare_nested_eq` decorator for dataclasses with array-like
   fields [[#378]](https://github.com/BAMWelDX/weldx/pull/378)
 - adds a `dataclass_serialization_class` utility function that automatically generates the asdf serialization class for 
   python dataclasses. [[#380]](https://github.com/BAMWelDX/weldx/pull/380)
+- Added method to set the interpolation method to the `TimeSeries` [[#353]](https://github.com/BAMWelDX/weldx/pull/353)
 
 ### changes
 
@@ -24,7 +23,11 @@
 - `get_yaml_header` received a new option parse, which optionally returns the parsed YAML header
   as `asdf.tagged.TaggedDict`. [[#338]](https://github.com/BAMWelDX/weldx/pull/338)
 - refactor `asdf_json_repr` into `view_tree` [[#339]](https://github.com/BAMWelDX/weldx/pull/339)
-- The `MeasurementChain` is now internally based on a `networkx.DiGraph`. New functions are also added to the class to
+- `TimeSeries.interp_time` [[#353]](https://github.com/BAMWelDX/weldx/pull/353)
+    - now returns a new `TimeSeries` instead of a `xarray.DataArray`
+    - if the data has already been interpolated before, a warning is emitted
+    - `TimeSeries` supports now all interpolation methods supported by xarray
+- The `MeasurementChain` is now internally based on a `networkx.DiGraph`. New functions are also added to the class to 
   simplify its usage. [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
   The following additional changes were applied during the update of the `MeasurementChain`:
     - renamed `DataTransformation` class to `SignalTransformation`
@@ -37,6 +40,7 @@
 
 - Add new tutorial about the `MeasurementChain` [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
 - Updated the measurement tutorial [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
+
 
 ### ASDF
 
