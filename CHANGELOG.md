@@ -26,6 +26,7 @@
 - `TimeSeries.interp_time` [[#353]](https://github.com/BAMWelDX/weldx/pull/353)
     - now returns a new `TimeSeries` instead of a `xarray.DataArray`
     - if the data has already been interpolated before, a warning is emitted
+    - `TimeSeries` supports now all interpolation methods supported by xarray
 - The `MeasurementChain` is now internally based on a `networkx.DiGraph`. New functions are also added to the class to 
   simplify its usage. [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
   The following additional changes were applied during the update of the `MeasurementChain`:
