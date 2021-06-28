@@ -4,7 +4,7 @@ import copy
 import math
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List, Union
+from typing import Dict, List, Union
 
 import numpy as np
 import pint
@@ -2906,6 +2906,8 @@ class TestSpatialData:
         if len(arguments) > 1 and arguments[1] is not None:
             np.all(arguments[1] == pc.triangles)
 
+    # test_class_creation_exceptions ---------------------------------------------------
+
     @staticmethod
     @pytest.mark.parametrize(
         "arguments, exception_type, test_name",
@@ -2930,6 +2932,57 @@ class TestSpatialData:
         """
         with pytest.raises(exception_type):
             SpatialData(*arguments)
+
+    # test_comparison ------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "kwargs_mod, expected_result",
+        [
+            ({}, True),
+            (dict(coordinates=[[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 1]]), False),
+            (dict(coordinates=[[0, 0, 0], [1, 0, 0], [1, 1, 0]]), False),
+            (dict(triangles=[[0, 1, 2], [2, 3, 1]]), False),
+            (dict(triangles=[[0, 1, 2], [2, 3, 1], [2, 3, 1]]), False),
+            (dict(triangles=[[0, 1, 2]]), False),
+            (dict(triangles=None), False),
+            (dict(attributes=dict(data=[2, 2, 3])), False),
+            (dict(attributes=dict(dat=[1, 2, 3])), False),
+            # uncomment once issue #376 is resolved
+            # (dict(attributes=dict(data=[1, 2, 3], more=[1, 2, 5])), False),
+            (dict(attributes={}), False),
+            (dict(attributes=None), False),
+        ],
+    )
+    def test_comparison(kwargs_mod: Dict, expected_result: bool):
+        """Test the comparison operator by comparing two instances.
+
+        Parameters
+        ----------
+        kwargs_mod :
+            A dictionary of key word arguments that is used to overwrite the default
+            values in the RHS `SpatialData`. If an empty dict is passed, LHS and RHS
+            are constructed with the same values.
+        expected_result :
+            Expected result of the comparison
+
+        """
+        from copy import deepcopy
+
+        default_kwargs = dict(
+            coordinates=[[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]],
+            triangles=[[0, 1, 2], [2, 3, 0]],
+            attributes=dict(data=[1, 2, 3]),
+        )
+        reference = SpatialData(**default_kwargs)
+
+        kwargs_other = deepcopy(default_kwargs)
+        kwargs_other.update(kwargs_mod)
+        other = SpatialData(**kwargs_other)
+
+        assert (reference == other) == expected_result
+
+    # test_read_write_file -------------------------------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize(

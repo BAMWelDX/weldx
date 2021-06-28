@@ -14,7 +14,7 @@ from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
 from weldx.asdf.tags.weldx.core.file import ExternalFile
-from weldx.asdf.util import _write_buffer, _write_read_buffer
+from weldx.asdf.util import write_buffer, write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
@@ -52,7 +52,7 @@ _base_rotation = Rotation.from_euler(
     ],
 )
 def test_rotation(inputs):
-    data = _write_read_buffer({"rot": inputs})
+    data = write_read_buffer({"rot": inputs})
     r = data["rot"]
     assert np.allclose(r.as_quat(), inputs.as_quat())
     if hasattr(inputs, "wx_meta"):
@@ -79,7 +79,7 @@ def test_rotation_euler_prefix(inputs):
     """Test unit prefix handling."""
     degrees = "degree" in str(inputs.u)
     rot = WXRotation.from_euler(seq="x", angles=inputs)
-    data = _write_read_buffer({"rot": rot})
+    data = write_read_buffer({"rot": rot})
     r = data["rot"].as_euler("xyz", degrees=degrees)[0]
     r = Q_(r, "degree") if degrees else Q_(r, "rad")
     assert np.allclose(inputs, r)
@@ -118,7 +118,7 @@ def test_xarray_data_array(copy_arrays, lazy_load):
     """Test ASDF read/write of xarray.DataArray."""
     dax = get_xarray_example_data_array()
     tree = {"dax": dax}
-    dax_file = _write_read_buffer(
+    dax_file = write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )["dax"]
     assert dax.identical(dax_file)
@@ -168,7 +168,7 @@ def get_xarray_example_dataset():
 def test_xarray_dataset(copy_arrays, lazy_load):
     dsx = get_xarray_example_dataset()
     tree = {"dsx": dsx}
-    dsx_file = _write_read_buffer(
+    dsx_file = write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )["dsx"]
     assert dsx.identical(dsx_file)
@@ -227,7 +227,7 @@ def test_local_coordinate_system(
 ):
     """Test (de)serialization of LocalCoordinateSystem in ASDF."""
     lcs = get_local_coordinate_system(time_dep_orientation, time_dep_coordinates)
-    data = _write_read_buffer(
+    data = write_read_buffer(
         {"lcs": lcs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )
     assert data["lcs"] == lcs
@@ -251,7 +251,7 @@ def test_local_coordinate_system_shape_violation():
     )
 
     with pytest.raises(ValidationError):
-        _write_buffer({"lcs": lcs})
+        write_buffer({"lcs": lcs})
 
     # orientations have wrong shape -----------------------
     orientation = xr.DataArray(
@@ -269,7 +269,7 @@ def test_local_coordinate_system_shape_violation():
     )
 
     with pytest.raises(ValidationError):
-        _write_buffer({"lcs": lcs})
+        write_buffer({"lcs": lcs})
 
 
 # weldx.transformations.CoordinateSystemManager ----------------------------------------
@@ -299,7 +299,7 @@ def get_example_coordinate_system_manager():
 def test_coordinate_system_manager(copy_arrays, lazy_load):
     csm = get_example_coordinate_system_manager()
     tree = {"cs_hierarchy": csm}
-    data = _write_read_buffer(
+    data = write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )
     csm_file = data["cs_hierarchy"]
@@ -361,7 +361,7 @@ def get_coordinate_system_manager_with_subsystems(nested: bool):
 def test_coordinate_system_manager_with_subsystems(copy_arrays, lazy_load, nested):
     csm = get_coordinate_system_manager_with_subsystems(nested)
     tree = {"cs_hierarchy": csm}
-    data = _write_read_buffer(
+    data = write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )
     csm_file = data["cs_hierarchy"]
@@ -403,11 +403,48 @@ def test_coordinate_system_manager_time_dependencies(
     csm_root.merge(csm_sub_2)
 
     tree = {"cs_hierarchy": csm_root}
-    data = _write_read_buffer(
+    data = write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )
     csm_file = data["cs_hierarchy"]
     assert csm_root == csm_file
+
+
+@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("lazy_load", [True, False])
+def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
+    """Test if data attached to a CSM is stored and read correctly."""
+    csm = tf.CoordinateSystemManager("root", "csm")
+    csm.create_cs("cs_1", "root", coordinates=[1, 1, 1])
+    csm.create_cs("cs_2", "root", coordinates=[-1, -1, -1])
+    csm.create_cs("cs_11", "cs_1", coordinates=[1, 1, 1])
+
+    data_11 = SpatialData(coordinates=np.array([[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]]))
+    data_2 = SpatialData(
+        coordinates=np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ]
+        ),
+        triangles=np.array([[0, 1, 2], [0, 2, 3]], dtype="uint32"),
+    )
+
+    csm.assign_data(data_11, "data_11", "cs_11")
+    csm.assign_data(data_2, "data_2", "cs_2")
+
+    tree = {"csm": csm}
+    buffer = write_read_buffer(
+        tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )
+    csm_buffer = buffer["csm"]
+
+    for data_name in csm.data_names:
+        sd = csm.get_data(data_name)
+        sd_buffer = csm_buffer.get_data(data_name)
+        assert sd == sd_buffer
 
 
 # --------------------------------------------------------------------------------------
@@ -428,7 +465,7 @@ def test_coordinate_system_manager_time_dependencies(
     ],
 )
 def test_time_series_discrete(ts, copy_arrays, lazy_load):
-    ts_file = _write_read_buffer(
+    ts_file = write_read_buffer(
         {"ts": ts}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )["ts"]
     if isinstance(ts.data, ME):
@@ -616,7 +653,7 @@ class TestExternalFile:
             asdf_save_content=store_content,
         )
         tree = {"file": ef}
-        ef_file = _write_read_buffer(
+        ef_file = write_read_buffer(
             tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
         )["file"]
 
@@ -661,7 +698,7 @@ class TestPointCloud:
 
         pc = SpatialData(coordinates=coordinates, triangles=triangles)
         tree = {"point_cloud": pc}
-        pc_file = _write_read_buffer(
+        pc_file = write_read_buffer(
             tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
         )["point_cloud"]
 
@@ -678,7 +715,7 @@ class TestGraph:
         g.add_edges_from(
             [("A", "B"), ("A", "C"), ("A", "F"), ("D", "C"), ("B", "H"), ("X", "A")]
         )
-        g2 = _write_read_buffer({"graph": g})["graph"]
+        g2 = write_read_buffer({"graph": g})["graph"]
 
         assert all(e in g.edges for e in g2.edges)
         assert all(n in g.nodes for n in g2.nodes)

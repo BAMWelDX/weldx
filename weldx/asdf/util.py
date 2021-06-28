@@ -1,7 +1,7 @@
 """Utilities for asdf files."""
 from io import BytesIO
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Callable, Tuple, Type, Union
 from warnings import warn
 
 import asdf
@@ -9,6 +9,7 @@ from boltons.iterutils import get_path
 
 from weldx.asdf.constants import SCHEMA_PATH
 from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
+from weldx.asdf.types import WeldxType
 from weldx.types import (
     SupportsFileReadOnly,
     SupportsFileReadWrite,
@@ -288,3 +289,60 @@ def view_tree(file: types_path_and_file_like, path: Tuple = None, **kwargs):
 def asdf_json_repr(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
     """See `view_tree` function."""
     return view_tree(file, path, **kwargs)
+
+
+def dataclass_serialization_class(
+    class_type: Type,
+    class_name: str,
+    version: str,
+    to_tree_mod: Callable = None,
+    from_tree_mod: Callable = None,
+) -> Type:
+    """Generate a asdf serialization class for a python dataclass.
+
+    Parameters
+    ----------
+    class_type :
+        The type of the dataclass
+    class_name :
+        The value that should ba stored as the classes name property
+    version :
+        The version number
+    to_tree_mod :
+        A method that applies additional modifications to the tree during the
+        ``to_tree`` function call
+    from_tree_mod :
+        A method that applies additional modifications to the tree during the
+        ``from_tree`` function call
+
+    Returns
+    -------
+    Type :
+        A new asdf serialization class.
+
+    """
+
+    def _noop(tree):
+        return tree
+
+    if to_tree_mod is None:
+        to_tree_mod = _noop
+    if from_tree_mod is None:
+        from_tree_mod = _noop
+
+    class _SerializationClass(WeldxType):
+        name = class_name
+        version = "1.0.0"
+        types = [class_type]
+        requires = ["weldx"]
+        handle_dynamic_subclasses = True
+
+        @classmethod
+        def to_tree(cls, node, ctx):
+            return to_tree_mod(node.__dict__)
+
+        @classmethod
+        def from_tree(cls, tree, ctx):
+            return class_type(**from_tree_mod(tree))
+
+    return _SerializationClass

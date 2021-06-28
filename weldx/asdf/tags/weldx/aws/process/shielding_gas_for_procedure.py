@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import pint
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf.util import dataclass_serialization_class
 
 from .shielding_gas_type import ShieldingGasType
 
@@ -24,22 +24,8 @@ class ShieldingGasForProcedure:
     trailing_shielding_gas_flowrate: pint.Quantity = None
 
 
-class ShieldingGasForProcedureType(WeldxType):
-    """<ASDF TYPE DOCSTRING>"""
-
-    name = "aws/process/shielding_gas_for_procedure"
-    version = "1.0.0"
-    types = [ShieldingGasForProcedure]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = ShieldingGasForProcedure(**tree)
-        return obj
+ShieldingGasForProcedureType = dataclass_serialization_class(
+    class_type=ShieldingGasForProcedure,
+    class_name="aws/process/shielding_gas_for_procedure",
+    version="1.0.0",
+)

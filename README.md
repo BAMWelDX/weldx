@@ -25,7 +25,7 @@ division at Bundesanstalt für Materialforschung und -prüfung (BAM).
 
 ## Features
 
-WeldX provides several Python API to perform standard tasks like experiment design, data analysis, and experimental data archiving.
+WelDX provides several Python API to perform standard tasks like experiment design, data analysis, and experimental data archiving.
 
 ### Planning
 
@@ -46,7 +46,7 @@ We choose the popular [ASDF](https://en.wikipedia.org/wiki/Advanced_Scientific_D
 This enables us to store arbitrary binary data, while maintaining a human readable text based header. All information is stored
 in a tree like structure, which makes it convenient to structure the data in arbitrary complex ways.
 
-The ASDF format and the provided extensions for WeldX types like
+The ASDF format and the provided extensions for WelDX types like
 
 - workpiece information (used alloys, geometries)
 - welding process parameters (GMAW parameters
@@ -57,22 +57,22 @@ enables us to store the whole experimental pipeline performed in a modern labora
 
 ## Design goals
 
-We seek to provide a user-friendly, well documented programming interface. All functions and classes in WeldX have attached
+We seek to provide a user-friendly, well documented programming interface. All functions and classes in WelDX have attached
 documentation about the involved parameters (types and explanation), see [API docs](https://weldx.readthedocs.io/en/stable/api.html).
 Further we provide rich [Jupyter notebook tutorials](https://weldx.readthedocs.io/en/stable/tutorials.htm) about the handling of the basic workflows.
 
 All involved physical quantities used in weldX (lengths, angles, voltages, currents, etc.) should be attached
 with a unit to ensure automatic conversion and correct mathematical handling. Units are being used in all standard features
-of WeldX and are also archived in the ASDF files. This is implemented by the popular Python library
+of WelDX and are also archived in the ASDF files. This is implemented by the popular Python library
 [Pint](https://pint.readthedocs.io/en/stable/), which flawlessly handles the creation and conversion of units and dimensions.
 
 ## Installation
 
-The WeldX package can be installed using conda or mamba package manager from the :code:`conda-forge` channel.
+The WelDX package can be installed using conda or mamba package manager from the :code:`conda-forge` channel.
 These managers originate from the freely available [Anaconda Python stack](https://docs.conda.io/en/latest/miniconda.html>).
 If you do not have Anaconda or Miniconda installed yet, we ask you to install `Miniconda-3`.
 Documentation for the installation procedure can be found [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation).
-After this step you have access to the conda command and can proceed to installing the WeldX package.
+After this step you have access to the conda command and can proceed to installing the WelDX package.
 
 ```console
 conda install weldx -c conda-forge
@@ -102,7 +102,6 @@ This research is funded by the Federal Ministry of Education and Research of Ger
 
 [![pytest](https://github.com/BAMWelDX/weldx/workflows/pytest/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Apytest+branch%3Amaster)
 [![conda build](https://github.com/BAMWelDX/weldx/workflows/conda%20build/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22conda+build%22+branch%3Amaster)
-[![](https://travis-ci.com/BAMWelDX/weldx.svg?branch=master)](https://travis-ci.com/BAMWelDX/weldx)
 [![Build status](https://ci.appveyor.com/api/projects/status/6yvswkpj7mmdbrk1/branch/master?svg=true)](https://ci.appveyor.com/project/BAMWelDX/weldx/branch/master)
 
 ### Code Status

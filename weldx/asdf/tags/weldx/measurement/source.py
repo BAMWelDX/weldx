@@ -1,25 +1,9 @@
-from weldx.asdf.types import WeldxType
-from weldx.measurement import Source
+from weldx.asdf.util import dataclass_serialization_class
+from weldx.measurement import SignalSource
 
-__all__ = ["Source", "SourceType"]
+__all__ = ["SignalSource", "SignalSourceType"]
 
 
-class SourceType(WeldxType):
-    """Serialization class for measurement sources."""
-
-    name = "measurement/source"
-    version = "1.0.0"
-    types = [Source]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node: Source, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = Source(**tree)
-        return obj
+SignalSourceType = dataclass_serialization_class(
+    class_type=SignalSource, class_name="measurement/source", version="1.0.0"
+)

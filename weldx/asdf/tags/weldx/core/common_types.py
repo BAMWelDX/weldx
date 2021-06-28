@@ -7,6 +7,7 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_timedelta64_dtype as is_timedelta
 
 from weldx.asdf.types import WeldxType
+from weldx.asdf.util import dataclass_serialization_class
 from weldx.constants import WELDX_QUANTITY as Q_
 
 
@@ -21,59 +22,9 @@ class Dimension:
     length: int
 
 
-class DimensionTypeASDF(WeldxType):
-    """Serialization class for the 'Dimension' type"""
-
-    name = "core/dimension"
-    version = "1.0.0"
-    types = [Dimension]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node: Dimension, ctx):
-        """
-        Convert an instance of the 'Dimension' type into YAML representations.
-
-        Parameters
-        ----------
-        node :
-            Instance of the 'Dimension' type to be serialized.
-
-        ctx :
-            An instance of the 'AsdfFile' object that is being written out.
-
-        Returns
-        -------
-            A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
-            'complex') representing the properties of the 'Dimension' type to be
-            serialized.
-
-        """
-        tree = {"name": node.name, "length": node.length}
-
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """
-        Converts basic types representing YAML trees into custom types.
-
-        Parameters
-        ----------
-        tree :
-            An instance of a basic Python type (possibly nested) that
-            corresponds to a YAML subtree.
-        ctx :
-            An instance of the 'AsdfFile' object that is being constructed.
-
-        Returns
-        -------
-        Dimension :
-            An instance of the 'Dimension' type.
-
-        """
-        return Dimension(tree["name"], tree["length"])
+DimensionTypeASDF = dataclass_serialization_class(
+    class_type=Dimension, class_name="core/dimension", version="1.0.0"
+)
 
 
 # Variable -----------------------------------------------------------------------------
@@ -148,7 +99,7 @@ class VariableTypeASDF(WeldxType):
         dtype = node.data.dtype.str
         data = cls.convert_time_dtypes(data=data)
         if not data.shape:  # scalar
-            data = np.asscalar(data)
+            data = data.item()
         tree = {
             "name": node.name,
             "dimensions": node.dimensions,

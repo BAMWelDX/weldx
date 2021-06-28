@@ -24,11 +24,18 @@ examples:
 
 properties:
   signal_type:
+    description: |
+      The type of the signal (analog or digital).
     type: string
+    enum: [analog, digital]
   unit:
+    description: |
+      The unit of the signal (volt, kelvin, etc.).
     type: string
   data:
-    tag: "tag:weldx.bam.de:weldx/measurement/data-1.0.0"
+    description: |
+      Measurement data that was produced by the signal.
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
 
 
 propertyOrder: [signal_type, unit, data]
