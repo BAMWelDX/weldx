@@ -1853,6 +1853,21 @@ class TestCoordinateSystemManager:
         csm = [csm_0, csm_1, csm_2, csm_3, csm_4, csm_5]
         return [csm, lcs]
 
+    # test_init ------------------------------------------------------------------------
+
+    @staticmethod
+    def test_init():
+        """Test the init method of the coordinate system manager."""
+        # default construction ----------------------
+        csm = CSM(root_coordinate_system_name="root")
+        assert csm.number_of_coordinate_systems == 1
+        assert csm.number_of_neighbors("root") == 0
+
+        # Exceptions---------------------------------
+        # Invalid root system name
+        with pytest.raises(Exception):
+            CSM({})
+
     # test_add_coordinate_system -------------------------------------------------------
 
     # todo
@@ -1965,6 +1980,7 @@ class TestCoordinateSystemManager:
 
     @staticmethod
     def test_add_coordinate_system_timeseries():
+        """Test if adding an LCS with a `TimeSeries` as coordinates is possible."""
         csm = CSM("r")
         me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
         ts = TimeSeries(me)
@@ -2994,6 +3010,32 @@ class TestCoordinateSystemManager:
             with pytest.raises(Exception):
                 csm.get_cs(*function_arguments)
 
+    # test_get_local_coordinate_system_timeseries --------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "lcs, in_lcs",
+        [
+            ("r", "tdp_ts"),
+            ("tdp_ts", "r"),
+        ],
+    )
+    def test_get_local_coordinate_system_timeseries(lcs, in_lcs):
+        me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]])})
+        ts = TimeSeries(me)
+
+        csm = CSM("r")
+        csm.create_cs(
+            "tdp_r", "r", coordinates=[[0, 0, 1], [0, 0, 2]], time=Q_([1, 2], "s")
+        )
+        csm.create_cs("ts", "r", coordinates=ts)
+        csm.create_cs("s", "ts", coordinates=[1, 0, 0])
+        csm.create_cs(
+            "tdp_ts", "ts", coordinates=[[1, 0, 0], [2, 0, 0]], time=Q_([3, 4], "s")
+        )
+
+        csm.get_cs(lcs, in_lcs)
+
     # test_get_local_coordinate_system_exceptions --------------------------------------
 
     @staticmethod
@@ -3780,19 +3822,6 @@ def test_relabel():
 
     with pytest.raises(NotImplementedError):
         csm1.relabel({"A": "Z"})
-
-
-def test_coordinate_system_manager_init():
-    """Test the init method of the coordinate system manager."""
-    # default construction ----------------------
-    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
-    assert csm.number_of_coordinate_systems == 1
-    assert csm.number_of_neighbors("root") == 0
-
-    # Exceptions---------------------------------
-    # Invalid root system name
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager({})
 
 
 def test_coordinate_system_manager_create_coordinate_system():

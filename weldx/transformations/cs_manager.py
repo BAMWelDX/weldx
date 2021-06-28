@@ -1374,7 +1374,14 @@ class CoordinateSystemManager:
 
         lcs_result = LocalCoordinateSystem()
         for edge in path_edges:
+            invert = False
             lcs = self.graph.edges[edge]["lcs"]
+
+            # lcs has an expression as coordinates
+            if lcs is None:
+                lcs = self.graph.edges[(edge[1], edge[0])]["lcs"]
+                invert = True
+
             if lcs.is_time_dependent:
                 if not lcs.has_reference_time and self.has_reference_time:
                     time_lcs = time_interp + (time_ref_interp - self.reference_time)
@@ -1383,6 +1390,17 @@ class CoordinateSystemManager:
                     lcs.reset_reference_time(time_ref_interp)
                 else:
                     lcs = lcs.interp_time(time_interp, time_ref_interp)
+
+            if invert:
+                if isinstance(lcs.coordinates, TimeSeries):
+                    raise Exception(
+                        "The chosen transformation is time dependent, but no time is "
+                        "given. This is usually the case if the time dependencies are "
+                        "only described by mathematical expressions. Provide the "
+                        "desired time using the corresponding parameter to solve this "
+                        "issue."
+                    )
+                lcs = lcs.invert()
             lcs_result += lcs
         return lcs_result
 
@@ -1921,8 +1939,15 @@ class CoordinateSystemManager:
         if list_of_edges is None:
             lcs_list = self.lcs_time_dependent
         else:
-            lcs_list = [self.graph.edges[edge]["lcs"] for edge in list_of_edges]
-            lcs_list = [lcs for lcs in lcs_list if lcs.is_time_dependent]
+
+            def _get_lcs(edge):
+                lcs = self.graph.edges[edge]["lcs"]
+                if lcs is not None:
+                    return lcs
+                return self.graph.edges[(edge[1], edge[0])]["lcs"]
+
+            lcs_list = [_get_lcs(edge) for edge in list_of_edges]
+            lcs_list = [lcs for lcs in lcs_list if lcs.time is not None]
 
         if not lcs_list:
             return None
