@@ -13,6 +13,7 @@ import xarray as xr
 
 from weldx import util
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 
 from .local_cs import LocalCoordinateSystem
@@ -276,7 +277,12 @@ class CoordinateSystemManager:
 
         """
         self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
-        self._graph.add_edge(node_to, node_from, lcs=lcs.invert(), defined=False)
+
+        # only store inverted lcs if coordinates and orientations are discrete values
+        lcs_invert = None
+        if not isinstance(lcs.coordinates, TimeSeries):
+            lcs_invert = lcs.invert()
+        self._graph.add_edge(node_to, node_from, lcs=lcs_invert, defined=False)
 
     def _check_coordinate_system_exists(self, coordinate_system_name: str):
         """Raise an exception if the specified coordinate system does not exist.

@@ -1799,22 +1799,22 @@ def test_coordinate_system_time_interpolation():
 
 # todo: Refactor old tests
 
+CSM = tf.CoordinateSystemManager
+LCS = tf.LocalCoordinateSystem
+
 
 class TestCoordinateSystemManager:
     """Test the CoordinateSystemManager class."""
 
-    CSM = tf.CoordinateSystemManager
-    LCS = tf.LocalCoordinateSystem
-
     @pytest.fixture
     def csm_fix(self):
         """Create default coordinate system fixture."""
-        csm_default = self.CSM("root")
-        lcs_1 = self.LCS(coordinates=[0, 1, 2])
-        lcs_2 = self.LCS(coordinates=[0, -1, -2])
-        lcs_3 = self.LCS(coordinates=[-1, -2, -3])
-        lcs_4 = self.LCS(r_mat_y(1 / 2), [1, 2, 3])
-        lcs_5 = self.LCS(r_mat_y(3 / 2), [2, 3, 1])
+        csm_default = CSM("root")
+        lcs_1 = LCS(coordinates=[0, 1, 2])
+        lcs_2 = LCS(coordinates=[0, -1, -2])
+        lcs_3 = LCS(coordinates=[-1, -2, -3])
+        lcs_4 = LCS(r_mat_y(1 / 2), [1, 2, 3])
+        lcs_5 = LCS(r_mat_y(3 / 2), [2, 3, 1])
         csm_default.add_cs("lcs1", "root", lcs_1)
         csm_default.add_cs("lcs2", "root", lcs_2)
         csm_default.add_cs("lcs3", "lcs1", lcs_3)
@@ -1826,28 +1826,28 @@ class TestCoordinateSystemManager:
     @pytest.fixture()
     def list_of_csm_and_lcs_instances(self):
         """Get a list of LCS and CSM instances."""
-        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(11)]
+        lcs = [LCS(coordinates=[i, 0, 0]) for i in range(11)]
 
-        csm_0 = self.CSM("lcs0", "csm0")
+        csm_0 = CSM("lcs0", "csm0")
         csm_0.add_cs("lcs1", "lcs0", lcs[1])
         csm_0.add_cs("lcs2", "lcs0", lcs[2])
         csm_0.add_cs("lcs3", "lcs2", lcs[3])
 
-        csm_1 = self.CSM("lcs0", "csm1")
+        csm_1 = CSM("lcs0", "csm1")
         csm_1.add_cs("lcs4", "lcs0", lcs[4])
 
-        csm_2 = self.CSM("lcs5", "csm2")
+        csm_2 = CSM("lcs5", "csm2")
         csm_2.add_cs("lcs3", "lcs5", lcs[5], lsc_child_in_parent=False)
         csm_2.add_cs("lcs6", "lcs5", lcs[6])
 
-        csm_3 = self.CSM("lcs6", "csm3")
+        csm_3 = CSM("lcs6", "csm3")
         csm_3.add_cs("lcs7", "lcs6", lcs[7])
         csm_3.add_cs("lcs8", "lcs6", lcs[8])
 
-        csm_4 = self.CSM("lcs9", "csm4")
+        csm_4 = CSM("lcs9", "csm4")
         csm_4.add_cs("lcs3", "lcs9", lcs[9], lsc_child_in_parent=False)
 
-        csm_5 = self.CSM("lcs7", "csm5")
+        csm_5 = CSM("lcs7", "csm5")
         csm_5.add_cs("lcs10", "lcs7", lcs[10])
 
         csm = [csm_0, csm_1, csm_2, csm_3, csm_4, csm_5]
@@ -1862,25 +1862,20 @@ class TestCoordinateSystemManager:
     #  fail.
     csm_acs = CSM("root")
     time = pd.DatetimeIndex(["2000-01-01", "2000-01-04"])
-    lcs_1_acs = LCS(coordinates=[0, 1, 2])
     # lcs_2_acs = LCS(coordinates=[[0, -1, -2], [8, 2, 7]], time=time)
-    lcs_2_acs = LCS(coordinates=[0, -1, -2])
-    lcs_3_acs = LCS(coordinates=[-1, -2, -3])
-    lcs_4_acs = LCS(r_mat_y(1 / 2), [1, 2, 3])
-    lcs_5_acs = LCS(r_mat_y(3 / 2), [2, 3, 1])
 
     @pytest.mark.parametrize(
         "name , parent, lcs, child_in_parent, exp_num_cs",
         [
-            ("lcs1", "root", lcs_1_acs, True, 2),
-            ("lcs2", "root", lcs_2_acs, False, 3),
-            ("lcs3", "lcs2", lcs_4_acs, True, 4),
-            ("lcs3", "lcs2", lcs_3_acs, True, 4),
-            ("lcs2", "lcs3", lcs_3_acs, False, 4),
-            ("lcs2", "lcs3", lcs_3_acs, True, 4),
-            ("lcs4", "lcs2", lcs_1_acs, True, 5),
-            ("lcs4", "lcs2", lcs_4_acs, True, 5),
-            ("lcs5", "lcs1", lcs_5_acs, True, 6),
+            ("lcs1", "root", LCS(coordinates=[0, 1, 2]), True, 2),
+            ("lcs2", "root", LCS(coordinates=[0, -1, -2]), False, 3),
+            ("lcs3", "lcs2", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 4),
+            ("lcs3", "lcs2", LCS(coordinates=[-1, -2, -3]), True, 4),
+            ("lcs2", "lcs3", LCS(coordinates=[-1, -2, -3]), False, 4),
+            ("lcs2", "lcs3", LCS(coordinates=[-1, -2, -3]), True, 4),
+            ("lcs4", "lcs2", LCS(coordinates=[0, 1, 2]), True, 5),
+            ("lcs4", "lcs2", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 5),
+            ("lcs5", "lcs1", LCS(r_mat_y(3 / 2), [2, 3, 1]), True, 6),
         ],
     )
     def test_add_coordinate_system(
@@ -1965,6 +1960,17 @@ class TestCoordinateSystemManager:
                 csm.add_cs("lcs_2", "root", lcs_2)
         else:
             csm.add_cs("lcs_2", "root", lcs_2)
+
+    # test_add_coordinate_system_timeseries --------------------------------------------
+
+    @staticmethod
+    def test_add_coordinate_system_timeseries():
+        csm = CSM("r")
+        me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+        ts = TimeSeries(me)
+        lcs = LCS(coordinates=ts)
+
+        csm.add_cs("cs1", "r", lcs)
 
     # test_add_coordinate_system_exceptions --------------------------------------------
 
@@ -3316,7 +3322,7 @@ class TestCoordinateSystemManager:
 
         count = 0
         for parent_cs, target_csm in additional_cs.items():
-            lcs = self.LCS(coordinates=[count, count + 1, count + 2])
+            lcs = LCS(coordinates=[count, count + 1, count + 2])
             csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
             csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
             count += 1
@@ -3374,7 +3380,7 @@ class TestCoordinateSystemManager:
 
         count = 0
         for parent_cs, target_csm in additional_cs.items():
-            lcs = self.LCS(coordinates=[count, count + 1, count + 2])
+            lcs = LCS(coordinates=[count, count + 1, count + 2])
             csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
             csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
             if target_csm in [3, 5]:
@@ -3452,7 +3458,7 @@ class TestCoordinateSystemManager:
         # add some additional coordinate systems
         target_system_index = [0, 2, 5, 7, 10]
         for i, _ in enumerate(target_system_index):
-            lcs = self.LCS(coordinates=[i, 2 * i, -i])
+            lcs = LCS(coordinates=[i, 2 * i, -i])
             csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
 
         # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
@@ -3502,10 +3508,10 @@ class TestCoordinateSystemManager:
         csm_mg = deepcopy(csm[0])
 
         csm_n3 = deepcopy(csm[3])
-        csm_n3.add_cs("nes0", "lcs8", self.LCS(coordinates=[1, 2, 3]))
+        csm_n3.add_cs("nes0", "lcs8", LCS(coordinates=[1, 2, 3]))
         csm_n3.merge(csm[5])
         csm_n2 = deepcopy(csm[2])
-        csm_n2.add_cs("nes1", "lcs5", self.LCS(coordinates=[-1, -2, -3]))
+        csm_n2.add_cs("nes1", "lcs5", LCS(coordinates=[-1, -2, -3]))
         csm_n2.merge(csm_n3)
         csm_mg.merge(csm[1])
         csm_mg.merge(csm[4])
@@ -3514,7 +3520,7 @@ class TestCoordinateSystemManager:
         # add some additional coordinate systems
         target_system_indices = [0, 2, 5, 7, 10]
         for i, target_system_index in enumerate(target_system_indices):
-            lcs = self.LCS(coordinates=[i, 2 * i, -i])
+            lcs = LCS(coordinates=[i, 2 * i, -i])
             csm_mg.add_cs(f"add{i}", f"lcs{target_system_index}", lcs)
 
         # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
@@ -3534,20 +3540,20 @@ class TestCoordinateSystemManager:
 
     def test_plot(self):
         """Test if the plot function runs without problems. Output is not checked."""
-        csm_global = self.CSM("root", "global coordinate systems")
+        csm_global = CSM("root", "global coordinate systems")
         csm_global.create_cs("specimen", "root", coordinates=[1, 2, 3])
         csm_global.create_cs("robot head", "root", coordinates=[4, 5, 6])
 
-        csm_specimen = self.CSM("specimen", "specimen coordinate systems")
+        csm_specimen = CSM("specimen", "specimen coordinate systems")
         csm_specimen.create_cs("thermocouple 1", "specimen", coordinates=[1, 1, 0])
         csm_specimen.create_cs("thermocouple 2", "specimen", coordinates=[1, 4, 0])
 
-        csm_robot = self.CSM("robot head", "robot coordinate systems")
+        csm_robot = CSM("robot head", "robot coordinate systems")
         csm_robot.create_cs("torch", "robot head", coordinates=[0, 0, -2])
         csm_robot.create_cs("mount point 1", "robot head", coordinates=[0, 1, -1])
         csm_robot.create_cs("mount point 2", "robot head", coordinates=[0, -1, -1])
 
-        csm_scanner = self.CSM("scanner", "scanner coordinate systems")
+        csm_scanner = CSM("scanner", "scanner coordinate systems")
         csm_scanner.create_cs("mount point 1", "scanner", coordinates=[0, 0, 2])
 
         csm_robot.merge(csm_scanner)
