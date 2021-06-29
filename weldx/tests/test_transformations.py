@@ -3014,27 +3014,52 @@ class TestCoordinateSystemManager:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "lcs, in_lcs",
+        "lcs, in_lcs, exp_coords, exp_time, exp_angles",
         [
-            ("r", "tdp_ts"),
-            ("tdp_ts", "r"),
+            ("r", "ts", [[0, -1, -1], [0, -2, -1]], [1, 2], [0, -90]),
+            ("ts", "r", [[0, 1, 1], [-2, 0, 1]], [1, 2], [0, 90]),
+            ("s", "trl", [[0, 0, 0], [-1, 0, 0]], [2, 3], [0, 0]),
+            ("trl", "s", [[0, 0, 0], [1, 0, 0]], [2, 3], [0, 0]),
+            ("s", "r", [[1, 1, 1], [-2, 1, 1]], [1, 2], [0, 90]),
+            ("r", "s", [[-1, -1, -1], [-1, -2, -1]], [1, 2], [0, -90]),
+            ("trl", "r", [[1, 1, 1], [-2, 1, 1], [-3, 2, 1]], [1, 2, 3], [0, 90, 90]),
         ],
     )
-    def test_get_local_coordinate_system_timeseries(lcs, in_lcs):
+    def test_get_local_coordinate_system_timeseries(
+        lcs, in_lcs, exp_coords, exp_time, exp_angles
+    ):
+        """Test the get_cs method with one lcs having a `TimeSeries` as coordinates.
+
+        Parameters
+        ----------
+        lcs :
+            The lcs that should be transformed
+        in_lcs :
+            The target lcs
+        exp_coords :
+            Expected coordinates
+        exp_time :
+            The expected time (in seconds)
+        exp_angles :
+            The expected rotation angles around the z-axis
+
+        """
         me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]])})
         ts = TimeSeries(me)
+        rotation = WXRotation.from_euler("z", [0, 90], degrees=True).as_matrix()
+        translation = [[1, 0, 0], [2, 0, 0]]
+        exp_orient = WXRotation.from_euler("z", exp_angles, degrees=True).as_matrix()
 
         csm = CSM("r")
-        csm.create_cs(
-            "tdp_r", "r", coordinates=[[0, 0, 1], [0, 0, 2]], time=Q_([1, 2], "s")
-        )
-        csm.create_cs("ts", "r", coordinates=ts)
+        csm.create_cs("rot", "r", rotation, [0, 0, 1], time=Q_([1, 2], "s"))
+        csm.create_cs("ts", "rot", coordinates=ts)
         csm.create_cs("s", "ts", coordinates=[1, 0, 0])
-        csm.create_cs(
-            "tdp_ts", "ts", coordinates=[[1, 0, 0], [2, 0, 0]], time=Q_([3, 4], "s")
-        )
+        csm.create_cs("trl", "ts", coordinates=translation, time=Q_([2, 3], "s"))
 
-        csm.get_cs(lcs, in_lcs)
+        result = csm.get_cs(lcs, in_lcs)
+        assert np.allclose(result.orientation, exp_orient)
+        assert np.allclose(result.coordinates, exp_coords)
+        assert np.allclose(result.time_quantity.m, exp_time)
 
     # test_get_local_coordinate_system_exceptions --------------------------------------
 
@@ -3082,6 +3107,53 @@ class TestCoordinateSystemManager:
         # test
         with pytest.raises(exception_type):
             csm.get_cs(*function_arguments)
+
+    # test_get_cs_exception_timeseries -------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "lcs, in_lcs, exp_exception",
+        [
+            ("trl1", "ts", True),
+            # todo: revisit case below, returns itself without the need to calc anything
+            ("ts", "trl1", True),
+            ("s", "trl1", True),
+            ("trl1", "s", True),
+            ("trl1", "trl2", False),
+            ("trl2", "trl1", False),
+            ("r", "trl2", False),
+            ("trl2", "r", False),
+            ("s", "r", False),
+            ("r", "s", False),
+        ],
+    )
+    def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
+        """Test exceptions of get_cs method if 1 lcs has a `TimeSeries` as coordinates.
+
+        Parameters
+        ----------
+        lcs :
+            The lcs that should be transformed
+        in_lcs :
+            The target lcs
+        exp_exception :
+            Set to `True` if the transformation should raise
+
+        """
+        me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]])})
+        ts = TimeSeries(me)
+        translation = [[1, 0, 0], [2, 0, 0]]
+
+        csm = CSM("r")
+        csm.create_cs("trl1", "r", coordinates=translation, time=Q_([1, 2], "s"))
+        csm.create_cs("ts", "trl1", coordinates=ts)
+        csm.create_cs("s", "ts", coordinates=[1, 0, 0])
+        csm.create_cs("trl2", "ts", coordinates=translation, time=Q_([2, 3], "s"))
+        if exp_exception:
+            with pytest.raises(Exception):
+                csm.get_cs(lcs, in_lcs)
+        else:
+            csm.get_cs(lcs, in_lcs)
 
     # test_merge -----------------------------------------------------------------------
 
