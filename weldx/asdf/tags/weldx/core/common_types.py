@@ -138,4 +138,7 @@ class VariableTypeASDF(WeldxType):
         if "unit" in tree:  # convert to pint.Quantity
             data = Q_(data, tree["unit"])
 
-        return Variable(tree["name"], tree["dimensions"], data, tree["attrs"])
+        # FIXME: for some reason, "attrs" is not set in the tree (sometimes, e.g. coordinate transformation schema)
+        attrs = tree.get("attrs", None)
+
+        return Variable(tree["name"], tree["dimensions"], data, attrs)
