@@ -1,5 +1,6 @@
+import dataclasses
 from dataclasses import dataclass
-from typing import List
+from typing import List, Mapping, Hashable, Any
 
 import numpy as np
 import pint
@@ -35,6 +36,7 @@ class Variable:
     name: str
     dimensions: List
     data: np.ndarray
+    attrs: Mapping[Hashable, Any] = dataclasses.field(default_factory=dict)
 
 
 class VariableTypeASDF(WeldxType):
@@ -105,6 +107,7 @@ class VariableTypeASDF(WeldxType):
             "dimensions": node.dimensions,
             "dtype": dtype,
             "data": data,
+            "attrs": node.attrs,
         }
         if unit:
             tree["unit"] = unit
@@ -135,4 +138,4 @@ class VariableTypeASDF(WeldxType):
         if "unit" in tree:  # convert to pint.Quantity
             data = Q_(data, tree["unit"])
 
-        return Variable(tree["name"], tree["dimensions"], data)
+        return Variable(tree["name"], tree["dimensions"], data, tree["attrs"])
