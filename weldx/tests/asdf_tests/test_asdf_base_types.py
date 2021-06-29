@@ -20,11 +20,19 @@ def test_uuid():
 
 
 # --------------------------------------------------------------------------------------
-# xarray.DataSet
+# xarray
 # --------------------------------------------------------------------------------------
+def test_dataarray():
+    da = xr.DataArray(np.random.randn(2, 3), dims=("x", "y"), coords={"x": [10, 20]})
+    da.attrs["long_name"] = "random velocity"
+    # add metadata to coordinate
+    da.x.attrs["units"] = "x units"
+    da2 = write_read_buffer({"da": da})["da"]
+    assert da2.identical(da)
+
+
 def test_dataset_children():
     da = xr.DataArray(np.arange(10), name="arr1", attrs={"name": "sample data"})
     ds = da.to_dataset()
     ds2 = write_read_buffer({"ds": ds})["ds"]
-    assert ds.arr1.attrs == ds2.arr1.attrs
-    assert np.all(ds.arr1 == ds2.arr1)
+    assert ds2.identical(ds)
