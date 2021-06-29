@@ -34,18 +34,15 @@ class XarrayDatasetASDF(WeldxType):
 
         """
         attributes = node.attrs
-        coordinates = []
-        dimensions = []
-        variables = []
-
-        for name, length in dict(node.dims).items():
-            dimensions.append(ct.Dimension(name, length))
-
-        for name, data in node.data_vars.items():
-            variables.append(ct.Variable(name, data.dims, data.data))
-
-        for name, data in node.coords.items():
-            coordinates.append(ct.Variable(name, data.dims, data.data))
+        coordinates = [
+            ct.Variable(name, da.dims, da.data, da.attrs)
+            for name, da in node.coords.items()
+        ]
+        dimensions = [ct.Dimension(name, length) for name, length in node.dims.items()]
+        variables = [
+            ct.Variable(name, da.dims, da.data, da.attrs)
+            for name, da in node.data_vars.items()
+        ]
 
         tree = {
             "attributes": attributes,
@@ -53,11 +50,6 @@ class XarrayDatasetASDF(WeldxType):
             "dimensions": dimensions,
             "variables": variables,
         }
-
-        # variables = []
-        # for variable_name in node:
-        #    variables.append(netcdf.NetCDFVariable(node[variable_name]))
-        # tree = {"coordinates": dict(node.coords), "variables": variables}
 
         return tree
 
@@ -80,17 +72,9 @@ class XarrayDatasetASDF(WeldxType):
             An instance of the 'xarray.Dataset' type.
 
         """
-        data_vars = {}
+        data_vars = {v.name: (v.dimensions, v.data, v.attrs) for v in tree["variables"]}
+        coords = {c.name: (c.dimensions, c.data, c.attrs) for c in tree["coordinates"]}
 
-        for variable in tree["variables"]:
-            data_vars[variable.name] = (variable.dimensions, variable.data)
+        ds = Dataset(data_vars=data_vars, coords=coords, attrs=tree["attributes"])
 
-        coords = {}
-        for coordinate in tree["coordinates"]:
-            coords[coordinate.name] = (coordinate.dimensions, coordinate.data)
-
-        obj = Dataset(data_vars=data_vars, coords=coords)
-
-        obj.attrs = tree["attributes"]
-
-        return obj
+        return ds
