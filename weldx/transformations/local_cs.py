@@ -893,6 +893,11 @@ class LocalCoordinateSystem:
             Inverted coordinate system.
 
         """
+        if isinstance(self.coordinates, TimeSeries):
+            raise Exception(
+                "Can not invert coordinates that are described by an expression. "
+                "Use 'interp_time' to create discrete values."
+            )
         orientation = ut.xr_transpose_matrix_data(self.orientation, dim1="c", dim2="v")
         coordinates = ut.xr_matmul(
             self.orientation,
