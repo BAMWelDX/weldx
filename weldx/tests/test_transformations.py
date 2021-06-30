@@ -1865,8 +1865,9 @@ LCS = tf.LocalCoordinateSystem
 class TestCoordinateSystemManager:
     """Test the CoordinateSystemManager class."""
 
+    @staticmethod
     @pytest.fixture
-    def csm_fix(self):
+    def csm_fix():
         """Create default coordinate system fixture."""
         csm_default = CSM("root")
         lcs_1 = LCS(coordinates=[0, 1, 2])
@@ -1882,8 +1883,9 @@ class TestCoordinateSystemManager:
 
         return csm_default
 
+    @staticmethod
     @pytest.fixture()
-    def list_of_csm_and_lcs_instances(self):
+    def list_of_csm_and_lcs_instances():
         """Get a list of LCS and CSM instances."""
         lcs = [LCS(coordinates=[i, 0, 0]) for i in range(11)]
 
@@ -3455,6 +3457,7 @@ class TestCoordinateSystemManager:
 
     # test_unmerge_merged_serially -----------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "additional_cs",
         [
@@ -3475,9 +3478,7 @@ class TestCoordinateSystemManager:
         ],
     )
     @pytest.mark.slow
-    def test_unmerge_merged_serially(
-        self, list_of_csm_and_lcs_instances, additional_cs
-    ):
+    def test_unmerge_merged_serially(list_of_csm_and_lcs_instances, additional_cs):
         """Test the CSM unmerge function.
 
         In this test case, all sub systems are merged into the same target system.
@@ -3512,6 +3513,7 @@ class TestCoordinateSystemManager:
 
     # test_unmerge_merged_nested -------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "additional_cs",
         [
@@ -3532,7 +3534,7 @@ class TestCoordinateSystemManager:
         ],
     )
     @pytest.mark.slow
-    def test_unmerge_merged_nested(self, list_of_csm_and_lcs_instances, additional_cs):
+    def test_unmerge_merged_nested(list_of_csm_and_lcs_instances, additional_cs):
         """Test the CSM unmerge function.
 
         In this test case, several systems are merged together before they are merged
@@ -3593,6 +3595,7 @@ class TestCoordinateSystemManager:
 
     # test_delete_cs_with_serially_merged_subsystems -----------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "name, subsystems_exp, num_cs_exp",
         [
@@ -3614,7 +3617,7 @@ class TestCoordinateSystemManager:
         ],
     )
     def test_delete_cs_with_serially_merged_subsystems(
-        self, list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
+        list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
     ):
         """Test the delete_cs function with subsystems that were merged serially."""
         # setup -------------------------------------------
@@ -3649,6 +3652,7 @@ class TestCoordinateSystemManager:
 
     # test_delete_cs_with_nested_subsystems --------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "name, subsystems_exp, num_cs_exp",
         [
@@ -3672,7 +3676,7 @@ class TestCoordinateSystemManager:
         ],
     )
     def test_delete_cs_with_nested_subsystems(
-        self, list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
+        list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
     ):
         """Test the delete_cs function with nested subsystems."""
         # setup -------------------------------------------
@@ -3711,7 +3715,8 @@ class TestCoordinateSystemManager:
 
     # test_plot ------------------------------------------------------------------------
 
-    def test_plot(self):
+    @staticmethod
+    def test_plot():
         """Test if the plot function runs without problems. Output is not checked."""
         csm_global = CSM("root", "global coordinate systems")
         csm_global.create_cs("specimen", "root", coordinates=[1, 2, 3])
