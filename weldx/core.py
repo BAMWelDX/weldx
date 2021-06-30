@@ -132,7 +132,11 @@ class MathematicalExpression:
                 equality = simplify(self.expression - other.expression) == 0
 
             if check_parameters:
-                equality = equality and self._parameters == other.parameters
+                from weldx.util import compare_nested
+
+                equality = equality and compare_nested(
+                    self._parameters, other.parameters
+                )
             return equality
         return False
 

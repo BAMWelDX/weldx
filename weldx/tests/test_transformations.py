@@ -3,7 +3,7 @@
 import math
 import random
 from copy import deepcopy
-from typing import Any, List, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -1371,6 +1371,65 @@ class TestLocalCoordinateSystem:
             time_exp,
             time_ref_exp,
         )
+
+    # test_comparison_coords_timeseries ------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "kwargs_me_other_upd, kwargs_ts_other_upd, kwargs_other_upd, exp_result",
+        [
+            ({}, {}, {}, True),
+            (dict(expression="2*a*t"), {}, {}, False),
+            (dict(parameters=dict(a=Q_([[2, 0, 0]], "1/s"))), {}, {}, False),
+            ({}, dict(data=Q_([1, 2], ""), time=Q_([1, 2], "s")), {}, False),
+            ({}, {}, dict(orientation=[[0, -1, 0], [1, 0, 0], [0, 0, 1]]), False),
+            ({}, {}, dict(time_ref=TS("11:12")), False),
+        ],
+    )
+    def test_comparison_coords_timeseries(
+        kwargs_me_other_upd: Dict,
+        kwargs_ts_other_upd: Dict,
+        kwargs_other_upd: Dict,
+        exp_result: bool,
+    ):
+        """Test the comparison operator with a TimeSeries as coordinates.
+
+        Parameters
+        ----------
+        kwargs_me_other_upd :
+            Set of key word arguments that should be passed to the `__init__` method of
+            the `MathematicalExpression` of the `TimeSeries` that will be passed to the
+            second lcs. All missing kwargs will get default values.
+        kwargs_ts_other_upd :
+            Set of key word arguments that should be passed to the `__init__` method of
+            the `TimeSeries` of the second lcs. All missing kwargs will get default
+            values.
+        kwargs_other_upd :
+            Set of key word arguments that should be passed to the `__init__` method of
+            the second lcs. All missing kwargs will get default values.
+        exp_result :
+            Expected result of the comparison
+
+        """
+        me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+        ts = TimeSeries(data=me)
+        lcs = LCS(coordinates=ts)
+
+        kwargs_me_other = dict(expression=me.expression, parameters=me.parameters)
+        kwargs_me_other.update(kwargs_me_other_upd)
+        me_other = MathematicalExpression(**kwargs_me_other)
+
+        kwargs_ts_other = dict(data=me_other, time=None, interpolation=None)
+        kwargs_ts_other.update(kwargs_ts_other_upd)
+        ts_other = TimeSeries(**kwargs_ts_other)
+
+        kwargs_other = dict(
+            orientation=None, coordinates=ts_other, time=None, time_ref=None
+        )
+        kwargs_other.update(kwargs_other_upd)
+        lcs_other = LCS(**kwargs_other)
+
+        assert (lcs == lcs_other) == exp_result
 
 
 def test_coordinate_system_init():

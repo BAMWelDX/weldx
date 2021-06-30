@@ -238,9 +238,17 @@ class LocalCoordinateSystem:
 
     def __eq__(self: "LocalCoordinateSystem", other: "LocalCoordinateSystem") -> bool:
         """Check equality of LocalCoordinateSystems."""
+
+        def _comp_coords():
+            if not isinstance(self.coordinates, type(other.coordinates)):
+                return False
+            if isinstance(self.coordinates, TimeSeries):
+                return self.coordinates == other.coordinates
+            return self.coordinates.identical(other.coordinates)
+
         return (
             self.orientation.identical(other.orientation)
-            and self.coordinates.identical(other.coordinates)
+            and _comp_coords()
             and self.reference_time == other.reference_time
         )
 
