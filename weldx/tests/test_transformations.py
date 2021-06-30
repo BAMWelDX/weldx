@@ -646,7 +646,7 @@ class TestLocalCoordinateSystem:
         ],
     )
     def test_init_time_series_as_coord(time, time_ref, angles):
-        """Test if a fitting `TimeSeries` can be used as coordinates
+        """Test if a fitting `TimeSeries` can be used as coordinates.
 
         Parameters
         ----------

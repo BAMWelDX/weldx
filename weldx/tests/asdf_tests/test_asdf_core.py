@@ -237,7 +237,7 @@ def test_local_coordinate_system(
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize("has_ref_time", [True, False])
 @pytest.mark.parametrize("has_tdp_orientation", [True, False])
-def test_local_coordinate_system(
+def test_local_coordinate_system_coords_timeseries(
     copy_arrays, lazy_load, has_ref_time, has_tdp_orientation
 ):
     """Test reading and writing a LCS with a `TimeSeries` as coordinates to asdf."""
