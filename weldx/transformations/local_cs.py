@@ -114,7 +114,7 @@ class LocalCoordinateSystem:
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
-        # todo: rewrite
+        # todo: rewrite if expressions are fully supported
         return self._dataset.__repr__().replace(
             "<xarray.Dataset", "<LocalCoordinateSystem"
         )
@@ -774,8 +774,10 @@ class LocalCoordinateSystem:
     @property
     def is_unity_translation(self) -> bool:
         """Return true if the LCS has a zero translation/coordinates value."""
-        if self.coordinates.shape[-1] == 3 and np.allclose(
-            self.coordinates, np.zeros(3)
+        if (
+            not isinstance(self.coordinates, TimeSeries)
+            and self.coordinates.shape[-1] == 3
+            and np.allclose(self.coordinates, np.zeros(3))
         ):
             return True
         return False

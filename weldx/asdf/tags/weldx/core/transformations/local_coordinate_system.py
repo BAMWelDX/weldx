@@ -4,6 +4,7 @@ import pint
 from weldx.asdf.tags.weldx.core.common_types import Variable
 from weldx.asdf.types import WeldxType
 from weldx.asdf.validators import wx_shape_validator
+from weldx.core import TimeSeries
 from weldx.transformations import LocalCoordinateSystem
 
 
@@ -49,7 +50,9 @@ class LocalCoordinateSystemASDF(WeldxType):
             tree["orientations"] = orientations
 
         coordinates = None
-        if not node.is_unity_translation:
+        if isinstance(node.coordinates, TimeSeries):
+            tree["coordinates"] = node.coordinates
+        elif not node.is_unity_translation:
             coordinates = Variable(
                 "coordinates", node.coordinates.dims, node.coordinates.data
             )
@@ -87,27 +90,17 @@ class LocalCoordinateSystemASDF(WeldxType):
             An instance of the 'LocalCoordinateSystem' type.
 
         """
-        orientations = None
-        if "orientations" in tree:
-            orientations = tree["orientations"].data
+        orientations = tree.get("orientations")
+        if orientations is not None:
+            orientations = orientations.data
 
-        coordinates = None
-        if "coordinates" in tree:
+        coordinates = tree.get("coordinates")
+        if coordinates is not None and not isinstance(coordinates, TimeSeries):
             coordinates = tree["coordinates"].data
-
-        if "time" in tree:
-            time = tree["time"]
-        else:
-            time = None
-
-        if "reference_time" in tree:
-            time_ref = tree["reference_time"]
-        else:
-            time_ref = None
 
         return LocalCoordinateSystem(
             orientation=orientations,
             coordinates=coordinates,
-            time=time,
-            time_ref=time_ref,
+            time=tree.get("time"),
+            time_ref=tree.get("reference_time"),
         )
