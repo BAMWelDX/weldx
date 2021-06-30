@@ -179,7 +179,7 @@ class Config:
             for standard in standards:
                 if not isinstance(standard, QualityStandard):
                     raise TypeError("Invalid quality standard.")
-                Config._add_quality_standard(standard)
+                Config.add_quality_standard(standard)
 
 
 def add_quality_standard(standard: QualityStandard):
