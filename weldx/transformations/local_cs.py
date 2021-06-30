@@ -903,7 +903,7 @@ class LocalCoordinateSystem:
         orientation = ut.xr_transpose_matrix_data(self.orientation, dim1="c", dim2="v")
         coordinates = ut.xr_matmul(
             self.orientation,
-            -self.coordinates,
+            self.coordinates * -1,
             dims_a=["c", "v"],
             dims_b=["c"],
             trans_a=True,
