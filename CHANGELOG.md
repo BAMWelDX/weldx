@@ -18,6 +18,8 @@
 
 ### changes
 
+- `LocalCoordinateSystem.__init__` now accepts a `TimeSeries` as input. 
+  [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
 - move tests folder to `weldx/tests` [[#323]](https://github.com/BAMWelDX/weldx/pull/323)
 - `get_yaml_header` received a new option parse, which optionally returns the parsed YAML header
