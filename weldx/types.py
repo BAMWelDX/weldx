@@ -7,6 +7,7 @@ __all__ = [
     "SupportsFileReadOnly",
     "SupportsFileReadWrite",
     "types_file_like",
+    "types_path_like",
     "types_path_and_file_like",
 ]
 

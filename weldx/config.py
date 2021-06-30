@@ -9,11 +9,13 @@ import yaml
 from asdf.config import ResourceMappingProxy
 from asdf.versioning import AsdfVersion, split_tag_version
 
+from weldx.types import types_path_like
+
 
 class QualityStandard:
     """Stores information about a quality standard."""
 
-    def __init__(self, resource_root_dir: Path):
+    def __init__(self, resource_root_dir: types_path_like):
         """Create a ``QualityStandard`` instance.
 
         Parameters
