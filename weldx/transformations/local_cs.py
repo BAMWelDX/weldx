@@ -658,7 +658,7 @@ class LocalCoordinateSystem:
         return self.dataset.orientation
 
     @property
-    def coordinates(self) -> xr.DataArray:
+    def coordinates(self) -> Union[xr.DataArray, TimeSeries]:
         """Get the coordinate systems coordinates.
 
         Returns
