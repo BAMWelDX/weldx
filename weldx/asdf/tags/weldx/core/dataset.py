@@ -75,6 +75,4 @@ class XarrayDatasetASDF(WeldxType):
         data_vars = {v.name: (v.dimensions, v.data, v.attrs) for v in tree["variables"]}
         coords = {c.name: (c.dimensions, c.data, c.attrs) for c in tree["coordinates"]}
 
-        ds = Dataset(data_vars=data_vars, coords=coords, attrs=tree["attributes"])
-
-        return ds
+        return Dataset(data_vars=data_vars, coords=coords, attrs=tree["attributes"])
