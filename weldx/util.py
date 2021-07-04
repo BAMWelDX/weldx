@@ -1083,9 +1083,9 @@ def xr_interp_orientation_in_time(
 
         # interpolate rotations in the intersecting time range
         rotations_key = Rot.from_matrix(dsx.transpose(..., "c", "v").data)
-        times_key = times_ds.astype(np.int64)
+        times_key = times_ds.view(np.int64)
         rotations_interp = Slerp(times_key, rotations_key)(
-            times_intersect.astype(np.int64)
+            times_intersect.view(np.int64)
         )
         dsx_out = xr_3d_matrix(rotations_interp.as_matrix(), times_intersect)
     else:
