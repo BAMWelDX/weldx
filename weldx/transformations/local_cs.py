@@ -707,20 +707,19 @@ class LocalCoordinateSystem:
     @property
     def is_unity_translation(self) -> bool:
         """Return true if the LCS has a zero translation/coordinates value."""
-        if self.coordinates.shape[-1] == 3 and np.allclose(
-            self.coordinates, np.zeros(3)
-        ):
-            return True
-        return False
+        coords = (
+            self.coordinates.data.magnitude
+            if isinstance(self.coordinates.data, pint.Quantity)
+            else self.coordinates.data
+        )
+        return coords.shape[-1] == 3 and np.allclose(coords, np.zeros(3))
 
     @property
     def is_unity_rotation(self) -> bool:
         """Return true if the LCS represents a unity rotation/orientations value."""
-        if self.orientation.shape[-2:] == (3, 3) and np.allclose(
-            self.orientation, np.eye(3)
-        ):
-            return True
-        return False
+        return self.orientation.shape[-2:] == (3, 3) and np.allclose(
+            self.orientation.values, np.eye(3)
+        )
 
     def as_euler(
         self, seq: str = "xyz", degrees: bool = False
