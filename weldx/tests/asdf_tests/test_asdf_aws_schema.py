@@ -21,6 +21,7 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
 from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
 from weldx.asdf.util import write_read_buffer
 from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.util import compare_nested
 
 # iso groove -----------------------------------------------------------------
 from weldx.welding.groove.iso_9692_1 import get_groove
@@ -101,4 +102,6 @@ def test_aws_example():
     tree = dict(process=process, weldment=weldment, base_metal=base_metal)
 
     data = write_read_buffer(tree)
-    assert isinstance(data, dict)
+    data.pop("asdf_library", None)
+    data.pop("history", None)
+    assert compare_nested(data, tree)
