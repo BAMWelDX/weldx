@@ -321,6 +321,7 @@ def dataclass_serialization_class(
         A new asdf serialization class.
 
     """
+    v = version
 
     def _noop(tree):
         return tree
@@ -332,7 +333,7 @@ def dataclass_serialization_class(
 
     class _SerializationClass(WeldxType):
         name = class_name
-        version = "1.0.0"
+        version = v
         types = [class_type]
         requires = ["weldx"]
         handle_dynamic_subclasses = True
