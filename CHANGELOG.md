@@ -56,6 +56,7 @@
 - replace references to base asdf tags with `-1.*` version wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
 - update `single-pass-weldx.1.0.0.schema` to allow groove types by
   wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
+- fix attributes serialization of DataSet children [[#384]](https://github.com/BAMWelDX/weldx/pull/384).  
 
 ### fixes
 
