@@ -124,11 +124,11 @@ def test_vector_is_close():
     "arg, expected",
     [
         # timedeltas
-        (TDI([42]), TDI([42])),
+        (TDI([42], unit="ns"), TDI([42], unit="ns")),
         (pd.timedelta_range("0s", "20s", 10), pd.timedelta_range("0s", "20s", 10)),
-        (np.timedelta64(42), TDI([42])),
-        (np.array([-10, 0, 20]).astype(np.timedelta64), TDI([-10, 0, 20])),
-        (Q_(42, "ns"), TDI([42])),
+        (np.timedelta64(42), TDI([42], unit="ns")),
+        (np.array([-10, 0, 20]).astype("timedelta64[ns]"), TDI([-10, 0, 20], "ns")),
+        (Q_(42, "ns"), TDI([42], unit="ns")),
         ("10s", TDI(["10s"])),
         (["5ms", "10s", "2D"], TDI(["5 ms", "10s", "2D"])),
         # datetimes

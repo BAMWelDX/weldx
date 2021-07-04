@@ -59,8 +59,13 @@ class ArcWeldingProcess:
             )
 
 
+def _from_tree(tree):
+    return dict(name_or_abbreviation=tree["name"])
+
+
 ArcWeldingProcessType = dataclass_serialization_class(
     class_type=ArcWeldingProcess,
     class_name="aws/process/arc_welding_process",
     version="1.0.0",
+    from_tree_mod=_from_tree,
 )
