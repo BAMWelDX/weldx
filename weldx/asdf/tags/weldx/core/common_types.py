@@ -1,6 +1,6 @@
 import dataclasses
 from dataclasses import dataclass
-from typing import List, Mapping, Hashable, Any
+from typing import Any, Hashable, List, Mapping
 
 import numpy as np
 import pint
@@ -107,7 +107,7 @@ class VariableTypeASDF(WeldxType):
             "dimensions": node.dimensions,
             "dtype": dtype,
             "data": data,
-            "attrs": node.attrs,
+            "attrs": node.attrs if node.attrs else None,
         }
         if unit:
             tree["unit"] = unit
