@@ -1,6 +1,6 @@
 import dataclasses
 from dataclasses import dataclass
-from typing import List, Mapping, Hashable, Any
+from typing import Any, Hashable, List, Mapping
 
 import numpy as np
 import pint
