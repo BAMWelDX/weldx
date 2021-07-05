@@ -107,7 +107,7 @@ class VariableTypeASDF(WeldxType):
             "dimensions": node.dimensions,
             "dtype": dtype,
             "data": data,
-            "attrs": node.attrs,
+            "attrs": node.attrs if node.attrs else None,
         }
         if unit:
             tree["unit"] = unit
