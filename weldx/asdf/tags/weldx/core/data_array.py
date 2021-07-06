@@ -34,11 +34,11 @@ class XarrayDataArrayASDF(WeldxType):
 
         """
         attributes = node.attrs
-        coordinates = []
-        data = ct.Variable("data", node.dims, node.data)
-
-        for name, coord_data in node.coords.items():
-            coordinates.append(ct.Variable(name, coord_data.dims, coord_data.data))
+        coordinates = [
+            ct.Variable(name, coord_data.dims, coord_data.data, attrs=coord_data.attrs)
+            for name, coord_data in node.coords.items()
+        ]
+        data = ct.Variable("data", node.dims, node.data, attrs={})
 
         tree = {
             "attributes": attributes,
@@ -69,12 +69,8 @@ class XarrayDataArrayASDF(WeldxType):
         """
         data = tree["data"].data
         dims = tree["data"].dimensions
-        coords = {}
-        for coordinate in tree["coordinates"]:
-            coords[coordinate.name] = (coordinate.dimensions, coordinate.data)
+        coords = {c.name: (c.dimensions, c.data, c.attrs) for c in tree["coordinates"]}
+        attrs = tree["attributes"]
 
-        obj = DataArray(data=data, coords=coords, dims=dims)
-
-        obj.attrs = tree["attributes"]
-
-        return obj
+        da = DataArray(data=data, coords=coords, dims=dims, attrs=attrs)
+        return da
