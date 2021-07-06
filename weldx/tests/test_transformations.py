@@ -633,7 +633,7 @@ class TestLocalCoordinateSystem:
         assert np.all(lcs.time == time_exp)
         assert lcs.reference_time == time_ref
 
-    # test_init_time_series_as_coord ---------------------------------------------------
+    # test_init_expr_time_series_as_coord ----------------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize("time_ref", [None, TS("2020-01-01")])
@@ -645,8 +645,8 @@ class TestLocalCoordinateSystem:
             (Q_([1, 2, 3], "s"), [1, 2, 3]),
         ],
     )
-    def test_init_time_series_as_coord(time, time_ref, angles):
-        """Test if a fitting `TimeSeries` can be used as coordinates.
+    def test_init_expr_time_series_as_coord(time, time_ref, angles):
+        """Test if a fitting, expression based `TimeSeries` can be used as coordinates.
 
         Parameters
         ----------
@@ -672,6 +672,19 @@ class TestLocalCoordinateSystem:
             orientation=orientation, coordinates=ts_coord, time=time, time_ref=time_ref
         )
         assert lcs.has_reference_time == (time_ref is not None)
+
+    # test_init_discrete_time_series_as_coord ------------------------------------------
+
+    @staticmethod
+    def test_init_expr_time_series_as_coord():
+        """Test if a fitting, discrete `TimeSeries` can be used as coordinates."""
+        data = Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1]], "")
+        time = Q_([1, 2, 3], "s")
+        ts_coords = TimeSeries(data, time)
+        lcs = LCS(coordinates=ts_coords)
+
+        assert np.allclose(lcs.coordinates, data.m)
+        assert np.all(lcs.time_quantity == time)
 
     # test_reset_reference_time --------------------------------------------------------
 
