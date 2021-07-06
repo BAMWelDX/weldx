@@ -75,7 +75,8 @@ class LocalCoordinateSystem:
             Cartesian coordinate system
 
         """
-        time, time_ref = build_time_index(time, time_ref)
+
+        time, time_ref = self._build_time_index(coordinates, time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
@@ -306,9 +307,13 @@ class LocalCoordinateSystem:
 
         """
         if isinstance(coordinates, TimeSeries):
-            return coordinates
+            if coordinates.is_expression:
+                return coordinates
+            coordinates = coordinates.interp_time(time).data.m
+
         if coordinates is None:
             coordinates = np.array([0, 0, 0])
+
         if not isinstance(coordinates, xr.DataArray):
             time_coordinates = None
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
@@ -321,6 +326,21 @@ class LocalCoordinateSystem:
         coordinates = coordinates.weldx.time_ref_restore()
 
         return coordinates
+
+    @staticmethod
+    def _build_time_index(
+        coordinates: Union[types_coordinates, TimeSeries] = None,
+        time: types_timeindex = None,
+        time_ref: pd.Timestamp = None,
+    ) -> Tuple[pd.TimedeltaIndex, pd.Timestamp]:
+        if (
+            isinstance(coordinates, TimeSeries)
+            and coordinates.is_discrete
+            and time is None
+        ):
+            time = coordinates.time
+
+        return build_time_index(time, time_ref)
 
     @staticmethod
     def _check_and_normalize_orientation(orientation: xr.DataArray) -> xr.DataArray:

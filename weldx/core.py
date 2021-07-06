@@ -532,6 +532,16 @@ class TimeSeries:
             self.data_array.attrs["interpolation"] = interpolation
 
     @property
+    def is_discrete(self) -> bool:
+        """Return `True` if the time series is described by discrete values."""
+        return not self.is_expression
+
+    @property
+    def is_expression(self) -> bool:
+        """Return `True` if the time series is described by an expression."""
+        return isinstance(self.data, MathematicalExpression)
+
+    @property
     def time(self) -> Union[None, pd.TimedeltaIndex]:
         """Return the data's timestamps.
 

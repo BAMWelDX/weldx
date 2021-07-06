@@ -1,6 +1,7 @@
 """Contains functions for coordinate transformations."""
 
 import math
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -25,7 +26,7 @@ __all__ = [
 def build_time_index(
     time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
-) -> pd.TimedeltaIndex:
+) -> Tuple[pd.TimedeltaIndex, pd.Timestamp]:
     """Build time index used for xarray objects.
 
     Parameters

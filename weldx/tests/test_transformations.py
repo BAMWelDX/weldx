@@ -1381,7 +1381,7 @@ class TestLocalCoordinateSystem:
             ({}, {}, {}, True),
             (dict(expression="2*a*t"), {}, {}, False),
             (dict(parameters=dict(a=Q_([[2, 0, 0]], "1/s"))), {}, {}, False),
-            ({}, dict(data=Q_([1, 2], ""), time=Q_([1, 2], "s")), {}, False),
+            ({}, dict(data=Q_(np.ones((2, 3)), ""), time=Q_([1, 2], "s")), {}, False),
             ({}, {}, dict(orientation=[[0, -1, 0], [1, 0, 0], [0, 0, 1]]), False),
             ({}, {}, dict(time_ref=TS("11:12")), False),
         ],
