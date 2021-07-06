@@ -42,9 +42,7 @@ class TestConfig:
         "standard, expect_validation_error",
         [
             (None, False),
-            # problem: once we have evaluated a file, changes have no effect anymore.
-            # Report upstream?
-            # ("test_standard", True),
+            ("test_standard", True),
         ],
     )
     def test_enable_quality_standard(standard: str, expect_validation_error: bool):
