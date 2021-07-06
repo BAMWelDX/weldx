@@ -676,7 +676,7 @@ class TestLocalCoordinateSystem:
     # test_init_discrete_time_series_as_coord ------------------------------------------
 
     @staticmethod
-    def test_init_expr_time_series_as_coord():
+    def test_init_discrete_time_series_as_coord():
         """Test if a fitting, discrete `TimeSeries` can be used as coordinates."""
         data = Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1]], "")
         time = Q_([1, 2, 3], "s")
