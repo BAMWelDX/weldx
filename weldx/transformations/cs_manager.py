@@ -477,7 +477,10 @@ class CoordinateSystemManager:
         edge_from_to["defined"] = True
 
         edge_to_from = self.graph.edges[(node_to, node_from)]
-        edge_to_from["lcs"] = lcs.invert()
+        if isinstance(lcs.coordinates, TimeSeries):
+            edge_to_from["lcs"] = None
+        else:
+            edge_to_from["lcs"] = lcs.invert()
         edge_to_from["defined"] = False
 
     @property
@@ -1401,6 +1404,8 @@ class CoordinateSystemManager:
                         "issue."
                     )
                 lcs = lcs.invert()
+            if len(path_edges) == 1:
+                return lcs
             lcs_result += lcs
         return lcs_result
 

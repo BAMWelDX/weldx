@@ -1952,6 +1952,16 @@ class TestCoordinateSystemManager:
             ("lcs4", "lcs2", LCS(coordinates=[0, 1, 2]), True, 5),
             ("lcs4", "lcs2", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 5),
             ("lcs5", "lcs1", LCS(r_mat_y(3 / 2), [2, 3, 1]), True, 6),
+            (
+                "lcs5",
+                "lcs1",
+                LCS(
+                    None,
+                    TimeSeries(MathematicalExpression("a*t", dict(a=Q_(1, "1/s")))),
+                ),
+                True,
+                6,
+            ),
         ],
     )
     def test_add_coordinate_system(
@@ -1964,9 +1974,11 @@ class TestCoordinateSystemManager:
         assert csm.number_of_coordinate_systems == exp_num_cs
         if child_in_parent:
             assert csm.get_cs(name, parent) == lcs
-            assert csm.get_cs(parent, name) == lcs.invert()
+            if not isinstance(lcs.coordinates, TimeSeries):
+                assert csm.get_cs(parent, name) == lcs.invert()
         else:
-            assert csm.get_cs(name, parent) == lcs.invert()
+            if not isinstance(lcs.coordinates, TimeSeries):
+                assert csm.get_cs(name, parent) == lcs.invert()
             assert csm.get_cs(parent, name) == lcs
 
     # test_add_cs_reference_time -------------------------------------------------------
@@ -3176,8 +3188,7 @@ class TestCoordinateSystemManager:
         "lcs, in_lcs, exp_exception",
         [
             ("trl1", "ts", True),
-            # todo: revisit case below, returns itself without the need to calc anything
-            ("ts", "trl1", True),
+            ("ts", "trl1", False),
             ("s", "trl1", True),
             ("trl1", "s", True),
             ("trl1", "trl2", False),
