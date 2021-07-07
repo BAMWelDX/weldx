@@ -223,63 +223,7 @@ def test_shape_validator_exceptions(test_input):
 @pytest.mark.parametrize(
     "test",
     [
-        UnitValidatorTestClass(
-            length_prop=Q_(1, "inch"),
-            velocity_prop=Q_(2, "km / s"),
-            current_prop=Q_(np.eye(2, 2), "mA"),
-            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
-            simple_prop={"value": float(3), "unit": "m"},
-        ),
-        pytest.param(
-            UnitValidatorTestClass(
-                length_prop=Q_(1, "s"),  # wrong unit
-                velocity_prop=Q_(2, "km / s"),
-                current_prop=Q_(np.eye(2, 2), "mA"),
-                nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
-                simple_prop={"value": float(3), "unit": "m"},
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            UnitValidatorTestClass(
-                length_prop=Q_(1, "s"),
-                velocity_prop=Q_(2, "liter"),  # wrong unit
-                current_prop=Q_(np.eye(2, 2), "mA"),
-                nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
-                simple_prop={"value": float(3), "unit": "m"},
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            UnitValidatorTestClass(
-                length_prop=Q_(1, "inch"),
-                velocity_prop=Q_(2, "km / s"),
-                current_prop=Q_(np.eye(2, 2), "V"),  # wrong unit
-                nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
-                simple_prop={"value": float(3), "unit": "m"},
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            UnitValidatorTestClass(
-                length_prop=Q_(1, "m"),
-                velocity_prop=Q_(2, "km / s"),
-                current_prop=Q_(np.eye(2, 2), "mA"),
-                nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "V")),  # wrong unit
-                simple_prop={"value": float(3), "unit": "m"},
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
-        pytest.param(
-            UnitValidatorTestClass(
-                length_prop=Q_(1, "m"),
-                velocity_prop=Q_(2, "km / s"),
-                current_prop=Q_(np.eye(2, 2), "mA"),
-                nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3")),
-                simple_prop={"value": float(3), "unit": "s"},  # wrong unit
-            ),
-            marks=pytest.mark.xfail(raises=ValidationError),
-        ),
+        UnitValidatorTestClass(),
     ],
 )
 def test_unit_validator(test):
@@ -292,3 +236,28 @@ def test_unit_validator(test):
     assert np.all(test_read.nested_prop["q1"] == test.nested_prop["q1"])
     assert test_read.nested_prop["q2"] == test.nested_prop["q2"]
     assert test_read.simple_prop == test.simple_prop
+
+
+@pytest.mark.parametrize(
+    "test",
+    [
+        UnitValidatorTestClass(
+            length_prop=Q_(1, "s"),  # wrong unit
+        ),
+        UnitValidatorTestClass(
+            velocity_prop=Q_(2, "liter"),  # wrong unit
+        ),
+        UnitValidatorTestClass(
+            current_prop=Q_(np.eye(2, 2), "V"),  # wrong unit
+        ),
+        UnitValidatorTestClass(
+            nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "V")),  # wrong unit
+        ),
+        UnitValidatorTestClass(
+            simple_prop={"value": float(3), "unit": "s"},  # wrong unit
+        ),
+    ],
+)
+def test_unit_validator_exception(test):
+    with pytest.raises(ValidationError):
+        write_read_buffer({"root_node": test})
