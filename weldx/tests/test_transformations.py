@@ -676,15 +676,25 @@ class TestLocalCoordinateSystem:
     # test_init_discrete_time_series_as_coord ------------------------------------------
 
     @staticmethod
-    def test_init_discrete_time_series_as_coord():
+    @pytest.mark.parametrize(
+        "data, time, conversion_factor",
+        [
+            (Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1]], "mm"), Q_([1, 2, 3], "s"), 1),
+            (Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1]], "m"), Q_([1, 2, 3], "s"), 1000),
+            (Q_([[1, 2, 3]], "mm"), Q_([1], "s"), 1),
+        ],
+    )
+    def test_init_discrete_time_series_as_coord(data, time, conversion_factor):
         """Test if a fitting, discrete `TimeSeries` can be used as coordinates."""
-        data = Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1], [2, 1, 1]], "mm")
-        time = Q_([1, 2, 3, 4], "s")
+
         ts_coords = TimeSeries(data, time)
         lcs = LCS(coordinates=ts_coords)
 
-        assert np.allclose(lcs.coordinates, data.m)
-        assert np.all(lcs.time_quantity == time)
+        assert np.allclose(lcs.coordinates, data.m * conversion_factor)
+        if len(time) == 1:
+            assert lcs.time is None
+        else:
+            assert np.all(lcs.time_quantity == time)
 
     # test_reset_reference_time --------------------------------------------------------
 

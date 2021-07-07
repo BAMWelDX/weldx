@@ -315,13 +315,16 @@ class LocalCoordinateSystem:
                     f"{coordinates.shape}"
                 )
             coordinates = coordinates.data_array
-            coordinates = coordinates.rename({coordinates.dims[1]: "c"})
-            coordinates = coordinates.assign_coords(dict(c=["x", "y", "z"]))
             # This is a workaround to remove the warning about stripped units. This line
             # should be removed once we add/require units in the lcs
             # Additionally, the correct unit should be checked for TimeSeries
             # (also expressions)
             coordinates.data = coordinates.data.to(UREG.mm).m
+            if coordinates.data.shape[0] == 1:
+                coordinates = coordinates.data.reshape(3)
+            else:
+                coordinates = coordinates.rename({coordinates.dims[1]: "c"})
+                coordinates = coordinates.assign_coords(dict(c=["x", "y", "z"]))
 
         if coordinates is None:
             coordinates = np.array([0, 0, 0])
