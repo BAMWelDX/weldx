@@ -326,6 +326,8 @@ def dataclass_serialization_class(
 
     """
     v = version
+    if validators is None:
+        validators = {}
     vals = validators
 
     def _noop(tree):
