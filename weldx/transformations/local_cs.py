@@ -58,9 +58,7 @@ class LocalCoordinateSystem:
             provided as orientation.
             Passing a scipy.spatial.transform.Rotation object is also supported.
         coordinates :
-            Coordinates of the origin. If the passed type is a `TimeSeries` with
-            discrete values and the ``time`` parameter is set, it will be interpolated
-            the values of ``time``.
+            Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems. If the provided coordinates
             and orientations contain only a single value, the coordinate system is
@@ -310,7 +308,14 @@ class LocalCoordinateSystem:
         if isinstance(coordinates, TimeSeries):
             if coordinates.is_expression:
                 return coordinates
-            coordinates = coordinates.interp_time(time).data.m
+            if coordinates.shape[1] != 3:
+                raise ValueError(
+                    "The shape of the TimeSeries must be (n, 3). It actually is: "
+                    f"{coordinates.shape}"
+                )
+            coordinates = coordinates.data_array
+            coordinates = coordinates.rename({coordinates.dims[1]: "c"})
+            coordinates = coordinates.assign_coords(dict(c=["x", "y", "z"]))
 
         if coordinates is None:
             coordinates = np.array([0, 0, 0])

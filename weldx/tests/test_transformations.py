@@ -678,8 +678,8 @@ class TestLocalCoordinateSystem:
     @staticmethod
     def test_init_discrete_time_series_as_coord():
         """Test if a fitting, discrete `TimeSeries` can be used as coordinates."""
-        data = Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1]], "")
-        time = Q_([1, 2, 3], "s")
+        data = Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1], [2, 1, 1]], "")
+        time = Q_([1, 2, 3, 4], "s")
         ts_coords = TimeSeries(data, time)
         lcs = LCS(coordinates=ts_coords)
 
