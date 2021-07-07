@@ -284,9 +284,8 @@ def test_local_coordinate_system_shape_violation():
         orientation=orientation, coordinates=coordinates, construction_checks=False
     )
 
-    # todo: undo comment once shape validation is working with time_series
-    # with pytest.raises(ValidationError):
-    #     write_buffer({"lcs": lcs})
+    with pytest.raises(ValidationError):
+        write_buffer({"lcs": lcs})
 
     # orientations have wrong shape -----------------------
     orientation = xr.DataArray(
