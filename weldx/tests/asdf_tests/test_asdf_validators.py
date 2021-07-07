@@ -224,6 +224,7 @@ def test_shape_validator_exceptions(test_input):
     "test",
     [
         UnitValidatorTestClass(),
+        UnitValidatorTestClass(length_prop=Q_(1, "inch")),
     ],
 )
 def test_unit_validator(test):

@@ -14,7 +14,7 @@ __all__ = ["UnitValidatorTestClass", "UnitValidatorTestClassType"]
 class UnitValidatorTestClass:
     """Testclass for validating pint.Quantities with wx_unit."""
 
-    length_prop: pint.Quantity = Q_(1, "inch")
+    length_prop: pint.Quantity = Q_(1, "m")
     velocity_prop: pint.Quantity = Q_(2, "km / s")
     current_prop: pint.Quantity = Q_(np.eye(2, 2), "mA")
     nested_prop: dict = field(
