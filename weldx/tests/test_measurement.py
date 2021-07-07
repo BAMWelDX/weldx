@@ -233,7 +233,7 @@ class TestMeasurementChain:
 
         mc.add_transformation(self._default_transformation(tf_kwargs))
 
-        signal = mc.get_signal("transformation")
+        signal = mc.output_signal
         assert signal.signal_type == exp_signal_type
         assert signal.unit == exp_signal_unit
 
