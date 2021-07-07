@@ -382,6 +382,8 @@ def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> Lis
             if isinstance(instance_dict["value"], dict):  # ndarray
                 return _get_instance_shape(instance_dict["value"])
             return [1]  # scalar
+        elif "weldx/core/variable" in instance_dict._tag:
+            return _get_instance_shape(instance_dict["data"])
 
     return None
 
