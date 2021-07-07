@@ -9,7 +9,7 @@ from weldx.asdf.extension import WxSyntaxError
 from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass
-from weldx.asdf.util import write_read_buffer
+from weldx.asdf.util import write_buffer, write_read_buffer
 from weldx.asdf.validators import _compare_tag_version, _custom_shape_validator
 from weldx.util import compare_nested
 
@@ -261,4 +261,4 @@ def test_unit_validator(test):
 )
 def test_unit_validator_exception(test):
     with pytest.raises(ValidationError):
-        write_read_buffer({"root_node": test})
+        write_buffer({"root_node": test})
