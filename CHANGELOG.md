@@ -12,7 +12,7 @@
 - add `"step"` as additional method to `util.xr_interp_like` [[#363]](https://github.com/BAMWelDX/weldx/pull/363)
 - add `util.compare_nested_eq` decorator for dataclasses with array-like
   fields [[#378]](https://github.com/BAMWelDX/weldx/pull/378)
-- adds a `dataclass_serialization_class` utility function that automatically generates the asdf serialization class for 
+- adds a `dataclass_serialization_class` utility function that automatically generates the asdf serialization class for
   python dataclasses. [[#380]](https://github.com/BAMWelDX/weldx/pull/380)
 - Added method to set the interpolation method to the `TimeSeries` [[#353]](https://github.com/BAMWelDX/weldx/pull/353)
 - Add `MeasurementChain.output_signal` property that returns the output signal of the `MeasurementChain`
@@ -30,7 +30,7 @@
     - now returns a new `TimeSeries` instead of a `xarray.DataArray`
     - if the data has already been interpolated before, a warning is emitted
     - `TimeSeries` supports now all interpolation methods supported by xarray
-- The `MeasurementChain` is now internally based on a `networkx.DiGraph`. New functions are also added to the class to 
+- The `MeasurementChain` is now internally based on a `networkx.DiGraph`. New functions are also added to the class to
   simplify its usage. [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
   The following additional changes were applied during the update of the `MeasurementChain`:
     - renamed `DataTransformation` class to `SignalTransformation`
@@ -44,7 +44,6 @@
 - Add new tutorial about the `MeasurementChain` [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
 - Updated the measurement tutorial [[#326]](https://github.com/BAMWelDX/weldx/pull/326)
 
-
 ### ASDF
 
 - fix inline array serialization for new 64bit inline limit [[#218]](https://github.com/BAMWelDX/weldx/pull/218)
@@ -54,12 +53,13 @@
 - add `core/graph/di_node`, `core/graph/di_edge` & `core/graph/di_graph` for implementing a
   generic `networkx.DiGraph` [[#330]](https://github.com/BAMWelDX/weldx/pull/330)
 - compatibility with ASDF-2.8 [[#355]](https://github.com/BAMWelDX/weldx/pull/355)
-- data attached to an instance of the `CoordinateSystemManger` is now also stored in a WelDX file 
+- data attached to an instance of the `CoordinateSystemManger` is now also stored in a WelDX file
   [[#364]](https://github.com/BAMWelDX/weldx/pull/339)
 - replace references to base asdf tags with `-1.*` version wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
 - update `single-pass-weldx.1.0.0.schema` to allow groove types by
   wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
-- fix attributes serialization of DataSet children [[#384]](https://github.com/BAMWelDX/weldx/pull/384).  
+- fix attributes serialization of DataSet children [[#384]](https://github.com/BAMWelDX/weldx/pull/384).
+- remove outdated `TimeSeries` shape validation code [[#399]](https://github.com/BAMWelDX/weldx/pull/399)
 
 ### fixes
 
