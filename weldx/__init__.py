@@ -63,9 +63,9 @@ __all__ = (
     "core",
     "geometry",
     "get_groove",
-    "get_groove",
     "measurement",
     "transformations",
     "util",
     "welding",
+    "TimeSeries",
 )

@@ -4,7 +4,7 @@ import numpy as np
 import pint
 
 from weldx import Q_
-from weldx.asdf.types import WeldxType
+from weldx.asdf.util import dataclass_serialization_class
 from weldx.asdf.validators import wx_unit_validator
 
 __all__ = ["UnitValidatorTestClass", "UnitValidatorTestClassType"]
@@ -23,25 +23,11 @@ class UnitValidatorTestClass:
     simple_prop: dict = field(default_factory=lambda: dict(value=float(3), unit="m"))
 
 
-class UnitValidatorTestClassType(WeldxType):
-    """Serialization testclass custom validators."""
-
-    name = "debug/test_unit_validator"
-    version = "1.0.0"
-    types = [UnitValidatorTestClass]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-    validators = {
+UnitValidatorTestClassType = dataclass_serialization_class(
+    class_type=UnitValidatorTestClass,
+    class_name="debug/test_unit_validator",
+    version="1.0.0",
+    validators={
         "wx_unit": wx_unit_validator,
-    }
-
-    @classmethod
-    def to_tree(cls, node: UnitValidatorTestClass, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = UnitValidatorTestClass(**tree)
-        return obj
+    },
+)
