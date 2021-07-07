@@ -33,6 +33,7 @@ from weldx.geometry import (
     ArcSegment,
     Geometry,
     LineSegment,
+    LinearHorizontalTraceSegment,
     Profile,
     Shape,
     Trace,
@@ -68,4 +69,5 @@ __all__ = (
     "util",
     "welding",
     "TimeSeries",
+    "LinearHorizontalTraceSegment",
 )
