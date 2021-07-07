@@ -685,8 +685,18 @@ class TestLocalCoordinateSystem:
         ],
     )
     def test_init_discrete_time_series_as_coord(data, time, conversion_factor):
-        """Test if a fitting, discrete `TimeSeries` can be used as coordinates."""
+        """Test if a fitting, discrete `TimeSeries` can be used as coordinates.
 
+        Parameters
+        ----------
+        data :
+            Data of the `TimeSeries`
+        time :
+            Time of the `TimeSeries`
+        conversion_factor :
+            The conversion factor of the data's quantity to `mm`
+
+        """
         ts_coords = TimeSeries(data, time)
         lcs = LCS(coordinates=ts_coords)
 
