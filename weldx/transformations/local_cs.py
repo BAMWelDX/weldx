@@ -13,6 +13,7 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
+from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import TimeSeries
 from weldx.transformations.types import (
     types_coordinates,
@@ -320,7 +321,7 @@ class LocalCoordinateSystem:
             # should be removed once we add/require units in the lcs
             # Additionally, the correct unit should be checked for TimeSeries
             # (also expressions)
-            coordinates.data = coordinates.data.m
+            coordinates.data = coordinates.data.to(UREG.mm).m
 
         if coordinates is None:
             coordinates = np.array([0, 0, 0])

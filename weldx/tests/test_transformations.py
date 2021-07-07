@@ -678,7 +678,7 @@ class TestLocalCoordinateSystem:
     @staticmethod
     def test_init_discrete_time_series_as_coord():
         """Test if a fitting, discrete `TimeSeries` can be used as coordinates."""
-        data = Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1], [2, 1, 1]], "")
+        data = Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1], [2, 1, 1]], "mm")
         time = Q_([1, 2, 3, 4], "s")
         ts_coords = TimeSeries(data, time)
         lcs = LCS(coordinates=ts_coords)
@@ -1394,7 +1394,7 @@ class TestLocalCoordinateSystem:
             ({}, {}, {}, True),
             (dict(expression="2*a*t"), {}, {}, False),
             (dict(parameters=dict(a=Q_([[2, 0, 0]], "1/s"))), {}, {}, False),
-            ({}, dict(data=Q_(np.ones((2, 3)), ""), time=Q_([1, 2], "s")), {}, False),
+            ({}, dict(data=Q_(np.ones((2, 3)), "mm"), time=Q_([1, 2], "s")), {}, False),
             ({}, {}, dict(orientation=[[0, -1, 0], [1, 0, 0], [0, 0, 1]]), False),
             ({}, {}, dict(time_ref=TS("11:12")), False),
         ],
