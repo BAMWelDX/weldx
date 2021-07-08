@@ -50,6 +50,7 @@ class MathematicalExpression:
                 raise ValueError(
                     f'"parameters" must be dictionary, got {type(parameters)}'
                 )
+            parameters = {k: Q_(v) for k, v in parameters.items()}
             variable_names = self.get_variable_names()
             for key in parameters:
                 if key not in variable_names:
@@ -350,6 +351,7 @@ class TimeSeries:
             interpolation = "step"
 
         # expand dim for scalar input
+        data = Q_(data)
         if not np.iterable(data):
             data = np.expand_dims(data, 0)
 
