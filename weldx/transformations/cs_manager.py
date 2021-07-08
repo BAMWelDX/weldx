@@ -1736,12 +1736,15 @@ class CoordinateSystemManager:
             edge for edge in self._graph.edges if not self._graph.edges[edge]["defined"]
         ]
 
+        def _is_edge_time_dependent(edge):
+            lcs = self._graph.edges[edge]["lcs"]
+            # inverse lcs contains a TimeSeries
+            if lcs is None:
+                return True
+            return lcs.is_time_dependent
+
         # separate time dependent and static edges
-        tdp_edges = [
-            edge
-            for edge in all_edges
-            if self.get_cs(edge[0], edge[1]).is_time_dependent
-        ]
+        tdp_edges = [edge for edge in all_edges if _is_edge_time_dependent(edge)]
         stc_edges = [edge for edge in all_edges if edge not in tdp_edges]
 
         from networkx import draw, draw_networkx_edges
