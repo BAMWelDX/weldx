@@ -289,8 +289,8 @@ class LocalCoordinateSystem:
 
         return orientation
 
-    @staticmethod
-    def _build_coordinates(coordinates, time: pd.DatetimeIndex = None):
+    @classmethod
+    def _build_coordinates(cls, coordinates, time: pd.DatetimeIndex = None):
         """Create xarray coordinates from different formats and time-inputs.
 
         Parameters
@@ -308,22 +308,7 @@ class LocalCoordinateSystem:
         if isinstance(coordinates, TimeSeries):
             if coordinates.is_expression:
                 return coordinates
-            if coordinates.shape[1] != 3:
-                raise ValueError(
-                    "The shape of the TimeSeries must be (n, 3). It actually is: "
-                    f"{coordinates.shape}"
-                )
-            coordinates = coordinates.data_array
-            # This is a workaround to remove the warning about stripped units. This line
-            # should be removed once we add/require units in the lcs
-            # Additionally, the correct unit should be checked for TimeSeries
-            # (also expressions)
-            coordinates.data = coordinates.data.to("mm").m
-            if coordinates.data.shape[0] == 1:
-                coordinates = coordinates.data.reshape(3)
-            else:
-                coordinates = coordinates.rename({coordinates.dims[1]: "c"})
-                coordinates = coordinates.assign_coords(dict(c=["x", "y", "z"]))
+            coordinates = cls._coords_from_time_series(coordinates)
 
         if coordinates is None:
             coordinates = np.array([0, 0, 0])
@@ -395,6 +380,29 @@ class LocalCoordinateSystem:
         else:
             # todo: check time series shape
             pass
+
+    @staticmethod
+    def _coords_from_time_series(time_series):
+        """Creates and returns compatible coordinates from a `TimeSeries`."""
+        if time_series.is_expression:
+            return time_series
+        if time_series.shape[1] != 3:
+            raise ValueError(
+                "The shape of the TimeSeries must be (n, 3). It actually is: "
+                f"{time_series.shape}"
+            )
+        coordinates = time_series.data_array
+        # This is a workaround to remove the warning about stripped units. This line
+        # should be removed once we add/require units in the lcs
+        # Additionally, the correct unit should be checked for TimeSeries
+        # (also expressions)
+        coordinates.data = coordinates.data.to("mm").m
+        if coordinates.data.shape[0] == 1:
+            return coordinates.data.reshape(3)
+
+        return coordinates.rename({coordinates.dims[1]: "c"}).assign_coords(
+            dict(c=["x", "y", "z"])
+        )
 
     @staticmethod
     def _unify_time_axis(
