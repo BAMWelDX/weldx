@@ -908,7 +908,8 @@ class LocalCoordinateSystem:
                 time_interp = time - self.reference_time
             coordinates = self.coordinates.interp_time(time_interp).data.m
             coordinates = self._build_coordinates(coordinates, time_interp)
-            coordinates.weldx.time_ref = self.reference_time
+            if self.has_reference_time:
+                coordinates.weldx.time_ref = self.reference_time
         else:
             coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
