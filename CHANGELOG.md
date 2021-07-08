@@ -18,7 +18,6 @@
 - Add `MeasurementChain.output_signal` property that returns the output signal of the `MeasurementChain`
   [[#394]](https://github.com/BAMWelDX/weldx/pull/394)
 
-
 ### changes
 
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
@@ -38,6 +37,8 @@
     - Added additional functionality to `Signal`, `SignalTransformation` and `GenericEquipment`
     - Removed `Data` class
     - Updated asdf schemas of all modified classes and the ones that contained references to those classes
+- allow input of string quantities in `MathematicalExpression` parameters and a few other
+  places [[#402]](https://github.com/BAMWelDX/weldx/pull/402)
 
 ### documentation
 
