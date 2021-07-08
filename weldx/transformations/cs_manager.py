@@ -1955,7 +1955,7 @@ class CoordinateSystemManager:
                 return self.graph.edges[(edge[1], edge[0])]["lcs"]
 
             lcs_list = [_get_lcs(edge) for edge in list_of_edges]
-            lcs_list = [lcs for lcs in lcs_list if lcs.time is not None]
+        lcs_list = [lcs for lcs in lcs_list if lcs.time is not None]
 
         if not lcs_list:
             return None
