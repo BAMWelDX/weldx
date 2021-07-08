@@ -308,7 +308,7 @@ class LocalCoordinateSystem:
         if isinstance(coordinates, TimeSeries):
             if coordinates.is_expression:
                 return coordinates
-            coordinates = cls._coords_from_time_series(coordinates)
+            coordinates = cls._coords_from_discrete_time_series(coordinates)
 
         if coordinates is None:
             coordinates = np.array([0, 0, 0])
@@ -382,10 +382,8 @@ class LocalCoordinateSystem:
             pass
 
     @staticmethod
-    def _coords_from_time_series(time_series):
-        """Creates and returns compatible coordinates from a `TimeSeries`."""
-        if time_series.is_expression:
-            return time_series
+    def _coords_from_discrete_time_series(time_series):
+        """Return compatible coordinates from a discrete `TimeSeries`."""
         if time_series.shape[1] != 3:
             raise ValueError(
                 "The shape of the TimeSeries must be (n, 3). It actually is: "
@@ -397,12 +395,11 @@ class LocalCoordinateSystem:
         # Additionally, the correct unit should be checked for TimeSeries
         # (also expressions)
         coordinates.data = coordinates.data.to("mm").m
-        if coordinates.data.shape[0] == 1:
-            return coordinates.data.reshape(3)
 
-        return coordinates.rename({coordinates.dims[1]: "c"}).assign_coords(
-            dict(c=["x", "y", "z"])
-        )
+        c_dict = dict(c=["x", "y", "z"])
+        if coordinates.data.shape[0] == 1:
+            return xr.DataArray(coordinates.data.reshape(3), dims=["c"], coords=c_dict)
+        return coordinates.rename({coordinates.dims[1]: "c"}).assign_coords(c_dict)
 
     @staticmethod
     def _unify_time_axis(
@@ -914,8 +911,11 @@ class LocalCoordinateSystem:
             time_interp = time
             if isinstance(time_interp, pd.DatetimeIndex):
                 time_interp = time - self.reference_time
-            coordinates = self.coordinates.interp_time(time_interp)
-            coordinates = self._build_coordinates(coordinates, time_interp)
+
+            coordinates = self._coords_from_discrete_time_series(
+                self.coordinates.interp_time(time_interp)
+            )
+
             if self.has_reference_time:
                 coordinates.weldx.time_ref = self.reference_time
         else:
