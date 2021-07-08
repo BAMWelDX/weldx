@@ -2691,6 +2691,74 @@ class TestCoordinateSystemManager:
         # check time_union result
         assert np.all(csm.time_union(list_of_edges=edges) == exp_time)
 
+    # test_time_union_time_series_coords -----------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        " tdp_orientation, add_discrete_lcs, list_of_edges, exp_time",
+        [
+            (False, False, None, None),
+            (True, False, None, [1, 2]),
+            (False, True, None, [2, 3]),
+            (True, True, None, [1, 2, 3]),
+            (False, True, [("tdp", "base"), ("ts", "base")], [2, 3]),
+            (False, True, [("tdp", "base"), ("base", "ts")], [2, 3]),
+            (False, True, [("st", "base"), ("ts", "base")], None),
+            (False, True, [("st", "base"), ("base", "ts")], None),
+            (False, True, [("ts", "base")], None),
+            (False, True, [("base", "ts")], None),
+            (False, True, [("tdp", "base"), ("st", "base")], [2, 3]),
+            (False, True, [("tdp", "base"), ("st", "base"), ("ts", "base")], [2, 3]),
+            (False, True, [("tdp", "base"), ("st", "base"), ("base", "ts")], [2, 3]),
+            (True, True, [("tdp", "base"), ("ts", "base")], [1, 2, 3]),
+            (True, True, [("tdp", "base"), ("base", "ts")], [1, 2, 3]),
+            (True, True, [("st", "base"), ("ts", "base")], [1, 2]),
+            (True, True, [("st", "base"), ("base", "ts")], [1, 2]),
+            (True, True, [("ts", "base")], [1, 2]),
+            (True, True, [("base", "ts")], [1, 2]),
+            (True, True, [("tdp", "base"), ("st", "base")], [2, 3]),
+            (True, True, [("tdp", "base"), ("st", "base"), ("ts", "base")], [1, 2, 3]),
+            (True, True, [("tdp", "base"), ("st", "base"), ("base", "ts")], [1, 2, 3]),
+        ],
+    )
+    def test_time_union_time_series_coords(
+        tdp_orientation, add_discrete_lcs, list_of_edges, exp_time
+    ):
+        """Test time_union with an lcs that has a `TimeSeries` as coordinates.
+
+        Parameters
+        ----------
+        tdp_orientation :
+            If `True`, the LCS with the `TimeSeries` also has discrete time dependent
+            orientations
+        add_discrete_lcs :
+            If `True`, another time dependent system with discrete values is added to
+            the CSM
+        list_of_edges :
+            A list of edges that should be passed to `time_union`
+        exp_time :
+            The expected time values (in seconds)
+
+        """
+        ts = TimeSeries(MathematicalExpression("a*t", dict(a=Q_([[1, 2, 3]], "mm/s"))))
+        lcs_ts_orientation = None
+        lcs_ts_time = None
+        if tdp_orientation:
+            lcs_ts_orientation = WXRotation.from_euler("x", [0, 2]).as_matrix()
+            lcs_ts_time = Q_([1, 2], "s")
+
+        csm = CSM("base")
+        csm.create_cs("st", "base", coordinates=[2, 2, 2])
+        csm.create_cs("ts", "base", lcs_ts_orientation, ts, lcs_ts_time)
+        if add_discrete_lcs:
+            csm.create_cs(
+                "tdp", "base", coordinates=[[2, 4, 5], [2, 2, 2]], time=Q_([2, 3], "s")
+            )
+
+        if exp_time is not None:
+            exp_time = TDI(exp_time, unit="s")
+        assert np.all(exp_time == csm.time_union(list_of_edges))
+
     # test_get_local_coordinate_system_no_time_dep -------------------------------------
 
     @staticmethod
