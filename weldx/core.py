@@ -23,7 +23,9 @@ class MathematicalExpression:
     """Mathematical expression using sympy syntax."""
 
     def __init__(
-        self, expression: Union[sympy.Expr, str], parameters: Union[Dict, None] = None
+        self,
+        expression: Union[sympy.Expr, str],
+        parameters: Dict[str, Union[pint.Quantity, str]] = None,
     ):
         """Construct a MathematicalExpression.
 
