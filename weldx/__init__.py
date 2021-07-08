@@ -13,6 +13,9 @@ except ModuleNotFoundError:  # pragma: no cover
         category=UserWarning,
     )
 
+# constants - should be imported first, no internal weldx deps
+from weldx.constants import WELDX_QUANTITY as Q_
+
 # main modules
 import weldx.transformations  # import this first to avoid circular dependencies
 import weldx.util
@@ -25,12 +28,12 @@ import weldx.asdf
 from weldx.asdf.file import WeldxFile
 
 # class imports to weldx namespace
-from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.geometry import (
     ArcSegment,
     Geometry,
     LineSegment,
+    LinearHorizontalTraceSegment,
     Profile,
     Shape,
     Trace,
@@ -61,9 +64,10 @@ __all__ = (
     "core",
     "geometry",
     "get_groove",
-    "get_groove",
     "measurement",
     "transformations",
     "util",
     "welding",
+    "TimeSeries",
+    "LinearHorizontalTraceSegment",
 )

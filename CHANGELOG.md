@@ -16,6 +16,10 @@
   python dataclasses. [[#380]](https://github.com/BAMWelDX/weldx/pull/380)
 - Added method to set the interpolation method to the `TimeSeries` [[#353]](https://github.com/BAMWelDX/weldx/pull/353)
 - Add `is_discrete` and `is_expression` properties to `TimeSeries` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
+- Add `MeasurementChain.output_signal` property that returns the output signal of the `MeasurementChain`
+  [[#394]](https://github.com/BAMWelDX/weldx/pull/394)
+
+
 
 ### changes
 
@@ -61,6 +65,8 @@
 - fix attributes serialization of DataSet children [[#384]](https://github.com/BAMWelDX/weldx/pull/384).
 - update `wx_shape` syntax in `local_coordinate_system-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - add custom `wx_shape` validation to `variable-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
+- remove outdated `TimeSeries` shape validation code [[#399]](https://github.com/BAMWelDX/weldx/pull/399)
+
 
 ### fixes
 

@@ -1053,6 +1053,11 @@ class MeasurementChain:
             self._graph.edges[edge]["transformation"].name for edge in self._graph.edges
         ]
 
+    @property
+    def output_signal(self) -> Signal:
+        """Get the output signal of the measurement chain."""
+        return self.signals[-1]
+
 
 @dataclass
 class Measurement:
