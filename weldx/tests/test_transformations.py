@@ -946,7 +946,7 @@ class TestLocalCoordinateSystem:
 
         # create expression
         expr = "a*t+b"
-        param = dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 1, 1])
+        param = dict(a=Q_([[1, 0, 0]], "mm/s"), b=Q_([1, 1, 1], "mm"))
         me = MathematicalExpression(expression=expr, parameters=param)
 
         # create orientation and time of LCS
@@ -3150,7 +3150,7 @@ class TestCoordinateSystemManager:
             The expected rotation angles around the z-axis
 
         """
-        me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]])})
+        me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
         ts = TimeSeries(me)
         rotation = WXRotation.from_euler("z", [0, 90], degrees=True).as_matrix()
         translation = [[1, 0, 0], [2, 0, 0]]
@@ -3245,7 +3245,7 @@ class TestCoordinateSystemManager:
             Set to `True` if the transformation should raise
 
         """
-        me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]])})
+        me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
         ts = TimeSeries(me)
         translation = [[1, 0, 0], [2, 0, 0]]
 

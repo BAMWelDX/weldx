@@ -914,7 +914,7 @@ class LocalCoordinateSystem:
             time_interp = time
             if isinstance(time_interp, pd.DatetimeIndex):
                 time_interp = time - self.reference_time
-            coordinates = self.coordinates.interp_time(time_interp).data.m
+            coordinates = self.coordinates.interp_time(time_interp)
             coordinates = self._build_coordinates(coordinates, time_interp)
             if self.has_reference_time:
                 coordinates.weldx.time_ref = self.reference_time
