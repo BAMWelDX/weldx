@@ -321,7 +321,8 @@ class TestWeldXFile:
         with pytest.raises(ValueError):
             WeldxFile(custom_schema="no")
 
-    def test_custom_schema_real_file(self, tmpdir):
+    @staticmethod
+    def test_custom_schema_real_file(tmpdir):
         """Passing real paths."""
         assert not pathlib.Path("single_pass_weld-1.0.0.schema").exists()
         shutil.copy(get_schema_path("single_pass_weld-1.0.0.schema"), ".")
