@@ -18,7 +18,7 @@
 - Add `is_discrete` and `is_expression` properties to `TimeSeries` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - Add `MeasurementChain.output_signal` property that returns the output signal of the `MeasurementChain`
   [[#394]](https://github.com/BAMWelDX/weldx/pull/394)
-  
+
 ### changes
 
 - `WXRotation.from_euler()` now accepts a `pint.Quantity` as input. [[#318]](https://github.com/BAMWelDX/weldx/pull/318)
@@ -66,7 +66,6 @@
 - update `wx_shape` syntax in `local_coordinate_system-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - add custom `wx_shape` validation to `variable-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - remove outdated `TimeSeries` shape validation code [[#399]](https://github.com/BAMWelDX/weldx/pull/399)
-
 
 ### fixes
 
