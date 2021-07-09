@@ -63,7 +63,8 @@ class WeldxFile(UserDict):
         If True, the changes to file will be written upon closing this. This is only
         relevant, if the file has been opened in write mode.
     custom_schema :
-        a path-like object to a custom schema which validates the tree.
+        A path-like object to a custom schema which validates the tree. All schemas
+        provided by weldx can be given by name as well.
     software_history_entry :
         An optional dictionary which will be used to add history entries upon
         modification of the file. It has to provide the following keys:
