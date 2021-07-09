@@ -6,6 +6,7 @@ import pytest
 
 from weldx import WeldxFile
 from weldx.config import QualityStandard, add_quality_standard, enable_quality_standard
+from weldx.measurement import MeasurementEquipment
 
 current_dir = Path(__file__).parent.absolute().as_posix()
 qs_dir = f"{current_dir}/data/quality_standard/resources/test_organization"
@@ -50,7 +51,7 @@ class TestConfig:
     def test_enable_quality_standard(standard: str, expect_validation_error: bool):
         """Test enabling quality standards.
 
-        The test uses the `GenericEquipment` class for test purposes. The standard
+        The test uses the `MeasurementEquipment` class for test purposes. The standard
         created for the tests expects it to have a `wx_metadata` property with a
         `serial_number` field.
 
@@ -60,15 +61,13 @@ class TestConfig:
             Name of the standard that should be enabled. If `None` is provided, no
             standard is enabled.
         expect_validation_error :
-            `True` if an unmodified instance of the `GenericEquipment` class should
+            `True` if an unmodified instance of the `MeasurementEquipment` class should
             yield a `ValidationError` when validated against the specified standard.
 
         """
         if standard is not None:
             add_quality_standard(QualityStandard(qs_dir))
             enable_quality_standard(name=standard)
-
-        from weldx.measurement import MeasurementEquipment
 
         ge = MeasurementEquipment(name="GE")
         if expect_validation_error:

@@ -29,6 +29,7 @@ import weldx.asdf
 from weldx.asdf.file import WeldxFile
 
 # class imports to weldx namespace
+from weldx.config import Config
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.geometry import (
     ArcSegment,
@@ -71,6 +72,7 @@ __all__ = (
     "welding",
     "TimeSeries",
     "LinearHorizontalTraceSegment",
+    "Config",
 )
 
 weldx.config.Config.load_installed_standards()

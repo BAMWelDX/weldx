@@ -5,10 +5,11 @@ id: "http://weldx.bam.de/schemas/weldx/equipment/measurement_equipment-1.0.0"
 tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
 
 title: |
-  A generic piece of equipment.
+  A piece of measurement equipment.
 description: |
-  Generic placeholder class do describe any kind of equipment with additional metadata.
+  This schema describes a piece of measurement equipment that is part of a measurement chain.
   Equipments can be associated with signal sources and data transformations.
+
 type: object
 properties:
   name:
