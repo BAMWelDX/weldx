@@ -171,14 +171,6 @@ class Config:
         asdf_config.add_resource_mapping(manifest_mapping)
         asdf_config.add_resource_mapping(schema_mapping)
 
-        # Since we modified the resource mapping, we have to clear the already loaded
-        # schema cache to make it possible to set another schema for a type.
-        # Note that this could bear inefficiencies due to lack of caching!
-        # FIXME: this is a hack into impl details of asdf and should be changed.
-        from asdf.schema import _load_schema_cached
-
-        _load_schema_cached.cache_clear()
-
     @staticmethod
     def load_installed_standards():
         """Load all standards that are installed to the active virtual environment."""
