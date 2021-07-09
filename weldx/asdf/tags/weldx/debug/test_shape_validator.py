@@ -5,7 +5,7 @@ import pandas as pd
 import pint
 
 from weldx import Q_, TimeSeries
-from weldx.asdf.types import WeldxType
+from weldx.asdf.util import dataclass_serialization_class
 from weldx.asdf.validators import wx_shape_validator
 
 __all__ = ["ShapeValidatorTestClass", "ShapeValidatorTestClassType"]
@@ -32,25 +32,11 @@ class ShapeValidatorTestClass:
     optional_prop: np.ndarray = None
 
 
-class ShapeValidatorTestClassType(WeldxType):
-    """Helper class to test the shape validator"""
-
-    name = "debug/test_shape_validator"
-    version = "1.0.0"
-    types = [ShapeValidatorTestClass]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-    validators = {
+ShapeValidatorTestClassType = dataclass_serialization_class(
+    class_type=ShapeValidatorTestClass,
+    class_name="debug/test_shape_validator",
+    version="1.0.0",
+    validators={
         "wx_shape": wx_shape_validator,
-    }
-
-    @classmethod
-    def to_tree(cls, node: ShapeValidatorTestClass, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = ShapeValidatorTestClass(**tree)
-        return obj
+    },
+)

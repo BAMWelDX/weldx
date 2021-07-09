@@ -229,10 +229,10 @@ def inherit_docstrings(cls):
 
 
 def sine(
-    f: pint.Quantity,
-    amp: pint.Quantity,
-    bias: pint.Quantity = None,
-    phase: pint.Quantity = Q_(0, "rad"),
+    f: Union[pint.Quantity, str],
+    amp: Union[pint.Quantity, str],
+    bias: Union[pint.Quantity, str] = None,
+    phase: Union[pint.Quantity, str] = Q_(0, "rad"),
 ) -> TimeSeries:
     """Create a simple sine TimeSeries from quantity parameters.
 
@@ -240,13 +240,13 @@ def sine(
 
     Parameters
     ----------
-    f : pint.Quantity
+    f :
         Frequency of the sine (in Hz)
-    amp : pint.Quantity
+    amp :
         Sine amplitude
-    bias : pint.Quantity
+    bias :
         function bias
-    phase : pint.Quantity
+    phase :
         phase shift
 
     Returns
@@ -255,9 +255,10 @@ def sine(
 
     """
     if bias is None:
+        amp = Q_(amp)
         bias = 0.0 * amp.u
     expr_string = "a*sin(o*t+p)+b"
-    parameters = {"a": amp, "b": bias, "o": Q_(2 * np.pi, "rad") * f, "p": phase}
+    parameters = {"a": amp, "b": bias, "o": Q_(2 * np.pi, "rad") * Q_(f), "p": phase}
     expr = MathematicalExpression(expression=expr_string, parameters=parameters)
     return TimeSeries(expr)
 

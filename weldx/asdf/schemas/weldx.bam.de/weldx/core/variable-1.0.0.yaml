@@ -34,6 +34,10 @@ properties:
     description: |
       Optional field describing the unit of the data as valid string representation.
     type: string
+  attrs:
+    description: |
+      Additional attributes metadata associated with the variable.
+    type: object
 
 required: [name, dimensions, dtype, data]
 propertyOrder: [name, dimensions, dtype, unit, data]

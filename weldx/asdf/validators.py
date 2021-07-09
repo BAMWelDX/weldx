@@ -375,8 +375,6 @@ def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> Lis
         elif "weldx/time/datetimeindex" in instance_dict._tag:
             return DatetimeIndexType.shape_from_tagged(instance_dict)
         elif "weldx/core/time_series" in instance_dict._tag:
-            if isinstance(instance_dict["value"], dict):  # ndarray
-                return _get_instance_shape(instance_dict["value"])
             return [1]  # scalar
         elif "asdf/unit/quantity" in instance_dict._tag:
             if isinstance(instance_dict["value"], dict):  # ndarray
