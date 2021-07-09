@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -13,14 +13,14 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
-
-from .types import (
+from weldx.core import TimeSeries
+from weldx.transformations.types import (
     types_coordinates,
     types_orientation,
     types_time_and_lcs,
     types_timeindex,
 )
-from .util import build_time_index, normalize
+from weldx.transformations.util import build_time_index, normalize
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
@@ -41,7 +41,7 @@ class LocalCoordinateSystem:
     def __init__(
         self,
         orientation: types_orientation = None,
-        coordinates: types_coordinates = None,
+        coordinates: Union[types_coordinates, TimeSeries] = None,
         time: types_timeindex = None,
         time_ref: pd.Timestamp = None,
         construction_checks: bool = True,
@@ -58,7 +58,7 @@ class LocalCoordinateSystem:
             provided as orientation.
             Passing a scipy.spatial.transform.Rotation object is also supported.
         coordinates :
-            Coordinates of the origin
+            Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems. If the provided coordinates
             and orientations contain only a single value, the coordinate system is
@@ -75,71 +75,46 @@ class LocalCoordinateSystem:
             Cartesian coordinate system
 
         """
-        if orientation is None:
-            orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
-        if coordinates is None:
-            coordinates = np.array([0, 0, 0])
-
-        time, time_ref = build_time_index(time, time_ref)
+        time, time_ref = self._build_time_index(coordinates, time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
-        if time is not None and not (
-            "time" in coordinates.coords or "time" in orientation.coords
+        if (
+            time is not None
+            and "time" not in orientation.coords
+            and (
+                isinstance(coordinates, TimeSeries) or "time" not in coordinates.coords
+            )
         ):
             warnings.warn(
-                "Neither the coordinates nor the orientation are time dependent. "
-                "Provided time is dropped"
+                "Provided time is dropped because of the given coordinates and "
+                "orientation."
             )
 
         if construction_checks:
-            ut.xr_check_coords(
-                coordinates,
-                dict(
-                    c={"values": ["x", "y", "z"]},
-                    time={"dtype": "timedelta64", "optional": True},
-                ),
-            )
+            self._check_coordinates(coordinates)
+            orientation = self._check_and_normalize_orientation(orientation)
 
-            ut.xr_check_coords(
-                orientation,
-                dict(
-                    c={"values": ["x", "y", "z"]},
-                    v={"values": [0, 1, 2]},
-                    time={"dtype": "timedelta64", "optional": True},
-                ),
-            )
+        orientation, coordinates = self._unify_time_axis(orientation, coordinates)
 
-            orientation = xr.apply_ufunc(
-                normalize,
-                orientation,
-                input_core_dims=[["c"]],
-                output_core_dims=[["c"]],
-            )
-
-            # vectorize test if orthogonal
-            if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
-                raise ValueError("Orientation vectors must be orthogonal")
-
-        # unify time axis
-        if (
-            ("time" in orientation.coords)
-            and ("time" in coordinates.coords)
-            and (not np.all(orientation.time.data == coordinates.time.data))
-        ):
-            time_union = ut.get_time_union([orientation, coordinates])
-            orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
-            coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
-
-        coordinates.name = "coordinates"
         orientation.name = "orientation"
+        dataset_items = [orientation]
 
-        self._dataset = xr.merge([coordinates, orientation], join="exact")
+        self._coord_ts = None
+        if isinstance(coordinates, TimeSeries):
+            self._coord_ts = coordinates
+        else:
+            coordinates.name = "coordinates"
+            dataset_items.append(coordinates)
+
+        self._time_ref = time_ref
+        self._dataset = xr.merge(dataset_items, join="exact")
         if "time" in self._dataset and time_ref is not None:
             self._dataset.weldx.time_ref = time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
+        # todo: rewrite if expressions are fully supported
         return self._dataset.__repr__().replace(
             "<xarray.Dataset", "<LocalCoordinateSystem"
         )
@@ -179,6 +154,21 @@ class LocalCoordinateSystem:
 
         """
         lhs_cs = self
+
+        if isinstance(lhs_cs.coordinates, TimeSeries) or isinstance(
+            rhs_cs.coordinates, TimeSeries
+        ):
+            raise Exception(
+                "Addition of coordinate systems that use a 'TimeSeries' as coordinates "
+                "is not supported. Use 'interp_time' to create discrete values."
+            )
+
+        # handle time
+        time = lhs_cs.time
+        if time is None:
+            time = rhs_cs.time
+
+        # handle reference times
         if (
             lhs_cs.reference_time != rhs_cs.reference_time
             and lhs_cs.has_reference_time
@@ -197,8 +187,10 @@ class LocalCoordinateSystem:
         else:
             time_ref = lhs_cs.reference_time
 
+        # interpolate rhs time to match lhs
         rhs_cs = rhs_cs.interp_time(lhs_cs.time, time_ref)
 
+        # calculate resulting orientation and coordinates
         orientation = ut.xr_matmul(
             rhs_cs.orientation, lhs_cs.orientation, dims_a=["c", "v"]
         )
@@ -246,9 +238,17 @@ class LocalCoordinateSystem:
 
     def __eq__(self: "LocalCoordinateSystem", other: "LocalCoordinateSystem") -> bool:
         """Check equality of LocalCoordinateSystems."""
+
+        def _comp_coords():
+            if not isinstance(self.coordinates, type(other.coordinates)):
+                return False
+            if isinstance(self.coordinates, TimeSeries):
+                return self.coordinates == other.coordinates
+            return self.coordinates.identical(other.coordinates)
+
         return (
             self.orientation.identical(other.orientation)
-            and self.coordinates.identical(other.coordinates)
+            and _comp_coords()
             and self.reference_time == other.reference_time
         )
 
@@ -271,6 +271,8 @@ class LocalCoordinateSystem:
         xarray.DataArray
 
         """
+        if orientation is None:
+            orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
         if not isinstance(orientation, xr.DataArray):
             time_orientation = None
             if isinstance(orientation, Rot):
@@ -287,8 +289,8 @@ class LocalCoordinateSystem:
 
         return orientation
 
-    @staticmethod
-    def _build_coordinates(coordinates, time: pd.DatetimeIndex = None):
+    @classmethod
+    def _build_coordinates(cls, coordinates, time: pd.DatetimeIndex = None):
         """Create xarray coordinates from different formats and time-inputs.
 
         Parameters
@@ -303,6 +305,14 @@ class LocalCoordinateSystem:
         xarray.DataArray
 
         """
+        if isinstance(coordinates, TimeSeries):
+            if coordinates.is_expression:
+                return coordinates
+            coordinates = cls._coords_from_discrete_time_series(coordinates)
+
+        if coordinates is None:
+            coordinates = np.array([0, 0, 0])
+
         if not isinstance(coordinates, xr.DataArray):
             time_coordinates = None
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
@@ -315,6 +325,98 @@ class LocalCoordinateSystem:
         coordinates = coordinates.weldx.time_ref_restore()
 
         return coordinates
+
+    @staticmethod
+    def _build_time_index(
+        coordinates: Union[types_coordinates, TimeSeries] = None,
+        time: types_timeindex = None,
+        time_ref: pd.Timestamp = None,
+    ) -> Tuple[pd.TimedeltaIndex, pd.Timestamp]:
+        if (
+            isinstance(coordinates, TimeSeries)
+            and coordinates.is_discrete
+            and time is None
+        ):
+            time = coordinates.time
+
+        return build_time_index(time, time_ref)
+
+    @staticmethod
+    def _check_and_normalize_orientation(orientation: xr.DataArray) -> xr.DataArray:
+        """Check if the orientation has the correct format and normalize it."""
+        ut.xr_check_coords(
+            orientation,
+            dict(
+                c={"values": ["x", "y", "z"]},
+                v={"values": [0, 1, 2]},
+                time={"dtype": "timedelta64", "optional": True},
+            ),
+        )
+
+        orientation = xr.apply_ufunc(
+            normalize,
+            orientation,
+            input_core_dims=[["c"]],
+            output_core_dims=[["c"]],
+        )
+
+        # vectorize test if orthogonal
+        if not ut.xr_is_orthogonal_matrix(orientation, dims=["c", "v"]):
+            raise ValueError("Orientation vectors must be orthogonal")
+
+        return orientation
+
+    @staticmethod
+    def _check_coordinates(coordinates: Union[xr.DataArray, TimeSeries]):
+        """Check if the coordinates have the correct format."""
+        if isinstance(coordinates, xr.DataArray):
+            ut.xr_check_coords(
+                coordinates,
+                dict(
+                    c={"values": ["x", "y", "z"]},
+                    time={"dtype": "timedelta64", "optional": True},
+                ),
+            )
+        else:
+            # todo: check time series shape
+            pass
+
+    @staticmethod
+    def _coords_from_discrete_time_series(time_series):
+        """Return compatible coordinates from a discrete `TimeSeries`."""
+        if time_series.shape[1] != 3:
+            raise ValueError(
+                "The shape of the TimeSeries must be (n, 3). It actually is: "
+                f"{time_series.shape}"
+            )
+        coordinates = time_series.data_array
+        # This is a workaround to remove the warning about stripped units. This line
+        # should be removed once we add/require units in the lcs
+        # Additionally, the correct unit should be checked for TimeSeries
+        # (also expressions)
+        coordinates.data = coordinates.data.to("mm").m
+
+        c_dict = dict(c=["x", "y", "z"])
+        if coordinates.data.shape[0] == 1:
+            return xr.DataArray(coordinates.data.reshape(3), dims=["c"], coords=c_dict)
+        return coordinates.rename({coordinates.dims[1]: "c"}).assign_coords(c_dict)
+
+    @staticmethod
+    def _unify_time_axis(
+        orientation: xr.DataArray, coordinates: Union[xr.DataArray, TimeSeries]
+    ) -> Tuple:
+        """Unify time axis of orientation and coordinates if both are DataArrays."""
+        if (
+            not isinstance(coordinates, TimeSeries)
+            and ("time" in orientation.coords)
+            and ("time" in coordinates.coords)
+            and (not np.all(orientation.time.data == coordinates.time.data))
+        ):
+            time_union = ut.get_time_union([orientation, coordinates])
+            orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
+            coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
+
+        return (orientation, coordinates)
 
     @classmethod
     def from_euler(
@@ -603,7 +705,7 @@ class LocalCoordinateSystem:
         return self.dataset.orientation
 
     @property
-    def coordinates(self) -> xr.DataArray:
+    def coordinates(self) -> Union[xr.DataArray, TimeSeries]:
         """Get the coordinate systems coordinates.
 
         Returns
@@ -612,6 +714,8 @@ class LocalCoordinateSystem:
             Coordinates of the coordinate system
 
         """
+        if self._coord_ts is not None:
+            return self._coord_ts
         return self.dataset.coordinates
 
     @property
@@ -624,7 +728,7 @@ class LocalCoordinateSystem:
             `True` if the coordinate system is time dependent, `False` otherwise.
 
         """
-        return self.time is not None
+        return self.time is not None or self._coord_ts is not None
 
     @property
     def has_reference_time(self) -> bool:
@@ -648,6 +752,8 @@ class LocalCoordinateSystem:
             The coordinate systems reference time
 
         """
+        if isinstance(self.coordinates, TimeSeries):
+            return self._time_ref
         return self._dataset.weldx.time_ref
 
     @property
@@ -707,6 +813,8 @@ class LocalCoordinateSystem:
     @property
     def is_unity_translation(self) -> bool:
         """Return true if the LCS has a zero translation/coordinates value."""
+        if isinstance(self.coordinates, TimeSeries):
+            return False
         coords = (
             self.coordinates.data.magnitude
             if isinstance(self.coordinates.data, pint.Quantity)
@@ -799,9 +907,23 @@ class LocalCoordinateSystem:
             time = time + time_ref
 
         orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
-        coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
+        if isinstance(self.coordinates, TimeSeries):
+            time_interp = time
+            if isinstance(time_interp, pd.DatetimeIndex):
+                time_interp = time - self.reference_time
 
-        return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
+            coordinates = self._coords_from_discrete_time_series(
+                self.coordinates.interp_time(time_interp)
+            )
+
+            if self.has_reference_time:
+                coordinates.weldx.time_ref = self.reference_time
+        else:
+            coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
+
+        return LocalCoordinateSystem(
+            orientation, coordinates, time=time, time_ref=time_ref
+        )
 
     def invert(self) -> "LocalCoordinateSystem":
         """Get a local coordinate system defining the parent in the child system.
@@ -815,10 +937,15 @@ class LocalCoordinateSystem:
             Inverted coordinate system.
 
         """
+        if isinstance(self.coordinates, TimeSeries):
+            raise Exception(
+                "Can not invert coordinates that are described by an expression. "
+                "Use 'interp_time' to create discrete values."
+            )
         orientation = ut.xr_transpose_matrix_data(self.orientation, dim1="c", dim2="v")
         coordinates = ut.xr_matmul(
             self.orientation,
-            -self.coordinates,
+            self.coordinates * -1,
             dims_a=["c", "v"],
             dims_b=["c"],
             trans_a=True,
