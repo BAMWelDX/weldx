@@ -135,7 +135,11 @@ class MathematicalExpression:
                 equality = simplify(self.expression - other.expression) == 0
 
             if check_parameters:
-                equality = equality and self._parameters == other.parameters
+                from weldx.util import compare_nested
+
+                equality = equality and compare_nested(
+                    self._parameters, other.parameters
+                )
             return equality
         return False
 
@@ -530,6 +534,16 @@ class TimeSeries:
             if self.time is None and interpolation != "step":
                 interpolation = "step"
             self.data_array.attrs["interpolation"] = interpolation
+
+    @property
+    def is_discrete(self) -> bool:
+        """Return `True` if the time series is described by discrete values."""
+        return not self.is_expression
+
+    @property
+    def is_expression(self) -> bool:
+        """Return `True` if the time series is described by an expression."""
+        return isinstance(self.data, MathematicalExpression)
 
     @property
     def time(self) -> Union[None, pd.TimedeltaIndex]:

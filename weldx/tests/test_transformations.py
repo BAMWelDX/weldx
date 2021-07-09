@@ -3,7 +3,7 @@
 import math
 import random
 from copy import deepcopy
-from typing import Any, List, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -16,6 +16,7 @@ from pandas import date_range
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx import Q_, SpatialData
+from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
@@ -632,6 +633,79 @@ class TestLocalCoordinateSystem:
         assert np.all(lcs.time == time_exp)
         assert lcs.reference_time == time_ref
 
+    # test_init_expr_time_series_as_coord ----------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("time_ref", [None, TS("2020-01-01")])
+    @pytest.mark.parametrize(
+        "time, angles",
+        [
+            (None, None),
+            (Q_([1, 2, 3], "s"), None),
+            (Q_([1, 2, 3], "s"), [1, 2, 3]),
+        ],
+    )
+    def test_init_expr_time_series_as_coord(time, time_ref, angles):
+        """Test if a fitting, expression based `TimeSeries` can be used as coordinates.
+
+        Parameters
+        ----------
+        time :
+            The time that should be passed to the `__init__` method of the LCS
+        time_ref :
+            The reference time that should be passed to the `__init__` method of the LCS
+        angles :
+            A set of angles that should be used to calculate the orientation matrices.
+            Values are irrelevant, just make sure it has the same length as the `time`
+            parameter
+
+        """
+        coordinates = MathematicalExpression(
+            expression="a*t+b", parameters=dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 2, 3])
+        )
+
+        ts_coord = TimeSeries(data=coordinates)
+        orientation = None
+        if angles is not None:
+            orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
+        lcs = LCS(
+            orientation=orientation, coordinates=ts_coord, time=time, time_ref=time_ref
+        )
+        assert lcs.has_reference_time == (time_ref is not None)
+
+    # test_init_discrete_time_series_as_coord ------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "data, time, conversion_factor",
+        [
+            (Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1]], "mm"), Q_([1, 2, 3], "s"), 1),
+            (Q_([[1, 0, 0], [1, 1, 0], [1, 1, 1]], "m"), Q_([1, 2, 3], "s"), 1000),
+            (Q_([[1, 2, 3]], "mm"), Q_([1], "s"), 1),
+        ],
+    )
+    def test_init_discrete_time_series_as_coord(data, time, conversion_factor):
+        """Test if a fitting, discrete `TimeSeries` can be used as coordinates.
+
+        Parameters
+        ----------
+        data :
+            Data of the `TimeSeries`
+        time :
+            Time of the `TimeSeries`
+        conversion_factor :
+            The conversion factor of the data's quantity to `mm`
+
+        """
+        ts_coords = TimeSeries(data, time)
+        lcs = LCS(coordinates=ts_coords)
+
+        assert np.allclose(lcs.coordinates, data.m * conversion_factor)
+        if len(time) == 1:
+            assert lcs.time is None
+        else:
+            assert np.all(lcs.time_quantity == time)
+
     # test_reset_reference_time --------------------------------------------------------
 
     @staticmethod
@@ -684,7 +758,7 @@ class TestLocalCoordinateSystem:
         # check results
         assert np.all(lcs.time == time_exp)
 
-    # test_reset_reference_time exceptions ---------------------------------------------
+    # test_reset_reference_time_exceptions ---------------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -723,7 +797,7 @@ class TestLocalCoordinateSystem:
         with pytest.raises(exception_type):
             lcs.reset_reference_time(time_ref_new)
 
-    # test_interp_time -----------------------------------------------------------------
+    # test_interp_time_discrete --------------------------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -775,10 +849,10 @@ class TestLocalCoordinateSystem:
             ),
         ],
     )
-    def test_interp_time(
+    def test_interp_time_discrete(
         time_ref_lcs, time, time_ref, orientation_exp, coordinates_exp
     ):
-        """Test the interp_time function.
+        """Test the interp_time function with discrete coordinates and orientations.
 
         Parameters
         ----------
@@ -813,6 +887,114 @@ class TestLocalCoordinateSystem:
         check_coordinate_system(
             lcs_interp_like, orientation_exp, coordinates_exp, True, time, time_ref
         )
+
+    # test_interp_time_timeseries_as_coords --------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "seconds, lcs_ref_sec, ref_sec, time_dep_orientation",
+        (
+            [
+                ([1, 2, 3, 4, 5], None, None, False),
+                ([1, 3, 5], 1, 1, False),
+                ([1, 3, 5], 1, 1, True),
+                ([1, 3, 5], 3, 1, False),
+                ([1, 3, 5], 3, 1, True),
+                ([1, 3, 5], 1, 3, False),
+                ([1, 3, 5], 1, 3, True),
+            ]
+        ),
+    )
+    def test_interp_time_timeseries_as_coords(
+        seconds: List[float],
+        lcs_ref_sec: float,
+        ref_sec: float,
+        time_dep_orientation: bool,
+    ):
+        """Test if the `interp_time` method works with a TimeSeries as coordinates.
+
+        The test creates a reference LCS where the coordinates x-values increase
+        linearly in time.
+
+        Parameters
+        ----------
+        seconds :
+            The seconds (time delta) that should be interpolated
+        lcs_ref_sec :
+            The seconds of the reference time, that will passed to the created LCS. If
+            `None`, no reference time will be passed
+        ref_sec :
+            The seconds of the reference time, that will passed to `interp_time`. If
+            `None`, no reference time will be passed
+        time_dep_orientation :
+            If `True` a time dependent orientation will be passed to the LCS.
+            The orientation is a rotation around the x axis. The rotation angle is 0
+            degrees at t=0 seconds and increases linearly to 90 degrees over the next
+            4 seconds. Before and after this period, the angle is kept constant.
+
+        """
+        # create timestamps
+        lcs_ref_time = None
+        ref_time = None
+        time_offset = 0
+        if lcs_ref_sec is not None:
+            lcs_ref_time = TS(year=2017, month=1, day=1, hour=12, second=lcs_ref_sec)
+        if ref_sec is not None:
+            ref_time = TS(year=2017, month=1, day=1, hour=12, second=ref_sec)
+            if lcs_ref_sec is not None:
+                time_offset += ref_sec - lcs_ref_sec
+
+        # create expression
+        expr = "a*t+b"
+        param = dict(a=Q_([[1, 0, 0]], "mm/s"), b=Q_([1, 1, 1], "mm"))
+        me = MathematicalExpression(expression=expr, parameters=param)
+
+        # create orientation and time of LCS
+        orientation = None
+        lcs_time = None
+        if time_dep_orientation:
+            lcs_time = Q_([0, 4], "s")
+            orientation = WXRotation.from_euler(
+                "x", lcs_time.m * 22.5, degrees=True
+            ).as_matrix()
+
+        # create LCS
+        lcs = LCS(
+            orientation=orientation,
+            coordinates=TimeSeries(data=me),
+            time=lcs_time,
+            time_ref=lcs_ref_time,
+        )
+
+        # interpolate
+        time = Q_(seconds, "s")
+        lcs_interp = lcs.interp_time(time, time_ref=ref_time)
+
+        # check time
+        assert lcs_interp.reference_time == ref_time
+        assert np.allclose(lcs_interp.time_quantity, time)
+
+        # check coordinates
+        exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
+        assert isinstance(lcs_interp.coordinates, xr.DataArray)
+        assert np.allclose(lcs_interp.coordinates, exp_vals)
+
+        # check orientation
+        seconds_offset = np.array(seconds) + time_offset
+
+        if lcs_time is not None:
+            angles = []
+            for sec in seconds_offset:
+                if sec <= lcs_time[0].m:
+                    angles.append(0)
+                elif sec >= lcs_time[1].m:
+                    angles.append(90)
+                else:
+                    angles.append(22.5 * sec)
+        else:
+            angles = 0
+        exp_orientations = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
+        assert np.allclose(exp_orientations, lcs_interp.orientation)
 
     # test_interp_time_exceptions ------------------------------------------------------
 
@@ -1222,6 +1404,65 @@ class TestLocalCoordinateSystem:
             time_exp,
             time_ref_exp,
         )
+
+    # test_comparison_coords_timeseries ------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "kwargs_me_other_upd, kwargs_ts_other_upd, kwargs_other_upd, exp_result",
+        [
+            ({}, {}, {}, True),
+            (dict(expression="2*a*t"), {}, {}, False),
+            (dict(parameters=dict(a=Q_([[2, 0, 0]], "1/s"))), {}, {}, False),
+            ({}, dict(data=Q_(np.ones((2, 3)), "mm"), time=Q_([1, 2], "s")), {}, False),
+            ({}, {}, dict(orientation=[[0, -1, 0], [1, 0, 0], [0, 0, 1]]), False),
+            ({}, {}, dict(time_ref=TS("11:12")), False),
+        ],
+    )
+    def test_comparison_coords_timeseries(
+        kwargs_me_other_upd: Dict,
+        kwargs_ts_other_upd: Dict,
+        kwargs_other_upd: Dict,
+        exp_result: bool,
+    ):
+        """Test the comparison operator with a TimeSeries as coordinates.
+
+        Parameters
+        ----------
+        kwargs_me_other_upd :
+            Set of key word arguments that should be passed to the `__init__` method of
+            the `MathematicalExpression` of the `TimeSeries` that will be passed to the
+            second lcs. All missing kwargs will get default values.
+        kwargs_ts_other_upd :
+            Set of key word arguments that should be passed to the `__init__` method of
+            the `TimeSeries` of the second lcs. All missing kwargs will get default
+            values.
+        kwargs_other_upd :
+            Set of key word arguments that should be passed to the `__init__` method of
+            the second lcs. All missing kwargs will get default values.
+        exp_result :
+            Expected result of the comparison
+
+        """
+        me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+        ts = TimeSeries(data=me)
+        lcs = LCS(coordinates=ts)
+
+        kwargs_me_other = dict(expression=me.expression, parameters=me.parameters)
+        kwargs_me_other.update(kwargs_me_other_upd)
+        me_other = MathematicalExpression(**kwargs_me_other)
+
+        kwargs_ts_other = dict(data=me_other, time=None, interpolation=None)
+        kwargs_ts_other.update(kwargs_ts_other_upd)
+        ts_other = TimeSeries(**kwargs_ts_other)
+
+        kwargs_other = dict(
+            orientation=None, coordinates=ts_other, time=None, time_ref=None
+        )
+        kwargs_other.update(kwargs_other_upd)
+        lcs_other = LCS(**kwargs_other)
+
+        assert (lcs == lcs_other) == exp_result
 
 
 def test_coordinate_system_init():
@@ -1650,22 +1891,23 @@ def test_coordinate_system_time_interpolation():
 
 # todo: Refactor old tests
 
+CSM = tf.CoordinateSystemManager
+LCS = tf.LocalCoordinateSystem
+
 
 class TestCoordinateSystemManager:
     """Test the CoordinateSystemManager class."""
 
-    CSM = tf.CoordinateSystemManager
-    LCS = tf.LocalCoordinateSystem
-
+    @staticmethod
     @pytest.fixture
-    def csm_fix(self):
+    def csm_fix():
         """Create default coordinate system fixture."""
-        csm_default = self.CSM("root")
-        lcs_1 = self.LCS(coordinates=[0, 1, 2])
-        lcs_2 = self.LCS(coordinates=[0, -1, -2])
-        lcs_3 = self.LCS(coordinates=[-1, -2, -3])
-        lcs_4 = self.LCS(r_mat_y(1 / 2), [1, 2, 3])
-        lcs_5 = self.LCS(r_mat_y(3 / 2), [2, 3, 1])
+        csm_default = CSM("root")
+        lcs_1 = LCS(coordinates=[0, 1, 2])
+        lcs_2 = LCS(coordinates=[0, -1, -2])
+        lcs_3 = LCS(coordinates=[-1, -2, -3])
+        lcs_4 = LCS(r_mat_y(1 / 2), [1, 2, 3])
+        lcs_5 = LCS(r_mat_y(3 / 2), [2, 3, 1])
         csm_default.add_cs("lcs1", "root", lcs_1)
         csm_default.add_cs("lcs2", "root", lcs_2)
         csm_default.add_cs("lcs3", "lcs1", lcs_3)
@@ -1674,35 +1916,51 @@ class TestCoordinateSystemManager:
 
         return csm_default
 
+    @staticmethod
     @pytest.fixture()
-    def list_of_csm_and_lcs_instances(self):
+    def list_of_csm_and_lcs_instances():
         """Get a list of LCS and CSM instances."""
-        lcs = [self.LCS(coordinates=[i, 0, 0]) for i in range(11)]
+        lcs = [LCS(coordinates=[i, 0, 0]) for i in range(11)]
 
-        csm_0 = self.CSM("lcs0", "csm0")
+        csm_0 = CSM("lcs0", "csm0")
         csm_0.add_cs("lcs1", "lcs0", lcs[1])
         csm_0.add_cs("lcs2", "lcs0", lcs[2])
         csm_0.add_cs("lcs3", "lcs2", lcs[3])
 
-        csm_1 = self.CSM("lcs0", "csm1")
+        csm_1 = CSM("lcs0", "csm1")
         csm_1.add_cs("lcs4", "lcs0", lcs[4])
 
-        csm_2 = self.CSM("lcs5", "csm2")
+        csm_2 = CSM("lcs5", "csm2")
         csm_2.add_cs("lcs3", "lcs5", lcs[5], lsc_child_in_parent=False)
         csm_2.add_cs("lcs6", "lcs5", lcs[6])
 
-        csm_3 = self.CSM("lcs6", "csm3")
+        csm_3 = CSM("lcs6", "csm3")
         csm_3.add_cs("lcs7", "lcs6", lcs[7])
         csm_3.add_cs("lcs8", "lcs6", lcs[8])
 
-        csm_4 = self.CSM("lcs9", "csm4")
+        csm_4 = CSM("lcs9", "csm4")
         csm_4.add_cs("lcs3", "lcs9", lcs[9], lsc_child_in_parent=False)
 
-        csm_5 = self.CSM("lcs7", "csm5")
+        csm_5 = CSM("lcs7", "csm5")
         csm_5.add_cs("lcs10", "lcs7", lcs[10])
 
         csm = [csm_0, csm_1, csm_2, csm_3, csm_4, csm_5]
         return [csm, lcs]
+
+    # test_init ------------------------------------------------------------------------
+
+    @staticmethod
+    def test_init():
+        """Test the init method of the coordinate system manager."""
+        # default construction ----------------------
+        csm = CSM(root_coordinate_system_name="root")
+        assert csm.number_of_coordinate_systems == 1
+        assert csm.number_of_neighbors("root") == 0
+
+        # Exceptions---------------------------------
+        # Invalid root system name
+        with pytest.raises(Exception):
+            CSM({})
 
     # test_add_coordinate_system -------------------------------------------------------
 
@@ -1713,25 +1971,30 @@ class TestCoordinateSystemManager:
     #  fail.
     csm_acs = CSM("root")
     time = pd.DatetimeIndex(["2000-01-01", "2000-01-04"])
-    lcs_1_acs = LCS(coordinates=[0, 1, 2])
     # lcs_2_acs = LCS(coordinates=[[0, -1, -2], [8, 2, 7]], time=time)
-    lcs_2_acs = LCS(coordinates=[0, -1, -2])
-    lcs_3_acs = LCS(coordinates=[-1, -2, -3])
-    lcs_4_acs = LCS(r_mat_y(1 / 2), [1, 2, 3])
-    lcs_5_acs = LCS(r_mat_y(3 / 2), [2, 3, 1])
 
     @pytest.mark.parametrize(
         "name , parent, lcs, child_in_parent, exp_num_cs",
         [
-            ("lcs1", "root", lcs_1_acs, True, 2),
-            ("lcs2", "root", lcs_2_acs, False, 3),
-            ("lcs3", "lcs2", lcs_4_acs, True, 4),
-            ("lcs3", "lcs2", lcs_3_acs, True, 4),
-            ("lcs2", "lcs3", lcs_3_acs, False, 4),
-            ("lcs2", "lcs3", lcs_3_acs, True, 4),
-            ("lcs4", "lcs2", lcs_1_acs, True, 5),
-            ("lcs4", "lcs2", lcs_4_acs, True, 5),
-            ("lcs5", "lcs1", lcs_5_acs, True, 6),
+            ("lcs1", "root", LCS(coordinates=[0, 1, 2]), True, 2),
+            ("lcs2", "root", LCS(coordinates=[0, -1, -2]), False, 3),
+            ("lcs3", "lcs2", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 4),
+            ("lcs3", "lcs2", LCS(coordinates=[-1, -2, -3]), True, 4),
+            ("lcs2", "lcs3", LCS(coordinates=[-1, -2, -3]), False, 4),
+            ("lcs2", "lcs3", LCS(coordinates=[-1, -2, -3]), True, 4),
+            ("lcs4", "lcs2", LCS(coordinates=[0, 1, 2]), True, 5),
+            ("lcs4", "lcs2", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 5),
+            ("lcs5", "lcs1", LCS(r_mat_y(3 / 2), [2, 3, 1]), True, 6),
+            (
+                "lcs5",
+                "lcs1",
+                LCS(
+                    None,
+                    TimeSeries(MathematicalExpression("a*t", dict(a=Q_(1, "1/s")))),
+                ),
+                True,
+                6,
+            ),
         ],
     )
     def test_add_coordinate_system(
@@ -1744,9 +2007,11 @@ class TestCoordinateSystemManager:
         assert csm.number_of_coordinate_systems == exp_num_cs
         if child_in_parent:
             assert csm.get_cs(name, parent) == lcs
-            assert csm.get_cs(parent, name) == lcs.invert()
+            if not isinstance(lcs.coordinates, TimeSeries):
+                assert csm.get_cs(parent, name) == lcs.invert()
         else:
-            assert csm.get_cs(name, parent) == lcs.invert()
+            if not isinstance(lcs.coordinates, TimeSeries):
+                assert csm.get_cs(name, parent) == lcs.invert()
             assert csm.get_cs(parent, name) == lcs
 
     # test_add_cs_reference_time -------------------------------------------------------
@@ -1816,6 +2081,18 @@ class TestCoordinateSystemManager:
                 csm.add_cs("lcs_2", "root", lcs_2)
         else:
             csm.add_cs("lcs_2", "root", lcs_2)
+
+    # test_add_coordinate_system_timeseries --------------------------------------------
+
+    @staticmethod
+    def test_add_coordinate_system_timeseries():
+        """Test if adding an LCS with a `TimeSeries` as coordinates is possible."""
+        csm = CSM("r")
+        me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+        ts = TimeSeries(me)
+        lcs = LCS(coordinates=ts)
+
+        csm.add_cs("cs1", "r", lcs)
 
     # test_add_coordinate_system_exceptions --------------------------------------------
 
@@ -2414,6 +2691,74 @@ class TestCoordinateSystemManager:
         # check time_union result
         assert np.all(csm.time_union(list_of_edges=edges) == exp_time)
 
+    # test_time_union_time_series_coords -----------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        " tdp_orientation, add_discrete_lcs, list_of_edges, exp_time",
+        [
+            (False, False, None, None),
+            (True, False, None, [1, 2]),
+            (False, True, None, [2, 3]),
+            (True, True, None, [1, 2, 3]),
+            (False, True, [("tdp", "base"), ("ts", "base")], [2, 3]),
+            (False, True, [("tdp", "base"), ("base", "ts")], [2, 3]),
+            (False, True, [("st", "base"), ("ts", "base")], None),
+            (False, True, [("st", "base"), ("base", "ts")], None),
+            (False, True, [("ts", "base")], None),
+            (False, True, [("base", "ts")], None),
+            (False, True, [("tdp", "base"), ("st", "base")], [2, 3]),
+            (False, True, [("tdp", "base"), ("st", "base"), ("ts", "base")], [2, 3]),
+            (False, True, [("tdp", "base"), ("st", "base"), ("base", "ts")], [2, 3]),
+            (True, True, [("tdp", "base"), ("ts", "base")], [1, 2, 3]),
+            (True, True, [("tdp", "base"), ("base", "ts")], [1, 2, 3]),
+            (True, True, [("st", "base"), ("ts", "base")], [1, 2]),
+            (True, True, [("st", "base"), ("base", "ts")], [1, 2]),
+            (True, True, [("ts", "base")], [1, 2]),
+            (True, True, [("base", "ts")], [1, 2]),
+            (True, True, [("tdp", "base"), ("st", "base")], [2, 3]),
+            (True, True, [("tdp", "base"), ("st", "base"), ("ts", "base")], [1, 2, 3]),
+            (True, True, [("tdp", "base"), ("st", "base"), ("base", "ts")], [1, 2, 3]),
+        ],
+    )
+    def test_time_union_time_series_coords(
+        tdp_orientation, add_discrete_lcs, list_of_edges, exp_time
+    ):
+        """Test time_union with an lcs that has a `TimeSeries` as coordinates.
+
+        Parameters
+        ----------
+        tdp_orientation :
+            If `True`, the LCS with the `TimeSeries` also has discrete time dependent
+            orientations
+        add_discrete_lcs :
+            If `True`, another time dependent system with discrete values is added to
+            the CSM
+        list_of_edges :
+            A list of edges that should be passed to `time_union`
+        exp_time :
+            The expected time values (in seconds)
+
+        """
+        ts = TimeSeries(MathematicalExpression("a*t", dict(a=Q_([[1, 2, 3]], "mm/s"))))
+        lcs_ts_orientation = None
+        lcs_ts_time = None
+        if tdp_orientation:
+            lcs_ts_orientation = WXRotation.from_euler("x", [0, 2]).as_matrix()
+            lcs_ts_time = Q_([1, 2], "s")
+
+        csm = CSM("base")
+        csm.create_cs("st", "base", coordinates=[2, 2, 2])
+        csm.create_cs("ts", "base", lcs_ts_orientation, ts, lcs_ts_time)
+        if add_discrete_lcs:
+            csm.create_cs(
+                "tdp", "base", coordinates=[[2, 4, 5], [2, 2, 2]], time=Q_([2, 3], "s")
+            )
+
+        if exp_time is not None:
+            exp_time = TDI(exp_time, unit="s")
+        assert np.all(exp_time == csm.time_union(list_of_edges))
+
     # test_get_local_coordinate_system_no_time_dep -------------------------------------
 
     @staticmethod
@@ -2839,6 +3184,57 @@ class TestCoordinateSystemManager:
             with pytest.raises(Exception):
                 csm.get_cs(*function_arguments)
 
+    # test_get_local_coordinate_system_timeseries --------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "lcs, in_lcs, exp_coords, exp_time, exp_angles",
+        [
+            ("r", "ts", [[0, -1, -1], [0, -2, -1]], [1, 2], [0, -90]),
+            ("ts", "r", [[0, 1, 1], [-2, 0, 1]], [1, 2], [0, 90]),
+            ("s", "trl", [[0, 0, 0], [-1, 0, 0]], [2, 3], [0, 0]),
+            ("trl", "s", [[0, 0, 0], [1, 0, 0]], [2, 3], [0, 0]),
+            ("s", "r", [[1, 1, 1], [-2, 1, 1]], [1, 2], [0, 90]),
+            ("r", "s", [[-1, -1, -1], [-1, -2, -1]], [1, 2], [0, -90]),
+            ("trl", "r", [[1, 1, 1], [-2, 1, 1], [-3, 2, 1]], [1, 2, 3], [0, 90, 90]),
+        ],
+    )
+    def test_get_local_coordinate_system_timeseries(
+        lcs, in_lcs, exp_coords, exp_time, exp_angles
+    ):
+        """Test the get_cs method with one lcs having a `TimeSeries` as coordinates.
+
+        Parameters
+        ----------
+        lcs :
+            The lcs that should be transformed
+        in_lcs :
+            The target lcs
+        exp_coords :
+            Expected coordinates
+        exp_time :
+            The expected time (in seconds)
+        exp_angles :
+            The expected rotation angles around the z-axis
+
+        """
+        me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
+        ts = TimeSeries(me)
+        rotation = WXRotation.from_euler("z", [0, 90], degrees=True).as_matrix()
+        translation = [[1, 0, 0], [2, 0, 0]]
+        exp_orient = WXRotation.from_euler("z", exp_angles, degrees=True).as_matrix()
+
+        csm = CSM("r")
+        csm.create_cs("rot", "r", rotation, [0, 0, 1], time=Q_([1, 2], "s"))
+        csm.create_cs("ts", "rot", coordinates=ts)
+        csm.create_cs("s", "ts", coordinates=[1, 0, 0])
+        csm.create_cs("trl", "ts", coordinates=translation, time=Q_([2, 3], "s"))
+
+        result = csm.get_cs(lcs, in_lcs)
+        assert np.allclose(result.orientation, exp_orient)
+        assert np.allclose(result.coordinates, exp_coords)
+        assert np.allclose(result.time_quantity.m, exp_time)
+
     # test_get_local_coordinate_system_exceptions --------------------------------------
 
     @staticmethod
@@ -2885,6 +3281,52 @@ class TestCoordinateSystemManager:
         # test
         with pytest.raises(exception_type):
             csm.get_cs(*function_arguments)
+
+    # test_get_cs_exception_timeseries -------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "lcs, in_lcs, exp_exception",
+        [
+            ("trl1", "ts", True),
+            ("ts", "trl1", False),
+            ("s", "trl1", True),
+            ("trl1", "s", True),
+            ("trl1", "trl2", False),
+            ("trl2", "trl1", False),
+            ("r", "trl2", False),
+            ("trl2", "r", False),
+            ("s", "r", False),
+            ("r", "s", False),
+        ],
+    )
+    def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
+        """Test exceptions of get_cs method if 1 lcs has a `TimeSeries` as coordinates.
+
+        Parameters
+        ----------
+        lcs :
+            The lcs that should be transformed
+        in_lcs :
+            The target lcs
+        exp_exception :
+            Set to `True` if the transformation should raise
+
+        """
+        me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
+        ts = TimeSeries(me)
+        translation = [[1, 0, 0], [2, 0, 0]]
+
+        csm = CSM("r")
+        csm.create_cs("trl1", "r", coordinates=translation, time=Q_([1, 2], "s"))
+        csm.create_cs("ts", "trl1", coordinates=ts)
+        csm.create_cs("s", "ts", coordinates=[1, 0, 0])
+        csm.create_cs("trl2", "ts", coordinates=translation, time=Q_([2, 3], "s"))
+        if exp_exception:
+            with pytest.raises(Exception):
+                csm.get_cs(lcs, in_lcs)
+        else:
+            csm.get_cs(lcs, in_lcs)
 
     # test_merge -----------------------------------------------------------------------
 
@@ -3127,6 +3569,7 @@ class TestCoordinateSystemManager:
 
     # test_unmerge_merged_serially -----------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "additional_cs",
         [
@@ -3147,9 +3590,7 @@ class TestCoordinateSystemManager:
         ],
     )
     @pytest.mark.slow
-    def test_unmerge_merged_serially(
-        self, list_of_csm_and_lcs_instances, additional_cs
-    ):
+    def test_unmerge_merged_serially(list_of_csm_and_lcs_instances, additional_cs):
         """Test the CSM unmerge function.
 
         In this test case, all sub systems are merged into the same target system.
@@ -3167,7 +3608,7 @@ class TestCoordinateSystemManager:
 
         count = 0
         for parent_cs, target_csm in additional_cs.items():
-            lcs = self.LCS(coordinates=[count, count + 1, count + 2])
+            lcs = LCS(coordinates=[count, count + 1, count + 2])
             csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
             csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
             count += 1
@@ -3184,6 +3625,7 @@ class TestCoordinateSystemManager:
 
     # test_unmerge_merged_nested -------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "additional_cs",
         [
@@ -3204,7 +3646,7 @@ class TestCoordinateSystemManager:
         ],
     )
     @pytest.mark.slow
-    def test_unmerge_merged_nested(self, list_of_csm_and_lcs_instances, additional_cs):
+    def test_unmerge_merged_nested(list_of_csm_and_lcs_instances, additional_cs):
         """Test the CSM unmerge function.
 
         In this test case, several systems are merged together before they are merged
@@ -3225,7 +3667,7 @@ class TestCoordinateSystemManager:
 
         count = 0
         for parent_cs, target_csm in additional_cs.items():
-            lcs = self.LCS(coordinates=[count, count + 1, count + 2])
+            lcs = LCS(coordinates=[count, count + 1, count + 2])
             csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
             csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
             if target_csm in [3, 5]:
@@ -3265,6 +3707,7 @@ class TestCoordinateSystemManager:
 
     # test_delete_cs_with_serially_merged_subsystems -----------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "name, subsystems_exp, num_cs_exp",
         [
@@ -3286,7 +3729,7 @@ class TestCoordinateSystemManager:
         ],
     )
     def test_delete_cs_with_serially_merged_subsystems(
-        self, list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
+        list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
     ):
         """Test the delete_cs function with subsystems that were merged serially."""
         # setup -------------------------------------------
@@ -3303,7 +3746,7 @@ class TestCoordinateSystemManager:
         # add some additional coordinate systems
         target_system_index = [0, 2, 5, 7, 10]
         for i, _ in enumerate(target_system_index):
-            lcs = self.LCS(coordinates=[i, 2 * i, -i])
+            lcs = LCS(coordinates=[i, 2 * i, -i])
             csm_mg.add_cs(f"add{i}", f"lcs{target_system_index[i]}", lcs)
 
         # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
@@ -3321,6 +3764,7 @@ class TestCoordinateSystemManager:
 
     # test_delete_cs_with_nested_subsystems --------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize(
         "name, subsystems_exp, num_cs_exp",
         [
@@ -3344,7 +3788,7 @@ class TestCoordinateSystemManager:
         ],
     )
     def test_delete_cs_with_nested_subsystems(
-        self, list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
+        list_of_csm_and_lcs_instances, name, subsystems_exp, num_cs_exp
     ):
         """Test the delete_cs function with nested subsystems."""
         # setup -------------------------------------------
@@ -3353,10 +3797,10 @@ class TestCoordinateSystemManager:
         csm_mg = deepcopy(csm[0])
 
         csm_n3 = deepcopy(csm[3])
-        csm_n3.add_cs("nes0", "lcs8", self.LCS(coordinates=[1, 2, 3]))
+        csm_n3.add_cs("nes0", "lcs8", LCS(coordinates=[1, 2, 3]))
         csm_n3.merge(csm[5])
         csm_n2 = deepcopy(csm[2])
-        csm_n2.add_cs("nes1", "lcs5", self.LCS(coordinates=[-1, -2, -3]))
+        csm_n2.add_cs("nes1", "lcs5", LCS(coordinates=[-1, -2, -3]))
         csm_n2.merge(csm_n3)
         csm_mg.merge(csm[1])
         csm_mg.merge(csm[4])
@@ -3365,7 +3809,7 @@ class TestCoordinateSystemManager:
         # add some additional coordinate systems
         target_system_indices = [0, 2, 5, 7, 10]
         for i, target_system_index in enumerate(target_system_indices):
-            lcs = self.LCS(coordinates=[i, 2 * i, -i])
+            lcs = LCS(coordinates=[i, 2 * i, -i])
             csm_mg.add_cs(f"add{i}", f"lcs{target_system_index}", lcs)
 
         # just to avoid useless tests (delete does nothing if the lcs doesn't exist)
@@ -3383,22 +3827,23 @@ class TestCoordinateSystemManager:
 
     # test_plot ------------------------------------------------------------------------
 
-    def test_plot(self):
+    @staticmethod
+    def test_plot():
         """Test if the plot function runs without problems. Output is not checked."""
-        csm_global = self.CSM("root", "global coordinate systems")
+        csm_global = CSM("root", "global coordinate systems")
         csm_global.create_cs("specimen", "root", coordinates=[1, 2, 3])
         csm_global.create_cs("robot head", "root", coordinates=[4, 5, 6])
 
-        csm_specimen = self.CSM("specimen", "specimen coordinate systems")
+        csm_specimen = CSM("specimen", "specimen coordinate systems")
         csm_specimen.create_cs("thermocouple 1", "specimen", coordinates=[1, 1, 0])
         csm_specimen.create_cs("thermocouple 2", "specimen", coordinates=[1, 4, 0])
 
-        csm_robot = self.CSM("robot head", "robot coordinate systems")
+        csm_robot = CSM("robot head", "robot coordinate systems")
         csm_robot.create_cs("torch", "robot head", coordinates=[0, 0, -2])
         csm_robot.create_cs("mount point 1", "robot head", coordinates=[0, 1, -1])
         csm_robot.create_cs("mount point 2", "robot head", coordinates=[0, -1, -1])
 
-        csm_scanner = self.CSM("scanner", "scanner coordinate systems")
+        csm_scanner = CSM("scanner", "scanner coordinate systems")
         csm_scanner.create_cs("mount point 1", "scanner", coordinates=[0, 0, 2])
 
         csm_robot.merge(csm_scanner)
@@ -3625,19 +4070,6 @@ def test_relabel():
 
     with pytest.raises(NotImplementedError):
         csm1.relabel({"A": "Z"})
-
-
-def test_coordinate_system_manager_init():
-    """Test the init method of the coordinate system manager."""
-    # default construction ----------------------
-    csm = tf.CoordinateSystemManager(root_coordinate_system_name="root")
-    assert csm.number_of_coordinate_systems == 1
-    assert csm.number_of_neighbors("root") == 0
-
-    # Exceptions---------------------------------
-    # Invalid root system name
-    with pytest.raises(Exception):
-        tf.CoordinateSystemManager({})
 
 
 def test_coordinate_system_manager_create_coordinate_system():

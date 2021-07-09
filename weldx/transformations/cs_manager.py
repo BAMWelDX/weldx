@@ -13,6 +13,7 @@ import xarray as xr
 
 from weldx import util
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 
 from .local_cs import LocalCoordinateSystem
@@ -276,7 +277,12 @@ class CoordinateSystemManager:
 
         """
         self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
-        self._graph.add_edge(node_to, node_from, lcs=lcs.invert(), defined=False)
+
+        # only store inverted lcs if coordinates and orientations are discrete values
+        lcs_invert = None
+        if not isinstance(lcs.coordinates, TimeSeries):
+            lcs_invert = lcs.invert()
+        self._graph.add_edge(node_to, node_from, lcs=lcs_invert, defined=False)
 
     def _check_coordinate_system_exists(self, coordinate_system_name: str):
         """Raise an exception if the specified coordinate system does not exist.
@@ -471,7 +477,10 @@ class CoordinateSystemManager:
         edge_from_to["defined"] = True
 
         edge_to_from = self.graph.edges[(node_to, node_from)]
-        edge_to_from["lcs"] = lcs.invert()
+        if isinstance(lcs.coordinates, TimeSeries):
+            edge_to_from["lcs"] = None
+        else:
+            edge_to_from["lcs"] = lcs.invert()
         edge_to_from["defined"] = False
 
     @property
@@ -1368,7 +1377,14 @@ class CoordinateSystemManager:
 
         lcs_result = LocalCoordinateSystem()
         for edge in path_edges:
+            invert = False
             lcs = self.graph.edges[edge]["lcs"]
+
+            # lcs has an expression as coordinates
+            if lcs is None:
+                lcs = self.graph.edges[(edge[1], edge[0])]["lcs"]
+                invert = True
+
             if lcs.is_time_dependent:
                 if not lcs.has_reference_time and self.has_reference_time:
                     time_lcs = time_interp + (time_ref_interp - self.reference_time)
@@ -1377,6 +1393,19 @@ class CoordinateSystemManager:
                     lcs.reset_reference_time(time_ref_interp)
                 else:
                     lcs = lcs.interp_time(time_interp, time_ref_interp)
+
+            if invert:
+                if isinstance(lcs.coordinates, TimeSeries):
+                    raise Exception(
+                        "The chosen transformation is time dependent, but no time is "
+                        "given. This is usually the case if the time dependencies are "
+                        "only described by mathematical expressions. Provide the "
+                        "desired time using the corresponding parameter to solve this "
+                        "issue."
+                    )
+                lcs = lcs.invert()
+            if len(path_edges) == 1:
+                return lcs
             lcs_result += lcs
         return lcs_result
 
@@ -1707,12 +1736,15 @@ class CoordinateSystemManager:
             edge for edge in self._graph.edges if not self._graph.edges[edge]["defined"]
         ]
 
+        def _is_edge_time_dependent(edge):
+            lcs = self._graph.edges[edge]["lcs"]
+            # inverse lcs contains a TimeSeries
+            if lcs is None:
+                return True
+            return lcs.is_time_dependent
+
         # separate time dependent and static edges
-        tdp_edges = [
-            edge
-            for edge in all_edges
-            if self.get_cs(edge[0], edge[1]).is_time_dependent
-        ]
+        tdp_edges = [edge for edge in all_edges if _is_edge_time_dependent(edge)]
         stc_edges = [edge for edge in all_edges if edge not in tdp_edges]
 
         from networkx import draw, draw_networkx_edges
@@ -1915,8 +1947,15 @@ class CoordinateSystemManager:
         if list_of_edges is None:
             lcs_list = self.lcs_time_dependent
         else:
-            lcs_list = [self.graph.edges[edge]["lcs"] for edge in list_of_edges]
-            lcs_list = [lcs for lcs in lcs_list if lcs.is_time_dependent]
+
+            def _get_lcs(edge):
+                lcs = self.graph.edges[edge]["lcs"]
+                if lcs is not None:
+                    return lcs
+                return self.graph.edges[(edge[1], edge[0])]["lcs"]
+
+            lcs_list = [_get_lcs(edge) for edge in list_of_edges]
+        lcs_list = [lcs for lcs in lcs_list if lcs.time is not None]
 
         if not lcs_list:
             return None
