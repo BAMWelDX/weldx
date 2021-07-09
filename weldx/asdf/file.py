@@ -16,7 +16,7 @@ from asdf.util import get_file_type
 from jsonschema import ValidationError
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.util import get_yaml_header, view_tree
+from weldx.asdf.util import get_yaml_header, view_tree, get_schema_path
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
 __all__ = [
@@ -94,6 +94,14 @@ class WeldxFile(UserDict):
 
         self._asdffile_kwargs = asdffile_kwargs
         if custom_schema is not None:
+            _custom_schema_path = pathlib.Path(custom_schema)
+            if not _custom_schema_path.exists():
+                try:
+                    custom_schema = get_schema_path(custom_schema)
+                except ValueError:
+                    raise ValueError(
+                        f"provided custom_schema {custom_schema} " "does not exist."
+                    )
             asdffile_kwargs["custom_schema"] = custom_schema
 
         if mode not in ("r", "rw"):

@@ -1,11 +1,13 @@
 """Tests for the WeldxFile class."""
 import io
 import pathlib
+import shutil
 import tempfile
 from io import BytesIO
 
 import asdf
 import pytest
+from jsonschema import ValidationError
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
@@ -304,6 +306,24 @@ class TestWeldXFile:
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
+
+    @staticmethod
+    def test_custom_schema_resolve_path():
+        schema = "single_pass_weld-1.0.0.schema"
+        with pytest.raises(ValidationError) as e:
+            WeldxFile(custom_schema=schema)
+        assert "required property" in e.value.message
+
+    @staticmethod
+    def test_custom_schema_not_existent():
+        with pytest.raises(ValueError):
+            WeldxFile(custom_schema="no")
+
+    def test_custom_schema_real_file(self, tmpdir):
+        assert not pathlib.Path("single_pass_weld-1.0.0.schema").exists()
+        shutil.copy(get_schema_path("single_pass_weld-1.0.0.schema"), ".")
+        with pytest.raises(ValueError):
+            WeldxFile(custom_schema="no")
 
     @staticmethod
     def test_show_header_file_pos_unchanged():

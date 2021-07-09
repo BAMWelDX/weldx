@@ -42,6 +42,9 @@
   places [[#402]](https://github.com/BAMWelDX/weldx/pull/402)
 - `LocalCoordinateSystem.__init__` now accepts a `TimeSeries` as input. All methods of the `CoordinateSystemManager`
   also support this new behavior [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
+- During the creation of a `WeldxFile` the path of a passed custom schema is resolved automatically
+  [[#412]](https://github.com/BAMWelDX/weldx/pull/412).
+
 
 ### documentation
 
