@@ -601,11 +601,6 @@ def _compare_tag_version(instance_tag: str, tagname: str):
     return True
 
 
-@deprecated(
-    "0.4.0",
-    "0.5.0",
-    "wx_tag_validator will be removed in 0.5.0. Use asdf tag validation instead.",
-)
 def wx_tag_validator(validator, tagname, instance, schema):
     """Validate instance tag string with flexible version syntax.
 
