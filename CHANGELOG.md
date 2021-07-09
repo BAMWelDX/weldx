@@ -17,6 +17,7 @@
 - adds a `dataclass_serialization_class` utility function that automatically generates the asdf serialization class for
   python dataclasses. [[#380]](https://github.com/BAMWelDX/weldx/pull/380)
 - Added method to set the interpolation method to the `TimeSeries` [[#353]](https://github.com/BAMWelDX/weldx/pull/353)
+- Add `is_discrete` and `is_expression` properties to `TimeSeries` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - Add `MeasurementChain.output_signal` property that returns the output signal of the `MeasurementChain`
   [[#394]](https://github.com/BAMWelDX/weldx/pull/394)
 
@@ -41,6 +42,8 @@
     - Updated asdf schemas of all modified classes and the ones that contained references to those classes
 - allow input of string quantities in `MathematicalExpression` parameters and a few other
   places [[#402]](https://github.com/BAMWelDX/weldx/pull/402)
+- `LocalCoordinateSystem.__init__` now accepts a `TimeSeries` as input. All methods of the `CoordinateSystemManager`
+  also support this new behavior [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 
 ### documentation
 
@@ -62,6 +65,8 @@
 - update `single-pass-weldx.1.0.0.schema` to allow groove types by
   wildcard [[#373]](https://github.com/BAMWelDX/weldx/pull/373)
 - fix attributes serialization of DataSet children [[#384]](https://github.com/BAMWelDX/weldx/pull/384).
+- update `wx_shape` syntax in `local_coordinate_system-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
+- add custom `wx_shape` validation to `variable-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - remove outdated `TimeSeries` shape validation code [[#399]](https://github.com/BAMWelDX/weldx/pull/399)
 
 ### fixes
