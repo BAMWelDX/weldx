@@ -28,6 +28,7 @@ properties:
     type: string
   parameters:
     type: object
+    wx_property_tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
 
 required: [expression]
 propertyOrder: [expression, parameters]
