@@ -309,6 +309,7 @@ class TestWeldXFile:
 
     @staticmethod
     def test_custom_schema_resolve_path():
+        """Schema paths should be resolved internally."""
         schema = "single_pass_weld-1.0.0.schema"
         with pytest.raises(ValidationError) as e:
             WeldxFile(custom_schema=schema)
@@ -316,10 +317,12 @@ class TestWeldXFile:
 
     @staticmethod
     def test_custom_schema_not_existent():
+        """Non existent schema should raise."""
         with pytest.raises(ValueError):
             WeldxFile(custom_schema="no")
 
     def test_custom_schema_real_file(self, tmpdir):
+        """Passing real paths."""
         assert not pathlib.Path("single_pass_weld-1.0.0.schema").exists()
         shutil.copy(get_schema_path("single_pass_weld-1.0.0.schema"), ".")
         with pytest.raises(ValueError):
