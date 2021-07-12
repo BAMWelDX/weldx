@@ -17,6 +17,6 @@ jobs:
       - name: pip installs
         run: |
           pip install -e .[test]
-      - name: run pytest
+      - name: run asdf schema pytest
         run: |
-          pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/asdf/schemas
+          pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/asdf/schemas/
