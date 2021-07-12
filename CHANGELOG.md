@@ -4,6 +4,8 @@
 
 ### added
 
+- add support for quality standards. Further information can be found in the corresponding new tutorial. 
+  [[#211]](https://github.com/BAMWelDX/weldx/pull/211)
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
 - added `util.compare_nested` to check equality of two nested data
   structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
