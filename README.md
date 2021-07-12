@@ -29,7 +29,7 @@ WelDX provides several Python API to perform standard tasks like experiment desi
 
 ### Planning
 
-- Define measurement chains with all involved devices, error sources, and meta data annotations.
+- Define measurement chains with all involved devices, error sources, and metadata annotations.
 - Handle complex coordinate transformations needed to describe the movement of welding robots, workpieces, and sensors.
 - Planing of welding experiments.
 - convenient creation of [ISO 9692-1](https://www.iso.org/standard/62520.html) welding groove types.
