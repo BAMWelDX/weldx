@@ -4,6 +4,8 @@
 
 ### added
 
+- add support for quality standards. Further information can be found in the corresponding new tutorial. 
+  [[#211]](https://github.com/BAMWelDX/weldx/pull/211)
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
 - added `util.compare_nested` to check equality of two nested data
   structures. [[#328]](https://github.com/BAMWelDX/weldx/pull/328)
@@ -42,6 +44,9 @@
   places [[#402]](https://github.com/BAMWelDX/weldx/pull/402)
 - `LocalCoordinateSystem.__init__` now accepts a `TimeSeries` as input. All methods of the `CoordinateSystemManager`
   also support this new behavior [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
+- During the creation of a `WeldxFile` the path of a passed custom schema is resolved automatically
+  [[#412]](https://github.com/BAMWelDX/weldx/pull/412).
+
 
 ### documentation
 
@@ -66,11 +71,18 @@
 - update `wx_shape` syntax in `local_coordinate_system-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - add custom `wx_shape` validation to `variable-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - remove outdated `TimeSeries` shape validation code [[#399]](https://github.com/BAMWelDX/weldx/pull/399)
+- use asdf tag validation pattern for `wx_property_tag` [[#410]](https://github.com/BAMWelDX/weldx/pull/410)
+- update `MathematicalExpression` schema [[#410]](https://github.com/BAMWelDX/weldx/pull/410)
 
 ### fixes
 
 - added check for symmetric key difference for mappings
   with `util.compare_nested` [[#377]](https://github.com/BAMWelDX/weldx/pull/377)
+
+### deprecations
+
+- deprecate `wx_tag` validator (use default asdf uri pattern
+  matching) [[#410]](https://github.com/BAMWelDX/weldx/pull/410)
 
 ## 0.3.3 (30.03.2021)
 

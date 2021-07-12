@@ -16,7 +16,7 @@ from asdf.util import get_file_type
 from jsonschema import ValidationError
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.util import get_yaml_header, view_tree
+from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
 __all__ = [
@@ -63,7 +63,8 @@ class WeldxFile(UserDict):
         If True, the changes to file will be written upon closing this. This is only
         relevant, if the file has been opened in write mode.
     custom_schema :
-        a path-like object to a custom schema which validates the tree.
+        A path-like object to a custom schema which validates the tree. All schemas
+        provided by weldx can be given by name as well.
     software_history_entry :
         An optional dictionary which will be used to add history entries upon
         modification of the file. It has to provide the following keys:
@@ -94,6 +95,14 @@ class WeldxFile(UserDict):
 
         self._asdffile_kwargs = asdffile_kwargs
         if custom_schema is not None:
+            _custom_schema_path = pathlib.Path(custom_schema)
+            if not _custom_schema_path.exists():
+                try:
+                    custom_schema = get_schema_path(custom_schema)
+                except ValueError:
+                    raise ValueError(
+                        f"provided custom_schema {custom_schema} " "does not exist."
+                    )
             asdffile_kwargs["custom_schema"] = custom_schema
 
         if mode not in ("r", "rw"):
