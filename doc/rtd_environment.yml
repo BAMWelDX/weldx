@@ -9,7 +9,7 @@ dependencies:
   # documentation
   - sphinx
   - jinja2=2
-  - r2m2
+  - m2r2
   - sphinxcontrib-napoleon
   - nbsphinx
   - sphinx-copybutton
