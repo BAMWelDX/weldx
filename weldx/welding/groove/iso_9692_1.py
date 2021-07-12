@@ -1946,7 +1946,11 @@ def get_groove(
     _mapping = groove_cls._mapping
 
     # convert function arguments to groove arguments
-    args = {k: _loc[v] for k, v in _mapping.items() if _loc[v] is not None}
+    args = {
+        k: Q_(_loc[v]) if k != "code_number" else _loc[v]
+        for k, v in _mapping.items()
+        if _loc[v] is not None
+    }
     if _loc["code_number"] is not None:
         args["code_number"] = _loc["code_number"]
 
