@@ -98,4 +98,20 @@ This research is funded by the Federal Ministry of Education and Research of Ger
 
 ## Repository status
 
-....
+### Continuous Integration
+
+[![pytest](https://github.com/BAMWelDX/weldx/workflows/pytest/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Apytest+branch%3Amaster)
+[![conda build](https://github.com/BAMWelDX/weldx/workflows/conda%20build/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22conda+build%22+branch%3Amaster)
+[![Build status](https://ci.appveyor.com/api/projects/status/6yvswkpj7mmdbrk1/branch/master?svg=true)](https://ci.appveyor.com/project/BAMWelDX/weldx/branch/master)
+
+### Code Status
+
+[![static analysis](https://github.com/BAMWelDX/weldx/workflows/static%20analysis/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22static+analysis%22+branch%3Amaster)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5e7ede6d978249a781e5c580ed1c813f)](https://www.codacy.com/gh/BAMWelDX/weldx?utm_source=github.com&utm_medium=referral&utm_content=BAMWelDX/weldx&utm_campaign=Badge_Grade)
+[![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
+[![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/BAMWelDX/weldx/?ref=repository-badge)
+
+### Documentation build
+
+[![Documentation Status](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest)
+[![documentation](https://github.com/BAMWelDX/weldx/workflows/documentation/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Adocumentation+branch%3Amaster)
