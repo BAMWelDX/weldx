@@ -71,11 +71,18 @@
 - update `wx_shape` syntax in `local_coordinate_system-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - add custom `wx_shape` validation to `variable-1.0.0` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - remove outdated `TimeSeries` shape validation code [[#399]](https://github.com/BAMWelDX/weldx/pull/399)
+- use asdf tag validation pattern for `wx_property_tag` [[#410]](https://github.com/BAMWelDX/weldx/pull/410)
+- update `MathematicalExpression` schema [[#410]](https://github.com/BAMWelDX/weldx/pull/410)
 
 ### fixes
 
 - added check for symmetric key difference for mappings
   with `util.compare_nested` [[#377]](https://github.com/BAMWelDX/weldx/pull/377)
+
+### deprecations
+
+- deprecate `wx_tag` validator (use default asdf uri pattern
+  matching) [[#410]](https://github.com/BAMWelDX/weldx/pull/410)
 
 ## 0.3.3 (30.03.2021)
 

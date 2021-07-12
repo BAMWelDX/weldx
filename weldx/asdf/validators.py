@@ -5,12 +5,14 @@ import asdf
 from asdf import ValidationError
 from asdf.schema import _type_to_tag
 from asdf.tagged import TaggedDict
+from asdf.util import uri_match
 
 from weldx.asdf.extension import WxSyntaxError
 from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexType
 from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexType
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.util import deprecated
 
 
 def _walk_validator(
@@ -558,6 +560,7 @@ def wx_shape_validator(
         )
 
 
+@deprecated("0.4.0", "0.5.0", " _compare_tag_version will be removed in 0.5.0")
 def _compare_tag_version(instance_tag: str, tagname: str):
     """Compare ASDF tag-strings with flexible version syntax.
 
@@ -631,7 +634,7 @@ def wx_tag_validator(validator, tagname, instance, schema):
         instance_tag = _type_to_tag(type(instance))
 
     if instance_tag is not None:
-        if not _compare_tag_version(instance_tag, tagname):
+        if not uri_match(tagname, instance_tag):
             yield ValidationError(
                 "mismatched tags, wanted '{0}', got '{1}'".format(tagname, instance_tag)
             )
