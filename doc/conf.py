@@ -85,7 +85,7 @@ pygments_style = "sphinx"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "recommonmark",
+    "m2r2",
     "sphinxcontrib.napoleon",
     "nbsphinx",
     "sphinx.ext.autodoc",
