@@ -7,7 +7,7 @@ dependencies:
   - ipykernel
   - ipywidgets
   # documentation
-  - sphinx
+  - sphinx=4.0
   - jinja2=2
   - m2r2
   - sphinxcontrib-napoleon
