@@ -1,3 +1,3 @@
-"""Temporary module for welding related classes."""
+"""Module for welding related classes."""
 
 from . import groove, processes, util

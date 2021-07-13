@@ -1,4 +1,4 @@
-# WelDX - Welding Data Exchange Format
+# WelDX - data and quality standards for welding research data
 
 [![Documentation](https://readthedocs.org/projects/weldx/badge/?version=latest)](https://weldx.readthedocs.io/en/latest/?badge=latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/tutorials/welding_example_01_basics.ipynb)
@@ -29,7 +29,7 @@ WelDX provides several Python API to perform standard tasks like experiment desi
 
 ### Planning
 
-- Define measurement chains with all involved devices, error sources, and meta data annotations.
+- Define measurement chains with all involved devices, error sources, and metadata annotations.
 - Handle complex coordinate transformations needed to describe the movement of welding robots, workpieces, and sensors.
 - Planing of welding experiments.
 - convenient creation of [ISO 9692-1](https://www.iso.org/standard/62520.html) welding groove types.
@@ -59,7 +59,7 @@ enables us to store the whole experimental pipeline performed in a modern labora
 
 We seek to provide a user-friendly, well documented programming interface. All functions and classes in WelDX have attached
 documentation about the involved parameters (types and explanation), see [API docs](https://weldx.readthedocs.io/en/stable/api.html).
-Further we provide rich [Jupyter notebook tutorials](https://weldx.readthedocs.io/en/stable/tutorials.htm) about the handling of the basic workflows.
+Further we provide rich [Jupyter notebook tutorials](https://weldx.readthedocs.io/en/stable/tutorials.html) about the handling of the basic workflows.
 
 All involved physical quantities used in weldX (lengths, angles, voltages, currents, etc.) should be attached
 with a unit to ensure automatic conversion and correct mathematical handling. Units are being used in all standard features
@@ -69,7 +69,7 @@ of WelDX and are also archived in the ASDF files. This is implemented by the pop
 ## Installation
 
 The WelDX package can be installed using conda or mamba package manager from the :code:`conda-forge` channel.
-These managers originate from the freely available [Anaconda Python stack](https://docs.conda.io/en/latest/miniconda.html>).
+These managers originate from the freely available [Anaconda Python stack](https://docs.conda.io/en/latest/miniconda.html).
 If you do not have Anaconda or Miniconda installed yet, we ask you to install `Miniconda-3`.
 Documentation for the installation procedure can be found [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation).
 After this step you have access to the conda command and can proceed to installing the WelDX package.
