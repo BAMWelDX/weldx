@@ -233,10 +233,10 @@ html_theme = "pydata_sphinx_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
-# The name of an image file (relative to this directory) to place at the top
+# The name of an image file (relative to html_static_path) to place at the top
 # of the sidebar.
-html_logo = "_static/WelDX_notext.svg"
-html_favicon = "_static/WelDX_notext.ico"
+html_logo = "WelDX_notext.svg"
+html_favicon = "WelDX_notext.ico"
 
 html_theme_options = {
     #  "external_links": [{"url": "https://asdf.readthedocs.io/", "name": "ASDF"}],
