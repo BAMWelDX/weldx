@@ -102,7 +102,6 @@ This research is funded by the Federal Ministry of Education and Research of Ger
 
 [![pytest](https://github.com/BAMWelDX/weldx/workflows/pytest/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3Apytest+branch%3Amaster)
 [![conda build](https://github.com/BAMWelDX/weldx/workflows/conda%20build/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22conda+build%22+branch%3Amaster)
-[![Build status](https://ci.appveyor.com/api/projects/status/6yvswkpj7mmdbrk1/branch/master?svg=true)](https://ci.appveyor.com/project/BAMWelDX/weldx/branch/master)
 
 ### Code Status
 
