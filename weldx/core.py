@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 from warnings import warn
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pint
@@ -601,6 +602,12 @@ class TimeSeries:
         ts._interp_counter = self._interp_counter + 1
         return ts
 
+    def plot(self, axes):
+        if axes is None:
+            _, axes = plt.subplots(
+                subplot_kw={"projection": "3d", "proj_type": "ortho"}
+            )
+
     @property
     def shape(self) -> Tuple:
         """Return the shape of the TimeSeries data.
@@ -624,7 +631,7 @@ class TimeSeries:
         Returns
         -------
         str:
-            Unit sting
+            Unit string
 
         """
         if isinstance(self._data, xr.DataArray):
