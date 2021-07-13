@@ -14,4 +14,5 @@ exclude_paths:
   - 'weldx/_version.py'
   - 'scripts/**'
   - 'CHANGELOG.md'
+  - 'README.md'
   - '.github/pull_request_template.md'
