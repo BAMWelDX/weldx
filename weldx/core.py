@@ -602,11 +602,51 @@ class TimeSeries:
         ts._interp_counter = self._interp_counter + 1
         return ts
 
-    def plot(self, axes):
+    def plot(
+        self,
+        time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
+        axes: plt.Axes = None,
+        title: str = None,
+        data_name: str = "values",
+        **mpl_kwargs,
+    ) -> plt.Axes:
+        """Plot the `TimeSeries`.
+
+        Parameters
+        ----------
+        time :
+            The points in time that should be plotted. This is an optional parameter for
+            discrete `TimeSeries` but mandatory for expression based TimeSeries.
+        axes :
+            An optional matplotlib axes object
+        title :
+            The title of the plot
+        data_name :
+            Name of the data that will appear in the y-axis label
+        mpl_kwargs :
+            Key word arguments that are passed to the matplotlib plot function
+
+        Returns
+        -------
+        matplotlib.pyplot.Axes :
+            The matplotlib axes object that was used for the plot
+
+        """
         if axes is None:
-            _, axes = plt.subplots(
-                subplot_kw={"projection": "3d", "proj_type": "ortho"}
+            _, axes = plt.subplots()
+        if self.is_expression or time is not None:
+            return self.interp_time(time).plot(
+                axes=axes, title=title, data_name=data_name, **mpl_kwargs
             )
+
+        axes.plot(self.time.values / 1e9, self._data.data.m, **mpl_kwargs)
+        axes.set_title(title)
+        axes.set_xlabel("t in s")
+        y_unit_label = ""
+        if self.units != "" and self.units != "dimensionless":
+            y_unit_label = f"in {self.units}"
+        axes.set_ylabel(f"{data_name} {y_unit_label}")
+        return axes
 
     @property
     def shape(self) -> Tuple:
