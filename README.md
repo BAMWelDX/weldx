@@ -50,7 +50,7 @@ like structure, which makes it convenient to structure the data in arbitrary com
 The ASDF format and the provided extensions for WelDX types like
 
 - workpiece information (used alloys, geometries)
-- welding process parameters (GMAW parameters
+- welding process parameters (GMAW parameters)
 - measurement data
 - coordinate systems (robot movement, sensors)
 
