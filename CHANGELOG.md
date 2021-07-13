@@ -4,7 +4,7 @@
 
 ### added
 
-- add support for quality standards. Further information can be found in the corresponding new tutorial. 
+- add support for quality standards. Further information can be found in the corresponding new tutorial.
   [[#211]](https://github.com/BAMWelDX/weldx/pull/211)
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
 - added `util.compare_nested` to check equality of two nested data
@@ -41,12 +41,11 @@
     - Removed `Data` class
     - Updated asdf schemas of all modified classes and the ones that contained references to those classes
 - allow input of string quantities in `MathematicalExpression` parameters and a few other
-  places [[#402]](https://github.com/BAMWelDX/weldx/pull/402)
+  places [[#402]](https://github.com/BAMWelDX/weldx/pull/402) [[#416]](https://github.com/BAMWelDX/weldx/pull/416)
 - `LocalCoordinateSystem.__init__` now accepts a `TimeSeries` as input. All methods of the `CoordinateSystemManager`
   also support this new behavior [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - During the creation of a `WeldxFile` the path of a passed custom schema is resolved automatically
   [[#412]](https://github.com/BAMWelDX/weldx/pull/412).
-
 
 ### documentation
 
