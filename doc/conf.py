@@ -10,17 +10,16 @@
 # -D nbsphinx_kernel_name="weldx" -D nbsphinx_execute="never"
 
 # -- Path setup --------------------------------------------------------------
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
+
+import datetime
 import os
 import pathlib
 import shutil
 import sys
 import typing
-import datetime
 
 import traitlets
 

@@ -12,7 +12,7 @@
 
 
 Python API
-==========
+----------
 
 The first core component of the ``WelDX`` project is the Python API.
 The API aims to provide a framework for describing welding experiments as well as
