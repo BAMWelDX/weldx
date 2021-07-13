@@ -72,8 +72,8 @@ dimensions.
 
 ## Publications
 
-Fabry, C., Pittner, A., Hirthammer, V. et al. Recommendations for an Open Science approach to welding process research
-data. *Weld World* (2021). https://doi.org/10.1007/s40194-021-01151-x
+- Recommendations for an Open Science approach to welding process research data. Fabry, C., Pittner, A., Hirthammer, V.
+  et al. *Weld World* (2021). https://doi.org/10.1007/s40194-021-01151-x
 
 ## Installation
 
