@@ -1,5 +1,12 @@
 # Release Notes
 
+
+## 0.4.1 (unreleased)
+
+### added
+
+- add `plot` function to `TimeSeries` [[#420]](https://github.com/BAMWelDX/weldx/pull/420)
+
 ## 0.4.0 (unreleased)
 
 ### added
