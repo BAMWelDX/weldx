@@ -59,7 +59,7 @@ enables us to store the whole experimental pipeline performed in a modern labora
 
 We seek to provide a user-friendly, well documented programming interface. All functions and classes in WelDX have attached
 documentation about the involved parameters (types and explanation), see [API docs](https://weldx.readthedocs.io/en/stable/api.html).
-Further we provide rich [Jupyter notebook tutorials](https://weldx.readthedocs.io/en/stable/tutorials.htm) about the handling of the basic workflows.
+Further we provide rich [Jupyter notebook tutorials](https://weldx.readthedocs.io/en/stable/tutorials.html) about the handling of the basic workflows.
 
 All involved physical quantities used in weldX (lengths, angles, voltages, currents, etc.) should be attached
 with a unit to ensure automatic conversion and correct mathematical handling. Units are being used in all standard features

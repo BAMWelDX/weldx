@@ -1,7 +1,3 @@
-============================================================
-WelDX - data and quality standards for welding research data
-============================================================
-
 .. mdinclude:: ../README.md
 
 .. toctree::
