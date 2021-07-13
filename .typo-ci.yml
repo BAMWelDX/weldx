@@ -76,9 +76,9 @@ excluded_words:
   - fillna
   - sel
   - dtypes
+  - datetimeindex
   - timedelta
   - timedeltaindex
-  - datetimeindex
   - isoformat
   # pyfilesystem --------------------------------
   - osfs
