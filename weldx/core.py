@@ -643,7 +643,7 @@ class TimeSeries:
         axes.set_title(title)
         axes.set_xlabel("t in s")
         y_unit_label = ""
-        if self.units != "" and self.units != "dimensionless":
+        if self.units in ["", "dimensionless"]:
             y_unit_label = f"in {self.units}"
         axes.set_ylabel(f"{data_name} {y_unit_label}")
         return axes
