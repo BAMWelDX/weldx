@@ -1,6 +1,26 @@
 # Release Notes
 
-## 0.4.0 (unreleased)
+## 0.4.0 (13.07.2021)
+
+Release `0.4.0` brings many new major features to `weldx`
+
+### Highlights
+
+- [Quality Standards](https://weldx.readthedocs.io/en/latest/tutorials/quality_standards.html):
+  Users can now create and integrate their own quality standards by defining new ASDF schema definitions and loading
+  them into weldx. It is possible to add new definitions or modify existing schemas to create your own flavour of the
+  weldx standard.
+- [WeldxFile](https://weldx.readthedocs.io/en/latest/tutorials/weldxfile.html):
+  Create/Load/Modify asdf files directly using ``WeldxFile`` with many helpful utility functions included.
+- [TimeSeries support](https://weldx.readthedocs.io/en/latest/tutorials/welding_example_02_weaving.html#add-a-sine-wave-to-the-TCP-movement)
+  for ``LocalCoordinateSystem``:
+  It is now possible to define a time-dependent ``LocalCoordinateSystem`` with a simple function by passing
+  a ``TimeSeries``
+  object with a ``MathematicalExpression`` as ``coordinates``. For an example, click the link above.
+- [MeasurementChain](https://weldx.readthedocs.io/en/latest/tutorials/measurement_chain.html) \
+  The ``MeasurementChain`` has been reworked to be easier and more flexible to use.
+
+full changelog below:
 
 ### added
 
