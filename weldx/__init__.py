@@ -18,7 +18,8 @@ from weldx.constants import WELDX_QUANTITY as Q_
 
 # main modules
 import weldx.transformations  # import this first to avoid circular dependencies
-import weldx.util
+import weldx.util  # import this first to avoid circular dependencies
+import weldx.config
 import weldx.core
 import weldx.geometry
 import weldx.welding
@@ -28,6 +29,7 @@ import weldx.asdf
 from weldx.asdf.file import WeldxFile
 
 # class imports to weldx namespace
+from weldx.config import Config
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.geometry import (
     ArcSegment,
@@ -70,4 +72,7 @@ __all__ = (
     "welding",
     "TimeSeries",
     "LinearHorizontalTraceSegment",
+    "Config",
 )
+
+weldx.config.Config.load_installed_standards()
