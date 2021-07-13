@@ -20,6 +20,8 @@
 - Add `is_discrete` and `is_expression` properties to `TimeSeries` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - Add `MeasurementChain.output_signal` property that returns the output signal of the `MeasurementChain`
   [[#394]](https://github.com/BAMWelDX/weldx/pull/394)
+- Add `closed_mesh` parameter to `Geometry.spatial_data` and `SpatialData.from_geometry_raster`
+  [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
 
 ### changes
 
