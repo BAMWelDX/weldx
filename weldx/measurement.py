@@ -10,11 +10,12 @@ from networkx import draw, draw_networkx_edge_labels
 
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
+from weldx.core import TimeSeries
 
 if TYPE_CHECKING:  # pragma: no cover
     from pint import Quantity
 
-    from weldx.core import MathematicalExpression, TimeSeries
+    from weldx.core import MathematicalExpression
 
 
 # measurement --------------------------------------------------------------------------
@@ -1064,5 +1065,5 @@ class Measurement:
     """Simple dataclass implementation for generic measurements."""
 
     name: str
-    data: List["TimeSeries"]
+    data: List[TimeSeries]
     measurement_chain: MeasurementChain

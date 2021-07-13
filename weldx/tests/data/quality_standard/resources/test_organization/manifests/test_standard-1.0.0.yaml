@@ -1,0 +1,12 @@
+# header
+id: http://test_organization/manifests/test_standard-1.0.0
+extension_uri: http://test_organization/standards/test_standard-1.0.0
+title: My own standard
+description: |-
+  A new and stricter standard for measurement equipment.
+asdf_standard_requirement: 1.0.0
+
+# mappings
+tags:
+- uri: "http://weldx.bam.de/schemas/weldx/equipment/measurement_equipment-1.0.0"
+  file: "alternative_measurement_equipment_schema-1.0.0"
