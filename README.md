@@ -64,7 +64,7 @@ see [API docs](https://weldx.readthedocs.io/en/stable/api.html). Further we prov
 rich [Jupyter notebook tutorials](https://weldx.readthedocs.io/en/stable/tutorials.html) about the handling of the basic
 workflows.
 
-All involved physical quantities used in weldX (lengths, angles, voltages, currents, etc.) should be attached with a
+All involved physical quantities used in `weldx` (lengths, angles, voltages, currents, etc.) should be attached with a
 unit to ensure automatic conversion and correct mathematical handling. Units are being used in all standard features of
 WelDX and are also archived in the ASDF files. This is implemented by the popular Python library
 [Pint](https://pint.readthedocs.io/en/stable/), which flawlessly handles the creation and conversion of units and
@@ -72,8 +72,8 @@ dimensions.
 
 ## Publications
 
-Recommendations for an Open Science approach to welding process research data.\
-Fabry, C., Pittner, A., Hirthammer, V. et al. *Weld World* (2021). https://doi.org/10.1007/s40194-021-01151-x
+Fabry, C., Pittner, A., Hirthammer, V. et al. Recommendations for an Open Science approach to welding process research
+data. *Weld World* (2021). https://doi.org/10.1007/s40194-021-01151-x
 
 ## Installation
 
