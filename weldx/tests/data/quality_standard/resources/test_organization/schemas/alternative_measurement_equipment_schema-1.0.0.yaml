@@ -1,0 +1,37 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/equipment/measurement_equipment-1.0.0"
+tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
+
+title: |
+  A piece of measurement equipment.
+description: |
+  This schema describes a piece of measurement equipment that is part of a measurement chain.
+  Equipments can be associated with signal sources and data transformations.
+
+type: object
+properties:
+  name:
+    type: string
+  sources:
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
+  data_transformations:
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/measurement/data_transformation-1.0.0"
+  wx_metadata:
+    type: object
+    properties:
+      serial_number:
+        type: number
+  required: [serial_number]
+
+
+propertyOrder: [name, sources, data_transformations]
+required: [name, wx_metadata]
+
+flowStyle: block
+...

@@ -16,7 +16,7 @@ from asdf.util import get_file_type
 from jsonschema import ValidationError
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.util import get_yaml_header, view_tree, get_schema_path
+from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
 __all__ = [
