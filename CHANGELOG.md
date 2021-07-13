@@ -4,7 +4,7 @@
 
 ### added
 
-- add support for quality standards. Further information can be found in the corresponding new tutorial. 
+- add support for quality standards. Further information can be found in the corresponding new tutorial.
   [[#211]](https://github.com/BAMWelDX/weldx/pull/211)
 - added `asdf.util.get_schema_path` helper function [[#325]](https://github.com/BAMWelDX/weldx/pull/325)
 - added `util.compare_nested` to check equality of two nested data
@@ -46,7 +46,6 @@
   also support this new behavior [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - During the creation of a `WeldxFile` the path of a passed custom schema is resolved automatically
   [[#412]](https://github.com/BAMWelDX/weldx/pull/412).
-
 
 ### documentation
 
