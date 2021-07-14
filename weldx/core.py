@@ -606,7 +606,6 @@ class TimeSeries:
         self,
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
         axes: plt.Axes = None,
-        title: str = None,
         data_name: str = "values",
         **mpl_kwargs,
     ) -> plt.Axes:
@@ -619,8 +618,6 @@ class TimeSeries:
             discrete `TimeSeries` but mandatory for expression based TimeSeries.
         axes :
             An optional matplotlib axes object
-        title :
-            The title of the plot
         data_name :
             Name of the data that will appear in the y-axis label
         mpl_kwargs :
@@ -636,16 +633,16 @@ class TimeSeries:
             _, axes = plt.subplots()
         if self.is_expression or time is not None:
             return self.interp_time(time).plot(
-                axes=axes, title=title, data_name=data_name, **mpl_kwargs
+                axes=axes, data_name=data_name, **mpl_kwargs
             )
 
         axes.plot(self.time.values / 1e9, self._data.data.m, **mpl_kwargs)
-        axes.set_title(title)
         axes.set_xlabel("t in s")
         y_unit_label = ""
         if self.units in ["", "dimensionless"]:
             y_unit_label = f"in {self.units:~}"
-        axes.set_ylabel(f"{data_name} {y_unit_label}")
+        axes.set_ylabel(data_name + y_unit_label)
+
         return axes
 
     @property
