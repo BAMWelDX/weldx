@@ -2254,11 +2254,14 @@ class Geometry:
 
     @UREG.wraps(
         None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT),
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
         strict=False,
     )
     def spatial_data(
-        self, profile_raster_width: pint.Quantity, trace_raster_width: pint.Quantity
+        self,
+        profile_raster_width: pint.Quantity,
+        trace_raster_width: pint.Quantity,
+        closed_mesh: bool = True,
     ):
         """Rasterize the geometry and get it as `SpatialData` instance.
 
@@ -2266,10 +2269,12 @@ class Geometry:
 
         Parameters
         ----------
-        profile_raster_width : pint.Quantity
+        profile_raster_width :
             Target distance between the individual points of a profile
-        trace_raster_width : pint.Quantity
+        trace_raster_width :
             Target distance between the individual profiles on the trace
+        closed_mesh :
+            If `True`, the surface of the 3d geometry will be closed
 
         Returns
         -------
@@ -2288,7 +2293,7 @@ class Geometry:
         rasterization = self.rasterize(
             profile_raster_width, trace_raster_width, stack=False
         )
-        return SpatialData.from_geometry_raster(rasterization)
+        return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
 
 # SpatialData --------------------------------------------------------------------------
@@ -2352,13 +2357,17 @@ class SpatialData:
         return SpatialData(mesh.points, triangles)
 
     @staticmethod
-    def from_geometry_raster(geometry_raster: np.ndarray) -> "SpatialData":
+    def from_geometry_raster(
+        geometry_raster: np.ndarray, closed_mesh: bool = True
+    ) -> "SpatialData":
         """Triangulate rasterized Geometry Profile.
 
         Parameters
         ----------
         geometry_raster : numpy.ndarray
             A single unstacked geometry rasterization.
+        closed_mesh :
+            If `True`, the surface of the 3d geometry will be closed
 
         Returns
         -------
@@ -2374,12 +2383,31 @@ class SpatialData:
             return SpatialData(*ut.triangulate_geometry(geometry_raster))
 
         part_data = [ut.triangulate_geometry(part) for part in geometry_raster]
-
         total_points = []
         total_triangles = []
-        for points, triangulation in part_data:
+        for i, (points, triangulation) in enumerate(part_data):
             total_triangles += (triangulation + len(total_points)).tolist()
+            if closed_mesh:
+                # closes side faces
+                i_p1 = len(total_points)
+                i_p2 = i_p1 + len(geometry_raster[i][0][0]) - 1
+                i_p3 = i_p1 + len(points) - 1
+                i_p4 = i_p3 - len(geometry_raster[i][-1][0]) + 1
+                total_triangles += [[i_p1, i_p2, i_p3], [i_p3, i_p4, i_p1]]
+
+                # closes front and back faces
+                def _triangulate_profile(p_0, p_1):
+                    triangles = []
+                    while p_1 > p_0:
+                        triangles += [[p_0, p_1, p_1 - 1], [p_1 - 1, p_0 + 1, p_0]]
+                        p_0 += 1
+                        p_1 -= 1
+                    return triangles
+
+                total_triangles += _triangulate_profile(i_p1, i_p2)
+                total_triangles += _triangulate_profile(i_p4, i_p3)
             total_points += points.tolist()
+
         return SpatialData(total_points, total_triangles)
 
     def plot(
