@@ -636,8 +636,9 @@ class TimeSeries:
                 axes=axes, data_name=data_name, **mpl_kwargs
             )
 
-        axes.plot(self.time.values / 1e9, self._data.data.m, **mpl_kwargs)
-        axes.set_xlabel("t in s")
+        time = ut.pandas_time_delta_to_quantity(self.time)
+        axes.plot(time.m, self._data.data.m, **mpl_kwargs)
+        axes.set_xlabel(f"t in {time.u:~}")
         y_unit_label = ""
         if self.units in ["", "dimensionless"]:
             y_unit_label = f"in {self.units:~}"
