@@ -1,5 +1,26 @@
 # Release Notes
 
+## 0.4.1 (unreleased)
+
+### added
+
+- Add `closed_mesh` parameter to `Geometry.spatial_data` and `SpatialData.from_geometry_raster`
+  [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
+
+### removed
+
+### changes
+
+### fixes
+
+### documentation
+
+### ASDF
+
+### deprecations
+
+### dependencies
+
 ## 0.4.0 (13.07.2021)
 
 Release `0.4.0` brings many new major features to `weldx`
@@ -40,8 +61,6 @@ full changelog below:
 - Add `is_discrete` and `is_expression` properties to `TimeSeries` [[#366]](https://github.com/BAMWelDX/weldx/pull/366)
 - Add `MeasurementChain.output_signal` property that returns the output signal of the `MeasurementChain`
   [[#394]](https://github.com/BAMWelDX/weldx/pull/394)
-- Add `closed_mesh` parameter to `Geometry.spatial_data` and `SpatialData.from_geometry_raster`
-  [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
 
 ### changes
 
