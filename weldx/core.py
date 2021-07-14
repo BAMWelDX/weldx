@@ -670,13 +670,13 @@ class TimeSeries:
         return self._shape
 
     @property
-    def units(self) -> str:
+    def units(self) -> pint.Unit:
         """Return the units of the TimeSeries Data.
 
         Returns
         -------
-        str:
-            Unit string
+        pint.Unit:
+            The unit of the `TimeSeries`
 
         """
         if isinstance(self._data, xr.DataArray):
