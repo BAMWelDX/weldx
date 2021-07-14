@@ -2863,7 +2863,7 @@ class TestGeometry:
             instance
 
         """
-        spatial_data = geometry.spatial_data(p_rw, t_rw)
+        spatial_data = geometry.spatial_data(p_rw, t_rw, closed_mesh=False)
         assert len(spatial_data.coordinates.data) == exp_num_points
 
         num_triangles = 0
