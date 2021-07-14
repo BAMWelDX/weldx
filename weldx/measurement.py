@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Tuple  # noqa: F401
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 from warnings import warn
 
 from networkx import draw, draw_networkx_edge_labels
@@ -13,7 +13,9 @@ from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import TimeSeries
 
 if TYPE_CHECKING:  # pragma: no cover
-    from pint import Quantity
+    import matplotlib.pyplot as plt
+    from pandas import TimedeltaIndex
+    from pint import Quantity, Unit
 
     from weldx.core import MathematicalExpression
 
@@ -40,6 +42,44 @@ class Signal:
         """Perform some checks after construction."""
         if self.signal_type not in ["analog", "digital"]:
             raise ValueError(f"{self.signal_type} is an invalid signal type.")
+
+    def plot(
+        self,
+        time: Union[TimedeltaIndex, Quantity] = None,
+        axes: plt.Axes = None,
+        data_name: str = "values",
+        time_unit: Union[str, Unit] = None,
+        **mpl_kwargs,
+    ) -> plt.Axes:
+        """Plot the time dependent data of the `Signal`.
+
+        Parameters
+        ----------
+        time :
+            The points in time that should be plotted. This is an optional parameter for
+            discrete data but mandatory for expression based data.
+        axes :
+            An optional matplotlib axes object
+        data_name :
+            Name of the data that will appear in the y-axis label
+        mpl_kwargs :
+            Key word arguments that are passed to the matplotlib plot function
+        time_unit :
+            The desired time unit for the plot. If `None` is provided, the internally
+            stored unit will be used.
+
+        Returns
+        -------
+        matplotlib.pyplot.Axes :
+            The matplotlib axes object that was used for the plot
+
+        """
+        if self.data is None:
+            raise ValueError("This signal has no data that can be plotted.")
+
+        return self.data.plot(
+            time=time, axes=axes, data_name=data_name, time_unit=time_unit, **mpl_kwargs
+        )
 
 
 @dataclass
