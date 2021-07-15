@@ -8,8 +8,7 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
-from asdf import AsdfFile, generic_io
-from asdf import open as open_asdf
+from asdf import AsdfFile, generic_io, open as open_asdf
 from asdf import util
 from asdf.tags.core import Software
 from asdf.util import get_file_type
@@ -497,15 +496,27 @@ class WeldxFile(UserDict):
         >>> tree = dict(my_var=(1, 2, 3), some_str="foobar", array=np.arange(5))
         >>> f = WeldxFile(tree=tree, mode='rw')
         >>> f.show_asdf_header()  #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'asdf_library': {'author': 'The ASDF Developers', \
-        'homepage': 'http://github.com/asdf-format/asdf', 'name': 'asdf',\
-         'version': '...'},
-         'history': {'extensions': [{'extension_class': \
-            'asdf.extension.BuiltinExtension', \
-            'software': {'name': 'asdf', 'version': '...'}}]}, \
-         'array': {'source': 0, 'datatype': 'int...', 'byteorder': 'little', \
-                   'shape': [5]}, \
-         'my_var': [1, 2, 3], 'some_str': 'foobar'}
+        #ASDF 1.0.0
+        #ASDF_STANDARD 1.5.0
+        %YAML 1.1
+        %TAG ! tag:stsci.edu:asdf/
+        --- !core/asdf-1.1.0
+        asdf_library: !core/software-1.0.0 {author: The ASDF Developers,
+          homepage: 'http://github.com/asdf-format/asdf',
+          name: asdf, version: ...}
+        history:
+          extensions:
+          - !core/extension_metadata-1.0.0
+            extension_class: asdf.extension.BuiltinExtension
+            software: !core/software-1.0.0 {name: asdf, version: ...}
+        array: !core/ndarray-1.0.0
+          source: 0
+          datatype: int64
+          byteorder: little
+          shape: [5]
+        my_var: [1, 2, 3]
+        some_str: foobar
+        <BLANKLINE>
 
         """
         # We need to synchronize the file contents here to make sure the header is in
