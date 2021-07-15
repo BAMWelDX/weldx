@@ -294,7 +294,7 @@ class TimeSeries:
         self._units = None
         self._interp_counter = 0
 
-        if isinstance(data, pint.Quantity):
+        if isinstance(data, (pint.Quantity, xr.DataArray)):
             self._initialize_discrete(data, time, interpolation)
         elif isinstance(data, MathematicalExpression):
             self._init_expression(data)
@@ -347,7 +347,7 @@ class TimeSeries:
 
     def _initialize_discrete(
         self,
-        data: pint.Quantity,
+        data: Union[pint.Quantity, xr.DataArray],
         time: Union[None, pd.TimedeltaIndex, pint.Quantity],
         interpolation: str,
     ):
