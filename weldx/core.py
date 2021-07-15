@@ -345,6 +345,26 @@ class TimeSeries:
             )
         return representation + f"Units:\n\t{self.units}\n"
 
+    @staticmethod
+    def _check_data_array(data_array: xr.DataArray):
+        """Raise an exception if the 'DataArray' can't be used as 'self._data'."""
+        if "time" != data_array.dims[0]:
+            raise ValueError("The first dimension of the DataArray must be 'time'.")
+
+        if (time_coords := data_array.coords.get("time")) is None:
+            raise ValueError("The 'DataArray' does not specify time values.")
+
+        try:
+            ut.to_pandas_time_index(time_coords.data)
+        except TypeError:
+            raise TypeError(
+                "The time values of the 'DataArray' must be convertible to a "
+                "'pandas.TimedeltaIndex'."
+            )
+
+        if not isinstance(data_array.data, pint.Quantity):
+            raise TypeError("The data of the 'DataArray' must be a 'pint.Quantity'.")
+
     def _initialize_discrete(
         self,
         data: Union[pint.Quantity, xr.DataArray],
@@ -356,24 +376,28 @@ class TimeSeries:
         if interpolation is None:
             interpolation = "step"
 
-        # expand dim for scalar input
-        data = Q_(data)
-        if not np.iterable(data):
-            data = np.expand_dims(data, 0)
+        if isinstance(data, xr.DataArray):
+            self._check_data_array(data)
+            self._data = data
+        else:
+            # expand dim for scalar input
+            data = Q_(data)
+            if not np.iterable(data):
+                data = np.expand_dims(data, 0)
 
-        # constant value case
-        if time is None:
-            time = pd.TimedeltaIndex([0])
+            # constant value case
+            if time is None:
+                time = pd.TimedeltaIndex([0])
 
-        if isinstance(time, pint.Quantity):
-            time = ut.to_pandas_time_index(time)
-        if not isinstance(time, pd.TimedeltaIndex):
-            raise ValueError(
-                '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-            )
+            if isinstance(time, pint.Quantity):
+                time = ut.to_pandas_time_index(time)
+            if not isinstance(time, pd.TimedeltaIndex):
+                raise ValueError(
+                    '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
+                )
 
-        dax = xr.DataArray(data=data)
-        self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
+            dax = xr.DataArray(data=data)
+            self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
         self.interpolation = interpolation
 
     def _init_expression(self, data):
