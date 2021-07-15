@@ -20,6 +20,8 @@
 
 ### deprecations
 
+- `lcs_coords_from_ts` will be removed in version 0.5.0 [[#426]](https://github.com/BAMWelDX/weldx/pull/426)
+
 ### dependencies
 
 ## 0.4.0 (13.07.2021)
