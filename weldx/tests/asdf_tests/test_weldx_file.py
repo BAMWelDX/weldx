@@ -1,9 +1,7 @@
 """Tests for the WeldxFile class."""
-import io
 import pathlib
 import shutil
 import tempfile
-from _curses import use_env
 from io import BytesIO
 
 import asdf
@@ -78,7 +76,7 @@ def test_protocol_check(tmpdir):
 def simple_asdf_file(request):
     """Create an ASDF file with a very simple tree and attaches it to cls."""
     f = asdf.AsdfFile(tree=dict(wx_metadata=dict(welder="anonymous")))
-    buff = io.BytesIO()
+    buff = BytesIO()
     f.write_to(buff)
     request.cls.simple_asdf_file = buff
 
