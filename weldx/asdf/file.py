@@ -538,9 +538,10 @@ class WeldxFile(UserDict):
                 else:
                     return notebook_fileprinter(self.file_handle)
 
-        def _impl_non_interactive() -> dict:
+        def _impl_non_interactive():
             with reset_file_position(self.file_handle):
-                return get_yaml_header(self.file_handle, parse=True)
+                out = get_yaml_header(self.file_handle, parse=False)
+                print(out)
 
         # automatically determine if this runs in an interactive session.
         if _interactive is None:
@@ -549,7 +550,7 @@ class WeldxFile(UserDict):
             else:
                 return self.show_asdf_header(_interactive=False)
         elif _interactive is False:
-            return _impl_non_interactive()
+            _impl_non_interactive()
         elif _interactive is True:
             return _impl_interactive()
 

@@ -3,6 +3,7 @@ import io
 import pathlib
 import shutil
 import tempfile
+from _curses import use_env
 from io import BytesIO
 
 import asdf
@@ -337,6 +338,18 @@ class TestWeldXFile:
         file.show_asdf_header()
         after_pos = file.file_handle.tell()
         assert old_pos == after_pos
+
+    @staticmethod
+    @pytest.mark.parametrize("mode", ("r", "rw"))
+    def test_show_header_in_sync(mode, capsys):
+        """Ensure that the updated tree is displayed in show_header"""
+        with WeldxFile(mode=mode) as fh:
+            fh["wx_user"] = dict(test=True)
+            fh.show_asdf_header(use_widgets=False, _interactive=False)
+
+        out, err = capsys.readouterr()
+        assert "wx_user" in out
+        assert "test" in out
 
     def test_invalid_software_entry(self):
         """Invalid software entries should raise."""
