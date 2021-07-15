@@ -308,6 +308,7 @@ class TestTimeSeries:
         ],
     )
     def test_init_data_array(data, dims, coords, exception_type):
+        """Test the `__init__` method with an xarray as data parameter."""
         da = xr.DataArray(data=data, dims=dims, coords=coords)
         if exception_type is not None:
             with pytest.raises(exception_type):
