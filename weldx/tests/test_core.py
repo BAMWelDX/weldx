@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pint
 import pytest
+import xarray as xr
 
 import weldx.util as ut
 from weldx.constants import WELDX_QUANTITY as Q_
@@ -291,6 +292,28 @@ class TestTimeSeries:
         assert ts.shape == shape_exp
         assert ts.data_array is None
         assert Q_(1, unit_exp).check(UREG.get_dimensionality(ts.units))
+
+    # test_init_data_array -------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "data, dims, coords, exception_type",
+        [
+            (Q_([1, 2, 3], "m"), "time", dict(time=TDI([1, 2, 3])), None),
+            (Q_([1, 2, 3], "m"), "a", dict(a=TDI([1, 2, 3])), ValueError),
+            (Q_([[1]], "m"), ("a", "time"), dict(a=[2], time=TDI([1])), ValueError),
+            (Q_([1, 2, 3], "m"), "time", None, ValueError),
+            (Q_([1, 2, 3], "m"), "time", dict(time=[1, 2, 3]), TypeError),
+            ([1, 2, 3], "time", dict(time=TDI([1, 2, 3])), TypeError),
+        ],
+    )
+    def test_init_data_array(data, dims, coords, exception_type):
+        da = xr.DataArray(data=data, dims=dims, coords=coords)
+        if exception_type is not None:
+            with pytest.raises(exception_type):
+                TimeSeries(da)
+        else:
+            TimeSeries(da)
 
     # test_construction_exceptions -----------------------------------------------------
 

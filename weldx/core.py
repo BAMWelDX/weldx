@@ -352,11 +352,11 @@ class TimeSeries:
         if "time" != data_array.dims[0]:
             raise ValueError("The first dimension of the DataArray must be 'time'.")
 
-        if (time_coords := data_array.coords.get("time")) is None:
+        if "time" not in data_array.coords:
             raise ValueError("The 'DataArray' does not specify time values.")
 
         try:
-            ut.to_pandas_time_index(time_coords.data)
+            ut.to_pandas_time_index(data_array.coords.get("time").data)
         except TypeError:
             raise TypeError(
                 "The time values of the 'DataArray' must be convertible to a "
