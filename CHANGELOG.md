@@ -14,6 +14,9 @@
 
 ### fixes
 
+- `WeldxFile.show_asdf_header` prints output on console, before it only returned the header
+  as parsed dict and string representation [[#]]().
+
 ### documentation
 
 ### ASDF
