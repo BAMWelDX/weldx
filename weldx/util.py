@@ -263,6 +263,12 @@ def sine(
     return TimeSeries(expr)
 
 
+@deprecated(
+    "0.4.1",
+    "0.5.0",
+    "The 'LocalCoordinateSystem' now supports 'TimeSeries' as coordinates rendering "
+    "this function obsolete.",
+)
 def lcs_coords_from_ts(
     ts: TimeSeries, time: Union[pd.DatetimeIndex, pint.Quantity]
 ) -> xr.DataArray:

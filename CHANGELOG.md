@@ -6,6 +6,7 @@
 
 - `closed_mesh` parameter to `Geometry.spatial_data`
   and `SpatialData.from_geometry_raster` [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
+- `TimeSeries.plot` and `Signal.plot` [[#420]](https://github.com/BAMWelDX/weldx/pull/420)
 
 ### removed
 
@@ -18,6 +19,8 @@
 ### ASDF
 
 ### deprecations
+
+- `lcs_coords_from_ts` will be removed in version 0.5.0 [[#426]](https://github.com/BAMWelDX/weldx/pull/426)
 
 ### dependencies
 

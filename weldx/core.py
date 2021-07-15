@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 from warnings import warn
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pint
@@ -625,6 +626,57 @@ class TimeSeries:
         ts._interp_counter = self._interp_counter + 1
         return ts
 
+    def plot(
+        self,
+        time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
+        axes: plt.Axes = None,
+        data_name: str = "values",
+        time_unit: Union[str, pint.Unit] = None,
+        **mpl_kwargs,
+    ) -> plt.Axes:
+        """Plot the `TimeSeries`.
+
+        Parameters
+        ----------
+        time :
+            The points in time that should be plotted. This is an optional parameter for
+            discrete `TimeSeries` but mandatory for expression based TimeSeries.
+        axes :
+            An optional matplotlib axes object
+        data_name :
+            Name of the data that will appear in the y-axis label
+        mpl_kwargs :
+            Key word arguments that are passed to the matplotlib plot function
+        time_unit :
+            The desired time unit for the plot. If `None` is provided, the internally
+            stored unit will be used.
+
+        Returns
+        -------
+        matplotlib.axes._axes.Axes :
+            The matplotlib axes object that was used for the plot
+
+        """
+        if axes is None:
+            _, axes = plt.subplots()
+        if self.is_expression or time is not None:
+            return self.interp_time(time).plot(
+                axes=axes, data_name=data_name, time_unit=time_unit, **mpl_kwargs
+            )
+
+        time = ut.pandas_time_delta_to_quantity(self.time)
+        if time_unit is not None:
+            time = time.to(time_unit)
+
+        axes.plot(time.m, self._data.data.m, **mpl_kwargs)
+        axes.set_xlabel(f"t in {time.u:~}")
+        y_unit_label = ""
+        if self.units not in ["", "dimensionless"]:
+            y_unit_label = f" in {self.units:~}"
+        axes.set_ylabel(data_name + y_unit_label)
+
+        return axes
+
     @property
     def shape(self) -> Tuple:
         """Return the shape of the TimeSeries data.
@@ -642,13 +694,13 @@ class TimeSeries:
         return self._shape
 
     @property
-    def units(self) -> str:
+    def units(self) -> pint.Unit:
         """Return the units of the TimeSeries Data.
 
         Returns
         -------
-        str:
-            Unit sting
+        pint.Unit:
+            The unit of the `TimeSeries`
 
         """
         if isinstance(self._data, xr.DataArray):
