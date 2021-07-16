@@ -301,7 +301,7 @@ class TestTimeSeries:
         [
             (Q_([1, 2, 3], "m"), "time", dict(time=TDI([1, 2, 3])), None),
             (Q_([1, 2, 3], "m"), "a", dict(a=TDI([1, 2, 3])), ValueError),
-            (Q_([[1]], "m"), ("a", "time"), dict(a=[2], time=TDI([1])), ValueError),
+            (Q_([[1, 2]], "m"), ("a", "time"), dict(a=[2], time=TDI([1, 2])), None),
             (Q_([1, 2, 3], "m"), "time", None, ValueError),
             (Q_([1, 2, 3], "m"), "time", dict(time=[1, 2, 3]), TypeError),
             ([1, 2, 3], "time", dict(time=TDI([1, 2, 3])), TypeError),
@@ -314,7 +314,8 @@ class TestTimeSeries:
             with pytest.raises(exception_type):
                 TimeSeries(da)
         else:
-            TimeSeries(da)
+            ts = TimeSeries(da)
+            assert ts.data_array.dims[0] == "time"
 
     # test_construction_exceptions -----------------------------------------------------
 

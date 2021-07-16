@@ -349,8 +349,8 @@ class TimeSeries:
     @staticmethod
     def _check_data_array(data_array: xr.DataArray):
         """Raise an exception if the 'DataArray' can't be used as 'self._data'."""
-        if "time" != data_array.dims[0]:
-            raise ValueError("The first dimension of the DataArray must be 'time'.")
+        if "time" not in data_array.dims:
+            raise ValueError("The 'DataArray' must have a dimension called 'time'.")
 
         if "time" not in data_array.coords:
             raise ValueError("The 'DataArray' does not specify time values.")
@@ -379,6 +379,10 @@ class TimeSeries:
 
         if isinstance(data, xr.DataArray):
             self._check_data_array(data)
+            if data.dims[0] != "time":
+                data = data.transpose(
+                    *ut.swap_list_items(data.dims, data.dims[0], "time")
+                )
             self._data = data
         else:
             # expand dim for scalar input
