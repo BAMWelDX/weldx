@@ -376,9 +376,7 @@ class TimeSeries:
         if isinstance(data, xr.DataArray):
             self._check_data_array(data)
             if data.dims[0] != "time":
-                data = data.transpose(
-                    *ut.swap_list_items(data.dims, data.dims[0], "time")
-                )
+                data = data.transpose("time", ...)
             self._data = data
         else:
             # expand dim for scalar input
