@@ -12,6 +12,9 @@
 
 ### changes
 
+- `TimeSeries.__init__` accepts `xarray.DataArray` as `data`
+  parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
+
 ### fixes
 
 ### documentation
