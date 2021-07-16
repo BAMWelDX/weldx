@@ -56,7 +56,8 @@ def _from_tree_mod(tree):
 
 
 @pytest.mark.parametrize(
-    "val_a, exp_val_a_tree, exp_val_a_dc, to_tree_mod, from_tree_mod, sort_string_lists",
+    "val_a, exp_val_a_tree, exp_val_a_dc, to_tree_mod, from_tree_mod,"
+    "sort_string_lists",
     [
         (["c", "b", "a"], ["a", "b", "c"], ["a", "b", "c"], None, None, True),
         (["c", "b", "a"], ["c", "b", "a"], ["c", "b", "a"], None, None, False),
