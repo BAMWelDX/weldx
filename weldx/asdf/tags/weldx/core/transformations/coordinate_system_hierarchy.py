@@ -421,7 +421,7 @@ class CoordinateSystemManagerASDF(WeldxType):
         tree = {
             "name": node.name,
             "reference_time": node.reference_time,
-            "subsystem_names": sorted(subsystems),
+            "subsystem_names": subsystems,
             "subsystems": subsystem_data,
             "root_system_name": node.root_system_name,
             "coordinate_systems": coordinate_system_data,
