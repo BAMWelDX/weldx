@@ -91,6 +91,11 @@ class CoordinateSystemManagerSubsystem:
     subsystems: List[str]
     members: List[str]
 
+    def __post_init__(self):
+        """Sort the string lists."""
+        self.subsystems = sorted(self.subsystems)
+        self.members = sorted(self.members)
+
 
 class CoordinateSystemManagerSubsystemASDF(WeldxType):
     """Serialization class for a CoordinateSystemManagerSubsystem instance"""
