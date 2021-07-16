@@ -503,15 +503,15 @@ class WeldxFile(UserDict):
         --- !core/asdf-1.1.0
         asdf_library: !core/software-1.0.0 {author: The ASDF Developers,
           homepage: 'http://github.com/asdf-format/asdf',
-          name: asdf, version: ...}
+          name: asdf, version: ... }
         history:
           extensions:
           - !core/extension_metadata-1.0.0
             extension_class: asdf.extension.BuiltinExtension
-            software: !core/software-1.0.0 {name: asdf, version: ...}
+            software: !core/software-1.0.0 {name: asdf, version: ... }
         array: !core/ndarray-1.0.0
           source: 0
-          datatype: int64
+          datatype: int...
           byteorder: little
           shape: [5]
         my_var: [1, 2, 3]
