@@ -349,18 +349,14 @@ class TimeSeries:
     @staticmethod
     def _check_data_array(data_array: xr.DataArray):
         """Raise an exception if the 'DataArray' can't be used as 'self._data'."""
-        if "time" not in data_array.dims:
-            raise ValueError("The 'DataArray' must have a dimension called 'time'.")
-
-        if "time" not in data_array.coords:
-            raise ValueError("The 'DataArray' does not specify time values.")
-
         try:
-            ut.to_pandas_time_index(data_array.coords.get("time").data)
-        except TypeError:
-            raise TypeError(
-                "The time values of the 'DataArray' must be convertible to a "
-                "'pandas.TimedeltaIndex'."
+            ut.xr_check_coords(data_array, dict(time={"dtype": ["timedelta64[ns]"]}))
+        except (KeyError, TypeError, ValueError) as e:
+            raise type(e)(
+                "The provided 'DataArray' does not match the required pattern. It "
+                "needs to have a dimension called 'time' with coordinates of type "
+                "'timedelta64[ns]'. The error reported by the comparison function was:"
+                f"\n{e}"
             )
 
         if not isinstance(data_array.data, pint.Quantity):
