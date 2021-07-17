@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/weldx/core/time_series-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
 
 title: |
   Schema that describes a time series.
@@ -13,14 +13,14 @@ examples:
   -
     - A time_series describing a constant value in time.
     - |
-      !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
         unit: millimeter / second
         value: 10.0
   -
     - A time_series describing a sine oscillation in 3d space along the z-axis
     - |
-      !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
-        expression: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+        expression: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
           expression: a*sin(o*t + p) + b
           parameters:
             a: !unit/quantity-1.1.0
@@ -61,7 +61,7 @@ oneOf:
       expression:
         description: |
           A mathematical expression that describes the time dependent behaviour.
-        tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
+        tag: "asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0"
       unit:
         description: |
           Resulting unit of the data when the expression is evaluated.
@@ -79,7 +79,7 @@ oneOf:
       time:
         description: |
           A set of time deltas.
-        tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
+        tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0"
       unit:
         description: |
           Unit of the data.

@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/aws/process/arc_welding_process-1.0.0"
-tag: "tag:weldx.bam.de:weldx/aws/process/arc_welding_process-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/aws/process/arc_welding_process-1.0.0"
 
 title: |
   <TODO DESCRIPTION>

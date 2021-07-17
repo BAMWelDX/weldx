@@ -23,7 +23,7 @@ base_process:
       type: string
     parameters:
       type: object
-      wx_property_tag: "tag:weldx.bam.de:weldx/core/time_series-*"
+      wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-*"
     meta:
       type: object
   required: [base_process,manufacturer,power_source,parameters]
@@ -43,14 +43,14 @@ quantity (therefor having a unit) and with a time-dependent behavior. We will se
 ## simple generic GMAW process definition
 
 The most generic tag implementation of any arc welding process is provided
-by `tag:weldx.bam.de:weldx/process/GMAW-1.0.0`:
+by `asdf://weldx.bam.de/weldx/tags/process/GMAW-1.0.0`:
 
 ```yaml
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/process/GMAW-1.0.0"
-tag: "tag:weldx.bam.de:weldx/process/GMAW-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/process/GMAW-1.0.0"
 
 title: |
   Generic GMAW process definition.
@@ -98,13 +98,13 @@ parameters:
   wire_feedrate:
     description: |
       Nominal average wire feedrate.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "m/s"
 
   voltage:
     description: |
       Nominal target voltage for spray arc processes.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "V"
 ```
 
@@ -142,7 +142,7 @@ base_process metadata requirements as well as generic spray arc and additional C
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/process/CLOOS/spray_arc-1.0.0"
-tag: "tag:weldx.bam.de:weldx/process/CLOOS/spray_arc-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/process/CLOOS/spray_arc-1.0.0"
 
 title: |
   CLOOS spray arc process.
@@ -156,10 +156,10 @@ allOf:
         type: object
         properties:
           impedance:
-            tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+            tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
             wx_unit: "percent"
           characteristic:
-            tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+            tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
             wx_unit: "V/A"
         required: [impedance, characteristic]
 
@@ -192,20 +192,20 @@ schema to correctly associate the tag.
 And here is the resulting ASDF snippet:
 
 ```yaml
-spray: !<tag:weldx.bam.de:weldx/process/CLOOS/spray_arc-1.0.0>
+spray: !<asdf://weldx.bam.de/weldx/tags/process/CLOOS/spray_arc-1.0.0>
   base_process: spray
   manufacturer: CLOOS
   parameters:
-    characteristic: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+    characteristic: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
       unit: volt / ampere
       values: 5
-    impedance: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+    impedance: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
       unit: percent
       values: 10.0
-    voltage: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+    voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
       unit: volt
       values: 40.0
-    wire_feedrate: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+    wire_feedrate: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
       unit: meter / minute
       values: 10.0
   power_source: Quinto

@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/time/timestamp-1.0.0"
-tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0"
 
 title: |
   Represents an instance in time.
@@ -12,15 +12,15 @@ examples:
   -
     - A timestamp representing the date 2020-01-01 12:00:00 (without timezone information)
     - |
-      !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T00:00:00'}
+      !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-01-01T00:00:00'}
   -
     - A timestamp representing the date 2020-01-01 12:00:00 in UTC time
     - |
-      !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T12:00:00+00:00'}
+      !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-01-01T12:00:00+00:00'}
   -
     - A timestamp representing the date 2020-01-01 12:00:00 in CET time
     - |
-      !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T12:00:00+01:00'}
+      !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-01-01T12:00:00+01:00'}
 
 properties:
   value:

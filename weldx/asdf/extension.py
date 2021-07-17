@@ -36,7 +36,7 @@ class WeldxExtension(AsdfExtension):
 
     @property
     def yaml_tag_handles(self):
-        return {"!weldx!": "tag:weldx.bam.de:weldx/"}
+        return {"!weldx!": "asdf://weldx.bam.de/weldx/tags/"}
 
 
 class WeldxAsdfExtension(BuiltinExtension):

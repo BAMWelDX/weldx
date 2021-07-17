@@ -189,7 +189,7 @@ The following custom types can be validate with `wx_shape` even though the might
 itself.
 
 * `number` will validate like `shape: [1]`
-* `tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0` will validate against the length of the `TimedeltaIndex` even if no
+* `asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0` will validate against the length of the `TimedeltaIndex` even if no
   data is stored.
 
 ### complex nested example
@@ -201,7 +201,7 @@ Here is a more complex example demonstration some of the above points.
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/debug/test_shape_validator-1.0.0"
-tag: "tag:weldx.bam.de:weldx/debug/test_shape_validator-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/debug/test_shape_validator-1.0.0"
 
 title: |
   simple demonstration and test schema for wx_shape validator syntax

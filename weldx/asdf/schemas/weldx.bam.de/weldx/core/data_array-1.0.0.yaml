@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/core/data_array-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/data_array-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/core/data_array-1.0.0"
 
 title: |
   Schema that describes a data_array
@@ -21,11 +21,11 @@ properties:
       An array of variables that represent coordinates.
     type: array
     items:
-      tag: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0"
   data:
     description: |
       The actual data.
-    tag: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0"
 
 required: [attributes, coordinates, data]
 propertyOrder: [attributes, coordinates, data]

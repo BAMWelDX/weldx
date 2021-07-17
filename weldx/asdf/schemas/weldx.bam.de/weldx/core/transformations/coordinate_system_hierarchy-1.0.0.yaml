@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/core/transformations/coordinate_system_hierarchy-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0"
 
 title: |
   Schema that describes a local coordinate system hierarchy
@@ -15,29 +15,29 @@ examples:
   -
     - A CSM with two static transformations and no subsystems.
     - |
-      !<tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0>
         name: Coordinate system manager 0
         root_system_name: base
         subsystems: []
         coordinate_systems:
-        - !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
+        - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
           name: workpiece
           reference_system: base
-          transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0> {}
-        - !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
+          transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+        - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
           name: tcp_wire
           reference_system: workpiece
-          transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
-            time: !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
+          transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
+            time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
               values: !core/ndarray-1.0.0
                 data: [0, 29000000000]
                 datatype: int64
                 shape: [2]
-              start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-              end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-              min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-              max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-            orientations: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
+              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
+              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
+            orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
               name: orientations
               dimensions: [c, v]
               dtype: <f8
@@ -48,7 +48,7 @@ examples:
                 - [0.0, 1.2246467991473532e-16, -1.0]
                 datatype: float64
                 shape: [3, 3]
-            coordinates: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
+            coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
               name: coordinates
               dimensions: [time, c]
               dtype: <f8
@@ -72,7 +72,7 @@ properties:
   reference_time:
     description: |
       A timestamp that serves as reference point for all attached coordinate systems.
-    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0"
 
   subsystem_names:
     description: |
@@ -87,7 +87,7 @@ properties:
       A list containing the data of all subsystems including nested structures.
     type: array
     items:
-      tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
 
   coordinate_systems:
     description: |
@@ -95,7 +95,7 @@ properties:
       towards their parent system.
     type: array
     items:
-      tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0"
 
   spatial_data:
     type: array
@@ -107,7 +107,7 @@ properties:
         name:
           type: string
         data:
-          tag: "tag:weldx.bam.de:weldx/core/geometry/spatial_data-1.*"
+          tag: "asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-1.*"
       required: [coordinate_system, name, data]
 
 propertyOrder: [name, root_system_name, reference_time, subsystems, subsystem_data, coordinate_systems, spatial_data]

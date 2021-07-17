@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/measurement/measurement_chain-1.0.0"
-tag: "tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.0.0"
 
 title: |
   Schema that describes a measurement_chain
@@ -18,57 +18,57 @@ example:
       A measurement chain representing a current measurement. It consists of 2 transformations, an AD conversion and
       subsequent application of the calibration data.
     - |
-      !<tag:weldx.bam.de:weldx/measurement/measurement_chain-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.0.0>
         name: Welding current measurement chain
-        data_source: !<tag:weldx.bam.de:weldx/measurement/source-1.0.0>
+        data_source: !<asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0>
           name: Current sensor
-          output_signal: &id001 !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+          output_signal: &id001 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
             signal_type: analog
             unit: V
-          error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+          error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
             deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.2}
-        graph: !<tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0>
-          root_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+        graph: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0>
+          root_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
             name: Current sensor
             attributes:
               signal: *id001
             edges:
-            - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+            - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
               direction: fwd
               attributes:
-                transformation: !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
+                transformation: !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0>
                   name: AD conversion
-                  error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+                  error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
                     deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.025}
-                  func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+                  func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
                     expression: a*x
                     parameters:
                       a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 1}
                   type_transformation: AD
-              target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+              target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                 name: AD conversion
                 attributes:
-                  signal: !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+                  signal: !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
                     signal_type: digital
                     unit: dimensionless
                 edges:
-                - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+                - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
                   direction: fwd
                   attributes:
-                    transformation: !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
+                    transformation: !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0>
                       name: Calibration
-                      error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+                      error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
                         deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
-                      func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+                      func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
                         expression: a*x + b
                         parameters:
                           a: !unit/quantity-1.1.0 {unit: ampere, value: 75}
                           b: !unit/quantity-1.1.0 {unit: ampere, value: 25}
                       type_transformation: DD
-                  target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+                  target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                     name: Calibration
                     attributes:
-                      signal: !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+                      signal: !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
                         signal_type: digital
                         unit: ampere
 
@@ -77,7 +77,7 @@ definitions:
     description: |
       A graph node that represents a measurement signal.
     allOf:
-      - tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
       - type: object
         properties:
           attributes:
@@ -86,7 +86,7 @@ definitions:
               signal:
                 description: |
                   The measurement signal
-                tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
+                tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0"
             required: [signal]
           edges:
             type: array
@@ -99,7 +99,7 @@ definitions:
     description: |
       A graph edge that represents a signal transformation.
     allOf:
-      - tag: "tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0"
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0"
       - type: object
         properties:
           attributes:
@@ -108,11 +108,11 @@ definitions:
               transformation:
                 description: |
                   The performed transformation.
-                tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0"
+                tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0"
               equipment:
                 description: |
                   The equipment that performs the transformation
-                tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
+                tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0"
             required: [transformation]
           target_node:
             $ref: "#/definitions/signal_node"
@@ -131,13 +131,13 @@ properties:
   data_source:
     description: |
       The source that generates the first signal and is the first element of the chain.
-    tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0"
 
   graph:
     description: |
       The measurement chain depicted by a graph. Signals are represented by the nodes and transformations by the edges.
     allOf:
-      - tag: "tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0"
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0"
       - type: object
         properties:
           root_node:
@@ -146,7 +146,7 @@ properties:
   source_equipment:
     description: |
             The equipment that produces the source signal.
-    tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0"
 
 
 propertyOrder: [name, data_source, graph, source_equipment]

@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/weldx/core/file-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/file-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/core/file-1.0.0"
 
 title: |
   Schema for a file.
@@ -14,14 +14,14 @@ examples:
   -
     - Full description of a pdf-file without its content
     - |
-      !<tag:weldx.bam.de:weldx/core/file-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/file-1.0.0>
         filename: file.pdf
         suffix: pdf
         hostname: my_computer
         directory: C:/Users/some_user/my_files
         size: 90571
-        created: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-12-09T12:51:20.653744500'}
-        modified: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-12-10T13:14:17.362481500'}
+        created: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-12-09T12:51:20.653744500'}
+        modified: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-12-10T13:14:17.362481500'}
         content_hash: {algorithm: SHA-256, value: 5a6270ea5e2662c6489ee9e9c2201645e1b3cdadf0e3a621cca213a29ff4ae32}
 
 type: object
@@ -41,11 +41,11 @@ properties:
   created:
     description: |
       The timestamp when the file was created.
-    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0"
   modified:
     description: |
       The timestamp when the file was modified last.
-    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0"
   hostname:
     description: |
       The name of the host machine accessing the file.

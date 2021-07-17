@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1_2013_12/DUGroove-1.0.0"
-tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DUGroove-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/DUGroove-1.0.0"
 
 title: |
   DUGroove representation.
@@ -11,7 +11,7 @@ examples:
   -
     - A simple DU-Groove
     - |
-      !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DUGroove-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/DUGroove-1.0.0>
         t: !unit/quantity-1.1.0 {unit: millimeter, value: 33}
         beta_1: !unit/quantity-1.1.0 {unit: degree, value: 8}
         beta_2: !unit/quantity-1.1.0 {unit: degree, value: 12}

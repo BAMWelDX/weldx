@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "http://weldx.bam.de/schemas/weldx/debug/test_shape_validator-1.0.0"
-tag: "tag:weldx.bam.de:weldx/debug/test_shape_validator-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/debug/test_shape_validator-1.0.0"
 
 title: |
   simple demonstration and test schema for wx_shape validator syntax
@@ -33,7 +33,7 @@ properties:
     wx_shape: [1]
 
   timeseries:
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_shape: [1]
 
   nested_prop:
@@ -48,8 +48,8 @@ properties:
 
   time_prop:
     oneOf:
-      - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
-      - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0"
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0"
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/datetimeindex-1.0.0"
 
   optional_prop:
     tag: "tag:stsci.edu:asdf/core/ndarray-1.*"

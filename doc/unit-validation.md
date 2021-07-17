@@ -40,7 +40,7 @@ It is also possible to validate multiple or nested properties with a single `wx_
 structure. See this more complex example for details:
 
 ```yaml
-tag: "tag:weldx.bam.de:weldx/debug/test_unit_validator-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/debug/test_unit_validator-1.0.0"
 
 title: |
   simple demonstration schema for wx_unit validator
