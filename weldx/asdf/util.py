@@ -299,6 +299,7 @@ def dataclass_serialization_class(
     to_tree_mod: Callable = None,
     from_tree_mod: Callable = None,
     validators: dict = None,
+    sort_string_lists: bool = True,
 ) -> Type:
     """Generate a asdf serialization class for a python dataclass.
 
@@ -337,6 +338,17 @@ def dataclass_serialization_class(
         to_tree_mod = _noop
     if from_tree_mod is None:
         from_tree_mod = _noop
+
+    if sort_string_lists:
+        original_to_tree_mod = to_tree_mod
+
+        def _sort_string_list(tree):
+            for k, v in tree.items():
+                if isinstance(v, list) and all(isinstance(item, str) for item in v):
+                    tree[k] = sorted(v)
+            return original_to_tree_mod(tree)
+
+        to_tree_mod = _sort_string_list
 
     class _SerializationClass(WeldxType):
         name = class_name
