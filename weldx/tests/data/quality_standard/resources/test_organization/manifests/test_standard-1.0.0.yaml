@@ -8,5 +8,5 @@ asdf_standard_requirement: 1.0.0
 
 # mappings
 tags:
-- uri: "http://weldx.bam.de/schemas/weldx/equipment/measurement_equipment-1.0.0"
+- uri: "asdf://weldx.bam.de/weldx/schemas/equipment/measurement_equipment-1.0.0"
   file: "alternative_measurement_equipment_schema-1.0.0"

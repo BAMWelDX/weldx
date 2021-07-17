@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/core/transformations/local_coordinate_system-1.0.0"
+id: "asdf://weldx.bam.de/weldx/schemas/core/transformations/local_coordinate_system-1.0.0"
 tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0"
 
 title: |
