@@ -37,7 +37,6 @@ class IsoGrooveType(WeldxType):
         tree = cls.to_tree(node, ctx)
         tag = (
             WELDX_TAG_BASE
-            + "/"
             + _ISO_GROOVE_SCHEMA
             + type(node).__name__
             + "-"
