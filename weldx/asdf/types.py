@@ -84,7 +84,7 @@ class WeldxTypeMeta(ExtensionTypeMeta):
         return cls
 
 
-def format_tag(organization, standard, version, tag_name):
+def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="weldx"):
     """
     Format a YAML tag to new style asdf:// syntax.
     """
@@ -132,7 +132,10 @@ class WeldxType(CustomType, metaclass=WeldxTypeMeta):
             `str` representing the YAML tag
         """
         return format_tag(
-            cls.organization, cls.standard, cls.version if versioned else None, name
+            organization=cls.organization,
+            standard=cls.standard,
+            version=cls.version if versioned else None,
+            tag_name=name,
         )
 
 
