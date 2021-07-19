@@ -69,3 +69,22 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
       - uses: psf/black@20.8b1
+
+  mypy:
+    name: mypy
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        py: ['3.8']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.py }}
+      - name: pip installs
+        run: pip install mypy
+      - name: run mypy
+        run: |
+          mypy weldx/core.py
