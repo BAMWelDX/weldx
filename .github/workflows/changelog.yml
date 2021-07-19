@@ -6,12 +6,12 @@ on:
 
 jobs:
   changelog:
-    name: Confirm changelog entry
-    runs-on: ubuntu-latest
     if: |
       !contains(github.event.pull_request.labels.*.name, 'no-changelog-entry-needed') &&
       github.event.pull_request.draft == false &&
       github.base_ref == 'master'
+    name: Confirm changelog entry
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
