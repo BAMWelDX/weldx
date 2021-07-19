@@ -43,8 +43,16 @@ class Time:
         # discuss what this is supposed to do. There are multiple possibilities
         pass
 
+    def __radd__(self, other):
+        # custom implementation for right hand syntax with other time-like types
+        return self + other  # simply call normal __add__
+
     def __sub__(self, other):
         # discuss what this is supposed to do. There are multiple possibilities
+        pass
+
+    def __rsub__(self, other):
+        # custom implementation for right hand syntax with other time-like types
         pass
 
     def __eq__(self, other: Union[types_time_like, Time]) -> bool:
