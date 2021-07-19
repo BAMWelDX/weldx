@@ -1,5 +1,6 @@
 """Contains classes and functions related to time."""
 
+from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Union
 
@@ -16,8 +17,8 @@ class Time:
 
     def __init__(
         self,
-        time: Union[types_time_like, "Time"],
-        time_ref: Union[types_timestamp_like, "Time", None] = None,
+        time: Union[types_time_like, Time],
+        time_ref: Union[types_timestamp_like, Time, None] = None,
     ):
         """Initialize a new `Time` class.
 
@@ -46,13 +47,13 @@ class Time:
         # discuss what this is supposed to do. There are multiple possibilities
         pass
 
-    def __eq__(self, other: Union[types_time_like, "Time"]) -> bool:
+    def __eq__(self, other: Union[types_time_like, Time]) -> bool:
         pass
 
-    def __le__(self, other: Union[types_time_like, "Time"]) -> bool:
+    def __le__(self, other: Union[types_time_like, Time]) -> bool:
         pass
 
-    def all_close(self, other: Union[types_time_like, "Time"], tolerance) -> bool:
+    def all_close(self, other: Union[types_time_like, Time], tolerance) -> bool:
         """Return `True` if another object compares equal within a certain tolerance."""
 
     def as_quantity(self) -> Quantity:
@@ -76,7 +77,7 @@ class Time:
         """Set the internal data."""
 
     @property
-    def reference_time(self) -> "Time":
+    def reference_time(self) -> Time:
         """Get the reference time."""
 
     @property
@@ -85,7 +86,7 @@ class Time:
         return self.reference_time.as_timestamp()
 
     @reference_time.setter
-    def reference_time(self, time_ref: Union[types_timestamp_like, "Time"]):
+    def reference_time(self, time_ref: Union[types_timestamp_like, Time]):
         """Set the reference time."""
         pass
 
@@ -102,14 +103,14 @@ class Time:
         """Return `True` if the data represents a timestamp and `False` otherwise."""
         return self.length == 1 and self.has_reference_time
 
-    def max(self) -> "Time":
+    def max(self) -> Time:
         """Get the maximal time of the data."""
 
-    def min(self) -> "Time":
+    def min(self) -> Time:
         """Get the minimal time of the data."""
 
     @staticmethod
-    def union(times=List[Union[types_time_like, "Time"]]) -> "Time":
+    def union(times=List[Union[types_time_like, "Time"]]) -> Time:
         """Calculate the union of multiple `Time` instances.
 
         Parameters
