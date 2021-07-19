@@ -324,9 +324,9 @@ class TimeSeries:
         if not isinstance(self.data, MathematicalExpression):
             if not isinstance(other.data, pint.Quantity):
                 return False
-            return self._data.identical(other.data_array)
+            return self.data.identical(other.data_array)
 
-        return self._data == other.data
+        return self.data == other.data
 
     def __repr__(self):
         """Give __repr__ output."""
@@ -366,7 +366,7 @@ class TimeSeries:
         self,
         data: Union[pint.Quantity, xr.DataArray],
         time: Union[None, pd.TimedeltaIndex, pint.Quantity],
-        interpolation: str,
+        interpolation: Union[None, str],
     ):
         """Initialize the internal data with discrete values."""
         # set default interpolation
