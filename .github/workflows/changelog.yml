@@ -3,13 +3,14 @@ name: Changelog
 on:
   pull_request:
     types: [labeled, unlabeled, opened, synchronize, reopened]
+    branches:
+      - master
 
 jobs:
   changelog:
     if: |
       !contains(github.event.pull_request.labels.*.name, 'no-changelog-entry-needed') &&
-      github.event.pull_request.draft == false &&
-      github.base_ref == 'master'
+      github.event.pull_request.draft == false
     name: Confirm changelog entry
     runs-on: ubuntu-latest
     steps:
