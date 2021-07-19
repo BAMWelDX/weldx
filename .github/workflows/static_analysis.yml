@@ -87,4 +87,4 @@ jobs:
         run: pip install mypy
       - name: run mypy
         run: |
-          mypy weldx/core.py
+          mypy --install-types --non-interactive weldx/
