@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.4.1 (unreleased)
+## 0.4.1 (19.07.2021)
 
 ### added
 
@@ -8,16 +8,10 @@
   and `SpatialData.from_geometry_raster` [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
 - `TimeSeries.plot` and `Signal.plot` [[#420]](https://github.com/BAMWelDX/weldx/pull/420)
 
-### removed
-
 ### changes
 
 - `TimeSeries.__init__` accepts `xarray.DataArray` as `data`
   parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
-
-### fixes
-
-### documentation
 
 ### ASDF
 
@@ -27,8 +21,6 @@
 ### deprecations
 
 - `lcs_coords_from_ts` will be removed in version 0.5.0 [[#426]](https://github.com/BAMWelDX/weldx/pull/426)
-
-### dependencies
 
 ## 0.4.0 (13.07.2021)
 
