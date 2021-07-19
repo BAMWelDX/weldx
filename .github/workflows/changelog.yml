@@ -18,4 +18,5 @@ jobs:
         run: grep -P '\[[^\]]*#${{github.event.number}}[,\]]' CHANGELOG.md
         if: |
           !contains(github.event.pull_request.labels.*.name, 'no-changelog-entry-needed') &&
-          github.event.pull_request.draft == false
+          github.event.pull_request.draft == false &&
+          github.base_ref == 'master'
