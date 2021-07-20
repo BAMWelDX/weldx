@@ -289,7 +289,7 @@ class TimeSeries:
             'step', 'linear'.
 
         """
-        self._data = None  # type: Union[MathematicalExpression, xr.DataArray]
+        self._data: Union[MathematicalExpression, xr.DataArray] = None
         self._time_var_name = None  # type: str
         self._shape = None
         self._units = None
