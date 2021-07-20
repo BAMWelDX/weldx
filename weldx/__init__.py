@@ -17,10 +17,10 @@ except ModuleNotFoundError:  # pragma: no cover
 from weldx.constants import WELDX_QUANTITY as Q_
 
 # main modules
-import weldx.transformations  # import this first to avoid circular dependencies
 import weldx.util  # import this first to avoid circular dependencies
-import weldx.config
 import weldx.core
+import weldx.transformations
+import weldx.config
 import weldx.geometry
 import weldx.welding
 
