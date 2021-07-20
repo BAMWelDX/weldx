@@ -118,6 +118,17 @@ class Time:
         """Return the underlying pandas time datatype."""
         return self._time
 
+    def as_pandas_index(self):
+        """Return a pandas index type regardless of length.
+
+        This is useful when using time as coordinate in xarray types.
+        """
+        if isinstance(self._time, pd.Timestamp):
+            return pd.DatetimeIndex([self._time])
+        if isinstance(self._time, pd.Timedelta):
+            return pd.TimedeltaIndex([self._time])
+        return self._time
+
     def as_data_array(self) -> DataArray:
         """Return the data as `xarray.DataArray`."""
         da = xr.DataArray(self._time, coords={"time": self._time}, dims=["time"])
