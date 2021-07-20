@@ -80,9 +80,8 @@ class Time:
         pass
      
 
-    @property
-    def data_array(self) -> DataArray:
-        """Return the internally stored data."""
+    def as_data_array(self) -> DataArray:
+        """Return the data as `xarray.DataArray`."""
 
     @data_array.setter
     def data_array(self, data_array: DataArray):
