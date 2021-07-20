@@ -9,7 +9,6 @@ import pandas as pd
 import pint
 import xarray as xr
 from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
-from pint import Quantity
 from xarray import DataArray
 
 from weldx.types import types_time_like, types_timestamp_like
@@ -91,9 +90,6 @@ class Time:
     def __eq__(self, other: Union[types_time_like, Time]) -> bool:
         return self._time == Time(other).as_pandas()
 
-    def __le__(self, other: Union[types_time_like, Time]) -> bool:
-        pass
-
     def all_close(self, other: Union[types_time_like, Time], tolerance) -> bool:
         """Return `True` if another object compares equal within a certain tolerance."""
         return np.allclose(self._time, Time(other).as_pandas())
@@ -124,6 +120,9 @@ class Time:
 
     def as_data_array(self) -> DataArray:
         """Return the data as `xarray.DataArray`."""
+        da = xr.DataArray(self._time, coords={"time": self._time}, dims=["time"])
+        da.attrs["time_ref"] = self.reference_time
+        return da
 
     @property
     def reference_time(self) -> Union[Timestamp, None]:
