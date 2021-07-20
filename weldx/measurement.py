@@ -267,8 +267,10 @@ class MeasurementChain:
         if signal_data is not None:
             self.add_signal_data(signal_data)
 
-    def __eq__(self, other: "MeasurementChain") -> bool:
+    def __eq__(self, other: object) -> bool:
         """Return `True` if two measurement chains are equal and `False` otherwise."""
+        if not isinstance(other, MeasurementChain):
+            return False
         return (
             self._name == other._name
             and self._source == other._source
