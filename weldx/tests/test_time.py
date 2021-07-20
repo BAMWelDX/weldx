@@ -51,6 +51,10 @@ class TestTime:
             (np.datetime64("2000"), "2005", True, "2000"),
             (np.timedelta64(1, "s"), None, False, None),
             (np.timedelta64(1, "s"), "16:00", True, "16:00:01"),
+            ("2000", None, True, "2000"),
+            ("2000", "2005", True, "2000"),
+            (["2000", "2010"], None, True, "2000"),
+            (["2000", "2010"], "2005", True, "2005"),
         ],
     )
     def test_init(time, time_ref, exp_absolute, exp_time_ref):
