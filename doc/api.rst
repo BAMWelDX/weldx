@@ -1,11 +1,26 @@
 API
 ===
 
-**Python modules**
+**User API Reference**
 
 .. autosummary::
     :toctree: _autosummary
-    :caption: API Reference
+    :caption: User API Reference
+
+    weldx.WeldxFile
+    weldx.TimeSeries
+    weldx.LocalCoordinateSystem
+    weldx.CoordinateSystemManager
+    weldx.GmawProcess
+    weldx.Trace
+    weldx.get_groove
+
+
+**Full API Reference**
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Full API Reference
     :template: module-template.rst
     :recursive:
 
@@ -20,7 +35,7 @@ API
     weldx.welding
 
 
-**ASDF modules**
+**ASDF API Reference**
 
 .. autosummary::
     :toctree: _autosummary
