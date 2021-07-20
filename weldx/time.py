@@ -77,7 +77,7 @@ class Time:
 
     def __radd__(self, other):
         # custom implementation for right hand syntax with other time-like types
-        return Time(time=Time(other).as_pandas() + self._time)
+        return self + other
 
     def __sub__(self, other):
         # discuss what this is supposed to do. There are multiple possibilities

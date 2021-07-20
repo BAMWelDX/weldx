@@ -17,6 +17,8 @@ def _initialize_type(cls_type, values, unit):
         values = [values]
     if cls_type is np.timedelta64:
         return np.array(values, dtype=f"timedelta64[{unit}]")
+    if cls_type is Time:
+        return Time(Q_(values, unit))
     return cls_type(values, unit)
 
 
@@ -64,44 +66,58 @@ class TestTime:
     # test_add_timedelta ---------------------------------------------------------------
 
     @staticmethod
-    @pytest.mark.parametrize("lhs_is_array", [False, True])
-    @pytest.mark.parametrize("rhs_is_array", [False, True])
+    @pytest.mark.parametrize("other_on_rhs", [True, False])
+    @pytest.mark.parametrize("time_class_is_array", [False, True])
+    @pytest.mark.parametrize("other_is_array", [False, True])
     @pytest.mark.parametrize("unit", ["s", "h"])
     @pytest.mark.parametrize(
-        "rhs_type", [Q_, TimedeltaIndex, Timedelta, np.timedelta64]
+        "other_type", [Q_, TimedeltaIndex, Timedelta, np.timedelta64, Time]
     )
-    def test_add_timedelta(rhs_type, unit, lhs_is_array, rhs_is_array):
+    def test_add_timedelta(
+        other_type,
+        other_on_rhs: bool,
+        unit: str,
+        time_class_is_array: bool,
+        other_is_array: bool,
+    ):
         """Test the `__add__` method if the `Time` class represents a time delta.
 
         Parameters
         ----------
-        rhs_type :
-            The type on the right hand side
+        other_type :
+            The type of the other object
+        other_on_rhs :
+            If `True`, the other type is on the rhs of the + sign and on the lhs
+            otherwise
         unit :
             The time unit to use
-        lhs_is_array :
-            If `True`, the lhs contains 3 time values and 1 otherwise
-        rhs_is_array :
-            If `True`, the rhs contains 3 time values and 1 otherwise
+        time_class_is_array :
+            If `True`, the `Time` instance contains 3 time values and 1 otherwise
+        other_is_array :
+            If `True`, the other time object contains 3 time values and 1 otherwise
 
         """
-        # skip non-working matrix combination
-        if rhs_type is Timedelta and rhs_is_array:
+        # skip array cases where the type does not support arrays
+        if other_type is Timedelta and other_is_array:
+            pytest.skip()
+        # skip __radd__ cases where we got conflicts with the other types' __add__
+        if not other_on_rhs and other_type in (Q_, np.ndarray, np.timedelta64):
             pytest.skip()
 
         # setup rhs
-        rhs_values = [1, 100, 10000] if rhs_is_array else 10
-        rhs = Time(_initialize_type(rhs_type, rhs_values, unit))
+        other_values = [1, 100, 10000] if other_is_array else 10
+        other = _initialize_type(other_type, other_values, unit)
 
         # setup lhs
-        lhs_values = [1, 2, 3] if lhs_is_array else 1
-        lhs = Time(Q_(lhs_values, unit))
+        time_class_values = [1, 2, 3] if time_class_is_array else 1
+        time_class = Time(Q_(time_class_values, unit))
 
         # setup expected values
-        exp_val = np.array(lhs_values) + rhs_values
+        exp_val = np.array(time_class_values) + other_values
         exp = Time(Q_(exp_val, unit))
 
-        res = lhs + rhs
+        # calculate and evaluate result
+        res = time_class + other if other_on_rhs else other + time_class
 
         assert np.all(res.as_pandas() == exp.as_pandas())
         assert np.all(res == exp)
