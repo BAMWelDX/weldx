@@ -1,7 +1,5 @@
 # Release Notes
 
-# Release Notes
-
 ## 0.5.0 (unreleased)
 
 ### added
