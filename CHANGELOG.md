@@ -1,5 +1,25 @@
 # Release Notes
 
+# Release Notes
+
+## 0.5.0 (unreleased)
+
+### added
+
+### removed
+
+### changes
+
+### fixes
+
+### documentation
+
+### ASDF
+
+### deprecations
+
+### dependencies
+
 ## 0.4.1 (20.07.2021)
 
 ### added
