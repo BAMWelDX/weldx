@@ -490,34 +490,6 @@ class WeldxFile(UserDict):
         to call this method only with mode='rw', e.g. read-write mode. When mode is
         read-only, a temporary file will be created, which can cause in-efficiencies.
 
-        Examples
-        --------
-        >>> import numpy as np
-        >>> tree = dict(my_var=(1, 2, 3), some_str="foobar", array=np.arange(5))
-        >>> f = WeldxFile(tree=tree, mode='rw')
-        >>> f.show_asdf_header()  #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        #ASDF 1.0.0
-        #ASDF_STANDARD 1.5.0
-        %YAML 1.1
-        %TAG ! tag:stsci.edu:asdf/
-        --- !core/asdf-1.1.0
-        asdf_library: !core/software-1.0.0 {author: The ASDF Developers,
-          homepage: 'http://github.com/asdf-format/asdf',
-          name: asdf, version: ... }
-        history:
-          extensions:
-          - !core/extension_metadata-1.0.0
-            extension_class: asdf.extension.BuiltinExtension
-            software: !core/software-1.0.0 {name: asdf, version: ... }
-        array: !core/ndarray-1.0.0
-          source: 0
-          datatype: int...
-          byteorder: little
-          shape: [5]
-        my_var: [1, 2, 3]
-        some_str: foobar
-        <BLANKLINE>
-
         """
         # We need to synchronize the file contents here to make sure the header is in
         # place.
@@ -550,9 +522,9 @@ class WeldxFile(UserDict):
                     return notebook_fileprinter(self.file_handle)
 
         def _impl_non_interactive():
-            with reset_file_position(self.file_handle):
-                out = get_yaml_header(self.file_handle, parse=False)
-                print(out)
+            from asdf import info
+
+            info(self._asdf_handle)
 
         # automatically determine if this runs in an interactive session.
         if _interactive is None:
