@@ -295,7 +295,7 @@ class TimeSeries:
         self._units = None
         self._interp_counter = 0
 
-        if isinstance(data, pint.Quantity):
+        if isinstance(data, (pint.Quantity, xr.DataArray)):
             self._initialize_discrete(data, time, interpolation)
         elif isinstance(data, MathematicalExpression):
             self._init_expression(data)
@@ -346,9 +346,25 @@ class TimeSeries:
             )
         return representation + f"Units:\n\t{self.units}\n"
 
+    @staticmethod
+    def _check_data_array(data_array: xr.DataArray):
+        """Raise an exception if the 'DataArray' can't be used as 'self._data'."""
+        try:
+            ut.xr_check_coords(data_array, dict(time={"dtype": ["timedelta64[ns]"]}))
+        except (KeyError, TypeError, ValueError) as e:
+            raise type(e)(
+                "The provided 'DataArray' does not match the required pattern. It "
+                "needs to have a dimension called 'time' with coordinates of type "
+                "'timedelta64[ns]'. The error reported by the comparison function was:"
+                f"\n{e}"
+            )
+
+        if not isinstance(data_array.data, pint.Quantity):
+            raise TypeError("The data of the 'DataArray' must be a 'pint.Quantity'.")
+
     def _initialize_discrete(
         self,
-        data: pint.Quantity,
+        data: Union[pint.Quantity, xr.DataArray],
         time: Union[None, pd.TimedeltaIndex, pint.Quantity],
         interpolation: str,
     ):
@@ -357,24 +373,29 @@ class TimeSeries:
         if interpolation is None:
             interpolation = "step"
 
-        # expand dim for scalar input
-        data = Q_(data)
-        if not np.iterable(data):
-            data = np.expand_dims(data, 0)
+        if isinstance(data, xr.DataArray):
+            self._check_data_array(data)
+            data = data.transpose("time", ...)
+            self._data = data
+        else:
+            # expand dim for scalar input
+            data = Q_(data)
+            if not np.iterable(data):
+                data = np.expand_dims(data, 0)
 
-        # constant value case
-        if time is None:
-            time = pd.TimedeltaIndex([0])
+            # constant value case
+            if time is None:
+                time = pd.TimedeltaIndex([0])
 
-        if isinstance(time, pint.Quantity):
-            time = ut.to_pandas_time_index(time)
-        if not isinstance(time, pd.TimedeltaIndex):
-            raise ValueError(
-                '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-            )
+            if isinstance(time, pint.Quantity):
+                time = ut.to_pandas_time_index(time)
+            if not isinstance(time, pd.TimedeltaIndex):
+                raise ValueError(
+                    '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
+                )
 
-        dax = xr.DataArray(data=data)
-        self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
+            dax = xr.DataArray(data=data)
+            self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
         self.interpolation = interpolation
 
     def _init_expression(self, data):

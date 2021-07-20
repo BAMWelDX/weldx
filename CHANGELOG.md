@@ -1,12 +1,8 @@
 # Release Notes
 
-## 0.4.1 (unreleased)
+## 0.5.0 (unreleased)
 
 ### added
-
-- `closed_mesh` parameter to `Geometry.spatial_data`
-  and `SpatialData.from_geometry_raster` [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
-- `TimeSeries.plot` and `Signal.plot` [[#420]](https://github.com/BAMWelDX/weldx/pull/420)
 
 ### removed
 
@@ -23,9 +19,29 @@
 
 ### deprecations
 
-- `lcs_coords_from_ts` will be removed in version 0.5.0 [[#426]](https://github.com/BAMWelDX/weldx/pull/426)
-
 ### dependencies
+
+## 0.4.1 (20.07.2021)
+
+### added
+
+- `closed_mesh` parameter to `Geometry.spatial_data`
+  and `SpatialData.from_geometry_raster` [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
+- `TimeSeries.plot` and `Signal.plot` [[#420]](https://github.com/BAMWelDX/weldx/pull/420)
+
+### changes
+
+- `TimeSeries.__init__` accepts `xarray.DataArray` as `data`
+  parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
+
+### ASDF
+
+- sort `List[str]` before serialization of most `weldx` classes to avoid random reordering in the same file and enforce
+  consistency. [[#430]](https://github.com/BAMWelDX/weldx/pull/430)
+
+### deprecations
+
+- `lcs_coords_from_ts` will be removed in version 0.5.0 [[#426]](https://github.com/BAMWelDX/weldx/pull/426)
 
 ## 0.4.0 (13.07.2021)
 
