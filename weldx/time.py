@@ -76,6 +76,10 @@ class Time:
     def as_timestamp(self) -> Timestamp:
         """Return the data as `pandas.Timestamp`."""
 
+    def as_pandas(self):
+        pass
+     
+
     @property
     def data_array(self) -> DataArray:
         """Return the internally stored data."""
