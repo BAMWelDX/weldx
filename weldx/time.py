@@ -4,12 +4,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Union
 
-if TYPE_CHECKING:
-    from pandas import DatetimeIndex, TimedeltaIndex, Timestamp
-    from pint import Quantity
-    from xarray import DataArray
+import numpy as np
+import pandas as pd
+import pint
+import xarray as xr
+from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
+from pint import Quantity
+from xarray import DataArray
 
-    from weldx.types import types_time_like, types_timestamp_like
+from weldx.types import types_time_like, types_timestamp_like
+
+from .util import get_time_union, pandas_time_delta_to_quantity, to_pandas_time_index
+
+__all__ = ["Time"]
 
 
 class Time:
@@ -37,88 +44,133 @@ class Time:
             the data will be used as reference time.
 
         """
-        pass
+        if isinstance(time, Time):
+            self._time = time._time
+            self._time_ref = time._time_ref
+            return
+
+        if isinstance(time, pint.Quantity) & (time_ref is None):
+            time_ref = getattr(time, "time_ref", None)
+
+        time = to_pandas_time_index(time)
+
+        if len(time) == 1:
+            if isinstance(time, pd.DatetimeIndex):
+                time = pd.Timestamp(time[0])
+            elif isinstance(time, pd.TimedeltaIndex):
+                time = pd.Timedelta(time[0])
+
+        if time_ref is not None:
+            time_ref = pd.Timestamp(time_ref)
+            if isinstance(time, pd.Timedelta):
+                time = time + time_ref
+                time_ref = None
+
+        if isinstance(time, pd.TimedeltaIndex) & (time_ref is not None):
+            time = time + time_ref
+
+        self._time = time
+        self._time_ref = time_ref
 
     def __add__(self, other):
         # discuss what this is supposed to do. There are multiple possibilities
-        pass
+        return Time(time=self._time + Time(other).as_pandas())
 
     def __radd__(self, other):
         # custom implementation for right hand syntax with other time-like types
-        return self + other  # simply call normal __add__
+        return Time(time=Time(other).as_pandas() + self._time)
 
     def __sub__(self, other):
         # discuss what this is supposed to do. There are multiple possibilities
-        pass
+        return Time(time=self._time - Time(other).as_pandas())
 
     def __rsub__(self, other):
         # custom implementation for right hand syntax with other time-like types
-        pass
+        return Time(time=Time(other).as_pandas() - self._time)
 
     def __eq__(self, other: Union[types_time_like, Time]) -> bool:
-        pass
+        return self._time == Time(other).as_pandas()
 
     def __le__(self, other: Union[types_time_like, Time]) -> bool:
         pass
 
     def all_close(self, other: Union[types_time_like, Time], tolerance) -> bool:
         """Return `True` if another object compares equal within a certain tolerance."""
+        return np.allclose(self._time, Time(other).as_pandas())
 
-    def as_quantity(self) -> Quantity:
+    def as_quantity(self) -> pint.Quantity:
         """Return the data as `pint.Quantity`."""
+        if self.is_absolute:
+            q = pandas_time_delta_to_quantity(self._time - self._time_ref)
+            setattr(q, "time_ref", self._time_ref)  # store time_ref info
+            return q
+        return pandas_time_delta_to_quantity(self._time)
 
-    def as_time_delta_index(self) -> TimedeltaIndex:
+    def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
         """Return the data as `pandas.TimedeltaIndex`."""
+        if self.is_absolute:
+            return self._time - self.reference_time
+        return self._time
 
-    def as_datetime_index(self) -> DatetimeIndex:
+    def as_datetime(self) -> Union[Timestamp, DatetimeIndex]:
         """Return the data as `pandas.DatetimeIndex`."""
-
-    def as_timestamp(self) -> Timestamp:
-        """Return the data as `pandas.Timestamp`."""
+        if not self.is_absolute:
+            raise TypeError("Cannot convert non absolute Time object to datetime")
+        return self._time
 
     def as_pandas(self):
-        pass
-     
+        """Return the underlying pandas time datatype."""
+        return self._time
 
     def as_data_array(self) -> DataArray:
         """Return the data as `xarray.DataArray`."""
 
-    @data_array.setter
-    def data_array(self, data_array: DataArray):
-        """Set the internal data."""
-
     @property
-    def reference_time(self) -> Time:
+    def reference_time(self) -> Union[Timestamp, None]:
         """Get the reference time."""
-
-    @property
-    def reference_time_as_timestamp(self) -> Timestamp:
-        """Get the reference time as `pandas.Timestamp`."""
-        return self.reference_time.as_timestamp()
+        if isinstance(self._time, DatetimeIndex):
+            return self._time_ref if self._time_ref is not None else self._time[0]
+        elif isinstance(self._time, Timestamp):
+            return self._time
+        return None
 
     @reference_time.setter
     def reference_time(self, time_ref: Union[types_timestamp_like, Time]):
         """Set the reference time."""
-        pass
+        self._time_ref = pd.Timestamp(time_ref)
 
     @property
-    def has_reference_time(self) -> bool:
+    def is_absolute(self) -> bool:
         """Return `True` if the class has a reference time and `False` otherwise."""
+        return isinstance(self._time, (Timestamp, DatetimeIndex))
 
     @property
     def length(self) -> int:
         """Return the length of the data."""
+        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
+            return len(self._time)
+        return 1
 
     @property
     def is_timestamp(self) -> bool:
         """Return `True` if the data represents a timestamp and `False` otherwise."""
-        return self.length == 1 and self.has_reference_time
+        return isinstance(self._time, pd.Timestamp)
 
-    def max(self) -> Time:
+    def max(self) -> Union[Timedelta, Timestamp]:
         """Get the maximal time of the data."""
+        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
+            return self._time.max()
+        return self._time
 
-    def min(self) -> Time:
+    def min(self) -> Union[Timedelta, Timestamp]:
         """Get the minimal time of the data."""
+        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
+            return self._time.min()
+        return self._time
+
+    @staticmethod
+    def _from_quantity(time):
+        return to_pandas_time_index(time)
 
     @staticmethod
     def union(times=List[Union[types_time_like, "Time"]]) -> Time:
@@ -135,3 +187,4 @@ class Time:
             The time union
 
         """
+        return Time(get_time_union(times))
