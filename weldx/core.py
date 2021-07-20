@@ -14,6 +14,8 @@ import weldx.util as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
+from .time import Time
+
 if TYPE_CHECKING:
     import sympy
 
@@ -271,6 +273,7 @@ class TimeSeries:
         data: Union[pint.Quantity, MathematicalExpression],
         time: Union[None, pd.TimedeltaIndex, pint.Quantity] = None,
         interpolation: str = None,
+        reference_time: pd.Timestamp = None,
     ):
         """Construct a TimSeries.
 
@@ -294,6 +297,7 @@ class TimeSeries:
         self._shape = None
         self._units = None
         self._interp_counter = 0
+        self._reference_time = reference_time
 
         if isinstance(data, (pint.Quantity, xr.DataArray)):
             self._initialize_discrete(data, time, interpolation)
@@ -385,10 +389,16 @@ class TimeSeries:
 
             # constant value case
             if time is None:
-                time = pd.TimedeltaIndex([0])
+                time = pd.Timedelta(0)
 
-            if isinstance(time, pint.Quantity):
-                time = ut.to_pandas_time_index(time)
+            time = Time(time)
+
+            if time.is_absolute:
+                self._reference_time = time.reference_time
+                time = time - time.reference_time
+
+            time = time.as_pandas_index()
+
             if not isinstance(time, pd.TimedeltaIndex):
                 raise ValueError(
                     '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
@@ -440,19 +450,22 @@ class TimeSeries:
             )
 
     def _interp_time_discrete(
-        self, time: Union[pd.TimedeltaIndex, pint.Quantity]
+        self, time: Union[pd.TimedeltaIndex, pint.Quantity, Time]
     ) -> xr.DataArray:
         """Interpolate the time series if its data is composed of discrete values.
 
         See `interp_time` for interface description.
 
         """
-        if isinstance(time, pint.Quantity):
-            time = ut.to_pandas_time_index(time)
-        if not isinstance(time, pd.TimedeltaIndex):
-            raise ValueError(
-                '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-            )
+        time = Time(time)
+
+        if time.is_absolute:
+            if self._reference_time is not None:
+                time = time - self._reference_time
+            else:
+                time = time - time.reference_time
+
+        time = time.as_pandas_index()
 
         return ut.xr_interp_like(
             self._data,
@@ -463,7 +476,7 @@ class TimeSeries:
         )
 
     def _interp_time_expression(
-        self, time: Union[pd.TimedeltaIndex, pint.Quantity], time_unit: str
+        self, time: Union[pd.TimedeltaIndex, pint.Quantity, Time], time_unit: str
     ) -> xr.DataArray:
         """Interpolate the time series if its data is a mathematical expression.
 
@@ -471,16 +484,16 @@ class TimeSeries:
 
         """
         # Transform time to both formats
-        if isinstance(time, pint.Quantity) and time.check(UREG.get_dimensionality("s")):
-            time_q = time
-            time_pd = ut.to_pandas_time_index(time)
-        elif isinstance(time, pd.TimedeltaIndex):
-            time_q = ut.pandas_time_delta_to_quantity(time, time_unit)
-            time_pd = time
-        else:
-            raise ValueError(
-                '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-            )
+        time = Time(time)
+
+        if time.is_absolute:
+            if self._reference_time is not None:
+                time = time - self._reference_time
+            else:
+                time = time - time.reference_time
+
+        time_q = time.as_quantity(unit=time_unit)
+        time_pd = time.as_pandas_index()
 
         if len(self.shape) > 1 and np.iterable(time_q):
             while len(time_q.shape) < len(self.shape):

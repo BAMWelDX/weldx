@@ -94,13 +94,15 @@ class Time:
         """Return `True` if another object compares equal within a certain tolerance."""
         return np.allclose(self._time, Time(other).as_pandas())
 
-    def as_quantity(self) -> pint.Quantity:
+    def as_quantity(self, unit: str = "s") -> pint.Quantity:
         """Return the data as `pint.Quantity`."""
         if self.is_absolute:
-            q = pandas_time_delta_to_quantity(self._time - self._time_ref)
+            q = pandas_time_delta_to_quantity(
+                self.as_pandas_index() - self._time_ref, unit
+            )
             setattr(q, "time_ref", self._time_ref)  # store time_ref info
             return q
-        return pandas_time_delta_to_quantity(self._time)
+        return pandas_time_delta_to_quantity(self.as_pandas_index(), unit)
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
         """Return the data as `pandas.TimedeltaIndex`."""
