@@ -18,6 +18,9 @@ from .util import get_time_union, pandas_time_delta_to_quantity
 
 __all__ = ["Time"]
 
+# list of types that are supported to be stored in Time._time
+_data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
+
 
 class Time:
     """Provides a unified interface for time related operations."""
@@ -53,7 +56,7 @@ class Time:
             time_ref = time_ref if time_ref is not None else time._time_ref
             time = time._time
 
-        if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+        if isinstance(time, _data_base_types):
             pass
         elif isinstance(time, pint.Quantity):
             time = Time._from_quantity(time)
@@ -62,11 +65,13 @@ class Time:
         else:
             time = Time._from_other(time)
 
-        if len(time) == 1:
-            if isinstance(time, pd.DatetimeIndex):
-                time = pd.Timestamp(time[0])
-            elif isinstance(time, pd.TimedeltaIndex):
-                time = pd.Timedelta(time[0])
+        # catch scalar Index-objects
+        if isinstance(time, pd.Index) and len(time) == 1:
+            time = time[0]
+
+        # sanity check
+        if not isinstance(time, _data_base_types):
+            raise TypeError(f"Could not create pandas time-like object.")
 
         if time_ref is not None:
             time_ref = pd.Timestamp(time_ref)
@@ -202,7 +207,9 @@ class Time:
         return self._time
 
     @staticmethod
-    def _from_quantity(time):
+    def _from_quantity(
+        time: pint.Quantity,
+    ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         """Build a time-like pandas.Index from pint.Quantity."""
         time_ref = getattr(time, "time_ref", None)
         base = "s"  # using low base unit could cause rounding errors
@@ -214,7 +221,9 @@ class Time:
         return delta
 
     @staticmethod
-    def _from_xarray(time):
+    def _from_xarray(
+        time: Union[xr.DataArray, xr.Dataset]
+    ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         """Build a time-like pandas.Index from xarray objects."""
         if "time" in time.coords:
             time = time.time
@@ -225,7 +234,7 @@ class Time:
         return time_index
 
     @staticmethod
-    def _from_other(time):
+    def _from_other(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         """Try autocasting input to time-like pandas index."""
         _input_type = type(time)
 

@@ -3,7 +3,7 @@ import pathlib
 from io import IOBase
 from typing import Protocol, Union, runtime_checkable
 
-from pandas import DatetimeIndex, TimedeltaIndex, Timestamp
+from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
 from pint import Quantity
 
 __all__ = [
@@ -72,3 +72,6 @@ types_timedelta_like = Union[TimedeltaIndex, Quantity]
 
 types_time_like = Union[types_datetime_like, types_timedelta_like, types_timestamp_like]
 """types that represent time."""
+
+types_pandas_times = Union[Timedelta, Timestamp, DatetimeIndex, TimedeltaIndex]
+"""supported pandas time types."""
