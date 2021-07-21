@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import reduce
 from typing import List, Union
 
 import numpy as np
@@ -14,7 +15,7 @@ from xarray import DataArray
 
 from weldx.types import types_time_like, types_timestamp_like
 
-from .util import get_time_union, pandas_time_delta_to_quantity
+from .util import pandas_time_delta_to_quantity
 
 __all__ = ["Time"]
 
@@ -263,17 +264,23 @@ class Time:
 
     @staticmethod
     def union(times=List[Union[types_time_like, "Time"]]) -> Time:
-        """Calculate the union of multiple `Time` instances.
+        """Calculate the union of multiple `Time` instances (or supported objects).
+
+        Any reference time information will be dropped.
 
         Parameters
         ----------
-        times :
+        times
             A list of time class instances
 
         Returns
         -------
-        weldx.Time :
+        weldx.Time
             The time union
 
         """
-        return Time(get_time_union(times))
+        pandas_index = reduce(
+            lambda x, y: x.union(y),
+            (Time(time).as_pandas_index() for time in times),
+        )
+        return Time(pandas_index)
