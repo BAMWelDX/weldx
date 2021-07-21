@@ -13,16 +13,34 @@ from weldx.time import Time
 
 def _initialize_delta_type(cls_type, values, unit):
     """Initialize the passed time type."""
-    if cls_type not in (pint.Quantity, Timedelta) and not isinstance(values, List):
+    if cls_type not in (Q_, Timedelta) and not isinstance(values, List):
         values = [values]
     if cls_type is np.timedelta64:
         return np.array(values, dtype=f"timedelta64[{unit}]")
     if cls_type is Time:
         return Time(Q_(values, unit))
+    if cls_type is str:
+        return [f"{v}{unit}" for v in values]
     return cls_type(values, unit)
 
 
+def _initialize_datetime_type(cls_type, values):
+    if cls_type is np.datetime64:
+        return np.array(values, dtype="datetime64")
+    if cls_type is str:
+        return values
+    return cls_type(values)
+
+
+def _initialize_date_time_quantity(timedelta, unit, time_ref):
+    quantity = Q_(timedelta, unit)
+    setattr(quantity, "time_ref", Timestamp(time_ref))
+    print(quantity)
+    return quantity
+
+
 def _is_timedelta(cls_type):
+    # todo: Q_ must be checked for attribute
     return cls_type in [Q_, TimedeltaIndex, Timedelta, np.timedelta64] or (
         cls_type is Time and not Time.is_absolute
     )
@@ -37,76 +55,30 @@ class TestTime:
 
     # test_init ------------------------------------------------------------------------
 
-    @staticmethod
-    @pytest.mark.parametrize(
-        "time, time_ref, exp_absolute, exp_time_ref",
-        [
-            (TimedeltaIndex([1, 2, 3]), None, False, None),
-            (TimedeltaIndex([1, 2, 3]), Timestamp("16:00"), True, "16:00"),
-            (TimedeltaIndex([1, 2, 3]), "16:00", True, "16:00"),
-            (Q_(2, "s"), None, False, None),
-            (Q_(1, "s"), "16:00", True, "16:00:01"),
-            (Q_([1], "s"), None, False, None),
-            (Q_([1], "s"), "16:00", True, "16:00:01"),
-            (Q_([1, 2, 3], "s"), None, False, None),
-            (Q_([1, 2, 3], "s"), "16:00", True, "16:00"),
-            (np.array([1, 2, 3], dtype="timedelta64[s]"), None, False, None),
-            (np.array([1, 2, 3], dtype="timedelta64[s]"), "16:00", True, "16:00"),
-            (DatetimeIndex(["2000", "2010"]), None, True, "2000"),
-            (DatetimeIndex(["2000", "2010"]), "2005", True, "2005"),
-            (np.array(["2000", "2010"], dtype="datetime64"), None, True, "2000"),
-            (np.array(["2000", "2010"], dtype="datetime64"), "2005", True, "2005"),
-            (Timestamp("2000"), None, True, "2000"),
-            (Timestamp("2000"), "2005", True, "2005"),
-            (Timedelta(1, "d"), None, False, None),
-            (Timedelta(1, "d"), "2005", True, "2005-01-02"),
-            (np.datetime64("2000"), None, True, "2000"),
-            (np.datetime64("2000"), "2005", True, "2005"),
-            (np.timedelta64(1, "s"), None, False, None),
-            (np.timedelta64(1, "s"), "16:00", True, "16:00:01"),
-            ("2000", None, True, "2000"),
-            ("2000", "2005", True, "2005"),
-            (["2000", "2010"], None, True, "2000"),
-            (["2000", "2010"], "2005", True, "2005"),
-            (["1s", "2s", "3s"], None, False, None),
-            (["1s", "2s", "3s"], Timestamp("16:00"), True, "16:00"),
-        ],
-    )
-    def test_init_old(time, time_ref, exp_absolute, exp_time_ref):
-        """Test initialization of the `Time` class with all supported types."""
-        if exp_time_ref is not None:
-            exp_time_ref = Timestamp(exp_time_ref)
-
-        t = Time(time, time_ref)
-
-        assert t.is_absolute == exp_absolute
-        assert t.reference_time == exp_time_ref
-
-    @staticmethod
-    def _transform_array(data, is_array, is_scalar):
-        if not is_array:
-            return data[0]
-        if is_scalar:
-            return [data[0]]
-        return data
+    _create_input_type():
+        pass
 
     @pytest.mark.parametrize("scl, arr", [(True, False), (True, True), (False, True)])
     @pytest.mark.parametrize("set_time_ref", [False, True])
     @pytest.mark.parametrize(
         "input_vals",
         [
-            Q_,
-            # TimedeltaIndex,
-            # Timedelta,
-            # np.timedelta64,
-            # (str, "timedelta"),
-            # (Time, "timedelta"),
-            # (Time, "datetime"),
+            (str, "timedelta"),
+            (Time, "timedelta"),
+            (Q_, "timedelta"),
+            TimedeltaIndex,
+            Timedelta,
+            np.timedelta64,
+            (str, "datetime"),
+            (Time, "datetime"),
+            (Q_, "datetime"),
             DatetimeIndex,
+            Timestamp,
+            # np.datetime64,  # 2 failures since util cant convert single vals to index
         ],
     )
     def test_init(self, input_vals, scl, arr, set_time_ref):
-        # analyze test input values
+        # analyze test input values -----------------------------
         if isinstance(input_vals, Tuple):
             # to avoid wrong test setups due to spelling mistakes
             assert input_vals[1] in ["timedelta", "datetime"]
@@ -116,43 +88,68 @@ class TestTime:
             input_type = input_vals
             is_timedelta = _is_timedelta(input_vals)
 
-        # skip matrix cases that do not work
+        # skip matrix cases that do not work --------------------
+        if arr and input_type in [Timedelta, Timestamp]:
+            pytest.skip()
         if not arr and input_type in [DatetimeIndex, TimedeltaIndex]:
             pytest.skip()
 
-        # set the values passed to the input type
-        values = [1, 2, 3]
+        # set the values passed to the input type ---------------
+        delta_val = [1, 2, 3]
         if not is_timedelta:
-            values = [f"2000-01-01 16:00:0{v}" for v in values]
-        values = self._transform_array(values, is_array=arr, is_scalar=scl)
+            abs_val = [f"2000-01-01 16:00:0{v}" for v in delta_val]
 
-        # create the time input
+        val = delta_val if is_timedelta else abs_val
+        if not is_timedelta and input_type is Q_:
+            val = [v - 1 for v in delta_val]
+        val = self._transform_array(val, is_array=arr, is_scalar=scl)
+
+        # create the time input ---------------------------------
         if is_timedelta:
-            time = _initialize_delta_type(input_type, values, "s")
+            time = _initialize_delta_type(input_type, val, "s")
         else:
-            time = input_type(values) if input_type is not str else values
+            if input_type is not Q_:
+                time = _initialize_datetime_type(input_type, val)
+            else:
+                time = _initialize_date_time_quantity(val, "s", abs_val[0])
 
-        # create reference time
+        # create reference time ---------------------------------
         time_ref = f"2000-01-01 15:00:00" if set_time_ref else None
 
-        # create `Time` instance
-
+        # create `Time` instance --------------------------------
         time_class_instance = Time(time, time_ref)
 
-        # set expected values
+        # set expected values -----------------------------------
         exp_is_absolute = set_time_ref or not is_timedelta
 
+        exp_time_ref = None
         if exp_is_absolute:
-            exp_time_ref = Timestamp(time_ref if set_time_ref else values[0])
-        else:
-            exp_time_ref = None
+            exp_time_ref = Timestamp(time_ref if set_time_ref else abs_val[0])
 
-        # check
+        val = delta_val
+        if exp_is_absolute:
+            offset = 0 if is_timedelta else 3600 if set_time_ref else -delta_val[0]
+            val = [v + offset for v in delta_val]
+        val = val[0] if scl else val
+        exp_timedelta = Timedelta(val, "s") if scl else TimedeltaIndex(val, "s")
+
+        exp_datetime = None
+        if exp_is_absolute:
+            time_ref = Timestamp(time_ref if set_time_ref else abs_val[0])
+            exp_datetime = time_ref + exp_timedelta
+
+        # check -------------------------------------------------
         assert time_class_instance.is_absolute == exp_is_absolute
         assert time_class_instance.reference_time == exp_time_ref
+        assert np.all(time_class_instance.as_timedelta() == exp_timedelta)
+        if exp_is_absolute:
+            assert np.all(time_class_instance.as_datetime() == exp_datetime)
+        else:
+            with pytest.raises(TypeError):
+                time_class_instance.as_datetime()
 
     # todo: issues
-    #   - time can be None
+    #   - time parameter can be None
 
     # test_add_timedelta ---------------------------------------------------------------
 

@@ -44,12 +44,8 @@ class Time:
 
         """
         if isinstance(time, Time):
-            self._time = time._time
-            self._time_ref = time._time_ref
-            return
-
-        if isinstance(time, pint.Quantity) & (time_ref is None):
-            time_ref = getattr(time, "time_ref", None)
+            time_ref = time_ref if time_ref is not None else time._time_ref
+            time = time._time
 
         time = to_pandas_time_index(time)
 
@@ -63,7 +59,6 @@ class Time:
             time_ref = pd.Timestamp(time_ref)
             if isinstance(time, pd.Timedelta):
                 time = time + time_ref
-                time_ref = None
 
         if isinstance(time, pd.TimedeltaIndex) & (time_ref is not None):
             time = time + time_ref
