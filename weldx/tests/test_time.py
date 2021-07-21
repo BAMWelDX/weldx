@@ -1,9 +1,8 @@
 """Test the `Time` class."""
 
-from typing import List, Tuple
+from typing import List, Tuple, Type, Union
 
 import numpy as np
-import pint
 import pytest
 from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
 
@@ -13,10 +12,12 @@ from weldx.time import Time
 
 def _initialize_delta_type(cls_type, values, unit):
     """Initialize the passed time type."""
-    if cls_type not in (Q_, Timedelta) and not isinstance(values, List):
+    if cls_type not in (Q_, Timedelta, np.timedelta64) and not isinstance(values, List):
         values = [values]
     if cls_type is np.timedelta64:
-        return np.array(values, dtype=f"timedelta64[{unit}]")
+        if isinstance(values, List):
+            return np.array(values, dtype=f"timedelta64[{unit}]")
+        return np.timedelta64(values, unit)
     if cls_type is Time:
         return Time(Q_(values, unit))
     if cls_type is str:
@@ -26,7 +27,9 @@ def _initialize_delta_type(cls_type, values, unit):
 
 def _initialize_datetime_type(cls_type, values):
     if cls_type is np.datetime64:
-        return np.array(values, dtype="datetime64")
+        if isinstance(values, List):
+            return np.array(values, dtype="datetime64")
+        return np.datetime64(values)
     if cls_type is str:
         return values
     return cls_type(values)
@@ -35,7 +38,6 @@ def _initialize_datetime_type(cls_type, values):
 def _initialize_date_time_quantity(timedelta, unit, time_ref):
     quantity = Q_(timedelta, unit)
     setattr(quantity, "time_ref", Timestamp(time_ref))
-    print(quantity)
     return quantity
 
 
@@ -53,10 +55,81 @@ def _is_datetime(cls_type):
 class TestTime:
     """Test the time class."""
 
-    # test_init ------------------------------------------------------------------------
+    # test_init helper functions -------------------------------------------------------
 
-    _create_input_type():
-        pass
+    @staticmethod
+    def _transform_array(data, is_array, is_scalar):
+        if not is_array:
+            return data[0]
+        if is_scalar:
+            return [data[0]]
+        return data
+
+    @classmethod
+    def _create_init_input_type(
+        cls, input_type, delta_val, abs_val, is_timedelta, is_array, is_scalar
+    ):
+        """Create an instance of the desired input type for the `__init__` test."""
+        val = delta_val if is_timedelta else abs_val
+        if not is_timedelta and input_type is Q_:
+            val = [v - 1 for v in delta_val]
+        val = cls._transform_array(val, is_array=is_array, is_scalar=is_scalar)
+
+        # create the time input ---------------------------------
+        if is_timedelta:
+            return _initialize_delta_type(input_type, val, "s")
+        elif input_type is not Q_:
+            return _initialize_datetime_type(input_type, val)
+        return _initialize_date_time_quantity(val, "s", abs_val[0])
+
+    @classmethod
+    def _get_init_exp_values(
+        cls,
+        is_timedelta,
+        time_ref,
+        data_was_scalar,
+        delta_val,
+        abs_val,
+    ):
+        """Get the expected result values for the `__init__` test."""
+        exp_is_absolute = time_ref is not None or not is_timedelta
+
+        # expected reference time
+        exp_time_ref = None
+        if exp_is_absolute:
+            exp_time_ref = Timestamp(time_ref if time_ref is not None else abs_val[0])
+
+        # expected time delta values
+        val = delta_val
+        if exp_is_absolute:
+            offset = 0
+            if not is_timedelta:
+                if time_ref is not None:
+                    offset = Timestamp(abs_val[0]) - Timestamp(time_ref)
+                    offset = offset.total_seconds()
+                offset -= delta_val[0]
+
+            val = [v + offset for v in delta_val]
+
+        val = val[0] if data_was_scalar else val
+        exp_timedelta = (
+            Timedelta(val, "s") if data_was_scalar else TimedeltaIndex(val, "s")
+        )
+
+        # expected datetime
+        exp_datetime = None
+        if exp_is_absolute:
+            time_ref = Timestamp(time_ref if time_ref is not None else abs_val[0])
+            exp_datetime = time_ref + exp_timedelta
+
+        return dict(
+            is_absolute=exp_is_absolute,
+            time_ref=exp_time_ref,
+            timedelta=exp_timedelta,
+            datetime=exp_datetime,
+        )
+
+    # test_init ------------------------------------------------------------------------
 
     @pytest.mark.parametrize("scl, arr", [(True, False), (True, True), (False, True)])
     @pytest.mark.parametrize("set_time_ref", [False, True])
@@ -74,10 +147,34 @@ class TestTime:
             (Q_, "datetime"),
             DatetimeIndex,
             Timestamp,
-            # np.datetime64,  # 2 failures since util cant convert single vals to index
+            np.datetime64,
         ],
     )
-    def test_init(self, input_vals, scl, arr, set_time_ref):
+    def test_init(
+        self,
+        input_vals: Union[Type, Tuple[Type, str]],
+        set_time_ref: bool,
+        scl: bool,
+        arr: bool,
+    ):
+        """Test the `__init__` method of the time class.
+
+        Parameters
+        ----------
+        input_vals :
+            Either a compatible time type or a tuple of two values. The tuple is needed
+            in case the tested time type can either represent relative time values as
+            well as absolute ones. In this case, the first value is the type. The
+            second value is a string specifying if the type represents absolute
+            ("datetime") or relative ("timedelta") values.
+        set_time_ref :
+            If `True`, a reference time will be passed to the `__init__` method
+        scl :
+            If `True`, the data of the passed type consists of a single value.
+        arr :
+            If `True`, the data of the passed type is an array
+
+        """
         # analyze test input values -----------------------------
         if isinstance(input_vals, Tuple):
             # to avoid wrong test setups due to spelling mistakes
@@ -94,56 +191,26 @@ class TestTime:
         if not arr and input_type in [DatetimeIndex, TimedeltaIndex]:
             pytest.skip()
 
-        # set the values passed to the input type ---------------
+        # create input values -----------------------------------
         delta_val = [1, 2, 3]
-        if not is_timedelta:
-            abs_val = [f"2000-01-01 16:00:0{v}" for v in delta_val]
+        abs_val = [f"2000-01-01 16:00:0{v}" for v in delta_val]
 
-        val = delta_val if is_timedelta else abs_val
-        if not is_timedelta and input_type is Q_:
-            val = [v - 1 for v in delta_val]
-        val = self._transform_array(val, is_array=arr, is_scalar=scl)
-
-        # create the time input ---------------------------------
-        if is_timedelta:
-            time = _initialize_delta_type(input_type, val, "s")
-        else:
-            if input_type is not Q_:
-                time = _initialize_datetime_type(input_type, val)
-            else:
-                time = _initialize_date_time_quantity(val, "s", abs_val[0])
-
-        # create reference time ---------------------------------
+        time = self._create_init_input_type(
+            input_type, delta_val, abs_val, is_timedelta, arr, scl
+        )
         time_ref = f"2000-01-01 15:00:00" if set_time_ref else None
 
         # create `Time` instance --------------------------------
         time_class_instance = Time(time, time_ref)
 
-        # set expected values -----------------------------------
-        exp_is_absolute = set_time_ref or not is_timedelta
+        # check results -----------------------------------------
+        exp = self._get_init_exp_values(is_timedelta, time_ref, scl, delta_val, abs_val)
 
-        exp_time_ref = None
-        if exp_is_absolute:
-            exp_time_ref = Timestamp(time_ref if set_time_ref else abs_val[0])
-
-        val = delta_val
-        if exp_is_absolute:
-            offset = 0 if is_timedelta else 3600 if set_time_ref else -delta_val[0]
-            val = [v + offset for v in delta_val]
-        val = val[0] if scl else val
-        exp_timedelta = Timedelta(val, "s") if scl else TimedeltaIndex(val, "s")
-
-        exp_datetime = None
-        if exp_is_absolute:
-            time_ref = Timestamp(time_ref if set_time_ref else abs_val[0])
-            exp_datetime = time_ref + exp_timedelta
-
-        # check -------------------------------------------------
-        assert time_class_instance.is_absolute == exp_is_absolute
-        assert time_class_instance.reference_time == exp_time_ref
-        assert np.all(time_class_instance.as_timedelta() == exp_timedelta)
-        if exp_is_absolute:
-            assert np.all(time_class_instance.as_datetime() == exp_datetime)
+        assert time_class_instance.is_absolute == exp["is_absolute"]
+        assert time_class_instance.reference_time == exp["time_ref"]
+        assert np.all(time_class_instance.as_timedelta() == exp["timedelta"])
+        if exp["is_absolute"]:
+            assert np.all(time_class_instance.as_datetime() == exp["datetime"])
         else:
             with pytest.raises(TypeError):
                 time_class_instance.as_datetime()

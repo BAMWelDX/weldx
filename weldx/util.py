@@ -407,7 +407,6 @@ def to_pandas_time_index(
 
     if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
         return time
-
     if isinstance(time, LocalCoordinateSystem):
         return to_pandas_time_index(time.time)
 
@@ -427,14 +426,15 @@ def to_pandas_time_index(
         if is_timedelta64_dtype(time_index) and time.weldx.time_ref:
             time_index = time_index + time.weldx.time_ref
         return time_index
-
-    if not np.iterable(time) or isinstance(time, str):
+    if (not np.iterable(time) or isinstance(time, str)) and not isinstance(
+        time, np.ndarray
+    ):
         time = [time]
+
     time = pd.Index(time)
 
     if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
         return time
-
     # try manual casting for object dtypes (i.e. strings), should avoid integers
     # warning: this allows something like ["1","2","3"] which will be ns !!
     if is_object_dtype(time):
