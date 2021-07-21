@@ -9,11 +9,12 @@ import pandas as pd
 import pint
 import xarray as xr
 from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
+from pandas.api.types import is_object_dtype
 from xarray import DataArray
 
 from weldx.types import types_time_like, types_timestamp_like
 
-from .util import get_time_union, pandas_time_delta_to_quantity, to_pandas_time_index
+from .util import get_time_union, pandas_time_delta_to_quantity
 
 __all__ = ["Time"]
 
@@ -52,7 +53,14 @@ class Time:
             time_ref = time_ref if time_ref is not None else time._time_ref
             time = time._time
 
-        time = to_pandas_time_index(time)
+        if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+            pass
+        elif isinstance(time, pint.Quantity):
+            time = Time._from_quantity(time)
+        elif isinstance(time, (xr.DataArray, xr.Dataset)):
+            time = Time._from_xarray(time)
+        else:
+            time = Time._from_other(time)
 
         if len(time) == 1:
             if isinstance(time, pd.DatetimeIndex):
@@ -195,7 +203,54 @@ class Time:
 
     @staticmethod
     def _from_quantity(time):
-        return to_pandas_time_index(time)
+        """Build a time-like pandas.Index from pint.Quantity."""
+        time_ref = getattr(time, "time_ref", None)
+        base = "s"  # using low base unit could cause rounding errors
+        if not np.iterable(time):  # catch zero-dim arrays
+            time = np.expand_dims(time, 0)
+        delta = pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
+        if time_ref is not None:
+            delta = delta + time_ref
+        return delta
+
+    @staticmethod
+    def _from_xarray(time):
+        """Build a time-like pandas.Index from xarray objects."""
+        if "time" in time.coords:
+            time = time.time
+        time_ref = time.weldx.time_ref
+        time_index = pd.Index(time.values)
+        if time_ref is not None:
+            time_index = time_index + time_ref
+        return time_index
+
+    @staticmethod
+    def _from_other(time):
+        """Try autocasting input to time-like pandas index."""
+        _input_type = type(time)
+
+        if (not np.iterable(time) or isinstance(time, str)) and not isinstance(
+            time, np.ndarray
+        ):
+            time = [time]
+
+        time = pd.Index(time)
+
+        if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
+            return time
+        # try manual casting for object dtypes (i.e. strings), should avoid integers
+        # warning: this allows something like ["1","2","3"] which will be ns !!
+        if is_object_dtype(time):
+            for func in (pd.DatetimeIndex, pd.TimedeltaIndex):
+                try:
+                    return func(time)
+                except (ValueError, TypeError):
+                    continue
+
+        raise TypeError(
+            f"Could not convert {_input_type} "
+            f"to pd.DatetimeIndex or pd.TimedeltaIndex"
+        )
 
     @staticmethod
     def union(times=List[Union[types_time_like, "Time"]]) -> Time:
