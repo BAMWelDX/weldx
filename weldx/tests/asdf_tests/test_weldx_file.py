@@ -345,7 +345,7 @@ class TestWeldXFile:
             fh["wx_user"] = dict(test=True)
             fh.show_asdf_header(use_widgets=False, _interactive=False)
 
-        out, err = capsys.readouterr()
+        out, _ = capsys.readouterr()
         assert "wx_user" in out
         assert "test" in out
 
