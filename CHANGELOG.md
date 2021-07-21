@@ -4,6 +4,9 @@
 
 ### added
 
+- added "units" (exact) and "dimensionality" (dimensionality compatible) checking options
+  to `util.xr_check_coords` [[#442]](https://github.com/BAMWelDX/weldx/pull/442)
+
 ### removed
 
 ### changes
@@ -12,8 +15,8 @@
 
 ### fixes
 
-- `WeldxFile.show_asdf_header` prints output on console, before it only returned the header
-  as parsed dict and string representation [[#428]](https://github.com/BAMWelDX/weldx/pull/428).
+- `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
+  representation [[#428]](https://github.com/BAMWelDX/weldx/pull/428).
 
 ### documentation
 
