@@ -42,6 +42,11 @@ class Time:
             absolute values and this parameter is set to ``None``, the first value of
             the data will be used as reference time.
 
+        Raises
+        ------
+        ValueError:
+            When time values passed are not sorted in monotonic increasing order.
+
         """
         if isinstance(time, Time):
             self._time = time._time
@@ -68,27 +73,40 @@ class Time:
         if isinstance(time, pd.TimedeltaIndex) & (time_ref is not None):
             time = time + time_ref
 
+        if isinstance(time, pd.Index) and not time.is_monotonic_increasing:
+            raise ValueError("The time values passed are not monotonic increasing.")
+
         self._time = time
         self._time_ref = time_ref
 
-    def __add__(self, other):
-        # discuss what this is supposed to do. There are multiple possibilities
+    def __add__(self, other: Union[types_time_like, Time]) -> Time:
+        """Element-wise addition between `Time` object and compatible types."""
         return Time(time=self._time + Time(other).as_pandas())
 
-    def __radd__(self, other):
-        # custom implementation for right hand syntax with other time-like types
-        return Time(time=Time(other).as_pandas() + self._time)
+    def __radd__(self, other: Union[types_time_like, Time]) -> Time:
+        """Element-wise addition between `Time` object and compatible types."""
+        return self + other
 
-    def __sub__(self, other):
-        # discuss what this is supposed to do. There are multiple possibilities
+    def __sub__(self, other: Union[types_time_like, Time]) -> Time:
+        """Element-wise substraction between `Time` object and compatible types."""
         return Time(time=self._time - Time(other).as_pandas())
 
-    def __rsub__(self, other):
-        # custom implementation for right hand syntax with other time-like types
+    def __rsub__(self, other: Union[types_time_like, Time]) -> Time:
+        """Element-wise substraction between `Time` object and compatible types."""
         return Time(time=Time(other).as_pandas() - self._time)
 
-    def __eq__(self, other: Union[types_time_like, Time]) -> bool:
+    def __eq__(self, other: Union[types_time_like, Time]) -> Union[bool, List[bool]]:
+        """Element-wise comparisons between time object and compatible types.
+
+        See Also
+        --------
+        equals : Check equality of `Time` objects.
+        """
         return self._time == Time(other).as_pandas()
+
+    def equals(self, other: Time) -> bool:
+        """Test for matching ``time`` and ``reference_time`` between objects."""
+        return np.all(self._time == other._time) & (self._time_ref == other._time_ref)
 
     def all_close(self, other: Union[types_time_like, Time], tolerance) -> bool:
         """Return `True` if another object compares equal within a certain tolerance."""
@@ -116,11 +134,13 @@ class Time:
             raise TypeError("Cannot convert non absolute Time object to datetime")
         return self._time
 
-    def as_pandas(self):
+    def as_pandas(
+        self,
+    ) -> Union[pd.Timedelta, pd.TimedeltaIndex, pd.Timestamp, pd.DatetimeIndex]:
         """Return the underlying pandas time datatype."""
         return self._time
 
-    def as_pandas_index(self):
+    def as_pandas_index(self) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         """Return a pandas index type regardless of length.
 
         This is useful when using time as coordinate in xarray types.
@@ -143,7 +163,7 @@ class Time:
         if isinstance(self._time, DatetimeIndex):
             return self._time_ref if self._time_ref is not None else self._time[0]
         elif isinstance(self._time, Timestamp):
-            return self._time
+            return self._time_ref if self._time_ref is not None else self._time
         return None
 
     @reference_time.setter
