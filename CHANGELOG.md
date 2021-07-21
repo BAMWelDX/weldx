@@ -8,7 +8,12 @@
 
 ### changes
 
+- move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
+
 ### fixes
+
+- `WeldxFile.show_asdf_header` prints output on console, before it only returned the header
+  as parsed dict and string representation [[#428]](https://github.com/BAMWelDX/weldx/pull/428).
 
 ### documentation
 
