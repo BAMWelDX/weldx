@@ -13,6 +13,7 @@ import xarray as xr
 import weldx.util as ut
 from weldx.constants import WELDX_QUANTITY as Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.types import types_time_like
 
 from .time import Time
 
@@ -271,7 +272,7 @@ class TimeSeries:
     def __init__(
         self,
         data: Union[pint.Quantity, MathematicalExpression],
-        time: Union[None, pd.TimedeltaIndex, pint.Quantity] = None,
+        time: Union[types_time_like, Time] = None,
         interpolation: str = None,
         reference_time: pd.Timestamp = None,
     ):
@@ -369,8 +370,8 @@ class TimeSeries:
     def _initialize_discrete(
         self,
         data: Union[pint.Quantity, xr.DataArray],
-        time: Union[None, pd.TimedeltaIndex, pint.Quantity],
-        interpolation: str,
+        time: Union[types_time_like, Time] = None,
+        interpolation: str = None,
     ):
         """Initialize the internal data with discrete values."""
         # set default interpolation
