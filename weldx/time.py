@@ -59,11 +59,11 @@ class Time:
         if isinstance(time, _data_base_types):
             pass
         elif isinstance(time, pint.Quantity):
-            time = Time._from_quantity(time)
+            time = Time._convert_quantity(time)
         elif isinstance(time, (xr.DataArray, xr.Dataset)):
-            time = Time._from_xarray(time)
+            time = Time._convert_xarray(time)
         else:
-            time = Time._from_other(time)
+            time = Time._convert_other(time)
 
         # catch scalar Index-objects
         if isinstance(time, pd.Index) and len(time) == 1:
@@ -207,7 +207,7 @@ class Time:
         return self._time
 
     @staticmethod
-    def _from_quantity(
+    def _convert_quantity(
         time: pint.Quantity,
     ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         """Build a time-like pandas.Index from pint.Quantity."""
@@ -221,7 +221,7 @@ class Time:
         return delta
 
     @staticmethod
-    def _from_xarray(
+    def _convert_xarray(
         time: Union[xr.DataArray, xr.Dataset]
     ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         """Build a time-like pandas.Index from xarray objects."""
@@ -234,7 +234,7 @@ class Time:
         return time_index
 
     @staticmethod
-    def _from_other(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+    def _convert_other(time) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         """Try autocasting input to time-like pandas index."""
         _input_type = type(time)
 
