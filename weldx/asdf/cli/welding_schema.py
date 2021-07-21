@@ -30,7 +30,6 @@ def single_pass_weld_example(
     import weldx
     import weldx.geometry as geo
     import weldx.measurement as msm
-    import weldx.util as ut
     from weldx import Q_, GmawProcess
     from weldx import LocalCoordinateSystem as lcs
     from weldx import TimeSeries, WXRotation, get_groove
@@ -41,6 +40,7 @@ def single_pass_weld_example(
     from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
     from weldx.asdf.util import get_schema_path, write_buffer
     from weldx.core import MathematicalExpression
+    from weldx.welding.util import sine
 
     # Timestamp
     reference_timestamp = pd.Timestamp("2020-11-09 12:00:00")
@@ -120,13 +120,11 @@ def single_pass_weld_example(
     time = pd.timedelta_range(start="0s", end="10s", freq="2s")
 
     # current data
-    I_ts = ut.sine(f=Q_(10, "1/s"), amp=Q_(20, "A"), bias=Q_(300, "A"))
+    I_ts = sine(f=Q_(10, "1/s"), amp=Q_(20, "A"), bias=Q_(300, "A"))
     current_data = TimeSeries(I_ts.interp_time(time).data, time)
 
     # voltage data
-    U_ts = ut.sine(
-        f=Q_(10, "1/s"), amp=Q_(3, "V"), bias=Q_(40, "V"), phase=Q_(0.1, "rad")
-    )
+    U_ts = sine(f=Q_(10, "1/s"), amp=Q_(3, "V"), bias=Q_(40, "V"), phase=Q_(0.1, "rad"))
     voltage_data = TimeSeries(U_ts.interp_time(time).data, time)
 
     # define current source and transformations

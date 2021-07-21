@@ -14,13 +14,13 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 # constants - should be imported first, no internal weldx deps
-from weldx.constants import WELDX_QUANTITY as Q_
+from .constants import WELDX_QUANTITY as Q_
 
 # main modules
-import weldx.transformations  # import this first to avoid circular dependencies
 import weldx.util  # import this first to avoid circular dependencies
-import weldx.config
 import weldx.core
+import weldx.transformations
+import weldx.config
 import weldx.geometry
 import weldx.welding
 import weldx.time
