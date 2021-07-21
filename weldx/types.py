@@ -12,6 +12,8 @@ __all__ = [
     "types_file_like",
     "types_path_like",
     "types_path_and_file_like",
+    "types_timestamp_like",
+    "types_time_like",
 ]
 
 
