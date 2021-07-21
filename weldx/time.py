@@ -108,7 +108,7 @@ class Time:
         """Test for matching ``time`` and ``reference_time`` between objects."""
         return np.all(self._time == other._time) & (self._time_ref == other._time_ref)
 
-    def all_close(self, other: Union[types_time_like, Time], tolerance) -> bool:
+    def all_close(self, other: Union[types_time_like, Time]) -> bool:
         """Return `True` if another object compares equal within a certain tolerance."""
         return np.allclose(self._time, Time(other).as_pandas())
 

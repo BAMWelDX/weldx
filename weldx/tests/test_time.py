@@ -67,6 +67,24 @@ class TestTime:
         assert t.is_absolute == exp_absolute
         assert t.reference_time == exp_time_ref
 
+    # test_init_exceptions -------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "time, time_ref, raises",
+        [
+            (TimedeltaIndex([3, 2, 1]), None, ValueError),
+            (DatetimeIndex(["2010", "2000"]), None, ValueError),
+            (["2010", "2000"], None, ValueError),
+            (Q_([3, 2, 1], "s"), None, ValueError),
+            (np.array([3, 2, 1], dtype="timedelta64[s]"), None, ValueError),
+        ],
+    )
+    def test_init_exception(time, time_ref, raises):
+        """Test initialization of the `Time` class with all supported types."""
+        with pytest.raises(raises):
+            Time(time, time_ref)
+
     # test_add_timedelta ---------------------------------------------------------------
 
     @staticmethod
