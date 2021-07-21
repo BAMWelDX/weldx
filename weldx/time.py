@@ -73,7 +73,7 @@ class Time:
         if isinstance(time, pd.TimedeltaIndex) & (time_ref is not None):
             time = time + time_ref
 
-        if not time.is_monotonic_increasing:
+        if isinstance(time, pd.Index) and not time.is_monotonic_increasing:
             raise ValueError("The time values passed are not monotonic increasing.")
 
         self._time = time
@@ -132,11 +132,13 @@ class Time:
             raise TypeError("Cannot convert non absolute Time object to datetime")
         return self._time
 
-    def as_pandas(self):
+    def as_pandas(
+        self,
+    ) -> Union[pd.Timedelta, pd.TimedeltaIndex, pd.Timestamp, pd.DatetimeIndex]:
         """Return the underlying pandas time datatype."""
         return self._time
 
-    def as_pandas_index(self):
+    def as_pandas_index(self) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
         """Return a pandas index type regardless of length.
 
         This is useful when using time as coordinate in xarray types.
