@@ -141,7 +141,7 @@ class Time:
         if isinstance(self._time, DatetimeIndex):
             return self._time_ref if self._time_ref is not None else self._time[0]
         elif isinstance(self._time, Timestamp):
-            return self._time
+            return self._time_ref if self._time_ref is not None else self._time
         return None
 
     @reference_time.setter
