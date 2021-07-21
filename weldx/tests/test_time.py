@@ -78,7 +78,7 @@ class TestTime:
         # create the time input ---------------------------------
         if is_timedelta:
             return _initialize_delta_type(input_type, val, "s")
-        elif input_type is not Q_:
+        if input_type is not Q_:
             return _initialize_datetime_type(input_type, val)
         return _initialize_date_time_quantity(val, "s", abs_val[0])
 
@@ -198,7 +198,7 @@ class TestTime:
         time = self._create_init_input_type(
             input_type, delta_val, abs_val, is_timedelta, arr, scl
         )
-        time_ref = f"2000-01-01 15:00:00" if set_time_ref else None
+        time_ref = "2000-01-01 15:00:00" if set_time_ref else None
 
         # create `Time` instance --------------------------------
         time_class_instance = Time(time, time_ref)
