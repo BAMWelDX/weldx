@@ -91,11 +91,11 @@ class Time:
         return self + other
 
     def __sub__(self, other: Union[types_time_like, Time]) -> Time:
-        """Element-wise substraction between `Time` object and compatible types."""
+        """Element-wise subtraction between `Time` object and compatible types."""
         return Time(time=self._time - Time(other).as_pandas())
 
     def __rsub__(self, other: Union[types_time_like, Time]) -> Time:
-        """Element-wise substraction between `Time` object and compatible types."""
+        """Element-wise subtraction between `Time` object and compatible types."""
         return Time(time=Time(other).as_pandas() - self._time)
 
     def __eq__(self, other: Union[types_time_like, Time]) -> Union[bool, List[bool]]:
