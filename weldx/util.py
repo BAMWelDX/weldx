@@ -1,4 +1,6 @@
 """Contains package internal utility functions."""
+from __future__ import annotations
+
 import functools
 import json
 import sys
@@ -7,7 +9,7 @@ from collections.abc import Iterable, Sequence
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Collection, Dict, List, Mapping, Union
+from typing import Any, Callable, Collection, Dict, List, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -19,11 +21,8 @@ from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta6
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
-from weldx.constants import WELDX_QUANTITY as Q_
-from weldx.constants import WELDX_UNIT_REGISTRY as ureg
-
-if TYPE_CHECKING:  # pragma: no cover
-    import weldx.transformations as tf
+from .constants import WELDX_QUANTITY as Q_
+from .constants import WELDX_UNIT_REGISTRY as ureg
 
 
 class WeldxDeprecationWarning(DeprecationWarning):
@@ -316,7 +315,6 @@ def to_pandas_time_index(
         pd.TimedeltaIndex,
         pd.DatetimeIndex,
         xr.DataArray,
-        "tf.LocalCoordinateSystem",
     ],
 ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
     """Convert a time variable to the corresponding pandas time index type.
