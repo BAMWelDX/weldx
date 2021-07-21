@@ -8,6 +8,8 @@
 
 ### changes
 
+- move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
+
 ### fixes
 
 ### documentation
