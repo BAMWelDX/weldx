@@ -125,20 +125,22 @@ class Time:
     >>>
     >>> from pandas import DatetimeIndex
     >>>
-    >>> DatetimeIndex(["2001", "2002"])
+    >>> dti = DatetimeIndex(["2001", "2002"])
+    >>> t_abs = Time(dti)
+
 
     If you want to create a ``Time`` instance without importing anything else, just use
     strings:
 
     >>> # relative times
-    >>> Time("1h")
-    >>> Time(["3s","3h","3d"])
+    >>> t_rel_1 = Time("1h")
+    >>> t_rel_2 = Time(["3s","3h","3d"])
     >>>
     >>> # absolute times
-    >>> Time(["1s","2s","3s"],"2010-10-05 12:00:00")
-    >>> Time("3h", "2010-08-11")
-    >>> Time("2014-07-23")
-    >>> Time(["2000","2001","2002"])
+    >>> t_abs_1 = Time(["1s","2s","3s"],"2010-10-05 12:00:00")
+    >>> t_abs_2 = Time("3h", "2010-08-11")
+    >>> t_abs_3 = Time("2014-07-23")
+    >>> t_abs_4 = Time(["2000","2001","2002"])
 
     Raises
     ------
