@@ -108,6 +108,7 @@ class Time:
     is ``False``:
 
     >>> t_rel.is_absolute
+    False
 
     To create an absolute value, just add a time stamp as ``time_ref`` parameter:
 
@@ -116,6 +117,7 @@ class Time:
     >>> timestamp = Timestamp("2042-01-01 13:37")
     >>> t_abs = Time(quantity, timestamp)
     >>> t_abs.is_absolute
+    True
 
     Or use an absolute time type:
 
