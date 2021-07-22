@@ -4,7 +4,7 @@ import numpy as np
 import pint
 
 from weldx.asdf.types import WeldxType
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.core import TimeSeries
 
 

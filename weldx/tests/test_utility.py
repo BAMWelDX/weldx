@@ -16,7 +16,7 @@ from pint.errors import DimensionalityError
 from xarray import DataArray
 
 import weldx.util as ut
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 
 
 def test_deprecation_decorator():
@@ -446,7 +446,7 @@ def test_xr_fill_all():
 
 
 _dax_check = xr.DataArray(
-    data=np.ones((2, 2, 2, 4, 3)),
+    data=Q_(np.ones((2, 2, 2, 4, 3)), "mm"),
     dims=["d1", "d2", "d3", "d4", "d5"],
     coords={
         "d1": np.array([-1, 1], dtype=float),
@@ -456,9 +456,15 @@ _dax_check = xr.DataArray(
         "d5": ["x", "y", "z"],
     },
 )
+_dax_check["d1"].attrs["units"] = "cm"
 
 _dax_ref = dict(
-    d1={"values": np.array([-1, 1]), "dtype": "float"},
+    d1={
+        "values": np.array([-1, 1]),
+        "dtype": "float",
+        "units": "cm",
+        "dimensionality": "m",
+    },
     d2={"values": np.array([-1, 1]), "dtype": int},
     d3={
         "values": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
@@ -503,6 +509,8 @@ def test_xr_check_coords(dax, ref_dict):
             ValueError,
         ),
         (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
+        (_dax_check, {"d1": {"units": "dm"}}, ValueError),
+        (_dax_check, {"d1": {"dimensionality": "kg"}}, DimensionalityError),
         (_dax_check, {"d3": {"dtype": "timedelta64"}}, TypeError),
         (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
         ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
@@ -678,8 +686,6 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         assert not ut.compare_nested(self.a, self.b)
 
     def test_measurements_modified(self):  # noqa: D102
-        from weldx import Q_
-
         self.b["welding_current"].data.data[-1] = Q_(500, "A")
         assert not ut.compare_nested(self.a, self.b)
 

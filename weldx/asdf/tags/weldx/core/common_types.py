@@ -9,7 +9,7 @@ from pandas.api.types import is_timedelta64_dtype as is_timedelta
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.util import dataclass_serialization_class
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 
 
 # Dimension ----------------------------------------------------------------------------
