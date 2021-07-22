@@ -117,7 +117,9 @@ class Time:
 
     def __add__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise addition between `Time` object and compatible types."""
-        return Time(time=self._time + Time(other).as_pandas())
+        other = Time(other)
+        time_ref = self.reference_time if self.is_absolute else other.reference_time
+        return Time(self._time + other.as_pandas(), time_ref)
 
     def __radd__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise addition between `Time` object and compatible types."""
