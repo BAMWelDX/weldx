@@ -1,9 +1,8 @@
 """Contains classes and functions related to time."""
 from __future__ import annotations
 
-import doctest
 from functools import reduce
-from typing import TYPE_CHECKING, List, Union
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
