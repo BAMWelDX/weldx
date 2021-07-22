@@ -8,7 +8,7 @@ from warnings import warn
 
 from networkx import draw, draw_networkx_edge_labels
 
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import TimeSeries
 

@@ -2,7 +2,7 @@
 import pint
 import pytest
 
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.welding.groove.iso_9692_1 import IGroove
 from weldx.welding.util import compute_welding_speed
 

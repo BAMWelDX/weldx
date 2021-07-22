@@ -16,7 +16,7 @@ from pint.errors import DimensionalityError
 from xarray import DataArray
 
 import weldx.util as ut
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 
 
 def test_deprecation_decorator():
