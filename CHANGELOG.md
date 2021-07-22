@@ -1,5 +1,31 @@
 # Release Notes
 
+## 0.5.0 (unreleased)
+
+### added
+
+- added "units" (exact) and "dimensionality" (dimensionality compatible) checking options
+  to `util.xr_check_coords` [[#442]](https://github.com/BAMWelDX/weldx/pull/442)
+
+### removed
+
+### changes
+
+- move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
+
+### fixes
+
+- `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
+  representation [[#428]](https://github.com/BAMWelDX/weldx/pull/428).
+
+### documentation
+
+### ASDF
+
+### deprecations
+
+### dependencies
+
 ## 0.4.1 (20.07.2021)
 
 ### added

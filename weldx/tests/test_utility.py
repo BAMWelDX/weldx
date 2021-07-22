@@ -446,7 +446,7 @@ def test_xr_fill_all():
 
 
 _dax_check = xr.DataArray(
-    data=np.ones((2, 2, 2, 4, 3)),
+    data=Q_(np.ones((2, 2, 2, 4, 3)), "mm"),
     dims=["d1", "d2", "d3", "d4", "d5"],
     coords={
         "d1": np.array([-1, 1], dtype=float),
@@ -456,9 +456,15 @@ _dax_check = xr.DataArray(
         "d5": ["x", "y", "z"],
     },
 )
+_dax_check["d1"].attrs["units"] = "cm"
 
 _dax_ref = dict(
-    d1={"values": np.array([-1, 1]), "dtype": "float"},
+    d1={
+        "values": np.array([-1, 1]),
+        "dtype": "float",
+        "units": "cm",
+        "dimensionality": "m",
+    },
     d2={"values": np.array([-1, 1]), "dtype": int},
     d3={
         "values": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
@@ -503,6 +509,8 @@ def test_xr_check_coords(dax, ref_dict):
             ValueError,
         ),
         (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
+        (_dax_check, {"d1": {"units": "dm"}}, ValueError),
+        (_dax_check, {"d1": {"dimensionality": "kg"}}, DimensionalityError),
         (_dax_check, {"d3": {"dtype": "timedelta64"}}, TypeError),
         (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
         ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
