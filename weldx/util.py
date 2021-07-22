@@ -22,7 +22,7 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
-from .constants import WELDX_QUANTITY as Q_
+from .constants import Q_
 from .constants import WELDX_UNIT_REGISTRY as ureg
 
 

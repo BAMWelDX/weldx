@@ -5,7 +5,7 @@ import pytest
 from decorator import contextmanager
 
 from weldx.asdf.util import write_read_buffer
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.geometry import Profile
 from weldx.welding.groove.iso_9692_1 import (
     IsoBaseGroove,

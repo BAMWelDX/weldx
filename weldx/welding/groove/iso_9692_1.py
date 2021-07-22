@@ -9,7 +9,7 @@ import pint
 from sympy import Point2D, Polygon
 
 import weldx.geometry as geo
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.util import inherit_docstrings, ureg_check_class
 
 __all__ = [
