@@ -18,6 +18,7 @@ import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
 from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta64_dtype
+from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
@@ -850,6 +851,12 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     ``optional`` : boolean
         default ``False`` - if ``True``, the dimension has to be in the DataArray dax
 
+    ``dimensionality`` : str or pint.Unit
+        Check if ``.attrs["units"]`` is the requested dimensionality
+
+    ``units`` : str or pint.Unit
+        Check if ``.attrs["units"]`` matches the requested unit
+
     Parameters
     ----------
     dax : xarray.DataArray
@@ -926,6 +933,27 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
             ):
                 raise TypeError(
                     f"Mismatch in the dtype of the DataArray and ref['{key}']"
+                )
+
+        if "units" in check:
+            units = coords[key].attrs.get("units", None)
+            if not units or not (ureg.Unit(units) == ureg.Unit(check["units"])):
+                raise ValueError(
+                    f"Unit mismatch in coordinate '{key}'\n"
+                    f"Coordinate has unit '{str(units)}', expected '{check['units']}'"
+                )
+
+        if "dimensionality" in check:
+            units = coords[key].attrs.get("units", None)
+            dim = check["dimensionality"]
+            if not units or not (
+                ureg.get_dimensionality(units) == ureg.get_dimensionality(dim)
+            ):
+                raise DimensionalityError(
+                    units,
+                    check["dimensionality"],
+                    f"\nDimensionalit mismatch in coordinate '{key}'\n"
+                    f"Coordinate has unit '{str(units)}', expected '{dim}'",
                 )
 
     return True
