@@ -51,35 +51,105 @@ def pandas_time_delta_to_quantity(
 
 
 class Time:
-    """Provides a unified interface for time related operations."""
+    """Provides a unified interface for time related operations.
+
+    The purpose of this class is to provide a unified interface for all operations
+    related to time. This is important because time can have multiple representations.
+    When working with time, some difficulties that might arise are the following:
+
+        - we can have absolute times in form of dates and relative times in form of
+          quantities
+        - conversion factors between different time quantities differ. An hour consists
+          of 60 minutes, but a day has only 24 hours
+        - there are multiple time data types available in python like the ones provided
+          by numpy or pandas. If you have to work with time classes from multiple
+          libraries you might have to do a lot of conversions to perform simple tasks as
+          calculating a time delta between two dates.
+
+    This class solves the mentioned problems for many cases. It can be created
+    from many different data types and offers methods to convert back to one of the
+    supported types. Most of its methods also support the date types that can be used to
+    create an instance of this class. Therefore, you do not need to perform any
+    conversions yourself.
+
+    You can create the class from the following time representations:
+
+        - other instances of the ``Time`` class
+        - numpy: ``datetime64`` and ``timedelta64``
+        - pandas: ``Timedelta``, ``Timestamp``, ``TimedeltaIndex``, ``DatetimeIndex``
+        - `pint.Quantity`
+        - strings representing a date (``"2001-01-23 14:23:11"``) or a timedelta
+          (``23s``)
+
+    Parameters
+    ----------
+    time :
+        A supported class that represents either absolute or relative times. The
+        data must be in ascending order.
+    time_ref :
+        An absolute reference point in time (timestamp). The return values of all
+        accessors that return relative times will be calculated towards this
+        reference time.
+        This will turn the data of this class into absolute time values if relative
+        times are passed as ``time`` parameter. In case ``time`` already contains
+        absolute values and this parameter is set to ``None``, the first value of
+        the data will be used as reference time.
+
+    Examples
+    --------
+    Creation from a quantity:
+
+    >>> from weldx import Q_, Time
+    ...
+    ... quantity = Q_("10s")
+    ... t_rel = Time(quantity)
+
+    Since a quantity is not an absolute time like a date, the ``is_absolute`` property
+    is ``False``:
+
+    >>> print(t_rel.is_absolute)
+
+    To create an absolute value, just add a time stamp as ``time_ref`` parameter:
+
+    >>> from pandas import Timestamp
+    ...
+    ... timestamp = Timestamp("2042-01-01 13:37")
+    ... t_abs = Time(quantity, timestamp)
+    ... print(t_abs.is_absolute)
+
+    Or use an absolute time type:
+
+    >>> Time(timestamp)
+    ...
+    ... from pandas import DatetimeIndex
+    ...
+    ... DatetimeIndex(["2001", "2002"])
+
+    If you want to create a ``Time`` instance without importing anything else, just use
+    strings:
+
+    >>> # relative times
+    ... Time("1h")
+    ... Time(["3s","3h","3d"])
+    ...
+    ... # absolute times
+    ... Time(["1s","2s","3s"],"2010-10-05 12:00:00")
+    ... Time("3h", "2010-08-11")
+    ... Time("2014-07-23")
+    ... Time(["2000","2001","2002"])
+
+    Raises
+    ------
+    ValueError:
+        When time values passed are not sorted in monotonic increasing order.
+
+    """
 
     def __init__(
         self,
         time: Union[types_time_like, Time],
         time_ref: Union[types_timestamp_like, Time, None] = None,
     ):
-        """Initialize a new `Time` class.
-
-        Parameters
-        ----------
-        time :
-            A supported class that represents either absolute or relative times. The
-            data must be in ascending order.
-        time_ref :
-            An absolute reference point in time (timestamp). The return values of all
-            accessors that return relative times will be calculated towards this
-            reference time.
-            This will turn the data of this class into absolute time values if relative
-            times are passed as ``time`` parameter. In case ``time`` already contains
-            absolute values and this parameter is set to ``None``, the first value of
-            the data will be used as reference time.
-
-        Raises
-        ------
-        ValueError:
-            When time values passed are not sorted in monotonic increasing order.
-
-        """
         if isinstance(time, Time):
             time_ref = time_ref if time_ref is not None else time._time_ref
             time = time._time
