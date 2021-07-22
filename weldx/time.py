@@ -107,7 +107,7 @@ class Time:
     Since a quantity is not an absolute time like a date, the ``is_absolute`` property
     is ``False``:
 
-    >>> print(t_rel.is_absolute)
+    >>> t_rel.is_absolute
 
     To create an absolute value, just add a time stamp as ``time_ref`` parameter:
 
@@ -115,7 +115,7 @@ class Time:
     >>>
     >>> timestamp = Timestamp("2042-01-01 13:37")
     >>> t_abs = Time(quantity, timestamp)
-    >>> print(t_abs.is_absolute)
+    >>> t_abs.is_absolute
 
     Or use an absolute time type:
 
