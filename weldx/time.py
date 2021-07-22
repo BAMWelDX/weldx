@@ -72,7 +72,7 @@ class Time:
 
         # sanity check
         if not isinstance(time, _data_base_types):
-            raise TypeError(f"Could not create pandas time-like object.")
+            raise TypeError("Could not create pandas time-like object.")
 
         if time_ref is not None:
             time_ref = pd.Timestamp(time_ref)
@@ -117,8 +117,9 @@ class Time:
         """Test for matching ``time`` and ``reference_time`` between objects."""
         return np.all(self._time == other._time) & (self._time_ref == other._time_ref)
 
-    def all_close(self, other: Union[types_time_like, Time], tolerance) -> bool:
+    def all_close(self, other: Union[types_time_like, Time]) -> bool:
         """Return `True` if another object compares equal within a certain tolerance."""
+        # TODO: handle tolerances ?
         return np.allclose(self._time, Time(other).as_pandas())
 
     def as_quantity(self) -> pint.Quantity:
@@ -169,7 +170,7 @@ class Time:
         """Get the reference time."""
         if isinstance(self._time, DatetimeIndex):
             return self._time_ref if self._time_ref is not None else self._time[0]
-        elif isinstance(self._time, Timestamp):
+        if isinstance(self._time, Timestamp):
             return self._time_ref if self._time_ref is not None else self._time
         return None
 
