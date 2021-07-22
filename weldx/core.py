@@ -11,7 +11,7 @@ import pint
 import xarray as xr
 
 import weldx.util as ut
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.time import pandas_time_delta_to_quantity
 
