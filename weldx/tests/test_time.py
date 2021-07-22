@@ -3,7 +3,9 @@
 from typing import List, Tuple, Type, Union
 
 import numpy as np
+import pandas as pd
 import pytest
+import xarray as xr
 from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
 
 from weldx import Q_
@@ -294,3 +296,29 @@ class TestTime:
 
         assert np.all(res.as_pandas() == exp.as_pandas())
         assert np.all(res == exp)
+
+    # test_convert_util ----------------------------------------------------------------
+
+    @staticmethod
+    def test_convert_util():
+        """Test basic conversion functions from/to xarray/pint"""
+        t = pd.date_range("2020", periods=10, freq="1s")
+        ts = t[0]
+
+        arr = xr.DataArray(
+            np.arange(10),
+            dims=["time"],
+            coords={"time": t - ts},
+        )
+        arr.time.weldx.time_ref = ts
+        time = Time(arr)
+
+        assert time.length == len(t)
+        assert time.equals(Time(t))
+
+        time_q = time.as_quantity()
+        assert np.all(time_q == Q_(range(10), "s"))
+        assert time_q.time_ref == ts
+
+        arr2 = time.as_data_array().weldx.time_ref_restore()
+        assert arr.time.identical(arr2.time)

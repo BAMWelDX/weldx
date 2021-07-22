@@ -124,8 +124,8 @@ class Time:
     def as_quantity(self) -> pint.Quantity:
         """Return the data as `pint.Quantity`."""
         if self.is_absolute:
-            q = pandas_time_delta_to_quantity(self._time - self._time_ref)
-            setattr(q, "time_ref", self._time_ref)  # store time_ref info
+            q = pandas_time_delta_to_quantity(self._time - self.reference_time)
+            setattr(q, "time_ref", self.reference_time)  # store time_ref info
             return q
         return pandas_time_delta_to_quantity(self._time)
 
@@ -161,7 +161,7 @@ class Time:
     def as_data_array(self) -> DataArray:
         """Return the data as `xarray.DataArray`."""
         da = xr.DataArray(self._time, coords={"time": self._time}, dims=["time"])
-        da.attrs["time_ref"] = self.reference_time
+        da.time.attrs["time_ref"] = self.reference_time
         return da
 
     @property
