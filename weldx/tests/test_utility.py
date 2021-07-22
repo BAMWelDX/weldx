@@ -686,8 +686,6 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         assert not ut.compare_nested(self.a, self.b)
 
     def test_measurements_modified(self):  # noqa: D102
-        from weldx import Q_
-
         self.b["welding_current"].data.data[-1] = Q_(500, "A")
         assert not ut.compare_nested(self.a, self.b)
 
