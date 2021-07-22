@@ -140,6 +140,10 @@ class Time:
         """
         return self._time == Time(other).as_pandas()
 
+    def __len__(self):
+        """Return the length of the data."""
+        return self.length
+
     def equals(self, other: Time) -> bool:
         """Test for matching ``time`` and ``reference_time`` between objects."""
         return np.all(self._time == other._time) & (self._time_ref == other._time_ref)
