@@ -301,7 +301,7 @@ class TestTime:
 
     @staticmethod
     def test_convert_util():
-        """Test basic conversion functions from/to xarray/pint"""
+        """Test basic conversion functions from/to xarray/pint."""
         t = pd.date_range("2020", periods=10, freq="1s")
         ts = t[0]
 
