@@ -1,6 +1,5 @@
 """Test the internal utility functions."""
 import copy
-import math
 import unittest
 from typing import Dict, List
 
@@ -155,38 +154,6 @@ def test_to_pandas_time_index_exceptions(arg, exception):
     """Test correct exceptions on invalid inputs."""
     with pytest.raises(exception):
         ut.to_pandas_time_index(arg)
-
-
-def test_pandas_time_delta_to_quantity():
-    """Test the 'pandas_time_delta_to_quantity' utility function."""
-    is_close = np.vectorize(math.isclose)
-
-    def _check_close(t1, t2):
-        assert np.all(is_close(t1.magnitude, t2.magnitude))
-        assert t1.units == t2.units
-
-    time_single = pd.TimedeltaIndex([1], unit="s")
-
-    _check_close(ut.pandas_time_delta_to_quantity(time_single), Q_(1, "s"))
-    _check_close(ut.pandas_time_delta_to_quantity(time_single, "ms"), Q_(1000, "ms"))
-    _check_close(ut.pandas_time_delta_to_quantity(time_single, "us"), Q_(1000000, "us"))
-    _check_close(
-        ut.pandas_time_delta_to_quantity(time_single, "ns"), Q_(1000000000, "ns")
-    )
-
-    time_multi = pd.TimedeltaIndex([1, 2, 3], unit="s")
-    _check_close(ut.pandas_time_delta_to_quantity(time_multi), Q_([1, 2, 3], "s"))
-    _check_close(
-        ut.pandas_time_delta_to_quantity(time_multi, "ms"), Q_([1000, 2000, 3000], "ms")
-    )
-    _check_close(
-        ut.pandas_time_delta_to_quantity(time_multi, "us"),
-        Q_([1000000, 2000000, 3000000], "us"),
-    )
-    _check_close(
-        ut.pandas_time_delta_to_quantity(time_multi, "ns"),
-        Q_([1000000000, 2000000000, 3000000000], "ns"),
-    )
 
 
 class TestXarrayInterpolation:

@@ -10,15 +10,12 @@ WELDX_UNIT_REGISTRY = _ureg(
     force_ndarray_like=True,
 )
 
-WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
-
 # add percent unit
 WELDX_UNIT_REGISTRY.define("percent = 0.01*count = %")
 # swap plank constant for hour definition
 WELDX_UNIT_REGISTRY.define("hour = 60*minute = h = hr")
 
-__all__ = (
-    "WELDX_PATH",
-    "WELDX_QUANTITY",
-    "WELDX_UNIT_REGISTRY",
-)
+WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
+Q_ = WELDX_QUANTITY
+
+__all__ = ("WELDX_PATH", "WELDX_QUANTITY", "WELDX_UNIT_REGISTRY", "Q_")

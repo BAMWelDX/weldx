@@ -15,12 +15,39 @@ from xarray import DataArray
 
 from weldx.types import types_time_like, types_timestamp_like
 
-from .util import pandas_time_delta_to_quantity
+from .constants import Q_
 
 __all__ = ["Time"]
 
 # list of types that are supported to be stored in Time._time
 _data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
+
+
+def pandas_time_delta_to_quantity(
+    time: pd.TimedeltaIndex, unit: str = "s"
+) -> pint.Quantity:
+    """Convert a `pandas.TimedeltaIndex` into a corresponding `pint.Quantity`.
+
+    Parameters
+    ----------
+    time : pandas.TimedeltaIndex
+        Instance of `pandas.TimedeltaIndex`
+    unit :
+        String that specifies the desired time unit.
+
+    Returns
+    -------
+    pint.Quantity :
+        Converted time quantity
+
+    """
+    # from pandas Timedelta documentation: "The .value attribute is always in ns."
+    # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas
+    # .Timedelta.html
+    nanoseconds = time.values.astype(np.int64)
+    if len(nanoseconds) == 1:
+        nanoseconds = nanoseconds[0]
+    return Q_(nanoseconds, "ns").to(unit)
 
 
 class Time:
