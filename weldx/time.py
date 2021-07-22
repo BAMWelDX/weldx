@@ -100,9 +100,9 @@ class Time:
     Creation from a quantity:
 
     >>> from weldx import Q_, Time
-    ...
-    ... quantity = Q_("10s")
-    ... t_rel = Time(quantity)
+    >>>
+    >>>  quantity = Q_("10s")
+    >>>  t_rel = Time(quantity)
 
     Since a quantity is not an absolute time like a date, the ``is_absolute`` property
     is ``False``:
@@ -112,31 +112,31 @@ class Time:
     To create an absolute value, just add a time stamp as ``time_ref`` parameter:
 
     >>> from pandas import Timestamp
-    ...
-    ... timestamp = Timestamp("2042-01-01 13:37")
-    ... t_abs = Time(quantity, timestamp)
-    ... print(t_abs.is_absolute)
+    >>>
+    >>> timestamp = Timestamp("2042-01-01 13:37")
+    >>> t_abs = Time(quantity, timestamp)
+    >>> print(t_abs.is_absolute)
 
     Or use an absolute time type:
 
     >>> Time(timestamp)
-    ...
-    ... from pandas import DatetimeIndex
-    ...
-    ... DatetimeIndex(["2001", "2002"])
+    >>>
+    >>> from pandas import DatetimeIndex
+    >>>
+    >>> DatetimeIndex(["2001", "2002"])
 
     If you want to create a ``Time`` instance without importing anything else, just use
     strings:
 
     >>> # relative times
-    ... Time("1h")
-    ... Time(["3s","3h","3d"])
-    ...
-    ... # absolute times
-    ... Time(["1s","2s","3s"],"2010-10-05 12:00:00")
-    ... Time("3h", "2010-08-11")
-    ... Time("2014-07-23")
-    ... Time(["2000","2001","2002"])
+    >>> Time("1h")
+    >>> Time(["3s","3h","3d"])
+    >>>
+    >>> # absolute times
+    >>> Time(["1s","2s","3s"],"2010-10-05 12:00:00")
+    >>> Time("3h", "2010-08-11")
+    >>> Time("2014-07-23")
+    >>> Time(["2000","2001","2002"])
 
     Raises
     ------

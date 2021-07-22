@@ -3,6 +3,7 @@ import pathlib
 from io import IOBase
 from typing import Protocol, Union, runtime_checkable
 
+import numpy as np
 from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
 from pint import Quantity
 
@@ -61,13 +62,13 @@ types_path_like = Union[str, pathlib.Path]
 types_path_and_file_like = Union[types_path_like, types_file_like]
 """types to handle paths and file handles."""
 
-types_datetime_like = Union[DatetimeIndex]
+types_datetime_like = Union[DatetimeIndex, np.datetime64]
 """types that define ascending arrays of time stamps."""
 
 types_timestamp_like = Union[Timestamp, str]
 """types that define timestamps."""
 
-types_timedelta_like = Union[TimedeltaIndex, Quantity]
+types_timedelta_like = Union[TimedeltaIndex, Quantity, np.timedelta64]
 """types that define ascending time delta arrays."""
 
 types_time_like = Union[types_datetime_like, types_timedelta_like, types_timestamp_like]
