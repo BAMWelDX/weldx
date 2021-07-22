@@ -1,9 +1,9 @@
 """Contains classes and functions related to time."""
-
 from __future__ import annotations
 
+import doctest
 from functools import reduce
-from typing import List, Union
+from typing import TYPE_CHECKING, List, Union
 
 import numpy as np
 import pandas as pd
@@ -121,12 +121,17 @@ class Time:
 
     Or use an absolute time type:
 
-    >>> Time(timestamp)
-    >>>
+    >>> t_abs = Time(timestamp)
+    >>> t_abs.is_absolute
+    True
+
     >>> from pandas import DatetimeIndex
     >>>
     >>> dti = DatetimeIndex(["2001", "2002"])
     >>> t_abs = Time(dti)
+    >>> t_abs.is_absolute
+    True
+
 
 
     If you want to create a ``Time`` instance without importing anything else, just use
