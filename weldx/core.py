@@ -11,11 +11,11 @@ import pint
 import xarray as xr
 
 import weldx.util as ut
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.types import types_time_like
 
-from .time import Time
+from weldx.time import Time, pandas_time_delta_to_quantity
 
 if TYPE_CHECKING:
     import sympy
@@ -675,7 +675,7 @@ class TimeSeries:
                 axes=axes, data_name=data_name, time_unit=time_unit, **mpl_kwargs
             )
 
-        time = ut.pandas_time_delta_to_quantity(self.time)
+        time = pandas_time_delta_to_quantity(self.time)
         if time_unit is not None:
             time = time.to(time_unit)
 

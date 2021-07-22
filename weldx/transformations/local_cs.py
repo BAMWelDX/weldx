@@ -22,6 +22,8 @@ from weldx.transformations.types import (
 )
 from weldx.transformations.util import build_time_index, normalize
 
+from ..time import pandas_time_delta_to_quantity
+
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
@@ -796,7 +798,7 @@ class LocalCoordinateSystem:
             The coordinate systems time as 'pint.Quantity'
 
         """
-        return ut.pandas_time_delta_to_quantity(self.time)
+        return pandas_time_delta_to_quantity(self.time)
 
     @property
     def dataset(self) -> xr.Dataset:
