@@ -101,8 +101,8 @@ class Time:
 
     >>> from weldx import Q_, Time
     >>>
-    >>>  quantity = Q_("10s")
-    >>>  t_rel = Time(quantity)
+    >>> quantity = Q_("10s")
+    >>> t_rel = Time(quantity)
 
     Since a quantity is not an absolute time like a date, the ``is_absolute`` property
     is ``False``:
@@ -147,7 +147,7 @@ class Time:
 
     def __init__(
         self,
-        time: Union[types_time_like, Time],
+        time: Union[types_time_like, Time, List[str]],
         time_ref: Union[types_timestamp_like, Time, None] = None,
     ):
         if isinstance(time, Time):
