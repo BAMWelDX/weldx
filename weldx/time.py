@@ -284,11 +284,37 @@ class Time:
         return self.length
 
     def equals(self, other: Time) -> bool:
-        """Test for matching ``time`` and ``reference_time`` between objects."""
+        """Test for matching ``time`` and ``reference_time`` between objects.
+
+        Parameters
+        ----------
+        other :
+            The compared object
+
+        Returns
+        -------
+        bool :
+            `True` if both objects have the same time values and reference time, `False`
+            otherwise
+
+        """
         return np.all(self == other) & (self._time_ref == other._time_ref)
 
     def all_close(self, other: Union[types_time_like, Time]) -> bool:
-        """Return `True` if another object compares equal within a certain tolerance."""
+        """Return `True` if another object compares equal within a certain tolerance.
+
+        Parameters
+        ----------
+        other :
+            The compared object
+
+        Returns
+        -------
+        bool :
+            `True` if all time values compare equal within a certain tolerance, `False`
+            otherwise
+
+        """
         # TODO: handle tolerances ?
         return np.allclose(self._time, Time(other).as_pandas())
 
