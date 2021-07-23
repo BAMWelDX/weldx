@@ -183,7 +183,7 @@ class Time:
     Note that any provided reference time is not taken into account when comparing two
     absolute time values. Only the values itself are compared:
 
-    >>> tdi = TimedeltaIndex("2001", "2002", "2003")
+    >>> tdi = TimedeltaIndex(["2001", "2002", "2003"])
     >>> Time(tdi, "2000") == Time(tdi, "2042")
     True
 
@@ -192,7 +192,7 @@ class Time:
 
     All supported types can also be used on the right hand side of the `==` operator:
 
-    >>> Time("2000", "2001") == TimedeltaIndex("2000", "2001")
+    >>> Time(["2000", "2001"]) == TimedeltaIndex(["2000", "2001"])
     True
 
     >>> Time(["1s", "2s"]) == Q_([1, 2],"s")
