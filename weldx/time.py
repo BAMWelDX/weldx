@@ -131,20 +131,30 @@ class Time:
     >>> t_abs.is_absolute
     True
 
-
-
     If you want to create a ``Time`` instance without importing anything else, just use
     strings:
 
     >>> # relative times
-    >>> t_rel_1 = Time("1h")
-    >>> t_rel_2 = Time(["3s","3h","3d"])
+    >>> t_rel = Time("1h")
+    >>> t_rel = Time(["3s","3h","3d"])
     >>>
     >>> # absolute times
-    >>> t_abs_1 = Time(["1s","2s","3s"],"2010-10-05 12:00:00")
-    >>> t_abs_2 = Time("3h", "2010-08-11")
-    >>> t_abs_3 = Time("2014-07-23")
-    >>> t_abs_4 = Time(["2000","2001","2002"])
+    >>> t_abs = Time(["1s","2s","3s"],"2010-10-05 12:00:00")
+    >>> t_abs = Time("3h", "2010-08-11")
+    >>> t_abs = Time("2014-07-23")
+    >>> t_abs = Time(["2000","2001","2002"])
+
+    As long as one of the operands represents a timedelta, you can add two `Time`
+    instances. If one of the instances is an array, the other one needs to be either a
+    scalar or an array of same length. In the latter case, values are added per index:
+
+    >>> t_res = Time(["1s", "2s"]) + Time("3s")
+    >>> t_res = Time(["1s", "2s"]) + Time(["3s", "4s"])
+    >>>
+    >>> t_res = Time(["1d", "2d"]) + Time("2000-01-01")
+    >>> t_res = Time(["2001-01-01", "2001-01-02"]) + Time(["3d", "4d"])
+
+
 
     Raises
     ------
