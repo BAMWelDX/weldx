@@ -203,7 +203,7 @@ class Time:
 
     Raises
     ------
-    ~exceptions.ValueError :
+    ValueError :
         When time values passed are not sorted in monotonic increasing order.
 
     """
