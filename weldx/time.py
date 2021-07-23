@@ -154,7 +154,7 @@ class Time:
     >>> t_res = Time(["1d", "2d"]) + Time("2000-01-01")
     >>> t_res = Time(["2001-01-01", "2001-01-02"]) + Time(["3d", "4d"])
 
-    `Time` also accepts all other suppoted types on the right hand side of the `+`
+    `Time` also accepts all other suppoted types on the right hand side of the ``+``
     operator:
 
     >>> t_res = Time(["1s", "2s"]) + Q_("10s")
@@ -190,7 +190,7 @@ class Time:
     If you want to include the reference times into the comparison, use the `equals`
     method.
 
-    All supported types can also be used on the right hand side of the `==` operator:
+    All supported types can also be used on the right hand side of the ``==`` operator:
 
     >>> all(Time(["2000", "2001"]) == DatetimeIndex(["2000", "2001"]))
     True
@@ -203,7 +203,7 @@ class Time:
 
     Raises
     ------
-    ValueError:
+    ValueError :
         When time values passed are not sorted in monotonic increasing order.
 
     """
