@@ -183,8 +183,8 @@ class Time:
     Note that any provided reference time is not taken into account when comparing two
     absolute time values. Only the values itself are compared:
 
-    >>> tdi = TimedeltaIndex(["2001", "2002", "2003"])
-    >>> Time(tdi, "2000") == Time(tdi, "2042")
+    >>> dti = DatetimeIndex(["2001", "2002", "2003"])
+    >>> all(Time(dti, "2000") == Time(dti, "2042"))
     True
 
     If you want to include the reference times into the comparison, use the `equals`
@@ -192,10 +192,10 @@ class Time:
 
     All supported types can also be used on the right hand side of the `==` operator:
 
-    >>> Time(["2000", "2001"]) == TimedeltaIndex(["2000", "2001"])
+    >>> all(Time(["2000", "2001"]) == DatetimeIndex(["2000", "2001"]))
     True
 
-    >>> Time(["1s", "2s"]) == Q_([1, 2],"s")
+    >>> all(Time(["1s", "2s"]) == Q_([1, 2],"s"))
     True
 
     >>> Time("3s") == "20d"
@@ -285,7 +285,7 @@ class Time:
 
     def equals(self, other: Time) -> bool:
         """Test for matching ``time`` and ``reference_time`` between objects."""
-        return np.all(self._time == other._time) & (self._time_ref == other._time_ref)
+        return np.all(self == other) & (self._time_ref == other._time_ref)
 
     def all_close(self, other: Union[types_time_like, Time]) -> bool:
         """Return `True` if another object compares equal within a certain tolerance."""
