@@ -154,7 +154,20 @@ class Time:
     >>> t_res = Time(["1d", "2d"]) + Time("2000-01-01")
     >>> t_res = Time(["2001-01-01", "2001-01-02"]) + Time(["3d", "4d"])
 
+    `Time` also accepts all other suppoted types on the right hand side of the `+`
+    operator:
 
+    >>> t_res = Time(["1s", "2s"]) + Q_("10s")
+    >>> t_res = Time(["1s", "2s"]) + DatetimeIndex(["2001", "2002"])
+    >>> t_res = Time(["1d", "2d"]) + "2000-01-01"
+    >>> t_res = Time(["1s", "2s"]) + ["3s", "4s"]
+
+    Except for the numpy types and `pint.Quantity` other types are also supported on
+    the left hand side:
+
+    >>> t_res = DatetimeIndex(["2001", "2002"]) + Time(["1d", "2d"])
+    >>> t_res = "2000-01-01" + Time(["1d", "2d"])
+    >>> t_res = ["3s", "4s"] + Time(["1s", "2s"])
 
     Raises
     ------
