@@ -169,6 +169,17 @@ class Time:
     >>> t_res = "2000-01-01" + Time(["1d", "2d"])
     >>> t_res = ["3s", "4s"] + Time(["1s", "2s"])
 
+    You can also compare two instances of `Time`:
+
+    >>> Time(["1s"]) == Time(Q_("1s"))
+    True
+
+    >>> Time("1s") == Time("2s")
+    False
+
+    >>> Time("2000-01-01 17:00:00") == Time("2s")
+    False
+
     Raises
     ------
     ValueError:
@@ -228,11 +239,15 @@ class Time:
 
     def __sub__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
-        return Time(time=self._time - Time(other).as_pandas())
+        other = Time(other)
+        time_ref = self.reference_time if self.is_absolute else other.reference_time
+        return Time(self._time - other.as_pandas(), time_ref)
 
     def __rsub__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
-        return Time(time=Time(other).as_pandas() - self._time)
+        other = Time(other)
+        time_ref = self.reference_time if self.is_absolute else other.reference_time
+        return Time(other.as_pandas() - self._time, time_ref)
 
     def __eq__(self, other: Union[types_time_like, Time]) -> Union[bool, List[bool]]:
         """Element-wise comparisons between time object and compatible types.
