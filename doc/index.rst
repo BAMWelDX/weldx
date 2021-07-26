@@ -4,6 +4,7 @@
     :hidden:
     :maxdepth: 1
 
+    installation
     tutorials
     standard
     api
