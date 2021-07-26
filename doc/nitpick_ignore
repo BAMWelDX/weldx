@@ -1,7 +1,3 @@
-# builtins
-# maybe related: https://stackoverflow.com/a/30624034/6700329
-py:class ValueError
-
 # matplotlib
 py:class matplotlib.axes.Axes
 py:class matplotlib.axes._axes.Axes

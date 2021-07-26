@@ -203,7 +203,7 @@ class Time:
 
     Raises
     ------
-    ValueError :
+    ValueError
         When time values passed are not sorted in monotonic increasing order.
 
     """
@@ -472,7 +472,7 @@ class Time:
 
         Returns
         -------
-        weldx.Time
+        Time
             The time union
 
         """
