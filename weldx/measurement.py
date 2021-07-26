@@ -257,8 +257,8 @@ class MeasurementChain:
 
         self._name = name
         self._source = source
-        self._source_equipment = None
-        self._prev_added_signal = None
+        self._source_equipment: MeasurementEquipment = None
+        self._prev_added_signal: str = None
         self._graph = DiGraph()
 
         self._add_signal(node_id=source.name, signal=source.output_signal)
@@ -833,7 +833,7 @@ class MeasurementChain:
                     )
             else:
                 if output_signal_unit == "":
-                    output_signal_unit = 1
+                    output_signal_unit = "1"
                 unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
                 func = MathematicalExpression(
                     "a*x",
