@@ -154,7 +154,7 @@ class Time:
     >>> t_res = Time(["1d", "2d"]) + Time("2000-01-01")
     >>> t_res = Time(["2001-01-01", "2001-01-02"]) + Time(["3d", "4d"])
 
-    `Time` also accepts all other suppoted types on the right hand side of the ``+``
+    `Time` also accepts all other supported types on the right hand side of the ``+``
     operator:
 
     >>> t_res = Time(["1s", "2s"]) + Q_("10s")
