@@ -22,7 +22,6 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
-from .constants import Q_
 from .constants import WELDX_UNIT_REGISTRY as ureg
 
 
@@ -337,16 +336,18 @@ def to_pandas_time_index(
 
     if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
         return time
-
     if isinstance(time, LocalCoordinateSystem):
         return to_pandas_time_index(time.time)
 
     if isinstance(time, pint.Quantity):
+        time_ref = getattr(time, "time_ref", None)
         base = "s"  # using low base unit could cause rounding errors
         if not np.iterable(time):  # catch zero-dim arrays
             time = np.expand_dims(time, 0)
-        return pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
-
+        delta = pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
+        if time_ref is not None:
+            return delta + pd.Timestamp(time_ref)
+        return delta
     if isinstance(time, (xr.DataArray, xr.Dataset)):
         if "time" in time.coords:
             time = time.time
@@ -354,14 +355,15 @@ def to_pandas_time_index(
         if is_timedelta64_dtype(time_index) and time.weldx.time_ref:
             time_index = time_index + time.weldx.time_ref
         return time_index
-
-    if not np.iterable(time) or isinstance(time, str):
+    if (not np.iterable(time) or isinstance(time, str)) and not isinstance(
+        time, np.ndarray
+    ):
         time = [time]
+
     time = pd.Index(time)
 
     if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
         return time
-
     # try manual casting for object dtypes (i.e. strings), should avoid integers
     # warning: this allows something like ["1","2","3"] which will be ns !!
     if is_object_dtype(time):
@@ -374,32 +376,6 @@ def to_pandas_time_index(
     raise TypeError(
         f"Could not convert {_input_type} " f"to pd.DatetimeIndex or pd.TimedeltaIndex"
     )
-
-
-def pandas_time_delta_to_quantity(
-    time: pd.TimedeltaIndex, unit: str = "s"
-) -> pint.Quantity:
-    """Convert a `pandas.TimedeltaIndex` into a corresponding `pint.Quantity`.
-
-    Parameters
-    ----------
-    time : pandas.TimedeltaIndex
-        Instance of `pandas.TimedeltaIndex`
-    unit :
-        String that specifies the desired time unit.
-
-    Returns
-    -------
-    pint.Quantity :
-        Converted time quantity
-
-    """
-    # from pandas Timedelta documentation: "The .value attribute is always in ns."
-    # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas.Timedelta.html
-    nanoseconds = time.values.astype(np.int64)
-    if len(nanoseconds) == 1:
-        nanoseconds = nanoseconds[0]
-    return Q_(nanoseconds, "ns").to(unit)
 
 
 def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
