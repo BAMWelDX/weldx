@@ -14,6 +14,7 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
 from weldx.core import TimeSeries
+from weldx.time import Time
 from weldx.transformations.types import (
     types_coordinates,
     types_orientation,
@@ -21,6 +22,7 @@ from weldx.transformations.types import (
     types_timeindex,
 )
 from weldx.transformations.util import build_time_index, normalize
+from weldx.types import types_time_like, types_timestamp_like
 
 from ..time import pandas_time_delta_to_quantity
 
@@ -44,8 +46,8 @@ class LocalCoordinateSystem:
         self,
         orientation: types_orientation = None,
         coordinates: Union[types_coordinates, TimeSeries] = None,
-        time: types_timeindex = None,
-        time_ref: pd.Timestamp = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
         construction_checks: bool = True,
     ):
         """Construct a cartesian coordinate system.
@@ -77,7 +79,7 @@ class LocalCoordinateSystem:
             Cartesian coordinate system
 
         """
-        time, time_ref = self._build_time_index(coordinates, time, time_ref)
+        time = self._build_time(coordinates, time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
@@ -109,10 +111,10 @@ class LocalCoordinateSystem:
             coordinates.name = "coordinates"
             dataset_items.append(coordinates)
 
-        self._time_ref = time_ref
+        self._time_ref = time.reference_time if isinstance(time, Time) else time_ref
         self._dataset = xr.merge(dataset_items, join="exact")
-        if "time" in self._dataset and time_ref is not None:
-            self._dataset.weldx.time_ref = time_ref
+        if "time" in self._dataset and self._time_ref is not None:
+            self._dataset.weldx.time_ref = self._time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -257,7 +259,7 @@ class LocalCoordinateSystem:
     @staticmethod
     def _build_orientation(
         orientation: types_orientation,
-        time: pd.DatetimeIndex = None,
+        time: Time = None,
     ):
         """Create xarray orientation from different formats and time-inputs.
 
@@ -266,7 +268,7 @@ class LocalCoordinateSystem:
         orientation :
             Orientation object or data.
         time :
-            Valid time index formatted with `_build_time_index`.
+            Valid time index formatted with `_build_time`.
 
         Returns
         -------
@@ -276,14 +278,12 @@ class LocalCoordinateSystem:
         if orientation is None:
             orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
         if not isinstance(orientation, xr.DataArray):
-            time_orientation = None
             if isinstance(orientation, Rot):
                 orientation = orientation.as_matrix()
             elif not isinstance(orientation, np.ndarray):
                 orientation = np.array(orientation)
 
-            if orientation.ndim == 3:
-                time_orientation = time
+            time_orientation = time.as_pandas() if orientation.ndim == 3 else None
             orientation = ut.xr_3d_matrix(orientation, time_orientation)
 
         # make sure we have correct "time" format
@@ -292,7 +292,7 @@ class LocalCoordinateSystem:
         return orientation
 
     @classmethod
-    def _build_coordinates(cls, coordinates, time: pd.DatetimeIndex = None):
+    def _build_coordinates(cls, coordinates, time: Time = None):
         """Create xarray coordinates from different formats and time-inputs.
 
         Parameters
@@ -300,7 +300,7 @@ class LocalCoordinateSystem:
         coordinates:
             Coordinates data.
         time:
-            Valid time index formatted with `_build_time_index`.
+            Valid time index formatted with `_build_time`.
 
         Returns
         -------
@@ -316,11 +316,10 @@ class LocalCoordinateSystem:
             coordinates = np.array([0, 0, 0])
 
         if not isinstance(coordinates, xr.DataArray):
-            time_coordinates = None
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                 coordinates = np.array(coordinates)
-            if coordinates.ndim == 2:
-                time_coordinates = time
+
+            time_coordinates = time.as_pandas() if coordinates.ndim == 2 else None
             coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
 
         # make sure we have correct "time" format
@@ -329,19 +328,26 @@ class LocalCoordinateSystem:
         return coordinates
 
     @staticmethod
-    def _build_time_index(
+    def _build_time(
         coordinates: Union[types_coordinates, TimeSeries] = None,
-        time: types_timeindex = None,
-        time_ref: pd.Timestamp = None,
-    ) -> Tuple[pd.TimedeltaIndex, pd.Timestamp]:
-        if (
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
+    ) -> Union[Time, None]:
+        # check if this function can be refactored with the TimeSeries supporting Time
+        if isinstance(time, (xr.DataArray, xr.Dataset)):
+            if "time" in time.coords:
+                time = time.time
+            time_ref = time.weldx.time_ref
+            time = time.values
+
+        elif (
             isinstance(coordinates, TimeSeries)
             and coordinates.is_discrete
             and time is None
         ):
             time = coordinates.time
 
-        return build_time_index(time, time_ref)
+        return Time(time, time_ref) if time is not None else None
 
     @staticmethod
     def _check_and_normalize_orientation(orientation: xr.DataArray) -> xr.DataArray:
