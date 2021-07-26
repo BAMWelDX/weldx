@@ -245,8 +245,8 @@ class Time:
         if isinstance(time, pd.Index) and not time.is_monotonic_increasing:
             raise ValueError("The time values passed are not monotonic increasing.")
 
-        self._time = time
-        self._time_ref = time_ref
+        self._time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = time
+        self._time_ref: pd.Timestamp = time_ref
 
     def __add__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise addition between `Time` object and compatible types."""
@@ -270,7 +270,9 @@ class Time:
         time_ref = self.reference_time if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
-    def __eq__(self, other: Union[types_time_like, Time]) -> Union[bool, List[bool]]:
+    def __eq__(  # type: ignore
+        self, other: Union[types_time_like, Time]
+    ) -> Union[bool, List[bool]]:
         """Element-wise comparisons between time object and compatible types.
 
         See Also
