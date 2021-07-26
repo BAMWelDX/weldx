@@ -270,6 +270,7 @@ class Time:
         time_ref = self.reference_time if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
+    # see issue #447
     def __eq__(  # type: ignore
         self, other: Union[types_time_like, Time]
     ) -> Union[bool, List[bool]]:

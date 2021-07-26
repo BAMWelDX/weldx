@@ -401,7 +401,7 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
 
     if mat_a.shape != mat_b.shape:
         return False
-    return np.all(np.isclose(mat_a, mat_b, atol=abs_tol))
+    return np.all(np.isclose(mat_a, mat_b, atol=abs_tol)).__bool__()
 
 
 def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
@@ -427,7 +427,7 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
 
     if vec_a.size != vec_b.size:
         return False
-    return np.all(np.isclose(vec_a, vec_b, atol=abs_tol))
+    return np.all(np.isclose(vec_a, vec_b, atol=abs_tol)).__bool__()
 
 
 def mat_vec_mul(a, b) -> np.ndarray:
