@@ -111,8 +111,7 @@ class LocalCoordinateSystem:
             coordinates.name = "coordinates"
             dataset_items.append(coordinates)
 
-        # todo: check if the else case can be handled more elegant by the time class
-        self._time_ref = time.reference_time if isinstance(time, Time) else time_ref
+        self._time_ref = time.reference_time if isinstance(time, Time) else None
         self._dataset = xr.merge(dataset_items, join="exact")
         if "time" in self._dataset and self._time_ref is not None:
             self._dataset.weldx.time_ref = self._time_ref
@@ -348,6 +347,9 @@ class LocalCoordinateSystem:
             and time is None
         ):
             time = coordinates.time
+        # this branch is only relevant if coordinates and orientations are xarray types
+        elif time is None and time_ref is not None:
+            time = time_ref
 
         return Time(time, time_ref) if time is not None else None
 
