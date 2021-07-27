@@ -26,7 +26,6 @@ This keeps the environments clean and easier to upgrade (is that really true???)
 
 Here is a guide on howto setup different kernels for
 Jupyter `guide <https://ipython.readthedocs.io/en/7.25.0/install/kernel_install.html>`_.
-S
 
 
 Create an environment named "jupyter" via conda::
