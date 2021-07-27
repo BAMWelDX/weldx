@@ -22,6 +22,8 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
+from weldx.time import Time
+
 from .constants import WELDX_UNIT_REGISTRY as ureg
 
 
@@ -315,6 +317,7 @@ def to_pandas_time_index(
         pd.TimedeltaIndex,
         pd.DatetimeIndex,
         xr.DataArray,
+        Time,
     ],
 ) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
     """Convert a time variable to the corresponding pandas time index type.
@@ -333,7 +336,8 @@ def to_pandas_time_index(
     from weldx.transformations import LocalCoordinateSystem
 
     _input_type = type(time)
-
+    if isinstance(time, Time):
+        return time.as_pandas_index()
     if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
         return time
     if isinstance(time, LocalCoordinateSystem):
@@ -989,7 +993,7 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
 
 
 def xr_interp_orientation_in_time(
-    dsx: xr.DataArray, times: Union[pd.DatetimeIndex, pd.TimedeltaIndex]
+    dsx: xr.DataArray, times: Union[Time, pd.DatetimeIndex, pd.TimedeltaIndex]
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents orientation data in time.
 
@@ -1044,7 +1048,7 @@ def xr_interp_orientation_in_time(
 
 
 def xr_interp_coordinates_in_time(
-    da: xr.DataArray, times: Union[pd.TimedeltaIndex, pd.DatetimeIndex]
+    da: xr.DataArray, times: Union[Time, pd.TimedeltaIndex, pd.DatetimeIndex]
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents 3d coordinates in time.
 
@@ -1061,6 +1065,7 @@ def xr_interp_coordinates_in_time(
         Interpolated data
 
     """
+    times = to_pandas_time_index(times)
     da = da.weldx.time_ref_unset()
     da = xr_interp_like(
         da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True

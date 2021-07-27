@@ -908,28 +908,21 @@ class LocalCoordinateSystem:
                 "allowed. Also check that the reference time has the correct type."
             )
 
-        orientation = ut.xr_interp_orientation_in_time(
-            self.orientation, time.as_pandas()
-        )
+        orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
+
         if isinstance(self.coordinates, TimeSeries):
-            time_interp = time.as_pandas_index()
-            if isinstance(time_interp, pd.DatetimeIndex):
-                time_interp = time_interp - self.reference_time
+            time_interp = Time(time, self.reference_time)
 
+            # todo: remove as_timedelta when TimeSeries supports Time
             coordinates = self._coords_from_discrete_time_series(
-                self.coordinates.interp_time(time_interp)
+                self.coordinates.interp_time(time_interp.as_timedelta())
             )
-
             if self.has_reference_time:
                 coordinates.weldx.time_ref = self.reference_time
         else:
-            coordinates = ut.xr_interp_coordinates_in_time(
-                self.coordinates, time.as_pandas()
-            )
+            coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
-        return LocalCoordinateSystem(
-            orientation, coordinates, time=time.as_pandas(), time_ref=time_ref
-        )
+        return LocalCoordinateSystem(orientation, coordinates, time)
 
     def invert(self) -> "LocalCoordinateSystem":
         """Get a local coordinate system defining the parent in the child system.
@@ -1038,4 +1031,5 @@ class LocalCoordinateSystem:
             The new reference time
 
         """
+        self._time_ref = time_ref_new
         self._dataset.weldx.time_ref = time_ref_new
