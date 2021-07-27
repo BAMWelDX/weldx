@@ -69,7 +69,7 @@ class LocalCoordinateSystem:
             considered to be static and the provided value won't be stored. If this
             happens, a warning will be emitted.
         time_ref :
-            Optional reference timestamp if time is a time delta.
+            Optional reference timestamp if ``time`` is a time delta.
         construction_checks :
             If 'True', the validity of the data will be verified
 
@@ -409,7 +409,13 @@ class LocalCoordinateSystem:
 
     @classmethod
     def from_euler(
-        cls, sequence, angles, degrees=False, coordinates=None, time=None, time_ref=None
+        cls,
+        sequence,
+        angles,
+        degrees=False,
+        coordinates=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
 
@@ -446,7 +452,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -459,7 +465,11 @@ class LocalCoordinateSystem:
 
     @classmethod
     def from_orientation(
-        cls, orientation, coordinates=None, time=None, time_ref=None
+        cls,
+        orientation,
+        coordinates=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from orientation matrix.
 
@@ -472,7 +482,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -484,7 +494,13 @@ class LocalCoordinateSystem:
 
     @classmethod
     def from_xyz(
-        cls, vec_x, vec_y, vec_z, coordinates=None, time=None, time_ref=None
+        cls,
+        vec_x,
+        vec_y,
+        vec_z,
+        coordinates=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from 3 vectors defining the orientation.
 
@@ -501,7 +517,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -525,8 +541,8 @@ class LocalCoordinateSystem:
         vec_y,
         positive_orientation=True,
         coordinates=None,
-        time=None,
-        time_ref=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -544,7 +560,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -565,8 +581,8 @@ class LocalCoordinateSystem:
         vec_z,
         positive_orientation=True,
         coordinates=None,
-        time=None,
-        time_ref=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -584,7 +600,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -605,8 +621,8 @@ class LocalCoordinateSystem:
         vec_z,
         positive_orientation=True,
         coordinates=None,
-        time=None,
-        time_ref=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -624,7 +640,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
