@@ -261,7 +261,9 @@ class Time:
     def __sub__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
         other = Time(other)
-        time_ref = self.reference_time if self.is_absolute else other.reference_time
+        time_ref = (
+            self.reference_time if self.is_absolute and not other.is_absolute else None
+        )
         return Time(self._time - other.as_pandas(), time_ref)
 
     def __rsub__(self, other: Union[types_time_like, Time]) -> Time:

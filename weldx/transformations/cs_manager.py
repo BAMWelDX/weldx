@@ -1383,16 +1383,11 @@ class CoordinateSystemManager:
             time = self.get_cs(time, parent_name).time
             if time is None:
                 raise ValueError(f'The system "{time}" is not time dependent')
-        elif not isinstance(time, (pd.DatetimeIndex, pint.Quantity)):
-            time = pd.TimedeltaIndex(time)
 
         if time_ref is None:
             time_ref = self.reference_time
-        # else:
-        # time_ref = pd.Timestamp(time_ref)
-
-        # time_interp, time_ref_interp = build_time_index(time, time_ref)
-        time_interp = Time(time, time_ref) if time is not None else None
+        if time is not None:
+            time = Time(time, time_ref)
 
         lcs_result = LocalCoordinateSystem()
         for edge in path_edges:
@@ -1406,15 +1401,12 @@ class CoordinateSystemManager:
 
             if lcs.is_time_dependent:
                 if not lcs.has_reference_time and self.has_reference_time:
-                    # time_lcs = time_interp + (time_ref_interp - self.reference_time)
-                    time_lcs = time_interp + (
-                        time_interp.reference_time - self.reference_time
+                    lcs = lcs.interp_time(time - self.reference_time)
+                    lcs = LocalCoordinateSystem(
+                        lcs.orientation.data, lcs.coordinates.data, time
                     )
-                    lcs = lcs.interp_time(time_lcs.as_timedelta())
-                    lcs.reset_reference_time(self.reference_time)
-                    lcs.reset_reference_time(time_interp.reference_time)
                 else:
-                    lcs = lcs.interp_time(time_interp)
+                    lcs = lcs.interp_time(time)
 
             if invert:
                 if isinstance(lcs.coordinates, TimeSeries):
