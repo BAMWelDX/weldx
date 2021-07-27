@@ -111,6 +111,7 @@ class LocalCoordinateSystem:
             coordinates.name = "coordinates"
             dataset_items.append(coordinates)
 
+        # todo: check if the else case can be handled more elegant by the time class
         self._time_ref = time.reference_time if isinstance(time, Time) else time_ref
         self._dataset = xr.merge(dataset_items, join="exact")
         if "time" in self._dataset and self._time_ref is not None:
@@ -276,14 +277,15 @@ class LocalCoordinateSystem:
 
         """
         if orientation is None:
-            orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+            orientation = np.eye(3)
+
         if not isinstance(orientation, xr.DataArray):
             if isinstance(orientation, Rot):
                 orientation = orientation.as_matrix()
             elif not isinstance(orientation, np.ndarray):
                 orientation = np.array(orientation)
 
-            time_orientation = time.as_pandas() if orientation.ndim == 3 else None
+            time_orientation = time.as_timedelta() if orientation.ndim == 3 else None
             orientation = ut.xr_3d_matrix(orientation, time_orientation)
 
         # make sure we have correct "time" format
@@ -313,13 +315,13 @@ class LocalCoordinateSystem:
             coordinates = cls._coords_from_discrete_time_series(coordinates)
 
         if coordinates is None:
-            coordinates = np.array([0, 0, 0])
+            coordinates = np.zeros(3)
 
         if not isinstance(coordinates, xr.DataArray):
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                 coordinates = np.array(coordinates)
 
-            time_coordinates = time.as_pandas() if coordinates.ndim == 2 else None
+            time_coordinates = time.as_timedelta() if coordinates.ndim == 2 else None
             coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
 
         # make sure we have correct "time" format
