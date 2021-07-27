@@ -1005,7 +1005,7 @@ class TestLocalCoordinateSystem:
             (TS("2020-02-02"), TDI([1]), None, TypeError, "# mixed ref. times #1"),
             (None, TDI([1]), TS("2020-02-02"), TypeError, "# mixed ref. times #2"),
             (TS("2020-02-02"), "no", TS("2020-02-02"), TypeError, "# wrong type #1"),
-            (TS("2020-02-02"), TDI([1]), "no", TypeError, "# wrong type #2"),
+            (TS("2020-02-02"), TDI([1]), "no", Exception, "# wrong type #2"),
         ],
         ids=get_test_name,
     )

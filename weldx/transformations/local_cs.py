@@ -19,9 +19,8 @@ from weldx.transformations.types import (
     types_coordinates,
     types_orientation,
     types_time_and_lcs,
-    types_timeindex,
 )
-from weldx.transformations.util import build_time_index, normalize
+from weldx.transformations.util import normalize
 from weldx.types import types_time_like, types_timestamp_like
 
 from ..time import pandas_time_delta_to_quantity
@@ -870,9 +869,9 @@ class LocalCoordinateSystem:
 
     def interp_time(
         self,
-        time: types_time_and_lcs,
-        time_ref: Union[pd.Timestamp, None] = None,
-    ) -> "LocalCoordinateSystem":
+        time: Union[types_time_like, LocalCoordinateSystem, None],
+        time_ref: Union[types_timestamp_like, None] = None,
+    ) -> LocalCoordinateSystem:
         """Interpolates the data in time.
 
         Parameters
@@ -892,14 +891,15 @@ class LocalCoordinateSystem:
         if (not self.is_time_dependent) or (time is None):
             return self
 
-        # use LCS reference time if none provided
-        if isinstance(time, LocalCoordinateSystem) and time_ref is None:
-            time_ref = time.reference_time
-        time = ut.to_pandas_time_index(time)
+        # handle LCS as time
+        if isinstance(time, LocalCoordinateSystem):
+            if time_ref is None:
+                time_ref = time.reference_time
+            time = time.time
 
-        if self.has_reference_time != (
-            time_ref is not None or isinstance(time, pd.DatetimeIndex)
-        ):
+        time = Time(time, time_ref)
+
+        if self.has_reference_time != time.is_absolute:
             raise TypeError(
                 "Only 1 reference time provided for time dependent coordinate "
                 "system. Either the reference time of the coordinate system or the "
@@ -908,14 +908,13 @@ class LocalCoordinateSystem:
                 "allowed. Also check that the reference time has the correct type."
             )
 
-        if self.has_reference_time and (not isinstance(time, pd.DatetimeIndex)):
-            time = time + time_ref
-
-        orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
+        orientation = ut.xr_interp_orientation_in_time(
+            self.orientation, time.as_pandas()
+        )
         if isinstance(self.coordinates, TimeSeries):
-            time_interp = time
+            time_interp = time.as_pandas_index()
             if isinstance(time_interp, pd.DatetimeIndex):
-                time_interp = time - self.reference_time
+                time_interp = time_interp - self.reference_time
 
             coordinates = self._coords_from_discrete_time_series(
                 self.coordinates.interp_time(time_interp)
@@ -924,10 +923,12 @@ class LocalCoordinateSystem:
             if self.has_reference_time:
                 coordinates.weldx.time_ref = self.reference_time
         else:
-            coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
+            coordinates = ut.xr_interp_coordinates_in_time(
+                self.coordinates, time.as_pandas()
+            )
 
         return LocalCoordinateSystem(
-            orientation, coordinates, time=time, time_ref=time_ref
+            orientation, coordinates, time=time.as_pandas(), time_ref=time_ref
         )
 
     def invert(self) -> "LocalCoordinateSystem":

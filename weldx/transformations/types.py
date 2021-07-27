@@ -13,6 +13,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 types_coordinates = Union[xr.DataArray, np.ndarray, List]
 types_orientation = Union[xr.DataArray, np.ndarray, List[List], Rotation]
+# todo: remove next two definitions if possible
 types_timeindex = Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity]
 types_time_and_lcs = Union[
     types_timeindex, "weldx.transformations.LocalCoordinateSystem"
