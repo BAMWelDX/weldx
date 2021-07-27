@@ -289,6 +289,8 @@ class SpatialDataVisualizer:
         if isinstance(data, geo.SpatialData):
             triangles = data.triangles
             data = data.coordinates.data
+        # k3d needs single precision data.
+        data = data.astype(np.float32)
 
         self._reference_system = reference_system
 
