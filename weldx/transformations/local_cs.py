@@ -46,8 +46,8 @@ class LocalCoordinateSystem:
         self,
         orientation: types_orientation = None,
         coordinates: Union[types_coordinates, TimeSeries] = None,
-        time: types_time_like = None,
-        time_ref: types_timestamp_like = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
         construction_checks: bool = True,
     ):
         """Construct a cartesian coordinate system.
@@ -69,7 +69,7 @@ class LocalCoordinateSystem:
             considered to be static and the provided value won't be stored. If this
             happens, a warning will be emitted.
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if time is a time delta.
         construction_checks :
             If 'True', the validity of the data will be verified
 
@@ -111,8 +111,9 @@ class LocalCoordinateSystem:
             coordinates.name = "coordinates"
             dataset_items.append(coordinates)
 
-        self._time_ref = time.reference_time if isinstance(time, Time) else None
         self._dataset = xr.merge(dataset_items, join="exact")
+
+        self._time_ref = time.reference_time if isinstance(time, Time) else None
         if "time" in self._dataset and self._time_ref is not None:
             self._dataset.weldx.time_ref = self._time_ref
 
@@ -259,22 +260,9 @@ class LocalCoordinateSystem:
     @staticmethod
     def _build_orientation(
         orientation: types_orientation,
-        time: Time = None,
-    ):
-        """Create xarray orientation from different formats and time-inputs.
-
-        Parameters
-        ----------
-        orientation :
-            Orientation object or data.
-        time :
-            Valid time index formatted with `_build_time`.
-
-        Returns
-        -------
-        xarray.DataArray
-
-        """
+        time: Union[Time, None],
+    ) -> xr.DataArray:
+        """Create xarray orientation from different formats and time-inputs."""
         if orientation is None:
             orientation = np.eye(3)
 
@@ -293,21 +281,10 @@ class LocalCoordinateSystem:
         return orientation
 
     @classmethod
-    def _build_coordinates(cls, coordinates, time: Time = None):
-        """Create xarray coordinates from different formats and time-inputs.
-
-        Parameters
-        ----------
-        coordinates:
-            Coordinates data.
-        time:
-            Valid time index formatted with `_build_time`.
-
-        Returns
-        -------
-        xarray.DataArray
-
-        """
+    def _build_coordinates(
+        cls, coordinates, time: Union[Time, None]
+    ) -> Union[xr.DataArray, TimeSeries]:
+        """Create xarray coordinates from different formats and time-inputs."""
         if isinstance(coordinates, TimeSeries):
             if coordinates.is_expression:
                 return coordinates
@@ -330,9 +307,9 @@ class LocalCoordinateSystem:
 
     @staticmethod
     def _build_time(
-        coordinates: Union[types_coordinates, TimeSeries] = None,
-        time: types_time_like = None,
-        time_ref: types_timestamp_like = None,
+        coordinates: Union[types_coordinates, TimeSeries, None],
+        time: Union[types_time_like, Time, None],
+        time_ref: Union[types_timestamp_like, Time, None],
     ) -> Union[Time, None]:
         # check if this function can be refactored with the TimeSeries supporting Time
         if isinstance(time, (xr.DataArray, xr.Dataset)):
