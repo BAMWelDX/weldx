@@ -15,6 +15,8 @@ from weldx import util
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
+from weldx.time import Time
+from weldx.types import types_time_like, types_timestamp_like
 
 from .local_cs import LocalCoordinateSystem
 from .types import (
@@ -64,7 +66,7 @@ class CoordinateSystemManager:
         self,
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
-        time_ref: pd.Timestamp = None,
+        time_ref: Union[types_timestamp_like, None] = None,
     ):
         """Construct a coordinate system manager.
 
@@ -106,7 +108,7 @@ class CoordinateSystemManager:
         cls,
         root_coordinate_system_name: str,
         coordinate_system_manager_name: Union[str, None] = None,
-        time_ref: pd.Timestamp = None,
+        time_ref: Union[types_timestamp_like, None] = None,
         graph: Union[nx.DiGraph, None] = None,
         subsystems=None,
     ):
@@ -739,8 +741,8 @@ class CoordinateSystemManager:
         reference_system_name: str,
         orientation: types_orientation = None,
         coordinates: types_coordinates = None,
-        time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = None,
-        time_ref: pd.Timestamp = None,
+        time: Union[types_time_like, Time, None] = None,
+        time_ref: Union[types_timestamp_like, None] = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -787,7 +789,8 @@ class CoordinateSystemManager:
         angles,
         degrees: bool = False,
         coordinates: types_coordinates = None,
-        time: pd.DatetimeIndex = None,
+        time: Union[types_time_like, Time, None] = None,
+        time_ref: Union[types_timestamp_like, None] = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -826,6 +829,8 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        time_ref :
+            Reference time for time dependent coordinate systems
         lsc_child_in_parent :
             If set to `True`, the passed
             `~weldx.transformations.LocalCoordinateSystem` instance describes
@@ -835,7 +840,7 @@ class CoordinateSystemManager:
 
         """
         lcs = LocalCoordinateSystem.from_euler(
-            sequence, angles, degrees, coordinates, time
+            sequence, angles, degrees, coordinates, time, time_ref
         )
         self.add_cs(
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
@@ -849,7 +854,8 @@ class CoordinateSystemManager:
         vec_y,
         vec_z,
         coordinates: types_coordinates = None,
-        time: pd.DatetimeIndex = None,
+        time: Union[types_time_like, Time, None] = None,
+        time_ref: Union[types_timestamp_like, None] = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -873,6 +879,8 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        time_ref :
+            Reference time for time dependent coordinate systems
         lsc_child_in_parent :
             If set to `True`, the passed
             `~weldx.transformations.LocalCoordinateSystem` instance describes
@@ -880,7 +888,9 @@ class CoordinateSystemManager:
             how the parent system is positioned in its new child system.
 
         """
-        lcs = LocalCoordinateSystem.from_xyz(vec_x, vec_y, vec_z, coordinates, time)
+        lcs = LocalCoordinateSystem.from_xyz(
+            vec_x, vec_y, vec_z, coordinates, time, time_ref
+        )
         self.add_cs(
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
         )
@@ -893,7 +903,8 @@ class CoordinateSystemManager:
         vec_y,
         positive_orientation: bool = True,
         coordinates: types_coordinates = None,
-        time: pd.DatetimeIndex = None,
+        time: Union[types_time_like, Time, None] = None,
+        time_ref: Union[types_timestamp_like, None] = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -919,6 +930,8 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        time_ref :
+            Reference time for time dependent coordinate systems
         lsc_child_in_parent :
             If set to `True`, the passed
             `~weldx.transformations.LocalCoordinateSystem` instance describes
@@ -927,7 +940,7 @@ class CoordinateSystemManager:
 
         """
         lcs = LocalCoordinateSystem.from_xy_and_orientation(
-            vec_x, vec_y, positive_orientation, coordinates, time
+            vec_x, vec_y, positive_orientation, coordinates, time, time_ref
         )
         self.add_cs(
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
@@ -941,7 +954,8 @@ class CoordinateSystemManager:
         vec_z,
         positive_orientation=True,
         coordinates: types_coordinates = None,
-        time: pd.DatetimeIndex = None,
+        time: Union[types_time_like, Time, None] = None,
+        time_ref: Union[types_timestamp_like, None] = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -967,6 +981,8 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        time_ref :
+            Reference time for time dependent coordinate systems
         lsc_child_in_parent :
             If set to `True`, the passed
             `~weldx.transformations.LocalCoordinateSystem` instance describes
@@ -975,7 +991,7 @@ class CoordinateSystemManager:
 
         """
         lcs = LocalCoordinateSystem.from_xz_and_orientation(
-            vec_x, vec_z, positive_orientation, coordinates, time
+            vec_x, vec_z, positive_orientation, coordinates, time, time_ref
         )
         self.add_cs(
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
@@ -989,7 +1005,8 @@ class CoordinateSystemManager:
         vec_z,
         positive_orientation: bool = True,
         coordinates: types_coordinates = None,
-        time: pd.DatetimeIndex = None,
+        time: Union[types_time_like, Time, None] = None,
+        time_ref: Union[types_timestamp_like, None] = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -1015,6 +1032,8 @@ class CoordinateSystemManager:
             Coordinates of the origin.
         time :
             Time data for time dependent coordinate systems.
+        time_ref :
+            Reference time for time dependent coordinate systems
         lsc_child_in_parent :
             If set to `True`, the passed
             `~weldx.transformations.LocalCoordinateSystem` instance describes
@@ -1023,7 +1042,7 @@ class CoordinateSystemManager:
 
         """
         lcs = LocalCoordinateSystem.from_yz_and_orientation(
-            vec_y, vec_z, positive_orientation, coordinates, time
+            vec_y, vec_z, positive_orientation, coordinates, time, time_ref
         )
         self.add_cs(
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
@@ -1209,8 +1228,8 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: str = None,
-        time: Union[types_timeindex, str] = None,
-        time_ref: pd.Timestamp = None,
+        time: Union[types_time_like, Time, None] = None,
+        time_ref: Union[types_timestamp_like, None] = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
 
@@ -1356,7 +1375,6 @@ class CoordinateSystemManager:
         if time is None:
             time_ref = None  # ignore passed reference time if no time was passed
             time = self.time_union(path_edges)
-
         elif isinstance(time, str):
             parent_name = self.get_parent_system_name(time)
             if parent_name is None:
@@ -1370,10 +1388,11 @@ class CoordinateSystemManager:
 
         if time_ref is None:
             time_ref = self.reference_time
-        else:
-            time_ref = pd.Timestamp(time_ref)
+        # else:
+        # time_ref = pd.Timestamp(time_ref)
 
-        time_interp, time_ref_interp = build_time_index(time, time_ref)
+        # time_interp, time_ref_interp = build_time_index(time, time_ref)
+        time_interp = Time(time, time_ref) if time is not None else None
 
         lcs_result = LocalCoordinateSystem()
         for edge in path_edges:
@@ -1387,12 +1406,15 @@ class CoordinateSystemManager:
 
             if lcs.is_time_dependent:
                 if not lcs.has_reference_time and self.has_reference_time:
-                    time_lcs = time_interp + (time_ref_interp - self.reference_time)
-                    lcs = lcs.interp_time(time_lcs)
+                    # time_lcs = time_interp + (time_ref_interp - self.reference_time)
+                    time_lcs = time_interp + (
+                        time_interp.reference_time - self.reference_time
+                    )
+                    lcs = lcs.interp_time(time_lcs.as_timedelta())
                     lcs.reset_reference_time(self.reference_time)
-                    lcs.reset_reference_time(time_ref_interp)
+                    lcs.reset_reference_time(time_interp.reference_time)
                 else:
-                    lcs = lcs.interp_time(time_interp, time_ref_interp)
+                    lcs = lcs.interp_time(time_interp)
 
             if invert:
                 if isinstance(lcs.coordinates, TimeSeries):
