@@ -1,9 +1,9 @@
 Installation guide
 ==================
 
-The WelDX package can be installed using `conda` or `mamba` package manager from the :code:`conda-forge` channel. These
+The WelDX package can be installed using *conda* or `mamba` package manager from the :code:`conda-forge` channel. These
 managers originate from the freely available `Anaconda Python stack <https://docs.conda.io/en/latest/miniconda.html>`_.
-If you do not have Anaconda or Miniconda installed yet, we ask you to install `Miniconda-3`. Documentation for the
+If you do not have Anaconda or Miniconda installed yet, we ask you to install *Miniconda*-3. Documentation for the
 installation procedure can be
 found `here <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation>`_.
 
@@ -11,7 +11,7 @@ After this step you have access to the conda command and can proceed to installi
 
     conda create -n weldx -c conda-forge weldx
 
-The package is also available on pypi and can be installed via `pip`::
+The package is also available on pypi and can be installed via *pip*::
 
     pip install weldx
 
@@ -20,7 +20,7 @@ Setting up Jupyter Lab
 
 Weldx provides lots of visualization methods for planning and analysis. These methods need a frontend like
 Jupyter lab or Jupyter notebook. We currently recommend to use Jupyter lab, as it is modern and makes working with
-several notebooks easier. You can install Jupyter lab both via `conda` or `pip`.
+several notebooks easier. You can install Jupyter lab both via *conda* or *pip*.
 If you use conda we suggest that you create a separate environment for your weldx installation and jupyter.
 This keeps the environments clean and easier to upgrade (is that really true? think of mixed versions of extensions in lab env and weldx env!).
 
