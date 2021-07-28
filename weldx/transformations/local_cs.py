@@ -271,7 +271,9 @@ class LocalCoordinateSystem:
             elif not isinstance(orientation, np.ndarray):
                 orientation = np.array(orientation)
 
-            time_orientation = time.as_timedelta() if orientation.ndim == 3 else None
+            time_orientation = (
+                time.as_timedelta_index() if orientation.ndim == 3 else None
+            )
             orientation = ut.xr_3d_matrix(orientation, time_orientation)
 
         # make sure we have correct "time" format
@@ -296,7 +298,9 @@ class LocalCoordinateSystem:
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                 coordinates = np.array(coordinates)
 
-            time_coordinates = time.as_timedelta() if coordinates.ndim == 2 else None
+            time_coordinates = (
+                time.as_timedelta_index() if coordinates.ndim == 2 else None
+            )
             coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
 
         # make sure we have correct "time" format

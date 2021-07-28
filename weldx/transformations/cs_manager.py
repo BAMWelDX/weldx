@@ -1376,6 +1376,8 @@ class CoordinateSystemManager:
             time_ref = None  # ignore passed reference time if no time was passed
             time = self.time_union(path_edges)
         elif isinstance(time, str):
+            # todo: this branch conflicts a bit with our other str inputs for time.
+            #       We should catch that with a try, except
             parent_name = self.get_parent_system_name(time)
             if parent_name is None:
                 raise ValueError("The root system has no time dependency.")
@@ -1516,8 +1518,8 @@ class CoordinateSystemManager:
 
     def interp_time(
         self,
-        time: types_time_and_lcs,
-        time_ref: pd.Timestamp = None,
+        time: Union[types_time_like, Time, LocalCoordinateSystem, None] = None,
+        time_ref: Union[types_timestamp_like, None] = None,
         affected_coordinate_systems: Union[str, List[str], None] = None,
         in_place: bool = False,
     ) -> "CoordinateSystemManager":
@@ -1991,7 +1993,7 @@ class CoordinateSystemManager:
                 for t in time_list
             ]
 
-        return util.get_time_union(time_list)
+        return Time.union(time_list).as_pandas_index()
 
     def transform_data(
         self,

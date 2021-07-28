@@ -329,10 +329,17 @@ class Time:
         return pandas_time_delta_to_quantity(self._time)
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
-        """Return the data as `pandas.TimedeltaIndex`."""
+        """Return the data as `pandas.TimedeltaIndex` or `pandas.Timedelta`."""
         if self.is_absolute:
             return self._time - self.reference_time
         return self._time
+
+    def as_timedelta_index(self) -> TimedeltaIndex:
+        """Return the data as `pandas.TimedeltaIndex`."""
+        timedelta = self.as_timedelta()
+        if isinstance(timedelta, Timedelta):
+            return TimedeltaIndex([timedelta])
+        return timedelta
 
     def as_datetime(self) -> Union[Timestamp, DatetimeIndex]:
         """Return the data as `pandas.DatetimeIndex`."""
