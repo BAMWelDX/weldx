@@ -4064,12 +4064,11 @@ class TestCoordinateSystemManager:
         "time, time_ref, systems",
         [
             (pd.TimedeltaIndex([1, 7, 11, 20], "D"), None, None),
-            (pd.TimedeltaIndex([1, 7, 11, 20], "D"), None, "lcs_1"),
+            (pd.TimedeltaIndex([1, 7, 11, 20], "D"), None, ["lcs_1"]),
+            (pd.TimedeltaIndex([1, 7, 11, 20], "D"), None, ["lcs_1", "lcs_2"]),
         ],
     )
     def test_interp_time(self, time, time_ref, systems):
-        # Setup -------------------------------------
-
         lcs_data = dict(
             lcs_0=("root", [1, 4, 7]),
             lcs_1=("lcs_0", [1, 5, 9]),
@@ -4091,8 +4090,10 @@ class TestCoordinateSystemManager:
         )
         csm.add_cs("lcs_3", "lcs_2", lcs_3)
 
+        # interpolate
         csm_interp = csm.interp_time(time, time_ref, systems)
 
+        # calculate expected results and check
         if systems is None:
             systems = ["lcs_0", "lcs_1", "lcs_2"]
 
