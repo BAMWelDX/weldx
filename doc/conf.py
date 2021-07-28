@@ -163,7 +163,10 @@ else:
 # default "python3" is needed for readthedocs run
 # if building locally, this might need to be "weldx" - try setting using -D option:
 # -D nbsphinx_kernel_name="weldx"
-nbsphinx_kernel_name = "python3"
+if os.getenv("READTHEDOCS", False):
+    nbsphinx_kernel_name = "python3"
+else:
+    nbsphinx_kernel_name = "weldx"
 
 # This is processed by Jinja2 and inserted before each notebook
 nbsphinx_prolog = r"""
