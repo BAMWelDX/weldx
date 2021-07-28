@@ -18,6 +18,7 @@ import weldx.util as ut
 from weldx import Q_, SpatialData
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
+from weldx.time import Time
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
@@ -4041,178 +4042,83 @@ class TestCoordinateSystemManager:
         with pytest.raises(exception_type):
             csm.get_data(*arguments)
 
+    # test_interp_time -----------------------------------------------------------------
 
-def test_relabel():
-    """Test relabeling unmerged and merged CSM nodes.
+    @staticmethod
+    def _orientation_from_days(days, clip_min=None, clip_max=None):
+        if clip_min is not None and clip_max is not None:
+            angles = np.clip(days, clip_min, clip_max)
+        else:
+            angles = days
+        return WXRotation.from_euler("z", angles, degrees=True).as_matrix()
 
-    Test covers: relabeling of child system, relabeling root system, merge
-    two systems after relabeling, make sure cannot relabel after merge.
-    """
-    csm1 = tf.CoordinateSystemManager("A")
-    csm1.add_cs("B", "A", tf.LocalCoordinateSystem())
+    @staticmethod
+    def _coordinates_from_days(days, clip_min=None, clip_max=None):
+        if clip_min is not None and clip_max is not None:
+            val = np.clip(days, clip_min, clip_max)
+        else:
+            val = days
+        return [[v, 2 * v, -v] for v in val]
 
-    csm2 = tf.CoordinateSystemManager("C")
-    csm2.add_cs("D", "C", tf.LocalCoordinateSystem())
-
-    csm1.relabel({"B": "X"})
-    csm2.relabel({"C": "X"})
-
-    assert "B" not in csm1.graph.nodes
-    assert "X" in csm1.graph.nodes
-
-    assert "C" not in csm2.graph.nodes
-    assert "X" in csm2.graph.nodes
-    assert csm2.root_system_name == "X"
-
-    csm1.merge(csm2)
-    for n in ["A", "D", "X"]:
-        assert n in csm1.graph.nodes
-
-    with pytest.raises(NotImplementedError):
-        csm1.relabel({"A": "Z"})
-
-
-def test_coordinate_system_manager_create_coordinate_system():
-    """Test direct construction of coordinate systems in the coordinate system manager.
-
-    Create multiple coordinate systems with all provided methods and check
-    if they are constructed correctly.
-
-    """
-    angles_x = np.array([0.5, 1, 2, 2.5]) * np.pi / 2
-    angles_y = np.array([1.5, 0, 1, 0.5]) * np.pi / 2
-    angles = np.array([[*angles_y], [*angles_x]]).transpose()
-    angles_deg = 180 / np.pi * angles
-
-    rot_mat_x = WXRotation.from_euler("x", angles_x).as_matrix()
-    rot_mat_y = WXRotation.from_euler("y", angles_y).as_matrix()
-
-    time = TDI([0, 6, 12, 18], "H")
-    orientations = np.matmul(rot_mat_x, rot_mat_y)
-    coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
-
-    vec_x = orientations[:, :, 0]
-    vec_y = orientations[:, :, 1]
-    vec_z = orientations[:, :, 2]
-
-    csm = tf.CoordinateSystemManager("root")
-    lcs_default = tf.LocalCoordinateSystem()
-
-    # orientation and coordinates -------------------------
-    csm.create_cs("lcs_init_default", "root")
-    check_coordinate_system(
-        csm.get_cs("lcs_init_default"),
-        lcs_default.orientation,
-        lcs_default.coordinates,
-        True,
+    @pytest.mark.parametrize(
+        "time, time_ref, systems",
+        [
+            (pd.TimedeltaIndex([1, 7, 11, 20], "D"), None, None),
+            (pd.TimedeltaIndex([1, 7, 11, 20], "D"), None, "lcs_1"),
+        ],
     )
+    def test_interp_time(self, time, time_ref, systems):
+        # Setup -------------------------------------
 
-    csm.create_cs("lcs_init_tdp", "root", orientations, coords, time)
-    check_coordinate_system(
-        csm.get_cs("lcs_init_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
+        lcs_data = dict(
+            lcs_0=("root", [1, 4, 7]),
+            lcs_1=("lcs_0", [1, 5, 9]),
+            lcs_2=("root", [1, 6, 11]),
+        )
+        time_class = Time(time, time_ref)
+        csm = tf.CoordinateSystemManager("root")
+        for k, v in lcs_data.items():
+            csm.create_cs(
+                k,
+                v[0],
+                self._orientation_from_days(v[1]),
+                self._coordinates_from_days(v[1]),
+                Q_(v[1], "day"),
+            )
 
-    # from euler ------------------------------------------
-    csm.create_cs_from_euler("lcs_euler_default", "root", "yx", angles[0])
-    check_coordinate_system(
-        csm.get_cs("lcs_euler_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
-    )
+        lcs_3 = tf.LocalCoordinateSystem(
+            WXRotation.from_euler("y", 1).as_matrix(), [4, 2, 0]
+        )
+        csm.add_cs("lcs_3", "lcs_2", lcs_3)
 
-    csm.create_cs_from_euler(
-        "lcs_euler_tdp", "root", "yx", angles_deg, True, coords, time
-    )
-    check_coordinate_system(
-        csm.get_cs("lcs_euler_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
+        csm_interp = csm.interp_time(time, time_ref, systems)
 
-    # from xyz --------------------------------------------
-    csm.create_cs_from_xyz("lcs_xyz_default", "root", vec_x[0], vec_y[0], vec_z[0])
-    check_coordinate_system(
-        csm.get_cs("lcs_xyz_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
-    )
+        if systems is None:
+            systems = ["lcs_0", "lcs_1", "lcs_2"]
 
-    csm.create_cs_from_xyz("lcs_xyz_tdp", "root", vec_x, vec_y, vec_z, coords, time)
-    check_coordinate_system(
-        csm.get_cs("lcs_xyz_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
+        days_interp = time_class.as_quantity().to("days").m
+        for k, v in lcs_data.items():
+            if k in systems:
+                lcs_exp = tf.LocalCoordinateSystem(
+                    self._orientation_from_days(days_interp, v[1][0], v[1][-1]),
+                    self._coordinates_from_days(days_interp, v[1][0], v[1][-1]),
+                    time_class,
+                )
+            else:
+                lcs_exp = csm.get_cs(k)
 
-    # from xy and orientation -----------------------------
-    csm.create_cs_from_xy_and_orientation("lcs_xyo_default", "root", vec_x[0], vec_y[0])
-    check_coordinate_system(
-        csm.get_cs("lcs_xyo_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
-    )
+            lcs = csm_interp.get_cs(k)
+            lcs_inv = csm_interp.get_cs(v[0], k)
 
-    csm.create_cs_from_xy_and_orientation(
-        "lcs_xyo_tdp", "root", vec_x, vec_y, True, coords, time
-    )
-    check_coordinate_system(
-        csm.get_cs("lcs_xyo_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
+            check_coordinate_systems_close(lcs, lcs_exp)
+            check_coordinate_systems_close(lcs_inv, lcs_exp.invert())
 
-    # from xz and orientation -----------------------------
-    csm.create_cs_from_xz_and_orientation("lcs_xzo_default", "root", vec_x[0], vec_z[0])
-    check_coordinate_system(
-        csm.get_cs("lcs_xzo_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
-    )
+        lcs = csm_interp.get_cs("lcs_3")
+        assert lcs.time is None
+        check_coordinate_systems_close(lcs, lcs_3)
 
-    csm.create_cs_from_xz_and_orientation(
-        "lcs_xzo_tdp", "root", vec_x, vec_z, True, coords, time
-    )
-    check_coordinate_system(
-        csm.get_cs("lcs_xzo_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
-
-    # from yz and orientation -----------------------------
-    csm.create_cs_from_yz_and_orientation("lcs_yzo_default", "root", vec_y[0], vec_z[0])
-    check_coordinate_system(
-        csm.get_cs("lcs_yzo_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
-    )
-
-    csm.create_cs_from_yz_and_orientation(
-        "lcs_yzo_tdp", "root", vec_y, vec_z, True, coords, time
-    )
-    check_coordinate_system(
-        csm.get_cs("lcs_yzo_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
+        if len(systems) == 3:
+            assert np.all(csm_interp.time_union() == time_class.as_pandas())
 
 
 def test_coordinate_system_manager_interp_time():
@@ -4426,6 +4332,179 @@ def test_coordinate_system_manager_interp_time():
         csm_1.merge(csm_2)
 
         csm_1.interp_time(csm_1.time_union())
+
+
+def test_relabel():
+    """Test relabeling unmerged and merged CSM nodes.
+
+    Test covers: relabeling of child system, relabeling root system, merge
+    two systems after relabeling, make sure cannot relabel after merge.
+    """
+    csm1 = tf.CoordinateSystemManager("A")
+    csm1.add_cs("B", "A", tf.LocalCoordinateSystem())
+
+    csm2 = tf.CoordinateSystemManager("C")
+    csm2.add_cs("D", "C", tf.LocalCoordinateSystem())
+
+    csm1.relabel({"B": "X"})
+    csm2.relabel({"C": "X"})
+
+    assert "B" not in csm1.graph.nodes
+    assert "X" in csm1.graph.nodes
+
+    assert "C" not in csm2.graph.nodes
+    assert "X" in csm2.graph.nodes
+    assert csm2.root_system_name == "X"
+
+    csm1.merge(csm2)
+    for n in ["A", "D", "X"]:
+        assert n in csm1.graph.nodes
+
+    with pytest.raises(NotImplementedError):
+        csm1.relabel({"A": "Z"})
+
+
+def test_coordinate_system_manager_create_coordinate_system():
+    """Test direct construction of coordinate systems in the coordinate system manager.
+
+    Create multiple coordinate systems with all provided methods and check
+    if they are constructed correctly.
+
+    """
+    angles_x = np.array([0.5, 1, 2, 2.5]) * np.pi / 2
+    angles_y = np.array([1.5, 0, 1, 0.5]) * np.pi / 2
+    angles = np.array([[*angles_y], [*angles_x]]).transpose()
+    angles_deg = 180 / np.pi * angles
+
+    rot_mat_x = WXRotation.from_euler("x", angles_x).as_matrix()
+    rot_mat_y = WXRotation.from_euler("y", angles_y).as_matrix()
+
+    time = TDI([0, 6, 12, 18], "H")
+    orientations = np.matmul(rot_mat_x, rot_mat_y)
+    coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
+
+    vec_x = orientations[:, :, 0]
+    vec_y = orientations[:, :, 1]
+    vec_z = orientations[:, :, 2]
+
+    csm = tf.CoordinateSystemManager("root")
+    lcs_default = tf.LocalCoordinateSystem()
+
+    # orientation and coordinates -------------------------
+    csm.create_cs("lcs_init_default", "root")
+    check_coordinate_system(
+        csm.get_cs("lcs_init_default"),
+        lcs_default.orientation,
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_cs("lcs_init_tdp", "root", orientations, coords, time)
+    check_coordinate_system(
+        csm.get_cs("lcs_init_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from euler ------------------------------------------
+    csm.create_cs_from_euler("lcs_euler_default", "root", "yx", angles[0])
+    check_coordinate_system(
+        csm.get_cs("lcs_euler_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_cs_from_euler(
+        "lcs_euler_tdp", "root", "yx", angles_deg, True, coords, time
+    )
+    check_coordinate_system(
+        csm.get_cs("lcs_euler_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from xyz --------------------------------------------
+    csm.create_cs_from_xyz("lcs_xyz_default", "root", vec_x[0], vec_y[0], vec_z[0])
+    check_coordinate_system(
+        csm.get_cs("lcs_xyz_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_cs_from_xyz("lcs_xyz_tdp", "root", vec_x, vec_y, vec_z, coords, time)
+    check_coordinate_system(
+        csm.get_cs("lcs_xyz_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from xy and orientation -----------------------------
+    csm.create_cs_from_xy_and_orientation("lcs_xyo_default", "root", vec_x[0], vec_y[0])
+    check_coordinate_system(
+        csm.get_cs("lcs_xyo_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_cs_from_xy_and_orientation(
+        "lcs_xyo_tdp", "root", vec_x, vec_y, True, coords, time
+    )
+    check_coordinate_system(
+        csm.get_cs("lcs_xyo_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from xz and orientation -----------------------------
+    csm.create_cs_from_xz_and_orientation("lcs_xzo_default", "root", vec_x[0], vec_z[0])
+    check_coordinate_system(
+        csm.get_cs("lcs_xzo_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_cs_from_xz_and_orientation(
+        "lcs_xzo_tdp", "root", vec_x, vec_z, True, coords, time
+    )
+    check_coordinate_system(
+        csm.get_cs("lcs_xzo_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
+
+    # from yz and orientation -----------------------------
+    csm.create_cs_from_yz_and_orientation("lcs_yzo_default", "root", vec_y[0], vec_z[0])
+    check_coordinate_system(
+        csm.get_cs("lcs_yzo_default"),
+        orientations[0],
+        lcs_default.coordinates,
+        True,
+    )
+
+    csm.create_cs_from_yz_and_orientation(
+        "lcs_yzo_tdp", "root", vec_y, vec_z, True, coords, time
+    )
+    check_coordinate_system(
+        csm.get_cs("lcs_yzo_tdp"),
+        orientations,
+        coords,
+        True,
+        time=time,
+    )
 
 
 def test_coordinate_system_manager_transform_data():

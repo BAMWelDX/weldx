@@ -1976,7 +1976,6 @@ class CoordinateSystemManager:
         if not lcs_list:
             return None
 
-        time_list = [util.to_pandas_time_index(lcs) for lcs in lcs_list]
         reference_time = self.reference_time
         if self.uses_absolute_times and not reference_time:
             reference_time = min(
@@ -1987,6 +1986,9 @@ class CoordinateSystemManager:
                 ]
             )
 
+        # time_list = [Time(lcs.time, reference_time) for lcs in lcs_list]
+
+        time_list = [util.to_pandas_time_index(lcs) for lcs in lcs_list]
         if reference_time:
             time_list = [
                 t + reference_time if isinstance(t, pd.TimedeltaIndex) else t
