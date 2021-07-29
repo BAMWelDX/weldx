@@ -3,7 +3,7 @@
 import math
 import random
 from copy import deepcopy
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Iterable, List, Union
 
 import numpy as np
 import pandas as pd
@@ -198,7 +198,12 @@ def check_coordinate_systems_close(lcs_0, lcs_1):
     if "time" in lcs_1.dataset:
         time = lcs_1.time
     check_coordinate_system(
-        lcs_0, lcs_1.orientation.data, lcs_1.coordinates.data, True, time
+        lcs_0,
+        lcs_1.orientation.data,
+        lcs_1.coordinates.data,
+        True,
+        time,
+        lcs_1.reference_time,
     )
 
 
@@ -4058,24 +4063,48 @@ class TestCoordinateSystemManager:
             val = np.clip(days, clip_min, clip_max)
         else:
             val = days
+        if not isinstance(val, Iterable):
+            val = [val]
         return [[v, 2 * v, -v] for v in val]
 
     @pytest.mark.parametrize(
-        "time, time_ref, systems",
+        "time, time_ref, systems, csm_has_time_ref, num_abs_systems",
         [
-            (pd.TimedeltaIndex([1, 7, 11, 20], "D"), None, None),
-            (pd.TimedeltaIndex([1, 7, 11, 20], "D"), None, ["lcs_1"]),
-            (pd.TimedeltaIndex([1, 7, 11, 20], "D"), None, ["lcs_1", "lcs_2"]),
+            (TDI([1, 7, 11, 20], "D"), None, None, False, 0),
+            (TDI([3], "D"), None, None, False, 0),
+            (pd.Timedelta(3, "D"), None, None, False, 0),
+            (Q_([1, 7, 11, 20], "days"), None, None, False, 0),
+            (["5days", "8days"], None, None, False, 0),
+            (TDI([1, 7, 11, 20], "D"), None, ["lcs_1"], False, 0),
+            (TDI([1, 7, 11, 20], "D"), None, ["lcs_1", "lcs_2"], False, 0),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-10", None, True, 0),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 0),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, False, 3),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 3),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 2),
+            (["2000-01-13", "2000-01-17"], None, None, True, 2),
         ],
     )
-    def test_interp_time(self, time, time_ref, systems):
+    def test_interp_time(
+        self, time, time_ref, systems, csm_has_time_ref, num_abs_systems
+    ):
+        # csm data
+        csm_time_ref = "2000-01-10" if csm_has_time_ref else None
+        abs_systems = [f"lcs_{i}" for i in range(num_abs_systems)]
         lcs_data = dict(
-            lcs_0=("root", [1, 4, 7]),
-            lcs_1=("lcs_0", [1, 5, 9]),
-            lcs_2=("root", [1, 6, 11]),
+            lcs_0=("root", [1, 4, 7], TS("2000-01-09")),
+            lcs_1=("lcs_0", [1, 5, 9], TS("2000-01-14")),
+            lcs_2=("root", [1, 6, 11], TS("2000-01-11")),
         )
+
+        # time data
         time_class = Time(time, time_ref)
-        csm = tf.CoordinateSystemManager("root")
+        days_interp = time_class.as_quantity().to("days").m
+        if len(days_interp.shape) == 0:
+            days_interp = days_interp.reshape(1)
+
+        # create csm
+        csm = tf.CoordinateSystemManager("root", time_ref=csm_time_ref)
         for k, v in lcs_data.items():
             csm.create_cs(
                 k,
@@ -4083,6 +4112,7 @@ class TestCoordinateSystemManager:
                 self._orientation_from_days(v[1]),
                 self._coordinates_from_days(v[1]),
                 Q_(v[1], "day"),
+                v[2] if k in abs_systems else None,
             )
 
         lcs_3 = tf.LocalCoordinateSystem(
@@ -4093,32 +4123,37 @@ class TestCoordinateSystemManager:
         # interpolate
         csm_interp = csm.interp_time(time, time_ref, systems)
 
-        # calculate expected results and check
-        if systems is None:
-            systems = ["lcs_0", "lcs_1", "lcs_2"]
-
-        days_interp = time_class.as_quantity().to("days").m
+        # evaluate results
+        time_ref_exp = time_class.reference_time
         for k, v in lcs_data.items():
-            if k in systems:
+            # create expected lcs
+            if systems is None or k in systems:
+                d = 0
+                if time_ref_exp is not None:
+                    if k in abs_systems:
+                        d = Time(time_class.reference_time - v[2])
+                    else:
+                        d = Time(time_class.reference_time - csm.reference_time)
+                    d = d.as_quantity().to("days").m
+
                 lcs_exp = tf.LocalCoordinateSystem(
-                    self._orientation_from_days(days_interp, v[1][0], v[1][-1]),
-                    self._coordinates_from_days(days_interp, v[1][0], v[1][-1]),
-                    time_class,
+                    self._orientation_from_days(days_interp + d, v[1][0], v[1][-1]),
+                    self._coordinates_from_days(days_interp + d, v[1][0], v[1][-1]),
+                    TDI(days_interp, "D"),
+                    csm.reference_time if csm.has_reference_time else time_ref_exp,
                 )
             else:
                 lcs_exp = csm.get_cs(k)
 
-            lcs = csm_interp.get_cs(k)
-            lcs_inv = csm_interp.get_cs(v[0], k)
+            # check results
+            check_coordinate_systems_close(csm_interp.get_cs(k), lcs_exp)
+            check_coordinate_systems_close(csm_interp.get_cs(v[0], k), lcs_exp.invert())
 
-            check_coordinate_systems_close(lcs, lcs_exp)
-            check_coordinate_systems_close(lcs_inv, lcs_exp.invert())
+        # check static lcs unmodified
+        check_coordinate_systems_close(csm_interp.get_cs("lcs_3"), lcs_3)
 
-        lcs = csm_interp.get_cs("lcs_3")
-        assert lcs.time is None
-        check_coordinate_systems_close(lcs, lcs_3)
-
-        if len(systems) == 3:
+        # check time union
+        if systems is None or len(systems) == 3:
             assert np.all(csm_interp.time_union() == time_class.as_pandas())
 
 

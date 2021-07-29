@@ -1408,7 +1408,9 @@ class CoordinateSystemManager:
                         lcs.orientation.data, lcs.coordinates.data, time
                     )
                 else:
-                    lcs = lcs.interp_time(time)
+                    if time_ref is None:
+                        time_ref = lcs.reference_time
+                    lcs = lcs.interp_time(time, time_ref)
 
             if invert:
                 if isinstance(lcs.coordinates, TimeSeries):

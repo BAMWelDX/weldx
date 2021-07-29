@@ -322,11 +322,10 @@ class Time:
 
     def as_quantity(self) -> pint.Quantity:
         """Return the data as `pint.Quantity`."""
+        q = pandas_time_delta_to_quantity(self.as_timedelta_index())
         if self.is_absolute:
-            q = pandas_time_delta_to_quantity(self._time - self.reference_time)
             setattr(q, "time_ref", self.reference_time)  # store time_ref info
-            return q
-        return pandas_time_delta_to_quantity(self._time)
+        return q
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
         """Return the data as `pandas.TimedeltaIndex` or `pandas.Timedelta`."""
