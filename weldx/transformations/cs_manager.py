@@ -1408,7 +1408,7 @@ class CoordinateSystemManager:
                         lcs.orientation.data, lcs.coordinates.data, time
                     )
                 else:
-                    if time_ref is None:
+                    if time_ref is None and len(path_edges) == 1:
                         time_ref = lcs.reference_time
                     lcs = lcs.interp_time(time, time_ref)
 
