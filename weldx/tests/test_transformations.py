@@ -21,6 +21,7 @@ from weldx.tests._helpers import get_test_name
 from weldx.time import Time
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
+from weldx.types import types_time_like, types_timestamp_like
 
 # helpers for tests -----------------------------------------------------------
 
@@ -4050,19 +4051,18 @@ class TestCoordinateSystemManager:
     # test_interp_time -----------------------------------------------------------------
 
     @staticmethod
-    def _orientation_from_days(days, clip_min=None, clip_max=None):
+    def _orientation_from_value(val, clip_min=None, clip_max=None):
+        """ """
         if clip_min is not None and clip_max is not None:
-            angles = np.clip(days, clip_min, clip_max)
+            angles = np.clip(val, clip_min, clip_max)
         else:
-            angles = days
+            angles = val
         return WXRotation.from_euler("z", angles, degrees=True).as_matrix()
 
     @staticmethod
-    def _coordinates_from_days(days, clip_min=None, clip_max=None):
+    def _coordinates_from_value(val, clip_min=None, clip_max=None):
         if clip_min is not None and clip_max is not None:
-            val = np.clip(days, clip_min, clip_max)
-        else:
-            val = days
+            val = np.clip(val, clip_min, clip_max)
         if not isinstance(val, Iterable):
             val = [val]
         return [[v, 2 * v, -v] for v in val]
@@ -4086,8 +4086,31 @@ class TestCoordinateSystemManager:
         ],
     )
     def test_interp_time(
-        self, time, time_ref, systems, csm_has_time_ref, num_abs_systems
+        self,
+        time: types_time_like,
+        time_ref: types_timestamp_like,
+        systems: List[str],
+        csm_has_time_ref: bool,
+        num_abs_systems: int,
     ):
+        """Test the ``interp_time`` method.
+
+        Parameters
+        ----------
+        time :
+            The value passed to the functions as ``time`` parameter
+        time_ref :
+            The value passed to the functions as ``time_ref`` parameter
+        systems :
+            The value passed to the functions as ``affected_coordinate_systems``
+            parameter
+        csm_has_time_ref :
+            If `True`, a reference time is added to the CSM
+        num_abs_systems :
+            The number of time dependent systems that get a reference time assigned to
+            them.
+
+        """
         # csm data
         csm_time_ref = "2000-01-10" if csm_has_time_ref else None
         abs_systems = [f"lcs_{i}" for i in range(num_abs_systems)]
@@ -4109,8 +4132,8 @@ class TestCoordinateSystemManager:
             csm.create_cs(
                 k,
                 v[0],
-                self._orientation_from_days(v[1]),
-                self._coordinates_from_days(v[1]),
+                self._orientation_from_value(v[1]),
+                self._coordinates_from_value(v[1]),
                 Q_(v[1], "day"),
                 v[2] if k in abs_systems else None,
             )
@@ -4128,17 +4151,17 @@ class TestCoordinateSystemManager:
         for k, v in lcs_data.items():
             # create expected lcs
             if systems is None or k in systems:
-                d = 0
+                diff = 0
                 if time_ref_exp is not None:
                     if k in abs_systems:
-                        d = Time(time_class.reference_time - v[2])
+                        diff = Time(time_class.reference_time - v[2])
                     else:
-                        d = Time(time_class.reference_time - csm.reference_time)
-                    d = d.as_quantity().to("days").m
+                        diff = Time(time_class.reference_time - csm.reference_time)
+                    diff = diff.as_quantity().to("days").m
 
                 lcs_exp = tf.LocalCoordinateSystem(
-                    self._orientation_from_days(days_interp + d, v[1][0], v[1][-1]),
-                    self._coordinates_from_days(days_interp + d, v[1][0], v[1][-1]),
+                    self._orientation_from_value(days_interp + diff, v[1][0], v[1][-1]),
+                    self._coordinates_from_value(days_interp + diff, v[1][0], v[1][-1]),
                     TDI(days_interp, "D"),
                     csm.reference_time if csm.has_reference_time else time_ref_exp,
                 )
