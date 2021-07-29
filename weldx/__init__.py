@@ -1,4 +1,48 @@
-"""WelDX data format and analysis package."""
+"""
+WelDX data format and analysis package
+======================================
+
+The weldx package provides several tools to setup an experiment, systematically process
+measurement data, and archive it in a standardized fashion.
+
+Here we quickly list the most important functions and classes.
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: File handling
+
+    WeldxFile
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Welding
+
+    GmawProcess
+    get_groove
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Geometry
+
+    ArcSegment
+    Geometry
+    LineSegment
+    LinearHorizontalTraceSegment
+    Profile
+    Shape
+    Trace
+    SpatialData
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Data handling and transformation
+
+    Q_
+    TimeSeries
+    CoordinateSystemManager
+    LocalCoordinateSystem
+
+"""
 # isort:skip_file
 import warnings
 

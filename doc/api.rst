@@ -3,17 +3,7 @@ API
 
 **User API Reference**
 
-.. autosummary::
-    :toctree: _autosummary
-    :caption: User API Reference
-
-    weldx.WeldxFile
-    weldx.TimeSeries
-    weldx.LocalCoordinateSystem
-    weldx.CoordinateSystemManager
-    weldx.GmawProcess
-    weldx.Trace
-    weldx.get_groove
+.. automodule:: weldx
 
 
 **Full API Reference**
