@@ -13,6 +13,7 @@ import xarray as xr
 import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.time import pandas_time_delta_to_quantity
 
 if TYPE_CHECKING:
     import sympy
@@ -475,7 +476,7 @@ class TimeSeries:
             time_q = time
             time_pd = ut.to_pandas_time_index(time)
         elif isinstance(time, pd.TimedeltaIndex):
-            time_q = ut.pandas_time_delta_to_quantity(time, time_unit)
+            time_q = pandas_time_delta_to_quantity(time, time_unit)
             time_pd = time
         else:
             raise ValueError(
@@ -661,7 +662,7 @@ class TimeSeries:
                 axes=axes, data_name=data_name, time_unit=time_unit, **mpl_kwargs
             )
 
-        time = ut.pandas_time_delta_to_quantity(self.time)
+        time = pandas_time_delta_to_quantity(self.time)
         if time_unit is not None:
             time = time.to(time_unit)
 

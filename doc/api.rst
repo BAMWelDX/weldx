@@ -30,6 +30,7 @@ API
     weldx.measurement
     weldx.transformations
     weldx.util
+    weldx.time
     weldx.types
     weldx.visualization
     weldx.welding
