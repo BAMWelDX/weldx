@@ -17,6 +17,7 @@ from jsonschema import ValidationError
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
+import wrapt
 
 __all__ = [
     "WeldxFile",
@@ -40,7 +41,35 @@ def reset_file_position(fh: SupportsFileReadWrite):
     fh.seek(old_pos)
 
 
-class WeldxFile(UserDict):
+DEFAULT_ARRAY_COMPRESSION = "input"
+"""All arrays will be compressed using this algorithm, if not specified by user."""
+
+
+class _Informer(wrapt.ObjectProxy):
+    def __init__(self, detector, wrapped):
+        self.detector = detector
+        super(_Informer, self).__init__(wrapped)
+
+
+class _ModificationDetectingDict(UserDict):
+    def __init__(self):
+        super(_ModificationDetectingDict, self).__init__()
+        self.modified = False
+        self.read = False
+
+    def get(self, key):
+        self.read = True
+        result = super(_ModificationDetectingDict, self).get(key)
+        return _Informer(self, result)
+
+    def __getitem__(self, item):
+        self.read = True
+        return wrapt.ObjectProxy(
+            super(_ModificationDetectingDict, self).__getitem__(item)
+        )
+
+
+class WeldxFile(_ModificationDetectingDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
 
     Parameters
@@ -69,6 +98,16 @@ class WeldxFile(UserDict):
         modification of the file. It has to provide the following keys:
         "name", "author", "homepage", "version"
         These should be set to string typed values. The homepage should be a URL.
+    compression :
+        If provided, set the compression type on all binary blocks
+        in the file.  Must be one of:
+
+        - ``''`` or `None`: No compression.
+        - ``zlib``: Use zlib compression.
+        - ``bzp2``: Use bzip2 compression.
+        - ``lz4``: Use lz4 compression.
+        - ``input``: Use the same compression as in the file read.
+          If there is no prior file, acts as None.
 
     """
 
@@ -84,13 +123,14 @@ class WeldxFile(UserDict):
         sync: bool = True,
         custom_schema: Union[str, pathlib.Path] = None,
         software_history_entry: Mapping = None,
+        compression: str = DEFAULT_ARRAY_COMPRESSION,
     ):
         if write_kwargs is None:
-            write_kwargs = {}
+            write_kwargs = dict(all_array_compression=compression)
         self._write_kwargs = write_kwargs
 
         if asdffile_kwargs is None:
-            asdffile_kwargs = {}
+            asdffile_kwargs = dict()
 
         self._asdffile_kwargs = asdffile_kwargs
         if custom_schema is not None:
@@ -277,7 +317,8 @@ class WeldxFile(UserDict):
     def close(self):
         """Close this file and sync it, if mode is read/write."""
         if self.mode == "rw" and self.sync_upon_close:
-            self._asdf_handle.update(**self._write_kwargs)
+            # self._asdf_handle.update(**self._write_kwargs)
+            self.sync(**self._write_kwargs)
         fh = self.file_handle
         self._asdf_handle.close()
 
@@ -352,6 +393,7 @@ class WeldxFile(UserDict):
         This calls `asdf.AsdfFile.update`.
 
         """
+        print("compression algo in sync:", all_array_compression)
         self._asdf_handle.update(
             all_array_storage=all_array_storage,
             all_array_compression=all_array_compression,
@@ -508,6 +550,7 @@ class WeldxFile(UserDict):
             )
         else:
             # in write-mode, we sync to file first prior obtaining the header.
+            # TODO: can this be avoided, if the file remains unchanged?? Seems very hard to determine.
             self.sync(**self._write_kwargs)
 
         def _impl_interactive() -> Union[
