@@ -1,13 +1,8 @@
 """Contains functions for coordinate transformations."""
 
 import math
-from typing import Tuple
 
 import numpy as np
-import pandas as pd
-
-from weldx import util
-from weldx.transformations.types import types_timeindex
 
 __all__ = [
     "is_orthogonal",
