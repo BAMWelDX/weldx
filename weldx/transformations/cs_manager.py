@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
-import pint
 import xarray as xr
 
 from weldx import util
@@ -23,11 +22,8 @@ from .types import (
     types_coordinates,
     types_orientation,
     types_time_and_lcs,
-    types_timeindex,
 )
 
-# shared type aliases
-from .util import build_time_index
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover

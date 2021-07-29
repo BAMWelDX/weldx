@@ -4052,7 +4052,6 @@ class TestCoordinateSystemManager:
 
     @staticmethod
     def _orientation_from_value(val, clip_min=None, clip_max=None):
-        """ """
         if clip_min is not None and clip_max is not None:
             angles = np.clip(val, clip_min, clip_max)
         else:
