@@ -1984,14 +1984,7 @@ class CoordinateSystemManager:
                 ]
             )
 
-        # time_list = [Time(lcs.time, reference_time) for lcs in lcs_list]
-
-        time_list = [util.to_pandas_time_index(lcs) for lcs in lcs_list]
-        if reference_time:
-            time_list = [
-                t + reference_time if isinstance(t, pd.TimedeltaIndex) else t
-                for t in time_list
-            ]
+        time_list = [Time(lcs.time, reference_time) for lcs in lcs_list]
 
         return Time.union(time_list).as_pandas_index()
 

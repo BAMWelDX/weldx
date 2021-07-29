@@ -781,13 +781,13 @@ class LocalCoordinateSystem:
         return self.time + self.reference_time
 
     @property
-    def time(self) -> Union[pd.TimedeltaIndex, None]:
+    def time(self) -> Union[xr.DataArray, None]:
         """Get the time union of the local coordinate system (None if system is static).
 
         Returns
         -------
-        pandas.TimedeltaIndex
-            DateTimeIndex-like time union
+        xarray.DataArray
+            Time-like data array representing the time union of the LCS
 
         """
         if "time" in self._dataset.coords:
