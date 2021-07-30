@@ -18,12 +18,7 @@ from weldx.time import Time
 from weldx.types import types_time_like, types_timestamp_like
 
 from .local_cs import LocalCoordinateSystem
-from .types import (
-    types_coordinates,
-    types_orientation,
-    types_time_and_lcs,
-)
-
+from .types import types_coordinates, types_orientation, types_time_and_lcs
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover

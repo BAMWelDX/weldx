@@ -14,6 +14,8 @@
 ### changes
 
 - move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
+- `LocalCoordinateSystem` and `CoordinateSystemManager` function parameters related to time now support all types that
+  are also supported by the new `Time` class [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
 
 ### fixes
 
