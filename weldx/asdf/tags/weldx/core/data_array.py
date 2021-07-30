@@ -1,3 +1,4 @@
+from asdf.tags.core import NDArrayType
 from xarray import DataArray
 
 import weldx.asdf.tags.weldx.core.common_types as ct
@@ -73,4 +74,7 @@ class XarrayDataArrayASDF(WeldxType):
         attrs = tree["attributes"]
 
         da = DataArray(data=data, coords=coords, dims=dims, attrs=attrs)
+        da.name = None  # we currently do not use the name attribute
+        # (but since it gets automatically derived if not set, we define it now.
+
         return da
