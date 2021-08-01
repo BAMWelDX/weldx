@@ -55,6 +55,7 @@ If you feel lucky, you can try and copy-paste all install commands into a shell.
 all subsequent commands will not be executed.
 
 using conda::
+
     conda create -n weldx -c conda-forge weldx
     conda activate weldx
     python -m ipykernel install --user --name weldx --display-name "Python (WeldX)"
