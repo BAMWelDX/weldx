@@ -44,7 +44,11 @@ py:obj vectors[i]
 py:obj (3, )
 py:obj (1, 3)
 py:obj rotated_vectors
+py:obj seed
+py:obj np.random
 py:obj n
 py:obj num
 py:obj left
 py:obj right
+py:meth scipy.stats.special_ortho_group
+py:obj mrp[i]
