@@ -285,6 +285,13 @@ class Time:
         """Return the length of the data."""
         return self.length
 
+    def __repr__(self):
+        """Console info."""
+        repr_str = "Time:\n" + self.as_pandas().__str__()
+        if self.is_absolute:
+            repr_str = repr_str + f"\nreference time: {str(self.reference_time)}"
+        return repr_str
+
     def equals(self, other: Time) -> bool:
         """Test for matching ``time`` and ``reference_time`` between objects.
 
