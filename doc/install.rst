@@ -35,18 +35,17 @@ Create an environment named "jupyter" via conda::
 Then we switch to the weldx environment created in the first step and make it available within Jupyter::
 
     conda activate weldx
-    python -m ipykernel install --user --name weldx --display-name "Python (WeldX)"
+    python -m ipykernel install --user --name weldx --display-name "Python (weldx)"
 
 This will enable us to select the Python interpreter installed in the weldx environment within Jupyter. So when a new
-notebook is created, we can choose "Python (WeldX)" to access all the software bundled with the weldx Python package.
+notebook is created, we can choose "Python (weldx)" to access all the software bundled with the weldx Python package.
 
 Build and enable Jupyter lab extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 We need to install several different extensions for Jupyter::
 
     conda activate jlab
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    jupyter labextension install k3d
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager k3d
 
 
 Everything in one-shot
@@ -58,8 +57,7 @@ using conda::
 
     conda create -n weldx -c conda-forge weldx
     conda activate weldx
-    python -m ipykernel install --user --name weldx --display-name "Python (WeldX)"
+    python -m ipykernel install --user --name weldx --display-name "Python (weldx)"
     conda create -n jlab -c conda-forge jupyter-lab
     conda activate jlab
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager
-    jupyter labextension install k3d
+    jupyter labextension install @jupyter-widgets/jupyterlab-manager k3d
