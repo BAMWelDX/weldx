@@ -1,6 +1,7 @@
 """Define constants for global library use."""
 from pathlib import Path as _Path
 
+import pint_xarray
 from pint import UnitRegistry as _ureg
 
 WELDX_PATH = _Path(__file__).parent.resolve()
@@ -17,6 +18,9 @@ WELDX_UNIT_REGISTRY.define("hour = 60*minute = h = hr")
 
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 Q_ = WELDX_QUANTITY
+
+# set default unit registry for pint-xarray
+pint_xarray.unit_registry = WELDX_UNIT_REGISTRY
 
 __all__ = (
     "WELDX_PATH",
