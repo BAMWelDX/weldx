@@ -7,6 +7,7 @@ from io import BytesIO
 import asdf
 import pytest
 from jsonschema import ValidationError
+from memory_profiler import profile
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
@@ -338,6 +339,38 @@ class TestWeldXFile:
         assert old_pos == after_pos
 
     @staticmethod
+    @pytest.mark.parametrize("mode", ("rw", "r"))
+    def test_show_header_memory_usage(mode, capsys, tmpdir):
+        """Check we do not significantly increase memory usage by showing the header.
+
+        Also ensure the tree is still usable after showing the header.
+        """
+        import numpy as np
+        import psutil
+        import gc
+
+        large_array = np.ones((1000, 1000), dtype=np.float64)  # ~7.6mb
+        proc = psutil.Process()
+
+        def get_mem_info():
+            return proc.memory_info().rss
+
+        before = get_mem_info()
+        fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+        with WeldxFile(mode=mode) as fh:
+            fh["x"] = large_array
+            fh.show_asdf_header(use_widgets=False, _interactive=False)
+            fh.write_to(fn)
+        gc.collect()
+        after = get_mem_info()
+        if after > before:
+            diff = after - before
+            # pytest increases memory a bit, but not as much as our large array would
+            # occupy in memory.
+            assert diff < 3 * 1024 ** 2, diff / 1024 ** 2
+        assert np.all(WeldxFile(fn)["x"] == large_array)
+
+    @staticmethod
     @pytest.mark.parametrize("mode", ("r", "rw"))
     def test_show_header_in_sync(mode, capsys):
         """Ensure that the updated tree is displayed in show_header"""
@@ -347,38 +380,6 @@ class TestWeldXFile:
         out, err = capsys.readouterr()
         assert "wx_user" in out
         assert "test" in out
-
-    @staticmethod
-    # @pytest.mark.parametrize("mode", ("r", "rw"))
-    # @profile
-    def test_show_header_memory_usage(capsys, tmpdir):
-        """Check we do not significantly increase memory usage by showing the header.
-        Also ensure the tree is still usable after showing the header.
-        """
-        import numpy as np
-        import psutil
-
-        large_array = np.ones((1000, 10000), dtype=np.float64)  # ~76mb
-        proc = psutil.Process()
-
-        def get_mem_info():
-            return proc.memory_info().rss
-
-        before = get_mem_info()
-        fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
-        with WeldxFile(mode="rw") as fh:
-            fh["x"] = large_array
-            fh.show_asdf_header(use_widgets=False, _interactive=False)
-            fh.write_to(fn)
-
-        after = get_mem_info()
-        assert after > before
-        diff = after - before
-
-        # pytest increases memory a bit, but not as much as our large array would
-        # occupy in memory.
-        assert diff < 3 * 1024 ** 2, diff / 1024 ** 2
-        assert np.all(WeldxFile(fn)["x"] == large_array)
 
     def test_invalid_software_entry(self):
         """Invalid software entries should raise."""
