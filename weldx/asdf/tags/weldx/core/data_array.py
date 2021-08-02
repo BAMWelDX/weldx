@@ -68,7 +68,7 @@ class XarrayDataArrayASDF(WeldxType):
 
         """
         data = tree["data"].data
-        dims = tree["data"].dimensions
+        dims = data.dimensions
         coords = {c.name: (c.dimensions, c.data, c.attrs) for c in tree["coordinates"]}
         attrs = tree["attributes"]
 
