@@ -4,7 +4,8 @@ import platform
 import shutil
 import tempfile
 from io import BytesIO
-
+import xarray as xr
+import numpy as np
 import asdf
 import pytest
 from jsonschema import ValidationError
@@ -405,3 +406,29 @@ class TestWeldXFile:
 
         with pytest.raises(ValueError):
             self.fh.software_history_entry = {"name": None}
+
+    def test_compression(self, tmpdir):
+        """Check we do not modify the input during basic operations, even under
+        different conditions like compression."""
+        fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+
+        def get_size_and_mtime(fn):
+            stat = pathlib.Path(fn).stat()
+            return stat.st_size, stat.st_mtime_ns
+
+        # compressed file created with asdf
+        with asdf.AsdfFile({"data": xr.DataArray(np.ones((100, 100)))}) as af:
+            af.write_to(fn, all_array_compression="zlib")
+            af.close()
+
+        size_asdf = get_size_and_mtime(fn)
+
+        # wx file:
+        wx_file = WeldxFile(fn, "rw", compression="input")
+        size_rw = get_size_and_mtime(fn)
+
+        wx_file.show_asdf_header()
+        size_show_hdr = get_size_and_mtime(fn)
+        wx_file.close()
+
+        assert size_asdf == size_rw == size_show_hdr
