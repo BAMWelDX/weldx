@@ -448,23 +448,12 @@ class TimeSeries:
                 f' "{str(e)}"'
             )
 
-    def _interp_time_discrete(
-        self, time: Union[pd.TimedeltaIndex, pint.Quantity, Time]
-    ) -> xr.DataArray:
+    def _interp_time_discrete(self, time: pd.TimedeltaIndex) -> xr.DataArray:
         """Interpolate the time series if its data is composed of discrete values.
 
         See `interp_time` for interface description.
 
         """
-        time = Time(time)
-
-        if time.is_absolute:
-            if self._reference_time is not None:
-                time = time - self._reference_time
-            else:
-                time = time - time.reference_time
-
-        time = time.as_pandas_index()
 
         return ut.xr_interp_like(
             self._data,
@@ -475,7 +464,7 @@ class TimeSeries:
         )
 
     def _interp_time_expression(
-        self, time: Union[pd.TimedeltaIndex, pint.Quantity, Time], time_unit: str
+        self, time: pd.TimedeltaIndex, time_unit: str
     ) -> xr.DataArray:
         """Interpolate the time series if its data is a mathematical expression.
 
@@ -484,16 +473,7 @@ class TimeSeries:
         """
         # Transform time to both formats
 
-        time = Time(time)
-
-        if time.is_absolute:
-            if self._reference_time is not None:
-                time = time - self._reference_time
-            else:
-                time = time - time.reference_time
-
-        time_q = time.as_quantity(unit=time_unit)
-        time_pd = time.as_pandas_index()
+        time_q = Time(time).as_quantity(unit=time_unit)
 
         if len(self.shape) > 1 and np.iterable(time_q):
             while len(time_q.shape) < len(self.shape):
@@ -508,7 +488,7 @@ class TimeSeries:
             data = np.expand_dims(data, 0)
 
         dax = xr.DataArray(data=data)  # don't know exact dimensions so far
-        return dax.rename({"dim_0": "time"}).assign_coords({"time": time_pd})
+        return dax.rename({"dim_0": "time"}).assign_coords({"time": time})
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
@@ -594,8 +574,13 @@ class TimeSeries:
             return ut.to_pandas_time_index(self._data.time.data)
         return None
 
+    @property
+    def reference_time(self) -> Union[pd.Timestamp, None]:
+        """Get the reference time."""
+        return self._reference_time
+
     def interp_time(
-        self, time: Union[pd.TimedeltaIndex, pint.Quantity], time_unit: str = "s"
+        self, time: Union[pd.TimedeltaIndex, pint.Quantity, Time], time_unit: str = "s"
     ) -> "TimeSeries":
         """Interpolate the TimeSeries in time.
 
@@ -606,7 +591,7 @@ class TimeSeries:
         Parameters
         ----------
         time:
-            A set of timestamps.
+            The time values to be used for interpolation.
         time_unit:
             Only important if the time series is described by an expression and a
             'pandas.TimedeltaIndex' is passed to this function. In this case, time is
@@ -627,10 +612,21 @@ class TimeSeries:
                 f"{self._interp_counter} time(s)."
             )
 
-        if isinstance(self._data, xr.DataArray):
-            dax = self._interp_time_discrete(time)
+        # prepare timedelta values for internal interpolation
+        time = Time(time)
+        if time.is_absolute:
+            if self._reference_time is not None:
+                time_interp = time - self._reference_time
+            else:
+                time_interp = time - time.reference_time
         else:
-            dax = self._interp_time_expression(time, time_unit)
+            time_interp = time
+        time_interp = time_interp.as_pandas_index()
+
+        if isinstance(self._data, xr.DataArray):
+            dax = self._interp_time_discrete(time_interp)
+        else:
+            dax = self._interp_time_expression(time_interp, time_unit)
 
         ts = TimeSeries(data=dax.data, time=time, interpolation=self.interpolation)
         ts._interp_counter = self._interp_counter + 1
