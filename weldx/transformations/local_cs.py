@@ -270,11 +270,7 @@ class LocalCoordinateSystem:
                 orientation = orientation.as_matrix()
             elif not isinstance(orientation, np.ndarray):
                 orientation = np.array(orientation)
-
-            time_orientation = (
-                time.as_timedelta_index() if orientation.ndim == 3 else None
-            )
-            orientation = ut.xr_3d_matrix(orientation, time_orientation)
+            orientation = ut.xr_3d_matrix(orientation, time)
 
         # make sure we have correct "time" format
         orientation = orientation.weldx.time_ref_restore()
@@ -297,11 +293,7 @@ class LocalCoordinateSystem:
         if not isinstance(coordinates, xr.DataArray):
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                 coordinates = np.array(coordinates)
-
-            time_coordinates = (
-                time.as_timedelta_index() if coordinates.ndim == 2 else None
-            )
-            coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
+            coordinates = ut.xr_3d_vector(coordinates, time)
 
         # make sure we have correct "time" format
         coordinates = coordinates.weldx.time_ref_restore()

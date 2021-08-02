@@ -951,7 +951,9 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
     xarray.DataArray
 
     """
-    if times is not None:
+    if times is not None and np.array(data).ndim == 2:
+        if isinstance(times, Time):
+            times = times.as_timedelta_index()
         dsx = xr.DataArray(
             data=data,
             dims=["time", "c"],
@@ -977,7 +979,9 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
     xarray.DataArray
 
     """
-    if times is not None:
+    if times is not None and np.array(data).ndim == 3:
+        if isinstance(times, Time):
+            times = times.as_timedelta_index()
         dsx = xr.DataArray(
             data=data,
             dims=["time", "c", "v"],
