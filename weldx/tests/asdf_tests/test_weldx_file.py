@@ -351,24 +351,26 @@ class TestWeldXFile:
     @staticmethod
     # @pytest.mark.parametrize("mode", ("r", "rw"))
     # @profile
-    def test_show_header_memory_usage(capsys):
-        """Check we do not significantly increase memory usage by showing the header."""
+    def test_show_header_memory_usage(capsys, tmpdir):
+        """Check we do not significantly increase memory usage by showing the header.
+        Also ensure the tree is still usable after showing the header.
+        """
         import numpy as np
-        import gc, psutil
+        import psutil
 
         large_array = np.ones((1000, 10000), dtype=np.float64)  # ~76mb
         proc = psutil.Process()
 
         def get_mem_info():
-            # print("MB:", proc.memory_info().rss / 1024 ** 2)
             return proc.memory_info().rss
 
         before = get_mem_info()
+        fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
         with WeldxFile(mode="rw") as fh:
             fh["x"] = large_array
             fh.show_asdf_header(use_widgets=False, _interactive=False)
-        # gc.collect()
-        # print("-" * 80)
+            fh.write_to(fn)
+
         after = get_mem_info()
         assert after > before
         diff = after - before
@@ -376,6 +378,7 @@ class TestWeldXFile:
         # pytest increases memory a bit, but not as much as our large array would
         # occupy in memory.
         assert diff < 3 * 1024 ** 2, diff / 1024 ** 2
+        assert np.all(WeldxFile(fn)["x"] == large_array)
 
     def test_invalid_software_entry(self):
         """Invalid software entries should raise."""

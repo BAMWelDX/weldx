@@ -307,69 +307,10 @@ class WeldxFile(UserDict):
         self,
         all_array_storage: str = None,
         all_array_compression: str = "input",
-        auto_inline: int = None,
         pad_blocks: Union[float, bool] = False,
         include_block_index: bool = True,
         version: str = None,
     ):
-        """Update the file on disk in place.
-
-        Parameters
-        ----------
-        all_array_storage :
-            If provided, override the array storage type of all blocks
-            in the file immediately before writing.  Must be one of:
-
-            - ``internal``: The default.  The array data will be
-              stored in a binary block in the same ASDF file.
-
-            - ``external``: Store the data in a binary block in a
-              separate ASDF file.
-
-            - ``inline``: Store the data as YAML inline in the tree.
-
-        all_array_compression :
-            If provided, set the compression type on all binary blocks
-            in the file.  Must be one of:
-
-            - ``''`` or `None`: No compression.
-
-            - ``zlib``: Use zlib compression.
-
-            - ``bzp2``: Use bzip2 compression.
-
-            - ``lz4``: Use lz4 compression.
-
-            - ``input``: Use the same compression as in the file read.
-              If there is no prior file, acts as None
-
-        auto_inline :
-            When the number of elements in an array is less than this
-            threshold, store the array as inline YAML, rather than a
-            binary block.  This only works on arrays that do not share
-            data with other arrays.  Default is 0.
-
-        pad_blocks :
-            Add extra space between blocks to allow for updating of
-            the file.  If `False` (default), add no padding (always
-            return 0).  If `True`, add a default amount of padding of
-            10% If a float, it is a factor to multiple content_size by
-            to get the new total size.
-
-        include_block_index :
-            If `False`, don't include a block index at the end of the
-            file.  (Default: `True`)  A block index is never written
-            if the file has a streamed block.
-
-        version :
-            The ASDF version to write out.  If not provided, it will
-            write out in the latest version supported by asdf.
-
-        Notes
-        -----
-        This calls `asdf.AsdfFile.update`.
-
-        """
         self._asdf_handle.update(
             all_array_storage=all_array_storage,
             all_array_compression=all_array_compression,
@@ -378,6 +319,8 @@ class WeldxFile(UserDict):
             include_block_index=include_block_index,
             version=version,
         )
+
+    sync.__doc__ = AsdfFile.update.__doc__
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -530,14 +473,8 @@ class WeldxFile(UserDict):
             ) as blocks_property:
                 blocks_property.return_value = fake
                 assert self._asdf_handle.blocks is fake
-                handle = self._asdf_handle
-                # handle = copy(
-                #    self._asdf_handle
-                # )  # we do not want a deepcopy here, (tree could be large)
-
                 buff = BytesIO()
-                handle.write_to(buff)
-            # print("buff pos:", buff.tell())
+                self._asdf_handle.write_to(buff)
             buff.seek(0)
             return buff
 
