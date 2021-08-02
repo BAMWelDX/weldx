@@ -372,10 +372,10 @@ class WeldxFile(UserDict):
         software :
             Optional software used to make the change.
 
-        See Also
+        Notes
         --------
         The software entry will be inferred from the constructor or, if not defined,
-        from `software_history_entry`.
+        from ``software_history_entry``.
 
         """
         if software is None:
