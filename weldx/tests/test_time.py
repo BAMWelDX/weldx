@@ -16,8 +16,6 @@ from weldx.types import types_time_like
 
 def _initialize_delta_type(cls_type, values, unit):
     """Initialize the passed time type."""
-    if cls_type not in (Q_, Timedelta, np.timedelta64) and not isinstance(values, List):
-        values = [values]
     if cls_type is np.timedelta64:
         if isinstance(values, List):
             return np.array(values, dtype=f"timedelta64[{unit}]")
@@ -25,11 +23,14 @@ def _initialize_delta_type(cls_type, values, unit):
     if cls_type is Time:
         return Time(Q_(values, unit))
     if cls_type is str:
+        if not isinstance(values, List):
+            return f"{values}{unit}"
         return [f"{v}{unit}" for v in values]
     return cls_type(values, unit)
 
 
 def _initialize_datetime_type(cls_type, values):
+    """Initialize the passed datetime type."""
     if cls_type is np.datetime64:
         if isinstance(values, List):
             return np.array(values, dtype="datetime64")
@@ -40,12 +41,14 @@ def _initialize_datetime_type(cls_type, values):
 
 
 def _initialize_date_time_quantity(timedelta, unit, time_ref):
+    """Initialize a quantity that represents a datetime by adding a ``time_ref``."""
     quantity = Q_(timedelta, unit)
     setattr(quantity, "time_ref", Timestamp(time_ref))
     return quantity
 
 
 def _transform_array(data, is_array, is_scalar):
+    """Transform an array into a scalar, single value array or return in unmodified."""
     if not is_array:
         return data[0]
     if is_scalar:
@@ -56,7 +59,7 @@ def _transform_array(data, is_array, is_scalar):
 def _initialize_time_type(
     input_type, delta_val, abs_val, is_timedelta, is_array, is_scalar, unit="s"
 ):
-    """Create an instance of the desired input type for the `__init__` test."""
+    """Create an instance of the desired input type."""
     val = delta_val if is_timedelta else abs_val
     if not is_timedelta and input_type is Q_:
         val = [v - delta_val[0] for v in delta_val]
@@ -71,13 +74,14 @@ def _initialize_time_type(
 
 
 def _is_timedelta(cls_type):
-    # todo: Q_ must be checked for attribute
-    return cls_type in [Q_, TimedeltaIndex, Timedelta, np.timedelta64] or (
+    """Return ``True`` if the passed type is a timedelta type."""
+    return cls_type in [TimedeltaIndex, Timedelta, np.timedelta64] or (
         cls_type is Time and not Time.is_absolute
     )
 
 
 def _is_datetime(cls_type):
+    """Return ``True`` if the passed type is a datetime type."""
     return not _is_timedelta(cls_type)
 
 
@@ -90,6 +94,13 @@ class TestTime:
     def _parse_time_type_test_input(
         type_input,
     ) -> Tuple[Union[types_time_like, Time], bool]:
+        """Return the time type and a bool that defines if the returned type is a delta.
+
+        This is mainly used in generalized tests where a type like `Time` itself can
+        represent deltas and absolute times. In this case one can use this function
+        to extract the information from a tuple.
+
+        """
         if isinstance(type_input, Tuple):
             # to avoid wrong test setups due to spelling mistakes
             assert type_input[1] in ["timedelta", "datetime"]

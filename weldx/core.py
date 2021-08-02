@@ -17,6 +17,7 @@ from weldx.types import types_time_like
 
 from weldx.time import Time, pandas_time_delta_to_quantity
 
+
 if TYPE_CHECKING:
     import sympy
 
@@ -485,6 +486,7 @@ class TimeSeries:
 
         """
         # Transform time to both formats
+
         time = Time(time)
 
         if time.is_absolute:
@@ -495,6 +497,17 @@ class TimeSeries:
 
         time_q = time.as_quantity(unit=time_unit)
         time_pd = time.as_pandas_index()
+
+        # if isinstance(time, pint.Quantity) and time.check(UREG.get_dimensionality("s")):
+        #     time_q = time
+        #     time_pd = ut.to_pandas_time_index(time)
+        # elif isinstance(time, pd.TimedeltaIndex):
+        #     time_q = pandas_time_delta_to_quantity(time, time_unit)
+        #     time_pd = time
+        # else:
+        #     raise ValueError(
+        #         '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
+        #     )
 
         if len(self.shape) > 1 and np.iterable(time_q):
             while len(time_q.shape) < len(self.shape):

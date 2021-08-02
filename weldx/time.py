@@ -23,13 +23,13 @@ _data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIn
 
 
 def pandas_time_delta_to_quantity(
-    time: pd.TimedeltaIndex, unit: str = "s"
+    time: Union[Timedelta, TimedeltaIndex], unit: str = "s"
 ) -> pint.Quantity:
-    """Convert a `pandas.TimedeltaIndex` into a corresponding `pint.Quantity`.
+    """Convert a pandas timedelta type into a corresponding `pint.Quantity`.
 
     Parameters
     ----------
-    time : pandas.TimedeltaIndex
+    time :
         Instance of `pandas.TimedeltaIndex`
     unit :
         String that specifies the desired time unit.
@@ -43,6 +43,8 @@ def pandas_time_delta_to_quantity(
     # from pandas Timedelta documentation: "The .value attribute is always in ns."
     # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas
     # .Timedelta.html
+    if isinstance(time, Timedelta):
+        time = TimedeltaIndex([time])
     nanoseconds = time.values.astype(np.int64)
     if len(nanoseconds) == 1:
         nanoseconds = nanoseconds[0]
@@ -131,24 +133,79 @@ class Time:
     >>> t_abs.is_absolute
     True
 
-
-
     If you want to create a ``Time`` instance without importing anything else, just use
     strings:
 
     >>> # relative times
-    >>> t_rel_1 = Time("1h")
-    >>> t_rel_2 = Time(["3s","3h","3d"])
+    >>> t_rel = Time("1h")
+    >>> t_rel = Time(["3s","3h","3d"])
     >>>
     >>> # absolute times
-    >>> t_abs_1 = Time(["1s","2s","3s"],"2010-10-05 12:00:00")
-    >>> t_abs_2 = Time("3h", "2010-08-11")
-    >>> t_abs_3 = Time("2014-07-23")
-    >>> t_abs_4 = Time(["2000","2001","2002"])
+    >>> t_abs = Time(["1s","2s","3s"],"2010-10-05 12:00:00")
+    >>> t_abs = Time("3h", "2010-08-11")
+    >>> t_abs = Time("2014-07-23")
+    >>> t_abs = Time(["2000","2001","2002"])
+
+    As long as one of the operands represents a timedelta, you can add two `Time`
+    instances. If one of the instances is an array, the other one needs to be either a
+    scalar or an array of same length. In the latter case, values are added per index:
+
+    >>> t_res = Time(["1s", "2s"]) + Time("3s")
+    >>> t_res = Time(["1s", "2s"]) + Time(["3s", "4s"])
+    >>>
+    >>> t_res = Time(["1d", "2d"]) + Time("2000-01-01")
+    >>> t_res = Time(["2001-01-01", "2001-01-02"]) + Time(["3d", "4d"])
+
+    `Time` also accepts all other supported types on the right hand side of the ``+``
+    operator:
+
+    >>> t_res = Time(["1s", "2s"]) + Q_("10s")
+    >>> t_res = Time(["1s", "2s"]) + DatetimeIndex(["2001", "2002"])
+    >>> t_res = Time(["1d", "2d"]) + "2000-01-01"
+    >>> t_res = Time(["1s", "2s"]) + ["3s", "4s"]
+
+    Except for the numpy types and `pint.Quantity` other types are also supported on
+    the left hand side:
+
+    >>> t_res = DatetimeIndex(["2001", "2002"]) + Time(["1d", "2d"])
+    >>> t_res = "2000-01-01" + Time(["1d", "2d"])
+    >>> t_res = ["3s", "4s"] + Time(["1s", "2s"])
+
+    You can also compare two instances of `Time`:
+
+    >>> Time(["1s"]) == Time(Q_("1s"))
+    True
+
+    >>> Time("1s") == Time("2s")
+    False
+
+    >>> Time("2000-01-01 17:00:00") == Time("2s")
+    False
+
+    Note that any provided reference time is not taken into account when comparing two
+    absolute time values. Only the values itself are compared:
+
+    >>> dti = DatetimeIndex(["2001", "2002", "2003"])
+    >>> all(Time(dti, "2000") == Time(dti, "2042"))
+    True
+
+    If you want to include the reference times into the comparison, use the `equals`
+    method.
+
+    All supported types can also be used on the right hand side of the ``==`` operator:
+
+    >>> all(Time(["2000", "2001"]) == DatetimeIndex(["2000", "2001"]))
+    True
+
+    >>> all(Time(["1s", "2s"]) == Q_([1, 2],"s"))
+    True
+
+    >>> Time("3s") == "20d"
+    False
 
     Raises
     ------
-    ValueError:
+    ValueError
         When time values passed are not sorted in monotonic increasing order.
 
     """
@@ -205,11 +262,15 @@ class Time:
 
     def __sub__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
-        return Time(time=self._time - Time(other).as_pandas())
+        other = Time(other)
+        time_ref = self.reference_time if self.is_absolute else other.reference_time
+        return Time(self._time - other.as_pandas(), time_ref)
 
     def __rsub__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
-        return Time(time=Time(other).as_pandas() - self._time)
+        other = Time(other)
+        time_ref = self.reference_time if self.is_absolute else other.reference_time
+        return Time(other.as_pandas() - self._time, time_ref)
 
     def __eq__(self, other: Union[types_time_like, Time]) -> Union[bool, List[bool]]:
         """Element-wise comparisons between time object and compatible types.
@@ -225,23 +286,47 @@ class Time:
         return self.length
 
     def equals(self, other: Time) -> bool:
-        """Test for matching ``time`` and ``reference_time`` between objects."""
-        return np.all(self._time == other._time) & (self._time_ref == other._time_ref)
+        """Test for matching ``time`` and ``reference_time`` between objects.
+
+        Parameters
+        ----------
+        other :
+            The compared object
+
+        Returns
+        -------
+        bool :
+            `True` if both objects have the same time values and reference time, `False`
+            otherwise
+
+        """
+        return np.all(self == other) & (self._time_ref == other._time_ref)
 
     def all_close(self, other: Union[types_time_like, Time]) -> bool:
-        """Return `True` if another object compares equal within a certain tolerance."""
+        """Return `True` if another object compares equal within a certain tolerance.
+
+        Parameters
+        ----------
+        other :
+            The compared object
+
+        Returns
+        -------
+        bool :
+            `True` if all time values compare equal within a certain tolerance, `False`
+            otherwise
+
+        """
         # TODO: handle tolerances ?
         return np.allclose(self._time, Time(other).as_pandas())
 
     def as_quantity(self, unit: str = "s") -> pint.Quantity:
         """Return the data as `pint.Quantity`."""
         if self.is_absolute:
-            q = pandas_time_delta_to_quantity(
-                self.as_pandas_index() - self.reference_time, unit
-            )
+            q = pandas_time_delta_to_quantity(self._time - self.reference_time, unit)
             setattr(q, "time_ref", self.reference_time)  # store time_ref info
             return q
-        return pandas_time_delta_to_quantity(self.as_pandas_index(), unit)
+        return pandas_time_delta_to_quantity(self._time, unit)
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
         """Return the data as `pandas.TimedeltaIndex`."""
@@ -389,7 +474,7 @@ class Time:
 
         Returns
         -------
-        weldx.Time
+        Time
             The time union
 
         """
