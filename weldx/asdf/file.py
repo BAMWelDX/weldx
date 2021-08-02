@@ -1,5 +1,4 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
-import io
 import pathlib
 import unittest.mock
 from collections import UserDict
@@ -139,7 +138,7 @@ class WeldxFile(UserDict):
             self._in_memory = False
             self._close = True
         elif isinstance(filename_or_file_like, types_file_like.__args__):
-            if isinstance(filename_or_file_like, io.BytesIO):
+            if isinstance(filename_or_file_like, BytesIO):
                 self._in_memory = True
             else:
                 self._in_memory = False
