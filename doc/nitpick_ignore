@@ -14,10 +14,6 @@ py:class pandas._libs.tslibs.timedeltas.Timedelta
 py:class pandas._libs.tslibs.timestamps.Timestamp
 py:class pandas.core.indexes.datetimes.DatetimeIndex
 py:class pandas.core.indexes.timedeltas.TimedeltaIndex
-py:class pandas.DatetimeIndex
-py:class pandas.TimedeltaIndex
-py:class pandas.Timestamp
-py:class pandas.Timedelta
 
 # pint
 py:class pint.Quantity
