@@ -2,15 +2,13 @@
 import io
 import pathlib
 import unittest.mock
-import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
-from asdf import AsdfFile, generic_io, open as open_asdf, info
-from asdf import util
+from asdf import AsdfFile, generic_io, open as open_asdf, info, util
 from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
@@ -18,7 +16,6 @@ from jsonschema import ValidationError
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.util import get_schema_path, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
-import wrapt
 
 __all__ = [
     "WeldxFile",
@@ -310,14 +307,15 @@ class WeldxFile(UserDict):
         pad_blocks: Union[float, bool] = False,
         include_block_index: bool = True,
         version: str = None,
+        **kwargs,
     ):
         self._asdf_handle.update(
             all_array_storage=all_array_storage,
             all_array_compression=all_array_compression,
-            auto_inline=auto_inline,
             pad_blocks=pad_blocks,
             include_block_index=include_block_index,
             version=version,
+            **kwargs,
         )
 
     sync.__doc__ = AsdfFile.update.__doc__
@@ -458,7 +456,6 @@ class WeldxFile(UserDict):
         def _write_to_buffer_without_blocks():
             # print("_write_to_buffer_without_blocks")
             from unittest import mock
-            from copy import copy
 
             fake = unittest.mock.MagicMock()
 
