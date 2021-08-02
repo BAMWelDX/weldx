@@ -15,9 +15,6 @@ py:class pandas._libs.tslibs.timestamps.Timestamp
 py:class pandas.core.indexes.datetimes.DatetimeIndex
 py:class pandas.core.indexes.timedeltas.TimedeltaIndex
 
-# scipy
-py:class scipy.spatial.transform.rotation.Rotation
-py:class scipy.spatial.transform.Rotation
 
 # derived from scipy
 py:method weldx.transformations.WXRotation.from_mrp
