@@ -1,4 +1,3 @@
-from asdf.tags.core import NDArrayType
 from xarray import DataArray
 
 import weldx.asdf.tags.weldx.core.common_types as ct
