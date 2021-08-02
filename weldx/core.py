@@ -452,9 +452,7 @@ class TimeSeries:
         """Interpolate the time series if its data is composed of discrete values.
 
         See `interp_time` for interface description.
-
         """
-
         return ut.xr_interp_like(
             self._data,
             {"time": time},
