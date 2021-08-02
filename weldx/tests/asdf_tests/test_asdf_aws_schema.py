@@ -20,7 +20,7 @@ from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
 )
 from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
 from weldx.asdf.util import write_read_buffer
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.util import compare_nested
 
 # iso groove -----------------------------------------------------------------

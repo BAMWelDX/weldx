@@ -1,6 +1,5 @@
 """Test the internal utility functions."""
 import copy
-import math
 import unittest
 from typing import Dict, List
 
@@ -16,7 +15,7 @@ from pint.errors import DimensionalityError
 from xarray import DataArray
 
 import weldx.util as ut
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 
 
 def test_deprecation_decorator():
@@ -155,38 +154,6 @@ def test_to_pandas_time_index_exceptions(arg, exception):
     """Test correct exceptions on invalid inputs."""
     with pytest.raises(exception):
         ut.to_pandas_time_index(arg)
-
-
-def test_pandas_time_delta_to_quantity():
-    """Test the 'pandas_time_delta_to_quantity' utility function."""
-    is_close = np.vectorize(math.isclose)
-
-    def _check_close(t1, t2):
-        assert np.all(is_close(t1.magnitude, t2.magnitude))
-        assert t1.units == t2.units
-
-    time_single = pd.TimedeltaIndex([1], unit="s")
-
-    _check_close(ut.pandas_time_delta_to_quantity(time_single), Q_(1, "s"))
-    _check_close(ut.pandas_time_delta_to_quantity(time_single, "ms"), Q_(1000, "ms"))
-    _check_close(ut.pandas_time_delta_to_quantity(time_single, "us"), Q_(1000000, "us"))
-    _check_close(
-        ut.pandas_time_delta_to_quantity(time_single, "ns"), Q_(1000000000, "ns")
-    )
-
-    time_multi = pd.TimedeltaIndex([1, 2, 3], unit="s")
-    _check_close(ut.pandas_time_delta_to_quantity(time_multi), Q_([1, 2, 3], "s"))
-    _check_close(
-        ut.pandas_time_delta_to_quantity(time_multi, "ms"), Q_([1000, 2000, 3000], "ms")
-    )
-    _check_close(
-        ut.pandas_time_delta_to_quantity(time_multi, "us"),
-        Q_([1000000, 2000000, 3000000], "us"),
-    )
-    _check_close(
-        ut.pandas_time_delta_to_quantity(time_multi, "ns"),
-        Q_([1000000000, 2000000000, 3000000000], "ns"),
-    )
 
 
 class TestXarrayInterpolation:
@@ -446,7 +413,7 @@ def test_xr_fill_all():
 
 
 _dax_check = xr.DataArray(
-    data=np.ones((2, 2, 2, 4, 3)),
+    data=Q_(np.ones((2, 2, 2, 4, 3)), "mm"),
     dims=["d1", "d2", "d3", "d4", "d5"],
     coords={
         "d1": np.array([-1, 1], dtype=float),
@@ -456,9 +423,15 @@ _dax_check = xr.DataArray(
         "d5": ["x", "y", "z"],
     },
 )
+_dax_check["d1"].attrs["units"] = "cm"
 
 _dax_ref = dict(
-    d1={"values": np.array([-1, 1]), "dtype": "float"},
+    d1={
+        "values": np.array([-1, 1]),
+        "dtype": "float",
+        "units": "cm",
+        "dimensionality": "m",
+    },
     d2={"values": np.array([-1, 1]), "dtype": int},
     d3={
         "values": pd.DatetimeIndex(["2020-05-01", "2020-05-03"]),
@@ -503,6 +476,8 @@ def test_xr_check_coords(dax, ref_dict):
             ValueError,
         ),
         (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
+        (_dax_check, {"d1": {"units": "dm"}}, ValueError),
+        (_dax_check, {"d1": {"dimensionality": "kg"}}, DimensionalityError),
         (_dax_check, {"d3": {"dtype": "timedelta64"}}, TypeError),
         (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
         ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
@@ -678,8 +653,6 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         assert not ut.compare_nested(self.a, self.b)
 
     def test_measurements_modified(self):  # noqa: D102
-        from weldx import Q_
-
         self.b["welding_current"].data.data[-1] = Q_(500, "A")
         assert not ut.compare_nested(self.a, self.b)
 

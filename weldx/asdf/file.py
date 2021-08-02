@@ -300,7 +300,6 @@ class WeldxFile(UserDict):
     def close(self):
         """Close this file and sync it, if mode is read/write."""
         if self.mode == "rw" and self.sync_upon_close:
-            # self._asdf_handle.update(**self._write_kwargs)
             self.sync(**self._write_kwargs)
         fh = self.file_handle
         self._asdf_handle.close()
@@ -432,7 +431,6 @@ class WeldxFile(UserDict):
             fd.seek(0)
         return fd
 
-    # @profile
     def show_asdf_header(
         self, use_widgets: bool = False, _interactive: Optional[bool] = None
     ):

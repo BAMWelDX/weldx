@@ -10,7 +10,7 @@ from asdf.util import uri_match
 from weldx.asdf.extension import WxSyntaxError
 from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexType
 from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexType
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.util import deprecated
 

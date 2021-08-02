@@ -7,7 +7,6 @@ from io import BytesIO
 import asdf
 import pytest
 from jsonschema import ValidationError
-from memory_profiler import profile
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
@@ -377,7 +376,8 @@ class TestWeldXFile:
         with WeldxFile(mode=mode) as fh:
             fh["wx_user"] = dict(test=True)
             fh.show_asdf_header(use_widgets=False, _interactive=False)
-        out, err = capsys.readouterr()
+
+        out, _ = capsys.readouterr()
         assert "wx_user" in out
         assert "test" in out
 
