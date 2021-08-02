@@ -41,6 +41,9 @@ def reset_file_position(fh: SupportsFileReadWrite):
 DEFAULT_ARRAY_COMPRESSION = "input"
 """All arrays will be compressed using this algorithm, if not specified by user."""
 
+DEFAULT_ARRAY_COPYING = True
+"""Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
+
 
 class WeldxFile(UserDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
@@ -81,6 +84,10 @@ class WeldxFile(UserDict):
         - ``lz4``: Use lz4 compression.
         - ``input``: Use the same compression as in the file read.
           If there is no prior file, acts as None.
+    copy_arrays :
+        When `False`, when reading files, attempt to memory map (memmap) underlying data
+        arrays when possible. This avoids blowing the memory when working with very
+        large datasets.
 
     """
 
@@ -97,15 +104,18 @@ class WeldxFile(UserDict):
         custom_schema: Union[str, pathlib.Path] = None,
         software_history_entry: Mapping = None,
         compression: str = DEFAULT_ARRAY_COMPRESSION,
+        copy_arrays: bool = DEFAULT_ARRAY_COPYING,
     ):
         if write_kwargs is None:
             write_kwargs = dict(all_array_compression=compression)
-        self._write_kwargs = write_kwargs
 
         if asdffile_kwargs is None:
-            asdffile_kwargs = dict(copy_arrays=False)
+            asdffile_kwargs = dict(copy_arrays=copy_arrays)
 
+        # TODO: ensure no mismatching args for compression and copy_arrays.
+        self._write_kwargs = write_kwargs
         self._asdffile_kwargs = asdffile_kwargs
+
         if custom_schema is not None:
             _custom_schema_path = pathlib.Path(custom_schema)
             if not _custom_schema_path.exists():
