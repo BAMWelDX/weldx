@@ -15,10 +15,6 @@ py:class pandas._libs.tslibs.timestamps.Timestamp
 py:class pandas.core.indexes.datetimes.DatetimeIndex
 py:class pandas.core.indexes.timedeltas.TimedeltaIndex
 
-# pint
-py:class pint.Quantity
-py:class pint.quantity.Quantity
-
 # scipy
 py:class scipy.spatial.transform.rotation.Rotation
 py:class scipy.spatial.transform.Rotation
