@@ -1,6 +1,7 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
 import io
 import pathlib
+import unittest.mock
 import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
@@ -8,14 +9,14 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
-from asdf import AsdfFile, generic_io, open as open_asdf
+from asdf import AsdfFile, generic_io, open as open_asdf, info
 from asdf import util
 from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
+from weldx.asdf.util import get_schema_path, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 import wrapt
 
@@ -45,31 +46,7 @@ DEFAULT_ARRAY_COMPRESSION = "input"
 """All arrays will be compressed using this algorithm, if not specified by user."""
 
 
-class _Informer(wrapt.ObjectProxy):
-    def __init__(self, detector, wrapped):
-        self.detector = detector
-        super(_Informer, self).__init__(wrapped)
-
-
-class _ModificationDetectingDict(UserDict):
-    def __init__(self):
-        super(_ModificationDetectingDict, self).__init__()
-        self.modified = False
-        self.read = False
-
-    def get(self, key):
-        self.read = True
-        result = super(_ModificationDetectingDict, self).get(key)
-        return _Informer(self, result)
-
-    def __getitem__(self, item):
-        self.read = True
-        return wrapt.ObjectProxy(
-            super(_ModificationDetectingDict, self).__getitem__(item)
-        )
-
-
-class WeldxFile(_ModificationDetectingDict):
+class WeldxFile(UserDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
 
     Parameters
@@ -130,7 +107,7 @@ class WeldxFile(_ModificationDetectingDict):
         self._write_kwargs = write_kwargs
 
         if asdffile_kwargs is None:
-            asdffile_kwargs = dict()
+            asdffile_kwargs = dict(copy_arrays=False)
 
         self._asdffile_kwargs = asdffile_kwargs
         if custom_schema is not None:
@@ -393,7 +370,6 @@ class WeldxFile(_ModificationDetectingDict):
         This calls `asdf.AsdfFile.update`.
 
         """
-        print("compression algo in sync:", all_array_compression)
         self._asdf_handle.update(
             all_array_storage=all_array_storage,
             all_array_compression=all_array_compression,
@@ -506,6 +482,7 @@ class WeldxFile(_ModificationDetectingDict):
             fd.seek(0)
         return fd
 
+    # @profile
     def show_asdf_header(
         self, use_widgets: bool = False, _interactive: Optional[bool] = None
     ):
@@ -533,41 +510,89 @@ class WeldxFile(_ModificationDetectingDict):
         read-only, a temporary file will be created, which can cause in-efficiencies.
 
         """
-        # We need to synchronize the file contents here to make sure the header is in
-        # place.
-        if self.mode == "r":
-            with warnings.catch_warnings():
-                warnings.warn(
-                    "mode read-only, creating a temporary (in-memory) file"
-                    " to display header. Your changes will be lost! "
-                    "Use write_to(file_name) to save on disk.",
-                    stacklevel=1,
-                    category=UserWarning,
-                )
-            buff = self.write_to(**self._write_kwargs)
-            return WeldxFile(buff, mode="rw").show_asdf_header(
-                use_widgets=use_widgets, _interactive=_interactive
-            )
-        else:
-            # in write-mode, we sync to file first prior obtaining the header.
-            # TODO: can this be avoided, if the file remains unchanged?? Seems very hard to determine.
-            self.sync(**self._write_kwargs)
+
+        # write an asdf file with no binary blobs
+        def _write_to_buffer_without_blocks():
+            # print("_write_to_buffer_without_blocks")
+            from unittest import mock
+            from copy import copy
+
+            fake = unittest.mock.MagicMock()
+
+            def get_source(*args, **kwargs):
+                # print(args, kwargs)
+                return 0
+
+            fake.get_source = get_source
+
+            with mock.patch(
+                "asdf.AsdfFile.blocks", new_callable=mock.PropertyMock
+            ) as blocks_property:
+                blocks_property.return_value = fake
+                assert self._asdf_handle.blocks is fake
+                handle = self._asdf_handle
+                # handle = copy(
+                #    self._asdf_handle
+                # )  # we do not want a deepcopy here, (tree could be large)
+
+                buff = BytesIO()
+                handle.write_to(buff)
+            # print("buff pos:", buff.tell())
+            buff.seek(0)
+            return buff
+
+        def _write_to_buffer_fake_compressor():
+            from copy import copy
+            import asdf
+
+            buff = BytesIO()
+
+            handle = copy(
+                self._asdf_handle
+            )  # we do not want a deepcopy here, (tree could be large)
+
+            class FakeCompressor(asdf.extension.Compressor):
+                def label(self):
+                    return b"fake"
+
+                def compress(self, data, **kwargs):
+                    print("compressing")
+                    return b""
+
+            from asdf.extension import Extension
+
+            class LzmaExtension(Extension):
+                @property
+                def extension_uri(self):
+                    return "asdf://somewhere.org/extensions/shjizla-1.0"
+
+                @property
+                def compressors(self):
+                    return [FakeCompressor()]
+
+            handle.extensions.append(LzmaExtension)
+
+            handle.write_to(buff, all_array_compression="input")
+            buff.seek(0)
+            return buff
+
+        # We write the current tree to a buffer __without__ any binary data attached.
+        buff = _write_to_buffer_without_blocks()
+        # buff = _write_to_buffer_fake_compressor()
 
         def _impl_interactive() -> Union[
             "IPython.display.HTML", "IPython.display.JSON"  # noqa: F821
         ]:
             from weldx.asdf.util import notebook_fileprinter
 
-            with reset_file_position(self.file_handle):
-                if use_widgets:
-                    return view_tree(self.file_handle)
-                else:
-                    return notebook_fileprinter(self.file_handle)
+            if use_widgets:
+                return view_tree(buff)
+            else:
+                return notebook_fileprinter(buff)
 
         def _impl_non_interactive():
-            from asdf import info
-
-            info(self._asdf_handle)
+            assert buff.tell() == 0
+            info(WeldxFile(buff)._asdf_handle)
 
         # automatically determine if this runs in an interactive session.
         if _interactive is None:
