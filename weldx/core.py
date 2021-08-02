@@ -469,8 +469,6 @@ class TimeSeries:
         See `interp_time` for interface description.
 
         """
-        # Transform time to both formats
-
         time_q = Time(time).as_quantity(unit=time_unit)
 
         if len(self.shape) > 1 and np.iterable(time_q):
