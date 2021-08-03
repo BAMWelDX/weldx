@@ -8,8 +8,6 @@ import pandas as pd
 import pytest
 import xarray as xr
 from numpy import NaN
-from pandas import DatetimeIndex as DTI
-from pandas import TimedeltaIndex as TDI
 from pint.errors import DimensionalityError
 from xarray import DataArray
 

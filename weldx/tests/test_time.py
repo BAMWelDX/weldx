@@ -1,6 +1,5 @@
 """Test the `Time` class."""
 
-import math
 from typing import List, Tuple, Type, Union
 
 import numpy as np
@@ -18,8 +17,6 @@ from pint import DimensionalityError
 from weldx import Q_
 from weldx.time import Time
 from weldx.types import types_time_like
-
-pandas_time_delta_to_quantity = lambda time, unit: Time(time).as_quantity(unit)
 
 
 def _initialize_delta_type(cls_type, values, unit):
@@ -397,6 +394,32 @@ class TestTime:
         """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
         assert np.all(Time(arg).as_pandas_index() == expected)
 
+    # test_as_quantity -----------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "arg, unit, expected",
+        [
+            ("1s", "s", 1),
+            ("1s", "ms", 1000),
+            ("1s", "us", 1000000),
+            ("1s", "ns", 1000000000),
+            (TDI([1, 2, 3], "s"), "s", [1, 2, 3]),
+            (TDI([1, 2, 3], "s"), "ms", np.array([1, 2, 3]) * 1e3),
+            (TDI([1, 2, 3], "s"), "us", np.array([1, 2, 3]) * 1e6),
+            (TDI([1, 2, 3], "s"), "ns", np.array([1, 2, 3]) * 1e9),
+            ("2020-01-01", "s", 0),
+        ],
+    )
+    def test_quantity(arg, unit, expected):
+        """Test conversion to pint.Quantity with different scales."""
+        t = Time(arg)
+        q = Time(arg).as_quantity(unit)
+        expected = Q_(expected, unit)
+        assert np.allclose(q, expected)
+        if t.is_absolute:
+            assert t.reference_time == q.time_ref
+
     # test_convert_util ----------------------------------------------------------------
 
     @staticmethod
@@ -422,6 +445,8 @@ class TestTime:
 
         arr2 = time.as_data_array().weldx.time_ref_restore()
         assert arr.time.identical(arr2.time)
+
+    # test_union -----------------------------------------------------------------------
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -450,36 +475,3 @@ class TestTime:
 
         """
         assert np.all(Time.union(list_of_objects) == time_exp)
-
-
-# test_pandas_time_delta_to_quantity ---------------------------------------------------
-
-
-def test_pandas_time_delta_to_quantity():
-    """Test the 'pandas_time_delta_to_quantity' utility function."""
-    is_close = np.vectorize(math.isclose)
-
-    def _check_close(t1, t2):
-        assert np.all(is_close(t1.magnitude, t2.magnitude))
-        assert t1.units == t2.units
-
-    time_single = pd.TimedeltaIndex([1], unit="s")
-
-    _check_close(pandas_time_delta_to_quantity(time_single, "s"), Q_(1, "s"))
-    _check_close(pandas_time_delta_to_quantity(time_single, "ms"), Q_(1000, "ms"))
-    _check_close(pandas_time_delta_to_quantity(time_single, "us"), Q_(1000000, "us"))
-    _check_close(pandas_time_delta_to_quantity(time_single, "ns"), Q_(1000000000, "ns"))
-
-    time_multi = pd.TimedeltaIndex([1, 2, 3], unit="s")
-    _check_close(pandas_time_delta_to_quantity(time_multi, "s"), Q_([1, 2, 3], "s"))
-    _check_close(
-        pandas_time_delta_to_quantity(time_multi, "ms"), Q_([1000, 2000, 3000], "ms")
-    )
-    _check_close(
-        pandas_time_delta_to_quantity(time_multi, "us"),
-        Q_([1000000, 2000000, 3000000], "us"),
-    )
-    _check_close(
-        pandas_time_delta_to_quantity(time_multi, "ns"),
-        Q_([1000000000, 2000000000, 3000000000], "ns"),
-    )
