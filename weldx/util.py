@@ -17,7 +17,7 @@ import pint
 import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
-from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta64_dtype
+from pandas.api.types import is_datetime64_dtype, is_timedelta64_dtype
 from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
