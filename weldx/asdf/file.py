@@ -562,7 +562,7 @@ class _HeaderVisualizer:
 
     @staticmethod
     def _show_interactive(
-        use_widgets:bool, buff: BytesIO
+        use_widgets: bool, buff: BytesIO
     ) -> Union["IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
         from weldx.asdf.util import notebook_fileprinter
 
