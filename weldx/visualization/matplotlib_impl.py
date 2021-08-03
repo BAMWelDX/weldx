@@ -381,7 +381,7 @@ def plot_coordinate_system_manager_matplotlib(
     colors :
         A mapping between a coordinate system name or a data set name and a color.
         The colors must be provided as 24 bit integer values that are divided into
-        three 8 bit sections for the rgb values. For example `0xFF0000` for pure
+        three 8 bit sections for the rgb values. For example ``0xFF0000`` for pure
         red.
         Each coordinate system or data set that does not have a mapping in this
         dictionary will get a default color assigned to it.
