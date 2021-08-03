@@ -498,10 +498,10 @@ class TimeDependent(ABC):
 
     @property
     @abstractmethod
-    def time(self) -> Union[Time, None]:
-        """Get the classes time component"""
+    def time(self) -> Time:
+        """Get the classes time component."""
 
     @property
     @abstractmethod
     def reference_time(self) -> Union[Timestamp, None]:
-        """Returns the reference timestamp if the time data is absolute."""
+        """Return the reference timestamp if the time data is absolute."""
