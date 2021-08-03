@@ -340,7 +340,7 @@ class TestWeldXFile:
         assert old_pos == after_pos
 
     @staticmethod
-    @pytest.mark.skipif(platform.system() == "Darwin")
+    @pytest.mark.skipif(platform.system() == "Darwin", "evolution will strike on you!")
     @pytest.mark.parametrize(
         "mode",
         ("rw", "r"),
