@@ -23,13 +23,13 @@ _data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIn
 
 
 def pandas_time_delta_to_quantity(
-    time: pd.TimedeltaIndex, unit: str = "s"
+    time: Union[Timedelta, TimedeltaIndex], unit: str = "s"
 ) -> pint.Quantity:
-    """Convert a `pandas.TimedeltaIndex` into a corresponding `pint.Quantity`.
+    """Convert a pandas timedelta type into a corresponding `pint.Quantity`.
 
     Parameters
     ----------
-    time : pandas.TimedeltaIndex
+    time :
         Instance of `pandas.TimedeltaIndex`
     unit :
         String that specifies the desired time unit.
@@ -43,6 +43,8 @@ def pandas_time_delta_to_quantity(
     # from pandas Timedelta documentation: "The .value attribute is always in ns."
     # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas
     # .Timedelta.html
+    if isinstance(time, Timedelta):
+        time = TimedeltaIndex([time])
     nanoseconds = time.values.astype(np.int64)
     if len(nanoseconds) == 1:
         nanoseconds = nanoseconds[0]
@@ -283,6 +285,13 @@ class Time:
         """Return the length of the data."""
         return self.length
 
+    def __repr__(self):
+        """Console info."""
+        repr_str = "Time:\n" + self.as_pandas().__str__()
+        if self.is_absolute:
+            repr_str = repr_str + f"\nreference time: {str(self.reference_time)}"
+        return repr_str
+
     def equals(self, other: Time) -> bool:
         """Test for matching ``time`` and ``reference_time`` between objects.
 
@@ -318,12 +327,13 @@ class Time:
         # TODO: handle tolerances ?
         return np.allclose(self._time, Time(other).as_pandas())
 
-    def as_quantity(self) -> pint.Quantity:
+    def as_quantity(self, unit: str = "s") -> pint.Quantity:
         """Return the data as `pint.Quantity`."""
         q = pandas_time_delta_to_quantity(self.as_timedelta_index())
         if self.is_absolute:
             setattr(q, "time_ref", self.reference_time)  # store time_ref info
         return q
+
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
         """Return the data as `pandas.TimedeltaIndex` or `pandas.Timedelta`."""
