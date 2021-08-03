@@ -356,34 +356,6 @@ def test_xr_interp_like():
     assert np.all(test == np.arange(3, 7, 0.125))
 
 
-@pytest.mark.parametrize(
-    "list_of_objects, time_exp",
-    [
-        (
-            [
-                date_range("2020-02-02", periods=4, freq="2D"),
-                date_range("2020-02-01", periods=4, freq="2D"),
-                date_range("2020-02-03", periods=2, freq="3D"),
-            ],
-            date_range("2020-02-01", periods=8, freq="1D"),
-        ),
-        ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
-    ],
-)
-def test_get_time_union(list_of_objects, time_exp):
-    """Test input types for get_time_union function.
-
-    Parameters
-    ----------
-    list_of_objects:
-        List with input objects
-    time_exp:
-        Expected result time
-
-    """
-    assert np.all(ut.get_time_union(list_of_objects) == time_exp)
-
-
 def test_xr_fill_all():
     """Test filling along all dimensions."""
     da1 = xr.DataArray(

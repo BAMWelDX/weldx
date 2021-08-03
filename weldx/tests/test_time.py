@@ -7,7 +7,10 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
+from pandas import DatetimeIndex, Timedelta
+from pandas import TimedeltaIndex
+from pandas import TimedeltaIndex as TDI
+from pandas import Timestamp, date_range
 
 from weldx import Q_
 from weldx.time import Time, pandas_time_delta_to_quantity
@@ -382,6 +385,34 @@ class TestTime:
 
         arr2 = time.as_data_array().weldx.time_ref_restore()
         assert arr.time.identical(arr2.time)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "list_of_objects, time_exp",
+        [
+            (
+                [
+                    date_range("2020-02-02", periods=4, freq="2D"),
+                    date_range("2020-02-01", periods=4, freq="2D"),
+                    date_range("2020-02-03", periods=2, freq="3D"),
+                ],
+                date_range("2020-02-01", periods=8, freq="1D"),
+            ),
+            ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
+        ],
+    )
+    def test_union(list_of_objects, time_exp):
+        """Test input types for Time.union function.
+
+        Parameters
+        ----------
+        list_of_objects:
+            List with input objects
+        time_exp:
+            Expected result time
+
+        """
+        assert np.all(Time.union(list_of_objects) == time_exp)
 
 
 # test_pandas_time_delta_to_quantity ---------------------------------------------------

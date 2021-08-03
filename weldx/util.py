@@ -477,34 +477,6 @@ def swap_list_items(arr, i1, i2) -> list:
     return i
 
 
-def get_time_union(
-    list_of_objects: List[Union[pd.DatetimeIndex, pd.TimedeltaIndex]]
-) -> Union[pd.DatetimeIndex, pd.TimedeltaIndex]:
-    """Generate a merged union of `pandas.DatetimeIndex` from list of inputs.
-
-    The functions tries to merge common inputs that are "time-like" or might have time
-    coordinates such as xarray objects, `~weldx.transformations.LocalCoordinateSystem`
-    and other time objects. See `to_pandas_time_index` for supported input object types.
-
-    Parameters
-    ----------
-    list_of_objects :
-        list of input objects to merge
-
-    Returns
-    -------
-    Union[pandas.DatetimeIndex, pandas.TimedeltaIndex]
-        Pandas time index class with merged times
-
-    """
-    # TODO: add tests
-
-    # see https://stackoverflow.com/a/44762908/11242411
-    return reduce(
-        lambda x, y: x.union(y), (to_pandas_time_index(idx) for idx in list_of_objects)
-    )
-
-
 def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
     """Transpose data along two dimensions in an xarray DataArray.
 
