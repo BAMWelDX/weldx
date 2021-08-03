@@ -1,5 +1,6 @@
 """Tests for the WeldxFile class."""
 import pathlib
+import platform
 import shutil
 import tempfile
 from io import BytesIO
@@ -339,12 +340,10 @@ class TestWeldXFile:
         assert old_pos == after_pos
 
     @staticmethod
+    @pytest.mark.skipif(platform.system() == "Darwin")
     @pytest.mark.parametrize(
         "mode",
-        (
-            "rw",
-            # "r",
-        ),
+        ("rw", "r"),
     )
     def test_show_header_memory_usage(mode, capsys, tmpdir):
         """Check we do not significantly increase memory usage by showing the header.
@@ -355,7 +354,7 @@ class TestWeldXFile:
         import psutil
         import gc
 
-        large_array = np.ones((1000, 10000), dtype=np.float64)  # ~76mb
+        large_array = np.ones((1000, 1000), dtype=np.float64)  # ~7.6mb
         proc = psutil.Process()
 
         def get_mem_info():
@@ -373,7 +372,7 @@ class TestWeldXFile:
             diff = after - before
             # pytest increases memory a bit, but not as much as our large array would
             # occupy in memory.
-            assert diff < 20 * 1024 ** 2, diff / 1024 ** 2
+            assert diff < 3 * 1024 ** 2, diff / 1024 ** 2
         assert np.all(WeldxFile(fn)["x"] == large_array)
 
     @staticmethod
