@@ -794,7 +794,7 @@ class LocalCoordinateSystem:
             The coordinate systems time as 'pint.Quantity'
 
         """
-        return Time(self.time).as_quantity()
+        return Time(self.time, self.reference_time).as_quantity()
 
     @property
     def dataset(self) -> xr.Dataset:
