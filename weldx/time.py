@@ -334,7 +334,6 @@ class Time:
             setattr(q, "time_ref", self.reference_time)  # store time_ref info
         return q
 
-
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
         """Return the data as `pandas.TimedeltaIndex` or `pandas.Timedelta`."""
         if self.is_absolute:

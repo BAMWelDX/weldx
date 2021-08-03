@@ -10,7 +10,6 @@ import xarray as xr
 from numpy import NaN
 from pandas import DatetimeIndex as DTI
 from pandas import TimedeltaIndex as TDI
-from pandas import date_range
 from pint.errors import DimensionalityError
 from xarray import DataArray
 

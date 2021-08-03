@@ -6,7 +6,7 @@ import json
 import sys
 import warnings
 from collections.abc import Iterable, Sequence
-from functools import reduce, wraps
+from functools import wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
 from typing import Any, Callable, Collection, Dict, List, Mapping, Union
