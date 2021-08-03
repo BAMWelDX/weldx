@@ -926,14 +926,14 @@ def xr_3d_vector(data: np.ndarray, time: Time = None) -> xr.DataArray:
     if time is not None and np.array(data).ndim == 2:
         if isinstance(time, Time):
             time = time.as_timedelta_index()
-        dsx = xr.DataArray(
+        da = xr.DataArray(
             data=data,
             dims=["time", "c"],
             coords={"time": time, "c": ["x", "y", "z"]},
         )
     else:
-        dsx = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
-    return dsx.astype(float)
+        da = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
+    return da.astype(float)
 
 
 def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
