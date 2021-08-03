@@ -550,7 +550,7 @@ class TimeSeries:
         return isinstance(self.data, MathematicalExpression)
 
     @property
-    def time(self) -> Union[None, pd.TimedeltaIndex]:
+    def time(self) -> Union[None, pd.TimedeltaIndex, pd.DatetimeIndex]:
         """Return the data's timestamps.
 
         Returns
@@ -560,7 +560,7 @@ class TimeSeries:
 
         """
         if isinstance(self._data, xr.DataArray) and len(self._data.time) > 1:
-            return Time(self._data.time.data).as_pandas_index()
+            return Time(self._data.time.data, self.reference_time).as_pandas_index()
         return None
 
     @property
@@ -652,7 +652,7 @@ class TimeSeries:
                 axes=axes, data_name=data_name, time_unit=time_unit, **mpl_kwargs
             )
 
-        time = Time(self.time).as_quantity()
+        time = Time(self.time, self.reference_time).as_quantity()
         if time_unit is not None:
             time = time.to(time_unit)
 
