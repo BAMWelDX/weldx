@@ -661,7 +661,9 @@ def xr_interp_like(
         interpolated DataArray
 
     """
+    da1 = da1.weldx.time_ref_unset()  # catch time formats
     if isinstance(da2, (xr.DataArray, xr.Dataset)):
+        da2 = da2.weldx.time_ref_unset()  # catch time formats
         sel_coords = da2.coords  # remember original interpolation coordinates
     else:  # assume da2 to be dict-like
         sel_coords = {
@@ -925,7 +927,7 @@ def xr_3d_vector(data: np.ndarray, time: Time = None) -> xr.DataArray:
     """
     if time is not None and np.array(data).ndim == 2:
         if isinstance(time, Time):
-            time = time.as_timedelta_index()
+            time = time.as_pandas_index()
         da = xr.DataArray(
             data=data,
             dims=["time", "c"],
@@ -933,7 +935,7 @@ def xr_3d_vector(data: np.ndarray, time: Time = None) -> xr.DataArray:
         )
     else:
         da = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
-    return da.astype(float)
+    return da.astype(float).weldx.time_ref_restore()
 
 
 def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
@@ -953,7 +955,7 @@ def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
     """
     if time is not None and np.array(data).ndim == 3:
         if isinstance(time, Time):
-            time = time.as_timedelta_index()
+            time = time.as_pandas_index()
         da = xr.DataArray(
             data=data,
             dims=["time", "c", "v"],
@@ -965,7 +967,7 @@ def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
             dims=["c", "v"],
             coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
         )
-    return da.astype(float)
+    return da.astype(float).weldx.time_ref_restore()
 
 
 def xr_interp_orientation_in_time(
