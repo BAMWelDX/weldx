@@ -22,7 +22,7 @@ from weldx.transformations.types import (
 )
 from weldx.transformations.util import build_time_index, normalize
 
-from ..time import pandas_time_delta_to_quantity
+from ..time import TimeDependent, pandas_time_delta_to_quantity
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
@@ -30,7 +30,7 @@ if TYPE_CHECKING:  # pragma: no cover
 __all__ = ("LocalCoordinateSystem",)
 
 
-class LocalCoordinateSystem:
+class LocalCoordinateSystem(TimeDependent):
     """Defines a local cartesian coordinate system in 3d.
 
     Notes
