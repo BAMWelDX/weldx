@@ -7,7 +7,9 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
-from asdf import AsdfFile, generic_io, open as open_asdf, info, util
+from asdf import AsdfFile, generic_io, info
+from asdf import open as open_asdf
+from asdf import util
 from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
@@ -492,7 +494,8 @@ class _DummyBlockManager:
     def __init__(self):
         self.default_block = _DummyBlock()
 
-    def get_source(self, *args, **kwargs):
+    @staticmethod
+    def get_source(*args, **kwargs):
         return 0
 
     def get_block(self, source):
