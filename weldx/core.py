@@ -448,28 +448,20 @@ class TimeSeries:
                 f' "{str(e)}"'
             )
 
-    def _interp_time_discrete(self, time: pd.TimedeltaIndex) -> xr.DataArray:
-        """Interpolate the time series if its data is composed of discrete values.
+    def _interp_time_discrete(self, time: Time) -> xr.DataArray:
+        """Interpolate the time series if its data is composed of discrete values."""
 
-        See `interp_time` for interface description.
-        """
         return ut.xr_interp_like(
             self._data,
-            {"time": time},
+            {"time": time.as_timedelta()},
             method=self.interpolation,
             assume_sorted=False,
             broadcast_missing=False,
         )
 
-    def _interp_time_expression(
-        self, time: pd.TimedeltaIndex, time_unit: str
-    ) -> xr.DataArray:
-        """Interpolate the time series if its data is a mathematical expression.
-
-        See `interp_time` for interface description.
-
-        """
-        time_q = Time(time).as_quantity(unit=time_unit)
+    def _interp_time_expression(self, time: Time, time_unit: str) -> xr.DataArray:
+        """Interpolate the time series if its data is a mathematical expression."""
+        time_q = time.as_quantity(unit=time_unit)
 
         if len(self.shape) > 1 and np.iterable(time_q):
             while len(time_q.shape) < len(self.shape):
@@ -484,7 +476,9 @@ class TimeSeries:
             data = np.expand_dims(data, 0)
 
         dax = xr.DataArray(data=data)  # don't know exact dimensions so far
-        return dax.rename({"dim_0": "time"}).assign_coords({"time": time})
+        return dax.rename({"dim_0": "time"}).assign_coords(
+            {"time": time.as_pandas_index()}
+        )
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
@@ -610,14 +604,7 @@ class TimeSeries:
 
         # prepare timedelta values for internal interpolation
         time = Time(time)
-        if time.is_absolute:
-            if self._reference_time is not None:
-                time_interp = time - self._reference_time
-            else:
-                time_interp = time - time.reference_time
-        else:
-            time_interp = time
-        time_interp = time_interp.as_pandas_index()
+        time_interp = Time(time, self.reference_time)
 
         if isinstance(self._data, xr.DataArray):
             dax = self._interp_time_discrete(time_interp)
