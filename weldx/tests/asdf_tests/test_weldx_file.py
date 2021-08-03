@@ -355,7 +355,7 @@ class TestWeldXFile:
         import psutil
         import gc
 
-        large_array = np.ones((1000, 1000), dtype=np.float64)  # ~7.6mb
+        large_array = np.ones((1000, 10000), dtype=np.float64)  # ~76mb
         proc = psutil.Process()
 
         def get_mem_info():
@@ -373,7 +373,7 @@ class TestWeldXFile:
             diff = after - before
             # pytest increases memory a bit, but not as much as our large array would
             # occupy in memory.
-            assert diff < 3 * 1024 ** 2, diff / 1024 ** 2
+            assert diff < 20 * 1024 ** 2, diff / 1024 ** 2
         assert np.all(WeldxFile(fn)["x"] == large_array)
 
     @staticmethod
