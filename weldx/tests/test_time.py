@@ -13,8 +13,10 @@ from pandas import TimedeltaIndex as TDI
 from pandas import Timestamp, date_range
 
 from weldx import Q_
-from weldx.time import Time, pandas_time_delta_to_quantity
+from weldx.time import Time
 from weldx.types import types_time_like
+
+pandas_time_delta_to_quantity = lambda time, unit: Time(time).as_quantity(unit)
 
 
 def _initialize_delta_type(cls_type, values, unit):
@@ -428,13 +430,13 @@ def test_pandas_time_delta_to_quantity():
 
     time_single = pd.TimedeltaIndex([1], unit="s")
 
-    _check_close(pandas_time_delta_to_quantity(time_single), Q_(1, "s"))
+    _check_close(pandas_time_delta_to_quantity(time_single, "s"), Q_(1, "s"))
     _check_close(pandas_time_delta_to_quantity(time_single, "ms"), Q_(1000, "ms"))
     _check_close(pandas_time_delta_to_quantity(time_single, "us"), Q_(1000000, "us"))
     _check_close(pandas_time_delta_to_quantity(time_single, "ns"), Q_(1000000000, "ns"))
 
     time_multi = pd.TimedeltaIndex([1, 2, 3], unit="s")
-    _check_close(pandas_time_delta_to_quantity(time_multi), Q_([1, 2, 3], "s"))
+    _check_close(pandas_time_delta_to_quantity(time_multi, "s"), Q_([1, 2, 3], "s"))
     _check_close(
         pandas_time_delta_to_quantity(time_multi, "ms"), Q_([1000, 2000, 3000], "ms")
     )

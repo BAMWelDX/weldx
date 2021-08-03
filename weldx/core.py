@@ -12,7 +12,7 @@ import xarray as xr
 
 import weldx.util as ut
 from weldx.constants import Q_
-from weldx.time import Time, pandas_time_delta_to_quantity
+from weldx.time import Time
 from weldx.types import types_time_like
 
 if TYPE_CHECKING:
@@ -652,7 +652,7 @@ class TimeSeries:
                 axes=axes, data_name=data_name, time_unit=time_unit, **mpl_kwargs
             )
 
-        time = pandas_time_delta_to_quantity(self.time)
+        time = Time(self.time).as_quantity()
         if time_unit is not None:
             time = time.to(time_unit)
 

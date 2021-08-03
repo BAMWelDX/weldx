@@ -22,35 +22,6 @@ __all__ = ["Time"]
 _data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
 
 
-def pandas_time_delta_to_quantity(
-    time: Union[Timedelta, TimedeltaIndex], unit: str = "s"
-) -> pint.Quantity:
-    """Convert a pandas timedelta type into a corresponding `pint.Quantity`.
-
-    Parameters
-    ----------
-    time :
-        Instance of `pandas.TimedeltaIndex`
-    unit :
-        String that specifies the desired time unit.
-
-    Returns
-    -------
-    pint.Quantity :
-        Converted time quantity
-
-    """
-    # from pandas Timedelta documentation: "The .value attribute is always in ns."
-    # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas
-    # .Timedelta.html
-    if isinstance(time, Timedelta):
-        time = TimedeltaIndex([time])
-    nanoseconds = time.values.astype(np.int64)
-    if len(nanoseconds) == 1:
-        nanoseconds = nanoseconds[0]
-    return Q_(nanoseconds, "ns").to(unit)
-
-
 class Time:
     """Provides a unified interface for time related operations.
 
@@ -328,8 +299,27 @@ class Time:
         return np.allclose(self._time, Time(other).as_pandas())
 
     def as_quantity(self, unit: str = "s") -> pint.Quantity:
-        """Return the data as `pint.Quantity`."""
-        q = pandas_time_delta_to_quantity(self.as_timedelta_index())
+        """Return the data as `pint.Quantity`.
+
+        Parameters
+        ----------
+        unit :
+            String that specifies the desired time unit for conversion.
+
+        Returns
+        -------
+        pint.Quantity :
+            Converted time quantity
+
+        Notes
+        -----
+        from pandas Timedelta documentation: "The .value attribute is always in ns."
+        https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html
+        """
+        nanoseconds = self.as_timedelta_index().values.astype(np.int64)
+        if len(nanoseconds) == 1:
+            nanoseconds = nanoseconds[0]
+        q = Q_(nanoseconds, "ns").to(unit)
         if self.is_absolute:
             setattr(q, "time_ref", self.reference_time)  # store time_ref info
         return q
