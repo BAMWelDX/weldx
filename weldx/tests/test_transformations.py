@@ -529,7 +529,7 @@ class TestLocalCoordinateSystem:
                 TDI([86400, 86401, 86402], "s"),
                 TS("1999-12-31"),
                 date_time,
-                Q_([86400, 86401, 86402], "s"),
+                Q_([0.0, 1.0, 2.0], "s"),
             ),
         ],
     )
@@ -567,6 +567,7 @@ class TestLocalCoordinateSystem:
         assert lcs.reference_time == time_ref_exp
         assert np.all(lcs.datetimeindex == datetime_exp)
         assert np.all(lcs.time_quantity == quantity_exp)
+        assert np.all(Time(lcs.time_quantity) == (Time(quantity_exp, time_ref)))
 
     # test_time_warning ----------------------------------------------------------------
 
@@ -979,7 +980,7 @@ class TestLocalCoordinateSystem:
 
         # check time
         assert lcs_interp.reference_time == ref_time
-        assert np.allclose(lcs_interp.time_quantity, time)
+        assert np.all(Time(lcs_interp.time_quantity) == Time(time, ref_time))
 
         # check coordinates
         exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
