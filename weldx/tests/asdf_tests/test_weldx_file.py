@@ -7,6 +7,7 @@ from io import BytesIO
 import asdf
 import pytest
 from jsonschema import ValidationError
+import itertools
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
@@ -305,6 +306,7 @@ class TestWeldXFile:
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
+        w.show_asdf_header()  # check for exception safety.
 
     @staticmethod
     def test_custom_schema_resolve_path():
@@ -338,7 +340,13 @@ class TestWeldXFile:
         assert old_pos == after_pos
 
     @staticmethod
-    @pytest.mark.parametrize("mode", ("rw", "r"))
+    @pytest.mark.parametrize(
+        "mode",
+        (
+            "rw",
+            # "r",
+        ),
+    )
     def test_show_header_memory_usage(mode, capsys, tmpdir):
         """Check we do not significantly increase memory usage by showing the header.
 
@@ -375,11 +383,20 @@ class TestWeldXFile:
         """Ensure that the updated tree is displayed in show_header"""
         with WeldxFile(mode=mode) as fh:
             fh["wx_user"] = dict(test=True)
-            fh.show_asdf_header(use_widgets=False, _interactive=False)
+            fh.show_asdf_header()
 
         out, _ = capsys.readouterr()
         assert "wx_user" in out
         assert "test" in out
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ["use_widgets", "interactive"],
+        ([True, True], [False, False], [True, False], [False, True], [False, None]),
+    )
+    def test_show_header_params(use_widgets, interactive):
+        fh = WeldxFile()
+        fh.show_asdf_header(use_widgets=use_widgets, _interactive=interactive)
 
     def test_invalid_software_entry(self):
         """Invalid software entries should raise."""

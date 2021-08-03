@@ -7,7 +7,10 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
+import asdf
+import ipywidgets
 from asdf import AsdfFile, generic_io, open as open_asdf, info, util
+from asdf.block import BlockManager
 from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
@@ -458,99 +461,123 @@ class WeldxFile(UserDict):
         read-only, a temporary file will be created, which can cause in-efficiencies.
 
         """
-
-        # write an asdf file with no binary blobs
-        def _write_to_buffer_without_blocks():
-            # print("_write_to_buffer_without_blocks")
-            from unittest import mock
-
-            fake = unittest.mock.MagicMock()
-
-            def get_source(*args, **kwargs):
-                # print(args, kwargs)
-                return 0
-
-            fake.get_source = get_source
-
-            with mock.patch(
-                "asdf.AsdfFile.blocks", new_callable=mock.PropertyMock
-            ) as blocks_property:
-                blocks_property.return_value = fake
-                assert self._asdf_handle.blocks is fake
-                buff = BytesIO()
-                self._asdf_handle.write_to(buff)
-            buff.seek(0)
-            return buff
-
-        def _write_to_buffer_fake_compressor():
-            from copy import copy
-            import asdf
-
-            buff = BytesIO()
-
-            handle = copy(
-                self._asdf_handle
-            )  # we do not want a deepcopy here, (tree could be large)
-
-            class FakeCompressor(asdf.extension.Compressor):
-                def label(self):
-                    return b"fake"
-
-                def compress(self, data, **kwargs):
-                    print("compressing")
-                    return b""
-
-            from asdf.extension import Extension
-
-            class LzmaExtension(Extension):
-                @property
-                def extension_uri(self):
-                    return "asdf://somewhere.org/extensions/shjizla-1.0"
-
-                @property
-                def compressors(self):
-                    return [FakeCompressor()]
-
-            handle.extensions.append(LzmaExtension)
-
-            handle.write_to(buff, all_array_compression="input")
-            buff.seek(0)
-            return buff
-
-        # We write the current tree to a buffer __without__ any binary data attached.
-        buff = _write_to_buffer_without_blocks()
-        # buff = _write_to_buffer_fake_compressor()
-
-        def _impl_interactive() -> Union[
-            "IPython.display.HTML", "IPython.display.JSON"  # noqa: F821
-        ]:
-            from weldx.asdf.util import notebook_fileprinter
-
-            if use_widgets:
-                return view_tree(buff)
-            else:
-                return notebook_fileprinter(buff)
-
-        def _impl_non_interactive():
-            assert buff.tell() == 0
-            info(WeldxFile(buff)._asdf_handle)
-
-        # automatically determine if this runs in an interactive session.
-        if _interactive is None:
-            if is_interactive_session():
-                return _impl_interactive()
-            else:
-                return self.show_asdf_header(_interactive=False)
-        elif _interactive is False:
-            _impl_non_interactive()
-        elif _interactive is True:
-            return _impl_interactive()
+        return _HeaderVisualizer(self._asdf_handle).show(
+            use_widgets=use_widgets, _interactive=_interactive
+        )
 
     def _repr_json_(self) -> dict:
         """Return the headers a plain dict."""
         # set _interactive false, to enforce a dict.
+        print("json repr")
         return self.show_asdf_header(use_widgets=False, _interactive=False)
 
     def _ipython_display(self):
         # this will be called in Jupyter Lab, but not in a plain notebook.
+        print("ipython display")
         return self.show_asdf_header(use_widgets=False, _interactive=True)
+
+
+class _DummyBlock:
+    def __init__(self):
+        self.array_storage = "internal"
+        self.trust_data_dtype = False
+        self.data = None
+        self.readonly = True
+
+    def __len__(self):
+        return 0
+
+
+class _DummyBlockManager:
+    array_storage = "internal"
+    lazy_load = True
+
+    def __init__(self):
+        self.default_block = _DummyBlock()
+
+    def get_source(*args, **kwargs):
+        return 0
+
+    def get_block(self, source):
+        return self.default_block
+
+    __getitem__ = get_block
+
+    def find_or_create_block_for_array(self, *args, **kwargs):
+        return self.default_block
+
+    def get_output_compression_extensions(self):
+        return ()
+
+    def add(self, *args, **kwargs):
+        pass
+
+    write_internal_blocks_random_access = (
+        write_block_index
+    ) = (
+        write_internal_blocks_serial
+    ) = write_external_blocks = finalize = set_array_storage = add
+
+
+@contextmanager
+def _fake_block_context(asdf_handle):
+    blocks_org = asdf_handle.blocks
+    asdf_handle._blocks = _DummyBlockManager()
+    yield
+    asdf_handle._blocks = blocks_org
+
+
+class _HeaderVisualizer:
+    def __init__(self, asdf_handle):
+        self._asdf_handle = asdf_handle
+
+    def _write_to_buffer_without_blocks(self) -> BytesIO:
+        """Write an asdf file with no blocks using a fake block manager.
+
+        Returns
+        -------
+        buffer:
+            containing the header contents.
+        """
+        buff = BytesIO()
+        with _fake_block_context(self._asdf_handle):
+            self._asdf_handle.write_to(
+                buff, include_block_index=False, all_array_storage="internal"
+            )
+        buff.seek(0)
+
+        return buff
+
+    def show(
+        self, use_widgets=False, _interactive=None
+    ) -> Union[None, "IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
+        if _interactive is None:
+            _interactive = is_interactive_session()
+
+        # We write the current tree to a buffer __without__ any binary data attached.
+        buff = self._write_to_buffer_without_blocks()
+
+        # automatically determine if this runs in an interactive session.
+        if _interactive:
+            return self._show_interactive(use_widgets=use_widgets, buff=buff)
+        else:
+            self._show_non_interactive(buff=buff)
+
+    @staticmethod
+    def _show_interactive(
+        use_widgets:bool, buff: BytesIO
+    ) -> Union["IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
+        from weldx.asdf.util import notebook_fileprinter
+
+        if use_widgets:
+            return view_tree(buff)
+        else:
+            return notebook_fileprinter(buff)
+
+    @staticmethod
+    def _show_non_interactive(buff: BytesIO):
+        with unittest.mock.patch(
+            "asdf.AsdfFile.blocks", new_callable=_DummyBlockManager
+        ):
+            with WeldxFile(buff) as wx:
+                info(wx._asdf_handle, show_values=True, max_rows=None)
