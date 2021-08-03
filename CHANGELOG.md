@@ -6,8 +6,10 @@
 
 - added "units" (exact) and "dimensionality" (dimensionality compatible) checking options
   to `util.xr_check_coords` [[#442]](https://github.com/BAMWelDX/weldx/pull/442)
-- `Time` class that can be initialized from several other time types and provides time related utility functions 
+- `Time` class that can be initialized from several other time types and provides time related utility functions
   [[#433]](https://github.com/BAMWelDX/weldx/pull/433)
+- `TimeSeries` now supports setting a `reference_time` absolute time values for
+  interpolation [[#440]](https://github.com/BAMWelDX/weldx/pull/440)
 
 ### removed
 

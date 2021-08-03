@@ -23,13 +23,13 @@ _data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIn
 
 
 def pandas_time_delta_to_quantity(
-    time: pd.TimedeltaIndex, unit: str = "s"
+    time: Union[Timedelta, TimedeltaIndex], unit: str = "s"
 ) -> pint.Quantity:
-    """Convert a `pandas.TimedeltaIndex` into a corresponding `pint.Quantity`.
+    """Convert a pandas timedelta type into a corresponding `pint.Quantity`.
 
     Parameters
     ----------
-    time : pandas.TimedeltaIndex
+    time :
         Instance of `pandas.TimedeltaIndex`
     unit :
         String that specifies the desired time unit.
@@ -43,6 +43,8 @@ def pandas_time_delta_to_quantity(
     # from pandas Timedelta documentation: "The .value attribute is always in ns."
     # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas
     # .Timedelta.html
+    if isinstance(time, Timedelta):
+        time = TimedeltaIndex([time])
     nanoseconds = time.values.astype(np.int64)
     if len(nanoseconds) == 1:
         nanoseconds = nanoseconds[0]
@@ -261,13 +263,13 @@ class Time:
     def __sub__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
         other = Time(other)
-        time_ref = self.reference_time if self.is_absolute else other.reference_time
+        time_ref = None if other.is_absolute else self.reference_time
         return Time(self._time - other.as_pandas(), time_ref)
 
     def __rsub__(self, other: Union[types_time_like, Time]) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
         other = Time(other)
-        time_ref = self.reference_time if self.is_absolute else other.reference_time
+        time_ref = None if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
     def __eq__(self, other: Union[types_time_like, Time]) -> Union[bool, List[bool]]:
@@ -282,6 +284,13 @@ class Time:
     def __len__(self):
         """Return the length of the data."""
         return self.length
+
+    def __repr__(self):
+        """Console info."""
+        repr_str = "Time:\n" + self.as_pandas().__str__()
+        if self.is_absolute:
+            repr_str = repr_str + f"\nreference time: {str(self.reference_time)}"
+        return repr_str
 
     def equals(self, other: Time) -> bool:
         """Test for matching ``time`` and ``reference_time`` between objects.
@@ -318,13 +327,13 @@ class Time:
         # TODO: handle tolerances ?
         return np.allclose(self._time, Time(other).as_pandas())
 
-    def as_quantity(self) -> pint.Quantity:
+    def as_quantity(self, unit: str = "s") -> pint.Quantity:
         """Return the data as `pint.Quantity`."""
         if self.is_absolute:
-            q = pandas_time_delta_to_quantity(self._time - self.reference_time)
+            q = pandas_time_delta_to_quantity(self._time - self.reference_time, unit)
             setattr(q, "time_ref", self.reference_time)  # store time_ref info
             return q
-        return pandas_time_delta_to_quantity(self._time)
+        return pandas_time_delta_to_quantity(self._time, unit)
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
         """Return the data as `pandas.TimedeltaIndex`."""
