@@ -816,7 +816,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
         if "units" in check:
             units = coords[key].attrs.get("units", None)
-            if not units or not (ureg.Unit(units) == ureg.Unit(check["units"])):
+            if not units or not ureg.Unit(units) == ureg.Unit(check["units"]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{str(units)}', expected '{check['units']}'"

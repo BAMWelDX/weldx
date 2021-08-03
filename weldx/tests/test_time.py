@@ -6,10 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import DatetimeIndex
 from pandas import DatetimeIndex as DTI
 from pandas import Timedelta
-from pandas import TimedeltaIndex
 from pandas import TimedeltaIndex as TDI
 from pandas import Timestamp, date_range
 from pint import DimensionalityError
@@ -80,7 +78,7 @@ def _initialize_time_type(
 
 def _is_timedelta(cls_type):
     """Return ``True`` if the passed type is a timedelta type."""
-    return cls_type in [TimedeltaIndex, Timedelta, np.timedelta64] or (
+    return cls_type in [TDI, Timedelta, np.timedelta64] or (
         cls_type is Time and not Time.is_absolute
     )
 
@@ -146,9 +144,7 @@ class TestTime:
             val = [v + offset for v in delta_val]
 
         val = val[0] if data_was_scalar else val
-        exp_timedelta = (
-            Timedelta(val, "s") if data_was_scalar else TimedeltaIndex(val, "s")
-        )
+        exp_timedelta = Timedelta(val, "s") if data_was_scalar else TDI(val, "s")
 
         # expected datetime
         exp_datetime = None
@@ -173,13 +169,13 @@ class TestTime:
             (str, "timedelta"),
             (Time, "timedelta"),
             (Q_, "timedelta"),
-            TimedeltaIndex,
+            TDI,
             Timedelta,
             np.timedelta64,
             (str, "datetime"),
             (Time, "datetime"),
             (Q_, "datetime"),
-            DatetimeIndex,
+            DTI,
             Timestamp,
             np.datetime64,
         ],
@@ -214,7 +210,7 @@ class TestTime:
         # skip matrix cases that do not work --------------------
         if arr and input_type in [Timedelta, Timestamp]:
             pytest.skip()
-        if not arr and input_type in [DatetimeIndex, TimedeltaIndex]:
+        if not arr and input_type in [DTI, TDI]:
             pytest.skip()
 
         # create input values -----------------------------------
@@ -250,8 +246,8 @@ class TestTime:
     @pytest.mark.parametrize(
         "time, time_ref, raises",
         [
-            (TimedeltaIndex([3, 2, 1]), None, ValueError),
-            (DatetimeIndex(["2010", "2000"]), None, ValueError),
+            (TDI([3, 2, 1]), None, ValueError),
+            (DTI(["2010", "2000"]), None, ValueError),
             (["2010", "2000"], None, ValueError),
             (Q_([3, 2, 1], "s"), None, ValueError),
             (np.array([3, 2, 1], dtype="timedelta64[s]"), None, ValueError),
@@ -277,13 +273,13 @@ class TestTime:
             (str, "timedelta"),
             (Time, "timedelta"),
             (Q_, "timedelta"),
-            TimedeltaIndex,
+            TDI,
             Timedelta,
             np.timedelta64,
             (str, "datetime"),
             (Time, "datetime"),
             (Q_, "datetime"),
-            DatetimeIndex,
+            DTI,
             Timestamp,
             np.datetime64,
         ],
@@ -318,7 +314,7 @@ class TestTime:
         # skip array cases where the type does not support arrays
         if other_type in [Timedelta, Timestamp] and other_is_array:
             pytest.skip()
-        if not other_is_array and other_type in [DatetimeIndex, TimedeltaIndex]:
+        if not other_is_array and other_type in [DTI, TDI]:
             pytest.skip()
 
         # skip __radd__ cases where we got conflicts with the other types' __add__
