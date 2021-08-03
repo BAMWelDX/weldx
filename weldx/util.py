@@ -936,14 +936,14 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     return True
 
 
-def xr_3d_vector(data, times=None) -> xr.DataArray:
+def xr_3d_vector(data: np.ndarray, time: Time = None) -> xr.DataArray:
     """Create an xarray 3d vector with correctly named dimensions and coordinates.
 
     Parameters
     ----------
     data :
         Data
-    times :
+    time :
         Optional time data (Default value = None)
 
     Returns
@@ -951,27 +951,27 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
     xarray.DataArray
 
     """
-    if times is not None and np.array(data).ndim == 2:
-        if isinstance(times, Time):
-            times = times.as_timedelta_index()
+    if time is not None and np.array(data).ndim == 2:
+        if isinstance(time, Time):
+            time = time.as_timedelta_index()
         dsx = xr.DataArray(
             data=data,
             dims=["time", "c"],
-            coords={"time": times, "c": ["x", "y", "z"]},
+            coords={"time": time, "c": ["x", "y", "z"]},
         )
     else:
         dsx = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
     return dsx.astype(float)
 
 
-def xr_3d_matrix(data, times=None) -> xr.DataArray:
+def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
     """Create an xarray 3d matrix with correctly named dimensions and coordinates.
 
     Parameters
     ----------
     data :
         Data
-    times :
+    time :
         Optional time data (Default value = None)
 
     Returns
@@ -979,21 +979,21 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
     xarray.DataArray
 
     """
-    if times is not None and np.array(data).ndim == 3:
-        if isinstance(times, Time):
-            times = times.as_timedelta_index()
-        dsx = xr.DataArray(
+    if time is not None and np.array(data).ndim == 3:
+        if isinstance(time, Time):
+            time = time.as_timedelta_index()
+        da = xr.DataArray(
             data=data,
             dims=["time", "c", "v"],
-            coords={"time": times, "c": ["x", "y", "z"], "v": [0, 1, 2]},
+            coords={"time": time, "c": ["x", "y", "z"], "v": [0, 1, 2]},
         )
     else:
-        dsx = xr.DataArray(
+        da = xr.DataArray(
             data=data,
             dims=["c", "v"],
             coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
         )
-    return dsx.astype(float)
+    return da.astype(float)
 
 
 def xr_interp_orientation_in_time(

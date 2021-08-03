@@ -396,7 +396,7 @@ class LocalCoordinateSystem:
             and ("time" in coordinates.coords)
             and (not np.all(orientation.time.data == coordinates.time.data))
         ):
-            time_union = ut.get_time_union([orientation, coordinates])
+            time_union = Time.union([orientation.time, coordinates.time])
             orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
             coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
 
