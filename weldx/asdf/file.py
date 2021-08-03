@@ -7,10 +7,7 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
-import asdf
-import ipywidgets
 from asdf import AsdfFile, generic_io, open as open_asdf, info, util
-from asdf.block import BlockManager
 from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError

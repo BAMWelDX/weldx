@@ -7,7 +7,6 @@ from io import BytesIO
 import asdf
 import pytest
 from jsonschema import ValidationError
-import itertools
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
