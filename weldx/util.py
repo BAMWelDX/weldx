@@ -310,78 +310,6 @@ def to_list(var) -> list:
     return [var]
 
 
-def to_pandas_time_index(
-    time: Union[
-        pint.Quantity,
-        np.ndarray,
-        pd.TimedeltaIndex,
-        pd.DatetimeIndex,
-        xr.DataArray,
-        Time,
-    ],
-) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
-    """Convert a time variable to the corresponding pandas time index type.
-
-    Parameters
-    ----------
-    time :
-        Variable that should be converted.
-
-    Returns
-    -------
-    Union[pandas.TimedeltaIndex, pandas.DatetimeIndex] :
-        Time union of all input objects
-
-    """
-    from weldx.transformations import LocalCoordinateSystem
-
-    _input_type = type(time)
-    if isinstance(time, Time):
-        return time.as_pandas_index()
-    if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
-        return time
-    if isinstance(time, LocalCoordinateSystem):
-        return to_pandas_time_index(time.time)
-
-    if isinstance(time, pint.Quantity):
-        time_ref = getattr(time, "time_ref", None)
-        base = "s"  # using low base unit could cause rounding errors
-        if not np.iterable(time):  # catch zero-dim arrays
-            time = np.expand_dims(time, 0)
-        delta = pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
-        if time_ref is not None:
-            return delta + pd.Timestamp(time_ref)
-        return delta
-    if isinstance(time, (xr.DataArray, xr.Dataset)):
-        if "time" in time.coords:
-            time = time.time
-        time_index = pd.Index(time.values)
-        if is_timedelta64_dtype(time_index) and time.weldx.time_ref:
-            time_index = time_index + time.weldx.time_ref
-        return time_index
-    if (not np.iterable(time) or isinstance(time, str)) and not isinstance(
-        time, np.ndarray
-    ):
-        time = [time]
-
-    time = pd.Index(time)
-
-    if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
-        return time
-    # try manual casting for object dtypes (i.e. strings), should avoid integers
-    # warning: this allows something like ["1","2","3"] which will be ns !!
-    if is_object_dtype(time):
-        for func in (pd.DatetimeIndex, pd.TimedeltaIndex):
-            try:
-                return func(time)
-            except (ValueError, TypeError):
-                continue
-
-    raise TypeError(
-        f"Could not convert {_input_type} " f"to pd.DatetimeIndex or pd.TimedeltaIndex"
-    )
-
-
 def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
     """Check if a matrix is close or equal to another matrix.
 
@@ -991,8 +919,8 @@ def xr_interp_orientation_in_time(
     if "time" not in dsx.coords:
         return dsx
 
-    times = to_pandas_time_index(times)
-    times_ds = to_pandas_time_index(dsx)
+    times = Time(times).as_pandas_index()
+    times_ds = Time(dsx).as_pandas_index()
     time_ref = dsx.weldx.time_ref
 
     if len(times_ds) > 1:
@@ -1043,7 +971,7 @@ def xr_interp_coordinates_in_time(
         Interpolated data
 
     """
-    times = to_pandas_time_index(times)
+    times = Time(times).as_pandas_index()
     da = da.weldx.time_ref_unset()
     da = xr_interp_like(
         da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True

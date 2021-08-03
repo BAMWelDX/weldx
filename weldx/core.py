@@ -560,7 +560,7 @@ class TimeSeries:
 
         """
         if isinstance(self._data, xr.DataArray) and len(self._data.time) > 1:
-            return ut.to_pandas_time_index(self._data.time.data)
+            return Time(self._data.time.data).as_pandas_index()
         return None
 
     @property

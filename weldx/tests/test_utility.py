@@ -118,43 +118,6 @@ def test_vector_is_close():
     assert not ut.vector_is_close(vec_a, vec_a[0:2])
 
 
-@pytest.mark.parametrize(
-    "arg, expected",
-    [
-        # timedeltas
-        (TDI([42], unit="ns"), TDI([42], unit="ns")),
-        (pd.timedelta_range("0s", "20s", 10), pd.timedelta_range("0s", "20s", 10)),
-        (np.timedelta64(42), TDI([42], unit="ns")),
-        (np.array([-10, 0, 20]).astype("timedelta64[ns]"), TDI([-10, 0, 20], "ns")),
-        (Q_(42, "ns"), TDI([42], unit="ns")),
-        ("10s", TDI(["10s"])),
-        (["5ms", "10s", "2D"], TDI(["5 ms", "10s", "2D"])),
-        # datetimes
-        (np.datetime64(50, "Y"), DTI(["2020-01-01"])),
-        ("2020-01-01", DTI(["2020-01-01"])),
-        (
-            np.array(
-                ["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]"
-            ),
-            DTI(["2012-10-02", "2012-10-05", "2012-10-11"]),
-        ),
-    ],
-)
-def test_to_pandas_time_index(arg, expected):
-    """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
-    assert np.all(ut.to_pandas_time_index(arg) == expected)
-
-
-@pytest.mark.parametrize(
-    "arg, exception",
-    [(5, TypeError), ("string", TypeError), (Q_(10, "m"), DimensionalityError)],
-)
-def test_to_pandas_time_index_exceptions(arg, exception):
-    """Test correct exceptions on invalid inputs."""
-    with pytest.raises(exception):
-        ut.to_pandas_time_index(arg)
-
-
 class TestXarrayInterpolation:
     """Tests all custom xarray interpolation functions."""
 

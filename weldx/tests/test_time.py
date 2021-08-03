@@ -7,10 +7,13 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import DatetimeIndex, Timedelta
+from pandas import DatetimeIndex
+from pandas import DatetimeIndex as DTI
+from pandas import Timedelta
 from pandas import TimedeltaIndex
 from pandas import TimedeltaIndex as TDI
 from pandas import Timestamp, date_range
+from pint import DimensionalityError
 
 from weldx import Q_
 from weldx.time import Time
@@ -255,6 +258,9 @@ class TestTime:
             (["2010", "2000"], None, ValueError),
             (Q_([3, 2, 1], "s"), None, ValueError),
             (np.array([3, 2, 1], dtype="timedelta64[s]"), None, ValueError),
+            (5, None, TypeError),
+            ("string", None, TypeError),
+            (Q_(10, "m"), None, DimensionalityError),
         ],
     )
     def test_init_exception(time, time_ref, raises):
@@ -361,6 +367,35 @@ class TestTime:
         assert res.reference_time == exp.reference_time
         assert np.all(res.as_timedelta() == exp.as_timedelta())
         assert np.all(res == exp)
+
+    # test_pandas_index ----------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "arg, expected",
+        [
+            # timedeltas
+            (TDI([42], unit="ns"), TDI([42], unit="ns")),
+            (pd.timedelta_range("0s", "20s", 10), pd.timedelta_range("0s", "20s", 10)),
+            (np.timedelta64(42), TDI([42], unit="ns")),
+            (np.array([-10, 0, 20]).astype("timedelta64[ns]"), TDI([-10, 0, 20], "ns")),
+            (Q_(42, "ns"), TDI([42], unit="ns")),
+            ("10s", TDI(["10s"])),
+            (["5ms", "10s", "2D"], TDI(["5 ms", "10s", "2D"])),
+            # datetimes
+            (np.datetime64(50, "Y"), DTI(["2020-01-01"])),
+            ("2020-01-01", DTI(["2020-01-01"])),
+            (
+                np.array(
+                    ["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]"
+                ),
+                DTI(["2012-10-02", "2012-10-05", "2012-10-11"]),
+            ),
+        ],
+    )
+    def test_pandas_index(arg, expected):
+        """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
+        assert np.all(Time(arg).as_pandas_index() == expected)
 
     # test_convert_util ----------------------------------------------------------------
 
