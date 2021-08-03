@@ -259,7 +259,7 @@ class LocalCoordinateSystem:
     @staticmethod
     def _build_orientation(
         orientation: types_orientation,
-        time: Union[Time, None],
+        time: Time = None,
     ) -> xr.DataArray:
         """Create xarray orientation from different formats and time-inputs."""
         if orientation is None:
@@ -279,7 +279,7 @@ class LocalCoordinateSystem:
 
     @classmethod
     def _build_coordinates(
-        cls, coordinates, time: Union[Time, None]
+        cls, coordinates, time: Time = None
     ) -> Union[xr.DataArray, TimeSeries]:
         """Create xarray coordinates from different formats and time-inputs."""
         if isinstance(coordinates, TimeSeries):
@@ -302,9 +302,9 @@ class LocalCoordinateSystem:
 
     @staticmethod
     def _build_time(
-        coordinates: Union[types_coordinates, TimeSeries, None],
-        time: Union[types_time_like, Time, None],
-        time_ref: Union[types_timestamp_like, Time, None],
+        coordinates: Union[types_coordinates, TimeSeries],
+        time: Union[types_time_like, Time],
+        time_ref: Union[types_timestamp_like, Time],
     ) -> Union[Time, None]:
         # check if this function can be refactored with the TimeSeries supporting Time
         if isinstance(time, (xr.DataArray, xr.Dataset)):
@@ -865,8 +865,8 @@ class LocalCoordinateSystem:
 
     def interp_time(
         self,
-        time: Union[types_time_like, LocalCoordinateSystem, None],
-        time_ref: Union[types_timestamp_like, None] = None,
+        time: Union[types_time_like, LocalCoordinateSystem],
+        time_ref: types_timestamp_like = None,
     ) -> LocalCoordinateSystem:
         """Interpolates the data in time.
 

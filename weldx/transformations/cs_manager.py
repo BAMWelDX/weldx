@@ -56,8 +56,8 @@ class CoordinateSystemManager:
     def __init__(
         self,
         root_coordinate_system_name: str,
-        coordinate_system_manager_name: Union[str, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
+        coordinate_system_manager_name: str = None,
+        time_ref: types_timestamp_like = None,
     ):
         """Construct a coordinate system manager.
 
@@ -98,9 +98,9 @@ class CoordinateSystemManager:
     def _from_subsystem_graph(
         cls,
         root_coordinate_system_name: str,
-        coordinate_system_manager_name: Union[str, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
-        graph: Union[nx.DiGraph, None] = None,
+        coordinate_system_manager_name: str = None,
+        time_ref: types_timestamp_like = None,
+        graph: nx.DiGraph = None,
         subsystems=None,
     ):
         """Construct a coordinate system manager from existing graph and subsystems.
@@ -732,8 +732,8 @@ class CoordinateSystemManager:
         reference_system_name: str,
         orientation: types_orientation = None,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -780,8 +780,8 @@ class CoordinateSystemManager:
         angles,
         degrees: bool = False,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -845,8 +845,8 @@ class CoordinateSystemManager:
         vec_y,
         vec_z,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -894,8 +894,8 @@ class CoordinateSystemManager:
         vec_y,
         positive_orientation: bool = True,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -945,8 +945,8 @@ class CoordinateSystemManager:
         vec_z,
         positive_orientation=True,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -996,8 +996,8 @@ class CoordinateSystemManager:
         vec_z,
         positive_orientation: bool = True,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
         """Create a coordinate system and add it to the coordinate system manager.
@@ -1219,8 +1219,8 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: str = None,
-        time: Union[types_time_like, Time, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: types_timestamp_like = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
 
@@ -1511,9 +1511,9 @@ class CoordinateSystemManager:
 
     def interp_time(
         self,
-        time: Union[types_time_like, Time, LocalCoordinateSystem, None] = None,
-        time_ref: Union[types_timestamp_like, None] = None,
-        affected_coordinate_systems: Union[str, List[str], None] = None,
+        time: Union[types_time_like, Time, LocalCoordinateSystem] = None,
+        time_ref: types_timestamp_like = None,
+        affected_coordinate_systems: Union[str, List[str]] = None,
         in_place: bool = False,
     ) -> "CoordinateSystemManager":
         """Interpolates the coordinate systems in time.
