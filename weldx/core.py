@@ -450,7 +450,6 @@ class TimeSeries:
 
     def _interp_time_discrete(self, time: Time) -> xr.DataArray:
         """Interpolate the time series if its data is composed of discrete values."""
-
         return ut.xr_interp_like(
             self._data,
             {"time": time.as_timedelta()},
