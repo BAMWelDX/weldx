@@ -13,6 +13,9 @@
 
 ### removed
 
+- removed functions now covered by `Time`: ``pandas_time_delta_to_quantity``, ``to_pandas_time_index``
+  , ``get_time_union`` [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
+
 ### changes
 
 - move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
