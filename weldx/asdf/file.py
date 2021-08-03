@@ -492,7 +492,7 @@ class _DummyBlockManager:
     def __init__(self):
         self.default_block = _DummyBlock()
 
-    def get_source(*args, **kwargs):
+    def get_source(self, *args, **kwargs):
         return 0
 
     def get_block(self, source):
@@ -503,7 +503,8 @@ class _DummyBlockManager:
     def find_or_create_block_for_array(self, *args, **kwargs):
         return self.default_block
 
-    def get_output_compression_extensions(self):
+    @staticmethod
+    def get_output_compression_extensions():
         return ()
 
     def add(self, *args, **kwargs):
