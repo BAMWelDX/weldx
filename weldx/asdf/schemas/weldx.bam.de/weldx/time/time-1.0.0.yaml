@@ -12,34 +12,34 @@ examples:
     - A single timedelta of 2 seconds
     - |
       !<tag:weldx.bam.de:weldx/time/time-1.0.0>
-        values: !weldx!time/timedelta-1.0.0 {value: P0DT0H0M2S}
+        values: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M2S}
   -
     - A timedelta series from 0 s to 4 s with a 2 s frequency
     - |
       !<tag:weldx.bam.de:weldx/time/time-1.0.0>
-        values: !weldx!time/timedeltaindex-1.0.0
-            start: !weldx!time/timedelta-1.0.0 {value: P0DT0H0M0S}
-            end: !weldx!time/timedelta-1.0.0 {value: P0DT0H0M4S}
+        values: !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
+            start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+            end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M4S}
             freq: 2S
-            min: !weldx!time/timedelta-1.0.0 {value: P0DT0H0M0S}
-            max: !weldx!time/timedelta-1.0.0 {value: P0DT0H0M4S}
+            min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+            max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M4S}
   -
     - A single timestamp
     - |
       !<tag:weldx.bam.de:weldx/time/time-1.0.0>
-        values: &id001 !weldx!time/timestamp-1.0.0 {value: '2021-08-01T00:00:00'}
-          reference_time: *id001
+        values: &id001 !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2021-08-01T00:00:00'}
+        reference_time: *id001
   -
     - An absolute time index with a 1 s frequency
     - |
       !<tag:weldx.bam.de:weldx/time/time-1.0.0>
-        values: !weldx!time/datetimeindex-1.0.0
-          start: !weldx!time/timestamp-1.0.0 {value: '2021-01-01T00:00:00'}
-          end: !weldx!time/timestamp-1.0.0 {value: '2021-01-01T00:00:02'}
+        values: !<tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0>
+          start: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2021-01-01T00:00:00'}
+          end: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2021-01-01T00:00:02'}
           freq: S
-          min: !weldx!time/timestamp-1.0.0 {value: '2021-01-01T00:00:00'}
-          max: !weldx!time/timestamp-1.0.0 {value: '2021-01-01T00:00:02'}
-        reference_time: !weldx!time/timestamp-1.0.0 {value: '2021-01-01T00:00:00'}
+          min: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2021-01-01T00:00:00'}
+          max: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2021-01-01T00:00:02'}
+        reference_time: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2021-01-01T00:00:00'}
 
 type: object
 properties:
