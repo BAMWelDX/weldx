@@ -12,7 +12,7 @@ from pandas import TimedeltaIndex as TDI
 from pandas import Timestamp, date_range
 from pint import DimensionalityError
 
-from weldx import Q_
+from weldx import Q_, LocalCoordinateSystem, TimeSeries
 from weldx.time import Time
 from weldx.types import types_time_like
 
@@ -237,8 +237,20 @@ class TestTime:
             with pytest.raises(TypeError):
                 time_class_instance.as_datetime()
 
-    # todo: issues
-    #   - time parameter can be None
+    # test_init_from_time_dependent_types ----------------------------------------------
+    @staticmethod
+    @pytest.mark.parametrize(
+        "time_dep_type",
+        [
+            LocalCoordinateSystem(coordinates=np.zeros((2, 3)), time=["2s", "3s"]),
+            LocalCoordinateSystem(coordinates=np.zeros((2, 3)), time=["2000", "2001"]),
+            TimeSeries(Q_([2, 4, 1], "m"), TDI([1, 2, 3], "s")),
+            TimeSeries(Q_([2, 4, 1], "m"), ["2001", "2002", "2003"]),
+        ],
+    )
+    def test_init_from_time_dependent_types(time_dep_type):
+        t = Time(time_dep_type)
+        assert np.all(t == time_dep_type.time)
 
     # test_init_exceptions -------------------------------------------------------------
 
@@ -251,6 +263,7 @@ class TestTime:
             (["2010", "2000"], None, ValueError),
             (Q_([3, 2, 1], "s"), None, ValueError),
             (np.array([3, 2, 1], dtype="timedelta64[s]"), None, ValueError),
+            (None, None, TypeError),
             (5, None, TypeError),
             ("string", None, TypeError),
             (Q_(10, "m"), None, DimensionalityError),
