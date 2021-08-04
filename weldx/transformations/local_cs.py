@@ -890,12 +890,6 @@ class LocalCoordinateSystem(TimeDependent):
         if (not self.is_time_dependent) or (time is None):
             return self
 
-        # handle LCS as time
-        if isinstance(time, LocalCoordinateSystem):
-            if time_ref is None:
-                time_ref = time.reference_time
-            time = time.time
-
         time = Time(time, time_ref)
 
         if self.has_reference_time != time.is_absolute:
@@ -911,10 +905,8 @@ class LocalCoordinateSystem(TimeDependent):
 
         if isinstance(self.coordinates, TimeSeries):
             time_interp = Time(time, self.reference_time)
-
-            # todo: remove as_timedelta when TimeSeries supports Time
             coordinates = self._coords_from_discrete_time_series(
-                self.coordinates.interp_time(time_interp.as_timedelta())
+                self.coordinates.interp_time(time_interp)
             )
             if self.has_reference_time:
                 coordinates.weldx.time_ref = self.reference_time
