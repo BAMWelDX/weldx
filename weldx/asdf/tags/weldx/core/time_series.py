@@ -46,7 +46,7 @@ class TimeSeriesTypeASDF(WeldxType):
                 }
             else:
                 return {
-                    "time": node.time,
+                    "time": node.time.as_pandas_index(),
                     "unit": str(node.units),
                     "shape": node.shape,
                     "interpolation": node.interpolation,

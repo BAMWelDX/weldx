@@ -25,7 +25,6 @@ from weldx.types import types_time_like, types_timestamp_like
 
 from ..time import TimeDependent
 
-
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
