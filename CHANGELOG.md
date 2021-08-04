@@ -42,6 +42,7 @@
 - `closed_mesh` parameter to `Geometry.spatial_data`
   and `SpatialData.from_geometry_raster` [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
 - `TimeSeries.plot` and `Signal.plot` [[#420]](https://github.com/BAMWelDX/weldx/pull/420)
+- abstract base class `TimeDependent` [[#460]](https://github.com/BAMWelDX/weldx/pull/460)
 
 ### changes
 

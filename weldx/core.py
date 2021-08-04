@@ -12,7 +12,7 @@ import xarray as xr
 
 import weldx.util as ut
 from weldx.constants import Q_
-from weldx.time import Time
+from weldx.time import Time, TimeDependent
 from weldx.types import types_time_like
 
 if TYPE_CHECKING:
@@ -254,7 +254,7 @@ class MathematicalExpression:
 # TimeSeries ---------------------------------------------------------------------------
 
 
-class TimeSeries:
+class TimeSeries(TimeDependent):
     """Describes the behaviour of a quantity in time."""
 
     _valid_interpolations = [
