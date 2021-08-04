@@ -1,16 +1,19 @@
 """Test the `Time` class."""
 
-import math
 from typing import List, Tuple, Type, Union
 
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
+from pandas import DatetimeIndex as DTI
+from pandas import Timedelta
+from pandas import TimedeltaIndex as TDI
+from pandas import Timestamp, date_range
+from pint import DimensionalityError
 
 from weldx import Q_
-from weldx.time import Time, pandas_time_delta_to_quantity
+from weldx.time import Time
 from weldx.types import types_time_like
 
 
@@ -75,7 +78,7 @@ def _initialize_time_type(
 
 def _is_timedelta(cls_type):
     """Return ``True`` if the passed type is a timedelta type."""
-    return cls_type in [TimedeltaIndex, Timedelta, np.timedelta64] or (
+    return cls_type in [TDI, Timedelta, np.timedelta64] or (
         cls_type is Time and not Time.is_absolute
     )
 
@@ -141,9 +144,7 @@ class TestTime:
             val = [v + offset for v in delta_val]
 
         val = val[0] if data_was_scalar else val
-        exp_timedelta = (
-            Timedelta(val, "s") if data_was_scalar else TimedeltaIndex(val, "s")
-        )
+        exp_timedelta = Timedelta(val, "s") if data_was_scalar else TDI(val, "s")
 
         # expected datetime
         exp_datetime = None
@@ -168,13 +169,13 @@ class TestTime:
             (str, "timedelta"),
             (Time, "timedelta"),
             (Q_, "timedelta"),
-            TimedeltaIndex,
+            TDI,
             Timedelta,
             np.timedelta64,
             (str, "datetime"),
             (Time, "datetime"),
             (Q_, "datetime"),
-            DatetimeIndex,
+            DTI,
             Timestamp,
             np.datetime64,
         ],
@@ -209,7 +210,7 @@ class TestTime:
         # skip matrix cases that do not work --------------------
         if arr and input_type in [Timedelta, Timestamp]:
             pytest.skip()
-        if not arr and input_type in [DatetimeIndex, TimedeltaIndex]:
+        if not arr and input_type in [DTI, TDI]:
             pytest.skip()
 
         # create input values -----------------------------------
@@ -245,11 +246,14 @@ class TestTime:
     @pytest.mark.parametrize(
         "time, time_ref, raises",
         [
-            (TimedeltaIndex([3, 2, 1]), None, ValueError),
-            (DatetimeIndex(["2010", "2000"]), None, ValueError),
+            (TDI([3, 2, 1]), None, ValueError),
+            (DTI(["2010", "2000"]), None, ValueError),
             (["2010", "2000"], None, ValueError),
             (Q_([3, 2, 1], "s"), None, ValueError),
             (np.array([3, 2, 1], dtype="timedelta64[s]"), None, ValueError),
+            (5, None, TypeError),
+            ("string", None, TypeError),
+            (Q_(10, "m"), None, DimensionalityError),
         ],
     )
     def test_init_exception(time, time_ref, raises):
@@ -269,13 +273,13 @@ class TestTime:
             (str, "timedelta"),
             (Time, "timedelta"),
             (Q_, "timedelta"),
-            TimedeltaIndex,
+            TDI,
             Timedelta,
             np.timedelta64,
             (str, "datetime"),
             (Time, "datetime"),
             (Q_, "datetime"),
-            DatetimeIndex,
+            DTI,
             Timestamp,
             np.datetime64,
         ],
@@ -310,7 +314,7 @@ class TestTime:
         # skip array cases where the type does not support arrays
         if other_type in [Timedelta, Timestamp] and other_is_array:
             pytest.skip()
-        if not other_is_array and other_type in [DatetimeIndex, TimedeltaIndex]:
+        if not other_is_array and other_type in [DTI, TDI]:
             pytest.skip()
 
         # skip __radd__ cases where we got conflicts with the other types' __add__
@@ -357,6 +361,61 @@ class TestTime:
         assert np.all(res.as_timedelta() == exp.as_timedelta())
         assert np.all(res == exp)
 
+    # test_pandas_index ----------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "arg, expected",
+        [
+            # timedeltas
+            (TDI([42], unit="ns"), TDI([42], unit="ns")),
+            (pd.timedelta_range("0s", "20s", 10), pd.timedelta_range("0s", "20s", 10)),
+            (np.timedelta64(42), TDI([42], unit="ns")),
+            (np.array([-10, 0, 20]).astype("timedelta64[ns]"), TDI([-10, 0, 20], "ns")),
+            (Q_(42, "ns"), TDI([42], unit="ns")),
+            ("10s", TDI(["10s"])),
+            (["5ms", "10s", "2D"], TDI(["5 ms", "10s", "2D"])),
+            # datetimes
+            (np.datetime64(50, "Y"), DTI(["2020-01-01"])),
+            ("2020-01-01", DTI(["2020-01-01"])),
+            (
+                np.array(
+                    ["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]"
+                ),
+                DTI(["2012-10-02", "2012-10-05", "2012-10-11"]),
+            ),
+        ],
+    )
+    def test_pandas_index(arg, expected):
+        """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
+        assert np.all(Time(arg).as_pandas_index() == expected)
+
+    # test_as_quantity -----------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "arg, unit, expected",
+        [
+            ("1s", "s", 1),
+            ("1s", "ms", 1000),
+            ("1s", "us", 1000000),
+            ("1s", "ns", 1000000000),
+            (TDI([1, 2, 3], "s"), "s", [1, 2, 3]),
+            (TDI([1, 2, 3], "s"), "ms", np.array([1, 2, 3]) * 1e3),
+            (TDI([1, 2, 3], "s"), "us", np.array([1, 2, 3]) * 1e6),
+            (TDI([1, 2, 3], "s"), "ns", np.array([1, 2, 3]) * 1e9),
+            ("2020-01-01", "s", 0),
+        ],
+    )
+    def test_quantity(arg, unit, expected):
+        """Test conversion to pint.Quantity with different scales."""
+        t = Time(arg)
+        q = Time(arg).as_quantity(unit)
+        expected = Q_(expected, unit)
+        assert np.allclose(q, expected)
+        if t.is_absolute:
+            assert t.reference_time == q.time_ref
+
     # test_convert_util ----------------------------------------------------------------
 
     @staticmethod
@@ -383,35 +442,32 @@ class TestTime:
         arr2 = time.as_data_array().weldx.time_ref_restore()
         assert arr.time.identical(arr2.time)
 
+    # test_union -----------------------------------------------------------------------
 
-# test_pandas_time_delta_to_quantity ---------------------------------------------------
-
-
-def test_pandas_time_delta_to_quantity():
-    """Test the 'pandas_time_delta_to_quantity' utility function."""
-    is_close = np.vectorize(math.isclose)
-
-    def _check_close(t1, t2):
-        assert np.all(is_close(t1.magnitude, t2.magnitude))
-        assert t1.units == t2.units
-
-    time_single = pd.TimedeltaIndex([1], unit="s")
-
-    _check_close(pandas_time_delta_to_quantity(time_single), Q_(1, "s"))
-    _check_close(pandas_time_delta_to_quantity(time_single, "ms"), Q_(1000, "ms"))
-    _check_close(pandas_time_delta_to_quantity(time_single, "us"), Q_(1000000, "us"))
-    _check_close(pandas_time_delta_to_quantity(time_single, "ns"), Q_(1000000000, "ns"))
-
-    time_multi = pd.TimedeltaIndex([1, 2, 3], unit="s")
-    _check_close(pandas_time_delta_to_quantity(time_multi), Q_([1, 2, 3], "s"))
-    _check_close(
-        pandas_time_delta_to_quantity(time_multi, "ms"), Q_([1000, 2000, 3000], "ms")
+    @staticmethod
+    @pytest.mark.parametrize(
+        "list_of_objects, time_exp",
+        [
+            (
+                [
+                    date_range("2020-02-02", periods=4, freq="2D"),
+                    date_range("2020-02-01", periods=4, freq="2D"),
+                    date_range("2020-02-03", periods=2, freq="3D"),
+                ],
+                date_range("2020-02-01", periods=8, freq="1D"),
+            ),
+            ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
+        ],
     )
-    _check_close(
-        pandas_time_delta_to_quantity(time_multi, "us"),
-        Q_([1000000, 2000000, 3000000], "us"),
-    )
-    _check_close(
-        pandas_time_delta_to_quantity(time_multi, "ns"),
-        Q_([1000000000, 2000000000, 3000000000], "ns"),
-    )
+    def test_union(list_of_objects, time_exp):
+        """Test input types for Time.union function.
+
+        Parameters
+        ----------
+        list_of_objects:
+            List with input objects
+        time_exp:
+            Expected result time
+
+        """
+        assert np.all(Time.union(list_of_objects) == time_exp)
