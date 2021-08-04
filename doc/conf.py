@@ -163,7 +163,10 @@ else:
 # default "python3" is needed for readthedocs run
 # if building locally, this might need to be "weldx" - try setting using -D option:
 # -D nbsphinx_kernel_name="weldx"
-nbsphinx_kernel_name = "python3"
+if os.getenv("READTHEDOCS", False):
+    nbsphinx_kernel_name = "python3"
+else:
+    nbsphinx_kernel_name = "weldx"
 
 # This is processed by Jinja2 and inserted before each notebook
 nbsphinx_prolog = r"""
@@ -265,7 +268,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "xarray": ("http://xarray.pydata.org/en/stable", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "matplotlib": ("https://matplotlib.org", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),

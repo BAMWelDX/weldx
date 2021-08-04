@@ -29,7 +29,8 @@ The WelDX ASDF Extension implements some additional functionalities like unit an
 .. toctree::
     :maxdepth: 1
 
-    validators
-    shape-validation
-    unit-validation
-    welding-processes
+    standard/validators
+    standard/shape-validation
+    standard/unit-validation
+    standard/welding-processes
+

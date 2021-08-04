@@ -9,7 +9,7 @@ from pandas.api.types import is_timedelta64_dtype as is_timedelta
 
 from weldx.asdf.types import WeldxType
 from weldx.asdf.util import dataclass_serialization_class
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 
 
 # Dimension ----------------------------------------------------------------------------
@@ -134,7 +134,12 @@ class VariableTypeASDF(WeldxType):
 
         """
         dtype = np.dtype(tree["dtype"])
-        data = np.array(tree["data"], dtype=dtype)
+        # TODO: it would be ideal, if asdf would handle time types natively.
+        if dtype.char in ("M", "m"):  # handle np.timedelta64 and np.datetime64
+            data = np.array(tree["data"], dtype=dtype)
+            # assert data.base is tree["data"]
+        else:
+            data = tree["data"]  # let asdf handle np arrays with its own wrapper.
         if "unit" in tree:  # convert to pint.Quantity
             data = Q_(data, tree["unit"])
 
