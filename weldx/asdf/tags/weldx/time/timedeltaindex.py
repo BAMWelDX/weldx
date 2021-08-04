@@ -1,6 +1,3 @@
-# Licensed under a 3-clause BSD style license - see LICENSE
-# -*- coding: utf-8 -*-
-
 from typing import List
 
 import numpy as np
