@@ -32,6 +32,8 @@
 
 ### ASDF
 
+- add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
+
 ### deprecations
 
 ### dependencies
