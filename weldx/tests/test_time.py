@@ -249,6 +249,7 @@ class TestTime:
         ],
     )
     def test_init_from_time_dependent_types(time_dep_type):
+        """Test initialization with types derived from `TimeDependent`."""
         t = Time(time_dep_type)
         assert np.all(t == time_dep_type.time)
 
