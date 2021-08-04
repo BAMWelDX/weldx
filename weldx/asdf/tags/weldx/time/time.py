@@ -22,6 +22,4 @@ class TimeType(WeldxType):
     @classmethod
     def from_tree(cls, tree, ctx):
         """Construct Time from tree."""
-        values = tree["values"]
-        reference_time = tree.get("reference_time", None)
-        return Time(values, reference_time)
+        return Time(tree["values"], tree.get("reference_time"))

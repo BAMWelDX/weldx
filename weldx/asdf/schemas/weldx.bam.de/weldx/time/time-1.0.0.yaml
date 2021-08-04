@@ -43,6 +43,8 @@ examples:
 type: object
 properties:
   values:
+    description: |
+      The time values that are represented by the Time object.
     type: object
     oneOf:
       - tag: "tag:weldx.bam.de:weldx/time/timedelta-1.*"
@@ -51,6 +53,8 @@ properties:
       - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.*"
 
   reference_time:
+    description: |
+      Indicates a specific reference timestamp for the time object.
     type: object
     tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*"
 
