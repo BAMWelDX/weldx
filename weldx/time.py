@@ -1,6 +1,7 @@
 """Contains classes and functions related to time."""
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from functools import reduce
 from typing import List, Union
 
@@ -490,3 +491,17 @@ class Time:
             (Time(time).as_pandas_index() for time in times),
         )
         return Time(pandas_index)
+
+
+class TimeDependent(ABC):
+    """An abstract base class that describes a common interface of time dep. classes."""
+
+    @property
+    @abstractmethod
+    def time(self) -> Time:
+        """Get the classes time component."""
+
+    @property
+    @abstractmethod
+    def reference_time(self) -> Union[Timestamp, None]:
+        """Return the reference timestamp if the time data is absolute."""
