@@ -307,22 +307,12 @@ class LocalCoordinateSystem(TimeDependent):
         time: Union[types_time_like, Time],
         time_ref: Union[types_timestamp_like, Time],
     ) -> Union[Time, None]:
-        # check if this function can be refactored with the TimeSeries supporting Time
-        if isinstance(time, (xr.DataArray, xr.Dataset)):
-            if "time" in time.coords:
-                time = time.time
-            time_ref = time.weldx.time_ref
-            time = time.values
-
-        elif (
-            isinstance(coordinates, TimeSeries)
-            and coordinates.is_discrete
-            and time is None
-        ):
-            time = coordinates.time
-        # this branch is only relevant if coordinates and orientations are xarray types
-        elif time is None and time_ref is not None:
-            time = time_ref
+        if time is None:
+            if isinstance(coordinates, TimeSeries) and coordinates.is_discrete:
+                time = coordinates.time
+            # this branch is relevant if coordinates and orientations are xarray types
+            elif time_ref is not None:
+                time = time_ref
 
         return Time(time, time_ref) if time is not None else None
 
