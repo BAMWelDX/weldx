@@ -14,15 +14,16 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 # constants - should be imported first, no internal weldx deps
-from weldx.constants import WELDX_QUANTITY as Q_
+from .constants import Q_
 
 # main modules
-import weldx.transformations  # import this first to avoid circular dependencies
 import weldx.util  # import this first to avoid circular dependencies
-import weldx.config
 import weldx.core
+import weldx.transformations
+import weldx.config
 import weldx.geometry
 import weldx.welding
+import weldx.time
 
 # asdf extensions and tags
 import weldx.asdf
@@ -48,6 +49,7 @@ from weldx.transformations import (
 )
 from weldx.welding.processes import GmawProcess
 from weldx.welding.groove.iso_9692_1 import get_groove
+from weldx.time import Time
 
 __all__ = (
     "ArcSegment",
@@ -73,6 +75,7 @@ __all__ = (
     "TimeSeries",
     "LinearHorizontalTraceSegment",
     "Config",
+    "Time",
 )
 
 weldx.config.Config.load_installed_standards()

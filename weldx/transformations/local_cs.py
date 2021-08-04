@@ -14,13 +14,16 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
 from weldx.core import TimeSeries
+from weldx.time import Time
 from weldx.transformations.types import (
     types_coordinates,
     types_orientation,
     types_time_and_lcs,
-    types_timeindex,
 )
-from weldx.transformations.util import build_time_index, normalize
+from weldx.transformations.util import normalize
+from weldx.types import types_time_like, types_timestamp_like
+
+from ..time import TimeDependent
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
@@ -28,7 +31,7 @@ if TYPE_CHECKING:  # pragma: no cover
 __all__ = ("LocalCoordinateSystem",)
 
 
-class LocalCoordinateSystem:
+class LocalCoordinateSystem(TimeDependent):
     """Defines a local cartesian coordinate system in 3d.
 
     Notes
@@ -42,8 +45,8 @@ class LocalCoordinateSystem:
         self,
         orientation: types_orientation = None,
         coordinates: Union[types_coordinates, TimeSeries] = None,
-        time: types_timeindex = None,
-        time_ref: pd.Timestamp = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
         construction_checks: bool = True,
     ):
         """Construct a cartesian coordinate system.
@@ -65,7 +68,7 @@ class LocalCoordinateSystem:
             considered to be static and the provided value won't be stored. If this
             happens, a warning will be emitted.
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
         construction_checks :
             If 'True', the validity of the data will be verified
 
@@ -75,7 +78,7 @@ class LocalCoordinateSystem:
             Cartesian coordinate system
 
         """
-        time, time_ref = self._build_time_index(coordinates, time, time_ref)
+        time = self._build_time(coordinates, time, time_ref)
         orientation = self._build_orientation(orientation, time)
         coordinates = self._build_coordinates(coordinates, time)
 
@@ -107,10 +110,11 @@ class LocalCoordinateSystem:
             coordinates.name = "coordinates"
             dataset_items.append(coordinates)
 
-        self._time_ref = time_ref
         self._dataset = xr.merge(dataset_items, join="exact")
-        if "time" in self._dataset and time_ref is not None:
-            self._dataset.weldx.time_ref = time_ref
+
+        self._time_ref = time.reference_time if isinstance(time, Time) else None
+        if "time" in self._dataset and self._time_ref is not None:
+            self._dataset.weldx.time_ref = self._time_ref
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
@@ -255,34 +259,18 @@ class LocalCoordinateSystem:
     @staticmethod
     def _build_orientation(
         orientation: types_orientation,
-        time: pd.DatetimeIndex = None,
-    ):
-        """Create xarray orientation from different formats and time-inputs.
-
-        Parameters
-        ----------
-        orientation :
-            Orientation object or data.
-        time :
-            Valid time index formatted with `_build_time_index`.
-
-        Returns
-        -------
-        xarray.DataArray
-
-        """
+        time: Time = None,
+    ) -> xr.DataArray:
+        """Create xarray orientation from different formats and time-inputs."""
         if orientation is None:
-            orientation = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+            orientation = np.eye(3)
+
         if not isinstance(orientation, xr.DataArray):
-            time_orientation = None
             if isinstance(orientation, Rot):
                 orientation = orientation.as_matrix()
             elif not isinstance(orientation, np.ndarray):
                 orientation = np.array(orientation)
-
-            if orientation.ndim == 3:
-                time_orientation = time
-            orientation = ut.xr_3d_matrix(orientation, time_orientation)
+            orientation = ut.xr_3d_matrix(orientation, time)
 
         # make sure we have correct "time" format
         orientation = orientation.weldx.time_ref_restore()
@@ -290,36 +278,22 @@ class LocalCoordinateSystem:
         return orientation
 
     @classmethod
-    def _build_coordinates(cls, coordinates, time: pd.DatetimeIndex = None):
-        """Create xarray coordinates from different formats and time-inputs.
-
-        Parameters
-        ----------
-        coordinates:
-            Coordinates data.
-        time:
-            Valid time index formatted with `_build_time_index`.
-
-        Returns
-        -------
-        xarray.DataArray
-
-        """
+    def _build_coordinates(
+        cls, coordinates, time: Time = None
+    ) -> Union[xr.DataArray, TimeSeries]:
+        """Create xarray coordinates from different formats and time-inputs."""
         if isinstance(coordinates, TimeSeries):
             if coordinates.is_expression:
                 return coordinates
             coordinates = cls._coords_from_discrete_time_series(coordinates)
 
         if coordinates is None:
-            coordinates = np.array([0, 0, 0])
+            coordinates = np.zeros(3)
 
         if not isinstance(coordinates, xr.DataArray):
-            time_coordinates = None
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                 coordinates = np.array(coordinates)
-            if coordinates.ndim == 2:
-                time_coordinates = time
-            coordinates = ut.xr_3d_vector(coordinates, time_coordinates)
+            coordinates = ut.xr_3d_vector(coordinates, time)
 
         # make sure we have correct "time" format
         coordinates = coordinates.weldx.time_ref_restore()
@@ -327,19 +301,29 @@ class LocalCoordinateSystem:
         return coordinates
 
     @staticmethod
-    def _build_time_index(
-        coordinates: Union[types_coordinates, TimeSeries] = None,
-        time: types_timeindex = None,
-        time_ref: pd.Timestamp = None,
-    ) -> Tuple[pd.TimedeltaIndex, pd.Timestamp]:
-        if (
+    def _build_time(
+        coordinates: Union[types_coordinates, TimeSeries],
+        time: Union[types_time_like, Time],
+        time_ref: Union[types_timestamp_like, Time],
+    ) -> Union[Time, None]:
+        # check if this function can be refactored with the TimeSeries supporting Time
+        if isinstance(time, (xr.DataArray, xr.Dataset)):
+            if "time" in time.coords:
+                time = time.time
+            time_ref = time.weldx.time_ref
+            time = time.values
+
+        elif (
             isinstance(coordinates, TimeSeries)
             and coordinates.is_discrete
             and time is None
         ):
             time = coordinates.time
+        # this branch is only relevant if coordinates and orientations are xarray types
+        elif time is None and time_ref is not None:
+            time = time_ref
 
-        return build_time_index(time, time_ref)
+        return Time(time, time_ref) if time is not None else None
 
     @staticmethod
     def _check_and_normalize_orientation(orientation: xr.DataArray) -> xr.DataArray:
@@ -412,7 +396,7 @@ class LocalCoordinateSystem:
             and ("time" in coordinates.coords)
             and (not np.all(orientation.time.data == coordinates.time.data))
         ):
-            time_union = ut.get_time_union([orientation, coordinates])
+            time_union = Time.union([orientation.time, coordinates.time])
             orientation = ut.xr_interp_orientation_in_time(orientation, time_union)
             coordinates = ut.xr_interp_coordinates_in_time(coordinates, time_union)
 
@@ -420,7 +404,13 @@ class LocalCoordinateSystem:
 
     @classmethod
     def from_euler(
-        cls, sequence, angles, degrees=False, coordinates=None, time=None, time_ref=None
+        cls,
+        sequence,
+        angles,
+        degrees=False,
+        coordinates=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
 
@@ -457,7 +447,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -470,7 +460,11 @@ class LocalCoordinateSystem:
 
     @classmethod
     def from_orientation(
-        cls, orientation, coordinates=None, time=None, time_ref=None
+        cls,
+        orientation,
+        coordinates=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from orientation matrix.
 
@@ -483,7 +477,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -495,7 +489,13 @@ class LocalCoordinateSystem:
 
     @classmethod
     def from_xyz(
-        cls, vec_x, vec_y, vec_z, coordinates=None, time=None, time_ref=None
+        cls,
+        vec_x,
+        vec_y,
+        vec_z,
+        coordinates=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from 3 vectors defining the orientation.
 
@@ -512,7 +512,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -536,8 +536,8 @@ class LocalCoordinateSystem:
         vec_y,
         positive_orientation=True,
         coordinates=None,
-        time=None,
-        time_ref=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -555,7 +555,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -576,8 +576,8 @@ class LocalCoordinateSystem:
         vec_z,
         positive_orientation=True,
         coordinates=None,
-        time=None,
-        time_ref=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -595,7 +595,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -616,8 +616,8 @@ class LocalCoordinateSystem:
         vec_z,
         positive_orientation=True,
         coordinates=None,
-        time=None,
-        time_ref=None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -635,7 +635,7 @@ class LocalCoordinateSystem:
         time :
             Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference Timestamp to use if time is Timedelta or pint.Quantity.
+            Optional reference timestamp if ``time`` is a time delta.
 
         Returns
         -------
@@ -773,13 +773,13 @@ class LocalCoordinateSystem:
         return self.time + self.reference_time
 
     @property
-    def time(self) -> Union[pd.TimedeltaIndex, None]:
+    def time(self) -> Union[xr.DataArray, None]:
         """Get the time union of the local coordinate system (None if system is static).
 
         Returns
         -------
-        pandas.TimedeltaIndex
-            DateTimeIndex-like time union
+        xarray.DataArray
+            Time-like data array representing the time union of the LCS
 
         """
         if "time" in self._dataset.coords:
@@ -796,7 +796,7 @@ class LocalCoordinateSystem:
             The coordinate systems time as 'pint.Quantity'
 
         """
-        return ut.pandas_time_delta_to_quantity(self.time)
+        return Time(self.time, self.reference_time).as_quantity()
 
     @property
     def dataset(self) -> xr.Dataset:
@@ -865,9 +865,9 @@ class LocalCoordinateSystem:
 
     def interp_time(
         self,
-        time: types_time_and_lcs,
-        time_ref: Union[pd.Timestamp, None] = None,
-    ) -> "LocalCoordinateSystem":
+        time: Union[types_time_like, LocalCoordinateSystem],
+        time_ref: types_timestamp_like = None,
+    ) -> LocalCoordinateSystem:
         """Interpolates the data in time.
 
         Parameters
@@ -887,14 +887,15 @@ class LocalCoordinateSystem:
         if (not self.is_time_dependent) or (time is None):
             return self
 
-        # use LCS reference time if none provided
-        if isinstance(time, LocalCoordinateSystem) and time_ref is None:
-            time_ref = time.reference_time
-        time = ut.to_pandas_time_index(time)
+        # handle LCS as time
+        if isinstance(time, LocalCoordinateSystem):
+            if time_ref is None:
+                time_ref = time.reference_time
+            time = time.time
 
-        if self.has_reference_time != (
-            time_ref is not None or isinstance(time, pd.DatetimeIndex)
-        ):
+        time = Time(time, time_ref)
+
+        if self.has_reference_time != time.is_absolute:
             raise TypeError(
                 "Only 1 reference time provided for time dependent coordinate "
                 "system. Either the reference time of the coordinate system or the "
@@ -903,27 +904,21 @@ class LocalCoordinateSystem:
                 "allowed. Also check that the reference time has the correct type."
             )
 
-        if self.has_reference_time and (not isinstance(time, pd.DatetimeIndex)):
-            time = time + time_ref
-
         orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
+
         if isinstance(self.coordinates, TimeSeries):
-            time_interp = time
-            if isinstance(time_interp, pd.DatetimeIndex):
-                time_interp = time - self.reference_time
+            time_interp = Time(time, self.reference_time)
 
+            # todo: remove as_timedelta when TimeSeries supports Time
             coordinates = self._coords_from_discrete_time_series(
-                self.coordinates.interp_time(time_interp)
+                self.coordinates.interp_time(time_interp.as_timedelta())
             )
-
             if self.has_reference_time:
                 coordinates.weldx.time_ref = self.reference_time
         else:
             coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
-        return LocalCoordinateSystem(
-            orientation, coordinates, time=time, time_ref=time_ref
-        )
+        return LocalCoordinateSystem(orientation, coordinates, time)
 
     def invert(self) -> "LocalCoordinateSystem":
         """Get a local coordinate system defining the parent in the child system.
@@ -1032,4 +1027,5 @@ class LocalCoordinateSystem:
             The new reference time
 
         """
+        self._time_ref = time_ref_new
         self._dataset.weldx.time_ref = time_ref_new

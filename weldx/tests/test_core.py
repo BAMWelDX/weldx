@@ -7,11 +7,11 @@ import pint
 import pytest
 import xarray as xr
 
-import weldx.util as ut
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
+from weldx.time import Time
 
 # --------------------------------------------------------------------------------------
 # MathematicalExpression
@@ -330,7 +330,7 @@ class TestTimeSeries:
         "data, time, interpolation, exception_type, test_name",
         [
             (values_def, time_def, "int", ValueError, "# unknown interpolation"),
-            (values_def, time_def.magnitude, "step", ValueError, "# invalid time type"),
+            (values_def, time_def.magnitude, "step", TypeError, "# invalid time type"),
             (me_too_many_vars, None, None, Exception, "# too many free variables"),
             (me_param_units, None, None, Exception, "# incompatible parameter units"),
             (me_time_vec, None, None, Exception, "# not compatible with time vectors"),
@@ -413,6 +413,12 @@ class TestTimeSeries:
             (ts_constant, time_single, 1, "m"),
             (ts_constant, time_single_q, 1, "m"),
             (ts_constant, time_mul, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (
+                ts_constant,
+                time_mul + pd.Timestamp("2020"),
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                "m",
+            ),
             (ts_constant, time_mul_q, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
             (ts_disc_step, time_single, 12, "mm"),
             (ts_disc_step, time_single_q, 12, "mm"),
@@ -438,13 +444,11 @@ class TestTimeSeries:
         assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
         assert Q_(1, str(result.units)) == Q_(1, unit_exp)
 
-        exp_time = time
-        if isinstance(exp_time, pint.Quantity):
-            exp_time = ut.to_pandas_time_index(time)
-        if len(exp_time) == 1:
-            exp_time = None
-
-        assert np.all(result.time == exp_time)
+        time = Time(time)
+        if time.length == 1:
+            assert result.time is None
+        else:
+            assert np.all(Time(result.time, result._reference_time) == time)
 
     # test_interp_time_warning ---------------------------------------------------------
 
@@ -466,10 +470,10 @@ class TestTimeSeries:
     @pytest.mark.parametrize(
         "time,  exception_type, test_name",
         [
-            (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),
-            ("a string", ValueError, "# wrong type #2"),
-            ([1, 2, 3], ValueError, "# wrong type #3"),
-            (1, ValueError, "# wrong type #4"),
+            # (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),
+            ("a string", TypeError, "# wrong type #2"),
+            ([1, 2, 3], TypeError, "# wrong type #3"),
+            (1, TypeError, "# wrong type #4"),
             (Q_(2, "s/m"), Exception, "# wrong type #5"),
         ],
         ids=get_test_name,

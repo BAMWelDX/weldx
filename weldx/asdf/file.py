@@ -16,7 +16,7 @@ from asdf.util import get_file_type
 from jsonschema import ValidationError
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
+from weldx.asdf.util import get_schema_path, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
 __all__ = [
@@ -491,22 +491,6 @@ class WeldxFile(UserDict):
         to call this method only with mode='rw', e.g. read-write mode. When mode is
         read-only, a temporary file will be created, which can cause in-efficiencies.
 
-        Examples
-        --------
-        >>> import numpy as np
-        >>> tree = dict(my_var=(1, 2, 3), some_str="foobar", array=np.arange(5))
-        >>> f = WeldxFile(tree=tree, mode='rw')
-        >>> f.show_asdf_header()  #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'asdf_library': {'author': 'The ASDF Developers', \
-        'homepage': 'http://github.com/asdf-format/asdf', 'name': 'asdf',\
-         'version': '...'},
-         'history': {'extensions': [{'extension_class': \
-            'asdf.extension.BuiltinExtension', \
-            'software': {'name': 'asdf', 'version': '...'}}]}, \
-         'array': {'source': 0, 'datatype': 'int...', 'byteorder': 'little', \
-                   'shape': [5]}, \
-         'my_var': [1, 2, 3], 'some_str': 'foobar'}
-
         """
         # We need to synchronize the file contents here to make sure the header is in
         # place.
@@ -538,9 +522,10 @@ class WeldxFile(UserDict):
                 else:
                     return notebook_fileprinter(self.file_handle)
 
-        def _impl_non_interactive() -> dict:
-            with reset_file_position(self.file_handle):
-                return get_yaml_header(self.file_handle, parse=True)
+        def _impl_non_interactive():
+            from asdf import info
+
+            info(self._asdf_handle)
 
         # automatically determine if this runs in an interactive session.
         if _interactive is None:
@@ -549,7 +534,7 @@ class WeldxFile(UserDict):
             else:
                 return self.show_asdf_header(_interactive=False)
         elif _interactive is False:
-            return _impl_non_interactive()
+            _impl_non_interactive()
         elif _interactive is True:
             return _impl_interactive()
 

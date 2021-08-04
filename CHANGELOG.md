@@ -1,5 +1,41 @@
 # Release Notes
 
+## 0.5.0 (unreleased)
+
+### added
+
+- added "units" (exact) and "dimensionality" (dimensionality compatible) checking options
+  to `util.xr_check_coords` [[#442]](https://github.com/BAMWelDX/weldx/pull/442)
+- `Time` class that can be initialized from several other time types and provides time related utility functions
+  [[#433]](https://github.com/BAMWelDX/weldx/pull/433)
+- `TimeSeries` now supports setting a `reference_time` absolute time values for
+  interpolation [[#440]](https://github.com/BAMWelDX/weldx/pull/440)
+
+### removed
+
+- removed functions now covered by `Time`: ``pandas_time_delta_to_quantity``, ``to_pandas_time_index``
+  , ``get_time_union`` [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
+- removed custom ``wx_tag`` validator [[#461]](https://github.com/BAMWelDX/weldx/pull/461)
+
+### changes
+
+- move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
+- `LocalCoordinateSystem` and `CoordinateSystemManager` function parameters related to time now support all types that
+  are also supported by the new `Time` class [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
+
+### fixes
+
+- `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
+  representation [[#428]](https://github.com/BAMWelDX/weldx/pull/428).
+
+### documentation
+
+### ASDF
+
+### deprecations
+
+### dependencies
+
 ## 0.4.1 (20.07.2021)
 
 ### added
@@ -7,6 +43,7 @@
 - `closed_mesh` parameter to `Geometry.spatial_data`
   and `SpatialData.from_geometry_raster` [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
 - `TimeSeries.plot` and `Signal.plot` [[#420]](https://github.com/BAMWelDX/weldx/pull/420)
+- abstract base class `TimeDependent` [[#460]](https://github.com/BAMWelDX/weldx/pull/460)
 
 ### changes
 

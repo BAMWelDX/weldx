@@ -11,9 +11,8 @@ from weldx.asdf.extension import WxSyntaxError
 from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexType
 from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexType
 from weldx.asdf.types import format_tag
-from weldx.constants import WELDX_QUANTITY as Q_
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.util import deprecated
 
 
 def _walk_validator(
@@ -561,86 +560,6 @@ def wx_shape_validator(
         )
 
 
-@deprecated("0.4.0", "0.5.0", " _compare_tag_version will be removed in 0.5.0")
-def _compare_tag_version(instance_tag: str, tagname: str):
-    """Compare ASDF tag-strings with flexible version syntax.
-
-    Parameters
-    ----------
-    instance_tag:
-        the full ASDF tag to validate
-    tagname:
-        tag string with custom version syntax to validate against
-
-    Returns
-    -------
-        bool
-    """
-    if instance_tag is None:
-        return True
-
-    if instance_tag.startswith("tag:yaml.org"):  # test for python builtins
-        return instance_tag == tagname
-    instance_tag_version = [int(v) for v in instance_tag.rpartition("-")[-1].split(".")]
-
-    tag_parts = tagname.rpartition("-")
-    tag_uri = tag_parts[0]
-    tag_version = [v for v in tag_parts[-1].split(".")]
-
-    if tag_version == ["*"]:
-        version_compatible = True
-    elif all([vstr.isdigit() for vstr in tag_version]):
-        vnum = [int(vstr) for vstr in tag_version]
-        version_compatible = all(
-            [v[0] == v[1] for v in zip(vnum, instance_tag_version)]
-        )
-    else:
-        raise WxSyntaxError(f"Unknown wx_tag syntax {tagname}")
-
-    if (not instance_tag.startswith(tag_uri)) or (not version_compatible):
-        return False
-    return True
-
-
-def wx_tag_validator(validator, tagname, instance, schema):
-    """Validate instance tag string with flexible version syntax.
-
-    The following syntax is allowed to validate against:
-
-    wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
-    wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version
-    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version
-    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patch version
-
-    Parameters
-    ----------
-    validator:
-        A jsonschema.Validator instance.
-    tagname:
-        tag string with custom version syntax to validate against
-    instance:
-        Tree serialization (with default dtypes) of the instance
-    schema:
-        Dict representing the full ASDF schema.
-
-    Returns
-    -------
-        bool
-
-    """
-    if hasattr(instance, "_tag"):
-        instance_tag = instance._tag
-    else:
-        # Try tags for known Python builtins
-        instance_tag = _type_to_tag(type(instance))
-
-    if instance_tag is not None:
-        if not uri_match(tagname, instance_tag):
-            yield ValidationError(
-                "mismatched tags, wanted '{0}', got '{1}'".format(tagname, instance_tag)
-            )
-
-
 def wx_property_tag_validator(
     validator, wx_property_tag: str, instance, schema
 ) -> Iterator[ValidationError]:
@@ -662,7 +581,20 @@ def wx_property_tag_validator(
     asdf.ValidationError
 
     """
+
+    def _tag_validator(tagname, instance):
+        """Validate against a tag string using ASDF uri match patterns."""
+        if hasattr(instance, "_tag"):
+            instance_tag = instance._tag
+        else:
+            # Try tags for known Python builtins
+            instance_tag = _type_to_tag(type(instance))
+
+        if instance_tag is not None:
+            if not uri_match(tagname, instance_tag):
+                yield ValidationError(
+                    f"mismatched tags, wanted '{tagname}', got '{instance_tag}'"
+                )
+
     for _, value in instance.items():
-        yield from wx_tag_validator(
-            validator, tagname=wx_property_tag, instance=value, schema=None
-        )
+        yield from _tag_validator(tagname=wx_property_tag, instance=value)
