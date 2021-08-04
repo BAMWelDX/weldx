@@ -16,7 +16,7 @@ class TimeType(WeldxType):
         """Serialize timedelta to tree."""
         tree = dict()
         tree["values"] = node.as_pandas()
-        tree["reference_time"] = node.reference_time
+        tree["reference_time"] = node._time_ref
         return tree
 
     @classmethod

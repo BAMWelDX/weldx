@@ -27,8 +27,7 @@ examples:
     - A single timestamp
     - |
       !<tag:weldx.bam.de:weldx/time/time-1.0.0>
-        values: &id001 !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2021-08-01T00:00:00'}
-        reference_time: *id001
+        values: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2021-08-01T00:00:00'}
   -
     - An absolute time index with a 1 s frequency
     - |
