@@ -1,0 +1,27 @@
+from weldx.asdf.types import WeldxType
+from weldx.time import Time
+
+__all__ = ["TimeType"]
+
+
+class TimeType(WeldxType):
+    """A simple implementation of serializing a Time instance."""
+
+    name = "time/time"
+    version = "1.0.0"
+    types = [Time]
+
+    @classmethod
+    def to_tree(cls, node: Time, ctx):
+        """Serialize timedelta to tree."""
+        tree = dict()
+        tree["values"] = node.as_pandas()
+        tree["reference_time"] = node.reference_time
+        return tree
+
+    @classmethod
+    def from_tree(cls, tree, ctx):
+        """Construct Time from tree."""
+        values = tree["values"]
+        reference_time = tree.get("reference_time", None)
+        return Time(values, reference_time)
