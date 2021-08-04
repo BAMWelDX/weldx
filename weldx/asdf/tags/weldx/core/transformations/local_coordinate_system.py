@@ -1,4 +1,3 @@
-import pandas as pd
 import pint
 
 from weldx.asdf.tags.weldx.core.common_types import Variable
