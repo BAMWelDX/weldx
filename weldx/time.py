@@ -257,6 +257,10 @@ class Time:
         """Return the length of the data."""
         return self.length
 
+    def __iter__(self):
+        """Use generator to iterate over index values."""
+        return (t for t in self.as_pandas_index())
+
     def __repr__(self):
         """Console info."""
         repr_str = "Time:\n" + self.as_pandas().__str__()
