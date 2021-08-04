@@ -261,6 +261,10 @@ class Time:
         """Use generator to iterate over index values."""
         return (t for t in self.as_pandas_index())
 
+    def __getitem__(self, item):
+        """Access pandas index."""
+        return self.as_pandas_index()[item]
+
     def __repr__(self):
         """Console info."""
         repr_str = "Time:\n" + self.as_pandas().__str__()
