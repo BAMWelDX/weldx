@@ -1,6 +1,6 @@
 """Contains some functions to help with visualization."""
 
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import k3d
 import k3d.platonic as platonic
@@ -400,7 +400,7 @@ class CoordinateSystemManagerVisualizerK3D:
         csm,
         coordinate_systems: List[str] = None,
         data_sets: List[str] = None,
-        colors: Dict[str, int] = None,
+        colors: Dict[str, Union[int, Tuple[int, int, int]]] = None,
         reference_system: str = None,
         title: str = None,
         limits: types_limits = None,

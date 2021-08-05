@@ -4,7 +4,7 @@ from __future__ import annotations
 import itertools
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -1780,7 +1780,7 @@ class CoordinateSystemManager:
         reference_system: str = None,
         coordinate_systems: List[str] = None,
         data_sets: List[str] = None,
-        colors: Dict[str, int] = None,
+        colors: Dict[str, Union[int, Tuple[int, int, int]]] = None,
         title: str = None,
         limits: List[Tuple[float, float]] = None,
         time: types_time_and_lcs = None,
