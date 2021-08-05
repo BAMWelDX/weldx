@@ -5,7 +5,7 @@ id: "asdf://weldx.bam.de/weldx/schemas/time/timedelta-1.0.0"
 tag: "asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0"
 
 title: |
-  Represents an instance in time.
+  Represents a difference between two instances in time.
 
 examples:
   -
