@@ -33,6 +33,9 @@
 ### ASDF
 
 - add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
+- refactor all asdf uris to new ``asdf://`` naming convention,
+  see https://asdf.readthedocs.io/en/latest/asdf/extending/uris.html#entities-identified-by-uri
+  [[#431]](https://github.com/BAMWelDX/weldx/pull/431)
 
 ### deprecations
 
@@ -51,7 +54,7 @@
 
 - `TimeSeries.__init__` accepts `xarray.DataArray` as `data`
   parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
-- The `LocalCoordinateSystem.time` and `TimeSeries.time` now return an instance of `Time` 
+- The `LocalCoordinateSystem.time` and `TimeSeries.time` now return an instance of `Time`
   [[#464]](https://github.com/BAMWelDX/weldx/pull/464)
 
 ### ASDF
