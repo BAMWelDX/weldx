@@ -14,17 +14,14 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
 from weldx.core import TimeSeries
-from weldx.time import Time
+from weldx.time import Time, types_time_like, types_timestamp_like, TimeDependent
 from weldx.transformations.types import (
     types_coordinates,
     types_orientation,
-    types_time_and_lcs,
 )
 from weldx.transformations.util import normalize
-from weldx.types import types_time_like, types_timestamp_like
 from weldx.util import deprecated
 
-from ..time import TimeDependent
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
@@ -46,8 +43,8 @@ class LocalCoordinateSystem(TimeDependent):
         self,
         orientation: types_orientation = None,
         coordinates: Union[types_coordinates, TimeSeries] = None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
         construction_checks: bool = True,
     ):
         """Construct a cartesian coordinate system.
@@ -304,8 +301,8 @@ class LocalCoordinateSystem(TimeDependent):
     @staticmethod
     def _build_time(
         coordinates: Union[types_coordinates, TimeSeries],
-        time: Union[types_time_like, Time],
-        time_ref: Union[types_timestamp_like, Time],
+        time: types_time_like,
+        time_ref: types_timestamp_like,
     ) -> Union[Time, None]:
         if time is None:
             if isinstance(coordinates, TimeSeries) and coordinates.is_discrete:
@@ -400,8 +397,8 @@ class LocalCoordinateSystem(TimeDependent):
         angles,
         degrees=False,
         coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
 
@@ -454,8 +451,8 @@ class LocalCoordinateSystem(TimeDependent):
         cls,
         orientation,
         coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from orientation matrix.
 
@@ -485,8 +482,8 @@ class LocalCoordinateSystem(TimeDependent):
         vec_y,
         vec_z,
         coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from 3 vectors defining the orientation.
 
@@ -527,8 +524,8 @@ class LocalCoordinateSystem(TimeDependent):
         vec_y,
         positive_orientation=True,
         coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -567,8 +564,8 @@ class LocalCoordinateSystem(TimeDependent):
         vec_z,
         positive_orientation=True,
         coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -607,8 +604,8 @@ class LocalCoordinateSystem(TimeDependent):
         vec_z,
         positive_orientation=True,
         coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
     ) -> "LocalCoordinateSystem":
         """Construct a coordinate system from 2 vectors and an orientation.
 
@@ -868,7 +865,7 @@ class LocalCoordinateSystem(TimeDependent):
 
     def interp_time(
         self,
-        time: Union[types_time_like, LocalCoordinateSystem],
+        time: types_time_like,
         time_ref: types_timestamp_like = None,
     ) -> LocalCoordinateSystem:
         """Interpolates the data in time.
@@ -949,8 +946,8 @@ class LocalCoordinateSystem(TimeDependent):
         axes: matplotlib.axes.Axes = None,
         color: str = None,
         label: str = None,
-        time: types_time_and_lcs = None,
-        time_ref: pd.Timestamp = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
         time_index: int = None,
         scale_vectors: Union[float, List, np.ndarray] = None,
         show_origin: bool = True,

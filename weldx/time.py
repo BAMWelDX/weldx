@@ -13,14 +13,17 @@ from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
 from pandas.api.types import is_object_dtype
 from xarray import DataArray
 
-from weldx.types import types_time_like, types_timestamp_like
-
 from .constants import Q_
 
-__all__ = ["Time"]
-
-# list of types that are supported to be stored in Time._time
-_data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
+__all__ = [
+    "Time",
+    "TimeDependent",
+    "types_timestamp_like",
+    "types_datetime_like",
+    "types_timedelta_like",
+    "types_pandas_times",
+    "types_time_like",
+]
 
 
 class Time:
@@ -196,8 +199,8 @@ class Time:
 
     def __init__(
         self,
-        time: Union[types_time_like, Time, List[str]],
-        time_ref: Union[types_timestamp_like, Time, None] = None,
+        time: types_time_like,
+        time_ref: types_timestamp_like = None,
     ):
         # todo: update type hints (see: https://stackoverflow.com/q/46092104/6700329)
         # problem: ring dependency needs to be solved
@@ -238,29 +241,29 @@ class Time:
         self._time = time
         self._time_ref = time_ref
 
-    def __add__(self, other: Union[types_time_like, Time]) -> Time:
+    def __add__(self, other: types_time_like) -> Time:
         """Element-wise addition between `Time` object and compatible types."""
         other = Time(other)
         time_ref = self.reference_time if self.is_absolute else other.reference_time
         return Time(self._time + other.as_pandas(), time_ref)
 
-    def __radd__(self, other: Union[types_time_like, Time]) -> Time:
+    def __radd__(self, other: types_time_like) -> Time:
         """Element-wise addition between `Time` object and compatible types."""
         return self + other
 
-    def __sub__(self, other: Union[types_time_like, Time]) -> Time:
+    def __sub__(self, other: types_time_like) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
         other = Time(other)
         time_ref = None if other.is_absolute else self.reference_time
         return Time(self._time - other.as_pandas(), time_ref)
 
-    def __rsub__(self, other: Union[types_time_like, Time]) -> Time:
+    def __rsub__(self, other: types_time_like) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
         other = Time(other)
         time_ref = None if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
-    def __eq__(self, other: Union[types_time_like, Time]) -> Union[bool, List[bool]]:
+    def __eq__(self, other: types_time_like) -> Union[bool, List[bool]]:
         """Element-wise comparisons between time object and compatible types.
 
         See Also
@@ -305,7 +308,7 @@ class Time:
         """
         return np.all(self == other) & (self._time_ref == other._time_ref)
 
-    def all_close(self, other: Union[types_time_like, Time]) -> bool:
+    def all_close(self, other: types_time_like) -> bool:
         """Return `True` if another object compares equal within a certain tolerance.
 
         Parameters
@@ -401,7 +404,7 @@ class Time:
         return None
 
     @reference_time.setter
-    def reference_time(self, time_ref: Union[types_timestamp_like, Time]):
+    def reference_time(self, time_ref: types_timestamp_like):
         """Set the reference time."""
         self._time_ref = pd.Timestamp(time_ref)
 
@@ -490,7 +493,7 @@ class Time:
         )
 
     @staticmethod
-    def union(times=List[Union[types_time_like, "Time"]]) -> Time:
+    def union(times: List[types_time_like]) -> Time:
         """Calculate the union of multiple `Time` instances (or supported objects).
 
         Any reference time information will be dropped.
@@ -525,3 +528,26 @@ class TimeDependent(ABC):
     @abstractmethod
     def reference_time(self) -> Union[Timestamp, None]:
         """Return the reference timestamp if the time data is absolute."""
+
+
+# list of types that are supported to be stored in Time._time
+_data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
+
+types_datetime_like = Union[DatetimeIndex, np.datetime64, List[str], Time]
+"""types that define ascending arrays of time stamps."""
+
+types_timestamp_like = Union[Timestamp, str, Time]
+"""types that define timestamps."""
+
+types_timedelta_like = Union[
+    TimedeltaIndex, pint.Quantity, np.timedelta64, List[str], Time
+]
+"""types that define ascending time delta arrays."""
+
+types_time_like = Union[
+    types_datetime_like, types_timedelta_like, types_timestamp_like, TimeDependent
+]
+"""types that represent time."""
+
+types_pandas_times = Union[Timedelta, Timestamp, DatetimeIndex, TimedeltaIndex]
+"""supported pandas time types."""

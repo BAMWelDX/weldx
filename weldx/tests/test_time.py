@@ -13,8 +13,7 @@ from pandas import Timestamp, date_range
 from pint import DimensionalityError
 
 from weldx import Q_, LocalCoordinateSystem, TimeSeries
-from weldx.time import Time
-from weldx.types import types_time_like
+from weldx.time import Time, types_time_like
 
 
 def _initialize_delta_type(cls_type, values, unit):

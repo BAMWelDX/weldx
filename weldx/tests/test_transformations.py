@@ -18,10 +18,10 @@ import weldx.util as ut
 from weldx import Q_, SpatialData
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
-from weldx.time import Time
+from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
-from weldx.types import types_time_like, types_timestamp_like
+
 
 # helpers for tests -----------------------------------------------------------
 

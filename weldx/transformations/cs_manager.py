@@ -14,11 +14,10 @@ from weldx import util
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
-from weldx.time import Time
-from weldx.types import types_time_like, types_timestamp_like
+from weldx.time import Time, types_time_like, types_timestamp_like
 
 from .local_cs import LocalCoordinateSystem
-from .types import types_coordinates, types_orientation, types_time_and_lcs
+from .types import types_coordinates, types_orientation
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
@@ -732,7 +731,7 @@ class CoordinateSystemManager:
         reference_system_name: str,
         orientation: types_orientation = None,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -780,7 +779,7 @@ class CoordinateSystemManager:
         angles,
         degrees: bool = False,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -845,7 +844,7 @@ class CoordinateSystemManager:
         vec_y,
         vec_z,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -894,7 +893,7 @@ class CoordinateSystemManager:
         vec_y,
         positive_orientation: bool = True,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -945,7 +944,7 @@ class CoordinateSystemManager:
         vec_z,
         positive_orientation=True,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -996,7 +995,7 @@ class CoordinateSystemManager:
         vec_z,
         positive_orientation: bool = True,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
@@ -1219,7 +1218,7 @@ class CoordinateSystemManager:
         self,
         coordinate_system_name: str,
         reference_system_name: str = None,
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         time_ref: types_timestamp_like = None,
     ) -> LocalCoordinateSystem:
         """Get a coordinate system in relation to another reference system.
@@ -1511,7 +1510,7 @@ class CoordinateSystemManager:
 
     def interp_time(
         self,
-        time: Union[types_time_like, Time, LocalCoordinateSystem] = None,
+        time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         affected_coordinate_systems: Union[str, List[str]] = None,
         in_place: bool = False,
@@ -1783,8 +1782,8 @@ class CoordinateSystemManager:
         colors: Dict[str, int] = None,
         title: str = None,
         limits: List[Tuple[float, float]] = None,
-        time: types_time_and_lcs = None,
-        time_ref: pd.Timestamp = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
         axes_equal: bool = False,
         scale_vectors: Union[float, List, np.ndarray] = None,
         show_data_labels: bool = True,
