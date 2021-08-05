@@ -1347,3 +1347,14 @@ def is_interactive_session() -> bool:
         return False
     else:
         return True
+
+
+def is_jupyterlab_session() -> bool:
+    """Heuristic to check whether we are in a Jupyter-Lab session.
+    False positive, if classic nb launched from JupyLab...
+
+    Taken from: https://discourse.jupyter.org/t/find-out-if-my-code-runs-inside-a-notebook-or-jupyter-lab/6935/17
+    """
+    import psutil, re
+
+    return any(re.search("jupyter-lab", x) for x in psutil.Process().parent().cmdline())

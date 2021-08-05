@@ -22,7 +22,7 @@ __all__ = [
     "WeldxFile",
 ]
 
-from weldx.util import is_interactive_session
+from weldx.util import is_interactive_session, is_jupyterlab_session
 
 
 @contextmanager
@@ -434,7 +434,7 @@ class WeldxFile(UserDict):
         return fd
 
     def show_asdf_header(
-        self, use_widgets: bool = False, _interactive: Optional[bool] = None
+        self, use_widgets: bool = None, _interactive: Optional[bool] = None
     ):
         """Show the header of the ASDF serialization.
 
@@ -448,32 +448,20 @@ class WeldxFile(UserDict):
         use_widgets :
             When in an interactive session, use widgets to traverse the header or show
             a static syntax highlighted string?
-            Currently widgets are disabled by default, as jupyter notebook lacks the
-            capability to render the header nicely.
+            Representation is determined upon the frontend. Jupyter lab supports a
+            complex widget, which does not work in plain old Jupyter notebook.
         _interactive :
             Should not be set.
-
-        Notes
-        -----
-        Since the ASDF header will be created while writing the file, it is recommended
-        to call this method only with mode='rw', e.g. read-write mode. When mode is
-        read-only, a temporary file will be created, which can cause in-efficiencies.
-
         """
         return _HeaderVisualizer(self._asdf_handle).show(
             use_widgets=use_widgets, _interactive=_interactive
         )
 
-    def _repr_json_(self) -> dict:
-        """Return the headers a plain dict."""
-        # set _interactive false, to enforce a dict.
-        print("json repr")
-        return self.show_asdf_header(use_widgets=False, _interactive=False)
-
-    def _ipython_display(self):
+    def _ipython_display_(self):
         # this will be called in Jupyter Lab, but not in a plain notebook.
-        print("ipython display")
-        return self.show_asdf_header(use_widgets=False, _interactive=True)
+        from IPython.core.display import display
+
+        display(self.show_asdf_header(use_widgets=False, _interactive=True))
 
 
 class _DummyBlock:
@@ -524,7 +512,7 @@ class _DummyBlockManager:
 def _fake_block_context(asdf_handle):
     blocks_org = asdf_handle.blocks
     asdf_handle._blocks = _DummyBlockManager()
-    yield
+    yield asdf_handle
     asdf_handle._blocks = blocks_org
 
 
@@ -541,24 +529,26 @@ class _HeaderVisualizer:
             containing the header contents.
         """
         buff = BytesIO()
-        with _fake_block_context(self._asdf_handle):
-            self._asdf_handle.write_to(
-                buff, include_block_index=False, all_array_storage="internal"
-            )
+        with _fake_block_context(self._asdf_handle) as h:
+            h.write_to(buff, include_block_index=False, all_array_storage="internal")
         buff.seek(0)
 
         return buff
 
     def show(
-        self, use_widgets=False, _interactive=None
+        self, use_widgets=None, _interactive=None
     ) -> Union[None, "IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
         if _interactive is None:
             _interactive = is_interactive_session()
+        if use_widgets is None:
+            use_widgets = is_jupyterlab_session()
 
         # We write the current tree to a buffer __without__ any binary data attached.
         buff = self._write_to_buffer_without_blocks()
 
         # automatically determine if this runs in an interactive session.
+        # These methods return an IPython displayable object
+        # (passed to IPython.display()).
         if _interactive:
             return self._show_interactive(use_widgets=use_widgets, buff=buff)
         else:
@@ -571,9 +561,10 @@ class _HeaderVisualizer:
         from weldx.asdf.util import notebook_fileprinter
 
         if use_widgets:
-            return view_tree(buff)
+            result = view_tree(buff)
         else:
-            return notebook_fileprinter(buff)
+            result = notebook_fileprinter(buff)
+        return result
 
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
