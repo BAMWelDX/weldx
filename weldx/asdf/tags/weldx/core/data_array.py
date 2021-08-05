@@ -1,3 +1,4 @@
+"""Serialization for xarray.DataArray."""
 from xarray import DataArray
 
 import weldx.asdf.tags.weldx.core.common_types as ct
@@ -5,7 +6,7 @@ from weldx.asdf.types import WeldxType
 
 
 class XarrayDataArrayASDF(WeldxType):
-    """Serialization class for xarray.DataArray"""
+    """Serialization class for xarray.DataArray."""
 
     name = "core/data_array"
     version = "1.0.0"
@@ -50,8 +51,7 @@ class XarrayDataArrayASDF(WeldxType):
 
     @classmethod
     def from_tree(cls, tree, ctx):
-        """
-        Converts basic types representing YAML trees into an 'xarray.DataArray'.
+        """Convert basic types representing YAML trees into an 'xarray.DataArray'.
 
         Parameters
         ----------
