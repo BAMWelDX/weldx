@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import functools
 import json
+import re
 import sys
 import warnings
 from collections.abc import Iterable, Sequence
@@ -14,6 +15,7 @@ from typing import Any, Callable, Collection, Dict, List, Mapping, Union
 import numpy as np
 import pandas as pd
 import pint
+import psutil
 import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
@@ -1258,3 +1260,14 @@ def is_interactive_session() -> bool:
         return False
     else:
         return True
+
+
+def is_jupyterlab_session() -> bool:
+    """Heuristic to check whether we are in a Jupyter-Lab session.
+
+    Notes
+    -----
+    False positive, if classic NB launched from JupyterLab.
+
+    """
+    return any(re.search("jupyter-lab", x) for x in psutil.Process().parent().cmdline())
