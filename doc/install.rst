@@ -56,7 +56,7 @@ In case you run into an error when using the weldx kernel on Windows systems tha
 you might have to apply the fix mentioned `here <https://github.com/jupyter/notebook/issues/4569#issuecomment-609901011>`_.
 
 Go to :code:`%userprofile%\.ipython\profile_default\startup` using the windows explorer and create a new file
-called :code:`ipython_startup.py`. Open it with a text editor and paste the following commmands into the file::
+called :code:`ipython_startup.py`. Open it with a text editor and paste the following commands into the file::
 
     import sys
     import os
