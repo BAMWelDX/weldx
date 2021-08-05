@@ -15,8 +15,8 @@ from weldx.time import Time, TimeDependent
 from weldx.types import types_time_like
 
 if TYPE_CHECKING:
-    import sympy
     import matplotlib.pyplot
+    import sympy
 
 __all__ = ["MathematicalExpression", "TimeSeries"]
 
