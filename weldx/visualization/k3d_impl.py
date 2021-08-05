@@ -9,7 +9,7 @@ import pandas as pd
 from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
-from weldx import LocalCoordinateSystem, SpatialData
+from weldx import LocalCoordinateSystem, SpatialData, TimeSeries
 from weldx import geometry as geo
 
 from .colors import (
@@ -44,6 +44,12 @@ def _get_coordinates_and_orientation(lcs: LocalCoordinateSystem, index: int = 0)
         The orientation
 
     """
+    if isinstance(lcs.coordinates, TimeSeries):
+        raise ValueError(
+            "Can not visualize LCS with expression based coordinates. "
+            "Interpolate values before plotting to solve this issue"
+        )
+
     coordinates = lcs.coordinates.isel(time=index, missing_dims="ignore").values.astype(
         "float32"
     )
