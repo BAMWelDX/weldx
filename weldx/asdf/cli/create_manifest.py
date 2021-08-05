@@ -36,4 +36,6 @@ def create_manifest(
 
 
 if __name__ == "__main__":
-    create_manifest()
+    from weldx.asdf.constants import SCHEMA_PATH
+
+    create_manifest(SCHEMA_PATH)
