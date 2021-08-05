@@ -202,7 +202,7 @@ class Time:
         # todo: update type hints (see: https://stackoverflow.com/q/46092104/6700329)
         # problem: ring dependency needs to be solved
         if issubclass(type(time), TimeDependent):
-            time = time.time
+            time = time.time  # type: ignore[union-attr] # mypy doesn't filter correctly
         if isinstance(time, Time):
             time_ref = time_ref if time_ref is not None else time._time_ref
             time = time._time
