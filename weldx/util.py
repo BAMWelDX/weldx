@@ -6,7 +6,7 @@ import json
 import sys
 import warnings
 from collections.abc import Iterable, Sequence
-from functools import reduce, wraps
+from functools import wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
 from typing import Any, Callable, ClassVar, Collection, Dict, List, Mapping, Union
@@ -17,10 +17,12 @@ import pint
 import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
-from pandas.api.types import is_datetime64_dtype, is_object_dtype, is_timedelta64_dtype
+from pandas.api.types import is_datetime64_dtype, is_timedelta64_dtype
 from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
+
+from weldx.time import Time
 
 from .constants import WELDX_UNIT_REGISTRY as ureg
 
@@ -308,76 +310,6 @@ def to_list(var) -> list:
     return [var]
 
 
-def to_pandas_time_index(
-    time: Union[
-        pint.Quantity,
-        np.ndarray,
-        pd.TimedeltaIndex,
-        pd.DatetimeIndex,
-        xr.DataArray,
-    ],
-) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
-    """Convert a time variable to the corresponding pandas time index type.
-
-    Parameters
-    ----------
-    time :
-        Variable that should be converted.
-
-    Returns
-    -------
-    Union[pandas.TimedeltaIndex, pandas.DatetimeIndex] :
-        Time union of all input objects
-
-    """
-    from weldx.transformations import LocalCoordinateSystem
-
-    _input_type = type(time)
-
-    if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
-        return time
-    if isinstance(time, LocalCoordinateSystem):
-        return to_pandas_time_index(time.time)
-
-    if isinstance(time, pint.Quantity):
-        time_ref = getattr(time, "time_ref", None)
-        base = "s"  # using low base unit could cause rounding errors
-        if not np.iterable(time):  # catch zero-dim arrays
-            time = np.expand_dims(time, 0)
-        delta = pd.TimedeltaIndex(data=time.to(base).magnitude, unit=base)
-        if time_ref is not None:
-            return delta + pd.Timestamp(time_ref)
-        return delta
-    if isinstance(time, (xr.DataArray, xr.Dataset)):
-        if "time" in time.coords:
-            time = time.time
-        time_index = pd.Index(time.values)
-        if is_timedelta64_dtype(time_index) and time.weldx.time_ref:
-            time_index = time_index + time.weldx.time_ref
-        return time_index
-    if (not np.iterable(time) or isinstance(time, str)) and not isinstance(
-        time, np.ndarray
-    ):
-        time = [time]
-
-    time = pd.Index(time)
-
-    if isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
-        return time
-    # try manual casting for object dtypes (i.e. strings), should avoid integers
-    # warning: this allows something like ["1","2","3"] which will be ns !!
-    if is_object_dtype(time):
-        for func in (pd.DatetimeIndex, pd.TimedeltaIndex):
-            try:
-                return func(time)
-            except (ValueError, TypeError):
-                continue
-
-    raise TypeError(
-        f"Could not convert {_input_type} " f"to pd.DatetimeIndex or pd.TimedeltaIndex"
-    )
-
-
 def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
     """Check if a matrix is close or equal to another matrix.
 
@@ -471,34 +403,6 @@ def swap_list_items(arr, i1, i2) -> list:
     a, b = i.index(i1), i.index(i2)
     i[b], i[a] = i[a], i[b]
     return i
-
-
-def get_time_union(
-    list_of_objects: List[Union[pd.DatetimeIndex, pd.TimedeltaIndex]]
-) -> Union[pd.DatetimeIndex, pd.TimedeltaIndex]:
-    """Generate a merged union of `pandas.DatetimeIndex` from list of inputs.
-
-    The functions tries to merge common inputs that are "time-like" or might have time
-    coordinates such as xarray objects, `~weldx.transformations.LocalCoordinateSystem`
-    and other time objects. See `to_pandas_time_index` for supported input object types.
-
-    Parameters
-    ----------
-    list_of_objects :
-        list of input objects to merge
-
-    Returns
-    -------
-    Union[pandas.DatetimeIndex, pandas.TimedeltaIndex]
-        Pandas time index class with merged times
-
-    """
-    # TODO: add tests
-
-    # see https://stackoverflow.com/a/44762908/11242411
-    return reduce(
-        lambda x, y: x.union(y), (to_pandas_time_index(idx) for idx in list_of_objects)
-    )
 
 
 def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
@@ -685,7 +589,9 @@ def xr_interp_like(
         interpolated DataArray
 
     """
+    da1 = da1.weldx.time_ref_unset()  # catch time formats
     if isinstance(da2, (xr.DataArray, xr.Dataset)):
+        da2 = da2.weldx.time_ref_unset()  # catch time formats
         sel_coords = da2.coords  # remember original interpolation coordinates
     else:  # assume da2 to be dict-like
         sel_coords = {
@@ -910,7 +816,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
         if "units" in check:
             units = coords[key].attrs.get("units", None)
-            if not units or not (ureg.Unit(units) == ureg.Unit(check["units"])):
+            if not units or not ureg.Unit(units) == ureg.Unit(check["units"]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{str(units)}', expected '{check['units']}'"
@@ -932,14 +838,14 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     return True
 
 
-def xr_3d_vector(data, times=None) -> xr.DataArray:
+def xr_3d_vector(data: np.ndarray, time: Time = None) -> xr.DataArray:
     """Create an xarray 3d vector with correctly named dimensions and coordinates.
 
     Parameters
     ----------
     data :
         Data
-    times :
+    time :
         Optional time data (Default value = None)
 
     Returns
@@ -947,25 +853,27 @@ def xr_3d_vector(data, times=None) -> xr.DataArray:
     xarray.DataArray
 
     """
-    if times is not None:
-        dsx = xr.DataArray(
+    if time is not None and np.array(data).ndim == 2:
+        if isinstance(time, Time):
+            time = time.as_pandas_index()
+        da = xr.DataArray(
             data=data,
             dims=["time", "c"],
-            coords={"time": times, "c": ["x", "y", "z"]},
+            coords={"time": time, "c": ["x", "y", "z"]},
         )
     else:
-        dsx = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
-    return dsx.astype(float)
+        da = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
+    return da.astype(float).weldx.time_ref_restore()
 
 
-def xr_3d_matrix(data, times=None) -> xr.DataArray:
+def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
     """Create an xarray 3d matrix with correctly named dimensions and coordinates.
 
     Parameters
     ----------
     data :
         Data
-    times :
+    time :
         Optional time data (Default value = None)
 
     Returns
@@ -973,23 +881,25 @@ def xr_3d_matrix(data, times=None) -> xr.DataArray:
     xarray.DataArray
 
     """
-    if times is not None:
-        dsx = xr.DataArray(
+    if time is not None and np.array(data).ndim == 3:
+        if isinstance(time, Time):
+            time = time.as_pandas_index()
+        da = xr.DataArray(
             data=data,
             dims=["time", "c", "v"],
-            coords={"time": times, "c": ["x", "y", "z"], "v": [0, 1, 2]},
+            coords={"time": time, "c": ["x", "y", "z"], "v": [0, 1, 2]},
         )
     else:
-        dsx = xr.DataArray(
+        da = xr.DataArray(
             data=data,
             dims=["c", "v"],
             coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
         )
-    return dsx.astype(float)
+    return da.astype(float).weldx.time_ref_restore()
 
 
 def xr_interp_orientation_in_time(
-    dsx: xr.DataArray, times: Union[pd.DatetimeIndex, pd.TimedeltaIndex]
+    dsx: xr.DataArray, times: Union[Time, pd.DatetimeIndex, pd.TimedeltaIndex]
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents orientation data in time.
 
@@ -1009,8 +919,8 @@ def xr_interp_orientation_in_time(
     if "time" not in dsx.coords:
         return dsx
 
-    times = to_pandas_time_index(times)
-    times_ds = to_pandas_time_index(dsx)
+    times = Time(times).as_pandas_index()
+    times_ds = Time(dsx).as_pandas_index()
     time_ref = dsx.weldx.time_ref
 
     if len(times_ds) > 1:
@@ -1044,7 +954,7 @@ def xr_interp_orientation_in_time(
 
 
 def xr_interp_coordinates_in_time(
-    da: xr.DataArray, times: Union[pd.TimedeltaIndex, pd.DatetimeIndex]
+    da: xr.DataArray, times: Union[Time, pd.TimedeltaIndex, pd.DatetimeIndex]
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents 3d coordinates in time.
 
@@ -1061,6 +971,7 @@ def xr_interp_coordinates_in_time(
         Interpolated data
 
     """
+    times = Time(times).as_pandas_index()
     da = da.weldx.time_ref_unset()
     da = xr_interp_like(
         da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True

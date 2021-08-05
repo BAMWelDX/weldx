@@ -1,6 +1,3 @@
-# Licensed under a 3-clause BSD style license - see LICENSE
-# -*- coding: utf-8 -*-
-
 import pandas as pd
 
 from weldx.asdf.types import WeldxType

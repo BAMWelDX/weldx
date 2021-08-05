@@ -268,7 +268,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "xarray": ("http://xarray.pydata.org/en/stable", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "matplotlib": ("https://matplotlib.org", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
