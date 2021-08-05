@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/process/terms-1.0.0"
+id: "asdf://weldx.bam.de/weldx/schemas/process/terms-1.0.0"
 
 title: |
   GMAW process definitions
@@ -19,7 +19,7 @@ base_process:
       type: string
     parameters:
       type: object
-      wx_property_tag: "tag:weldx.bam.de:weldx/core/time_series-*"
+      wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-*"
     meta:
       type: object
   required: [base_process,manufacturer,power_source,parameters]
@@ -101,49 +101,49 @@ parameters:
   wire_feedrate:
     description: |
       Nominal average wire feedrate.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "m/s"
 
   voltage:
     description: |
       Nominal target voltage for spray arc processes.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "V"
 
   pulse_voltage:
     description: |
       Nominal target pulse voltage.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "V"
 
   pulse_current:
     description: |
       Nominal target pulse current.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "A"
 
   pulse_duration:
     description: |
       Nominal target pulse duration.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "s"
 
   pulse_frequency:
     description: |
       Nominal target pulse frequency.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "Hz"
 
   base_voltage:
     description: |
       Nominal target base voltage.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "V"
 
   base_current:
     description: |
       Nominal target base current.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
     wx_unit: "A"
 
 ...

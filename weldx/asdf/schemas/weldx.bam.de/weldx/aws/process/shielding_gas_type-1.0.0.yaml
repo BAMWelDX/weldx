@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/aws/process/shielding_gas_type-1.0.0"
-tag: "tag:weldx.bam.de:weldx/aws/process/shielding_gas_type-1.0.0"
+id: "asdf://weldx.bam.de/weldx/schemas/aws/process/shielding_gas_type-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_type-1.0.0"
 
 title: |
   GMAW shielding gas
@@ -14,12 +14,12 @@ examples:
   -
     - A shielding gas mixture of 82% argon and 18% CO2.
     - |
-      !<tag:weldx.bam.de:weldx/aws/process/shielding_gas_type-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_type-1.0.0>
         gas_component:
-        - !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
+        - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
           gas_chemical_name: argon
           gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
-        - !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
+        - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
           gas_chemical_name: carbon dioxide
           gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
         common_name: SG

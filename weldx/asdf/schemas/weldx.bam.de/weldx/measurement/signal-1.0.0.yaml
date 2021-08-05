@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/measurement/signal-1.0.0"
-tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
+id: "asdf://weldx.bam.de/weldx/schemas/measurement/signal-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0"
 
 title: |
   Representation of a measurement signal with optional data attached.
@@ -12,13 +12,13 @@ examples:
   -
     - A signal representing an analog voltage measurement without data.
     - |
-      !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
         signal_type: analog
         unit: V
   -
     - A digital dimensionless signal.
     - |
-      !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
         signal_type: digital
         unit: ''
 
@@ -35,7 +35,7 @@ properties:
   data:
     description: |
       Measurement data that was produced by the signal.
-    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
 
 
 propertyOrder: [signal_type, unit, data]

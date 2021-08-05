@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/aws/design/weldment-1.0.0"
-tag: "tag:weldx.bam.de:weldx/aws/design/weldment-1.0.0"
+id: "asdf://weldx.bam.de/weldx/schemas/aws/design/weldment-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/aws/design/weldment-1.0.0"
 
 title: |
   <TODO DESCRIPTION>

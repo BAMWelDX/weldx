@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/time/timedelta-1.0.0"
-tag: "tag:weldx.bam.de:weldx/time/timedelta-1.0.0"
+id: "asdf://weldx.bam.de/weldx/schemas/time/timedelta-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0"
 
 title: |
   Represents a difference between two instances in time.
@@ -11,7 +11,7 @@ examples:
   -
     - A timedelta of 10 s
     - |
-      !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+      !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M10S}
 
 type: object
 properties:

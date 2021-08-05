@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/uuid-1.0.0"
-tag: "tag:weldx.bam.de:weldx/uuid-1.0.0"
+id: "asdf://weldx.bam.de/weldx/schemas/uuid-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/uuid-1.0.0"
 
 title: |
   Version 4 UUID
@@ -13,7 +13,7 @@ examples:
   -
     - A version 4 UUID string
     - |
-      !<tag:weldx.bam.de:weldx/uuid-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/uuid-1.0.0>
         uuid: 448414c4-da7a-4832-9219-5e6042c2e96e
 
 type: object

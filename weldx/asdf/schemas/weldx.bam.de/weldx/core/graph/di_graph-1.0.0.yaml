@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/core/graph/di_graph-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0"
+id: "asdf://weldx.bam.de/weldx/schemas/core/graph/di_graph-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0"
 
 title: |
   Directed Graph.
@@ -16,35 +16,35 @@ examples:
   -
     - A directed graph with two branches
     - |
-      !<tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0>
-        root_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0>
+        root_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
           name: A
           attributes: {node_attr: 3.14}
           edges:
-          - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+          - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
             direction: fwd
             attributes: {edge_attr: 42}
-            target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+            target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
               name: B
               attributes: {node_attr: 3.14}
               edges:
-              - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+              - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
                 direction: fwd
                 attributes: {edge_attr: 42}
-                target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+                target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                   name: H
                   attributes: {node_attr: 3.14}
-          - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+          - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
             direction: fwd
             attributes: {edge_attr: 42}
-            target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+            target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
               name: C
               attributes: {node_attr: 3.14}
               edges:
-              - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+              - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
                 direction: bwd
                 attributes: {edge_attr: 42}
-                target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+                target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                   name: D
                   attributes: {node_attr: 3.14}
 
@@ -52,7 +52,7 @@ examples:
 type: object
 properties:
   root_node:
-    tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
 
 required: [root_node]
 ...

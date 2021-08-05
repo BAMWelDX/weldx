@@ -1,8 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "http://weldx.bam.de/schemas/weldx/core/mathematical_expression-1.0.0"
-tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
+id: "asdf://weldx.bam.de/weldx/schemas/core/mathematical_expression-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0"
 
 title: |
   Schema that describes a mathematical_expression.
@@ -16,7 +16,7 @@ examples:
   -
     - A linear mathematical expression
     - |
-      !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
         expression: a*x + b
         parameters:
           a: !unit/quantity-1.1.0 {unit: volt, value: 1.2}

@@ -10,6 +10,7 @@ from asdf.util import uri_match
 from weldx.asdf.extension import WxSyntaxError
 from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexType
 from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexType
+from weldx.asdf.types import format_tag
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
@@ -371,17 +372,17 @@ def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> Lis
         return instance_dict["shape"]
     elif isinstance(instance_dict, asdf.types.tagged.Tagged):
         # add custom type implementations
-        if "weldx/time/timedeltaindex" in instance_dict._tag:
+        if format_tag("time/timedeltaindex") in instance_dict._tag:
             return TimedeltaIndexType.shape_from_tagged(instance_dict)
-        elif "weldx/time/datetimeindex" in instance_dict._tag:
+        elif format_tag("time/datetimeindex") in instance_dict._tag:
             return DatetimeIndexType.shape_from_tagged(instance_dict)
-        elif "weldx/core/time_series" in instance_dict._tag:
+        elif format_tag("core/time_series") in instance_dict._tag:
             return [1]  # scalar
         elif "asdf/unit/quantity" in instance_dict._tag:
             if isinstance(instance_dict["value"], dict):  # ndarray
                 return _get_instance_shape(instance_dict["value"])
             return [1]  # scalar
-        elif "weldx/core/variable" in instance_dict._tag:
+        elif format_tag("core/variable") in instance_dict._tag:
             return _get_instance_shape(instance_dict["data"])
 
     return None

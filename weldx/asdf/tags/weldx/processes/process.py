@@ -24,7 +24,12 @@ class GmawProcessTypeAsdf(WeldxType):
     def to_tree_tagged(cls, node: GmawProcess, ctx):
         """Serialize tree with custom tag definition."""
         tree = cls.to_tree(node, ctx)
-        tag = "tag:weldx.bam.de:weldx/process/" + tree["tag"] + "-" + str(cls.version)
+        tag = (
+            "asdf://weldx.bam.de/weldx/tags/process/"
+            + tree["tag"]
+            + "-"
+            + str(cls.version)
+        )
         return tag_object(tag, tree, ctx=ctx)
 
     @classmethod

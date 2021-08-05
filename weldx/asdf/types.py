@@ -4,6 +4,7 @@
 import functools
 
 from asdf.types import CustomType, ExtensionTypeMeta
+from asdf.versioning import AsdfSpec
 from boltons.iterutils import remap
 
 META_ATTR = "wx_metadata"
@@ -83,6 +84,21 @@ class WeldxTypeMeta(ExtensionTypeMeta):
         return cls
 
 
+def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="weldx"):
+    """
+    Format a YAML tag to new style asdf:// syntax.
+    """
+    tag = "asdf://{0}/{1}/tags/{2}".format(organization, standard, tag_name)
+
+    if version is None:
+        return tag
+
+    if isinstance(version, AsdfSpec):
+        version = str(version.spec)
+
+    return "{0}-{1}".format(tag, version)
+
+
 class WeldxType(CustomType, metaclass=WeldxTypeMeta):
     """This class represents types that have schemas and tags that are defined
     within weldx.
@@ -91,6 +107,36 @@ class WeldxType(CustomType, metaclass=WeldxTypeMeta):
 
     organization = "weldx.bam.de"
     standard = "weldx"
+
+    @classmethod
+    def make_yaml_tag(cls, name, versioned=True):
+        """
+        Given the name of a type, returns a string representing its YAML tag.
+
+        This implementation uses the new style asdf:// tag syntax seen above.
+
+        Parameters
+        ----------
+        name : str
+            The name of the type. In most cases this will correspond to the
+            `name` attribute of the tag type. However, it is passed as a
+            parameter since some tag types represent multiple custom
+            types.
+
+        versioned : bool
+            If `True`, the tag will be versioned. Otherwise, a YAML tag without
+            a version will be returned.
+
+        Returns
+        -------
+            `str` representing the YAML tag
+        """
+        return format_tag(
+            organization=cls.organization,
+            standard=cls.standard,
+            version=cls.version if versioned else None,
+            tag_name=name,
+        )
 
 
 class WeldxAsdfType(CustomType, metaclass=WeldxTypeMeta):

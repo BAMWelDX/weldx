@@ -28,7 +28,7 @@ class WeldxExtension(AsdfExtension):
 
     @property
     def tag_mapping(self):
-        return [(WELDX_TAG_BASE, WELDX_SCHEMA_URI_BASE + "weldx{tag_suffix}")]
+        return [(WELDX_TAG_BASE, WELDX_SCHEMA_URI_BASE + "{tag_suffix}")]
 
     @property
     def url_mapping(self):
@@ -36,7 +36,7 @@ class WeldxExtension(AsdfExtension):
 
     @property
     def yaml_tag_handles(self):
-        return {"!weldx!": "tag:weldx.bam.de:weldx/"}
+        return {"!weldx!": "asdf://weldx.bam.de/weldx/tags/"}
 
 
 class WeldxAsdfExtension(BuiltinExtension):
