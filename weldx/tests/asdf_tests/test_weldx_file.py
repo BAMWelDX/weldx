@@ -30,7 +30,7 @@ class ReadOnlyFile:
     def read(self, *args, **kwargs):  # noqa: D102
         return self.file_read_only.read(*args, **kwargs)
 
-    def readline(self, limit=-1):  # noqa: D107
+    def readline(self, limit=-1):  # noqa: D102
         return self.file_read_only.readline(limit)
 
     @staticmethod
@@ -349,12 +349,11 @@ class TestWeldXFile:
         "mode",
         ("rw", "r"),
     )
-    def test_show_header_memory_usage(mode, capsys, tmpdir):
+    def test_show_header_memory_usage(mode, tmpdir):
         """Check we do not significantly increase memory usage by showing the header.
 
         Also ensure the tree is still usable after showing the header.
         """
-        import numpy as np
         import psutil
         import gc
 
@@ -413,7 +412,8 @@ class TestWeldXFile:
     def test_compression(tmpdir):
         """Check we do not modify the input during basic operations.
 
-        Even under different conditions like compression."""
+        Even under different conditions like compression.
+        """
         fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
 
         def get_size_and_mtime(fn):
