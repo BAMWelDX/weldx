@@ -174,7 +174,7 @@ def check_coordinate_system(
 
     if time is not None:
         assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
-        assert np.all(lcs.time == time)
+        assert np.all(lcs.time == Time(time, time_ref))
         assert lcs.reference_time == time_ref
 
     check_coordinate_system_orientation(
@@ -195,15 +195,12 @@ def check_coordinate_systems_close(lcs_0, lcs_1):
         Second coordinate system.
 
     """
-    time = None
-    if "time" in lcs_1.dataset:
-        time = lcs_1.time
     check_coordinate_system(
         lcs_0,
         lcs_1.orientation.data,
         lcs_1.coordinates.data,
         True,
-        time,
+        lcs_1.time,
         lcs_1.reference_time,
     )
 
@@ -516,26 +513,22 @@ class TestLocalCoordinateSystem:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "time, time_ref, time_exp, time_ref_exp, datetime_exp, quantity_exp",
+        "time, time_ref, time_exp, time_ref_exp",
         [
-            (time_delta, None, time_delta, None, None, time_quantity),
-            (time_delta, timestamp, time_delta, timestamp, date_time, time_quantity),
-            (time_quantity, None, time_delta, None, None, time_quantity),
-            (time_quantity, timestamp, time_delta, timestamp, date_time, time_quantity),
-            (date_time, None, time_delta, timestamp, date_time, time_quantity),
+            (time_delta, None, time_delta, None),
+            (time_delta, timestamp, time_delta, timestamp),
+            (time_quantity, None, time_delta, None),
+            (time_quantity, timestamp, time_delta, timestamp),
+            (date_time, None, time_delta, timestamp),
             (
                 date_time,
                 TS("1999-12-31"),
                 TDI([86400, 86401, 86402], "s"),
                 TS("1999-12-31"),
-                date_time,
-                Q_([86400, 86401, 86402], "s"),
             ),
         ],
     )
-    def test_init_time_formats(
-        time, time_ref, time_exp, time_ref_exp, datetime_exp, quantity_exp
-    ):
+    def test_init_time_formats(time, time_ref, time_exp, time_ref_exp):
         """Test the __init__ method with the different supported time formats.
 
         Parameters
@@ -548,10 +541,6 @@ class TestLocalCoordinateSystem:
             Expected return value of the 'time' property
         time_ref_exp:
             Expected return value of the 'time_ref' property
-        datetime_exp:
-            Expected return value of the 'datetimeindex' property
-        quantity_exp:
-            Expected return value of the 'time_quantity' property
 
         """
         # setup
@@ -563,12 +552,8 @@ class TestLocalCoordinateSystem:
 
         # check results
 
-        assert np.all(lcs.time == time_exp)
+        assert np.all(lcs.time == Time(time_exp, time_ref_exp))
         assert lcs.reference_time == time_ref_exp
-        assert np.all(lcs.datetimeindex == datetime_exp)
-        assert np.all(lcs.time_quantity == quantity_exp)
-        if datetime_exp is not None:
-            assert np.all(Time(lcs.time_quantity) == Time(datetime_exp))
 
     # test_time_warning ----------------------------------------------------------------
 
@@ -639,7 +624,7 @@ class TestLocalCoordinateSystem:
 
         # check results
 
-        assert np.all(lcs.time == time_exp)
+        assert np.all(lcs.time == Time(time_exp, time_ref))
         assert lcs.reference_time == time_ref
 
     # test_init_expr_time_series_as_coord ----------------------------------------------
@@ -765,7 +750,8 @@ class TestLocalCoordinateSystem:
         lcs.reset_reference_time(time_ref_new)
 
         # check results
-        assert np.all(lcs.time == time_exp)
+        assert np.all(lcs.time == Time(time_exp, time_ref_new))
+        assert lcs.reference_time == TS(time_ref_new)
 
     # test_reset_reference_time_exceptions ---------------------------------------------
 
@@ -4163,7 +4149,7 @@ class TestCoordinateSystemManager:
                 lcs_exp = tf.LocalCoordinateSystem(
                     self._orientation_from_value(days_interp + diff, v[1][0], v[1][-1]),
                     self._coordinates_from_value(days_interp + diff, v[1][0], v[1][-1]),
-                    TDI(days_interp, "D"),
+                    time_class,
                     csm.reference_time if csm.has_reference_time else time_ref_exp,
                 )
             else:

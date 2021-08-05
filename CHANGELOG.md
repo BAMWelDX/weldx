@@ -15,6 +15,7 @@
 
 - removed functions now covered by `Time`: ``pandas_time_delta_to_quantity``, ``to_pandas_time_index``
   , ``get_time_union`` [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
+- removed custom ``wx_tag`` validator [[#461]](https://github.com/BAMWelDX/weldx/pull/461)
 
 ### changes
 
@@ -30,6 +31,8 @@
 ### documentation
 
 ### ASDF
+
+- add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
 
 ### deprecations
 
@@ -48,6 +51,8 @@
 
 - `TimeSeries.__init__` accepts `xarray.DataArray` as `data`
   parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
+- The `LocalCoordinateSystem.time` and `TimeSeries.time` now return an instance of `Time` 
+  [[#464]](https://github.com/BAMWelDX/weldx/pull/464)
 
 ### ASDF
 

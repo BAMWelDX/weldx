@@ -22,9 +22,9 @@ from weldx.transformations.types import (
 )
 from weldx.transformations.util import normalize
 from weldx.types import types_time_like, types_timestamp_like
+from weldx.util import deprecated
 
 from ..time import TimeDependent
-
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
@@ -307,22 +307,12 @@ class LocalCoordinateSystem(TimeDependent):
         time: Union[types_time_like, Time],
         time_ref: Union[types_timestamp_like, Time],
     ) -> Union[Time, None]:
-        # check if this function can be refactored with the TimeSeries supporting Time
-        if isinstance(time, (xr.DataArray, xr.Dataset)):
-            if "time" in time.coords:
-                time = time.time
-            time_ref = time.weldx.time_ref
-            time = time.values
-
-        elif (
-            isinstance(coordinates, TimeSeries)
-            and coordinates.is_discrete
-            and time is None
-        ):
-            time = coordinates.time
-        # this branch is only relevant if coordinates and orientations are xarray types
-        elif time is None and time_ref is not None:
-            time = time_ref
+        if time is None:
+            if isinstance(coordinates, TimeSeries) and coordinates.is_discrete:
+                time = coordinates.time
+            # this branch is relevant if coordinates and orientations are xarray types
+            elif time_ref is not None:
+                time = time_ref
 
         return Time(time, time_ref) if time is not None else None
 
@@ -758,6 +748,12 @@ class LocalCoordinateSystem(TimeDependent):
         return self._dataset.weldx.time_ref
 
     @property
+    @deprecated(
+        "0.4.1",
+        "0.5.0",
+        "Use the interfaces of the 'Time' class that is now returned by the 'time' "
+        "property",
+    )
     def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
         """Get the time as 'pandas.DatetimeIndex'.
 
@@ -774,7 +770,7 @@ class LocalCoordinateSystem(TimeDependent):
         return self.time + self.reference_time
 
     @property
-    def time(self) -> Union[xr.DataArray, None]:
+    def time(self) -> Union[Time, None]:
         """Get the time union of the local coordinate system (None if system is static).
 
         Returns
@@ -784,10 +780,16 @@ class LocalCoordinateSystem(TimeDependent):
 
         """
         if "time" in self._dataset.coords:
-            return self._dataset.time
+            return Time(self._dataset.time, self.reference_time)
         return None
 
     @property
+    @deprecated(
+        "0.4.1",
+        "0.5.0",
+        "Use the interfaces of the 'Time' class that is now returned by the 'time' "
+        "property",
+    )
     def time_quantity(self) -> pint.Quantity:
         """Get the time as 'pint.Quantity'.
 
@@ -888,12 +890,6 @@ class LocalCoordinateSystem(TimeDependent):
         if (not self.is_time_dependent) or (time is None):
             return self
 
-        # handle LCS as time
-        if isinstance(time, LocalCoordinateSystem):
-            if time_ref is None:
-                time_ref = time.reference_time
-            time = time.time
-
         time = Time(time, time_ref)
 
         if self.has_reference_time != time.is_absolute:
@@ -909,10 +905,8 @@ class LocalCoordinateSystem(TimeDependent):
 
         if isinstance(self.coordinates, TimeSeries):
             time_interp = Time(time, self.reference_time)
-
-            # todo: remove as_timedelta when TimeSeries supports Time
             coordinates = self._coords_from_discrete_time_series(
-                self.coordinates.interp_time(time_interp.as_timedelta())
+                self.coordinates.interp_time(time_interp)
             )
             if self.has_reference_time:
                 coordinates.weldx.time_ref = self.reference_time

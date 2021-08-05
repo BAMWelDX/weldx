@@ -58,7 +58,8 @@ class Time:
     ----------
     time :
         A supported class that represents either absolute or relative times. The
-        data must be in ascending order.
+        data must be in ascending order. All classes derived from the abstract base
+        class 'TimeDependent' are supported too.
     time_ref :
         An absolute reference point in time (timestamp). The return values of all
         accessors that return relative times will be calculated towards this
@@ -117,6 +118,17 @@ class Time:
     >>> t_abs = Time("3h", "2010-08-11")
     >>> t_abs = Time("2014-07-23")
     >>> t_abs = Time(["2000","2001","2002"])
+
+    Types that are derived from the abstract base class `TimeDependent` can also be
+    passed directly to `Time` as `time` parameter:
+
+    >>> from weldx import LocalCoordinateSystem as LCS
+    >>> lcs = LCS(coordinates=[[0, 0, 0], [1, 1, 1]], time=["1s", "2s"])
+    >>> t_from_lcs = Time(lcs)
+    >>>
+    >>> from weldx import TimeSeries
+    >>> ts = TimeSeries(Q_([4, 5, 6], "m"), ["2000", "2001", "2002"])
+    >>> t_from_ts = Time(ts)
 
     As long as one of the operands represents a timedelta, you can add two `Time`
     instances. If one of the instances is an array, the other one needs to be either a
@@ -187,6 +199,10 @@ class Time:
         time: Union[types_time_like, Time, List[str]],
         time_ref: Union[types_timestamp_like, Time, None] = None,
     ):
+        # todo: update type hints (see: https://stackoverflow.com/q/46092104/6700329)
+        # problem: ring dependency needs to be solved
+        if issubclass(type(time), TimeDependent):
+            time = time.time
         if isinstance(time, Time):
             time_ref = time_ref if time_ref is not None else time._time_ref
             time = time._time
@@ -256,6 +272,14 @@ class Time:
     def __len__(self):
         """Return the length of the data."""
         return self.length
+
+    def __iter__(self):
+        """Use generator to iterate over index values."""
+        return (t for t in self.as_pandas_index())
+
+    def __getitem__(self, item):
+        """Access pandas index."""
+        return self.as_pandas_index()[item]
 
     def __repr__(self):
         """Console info."""
