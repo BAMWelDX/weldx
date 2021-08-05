@@ -22,7 +22,6 @@ from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
-
 # helpers for tests -----------------------------------------------------------
 
 
@@ -698,7 +697,7 @@ class TestLocalCoordinateSystem:
         if len(time) == 1:
             assert lcs.time is None
         else:
-            assert np.all(lcs.time_quantity == time)
+            assert np.all(lcs.time.as_quantity() == time)
 
     # test_reset_reference_time --------------------------------------------------------
 
@@ -967,7 +966,7 @@ class TestLocalCoordinateSystem:
 
         # check time
         assert lcs_interp.reference_time == ref_time
-        assert np.all(Time(lcs_interp.time_quantity) == Time(time, ref_time))
+        assert np.all(lcs_interp.time == Time(time, ref_time))
 
         # check coordinates
         exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
@@ -3228,7 +3227,7 @@ class TestCoordinateSystemManager:
         result = csm.get_cs(lcs, in_lcs)
         assert np.allclose(result.orientation, exp_orient)
         assert np.allclose(result.coordinates, exp_coords)
-        assert np.allclose(result.time_quantity.m, exp_time)
+        assert np.allclose(result.time.as_quantity().m, exp_time)
 
     # test_get_local_coordinate_system_exceptions --------------------------------------
 

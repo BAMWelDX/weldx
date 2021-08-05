@@ -14,14 +14,10 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
 from weldx.core import TimeSeries
-from weldx.time import Time, types_time_like, types_timestamp_like, TimeDependent
-from weldx.transformations.types import (
-    types_coordinates,
-    types_orientation,
-)
+from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
+from weldx.transformations.types import types_coordinates, types_orientation
 from weldx.transformations.util import normalize
 from weldx.util import deprecated
-
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
@@ -745,28 +741,6 @@ class LocalCoordinateSystem(TimeDependent):
         return self._dataset.weldx.time_ref
 
     @property
-    @deprecated(
-        "0.4.1",
-        "0.5.0",
-        "Use the interfaces of the 'Time' class that is now returned by the 'time' "
-        "property",
-    )
-    def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
-        """Get the time as 'pandas.DatetimeIndex'.
-
-        If the coordinate system has no reference time, 'None' is returned.
-
-        Returns
-        -------
-        Union[pandas.DatetimeIndex, None]:
-            The coordinate systems time as 'pandas.DatetimeIndex'
-
-        """
-        if not self.has_reference_time:
-            return None
-        return self.time + self.reference_time
-
-    @property
     def time(self) -> Union[Time, None]:
         """Get the time union of the local coordinate system (None if system is static).
 
@@ -779,24 +753,6 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" in self._dataset.coords:
             return Time(self._dataset.time, self.reference_time)
         return None
-
-    @property
-    @deprecated(
-        "0.4.1",
-        "0.5.0",
-        "Use the interfaces of the 'Time' class that is now returned by the 'time' "
-        "property",
-    )
-    def time_quantity(self) -> pint.Quantity:
-        """Get the time as 'pint.Quantity'.
-
-        Returns
-        -------
-        pint.Quantity:
-            The coordinate systems time as 'pint.Quantity'
-
-        """
-        return Time(self.time, self.reference_time).as_quantity()
 
     @property
     def dataset(self) -> xr.Dataset:
