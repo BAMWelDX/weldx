@@ -3,10 +3,6 @@ import pathlib
 from io import IOBase
 from typing import Protocol, Union, runtime_checkable
 
-import numpy as np
-from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
-from pint import Quantity
-
 __all__ = [
     "SupportsFileReadOnly",
     "SupportsFileReadWrite",
