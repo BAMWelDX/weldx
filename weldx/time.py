@@ -1,6 +1,7 @@
 """Contains classes and functions related to time."""
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from functools import reduce
 from typing import List, Union
 
@@ -20,35 +21,6 @@ __all__ = ["Time"]
 
 # list of types that are supported to be stored in Time._time
 _data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
-
-
-def pandas_time_delta_to_quantity(
-    time: Union[Timedelta, TimedeltaIndex], unit: str = "s"
-) -> pint.Quantity:
-    """Convert a pandas timedelta type into a corresponding `pint.Quantity`.
-
-    Parameters
-    ----------
-    time :
-        Instance of `pandas.TimedeltaIndex`
-    unit :
-        String that specifies the desired time unit.
-
-    Returns
-    -------
-    pint.Quantity :
-        Converted time quantity
-
-    """
-    # from pandas Timedelta documentation: "The .value attribute is always in ns."
-    # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas
-    # .Timedelta.html
-    if isinstance(time, Timedelta):
-        time = TimedeltaIndex([time])
-    nanoseconds = time.values.astype(np.int64)
-    if len(nanoseconds) == 1:
-        nanoseconds = nanoseconds[0]
-    return Q_(nanoseconds, "ns").to(unit)
 
 
 class Time:
@@ -86,7 +58,8 @@ class Time:
     ----------
     time :
         A supported class that represents either absolute or relative times. The
-        data must be in ascending order.
+        data must be in ascending order. All classes derived from the abstract base
+        class 'TimeDependent' are supported too.
     time_ref :
         An absolute reference point in time (timestamp). The return values of all
         accessors that return relative times will be calculated towards this
@@ -145,6 +118,17 @@ class Time:
     >>> t_abs = Time("3h", "2010-08-11")
     >>> t_abs = Time("2014-07-23")
     >>> t_abs = Time(["2000","2001","2002"])
+
+    Types that are derived from the abstract base class `TimeDependent` can also be
+    passed directly to `Time` as `time` parameter:
+
+    >>> from weldx import LocalCoordinateSystem as LCS
+    >>> lcs = LCS(coordinates=[[0, 0, 0], [1, 1, 1]], time=["1s", "2s"])
+    >>> t_from_lcs = Time(lcs)
+    >>>
+    >>> from weldx import TimeSeries
+    >>> ts = TimeSeries(Q_([4, 5, 6], "m"), ["2000", "2001", "2002"])
+    >>> t_from_ts = Time(ts)
 
     As long as one of the operands represents a timedelta, you can add two `Time`
     instances. If one of the instances is an array, the other one needs to be either a
@@ -215,6 +199,10 @@ class Time:
         time: Union[types_time_like, Time, List[str]],
         time_ref: Union[types_timestamp_like, Time, None] = None,
     ):
+        # todo: update type hints (see: https://stackoverflow.com/q/46092104/6700329)
+        # problem: ring dependency needs to be solved
+        if issubclass(type(time), TimeDependent):
+            time = time.time
         if isinstance(time, Time):
             time_ref = time_ref if time_ref is not None else time._time_ref
             time = time._time
@@ -285,6 +273,14 @@ class Time:
         """Return the length of the data."""
         return self.length
 
+    def __iter__(self):
+        """Use generator to iterate over index values."""
+        return (t for t in self.as_pandas_index())
+
+    def __getitem__(self, item):
+        """Access pandas index."""
+        return self.as_pandas_index()[item]
+
     def __repr__(self):
         """Console info."""
         repr_str = "Time:\n" + self.as_pandas().__str__()
@@ -328,18 +324,43 @@ class Time:
         return np.allclose(self._time, Time(other).as_pandas())
 
     def as_quantity(self, unit: str = "s") -> pint.Quantity:
-        """Return the data as `pint.Quantity`."""
+        """Return the data as `pint.Quantity`.
+
+        Parameters
+        ----------
+        unit :
+            String that specifies the desired time unit for conversion.
+
+        Returns
+        -------
+        pint.Quantity :
+            Converted time quantity
+
+        Notes
+        -----
+        from pandas Timedelta documentation: "The .value attribute is always in ns."
+        https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html
+        """
+        nanoseconds = self.as_timedelta_index().values.astype(np.int64)
+        if len(nanoseconds) == 1:
+            nanoseconds = nanoseconds[0]
+        q = Q_(nanoseconds, "ns").to(unit)
         if self.is_absolute:
-            q = pandas_time_delta_to_quantity(self._time - self.reference_time, unit)
             setattr(q, "time_ref", self.reference_time)  # store time_ref info
-            return q
-        return pandas_time_delta_to_quantity(self._time, unit)
+        return q
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
-        """Return the data as `pandas.TimedeltaIndex`."""
+        """Return the data as `pandas.TimedeltaIndex` or `pandas.Timedelta`."""
         if self.is_absolute:
             return self._time - self.reference_time
         return self._time
+
+    def as_timedelta_index(self) -> TimedeltaIndex:
+        """Return the data as `pandas.TimedeltaIndex`."""
+        timedelta = self.as_timedelta()
+        if isinstance(timedelta, Timedelta):
+            return TimedeltaIndex([timedelta])
+        return timedelta
 
     def as_datetime(self) -> Union[Timestamp, DatetimeIndex]:
         """Return the data as `pandas.DatetimeIndex`."""
@@ -490,3 +511,17 @@ class Time:
             (Time(time).as_pandas_index() for time in times),
         )
         return Time(pandas_index)
+
+
+class TimeDependent(ABC):
+    """An abstract base class that describes a common interface of time dep. classes."""
+
+    @property
+    @abstractmethod
+    def time(self) -> Time:
+        """Get the classes time component."""
+
+    @property
+    @abstractmethod
+    def reference_time(self) -> Union[Timestamp, None]:
+        """Return the reference timestamp if the time data is absolute."""

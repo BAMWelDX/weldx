@@ -13,9 +13,15 @@
 
 ### removed
 
+- removed functions now covered by `Time`: ``pandas_time_delta_to_quantity``, ``to_pandas_time_index``
+  , ``get_time_union`` [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
+- removed custom ``wx_tag`` validator [[#461]](https://github.com/BAMWelDX/weldx/pull/461)
+
 ### changes
 
 - move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
+- `LocalCoordinateSystem` and `CoordinateSystemManager` function parameters related to time now support all types that
+  are also supported by the new `Time` class [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
 
 ### fixes
 
@@ -25,6 +31,8 @@
 ### documentation
 
 ### ASDF
+
+- add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
 
 ### deprecations
 
@@ -37,11 +45,14 @@
 - `closed_mesh` parameter to `Geometry.spatial_data`
   and `SpatialData.from_geometry_raster` [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
 - `TimeSeries.plot` and `Signal.plot` [[#420]](https://github.com/BAMWelDX/weldx/pull/420)
+- abstract base class `TimeDependent` [[#460]](https://github.com/BAMWelDX/weldx/pull/460)
 
 ### changes
 
 - `TimeSeries.__init__` accepts `xarray.DataArray` as `data`
   parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
+- The `LocalCoordinateSystem.time` and `TimeSeries.time` now return an instance of `Time` 
+  [[#464]](https://github.com/BAMWelDX/weldx/pull/464)
 
 ### ASDF
 

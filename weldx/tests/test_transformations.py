@@ -3,7 +3,7 @@
 import math
 import random
 from copy import deepcopy
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Iterable, List, Union
 
 import numpy as np
 import pandas as pd
@@ -18,8 +18,10 @@ import weldx.util as ut
 from weldx import Q_, SpatialData
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
+from weldx.time import Time
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
+from weldx.types import types_time_like, types_timestamp_like
 
 # helpers for tests -----------------------------------------------------------
 
@@ -172,7 +174,7 @@ def check_coordinate_system(
 
     if time is not None:
         assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
-        assert np.all(lcs.time == time)
+        assert np.all(lcs.time == Time(time, time_ref))
         assert lcs.reference_time == time_ref
 
     check_coordinate_system_orientation(
@@ -193,11 +195,13 @@ def check_coordinate_systems_close(lcs_0, lcs_1):
         Second coordinate system.
 
     """
-    time = None
-    if "time" in lcs_1.dataset:
-        time = lcs_1.time
     check_coordinate_system(
-        lcs_0, lcs_1.orientation.data, lcs_1.coordinates.data, True, time
+        lcs_0,
+        lcs_1.orientation.data,
+        lcs_1.coordinates.data,
+        True,
+        lcs_1.time,
+        lcs_1.reference_time,
     )
 
 
@@ -509,26 +513,22 @@ class TestLocalCoordinateSystem:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "time, time_ref, time_exp, time_ref_exp, datetime_exp, quantity_exp",
+        "time, time_ref, time_exp, time_ref_exp",
         [
-            (time_delta, None, time_delta, None, None, time_quantity),
-            (time_delta, timestamp, time_delta, timestamp, date_time, time_quantity),
-            (time_quantity, None, time_delta, None, None, time_quantity),
-            (time_quantity, timestamp, time_delta, timestamp, date_time, time_quantity),
-            (date_time, None, time_delta, timestamp, date_time, time_quantity),
+            (time_delta, None, time_delta, None),
+            (time_delta, timestamp, time_delta, timestamp),
+            (time_quantity, None, time_delta, None),
+            (time_quantity, timestamp, time_delta, timestamp),
+            (date_time, None, time_delta, timestamp),
             (
                 date_time,
                 TS("1999-12-31"),
                 TDI([86400, 86401, 86402], "s"),
                 TS("1999-12-31"),
-                date_time,
-                Q_([86400, 86401, 86402], "s"),
             ),
         ],
     )
-    def test_init_time_formats(
-        time, time_ref, time_exp, time_ref_exp, datetime_exp, quantity_exp
-    ):
+    def test_init_time_formats(time, time_ref, time_exp, time_ref_exp):
         """Test the __init__ method with the different supported time formats.
 
         Parameters
@@ -541,10 +541,6 @@ class TestLocalCoordinateSystem:
             Expected return value of the 'time' property
         time_ref_exp:
             Expected return value of the 'time_ref' property
-        datetime_exp:
-            Expected return value of the 'datetimeindex' property
-        quantity_exp:
-            Expected return value of the 'time_quantity' property
 
         """
         # setup
@@ -556,10 +552,8 @@ class TestLocalCoordinateSystem:
 
         # check results
 
-        assert np.all(lcs.time == time_exp)
+        assert np.all(lcs.time == Time(time_exp, time_ref_exp))
         assert lcs.reference_time == time_ref_exp
-        assert np.all(lcs.datetimeindex == datetime_exp)
-        assert np.all(lcs.time_quantity == quantity_exp)
 
     # test_time_warning ----------------------------------------------------------------
 
@@ -630,7 +624,7 @@ class TestLocalCoordinateSystem:
 
         # check results
 
-        assert np.all(lcs.time == time_exp)
+        assert np.all(lcs.time == Time(time_exp, time_ref))
         assert lcs.reference_time == time_ref
 
     # test_init_expr_time_series_as_coord ----------------------------------------------
@@ -756,7 +750,8 @@ class TestLocalCoordinateSystem:
         lcs.reset_reference_time(time_ref_new)
 
         # check results
-        assert np.all(lcs.time == time_exp)
+        assert np.all(lcs.time == Time(time_exp, time_ref_new))
+        assert lcs.reference_time == TS(time_ref_new)
 
     # test_reset_reference_time_exceptions ---------------------------------------------
 
@@ -972,7 +967,7 @@ class TestLocalCoordinateSystem:
 
         # check time
         assert lcs_interp.reference_time == ref_time
-        assert np.allclose(lcs_interp.time_quantity, time)
+        assert np.all(Time(lcs_interp.time_quantity) == Time(time, ref_time))
 
         # check coordinates
         exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
@@ -1005,7 +1000,7 @@ class TestLocalCoordinateSystem:
             (TS("2020-02-02"), TDI([1]), None, TypeError, "# mixed ref. times #1"),
             (None, TDI([1]), TS("2020-02-02"), TypeError, "# mixed ref. times #2"),
             (TS("2020-02-02"), "no", TS("2020-02-02"), TypeError, "# wrong type #1"),
-            (TS("2020-02-02"), TDI([1]), "no", TypeError, "# wrong type #2"),
+            (TS("2020-02-02"), TDI([1]), "no", Exception, "# wrong type #2"),
         ],
         ids=get_test_name,
     )
@@ -4041,6 +4036,136 @@ class TestCoordinateSystemManager:
         with pytest.raises(exception_type):
             csm.get_data(*arguments)
 
+    # test_interp_time -----------------------------------------------------------------
+
+    @staticmethod
+    def _orientation_from_value(val, clip_min=None, clip_max=None):
+        if clip_min is not None and clip_max is not None:
+            angles = np.clip(val, clip_min, clip_max)
+        else:
+            angles = val
+        return WXRotation.from_euler("z", angles, degrees=True).as_matrix()
+
+    @staticmethod
+    def _coordinates_from_value(val, clip_min=None, clip_max=None):
+        if clip_min is not None and clip_max is not None:
+            val = np.clip(val, clip_min, clip_max)
+        if not isinstance(val, Iterable):
+            val = [val]
+        return [[v, 2 * v, -v] for v in val]
+
+    @pytest.mark.parametrize(
+        "time, time_ref, systems, csm_has_time_ref, num_abs_systems",
+        [
+            (TDI([1, 7, 11, 20], "D"), None, None, False, 0),
+            (TDI([3], "D"), None, None, False, 0),
+            (pd.Timedelta(3, "D"), None, None, False, 0),
+            (Q_([1, 7, 11, 20], "days"), None, None, False, 0),
+            (["5days", "8days"], None, None, False, 0),
+            (TDI([1, 7, 11, 20], "D"), None, ["lcs_1"], False, 0),
+            (TDI([1, 7, 11, 20], "D"), None, ["lcs_1", "lcs_2"], False, 0),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-10", None, True, 0),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 0),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, False, 3),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 3),
+            (TDI([1, 7, 11, 20], "D"), "2000-01-13", None, True, 2),
+            (["2000-01-13", "2000-01-17"], None, None, True, 2),
+        ],
+    )
+    def test_interp_time(
+        self,
+        time: types_time_like,
+        time_ref: types_timestamp_like,
+        systems: List[str],
+        csm_has_time_ref: bool,
+        num_abs_systems: int,
+    ):
+        """Test the ``interp_time`` method.
+
+        Parameters
+        ----------
+        time :
+            The value passed to the functions as ``time`` parameter
+        time_ref :
+            The value passed to the functions as ``time_ref`` parameter
+        systems :
+            The value passed to the functions as ``affected_coordinate_systems``
+            parameter
+        csm_has_time_ref :
+            If `True`, a reference time is added to the CSM
+        num_abs_systems :
+            The number of time dependent systems that get a reference time assigned to
+            them.
+
+        """
+        # csm data
+        csm_time_ref = "2000-01-10" if csm_has_time_ref else None
+        abs_systems = [f"lcs_{i}" for i in range(num_abs_systems)]
+        lcs_data = dict(
+            lcs_0=("root", [1, 4, 7], TS("2000-01-09")),
+            lcs_1=("lcs_0", [1, 5, 9], TS("2000-01-14")),
+            lcs_2=("root", [1, 6, 11], TS("2000-01-11")),
+        )
+
+        # time data
+        time_class = Time(time, time_ref)
+        days_interp = time_class.as_quantity().to("days").m
+        if len(days_interp.shape) == 0:
+            days_interp = days_interp.reshape(1)
+
+        # create csm
+        csm = tf.CoordinateSystemManager("root", time_ref=csm_time_ref)
+        for k, v in lcs_data.items():
+            csm.create_cs(
+                k,
+                v[0],
+                self._orientation_from_value(v[1]),
+                self._coordinates_from_value(v[1]),
+                Q_(v[1], "day"),
+                v[2] if k in abs_systems else None,
+            )
+
+        lcs_3 = tf.LocalCoordinateSystem(
+            WXRotation.from_euler("y", 1).as_matrix(), [4, 2, 0]
+        )
+        csm.add_cs("lcs_3", "lcs_2", lcs_3)
+
+        # interpolate
+        csm_interp = csm.interp_time(time, time_ref, systems)
+
+        # evaluate results
+        time_ref_exp = time_class.reference_time
+        for k, v in lcs_data.items():
+            # create expected lcs
+            if systems is None or k in systems:
+                diff = 0
+                if time_ref_exp is not None:
+                    if k in abs_systems:
+                        diff = Time(time_class.reference_time - v[2])
+                    else:
+                        diff = Time(time_class.reference_time - csm.reference_time)
+                    diff = diff.as_quantity().to("days").m
+
+                lcs_exp = tf.LocalCoordinateSystem(
+                    self._orientation_from_value(days_interp + diff, v[1][0], v[1][-1]),
+                    self._coordinates_from_value(days_interp + diff, v[1][0], v[1][-1]),
+                    time_class,
+                    csm.reference_time if csm.has_reference_time else time_ref_exp,
+                )
+            else:
+                lcs_exp = csm.get_cs(k)
+
+            # check results
+            check_coordinate_systems_close(csm_interp.get_cs(k), lcs_exp)
+            check_coordinate_systems_close(csm_interp.get_cs(v[0], k), lcs_exp.invert())
+
+        # check static lcs unmodified
+        check_coordinate_systems_close(csm_interp.get_cs("lcs_3"), lcs_3)
+
+        # check time union
+        if systems is None or len(systems) == 3:
+            assert np.all(csm_interp.time_union() == time_class.as_pandas())
+
 
 def test_relabel():
     """Test relabeling unmerged and merged CSM nodes.
@@ -4213,219 +4338,6 @@ def test_coordinate_system_manager_create_coordinate_system():
         True,
         time=time,
     )
-
-
-def test_coordinate_system_manager_interp_time():
-    """Test the coordinate system managers interp_time functions."""
-    # Setup -------------------------------------
-    angles = ut.to_float_array([0, np.pi / 2, np.pi])
-    orientation = WXRotation.from_euler("z", angles).as_matrix()
-    coordinates = ut.to_float_array([[5, 0, 0], [1, 0, 0], [1, 4, 4]])
-
-    time_0 = TDI([1, 4, 7], "D")
-    time_1 = TDI([1, 5, 9], "D")
-    time_2 = TDI([1, 6, 11], "D")
-
-    lcs_3_in_lcs_2 = tf.LocalCoordinateSystem(
-        orientation=WXRotation.from_euler("y", 1).as_matrix(), coordinates=[4, 2, 0]
-    )
-
-    csm = tf.CoordinateSystemManager("root")
-    csm.create_cs("lcs_0", "root", orientation, coordinates, time_0)
-    csm.create_cs("lcs_1", "lcs_0", orientation, coordinates, time_1)
-    csm.create_cs("lcs_2", "root", orientation, coordinates, time_2)
-    csm.create_cs(
-        "lcs_3", "lcs_2", WXRotation.from_euler("y", 1).as_matrix(), [4, 2, 0]
-    )
-
-    # interp_time -------------------------------
-    time_interp = TDI([1, 3, 5, 7, 9], "D")
-    csm_interp = csm.interp_time(time_interp)
-
-    assert np.all(csm_interp.time_union() == time_interp)
-
-    assert np.all(csm_interp.get_cs("lcs_0").time == time_interp)
-    assert np.all(csm_interp.get_cs("lcs_1").time == time_interp)
-    assert np.all(csm_interp.get_cs("lcs_2").time == time_interp)
-    assert csm_interp.get_cs("lcs_3").time is None
-
-    coords_0_exp = [
-        [5, 0, 0],
-        [7 / 3, 0, 0],
-        [1, 4 / 3, 4 / 3],
-        [1, 4, 4],
-        [1, 4, 4],
-    ]
-    orient_0_exp = r_mat_z([0, 1 / 3, 2 / 3, 1, 1])
-    lcs_0_in_root_exp = tf.LocalCoordinateSystem(
-        orient_0_exp, coords_0_exp, time_interp
-    )
-
-    coords_1_exp = [[5, 0, 0], [3, 0, 0], [1, 0, 0], [1, 2, 2], [1, 4, 4]]
-    orient_1_exp = r_mat_z([0, 1 / 4, 1 / 2, 3 / 4, 1])
-    lcs_1_in_lcs_0_exp = tf.LocalCoordinateSystem(
-        orient_1_exp, coords_1_exp, time_interp
-    )
-
-    coords_2_exp = [
-        [5, 0, 0],
-        [17 / 5, 0, 0],
-        [9 / 5, 0, 0],
-        [1, 4 / 5, 4 / 5],
-        [1, 12 / 5, 12 / 5],
-    ]
-    orient_2_exp = r_mat_z([0, 1 / 5, 2 / 5, 3 / 5, 4 / 5])
-    lcs_2_in_root_exp = tf.LocalCoordinateSystem(
-        orient_2_exp, coords_2_exp, time_interp
-    )
-
-    lcs_3_in_lcs_2_exp = tf.LocalCoordinateSystem(
-        lcs_3_in_lcs_2.orientation, lcs_3_in_lcs_2.coordinates
-    )
-
-    for cs_name in csm_interp.graph.nodes:
-        if cs_name == "root":
-            continue
-        ps_name = csm_interp.get_parent_system_name(cs_name)
-
-        if cs_name == "lcs_0":
-            exp = lcs_0_in_root_exp
-            exp_inv = lcs_0_in_root_exp.invert()
-        elif cs_name == "lcs_1":
-            exp = lcs_1_in_lcs_0_exp
-            exp_inv = lcs_1_in_lcs_0_exp.invert()
-        elif cs_name == "lcs_2":
-            exp = lcs_2_in_root_exp
-            exp_inv = lcs_2_in_root_exp.invert()
-        elif cs_name == "lcs_3":
-            exp = lcs_3_in_lcs_2_exp
-            exp_inv = lcs_3_in_lcs_2_exp.invert()
-        else:
-            exp = csm.get_cs(cs_name, ps_name)
-            exp_inv = csm.get_cs(ps_name, cs_name)
-
-        lcs = csm_interp.get_cs(cs_name, ps_name)
-        lcs_inv = csm_interp.get_cs(ps_name, cs_name)
-
-        check_coordinate_systems_close(lcs, exp)
-        check_coordinate_systems_close(lcs_inv, exp_inv)
-
-    # specific coordinate system (single) -----------------
-    time_interp_lcs0 = TDI([3, 5], "D")
-    csm_interp_single = csm.interp_time(time_interp_lcs0, None, "lcs_0")
-
-    coords_0_exp = np.array(coords_0_exp)[[1, 2], :]
-    orient_0_exp = np.array(orient_0_exp)[[1, 2], :]
-    lcs_0_in_root_exp = tf.LocalCoordinateSystem(
-        orient_0_exp, coords_0_exp, time_interp_lcs0
-    )
-
-    for cs_name in csm_interp_single.graph.nodes:
-        if cs_name == "root":
-            continue
-        ps_name = csm_interp_single.get_parent_system_name(cs_name)
-
-        if cs_name == "lcs_0":
-            exp = lcs_0_in_root_exp
-            exp_inv = lcs_0_in_root_exp.invert()
-        else:
-            exp = csm.get_cs(cs_name, ps_name)
-            exp_inv = csm.get_cs(ps_name, cs_name)
-
-        lcs = csm_interp_single.get_cs(cs_name, ps_name)
-        lcs_inv = csm_interp_single.get_cs(ps_name, cs_name)
-
-        check_coordinate_systems_close(lcs, exp)
-        check_coordinate_systems_close(lcs_inv, exp_inv)
-
-    # specific coordinate system (single, scalar timestamp) -----------------
-    time_interp_lcs0 = TDI([3], "D")
-    csm_interp_single = csm.interp_time(time_interp_lcs0, None, "lcs_0")
-
-    coords_0_exp = np.array(coords_0_exp)[[0], :]  # modified in prev test !
-    orient_0_exp = np.array(orient_0_exp)[[0], :]  # modified in prev test !
-    lcs_0_in_root_exp = tf.LocalCoordinateSystem(
-        orient_0_exp, coords_0_exp, time_interp_lcs0
-    )
-
-    for cs_name in csm_interp_single.graph.nodes:
-        if cs_name == "root":
-            continue
-        ps_name = csm_interp_single.get_parent_system_name(cs_name)
-
-        if cs_name == "lcs_0":
-            exp = lcs_0_in_root_exp
-            exp_inv = lcs_0_in_root_exp.invert()
-        else:
-            exp = csm.get_cs(cs_name, ps_name)
-            exp_inv = csm.get_cs(ps_name, cs_name)
-
-        lcs = csm_interp_single.get_cs(cs_name, ps_name)
-        lcs_inv = csm_interp_single.get_cs(ps_name, cs_name)
-
-        check_coordinate_systems_close(lcs, exp)
-        check_coordinate_systems_close(lcs_inv, exp_inv)
-
-    # specific coordinate systems (multiple) --------------
-    time_interp_multiple = TDI([5, 7, 9], "D")
-    csm_interp_multiple = csm.interp_time(
-        time_interp_multiple, None, ["lcs_1", "lcs_2"]
-    )
-
-    coords_1_exp = np.array(coords_1_exp)[2:, :]
-    orient_1_exp = np.array(orient_1_exp)[2:, :]
-    coords_2_exp = np.array(coords_2_exp)[2:, :]
-    orient_2_exp = np.array(orient_2_exp)[2:, :]
-
-    lcs_1_in_lcs_0_exp = tf.LocalCoordinateSystem(
-        orient_1_exp, coords_1_exp, time_interp_multiple
-    )
-    lcs_2_in_root_exp = tf.LocalCoordinateSystem(
-        orient_2_exp, coords_2_exp, time_interp_multiple
-    )
-
-    for cs_name in csm_interp_multiple.graph.nodes:
-        if cs_name == "root":
-            continue
-        ps_name = csm_interp_multiple.get_parent_system_name(cs_name)
-
-        if cs_name == "lcs_1":
-            exp = lcs_1_in_lcs_0_exp
-            exp_inv = lcs_1_in_lcs_0_exp.invert()
-        elif cs_name == "lcs_2":
-            exp = lcs_2_in_root_exp
-            exp_inv = lcs_2_in_root_exp.invert()
-        else:
-            exp = csm.get_cs(cs_name, ps_name)
-            exp_inv = csm.get_cs(ps_name, cs_name)
-
-        lcs = csm_interp_multiple.get_cs(cs_name, ps_name)
-        lcs_inv = csm_interp_multiple.get_cs(ps_name, cs_name)
-
-        check_coordinate_systems_close(lcs, exp)
-        check_coordinate_systems_close(lcs_inv, exp_inv)
-
-        # Related to pull request #275. This assures that interp time works
-        # correctly if some coordinate systems have no own reference time, but the CSM
-        # does.
-        lcs1 = tf.LocalCoordinateSystem(
-            coordinates=[[1, 0, 0], [2, 0, 0]], time=pd.TimedeltaIndex([1, 2])
-        )
-
-        lcs2 = tf.LocalCoordinateSystem(
-            coordinates=[[1, 0, 0], [2, 0, 0]],
-            time=pd.TimedeltaIndex([1, 2]) + pd.Timestamp("2000-01-03"),
-        )
-
-        csm_1 = tf.CoordinateSystemManager("root", time_ref=pd.Timestamp("2000-01-01"))
-        csm_1.add_cs("lcs2", "root", lcs2)
-
-        csm_2 = tf.CoordinateSystemManager("root")
-        csm_2.add_cs("lcs1", "root", lcs1)
-
-        csm_1.merge(csm_2)
-
-        csm_1.interp_time(csm_1.time_union())
 
 
 def test_coordinate_system_manager_transform_data():

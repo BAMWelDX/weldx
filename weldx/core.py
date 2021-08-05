@@ -11,7 +11,7 @@ import xarray as xr
 
 import weldx.util as ut
 from weldx.constants import Q_
-from weldx.time import Time, pandas_time_delta_to_quantity
+from weldx.time import Time, TimeDependent
 from weldx.types import types_time_like
 
 if TYPE_CHECKING:
@@ -254,7 +254,7 @@ class MathematicalExpression:
 # TimeSeries ---------------------------------------------------------------------------
 
 
-class TimeSeries:
+class TimeSeries(TimeDependent):
     """Describes the behaviour of a quantity in time."""
 
     _valid_interpolations = [
@@ -550,7 +550,7 @@ class TimeSeries:
         return isinstance(self.data, MathematicalExpression)
 
     @property
-    def time(self) -> Union[None, pd.TimedeltaIndex]:
+    def time(self) -> Union[None, Time]:
         """Return the data's timestamps.
 
         Returns
@@ -560,7 +560,7 @@ class TimeSeries:
 
         """
         if isinstance(self._data, xr.DataArray) and len(self._data.time) > 1:
-            return ut.to_pandas_time_index(self._data.time.data)
+            return Time(self._data.time.data, self.reference_time)
         return None
 
     @property
@@ -654,7 +654,7 @@ class TimeSeries:
                 axes=axes, data_name=data_name, time_unit=time_unit, **mpl_kwargs
             )
 
-        time = pandas_time_delta_to_quantity(self.time)
+        time = Time(self.time, self.reference_time).as_quantity()
         if time_unit is not None:
             time = time.to(time_unit)
 
