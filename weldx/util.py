@@ -9,7 +9,7 @@ from collections.abc import Iterable, Sequence
 from functools import reduce, wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
-from typing import Any, Callable, Collection, Dict, List, Mapping, Union
+from typing import Any, Callable, ClassVar, Collection, Dict, List, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -578,7 +578,7 @@ def xr_matmul(
 
     mul_func = np.matmul
     if len(dims_a) > len(dims_b):
-        mul_func = mat_vec_mul
+        mul_func = mat_vec_mul  # type: ignore[assignment] # irrelevant for us
 
     if trans_a:
         dims_a = reversed(dims_a)
@@ -777,7 +777,7 @@ def xr_interp_like(
     return result
 
 
-def _check_dtype(var_dtype, ref_dtype: dict) -> bool:
+def _check_dtype(var_dtype, ref_dtype: str) -> bool:
     """Check if dtype matches a reference dtype (or is subdtype).
 
     Parameters
@@ -1228,12 +1228,12 @@ class _Eq_compare_nested:
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
     # some types need special comparison handling.
-    compare_funcs = {
+    compare_funcs: ClassVar = {
         (np.ndarray, NDArrayType, pint.Quantity, pd.Index): _array_equal,
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
     }
     # these types will be treated as equivalent.
-    _type_equalities = [
+    _type_equalities: ClassVar = [
         (np.ndarray, NDArrayType),
     ]
 
@@ -1338,7 +1338,7 @@ compare_nested = _Eq_compare_nested.compare_nested
 def is_interactive_session() -> bool:
     """Check whether this Python session is interactive, e.g. Jupyter/IPython."""
     try:
-        get_ipython = sys.modules["IPython"].get_ipython
+        get_ipython = sys.modules["IPython"].get_ipython  # type: ignore[attr-defined]
         if not get_ipython():
             return False
         if "IPKernelApp" not in get_ipython().config:  # pragma: no cover
