@@ -4,7 +4,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 from warnings import warn
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pint
@@ -17,6 +16,7 @@ from weldx.types import types_time_like
 
 if TYPE_CHECKING:
     import sympy
+    import matplotlib.pyplot
 
 __all__ = ["MathematicalExpression", "TimeSeries"]
 
@@ -617,11 +617,11 @@ class TimeSeries:
     def plot(
         self,
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
-        axes: plt.Axes = None,
+        axes: "matplotlib.pyplot.Axes" = None,
         data_name: str = "values",
         time_unit: Union[str, pint.Unit] = None,
         **mpl_kwargs,
-    ) -> plt.Axes:
+    ) -> "matplotlib.pyplot.Axes":
         """Plot the `TimeSeries`.
 
         Parameters
@@ -645,6 +645,8 @@ class TimeSeries:
             The matplotlib axes object that was used for the plot
 
         """
+        import matplotlib.pyplot as plt
+
         if axes is None:
             _, axes = plt.subplots()
         if self.is_expression or time is not None:
