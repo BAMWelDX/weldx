@@ -19,6 +19,7 @@ dependencies:
   - typing_extensions
   # GH332
   - docutils=0.16
+  - psutil
   # pip packages
   - pip
   - pip:
