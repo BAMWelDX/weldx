@@ -5,7 +5,7 @@ The :code:`weldx` package can be installed using *conda* or *mamba* package mana
 managers originate from the freely available `Anaconda Python stack <https://docs.conda.io/en/latest/miniconda.html>`_.
 If you do not have Anaconda or Miniconda installed yet, we ask you to install *Miniconda*-3. Documentation for the
 installation procedure can be
-found `here <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation>`_.
+found `here <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation>`__.
 
 After this step you have access to the conda command and can proceed to installing the WelDX package::
 
@@ -25,7 +25,7 @@ If you use conda we suggest that you create a separate environment for your weld
 This keeps the environments clean and easier to upgrade (is that really true? think of mixed versions of extensions in lab env and weldx env!).
 
 Here is a guide on howto setup different kernels for
-Jupyter `guide <https://ipython.readthedocs.io/en/7.25.0/install/kernel_install.html>`_.
+Jupyter `guide <https://ipython.readthedocs.io/en/7.25.0/install/kernel_install.html>`__.
 
 
 Create an environment named "jlab" via conda::
@@ -53,7 +53,7 @@ In case you run into an error when using the weldx kernel on Windows systems tha
 
     ImportError: DLL load failed: The specified module could not be found
 
-you might have to apply the fix mentioned `here <https://github.com/jupyter/notebook/issues/4569#issuecomment-609901011>`_.
+you might have to apply the fix mentioned `here <https://github.com/jupyter/notebook/issues/4569#issuecomment-609901011>`__.
 
 Go to :code:`%userprofile%\.ipython\profile_default\startup` using the windows explorer and create a new file
 called :code:`ipython_startup.py`. Open it with a text editor and paste the following commands into the file::
