@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import functools
 import json
+import re
 import sys
 import warnings
 from collections.abc import Iterable, Sequence
@@ -14,6 +15,7 @@ from typing import Any, Callable, Collection, Dict, List, Mapping, Union
 import numpy as np
 import pandas as pd
 import pint
+import psutil
 import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
@@ -910,7 +912,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
         if "units" in check:
             units = coords[key].attrs.get("units", None)
-            if not units or not (ureg.Unit(units) == ureg.Unit(check["units"])):
+            if not units or not ureg.Unit(units) == ureg.Unit(check["units"]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{str(units)}', expected '{check['units']}'"
@@ -1351,10 +1353,10 @@ def is_interactive_session() -> bool:
 
 def is_jupyterlab_session() -> bool:
     """Heuristic to check whether we are in a Jupyter-Lab session.
-    False positive, if classic nb launched from JupyLab...
 
-    Taken from: https://discourse.jupyter.org/t/find-out-if-my-code-runs-inside-a-notebook-or-jupyter-lab/6935/17
+    Notes
+    -----
+    False positive, if classic NB launched from JupyterLab.
+
     """
-    import psutil, re
-
     return any(re.search("jupyter-lab", x) for x in psutil.Process().parent().cmdline())

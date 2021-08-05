@@ -1,4 +1,5 @@
 """Tests for the WeldxFile class."""
+import itertools
 import pathlib
 import platform
 import shutil
@@ -29,7 +30,7 @@ class ReadOnlyFile:
     def read(self, *args, **kwargs):  # noqa: D102
         return self.file_read_only.read(*args, **kwargs)
 
-    def readline(self, limit=-1):
+    def readline(self, limit=-1):  # noqa: D107
         return self.file_read_only.readline(limit)
 
     @staticmethod
@@ -381,7 +382,7 @@ class TestWeldXFile:
     @staticmethod
     @pytest.mark.parametrize("mode", ("r", "rw"))
     def test_show_header_in_sync(mode, capsys):
-        """Ensure that the updated tree is displayed in show_header"""
+        """Ensure that the updated tree is displayed in show_header."""
         with WeldxFile(mode=mode) as fh:
             fh["wx_user"] = dict(test=True)
             fh.show_asdf_header()
@@ -393,9 +394,10 @@ class TestWeldXFile:
     @staticmethod
     @pytest.mark.parametrize(
         ["use_widgets", "interactive"],
-        ([True, True], [False, False], [True, False], [False, True], [False, None]),
+        list(itertools.product([None, True, False], [True, False, None])),
     )
-    def test_show_header_params(use_widgets, interactive):
+    def test_show_header_params(use_widgets, interactive, capsys):
+        """Check different inputs for show method."""
         fh = WeldxFile()
         fh.show_asdf_header(use_widgets=use_widgets, _interactive=interactive)
 
@@ -407,9 +409,11 @@ class TestWeldXFile:
         with pytest.raises(ValueError):
             self.fh.software_history_entry = {"name": None}
 
-    def test_compression(self, tmpdir):
-        """Check we do not modify the input during basic operations, even under
-        different conditions like compression."""
+    @staticmethod
+    def test_compression(tmpdir):
+        """Check we do not modify the input during basic operations.
+
+        Even under different conditions like compression."""
         fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
 
         def get_size_and_mtime(fn):
