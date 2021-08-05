@@ -136,7 +136,7 @@ class QualityStandard:
 class Config:
     """Manages the global configuration."""
 
-    _standards = {}
+    _standards: Dict[str, QualityStandard] = {}
 
     @staticmethod
     def add_quality_standard(standard: QualityStandard):
