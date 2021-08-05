@@ -518,7 +518,9 @@ def _fake_block_context(asdf_handle):
 
 class _HeaderVisualizer:
     def __init__(self, asdf_handle):
-        self._asdf_handle = asdf_handle
+        import copy
+
+        self._asdf_handle = copy.copy(asdf_handle)
 
     def _write_to_buffer_without_blocks(self) -> BytesIO:
         """Write an asdf file with no blocks using a fake block manager.

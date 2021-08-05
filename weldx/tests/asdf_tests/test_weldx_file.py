@@ -375,7 +375,7 @@ class TestWeldXFile:
             diff = after - before
             # pytest increases memory a bit, but not as much as our large array would
             # occupy in memory.
-            assert diff < 3 * 1024 ** 2, diff / 1024 ** 2
+            assert diff <= large_array.nbytes * 1.1, diff / 1024 ** 2
         assert np.all(WeldxFile(fn)["x"] == large_array)
 
     @staticmethod
