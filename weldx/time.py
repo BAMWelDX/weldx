@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import List, Union
+from typing import List, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -493,7 +493,7 @@ class Time:
         )
 
     @staticmethod
-    def union(times: List[types_time_like]) -> Time:
+    def union(times: Sequence[types_time_like]) -> Time:
         """Calculate the union of multiple `Time` instances (or supported objects).
 
         Any reference time information will be dropped.
