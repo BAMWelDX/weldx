@@ -82,12 +82,12 @@ def to_yaml_tree_metadata(func):
         """Call default to_yaml_tree method and add metadata fields."""
         tree = func(obj, tag, ctx)
 
-        tree = remap(tree, lambda p, k, v: v is not None)  # drop all None values
-
         for key in [META_ATTR, USER_ATTR]:
             attr = getattr(obj, key, None)
             if attr:
                 tree[key] = attr
+
+        tree = remap(tree, lambda p, k, v: v is not None)  # drop all None values
         return tree
 
     return to_yaml_tree_wrapped
