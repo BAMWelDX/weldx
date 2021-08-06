@@ -26,7 +26,7 @@
 ### fixes
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
-  representation [[#428]](https://github.com/BAMWelDX/weldx/pull/428).
+  representation. Also tweaked efficency by not writing binary blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
 
 ### documentation
 
