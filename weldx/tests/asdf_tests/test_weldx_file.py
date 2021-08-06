@@ -1,14 +1,14 @@
 """Tests for the WeldxFile class."""
 import itertools
 import pathlib
-import platform
 import shutil
 import tempfile
 from io import BytesIO
-import xarray as xr
-import numpy as np
+
 import asdf
+import numpy as np
 import pytest
+import xarray as xr
 from jsonschema import ValidationError
 
 from weldx import WeldxFile
@@ -342,9 +342,6 @@ class TestWeldXFile:
         assert old_pos == after_pos
 
     @staticmethod
-    @pytest.mark.skipif(
-        platform.system() == "Darwin", reason="evolution will strike on you!"
-    )
     @pytest.mark.parametrize(
         "mode",
         ("rw", "r"),
@@ -355,7 +352,6 @@ class TestWeldXFile:
         Also ensure the tree is still usable after showing the header.
         """
         import psutil
-        import gc
 
         large_array = np.ones((1000, 1000), dtype=np.float64)  # ~7.6mb
         proc = psutil.Process()
@@ -369,7 +365,7 @@ class TestWeldXFile:
             fh["x"] = large_array
             fh.show_asdf_header(use_widgets=False, _interactive=False)
             fh.write_to(fn)
-        gc.collect()
+
         after = get_mem_info()
         if after > before:
             diff = after - before

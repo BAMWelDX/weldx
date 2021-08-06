@@ -1,6 +1,5 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
 import pathlib
-import unittest.mock
 from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
@@ -464,78 +463,19 @@ class WeldxFile(UserDict):
         display(self.show_asdf_header(use_widgets=False, _interactive=True))
 
 
-class _DummyBlock:
-    def __init__(self):
-        self.array_storage = "internal"
-        self.trust_data_dtype = False
-        self.data = None
-        self.readonly = True
-
-    def __len__(self):
-        return 0
-
-
-class _DummyBlockManager:
-    array_storage = "internal"
-    lazy_load = True
-
-    def __init__(self):
-        self.default_block = _DummyBlock()
-
-    @staticmethod
-    def get_source(*args, **kwargs):
-        return 0
-
-    def get_block(self, source):
-        return self.default_block
-
-    __getitem__ = get_block
-
-    def find_or_create_block_for_array(self, *args, **kwargs):
-        return self.default_block
-
-    @staticmethod
-    def get_output_compression_extensions():
-        return ()
-
-    def add(self, *args, **kwargs):
-        pass
-
-    write_internal_blocks_random_access = (
-        write_block_index
-    ) = (
-        write_internal_blocks_serial
-    ) = write_external_blocks = finalize = set_array_storage = add
-
-
-@contextmanager
-def _fake_block_context(asdf_handle):
-    blocks_org = asdf_handle.blocks
-    asdf_handle._blocks = _DummyBlockManager()
-    yield asdf_handle
-    asdf_handle._blocks = blocks_org
-
-
 class _HeaderVisualizer:
     def __init__(self, asdf_handle):
         import copy
+        import numpy as np
 
-        self._asdf_handle = copy.copy(asdf_handle)
-
-    def _write_to_buffer_without_blocks(self) -> BytesIO:
-        """Write an asdf file with no blocks using a fake block manager.
-
-        Returns
-        -------
-        buffer:
-            containing the header contents.
-        """
-        buff = BytesIO()
-        with _fake_block_context(self._asdf_handle) as h:
-            h.write_to(buff, include_block_index=False, all_array_storage="internal")
-        buff.seek(0)
-
-        return buff
+        # take a copy of the handle to avoid side effects!
+        copy._deepcopy_dispatch[np.ndarray] = lambda x, y: x
+        try:
+            # asdffile takes a deepcopy by default, so we fake the deep copy method of
+            # ndarray to avoid bloating memory.
+            self._asdf_handle = copy.copy(asdf_handle)
+        finally:
+            del copy._deepcopy_dispatch[np.ndarray]
 
     def show(
         self, use_widgets=None, _interactive=None
@@ -546,7 +486,12 @@ class _HeaderVisualizer:
             use_widgets = is_jupyterlab_session()
 
         # We write the current tree to a buffer __without__ any binary data attached.
-        buff = self._write_to_buffer_without_blocks()
+        from unittest.mock import patch
+
+        buff = BytesIO()
+        with patch("asdf.tags.core.ndarray.numpy_array_to_list", lambda x: []):
+            self._asdf_handle.write_to(buff, all_array_storage="inline")
+        buff.seek(0)
 
         # automatically determine if this runs in an interactive session.
         # These methods return an IPython displayable object
@@ -570,8 +515,5 @@ class _HeaderVisualizer:
 
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
-        with unittest.mock.patch(
-            "asdf.AsdfFile.blocks", new_callable=_DummyBlockManager
-        ):
-            with WeldxFile(buff) as wx:
-                info(wx._asdf_handle, show_values=True, max_rows=None)
+        with WeldxFile(buff) as wx:
+            info(wx._asdf_handle, show_values=True, max_rows=None)
