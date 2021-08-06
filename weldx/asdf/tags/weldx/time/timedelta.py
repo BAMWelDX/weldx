@@ -1,26 +1,26 @@
 import pandas as pd
+from asdf.extension import Converter
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf.types import WeldxConverterMeta
 
-__all__ = ["TimedeltaType"]
+__all__ = ["TimedeltaConverter"]
 
 
-class TimedeltaType(WeldxType):
+class TimedeltaConverter(Converter, metaclass=WeldxConverterMeta):
     """A simple implementation of serializing a single pandas Timedelta."""
 
-    name = "time/timedelta"
-    version = "1.0.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/time/timedelta-1.*"]
     types = [pd.Timedelta]
 
     @classmethod
-    def to_tree(cls, node: pd.Timedelta, ctx):
+    def to_yaml_tree(self, obj: pd.Timedelta, tag, ctx):
         """Serialize timedelta to tree."""
         tree = {}
-        tree["value"] = node.isoformat()
+        tree["value"] = obj.isoformat()
         return tree
 
     @classmethod
-    def from_tree(cls, tree, ctx):
+    def from_yaml_tree(self, node, tag, ctx):
         """Construct timedelta from tree."""
-        value = tree["value"]
+        value = node["value"]
         return pd.Timedelta(value)
