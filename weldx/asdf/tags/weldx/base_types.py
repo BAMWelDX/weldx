@@ -3,11 +3,13 @@ from uuid import UUID
 
 from asdf.extension import Converter
 
+from weldx.asdf.types import WeldxConverterMeta
+
 __all__ = ["UuidConverter"]
 
 
 # UUID ---------------------------------------------------------------------------------
-class UuidConverter(Converter):
+class UuidConverter(Converter, metaclass=WeldxConverterMeta):
     """Implements a version 4 UUID."""
 
     tags = ["asdf://weldx.bam.de/weldx/tags/uuid-1.*"]
@@ -19,6 +21,6 @@ class UuidConverter(Converter):
         return dict(uuid=str(obj))
 
     @classmethod
-    def from_yaml_tree(cls, node, tag, ctx):
+    def from_yaml_tree(self, node, tag, ctx):
         """Reconstruct from tree."""
         return UUID(node["uuid"])

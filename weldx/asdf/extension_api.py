@@ -3,7 +3,7 @@ from pathlib import Path
 import asdf
 from asdf.extension import ManifestExtension
 
-from .tags.weldx.base_types import UuidConverter
+from .types import _converters
 
 # RESOURCES ----------------------------------------------------------------------------
 RESOURCES = {
@@ -19,13 +19,14 @@ def get_resource_mappings():
 
 asdf.get_config().add_resource_mapping(RESOURCES)
 
+
 # Extension ----------------------------------------------------------------------------
 class WeldxExtension(ManifestExtension):
     """weldx extension class"""
 
     extension_uri = "asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0"
     yaml_tag_handles = {"!weldx!": "asdf://weldx.bam.de/weldx/tags/"}
-    converters = [UuidConverter()]
+    converters = _converters
     # asdf_standard_requirement = ">= 1.2.0, < 1.5.0"
     # legacy_class_names = ["weldx.asdf.extension.WeldxExtension"]
 
