@@ -53,6 +53,7 @@
   parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
 - The `LocalCoordinateSystem.time` and `TimeSeries.time` now return an instance of `Time` 
   [[#464]](https://github.com/BAMWelDX/weldx/pull/464)
+- Fix wrong and incomplete type-hints [[#435]](https://github.com/BAMWelDX/weldx/pull/435)
 
 ### ASDF
 

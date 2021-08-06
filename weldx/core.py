@@ -291,8 +291,8 @@ class TimeSeries(TimeDependent):
             'step', 'linear'.
 
         """
-        self._data = None
-        self._time_var_name = None
+        self._data: Union[MathematicalExpression, xr.DataArray] = None
+        self._time_var_name = None  # type: str
         self._shape = None
         self._units = None
         self._interp_counter = 0
@@ -327,7 +327,7 @@ class TimeSeries(TimeDependent):
         if not isinstance(self.data, MathematicalExpression):
             if not isinstance(other.data, pint.Quantity):
                 return False
-            return self._data.identical(other.data_array)
+            return self._data.identical(other.data_array)  # type: ignore
 
         return self._data == other.data
 
@@ -658,7 +658,7 @@ class TimeSeries(TimeDependent):
         if time_unit is not None:
             time = time.to(time_unit)
 
-        axes.plot(time.m, self._data.data.m, **mpl_kwargs)
+        axes.plot(time.m, self._data.data.m, **mpl_kwargs)  # type: ignore
         axes.set_xlabel(f"t in {time.u:~}")
         y_unit_label = ""
         if self.units not in ["", "dimensionless"]:
