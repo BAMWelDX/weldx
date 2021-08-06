@@ -1,24 +1,24 @@
 """Module providing ASDF implementations for basic python types."""
 from uuid import UUID
 
-from weldx.asdf.types import WeldxType
+from asdf.extension import Converter
+
+__all__ = ["UuidConverter"]
 
 
 # UUID ---------------------------------------------------------------------------------
-class UuidTypeASDF(WeldxType):
+class UuidConverter(Converter):
     """Implements a version 4 UUID."""
 
-    name = "uuid"
-    version = "1.0.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/uuid-1.*"]
     types = [UUID]
-    requires = ["weldx"]
 
     @classmethod
-    def to_tree(cls, node: UUID, ctx):
-        """convert to python dict"""
-        return dict(uuid=str(node))
+    def to_yaml_tree(self, obj, tag, ctx):
+        """Convert to python dict."""
+        return dict(uuid=str(obj))
 
     @classmethod
-    def from_tree(cls, tree, ctx):
-        """Reconstruct form tree."""
-        return UUID(tree["uuid"])
+    def from_yaml_tree(cls, node, tag, ctx):
+        """Reconstruct from tree."""
+        return UUID(node["uuid"])
