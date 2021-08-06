@@ -1,25 +1,15 @@
 """shared type definitions."""
 from abc import abstractmethod
-from typing import TYPE_CHECKING, List, Protocol, Union, runtime_checkable
+from typing import List, Protocol, Union, runtime_checkable
 
 import numpy as np
-import pandas as pd
-import pint
 import xarray as xr
 from scipy.spatial.transform import Rotation
 
-if TYPE_CHECKING:  # pragma: no cover
-    import weldx
-
 types_coordinates = Union[xr.DataArray, np.ndarray, List]
 types_orientation = Union[xr.DataArray, np.ndarray, List[List], Rotation]
-# todo: remove next two definitions if possible
-types_timeindex = Union[pd.DatetimeIndex, pd.TimedeltaIndex, pint.Quantity]
-types_time_and_lcs = Union[
-    types_timeindex, "weldx.transformations.LocalCoordinateSystem"
-]
 
-
+# remove ???
 @runtime_checkable
 class SupportsTime(Protocol):
     """An ABC with one abstract method time."""
@@ -35,6 +25,4 @@ __all__ = [
     "SupportsTime",
     "types_coordinates",
     "types_orientation",
-    "types_timeindex",
-    "types_time_and_lcs",
 ]
