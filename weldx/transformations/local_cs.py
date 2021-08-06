@@ -17,7 +17,6 @@ from weldx.core import TimeSeries
 from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.transformations.types import types_coordinates, types_orientation
 from weldx.transformations.util import normalize
-from weldx.util import deprecated
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
