@@ -1418,7 +1418,7 @@ class CoordinateSystemManager:
                 if parent_name is None:
                     raise ValueError("The root system has no time dependency.")
 
-                time = self.get_cs(time, parent_name).time
+                time = self.get_cs(time, parent_name).time  # type: ignore[arg-type]
                 if time is None:
                     raise ValueError(f'The system "{time}" is not time dependent')
 
