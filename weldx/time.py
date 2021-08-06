@@ -263,8 +263,7 @@ class Time:
         time_ref = None if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
-
-    def __eq__(self, other: types_time_like) -> Union[bool, List[bool]]: # type: ignore
+    def __eq__(self, other: types_time_like) -> Union[bool, List[bool]]:  # type: ignore
         """Element-wise comparisons between time object and compatible types.
 
         See Also

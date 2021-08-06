@@ -5,10 +5,11 @@ import platform
 import shutil
 import tempfile
 from io import BytesIO
-import xarray as xr
-import numpy as np
+
 import asdf
+import numpy as np
 import pytest
+import xarray as xr
 from jsonschema import ValidationError
 
 from weldx import WeldxFile
@@ -354,8 +355,9 @@ class TestWeldXFile:
 
         Also ensure the tree is still usable after showing the header.
         """
-        import psutil
         import gc
+
+        import psutil
 
         large_array = np.ones((1000, 1000), dtype=np.float64)  # ~7.6mb
         proc = psutil.Process()
