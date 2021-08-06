@@ -95,7 +95,7 @@ def write_buffer(
         tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], **asdffile_kwargs
     ) as ff:
         if dummy_inline_arrays:  # lets store an empty list in the asdf file.
-            write_kwargs["array_storage"] = "inline"
+            write_kwargs["all_array_storage"] = "inline"
             from unittest.mock import patch
 
             with patch("asdf.tags.core.ndarray.numpy_array_to_list", lambda x: []):
