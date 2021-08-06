@@ -205,7 +205,7 @@ class Time:
         # todo: update type hints (see: https://stackoverflow.com/q/46092104/6700329)
         # problem: ring dependency needs to be solved
         if issubclass(type(time), TimeDependent):
-            time = time.time
+            time = time.time  # type: ignore[union-attr] # mypy doesn't filter correctly
         if isinstance(time, Time):
             time_ref = time_ref if time_ref is not None else time._time_ref
             time = time._time
@@ -238,8 +238,8 @@ class Time:
         if isinstance(time, pd.Index) and not time.is_monotonic_increasing:
             raise ValueError("The time values passed are not monotonic increasing.")
 
-        self._time = time
-        self._time_ref = time_ref
+        self._time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = time
+        self._time_ref: pd.Timestamp = time_ref
 
     def __add__(self, other: types_time_like) -> Time:
         """Element-wise addition between `Time` object and compatible types."""
@@ -263,7 +263,8 @@ class Time:
         time_ref = None if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
-    def __eq__(self, other: types_time_like) -> Union[bool, List[bool]]:
+
+    def __eq__(self, other: types_time_like) -> Union[bool, List[bool]]: # type: ignore
         """Element-wise comparisons between time object and compatible types.
 
         See Also

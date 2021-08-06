@@ -70,3 +70,22 @@ jobs:
       - uses: psf/black@stable
         with:
           options: "--check --diff --verbose"
+
+  mypy:
+    name: mypy
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        py: ['3.9']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.py }}
+      - name: pip installs
+        run: pip install mypy
+      - name: run mypy
+        run: |
+          mypy --install-types --non-interactive .

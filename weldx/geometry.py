@@ -2314,7 +2314,7 @@ class SpatialData:
 
     """
 
-    coordinates: np.ndarray
+    coordinates: DataArray
     triangles: np.ndarray = None
     attributes: Dict[str, np.ndarray] = None
 

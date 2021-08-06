@@ -257,16 +257,18 @@ class MeasurementChain:
 
         self._name = name
         self._source = source
-        self._source_equipment = None
-        self._prev_added_signal = None
+        self._source_equipment: MeasurementEquipment = None
+        self._prev_added_signal: str = None
         self._graph = DiGraph()
 
         self._add_signal(node_id=source.name, signal=source.output_signal)
         if signal_data is not None:
             self.add_signal_data(signal_data)
 
-    def __eq__(self, other: "MeasurementChain") -> bool:
+    def __eq__(self, other: object) -> bool:
         """Return `True` if two measurement chains are equal and `False` otherwise."""
+        if not isinstance(other, MeasurementChain):
+            return False
         return (
             self._name == other._name
             and self._source == other._source
@@ -831,7 +833,7 @@ class MeasurementChain:
                     )
             else:
                 if output_signal_unit == "":
-                    output_signal_unit = 1
+                    output_signal_unit = "1"
                 unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
                 func = MathematicalExpression(
                     "a*x",

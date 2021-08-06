@@ -33,6 +33,7 @@ excluded_words:
   - meshio
   - pytest-xdist
   - nbval
+  - mypy
   # matplotlib ----------------------------------
   - gca
   - mpl
