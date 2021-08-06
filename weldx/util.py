@@ -982,26 +982,6 @@ def xr_interp_coordinates_in_time(
     return da
 
 
-def _as_valid_timestamp(value: Union[pd.Timestamp, np.datetime64, str]) -> pd.Timestamp:
-    """Create a valid (by convention) Timestamp object or raise TypeError.
-
-    Parameters
-    ----------
-    value: pandas.Timestamp, np.datetime64 or str
-        Value to convert to `pd.Timestamp`.
-
-    Returns
-    -------
-    pandas.Timestamp
-
-    """
-    if isinstance(value, (str, np.datetime64)):
-        value = pd.Timestamp(value)
-    if isinstance(value, pd.Timestamp):  # catch NaT from empty str.
-        return value
-    raise TypeError("Could not create a valid pandas.Timestamp.")
-
-
 # geometry --------------------------------------------------------
 def triangulate_geometry(geo_data):
     """Stack geometry data and add simple triangulation.
@@ -1111,7 +1091,7 @@ class WeldxAccessor:
         TODO: should None be allowed and pass through or raise TypeError ?
         """
         if "time" in self._obj.coords:
-            value = _as_valid_timestamp(value)
+            value = Time(value).as_timestamp()
             if self._obj.weldx.time_ref and is_timedelta64_dtype(self._obj.time):
                 if value == self._obj.weldx.time_ref:
                     return

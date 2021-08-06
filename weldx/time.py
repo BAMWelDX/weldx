@@ -365,6 +365,12 @@ class Time:
             return TimedeltaIndex([timedelta])
         return timedelta
 
+    def as_timestamp(self) -> Timestamp:
+        """Return a `pandas.Timestamp` if the object represents a timestamp."""
+        if not isinstance(self._time, Timestamp):
+            raise TypeError("Time object does not represent a timestamp.")
+        return self._time
+
     def as_datetime(self) -> Union[Timestamp, DatetimeIndex]:
         """Return the data as `pandas.DatetimeIndex`."""
         if not self.is_absolute:
