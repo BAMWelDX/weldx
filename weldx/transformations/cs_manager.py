@@ -1214,6 +1214,45 @@ class CoordinateSystemManager:
         """
         return self._data[data_name].coordinate_system_name
 
+    def _get_cs_on_edge(
+        self,
+        edge: Tuple[str, str],
+        time: types_time_like,
+        time_ref: types_timestamp_like,
+        use_lcs_time_ref: bool = False,
+    ):
+        """Get a lcs on a graph edge for the get_cs method."""
+        invert = False
+        lcs = self.graph.edges[edge]["lcs"]
+
+        # lcs has an expression as coordinates
+        if lcs is None:
+            lcs = self.graph.edges[(edge[1], edge[0])]["lcs"]
+            invert = True
+
+        if lcs.is_time_dependent:
+            if not lcs.has_reference_time and self.has_reference_time:
+                lcs = lcs.interp_time(time - self.reference_time)
+                lcs = LocalCoordinateSystem(
+                    lcs.orientation.data, lcs.coordinates.data, time
+                )
+            else:
+                if use_lcs_time_ref:
+                    time_ref = lcs.reference_time
+                lcs = lcs.interp_time(time, time_ref)
+
+        if invert:
+            if isinstance(lcs.coordinates, TimeSeries):
+                raise Exception(
+                    "The chosen transformation is time dependent, but no time is "
+                    "given. This is usually the case if the time dependencies are "
+                    "only described by mathematical expressions. Provide the "
+                    "desired time using the corresponding parameter to solve this "
+                    "issue."
+                )
+            return lcs.invert()
+        return lcs
+
     def get_cs(
         self,
         coordinate_system_name: str,
@@ -1344,6 +1383,7 @@ class CoordinateSystemManager:
         rotation order.
 
         """
+        # check inputs
         if reference_system_name is None:
             reference_system_name = self.get_parent_system_name(coordinate_system_name)
             if reference_system_name is None:
@@ -1354,67 +1394,44 @@ class CoordinateSystemManager:
         self._check_coordinate_system_exists(coordinate_system_name)
         self._check_coordinate_system_exists(reference_system_name)
 
+        # handle special case
         if coordinate_system_name == reference_system_name:
             return LocalCoordinateSystem()
 
+        # get path
         from networkx import shortest_path
 
         path = shortest_path(self.graph, coordinate_system_name, reference_system_name)
         path_edges = list(zip(path[:-1], path[1:]))
 
-        if time is None:
-            time_ref = None  # ignore passed reference time if no time was passed
-            time = self.time_union(path_edges)
-        elif isinstance(time, str):
-            # todo: this branch conflicts a bit with our other str inputs for time.
-            #       We should catch that with a try, except
-            parent_name = self.get_parent_system_name(time)
-            if parent_name is None:
-                raise ValueError("The root system has no time dependency.")
-
-            time = self.get_cs(time, parent_name).time
-            if time is None:
-                raise ValueError(f'The system "{time}" is not time dependent')
-
+        # handle time inputs
         if time_ref is None:
             time_ref = self.reference_time
+        if time is None:
+            time_ref = self.reference_time  # ignore time_ref if no time is passed
+            time = self.time_union(path_edges)
+        elif isinstance(time, str):
+            try:
+                time = Time(time, time_ref)
+            except TypeError:
+                parent_name = self.get_parent_system_name(time)
+                if parent_name is None:
+                    raise ValueError("The root system has no time dependency.")
+
+                time = self.get_cs(time, parent_name).time
+                if time is None:
+                    raise ValueError(f'The system "{time}" is not time dependent')
+
         if time is not None:
             time = Time(time, time_ref)
 
-        lcs_result = LocalCoordinateSystem()
-        for edge in path_edges:
-            invert = False
-            lcs = self.graph.edges[edge]["lcs"]
+        # calculate result lcs
+        if len(path_edges) == 1:
+            return self._get_cs_on_edge(path_edges[0], time, time_ref, time_ref is None)
 
-            # lcs has an expression as coordinates
-            if lcs is None:
-                lcs = self.graph.edges[(edge[1], edge[0])]["lcs"]
-                invert = True
-
-            if lcs.is_time_dependent:
-                if not lcs.has_reference_time and self.has_reference_time:
-                    lcs = lcs.interp_time(time - self.reference_time)
-                    lcs = LocalCoordinateSystem(
-                        lcs.orientation.data, lcs.coordinates.data, time
-                    )
-                else:
-                    if time_ref is None and len(path_edges) == 1:
-                        time_ref = lcs.reference_time
-                    lcs = lcs.interp_time(time, time_ref)
-
-            if invert:
-                if isinstance(lcs.coordinates, TimeSeries):
-                    raise Exception(
-                        "The chosen transformation is time dependent, but no time is "
-                        "given. This is usually the case if the time dependencies are "
-                        "only described by mathematical expressions. Provide the "
-                        "desired time using the corresponding parameter to solve this "
-                        "issue."
-                    )
-                lcs = lcs.invert()
-            if len(path_edges) == 1:
-                return lcs
-            lcs_result += lcs
+        lcs_result = self._get_cs_on_edge(path_edges[0], time, time_ref)
+        for edge in path_edges[1:]:
+            lcs_result += self._get_cs_on_edge(edge, time, time_ref)
         return lcs_result
 
     def get_parent_system_name(self, coordinate_system_name) -> Union[str, None]:

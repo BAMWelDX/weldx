@@ -2995,6 +2995,26 @@ class TestCoordinateSystemManager:
                 ([-4, 8, 20], "2000-03-08"),
                 False,
             ),
+            # get transformed cs at specific times using a list of timedelta strings
+            # - all systems and CSM have a reference time
+            (
+                ("cs_3", "root", ["-4day", "8day", "20day"]),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at a specific time using a timedelta string
+            # - all systems and CSM have a reference time
+            (
+                ("cs_3", "root", "20day"),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0]),
+                [[1, 0, 0]],
+                ([20], "2000-03-08"),
+                False,
+            ),
             # get transformed cs at specific times using a DatetimeIndex - all systems,
             # CSM and function have a reference time
             (
@@ -3022,6 +3042,30 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 1, 0]),
                 [[i, 0, 0] for i in [1, 1.5, 1]],
                 ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at specific times using a list of date strings - all
+            # systems and the CSM have a reference time
+            (
+                (
+                    "cs_3",
+                    "root",
+                    ["2000-03-04", "2000-03-16", "2000-03-28"],
+                ),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at a specific time using a date string - all
+            # systems and the CSM have a reference time
+            (
+                ("cs_3", "root", "2000-03-04"),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0]),
+                [[1, 0, 0]],
+                ([-4], "2000-03-08"),
                 False,
             ),
             # get transformed cs at specific times using a DatetimeIndex - all systems
