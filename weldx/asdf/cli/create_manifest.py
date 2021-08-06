@@ -4,7 +4,7 @@ import yaml
 
 
 def create_manifest(
-    search_dir: str = "../schemas", out: str = "../manifests/manifest.yaml"
+    search_dir: str = "../schemas", out: str = "../manifests/weldx_manifest-1.0.0.yaml"
 ):
     """Create manifest file from existing schemas."""
     manifest = dict(
