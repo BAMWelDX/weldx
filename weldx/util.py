@@ -24,7 +24,7 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
-from weldx.time import Time
+from weldx.time import Time, types_time_like
 
 from .constants import WELDX_UNIT_REGISTRY as ureg
 
@@ -901,7 +901,7 @@ def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
 
 
 def xr_interp_orientation_in_time(
-    dsx: xr.DataArray, times: Union[Time, pd.DatetimeIndex, pd.TimedeltaIndex]
+    dsx: xr.DataArray, times: types_time_like
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents orientation data in time.
 
@@ -956,7 +956,7 @@ def xr_interp_orientation_in_time(
 
 
 def xr_interp_coordinates_in_time(
-    da: xr.DataArray, times: Union[Time, pd.TimedeltaIndex, pd.DatetimeIndex]
+    da: xr.DataArray, times: types_time_like
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents 3d coordinates in time.
 
