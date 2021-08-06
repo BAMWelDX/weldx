@@ -78,17 +78,30 @@ def write_buffer(
     io.BytesIO
         Bytes buffer of the ASDF file.
 
+    Notes
+    -----
+    In addition to the usual asdf.AsdfFile.write_to arguments in write_args you can pass
+    the parameter "dummy_arrays". If set, all array data is replaced with a empty list.
     """
     if asdffile_kwargs is None:
         asdffile_kwargs = {}
     if write_kwargs is None:
         write_kwargs = {}
 
+    dummy_inline_arrays = write_kwargs.pop("dummy_arrays", False)
+
     buff = BytesIO()
     with asdf.AsdfFile(
         tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], **asdffile_kwargs
     ) as ff:
-        ff.write_to(buff, **write_kwargs)
+        if dummy_inline_arrays:  # lets store an empty list in the asdf file.
+            write_kwargs["array_storage"] = "inline"
+            from unittest.mock import patch
+
+            with patch("asdf.tags.core.ndarray.numpy_array_to_list", lambda x: []):
+                ff.write_to(buff, **write_kwargs)
+        else:
+            ff.write_to(buff, **write_kwargs)
         buff.seek(0)
     return buff
 
