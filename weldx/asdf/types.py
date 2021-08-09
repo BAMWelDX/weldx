@@ -64,6 +64,28 @@ class WeldxConverterMeta(type(Converter)):
     def __new__(mcs, name, bases, attrs):
         cls = super().__new__(mcs, name, bases, attrs)
 
+        if hasattr(cls, "to_tree"):
+
+            def to_yaml_tree(obj, tag: str, ctx):
+                """Temporary conversion function."""
+                return cls.to_tree(obj, ctx)
+
+            setattr(cls, "to_yaml_tree", to_yaml_tree)
+        if hasattr(cls, "from_tree"):
+
+            def from_yaml_tree(node, tag, ctx):
+                """Temporary conversion function."""
+                return cls.from_tree(node, ctx)
+
+            setattr(cls, "from_yaml_tree", from_yaml_tree)
+
+        if name := getattr(cls, "name", None):
+            setattr(
+                cls,
+                "tags",
+                [format_tag(name, "1.*")],
+            )
+
         # wrap original to/from_tree method to include metadata attributes
         cls.to_yaml_tree = classmethod(to_yaml_tree_metadata(cls.to_yaml_tree))
         cls.from_yaml_tree = classmethod(from_yaml_tree_metadata(cls.from_yaml_tree))
@@ -74,7 +96,15 @@ class WeldxConverterMeta(type(Converter)):
 class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
     """Base class to inherit from for custom converter classes."""
 
-    pass
+    tags = []
+
+    @classmethod
+    def to_yaml_tree(self, obj, tag, ctx):
+        raise NotImplemented
+
+    @classmethod
+    def from_yaml_tree(self, node, tag, ctx):
+        raise NotImplemented
 
 
 def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="weldx"):
