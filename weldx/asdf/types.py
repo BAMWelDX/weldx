@@ -10,11 +10,9 @@ USER_ATTR = "wx_user"
 __all__ = [
     "META_ATTR",
     "USER_ATTR",
-    "_converters",
     "WeldxConverterMeta",
+    "WeldxConverter",
 ]
-
-_converters = set()
 
 
 def to_yaml_tree_metadata(func):
@@ -61,23 +59,22 @@ def from_yaml_tree_metadata(func):
 
 
 class WeldxConverterMeta(type(Converter)):
-    """Metaclass to populate _converters and modify tree methods."""
+    """Metaclass to modify tree methods."""
 
     def __new__(mcs, name, bases, attrs):
         cls = super().__new__(mcs, name, bases, attrs)
-
-        _converters.add(cls())  # have in instanciate class for ne api
-
-        # if cls.organization == "weldx.bam.de" and cls.standard == "weldx":
-        #     _weldx_types.add(cls)
-        # elif cls.organization == "stsci.edu" and cls.standard == "asdf":
-        #     _weldx_asdf_types.add(cls)
 
         # wrap original to/from_tree method to include metadata attributes
         cls.to_yaml_tree = classmethod(to_yaml_tree_metadata(cls.to_yaml_tree))
         cls.from_yaml_tree = classmethod(from_yaml_tree_metadata(cls.from_yaml_tree))
 
         return cls
+
+
+class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
+    """Base class to inherit from for custom converter classes."""
+
+    pass
 
 
 def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="weldx"):

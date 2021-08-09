@@ -3,7 +3,7 @@ from pathlib import Path
 import asdf
 from asdf.extension import ManifestExtension
 
-from ._types import _converters
+from .types import WeldxConverter
 
 # RESOURCES ----------------------------------------------------------------------------
 RESOURCES = {
@@ -26,7 +26,7 @@ class WeldxExtension(ManifestExtension):
 
     extension_uri = "asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0"
     yaml_tag_handles = {"!weldx!": "asdf://weldx.bam.de/weldx/tags/"}
-    converters = _converters
+    converters = (cls() for cls in WeldxConverter.__subclasses__())
     # asdf_standard_requirement = ">= 1.2.0, < 1.5.0"
     # legacy_class_names = ["weldx.asdf.extension.WeldxExtension"]
 

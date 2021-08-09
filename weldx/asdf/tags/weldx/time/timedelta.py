@@ -1,12 +1,11 @@
 import pandas as pd
-from asdf.extension import Converter
 
-from weldx.asdf.types import WeldxConverterMeta
+from weldx.asdf.types import WeldxConverter
 
 __all__ = ["TimedeltaConverter"]
 
 
-class TimedeltaConverter(Converter, metaclass=WeldxConverterMeta):
+class TimedeltaConverter(WeldxConverter):
     """A simple implementation of serializing a single pandas Timedelta."""
 
     tags = ["asdf://weldx.bam.de/weldx/tags/time/timedelta-1.*"]

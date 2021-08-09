@@ -1,15 +1,13 @@
 """Module providing ASDF implementations for basic python types."""
 from uuid import UUID
 
-from asdf.extension import Converter
-
-from weldx.asdf.types import WeldxConverterMeta
+from weldx.asdf.types import WeldxConverter
 
 __all__ = ["UuidConverter"]
 
 
 # UUID ---------------------------------------------------------------------------------
-class UuidConverter(Converter, metaclass=WeldxConverterMeta):
+class UuidConverter(WeldxConverter):
     """Implements a version 4 UUID."""
 
     tags = ["asdf://weldx.bam.de/weldx/tags/uuid-1.*"]
