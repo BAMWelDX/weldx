@@ -359,14 +359,14 @@ class TestWeldXFile:
         def get_mem_info():
             return proc.memory_info().rss
 
-        before = get_mem_info()
         fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
         with WeldxFile(mode=mode) as fh:
             fh["x"] = large_array
+            before = get_mem_info()
             fh.show_asdf_header(use_widgets=False, _interactive=False)
+            after = get_mem_info()
             fh.write_to(fn)
 
-        after = get_mem_info()
         if after > before:
             diff = after - before
             # pytest increases memory a bit, but not as much as our large array would
