@@ -36,15 +36,15 @@ tags:
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/dimension-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/dimension-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/file-1.0.0
-  schema_uri: http://weldx.bam.de/weldx/core/file-1.0.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/file-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/mathematical_expression-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0
-  schema_uri: http://weldx.bam.de/weldx/core/time_series-1.0.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/time_series-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/variable-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-1.0.0
-  schema_uri: http://weldx.bam.de/weldx/core/geometry/spatial_data-1.0.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/geometry/spatial_data-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/graph/di_edge-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0
@@ -155,15 +155,15 @@ tags:
 - tag_uri: tag:weldx.bam.de:weldx/core/dimension-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/dimension-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/file-1.0.0
-  schema_uri: http://weldx.bam.de/weldx/core/file-1.0.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/file-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/mathematical_expression-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/time_series-1.0.0
-  schema_uri: http://weldx.bam.de/weldx/core/time_series-1.0.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/time_series-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/variable-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/variable-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/geometry/spatial_data-1.0.0
-  schema_uri: http://weldx.bam.de/weldx/core/geometry/spatial_data-1.0.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/geometry/spatial_data-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/graph/di_edge-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0

@@ -12,7 +12,6 @@ USER_ATTR = "wx_user"
 __all__ = [
     "META_ATTR",
     "USER_ATTR",
-    "WeldxConverterMeta",
     "WeldxConverter",
 ]
 

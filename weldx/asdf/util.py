@@ -8,8 +8,8 @@ import asdf
 from boltons.iterutils import get_path
 
 from weldx.asdf._extension import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf._types import WeldxType
 from weldx.asdf.constants import SCHEMA_PATH
+from weldx.asdf.types import WeldxConverter
 from weldx.types import (
     SupportsFileReadOnly,
     SupportsFileReadWrite,
@@ -350,7 +350,7 @@ def dataclass_serialization_class(
 
         to_tree_mod = _sort_string_list
 
-    class _SerializationClass(WeldxType):
+    class _SerializationClass(WeldxConverter):
         name = class_name
         version = v
         types = [class_type]
