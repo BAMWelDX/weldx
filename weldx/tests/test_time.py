@@ -374,6 +374,11 @@ class TestTime:
         assert np.all(res.as_timedelta() == exp.as_timedelta())
         assert np.all(res == exp)
 
+    # test_add_datetime ----------------------------------------------------------------
+
+    def test_add_datetime(self):
+        pass
+
     # test_pandas_index ----------------------------------------------------------------
 
     @staticmethod
