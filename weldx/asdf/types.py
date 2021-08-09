@@ -106,11 +106,11 @@ class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
 
     @classmethod
     def to_yaml_tree(self, obj, tag, ctx):
-        raise NotImplemented
+        raise NotImplementedError
 
     @classmethod
     def from_yaml_tree(self, node, tag, ctx):
-        raise NotImplemented
+        raise NotImplementedError
 
 
 def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="weldx"):
