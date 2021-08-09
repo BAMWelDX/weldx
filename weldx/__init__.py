@@ -25,10 +25,6 @@ import weldx.geometry
 import weldx.welding
 import weldx.time
 
-# asdf extensions and tags
-import weldx.asdf
-from weldx.asdf.file import WeldxFile
-
 # class imports to weldx namespace
 from weldx.config import Config
 from weldx.core import MathematicalExpression, TimeSeries
@@ -50,6 +46,10 @@ from weldx.transformations import (
 from weldx.welding.processes import GmawProcess
 from weldx.welding.groove.iso_9692_1 import get_groove
 from weldx.time import Time
+
+# asdf extensions and tags
+import weldx.asdf
+from weldx.asdf.file import WeldxFile
 
 __all__ = (
     "ArcSegment",
