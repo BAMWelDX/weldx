@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 from asdf.tagged import TaggedDict
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 
 __all__ = ["TimedeltaIndexType"]
 
 
-class TimedeltaIndexType(WeldxType):
+class TimedeltaIndexType(WeldxConverter):
     """A simple implementation of serializing pandas TimedeltaIndex."""
 
     name = "time/timedeltaindex"

@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "asdf://weldx.bam.de/weldx/schemas/time/timestamp-1.0.0"
-tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0"
+#tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0"
 
 title: |
   Represents a single instance in time.

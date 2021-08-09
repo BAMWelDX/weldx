@@ -1,10 +1,10 @@
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 from weldx.time import Time
 
 __all__ = ["TimeType"]
 
 
-class TimeType(WeldxType):
+class TimeType(WeldxConverter):
     """A simple implementation of serializing a Time instance."""
 
     name = "time/time"

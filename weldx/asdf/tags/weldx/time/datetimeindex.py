@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 from asdf.tagged import TaggedDict
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 
 __all__ = ["DatetimeIndexType"]
 
 
-class DatetimeIndexType(WeldxType):
+class DatetimeIndexType(WeldxConverter):
     """A simple implementation of serializing pandas DatetimeIndex."""
 
     name = "time/datetimeindex"

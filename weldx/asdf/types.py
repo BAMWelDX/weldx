@@ -1,4 +1,6 @@
 import functools
+import re
+from copy import copy
 
 from asdf.extension import Converter
 from asdf.versioning import AsdfSpec
@@ -13,6 +15,8 @@ __all__ = [
     "WeldxConverterMeta",
     "WeldxConverter",
 ]
+
+_new_tag_regex = re.compile(r"asdf://weldx.bam.de/weldx/tags/(.*)-(\d+.\d+.\d+ |1.\*)")
 
 
 def to_yaml_tree_metadata(func):
@@ -90,6 +94,9 @@ class WeldxConverterMeta(type(Converter)):
         cls.to_yaml_tree = classmethod(to_yaml_tree_metadata(cls.to_yaml_tree))
         cls.from_yaml_tree = classmethod(from_yaml_tree_metadata(cls.from_yaml_tree))
 
+        for tag in copy(cls.tags):
+            cls.tags.append(_legacy_tag_from_new_tag(tag))
+
         return cls
 
 
@@ -120,3 +127,8 @@ def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="we
         version = str(version.spec)
 
     return "{0}-{1}".format(tag, version)
+
+
+def _legacy_tag_from_new_tag(tag: str):
+    name, version = _new_tag_regex.search(tag).groups()
+    return f"tag:weldx.bam.de:weldx/{name}-{version}"
