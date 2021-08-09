@@ -3,7 +3,7 @@ from pathlib import Path
 import asdf
 from asdf.extension import ManifestExtension
 
-from .types import _converters
+from ._types import _converters
 
 # RESOURCES ----------------------------------------------------------------------------
 RESOURCES = {

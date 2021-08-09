@@ -5,7 +5,7 @@ import pytest
 from asdf import ValidationError
 
 from weldx import Q_, TimeSeries
-from weldx.asdf.extension import WxSyntaxError
+from weldx.asdf._extension import WxSyntaxError
 from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
 from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass

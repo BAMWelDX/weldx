@@ -7,10 +7,10 @@ from asdf.schema import _type_to_tag
 from asdf.tagged import TaggedDict
 from asdf.util import uri_match
 
-from weldx.asdf.extension import WxSyntaxError
+from weldx.asdf._extension import WxSyntaxError
+from weldx.asdf._types import format_tag
 from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexType
 from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexType
-from weldx.asdf.types import format_tag
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 

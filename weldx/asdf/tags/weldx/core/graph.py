@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 import networkx as nx
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf._types import WeldxType
 
 
 # DiEdge -------------------------------------------------------------------------------

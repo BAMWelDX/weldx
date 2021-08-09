@@ -1,7 +1,7 @@
 import pandas as pd
 from asdf.extension import Converter
 
-from weldx.asdf.types import WeldxConverterMeta
+from weldx.asdf._types import WeldxConverterMeta
 
 __all__ = ["TimedeltaConverter"]
 

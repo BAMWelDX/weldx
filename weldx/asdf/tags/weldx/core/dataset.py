@@ -1,7 +1,7 @@
 from xarray import Dataset
 
 import weldx.asdf.tags.weldx.core.common_types as ct
-from weldx.asdf.types import WeldxType
+from weldx.asdf._types import WeldxType
 
 
 class XarrayDatasetASDF(WeldxType):

@@ -7,9 +7,9 @@ from warnings import warn
 import asdf
 from boltons.iterutils import get_path
 
+from weldx.asdf._extension import WeldxAsdfExtension, WeldxExtension
+from weldx.asdf._types import WeldxType
 from weldx.asdf.constants import SCHEMA_PATH
-from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.types import WeldxType
 from weldx.types import (
     SupportsFileReadOnly,
     SupportsFileReadWrite,

@@ -1,4 +1,4 @@
-from weldx.asdf.types import WeldxType
+from weldx.asdf._types import WeldxType
 from weldx.time import Time
 
 __all__ = ["TimeType"]

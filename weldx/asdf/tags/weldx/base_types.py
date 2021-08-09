@@ -3,7 +3,7 @@ from uuid import UUID
 
 from asdf.extension import Converter
 
-from weldx.asdf.types import WeldxConverterMeta
+from weldx.asdf._types import WeldxConverterMeta
 
 __all__ = ["UuidConverter"]
 

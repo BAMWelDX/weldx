@@ -7,7 +7,7 @@ import pint
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_timedelta64_dtype as is_timedelta
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf._types import WeldxType
 from weldx.asdf.util import dataclass_serialization_class
 from weldx.constants import Q_
 

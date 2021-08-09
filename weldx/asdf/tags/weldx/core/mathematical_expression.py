@@ -1,6 +1,6 @@
 import sympy
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf._types import WeldxType
 from weldx.core import MathematicalExpression
 
 __all__ = ["MathematicalExpression", "MathematicalExpressionType"]

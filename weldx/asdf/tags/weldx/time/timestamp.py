@@ -1,6 +1,6 @@
 import pandas as pd
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf._types import WeldxType
 
 __all__ = ["TimestampType"]
 

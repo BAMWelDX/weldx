@@ -11,7 +11,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf._types import WeldxType
 
 # Python class -------------------------------------------------------------------------
 

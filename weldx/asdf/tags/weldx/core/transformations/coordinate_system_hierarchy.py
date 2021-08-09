@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple
 
 from pandas import Timestamp
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf._types import WeldxType
 from weldx.transformations import CoordinateSystemManager, LocalCoordinateSystem
 
 

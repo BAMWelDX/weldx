@@ -2,7 +2,7 @@
 
 from asdf.tagged import tag_object
 
-from weldx.asdf.types import WeldxType
+from weldx.asdf._types import WeldxType
 from weldx.welding.processes import GmawProcess
 
 
