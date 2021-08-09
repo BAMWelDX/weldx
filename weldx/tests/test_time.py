@@ -382,9 +382,9 @@ class TestTime:
     @pytest.mark.parametrize(
         "other_type",
         [
-            (str, "timedelta"),
-            (Time, "timedelta"),
-            (Q_, "timedelta"),
+            str,
+            Time,
+            Q_,
             TDI,
             Timedelta,
             np.timedelta64,
@@ -412,7 +412,46 @@ class TestTime:
             If `True`, the other time object contains 3 time values and 1 otherwise
 
         """
-        pass
+        # skip array cases where the type does not support arrays
+        if other_type in [Timedelta, Timestamp] and other_is_array:
+            pytest.skip()
+        if not other_is_array and other_type in [DTI, TDI]:
+            pytest.skip()
+
+        # skip __radd__ cases where we got conflicts with the other types' __add__
+        if not other_on_rhs and other_type in (Q_, np.ndarray, np.timedelta64):
+            pytest.skip()
+
+        # setup rhs
+        delta_val = [4, 6, 8]
+
+        other = _initialize_time_type(
+            other_type,
+            delta_val,
+            None,
+            True,
+            other_is_array,
+            not other_is_array,
+            "s",
+        )
+
+        # setup lhs
+        time_class_values = [1, 2, 3] if time_class_is_array else [1]
+        time_class = Time(Q_(time_class_values, "s"), "2000-01-01 10:00:00")
+
+        # setup expected values
+        add = delta_val if other_is_array else delta_val[0]
+        exp_val = np.array(time_class_values) + add
+
+        exp_time_ref = time_class.reference_time
+        exp = Time(Q_(exp_val, "s"), exp_time_ref)
+
+        # calculate and evaluate result
+        res = time_class + other if other_on_rhs else other + time_class
+
+        assert res.reference_time == exp.reference_time
+        assert np.all(res.as_timedelta() == exp.as_timedelta())
+        assert np.all(res == exp)
 
     # test_pandas_index ----------------------------------------------------------------
 
