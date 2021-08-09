@@ -8,7 +8,7 @@ from .types import _converters
 # RESOURCES ----------------------------------------------------------------------------
 RESOURCES = {
     "asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0": Path(
-        "C:/Python/weldx-dev/weldx/weldx/asdf/manifests/weldx_manifest-1.0.0.yaml"
+        "./manifests/weldx_manifest-1.0.0.yaml"
     ).read_text()
 }
 
