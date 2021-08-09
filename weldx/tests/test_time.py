@@ -376,7 +376,42 @@ class TestTime:
 
     # test_add_datetime ----------------------------------------------------------------
 
-    def test_add_datetime(self):
+    @pytest.mark.parametrize("other_on_rhs", [True, False])
+    @pytest.mark.parametrize("time_class_is_array", [False, True])
+    @pytest.mark.parametrize("other_is_array", [False, True])
+    @pytest.mark.parametrize(
+        "other_type",
+        [
+            (str, "timedelta"),
+            (Time, "timedelta"),
+            (Q_, "timedelta"),
+            TDI,
+            Timedelta,
+            np.timedelta64,
+        ],
+    )
+    def test_add_datetime(
+        self,
+        other_type,
+        other_on_rhs: bool,
+        time_class_is_array: bool,
+        other_is_array: bool,
+    ):
+        """Test the `__add__` method if the `Time` class represents a datetime.
+
+        Parameters
+        ----------
+        other_type :
+            The type of the other object
+        other_on_rhs :
+            If `True`, the other type is on the rhs of the + sign and on the lhs
+            otherwise
+        time_class_is_array :
+            If `True`, the `Time` instance contains 3 time values and 1 otherwise
+        other_is_array :
+            If `True`, the other time object contains 3 time values and 1 otherwise
+
+        """
         pass
 
     # test_pandas_index ----------------------------------------------------------------
