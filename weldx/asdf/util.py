@@ -19,6 +19,9 @@ from weldx.types import (
 )
 from weldx.util import deprecated
 
+_USE_WELDX_FILE = False
+_INVOKE_SHOW_HEADER = False
+
 __all__ = [
     "get_schema_path",
     "read_buffer",
@@ -59,7 +62,11 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
 
 
 def write_buffer(
-    tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict = None
+    tree: dict,
+    asdffile_kwargs: dict = None,
+    write_kwargs: dict = None,
+    _use_weldx_file=None,
+    _invoke_show_header=None,
 ) -> BytesIO:
     """Write ASDF file into buffer.
 
@@ -90,23 +97,48 @@ def write_buffer(
 
     dummy_inline_arrays = write_kwargs.pop("dummy_arrays", False)
 
-    buff = BytesIO()
-    with asdf.AsdfFile(
-        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], **asdffile_kwargs
-    ) as ff:
-        if dummy_inline_arrays:  # lets store an empty list in the asdf file.
-            write_kwargs["all_array_storage"] = "inline"
-            from unittest.mock import patch
+    if _use_weldx_file is None:
+        _use_weldx_file = _USE_WELDX_FILE
 
-            with patch("asdf.tags.core.ndarray.numpy_array_to_list", lambda x: []):
+    if _invoke_show_header is None:
+        _invoke_show_header = _INVOKE_SHOW_HEADER
+
+    def show(wx):
+        if _invoke_show_header:
+            wx.show_asdf_header(False, False)
+
+    if _use_weldx_file:
+        from weldx import WeldxFile
+
+        with WeldxFile(
+            tree=tree, asdffile_kwargs=asdffile_kwargs, write_kwargs=write_kwargs
+        ) as wx:
+            # show(wx)
+            wx.write_to()
+            show(wx)
+            buff = wx.file_handle
+    else:
+        buff = BytesIO()
+        with asdf.AsdfFile(
+            tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], **asdffile_kwargs
+        ) as ff:
+            if dummy_inline_arrays:  # lets store an empty list in the asdf file.
+                write_kwargs["all_array_storage"] = "inline"
+                from unittest.mock import patch
+
+                with patch("asdf.tags.core.ndarray.numpy_array_to_list", lambda x: []):
+                    ff.write_to(buff, **write_kwargs)
+            else:
                 ff.write_to(buff, **write_kwargs)
-        else:
-            ff.write_to(buff, **write_kwargs)
-        buff.seek(0)
+    buff.seek(0)
     return buff
 
 
-def read_buffer(buffer: BytesIO, open_kwargs: dict = None):
+def read_buffer(
+    buffer: BytesIO,
+    open_kwargs: dict = None,
+    _use_weldx_file=_USE_WELDX_FILE,
+):
     """Read ASDF file contents from buffer instance.
 
     Parameters
@@ -127,6 +159,14 @@ def read_buffer(buffer: BytesIO, open_kwargs: dict = None):
         open_kwargs = {"copy_arrays": True}
 
     buffer.seek(0)
+
+    if _use_weldx_file is None:
+        _use_weldx_file = _USE_WELDX_FILE
+    if _use_weldx_file:
+        from weldx import WeldxFile
+
+        return WeldxFile(buffer, asdffile_kwargs=open_kwargs)
+
     with asdf.open(
         buffer,
         extensions=[WeldxExtension(), WeldxAsdfExtension()],
