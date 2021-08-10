@@ -3,6 +3,12 @@ from pathlib import Path
 import asdf
 from asdf.extension import ManifestExtension
 
+from weldx.asdf.validators import (
+    wx_property_tag_validator,
+    wx_shape_validator,
+    wx_unit_validator,
+)
+
 from .types import WeldxConverter
 
 # RESOURCES ----------------------------------------------------------------------------
@@ -32,6 +38,11 @@ class WeldxExtension(ManifestExtension):
         "weldx.asdf.extension.WeldxAsdfExtension",
         "weldx.asdf.extension.WeldxExtension",
     ]
+    validators = {
+        "wx_property_tag": wx_property_tag_validator,
+        "wx_unit": wx_unit_validator,
+        "wx_shape": wx_shape_validator,
+    }
 
 
 def get_extensions():

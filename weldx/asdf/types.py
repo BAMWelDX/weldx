@@ -14,9 +14,14 @@ __all__ = [
     "META_ATTR",
     "USER_ATTR",
     "WeldxConverter",
+    "WxSyntaxError",
 ]
 
 _new_tag_regex = re.compile(r"asdf://weldx.bam.de/weldx/tags/(.*)-(\d+.\d+.\d+|1.\*)")
+
+
+class WxSyntaxError(Exception):
+    """Exception raising on custom weldx ASDF syntax errors."""
 
 
 def to_yaml_tree_metadata(func):
