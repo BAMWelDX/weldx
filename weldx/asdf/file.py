@@ -386,10 +386,22 @@ class WeldxFile(UserDict):
         >>> wfa.wx_meta.welder
         'Nikolai Nikolajewitsch Benardos'
 
+        We can also change theh data easily
+        >>> wfa.wx_meta.welder = "Myself"
+        >>> wfa.wx_meta.welder
+        'Myself'
         """
-        import attrdict
 
-        return attrdict.AttrDict(self)
+        class AttrDict(dict):
+            def __init__(self, iterable, **kwargs):
+                super(AttrDict, self).__init__(iterable, **kwargs)
+                for key, value in self.items():
+                    if isinstance(value, Mapping):
+                        self.__dict__[key] = AttrDict(value)
+                    else:
+                        self.__dict__[key] = value
+
+        return AttrDict(self)
 
     def write_to(
         self, fd: Optional[types_path_and_file_like] = None, **write_args
