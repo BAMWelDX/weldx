@@ -15,7 +15,7 @@ __all__ = [
     "WeldxConverter",
 ]
 
-_new_tag_regex = re.compile(r"asdf://weldx.bam.de/weldx/tags/(.*)-(\d+.\d+.\d+ |1.\*)")
+_new_tag_regex = re.compile(r"asdf://weldx.bam.de/weldx/tags/(.*)-(\d+.\d+.\d+|1.\*)")
 
 
 def to_yaml_tree_metadata(func):
