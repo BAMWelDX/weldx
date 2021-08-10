@@ -1,39 +1,33 @@
 """Welding process ASDF classes."""
 
-from asdf.tagged import tag_object
-
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter, format_tag
 from weldx.welding.processes import GmawProcess
 
+__all__ = ["GmawProcessConverter"]
 
-class GmawProcessTypeAsdf(WeldxType):
+
+class GmawProcessConverter(WeldxConverter):
     """Custom serialization class for GmawProcess."""
 
-    name = ["process/GMAW", "process/CLOOS/spray_arc", "process/CLOOS/pulse"]
-    version = "1.0.0"
+    tags = [
+        "asdf://weldx.bam.de/weldx/tags/process/GMAW-1.0.0",
+        "asdf://weldx.bam.de/weldx/tags/process/CLOOS/spray_arc-1.0.0",
+        "asdf://weldx.bam.de/weldx/tags/process/CLOOS/pulse-1.0.0",
+    ]
     types = [GmawProcess]
-    requires = ["weldx"]
 
     @classmethod
-    def to_tree(cls, node: GmawProcess, ctx):
-        """Convert tree and remove all None entries from node dictionary."""
-        tree = node.__dict__
-        return tree
+    def to_yaml_tree(self, obj: GmawProcess, tag: str, ctx):
+        """Convert to tree."""
+        return obj.__dict__
 
     @classmethod
-    def to_tree_tagged(cls, node: GmawProcess, ctx):
-        """Serialize tree with custom tag definition."""
-        tree = cls.to_tree(node, ctx)
-        tag = (
-            "asdf://weldx.bam.de/weldx/tags/process/"
-            + tree["tag"]
-            + "-"
-            + str(cls.version)
-        )
-        return tag_object(tag, tree, ctx=ctx)
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Convert from yaml node."""
+        return GmawProcess(**node)
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """Read tree object into dataclass."""
-        obj = GmawProcess(**tree)
-        return obj
+    def select_tag(self, obj: GmawProcess, tags, ctx):
+        """Select new style tag according to groove name."""
+        tag = format_tag(tag_name="process/" + obj.tag, version="1.0.0")
+        assert tag in tags
+        return tag
