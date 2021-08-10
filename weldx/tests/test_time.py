@@ -376,6 +376,7 @@ class TestTime:
 
     # test_add_datetime ----------------------------------------------------------------
 
+    @staticmethod
     @pytest.mark.parametrize("other_on_rhs", [True, False])
     @pytest.mark.parametrize("time_class_is_array", [False, True])
     @pytest.mark.parametrize("other_is_array", [False, True])
@@ -391,7 +392,6 @@ class TestTime:
         ],
     )
     def test_add_datetime(
-        self,
         other_type,
         other_on_rhs: bool,
         time_class_is_array: bool,
@@ -455,7 +455,8 @@ class TestTime:
 
     # test_sub -------------------------------------------------------------------------
 
-    def _date_diff(self, date_1: str, date_2: str, unit: str) -> int:
+    @staticmethod
+    def _date_diff(date_1: str, date_2: str, unit: str) -> int:
         """Calculate the diff between two dates in the specified unit."""
         return int(Time(Timestamp(date_1) - Timestamp(date_2)).as_quantity().m_as(unit))
 
