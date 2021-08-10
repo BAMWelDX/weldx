@@ -3,7 +3,11 @@
 id: asdf://weldx.bam.de/weldx/manifests/weldx-1.0.0
 extension_uri: asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0
 title: weldx extension manifest for tag mapping
-description: null
+description: |
+  This manifest list all tags URIs and associated schema URIs supported by weldx.
+
+  All tags implemented by WeldxConverter should be listed here.
+  For compatibility the schema mappings are also provided with the legacy tag format.
 tags:
 # ASDF internals
 - tag_uri: tag:stsci.edu:asdf/unit/quantity-1.1.0
