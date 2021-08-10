@@ -41,7 +41,6 @@ jobs:
             schema = asdf.schema.load_schema(
                 "asdf://asdf-format.org/core/schemas/extension_manifest-1.0.0"
             )
-            manifest = yaml.safe_load(
-                open(Path("./weldx/asdf/manifests/weldx_manifest-1.0.0.yaml")).read()
-            )
-            asdf.schema.validate(manifest, schema=schema)
+            for f in Path("./weldx/asdf/manifests/").glob("*.yaml"):
+                manifest = yaml.safe_load(open(f).read())
+                asdf.schema.validate(manifest, schema=schema)
