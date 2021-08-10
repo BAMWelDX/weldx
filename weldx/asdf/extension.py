@@ -28,7 +28,10 @@ class WeldxExtension(ManifestExtension):
     yaml_tag_handles = {"!weldx!": "asdf://weldx.bam.de/weldx/tags/"}
     converters = (cls() for cls in WeldxConverter.__subclasses__())
     # asdf_standard_requirement = ">= 1.2.0, < 1.5.0"
-    # legacy_class_names = ["weldx.asdf.extension.WeldxExtension"]
+    legacy_class_names = [
+        "weldx.asdf.extension.WeldxAsdfExtension",
+        "weldx.asdf.extension.WeldxExtension",
+    ]
 
 
 def get_extensions():
