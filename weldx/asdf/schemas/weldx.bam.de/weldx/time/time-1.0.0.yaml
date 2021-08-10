@@ -56,7 +56,9 @@ properties:
     description: |
       Indicates a specific reference timestamp for the time object.
     type: object
-    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*"
 
 required: [values]
 propertyOrder: [values, reference_time]

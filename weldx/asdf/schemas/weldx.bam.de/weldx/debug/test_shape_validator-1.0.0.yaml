@@ -33,7 +33,9 @@ properties:
     wx_shape: [1]
 
   timeseries:
-    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
     wx_shape: [1]
 
   nested_prop:

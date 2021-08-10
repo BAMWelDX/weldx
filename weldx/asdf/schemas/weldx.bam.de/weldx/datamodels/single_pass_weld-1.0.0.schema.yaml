@@ -54,11 +54,15 @@ properties:
       welding_process:
         $ref: "asdf://weldx.bam.de/weldx/schemas/process/GMAW-1.0.0"
       shielding_gas:
-        tag: "asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-1.*"
+        oneOf:
+          - tag: "asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-1.*"
+          - tag: "tag:weldx.bam.de:weldx/aws/process/shielding_gas_for_procedure-1.*"
       weld_speed:
         description: |
           The constant weld speed of the welding TCP movement.
-        tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
+        oneOf:
+          - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
+          - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
         wx_unit: "m/s"
         wx_shape: [1]
       welding_wire:
@@ -82,37 +86,49 @@ properties:
   welding_current:
     description: |
       The signal representing the welding current measurement.
-    tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
+      - tag: "tag:weldx.bam.de:weldx/measurement/signal-1.*"
     wx_unit: "A"
   welding_voltage:
     description: |
       The signal representing the welding voltage measurement.
-    tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
+      - tag: "tag:weldx.bam.de:weldx/measurement/signal-1.*"
     wx_unit: "V"
   TCP:
     description: |
       Transformation describing the welding TCP movement in relation to the groove coordinates.
 
       The movement describes a linear motion between two points along the weld seam at constant velocity.
-    tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.*"
     wx_shape:
       time: [2~]
   coordinate_systems:
     description: |
       The expanded coordinate system setup describing the welding experiment and associated coordinate systems in detail.
-    tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.*"
   equipment:
     description: |
       A list of equipments used for measurements and describing the weld seam.
     type: array
     items:
-      tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.*"
+      oneOf:
+        - tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.*"
+        - tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.*"
   measurements:
     description: |
       List of all measurements associated with the experiment.
     type: array
     items:
-      tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.*"
+      oneOf:
+        - tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.*"
+        - tag: "tag:weldx.bam.de:weldx/measurement/measurement-1.*"
   workpiece:
     description: |
       The workpiece to be welded defined by the base metal and the geometric description of the weld seam.
@@ -140,7 +156,9 @@ properties:
           groove_shape:
             description: |
               Constant groove shape of the weld seam.
-            tag: "asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*-1.*"
+            oneOf:
+              - tag: "asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*-1.*"
+              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/*-1.*"
           seam_length:
             description: |
               Length of the linear weld seam.
@@ -151,7 +169,9 @@ properties:
   reference_timestamp:
     description: |
       An optional timestamp indicating the start of the welding process.
-    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*"
   wx_metadata:
     description: |
       General metadata container.

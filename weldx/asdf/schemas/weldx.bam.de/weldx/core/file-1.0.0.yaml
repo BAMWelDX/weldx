@@ -41,11 +41,15 @@ properties:
   created:
     description: |
       The timestamp when the file was created.
-    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*"
   modified:
     description: |
       The timestamp when the file was modified last.
-    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*"
   hostname:
     description: |
       The name of the host machine accessing the file.
