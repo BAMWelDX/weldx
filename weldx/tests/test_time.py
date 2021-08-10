@@ -695,7 +695,8 @@ class TestTime:
             ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
         ],
     )
-    def test_union(list_of_objects, time_exp):
+    @pytest.mark.parametrize("test_instance", [True, False])
+    def test_union(test_instance, list_of_objects, time_exp):
         """Test input types for Time.union function.
 
         Parameters
@@ -706,4 +707,8 @@ class TestTime:
             Expected result time
 
         """
-        assert np.all(Time.union(list_of_objects) == time_exp)
+        if test_instance:
+            instance = Time(list_of_objects[0])
+            assert np.all(instance.union(list_of_objects[1:]) == time_exp)
+        else:
+            assert np.all(Time.union(list_of_objects) == time_exp)

@@ -498,8 +498,22 @@ class Time:
             f"to pd.DatetimeIndex or pd.TimedeltaIndex"
         )
 
+    class _UnionDescriptor(object):
+        """Enables different behavior of `.union` as class and instance method.
+
+        If called as instance, the instance values are automatically included to the
+        time union.
+        """
+
+        def __get__(self, ins, typ):
+            if ins is None:
+                return typ._union_class
+            return ins._union_instance
+
+    union = _UnionDescriptor()
+
     @staticmethod
-    def union(times: Sequence[types_time_like]) -> Time:
+    def _union_class(times: Sequence[types_time_like]) -> Time:
         """Calculate the union of multiple `Time` instances (or supported objects).
 
         Any reference time information will be dropped.
@@ -520,6 +534,24 @@ class Time:
             (Time(time).as_pandas_index() for time in times),
         )
         return Time(pandas_index)
+
+    def _union_instance(self, times: Sequence[types_time_like]) -> Time:
+        """Calculate the union of multiple time types (this instance included).
+
+        Any reference time information will be dropped.
+
+        Parameters
+        ----------
+        times
+            A list of time class instances
+
+        Returns
+        -------
+        Time
+            The time union
+
+        """
+        return Time._union_class([self, *times])
 
 
 class TimeDependent(ABC):
