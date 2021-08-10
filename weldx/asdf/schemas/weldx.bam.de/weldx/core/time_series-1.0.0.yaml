@@ -63,7 +63,7 @@ oneOf:
           A mathematical expression that describes the time dependent behaviour.
         oneOf:
           - tag: "asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.*"
-          - tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.*"
+          - tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.*" # legacy_tag
       unit:
         description: |
           Resulting unit of the data when the expression is evaluated.
@@ -83,7 +83,7 @@ oneOf:
           A set of time deltas.
         oneOf:
           - tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.*"
-          - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.*"
+          - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.*" # legacy_tag
       unit:
         description: |
           Unit of the data.

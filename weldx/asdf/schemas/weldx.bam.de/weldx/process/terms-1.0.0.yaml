@@ -103,7 +103,7 @@ parameters:
       Nominal average wire feedrate.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     wx_unit: "m/s"
 
   voltage:
@@ -111,7 +111,7 @@ parameters:
       Nominal target voltage for spray arc processes.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     wx_unit: "V"
 
   pulse_voltage:
@@ -119,7 +119,7 @@ parameters:
       Nominal target pulse voltage.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     wx_unit: "V"
 
   pulse_current:
@@ -127,7 +127,7 @@ parameters:
       Nominal target pulse current.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     wx_unit: "A"
 
   pulse_duration:
@@ -135,7 +135,7 @@ parameters:
       Nominal target pulse duration.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     wx_unit: "s"
 
   pulse_frequency:
@@ -143,7 +143,7 @@ parameters:
       Nominal target pulse frequency.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     wx_unit: "Hz"
 
   base_voltage:
@@ -151,7 +151,7 @@ parameters:
       Nominal target base voltage.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     wx_unit: "V"
 
   base_current:
@@ -159,7 +159,7 @@ parameters:
       Nominal target base current.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     wx_unit: "A"
 
 ...

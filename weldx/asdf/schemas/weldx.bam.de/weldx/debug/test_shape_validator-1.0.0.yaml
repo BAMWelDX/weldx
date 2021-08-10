@@ -35,7 +35,7 @@ properties:
   timeseries:
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     wx_shape: [1]
 
   nested_prop:
@@ -51,9 +51,9 @@ properties:
   time_prop:
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0"
-      - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0" # legacy_tag
       - tag: "asdf://weldx.bam.de/weldx/tags/time/datetimeindex-1.0.0"
-      - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0" # legacy_tag
 
   optional_prop:
     tag: "tag:stsci.edu:asdf/core/ndarray-1.*"

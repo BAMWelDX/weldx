@@ -23,7 +23,7 @@ properties:
     items:
       oneOf:
         - tag: "asdf://weldx.bam.de/weldx/tags/core/dimension-1.*"
-        - tag: "tag:weldx.bam.de:weldx/core/dimension-1.*"
+        - tag: "tag:weldx.bam.de:weldx/core/dimension-1.*" # legacy_tag
   coordinates:
     description: |
       An array of variables that represent coordinates.
@@ -31,7 +31,7 @@ properties:
     items:
       oneOf:
         - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
-        - tag: "tag:weldx.bam.de:weldx/core/variable-1.*"
+        - tag: "tag:weldx.bam.de:weldx/core/variable-1.*" # legacy_tag
   variables:
     description: |
       An array of variables.
@@ -39,7 +39,7 @@ properties:
     items:
       oneOf:
         - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
-        - tag: "tag:weldx.bam.de:weldx/core/variable-1.*"
+        - tag: "tag:weldx.bam.de:weldx/core/variable-1.*" # legacy_tag
 
 required: [dimensions, coordinates, variables]
 propertyOrder: [attributes, dimensions, coordinates, variables]

@@ -79,7 +79,7 @@ definitions:
     allOf:
       - oneOf:
         - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
-        - tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
+        - tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0" # legacy_tag
       - type: object
         properties:
           attributes:
@@ -90,7 +90,7 @@ definitions:
                   The measurement signal
                 oneOf:
                   - tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
-                  - tag: "tag:weldx.bam.de:weldx/measurement/signal-1.*"
+                  - tag: "tag:weldx.bam.de:weldx/measurement/signal-1.*" # legacy_tag
             required: [signal]
           edges:
             type: array
@@ -105,7 +105,7 @@ definitions:
     allOf:
       - oneOf:
         - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0"
-        - tag: "tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0"
+        - tag: "tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0" # legacy_tag
       - type: object
         properties:
           attributes:
@@ -116,13 +116,13 @@ definitions:
                   The performed transformation.
                 oneOf:
                   - tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.*"
-                  - tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.*"
+                  - tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.*" # legacy_tag
               equipment:
                 description: |
                   The equipment that performs the transformation
                 oneOf:
                   - tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.*"
-                  - tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.*"
+                  - tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.*" # legacy_tag
             required: [transformation]
           target_node:
             $ref: "#/definitions/signal_node"
@@ -143,7 +143,7 @@ properties:
       The source that generates the first signal and is the first element of the chain.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/measurement/source-1.*"
-      - tag: "tag:weldx.bam.de:weldx/measurement/source-1.*"
+      - tag: "tag:weldx.bam.de:weldx/measurement/source-1.*" # legacy_tag
 
   graph:
     description: |
@@ -151,7 +151,7 @@ properties:
     allOf:
       - oneOf:
         - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0"
-        - tag: "tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0"
+        - tag: "tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0" # legacy_tag
       - type: object
         properties:
           root_node:
@@ -162,7 +162,7 @@ properties:
             The equipment that produces the source signal.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.*"
-      - tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.*"
+      - tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.*" # legacy_tag
 
 
 propertyOrder: [name, data_source, graph, source_equipment]

@@ -50,7 +50,7 @@ properties:
       Data that describes the orientation and position of the coordinate system towards its parent system.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.*" # legacy_tag
 
 propertyOrder: [name, reference_system, transformation]
 required: [name, reference_system, transformation]

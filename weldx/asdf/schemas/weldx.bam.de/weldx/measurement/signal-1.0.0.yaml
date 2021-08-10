@@ -37,7 +37,7 @@ properties:
       Measurement data that was produced by the signal.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
 
 
 propertyOrder: [signal_type, unit, data]

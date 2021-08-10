@@ -42,13 +42,13 @@ properties:
       The error caused by the transformation
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/measurement/error-1.*"
-      - tag: "tag:weldx.bam.de:weldx/measurement/error-1.*"
+      - tag: "tag:weldx.bam.de:weldx/measurement/error-1.*" # legacy_tag
   func:
     description: |
       A mathematical expression that describes the relation between the values of the output and input signal
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.*" # legacy_tag
   type_transformation:
     description: |
       A string of length 2 containing an arbitrary combination of the letters A (for analog) and D (for digital). The

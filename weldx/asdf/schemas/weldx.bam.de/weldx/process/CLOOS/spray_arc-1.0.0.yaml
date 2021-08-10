@@ -17,12 +17,12 @@ allOf:
           impedance:
             oneOf:
               - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-              - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+              - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
             wx_unit: "percent"
           characteristic:
             oneOf:
               - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-              - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*"
+              - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
             wx_unit: "V/A"
         required: [impedance,characteristic]
 

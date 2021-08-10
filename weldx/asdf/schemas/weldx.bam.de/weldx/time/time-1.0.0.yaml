@@ -48,13 +48,13 @@ properties:
     type: object
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/time/timedelta-1.*"
-      - tag: "tag:weldx.bam.de:weldx/time/timedelta-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/timedelta-1.*" # legacy_tag
       - tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.*"
-      - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.*" # legacy_tag
       - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
-      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*" # legacy_tag
       - tag: "asdf://weldx.bam.de/weldx/tags/time/datetimeindex-1.*"
-      - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.*" # legacy_tag
 
   reference_time:
     description: |
@@ -62,7 +62,7 @@ properties:
     type: object
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
-      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*" # legacy_tag
 
 required: [values]
 propertyOrder: [values, reference_time]
