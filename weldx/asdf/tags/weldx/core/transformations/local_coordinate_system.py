@@ -1,5 +1,3 @@
-import pint
-
 from weldx.asdf.tags.weldx.core.common_types import Variable
 from weldx.asdf.types import WeldxConverter
 from weldx.asdf.validators import wx_shape_validator

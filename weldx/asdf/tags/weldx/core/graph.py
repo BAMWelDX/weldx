@@ -17,7 +17,7 @@ class DiEdge:
     direction: str = "fwd"
 
 
-class DiEdgeTypeConverter(WeldxConverter):
+class DiEdgeConverter(WeldxConverter):
     """ASDF type for `DiEdge`."""
 
     name = "core/graph/di_edge"
@@ -48,7 +48,7 @@ class DiNode:
     attributes: dict = field(default_factory=dict)
 
 
-class DiNodeTypeConverter(WeldxConverter):
+class DiNodeConverter(WeldxConverter):
     """ASDF type for `DiNode`."""
 
     name = "core/graph/di_node"
@@ -152,7 +152,7 @@ def build_graph(current_node: DiNode, graph: nx.DiGraph = None) -> nx.DiGraph:
     return graph
 
 
-class DiGraphTypeConverter(WeldxConverter):
+class DiGraphConverter(WeldxConverter):
     """Serialization class for `networkx.DiGraph`."""
 
     name = "core/graph/di_graph"

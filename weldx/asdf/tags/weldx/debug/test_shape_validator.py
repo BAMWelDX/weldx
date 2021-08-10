@@ -8,7 +8,7 @@ from weldx import Q_, TimeSeries
 from weldx.asdf.util import dataclass_serialization_class
 from weldx.asdf.validators import wx_shape_validator
 
-__all__ = ["ShapeValidatorTestClass", "ShapeValidatorTestClassType"]
+__all__ = ["ShapeValidatorTestClass", "ShapeValidatorTestClassConverter"]
 
 
 @dataclass
@@ -32,7 +32,7 @@ class ShapeValidatorTestClass:
     optional_prop: np.ndarray = None
 
 
-ShapeValidatorTestClassType = dataclass_serialization_class(
+ShapeValidatorTestClassConverter = dataclass_serialization_class(
     class_type=ShapeValidatorTestClass,
     class_name="debug/test_shape_validator",
     version="1.0.0",

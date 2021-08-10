@@ -136,7 +136,7 @@ class ExternalFile:
 # ASDF Serialization -------------------------------------------------------------------
 
 
-class FileTypeConverter(WeldxConverter):
+class ExternalFileConverter(WeldxConverter):
     """Serialization class for `weldx.core.ExternalFile`."""
 
     name = "core/file"

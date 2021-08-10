@@ -1,9 +1,5 @@
 """ISO 9692-1 welding groove type definitions"""
 
-
-from asdf.tagged import tag_object
-
-from weldx.asdf.constants import WELDX_TAG_BASE
 from weldx.asdf.types import WeldxConverter, format_tag
 from weldx.asdf.validators import wx_unit_validator
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove, _groove_name_to_type

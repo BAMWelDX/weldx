@@ -18,7 +18,7 @@ def from_tree_mod(tree):
     return tree
 
 
-SpatialDataTypeASDF = dataclass_serialization_class(
+SpatialDataConverter = dataclass_serialization_class(
     class_type=SpatialData,
     class_name="core/geometry/spatial_data",
     version="1.0.0",

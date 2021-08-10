@@ -1,7 +1,7 @@
 from weldx.asdf.util import dataclass_serialization_class
 from weldx.measurement import Signal
 
-__all__ = ["Signal", "SignalType"]
+__all__ = ["Signal", "SignalConverter"]
 
 
 def _from_tree_mod(tree):
@@ -10,7 +10,7 @@ def _from_tree_mod(tree):
     return tree
 
 
-SignalType = dataclass_serialization_class(
+SignalConverter = dataclass_serialization_class(
     class_type=Signal,
     class_name="measurement/signal",
     version="1.0.0",

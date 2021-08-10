@@ -8,7 +8,7 @@ from weldx.constants import Q_
 from weldx.core import TimeSeries
 
 
-class TimeSeriesTypeConverter(WeldxConverter):
+class TimeSeriesConverter(WeldxConverter):
     """Serialization class for weldx.core.TimeSeries"""
 
     name = "core/time_series"

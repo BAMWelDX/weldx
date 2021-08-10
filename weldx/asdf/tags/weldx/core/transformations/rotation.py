@@ -7,7 +7,7 @@ from weldx.constants import Q_
 from weldx.transformations.rotation import WXRotation
 
 
-class WXRotationTypeConverter(WeldxConverter):
+class WXRotationConverter(WeldxConverter):
     """Serialization class for the 'Scipy.Rotation' type"""
 
     name = "core/transformations/rotation"

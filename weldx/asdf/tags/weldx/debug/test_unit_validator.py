@@ -7,7 +7,7 @@ from weldx import Q_
 from weldx.asdf.util import dataclass_serialization_class
 from weldx.asdf.validators import wx_unit_validator
 
-__all__ = ["UnitValidatorTestClass", "UnitValidatorTestClassType"]
+__all__ = ["UnitValidatorTestClass", "UnitValidatorTestClassConverter"]
 
 
 @dataclass
@@ -23,7 +23,7 @@ class UnitValidatorTestClass:
     simple_prop: dict = field(default_factory=lambda: dict(value=float(3), unit="m"))
 
 
-UnitValidatorTestClassType = dataclass_serialization_class(
+UnitValidatorTestClassConverter = dataclass_serialization_class(
     class_type=UnitValidatorTestClass,
     class_name="debug/test_unit_validator",
     version="1.0.0",

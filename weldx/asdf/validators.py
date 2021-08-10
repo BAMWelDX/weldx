@@ -9,8 +9,8 @@ from asdf.util import uri_match
 
 from weldx.asdf._extension import WxSyntaxError
 from weldx.asdf._types import format_tag
-from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexType
-from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexType
+from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexConverter
+from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexConverter
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
@@ -373,9 +373,9 @@ def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> Lis
     elif isinstance(instance_dict, asdf.types.tagged.Tagged):
         # add custom type implementations
         if format_tag("time/timedeltaindex") in instance_dict._tag:
-            return TimedeltaIndexType.shape_from_tagged(instance_dict)
+            return TimedeltaIndexConverter.shape_from_tagged(instance_dict)
         elif format_tag("time/datetimeindex") in instance_dict._tag:
-            return DatetimeIndexType.shape_from_tagged(instance_dict)
+            return DatetimeIndexConverter.shape_from_tagged(instance_dict)
         elif format_tag("core/time_series") in instance_dict._tag:
             return [1]  # scalar
         elif "asdf/unit/quantity" in instance_dict._tag:
