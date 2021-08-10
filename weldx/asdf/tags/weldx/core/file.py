@@ -11,7 +11,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 
 # Python class -------------------------------------------------------------------------
 
@@ -136,7 +136,7 @@ class ExternalFile:
 # ASDF Serialization -------------------------------------------------------------------
 
 
-class FileTypeASDF(WeldxType):
+class FileTypeConverter(WeldxConverter):
     """Serialization class for `weldx.core.ExternalFile`."""
 
     name = "core/file"

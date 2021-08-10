@@ -1,13 +1,13 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 from weldx.asdf.validators import wx_unit_validator
 from weldx.constants import Q_
 from weldx.transformations.rotation import WXRotation
 
 
-class WXRotationTypeASDF(WeldxType):
+class WXRotationTypeConverter(WeldxConverter):
     """Serialization class for the 'Scipy.Rotation' type"""
 
     name = "core/transformations/rotation"

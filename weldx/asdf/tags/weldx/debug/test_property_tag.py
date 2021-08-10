@@ -2,10 +2,10 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 from weldx.asdf.validators import wx_property_tag_validator
 
-__all__ = ["PropertyTagTestClass", "PropertyTagTestClassType"]
+__all__ = ["PropertyTagTestClass", "PropertyTagTestClassConverter"]
 
 
 @dataclass
@@ -17,7 +17,7 @@ class PropertyTagTestClass:
     prop3: pd.Timestamp = pd.Timestamp("2020-01-03")
 
 
-class PropertyTagTestClassType(WeldxType):
+class PropertyTagTestClassConverter(WeldxConverter):
     """Helper class to test the shape validator"""
 
     name = "debug/test_property_tag"

@@ -1,13 +1,13 @@
 import pint
 
-from weldx.asdf._types import WeldxType
 from weldx.asdf.tags.weldx.core.common_types import Variable
+from weldx.asdf.types import WeldxConverter
 from weldx.asdf.validators import wx_shape_validator
 from weldx.core import TimeSeries
 from weldx.transformations import LocalCoordinateSystem
 
 
-class LocalCoordinateSystemASDF(WeldxType):
+class LocalCoordinateSystemConverter(WeldxConverter):
     """Serialization class for weldx.transformations.LocalCoordinateSystem"""
 
     name = "core/transformations/local_coordinate_system"
@@ -44,8 +44,9 @@ class LocalCoordinateSystemASDF(WeldxType):
             orientations = Variable(
                 "orientations", node.orientation.dims, node.orientation.data
             )
-            if "time" not in node.orientation.coords:
-                ctx.set_array_storage(orientations.data, "inline")
+            # TODO: restore inlining
+            # if "time" not in node.orientation.coords:
+            #     ctx.set_array_storage(orientations.data, "inline")
             tree["orientations"] = orientations
 
         coordinates = None
@@ -55,11 +56,12 @@ class LocalCoordinateSystemASDF(WeldxType):
             coordinates = Variable(
                 "coordinates", node.coordinates.dims, node.coordinates.data
             )
-            if "time" not in node.coordinates.coords:
-                if isinstance(coordinates.data, pint.Quantity):
-                    ctx.set_array_storage(coordinates.data.magnitude, "inline")
-                else:
-                    ctx.set_array_storage(coordinates.data, "inline")
+            # TODO: restore inlining
+            # if "time" not in node.coordinates.coords:
+            #     if isinstance(coordinates.data, pint.Quantity):
+            #         ctx.set_array_storage(coordinates.data.magnitude, "inline")
+            #     else:
+            #         ctx.set_array_storage(coordinates.data, "inline")
             tree["coordinates"] = coordinates
 
         if "time" in node.dataset.coords:

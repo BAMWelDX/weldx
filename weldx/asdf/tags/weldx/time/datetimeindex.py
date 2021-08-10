@@ -6,10 +6,10 @@ from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxConverter
 
-__all__ = ["DatetimeIndexType"]
+__all__ = ["DatetimeIndexConverter"]
 
 
-class DatetimeIndexType(WeldxConverter):
+class DatetimeIndexConverter(WeldxConverter):
     """A simple implementation of serializing pandas DatetimeIndex."""
 
     name = "time/datetimeindex"

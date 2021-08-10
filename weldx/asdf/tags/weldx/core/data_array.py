@@ -2,10 +2,10 @@
 from xarray import DataArray
 
 import weldx.asdf.tags.weldx.core.common_types as ct
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 
 
-class XarrayDataArrayASDF(WeldxType):
+class XarrayDataArrayConverter(WeldxConverter):
     """Serialization class for xarray.DataArray."""
 
     name = "core/data_array"

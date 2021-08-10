@@ -1,13 +1,13 @@
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 from weldx.measurement import MeasurementChain
 
 __all__ = [
     "MeasurementChain",
-    "MeasurementChainType",
+    "MeasurementChainConverter",
 ]
 
 
-class MeasurementChainType(WeldxType):
+class MeasurementChainConverter(WeldxConverter):
     """Serialization class for measurement chains"""
 
     name = "measurement/measurement_chain"

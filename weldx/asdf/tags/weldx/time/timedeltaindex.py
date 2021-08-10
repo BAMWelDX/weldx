@@ -6,10 +6,10 @@ from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxConverter
 
-__all__ = ["TimedeltaIndexType"]
+__all__ = ["TimedeltaIndexConverter"]
 
 
-class TimedeltaIndexType(WeldxConverter):
+class TimedeltaIndexConverter(WeldxConverter):
     """A simple implementation of serializing pandas TimedeltaIndex."""
 
     name = "time/timedeltaindex"

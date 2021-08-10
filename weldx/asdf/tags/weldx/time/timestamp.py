@@ -2,10 +2,10 @@ import pandas as pd
 
 from weldx.asdf.types import WeldxConverter
 
-__all__ = ["TimestampType"]
+__all__ = ["TimestampConverter"]
 
 
-class TimestampType(WeldxConverter):
+class TimestampConverter(WeldxConverter):
     """A simple implementation of serializing a single pandas Timestamp."""
 
     name = "time/timestamp"

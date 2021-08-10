@@ -1,12 +1,12 @@
 import sympy
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 from weldx.core import MathematicalExpression
 
-__all__ = ["MathematicalExpression", "MathematicalExpressionType"]
+__all__ = ["MathematicalExpression", "MathematicalExpressionConverter"]
 
 
-class MathematicalExpressionType(WeldxType):
+class MathematicalExpressionConverter(WeldxConverter):
     """Serialization class for sympy style math expressions."""
 
     name = "core/mathematical_expression"

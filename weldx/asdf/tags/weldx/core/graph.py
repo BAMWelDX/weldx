@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 
 import networkx as nx
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 
 
 # DiEdge -------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ class DiEdge:
     direction: str = "fwd"
 
 
-class DiEdgeTypeASDF(WeldxType):
+class DiEdgeTypeConverter(WeldxConverter):
     """ASDF type for `DiEdge`."""
 
     name = "core/graph/di_edge"
@@ -48,7 +48,7 @@ class DiNode:
     attributes: dict = field(default_factory=dict)
 
 
-class DiNodeTypeASDF(WeldxType):
+class DiNodeTypeConverter(WeldxConverter):
     """ASDF type for `DiNode`."""
 
     name = "core/graph/di_node"
@@ -152,7 +152,7 @@ def build_graph(current_node: DiNode, graph: nx.DiGraph = None) -> nx.DiGraph:
     return graph
 
 
-class DiGraphTypeASDF(WeldxType):
+class DiGraphTypeConverter(WeldxConverter):
     """Serialization class for `networkx.DiGraph`."""
 
     name = "core/graph/di_graph"

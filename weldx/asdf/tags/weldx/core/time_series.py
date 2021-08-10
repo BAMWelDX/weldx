@@ -3,12 +3,12 @@
 import numpy as np
 import pint
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 from weldx.constants import Q_
 from weldx.core import TimeSeries
 
 
-class TimeSeriesTypeASDF(WeldxType):
+class TimeSeriesTypeConverter(WeldxConverter):
     """Serialization class for weldx.core.TimeSeries"""
 
     name = "core/time_series"

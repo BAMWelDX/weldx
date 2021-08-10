@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple
 
 from pandas import Timestamp
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 from weldx.transformations import CoordinateSystemManager, LocalCoordinateSystem
 
 
@@ -17,7 +17,7 @@ class CoordinateTransformation:
     transformation: LocalCoordinateSystem
 
 
-class CoordinateTransformationASDF(WeldxType):
+class CoordinateTransformationConverter(WeldxConverter):
     """Serialization class for CoordinateTransformation"""
 
     name = "core/transformations/coordinate_transformation"
@@ -97,7 +97,7 @@ class CoordinateSystemManagerSubsystem:
         self.members = sorted(self.members)
 
 
-class CoordinateSystemManagerSubsystemASDF(WeldxType):
+class CoordinateSystemManagerSubsystemConverter(WeldxConverter):
     """Serialization class for a CoordinateSystemManagerSubsystem instance"""
 
     name = "core/transformations/coordinate_system_hierarchy_subsystem"
@@ -157,7 +157,7 @@ class CoordinateSystemManagerSubsystemASDF(WeldxType):
         return tree
 
 
-class CoordinateSystemManagerASDF(WeldxType):
+class CoordinateSystemManagerConverter(WeldxConverter):
     """Serialization class for weldx.transformations.LocalCoordinateSystem"""
 
     name = "core/transformations/coordinate_system_hierarchy"

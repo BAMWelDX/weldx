@@ -7,7 +7,7 @@ import pint
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_timedelta64_dtype as is_timedelta
 
-from weldx.asdf._types import WeldxType
+from weldx.asdf.types import WeldxConverter
 from weldx.asdf.util import dataclass_serialization_class
 from weldx.constants import Q_
 
@@ -39,7 +39,7 @@ class Variable:
     attrs: Mapping[Hashable, Any] = dataclasses.field(default_factory=dict)
 
 
-class VariableTypeASDF(WeldxType):
+class VariableTypeConverter(WeldxConverter):
     """Serialization class for a Variable"""
 
     name = "core/variable"

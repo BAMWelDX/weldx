@@ -14,11 +14,11 @@ class UuidConverter(WeldxConverter):
     types = [UUID]
 
     @classmethod
-    def to_yaml_tree(self, obj, tag, ctx):
+    def to_yaml_tree(self, obj, tag: str, ctx):
         """Convert to python dict."""
         return dict(uuid=str(obj))
 
     @classmethod
-    def from_yaml_tree(self, node, tag, ctx):
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Reconstruct from tree."""
         return UUID(node["uuid"])
