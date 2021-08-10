@@ -77,7 +77,9 @@ definitions:
     description: |
       A graph node that represents a measurement signal.
     allOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
+      - oneOf:
+        - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
+        - tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
       - type: object
         properties:
           attributes:
@@ -101,7 +103,9 @@ definitions:
     description: |
       A graph edge that represents a signal transformation.
     allOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0"
+      - oneOf:
+        - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0"
+        - tag: "tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0"
       - type: object
         properties:
           attributes:
@@ -145,7 +149,9 @@ properties:
     description: |
       The measurement chain depicted by a graph. Signals are represented by the nodes and transformations by the edges.
     allOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0"
+      - oneOf:
+        - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0"
+        - tag: "tag:weldx.bam.de:weldx/core/graph/di_graph-1.0.0"
       - type: object
         properties:
           root_node:

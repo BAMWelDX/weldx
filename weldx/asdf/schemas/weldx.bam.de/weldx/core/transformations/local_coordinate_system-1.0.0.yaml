@@ -112,7 +112,9 @@ properties:
 
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
   orientations:
     description: |
       An ndarray containing the orientations.
