@@ -26,19 +26,22 @@
 ### fixes
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
-  representation. Also tweaked efficency by not writing binary blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
+  representation. Also tweaked efficency by not writing binary
+  blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
 
 ### documentation
 
-- added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
-
+- added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and
+  solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
 
 ### ASDF
 
 - add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
 - refactor all asdf uris to new ``asdf://`` naming convention,
   see https://asdf.readthedocs.io/en/latest/asdf/extending/uris.html#entities-identified-by-uri
-  [[#431]](https://github.com/BAMWelDX/weldx/pull/431)
+  [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
+- replaced all referenced weldx tag versions in schemas
+  with ``1.*`` [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
 
 ### deprecations
 

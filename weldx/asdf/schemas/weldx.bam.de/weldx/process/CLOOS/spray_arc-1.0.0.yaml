@@ -15,10 +15,10 @@ allOf:
         type: object
         properties:
           impedance:
-            tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
+            tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
             wx_unit: "percent"
           characteristic:
-            tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
+            tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
             wx_unit: "V/A"
         required: [impedance,characteristic]
 

@@ -13,10 +13,10 @@ properties:
   data:
     type: array
     items:
-      tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
 
   measurement_chain:
-    tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.*"
 
 
 propertyOrder: [name, data, measurement_chain]

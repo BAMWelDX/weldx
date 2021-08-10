@@ -39,7 +39,7 @@ properties:
   edges:
     type: array
     items:
-      tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.*"
   attributes:
     type: object
 

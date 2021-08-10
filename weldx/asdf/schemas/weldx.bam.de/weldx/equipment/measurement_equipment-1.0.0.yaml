@@ -36,11 +36,11 @@ properties:
   sources:
     type: array
     items:
-      tag: "asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/measurement/source-1.*"
   transformations:
     type: array
     items:
-      tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.*"
 
 propertyOrder: [name, sources, transformations]
 required: [name]

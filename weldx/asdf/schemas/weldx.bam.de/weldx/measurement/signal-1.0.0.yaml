@@ -35,7 +35,7 @@ properties:
   data:
     description: |
       Measurement data that was produced by the signal.
-    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
 
 
 propertyOrder: [signal_type, unit, data]

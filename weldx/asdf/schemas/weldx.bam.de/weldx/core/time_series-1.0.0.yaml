@@ -61,7 +61,7 @@ oneOf:
       expression:
         description: |
           A mathematical expression that describes the time dependent behaviour.
-        tag: "asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0"
+        tag: "asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.*"
       unit:
         description: |
           Resulting unit of the data when the expression is evaluated.
@@ -79,7 +79,7 @@ oneOf:
       time:
         description: |
           A set of time deltas.
-        tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0"
+        tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.*"
       unit:
         description: |
           Unit of the data.

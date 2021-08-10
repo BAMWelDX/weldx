@@ -86,7 +86,7 @@ definitions:
               signal:
                 description: |
                   The measurement signal
-                tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0"
+                tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
             required: [signal]
           edges:
             type: array
@@ -108,11 +108,11 @@ definitions:
               transformation:
                 description: |
                   The performed transformation.
-                tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0"
+                tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.*"
               equipment:
                 description: |
                   The equipment that performs the transformation
-                tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0"
+                tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.*"
             required: [transformation]
           target_node:
             $ref: "#/definitions/signal_node"
@@ -131,7 +131,7 @@ properties:
   data_source:
     description: |
       The source that generates the first signal and is the first element of the chain.
-    tag: "asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/measurement/source-1.*"
 
   graph:
     description: |
@@ -146,7 +146,7 @@ properties:
   source_equipment:
     description: |
             The equipment that produces the source signal.
-    tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.*"
 
 
 propertyOrder: [name, data_source, graph, source_equipment]

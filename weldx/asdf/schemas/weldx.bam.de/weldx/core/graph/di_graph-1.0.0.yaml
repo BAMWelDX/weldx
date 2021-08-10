@@ -52,7 +52,7 @@ examples:
 type: object
 properties:
   root_node:
-    tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.*"
 
 required: [root_node]
 ...

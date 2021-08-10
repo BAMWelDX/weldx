@@ -48,7 +48,7 @@ properties:
   transformation:
     description: |
       Data that describes the orientation and position of the coordinate system towards its parent system.
-    tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
 
 propertyOrder: [name, reference_system, transformation]
 required: [name, reference_system, transformation]

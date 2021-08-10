@@ -97,11 +97,11 @@ properties:
   reference_time:
     description: |
       A timestamp that serves as reference point for the time deltas of the 'time' tag.
-    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
   time:
     description: |
       A list of timestamps
-    tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.*"
   coordinates:
     description: |
       An ndarray containing the coordinates.
@@ -112,7 +112,7 @@ properties:
   orientations:
     description: |
       An ndarray containing the orientations.
-    tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
 
 wx_shape:
   (coordinates): [..., 3]

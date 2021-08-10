@@ -35,7 +35,7 @@ properties:
   reference_time:
     description: |
       A timestamp that serves as reference point for all attached coordinate systems.
-    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
 
   root_cs:
     description: |

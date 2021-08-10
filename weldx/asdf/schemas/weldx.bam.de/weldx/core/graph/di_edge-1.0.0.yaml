@@ -31,7 +31,7 @@ properties:
     type: string
     enum: [fwd, bwd]
   target_node:
-    tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.*"
   attributes:
     type: object
 

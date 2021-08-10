@@ -21,11 +21,11 @@ properties:
       An array of variables that represent coordinates.
     type: array
     items:
-      tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
   data:
     description: |
       The actual data.
-    tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
 
 required: [attributes, coordinates, data]
 propertyOrder: [attributes, coordinates, data]

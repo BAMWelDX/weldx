@@ -72,7 +72,7 @@ properties:
   reference_time:
     description: |
       A timestamp that serves as reference point for all attached coordinate systems.
-    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0"
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
 
   subsystem_names:
     description: |
@@ -87,7 +87,7 @@ properties:
       A list containing the data of all subsystems including nested structures.
     type: array
     items:
-      tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy_subsystem-1.*"
 
   coordinate_systems:
     description: |
@@ -95,7 +95,7 @@ properties:
       towards their parent system.
     type: array
     items:
-      tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0"
+      tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.*"
 
   spatial_data:
     type: array
