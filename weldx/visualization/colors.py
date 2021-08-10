@@ -1,6 +1,6 @@
 """Color related tools."""
 
-from typing import Dict, Generator, List, Tuple, Union
+from typing import Dict, Generator, List, Sized, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -64,7 +64,7 @@ def _color_rgb_to_rgb_normalized(
         Color tuple with values in the range (0.0-1.0)
 
     """
-    return tuple([val / 255 for val in rgb])
+    return tuple([val / 255 for val in rgb])  # type: ignore[return-value]
 
 
 def _color_rgb_normalized_to_rgb(
@@ -83,7 +83,7 @@ def _color_rgb_normalized_to_rgb(
         Color tuple with values in the range (0-255)
 
     """
-    return tuple([int(np.round(val * 255)) for val in rgb])
+    return tuple([int(np.round(val * 255)) for val in rgb])  # type: ignore
 
 
 def color_int_to_rgb_normalized(integer):
@@ -159,9 +159,9 @@ def color_to_rgb_normalized(
         RGB color triplet with the value range 0.0 to 1.0
 
     """
-    if isinstance(color, Tuple) and len(color) == 3:
+    if isinstance(color, Sized) and len(color) == 3:
         if all(isinstance(number, int) for number in color):
-            return _color_rgb_to_rgb_normalized(color)
+            return _color_rgb_to_rgb_normalized(color)  # type: ignore[arg-type]
         if all(isinstance(number, (int, float)) for number in color):
             return color
     if isinstance(color, int):
@@ -180,7 +180,7 @@ _color_list = [
 ]
 
 
-def color_generator_function() -> int:
+def color_generator_function() -> Generator:
     """Yield a 24 bit RGB color integer.
 
     The returned value is taken from a predefined list.
@@ -196,7 +196,11 @@ def color_generator_function() -> int:
             yield color
 
 
-def get_color(key: str, color_dict: Dict[str, int], color_generator: Generator) -> int:
+def get_color(
+    key: str,
+    color_dict: Dict[str, Union[int, Tuple[int, int, int]]],
+    color_generator: Generator,
+) -> int:
     """Get a 24 bit RGB color from a dictionary or generator function.
 
     If the provided key is found in the dictionary, the corresponding color is returned.
@@ -218,7 +222,10 @@ def get_color(key: str, color_dict: Dict[str, int], color_generator: Generator) 
 
     """
     if color_dict is not None and key in color_dict:
-        return _color_rgb_to_int(color_dict[key])
+        value = color_dict[key]
+        if isinstance(value, int):
+            return value
+        return _color_rgb_to_int(value)
     try:
         return next(color_generator)
     except StopIteration:

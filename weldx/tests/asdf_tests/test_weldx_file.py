@@ -1,9 +1,12 @@
 """Tests for the WeldxFile class."""
+import itertools
 import pathlib
+import platform
 import shutil
 import tempfile
 from io import BytesIO
-
+import xarray as xr
+import numpy as np
 import asdf
 import pytest
 from jsonschema import ValidationError
@@ -27,7 +30,7 @@ class ReadOnlyFile:
     def read(self, *args, **kwargs):  # noqa: D102
         return self.file_read_only.read(*args, **kwargs)
 
-    def readline(self, limit=-1):
+    def readline(self, limit=-1):  # noqa: D102
         return self.file_read_only.readline(limit)
 
     @staticmethod
@@ -305,6 +308,7 @@ class TestWeldXFile:
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
+        w.show_asdf_header()  # check for exception safety.
 
     @staticmethod
     def test_custom_schema_resolve_path():
@@ -338,16 +342,63 @@ class TestWeldXFile:
         assert old_pos == after_pos
 
     @staticmethod
+    @pytest.mark.skipif(
+        platform.system() == "Darwin", reason="evolution will strike on you!"
+    )
+    @pytest.mark.parametrize(
+        "mode",
+        ("rw", "r"),
+    )
+    def test_show_header_memory_usage(mode, tmpdir):
+        """Check we do not significantly increase memory usage by showing the header.
+
+        Also ensure the tree is still usable after showing the header.
+        """
+        import psutil
+        import gc
+
+        large_array = np.ones((1000, 1000), dtype=np.float64)  # ~7.6mb
+        proc = psutil.Process()
+
+        def get_mem_info():
+            return proc.memory_info().rss
+
+        before = get_mem_info()
+        fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+        with WeldxFile(mode=mode) as fh:
+            fh["x"] = large_array
+            fh.show_asdf_header(use_widgets=False, _interactive=False)
+            fh.write_to(fn)
+        gc.collect()
+        after = get_mem_info()
+        if after > before:
+            diff = after - before
+            # pytest increases memory a bit, but not as much as our large array would
+            # occupy in memory.
+            assert diff <= large_array.nbytes * 1.1, diff / 1024 ** 2
+        assert np.all(WeldxFile(fn)["x"] == large_array)
+
+    @staticmethod
     @pytest.mark.parametrize("mode", ("r", "rw"))
     def test_show_header_in_sync(mode, capsys):
-        """Ensure that the updated tree is displayed in show_header"""
+        """Ensure that the updated tree is displayed in show_header."""
         with WeldxFile(mode=mode) as fh:
             fh["wx_user"] = dict(test=True)
-            fh.show_asdf_header(use_widgets=False, _interactive=False)
+            fh.show_asdf_header()
 
         out, _ = capsys.readouterr()
         assert "wx_user" in out
         assert "test" in out
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ["use_widgets", "interactive"],
+        list(itertools.product([None, True, False], [True, False, None])),
+    )
+    def test_show_header_params(use_widgets, interactive, capsys):
+        """Check different inputs for show method."""
+        fh = WeldxFile()
+        fh.show_asdf_header(use_widgets=use_widgets, _interactive=interactive)
 
     def test_invalid_software_entry(self):
         """Invalid software entries should raise."""
@@ -356,3 +407,32 @@ class TestWeldXFile:
 
         with pytest.raises(ValueError):
             self.fh.software_history_entry = {"name": None}
+
+    @staticmethod
+    def test_compression(tmpdir):
+        """Check we do not modify the input during basic operations.
+
+        Even under different conditions like compression.
+        """
+        fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+
+        def get_size_and_mtime(fn):
+            stat = pathlib.Path(fn).stat()
+            return stat.st_size, stat.st_mtime_ns
+
+        # compressed file created with asdf
+        with asdf.AsdfFile({"data": xr.DataArray(np.ones((100, 100)))}) as af:
+            af.write_to(fn, all_array_compression="zlib")
+            af.close()
+
+        size_asdf = get_size_and_mtime(fn)
+
+        # wx file:
+        wx_file = WeldxFile(fn, "rw", compression="input")
+        size_rw = get_size_and_mtime(fn)
+
+        wx_file.show_asdf_header()
+        size_show_hdr = get_size_and_mtime(fn)
+        wx_file.close()
+
+        assert size_asdf == size_rw == size_show_hdr

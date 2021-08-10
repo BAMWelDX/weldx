@@ -26,9 +26,12 @@
 ### fixes
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
-  representation [[#428]](https://github.com/BAMWelDX/weldx/pull/428).
+  representation. Also tweaked efficency by not writing binary blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
 
 ### documentation
+
+- added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
+
 
 ### ASDF
 
@@ -56,6 +59,7 @@
   parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
 - The `LocalCoordinateSystem.time` and `TimeSeries.time` now return an instance of `Time`
   [[#464]](https://github.com/BAMWelDX/weldx/pull/464)
+- Fix wrong and incomplete type-hints [[#435]](https://github.com/BAMWelDX/weldx/pull/435)
 
 ### ASDF
 

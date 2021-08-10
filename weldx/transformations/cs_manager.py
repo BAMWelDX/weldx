@@ -4,7 +4,7 @@ from __future__ import annotations
 import itertools
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -86,10 +86,10 @@ class CoordinateSystemManager:
             time_ref = pd.Timestamp(time_ref)
         self._reference_time = time_ref
 
-        self._data = {}
+        self._data: Dict[str, CoordinateSystemManager.CoordinateSystemData] = {}
         self._root_system_name = root_coordinate_system_name
 
-        self._sub_system_data_dict = {}
+        self._sub_system_data_dict: Dict[str, Dict] = {}
 
         self._graph = DiGraph()
         self._add_coordinate_system_node(root_coordinate_system_name)
@@ -148,7 +148,7 @@ class CoordinateSystemManager:
             f")"
         )
 
-    def __eq__(self: "CoordinateSystemManager", other: "CoordinateSystemManager"):
+    def __eq__(self, other: Any):
         """Test equality of CSM instances."""
         # todo: also check data  -> add tests
         if not isinstance(other, self.__class__):
@@ -1780,7 +1780,7 @@ class CoordinateSystemManager:
         reference_system: str = None,
         coordinate_systems: List[str] = None,
         data_sets: List[str] = None,
-        colors: Dict[str, int] = None,
+        colors: Dict[str, Union[int, Tuple[int, int, int]]] = None,
         title: str = None,
         limits: List[Tuple[float, float]] = None,
         time: types_time_and_lcs = None,

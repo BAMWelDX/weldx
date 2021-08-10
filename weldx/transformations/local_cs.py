@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Tuple, Union
+from typing import TYPE_CHECKING, List, Tuple, Union, Any
 
 import numpy as np
 import pandas as pd
@@ -241,8 +241,10 @@ class LocalCoordinateSystem(TimeDependent):
         rhs_cs_inv = rhs_cs.invert()
         return self + rhs_cs_inv
 
-    def __eq__(self: "LocalCoordinateSystem", other: "LocalCoordinateSystem") -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check equality of LocalCoordinateSystems."""
+        if not isinstance(other, LocalCoordinateSystem):
+            return NotImplemented
 
         def _comp_coords():
             if not isinstance(self.coordinates, type(other.coordinates)):
@@ -747,7 +749,7 @@ class LocalCoordinateSystem(TimeDependent):
             return self._time_ref
         return self._dataset.weldx.time_ref
 
-    @property
+    @property  # type: ignore[misc] # false report
     @deprecated(
         "0.4.1",
         "0.5.0",
@@ -783,7 +785,7 @@ class LocalCoordinateSystem(TimeDependent):
             return Time(self._dataset.time, self.reference_time)
         return None
 
-    @property
+    @property  # type: ignore[misc] # false report
     @deprecated(
         "0.4.1",
         "0.5.0",

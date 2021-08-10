@@ -33,6 +33,7 @@ excluded_words:
   - meshio
   - pytest-xdist
   - nbval
+  - mypy
   # matplotlib ----------------------------------
   - gca
   - mpl
@@ -94,7 +95,11 @@ excluded_words:
   - ipynb
   - ipywidgets
   - ipython
+  - ipykernel
+  - jupyterlab-manager
+  - jlab
   - jslink
+  - Miniconda
   # scipy ---------------------------------------
   - Slerp
   - rotvec
