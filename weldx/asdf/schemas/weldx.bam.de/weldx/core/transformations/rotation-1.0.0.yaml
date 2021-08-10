@@ -2,7 +2,7 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "asdf://weldx.bam.de/weldx/schemas/core/transformations/rotation-1.0.0"
-tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-1.0.0"
+#tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-1.0.0"
 
 title: |
   Schema to describe a 3D rotation.
