@@ -23,25 +23,25 @@ jobs:
 
   validate_manifest:
     name: validate weldx manifest
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - uses: actions/setup-python@v2
-          with:
-            python-version: '3.8'
-        - name: pip installs
-          run: |
-            python -m pip install git+https://github.com/asdf-format/asdf.git
-        - uses: jannekem/run-python-script-action@v1
-          with:
-            script: |
-              from pathlib import Path
-              import asdf
-              import yaml
-              schema = asdf.schema.load_schema(
-                  "asdf://asdf-format.org/core/schemas/extension_manifest-1.0.0"
-              )
-              manifest = yaml.safe_load(
-                  open(Path("./weldx/asdf/manifests/weldx_manifest-1.0.0.yaml")).read()
-              )
-              asdf.schema.validate(manifest, schema=schema)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: pip installs
+        run: |
+          python -m pip install git+https://github.com/asdf-format/asdf.git
+      - uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            from pathlib import Path
+            import asdf
+            import yaml
+            schema = asdf.schema.load_schema(
+                "asdf://asdf-format.org/core/schemas/extension_manifest-1.0.0"
+            )
+            manifest = yaml.safe_load(
+                open(Path("./weldx/asdf/manifests/weldx_manifest-1.0.0.yaml")).read()
+            )
+            asdf.schema.validate(manifest, schema=schema)
