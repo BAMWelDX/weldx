@@ -41,5 +41,6 @@ class IsoGrooveConverter(WeldxConverter):
         _snip = _ISO_GROOVE_SCHEMA + type(obj).__name__
         selection = [tag for tag in self.tags if tag.startswith("asdf://")]
         selection = [tag for tag in selection if _snip in tag]
-        assert len(selection) == 1
+        if not len(selection) == 1:
+            raise ValueError("Found groove tags for selection.")
         return selection[0]

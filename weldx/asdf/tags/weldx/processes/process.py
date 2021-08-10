@@ -29,5 +29,6 @@ class GmawProcessConverter(WeldxConverter):
     def select_tag(self, obj: GmawProcess, tags, ctx):
         """Select new style tag according to groove name."""
         tag = format_tag(tag_name="process/" + obj.tag, version="1.0.0")
-        assert tag in tags
+        if tag not in self.tags:
+            raise ValueError("The generated process tag is not supported")
         return tag
