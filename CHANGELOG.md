@@ -32,6 +32,9 @@
 
 ### documentation
 
+- added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
+
+
 ### ASDF
 
 - add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
