@@ -5,6 +5,10 @@ extension_uri: asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0
 title: weldx extension manifest for tag mapping
 description: null
 tags:
+# ASDF internals
+- tag_uri: tag:stsci.edu:asdf/unit/quantity-1.1.0
+  schema_uri: http://stsci.edu/schemas/asdf/unit/quantity-1.1.0
+# weldx tag definitions
 - tag_uri: asdf://weldx.bam.de/weldx/tags/uuid-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/uuid-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/aws/design/base_metal-1.0.0

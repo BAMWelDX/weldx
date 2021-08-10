@@ -1,6 +1,7 @@
 import functools
 import re
 from copy import copy
+from typing import List
 
 from asdf.extension import Converter
 from asdf.versioning import AsdfSpec
@@ -94,7 +95,8 @@ class WeldxConverterMeta(type(Converter)):
         cls.from_yaml_tree = classmethod(from_yaml_tree_metadata(cls.from_yaml_tree))
 
         for tag in copy(cls.tags):
-            cls.tags.append(_legacy_tag_from_new_tag(tag))
+            if tag.startswith("asdf://weldx.bam.de/weldx/tags/"):
+                cls.tags.append(_legacy_tag_from_new_tag(tag))
 
         return cls
 
@@ -102,7 +104,7 @@ class WeldxConverterMeta(type(Converter)):
 class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
     """Base class to inherit from for custom converter classes."""
 
-    tags = []
+    tags: List[str] = []
 
     @classmethod
     def to_yaml_tree(self, obj, tag, ctx):
