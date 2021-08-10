@@ -2,6 +2,7 @@ from pathlib import Path
 
 import asdf
 from asdf.extension import ManifestExtension
+from asdf.resource import DirectoryResourceMapping
 
 from weldx.asdf.validators import (
     wx_property_tag_validator,
@@ -12,18 +13,32 @@ from weldx.asdf.validators import (
 from .types import WeldxConverter
 
 # RESOURCES ----------------------------------------------------------------------------
-RESOURCES = {
+MANIFEST_MAPPING = {
     "asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0": (
         Path(__file__).parent / "manifests/weldx_manifest-1.0.0.yaml"
     ).read_text()
 }
 
 
+def get_schema_resource_mapping():
+    # Get path to schemas directory relative to this file
+    schemas_path = Path(__file__).parent / "schemas/weldx.bam.de/weldx/"
+    mapping = DirectoryResourceMapping(
+        schemas_path,
+        "asdf://weldx.bam.de/weldx/schemas/",
+        recursive=True,
+        filename_pattern="*.yaml",
+        stem_filename=True,
+    )
+    return mapping
+
+
 def get_resource_mappings():
-    return [RESOURCES]
+    return [MANIFEST_MAPPING, get_schema_resource_mapping()]
 
 
-asdf.get_config().add_resource_mapping(RESOURCES)
+# for mapping in get_resource_mappings():
+#     asdf.get_config().add_resource_mapping(mapping)
 
 
 # Extension ----------------------------------------------------------------------------

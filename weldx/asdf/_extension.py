@@ -1,5 +1,4 @@
-# Licensed under a 3-clause BSD style license - see LICENSE
-# -*- coding: utf-8 -*-
+"""Legacy asdf extension code."""
 
 from asdf.extension import AsdfExtension, BuiltinExtension
 

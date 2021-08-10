@@ -1,3 +1,5 @@
+"""Legacy asdf extension code."""
+
 import functools
 
 from asdf.types import CustomType, ExtensionTypeMeta

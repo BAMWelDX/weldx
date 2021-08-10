@@ -9,10 +9,14 @@ description: |
   All tags implemented by WeldxConverter should be listed here.
   For compatibility the schema mappings are also provided with the legacy tag format.
 tags:
+# --------------------------------------------------------------------------------
 # ASDF internals
+# --------------------------------------------------------------------------------
 - tag_uri: tag:stsci.edu:asdf/unit/quantity-1.1.0
   schema_uri: http://stsci.edu/schemas/asdf/unit/quantity-1.1.0
+# --------------------------------------------------------------------------------
 # weldx tag definitions
+# --------------------------------------------------------------------------------
 - tag_uri: asdf://weldx.bam.de/weldx/tags/uuid-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/uuid-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/aws/design/base_metal-1.0.0
@@ -131,7 +135,9 @@ tags:
   schema_uri: asdf://weldx.bam.de/weldx/schemas/time/timestamp-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/unit/dimension-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/unit/dimension-1.0.0
+# --------------------------------------------------------------------------------
 #  legacy tag definitions mapped to new schemas
+# --------------------------------------------------------------------------------
 - tag_uri: tag:weldx.bam.de:weldx/uuid-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/uuid-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/aws/design/base_metal-1.0.0
