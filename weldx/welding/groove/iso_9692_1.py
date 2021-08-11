@@ -2,7 +2,7 @@
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Tuple, Union, Dict
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import pint
