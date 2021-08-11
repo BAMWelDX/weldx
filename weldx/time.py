@@ -511,6 +511,7 @@ class Time:
             return ins._union_instance
 
     union = _UnionDescriptor()
+    """Test docstring."""
 
     @staticmethod
     def _union_class(times: Sequence[types_time_like]) -> Time:
