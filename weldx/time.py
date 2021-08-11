@@ -499,11 +499,7 @@ class Time:
         )
 
     class _UnionDescriptor:
-        """Enables different behavior of `.union` as class and instance method.
-
-        If called as instance, the instance values are automatically included to the
-        time union.
-        """
+        """Enables different behavior of `.union` as class and instance method."""
 
         def __get__(self, ins, typ):
             if ins is None:
@@ -511,25 +507,28 @@ class Time:
             return ins._union_instance
 
     union = _UnionDescriptor()
-    """Test docstring."""
+    """Calculate the union of multiple time-like objects.
+
+    This method can eiter be used as a class or instance method. When used on an 
+    instance, its values are included in the calculated time union.
+    
+    Note that any reference time information will be dropped.
+
+    Parameters
+    ----------
+    times: Sequence[types_time_like]
+        A list of time-like objects
+
+    Returns
+    -------
+    Time
+        The time union
+
+    """
 
     @staticmethod
     def _union_class(times: Sequence[types_time_like]) -> Time:
-        """Calculate the union of multiple `Time` instances (or supported objects).
-
-        Any reference time information will be dropped.
-
-        Parameters
-        ----------
-        times
-            A list of time class instances
-
-        Returns
-        -------
-        Time
-            The time union
-
-        """
+        """Class version of the ``union`` method."""
         pandas_index = reduce(
             lambda x, y: x.union(y),
             (Time(time).as_pandas_index() for time in times),
@@ -537,21 +536,7 @@ class Time:
         return Time(pandas_index)
 
     def _union_instance(self, times: Sequence[types_time_like]) -> Time:
-        """Calculate the union of multiple time types (this instance included).
-
-        Any reference time information will be dropped.
-
-        Parameters
-        ----------
-        times
-            A list of time class instances
-
-        Returns
-        -------
-        Time
-            The time union
-
-        """
+        """Instance version of the ``union`` method."""
         return Time._union_class([self, *times])
 
 
