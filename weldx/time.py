@@ -342,7 +342,7 @@ class Time:
         """Use generator to iterate over index values."""
         return (t for t in self.as_pandas_index())
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Union[Timedelta, Timestamp]:
         """Access pandas index."""
         return self.as_pandas_index()[item]
 
