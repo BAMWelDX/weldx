@@ -506,6 +506,9 @@ class Time:
                 return typ._union_class
             return ins._union_instance
 
+    # todo: Sphinx renders the docstring below as expected. However, the examples are
+    #       not run by doctest. A possible solution in Python 3.9 can be found here:
+    #       https://stackoverflow.com/a/8820636/6700329
     union = _UnionDescriptor()
     """Calculate the union of multiple time-like objects.
 
@@ -526,12 +529,21 @@ class Time:
         
     Examples
     --------
-    
+
     Using ``union`` as class method:
-    
+
     >>> from weldx import Time
     >>> t1 = Time(["1s", "3s", "4s"])
+    >>> t2 = Time(["2s", "4s", "5s"])
+    >>>
+    >>> all(Time.union([t1, t2]) == Time(["1s", "2s", "3s", "4s", "5s"]))
+    True
 
+    Using the instance method:
+
+    >>> all(t1.union([t2]) == Time(["1s", "2s", "3s", "4s", "5s"]))
+    True
+    
     """
 
     @staticmethod
