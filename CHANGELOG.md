@@ -16,6 +16,8 @@
 - removed functions now covered by `Time`: ``pandas_time_delta_to_quantity``, ``to_pandas_time_index``
   , ``get_time_union`` [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
 - removed custom ``wx_tag`` validator [[#461]](https://github.com/BAMWelDX/weldx/pull/461)
+- attrdict dependency replaced with a custom implementation of recursive dicts
+  [[#470]](https://github.com/BAMWelDX/weldx/pulls/470).
 
 ### changes
 
@@ -29,6 +31,9 @@
   representation. Also tweaked efficency by not writing binary blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
 
 ### documentation
+
+- added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
+
 
 ### ASDF
 

@@ -95,7 +95,11 @@ excluded_words:
   - ipynb
   - ipywidgets
   - ipython
+  - ipykernel
+  - jupyterlab-manager
+  - jlab
   - jslink
+  - Miniconda
   # scipy ---------------------------------------
   - Slerp
   - rotvec
