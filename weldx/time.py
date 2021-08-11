@@ -523,6 +523,14 @@ class Time:
     -------
     Time
         The time union
+        
+    Examples
+    --------
+    
+    Using ``union`` as class method:
+    
+    >>> from weldx import Time
+    >>> t1 = Time(["1s", "3s", "4s"])
 
     """
 
