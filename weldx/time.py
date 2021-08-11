@@ -526,7 +526,7 @@ class Time:
     -------
     Time
         The time union
-        
+
     Examples
     --------
 
@@ -543,7 +543,7 @@ class Time:
 
     >>> all(t1.union([t2]) == Time(["1s", "2s", "3s", "4s", "5s"]))
     True
-    
+
     """
 
     @staticmethod
