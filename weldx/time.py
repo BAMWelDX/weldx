@@ -581,7 +581,7 @@ class Time:
 
     Parameters
     ----------
-    times: Sequence[types_time_like]
+    times:
         A list of time-like objects
 
     Returns
