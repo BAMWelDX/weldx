@@ -158,6 +158,30 @@ class Time:
     >>> t_res = "2000-01-01" + Time(["1d", "2d"])
     >>> t_res = ["3s", "4s"] + Time(["1s", "2s"])
 
+    Subtraction is possible too, but there are some restrictions. It is not possible
+    to subtract an absolute time from a time delta. Additionally, since the values of
+    a ``Time`` instance must be monotonically increasing, any subtraction that
+    produces a result that doesn't fulfill this requirement will fail. This is always
+    the case when subtracting arrays from scalars because either the array that is
+    subtracted (it is intrenally cast to a ``Time`` instance) or the resulting array
+    violates this requirement.  Apart from that, subtraction works pretty similar as
+    the addition:
+
+    >>> # absolute and time delta
+    >>> t_res = Time("2002") - "1y"
+    >>> t_res = Time(["2002", "2007", "2022"]) - "1y"
+    >>> t_res = Time(["2002", "2007", "2022"]) - ["1y", "2y", "3y"]
+    >>>
+    >>> # both absolute
+    >>> t_res = Time(["2002"]) - "2001"
+    >>> t_res = Time(["2002", "2007", "2022"]) - "2001"
+    >>> t_res = Time(["2002", "2007", "2022"]) - ["2001", "2002", "2003"]
+    >>>
+    >>> # both time delta
+    >>> t_res = Time("2y") - "1y"
+    >>> t_res = Time(["2y", "7y", "22y"]) - "1y"
+    >>> t_res = Time(["2y", "7y", "22y"]) - ["1y", "2y", "3y"]
+
     You can also compare two instances of `Time`:
 
     >>> Time(["1s"]) == Time(Q_("1s"))
