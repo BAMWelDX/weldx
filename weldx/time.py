@@ -72,6 +72,11 @@ class Time:
         absolute values and this parameter is set to ``None``, the first value of
         the data will be used as reference time.
 
+    Raises
+    ------
+    ValueError
+        When time values passed are not sorted in monotonic increasing order.
+
     Examples
     --------
     Creation from a quantity:
@@ -214,10 +219,43 @@ class Time:
     >>> Time("3s") == "20d"
     False
 
-    Raises
-    ------
-    ValueError
-        When time values passed are not sorted in monotonic increasing order.
+    If you want to know how many entries are stored in a ``Time`` object, you can either
+    use the ``length`` property or use ``len``:
+
+    >>> len(Time(["1s", "3s"]))
+    2
+
+    Direct access and iteration are also supported. The return types are fitting pandas
+    types:
+
+    >>> from pandas import Timedelta
+    >>>
+    >>> t = Time(["1s", "2s", "3s"])
+    >>> t[1] == Timedelta(2, "s")
+    True
+
+    >>> isinstance(t[1], Timedelta)
+    True
+
+    >>> from pandas import Timestamp
+    >>>
+    >>> t = Time(["2000", "2001", "2002"])
+    >>> t[1] == Timestamp("2001")
+    True
+
+    >>> isinstance(t[1], Timestamp)
+    True
+
+    >>> t = Time(["1s", "2s", "3s"])
+    >>> result = Timedelta(0, "s")
+    >>>
+    >>> for value in t:
+    ...     if not isinstance(value, Timedelta):
+    ...         raise TypeError("Unexpected type")
+    ...     result += value
+    >>>
+    >>> result == Timedelta(6, "s")
+    True
 
     """
 
