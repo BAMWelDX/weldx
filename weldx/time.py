@@ -498,7 +498,7 @@ class Time:
             f"to pd.DatetimeIndex or pd.TimedeltaIndex"
         )
 
-    class _UnionDescriptor(object):
+    class _UnionDescriptor:
         """Enables different behavior of `.union` as class and instance method.
 
         If called as instance, the instance values are automatically included to the
