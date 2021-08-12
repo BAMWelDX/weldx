@@ -492,7 +492,7 @@ class LocalCoordinateSystem(TimeDependent):
         num_none = sum(v is None for v in mat)
 
         if num_none == 1:
-            idx = next(i for i, v in enumerate(mat) if v is None)
+            idx = next(i for i, v in enumerate(mat) if v is None)  # skipcq: PTC-W0063
             mat[idx] = cls._orthogonal_axis(mat[(idx - 2) % 3], mat[(idx - 1) % 3])
         elif num_none > 1:
             raise ValueError("You need to specify two or more vectors.")
