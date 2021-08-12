@@ -881,7 +881,6 @@ class CoordinateSystemManager:
 
         Examples
         --------
-
         Create a coordinate system from 3 orthogonal vectors:
 
         >>> from weldx import CoordinateSystemManager
