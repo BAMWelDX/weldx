@@ -741,6 +741,7 @@ class TestLocalCoordinateSystem:
         ids=get_test_name,
     )
     def test_from_axis_vectors_exceptions(kwargs, exception_type, test_name):
+        """Test the exceptions of the ``from_axis_vectors`` factory method."""
         with pytest.raises(exception_type):
             LCS.from_axis_vectors(**kwargs)
 
