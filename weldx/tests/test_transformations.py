@@ -1696,12 +1696,6 @@ def test_coordinate_system_factories_time_dependent():
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
 
-    print(orientations.shape)
-
-    vec_x = orientations[:, :, 0]
-    vec_y = orientations[:, :, 1]
-    vec_z = orientations[:, :, 2]
-
     # construction with euler -----------------------------
 
     cs_euler_oc = lcs.from_euler("yx", angles, False, coords, time)
@@ -1713,50 +1707,6 @@ def test_coordinate_system_factories_time_dependent():
     cs_euler_o = lcs.from_euler("yx", angles, False, coords[0], time)
     check_coordinate_system(cs_euler_o, orientations, coords[0], time=time)
 
-    # construction with x,y,z-vectors ---------------------
-
-    cs_xyz_oc = lcs.from_xyz(vec_x, vec_y, vec_z, coords, time)
-    check_coordinate_system(cs_xyz_oc, orientations, coords, time=time)
-
-    cs_xyz_c = lcs.from_xyz(vec_x[0], vec_y[0], vec_z[0], coords, time)
-    check_coordinate_system(cs_xyz_c, orientations[0], coords, time=time)
-
-    cs_xyz_o = lcs.from_xyz(vec_x, vec_y, vec_z, coords[0], time)
-    check_coordinate_system(cs_xyz_o, orientations, coords[0], time=time)
-
-    # construction with x,y-vectors and orientation -------
-
-    cs_xyo_oc = lcs.from_xy_and_orientation(vec_x, vec_y, True, coords, time)
-    check_coordinate_system(cs_xyo_oc, orientations, coords, True, time=time)
-
-    cs_xyo_c = lcs.from_xy_and_orientation(vec_x[0], vec_y[0], True, coords, time)
-    check_coordinate_system(cs_xyo_c, orientations[0], coords, True, time=time)
-
-    cs_xyo_o = lcs.from_xy_and_orientation(vec_x, vec_y, True, coords[0], time)
-    check_coordinate_system(cs_xyo_o, orientations, coords[0], True, time=time)
-
-    # construction with y,z-vectors and orientation -------
-
-    cs_yzo_oc = lcs.from_yz_and_orientation(vec_y, vec_z, True, coords, time)
-    check_coordinate_system(cs_yzo_oc, orientations, coords, True, time=time)
-
-    cs_yzo_c = lcs.from_yz_and_orientation(vec_y[0], vec_z[0], True, coords, time)
-    check_coordinate_system(cs_yzo_c, orientations[0], coords, True, time=time)
-
-    cs_yzo_o = lcs.from_yz_and_orientation(vec_y, vec_z, True, coords[0], time)
-    check_coordinate_system(cs_yzo_o, orientations, coords[0], True, time=time)
-
-    # construction with x,z-vectors and orientation -------
-
-    cs_xzo_oc = lcs.from_xz_and_orientation(vec_x, vec_z, True, coords, time)
-    check_coordinate_system(cs_xzo_oc, orientations, coords, True, time=time)
-
-    cs_xzo_c = lcs.from_xz_and_orientation(vec_x[0], vec_z[0], True, coords, time)
-    check_coordinate_system(cs_xzo_c, orientations[0], coords, True, time=time)
-
-    cs_xzo_o = lcs.from_xz_and_orientation(vec_x, vec_z, True, coords[0], time)
-    check_coordinate_system(cs_xzo_o, orientations, coords[0], True, time=time)
-
 
 def test_coordinate_system_invert():
     """Test the invert function.
@@ -1767,8 +1717,8 @@ def test_coordinate_system_invert():
 
     """
     # fix ---------------------------------------
-    lcs0_in_lcs1 = tf.LocalCoordinateSystem.from_xy_and_orientation(
-        [1, 1, 0], [-1, 1, 0], coordinates=[2, 0, 2]
+    lcs0_in_lcs1 = tf.LocalCoordinateSystem.from_axis_vectors(
+        x=[1, 1, 0], y=[-1, 1, 0], coordinates=[2, 0, 2]
     )
     lcs1_in_lcs0 = lcs0_in_lcs1.invert()
 
