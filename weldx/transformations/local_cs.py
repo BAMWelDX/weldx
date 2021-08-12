@@ -492,35 +492,13 @@ class LocalCoordinateSystem(TimeDependent):
 
         if num_none == 1:
             idx = next(i for i, v in enumerate(mat) if v is None)  # skipcq: PTC-W0063
-            mat[idx] = cls._orthogonal_axis(mat[(idx - 2) % 3], mat[(idx - 1) % 3])
+            mat[idx] = np.cross(mat[(idx - 2) % 3], mat[(idx - 1) % 3])
         elif num_none > 1:
             raise ValueError("You need to specify two or more vectors.")
 
         mat = np.array(mat)
         t_axes = (1, 0) if mat.ndim == 2 else (1, 2, 0)
         return cls(mat.transpose(t_axes), coordinates, time, time_ref)
-
-    @staticmethod
-    def _orthogonal_axis(a_0, a_1):
-        """Calculate an axis which is orthogonal to two other axes.
-
-        The calculated axis has a positive orientation towards the other 2
-        axes.
-
-        Parameters
-        ----------
-        a_0 :
-            First axis
-        a_1 :
-            Second axis
-
-        Returns
-        -------
-        numpy.ndarray
-            Orthogonal axis
-
-        """
-        return np.cross(a_0, a_1)
 
     @property
     def orientation(self) -> xr.DataArray:
