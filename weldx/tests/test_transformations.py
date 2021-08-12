@@ -705,9 +705,7 @@ class TestLocalCoordinateSystem:
     @staticmethod
     @pytest.mark.parametrize("time_dep_orient", [True, False])
     @pytest.mark.parametrize("time_dep_coord", [True, False])
-    def test_from_axis_vectors_not_time_dependent(
-        time_dep_orient: bool, time_dep_coord: bool
-    ):
+    def test_from_axis_vectors(time_dep_orient: bool, time_dep_coord: bool):
         t = ["1s", "2s", "3s", "4s"] if time_dep_orient or time_dep_coord else None
         angles = [[30, 45, 60], [40, 35, 80], [1, 33, 7], [90, 180, 270]]
 
