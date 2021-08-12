@@ -4244,7 +4244,9 @@ def test_coordinate_system_manager_create_coordinate_system():
     )
 
     # from xyz --------------------------------------------
-    csm.create_cs_from_xyz("lcs_xyz_default", "root", vec_x[0], vec_y[0], vec_z[0])
+    csm.create_cs_from_axis_vectors(
+        "lcs_xyz_default", "root", vec_x[0], vec_y[0], vec_z[0]
+    )
     check_coordinate_system(
         csm.get_cs("lcs_xyz_default"),
         orientations[0],
@@ -4252,7 +4254,9 @@ def test_coordinate_system_manager_create_coordinate_system():
         True,
     )
 
-    csm.create_cs_from_xyz("lcs_xyz_tdp", "root", vec_x, vec_y, vec_z, coords, time)
+    csm.create_cs_from_axis_vectors(
+        "lcs_xyz_tdp", "root", vec_x, vec_y, vec_z, coords, time
+    )
     check_coordinate_system(
         csm.get_cs("lcs_xyz_tdp"),
         orientations,
@@ -4262,7 +4266,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     )
 
     # from xy and orientation -----------------------------
-    csm.create_cs_from_xy_and_orientation("lcs_xyo_default", "root", vec_x[0], vec_y[0])
+    csm.create_cs_from_axis_vectors("lcs_xyo_default", "root", x=vec_x[0], y=vec_y[0])
     check_coordinate_system(
         csm.get_cs("lcs_xyo_default"),
         orientations[0],
@@ -4270,8 +4274,8 @@ def test_coordinate_system_manager_create_coordinate_system():
         True,
     )
 
-    csm.create_cs_from_xy_and_orientation(
-        "lcs_xyo_tdp", "root", vec_x, vec_y, True, coords, time
+    csm.create_cs_from_axis_vectors(
+        "lcs_xyo_tdp", "root", x=vec_x, y=vec_y, coordinates=coords, time=time
     )
     check_coordinate_system(
         csm.get_cs("lcs_xyo_tdp"),
@@ -4282,7 +4286,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     )
 
     # from xz and orientation -----------------------------
-    csm.create_cs_from_xz_and_orientation("lcs_xzo_default", "root", vec_x[0], vec_z[0])
+    csm.create_cs_from_axis_vectors("lcs_xzo_default", "root", x=vec_x[0], z=vec_z[0])
     check_coordinate_system(
         csm.get_cs("lcs_xzo_default"),
         orientations[0],
@@ -4290,8 +4294,8 @@ def test_coordinate_system_manager_create_coordinate_system():
         True,
     )
 
-    csm.create_cs_from_xz_and_orientation(
-        "lcs_xzo_tdp", "root", vec_x, vec_z, True, coords, time
+    csm.create_cs_from_axis_vectors(
+        "lcs_xzo_tdp", "root", x=vec_x, z=vec_z, coordinates=coords, time=time
     )
     check_coordinate_system(
         csm.get_cs("lcs_xzo_tdp"),
@@ -4302,7 +4306,7 @@ def test_coordinate_system_manager_create_coordinate_system():
     )
 
     # from yz and orientation -----------------------------
-    csm.create_cs_from_yz_and_orientation("lcs_yzo_default", "root", vec_y[0], vec_z[0])
+    csm.create_cs_from_axis_vectors("lcs_yzo_default", "root", y=vec_y[0], z=vec_z[0])
     check_coordinate_system(
         csm.get_cs("lcs_yzo_default"),
         orientations[0],
@@ -4310,8 +4314,8 @@ def test_coordinate_system_manager_create_coordinate_system():
         True,
     )
 
-    csm.create_cs_from_yz_and_orientation(
-        "lcs_yzo_tdp", "root", vec_y, vec_z, True, coords, time
+    csm.create_cs_from_axis_vectors(
+        "lcs_yzo_tdp", "root", y=vec_y, z=vec_z, coordinates=coords, time=time
     )
     check_coordinate_system(
         csm.get_cs("lcs_yzo_tdp"),
