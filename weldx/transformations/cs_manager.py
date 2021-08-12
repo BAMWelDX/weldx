@@ -837,6 +837,56 @@ class CoordinateSystemManager:
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
         )
 
+    def create_cs_from_axis_vectors(
+        self,
+        coordinate_system_name: str,
+        reference_system_name: str,
+        x: types_coordinates,
+        y: types_coordinates,
+        z: types_coordinates,
+        coordinates: types_coordinates = None,
+        time: Union[types_time_like, Time] = None,
+        time_ref: types_timestamp_like = None,
+        lsc_child_in_parent: bool = True,
+    ):
+        """Create a coordinate system and add it to the `CoordinateSystemManager`.
+
+        This function uses the
+        `~weldx.transformations.LocalCoordinateSystem.from_axis_vectors`
+        method of the `~weldx.transformations.LocalCoordinateSystem` class.
+
+        Parameters
+        ----------
+        coordinate_system_name :
+            Name of the new coordinate system.
+        reference_system_name :
+            Name of the parent system. This must have been already added.
+        x :
+            A vector representing the coordinate systems x-axis
+        y :
+            A vector representing the coordinate systems y-axis
+        z :
+            A vector representing the coordinate systems z-axis
+        coordinates :
+            Coordinates of the origin (Default value = None)
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Optional reference timestamp if ``time`` is a time delta.
+        lsc_child_in_parent :
+            If set to `True`, the passed
+            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            the new system orientation towards is parent. If `False`, it describes
+            how the parent system is positioned in its new child system.
+
+        """
+        lcs = LocalCoordinateSystem.from_axis_vectors(
+            x, y, z, coordinates, time, time_ref
+        )
+        self.add_cs(
+            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
+        )
+
     def create_cs_from_xyz(
         self,
         coordinate_system_name: str,
