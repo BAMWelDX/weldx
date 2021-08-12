@@ -168,7 +168,7 @@ class Time:
     a ``Time`` instance must be monotonically increasing, any subtraction that
     produces a result that doesn't fulfill this requirement will fail. This is always
     the case when subtracting arrays from scalars because either the array that is
-    subtracted (it is intrenally cast to a ``Time`` instance) or the resulting array
+    subtracted (it is internally cast to a `Time` instance) or the resulting array
     violates this requirement.  Apart from that, subtraction works pretty similar as
     the addition:
 
