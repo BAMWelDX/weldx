@@ -486,6 +486,24 @@ class LocalCoordinateSystem(TimeDependent):
         LocalCoordinateSystem
             The new coordinate system
 
+        Examples
+        --------
+
+        Create a coordinate system from 3 orthogonal vectors:
+
+        >>> from weldx import LocalCoordinateSystem
+        >>>
+        >>> x = [2, 2, 0]
+        >>> y = [-8, 8, 0]
+        >>> z = [0, 0, 3]
+        >>>
+        >>> lcs = LocalCoordinateSystem.from_axis_vectors(x, y, z)
+
+        Create a coordinate system from 2 orthogonal vectors and let the third one be
+        determined automatically:
+
+        >>> lcs = LocalCoordinateSystem.from_axis_vectors(x=x, z=z)
+
         """
         mat = [x, y, z]
         num_none = sum(v is None for v in mat)
