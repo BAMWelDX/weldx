@@ -879,6 +879,25 @@ class CoordinateSystemManager:
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
+        Examples
+        --------
+
+        Create a coordinate system from 3 orthogonal vectors:
+
+        >>> from weldx import CoordinateSystemManager
+        >>>
+        >>> x = [2, 2, 0]
+        >>> y = [-8, 8, 0]
+        >>> z = [0, 0, 3]
+        >>>
+        >>> csm = CoordinateSystemManager("root")
+        >>> csm.create_cs_from_axis_vectors("xyz", "root", x, y, z)
+
+        Create a coordinate system from 2 orthogonal vectors and let the third one be
+        determined automatically:
+
+        >>> csm.create_cs_from_axis_vectors("xz", "root", x=x, z=z)
+
         """
         lcs = LocalCoordinateSystem.from_axis_vectors(
             x, y, z, coordinates, time, time_ref
