@@ -4198,10 +4198,6 @@ def test_coordinate_system_manager_create_coordinate_system():
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
 
-    vec_x = orientations[:, :, 0]
-    vec_y = orientations[:, :, 1]
-    vec_z = orientations[:, :, 2]
-
     csm = tf.CoordinateSystemManager("root")
     lcs_default = tf.LocalCoordinateSystem()
 
