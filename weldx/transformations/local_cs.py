@@ -487,7 +487,6 @@ class LocalCoordinateSystem(TimeDependent):
             The new coordinate system
 
         """
-        # todo: check if ut.to_float_array can be removed
         mat = [x, y, z]
         num_none = sum(v is None for v in mat)
 
