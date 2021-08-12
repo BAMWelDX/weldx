@@ -705,11 +705,17 @@ class TestLocalCoordinateSystem:
     @staticmethod
     @pytest.mark.parametrize("time_dep_orient", [True, False])
     @pytest.mark.parametrize("time_dep_coord", [True, False])
-    def test_from_axis_vectors(time_dep_orient: bool, time_dep_coord: bool):
+    @pytest.mark.parametrize("has_time_ref", [True, False])
+    def test_from_axis_vectors(
+        time_dep_orient: bool, time_dep_coord: bool, has_time_ref: bool
+    ):
         """Test the ``from_axis_vectors`` factory method."""
-        t = ["1s", "2s", "3s", "4s"] if time_dep_orient or time_dep_coord else None
-        angles = [[30, 45, 60], [40, 35, 80], [1, 33, 7], [90, 180, 270]]
+        if has_time_ref and not (time_dep_coord or time_dep_orient):
+            return
 
+        t = ["1s", "2s", "3s", "4s"] if time_dep_orient or time_dep_coord else None
+        time_ref = "2011-07-22" if has_time_ref else None
+        angles = [[30, 45, 60], [40, 35, 80], [1, 33, 7], [90, 180, 270]]
         o = WXRotation.from_euler("xyz", angles, degrees=True).as_matrix()
         c = [[-1, 3, 2], [4, 2, 4], [5, 1, 2], [3, 3, 3]]
 
@@ -721,13 +727,14 @@ class TestLocalCoordinateSystem:
         x = o[..., 0] * 2
         y = o[..., 1] * 5
         z = o[..., 2] * 3
+        kwargs = dict(coordinates=c, time=t, time_ref=time_ref)
 
-        ref = LCS(o, c, t)
+        ref = LCS(o, c, t, time_ref)
 
-        check_cs_close(LCS.from_axis_vectors(x, y, z, c, t), ref)
-        check_cs_close(LCS.from_axis_vectors(x=x, y=y, coordinates=c, time=t), ref)
-        check_cs_close(LCS.from_axis_vectors(y=y, z=z, coordinates=c, time=t), ref)
-        check_cs_close(LCS.from_axis_vectors(x=x, z=z, coordinates=c, time=t), ref)
+        check_cs_close(LCS.from_axis_vectors(x, y, z, **kwargs), ref)
+        check_cs_close(LCS.from_axis_vectors(x=x, y=y, **kwargs), ref)
+        check_cs_close(LCS.from_axis_vectors(y=y, z=z, **kwargs), ref)
+        check_cs_close(LCS.from_axis_vectors(x=x, z=z, **kwargs), ref)
 
     # test_from_axis_vectors_exceptions ------------------------------------------------
 
