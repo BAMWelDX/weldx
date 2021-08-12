@@ -453,20 +453,53 @@ class LocalCoordinateSystem(TimeDependent):
 
     @classmethod
     def from_axis_vectors(
-        cls, x=None, y=None, z=None, coordinates=None, time=None, time_ref=None
+        cls,
+        x: types_coordinates = None,
+        y: types_coordinates = None,
+        z: types_coordinates = None,
+        coordinates: types_coordinates = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
     ):
+        """Create a LCS from two or more coordinate axes.
+
+        If only two axes are provided, the third one is calculated under the assumption
+        of a positively oriented coordinate system (right hand system).
+
+        Parameters
+        ----------
+        x :
+            A vector representing the coordinate systems x-axis
+        y :
+            A vector representing the coordinate systems y-axis
+        z :
+            A vector representing the coordinate systems z-axis
+        coordinates :
+            Coordinates of the origin (Default value = None)
+        time :
+            Time data for time dependent coordinate systems (Default value = None)
+        time_ref :
+            Optional reference timestamp if ``time`` is a time delta.
+
+        Returns
+        -------
+        LocalCoordinateSystem
+            The new coordinate system
+
+        """
+        # todo: check if ut.to_float_array can be removed
         mat = [x, y, z]
-        num_none = [x, y, z].count(None)
+        num_none = sum(v is None for v in mat)
 
         if num_none == 1:
-            for i, val in enumerate(mat):
-                if val is None:
-                    mat[i] = cls._orthogonal_axis(mat[(i - 2) % 3], mat[(i - 1) % 3])
-                    break
+            idx = next(i for i, v in enumerate(mat) if v is None)
+            mat[idx] = cls._orthogonal_axis(mat[(idx - 2) % 3], mat[(idx - 1) % 3])
         elif num_none > 1:
             raise ValueError("You need to specify two or more vectors.")
 
-        return cls(np.array(mat).transpose(), coordinates, time, time_ref)
+        mat = np.array(mat)
+        t_axes = (1, 0) if mat.ndim == 2 else (1, 2, 0)
+        return cls(mat.transpose(t_axes), coordinates, time, time_ref)
 
     @classmethod
     def from_xyz(

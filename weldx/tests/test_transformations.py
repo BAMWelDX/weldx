@@ -184,7 +184,7 @@ def check_coordinate_system(
     assert np.allclose(lcs.coordinates.values, coordinates_expected, atol=1e-9)
 
 
-def check_coordinate_systems_close(lcs_0, lcs_1):
+def check_cs_close(lcs_0, lcs_1):
     """Check if 2 coordinate systems are nearly identical.
 
     Parameters
@@ -699,6 +699,51 @@ class TestLocalCoordinateSystem:
             assert lcs.time is None
         else:
             assert np.all(lcs.time_quantity == time)
+
+    # test_from_axis_vectors -----------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("time_dep_orient", [True, False])
+    @pytest.mark.parametrize("time_dep_coord", [True, False])
+    def test_from_axis_vectors_not_time_dependent(
+        time_dep_orient: bool, time_dep_coord: bool
+    ):
+        t = ["1s", "2s", "3s", "4s"] if time_dep_orient or time_dep_coord else None
+        angles = [[30, 45, 60], [40, 35, 80], [1, 33, 7], [90, 180, 270]]
+
+        o = WXRotation.from_euler("xyz", angles, degrees=True).as_matrix()
+        c = [[-1, 3, 2], [4, 2, 4], [5, 1, 2], [3, 3, 3]]
+
+        if not time_dep_orient:
+            o = o[0]
+        if not time_dep_coord:
+            c = c[0]
+
+        x = o[..., 0] * 2
+        y = o[..., 1] * 5
+        z = o[..., 2] * 3
+
+        ref = LCS(o, c, t)
+
+        check_cs_close(LCS.from_axis_vectors(x, y, z, c, t), ref)
+        check_cs_close(LCS.from_axis_vectors(x=x, y=y, coordinates=c, time=t), ref)
+        check_cs_close(LCS.from_axis_vectors(y=y, z=z, coordinates=c, time=t), ref)
+        check_cs_close(LCS.from_axis_vectors(x=x, z=z, coordinates=c, time=t), ref)
+
+    # test_from_axis_vectors_exceptions ------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "kwargs,  exception_type, test_name",
+        [
+            (dict(x=[1, 0, 0], y=[0, 1, 0], z=[0, 1, 1]), ValueError, "# not ortho"),
+            (dict(x=[1, 0, 0], y=[1, 0, 0]), ValueError, "# not ortho 2"),
+        ],
+        ids=get_test_name,
+    )
+    def test_from_axis_vectors_exceptions(kwargs, exception_type, test_name):
+        with pytest.raises(exception_type):
+            LCS.from_axis_vectors(**kwargs)
 
     # test_reset_reference_time --------------------------------------------------------
 
@@ -1611,7 +1656,10 @@ def test_coordinate_system_factories_no_time_dependency():
 
     """
     # alias name for class - name is too long :)
-    lcs = tf.LocalCoordinateSystem
+
+    # todo: this test is actually pretty pointless since the creation of the reference
+    #       data is identical to the implementation of the tested method. We should come
+    #       up with a better test (Use hardcoded results for specific inputs?)
 
     # setup -----------------------------------------------
     angle_x = np.pi / 3
@@ -1620,68 +1668,11 @@ def test_coordinate_system_factories_no_time_dependency():
     coordinates = [4, -2, 6]
     orientation_pos = rotated_positive_orthogonal_basis(angle_x, angle_y, angle_z)
 
-    x = orientation_pos[:, 0]
-    y = orientation_pos[:, 1]
-    z = orientation_pos[:, 2]
-
-    orientation_neg = np.transpose([x, y, -z])
-
-    # construction with orientation -----------------------
-
-    cs_orientation_pos = lcs.from_orientation(orientation_pos, coordinates)
-    cs_orientation_neg = lcs.from_orientation(orientation_neg, coordinates)
-
-    check_coordinate_system(cs_orientation_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_orientation_neg, orientation_neg, coordinates, False)
-
     # construction with euler -----------------------------
 
     angles = [angle_x, angle_y, angle_z]
-    cs_euler_pos = lcs.from_euler("xyz", angles, False, coordinates)
+    cs_euler_pos = LCS.from_euler("xyz", angles, False, coordinates)
     check_coordinate_system(cs_euler_pos, orientation_pos, coordinates, True)
-
-    # construction with x,y,z-vectors ---------------------
-
-    cs_xyz_pos = lcs.from_xyz(x, y, z, coordinates)
-    cs_xyz_neg = lcs.from_xyz(x, y, -z, coordinates)
-
-    check_coordinate_system(cs_xyz_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_xyz_neg, orientation_neg, coordinates, False)
-
-    # construction with x,y-vectors and orientation -------
-    cs_xyo_pos = lcs.from_xy_and_orientation(x, y, True, coordinates)
-    cs_xyo_neg = lcs.from_xy_and_orientation(x, y, False, coordinates)
-
-    check_coordinate_system(cs_xyo_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_xyo_neg, orientation_neg, coordinates, False)
-
-    # construction with y,z-vectors and orientation -------
-    cs_yzo_pos = lcs.from_yz_and_orientation(y, z, True, coordinates)
-    cs_yzo_neg = lcs.from_yz_and_orientation(y, -z, False, coordinates)
-
-    check_coordinate_system(cs_yzo_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_yzo_neg, orientation_neg, coordinates, False)
-
-    # construction with x,z-vectors and orientation -------
-    cs_xzo_pos = lcs.from_xz_and_orientation(x, z, True, coordinates)
-    cs_xzo_neg = lcs.from_xz_and_orientation(x, -z, False, coordinates)
-
-    check_coordinate_system(cs_xzo_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_xzo_neg, orientation_neg, coordinates, False)
-
-    # test integers as inputs -----------------------------
-    x_i = [1, 1, 0]
-    y_i = [-1, 1, 0]
-    z_i = [0, 0, 1]
-
-    lcs.from_xyz(x_i, y_i, z_i, coordinates)
-    lcs.from_xy_and_orientation(x_i, y_i)
-    lcs.from_yz_and_orientation(y_i, z_i)
-    lcs.from_xz_and_orientation(z_i, x_i)
-
-    # check exceptions ------------------------------------
-    with pytest.raises(Exception):
-        lcs([x, y, [0, 0, 1]])
 
 
 def test_coordinate_system_factories_time_dependent():
@@ -1705,20 +1696,11 @@ def test_coordinate_system_factories_time_dependent():
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
 
+    print(orientations.shape)
+
     vec_x = orientations[:, :, 0]
     vec_y = orientations[:, :, 1]
     vec_z = orientations[:, :, 2]
-
-    # construction with orientation -----------------------
-
-    cs_orientation_oc = lcs.from_orientation(orientations, coords, time)
-    check_coordinate_system(cs_orientation_oc, orientations, coords, time=time)
-
-    cs_orientation_c = lcs.from_orientation(orientations[0], coords, time)
-    check_coordinate_system(cs_orientation_c, orientations[0], coords, time=time)
-
-    cs_orientation_o = lcs.from_orientation(orientations, coords[0], time)
-    check_coordinate_system(cs_orientation_o, orientations, coords[0], time=time)
 
     # construction with euler -----------------------------
 
@@ -4156,11 +4138,11 @@ class TestCoordinateSystemManager:
                 lcs_exp = csm.get_cs(k)
 
             # check results
-            check_coordinate_systems_close(csm_interp.get_cs(k), lcs_exp)
-            check_coordinate_systems_close(csm_interp.get_cs(v[0], k), lcs_exp.invert())
+            check_cs_close(csm_interp.get_cs(k), lcs_exp)
+            check_cs_close(csm_interp.get_cs(v[0], k), lcs_exp.invert())
 
         # check static lcs unmodified
-        check_coordinate_systems_close(csm_interp.get_cs("lcs_3"), lcs_3)
+        check_cs_close(csm_interp.get_cs("lcs_3"), lcs_3)
 
         # check time union
         if systems is None or len(systems) == 3:
