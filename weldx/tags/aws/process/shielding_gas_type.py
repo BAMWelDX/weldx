@@ -12,9 +12,16 @@ __all__ = ["ShieldingGasType", "ShieldingGasTypeConverter"]
 class ShieldingGasType:
     """<CLASS DOCSTRING>"""
 
+    # TODO: should be named gas_component__s__!!!
     gas_component: List[GasComponent]
     common_name: str
     designation: str = None
+
+    def __post_init__(self):
+        total_percentage = sum(g.gas_percentage for g in self.gas_component)
+        if total_percentage != 100:
+            raise ValueError("Gas components percentages do not sum to 100,"
+                             f" but {total_percentage}")
 
 
 ShieldingGasTypeConverter = dataclass_serialization_class(
