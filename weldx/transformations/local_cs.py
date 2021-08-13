@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Tuple, Union, Any
+from typing import TYPE_CHECKING, Any, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
