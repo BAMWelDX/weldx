@@ -652,9 +652,10 @@ class TestTime:
         q = Time(arg).as_quantity(unit)
         expected = Q_(expected, unit)
         assert np.allclose(q, expected)
-        assert np.all(q, t.quantity)
         if t.is_absolute:
             assert t.reference_time == q.time_ref
+        if unit == "s":
+            assert np.all(q == t.quantity)
 
     # test_convert_util ----------------------------------------------------------------
 
