@@ -855,7 +855,7 @@ def xr_3d_vector(data: np.ndarray, time: Time = None) -> xr.DataArray:
     xarray.DataArray
 
     """
-    if time is not None and np.array(data).ndim == 2:
+    if time is not None and data.ndim == 2:
         if isinstance(time, Time):
             time = time.as_pandas_index()
         da = xr.DataArray(
