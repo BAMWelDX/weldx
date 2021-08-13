@@ -505,6 +505,39 @@ class Time:
             return self._time.min()
         return self._time
 
+    @property
+    def index(self) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+        """Return a pandas index type regardless of length.
+
+        See Also
+        --------
+        Time.as_pandas_index
+
+        """
+        return self.as_pandas_index()
+
+    @property
+    def timedelta(self) -> pd.TimedeltaIndex:
+        """Return the timedelta values relative to the reference time (if it exists).
+
+        See Also
+        --------
+        Time.as_timedelta_index
+
+        """
+        return self.as_timedelta_index()
+
+    @property
+    def quantity(self) -> pint.Quantity:
+        """Return the `pint.Quantity` representation scaled to seconds.
+
+        See Also
+        --------
+        Time.as_quantity
+
+        """
+        return self.as_quantity(unit="s")
+
     @staticmethod
     def _convert_quantity(
         time: pint.Quantity,

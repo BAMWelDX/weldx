@@ -624,7 +624,10 @@ class TestTime:
     )
     def test_pandas_index(arg, expected):
         """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
-        assert np.all(Time(arg).as_pandas_index() == expected)
+        t = Time(arg)
+        assert np.all(t.as_pandas_index() == expected)
+        assert np.all(t.as_pandas_index() == t.index)
+        assert np.all(t.as_timedelta_index() == t.timedelta)
 
     # test_as_quantity -----------------------------------------------------------------
 
@@ -649,6 +652,7 @@ class TestTime:
         q = Time(arg).as_quantity(unit)
         expected = Q_(expected, unit)
         assert np.allclose(q, expected)
+        assert np.all(q, t.quantity)
         if t.is_absolute:
             assert t.reference_time == q.time_ref
 
