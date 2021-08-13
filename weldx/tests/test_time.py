@@ -208,9 +208,9 @@ class TestTime:
 
         # skip matrix cases that do not work --------------------
         if arr and input_type in [Timedelta, Timestamp]:
-            pytest.skip()
+            return
         if not arr and input_type in [DTI, TDI]:
-            pytest.skip()
+            return
 
         # create input values -----------------------------------
         delta_val = [1, 2, 3]
@@ -326,9 +326,9 @@ class TestTime:
 
         # skip array cases where the type does not support arrays
         if other_type in [Timedelta, Timestamp] and other_is_array:
-            pytest.skip()
+            return
         if not other_is_array and other_type in [DTI, TDI]:
-            pytest.skip()
+            return
 
         # skip __radd__ cases where we got conflicts with the other types' __add__
         if not other_on_rhs and other_type in (
@@ -337,7 +337,7 @@ class TestTime:
             np.timedelta64,
             np.datetime64,
         ):
-            pytest.skip()
+            return
 
         # setup rhs
         delta_val = [4, 6, 8]
@@ -414,13 +414,13 @@ class TestTime:
         """
         # skip array cases where the type does not support arrays
         if other_type in [Timedelta, Timestamp] and other_is_array:
-            pytest.skip()
+            return
         if not other_is_array and other_type in [DTI, TDI]:
-            pytest.skip()
+            return
 
         # skip __radd__ cases where we got conflicts with the other types' __add__
         if not other_on_rhs and other_type in (Q_, np.ndarray, np.timedelta64):
-            pytest.skip()
+            return
 
         # setup rhs
         delta_val = [4, 6, 8]
@@ -525,9 +525,9 @@ class TestTime:
 
         # skip array cases where the type does not support arrays or scalars
         if other_type in [Timedelta, Timestamp] and other_is_array:
-            pytest.skip()
+            return
         if not other_is_array and other_type in [DTI, TDI]:
-            pytest.skip()
+            return
 
         # skip __rsub__ cases where we got conflicts with the other types' __sub__
         if not other_on_rhs and other_type in (
@@ -536,17 +536,17 @@ class TestTime:
             np.timedelta64,
             np.datetime64,
         ):
-            pytest.skip()
+            return
 
         # skip cases where an absolute time is on the rhs, since pandas does
         # not support this case (and it does not make sense)
         if lhs_is_timedelta and not rhs_is_timedelta:
-            pytest.skip()
+            return
 
         # skip cases where the lhs is a scalar and the rhs is an array because it will
         # always involve non monotonically increasing array values, which is forbidden.
         if rhs_is_array and not lhs_is_array:
-            pytest.skip()
+            return
 
         # test values
         vals_lhs = [3, 5, 9] if lhs_is_array else [3]
