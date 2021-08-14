@@ -2,7 +2,6 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from weldx.asdf.types import WeldxConverter
-from weldx.asdf.validators import wx_unit_validator
 from weldx.constants import Q_
 from weldx.transformations.rotation import WXRotation
 

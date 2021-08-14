@@ -6,7 +6,6 @@ import pint
 
 from weldx import Q_, TimeSeries
 from weldx.asdf.util import dataclass_serialization_class
-from weldx.asdf.validators import wx_shape_validator
 
 __all__ = ["ShapeValidatorTestClass", "ShapeValidatorTestClassConverter"]
 

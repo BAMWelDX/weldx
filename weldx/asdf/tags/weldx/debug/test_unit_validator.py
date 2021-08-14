@@ -5,7 +5,6 @@ import pint
 
 from weldx import Q_
 from weldx.asdf.util import dataclass_serialization_class
-from weldx.asdf.validators import wx_unit_validator
 
 __all__ = ["UnitValidatorTestClass", "UnitValidatorTestClassConverter"]
 

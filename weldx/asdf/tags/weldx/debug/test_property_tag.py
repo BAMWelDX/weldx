@@ -3,7 +3,6 @@ from dataclasses import dataclass
 import pandas as pd
 
 from weldx.asdf.types import WeldxConverter
-from weldx.asdf.validators import wx_property_tag_validator
 
 __all__ = ["PropertyTagTestClass", "PropertyTagTestClassConverter"]
 
