@@ -7,7 +7,6 @@ excluded_files:
   - "docs*"
   - "environment.yml"
   - "tools*"
-  - "versioneer.py"
   - "weldx/_version.py"
 
 excluded_words:
@@ -24,7 +23,6 @@ excluded_words:
   - pytest
   - pydocstyle
   - matplotlib
-  - versioneer
   - isort
   - networkx
   - shutil

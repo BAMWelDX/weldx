@@ -384,7 +384,7 @@ class WeldxFile(UserDict):
         >>> wfa.wx_meta.welder
         'Nikolai Nikolajewitsch Benardos'
 
-        We can also change theh data easily
+        We can also change the data easily
         >>> wfa.wx_meta.welder = "Myself"
         >>> wfa.wx_meta.welder
         'Myself'

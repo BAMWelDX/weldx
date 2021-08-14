@@ -24,6 +24,7 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
+from weldx.constants import Q_
 from weldx.time import Time
 
 from .constants import WELDX_UNIT_REGISTRY as ureg
@@ -855,7 +856,7 @@ def xr_3d_vector(data: np.ndarray, time: Time = None) -> xr.DataArray:
     xarray.DataArray
 
     """
-    if time is not None and np.array(data).ndim == 2:
+    if time is not None and Q_(data).ndim == 2:
         if isinstance(time, Time):
             time = time.as_pandas_index()
         da = xr.DataArray(
