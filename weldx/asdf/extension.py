@@ -71,8 +71,8 @@ def get_extensions():
     return [WeldxExtension.from_uri("asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0")]
 
 
-# register resources and extension locally until entry points work
-for resource_mapping in get_resource_mappings():
-    asdf.get_config().add_resource_mapping(resource_mapping)
-for ext in get_extensions():
-    asdf.get_config().add_extension(ext)
+# # register resources and extension locally until entry points work
+# for resource_mapping in get_resource_mappings():
+#     asdf.get_config().add_resource_mapping(resource_mapping)
+# for ext in get_extensions():
+#     asdf.get_config().add_extension(ext)
