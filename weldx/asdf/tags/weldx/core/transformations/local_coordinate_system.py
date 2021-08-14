@@ -13,7 +13,6 @@ class LocalCoordinateSystemConverter(WeldxConverter):
     types = [LocalCoordinateSystem]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-    validators = {"wx_shape": wx_shape_validator}
 
     @classmethod
     def to_tree(cls, node: LocalCoordinateSystem, ctx):

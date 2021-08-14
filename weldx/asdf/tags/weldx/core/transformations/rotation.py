@@ -13,7 +13,6 @@ class WXRotationConverter(WeldxConverter):
     name = "core/transformations/rotation"
     version = "1.0.0"
     types = [Rotation, WXRotation]
-    validators = {"wx_unit": wx_unit_validator}
 
     @classmethod
     def to_tree(cls, node: Rotation, ctx):

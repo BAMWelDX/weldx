@@ -27,7 +27,4 @@ UnitValidatorTestClassConverter = dataclass_serialization_class(
     class_type=UnitValidatorTestClass,
     class_name="debug/test_unit_validator",
     version="1.0.0",
-    validators={
-        "wx_unit": wx_unit_validator,
-    },
 )

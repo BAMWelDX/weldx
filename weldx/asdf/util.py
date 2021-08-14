@@ -295,7 +295,6 @@ def dataclass_serialization_class(
     version: str,
     to_tree_mod: Callable = None,
     from_tree_mod: Callable = None,
-    validators: dict = None,
     sort_string_lists: bool = True,
 ) -> Type:
     """Generate a asdf serialization class for a python dataclass.
@@ -314,8 +313,6 @@ def dataclass_serialization_class(
     from_tree_mod :
         A method that applies additional modifications to the tree during the
         ``from_tree`` function call
-    validators :
-        Dict of validator keys and instances.
 
     Returns
     -------
@@ -324,9 +321,6 @@ def dataclass_serialization_class(
 
     """
     v = version
-    if validators is None:
-        validators = {}
-    vals = validators
 
     def _noop(tree):
         return tree
@@ -353,7 +347,6 @@ def dataclass_serialization_class(
         types = [class_type]
         requires = ["weldx"]
         handle_dynamic_subclasses = True
-        validators = vals
 
         @classmethod
         def to_tree(cls, node, ctx):

@@ -25,7 +25,6 @@ class CoordinateTransformationConverter(WeldxConverter):
     types = [CoordinateTransformation]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-    validators = {}
 
     @classmethod
     def to_tree(cls, node: CoordinateTransformation, ctx):
@@ -105,7 +104,6 @@ class CoordinateSystemManagerSubsystemConverter(WeldxConverter):
     types = [CoordinateSystemManagerSubsystem]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-    validators = {}
 
     @classmethod
     def to_tree(cls, node: CoordinateSystemManagerSubsystem, ctx):
@@ -165,7 +163,6 @@ class CoordinateSystemManagerConverter(WeldxConverter):
     types = [CoordinateSystemManager]
     requires = ["weldx"]
     handle_dynamic_subclasses = True
-    validators = {}
 
     @classmethod
     def _extract_all_subsystems(

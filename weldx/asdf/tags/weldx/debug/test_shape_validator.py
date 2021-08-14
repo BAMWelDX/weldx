@@ -36,7 +36,4 @@ ShapeValidatorTestClassConverter = dataclass_serialization_class(
     class_type=ShapeValidatorTestClass,
     class_name="debug/test_shape_validator",
     version="1.0.0",
-    validators={
-        "wx_shape": wx_shape_validator,
-    },
 )

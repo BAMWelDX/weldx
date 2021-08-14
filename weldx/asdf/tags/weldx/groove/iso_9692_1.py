@@ -22,7 +22,6 @@ class IsoGrooveConverter(WeldxConverter):
         for g in _groove_name_to_type.keys()
     ]
     types = [cls for cls in IsoBaseGroove.__subclasses__()]
-    validators = {"wx_unit": wx_unit_validator}
 
     def to_yaml_tree(self, obj: IsoBaseGroove, tag: str, ctx):
         """Convert to tree."""
