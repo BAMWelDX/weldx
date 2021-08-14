@@ -6,8 +6,7 @@ import pandas as pd
 import pint
 import xarray as xr
 
-from weldx import Q_
-from weldx.constants import WELDX_UNIT_REGISTRY
+from weldx.constants import Q_, WELDX_UNIT_REGISTRY
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.util import deprecated
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
