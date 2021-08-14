@@ -18,10 +18,9 @@ import weldx.util as ut
 from weldx import Q_, SpatialData
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
-from weldx.time import Time
+from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
-from weldx.types import types_time_like, types_timestamp_like
 
 # helpers for tests -----------------------------------------------------------
 
@@ -184,7 +183,7 @@ def check_coordinate_system(
     assert np.allclose(lcs.coordinates.values, coordinates_expected, atol=1e-9)
 
 
-def check_coordinate_systems_close(lcs_0, lcs_1):
+def check_cs_close(lcs_0, lcs_1):
     """Check if 2 coordinate systems are nearly identical.
 
     Parameters
@@ -698,7 +697,59 @@ class TestLocalCoordinateSystem:
         if len(time) == 1:
             assert lcs.time is None
         else:
-            assert np.all(lcs.time_quantity == time)
+            assert np.all(lcs.time.as_quantity() == time)
+
+    # test_from_axis_vectors -----------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("time_dep_orient", [True, False])
+    @pytest.mark.parametrize("time_dep_coord", [True, False])
+    @pytest.mark.parametrize("has_time_ref", [True, False])
+    def test_from_axis_vectors(
+        time_dep_orient: bool, time_dep_coord: bool, has_time_ref: bool
+    ):
+        """Test the ``from_axis_vectors`` factory method."""
+        if has_time_ref and not (time_dep_coord or time_dep_orient):
+            return
+
+        t = ["1s", "2s", "3s", "4s"] if time_dep_orient or time_dep_coord else None
+        time_ref = "2011-07-22" if has_time_ref else None
+        angles = [[30, 45, 60], [40, 35, 80], [1, 33, 7], [90, 180, 270]]
+        o = WXRotation.from_euler("xyz", angles, degrees=True).as_matrix()
+        c = [[-1, 3, 2], [4, 2, 4], [5, 1, 2], [3, 3, 3]]
+
+        if not time_dep_orient:
+            o = o[0]
+        if not time_dep_coord:
+            c = c[0]
+
+        x = o[..., 0] * 2
+        y = o[..., 1] * 5
+        z = o[..., 2] * 3
+        kwargs = dict(coordinates=c, time=t, time_ref=time_ref)
+
+        ref = LCS(o, c, t, time_ref)
+
+        check_cs_close(LCS.from_axis_vectors(x, y, z, **kwargs), ref)
+        check_cs_close(LCS.from_axis_vectors(x=x, y=y, **kwargs), ref)
+        check_cs_close(LCS.from_axis_vectors(y=y, z=z, **kwargs), ref)
+        check_cs_close(LCS.from_axis_vectors(x=x, z=z, **kwargs), ref)
+
+    # test_from_axis_vectors_exceptions ------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "kwargs,  exception_type, test_name",
+        [
+            (dict(x=[1, 0, 0], y=[0, 1, 0], z=[0, 1, 1]), ValueError, "# not ortho"),
+            (dict(x=[1, 0, 0], y=[1, 0, 0]), ValueError, "# not ortho 2"),
+        ],
+        ids=get_test_name,
+    )
+    def test_from_axis_vectors_exceptions(kwargs, exception_type, test_name):
+        """Test the exceptions of the ``from_axis_vectors`` factory method."""
+        with pytest.raises(exception_type):
+            LCS.from_axis_vectors(**kwargs)
 
     # test_reset_reference_time --------------------------------------------------------
 
@@ -967,7 +1018,7 @@ class TestLocalCoordinateSystem:
 
         # check time
         assert lcs_interp.reference_time == ref_time
-        assert np.all(Time(lcs_interp.time_quantity) == Time(time, ref_time))
+        assert np.all(lcs_interp.time == Time(time, ref_time))
 
         # check coordinates
         exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
@@ -1611,7 +1662,10 @@ def test_coordinate_system_factories_no_time_dependency():
 
     """
     # alias name for class - name is too long :)
-    lcs = tf.LocalCoordinateSystem
+
+    # todo: this test is actually pretty pointless since the creation of the reference
+    #       data is identical to the implementation of the tested method. We should come
+    #       up with a better test (Use hardcoded results for specific inputs?)
 
     # setup -----------------------------------------------
     angle_x = np.pi / 3
@@ -1620,68 +1674,11 @@ def test_coordinate_system_factories_no_time_dependency():
     coordinates = [4, -2, 6]
     orientation_pos = rotated_positive_orthogonal_basis(angle_x, angle_y, angle_z)
 
-    x = orientation_pos[:, 0]
-    y = orientation_pos[:, 1]
-    z = orientation_pos[:, 2]
-
-    orientation_neg = np.transpose([x, y, -z])
-
-    # construction with orientation -----------------------
-
-    cs_orientation_pos = lcs.from_orientation(orientation_pos, coordinates)
-    cs_orientation_neg = lcs.from_orientation(orientation_neg, coordinates)
-
-    check_coordinate_system(cs_orientation_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_orientation_neg, orientation_neg, coordinates, False)
-
     # construction with euler -----------------------------
 
     angles = [angle_x, angle_y, angle_z]
-    cs_euler_pos = lcs.from_euler("xyz", angles, False, coordinates)
+    cs_euler_pos = LCS.from_euler("xyz", angles, False, coordinates)
     check_coordinate_system(cs_euler_pos, orientation_pos, coordinates, True)
-
-    # construction with x,y,z-vectors ---------------------
-
-    cs_xyz_pos = lcs.from_xyz(x, y, z, coordinates)
-    cs_xyz_neg = lcs.from_xyz(x, y, -z, coordinates)
-
-    check_coordinate_system(cs_xyz_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_xyz_neg, orientation_neg, coordinates, False)
-
-    # construction with x,y-vectors and orientation -------
-    cs_xyo_pos = lcs.from_xy_and_orientation(x, y, True, coordinates)
-    cs_xyo_neg = lcs.from_xy_and_orientation(x, y, False, coordinates)
-
-    check_coordinate_system(cs_xyo_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_xyo_neg, orientation_neg, coordinates, False)
-
-    # construction with y,z-vectors and orientation -------
-    cs_yzo_pos = lcs.from_yz_and_orientation(y, z, True, coordinates)
-    cs_yzo_neg = lcs.from_yz_and_orientation(y, -z, False, coordinates)
-
-    check_coordinate_system(cs_yzo_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_yzo_neg, orientation_neg, coordinates, False)
-
-    # construction with x,z-vectors and orientation -------
-    cs_xzo_pos = lcs.from_xz_and_orientation(x, z, True, coordinates)
-    cs_xzo_neg = lcs.from_xz_and_orientation(x, -z, False, coordinates)
-
-    check_coordinate_system(cs_xzo_pos, orientation_pos, coordinates, True)
-    check_coordinate_system(cs_xzo_neg, orientation_neg, coordinates, False)
-
-    # test integers as inputs -----------------------------
-    x_i = [1, 1, 0]
-    y_i = [-1, 1, 0]
-    z_i = [0, 0, 1]
-
-    lcs.from_xyz(x_i, y_i, z_i, coordinates)
-    lcs.from_xy_and_orientation(x_i, y_i)
-    lcs.from_yz_and_orientation(y_i, z_i)
-    lcs.from_xz_and_orientation(z_i, x_i)
-
-    # check exceptions ------------------------------------
-    with pytest.raises(Exception):
-        lcs([x, y, [0, 0, 1]])
 
 
 def test_coordinate_system_factories_time_dependent():
@@ -1705,21 +1702,6 @@ def test_coordinate_system_factories_time_dependent():
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
 
-    vec_x = orientations[:, :, 0]
-    vec_y = orientations[:, :, 1]
-    vec_z = orientations[:, :, 2]
-
-    # construction with orientation -----------------------
-
-    cs_orientation_oc = lcs.from_orientation(orientations, coords, time)
-    check_coordinate_system(cs_orientation_oc, orientations, coords, time=time)
-
-    cs_orientation_c = lcs.from_orientation(orientations[0], coords, time)
-    check_coordinate_system(cs_orientation_c, orientations[0], coords, time=time)
-
-    cs_orientation_o = lcs.from_orientation(orientations, coords[0], time)
-    check_coordinate_system(cs_orientation_o, orientations, coords[0], time=time)
-
     # construction with euler -----------------------------
 
     cs_euler_oc = lcs.from_euler("yx", angles, False, coords, time)
@@ -1731,50 +1713,6 @@ def test_coordinate_system_factories_time_dependent():
     cs_euler_o = lcs.from_euler("yx", angles, False, coords[0], time)
     check_coordinate_system(cs_euler_o, orientations, coords[0], time=time)
 
-    # construction with x,y,z-vectors ---------------------
-
-    cs_xyz_oc = lcs.from_xyz(vec_x, vec_y, vec_z, coords, time)
-    check_coordinate_system(cs_xyz_oc, orientations, coords, time=time)
-
-    cs_xyz_c = lcs.from_xyz(vec_x[0], vec_y[0], vec_z[0], coords, time)
-    check_coordinate_system(cs_xyz_c, orientations[0], coords, time=time)
-
-    cs_xyz_o = lcs.from_xyz(vec_x, vec_y, vec_z, coords[0], time)
-    check_coordinate_system(cs_xyz_o, orientations, coords[0], time=time)
-
-    # construction with x,y-vectors and orientation -------
-
-    cs_xyo_oc = lcs.from_xy_and_orientation(vec_x, vec_y, True, coords, time)
-    check_coordinate_system(cs_xyo_oc, orientations, coords, True, time=time)
-
-    cs_xyo_c = lcs.from_xy_and_orientation(vec_x[0], vec_y[0], True, coords, time)
-    check_coordinate_system(cs_xyo_c, orientations[0], coords, True, time=time)
-
-    cs_xyo_o = lcs.from_xy_and_orientation(vec_x, vec_y, True, coords[0], time)
-    check_coordinate_system(cs_xyo_o, orientations, coords[0], True, time=time)
-
-    # construction with y,z-vectors and orientation -------
-
-    cs_yzo_oc = lcs.from_yz_and_orientation(vec_y, vec_z, True, coords, time)
-    check_coordinate_system(cs_yzo_oc, orientations, coords, True, time=time)
-
-    cs_yzo_c = lcs.from_yz_and_orientation(vec_y[0], vec_z[0], True, coords, time)
-    check_coordinate_system(cs_yzo_c, orientations[0], coords, True, time=time)
-
-    cs_yzo_o = lcs.from_yz_and_orientation(vec_y, vec_z, True, coords[0], time)
-    check_coordinate_system(cs_yzo_o, orientations, coords[0], True, time=time)
-
-    # construction with x,z-vectors and orientation -------
-
-    cs_xzo_oc = lcs.from_xz_and_orientation(vec_x, vec_z, True, coords, time)
-    check_coordinate_system(cs_xzo_oc, orientations, coords, True, time=time)
-
-    cs_xzo_c = lcs.from_xz_and_orientation(vec_x[0], vec_z[0], True, coords, time)
-    check_coordinate_system(cs_xzo_c, orientations[0], coords, True, time=time)
-
-    cs_xzo_o = lcs.from_xz_and_orientation(vec_x, vec_z, True, coords[0], time)
-    check_coordinate_system(cs_xzo_o, orientations, coords[0], True, time=time)
-
 
 def test_coordinate_system_invert():
     """Test the invert function.
@@ -1785,8 +1723,8 @@ def test_coordinate_system_invert():
 
     """
     # fix ---------------------------------------
-    lcs0_in_lcs1 = tf.LocalCoordinateSystem.from_xy_and_orientation(
-        [1, 1, 0], [-1, 1, 0], coordinates=[2, 0, 2]
+    lcs0_in_lcs1 = tf.LocalCoordinateSystem.from_axis_vectors(
+        x=[1, 1, 0], y=[-1, 1, 0], coordinates=[2, 0, 2]
     )
     lcs1_in_lcs0 = lcs0_in_lcs1.invert()
 
@@ -2109,6 +2047,49 @@ class TestCoordinateSystemManager:
         """Test the exceptions of the 'add_cs' method."""
         with pytest.raises(exception_type):
             csm_fix.add_cs(name, parent_name, lcs)
+
+    # test_create_cs_from_axis_vectors -------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("time_dep_orient", [True, False])
+    @pytest.mark.parametrize("time_dep_coord", [True, False])
+    @pytest.mark.parametrize("has_time_ref", [True, False])
+    def test_create_cs_from_axis_vectors(
+        time_dep_orient: bool, time_dep_coord: bool, has_time_ref: bool
+    ):
+        """Test the ``create_cs_from_axis_vectors`` method."""
+        if has_time_ref and not (time_dep_coord or time_dep_orient):
+            return
+
+        t = ["1s", "2s", "3s", "4s"] if time_dep_orient or time_dep_coord else None
+        time_ref = "2011-07-22" if has_time_ref else None
+        angles = [[30, 45, 60], [40, 35, 80], [1, 33, 7], [90, 180, 270]]
+
+        o = WXRotation.from_euler("xyz", angles, degrees=True).as_matrix()
+        c = [[-1, 3, 2], [4, 2, 4], [5, 1, 2], [3, 3, 3]]
+
+        if not time_dep_orient:
+            o = o[0]
+        if not time_dep_coord:
+            c = c[0]
+
+        x = o[..., 0] * 2
+        y = o[..., 1] * 5
+        z = o[..., 2] * 3
+        kwargs = dict(coordinates=c, time=t, time_ref=time_ref)
+
+        ref = LCS(o, c, t, time_ref)
+
+        csm = CSM("r")
+        csm.create_cs_from_axis_vectors("xyz", "r", x, y, z, **kwargs)
+        csm.create_cs_from_axis_vectors("xy", "r", x=x, y=y, **kwargs)
+        csm.create_cs_from_axis_vectors("yz", "r", y=y, z=z, **kwargs)
+        csm.create_cs_from_axis_vectors("xz", "r", x=x, z=z, **kwargs)
+
+        check_cs_close(csm.get_cs("xyz"), ref)
+        check_cs_close(csm.get_cs("xy"), ref)
+        check_cs_close(csm.get_cs("yz"), ref)
+        check_cs_close(csm.get_cs("xz"), ref)
 
     # test num_neighbors ---------------------------------------------------------------
 
@@ -2996,6 +2977,26 @@ class TestCoordinateSystemManager:
                 ([-4, 8, 20], "2000-03-08"),
                 False,
             ),
+            # get transformed cs at specific times using a list of timedelta strings
+            # - all systems and CSM have a reference time
+            (
+                ("cs_3", "root", ["-4day", "8day", "20day"]),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at a specific time using a timedelta string
+            # - all systems and CSM have a reference time
+            (
+                ("cs_3", "root", "20day"),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0]),
+                [[1, 0, 0]],
+                ([20], "2000-03-08"),
+                False,
+            ),
             # get transformed cs at specific times using a DatetimeIndex - all systems,
             # CSM and function have a reference time
             (
@@ -3023,6 +3024,30 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 1, 0]),
                 [[i, 0, 0] for i in [1, 1.5, 1]],
                 ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at specific times using a list of date strings - all
+            # systems and the CSM have a reference time
+            (
+                (
+                    "cs_3",
+                    "root",
+                    ["2000-03-04", "2000-03-16", "2000-03-28"],
+                ),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at a specific time using a date string - all
+            # systems and the CSM have a reference time
+            (
+                ("cs_3", "root", "2000-03-04"),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0]),
+                [[1, 0, 0]],
+                ([-4], "2000-03-08"),
                 False,
             ),
             # get transformed cs at specific times using a DatetimeIndex - all systems
@@ -3228,7 +3253,7 @@ class TestCoordinateSystemManager:
         result = csm.get_cs(lcs, in_lcs)
         assert np.allclose(result.orientation, exp_orient)
         assert np.allclose(result.coordinates, exp_coords)
-        assert np.allclose(result.time_quantity.m, exp_time)
+        assert np.allclose(result.time.as_quantity().m, exp_time)
 
     # test_get_local_coordinate_system_exceptions --------------------------------------
 
@@ -4156,11 +4181,11 @@ class TestCoordinateSystemManager:
                 lcs_exp = csm.get_cs(k)
 
             # check results
-            check_coordinate_systems_close(csm_interp.get_cs(k), lcs_exp)
-            check_coordinate_systems_close(csm_interp.get_cs(v[0], k), lcs_exp.invert())
+            check_cs_close(csm_interp.get_cs(k), lcs_exp)
+            check_cs_close(csm_interp.get_cs(v[0], k), lcs_exp.invert())
 
         # check static lcs unmodified
-        check_coordinate_systems_close(csm_interp.get_cs("lcs_3"), lcs_3)
+        check_cs_close(csm_interp.get_cs("lcs_3"), lcs_3)
 
         # check time union
         if systems is None or len(systems) == 3:
@@ -4216,10 +4241,6 @@ def test_coordinate_system_manager_create_coordinate_system():
     orientations = np.matmul(rot_mat_x, rot_mat_y)
     coords = [[1, 0, 0], [-1, 0, 2], [3, 5, 7], [-4, -5, -6]]
 
-    vec_x = orientations[:, :, 0]
-    vec_y = orientations[:, :, 1]
-    vec_z = orientations[:, :, 2]
-
     csm = tf.CoordinateSystemManager("root")
     lcs_default = tf.LocalCoordinateSystem()
 
@@ -4255,84 +4276,6 @@ def test_coordinate_system_manager_create_coordinate_system():
     )
     check_coordinate_system(
         csm.get_cs("lcs_euler_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
-
-    # from xyz --------------------------------------------
-    csm.create_cs_from_xyz("lcs_xyz_default", "root", vec_x[0], vec_y[0], vec_z[0])
-    check_coordinate_system(
-        csm.get_cs("lcs_xyz_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
-    )
-
-    csm.create_cs_from_xyz("lcs_xyz_tdp", "root", vec_x, vec_y, vec_z, coords, time)
-    check_coordinate_system(
-        csm.get_cs("lcs_xyz_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
-
-    # from xy and orientation -----------------------------
-    csm.create_cs_from_xy_and_orientation("lcs_xyo_default", "root", vec_x[0], vec_y[0])
-    check_coordinate_system(
-        csm.get_cs("lcs_xyo_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
-    )
-
-    csm.create_cs_from_xy_and_orientation(
-        "lcs_xyo_tdp", "root", vec_x, vec_y, True, coords, time
-    )
-    check_coordinate_system(
-        csm.get_cs("lcs_xyo_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
-
-    # from xz and orientation -----------------------------
-    csm.create_cs_from_xz_and_orientation("lcs_xzo_default", "root", vec_x[0], vec_z[0])
-    check_coordinate_system(
-        csm.get_cs("lcs_xzo_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
-    )
-
-    csm.create_cs_from_xz_and_orientation(
-        "lcs_xzo_tdp", "root", vec_x, vec_z, True, coords, time
-    )
-    check_coordinate_system(
-        csm.get_cs("lcs_xzo_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
-    )
-
-    # from yz and orientation -----------------------------
-    csm.create_cs_from_yz_and_orientation("lcs_yzo_default", "root", vec_y[0], vec_z[0])
-    check_coordinate_system(
-        csm.get_cs("lcs_yzo_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
-    )
-
-    csm.create_cs_from_yz_and_orientation(
-        "lcs_yzo_tdp", "root", vec_y, vec_z, True, coords, time
-    )
-    check_coordinate_system(
-        csm.get_cs("lcs_yzo_tdp"),
         orientations,
         coords,
         True,

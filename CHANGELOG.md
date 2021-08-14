@@ -10,6 +10,8 @@
   [[#433]](https://github.com/BAMWelDX/weldx/pull/433)
 - `TimeSeries` now supports setting a `reference_time` absolute time values for
   interpolation [[#440]](https://github.com/BAMWelDX/weldx/pull/440)
+- `LocalCoordinateSystem.from_axis_vectors`
+  and `CoordinateSystemManager.create_cs_from_axis_vectors` [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
 
 ### removed
 
@@ -18,6 +20,11 @@
 - removed custom ``wx_tag`` validator [[#461]](https://github.com/BAMWelDX/weldx/pull/461)
 - attrdict dependency replaced with a custom implementation of recursive dicts
   [[#470]](https://github.com/BAMWelDX/weldx/pulls/470).
+- `from_xyz`, `from_xy_and_orientation`, `from_yz_and_orientation` and `from_xz_and_orientation`
+  from `LocalCoordinateSystem`. Use `from_axis_vectors` instead. [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
+- `create_cs_from_xyz`, `create_cs_from_xy_and_orientation`, `create_cs_from_yz_and_orientation` and
+  `create_cs_from_xz_and_orientation` from `CoordinateSystemManager`. Use `create_cs_from_axis_vectors`
+  instead. [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
 
 ### changes
 

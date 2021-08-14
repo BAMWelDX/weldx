@@ -25,7 +25,7 @@ from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
 from weldx.constants import Q_
-from weldx.time import Time
+from weldx.time import Time, types_time_like
 
 from .constants import WELDX_UNIT_REGISTRY as ureg
 
@@ -902,7 +902,7 @@ def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
 
 
 def xr_interp_orientation_in_time(
-    dsx: xr.DataArray, times: Union[Time, pd.DatetimeIndex, pd.TimedeltaIndex]
+    dsx: xr.DataArray, times: types_time_like
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents orientation data in time.
 
@@ -957,7 +957,7 @@ def xr_interp_orientation_in_time(
 
 
 def xr_interp_coordinates_in_time(
-    da: xr.DataArray, times: Union[Time, pd.TimedeltaIndex, pd.DatetimeIndex]
+    da: xr.DataArray, times: types_time_like
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents 3d coordinates in time.
 
@@ -981,26 +981,6 @@ def xr_interp_coordinates_in_time(
     )
     da = da.weldx.time_ref_restore()
     return da
-
-
-def _as_valid_timestamp(value: Union[pd.Timestamp, np.datetime64, str]) -> pd.Timestamp:
-    """Create a valid (by convention) Timestamp object or raise TypeError.
-
-    Parameters
-    ----------
-    value: pandas.Timestamp, np.datetime64 or str
-        Value to convert to `pd.Timestamp`.
-
-    Returns
-    -------
-    pandas.Timestamp
-
-    """
-    if isinstance(value, (str, np.datetime64)):
-        value = pd.Timestamp(value)
-    if isinstance(value, pd.Timestamp):  # catch NaT from empty str.
-        return value
-    raise TypeError("Could not create a valid pandas.Timestamp.")
 
 
 # geometry --------------------------------------------------------
@@ -1112,7 +1092,7 @@ class WeldxAccessor:
         TODO: should None be allowed and pass through or raise TypeError ?
         """
         if "time" in self._obj.coords:
-            value = _as_valid_timestamp(value)
+            value = Time(value).as_timestamp()
             if self._obj.weldx.time_ref and is_timedelta64_dtype(self._obj.time):
                 if value == self._obj.weldx.time_ref:
                     return

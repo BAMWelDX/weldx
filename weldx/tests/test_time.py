@@ -13,8 +13,7 @@ from pandas import Timestamp, date_range
 from pint import DimensionalityError
 
 from weldx import Q_, LocalCoordinateSystem, TimeSeries
-from weldx.time import Time
-from weldx.types import types_time_like
+from weldx.time import Time, types_time_like
 
 
 def _initialize_delta_type(cls_type, values, unit):
@@ -209,9 +208,9 @@ class TestTime:
 
         # skip matrix cases that do not work --------------------
         if arr and input_type in [Timedelta, Timestamp]:
-            pytest.skip()
+            return
         if not arr and input_type in [DTI, TDI]:
-            pytest.skip()
+            return
 
         # create input values -----------------------------------
         delta_val = [1, 2, 3]
@@ -327,9 +326,9 @@ class TestTime:
 
         # skip array cases where the type does not support arrays
         if other_type in [Timedelta, Timestamp] and other_is_array:
-            pytest.skip()
+            return
         if not other_is_array and other_type in [DTI, TDI]:
-            pytest.skip()
+            return
 
         # skip __radd__ cases where we got conflicts with the other types' __add__
         if not other_on_rhs and other_type in (
@@ -338,7 +337,7 @@ class TestTime:
             np.timedelta64,
             np.datetime64,
         ):
-            pytest.skip()
+            return
 
         # setup rhs
         delta_val = [4, 6, 8]
@@ -375,6 +374,229 @@ class TestTime:
         assert np.all(res.as_timedelta() == exp.as_timedelta())
         assert np.all(res == exp)
 
+    # test_add_datetime ----------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("other_on_rhs", [True, False])
+    @pytest.mark.parametrize("time_class_is_array", [False, True])
+    @pytest.mark.parametrize("other_is_array", [False, True])
+    @pytest.mark.parametrize(
+        "other_type",
+        [
+            str,
+            Time,
+            Q_,
+            TDI,
+            Timedelta,
+            np.timedelta64,
+        ],
+    )
+    def test_add_datetime(
+        other_type,
+        other_on_rhs: bool,
+        time_class_is_array: bool,
+        other_is_array: bool,
+    ):
+        """Test the `__add__` method if the `Time` class represents a datetime.
+
+        Parameters
+        ----------
+        other_type :
+            The type of the other object
+        other_on_rhs :
+            If `True`, the other type is on the rhs of the + sign and on the lhs
+            otherwise
+        time_class_is_array :
+            If `True`, the `Time` instance contains 3 time values and 1 otherwise
+        other_is_array :
+            If `True`, the other time object contains 3 time values and 1 otherwise
+
+        """
+        # skip array cases where the type does not support arrays
+        if other_type in [Timedelta, Timestamp] and other_is_array:
+            return
+        if not other_is_array and other_type in [DTI, TDI]:
+            return
+
+        # skip __radd__ cases where we got conflicts with the other types' __add__
+        if not other_on_rhs and other_type in (Q_, np.ndarray, np.timedelta64):
+            return
+
+        # setup rhs
+        delta_val = [4, 6, 8]
+
+        other = _initialize_time_type(
+            other_type,
+            delta_val,
+            None,
+            True,
+            other_is_array,
+            not other_is_array,
+            "s",
+        )
+
+        # setup lhs
+        time_class_values = [1, 2, 3] if time_class_is_array else [1]
+        time_class = Time(Q_(time_class_values, "s"), "2000-01-01 10:00:00")
+
+        # setup expected values
+        add = delta_val if other_is_array else delta_val[0]
+        exp_val = np.array(time_class_values) + add
+
+        exp_time_ref = time_class.reference_time
+        exp = Time(Q_(exp_val, "s"), exp_time_ref)
+
+        # calculate and evaluate result
+        res = time_class + other if other_on_rhs else other + time_class
+
+        assert res.reference_time == exp.reference_time
+        assert np.all(res.as_timedelta() == exp.as_timedelta())
+        assert np.all(res == exp)
+
+    # test_sub -------------------------------------------------------------------------
+
+    @staticmethod
+    def _date_diff(date_1: str, date_2: str, unit: str) -> int:
+        """Calculate the diff between two dates in the specified unit."""
+        return int(Time(Timestamp(date_1) - Timestamp(date_2)).as_quantity().m_as(unit))
+
+    @pytest.mark.parametrize("other_on_rhs", [False, True])
+    @pytest.mark.parametrize("time_class_is_array", [False, True])
+    @pytest.mark.parametrize("other_is_array", [False, True])
+    @pytest.mark.parametrize("unit", ["s", "h"])
+    @pytest.mark.parametrize("time_class_is_timedelta", [False, True])
+    @pytest.mark.parametrize(
+        "other_type",
+        [
+            (str, "timedelta"),
+            (Time, "timedelta"),
+            (Q_, "timedelta"),
+            TDI,
+            Timedelta,
+            np.timedelta64,
+            (str, "datetime"),
+            (Time, "datetime"),
+            (Q_, "datetime"),
+            DTI,
+            Timestamp,
+            np.datetime64,
+        ],
+    )
+    def test_sub(
+        self,
+        other_type,
+        other_on_rhs: bool,
+        unit: str,
+        time_class_is_array: bool,
+        time_class_is_timedelta: bool,
+        other_is_array: bool,
+    ):
+        """Test the `__sub__` method of the `Time` class.
+
+        Parameters
+        ----------
+        other_type :
+            The type of the other object
+        other_on_rhs :
+            If `True`, the other type is on the rhs of the + sign and on the lhs
+            otherwise
+        unit :
+            The time unit to use
+        time_class_is_array :
+            If `True`, the `Time` instance contains 3 time values and 1 otherwise
+        time_class_is_timedelta :
+            If `True`, the `Time` instance represents a time delta and a datetime
+            otherwise
+        other_is_array :
+            If `True`, the other time object contains 3 time values and 1 otherwise
+
+        """
+        other_type, other_is_timedelta = self._parse_time_type_test_input(other_type)
+        if other_on_rhs:
+            lhs_is_array = time_class_is_array
+            lhs_is_timedelta = time_class_is_timedelta
+            rhs_is_array = other_is_array
+            rhs_is_timedelta = other_is_timedelta
+        else:
+            lhs_is_array = other_is_array
+            lhs_is_timedelta = other_is_timedelta
+            rhs_is_array = time_class_is_array
+            rhs_is_timedelta = time_class_is_timedelta
+
+        # skip array cases where the type does not support arrays or scalars
+        if other_type in [Timedelta, Timestamp] and other_is_array:
+            return
+        if not other_is_array and other_type in [DTI, TDI]:
+            return
+
+        # skip __rsub__ cases where we got conflicts with the other types' __sub__
+        if not other_on_rhs and other_type in (
+            Q_,
+            np.ndarray,
+            np.timedelta64,
+            np.datetime64,
+        ):
+            return
+
+        # skip cases where an absolute time is on the rhs, since pandas does
+        # not support this case (and it does not make sense)
+        if lhs_is_timedelta and not rhs_is_timedelta:
+            return
+
+        # skip cases where the lhs is a scalar and the rhs is an array because it will
+        # always involve non monotonically increasing array values, which is forbidden.
+        if rhs_is_array and not lhs_is_array:
+            return
+
+        # test values
+        vals_lhs = [3, 5, 9] if lhs_is_array else [3]
+        vals_rhs = [1, 2, 3] if rhs_is_array else [1]
+
+        # setup rhs
+        other_val = vals_rhs if other_on_rhs else vals_lhs
+        if unit == "s":
+            abs_val = [f"2000-01-01 10:00:0{v}" for v in other_val]
+        else:
+            abs_val = [f"2000-01-01 1{v}:00:00" for v in other_val]
+        other = _initialize_time_type(
+            other_type,
+            other_val,
+            abs_val,
+            other_is_timedelta,
+            other_is_array,
+            not other_is_array,
+            unit,
+        )
+
+        # setup lhs
+        time_class_values = vals_lhs if other_on_rhs else vals_rhs
+        time_class_time_ref = None if time_class_is_timedelta else "2000-01-01 11:00:00"
+        time_class = Time(Q_(time_class_values, unit), time_class_time_ref)
+
+        # setup expected values
+        sub = vals_rhs if other_is_array else vals_rhs[0]
+        exp_val = np.array(vals_lhs) - sub
+        if not other_is_timedelta:
+            if time_class_is_timedelta:
+                exp_val -= time_class_values[0] + exp_val[0]
+            else:
+                d = self._date_diff(time_class_time_ref, abs_val[0], unit) + vals_rhs[0]
+                exp_val += d if other_on_rhs else (d + exp_val[0]) * -1
+
+        exp_time_ref = None
+        if not other_is_timedelta and time_class_is_timedelta:
+            exp_time_ref = abs_val[0]
+        elif other_is_timedelta and not time_class_is_timedelta:
+            exp_time_ref = time_class_time_ref
+        exp = Time(Q_(exp_val, unit), exp_time_ref)
+
+        # calculate and evaluate result
+        res = time_class - other if other_on_rhs else other - time_class
+
+        assert res.reference_time == exp.reference_time
+        assert np.all(res.as_timedelta() == exp.as_timedelta())
+        assert np.all(res == exp)
+
     # test_pandas_index ----------------------------------------------------------------
 
     @staticmethod
@@ -402,7 +624,10 @@ class TestTime:
     )
     def test_pandas_index(arg, expected):
         """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
-        assert np.all(Time(arg).as_pandas_index() == expected)
+        t = Time(arg)
+        assert np.all(t.as_pandas_index() == expected)
+        assert np.all(t.as_pandas_index() == t.index)
+        assert np.all(t.as_timedelta_index() == t.timedelta)
 
     # test_as_quantity -----------------------------------------------------------------
 
@@ -429,6 +654,8 @@ class TestTime:
         assert np.allclose(q, expected)
         if t.is_absolute:
             assert t.reference_time == q.time_ref
+        if unit == "s":
+            assert np.all(q == t.quantity)
 
     # test_convert_util ----------------------------------------------------------------
 
@@ -473,7 +700,8 @@ class TestTime:
             ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
         ],
     )
-    def test_union(list_of_objects, time_exp):
+    @pytest.mark.parametrize("test_instance", [True, False])
+    def test_union(test_instance, list_of_objects, time_exp):
         """Test input types for Time.union function.
 
         Parameters
@@ -484,4 +712,8 @@ class TestTime:
             Expected result time
 
         """
-        assert np.all(Time.union(list_of_objects) == time_exp)
+        if test_instance:
+            instance = Time(list_of_objects[0])
+            assert np.all(instance.union(list_of_objects[1:]) == time_exp)
+        else:
+            assert np.all(Time.union(list_of_objects) == time_exp)
