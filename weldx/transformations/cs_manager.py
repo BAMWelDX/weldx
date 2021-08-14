@@ -836,21 +836,22 @@ class CoordinateSystemManager:
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
         )
 
-    def create_cs_from_xyz(
+    def create_cs_from_axis_vectors(
         self,
         coordinate_system_name: str,
         reference_system_name: str,
-        vec_x,
-        vec_y,
-        vec_z,
+        x: types_coordinates = None,
+        y: types_coordinates = None,
+        z: types_coordinates = None,
         coordinates: types_coordinates = None,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         lsc_child_in_parent: bool = True,
     ):
-        """Create a coordinate system and add it to the coordinate system manager.
+        """Create a coordinate system and add it to the `CoordinateSystemManager`.
 
-        This function uses the `~weldx.transformations.LocalCoordinateSystem.from_xyz`
+        This function uses the
+        `~weldx.transformations.LocalCoordinateSystem.from_axis_vectors`
         method of the `~weldx.transformations.LocalCoordinateSystem` class.
 
         Parameters
@@ -859,180 +860,45 @@ class CoordinateSystemManager:
             Name of the new coordinate system.
         reference_system_name :
             Name of the parent system. This must have been already added.
-        vec_x :
-            Vector defining the x-axis
-        vec_y :
-            Vector defining the y-axis
-        vec_z :
-            Vector defining the z-axis
+        x :
+            A vector representing the coordinate systems x-axis
+        y :
+            A vector representing the coordinate systems y-axis
+        z :
+            A vector representing the coordinate systems z-axis
         coordinates :
-            Coordinates of the origin.
+            Coordinates of the origin (Default value = None)
         time :
-            Time data for time dependent coordinate systems.
+            Time data for time dependent coordinate systems (Default value = None)
         time_ref :
-            Reference time for time dependent coordinate systems
+            Optional reference timestamp if ``time`` is a time delta.
         lsc_child_in_parent :
             If set to `True`, the passed
             `~weldx.transformations.LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
-        """
-        lcs = LocalCoordinateSystem.from_xyz(
-            vec_x, vec_y, vec_z, coordinates, time, time_ref
-        )
-        self.add_cs(
-            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
-        )
+        Examples
+        --------
+        Create a coordinate system from 3 orthogonal vectors:
 
-    def create_cs_from_xy_and_orientation(
-        self,
-        coordinate_system_name: str,
-        reference_system_name: str,
-        vec_x,
-        vec_y,
-        positive_orientation: bool = True,
-        coordinates: types_coordinates = None,
-        time: types_time_like = None,
-        time_ref: types_timestamp_like = None,
-        lsc_child_in_parent: bool = True,
-    ):
-        """Create a coordinate system and add it to the coordinate system manager.
+        >>> from weldx import CoordinateSystemManager
+        >>>
+        >>> x = [2, 2, 0]
+        >>> y = [-8, 8, 0]
+        >>> z = [0, 0, 3]
+        >>>
+        >>> csm = CoordinateSystemManager("root")
+        >>> csm.create_cs_from_axis_vectors("xyz", "root", x, y, z)
 
-        This function uses the
-        `~weldx.transformations.LocalCoordinateSystem.from_xy_and_orientation` method
-        of the `~weldx.transformations.LocalCoordinateSystem` class.
+        Create a coordinate system from 2 orthogonal vectors and let the third one be
+        determined automatically:
 
-        Parameters
-        ----------
-        coordinate_system_name :
-            Name of the new coordinate system.
-        reference_system_name :
-            Name of the parent system. This must have been already added.
-        vec_x :
-            Vector defining the x-axis
-        vec_y :
-            Vector defining the y-axis
-        positive_orientation :
-            Set to True if the orientation should
-            be positive and to False if not (Default value = True)
-        coordinates :
-            Coordinates of the origin.
-        time :
-            Time data for time dependent coordinate systems.
-        time_ref :
-            Reference time for time dependent coordinate systems
-        lsc_child_in_parent :
-            If set to `True`, the passed
-            `~weldx.transformations.LocalCoordinateSystem` instance describes
-            the new system orientation towards is parent. If `False`, it describes
-            how the parent system is positioned in its new child system.
+        >>> csm.create_cs_from_axis_vectors("xz", "root", x=x, z=z)
 
         """
-        lcs = LocalCoordinateSystem.from_xy_and_orientation(
-            vec_x, vec_y, positive_orientation, coordinates, time, time_ref
-        )
-        self.add_cs(
-            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
-        )
-
-    def create_cs_from_xz_and_orientation(
-        self,
-        coordinate_system_name: str,
-        reference_system_name: str,
-        vec_x,
-        vec_z,
-        positive_orientation=True,
-        coordinates: types_coordinates = None,
-        time: types_time_like = None,
-        time_ref: types_timestamp_like = None,
-        lsc_child_in_parent: bool = True,
-    ):
-        """Create a coordinate system and add it to the coordinate system manager.
-
-        This function uses the
-        `~weldx.transformations.LocalCoordinateSystem.from_xz_and_orientation` method
-        of the `~weldx.transformations.LocalCoordinateSystem` class.
-
-        Parameters
-        ----------
-        coordinate_system_name :
-            Name of the new coordinate system.
-        reference_system_name :
-            Name of the parent system. This must have been already added.
-        vec_x :
-            Vector defining the x-axis
-        vec_z :
-            Vector defining the z-axis
-        positive_orientation :
-            Set to True if the orientation should
-            be positive and to False if not (Default value = True)
-        coordinates :
-            Coordinates of the origin.
-        time :
-            Time data for time dependent coordinate systems.
-        time_ref :
-            Reference time for time dependent coordinate systems
-        lsc_child_in_parent :
-            If set to `True`, the passed
-            `~weldx.transformations.LocalCoordinateSystem` instance describes
-            the new system orientation towards is parent. If `False`, it describes
-            how the parent system is positioned in its new child system.
-
-        """
-        lcs = LocalCoordinateSystem.from_xz_and_orientation(
-            vec_x, vec_z, positive_orientation, coordinates, time, time_ref
-        )
-        self.add_cs(
-            coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
-        )
-
-    def create_cs_from_yz_and_orientation(
-        self,
-        coordinate_system_name: str,
-        reference_system_name: str,
-        vec_y,
-        vec_z,
-        positive_orientation: bool = True,
-        coordinates: types_coordinates = None,
-        time: types_time_like = None,
-        time_ref: types_timestamp_like = None,
-        lsc_child_in_parent: bool = True,
-    ):
-        """Create a coordinate system and add it to the coordinate system manager.
-
-        This function uses the
-        `~weldx.transformations.LocalCoordinateSystem.from_yz_and_orientation` method
-        of the `~weldx.transformations.LocalCoordinateSystem` class.
-
-        Parameters
-        ----------
-        coordinate_system_name :
-            Name of the new coordinate system.
-        reference_system_name :
-            Name of the parent system. This must have been already added.
-        vec_y :
-            Vector defining the y-axis
-        vec_z :
-            Vector defining the z-axis
-        positive_orientation :
-            Set to True if the orientation should
-            be positive and to False if not (Default value = True)
-        coordinates :
-            Coordinates of the origin.
-        time :
-            Time data for time dependent coordinate systems.
-        time_ref :
-            Reference time for time dependent coordinate systems
-        lsc_child_in_parent :
-            If set to `True`, the passed
-            `~weldx.transformations.LocalCoordinateSystem` instance describes
-            the new system orientation towards is parent. If `False`, it describes
-            how the parent system is positioned in its new child system.
-
-        """
-        lcs = LocalCoordinateSystem.from_yz_and_orientation(
-            vec_y, vec_z, positive_orientation, coordinates, time, time_ref
+        lcs = LocalCoordinateSystem.from_axis_vectors(
+            x, y, z, coordinates, time, time_ref
         )
         self.add_cs(
             coordinate_system_name, reference_system_name, lcs, lsc_child_in_parent
