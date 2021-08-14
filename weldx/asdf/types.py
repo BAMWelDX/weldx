@@ -3,6 +3,7 @@ import re
 from copy import copy
 from typing import List
 
+from asdf.asdf import SerializationContext
 from asdf.extension import Converter
 from asdf.versioning import AsdfSpec
 from boltons.iterutils import remap
@@ -34,7 +35,7 @@ def to_yaml_tree_metadata(func):
     @functools.wraps(func)
     def to_yaml_tree_wrapped(self, obj, tag, ctx):
         """Call default to_yaml_tree method and add metadata fields."""
-        tree = func(obj, tag, ctx)
+        tree = func(self, obj, tag, ctx)
 
         for key in [META_ATTR, USER_ATTR]:
             attr = getattr(obj, key, None)
@@ -51,7 +52,7 @@ def from_yaml_tree_metadata(func):
     """Wrapper that will add reading metadata and userdata during form_tree methods."""
 
     @functools.wraps(func)
-    def from_yaml_tree_wrapped(cls, tree: dict, tag, ctx):
+    def from_yaml_tree_wrapped(self, tree: dict, tag, ctx):
         """Call default from_yaml_tree method and add metadata attributes."""
         meta_dict = {}
         for key in [META_ATTR, USER_ATTR]:
@@ -59,7 +60,7 @@ def from_yaml_tree_metadata(func):
             if value:
                 meta_dict[key] = value
 
-        obj = func(tree, tag, ctx)
+        obj = func(self, tree, tag, ctx)
         for key, value in meta_dict.items():
             setattr(obj, key, value)
         return obj
@@ -75,19 +76,20 @@ class WeldxConverterMeta(type(Converter)):
 
         if hasattr(cls, "to_tree"):
 
-            def to_yaml_tree(obj, tag: str, ctx):
+            def to_yaml_tree(self, obj, tag: str, ctx):
                 """Temporary conversion function."""
                 return cls.to_tree(obj, ctx)
 
             setattr(cls, "to_yaml_tree", to_yaml_tree)
         if hasattr(cls, "from_tree"):
 
-            def from_yaml_tree(node, tag, ctx):
+            def from_yaml_tree(self, node, tag: str, ctx):
                 """Temporary conversion function."""
                 return cls.from_tree(node, ctx)
 
             setattr(cls, "from_yaml_tree", from_yaml_tree)
 
+        # legacy tag definitions
         if name := getattr(cls, "name", None):
             setattr(
                 cls,
@@ -96,8 +98,8 @@ class WeldxConverterMeta(type(Converter)):
             )
 
         # wrap original to/from_tree method to include metadata attributes
-        cls.to_yaml_tree = classmethod(to_yaml_tree_metadata(cls.to_yaml_tree))
-        cls.from_yaml_tree = classmethod(from_yaml_tree_metadata(cls.from_yaml_tree))
+        cls.to_yaml_tree = to_yaml_tree_metadata(cls.to_yaml_tree)
+        cls.from_yaml_tree = from_yaml_tree_metadata(cls.from_yaml_tree)
 
         for tag in copy(cls.tags):
             if tag.startswith("asdf://weldx.bam.de/weldx/tags/"):
@@ -111,12 +113,13 @@ class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
 
     tags: List[str] = []
 
-    @classmethod
-    def to_yaml_tree(self, obj, tag, ctx):
+    def types(self):
         raise NotImplementedError
 
-    @classmethod
-    def from_yaml_tree(self, node, tag, ctx):
+    def to_yaml_tree(self, obj, tag: str, ctx: SerializationContext):
+        raise NotImplementedError
+
+    def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
         raise NotImplementedError
 
 

@@ -11,15 +11,10 @@ class TimedeltaConverter(WeldxConverter):
     tags = ["asdf://weldx.bam.de/weldx/tags/time/timedelta-1.*"]
     types = [pd.Timedelta]
 
-    @classmethod
     def to_yaml_tree(self, obj: pd.Timedelta, tag, ctx):
         """Serialize timedelta to tree."""
-        tree = {}
-        tree["value"] = obj.isoformat()
-        return tree
+        return dict(value=obj.isoformat())
 
-    @classmethod
     def from_yaml_tree(self, node, tag, ctx):
         """Construct timedelta from tree."""
-        value = node["value"]
-        return pd.Timedelta(value)
+        return pd.Timedelta(node["value"])

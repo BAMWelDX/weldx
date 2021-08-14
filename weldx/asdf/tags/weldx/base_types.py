@@ -1,6 +1,8 @@
 """Module providing ASDF implementations for basic python types."""
 from uuid import UUID
 
+from asdf.asdf import SerializationContext
+
 from weldx.asdf.types import WeldxConverter
 
 __all__ = ["UuidConverter"]
@@ -13,12 +15,10 @@ class UuidConverter(WeldxConverter):
     tags = ["asdf://weldx.bam.de/weldx/tags/uuid-1.*"]
     types = [UUID]
 
-    @classmethod
-    def to_yaml_tree(self, obj, tag: str, ctx):
+    def to_yaml_tree(self, obj: UUID, tag: str, ctx: SerializationContext):
         """Convert to python dict."""
         return dict(uuid=str(obj))
 
-    @classmethod
-    def from_yaml_tree(self, node: dict, tag: str, ctx):
+    def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
         """Reconstruct from tree."""
         return UUID(node["uuid"])

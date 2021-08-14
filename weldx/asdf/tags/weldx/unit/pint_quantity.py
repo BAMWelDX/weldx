@@ -13,7 +13,6 @@ class PintQuantityConverter(WeldxConverter):
     tags = ["tag:stsci.edu:asdf/unit/quantity-1.*"]
     types = ["pint.quantity.build_quantity_class.<locals>.Quantity"]
 
-    @classmethod
     def to_yaml_tree(self, obj: pint.Quantity, tag: str, ctx):
         tree = {}
         value = obj.magnitude
@@ -23,7 +22,6 @@ class PintQuantityConverter(WeldxConverter):
         tree["unit"] = str(obj.units)
         return tree
 
-    @classmethod
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         quantity = Q_(node["value"], node["unit"])
         return quantity
