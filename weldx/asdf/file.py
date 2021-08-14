@@ -13,7 +13,6 @@ from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
 
-from weldx.asdf import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
@@ -162,7 +161,7 @@ class WeldxFile(UserDict):
                 f" Should be one of {_supported}."
             )
 
-        extensions = [WeldxExtension(), WeldxAsdfExtension()]
+        extensions = None
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree or new_file_created:
             asdf_file = AsdfFile(

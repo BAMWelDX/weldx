@@ -7,7 +7,6 @@ from warnings import warn
 import asdf
 from boltons.iterutils import get_path
 
-from weldx.asdf._extension import WeldxAsdfExtension, WeldxExtension
 from weldx.asdf.constants import SCHEMA_PATH
 from weldx.asdf.types import WeldxConverter
 from weldx.types import (
@@ -85,9 +84,7 @@ def write_buffer(
         write_kwargs = {}
 
     buff = BytesIO()
-    with asdf.AsdfFile(
-        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], **asdffile_kwargs
-    ) as ff:
+    with asdf.AsdfFile(tree, extensions=None, **asdffile_kwargs) as ff:
         ff.write_to(buff, **write_kwargs)
         buff.seek(0)
     return buff
@@ -116,7 +113,7 @@ def read_buffer(buffer: BytesIO, open_kwargs: dict = None):
     buffer.seek(0)
     with asdf.open(
         buffer,
-        extensions=[WeldxExtension(), WeldxAsdfExtension()],
+        extensions=None,
         **open_kwargs,
     ) as af:
         data = af.tree

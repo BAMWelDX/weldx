@@ -15,8 +15,6 @@ from weldx.asdf.validators import (
 
 from ._types import WeldxType, _weldx_asdf_types, _weldx_types
 
-__all__ = ["WeldxExtension", "WeldxAsdfExtension"]
-
 
 class WeldxLegacyValidatorType(WeldxType):
     """Dummy class to register weldx validators using legacy asdf API."""
@@ -31,7 +29,7 @@ class WeldxLegacyValidatorType(WeldxType):
     }
 
 
-class WeldxExtension(AsdfExtension):
+class WeldxLegacyExtension(AsdfExtension):
     """Extension class registering types with both tags and schemas defined by weldx."""
 
     @property
@@ -52,7 +50,7 @@ class WeldxExtension(AsdfExtension):
         return {"!weldx!": "asdf://weldx.bam.de/weldx/tags/"}
 
 
-class WeldxAsdfExtension(BuiltinExtension):
+class WeldxLegacyAsdfExtension(BuiltinExtension):
     """This extension is used to register custom tag types that have schemas defined
     by ASDF, but have tag implementations defined in the weldx package
 
