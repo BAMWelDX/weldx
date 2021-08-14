@@ -7,7 +7,7 @@ from warnings import warn
 import asdf
 from boltons.iterutils import get_path
 
-from weldx.asdf.constants import SCHEMA_PATH
+from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI_BASE
 from weldx.asdf.types import WeldxConverter
 from weldx.types import (
     SupportsFileReadOnly,
@@ -357,3 +357,15 @@ def dataclass_serialization_class(
             return class_type(**from_tree_mod(tree))
 
     return _SerializationClass
+
+
+def get_weldx_extension(ctx: asdf.asdf.SerializationContext):
+    """Grab the weldx extension from list of current active extensions."""
+    extensions = [
+        ext
+        for ext in ctx.extension_manager.extensions
+        if str(ext.extension_uri).startswith(WELDX_EXTENSION_URI_BASE + "-")
+    ]
+    if not len(extensions) == 1:
+        raise ValueError("Could not determine correct weldx extension.")
+    return extensions[0]

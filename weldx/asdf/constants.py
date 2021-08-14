@@ -13,3 +13,4 @@ WELDX_URL_MAPPING = [
         + "/{url_suffix}.yaml",
     )
 ]
+WELDX_EXTENSION_URI_BASE = "asdf://weldx.bam.de/weldx/extensions/weldx"

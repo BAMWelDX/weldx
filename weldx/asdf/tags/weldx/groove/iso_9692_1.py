@@ -1,7 +1,9 @@
 """ISO 9692-1 welding groove type definitions"""
 
+from asdf.util import uri_match
+
 from weldx.asdf.types import WeldxConverter, format_tag
-from weldx.asdf.validators import wx_unit_validator
+from weldx.asdf.util import get_weldx_extension
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove, _groove_name_to_type
 
 __all__ = ["IsoGrooveConverter"]
@@ -18,7 +20,7 @@ class IsoGrooveConverter(WeldxConverter):
     """ASDF Groove type."""
 
     tags = [
-        format_tag(tag_name=_ISO_GROOVE_SCHEMA + g, version="1.0.0")  # TODO: check 1.*
+        format_tag(tag_name=_ISO_GROOVE_SCHEMA + g, version="1.*")
         for g in _groove_name_to_type.keys()
     ]
     types = [cls for cls in IsoBaseGroove.__subclasses__()]
@@ -34,10 +36,15 @@ class IsoGrooveConverter(WeldxConverter):
         return groove
 
     def select_tag(self, obj, tags, ctx):
-        """Select new style tag according to groove name."""
+        """Select the highest supported new style tag according to groove name."""
         _snip = _ISO_GROOVE_SCHEMA + type(obj).__name__
+        # select only new style tags
         selection = [tag for tag in self.tags if tag.startswith("asdf://")]
+        # select the matching pattern
         selection = [tag for tag in selection if _snip in tag]
         if not len(selection) == 1:
-            raise ValueError("Found groove tags for selection.")
-        return selection[0]
+            raise ValueError("Found multiple groove tags for selection.")
+
+        ext = get_weldx_extension(ctx)
+        tag = [t.tag_uri for t in ext.tags if uri_match(selection[0], t.tag_uri)]
+        return tag[0]

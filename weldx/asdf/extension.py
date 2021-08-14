@@ -3,6 +3,7 @@ from pathlib import Path
 from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
 
+from weldx.asdf.constants import WELDX_EXTENSION_URI_BASE
 from weldx.asdf.validators import (
     wx_property_tag_validator,
     wx_shape_validator,
@@ -51,7 +52,7 @@ def get_resource_mappings():
 class WeldxExtension(ManifestExtension):
     """weldx extension class"""
 
-    extension_uri = "asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0"
+    extension_uri = f"{WELDX_EXTENSION_URI_BASE}-1.0.0"
     converters = (cls() for cls in WeldxConverter.__subclasses__())
     # asdf_standard_requirement = ">= 1.2.0, < 1.5.0"
     legacy_class_names = [
@@ -67,7 +68,7 @@ class WeldxExtension(ManifestExtension):
 
 
 def get_extensions():
-    return [WeldxExtension.from_uri("asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0")]
+    return [WeldxExtension.from_uri(f"{WELDX_EXTENSION_URI_BASE}-1.0.0")]
 
 
 # # register resources and extension locally until entry points work
