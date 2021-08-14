@@ -18,10 +18,9 @@ import weldx.util as ut
 from weldx import Q_, SpatialData
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
-from weldx.time import Time
+from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
-from weldx.types import types_time_like, types_timestamp_like
 
 # helpers for tests -----------------------------------------------------------
 
@@ -698,7 +697,7 @@ class TestLocalCoordinateSystem:
         if len(time) == 1:
             assert lcs.time is None
         else:
-            assert np.all(lcs.time_quantity == time)
+            assert np.all(lcs.time.as_quantity() == time)
 
     # test_from_axis_vectors -----------------------------------------------------------
 
@@ -1019,7 +1018,7 @@ class TestLocalCoordinateSystem:
 
         # check time
         assert lcs_interp.reference_time == ref_time
-        assert np.all(Time(lcs_interp.time_quantity) == Time(time, ref_time))
+        assert np.all(lcs_interp.time == Time(time, ref_time))
 
         # check coordinates
         exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
@@ -2978,6 +2977,26 @@ class TestCoordinateSystemManager:
                 ([-4, 8, 20], "2000-03-08"),
                 False,
             ),
+            # get transformed cs at specific times using a list of timedelta strings
+            # - all systems and CSM have a reference time
+            (
+                ("cs_3", "root", ["-4day", "8day", "20day"]),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at a specific time using a timedelta string
+            # - all systems and CSM have a reference time
+            (
+                ("cs_3", "root", "20day"),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0]),
+                [[1, 0, 0]],
+                ([20], "2000-03-08"),
+                False,
+            ),
             # get transformed cs at specific times using a DatetimeIndex - all systems,
             # CSM and function have a reference time
             (
@@ -3005,6 +3024,30 @@ class TestCoordinateSystemManager:
                 r_mat_x([0, 1, 0]),
                 [[i, 0, 0] for i in [1, 1.5, 1]],
                 ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at specific times using a list of date strings - all
+            # systems and the CSM have a reference time
+            (
+                (
+                    "cs_3",
+                    "root",
+                    ["2000-03-04", "2000-03-16", "2000-03-28"],
+                ),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0, 1, 0]),
+                [[i, 0, 0] for i in [1, 1.5, 1]],
+                ([-4, 8, 20], "2000-03-08"),
+                False,
+            ),
+            # get transformed cs at a specific time using a date string - all
+            # systems and the CSM have a reference time
+            (
+                ("cs_3", "root", "2000-03-04"),
+                ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
+                r_mat_x([0]),
+                [[1, 0, 0]],
+                ([-4], "2000-03-08"),
                 False,
             ),
             # get transformed cs at specific times using a DatetimeIndex - all systems
@@ -3210,7 +3253,7 @@ class TestCoordinateSystemManager:
         result = csm.get_cs(lcs, in_lcs)
         assert np.allclose(result.orientation, exp_orient)
         assert np.allclose(result.coordinates, exp_coords)
-        assert np.allclose(result.time_quantity.m, exp_time)
+        assert np.allclose(result.time.as_quantity().m, exp_time)
 
     # test_get_local_coordinate_system_exceptions --------------------------------------
 

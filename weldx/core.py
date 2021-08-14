@@ -11,8 +11,7 @@ import xarray as xr
 
 import weldx.util as ut
 from weldx.constants import Q_
-from weldx.time import Time, TimeDependent
-from weldx.types import types_time_like
+from weldx.time import Time, TimeDependent, types_time_like
 
 if TYPE_CHECKING:
     import matplotlib.pyplot
@@ -270,7 +269,7 @@ class TimeSeries(TimeDependent):
     def __init__(
         self,
         data: Union[pint.Quantity, MathematicalExpression],
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         interpolation: str = None,
         reference_time: pd.Timestamp = None,
     ):
@@ -365,10 +364,20 @@ class TimeSeries(TimeDependent):
         if not isinstance(data_array.data, pint.Quantity):
             raise TypeError("The data of the 'DataArray' must be a 'pint.Quantity'.")
 
+    @staticmethod
+    def _create_data_array(
+        data: Union[pint.Quantity, xr.DataArray], time: Time
+    ) -> xr.DataArray:
+        return (
+            xr.DataArray(data=data)
+            .rename({"dim_0": "time"})
+            .assign_coords({"time": time.as_timedelta_index()})
+        )
+
     def _initialize_discrete(
         self,
         data: Union[pint.Quantity, xr.DataArray],
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         interpolation: str = None,
     ):
         """Initialize the internal data with discrete values."""
@@ -380,6 +389,7 @@ class TimeSeries(TimeDependent):
             self._check_data_array(data)
             data = data.transpose("time", ...)
             self._data = data
+            # todo: set _reference_time?
         else:
             # expand dim for scalar input
             data = Q_(data)
@@ -389,22 +399,10 @@ class TimeSeries(TimeDependent):
             # constant value case
             if time is None:
                 time = pd.Timedelta(0)
-
             time = Time(time)
 
-            if time.is_absolute:
-                self._reference_time = time.reference_time
-                time = time - time.reference_time
-
-            time = time.as_pandas_index()
-
-            if not isinstance(time, pd.TimedeltaIndex):
-                raise ValueError(
-                    '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-                )
-
-            dax = xr.DataArray(data=data)
-            self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
+            self._reference_time = time.reference_time
+            self._data = self._create_data_array(data, time)
         self.interpolation = interpolation
 
     def _init_expression(self, data):
@@ -474,10 +472,7 @@ class TimeSeries(TimeDependent):
         if not np.iterable(data):  # make sure quantity is not scalar value
             data = np.expand_dims(data, 0)
 
-        dax = xr.DataArray(data=data)  # don't know exact dimensions so far
-        return dax.rename({"dim_0": "time"}).assign_coords(
-            {"time": time.as_pandas_index()}
-        )
+        return self._create_data_array(data, time)
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:

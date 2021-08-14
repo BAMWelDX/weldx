@@ -14,17 +14,9 @@ from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
 from weldx.core import TimeSeries
-from weldx.time import Time
-from weldx.transformations.types import (
-    types_coordinates,
-    types_orientation,
-    types_time_and_lcs,
-)
+from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
+from weldx.transformations.types import types_coordinates, types_orientation
 from weldx.transformations.util import normalize
-from weldx.types import types_time_like, types_timestamp_like
-from weldx.util import deprecated
-
-from ..time import TimeDependent
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
@@ -46,8 +38,8 @@ class LocalCoordinateSystem(TimeDependent):
         self,
         orientation: types_orientation = None,
         coordinates: Union[types_coordinates, TimeSeries] = None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
         construction_checks: bool = True,
     ):
         """Construct a cartesian coordinate system.
@@ -306,8 +298,8 @@ class LocalCoordinateSystem(TimeDependent):
     @staticmethod
     def _build_time(
         coordinates: Union[types_coordinates, TimeSeries],
-        time: Union[types_time_like, Time],
-        time_ref: Union[types_timestamp_like, Time],
+        time: types_time_like,
+        time_ref: types_timestamp_like,
     ) -> Union[Time, None]:
         if time is None:
             if isinstance(coordinates, TimeSeries) and coordinates.is_discrete:
@@ -402,8 +394,8 @@ class LocalCoordinateSystem(TimeDependent):
         angles,
         degrees=False,
         coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
     ) -> "LocalCoordinateSystem":
         """Construct a local coordinate system from an euler sequence.
 
@@ -458,9 +450,9 @@ class LocalCoordinateSystem(TimeDependent):
         y: types_coordinates = None,
         z: types_coordinates = None,
         coordinates: types_coordinates = None,
-        time: types_time_like = None,
-        time_ref: types_timestamp_like = None,
-    ):
+        time: Union[types_time_like, Time] = None,
+        time_ref: Union[types_timestamp_like, Time] = None,
+    ) -> LocalCoordinateSystem:
         """Create a LCS from two or more coordinate axes.
 
         If only two axes are provided, the third one is calculated under the assumption
@@ -581,28 +573,6 @@ class LocalCoordinateSystem(TimeDependent):
             return self._time_ref
         return self._dataset.weldx.time_ref
 
-    @property  # type: ignore[misc] # false report
-    @deprecated(
-        "0.4.1",
-        "0.5.0",
-        "Use the interfaces of the 'Time' class that is now returned by the 'time' "
-        "property",
-    )
-    def datetimeindex(self) -> Union[pd.DatetimeIndex, None]:
-        """Get the time as 'pandas.DatetimeIndex'.
-
-        If the coordinate system has no reference time, 'None' is returned.
-
-        Returns
-        -------
-        Union[pandas.DatetimeIndex, None]:
-            The coordinate systems time as 'pandas.DatetimeIndex'
-
-        """
-        if not self.has_reference_time:
-            return None
-        return self.time + self.reference_time
-
     @property
     def time(self) -> Union[Time, None]:
         """Get the time union of the local coordinate system (None if system is static).
@@ -616,24 +586,6 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" in self._dataset.coords:
             return Time(self._dataset.time, self.reference_time)
         return None
-
-    @property  # type: ignore[misc] # false report
-    @deprecated(
-        "0.4.1",
-        "0.5.0",
-        "Use the interfaces of the 'Time' class that is now returned by the 'time' "
-        "property",
-    )
-    def time_quantity(self) -> pint.Quantity:
-        """Get the time as 'pint.Quantity'.
-
-        Returns
-        -------
-        pint.Quantity:
-            The coordinate systems time as 'pint.Quantity'
-
-        """
-        return Time(self.time, self.reference_time).as_quantity()
 
     @property
     def dataset(self) -> xr.Dataset:
@@ -702,7 +654,7 @@ class LocalCoordinateSystem(TimeDependent):
 
     def interp_time(
         self,
-        time: Union[types_time_like, LocalCoordinateSystem],
+        time: types_time_like,
         time_ref: types_timestamp_like = None,
     ) -> LocalCoordinateSystem:
         """Interpolates the data in time.
@@ -783,8 +735,8 @@ class LocalCoordinateSystem(TimeDependent):
         axes: matplotlib.axes.Axes = None,
         color: str = None,
         label: str = None,
-        time: types_time_and_lcs = None,
-        time_ref: pd.Timestamp = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
         time_index: int = None,
         scale_vectors: Union[float, List, np.ndarray] = None,
         show_origin: bool = True,
