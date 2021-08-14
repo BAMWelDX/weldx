@@ -1,13 +1,12 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
 import pathlib
-import unittest.mock
 from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
-from asdf import AsdfFile, generic_io, info
+from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
 from asdf import util
 from asdf.tags.core import Software
@@ -15,7 +14,7 @@ from asdf.util import get_file_type
 from jsonschema import ValidationError
 
 from weldx.asdf import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.util import get_schema_path, view_tree
+from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
 __all__ = [
@@ -582,8 +581,4 @@ class _HeaderVisualizer:
 
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
-        with unittest.mock.patch(
-            "asdf.AsdfFile.blocks", new_callable=_DummyBlockManager
-        ):
-            with WeldxFile(buff) as wx:
-                info(wx._asdf_handle, show_values=True, max_rows=None)
+        print(get_yaml_header(buff))
