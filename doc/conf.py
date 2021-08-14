@@ -274,7 +274,7 @@ intersphinx_mapping = {
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
     "pint": ("https://pint.readthedocs.io/en/stable", None),
     "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
-    "asdf": ("https://asdf.readthedocs.io/en/stable/", None),
+    "asdf": ("https://asdf.readthedocs.io/en/latest/", None),
     "networkx": ("https://networkx.org/documentation/stable/", None),
     "IPython": ("https://ipython.readthedocs.io/en/stable/", None),
     "k3d": ("https://k3d-jupyter.org/", None),
