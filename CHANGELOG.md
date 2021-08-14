@@ -10,6 +10,8 @@
   [[#433]](https://github.com/BAMWelDX/weldx/pull/433)
 - `TimeSeries` now supports setting a `reference_time` absolute time values for
   interpolation [[#440]](https://github.com/BAMWelDX/weldx/pull/440)
+- `LocalCoordinateSystem.from_axis_vectors`
+  and `CoordinateSystemManager.create_cs_from_axis_vectors` [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
 
 ### removed
 
@@ -18,6 +20,11 @@
 - removed custom ``wx_tag`` validator [[#461]](https://github.com/BAMWelDX/weldx/pull/461)
 - attrdict dependency replaced with a custom implementation of recursive dicts
   [[#470]](https://github.com/BAMWelDX/weldx/pulls/470).
+- `from_xyz`, `from_xy_and_orientation`, `from_yz_and_orientation` and `from_xz_and_orientation`
+  from `LocalCoordinateSystem`. Use `from_axis_vectors` instead. [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
+- `create_cs_from_xyz`, `create_cs_from_xy_and_orientation`, `create_cs_from_yz_and_orientation` and
+  `create_cs_from_xz_and_orientation` from `CoordinateSystemManager`. Use `create_cs_from_axis_vectors`
+  instead. [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
 
 ### changes
 
@@ -28,12 +35,13 @@
 ### fixes
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
-  representation. Also tweaked efficency by not writing binary blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
+  representation. Also tweaked efficency by not writing binary
+  blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
 
 ### documentation
 
-- added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
-
+- added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and
+  solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
 
 ### ASDF
 
@@ -56,7 +64,7 @@
 
 - `TimeSeries.__init__` accepts `xarray.DataArray` as `data`
   parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
-- The `LocalCoordinateSystem.time` and `TimeSeries.time` now return an instance of `Time` 
+- The `LocalCoordinateSystem.time` and `TimeSeries.time` now return an instance of `Time`
   [[#464]](https://github.com/BAMWelDX/weldx/pull/464)
 - Fix wrong and incomplete type-hints [[#435]](https://github.com/BAMWelDX/weldx/pull/435)
 

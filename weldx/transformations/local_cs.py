@@ -452,19 +452,28 @@ class LocalCoordinateSystem(TimeDependent):
         return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
 
     @classmethod
-    def from_orientation(
+    def from_axis_vectors(
         cls,
-        orientation,
-        coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
-    ) -> "LocalCoordinateSystem":
-        """Construct a local coordinate system from orientation matrix.
+        x: types_coordinates = None,
+        y: types_coordinates = None,
+        z: types_coordinates = None,
+        coordinates: types_coordinates = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
+    ):
+        """Create a LCS from two or more coordinate axes.
+
+        If only two axes are provided, the third one is calculated under the assumption
+        of a positively oriented coordinate system (right hand system).
 
         Parameters
         ----------
-        orientation :
-            Orthogonal transformation matrix
+        x :
+            A vector representing the coordinate systems x-axis
+        y :
+            A vector representing the coordinate systems y-axis
+        z :
+            A vector representing the coordinate systems z-axis
         coordinates :
             Coordinates of the origin (Default value = None)
         time :
@@ -475,215 +484,38 @@ class LocalCoordinateSystem(TimeDependent):
         Returns
         -------
         LocalCoordinateSystem
-            Local coordinate system
+            The new coordinate system
+
+        Examples
+        --------
+        Create a coordinate system from 3 orthogonal vectors:
+
+        >>> from weldx import LocalCoordinateSystem
+        >>>
+        >>> x = [2, 2, 0]
+        >>> y = [-8, 8, 0]
+        >>> z = [0, 0, 3]
+        >>>
+        >>> lcs = LocalCoordinateSystem.from_axis_vectors(x, y, z)
+
+        Create a coordinate system from 2 orthogonal vectors and let the third one be
+        determined automatically:
+
+        >>> lcs = LocalCoordinateSystem.from_axis_vectors(x=x, z=z)
 
         """
-        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
+        mat = [x, y, z]
+        num_none = sum(v is None for v in mat)
 
-    @classmethod
-    def from_xyz(
-        cls,
-        vec_x,
-        vec_y,
-        vec_z,
-        coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
-    ) -> "LocalCoordinateSystem":
-        """Construct a local coordinate system from 3 vectors defining the orientation.
+        if num_none == 1:
+            idx = next(i for i, v in enumerate(mat) if v is None)  # skipcq: PTC-W0063
+            mat[idx] = np.cross(mat[(idx - 2) % 3], mat[(idx - 1) % 3])
+        elif num_none > 1:
+            raise ValueError("You need to specify two or more vectors.")
 
-        Parameters
-        ----------
-        vec_x :
-            Vector defining the x-axis
-        vec_y :
-            Vector defining the y-axis
-        vec_z :
-            Vector defining the z-axis
-        coordinates :
-            Coordinates of the origin (Default value = None)
-        time :
-            Time data for time dependent coordinate systems (Default value = None)
-        time_ref :
-            Optional reference timestamp if ``time`` is a time delta.
-
-        Returns
-        -------
-        LocalCoordinateSystem
-            Local coordinate system
-
-        """
-        vec_x = ut.to_float_array(vec_x)
-        vec_y = ut.to_float_array(vec_y)
-        vec_z = ut.to_float_array(vec_z)
-
-        orientation = np.concatenate((vec_x, vec_y, vec_z), axis=vec_x.ndim - 1)
-        orientation = np.reshape(orientation, (*vec_x.shape, 3))
-        orientation = orientation.swapaxes(orientation.ndim - 1, orientation.ndim - 2)
-        return cls(orientation, coordinates=coordinates, time=time, time_ref=time_ref)
-
-    @classmethod
-    def from_xy_and_orientation(
-        cls,
-        vec_x,
-        vec_y,
-        positive_orientation=True,
-        coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
-    ) -> "LocalCoordinateSystem":
-        """Construct a coordinate system from 2 vectors and an orientation.
-
-        Parameters
-        ----------
-        vec_x :
-            Vector defining the x-axis
-        vec_y :
-            Vector defining the y-axis
-        positive_orientation :
-            Set to True if the orientation should
-            be positive and to False if not (Default value = True)
-        coordinates :
-            Coordinates of the origin (Default value = None)
-        time :
-            Time data for time dependent coordinate systems (Default value = None)
-        time_ref :
-            Optional reference timestamp if ``time`` is a time delta.
-
-        Returns
-        -------
-        LocalCoordinateSystem
-            Local coordinate system
-
-        """
-        vec_z = cls._calculate_orthogonal_axis(vec_x, vec_y) * cls._sign_orientation(
-            positive_orientation
-        )
-
-        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time, time_ref=time_ref)
-
-    @classmethod
-    def from_yz_and_orientation(
-        cls,
-        vec_y,
-        vec_z,
-        positive_orientation=True,
-        coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
-    ) -> "LocalCoordinateSystem":
-        """Construct a coordinate system from 2 vectors and an orientation.
-
-        Parameters
-        ----------
-        vec_y :
-            Vector defining the y-axis
-        vec_z :
-            Vector defining the z-axis
-        positive_orientation :
-            Set to True if the orientation should
-            be positive and to False if not (Default value = True)
-        coordinates :
-            Coordinates of the origin (Default value = None)
-        time :
-            Time data for time dependent coordinate systems (Default value = None)
-        time_ref :
-            Optional reference timestamp if ``time`` is a time delta.
-
-        Returns
-        -------
-        LocalCoordinateSystem
-            Local coordinate system
-
-        """
-        vec_x = cls._calculate_orthogonal_axis(vec_y, vec_z) * cls._sign_orientation(
-            positive_orientation
-        )
-
-        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time, time_ref=time_ref)
-
-    @classmethod
-    def from_xz_and_orientation(
-        cls,
-        vec_x,
-        vec_z,
-        positive_orientation=True,
-        coordinates=None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
-    ) -> "LocalCoordinateSystem":
-        """Construct a coordinate system from 2 vectors and an orientation.
-
-        Parameters
-        ----------
-        vec_x :
-            Vector defining the x-axis
-        vec_z :
-            Vector defining the z-axis
-        positive_orientation :
-            Set to True if the orientation should
-            be positive and to False if not (Default value = True)
-        coordinates :
-            Coordinates of the origin (Default value = None)
-        time :
-            Time data for time dependent coordinate systems (Default value = None)
-        time_ref :
-            Optional reference timestamp if ``time`` is a time delta.
-
-        Returns
-        -------
-        LocalCoordinateSystem
-            Local coordinate system
-
-        """
-        vec_y = cls._calculate_orthogonal_axis(vec_z, vec_x) * cls._sign_orientation(
-            positive_orientation
-        )
-
-        return cls.from_xyz(vec_x, vec_y, vec_z, coordinates, time, time_ref=time_ref)
-
-    @staticmethod
-    def _sign_orientation(positive_orientation):
-        """Get -1 or 1 depending on the coordinate systems orientation.
-
-        Parameters
-        ----------
-        positive_orientation :
-            Set to True if the orientation should
-            be positive and to False if not
-
-        Returns
-        -------
-        int
-            1 if the coordinate system has positive orientation,
-            -1 otherwise
-
-        """
-        if positive_orientation:
-            return 1
-        return -1
-
-    @staticmethod
-    def _calculate_orthogonal_axis(a_0, a_1):
-        """Calculate an axis which is orthogonal to two other axes.
-
-        The calculated axis has a positive orientation towards the other 2
-        axes.
-
-        Parameters
-        ----------
-        a_0 :
-            First axis
-        a_1 :
-            Second axis
-
-        Returns
-        -------
-        numpy.ndarray
-            Orthogonal axis
-
-        """
-        return np.cross(a_0, a_1)
+        mat = np.array(mat)
+        t_axes = (1, 0) if mat.ndim == 2 else (1, 2, 0)
+        return cls(mat.transpose(t_axes), coordinates, time, time_ref)
 
     @property
     def orientation(self) -> xr.DataArray:
