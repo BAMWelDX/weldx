@@ -511,7 +511,7 @@ class Time:
 
         See Also
         --------
-        Time.as_pandas_index
+        `Time.as_pandas_index`
 
         """
         return self.as_pandas_index()
@@ -522,7 +522,7 @@ class Time:
 
         See Also
         --------
-        Time.as_timedelta_index
+        `Time.as_timedelta_index`
 
         """
         return self.as_timedelta_index()
@@ -533,7 +533,7 @@ class Time:
 
         See Also
         --------
-        Time.as_quantity
+        `Time.as_quantity`
 
         """
         return self.as_quantity(unit="s")
