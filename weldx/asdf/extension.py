@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import asdf
 from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
 
@@ -68,3 +69,10 @@ class WeldxExtension(ManifestExtension):
 
 def get_extensions():
     return [WeldxExtension.from_uri("asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0")]
+
+
+# register resources and extension locally until entry points work
+for resource_mapping in get_resource_mappings():
+    asdf.get_config().add_resource_mapping(resource_mapping)
+for ext in get_extensions():
+    asdf.get_config().add_extension(ext)
