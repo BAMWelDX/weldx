@@ -309,7 +309,7 @@ class TestWeldXFile:
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
-        # w.show_asdf_header()  # check for exception safety. TODO: reactivate
+        w.show_asdf_header()  # check for exception safety.
 
     @staticmethod
     def test_custom_schema_resolve_path():
