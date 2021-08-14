@@ -1,4 +1,4 @@
-recursive-include weldx/asdf/schemas *.yaml
+recursive-include weldx/asdf *.yaml
 
 prune .binder
 prune .github
