@@ -7,10 +7,28 @@ from weldx.asdf.constants import (
     WELDX_TAG_BASE,
     WELDX_URL_MAPPING,
 )
+from weldx.asdf.validators import (
+    wx_property_tag_validator,
+    wx_shape_validator,
+    wx_unit_validator,
+)
 
-from ._types import _weldx_asdf_types, _weldx_types
+from ._types import WeldxType, _weldx_asdf_types, _weldx_types
 
 __all__ = ["WeldxExtension", "WeldxAsdfExtension"]
+
+
+class WeldxLegacyValidatorType(WeldxType):
+    """Dummy class to register weldx validators using legacy asdf API."""
+
+    name = "legacy/validators"
+    version = "1.0.0"
+    types = []
+    validators = {
+        "wx_property_tag": wx_property_tag_validator,
+        "wx_unit": wx_unit_validator,
+        "wx_shape": wx_shape_validator,
+    }
 
 
 class WeldxExtension(AsdfExtension):
