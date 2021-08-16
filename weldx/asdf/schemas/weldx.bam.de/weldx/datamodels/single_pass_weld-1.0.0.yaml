@@ -186,289 +186,290 @@ examples:
   -
     - A simple welding application
     - |
-      TCP: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-        time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
-          values: !core/ndarray-1.0.0
-            data: [0, 29000000000]
-            datatype: int64
-            shape: [2]
-          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-        orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-          name: orientations
-          dimensions: [c, v]
-          dtype: <f8
-          data: !core/ndarray-1.0.0
-            data:
-            - [1.0, 0.0, 0.0]
-            - [0.0, -1.0, -1.2246467991473532e-16]
-            - [0.0, 1.2246467991473532e-16, -1.0]
-            datatype: float64
-            shape: [3, 3]
-        coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-          name: coordinates
-          dimensions: [time, c]
-          dtype: <f8
-          data: !core/ndarray-1.0.0
-            data:
-            - [5.0, 1.2246467991473533e-15, 12.0]
-            - [295.0, 1.2246467991473533e-15, 12.0]
-            datatype: float64
-            shape: [2, 3]
-      coordinate_systems: !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0>
-        name: Coordinate system manager 0
-        root_system_name: base
-        subsystems: []
-        coordinate_systems:
-        - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
-          name: workpiece
-          reference_system: base
-          transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
-        - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
-          name: tcp_wire
-          reference_system: workpiece
-          transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-            time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
-              values: !core/ndarray-1.0.0
-                data: [0, 29000000000]
-                datatype: int64
-                shape: [2]
-              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-            orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-              name: orientations
-              dimensions: [c, v]
-              dtype: <f8
-              data: !core/ndarray-1.0.0
-                data:
-                - [1.0, 0.0, 0.0]
-                - [0.0, -1.0, -1.2246467991473532e-16]
-                - [0.0, 1.2246467991473532e-16, -1.0]
-                datatype: float64
-                shape: [3, 3]
-            coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-              name: coordinates
-              dimensions: [time, c]
-              dtype: <f8
-              data: !core/ndarray-1.0.0
-                data:
-                - [5.0, 0.0, 2.0]
-                - [295.0, 0.0, 2.0]
-                datatype: float64
-                shape: [2, 3]
-        - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
-          name: tcp_contact
-          reference_system: tcp_wire
-          transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-            coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-              name: coordinates
-              dimensions: [c]
-              dtype: <f8
-              data: !core/ndarray-1.0.0
-                data: [0.0, 0.0, -10.0]
-                datatype: float64
-                shape: [3]
-        subsystem_names: []
-      equipment:
-      - !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0>
-        name: HKS P1000-S3
-        sources:
-        - &id003 !<asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0>
-          name: Current Sensor
-          output_signal: &id002 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-            signal_type: analog
-            unit: V
-          error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
-            deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
-        - &id007 !<asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0>
-          name: Voltage Sensor
-          output_signal: &id001 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-            signal_type: analog
-            unit: V
-          error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
-            deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
-        data_transformations:
-        - &id008 !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
-          name: AD conversion voltage measurement
-          input_signal: *id001
-          output_signal: &id009 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-            signal_type: digital
-            unit: ''
-          error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
-            deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
-          func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
-            expression: a*x + b
-            parameters:
-              a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
-              b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
-      - !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0>
-        name: Beckhoff ELM3002-0000
-        sources: []
-        data_transformations:
-        - &id004 !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
-          name: AD conversion current measurement
-          input_signal: *id002
-          output_signal: &id005 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-            signal_type: digital
-            unit: ''
-          error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
-            deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
-          func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
-            expression: a*x + b
-            parameters:
-              a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
-              b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
-      measurements:
-      - !<asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.0.0>
-        name: welding current measurement
-        data:
-        - &id006 !<asdf://weldx.bam.de/weldx/tags/measurement/data-1.0.0>
-          name: Welding current
-          data: !<asdf://weldx.bam.de/weldx/tags/core/data_array-1.0.0>
-            attributes: {}
-            coordinates:
-            - !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-              name: time
-              dimensions: [time]
-              dtype: <m8[ns]
-              data: !core/ndarray-1.0.0
-                source: 0
-                datatype: int64
-                byteorder: little
-                shape: [10001]
-            data: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-              name: data
-              dimensions: [time]
-              dtype: <f8
-              unit: ampere
-              data: !core/ndarray-1.0.0
-                source: 1
-                datatype: float64
-                byteorder: little
-                shape: [10001]
-        measurement_chain: !<asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.0.0>
-          name: welding current measurement chain
-          data_source: *id003
-          data_processors:
-          - *id004
-          - !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
-            name: Calibration current measurement
-            input_signal: *id005
-            output_signal: &id012 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-              signal_type: digital
-              unit: A
-              data: *id006
-            error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
-              deviation: 0.0
-            func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
-              expression: a*x + b
-              parameters:
-                a: !unit/quantity-1.1.0 {unit: ampere, value: 0.030517578125}
-                b: !unit/quantity-1.1.0 {unit: ampere, value: 0.0}
-            wx_metadata:
-              software: &id011 !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView, version: 3.4.3143}
-      - !<asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.0.0>
-        name: welding voltage measurement
-        data:
-        - &id010 !<asdf://weldx.bam.de/weldx/tags/measurement/data-1.0.0>
-          name: Welding voltage
-          data: !<asdf://weldx.bam.de/weldx/tags/core/data_array-1.0.0>
-            attributes: {}
-            coordinates:
-            - !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-              name: time
-              dimensions: [time]
-              dtype: <m8[ns]
-              data: !core/ndarray-1.0.0
-                source: 2
-                datatype: int64
-                byteorder: little
-                shape: [10001]
-            data: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-              name: data
-              dimensions: [time]
-              dtype: <f8
-              unit: volt
-              data: !core/ndarray-1.0.0
-                source: 3
-                datatype: float64
-                byteorder: little
-                shape: [10001]
-        measurement_chain: !<asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.0.0>
-          name: welding voltage measurement chain
-          data_source: *id007
-          data_processors:
-          - *id008
-          - !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
-            name: Calibration voltage measurement
-            input_signal: *id009
-            output_signal: &id013 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-              signal_type: digital
+      !<tag:stsci.edu:asdf/core/asdf-1.1.0>
+        TCP: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
+          time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
+            values: !core/ndarray-1.0.0
+              data: [0, 29000000000]
+              datatype: int64
+              shape: [2]
+            start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+            end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
+            min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+            max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
+          orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+            name: orientations
+            dimensions: [c, v]
+            dtype: <f8
+            data: !core/ndarray-1.0.0
+              data:
+              - [1.0, 0.0, 0.0]
+              - [0.0, -1.0, -1.2246467991473532e-16]
+              - [0.0, 1.2246467991473532e-16, -1.0]
+              datatype: float64
+              shape: [3, 3]
+          coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+            name: coordinates
+            dimensions: [time, c]
+            dtype: <f8
+            data: !core/ndarray-1.0.0
+              data:
+              - [5.0, 1.2246467991473533e-15, 12.0]
+              - [295.0, 1.2246467991473533e-15, 12.0]
+              datatype: float64
+              shape: [2, 3]
+        coordinate_systems: !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0>
+          name: Coordinate system manager 0
+          root_system_name: base
+          subsystems: []
+          coordinate_systems:
+          - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
+            name: workpiece
+            reference_system: base
+            transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+          - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
+            name: tcp_wire
+            reference_system: workpiece
+            transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
+              time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
+                values: !core/ndarray-1.0.0
+                  data: [0, 29000000000]
+                  datatype: int64
+                  shape: [2]
+                start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+                end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
+                min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+                max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
+              orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                name: orientations
+                dimensions: [c, v]
+                dtype: <f8
+                data: !core/ndarray-1.0.0
+                  data:
+                  - [1.0, 0.0, 0.0]
+                  - [0.0, -1.0, -1.2246467991473532e-16]
+                  - [0.0, 1.2246467991473532e-16, -1.0]
+                  datatype: float64
+                  shape: [3, 3]
+              coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                name: coordinates
+                dimensions: [time, c]
+                dtype: <f8
+                data: !core/ndarray-1.0.0
+                  data:
+                  - [5.0, 0.0, 2.0]
+                  - [295.0, 0.0, 2.0]
+                  datatype: float64
+                  shape: [2, 3]
+          - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
+            name: tcp_contact
+            reference_system: tcp_wire
+            transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
+              coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                name: coordinates
+                dimensions: [c]
+                dtype: <f8
+                data: !core/ndarray-1.0.0
+                  data: [0.0, 0.0, -10.0]
+                  datatype: float64
+                  shape: [3]
+          subsystem_names: []
+        equipment:
+        - !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0>
+          name: HKS P1000-S3
+          sources:
+          - &id003 !<asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0>
+            name: Current Sensor
+            output_signal: &id002 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+              signal_type: analog
               unit: V
-              data: *id010
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
-              deviation: 0.0
+              deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
+          - &id007 !<asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0>
+            name: Voltage Sensor
+            output_signal: &id001 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+              signal_type: analog
+              unit: V
+            error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+              deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
+          data_transformations:
+          - &id008 !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
+            name: AD conversion voltage measurement
+            input_signal: *id001
+            output_signal: &id009 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+              signal_type: digital
+              unit: ''
+            error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+              deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
             func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
               expression: a*x + b
               parameters:
-                a: !unit/quantity-1.1.0 {unit: volt, value: 0.0030517578125}
-                b: !unit/quantity-1.1.0 {unit: volt, value: 0.0}
-            wx_metadata:
-              software: *id011
-      process:
-        shielding_gas: !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-1.0.0>
-          use_torch_shielding_gas: true
-          torch_shielding_gas: !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_type-1.0.0>
-            gas_component:
-            - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
-              gas_chemical_name: argon
-              gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
-            - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
-              gas_chemical_name: carbon dioxide
-              gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
-            common_name: SG
-          torch_shielding_gas_flowrate: !unit/quantity-1.1.0 {unit: liter / minute, value: 20}
-        weld_speed: !unit/quantity-1.1.0 {unit: millimeter / second, value: 10}
-        welding_process: !<asdf://weldx.bam.de/weldx/tags/process/CLOOS/pulse-1.0.0>
-          base_process: pulse
-          manufacturer: CLOOS
-          meta: {modulation: UI}
-          parameters:
-            base_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
-              unit: ampere
-              value: 60.0
-            pulse_duration: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
-              unit: millisecond
-              value: 5.0
-            pulse_frequency: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
-              unit: hertz
-              value: 100.0
-            pulse_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
-              unit: volt
-              value: 40.0
-            wire_feedrate: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
-              unit: meter / minute
-              value: 10.0
-          power_source: Quinto
-          tag: CLOOS/pulse
-        welding_wire:
-          diameter: !unit/quantity-1.1.0 {unit: millimeter, value: 1.2}
-      reference_timestamp: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-11-09T12:00:00'}
-      welding_current: *id012
-      welding_voltage: *id013
-      workpiece:
-        base_metal: {common_name: S355J2+N, standard: 'DIN EN 10225-2:2011'}
-        geometry:
-          groove_shape: !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/VGroove-1.0.0>
-            t: !unit/quantity-1.1.0 {unit: millimeter, value: 5}
-            alpha: !unit/quantity-1.1.0 {unit: degree, value: 50}
-            b: !unit/quantity-1.1.0 {unit: millimeter, value: 1}
-            c: !unit/quantity-1.1.0 {unit: millimeter, value: 1}
-            code_number: ['1.3', '1.5']
-          seam_length: !unit/quantity-1.1.0 {unit: millimeter, value: 300}
-      wx_metadata: {welder: A.W. Elder}
+                a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
+                b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
+        - !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0>
+          name: Beckhoff ELM3002-0000
+          sources: []
+          data_transformations:
+          - &id004 !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
+            name: AD conversion current measurement
+            input_signal: *id002
+            output_signal: &id005 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+              signal_type: digital
+              unit: ''
+            error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+              deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
+            func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
+              expression: a*x + b
+              parameters:
+                a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
+                b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
+        measurements:
+        - !<asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.0.0>
+          name: welding current measurement
+          data:
+          - &id006 !<asdf://weldx.bam.de/weldx/tags/measurement/data-1.0.0>
+            name: Welding current
+            data: !<asdf://weldx.bam.de/weldx/tags/core/data_array-1.0.0>
+              attributes: {}
+              coordinates:
+              - !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                name: time
+                dimensions: [time]
+                dtype: <m8[ns]
+                data: !core/ndarray-1.0.0
+                  source: 0
+                  datatype: int64
+                  byteorder: little
+                  shape: [10001]
+              data: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                name: data
+                dimensions: [time]
+                dtype: <f8
+                unit: ampere
+                data: !core/ndarray-1.0.0
+                  source: 1
+                  datatype: float64
+                  byteorder: little
+                  shape: [10001]
+          measurement_chain: !<asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.0.0>
+            name: welding current measurement chain
+            data_source: *id003
+            data_processors:
+            - *id004
+            - !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
+              name: Calibration current measurement
+              input_signal: *id005
+              output_signal: &id012 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+                signal_type: digital
+                unit: A
+                data: *id006
+              error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+                deviation: 0.0
+              func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
+                expression: a*x + b
+                parameters:
+                  a: !unit/quantity-1.1.0 {unit: ampere, value: 0.030517578125}
+                  b: !unit/quantity-1.1.0 {unit: ampere, value: 0.0}
+              wx_metadata:
+                software: &id011 !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView, version: 3.4.3143}
+        - !<asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.0.0>
+          name: welding voltage measurement
+          data:
+          - &id010 !<asdf://weldx.bam.de/weldx/tags/measurement/data-1.0.0>
+            name: Welding voltage
+            data: !<asdf://weldx.bam.de/weldx/tags/core/data_array-1.0.0>
+              attributes: {}
+              coordinates:
+              - !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                name: time
+                dimensions: [time]
+                dtype: <m8[ns]
+                data: !core/ndarray-1.0.0
+                  source: 2
+                  datatype: int64
+                  byteorder: little
+                  shape: [10001]
+              data: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                name: data
+                dimensions: [time]
+                dtype: <f8
+                unit: volt
+                data: !core/ndarray-1.0.0
+                  source: 3
+                  datatype: float64
+                  byteorder: little
+                  shape: [10001]
+          measurement_chain: !<asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.0.0>
+            name: welding voltage measurement chain
+            data_source: *id007
+            data_processors:
+            - *id008
+            - !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
+              name: Calibration voltage measurement
+              input_signal: *id009
+              output_signal: &id013 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+                signal_type: digital
+                unit: V
+                data: *id010
+              error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+                deviation: 0.0
+              func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
+                expression: a*x + b
+                parameters:
+                  a: !unit/quantity-1.1.0 {unit: volt, value: 0.0030517578125}
+                  b: !unit/quantity-1.1.0 {unit: volt, value: 0.0}
+              wx_metadata:
+                software: *id011
+        process:
+          shielding_gas: !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-1.0.0>
+            use_torch_shielding_gas: true
+            torch_shielding_gas: !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_type-1.0.0>
+              gas_component:
+              - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
+                gas_chemical_name: argon
+                gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
+              - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
+                gas_chemical_name: carbon dioxide
+                gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
+              common_name: SG
+            torch_shielding_gas_flowrate: !unit/quantity-1.1.0 {unit: liter / minute, value: 20}
+          weld_speed: !unit/quantity-1.1.0 {unit: millimeter / second, value: 10}
+          welding_process: !<asdf://weldx.bam.de/weldx/tags/process/CLOOS/pulse-1.0.0>
+            base_process: pulse
+            manufacturer: CLOOS
+            meta: {modulation: UI}
+            parameters:
+              base_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+                unit: ampere
+                value: 60.0
+              pulse_duration: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+                unit: millisecond
+                value: 5.0
+              pulse_frequency: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+                unit: hertz
+                value: 100.0
+              pulse_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+                unit: volt
+                value: 40.0
+              wire_feedrate: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+                unit: meter / minute
+                value: 10.0
+            power_source: Quinto
+            tag: CLOOS/pulse
+          welding_wire:
+            diameter: !unit/quantity-1.1.0 {unit: millimeter, value: 1.2}
+        reference_timestamp: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-11-09T12:00:00'}
+        welding_current: *id012
+        welding_voltage: *id013
+        workpiece:
+          base_metal: {common_name: S355J2+N, standard: 'DIN EN 10225-2:2011'}
+          geometry:
+            groove_shape: !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/VGroove-1.0.0>
+              t: !unit/quantity-1.1.0 {unit: millimeter, value: 5}
+              alpha: !unit/quantity-1.1.0 {unit: degree, value: 50}
+              b: !unit/quantity-1.1.0 {unit: millimeter, value: 1}
+              c: !unit/quantity-1.1.0 {unit: millimeter, value: 1}
+              code_number: ['1.3', '1.5']
+            seam_length: !unit/quantity-1.1.0 {unit: millimeter, value: 300}
+        wx_metadata: {welder: A.W. Elder}
 ...
