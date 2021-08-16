@@ -17,7 +17,7 @@ WELDX_SCHEMA_URI_BASE = "asdf://weldx.bam.de/weldx/schemas/"
 WELDX_URL_MAPPING = [
     (
         WELDX_SCHEMA_URI_BASE,
-        filepath_to_url(str(SCHEMA_PATH / "weldx.bam.de/weldx")) + "/{url_suffix}.yaml",
+        filepath_to_url(str(SCHEMA_PATH)) + "/{url_suffix}.yaml",
     )
 ]
 
