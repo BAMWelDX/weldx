@@ -4203,6 +4203,12 @@ class TestCoordinateSystemManager:
     def test_issue_289_interp_outside_time_range(
         time_dep_orient, time_dep_coords, all_less
     ):
+        """Test if ``interp_time`` behaves as described in pull request #289.
+
+        The requirement is that a static system is returned when all time values of the
+        interpolation are outside of the value range of the involved coordinate systems.
+
+        """
         angles = [45, 135] if time_dep_orient else 135
         orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
         coordinates = [[0, 0, 0], [1, 1, 1]] if time_dep_coords else [1, 1, 1]
@@ -4216,14 +4222,6 @@ class TestCoordinateSystemManager:
         csm.create_cs("A", "R", orientation, coordinates, time)
         # add B as static in A
         csm.create_cs("B", "A")
-
-        # this is always static because no time dependencies are between A and B
-        print(csm.get_cs("B", "A", time=Q_([2, 3, 4], "s")).time)
-
-        # this is time dependent even though the result is known to be static
-        print(csm.get_cs("B", "R", time=Q_([2, 3, 4], "s")).time)
-
-        print(csm.get_cs("B", "R", time=Q_([2, 3, 4], "s")).coordinates.data)
 
         cs_br = csm.get_cs("B", "R", time=["2s", "3s", "4s"])
 
