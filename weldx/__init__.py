@@ -47,7 +47,10 @@ from weldx.welding.processes import GmawProcess
 from weldx.welding.groove.iso_9692_1 import get_groove
 from weldx.time import Time
 
-# asdf extensions and tags
+# tags (this will partially import weldx.asdf but not the extension)
+from weldx import tags
+
+# asdf extensions
 import weldx.asdf
 from weldx.asdf.file import WeldxFile
 

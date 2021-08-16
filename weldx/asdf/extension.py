@@ -3,15 +3,9 @@ from typing import List
 from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
 
-from weldx.asdf.constants import WELDX_EXTENSION_URI_BASE
-from weldx.asdf.validators import (
-    wx_property_tag_validator,
-    wx_shape_validator,
-    wx_unit_validator,
-)
-
-from .constants import MANIFEST_PATH, SCHEMA_PATH
+from .constants import MANIFEST_PATH, SCHEMA_PATH, WELDX_EXTENSION_URI_BASE
 from .types import WeldxConverter
+from .validators import wx_property_tag_validator, wx_shape_validator, wx_unit_validator
 
 # current version of the weldx extension
 _version = "1.0.0"

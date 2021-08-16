@@ -1,4 +1,4 @@
 """This submodule contains ASDF related weldx extensions and schemas."""
-
-from weldx.asdf import constants, util
-from weldx.asdf.extension import get_extensions, get_resource_mappings
+# isort:skip_file
+from weldx import tags  # implement tags before the asdf extensions
+from . import constants, file, types, util
