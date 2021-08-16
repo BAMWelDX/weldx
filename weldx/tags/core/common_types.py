@@ -24,7 +24,7 @@ class Dimension:
     length: int
 
 
-DimensionTypeConverter = dataclass_serialization_class(
+DimensionConverter = dataclass_serialization_class(
     class_type=Dimension, class_name="core/dimension", version="1.0.0"
 )
 
