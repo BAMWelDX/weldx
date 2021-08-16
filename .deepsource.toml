@@ -9,6 +9,7 @@ exclude_patterns = [
   "doc/**",
   "scripts/**",
   "weldx/_version.py",
+  "weldx/asdf/**",
   "weldx/tags/**",
 ]
 
