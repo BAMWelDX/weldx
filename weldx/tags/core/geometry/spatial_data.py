@@ -22,6 +22,6 @@ SpatialDataConverter = dataclass_serialization_class(
     class_type=SpatialData,
     class_name="core/geometry/spatial_data",
     version="1.0.0",
-    to_tree_mod=_to_yaml_tree_mod,
-    from_tree_mod=_from_yaml_tree_mod,
+    to_yaml_tree_mod=_to_yaml_tree_mod,
+    from_yaml_tree_mod=_from_yaml_tree_mod,
 )

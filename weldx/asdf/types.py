@@ -26,7 +26,7 @@ class WxSyntaxError(Exception):
 
 
 def to_yaml_tree_metadata(func):
-    """Wrapper that will add the metadata and userdata field for to_tree methods.
+    """Wrapper that will add the metadata and userdata field for ``to_yaml_tree`` methods.
 
     Also removes all "None" values from the initial tree.
     Behavior should be similar to ASDF defaults pre v2.8 (ASDF GH #863).
@@ -82,7 +82,7 @@ class WeldxConverterMeta(type(Converter)):
                 [format_tag(name, "1.*")],
             )
 
-        # wrap original to/from_tree method to include metadata attributes
+        # wrap original to/from_yaml_tree method to include metadata attributes
         cls.to_yaml_tree = to_yaml_tree_metadata(cls.to_yaml_tree)
         cls.from_yaml_tree = from_yaml_tree_metadata(cls.from_yaml_tree)
 

@@ -295,8 +295,8 @@ def dataclass_serialization_class(
     class_type: Type,
     class_name: str,
     version: str,
-    to_tree_mod: Callable = None,
-    from_tree_mod: Callable = None,
+    to_yaml_tree_mod: Callable = None,
+    from_yaml_tree_mod: Callable = None,
     sort_string_lists: bool = True,
 ) -> Type:
     """Generate a asdf serialization class for a python dataclass.
@@ -309,12 +309,12 @@ def dataclass_serialization_class(
         The value that should ba stored as the classes name property
     version :
         The version number
-    to_tree_mod :
+    to_yaml_tree_mod :
         A method that applies additional modifications to the tree during the
-        ``to_tree`` function call
-    from_tree_mod :
+        ``to_yaml_tree`` function call
+    from_yaml_tree_mod :
         A method that applies additional modifications to the tree during the
-        ``from_tree`` function call
+        ``from_yaml_tree`` function call
     sort_string_lists :
         Sort string lists before serialization.
 
@@ -329,21 +329,21 @@ def dataclass_serialization_class(
     def _noop(tree):
         return tree
 
-    if to_tree_mod is None:
-        to_tree_mod = _noop
-    if from_tree_mod is None:
-        from_tree_mod = _noop
+    if to_yaml_tree_mod is None:
+        to_yaml_tree_mod = _noop
+    if from_yaml_tree_mod is None:
+        from_yaml_tree_mod = _noop
 
     if sort_string_lists:
-        original_to_tree_mod = to_tree_mod
+        original_to_yaml_tree_mod = to_yaml_tree_mod
 
         def _sort_string_list(tree):
             for k, v in tree.items():
                 if isinstance(v, list) and all(isinstance(item, str) for item in v):
                     tree[k] = sorted(v)
-            return original_to_tree_mod(tree)
+            return original_to_yaml_tree_mod(tree)
 
-        to_tree_mod = _sort_string_list
+        to_yaml_tree_mod = _sort_string_list
 
     class _SerializationClass(WeldxConverter):
         name = class_name
@@ -352,11 +352,11 @@ def dataclass_serialization_class(
 
         def to_yaml_tree(self, obj, tag: str, ctx: SerializationContext):
             """Convert to python dict."""
-            return to_tree_mod(obj.__dict__)
+            return to_yaml_tree_mod(obj.__dict__)
 
         def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
             """Reconstruct from yaml node."""
-            return class_type(**from_tree_mod(node))
+            return class_type(**from_yaml_tree_mod(node))
 
     return _SerializationClass
 

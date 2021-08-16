@@ -67,5 +67,5 @@ ArcWeldingProcessType = dataclass_serialization_class(
     class_type=ArcWeldingProcess,
     class_name="aws/process/arc_welding_process",
     version="1.0.0",
-    from_tree_mod=_from_yaml_tree,
+    from_yaml_tree_mod=_from_yaml_tree,
 )

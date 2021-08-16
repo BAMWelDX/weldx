@@ -14,5 +14,5 @@ MeasurementEquipmentConverter = dataclass_serialization_class(
     class_type=MeasurementEquipment,
     class_name="equipment/measurement_equipment",
     version="1.0.0",
-    from_tree_mod=_from_yaml_tree_mod,
+    from_yaml_tree_mod=_from_yaml_tree_mod,
 )
