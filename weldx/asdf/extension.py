@@ -51,7 +51,7 @@ def get_resource_mappings() -> List[DirectoryResourceMapping]:
 class WeldxExtension(ManifestExtension):
     """weldx extension class"""
 
-    extension_uri = f"{WELDX_EXTENSION_URI_BASE}-1.0.0"
+    extension_uri = f"{WELDX_EXTENSION_URI_BASE}-{_version}"
     converters = (cls() for cls in WeldxConverter.__subclasses__())
     legacy_class_names = [
         "weldx.asdf.extension.WeldxAsdfExtension",
