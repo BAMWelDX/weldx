@@ -1,10 +1,11 @@
 """Utilities for asdf files."""
 from io import BytesIO
 from pathlib import Path
-from typing import Callable, Tuple, Type, Union
+from typing import Callable, List, Tuple, Type, Union
 from warnings import warn
 
 import asdf
+from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path
 
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI_BASE
@@ -369,3 +370,26 @@ def get_weldx_extension(ctx: asdf.asdf.SerializationContext):
     if not len(extensions) == 1:
         raise ValueError("Could not determine correct weldx extension.")
     return extensions[0]
+
+
+def uri_match(patterns: Union[str, List[str]], uri: str):
+    """Returns true if the ASDF URI matches any of the listed patterns.
+
+    See Also
+    --------
+    asdf.util.uri_match
+
+    """
+    if isinstance(patterns, str):
+        return asdf_uri_match(patterns, uri)
+    return any(asdf_uri_match(p, uri) for p in patterns)
+
+
+def get_converter_for_uri(uri: str) -> Union[type, bool]:
+    """Get the converter class that handles a given tag."""
+    converters = [s for s in WeldxConverter.__subclasses__() if uri_match(s.tags, uri)]
+    if len(converters) > 1:
+        warn(f"Found more than one converter class for uri {uri}", UserWarning)
+    if converters:
+        return converters[0]
+    return False
