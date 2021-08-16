@@ -10,15 +10,15 @@ from weldx.asdf.validators import (
     wx_unit_validator,
 )
 
+from .constants import MANIFEST_PATH, SCHEMA_PATH
 from .types import WeldxConverter
 
 
 # RESOURCES ----------------------------------------------------------------------------
 def get_extension_resource_mapping():
     # Get path to schemas directory relative to this file
-    schemas_path = Path(__file__).parent / "manifests/"
     mapping = DirectoryResourceMapping(
-        schemas_path,
+        MANIFEST_PATH,
         "asdf://weldx.bam.de/weldx/extensions/",
         recursive=True,
         filename_pattern="*.yaml",
@@ -29,9 +29,8 @@ def get_extension_resource_mapping():
 
 def get_schema_resource_mapping():
     # Get path to schemas directory relative to this file
-    schemas_path = Path(__file__).parent / "schemas/weldx.bam.de/weldx/"
     mapping = DirectoryResourceMapping(
-        schemas_path,
+        SCHEMA_PATH / "weldx.bam.de/weldx",
         "asdf://weldx.bam.de/weldx/schemas/",
         recursive=True,
         filename_pattern="*.yaml",

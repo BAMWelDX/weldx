@@ -46,7 +46,7 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
     """
     schema = schema.split(".yaml")[0]
 
-    p = Path(SCHEMA_PATH)
+    p = SCHEMA_PATH
     schemas = list(p.glob(f"**/{schema}.yaml"))
     if len(schemas) == 0:
         raise ValueError(f"No matching schema for filename '{schema}'.")
