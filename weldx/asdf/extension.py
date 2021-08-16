@@ -33,7 +33,7 @@ def get_extension_resource_mapping() -> DirectoryResourceMapping:
 def get_schema_resource_mapping() -> DirectoryResourceMapping:
     """Get the weldx schema resource mapping."""
     mapping = DirectoryResourceMapping(
-        SCHEMA_PATH / "weldx.bam.de/weldx",
+        SCHEMA_PATH,
         "asdf://weldx.bam.de/weldx/schemas/",
         recursive=True,
         filename_pattern="*.yaml",
@@ -53,13 +53,12 @@ class WeldxExtension(ManifestExtension):
 
     extension_uri = f"{WELDX_EXTENSION_URI_BASE}-1.0.0"
     converters = (cls() for cls in WeldxConverter.__subclasses__())
-    # asdf_standard_requirement = ">= 1.2.0, < 1.5.0"
     legacy_class_names = [
         "weldx.asdf.extension.WeldxAsdfExtension",
         "weldx.asdf.extension.WeldxExtension",
     ]
     yaml_tag_handles = {"!weldx!": "asdf://weldx.bam.de/weldx/tags/"}
-    validators = {
+    validators = {  # not active yet
         "wx_property_tag": wx_property_tag_validator,
         "wx_unit": wx_unit_validator,
         "wx_shape": wx_shape_validator,
