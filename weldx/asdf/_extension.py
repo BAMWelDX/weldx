@@ -1,24 +1,35 @@
-"""Legacy asdf extension code."""
+"""Legacy asdf extension code to add custom validators."""
 
-from asdf.extension import AsdfExtension, BuiltinExtension
+import os
 
-from weldx.asdf.constants import (
-    WELDX_SCHEMA_URI_BASE,
-    WELDX_TAG_BASE,
-    WELDX_URL_MAPPING,
-)
+from asdf.extension import AsdfExtension
+from asdf.types import CustomType
+from asdf.util import filepath_to_url
+
+from weldx.asdf.constants import WELDX_TAG_BASE
 from weldx.asdf.validators import (
     wx_property_tag_validator,
     wx_shape_validator,
     wx_unit_validator,
 )
 
-from ._types import WeldxType, _weldx_asdf_types, _weldx_types
+from .constants import SCHEMA_PATH
+
+WELDX_SCHEMA_URI_BASE = "asdf://weldx.bam.de/weldx/schemas/"
+WELDX_URL_MAPPING = [
+    (
+        WELDX_SCHEMA_URI_BASE,
+        filepath_to_url(os.path.join(SCHEMA_PATH, "weldx.bam.de/weldx"))
+        + "/{url_suffix}.yaml",
+    )
+]
 
 
-class WeldxLegacyValidatorType(WeldxType):
-    """Dummy class to register weldx validators using legacy asdf API."""
+class WeldxLegacyValidatorType(CustomType):
+    """Dummy legacy class to register weldx validators using legacy asdf API."""
 
+    organization = "weldx.bam.de"
+    standard = "weldx"
     name = "legacy/validators"
     version = "1.0.0"
     types = []
@@ -27,15 +38,15 @@ class WeldxLegacyValidatorType(WeldxType):
         "wx_unit": wx_unit_validator,
         "wx_shape": wx_shape_validator,
     }
+    versioned_siblings = []
 
 
-class WeldxLegacyExtension(AsdfExtension):
-    """Extension class registering types with both tags and schemas defined by weldx."""
+class WeldxValidatorExtension(AsdfExtension):
+    """Legacy extension class registering weldx validators."""
 
     @property
     def types(self):
-        # There are no types yet!
-        return _weldx_types
+        return [WeldxLegacyValidatorType()]
 
     @property
     def tag_mapping(self):
@@ -44,18 +55,3 @@ class WeldxLegacyExtension(AsdfExtension):
     @property
     def url_mapping(self):
         return WELDX_URL_MAPPING
-
-    @property
-    def yaml_tag_handles(self):
-        return {"!weldx!": "asdf://weldx.bam.de/weldx/tags/"}
-
-
-class WeldxLegacyAsdfExtension(BuiltinExtension):
-    """This extension is used to register custom tag types that have schemas defined
-    by ASDF, but have tag implementations defined in the weldx package
-
-    """
-
-    @property
-    def types(self):
-        return _weldx_asdf_types
