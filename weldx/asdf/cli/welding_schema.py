@@ -292,7 +292,7 @@ def single_pass_weld_example(
         wx_metadata={"welder": "A.W. Elder"},
     )
 
-    model_path = get_schema_path("single_pass_weld-1.0.0.schema.yaml")
+    model_path = get_schema_path("single_pass_weld-1.0.0.yaml")
 
     # pre-validate?
     weldx.asdf.util.write_read_buffer(

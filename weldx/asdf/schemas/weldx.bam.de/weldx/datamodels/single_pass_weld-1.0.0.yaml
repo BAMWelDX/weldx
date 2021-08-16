@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema"
+id: "asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0"
 
 title: |
   Single pass, single wire GMAW weldment.

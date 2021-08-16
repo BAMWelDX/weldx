@@ -51,6 +51,9 @@
   [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
 - replaced all referenced weldx tag versions in schemas
   with ``1.*`` [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
+- refactor ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema``
+  to ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0`` and enable schema test
+  [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
 
 ### deprecations
 
