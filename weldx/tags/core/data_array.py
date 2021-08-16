@@ -1,7 +1,7 @@
 """Serialization for xarray.DataArray."""
 from xarray import DataArray
 
-import weldx.asdf.tags.weldx.core.common_types as ct
+import weldx.tags.core.common_types as ct
 from weldx.asdf.types import WeldxConverter
 
 

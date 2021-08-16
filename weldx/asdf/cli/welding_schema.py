@@ -33,13 +33,13 @@ def single_pass_weld_example(
     from weldx import Q_, GmawProcess
     from weldx import LocalCoordinateSystem as lcs
     from weldx import TimeSeries, WXRotation, get_groove
-    from weldx.asdf.tags.weldx.aws.process.gas_component import GasComponent
-    from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
-        ShieldingGasForProcedure,
-    )
-    from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
     from weldx.asdf.util import get_schema_path, write_buffer
     from weldx.core import MathematicalExpression
+    from weldx.tags.aws.process.gas_component import GasComponent
+    from weldx.tags.aws.process.shielding_gas_for_procedure import (
+        ShieldingGasForProcedure,
+    )
+    from weldx.tags.aws.process.shielding_gas_type import ShieldingGasType
     from weldx.welding.util import sine
 
     # Timestamp

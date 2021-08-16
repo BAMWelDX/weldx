@@ -7,11 +7,11 @@ from asdf.schema import _type_to_tag
 from asdf.tagged import TaggedDict
 from asdf.util import uri_match
 
-from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexConverter
-from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexConverter
 from weldx.asdf.types import WxSyntaxError, format_tag
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.tags.time.datetimeindex import DatetimeIndexConverter
+from weldx.tags.time.timedeltaindex import TimedeltaIndexConverter
 
 __all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
 

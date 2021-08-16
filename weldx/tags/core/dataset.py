@@ -1,6 +1,6 @@
 from xarray import Dataset
 
-import weldx.asdf.tags.weldx.core.common_types as ct
+import weldx.tags.core.common_types as ct
 from weldx.asdf.types import WeldxConverter
 
 

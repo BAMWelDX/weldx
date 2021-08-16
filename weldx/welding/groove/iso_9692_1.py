@@ -1652,7 +1652,7 @@ def get_groove(
     special_depth: pint.Quantity = None,
     code_number=None,
 ) -> IsoBaseGroove:
-    """Create a Groove from weldx.asdf.tags.weldx.core.groove.
+    """Create a Groove from weldx.tags.core.groove.
 
     Parameters
     ----------
@@ -1707,7 +1707,7 @@ def get_groove(
     Returns
     -------
     type
-        an Groove from weldx.asdf.tags.weldx.core.groove
+        an Groove from weldx.tags.core.groove
 
     Examples
     --------

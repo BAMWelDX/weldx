@@ -1,6 +1,6 @@
-from weldx.asdf.tags.weldx.core.common_types import Variable
 from weldx.asdf.types import WeldxConverter
 from weldx.core import TimeSeries
+from weldx.tags.core.common_types import Variable
 from weldx.transformations import LocalCoordinateSystem
 
 
