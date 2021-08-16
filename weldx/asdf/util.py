@@ -291,6 +291,18 @@ def asdf_json_repr(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs
     return view_tree(file, path, **kwargs)
 
 
+def _fullname(obj):
+    """Get the fully qualified class name of an object."""
+    if isinstance(obj, str):
+        return obj
+
+    cls = obj.__class__
+    module = cls.__module__
+    if module == "builtins":  # no need for builtin prefix
+        return cls.__qualname__
+    return module + "." + cls.__qualname__
+
+
 def dataclass_serialization_class(
     class_type: Type,
     class_name: str,

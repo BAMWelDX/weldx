@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from weldx.asdf.types import WeldxConverter
 from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["PropertyTagTestClass", "PropertyTagTestClassConverter"]
