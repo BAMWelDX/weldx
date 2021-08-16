@@ -1,7 +1,7 @@
-from pathlib import Path
+from weldx.constants import WELDX_PATH
 
-SCHEMA_PATH = Path(__file__).resolve().parents[1] / "schemas/weldx.bam.de/weldx"
-MANIFEST_PATH = Path(__file__).resolve().parents[1] / "manifests"
+SCHEMA_PATH = WELDX_PATH / "schemas/weldx.bam.de/weldx"
+MANIFEST_PATH = WELDX_PATH / "manifests"
 
 WELDX_URI_BASE = "asdf://weldx.bam.de/weldx/"
 WELDX_TAG_BASE = "asdf://weldx.bam.de/weldx/tags/"
