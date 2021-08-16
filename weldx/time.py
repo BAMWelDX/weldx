@@ -173,9 +173,9 @@ class Time:
     the addition:
 
     >>> # absolute and time delta
-    >>> t_res = Time("2002") - "1y"
-    >>> t_res = Time(["2002", "2007", "2022"]) - "1y"
-    >>> t_res = Time(["2002", "2007", "2022"]) - ["1y", "2y", "3y"]
+    >>> t_res = Time("2002") - "1d"
+    >>> t_res = Time(["2002", "2007", "2022"]) - "1d"
+    >>> t_res = Time(["2002", "2007", "2022"]) - ["1d", "2d", "3d"]
     >>>
     >>> # both absolute
     >>> t_res = Time(["2002"]) - "2001"
@@ -183,9 +183,9 @@ class Time:
     >>> t_res = Time(["2002", "2007", "2022"]) - ["2001", "2002", "2003"]
     >>>
     >>> # both time delta
-    >>> t_res = Time("2y") - "1y"
-    >>> t_res = Time(["2y", "7y", "22y"]) - "1y"
-    >>> t_res = Time(["2y", "7y", "22y"]) - ["1y", "2y", "3y"]
+    >>> t_res = Time("2d") - "1d"
+    >>> t_res = Time(["2d", "7d", "22d"]) - "1d"
+    >>> t_res = Time(["2d", "7d", "22d"]) - ["1d", "2d", "3d"]
 
     You can also compare two instances of `Time`:
 
