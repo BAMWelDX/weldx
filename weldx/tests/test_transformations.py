@@ -851,17 +851,17 @@ class TestLocalCoordinateSystem:
         [
             (  # broadcast left
                 TS("2020-02-10"),
-                TDI([1, 2, 10], "D"),
+                TDI([1, 2, 14], "D"),
                 TS("2020-02-10"),
-                r_mat_z([0, 0, 0]),
-                np.array([[2, 8, 7], [2, 8, 7], [2, 8, 7]]),
+                r_mat_z([0, 0, 0.5]),
+                np.array([[2, 8, 7], [2, 8, 7], [4, 9, 2]]),
             ),
             (  # broadcast right
                 TS("2020-02-10"),
-                TDI([22, 29, 30], "D"),
+                TDI([14, 29, 30], "D"),
                 TS("2020-02-10"),
                 r_mat_z([0.5, 0.5, 0.5]),
-                np.array([[3, 1, 2], [3, 1, 2], [3, 1, 2]]),
+                np.array([[4, 9, 2], [3, 1, 2], [3, 1, 2]]),
             ),
             (  # pure interpolation
                 TS("2020-02-10"),
@@ -2994,7 +2994,7 @@ class TestCoordinateSystemManager:
                 ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
                 r_mat_x([0]),
                 [[1, 0, 0]],
-                ([20], "2000-03-08"),
+                (None, None),
                 False,
             ),
             # get transformed cs at specific times using a DatetimeIndex - all systems,
@@ -3047,7 +3047,7 @@ class TestCoordinateSystemManager:
                 ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
                 r_mat_x([0]),
                 [[1, 0, 0]],
-                ([-4], "2000-03-08"),
+                (None, None),
                 False,
             ),
             # get transformed cs at specific times using a DatetimeIndex - all systems
@@ -4069,15 +4069,17 @@ class TestCoordinateSystemManager:
             angles = np.clip(val, clip_min, clip_max)
         else:
             angles = val
+        if len(angles) == 1:
+            angles = angles[0]
         return WXRotation.from_euler("z", angles, degrees=True).as_matrix()
 
     @staticmethod
     def _coordinates_from_value(val, clip_min=None, clip_max=None):
         if clip_min is not None and clip_max is not None:
             val = np.clip(val, clip_min, clip_max)
-        if not isinstance(val, Iterable):
-            val = [val]
-        return [[v, 2 * v, -v] for v in val]
+        if len(val) > 1:
+            return [[v, 2 * v, -v] for v in val]
+        return [val[0], 2 * val[0], -val[0]]
 
     @pytest.mark.parametrize(
         "time, time_ref, systems, csm_has_time_ref, num_abs_systems",
@@ -4159,6 +4161,7 @@ class TestCoordinateSystemManager:
         csm_interp = csm.interp_time(time, time_ref, systems)
 
         # evaluate results
+        time_exp = time_class if len(time_class) > 1 else None
         time_ref_exp = time_class.reference_time
         for k, v in lcs_data.items():
             # create expected lcs
@@ -4174,7 +4177,7 @@ class TestCoordinateSystemManager:
                 lcs_exp = tf.LocalCoordinateSystem(
                     self._orientation_from_value(days_interp + diff, v[1][0], v[1][-1]),
                     self._coordinates_from_value(days_interp + diff, v[1][0], v[1][-1]),
-                    time_class,
+                    time_exp,
                     csm.reference_time if csm.has_reference_time else time_ref_exp,
                 )
             else:
