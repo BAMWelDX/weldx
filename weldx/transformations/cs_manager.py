@@ -1291,17 +1291,17 @@ class CoordinateSystemManager:
         if time is not None:
             time = Time(time, time_ref)
 
-        if all(
-            [not self.graph.edges[edge]["lcs"].has_timeseries for edge in path_edges]
-        ):
-            times = [self.graph.edges[edge]["lcs"].time for edge in path_edges]
-            times = [t for t in times if t is not None]
-            if times:
-                path_union = Time.union(times)
-                if np.all(time.index <= path_union.min()):
-                    time = path_union.min()
-                elif np.all(time.index >= path_union.max()):
-                    time = path_union.max()
+        # if all(
+        #     [not self.graph.edges[edge]["lcs"].has_timeseries for edge in path_edges]
+        # ):
+        #     times = [self.graph.edges[edge]["lcs"].time for edge in path_edges]
+        #     times = [t for t in times if t is not None]
+        #     if times:
+        #         path_union = Time.union(times)
+        #         if np.all(time.index <= path_union.min()):
+        #             time = path_union.min()
+        #         elif np.all(time.index >= path_union.max()):
+        #             time = path_union.max()
 
         # calculate result lcs
         if len(path_edges) == 1:

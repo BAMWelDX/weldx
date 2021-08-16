@@ -851,17 +851,17 @@ class TestLocalCoordinateSystem:
         [
             (  # broadcast left
                 TS("2020-02-10"),
-                TDI([1, 2], "D"),
+                TDI([1, 2, 10], "D"),
                 TS("2020-02-10"),
-                r_mat_z([0, 0]),
-                np.array([[2, 8, 7], [2, 8, 7]]),
+                r_mat_z([0, 0, 0]),
+                np.array([[2, 8, 7], [2, 8, 7], [2, 8, 7]]),
             ),
             (  # broadcast right
                 TS("2020-02-10"),
-                TDI([29, 30], "D"),
+                TDI([22, 29, 30], "D"),
                 TS("2020-02-10"),
-                r_mat_z([0.5, 0.5]),
-                np.array([[3, 1, 2], [3, 1, 2]]),
+                r_mat_z([0.5, 0.5, 0.5]),
+                np.array([[3, 1, 2], [3, 1, 2], [3, 1, 2]]),
             ),
             (  # pure interpolation
                 TS("2020-02-10"),
@@ -4190,6 +4190,49 @@ class TestCoordinateSystemManager:
         # check time union
         if systems is None or len(systems) == 3:
             assert np.all(csm_interp.time_union() == time_class.as_pandas())
+
+    # issue 289 ------------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("time_dep_coords", [True, False])
+    @pytest.mark.parametrize("time_dep_orient", [True, False])
+    @pytest.mark.parametrize("all_less", [True, False])
+    def test_issue_289_interp_outside_time_range(
+        time_dep_orient, time_dep_coords, all_less
+    ):
+        angles = [45, 135] if time_dep_orient else 135
+        orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
+        coordinates = [[0, 0, 0], [1, 1, 1]] if time_dep_coords else [1, 1, 1]
+        if time_dep_coords or time_dep_orient:
+            time = ["5s", "6s"] if all_less else ["0s", "1s"]
+        else:
+            time = None
+
+        csm = CSM("R")
+        # add A as time dependent in base
+        csm.create_cs("A", "R", orientation, coordinates, time)
+        # add B as static in A
+        csm.create_cs("B", "A")
+
+        # this is always static because no time dependencies are between A and B
+        print(csm.get_cs("B", "A", time=Q_([2, 3, 4], "s")).time)
+
+        # this is time dependent even though the result is known to be static
+        print(csm.get_cs("B", "R", time=Q_([2, 3, 4], "s")).time)
+
+        print(csm.get_cs("B", "R", time=Q_([2, 3, 4], "s")).coordinates.data)
+
+        cs_br = csm.get_cs("B", "R", time=["2s", "3s", "4s"])
+
+        exp_angle = 45 if time_dep_orient and all_less else 135
+        exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
+        exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
+
+        assert cs_br.time is None
+        assert cs_br.coordinates.values.shape == (3,)
+        assert cs_br.orientation.values.shape == (3, 3)
+        assert np.all(cs_br.coordinates.data == exp_coords)
+        assert np.all(cs_br.orientation.data == exp_orient)
 
 
 def test_relabel():
