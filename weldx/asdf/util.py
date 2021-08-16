@@ -409,7 +409,9 @@ def get_converter_for_uri(uri: str) -> Union[type, bool]:
     return False
 
 
-def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> List[int]:
+def _get_instance_shape(
+    instance_dict: Union[TaggedDict, Dict[str, Any]]
+) -> Union[List[int], None]:
     """Get the shape of an ASDF instance from its tagged dict form."""
     if isinstance(instance_dict, (float, int)):  # test against [1] for scalar values
         return [1]
@@ -417,9 +419,7 @@ def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> Lis
         return instance_dict["shape"]
     elif isinstance(instance_dict, asdf.types.tagged.Tagged):
         # try calling shape_from_tagged for custom types
-
         converter = get_converter_for_uri(instance_dict._tag)
         if hasattr(converter, "shape_from_tagged"):
             return converter.shape_from_tagged(instance_dict)
-
     return None
