@@ -275,47 +275,30 @@ examples:
                   shape: [3]
           subsystem_names: []
         equipment:
-        - !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0>
+        - &id008 !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0>
           name: HKS P1000-S3
           sources:
           - &id003 !<asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0>
             name: Current Sensor
-            output_signal: &id002 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+            output_signal: &id004 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
               signal_type: analog
               unit: V
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
               deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
-          - &id007 !<asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0>
+          - &id011 !<asdf://weldx.bam.de/weldx/tags/measurement/source-1.0.0>
             name: Voltage Sensor
-            output_signal: &id001 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+            output_signal: &id012 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
               signal_type: analog
               unit: V
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
               deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
-          data_transformations:
-          - &id008 !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
-            name: AD conversion voltage measurement
-            input_signal: *id001
-            output_signal: &id009 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-              signal_type: digital
-              unit: ''
-            error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
-              deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
-            func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
-              expression: a*x + b
-              parameters:
-                a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
-                b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
-        - !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0>
+          transformations: []
+        - &id005 !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0>
           name: Beckhoff ELM3002-0000
           sources: []
-          data_transformations:
-          - &id004 !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
+          transformations:
+          - &id006 !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0>
             name: AD conversion current measurement
-            input_signal: *id002
-            output_signal: &id005 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-              signal_type: digital
-              unit: ''
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
               deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
             func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
@@ -323,103 +306,144 @@ examples:
               parameters:
                 a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
                 b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
+            type_transformation: AD
+          - &id013 !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0>
+            name: AD conversion voltage measurement
+            error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+              deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
+            func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
+              expression: a*x + b
+              parameters:
+                a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
+                b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
+            type_transformation: AD
         measurements:
         - !<asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.0.0>
           name: welding current measurement
           data:
-          - &id006 !<asdf://weldx.bam.de/weldx/tags/measurement/data-1.0.0>
-            name: Welding current
-            data: !<asdf://weldx.bam.de/weldx/tags/core/data_array-1.0.0>
-              attributes: {}
-              coordinates:
-              - !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-                name: time
-                dimensions: [time]
-                dtype: <m8[ns]
-                data: !core/ndarray-1.0.0
-                  source: 0
-                  datatype: int64
-                  byteorder: little
-                  shape: [10001]
-              data: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-                name: data
-                dimensions: [time]
-                dtype: <f8
-                unit: ampere
-                data: !core/ndarray-1.0.0
-                  source: 1
-                  datatype: float64
-                  byteorder: little
-                  shape: [10001]
+          - &id007 !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+            &id001 values: &id002 !core/ndarray-1.0.0
+              data: [300.0, 299.9999999999999, 299.99999999999983, 299.99999999999915, 299.9999999999996,
+                300.00000000000006]
+              datatype: float64
+              shape: [6]
+            time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
+              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+              freq: 2S
+              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+            unit: ampere
+            shape: [6]
+            interpolation: step
+            *id001 : *id002
           measurement_chain: !<asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.0.0>
             name: welding current measurement chain
             data_source: *id003
-            data_processors:
-            - *id004
-            - !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
-              name: Calibration current measurement
-              input_signal: *id005
-              output_signal: &id012 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-                signal_type: digital
-                unit: A
-                data: *id006
-              error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
-                deviation: 0.0
-              func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
-                expression: a*x + b
-                parameters:
-                  a: !unit/quantity-1.1.0 {unit: ampere, value: 0.030517578125}
-                  b: !unit/quantity-1.1.0 {unit: ampere, value: 0.0}
-              wx_metadata:
-                software: &id011 !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView, version: 3.4.3143}
+            graph: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0>
+              root_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+                name: Current Sensor
+                attributes:
+                  signal: *id004
+                edges:
+                - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+                  direction: fwd
+                  attributes:
+                    equipment: *id005
+                    transformation: *id006
+                  target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+                    name: AD conversion current measurement
+                    attributes:
+                      signal: !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+                        signal_type: digital
+                        unit: dimensionless
+                    edges:
+                    - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+                      direction: fwd
+                      attributes:
+                        transformation: !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0>
+                          name: Calibration current measurement
+                          error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+                            deviation: 0.0
+                          func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
+                            expression: a*x + b
+                            parameters:
+                              a: !unit/quantity-1.1.0 {unit: ampere, value: 0.030517578125}
+                              b: !unit/quantity-1.1.0 {unit: ampere, value: 0.0}
+                          wx_metadata:
+                            software: !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView,
+                              version: 3.4.3143}
+                      target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+                        name: Calibration current measurement
+                        attributes:
+                          signal: &id015 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+                            signal_type: digital
+                            unit: ampere
+                            data: *id007
+            source_equipment: *id008
         - !<asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.0.0>
           name: welding voltage measurement
           data:
-          - &id010 !<asdf://weldx.bam.de/weldx/tags/measurement/data-1.0.0>
-            name: Welding voltage
-            data: !<asdf://weldx.bam.de/weldx/tags/core/data_array-1.0.0>
-              attributes: {}
-              coordinates:
-              - !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-                name: time
-                dimensions: [time]
-                dtype: <m8[ns]
-                data: !core/ndarray-1.0.0
-                  source: 2
-                  datatype: int64
-                  byteorder: little
-                  shape: [10001]
-              data: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-                name: data
-                dimensions: [time]
-                dtype: <f8
-                unit: volt
-                data: !core/ndarray-1.0.0
-                  source: 3
-                  datatype: float64
-                  byteorder: little
-                  shape: [10001]
+          - &id014 !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+            &id009 values: &id010 !core/ndarray-1.0.0
+              data: [40.299500249940486, 40.29950024994045, 40.299500249940436, 40.29950024994042,
+                40.29950024994049, 40.299500249940564]
+              datatype: float64
+              shape: [6]
+            time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
+              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+              freq: 2S
+              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+            unit: volt
+            shape: [6]
+            interpolation: step
+            *id009 : *id010
           measurement_chain: !<asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.0.0>
             name: welding voltage measurement chain
-            data_source: *id007
-            data_processors:
-            - *id008
-            - !<asdf://weldx.bam.de/weldx/tags/measurement/data_transformation-1.0.0>
-              name: Calibration voltage measurement
-              input_signal: *id009
-              output_signal: &id013 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
-                signal_type: digital
-                unit: V
-                data: *id010
-              error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
-                deviation: 0.0
-              func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
-                expression: a*x + b
-                parameters:
-                  a: !unit/quantity-1.1.0 {unit: volt, value: 0.0030517578125}
-                  b: !unit/quantity-1.1.0 {unit: volt, value: 0.0}
-              wx_metadata:
-                software: *id011
+            data_source: *id011
+            graph: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0>
+              root_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+                name: Voltage Sensor
+                attributes:
+                  signal: *id012
+                edges:
+                - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+                  direction: fwd
+                  attributes:
+                    equipment: *id005
+                    transformation: *id013
+                  target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+                    name: AD conversion voltage measurement
+                    attributes:
+                      signal: !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+                        signal_type: digital
+                        unit: dimensionless
+                    edges:
+                    - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+                      direction: fwd
+                      attributes:
+                        transformation: !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0>
+                          name: Calibration voltage measurement
+                          error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+                            deviation: 0.0
+                          func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
+                            expression: a*x + b
+                            parameters:
+                              a: !unit/quantity-1.1.0 {unit: volt, value: 0.0030517578125}
+                              b: !unit/quantity-1.1.0 {unit: volt, value: 0.0}
+                          wx_metadata:
+                            software: !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView,
+                              version: 3.4.3143}
+                      target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+                        name: Calibration voltage measurement
+                        attributes:
+                          signal: &id016 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+                            signal_type: digital
+                            unit: volt
+                            data: *id014
+            source_equipment: *id008
         process:
           shielding_gas: !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-1.0.0>
             use_torch_shielding_gas: true
@@ -433,7 +457,9 @@ examples:
                 gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
               common_name: SG
             torch_shielding_gas_flowrate: !unit/quantity-1.1.0 {unit: liter / minute, value: 20}
-          weld_speed: !unit/quantity-1.1.0 {unit: millimeter / second, value: 10}
+          weld_speed: !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+            unit: millimeter / second
+            value: 10
           welding_process: !<asdf://weldx.bam.de/weldx/tags/process/CLOOS/pulse-1.0.0>
             base_process: pulse
             manufacturer: CLOOS
@@ -459,8 +485,8 @@ examples:
           welding_wire:
             diameter: !unit/quantity-1.1.0 {unit: millimeter, value: 1.2}
         reference_timestamp: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-11-09T12:00:00'}
-        welding_current: *id012
-        welding_voltage: *id013
+        welding_current: *id015
+        welding_voltage: *id016
         workpiece:
           base_metal: {common_name: S355J2+N, standard: 'DIN EN 10225-2:2011'}
           geometry:
