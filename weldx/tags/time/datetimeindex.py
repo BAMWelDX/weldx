@@ -16,30 +16,27 @@ class DatetimeIndexConverter(WeldxConverter):
     version = "1.0.0"
     types = [pd.DatetimeIndex]
 
-    @classmethod
-    def to_tree(cls, node: pd.DatetimeIndex, ctx):
-        """Serialize DatetimeIndex to tree."""
+    def to_yaml_tree(self, obj: pd.DatetimeIndex, tag: str, ctx) -> dict:
+        """Convert to python dict."""
         tree = {}
-        if node.inferred_freq is not None:
-            tree["freq"] = node.inferred_freq
+        if obj.inferred_freq is not None:
+            tree["freq"] = obj.inferred_freq
         else:
-            tree["values"] = node.values.astype(np.int64)
+            tree["values"] = obj.values.astype(np.int64)
 
-        tree["start"] = node[0]
-        tree["end"] = node[-1]
-        tree["min"] = node.min()
-        tree["max"] = node.max()
+        tree["start"] = obj[0]
+        tree["end"] = obj[-1]
+        tree["min"] = obj.min()
+        tree["max"] = obj.max()
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct DatetimeIndex from tree."""
-        if "freq" in tree:
+        if "freq" in node:
             return pd.date_range(
-                start=tree["start"], end=tree["end"], freq=tree["freq"]
+                start=node["start"], end=node["end"], freq=node["freq"]
             )
-        values = tree["values"]
-        return pd.DatetimeIndex(values)
+        return pd.DatetimeIndex(node["values"])
 
     @staticmethod
     def shape_from_tagged(tree: TaggedDict) -> List[int]:

@@ -13,13 +13,11 @@ class MeasurementChainConverter(WeldxConverter):
     name = "measurement/measurement_chain"
     version = "1.0.0"
     types = [MeasurementChain]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
 
-    @classmethod
-    def to_tree(cls, node: MeasurementChain, ctx):
-        return node.to_dict()
+    def to_yaml_tree(self, obj: MeasurementChain, tag: str, ctx) -> dict:
+        """Convert to python dict."""
+        return obj.to_dict()
 
-    @classmethod
-    def from_tree(cls, tree, ctx) -> MeasurementChain:
-        return MeasurementChain.from_dict(tree)
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Reconstruct from tree."""
+        return MeasurementChain.from_dict(node)

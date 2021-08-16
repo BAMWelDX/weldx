@@ -13,7 +13,8 @@ class PintQuantityConverter(WeldxConverter):
     tags = ["tag:stsci.edu:asdf/unit/quantity-1.*"]
     types = ["pint.quantity.build_quantity_class.<locals>.Quantity"]
 
-    def to_yaml_tree(self, obj: pint.Quantity, tag: str, ctx):
+    def to_yaml_tree(self, obj: pint.Quantity, tag: str, ctx) -> dict:
+        """Convert to python dict."""
         tree = {}
         value = obj.magnitude
         if not value.shape:

@@ -142,30 +142,10 @@ class ExternalFileConverter(WeldxConverter):
     name = "core/file"
     version = "1.0.0"
     types = [ExternalFile]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
 
-    @classmethod
-    def to_tree(cls, node: ExternalFile, ctx):
-        """
-        Convert an 'weldx.core.ExternalFile' instance into YAML  representations.
-
-        Parameters
-        ----------
-        node :
-            Instance of the 'weldx.core.ExternalFile' type to be serialized.
-
-        ctx :
-            An instance of the 'AsdfFile' object that is being written out.
-
-        Returns
-        -------
-            A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
-            'complex') representing the properties of the
-            'weldx.core.ExternalFile' type to be serialized.
-
-        """
-        tree = deepcopy(node.__dict__)
+    def to_yaml_tree(self, obj: ExternalFile, tag: str, ctx) -> dict:
+        """Convert to python dict."""
+        tree = deepcopy(obj.__dict__)
 
         path = tree.pop("path", None)
         buffer = tree.pop("buffer", None)
@@ -175,53 +155,35 @@ class ExternalFileConverter(WeldxConverter):
 
         if save_content:
             if buffer is None:
-                buffer = node.get_file_content()
+                buffer = obj.get_file_content()
             tree["content"] = np.frombuffer(buffer, dtype=np.uint8)
 
         if buffer is None:
             if hash_value is None and path is not None:
-                hash_value = node.calculate_hash(path, node.hashing_algorithm)
+                hash_value = obj.calculate_hash(path, obj.hashing_algorithm)
         else:
-            hash_value = node.calculate_hash(buffer, node.hashing_algorithm)
+            hash_value = obj.calculate_hash(buffer, obj.hashing_algorithm)
 
         if hash_value is not None:
             tree["content_hash"] = {"algorithm": algorithm, "value": hash_value}
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """
-        Converts basic types representing YAML trees into an
-        'weldx.core.ExternalFile'.
-
-        Parameters
-        ----------
-        tree :
-            An instance of a basic Python type (possibly nested) that
-            corresponds to a YAML subtree.
-        ctx :
-            An instance of the 'AsdfFile' object that is being constructed.
-
-        Returns
-        -------
-        weldx.core.ExternalFile :
-            An instance of the 'weldx.core.ExternalFile' type.
-
-        """
-        buffer = tree.pop("content", None)
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
+        buffer = node.pop("content", None)
         if buffer is not None:
             buffer = buffer.tobytes()
-            tree["buffer"] = buffer
+            node["buffer"] = buffer
 
-        hash_data = tree.pop("content_hash", None)
+        hash_data = node.pop("content_hash", None)
         if hash_data is not None:
-            tree["hashing_algorithm"] = hash_data["algorithm"]
-            tree["hash"] = hash_data["value"]
+            node["hashing_algorithm"] = hash_data["algorithm"]
+            node["hash"] = hash_data["value"]
 
         if buffer is not None:
-            hash_buffer = ExternalFile.calculate_hash(buffer, tree["hashing_algorithm"])
-            if hash_buffer != tree["hash"]:  # pragma: no cover
+            hash_buffer = ExternalFile.calculate_hash(buffer, node["hashing_algorithm"])
+            if hash_buffer != node["hash"]:  # pragma: no cover
                 raise Exception(
                     "The stored hash does not match the stored contents' hash."
                 )
-        return ExternalFile(**tree)
+        return ExternalFile(**node)

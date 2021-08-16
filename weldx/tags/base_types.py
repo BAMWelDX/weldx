@@ -15,7 +15,7 @@ class UuidConverter(WeldxConverter):
     tags = ["asdf://weldx.bam.de/weldx/tags/uuid-1.*"]
     types = [UUID]
 
-    def to_yaml_tree(self, obj: UUID, tag: str, ctx: SerializationContext):
+    def to_yaml_tree(self, obj: UUID, tag: str, ctx: SerializationContext) -> dict:
         """Convert to python dict."""
         return dict(uuid=str(obj))
 

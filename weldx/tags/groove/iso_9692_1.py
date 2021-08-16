@@ -25,8 +25,8 @@ class IsoGrooveConverter(WeldxConverter):
     ]
     types = IsoBaseGroove.__subclasses__()
 
-    def to_yaml_tree(self, obj: IsoBaseGroove, tag: str, ctx):
-        """Convert to tree."""
+    def to_yaml_tree(self, obj: IsoBaseGroove, tag: str, ctx) -> dict:
+        """Convert to python dict."""
         return obj.__dict__
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):

@@ -14,71 +14,33 @@ class TimeSeriesConverter(WeldxConverter):
     name = "core/time_series"
     version = "1.0.0"
     types = [TimeSeries]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
 
-    @classmethod
-    def to_tree(cls, node: TimeSeries, ctx):
-        """
-        Convert an 'weldx.core.TimeSeries' instance into YAML  representations.
-
-        Parameters
-        ----------
-        node :
-            Instance of the 'weldx.core.TimeSeries' type to be serialized.
-
-        ctx :
-            An instance of the 'AsdfFile' object that is being written out.
-
-        Returns
-        -------
-            A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
-            'complex') representing the properties of the 'weldx.core.TimeSeries'
-            type to be serialized.
-
-        """
-
-        if isinstance(node.data, pint.Quantity):
-            if node.shape == tuple([1]):  # constant
+    def to_yaml_tree(self, obj: TimeSeries, tag: str, ctx) -> dict:
+        """Convert to python dict."""
+        if isinstance(obj.data, pint.Quantity):
+            if obj.shape == tuple([1]):  # constant
                 return {
-                    "unit": str(node.units),
-                    "value": node.data.magnitude[0],
+                    "unit": str(obj.units),
+                    "value": obj.data.magnitude[0],
                 }
             return {
-                "time": node.time.as_pandas_index(),
-                "unit": str(node.units),
-                "shape": node.shape,
-                "interpolation": node.interpolation,
-                "values": node.data.magnitude,
+                "time": obj.time.as_pandas_index(),
+                "unit": str(obj.units),
+                "shape": obj.shape,
+                "interpolation": obj.interpolation,
+                "values": obj.data.magnitude,
             }
-        return {"expression": node.data, "unit": str(node.units), "shape": node.shape}
+        return {"expression": obj.data, "unit": str(obj.units), "shape": obj.shape}
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """
-        Converts basic types representing YAML trees into an 'weldx.core.TimeSeries'.
-
-        Parameters
-        ----------
-        tree :
-            An instance of a basic Python type (possibly nested) that
-            corresponds to a YAML subtree.
-        ctx :
-            An instance of the 'AsdfFile' object that is being constructed.
-
-        Returns
-        -------
-        weldx.core.TimeSeries :
-            An instance of the 'weldx.core.TimeSeries' type.
-
-        """
-        if "value" in tree:  # constant
-            values = Q_(np.asarray(tree["value"]), tree["unit"])
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
+        if "value" in node:  # constant
+            values = Q_(np.asarray(node["value"]), node["unit"])
             return TimeSeries(values)
-        if "values" in tree:
-            time = tree["time"]
-            interpolation = tree["interpolation"]
-            values = Q_(tree["values"], tree["unit"])
+        if "values" in node:
+            time = node["time"]
+            interpolation = node["interpolation"]
+            values = Q_(node["values"], node["unit"])
             return TimeSeries(values, time, interpolation)
 
-        return TimeSeries(tree["expression"])  # mathexpression
+        return TimeSeries(node["expression"])  # mathexpression

@@ -12,15 +12,12 @@ class TimestampConverter(WeldxConverter):
     version = "1.0.0"
     types = [pd.Timestamp]
 
-    @classmethod
-    def to_tree(cls, node: pd.Timestamp, ctx):
-        """Serialize timestamp to tree."""
+    def to_yaml_tree(self, obj: pd.Timestamp, tag: str, ctx) -> dict:
+        """Convert to python dict."""
         tree = {}
-        tree["value"] = node.isoformat()
+        tree["value"] = obj.isoformat()
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct timestamp from tree."""
-        value = tree["value"]
-        return pd.Timestamp(value)
+        return pd.Timestamp(node["value"])

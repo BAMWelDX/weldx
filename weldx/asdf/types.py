@@ -74,21 +74,6 @@ class WeldxConverterMeta(type(Converter)):
     def __new__(mcs, name, bases, attrs):
         cls = super().__new__(mcs, name, bases, attrs)
 
-        if hasattr(cls, "to_tree"):
-
-            def to_yaml_tree(self, obj, tag: str, ctx):
-                """Temporary conversion function."""
-                return cls.to_tree(obj, ctx)
-
-            setattr(cls, "to_yaml_tree", to_yaml_tree)
-        if hasattr(cls, "from_tree"):
-
-            def from_yaml_tree(self, node, tag: str, ctx):
-                """Temporary conversion function."""
-                return cls.from_tree(node, ctx)
-
-            setattr(cls, "from_yaml_tree", from_yaml_tree)
-
         # legacy tag definitions
         if name := getattr(cls, "name", None):
             setattr(

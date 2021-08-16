@@ -16,30 +16,28 @@ class TimedeltaIndexConverter(WeldxConverter):
     version = "1.0.0"
     types = [pd.TimedeltaIndex]
 
-    @classmethod
-    def to_tree(cls, node: pd.TimedeltaIndex, ctx):
-        """Serialize TimedeltaIndex to tree."""
+    def to_yaml_tree(self, obj: pd.TimedeltaIndex, tag: str, ctx) -> dict:
+        """Convert to python dict."""
         tree = {}
-        if node.inferred_freq is not None:
-            tree["freq"] = node.inferred_freq
+        if obj.inferred_freq is not None:
+            tree["freq"] = obj.inferred_freq
         else:
-            tree["values"] = node.values.astype(np.int64)
+            tree["values"] = obj.values.astype(np.int64)
 
-        tree["start"] = node[0]
-        tree["end"] = node[-1]
-        tree["min"] = node.min()
-        tree["max"] = node.max()
+        tree["start"] = obj[0]
+        tree["end"] = obj[-1]
+        tree["min"] = obj.min()
+        tree["max"] = obj.max()
 
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct TimedeltaIndex from tree."""
-        if "freq" in tree:
+        if "freq" in node:
             return pd.timedelta_range(
-                start=tree["start"], end=tree["end"], freq=tree["freq"]
+                start=node["start"], end=node["end"], freq=node["freq"]
             )
-        values = tree["values"]
+        values = node["values"]
         return pd.TimedeltaIndex(values)
 
     @staticmethod

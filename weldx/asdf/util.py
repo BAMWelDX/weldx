@@ -315,6 +315,8 @@ def dataclass_serialization_class(
     from_tree_mod :
         A method that applies additional modifications to the tree during the
         ``from_tree`` function call
+    sort_string_lists :
+        Sort string lists before serialization.
 
     Returns
     -------

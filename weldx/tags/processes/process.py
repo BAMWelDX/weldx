@@ -16,8 +16,8 @@ class GmawProcessConverter(WeldxConverter):
     ]
     types = [GmawProcess]
 
-    def to_yaml_tree(self, obj: GmawProcess, tag: str, ctx):
-        """Convert to tree."""
+    def to_yaml_tree(self, obj: GmawProcess, tag: str, ctx) -> dict:
+        """Convert to python dict."""
         return obj.__dict__
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):

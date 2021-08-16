@@ -23,19 +23,16 @@ class DiEdgeConverter(WeldxConverter):
     name = "core/graph/di_edge"
     version = "1.0.0"
     types = [DiEdge]
-    requires = ["weldx"]
 
-    @classmethod
-    def to_tree(cls, node: DiEdge, ctx):
+    def to_yaml_tree(self, obj: DiEdge, tag: str, ctx) -> dict:
         """Convert to python dict."""
-        if not node.attributes:
-            node.attributes = None
-        return node.__dict__
+        if not obj.attributes:
+            obj.attributes = None
+        return obj.__dict__
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """Reconstruct form tree."""
-        return DiEdge(**tree)
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
+        return DiEdge(**node)
 
 
 # DiNode -------------------------------------------------------------------------------
@@ -54,19 +51,16 @@ class DiNodeConverter(WeldxConverter):
     name = "core/graph/di_node"
     version = "1.0.0"
     types = [DiNode]
-    requires = ["weldx"]
 
-    @classmethod
-    def to_tree(cls, node: DiNode, ctx):
+    def to_yaml_tree(self, obj: DiNode, tag: str, ctx) -> dict:
         """Convert to python dict."""
-        if not node.attributes:
-            node.attributes = None
-        return node.__dict__
+        if not obj.attributes:
+            obj.attributes = None
+        return obj.__dict__
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """Reconstruct from tree."""
-        return DiNode(**tree)
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
+        return DiNode(**node)
 
 
 # Graph --------------------------------------------------------------------------------
@@ -158,20 +152,17 @@ class DiGraphConverter(WeldxConverter):
     name = "core/graph/di_graph"
     version = "1.0.0"
     types = [nx.DiGraph]
-    requires = ["weldx"]
 
-    @classmethod
-    def to_tree(cls, node: nx.DiGraph, ctx):
+    def to_yaml_tree(self, obj: nx.DiGraph, tag: str, ctx) -> dict:
         """Check graph structure and build nested dictionary."""
-        if not nx.is_tree(node):  # no cycles, single tree
+        if not nx.is_tree(obj):  # no cycles, single tree
             raise ValueError("Graph must represent a tree.")
 
-        keep_uuid = getattr(node, "_wx_keep_uuid_name", False)
+        keep_uuid = getattr(obj, "_wx_keep_uuid_name", False)
 
-        root = build_tree(node, tuple(node.nodes)[0], keep_uuid=keep_uuid)
+        root = build_tree(obj, tuple(obj.nodes)[0], keep_uuid=keep_uuid)
         return dict(root_node=root)
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Rebuild directed graph from nested dictionary structure."""
-        return build_graph(tree["root_node"])
+        return build_graph(node["root_node"])

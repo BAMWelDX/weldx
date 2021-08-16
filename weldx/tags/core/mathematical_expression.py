@@ -12,18 +12,15 @@ class MathematicalExpressionConverter(WeldxConverter):
     name = "core/mathematical_expression"
     version = "1.0.0"
     types = [MathematicalExpression]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
 
-    @classmethod
-    def to_tree(cls, node: MathematicalExpression, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = {"expression": node.expression.__str__(), "parameters": node.parameters}
+    def to_yaml_tree(self, obj: MathematicalExpression, tag: str, ctx) -> dict:
+        """Convert to python dict."""
+        tree = {"expression": obj.expression.__str__(), "parameters": obj.parameters}
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
         obj = MathematicalExpression(
-            sympy.sympify(tree["expression"]), parameters=tree["parameters"]
+            sympy.sympify(node["expression"]), parameters=node["parameters"]
         )
         return obj

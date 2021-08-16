@@ -23,59 +23,22 @@ class CoordinateTransformationConverter(WeldxConverter):
     name = "core/transformations/coordinate_transformation"
     version = "1.0.0"
     types = [CoordinateTransformation]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
 
-    @classmethod
-    def to_tree(cls, node: CoordinateTransformation, ctx):
-        """
-        Convert a 'CoordinateTransformation' instance into YAML representations.
-
-        Parameters
-        ----------
-        node :
-            Instance of the 'CoordinateTransformation' type to be serialized.
-
-        ctx :
-            An instance of the 'AsdfFile' object that is being written out.
-
-        Returns
-        -------
-            A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
-            'complex') representing the properties of the 'CoordinateTransformation'
-            type to be serialized.
-
-        """
+    def to_yaml_tree(self, obj: CoordinateTransformation, tag: str, ctx) -> dict:
+        """Convert to python dict."""
         tree = {
-            "name": node.name,
-            "reference_system": node.reference_system,
-            "transformation": node.transformation,
+            "name": obj.name,
+            "reference_system": obj.reference_system,
+            "transformation": obj.transformation,
         }
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """
-        Converts basic types representing YAML trees into a 'CoordinateTransformation'.
-
-        Parameters
-        ----------
-        tree :
-            An instance of a basic Python type (possibly nested) that
-            corresponds to a YAML subtree.
-        ctx :
-            An instance of the 'AsdfFile' object that is being constructed.
-
-        Returns
-        -------
-        CoordinateTransformation :
-            An instance of the 'CoordinateTransformation' type.
-
-        """
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
         return CoordinateTransformation(
-            name=tree["name"],
-            reference_system=tree["reference_system"],
-            transformation=tree["transformation"],
+            name=node["name"],
+            reference_system=node["reference_system"],
+            transformation=node["transformation"],
         )
 
 
@@ -102,57 +65,24 @@ class CoordinateSystemManagerSubsystemConverter(WeldxConverter):
     name = "core/transformations/coordinate_system_hierarchy_subsystem"
     version = "1.0.0"
     types = [CoordinateSystemManagerSubsystem]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
 
-    @classmethod
-    def to_tree(cls, node: CoordinateSystemManagerSubsystem, ctx):
-        """Convert a 'CoordinateSystemManagerSubsystem' instance into YAML repr.
-
-        Parameters
-        ----------
-        node :
-            Instance of the 'CoordinateSystemManagerSubsystem' type to be serialized.
-
-        ctx :
-            An instance of the 'AsdfFile' object that is being written out.
-
-        Returns
-        -------
-            A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
-            'complex') representing the properties of the
-            'CoordinateSystemManagerSubsystem' type to be serialized.
-
-        """
+    def to_yaml_tree(
+        self, obj: CoordinateSystemManagerSubsystem, tag: str, ctx
+    ) -> dict:
+        """Convert to python dict."""
         tree = {
-            "name": node.name,
-            "root_cs": node.root_cs,
-            "reference_time": node.reference_time,
-            "parent_system": node.parent_system,
-            "subsystem_names": node.subsystems,
-            "members": node.members,
+            "name": obj.name,
+            "root_cs": obj.root_cs,
+            "reference_time": obj.reference_time,
+            "parent_system": obj.parent_system,
+            "subsystem_names": obj.subsystems,
+            "members": obj.members,
         }
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """
-        Converts YAML trees into a 'CoordinateSystemManagerSubsystem'.
-
-        Parameters
-        ----------
-        tree :
-            An instance of a basic Python type (possibly nested) that
-            corresponds to a YAML subtree.
-        ctx :
-            An instance of the 'AsdfFile' object that is being constructed.
-
-        Returns
-        -------
-        CoordinateSystemManagerSubsystem :
-            An instance of the 'CoordinateSystemManagerSubsystem
-        """
-        return tree
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
+        return node
 
 
 class CoordinateSystemManagerConverter(WeldxConverter):
@@ -161,8 +91,6 @@ class CoordinateSystemManagerConverter(WeldxConverter):
     name = "core/transformations/coordinate_system_hierarchy"
     version = "1.0.0"
     types = [CoordinateSystemManager]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
 
     @classmethod
     def _extract_all_subsystems(
@@ -363,26 +291,9 @@ class CoordinateSystemManagerConverter(WeldxConverter):
             leaf_nodes = leaf_nodes_next
             lcs_data_list = lcs_data_list_next
 
-    @classmethod
-    def to_tree(cls, node: CoordinateSystemManager, ctx):
-        """Convert a 'CoordinateSystemManager' instance into YAML representations.
-
-        Parameters
-        ----------
-        node :
-            Instance of the 'CoordinateSystemManager' type to be serialized.
-
-        ctx :
-            An instance of the 'AsdfFile' object that is being written out.
-
-        Returns
-        -------
-            A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
-            'complex') representing the properties of the 'CoordinateSystemManager'
-            type to be serialized.
-
-        """
-        graph = deepcopy(node.graph)  # TODO: Check if deepcopy is necessary
+    def to_yaml_tree(self, obj: CoordinateSystemManager, tag: str, ctx) -> dict:
+        """Convert to python dict."""
+        graph = deepcopy(obj.graph)  # TODO: Check if deepcopy is necessary
 
         # remove automatically computed edges (inverted directions)
         remove_edges = []
@@ -401,58 +312,41 @@ class CoordinateSystemManagerConverter(WeldxConverter):
                 )
             ]
 
-        subsystem_data = cls._extract_subsystem_data(node)
+        subsystem_data = self._extract_subsystem_data(obj)
         subsystems = [
             subsystem.name
             for subsystem in subsystem_data
-            if subsystem.parent_system == node.name
+            if subsystem.parent_system == obj.name
         ]
 
         spatial_data = None
-        if len(node._data) > 0:
+        if len(obj._data) > 0:
             spatial_data = [
                 dict(name=k, coordinate_system=v.coordinate_system_name, data=v.data)
-                for k, v in node._data.items()
+                for k, v in obj._data.items()
             ]
 
         tree = {
-            "name": node.name,
-            "reference_time": node.reference_time,
+            "name": obj.name,
+            "reference_time": obj.reference_time,
             "subsystem_names": subsystems,
             "subsystems": subsystem_data,
-            "root_system_name": node.root_system_name,
+            "root_system_name": obj.root_system_name,
             "coordinate_systems": coordinate_system_data,
             "spatial_data": spatial_data,
         }
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """
-        Converts basic types representing YAML trees into a 'CoordinateSystemManager'.
-
-        Parameters
-        ----------
-        tree :
-            An instance of a basic Python type (possibly nested) that
-            corresponds to a YAML subtree.
-        ctx :
-            An instance of the 'AsdfFile' object that is being constructed.
-
-        Returns
-        -------
-        CoordinateSystemManager :
-            An instance of the 'CoordinateSystemManager' type.
-
-        """
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
         reference_time = None
-        if "reference_time" in tree:
-            reference_time = tree["reference_time"]
+        if "reference_time" in node:
+            reference_time = node["reference_time"]
         csm = CoordinateSystemManager(
-            tree["root_system_name"], tree["name"], time_ref=reference_time
+            node["root_system_name"], node["name"], time_ref=reference_time
         )
 
-        subsystem_data_list = tree["subsystems"]
+        subsystem_data_list = node["subsystems"]
 
         for subsystem_data in subsystem_data_list:
             subsystem_reference_time = None
@@ -465,10 +359,10 @@ class CoordinateSystemManagerConverter(WeldxConverter):
             )
             subsystem_data["lcs"] = []
 
-        cls._add_coordinate_systems_to_subsystems(tree, csm, subsystem_data_list)
-        cls._merge_subsystems(tree, csm, subsystem_data_list)
+        self._add_coordinate_systems_to_subsystems(node, csm, subsystem_data_list)
+        self._merge_subsystems(node, csm, subsystem_data_list)
 
-        if (spatial_data := tree.get("spatial_data")) is not None:
+        if (spatial_data := node.get("spatial_data")) is not None:
             for item in spatial_data:
                 csm.assign_data(item["data"], item["name"], item["coordinate_system"])
 

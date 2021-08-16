@@ -45,8 +45,6 @@ class VariableTypeConverter(WeldxConverter):
     name = "core/variable"
     version = "1.0.0"
     types = [Variable]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
 
     @staticmethod
     def convert_time_dtypes(data: np.ndarray):
@@ -71,78 +69,42 @@ class VariableTypeConverter(WeldxConverter):
             return data.astype(np.int64)
         return data
 
-    @classmethod
-    def to_tree(cls, node: Variable, ctx):
-        """
-        Convert an instance of the 'Variable' type into YAML representations.
-
-        Parameters
-        ----------
-        node :
-            Instance of the 'Variable' type to be serialized.
-
-        ctx :
-            An instance of the 'AsdfFile' object that is being written out.
-
-        Returns
-        -------
-            A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
-            'complex') representing the properties of the 'Variable' type to be
-            serialized.
-
-        """
-
-        if isinstance(node.data, pint.Quantity):
-            unit = str(node.data.units)
-            data = node.data.magnitude
+    def to_yaml_tree(self, obj: Variable, tag: str, ctx) -> dict:
+        """Convert to python dict."""
+        if isinstance(obj.data, pint.Quantity):
+            unit = str(obj.data.units)
+            data = obj.data.magnitude
         else:
             unit = None
-            data = node.data
-        dtype = node.data.dtype.str
-        data = cls.convert_time_dtypes(data=data)
+            data = obj.data
+        dtype = obj.data.dtype.str
+        data = self.convert_time_dtypes(data=data)
         if not data.shape:  # scalar
             data = data.item()
         tree = {
-            "name": node.name,
-            "dimensions": node.dimensions,
+            "name": obj.name,
+            "dimensions": obj.dimensions,
             "dtype": dtype,
             "data": data,
-            "attrs": node.attrs if node.attrs else None,
+            "attrs": obj.attrs if obj.attrs else None,
         }
         if unit:
             tree["unit"] = unit
 
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """
-        Converts basic types representing YAML trees into custom types.
-
-        Parameters
-        ----------
-        tree :
-            An instance of a basic Python type (possibly nested) that
-            corresponds to a YAML subtree.
-        ctx :
-            An instance of the 'AsdfFile' object that is being constructed.
-
-        Returns
-        -------
-        Variable :
-            An instance of the 'Variable' type.
-
-        """
-        dtype = np.dtype(tree["dtype"])
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
+        dtype = np.dtype(node["dtype"])
         # TODO: it would be ideal, if asdf would handle time types natively.
         if dtype.char in ("M", "m"):  # handle np.timedelta64 and np.datetime64
-            data = np.array(tree["data"], dtype=dtype)
+            data = np.array(node["data"], dtype=dtype)
             # assert data.base is tree["data"]
         else:
-            data = tree["data"]  # let asdf handle np arrays with its own wrapper.
-        if "unit" in tree:  # convert to pint.Quantity
-            data = Q_(data, tree["unit"])
+            data = node["data"]  # let asdf handle np arrays with its own wrapper.
+        if "unit" in node:  # convert to pint.Quantity
+            data = Q_(data, node["unit"])
 
-        attrs = tree.get("attrs", None)
+        attrs = node.get("attrs", None)
 
-        return Variable(tree["name"], tree["dimensions"], data, attrs)
+        return Variable(node["name"], node["dimensions"], data, attrs)

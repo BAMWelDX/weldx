@@ -11,15 +11,13 @@ class TimeConverter(WeldxConverter):
     version = "1.0.0"
     types = [Time]
 
-    @classmethod
-    def to_tree(cls, node: Time, ctx):
-        """Serialize timedelta to tree."""
+    def to_yaml_tree(self, obj: Time, tag: str, ctx) -> dict:
+        """Convert to python dict."""
         tree = dict()
-        tree["values"] = node.as_pandas()
-        tree["reference_time"] = node._time_ref
+        tree["values"] = obj.as_pandas()
+        tree["reference_time"] = obj._time_ref
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct Time from tree."""
-        return Time(tree["values"], tree.get("reference_time"))
+        return Time(node["values"], node.get("reference_time"))

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import pandas as pd
 
 from weldx.asdf.types import WeldxConverter
+from weldx.asdf.util import dataclass_serialization_class
 
 __all__ = ["PropertyTagTestClass", "PropertyTagTestClassConverter"]
 
@@ -16,22 +17,8 @@ class PropertyTagTestClass:
     prop3: pd.Timestamp = pd.Timestamp("2020-01-03")
 
 
-class PropertyTagTestClassConverter(WeldxConverter):
-    """Helper class to test the shape validator"""
-
-    name = "debug/test_property_tag"
-    version = "1.0.0"
-    types = [PropertyTagTestClass]
-    requires = ["weldx"]
-    handle_dynamic_subclasses = True
-
-    @classmethod
-    def to_tree(cls, node: PropertyTagTestClass, ctx):
-        """convert to tagged tree and remove all None entries from node dictionary"""
-        tree = node.__dict__
-        return tree
-
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        obj = PropertyTagTestClass(**tree)
-        return obj
+PropertyTagTestClassConverter = dataclass_serialization_class(
+    class_type=PropertyTagTestClass,
+    class_name="debug/test_property_tag",
+    version="1.0.0",
+)

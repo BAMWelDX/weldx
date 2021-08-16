@@ -13,38 +13,20 @@ class WXRotationConverter(WeldxConverter):
     version = "1.0.0"
     types = [Rotation, WXRotation]
 
-    @classmethod
-    def to_tree(cls, node: Rotation, ctx):
-        """
-        Convert an instance of the 'Dimension' type into YAML representations.
-
-        Parameters
-        ----------
-        node :
-            Instance of the 'Dimension' type to be serialized.
-
-        ctx :
-            An instance of the 'AsdfFile' object that is being written out.
-
-        Returns
-        -------
-            A basic YAML type ('dict', 'list', 'str', 'int', 'float', or
-            'complex') representing the properties of the 'Dimension' type to be
-            serialized.
-
-        """
+    def to_yaml_tree(self, obj: Rotation, tag: str, ctx) -> dict:
+        """Convert to python dict."""
         tree = {}
 
-        if not hasattr(node, "wx_meta"):  # default to quaternion representation
-            tree["quaternions"] = node.as_quat()
-        elif node.wx_meta["constructor"] == "from_quat":
-            tree["quaternions"] = node.as_quat()
-        elif node.wx_meta["constructor"] == "from_matrix":
-            tree["matrix"] = node.as_matrix()
-        elif node.wx_meta["constructor"] == "from_rotvec":
-            tree["rotvec"] = node.as_rotvec()
-        elif node.wx_meta["constructor"] == "from_euler":
-            seq_str = node.wx_meta["seq"]
+        if not hasattr(obj, "wx_meta"):  # default to quaternion representation
+            tree["quaternions"] = obj.as_quat()
+        elif obj.wx_meta["constructor"] == "from_quat":
+            tree["quaternions"] = obj.as_quat()
+        elif obj.wx_meta["constructor"] == "from_matrix":
+            tree["matrix"] = obj.as_matrix()
+        elif obj.wx_meta["constructor"] == "from_rotvec":
+            tree["rotvec"] = obj.as_rotvec()
+        elif obj.wx_meta["constructor"] == "from_euler":
+            seq_str = obj.wx_meta["seq"]
             if not len(seq_str) == 3:
                 if all(c in "xyz" for c in seq_str):
                     seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
@@ -53,15 +35,15 @@ class WXRotationConverter(WeldxConverter):
                 else:  # pragma: no cover
                     raise ValueError("Mix of intrinsic and extrinsic euler angles.")
 
-            angles = node.as_euler(seq_str, degrees=node.wx_meta["degrees"])
-            angles = np.squeeze(angles[..., : len(node.wx_meta["seq"])])
+            angles = obj.as_euler(seq_str, degrees=obj.wx_meta["degrees"])
+            angles = np.squeeze(angles[..., : len(obj.wx_meta["seq"])])
 
-            if node.wx_meta["degrees"]:
+            if obj.wx_meta["degrees"]:
                 angles = Q_(angles, "degree")
             else:
                 angles = Q_(angles, "rad")
 
-            tree["sequence"] = node.wx_meta["seq"]
+            tree["sequence"] = obj.wx_meta["seq"]
             tree["angles"] = angles
 
         else:  # pragma: no cover
@@ -69,30 +51,13 @@ class WXRotationConverter(WeldxConverter):
 
         return tree
 
-    @classmethod
-    def from_tree(cls, tree, ctx):
-        """
-        Converts basic types representing YAML trees into custom types.
-
-        Parameters
-        ----------
-        tree :
-            An instance of a basic Python type (possibly nested) that
-            corresponds to a YAML subtree.
-        ctx :
-            An instance of the 'AsdfFile' object that is being constructed.
-
-        Returns
-        -------
-        Dimension :
-            An instance of the 'Dimension' type.
-
-        """
-        if "quaternions" in tree:
-            return WXRotation.from_quat(tree["quaternions"])
-        if "matrix" in tree:
-            return WXRotation.from_matrix(tree["matrix"])
-        if "rotvec" in tree:
-            return WXRotation.from_rotvec(tree["rotvec"])
-        if "angles" in tree:
-            return WXRotation.from_euler(seq=tree["sequence"], angles=tree["angles"])
+    def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Construct from tree."""
+        if "quaternions" in node:
+            return WXRotation.from_quat(node["quaternions"])
+        if "matrix" in node:
+            return WXRotation.from_matrix(node["matrix"])
+        if "rotvec" in node:
+            return WXRotation.from_rotvec(node["rotvec"])
+        if "angles" in node:
+            return WXRotation.from_euler(seq=node["sequence"], angles=node["angles"])
