@@ -19,7 +19,7 @@ jobs:
           pip install -e .[test]
       - name: run asdf schema pytest
         run: |
-          pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/asdf/schemas/
+          pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/
 
   validate_manifest:
     name: validate weldx manifest
@@ -41,6 +41,6 @@ jobs:
             schema = asdf.schema.load_schema(
                 "asdf://asdf-format.org/core/schemas/extension_manifest-1.0.0"
             )
-            for f in Path("./weldx/asdf/manifests/").glob("*.yaml"):
+            for f in Path("./weldx/manifests/").glob("*.yaml"):
                 manifest = yaml.safe_load(open(f).read())
                 asdf.schema.validate(manifest, schema=schema)
