@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from weldx.asdf.util import dataclass_serialization_class
 
-__all__ = ["ArcWeldingProcess", "ArcWeldingProcessType"]
+__all__ = ["ArcWeldingProcess", "ArcWeldingProcessConverter"]
 
 _name_to_abbr = {
     "atomicHydrogenWelding": "AHW",
@@ -63,7 +63,7 @@ def _from_yaml_tree(tree):
     return dict(name_or_abbreviation=tree["name"])
 
 
-ArcWeldingProcessType = dataclass_serialization_class(
+ArcWeldingProcessConverter = dataclass_serialization_class(
     class_type=ArcWeldingProcess,
     class_name="aws/process/arc_welding_process",
     version="1.0.0",

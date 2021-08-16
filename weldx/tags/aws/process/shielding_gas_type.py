@@ -5,7 +5,7 @@ from weldx.asdf.util import dataclass_serialization_class
 
 from .gas_component import GasComponent
 
-__all__ = ["ShieldingGasType", "ShieldingGasTypeType"]
+__all__ = ["ShieldingGasType", "ShieldingGasTypeConverter"]
 
 
 @dataclass
@@ -17,7 +17,7 @@ class ShieldingGasType:
     designation: str = None
 
 
-ShieldingGasTypeType = dataclass_serialization_class(
+ShieldingGasTypeConverter = dataclass_serialization_class(
     class_type=ShieldingGasType,
     class_name="aws/process/shielding_gas_type",
     version="1.0.0",

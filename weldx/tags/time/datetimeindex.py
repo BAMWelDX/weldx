@@ -39,13 +39,13 @@ class DatetimeIndexConverter(WeldxConverter):
         return pd.DatetimeIndex(node["values"])
 
     @staticmethod
-    def shape_from_tagged(tree: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> List[int]:
         """Calculate the shape (length of TDI) from static tagged tree instance."""
-        if "freq" in tree:
+        if "freq" in node:
             temp = pd.date_range(
-                start=tree["start"]["value"],
-                end=tree["end"]["value"],
-                freq=tree["freq"],
+                start=node["start"]["value"],
+                end=node["end"]["value"],
+                freq=node["freq"],
             )
             return [len(temp)]
-        return tree["values"]["shape"]
+        return node["values"]["shape"]

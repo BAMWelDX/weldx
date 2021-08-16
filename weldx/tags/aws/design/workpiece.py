@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from weldx.asdf.util import dataclass_serialization_class
 
-__all__ = ["Workpiece", "WorkpieceType"]
+__all__ = ["Workpiece", "WorkpieceConverter"]
 
 
 @dataclass
@@ -12,6 +12,6 @@ class Workpiece:
     geometry: str
 
 
-WorkpieceType = dataclass_serialization_class(
+WorkpieceConverter = dataclass_serialization_class(
     class_type=Workpiece, class_name="aws/design/workpiece", version="1.0.0"
 )

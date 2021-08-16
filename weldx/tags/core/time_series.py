@@ -1,7 +1,9 @@
 """Contains the serialization class for the weldx.core.TimeSeries."""
+from typing import List
 
 import numpy as np
 import pint
+from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxConverter
 from weldx.constants import Q_
@@ -44,3 +46,10 @@ class TimeSeriesConverter(WeldxConverter):
             return TimeSeries(values, time, interpolation)
 
         return TimeSeries(node["expression"])  # mathexpression
+
+    @staticmethod
+    def shape_from_tagged(node: TaggedDict) -> List[int]:
+        """Calculate the shape from static tagged tree instance."""
+        if "shape" in node:  # this should not be reached but lets make sure
+            return node["shape"]
+        return [1]  # scalar

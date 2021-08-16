@@ -1,11 +1,12 @@
 """Utilities for asdf files."""
 from io import BytesIO
 from pathlib import Path
-from typing import Callable, List, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from warnings import warn
 
 import asdf
 from asdf.asdf import SerializationContext
+from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path
 
@@ -406,3 +407,19 @@ def get_converter_for_uri(uri: str) -> Union[type, bool]:
     if converters:
         return converters[0]
     return False
+
+
+def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> List[int]:
+    """Get the shape of an ASDF instance from its tagged dict form."""
+    if isinstance(instance_dict, (float, int)):  # test against [1] for scalar values
+        return [1]
+    elif "shape" in instance_dict:
+        return instance_dict["shape"]
+    elif isinstance(instance_dict, asdf.types.tagged.Tagged):
+        # try calling shape_from_tagged for custom types
+
+        converter = get_converter_for_uri(instance_dict._tag)
+        if hasattr(converter, "shape_from_tagged"):
+            return converter.shape_from_tagged(instance_dict)
+
+    return None

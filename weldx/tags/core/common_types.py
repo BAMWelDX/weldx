@@ -4,11 +4,12 @@ from typing import Any, Hashable, List, Mapping
 
 import numpy as np
 import pint
+from asdf.tagged import TaggedDict
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_timedelta64_dtype as is_timedelta
 
 from weldx.asdf.types import WeldxConverter
-from weldx.asdf.util import dataclass_serialization_class
+from weldx.asdf.util import _get_instance_shape, dataclass_serialization_class
 from weldx.constants import Q_
 
 
@@ -23,7 +24,7 @@ class Dimension:
     length: int
 
 
-DimensionTypeASDF = dataclass_serialization_class(
+DimensionTypeConverter = dataclass_serialization_class(
     class_type=Dimension, class_name="core/dimension", version="1.0.0"
 )
 
@@ -39,7 +40,7 @@ class Variable:
     attrs: Mapping[Hashable, Any] = dataclasses.field(default_factory=dict)
 
 
-class VariableTypeConverter(WeldxConverter):
+class VariableConverter(WeldxConverter):
     """Serialization class for a Variable"""
 
     name = "core/variable"
@@ -108,3 +109,8 @@ class VariableTypeConverter(WeldxConverter):
         attrs = node.get("attrs", None)
 
         return Variable(node["name"], node["dimensions"], data, attrs)
+
+    @staticmethod
+    def shape_from_tagged(node: TaggedDict) -> List[int]:
+        """Calculate the shape from static tagged tree instance."""
+        return _get_instance_shape(node["data"])

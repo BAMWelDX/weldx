@@ -5,7 +5,7 @@ from weldx.asdf.util import dataclass_serialization_class
 
 from .sub_assembly import SubAssembly
 
-__all__ = ["Weldment", "WeldmentType"]
+__all__ = ["Weldment", "WeldmentConverter"]
 
 
 @dataclass
@@ -15,6 +15,6 @@ class Weldment:
     sub_assembly: List[SubAssembly]
 
 
-WeldmentType = dataclass_serialization_class(
+WeldmentConverter = dataclass_serialization_class(
     class_type=Weldment, class_name="aws/design/weldment", version="1.0.0"
 )

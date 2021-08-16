@@ -1,9 +1,10 @@
-# Licensed under a 3-clause BSD style license - see LICENSE
-# -*- coding: utf-8 -*-
+from typing import List
 
 import pint
+from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxConverter
+from weldx.asdf.util import _get_instance_shape
 from weldx.constants import Q_
 
 
@@ -24,5 +25,13 @@ class PintQuantityConverter(WeldxConverter):
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
+        """Reconstruct from tree."""
         quantity = Q_(node["value"], node["unit"])
         return quantity
+
+    @staticmethod
+    def shape_from_tagged(node: TaggedDict) -> List[int]:
+        """Calculate the shape from static tagged tree instance."""
+        if isinstance(node["value"], dict):  # ndarray
+            return _get_instance_shape(node["value"])
+        return [1]  # scalar

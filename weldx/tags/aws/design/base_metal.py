@@ -4,7 +4,7 @@ import pint
 
 from weldx.asdf.util import dataclass_serialization_class
 
-__all__ = ["BaseMetal", "BaseMetalType"]
+__all__ = ["BaseMetal", "BaseMetalConverter"]
 
 
 @dataclass
@@ -29,7 +29,7 @@ class BaseMetal:
     applied_coating_specification: str = None
 
 
-BaseMetalType = dataclass_serialization_class(
+BaseMetalConverter = dataclass_serialization_class(
     class_type=BaseMetal,
     class_name="aws/design/base_metal",
     version="1.0.0",

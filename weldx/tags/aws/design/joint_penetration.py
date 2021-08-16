@@ -4,7 +4,7 @@ import pint
 
 from weldx.asdf.util import dataclass_serialization_class
 
-__all__ = ["JointPenetration", "JointPenetrationType"]
+__all__ = ["JointPenetration", "JointPenetrationConverter"]
 
 
 @dataclass
@@ -21,7 +21,7 @@ class JointPenetration:
     depth_of_fusion: float = None
 
 
-JointPenetrationType = dataclass_serialization_class(
+JointPenetrationConverter = dataclass_serialization_class(
     class_type=JointPenetration,
     class_name="aws/design/joint_penetration",
     version="1.0.0",

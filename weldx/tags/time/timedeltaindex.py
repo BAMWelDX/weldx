@@ -41,13 +41,13 @@ class TimedeltaIndexConverter(WeldxConverter):
         return pd.TimedeltaIndex(values)
 
     @staticmethod
-    def shape_from_tagged(tree: TaggedDict) -> List[int]:
-        """Calculate the shape (length of TDI) from static tagged tree instance."""
-        if "freq" in tree:
+    def shape_from_tagged(node: TaggedDict) -> List[int]:
+        """Calculate the shape from static tagged tree instance."""
+        if "freq" in node:
             tdi_temp = pd.timedelta_range(
-                start=tree["start"]["value"],
-                end=tree["end"]["value"],
-                freq=tree["freq"],
+                start=node["start"]["value"],
+                end=node["end"]["value"],
+                freq=node["freq"],
             )
             return [len(tdi_temp)]
-        return tree["values"]["shape"]
+        return node["values"]["shape"]

@@ -6,7 +6,7 @@ from weldx.asdf.util import dataclass_serialization_class
 
 from .shielding_gas_type import ShieldingGasType
 
-__all__ = ["ShieldingGasForProcedure", "ShieldingGasForProcedureType"]
+__all__ = ["ShieldingGasForProcedure", "ShieldingGasForProcedureConverter"]
 
 
 @dataclass
@@ -24,7 +24,7 @@ class ShieldingGasForProcedure:
     trailing_shielding_gas_flowrate: pint.Quantity = None
 
 
-ShieldingGasForProcedureType = dataclass_serialization_class(
+ShieldingGasForProcedureConverter = dataclass_serialization_class(
     class_type=ShieldingGasForProcedure,
     class_name="aws/process/shielding_gas_for_procedure",
     version="1.0.0",
