@@ -2,7 +2,6 @@
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "asdf://weldx.bam.de/weldx/schemas/measurement/signal-1.0.0"
-#tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0"
 
 title: |
   Representation of a measurement signal with optional data attached.
