@@ -5,6 +5,7 @@ from typing import Callable, List, Tuple, Type, Union
 from warnings import warn
 
 import asdf
+from asdf.asdf import SerializationContext
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path
 
@@ -346,16 +347,14 @@ def dataclass_serialization_class(
         name = class_name
         version = v
         types = [class_type]
-        requires = ["weldx"]
-        handle_dynamic_subclasses = True
 
-        @classmethod
-        def to_tree(cls, node, ctx):
-            return to_tree_mod(node.__dict__)
+        def to_yaml_tree(self, obj, tag: str, ctx: SerializationContext):
+            """Convert to python dict."""
+            return to_tree_mod(obj.__dict__)
 
-        @classmethod
-        def from_tree(cls, tree, ctx):
-            return class_type(**from_tree_mod(tree))
+        def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
+            """Reconstruct from yaml node."""
+            return class_type(**from_tree_mod(node))
 
     return _SerializationClass
 

@@ -116,12 +116,12 @@ def test_dataclass_serialization_class(
         to_tree_mod=to_tree_mod,
         from_tree_mod=from_tree_mod,
     )
-    tree = dataclass_asdf.to_tree(dc, None)
+    tree = dataclass_asdf().to_yaml_tree(dc, None, None)
 
     assert tree["b"] == 2
     assert tree["a"] == exp_val_a_tree
 
-    dc_restored = dataclass_asdf.from_tree(tree, None)
+    dc_restored = dataclass_asdf().from_yaml_tree(tree, None, None)
 
     assert dc_restored.b == 2
     assert dc_restored.a == exp_val_a_dc
