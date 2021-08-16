@@ -1,8 +1,12 @@
 from weldx.constants import WELDX_PATH
 
-SCHEMA_PATH = WELDX_PATH / "schemas/weldx.bam.de/weldx"
+SCHEMA_PATH = WELDX_PATH / "schemas"
 MANIFEST_PATH = WELDX_PATH / "manifests"
 
 WELDX_URI_BASE = "asdf://weldx.bam.de/weldx/"
 WELDX_TAG_BASE = "asdf://weldx.bam.de/weldx/tags/"
-WELDX_EXTENSION_URI_BASE = "asdf://weldx.bam.de/weldx/extensions/weldx"
+WELDX_SCHEMA_BASE = "asdf://weldx.bam.de/weldx/schemas/"
+WELDX_EXTENSION_URI_BASE = "asdf://weldx.bam.de/weldx/extensions/"
+
+WELDX_EXTENSION_VERSION = "1.0.0"
+WELDX_EXTENSION_URI = f"{WELDX_EXTENSION_URI_BASE}weldx-{WELDX_EXTENSION_VERSION}"

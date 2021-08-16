@@ -10,7 +10,7 @@ from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path
 
-from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI_BASE
+from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
 from weldx.types import (
     SupportsFileReadOnly,
@@ -379,7 +379,7 @@ def get_weldx_extension(ctx: asdf.asdf.SerializationContext):
     extensions = [
         ext
         for ext in ctx.extension_manager.extensions
-        if str(ext.extension_uri).startswith(WELDX_EXTENSION_URI_BASE + "-")
+        if str(ext.extension_uri) == WELDX_EXTENSION_URI
     ]
     if not len(extensions) == 1:
         raise ValueError("Could not determine correct weldx extension.")
