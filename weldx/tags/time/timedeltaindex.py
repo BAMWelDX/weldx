@@ -52,5 +52,4 @@ class TimedeltaIndexConverter(WeldxConverter):
                 freq=tree["freq"],
             )
             return [len(tdi_temp)]
-        else:
-            return tree["values"]["shape"]
+        return tree["values"]["shape"]

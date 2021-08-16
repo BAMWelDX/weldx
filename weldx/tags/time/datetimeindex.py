@@ -51,5 +51,4 @@ class DatetimeIndexConverter(WeldxConverter):
                 freq=tree["freq"],
             )
             return [len(temp)]
-        else:
-            return tree["values"]["shape"]
+        return tree["values"]["shape"]

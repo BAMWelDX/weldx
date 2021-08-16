@@ -46,9 +46,9 @@ class WXRotationConverter(WeldxConverter):
         elif node.wx_meta["constructor"] == "from_euler":
             seq_str = node.wx_meta["seq"]
             if not len(seq_str) == 3:
-                if all([c in "xyz" for c in seq_str]):
+                if all(c in "xyz" for c in seq_str):
                     seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
-                elif all([c in "XYZ" for c in seq_str]):
+                elif all(c in "XYZ" for c in seq_str):
                     seq_str = seq_str + "".join([c for c in "XYZ" if c not in seq_str])
                 else:  # pragma: no cover
                     raise ValueError("Mix of intrinsic and extrinsic euler angles.")
@@ -90,9 +90,9 @@ class WXRotationConverter(WeldxConverter):
         """
         if "quaternions" in tree:
             return WXRotation.from_quat(tree["quaternions"])
-        elif "matrix" in tree:
+        if "matrix" in tree:
             return WXRotation.from_matrix(tree["matrix"])
-        elif "rotvec" in tree:
+        if "rotvec" in tree:
             return WXRotation.from_rotvec(tree["rotvec"])
-        elif "angles" in tree:
+        if "angles" in tree:
             return WXRotation.from_euler(seq=tree["sequence"], angles=tree["angles"])

@@ -23,7 +23,7 @@ class IsoGrooveConverter(WeldxConverter):
         format_tag(tag_name=_ISO_GROOVE_SCHEMA + g, version="1.*")
         for g in _groove_name_to_type.keys()
     ]
-    types = [cls for cls in IsoBaseGroove.__subclasses__()]
+    types = IsoBaseGroove.__subclasses__()
 
     def to_yaml_tree(self, obj: IsoBaseGroove, tag: str, ctx):
         """Convert to tree."""

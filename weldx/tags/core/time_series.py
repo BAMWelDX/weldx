@@ -44,14 +44,13 @@ class TimeSeriesConverter(WeldxConverter):
                     "unit": str(node.units),
                     "value": node.data.magnitude[0],
                 }
-            else:
-                return {
-                    "time": node.time.as_pandas_index(),
-                    "unit": str(node.units),
-                    "shape": node.shape,
-                    "interpolation": node.interpolation,
-                    "values": node.data.magnitude,
-                }
+            return {
+                "time": node.time.as_pandas_index(),
+                "unit": str(node.units),
+                "shape": node.shape,
+                "interpolation": node.interpolation,
+                "values": node.data.magnitude,
+            }
         return {"expression": node.data, "unit": str(node.units), "shape": node.shape}
 
     @classmethod
@@ -76,7 +75,7 @@ class TimeSeriesConverter(WeldxConverter):
         if "value" in tree:  # constant
             values = Q_(np.asarray(tree["value"]), tree["unit"])
             return TimeSeries(values)
-        elif "values" in tree:
+        if "values" in tree:
             time = tree["time"]
             interpolation = tree["interpolation"]
             values = Q_(tree["values"], tree["unit"])
