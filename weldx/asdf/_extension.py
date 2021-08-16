@@ -1,7 +1,5 @@
 """Legacy asdf extension code to add custom validators."""
 
-import os
-
 from asdf.extension import AsdfExtension
 from asdf.types import CustomType
 from asdf.util import filepath_to_url

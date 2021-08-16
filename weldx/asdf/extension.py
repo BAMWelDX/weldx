@@ -1,4 +1,4 @@
-from pathlib import Path
+from typing import List
 
 from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
@@ -13,10 +13,13 @@ from weldx.asdf.validators import (
 from .constants import MANIFEST_PATH, SCHEMA_PATH
 from .types import WeldxConverter
 
+# current version of the weldx extension
+_version = "1.0.0"
+
 
 # RESOURCES ----------------------------------------------------------------------------
-def get_extension_resource_mapping():
-    # Get path to schemas directory relative to this file
+def get_extension_resource_mapping() -> DirectoryResourceMapping:
+    """Get the weldx manifest resource mapping."""
     mapping = DirectoryResourceMapping(
         MANIFEST_PATH,
         "asdf://weldx.bam.de/weldx/extensions/",
@@ -27,8 +30,8 @@ def get_extension_resource_mapping():
     return mapping
 
 
-def get_schema_resource_mapping():
-    # Get path to schemas directory relative to this file
+def get_schema_resource_mapping() -> DirectoryResourceMapping:
+    """Get the weldx schema resource mapping."""
     mapping = DirectoryResourceMapping(
         SCHEMA_PATH / "weldx.bam.de/weldx",
         "asdf://weldx.bam.de/weldx/schemas/",
@@ -39,12 +42,9 @@ def get_schema_resource_mapping():
     return mapping
 
 
-def get_resource_mappings():
+def get_resource_mappings() -> List[DirectoryResourceMapping]:
+    """Get list of all weldx resource mappings."""
     return [get_extension_resource_mapping(), get_schema_resource_mapping()]
-
-
-# for mapping in get_resource_mappings():
-#     asdf.get_config().add_resource_mapping(mapping)
 
 
 # Extension ----------------------------------------------------------------------------
@@ -66,12 +66,6 @@ class WeldxExtension(ManifestExtension):
     }
 
 
-def get_extensions():
-    return [WeldxExtension.from_uri(f"{WELDX_EXTENSION_URI_BASE}-1.0.0")]
-
-
-# # register resources and extension locally until entry points work
-# for resource_mapping in get_resource_mappings():
-#     asdf.get_config().add_resource_mapping(resource_mapping)
-# for ext in get_extensions():
-#     asdf.get_config().add_extension(ext)
+def get_extensions() -> List[ManifestExtension]:
+    """Get a list of all weldx extensions."""
+    return [WeldxExtension.from_uri(f"{WELDX_EXTENSION_URI_BASE}-{_version}")]

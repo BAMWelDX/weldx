@@ -12,6 +12,8 @@
   interpolation [[#440]](https://github.com/BAMWelDX/weldx/pull/440)
 - `LocalCoordinateSystem.from_axis_vectors`
   and `CoordinateSystemManager.create_cs_from_axis_vectors` [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
+- asdf utility functions `weldx.asdf.util.uri_match`, `weldx.asdf.util.get_converter_for_uri`
+  and `weldx.asdf.util.get_weldx_extension` [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
 
 ### removed
 

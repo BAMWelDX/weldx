@@ -141,8 +141,3 @@ def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="we
 def _legacy_tag_from_new_tag(tag: str):
     name, version = _new_tag_regex.search(tag).groups()
     return f"tag:weldx.bam.de:weldx/{name}-{version}"
-
-
-def get_converter_for_tag(tag: str, base_converter=WeldxConverter):
-    """Get the converter class that implements a tag."""
-    tag_lists = [scls.tags for scls in base_converter.__subclasses__()]
