@@ -934,6 +934,51 @@ class TestLocalCoordinateSystem:
             lcs_interp_like, orientation_exp, coordinates_exp, True, time, time_ref
         )
 
+    # test_interp_time_discrete_outside_value_range ------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("time_dep_coords", [True, False])
+    @pytest.mark.parametrize("time_dep_orient", [True, False])
+    @pytest.mark.parametrize("all_less", [True, False])
+    def test_issue_289_interp_outside_time_range(
+        time_dep_orient: bool, time_dep_coords: bool, all_less: bool
+    ):
+        """Test if ``interp_time`` if all interp. values are outside the value range.
+
+        In this case it should always return a static system.
+
+        Parameters
+        ----------
+        time_dep_orient :
+            If `True`, the orientation is time dependent
+        time_dep_coords :
+            If `True`, the coordinates are time dependent
+        all_less :
+            If `True`, all interpolation values are less than the time values of the
+            LCS. Otherwise, all values are greater.
+
+        """
+        angles = [45, 135] if time_dep_orient else 135
+        orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
+        coordinates = [[0, 0, 0], [1, 1, 1]] if time_dep_coords else [1, 1, 1]
+        if time_dep_coords or time_dep_orient:
+            time = ["5s", "6s"] if all_less else ["0s", "1s"]
+        else:
+            time = None
+
+        lcs = LCS(orientation, coordinates, time)
+        lcs_interp = lcs.interp_time(["2s", "3s", "4s"])
+
+        exp_angle = 45 if time_dep_orient and all_less else 135
+        exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
+        exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
+
+        assert lcs_interp.time is None
+        assert lcs_interp.coordinates.values.shape == (3,)
+        assert lcs_interp.orientation.values.shape == (3, 3)
+        assert np.all(lcs_interp.coordinates.data == exp_coords)
+        assert np.all(lcs_interp.orientation.data == exp_orient)
+
     # test_interp_time_timeseries_as_coords --------------------------------------------
 
     @staticmethod
@@ -4201,12 +4246,22 @@ class TestCoordinateSystemManager:
     @pytest.mark.parametrize("time_dep_orient", [True, False])
     @pytest.mark.parametrize("all_less", [True, False])
     def test_issue_289_interp_outside_time_range(
-        time_dep_orient, time_dep_coords, all_less
+        time_dep_orient: bool, time_dep_coords: bool, all_less: bool
     ):
-        """Test if ``interp_time`` behaves as described in pull request #289.
+        """Test if ``get_cs`` behaves as described in pull request #289.
 
         The requirement is that a static system is returned when all time values of the
         interpolation are outside of the value range of the involved coordinate systems.
+
+        Parameters
+        ----------
+        time_dep_orient :
+            If `True`, the orientation is time dependent
+        time_dep_coords :
+            If `True`, the coordinates are time dependent
+        all_less :
+            If `True`, all interpolation values are less than the time values of the
+            LCS. Otherwise, all values are greater.
 
         """
         angles = [45, 135] if time_dep_orient else 135
