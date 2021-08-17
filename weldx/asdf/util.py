@@ -10,8 +10,6 @@ from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path
 
-from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
-from weldx.asdf.types import WeldxConverter
 from weldx.types import (
     SupportsFileReadOnly,
     SupportsFileReadWrite,
@@ -20,6 +18,9 @@ from weldx.types import (
     types_path_like,
 )
 from weldx.util import deprecated
+
+from .constants import SCHEMA_PATH, WELDX_EXTENSION_URI
+from .types import WeldxConverter
 
 __all__ = [
     "get_schema_path",

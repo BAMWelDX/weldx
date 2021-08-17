@@ -8,8 +8,8 @@ from .constants import (
     SCHEMA_PATH,
     WELDX_EXTENSION_URI,
     WELDX_EXTENSION_URI_BASE,
-    WELDX_SCHEMA_BASE,
-    WELDX_TAG_BASE,
+    WELDX_SCHEMA_URI_BASE,
+    WELDX_TAG_URI_BASE,
 )
 from .types import WeldxConverter
 from .validators import wx_property_tag_validator, wx_shape_validator, wx_unit_validator
@@ -32,7 +32,7 @@ def get_schema_resource_mapping() -> DirectoryResourceMapping:
     """Get the weldx schema resource mapping."""
     mapping = DirectoryResourceMapping(
         SCHEMA_PATH,
-        WELDX_SCHEMA_BASE,
+        WELDX_SCHEMA_URI_BASE,
         recursive=True,
         filename_pattern="*.yaml",
         stem_filename=True,
@@ -54,7 +54,7 @@ class WeldxExtension(ManifestExtension):
         "weldx.asdf.extension.WeldxAsdfExtension",
         "weldx.asdf.extension.WeldxExtension",
     ]
-    yaml_tag_handles = {"!weldx!": WELDX_TAG_BASE}
+    yaml_tag_handles = {"!weldx!": WELDX_TAG_URI_BASE}
     validators = {  # not active yet
         "wx_property_tag": wx_property_tag_validator,
         "wx_unit": wx_unit_validator,

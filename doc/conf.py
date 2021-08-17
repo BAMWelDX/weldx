@@ -53,7 +53,7 @@ except Exception as ex:
     raise
 
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
-from weldx.asdf.constants import SCHEMA_PATH, WELDX_TAG_BASE
+from weldx.asdf.constants import SCHEMA_PATH, WELDX_TAG_URI_BASE
 
 # -- copy tutorial files to doc folder -------------------------------------------------
 tutorials_dir = pathlib.Path("./tutorials")
@@ -208,7 +208,7 @@ asdf_schema_reference_mappings = [
         "http://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/",
     ),
     (
-        WELDX_TAG_BASE,
+        WELDX_TAG_URI_BASE,
         "http://weldx.readthedocs.io/en/latest/generated/weldx.bam.de/weldx/",
     ),
 ]

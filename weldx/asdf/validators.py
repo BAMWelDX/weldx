@@ -5,10 +5,11 @@ from asdf import ValidationError
 from asdf.schema import _type_to_tag
 from asdf.util import uri_match
 
-from weldx.asdf.types import WxSyntaxError
-from weldx.asdf.util import _get_instance_shape
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+
+from .types import WxSyntaxError
+from .util import _get_instance_shape
 
 __all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
 

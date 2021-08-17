@@ -4,16 +4,9 @@ from asdf.extension import AsdfExtension
 from asdf.types import CustomType
 from asdf.util import filepath_to_url
 
-from weldx.asdf.constants import WELDX_TAG_BASE
-from weldx.asdf.validators import (
-    wx_property_tag_validator,
-    wx_shape_validator,
-    wx_unit_validator,
-)
+from .constants import SCHEMA_PATH, WELDX_SCHEMA_URI_BASE, WELDX_TAG_URI_BASE
+from .validators import wx_property_tag_validator, wx_shape_validator, wx_unit_validator
 
-from .constants import SCHEMA_PATH
-
-WELDX_SCHEMA_URI_BASE = "asdf://weldx.bam.de/weldx/schemas/"
 WELDX_URL_MAPPING = [
     (
         WELDX_SCHEMA_URI_BASE,
@@ -47,7 +40,7 @@ class WeldxValidatorExtension(AsdfExtension):
 
     @property
     def tag_mapping(self):
-        return [(WELDX_TAG_BASE, WELDX_SCHEMA_URI_BASE + "{tag_suffix}")]
+        return [(WELDX_TAG_URI_BASE, WELDX_SCHEMA_URI_BASE + "{tag_suffix}")]
 
     @property
     def url_mapping(self):
