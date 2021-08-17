@@ -363,12 +363,18 @@ def dataclass_serialization_class(
         name = class_name
         version = v
         types = [class_type]
+        __module__ = class_type.__module__
+        __qualname__ = class_type.__qualname__ + "Converter"
 
-        def to_yaml_tree(self, obj, tag: str, ctx: SerializationContext):
+        def to_yaml_tree(
+            self, obj: class_type, tag: str, ctx: SerializationContext
+        ) -> dict:
             """Convert to python dict."""
             return to_yaml_tree_mod(obj.__dict__)
 
-        def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
+        def from_yaml_tree(
+            self, node: dict, tag: str, ctx: SerializationContext
+        ) -> class_type:
             """Reconstruct from yaml node."""
             return class_type(**from_yaml_tree_mod(node))
 
