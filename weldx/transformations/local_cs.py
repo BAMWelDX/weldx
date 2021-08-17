@@ -450,8 +450,8 @@ class LocalCoordinateSystem(TimeDependent):
         y: types_coordinates = None,
         z: types_coordinates = None,
         coordinates: types_coordinates = None,
-        time: Union[types_time_like, Time] = None,
-        time_ref: Union[types_timestamp_like, Time] = None,
+        time: types_time_like = None,
+        time_ref: types_timestamp_like = None,
     ) -> LocalCoordinateSystem:
         """Create a LCS from two or more coordinate axes.
 
