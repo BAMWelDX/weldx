@@ -31,6 +31,10 @@
 - move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
 - `LocalCoordinateSystem` and `CoordinateSystemManager` function parameters related to time now support all types that
   are also supported by the new `Time` class [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
+- `LocalCoordinateSystem.interp_time` returns static systems if only a single time value is passed or if there is no
+  overlap between the interpolation time range and the coordinate systems time range. This also affects the results of
+  some `CoordinateSystemManager` methods (``get_cs``
+  , ``interp_time``) [[#476]](https://github.com/BAMWelDX/weldx/pull/476)
 
 ### fixes
 
