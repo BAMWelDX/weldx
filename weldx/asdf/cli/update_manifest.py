@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 from weldx.asdf.types import _legacy_tag_from_new_tag
-from weldx.asdf.util import get_converter_for_uri
+from weldx.asdf.util import get_converter_for_tag
 
 
 def update_manifest(
@@ -33,7 +33,7 @@ def update_manifest(
         if "id" in content:  # should be schema file
             uri: str = content["id"]
             tag = uri.replace("/schemas/", "/tags/")
-            if get_converter_for_uri(tag):  # check if converter is implemented
+            if get_converter_for_tag(tag):  # check if converter is implemented
                 manifest["tags"].append(dict(tag_uri=tag, schema_uri=uri))
                 manifest["tags"].append(
                     dict(tag_uri=_legacy_tag_from_new_tag(tag), schema_uri=uri)

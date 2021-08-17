@@ -400,14 +400,14 @@ def uri_match(patterns: Union[str, List[str]], uri: str) -> bool:
     return any(asdf_uri_match(p, uri) for p in patterns)
 
 
-def get_converter_for_uri(uri: str) -> Union[type, bool]:
+def get_converter_for_tag(tag: str) -> Union[type, None]:
     """Get the converter class that handles a given tag."""
-    converters = [s for s in WeldxConverter.__subclasses__() if uri_match(s.tags, uri)]
+    converters = [s for s in WeldxConverter.__subclasses__() if uri_match(s.tags, tag)]
     if len(converters) > 1:
-        warn(f"Found more than one converter class for uri {uri}", UserWarning)
+        warn(f"Found more than one converter class for {tag=}", UserWarning)
     if converters:
         return converters[0]
-    return False
+    return None
 
 
 def _get_instance_shape(
@@ -420,7 +420,7 @@ def _get_instance_shape(
         return instance_dict["shape"]
     elif isinstance(instance_dict, asdf.types.tagged.Tagged):
         # try calling shape_from_tagged for custom types
-        converter = get_converter_for_uri(instance_dict._tag)
+        converter = get_converter_for_tag(instance_dict._tag)
         if hasattr(converter, "shape_from_tagged"):
             return converter.shape_from_tagged(instance_dict)
     return None
