@@ -550,7 +550,7 @@ class LocalCoordinateSystem(TimeDependent):
     @property
     def has_timeseries(self) -> bool:
         """Return `True` if the coordinate system has a `TimeSeries` component."""
-        return self._coord_ts is not None
+        return isinstance(self.coordinates, TimeSeries) or isinstance(self.orientation, TimeSeries)
 
     @property
     def has_reference_time(self) -> bool:
