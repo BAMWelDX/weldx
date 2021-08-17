@@ -549,8 +549,10 @@ class LocalCoordinateSystem(TimeDependent):
 
     @property
     def has_timeseries(self) -> bool:
-        """Return `True` if the coordinate system has a `TimeSeries` component."""
-        return isinstance(self.coordinates, TimeSeries) or isinstance(self.orientation, TimeSeries)
+        """Return `True` if the system has a `~weldx.core.TimeSeries` component."""
+        return isinstance(self.coordinates, TimeSeries) or isinstance(
+            self.orientation, TimeSeries
+        )
 
     @property
     def has_reference_time(self) -> bool:
