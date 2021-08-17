@@ -659,16 +659,16 @@ class LocalCoordinateSystem(TimeDependent):
 
     def _interp_time_orientation(self, time: Time) -> Union[xr.DataArray, np.ndarray]:
         """Interpolate the orientation in time."""
-        if self.orientation.ndim == 2:
+        if self.orientation.ndim == 2:  # don't interpolate static
             orientation = self.orientation
-        elif time.max() <= self.time.min():
+        elif time.max() <= self.time.min():  # only use edge timestamp
             orientation = self.orientation.values[0]
-        elif time.min() >= self.time.max():
+        elif time.min() >= self.time.max():  # only use edge timestamp
             orientation = self.orientation.values[-1]
-        else:
+        else:  # full interpolation with overlapping times
             orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
 
-        if len(orientation) == 1:
+        if len(orientation) == 1:  # remove "time dimension" for single value cases
             return orientation[0].values
         return orientation
 
@@ -681,16 +681,16 @@ class LocalCoordinateSystem(TimeDependent):
             )
             if self.has_reference_time:
                 coordinates.weldx.time_ref = self.reference_time
-        elif self.coordinates.ndim == 1:
+        elif self.coordinates.ndim == 1:  # don't interpolate static
             coordinates = self.coordinates
-        elif time.max() <= self.time.min():
+        elif time.max() <= self.time.min():  # only use edge timestamp
             coordinates = self.coordinates.values[0]
-        elif time.min() >= self.time.max():
+        elif time.min() >= self.time.max():  # only use edge timestamp
             coordinates = self.coordinates.values[-1]
-        else:
+        else:  # full interpolation with overlapping times
             coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
-        if len(coordinates) == 1:
+        if len(coordinates) == 1:  # remove "time dimension" for single value cases
             return coordinates[0].values
         return coordinates
 
@@ -739,6 +739,7 @@ class LocalCoordinateSystem(TimeDependent):
         orientation = self._interp_time_orientation(time)
         coordinates = self._interp_time_coordinates(time)
 
+        # remove time if orientations and coordinates are single values (static)
         if orientation.ndim == 2 and coordinates.ndim == 1:
             time = None
 
