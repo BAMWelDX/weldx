@@ -979,6 +979,25 @@ class TestLocalCoordinateSystem:
         assert np.all(lcs_interp.coordinates.data == exp_coords)
         assert np.all(lcs_interp.orientation.data == exp_orient)
 
+    # test_interp_time_discrete_single_time --------------------------------------------
+
+    @staticmethod
+    def test_interp_time_discrete_single_time():
+        orientation = WXRotation.from_euler("x", [45, 135], degrees=True).as_matrix()
+        coordinates = [[0, 0, 0], [2, 2, 2]]
+        time = ["1s", "3s"]
+        lcs = LCS(orientation, coordinates, time)
+
+        exp_coords = [1, 1, 1]
+        exp_orient = WXRotation.from_euler("x", 90, degrees=True).as_matrix()
+
+        lcs_interp = lcs.interp_time("2s")
+        assert lcs_interp.time is None
+        assert lcs_interp.coordinates.values.shape == (3,)
+        assert lcs_interp.orientation.values.shape == (3, 3)
+        assert np.all(lcs_interp.coordinates.data == exp_coords)
+        assert np.allclose(lcs_interp.orientation.data, exp_orient)
+
     # test_interp_time_timeseries_as_coords --------------------------------------------
 
     @staticmethod
@@ -4237,7 +4256,7 @@ class TestCoordinateSystemManager:
 
         # check time union
         if systems is None or len(systems) == 3:
-            assert np.all(csm_interp.time_union() == time_class.as_pandas())
+            assert np.all(csm_interp.time_union() == time_exp)
 
     # issue 289 ------------------------------------------------------------------------
 

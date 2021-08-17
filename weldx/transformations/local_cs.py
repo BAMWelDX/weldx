@@ -719,6 +719,10 @@ class LocalCoordinateSystem(TimeDependent):
         else:
             coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
+        if len(orientation) == 1:
+            orientation = orientation[0].values
+        if len(coordinates) == 1:
+            coordinates = coordinates[0].values
         if orientation.ndim == 2 and coordinates.ndim == 1:
             time = None
 
