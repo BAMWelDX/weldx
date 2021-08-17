@@ -657,6 +657,43 @@ class LocalCoordinateSystem(TimeDependent):
         """
         return Rot.from_matrix(self.orientation.values)
 
+    def _interp_time_orientation(self, time: Time) -> Union[xr.DataArray, np.ndarray]:
+        """Interpolate the orientation in time."""
+        if self.orientation.ndim == 2:
+            orientation = self.orientation
+        elif time.max() <= self.time.min():
+            orientation = self.orientation.values[0]
+        elif time.min() >= self.time.max():
+            orientation = self.orientation.values[-1]
+        else:
+            orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
+
+        if len(orientation) == 1:
+            return orientation[0].values
+        return orientation
+
+    def _interp_time_coordinates(self, time: Time) -> Union[xr.DataArray, np.ndarray]:
+        """Interpolate the coordinates in time."""
+        if isinstance(self.coordinates, TimeSeries):
+            time_interp = Time(time, self.reference_time)
+            coordinates = self._coords_from_discrete_time_series(
+                self.coordinates.interp_time(time_interp)
+            )
+            if self.has_reference_time:
+                coordinates.weldx.time_ref = self.reference_time
+        elif self.coordinates.ndim == 1:
+            coordinates = self.coordinates
+        elif time.max() <= self.time.min():
+            coordinates = self.coordinates.values[0]
+        elif time.min() >= self.time.max():
+            coordinates = self.coordinates.values[-1]
+        else:
+            coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
+
+        if len(coordinates) == 1:
+            return coordinates[0].values
+        return coordinates
+
     def interp_time(
         self,
         time: types_time_like,
@@ -664,11 +701,18 @@ class LocalCoordinateSystem(TimeDependent):
     ) -> LocalCoordinateSystem:
         """Interpolates the data in time.
 
+        Note that the returned system won't be time dependent anymore if only a single
+        time value was passed. The resulting system is constant and the passed time
+        value will be stripped from the result.
+        Additionally, if the passed time range does not overlap with the time range of
+        the coordinate system, the resulting system won't be time dependent neither
+        because the values outside of the coordinate systems time range are considered
+        as being constant.
+
         Parameters
         ----------
         time :
-            Series of times.
-            If passing "None" no interpolation will be performed.
+            Target time values. If `None` is passed, no interpolation will be performed.
         time_ref:
             The reference timestamp
 
@@ -692,37 +736,9 @@ class LocalCoordinateSystem(TimeDependent):
                 "allowed. Also check that the reference time has the correct type."
             )
 
-        # calculate orientations
-        if self.orientation.ndim == 2:
-            orientation = self.orientation
-        elif time.max() <= self.time.min():
-            orientation = self.orientation.values[0]
-        elif time.min() >= self.time.max():
-            orientation = self.orientation.values[-1]
-        else:
-            orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
+        orientation = self._interp_time_orientation(time)
+        coordinates = self._interp_time_coordinates(time)
 
-        # calculate coordinates
-        if isinstance(self.coordinates, TimeSeries):
-            time_interp = Time(time, self.reference_time)
-            coordinates = self._coords_from_discrete_time_series(
-                self.coordinates.interp_time(time_interp)
-            )
-            if self.has_reference_time:
-                coordinates.weldx.time_ref = self.reference_time
-        elif self.coordinates.ndim == 1:
-            coordinates = self.coordinates
-        elif time.max() <= self.time.min():
-            coordinates = self.coordinates.values[0]
-        elif time.min() >= self.time.max():
-            coordinates = self.coordinates.values[-1]
-        else:
-            coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
-
-        if len(orientation) == 1:
-            orientation = orientation[0].values
-        if len(coordinates) == 1:
-            coordinates = coordinates[0].values
         if orientation.ndim == 2 and coordinates.ndim == 1:
             time = None
 

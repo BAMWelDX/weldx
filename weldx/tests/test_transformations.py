@@ -983,6 +983,7 @@ class TestLocalCoordinateSystem:
 
     @staticmethod
     def test_interp_time_discrete_single_time():
+        """Test that single value interpolation results in a static system."""
         orientation = WXRotation.from_euler("x", [45, 135], degrees=True).as_matrix()
         coordinates = [[0, 0, 0], [2, 2, 2]]
         time = ["1s", "3s"]
@@ -997,6 +998,28 @@ class TestLocalCoordinateSystem:
         assert lcs_interp.orientation.values.shape == (3, 3)
         assert np.all(lcs_interp.coordinates.data == exp_coords)
         assert np.allclose(lcs_interp.orientation.data, exp_orient)
+
+    # test_interp_time_discrete_outside_value_range_both_sides -------------------------
+
+    @staticmethod
+    def test_interp_time_discrete_outside_value_range_both_sides():
+        """Test the interpolation is all values are outside of the LCS time range.
+
+        In this special case there is an overlap of the time ranges and we need to
+        ensure that the algorithm does not create a static system as it should if there
+        is no overlap.
+
+        """
+        orientation = WXRotation.from_euler("x", [45, 135], degrees=True).as_matrix()
+        coordinates = [[0, 0, 0], [2, 2, 2]]
+        time = ["2s", "3s"]
+        lcs = LCS(orientation, coordinates, time)
+
+        lcs_interp = lcs.interp_time(["1s", "4s"])
+
+        assert np.all(lcs_interp.time == ["1s", "4s"])
+        assert np.all(lcs_interp.coordinates.data == lcs.coordinates.data)
+        assert np.allclose(lcs_interp.orientation.data, lcs.orientation.data)
 
     # test_interp_time_timeseries_as_coords --------------------------------------------
 
