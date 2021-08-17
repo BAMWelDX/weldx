@@ -386,8 +386,8 @@ def get_weldx_extension(ctx: asdf.asdf.SerializationContext):
     return extensions[0]
 
 
-def uri_match(patterns: Union[str, List[str]], uri: str):
-    """Returns true if the ASDF URI matches any of the listed patterns.
+def uri_match(patterns: Union[str, List[str]], uri: str) -> bool:
+    """Returns `True` if the ASDF URI matches any of the listed patterns.
 
     See Also
     --------
