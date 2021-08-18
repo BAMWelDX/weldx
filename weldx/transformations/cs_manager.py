@@ -1089,9 +1089,9 @@ class CoordinateSystemManager:
     ):
         """Get a lcs on a graph edge for the get_cs method."""
         invert = False
-        lcs = self.graph.edges[edge]["lcs"]
+        lcs: LocalCoordinateSystem = self.graph.edges[edge]["lcs"]
 
-        # lcs has an expression as coordinates
+        # lcs was defined inverted
         if lcs is None:
             lcs = self.graph.edges[(edge[1], edge[0])]["lcs"]
             invert = True
