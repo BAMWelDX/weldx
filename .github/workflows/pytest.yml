@@ -1,5 +1,11 @@
 name: pytest
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'weldx/**'
+  pull_request:
+    paths:
+      - 'weldx/**'
 
 jobs:
   pytest:
