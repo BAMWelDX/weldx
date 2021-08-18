@@ -1,12 +1,6 @@
 name: pytest
 on:
   push:
-    branches:
-      - master
-    paths:
-      - 'weldx/**'
-      - 'tutorials/**'
-      - '.github/workflows/pytest.yml'
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
