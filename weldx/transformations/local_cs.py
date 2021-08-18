@@ -71,10 +71,11 @@ class LocalCoordinateSystem(TimeDependent):
             Cartesian coordinate system
 
         """
-        time = self._build_time(coordinates, time, time_ref)
-        orientation = self._build_orientation(orientation, time)
-        coordinates = self._build_coordinates(coordinates, time)
+        time_cls = self._build_time(coordinates, time, time_ref)
+        orientation = self._build_orientation(orientation, time_cls)
+        coordinates = self._build_coordinates(coordinates, time_cls)
 
+        # warn about dropped time data
         if (
             time is not None
             and "time" not in orientation.coords
@@ -105,9 +106,13 @@ class LocalCoordinateSystem(TimeDependent):
 
         self._dataset = xr.merge(dataset_items, join="exact")
 
-        self._time_ref = time.reference_time if isinstance(time, Time) else None
+        self._time_ref = time_cls.reference_time if isinstance(time_cls, Time) else None
         if "time" in self._dataset and self._time_ref is not None:
             self._dataset.weldx.time_ref = self._time_ref
+
+        # warn about dropped reference time
+        if time_ref is not None and time is None and self._time_ref is None:
+            warnings.warn("Reference time dropped. The system is not time dependent.")
 
     def __repr__(self):
         """Give __repr_ output in xarray format."""
