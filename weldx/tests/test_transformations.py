@@ -1894,7 +1894,7 @@ def test_coordinate_system_time_interpolation():
     )
 
     # test xr_interp_orientation_in_time for single time point interpolation
-    for i, t in enumerate(time_0):
+    for i, _ in enumerate(time_0):
         # test for scalar value as coordinate
         orientation_interp = ut.xr_interp_orientation_in_time(
             lcs.orientation.isel({"time": i}), time_0
