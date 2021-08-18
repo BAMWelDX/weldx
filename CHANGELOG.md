@@ -60,6 +60,7 @@
     - asdf utility functions `weldx.asdf.util.uri_match`, `weldx.asdf.util.get_converter_for_tag`
       and `weldx.asdf.util.get_weldx_extension`
     - add ``devtools/scripts/update_manifest.py`` to auto update manifest from extension metadata
+    - custom shape validation must now be implemented via staticmethod ``WeldxConverter.shape_from_tagged``
 
 ### deprecations
 
