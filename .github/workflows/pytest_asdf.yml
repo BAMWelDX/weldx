@@ -1,5 +1,13 @@
 name: pytest asdf
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'weldx/**'
+      - '.github/workflows/pytest_asdf.yaml'
+  pull_request:
+    paths:
+      - 'weldx/**'
+      - '.github/workflows/pytest_asdf.yaml'
 
 jobs:
   pytest:
