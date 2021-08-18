@@ -5,6 +5,7 @@ on:
       - 'weldx/**'
       - '.github/workflows/static_analysis.yml'
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'weldx/**'
       - '.github/workflows/static_analysis.yml'
