@@ -1,8 +1,5 @@
 name: build
 on:
-  # Run every Monday at 6am UTC
-  schedule:
-    - cron: '0 6 * * 1'
   # Trigger the workflow on push events on master and tags
   push:
     branches:
@@ -20,6 +17,9 @@ on:
   release:
     types:
       - created
+  # Run every Monday at 6am UTC
+  schedule:
+    - cron: '0 6 * * 1'
 
 jobs:
   conda:
