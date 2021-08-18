@@ -3,11 +3,11 @@ on:
   push:
     paths:
       - 'weldx/**'
-      - '.github/workflows/pytest.yaml'
+      - '.github/**'
   pull_request:
     paths:
       - 'weldx/**'
-      - '.github/workflows/pytest.yaml'
+      - '.github/**'
 
 jobs:
   pytest:
