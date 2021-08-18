@@ -10,7 +10,7 @@ source:
 build:
   number: 0
   noarch: python
-  script: pip install . -v
+  script: {{ PYTHON }} -m pip install . -vv
   entry_points:
   {% for e in data['entry_points']['console_scripts'] %}
     - {{ e }}
@@ -37,6 +37,8 @@ test:
     - weldx
     - weldx.visualization
   commands:
+    - pip check
+    - welding_schema --help
     - pytest --pyargs weldx.tests -n auto --dist=loadfile
 
 about:

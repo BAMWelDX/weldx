@@ -303,7 +303,7 @@ class TestWeldXFile:
     def test_custom_schema(schema_arg):
         """Check the property complex_schema is being set."""
         buff, _ = single_pass_weld_example(None)
-        schema = get_schema_path("datamodels/single_pass_weld-1.0.0.schema.yaml")
+        schema = get_schema_path("datamodels/single_pass_weld-1.0.0.yaml")
         kwargs = {schema_arg: schema}
         if schema_arg == "asdffile_kwargs":
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
@@ -314,7 +314,7 @@ class TestWeldXFile:
     @staticmethod
     def test_custom_schema_resolve_path():
         """Schema paths should be resolved internally."""
-        schema = "single_pass_weld-1.0.0.schema"
+        schema = "single_pass_weld-1.0.0"
         with pytest.raises(ValidationError) as e:
             WeldxFile(custom_schema=schema)
         assert "required property" in e.value.message
@@ -328,8 +328,8 @@ class TestWeldXFile:
     @staticmethod
     def test_custom_schema_real_file(tmpdir):
         """Passing real paths."""
-        assert not pathlib.Path("single_pass_weld-1.0.0.schema").exists()
-        shutil.copy(get_schema_path("single_pass_weld-1.0.0.schema"), ".")
+        assert not pathlib.Path("single_pass_weld-1.0.0").exists()
+        shutil.copy(get_schema_path("single_pass_weld-1.0.0"), ".")
         with pytest.raises(ValueError):
             WeldxFile(custom_schema="no")
 
