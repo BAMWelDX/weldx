@@ -7,7 +7,8 @@ from weldx.asdf.util import get_converter_for_tag
 
 
 def update_manifest(
-    search_dir: str = "../schemas", out: str = "../manifests/weldx-1.0.0.yaml"
+    search_dir: str = "../../schemas",
+    out: str = "../../manifests/weldx-1.0.0.yaml",
 ):
     """Create manifest file from existing schemas."""
     # read existing manifest
@@ -53,6 +54,4 @@ def update_manifest(
 
 
 if __name__ == "__main__":
-    from weldx.asdf.constants import MANIFEST_PATH, SCHEMA_PATH
-
-    update_manifest(SCHEMA_PATH, MANIFEST_PATH / "weldx-1.0.0.yaml")
+    update_manifest()
