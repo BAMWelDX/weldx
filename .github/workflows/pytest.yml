@@ -1,14 +1,15 @@
 name: pytest
 on:
   push:
-    paths:
-      - 'weldx/**'
-      - '.github/workflows/pytest.yml'
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - 'weldx/**'
+      - 'tutorials/**'
       - '.github/workflows/pytest.yml'
+  # Run every Monday at 6am UTC
+  schedule:
+    - cron: '0 6 * * 1'
 
 jobs:
   pytest:

@@ -1,14 +1,10 @@
 name: pytest asdf
 on:
   push:
-    paths:
-      - 'weldx/**'
-      - '.github/workflows/pytest_asdf.yml'
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - 'weldx/**'
-      - '.github/workflows/pytest_asdf.yml'
+  # Run every Monday at 6am UTC
+  schedule:
+    - cron: '0 6 * * 1'
 
 jobs:
   pytest:
