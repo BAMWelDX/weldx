@@ -55,7 +55,7 @@ jobs:
           pip install -e .[test]
 
       - name: setup matplotlib
-        if: startsWith(runner.os, 'Windows')
+        if: startsWith(runner.os, 'Windows') && ((github.event_name == 'pull_request') || (github.ref == 'refs/heads/master'))
         run: |
             if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
             echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
@@ -64,7 +64,7 @@ jobs:
         shell: cmd
 
       - name: run pytest
-        if: (matrix.os == 'ubuntu-latest') || (github.event_name == 'pull_request') || (github.ref == 'refs/heads/master')
+        if: ((matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')) || (github.event_name == 'pull_request') || (github.ref == 'refs/heads/master')
         run: |
           pytest -n 2 --runslow --dist=loadfile
           echo "Exited with '$?'"
