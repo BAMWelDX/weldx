@@ -3,7 +3,7 @@
 import math
 import random
 from copy import deepcopy
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -851,17 +851,17 @@ class TestLocalCoordinateSystem:
         [
             (  # broadcast left
                 TS("2020-02-10"),
-                TDI([1, 2], "D"),
+                TDI([1, 2, 14], "D"),
                 TS("2020-02-10"),
-                r_mat_z([0, 0]),
-                np.array([[2, 8, 7], [2, 8, 7]]),
+                r_mat_z([0, 0, 0.5]),
+                np.array([[2, 8, 7], [2, 8, 7], [4, 9, 2]]),
             ),
             (  # broadcast right
                 TS("2020-02-10"),
-                TDI([29, 30], "D"),
+                TDI([14, 29, 30], "D"),
                 TS("2020-02-10"),
-                r_mat_z([0.5, 0.5]),
-                np.array([[3, 1, 2], [3, 1, 2]]),
+                r_mat_z([0.5, 0.5, 0.5]),
+                np.array([[4, 9, 2], [3, 1, 2], [3, 1, 2]]),
             ),
             (  # pure interpolation
                 TS("2020-02-10"),
@@ -933,6 +933,93 @@ class TestLocalCoordinateSystem:
         check_coordinate_system(
             lcs_interp_like, orientation_exp, coordinates_exp, True, time, time_ref
         )
+
+    # test_interp_time_discrete_outside_value_range ------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("time_dep_coords", [True, False])
+    @pytest.mark.parametrize("time_dep_orient", [True, False])
+    @pytest.mark.parametrize("all_less", [True, False])
+    def test_issue_289_interp_outside_time_range(
+        time_dep_orient: bool, time_dep_coords: bool, all_less: bool
+    ):
+        """Test if ``interp_time`` if all interp. values are outside the value range.
+
+        In this case it should always return a static system.
+
+        Parameters
+        ----------
+        time_dep_orient :
+            If `True`, the orientation is time dependent
+        time_dep_coords :
+            If `True`, the coordinates are time dependent
+        all_less :
+            If `True`, all interpolation values are less than the time values of the
+            LCS. Otherwise, all values are greater.
+
+        """
+        angles = [45, 135] if time_dep_orient else 135
+        orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
+        coordinates = [[0, 0, 0], [1, 1, 1]] if time_dep_coords else [1, 1, 1]
+        if time_dep_coords or time_dep_orient:
+            time = ["5s", "6s"] if all_less else ["0s", "1s"]
+        else:
+            time = None
+
+        lcs = LCS(orientation, coordinates, time)
+        lcs_interp = lcs.interp_time(["2s", "3s", "4s"])
+
+        exp_angle = 45 if time_dep_orient and all_less else 135
+        exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
+        exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
+
+        assert lcs_interp.time is None
+        assert lcs_interp.coordinates.values.shape == (3,)
+        assert lcs_interp.orientation.values.shape == (3, 3)
+        assert np.all(lcs_interp.coordinates.data == exp_coords)
+        assert np.all(lcs_interp.orientation.data == exp_orient)
+
+    # test_interp_time_discrete_single_time --------------------------------------------
+
+    @staticmethod
+    def test_interp_time_discrete_single_time():
+        """Test that single value interpolation results in a static system."""
+        orientation = WXRotation.from_euler("x", [45, 135], degrees=True).as_matrix()
+        coordinates = [[0, 0, 0], [2, 2, 2]]
+        time = ["1s", "3s"]
+        lcs = LCS(orientation, coordinates, time)
+
+        exp_coords = [1, 1, 1]
+        exp_orient = WXRotation.from_euler("x", 90, degrees=True).as_matrix()
+
+        lcs_interp = lcs.interp_time("2s")
+        assert lcs_interp.time is None
+        assert lcs_interp.coordinates.values.shape == (3,)
+        assert lcs_interp.orientation.values.shape == (3, 3)
+        assert np.all(lcs_interp.coordinates.data == exp_coords)
+        assert np.allclose(lcs_interp.orientation.data, exp_orient)
+
+    # test_interp_time_discrete_outside_value_range_both_sides -------------------------
+
+    @staticmethod
+    def test_interp_time_discrete_outside_value_range_both_sides():
+        """Test the interpolation is all values are outside of the LCS time range.
+
+        In this special case there is an overlap of the time ranges and we need to
+        ensure that the algorithm does not create a static system as it should if there
+        is no overlap.
+
+        """
+        orientation = WXRotation.from_euler("x", [45, 135], degrees=True).as_matrix()
+        coordinates = [[0, 0, 0], [2, 2, 2]]
+        time = ["2s", "3s"]
+        lcs = LCS(orientation, coordinates, time)
+
+        lcs_interp = lcs.interp_time(["1s", "4s"])
+
+        assert np.all(lcs_interp.time == ["1s", "4s"])
+        assert np.all(lcs_interp.coordinates.data == lcs.coordinates.data)
+        assert np.allclose(lcs_interp.orientation.data, lcs.orientation.data)
 
     # test_interp_time_timeseries_as_coords --------------------------------------------
 
@@ -2994,7 +3081,7 @@ class TestCoordinateSystemManager:
                 ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
                 r_mat_x([0]),
                 [[1, 0, 0]],
-                ([20], "2000-03-08"),
+                (None, None),
                 False,
             ),
             # get transformed cs at specific times using a DatetimeIndex - all systems,
@@ -3047,7 +3134,7 @@ class TestCoordinateSystemManager:
                 ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
                 r_mat_x([0]),
                 [[1, 0, 0]],
-                ([-4], "2000-03-08"),
+                (None, None),
                 False,
             ),
             # get transformed cs at specific times using a DatetimeIndex - all systems
@@ -4069,15 +4156,17 @@ class TestCoordinateSystemManager:
             angles = np.clip(val, clip_min, clip_max)
         else:
             angles = val
+        if len(angles) == 1:
+            angles = angles[0]
         return WXRotation.from_euler("z", angles, degrees=True).as_matrix()
 
     @staticmethod
     def _coordinates_from_value(val, clip_min=None, clip_max=None):
         if clip_min is not None and clip_max is not None:
             val = np.clip(val, clip_min, clip_max)
-        if not isinstance(val, Iterable):
-            val = [val]
-        return [[v, 2 * v, -v] for v in val]
+        if len(val) > 1:
+            return [[v, 2 * v, -v] for v in val]
+        return [val[0], 2 * val[0], -val[0]]
 
     @pytest.mark.parametrize(
         "time, time_ref, systems, csm_has_time_ref, num_abs_systems",
@@ -4159,6 +4248,7 @@ class TestCoordinateSystemManager:
         csm_interp = csm.interp_time(time, time_ref, systems)
 
         # evaluate results
+        time_exp = time_class if len(time_class) > 1 else None
         time_ref_exp = time_class.reference_time
         for k, v in lcs_data.items():
             # create expected lcs
@@ -4174,7 +4264,7 @@ class TestCoordinateSystemManager:
                 lcs_exp = tf.LocalCoordinateSystem(
                     self._orientation_from_value(days_interp + diff, v[1][0], v[1][-1]),
                     self._coordinates_from_value(days_interp + diff, v[1][0], v[1][-1]),
-                    time_class,
+                    time_exp,
                     csm.reference_time if csm.has_reference_time else time_ref_exp,
                 )
             else:
@@ -4189,7 +4279,58 @@ class TestCoordinateSystemManager:
 
         # check time union
         if systems is None or len(systems) == 3:
-            assert np.all(csm_interp.time_union() == time_class.as_pandas())
+            assert np.all(csm_interp.time_union() == time_exp)
+
+    # issue 289 ------------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("time_dep_coords", [True, False])
+    @pytest.mark.parametrize("time_dep_orient", [True, False])
+    @pytest.mark.parametrize("all_less", [True, False])
+    def test_issue_289_interp_outside_time_range(
+        time_dep_orient: bool, time_dep_coords: bool, all_less: bool
+    ):
+        """Test if ``get_cs`` behaves as described in pull request #289.
+
+        The requirement is that a static system is returned when all time values of the
+        interpolation are outside of the value range of the involved coordinate systems.
+
+        Parameters
+        ----------
+        time_dep_orient :
+            If `True`, the orientation is time dependent
+        time_dep_coords :
+            If `True`, the coordinates are time dependent
+        all_less :
+            If `True`, all interpolation values are less than the time values of the
+            LCS. Otherwise, all values are greater.
+
+        """
+        angles = [45, 135] if time_dep_orient else 135
+        orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
+        coordinates = [[0, 0, 0], [1, 1, 1]] if time_dep_coords else [1, 1, 1]
+        if time_dep_coords or time_dep_orient:
+            time = ["5s", "6s"] if all_less else ["0s", "1s"]
+        else:
+            time = None
+
+        csm = CSM("R")
+        # add A as time dependent in base
+        csm.create_cs("A", "R", orientation, coordinates, time)
+        # add B as static in A
+        csm.create_cs("B", "A")
+
+        cs_br = csm.get_cs("B", "R", time=["2s", "3s", "4s"])
+
+        exp_angle = 45 if time_dep_orient and all_less else 135
+        exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
+        exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
+
+        assert cs_br.time is None
+        assert cs_br.coordinates.values.shape == (3,)
+        assert cs_br.orientation.values.shape == (3, 3)
+        assert np.all(cs_br.coordinates.data == exp_coords)
+        assert np.all(cs_br.orientation.data == exp_orient)
 
 
 def test_relabel():
