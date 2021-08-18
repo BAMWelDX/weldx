@@ -12,8 +12,6 @@
   interpolation [[#440]](https://github.com/BAMWelDX/weldx/pull/440)
 - `LocalCoordinateSystem.from_axis_vectors`
   and `CoordinateSystemManager.create_cs_from_axis_vectors` [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
-- asdf utility functions `weldx.asdf.util.uri_match`, `weldx.asdf.util.get_converter_for_tag`
-  and `weldx.asdf.util.get_weldx_extension` [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
 
 ### removed
 
@@ -48,14 +46,20 @@
 ### ASDF
 
 - add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
-- refactor all asdf uris to new ``asdf://`` naming convention,
-  see https://asdf.readthedocs.io/en/latest/asdf/extending/uris.html#entities-identified-by-uri
-  [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
-- replaced all referenced weldx tag versions in schemas
-  with ``1.*`` [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
-- refactor ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema``
-  to ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0`` and enable schema test
-  [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
+- rework ASDF extension to new asdf 2.8 API [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
+    - move schema files to ``weldx/schemas``
+    - create extension manifest in ``weldx/manifests``. The manifest also contains tag mappings for legacy tag names for
+      backwards compatibility.
+    - move tag module to ``weldx/tags``
+    - refactor all asdf uris to new ``asdf://`` naming convention,
+      see https://asdf.readthedocs.io/en/latest/asdf/extending/uris.html#entities-identified-by-uri
+    - replaced all referenced weldx tag versions in schemas with ``1.*``
+    - refactor ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema``
+      to ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0`` and enable schema test
+    - add legacy class for validators support in ``weldx.asdf._extension.py``
+    - asdf utility functions `weldx.asdf.util.uri_match`, `weldx.asdf.util.get_converter_for_tag`
+      and `weldx.asdf.util.get_weldx_extension`
+    - add ``devtools/scripts/update_manifest.py`` to auto update manifest from extension metadata
 
 ### deprecations
 
