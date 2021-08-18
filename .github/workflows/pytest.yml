@@ -1,5 +1,14 @@
 name: pytest
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'weldx/**'
+      - '.github/workflows/pytest.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'weldx/**'
+      - '.github/workflows/pytest.yml'
 
 jobs:
   pytest:
@@ -41,12 +50,13 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: pip installs
+        if: ((matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')) || (github.event.pull_request.draft == false) || (github.ref == 'refs/heads/master')
         run: |
           pip install wheel
           pip install -e .[test]
 
       - name: setup matplotlib
-        if: startsWith(runner.os, 'Windows')
+        if: startsWith(runner.os, 'Windows') && ((github.event.pull_request.draft == false) || (github.ref == 'refs/heads/master'))
         run: |
             if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
             echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
@@ -55,6 +65,7 @@ jobs:
         shell: cmd
 
       - name: run pytest
+        if: ((matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')) || (github.event.pull_request.draft == false) || (github.ref == 'refs/heads/master')
         run: |
           pytest -n 2 --runslow --dist=loadfile
           echo "Exited with '$?'"

@@ -1,19 +1,24 @@
 name: pytest asdf
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'weldx/**'
+      - '.github/workflows/pytest_asdf.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'weldx/**'
+      - '.github/workflows/pytest_asdf.yml'
 
 jobs:
   pytest:
     name: pytest asdf
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        py: ['3.8']
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.py }}
+          python-version: '3.8'
       - name: pip installs
         run: |
           pip install -e .[test]

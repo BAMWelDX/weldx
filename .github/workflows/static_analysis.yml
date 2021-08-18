@@ -1,20 +1,26 @@
 name: static analysis
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'weldx/**'
+      - '.github/workflows/static_analysis.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'weldx/**'
+      - '.github/workflows/static_analysis.yml'
 
 jobs:
   pydocstyle:
     name: pydocstyle
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        py: ['3.8']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.py }}
+          python-version: '3.8'
       - name: pip installs
         run: pip install pydocstyle
       - name: run pydocstyle
@@ -23,17 +29,14 @@ jobs:
 
   flake8:
     name: flake8
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        py: ['3.8']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.py }}
+          python-version: '3.8'
       - name: pip installs
         run: pip install flake8==3.8.*
       - name: run flake8
@@ -42,18 +45,15 @@ jobs:
 
   isort:
     name: isort
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        py: ['3.8']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.py }}
+          python-version: '3.8'
       - name: pip installs
         run: pip install isort==5.*
       - name: show isort diff
@@ -73,17 +73,14 @@ jobs:
 
   mypy:
     name: mypy
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        py: ['3.9']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.py }}
+          python-version: '3.9'
       - name: pip installs
         run: pip install mypy
       - name: run mypy
