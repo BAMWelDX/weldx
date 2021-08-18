@@ -661,9 +661,11 @@ class TestLocalCoordinateSystem:
         orientation = None
         if angles is not None:
             orientation = WXRotation.from_euler("x", angles, degrees=True).as_matrix()
-        lcs = LCS(
-            orientation=orientation, coordinates=ts_coord, time=time, time_ref=time_ref
-        )
+        if orientation is None and time is not None:
+            with pytest.warns(UserWarning):
+                lcs = LCS(orientation, ts_coord, time, time_ref)
+        else:
+            lcs = LCS(orientation, ts_coord, time, time_ref)
         assert lcs.has_reference_time == (time_ref is not None)
 
     # test_init_discrete_time_series_as_coord ------------------------------------------
@@ -1038,6 +1040,7 @@ class TestLocalCoordinateSystem:
             ]
         ),
     )
+    @pytest.mark.filterwarnings("ignore:Provided time is dropped")
     def test_interp_time_timeseries_as_coords(
         seconds: List[float],
         lcs_ref_sec: float,

@@ -39,7 +39,7 @@ test:
   commands:
     - pip check
     - welding_schema --help
-    - pytest --pyargs weldx.tests -n auto --dist=loadfile
+    - pytest --pyargs weldx.tests -n auto --dist=loadfile --tb=short --color=yes
 
 about:
   home: https://www.bam.de/Content/EN/Projects/WelDX/weldx.html
