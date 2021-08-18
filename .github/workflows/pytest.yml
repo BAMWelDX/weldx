@@ -61,6 +61,7 @@ jobs:
         shell: cmd
 
       - name: run pytest
+        if: (matrix.os == 'ubuntu-latest') || (${{ github.event_name == 'pull_request') || (github.ref == 'refs/heads/master')
         run: |
           pytest -n 2 --runslow --dist=loadfile
           echo "Exited with '$?'"
