@@ -18,8 +18,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         py: ['3.8', '3.9']
-    defaults:
-      if: ((matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')) || (github.event.pull_request.draft == false) || (github.ref == 'refs/heads/master')
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
