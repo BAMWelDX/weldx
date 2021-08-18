@@ -9,6 +9,10 @@ on:
   # Trigger the workflow on relevant pull request events
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - 'doc/**'
+      - '!.github/workflows/build.yml'
   # Trigger the workflow on all release created events (this could redirect to main conda channel)
   release:
     types:
