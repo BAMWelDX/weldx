@@ -1,15 +1,12 @@
-import os
-from pathlib import Path
+from weldx.constants import WELDX_PATH
 
-from asdf.util import filepath_to_url
+SCHEMA_PATH = WELDX_PATH / "schemas/weldx.bam.de/weldx"
+MANIFEST_PATH = WELDX_PATH / "manifests"
 
-SCHEMA_PATH = str(Path(__file__).resolve().parents[0] / "schemas")
-WELDX_SCHEMA_URI_BASE = "http://weldx.bam.de/schemas/"
-WELDX_TAG_BASE = "tag:weldx.bam.de:weldx"
-WELDX_URL_MAPPING = [
-    (
-        WELDX_SCHEMA_URI_BASE,
-        filepath_to_url(os.path.join(SCHEMA_PATH, "weldx.bam.de"))
-        + "/{url_suffix}.yaml",
-    )
-]
+WELDX_URI_BASE = "asdf://weldx.bam.de/weldx/"
+WELDX_TAG_URI_BASE = "asdf://weldx.bam.de/weldx/tags/"
+WELDX_SCHEMA_URI_BASE = "asdf://weldx.bam.de/weldx/schemas/"
+WELDX_EXTENSION_URI_BASE = "asdf://weldx.bam.de/weldx/extensions/"
+
+WELDX_EXTENSION_VERSION = "1.0.0"
+WELDX_EXTENSION_URI = f"{WELDX_EXTENSION_URI_BASE}weldx-{WELDX_EXTENSION_VERSION}"
