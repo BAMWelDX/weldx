@@ -25,7 +25,7 @@ import weldx.geometry
 import weldx.welding
 import weldx.time
 
-# class imports to weldx namespace
+# class imports to weldx namespace DUMMY
 from weldx.config import Config
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.geometry import (
