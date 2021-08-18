@@ -1132,7 +1132,10 @@ class CoordinateSystemManager:
         reference.
 
         If any coordinate system that is involved in the coordinate transformation has
-        a time dependency, the returned coordinate system will also be time dependent.
+        a time dependency, the returned coordinate system will most likely be also time
+        dependent. This won't be the case if only a single time value is passed or if
+        the passed time values do not overlap with any of the time dependent coordinate
+        systems' time ranges.
 
         The timestamps of the returned system depend on the functions time parameter.
         By default, the time union of all involved coordinate systems is taken.

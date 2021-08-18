@@ -10,6 +10,7 @@ exclude_patterns = [
   "scripts/**",
   "weldx/_version.py",
   "weldx/asdf/**",
+  "weldx/tags/**",
 ]
 
 [[analyzers]]

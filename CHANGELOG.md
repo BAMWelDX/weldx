@@ -31,11 +31,15 @@
 - move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
 - `LocalCoordinateSystem` and `CoordinateSystemManager` function parameters related to time now support all types that
   are also supported by the new `Time` class [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
+- `LocalCoordinateSystem.interp_time` returns static systems if only a single time value is passed or if there is no
+  overlap between the interpolation time range and the coordinate systems time range. This also affects the results of
+  some `CoordinateSystemManager` methods (``get_cs``
+  , ``interp_time``) [[#476]](https://github.com/BAMWelDX/weldx/pull/476)
 
 ### fixes
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
-  representation. Also tweaked efficency by not writing binary
+  representation. Also tweaked efficiency by not writing binary
   blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
 
 ### documentation
@@ -46,6 +50,21 @@
 ### ASDF
 
 - add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
+- rework ASDF extension to new asdf 2.8 API [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
+    - move schema files to ``weldx/schemas``
+    - create extension manifest in ``weldx/manifests``. The manifest also contains tag mappings for legacy tag names for
+      backwards compatibility.
+    - move tag module to ``weldx/tags``
+    - refactor all asdf uris to new ``asdf://`` naming convention,
+      see https://asdf.readthedocs.io/en/latest/asdf/extending/uris.html#entities-identified-by-uri
+    - replaced all referenced weldx tag versions in schemas with ``1.*``
+    - refactor ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema``
+      to ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0`` and enable schema test
+    - add legacy class for validators support in ``weldx.asdf._extension.py``
+    - asdf utility functions `weldx.asdf.util.uri_match`, `weldx.asdf.util.get_converter_for_tag`
+      and `weldx.asdf.util.get_weldx_extension`
+    - add ``devtools/scripts/update_manifest.py`` to auto update manifest from extension metadata
+    - custom shape validation must now be implemented via staticmethod ``WeldxConverter.shape_from_tagged``
 
 ### deprecations
 
