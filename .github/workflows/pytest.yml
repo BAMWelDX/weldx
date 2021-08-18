@@ -3,11 +3,11 @@ on:
   push:
     paths:
       - 'weldx/**'
-      - '.github/**'
+      - '.github/workflows/pytest.yml'
   pull_request:
     paths:
       - 'weldx/**'
-      - '.github/**'
+      - '.github/workflows/pytest.yml'
 
 jobs:
   pytest:
@@ -49,6 +49,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: pip installs
+        if: (matrix.os == 'ubuntu-latest') || (github.event_name == 'pull_request') || (github.ref == 'refs/heads/master')
         run: |
           pip install wheel
           pip install -e .[test]
@@ -63,7 +64,7 @@ jobs:
         shell: cmd
 
       - name: run pytest
-        if: (matrix.os == 'ubuntu-latest') || (github.event_name == 'pull_request')
+        if: (matrix.os == 'ubuntu-latest') || (github.event_name == 'pull_request') || (github.ref == 'refs/heads/master')
         run: |
           pytest -n 2 --runslow --dist=loadfile
           echo "Exited with '$?'"

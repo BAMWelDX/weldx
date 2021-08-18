@@ -3,11 +3,11 @@ on:
   push:
     paths:
       - 'weldx/**'
-      - '.github/workflows/static_analysis.yaml'
+      - '.github/workflows/static_analysis.yml'
   pull_request:
     paths:
       - 'weldx/**'
-      - '.github/workflows/static_analysis.yaml'
+      - '.github/workflows/static_analysis.yml'
 
 jobs:
   pydocstyle:
