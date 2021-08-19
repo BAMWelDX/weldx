@@ -1,57 +1,17 @@
-"""Tests the transformation package."""
+"""Test the utility functions of the transformation module."""
 
 import math
 import random
-from copy import deepcopy
-from typing import Any, Dict, List, Union
 
 import numpy as np
-import pandas as pd
 import pytest
-import xarray as xr
-from pandas import TimedeltaIndex as TDI  # noqa
-from pandas import Timestamp as TS  # noqa
-from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.util as ut
-from weldx import Q_, SpatialData
-from weldx.core import MathematicalExpression, TimeSeries
-from weldx.tests._helpers import get_test_name
-from weldx.time import Time, types_time_like, types_timestamp_like
-from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
-from weldx.transformations import WXRotation
 
-# helpers for tests -----------------------------------------------------------
-
-
-def check_matrix_does_not_reflect(matrix):
-    """Check if a matrix does not reflect.
-
-    Parameters
-    ----------
-    matrix :
-        Matrix that should be checked
-
-    """
-    assert np.linalg.det(matrix) >= 0
-
-
-def check_matrix_orthogonal(matrix):
-    """Check if a matrix is orthogonal.
-
-    Condition: A^-1 = A^T.
-
-    Parameters
-    ----------
-    matrix :
-        Matrix that should be checked
-
-    """
-    transposed = np.transpose(matrix)
-
-    product = np.matmul(transposed, matrix)
-    assert ut.matrix_is_close(product, np.identity(3))
+# --------------------------------------------------------------------------------------
+# helper functions
+# --------------------------------------------------------------------------------------
 
 
 def random_vector():
@@ -85,126 +45,9 @@ def random_non_unit_vector():
     return vec
 
 
-def rotated_positive_orthogonal_basis(
-    angle_x=np.pi / 3, angle_y=np.pi / 4, angle_z=np.pi / 5
-):
-    """Get a rotated orthogonal basis.
-
-    If X,Y,Z are the rotation matrices of the passed angles, the resulting
-    basis is Z * Y * X.
-
-    Parameters
-    ----------
-    angle_x :
-        Rotation angle around the x-axis (Default value = np.pi / 3)
-    angle_y :
-        Rotation angle around the y-axis (Default value = np.pi / 4)
-    angle_z :
-        Rotation angle around the z-axis (Default value = np.pi / 5)
-
-    Returns
-    -------
-    np.ndarray
-        Rotated orthogonal basis
-
-    """
-    # rotate axes to produce a more general test case
-    return WXRotation.from_euler("xyz", [angle_x, angle_y, angle_z]).as_matrix()
-
-
-def check_coordinate_system_orientation(
-    orientation: xr.DataArray,
-    orientation_expected: np.ndarray,
-    positive_orientation_expected: bool,
-):
-    """Check if the orientation of a local coordinate system is as expected.
-
-    Parameters
-    ----------
-    orientation :
-        Orientation
-    orientation_expected :
-        Expected orientation
-    positive_orientation_expected :
-        True, if the orientation is expected to be
-        positive. False otherwise.
-
-    """
-    # test expected positive orientation
-    det = np.linalg.det(orientation.sel(v=[2, 0, 1]))
-    assert np.all((det > 0) == positive_orientation_expected)
-
-    assert tf.is_orthogonal_matrix(orientation.values)
-
-    orientation_expected = tf.normalize(orientation_expected)
-
-    assert np.allclose(orientation, orientation_expected)
-
-
-def check_coordinate_system(
-    lcs: tf.LocalCoordinateSystem,
-    orientation_expected: Union[np.ndarray, List[List[Any]], xr.DataArray],
-    coordinates_expected: Union[np.ndarray, List[Any], xr.DataArray],
-    positive_orientation_expected: bool = True,
-    time=None,
-    time_ref=None,
-):
-    """Check the values of a coordinate system.
-
-    Parameters
-    ----------
-    lcs :
-        Coordinate system that should be checked
-    orientation_expected :
-        Expected orientation
-    coordinates_expected :
-        Expected coordinates
-    positive_orientation_expected :
-        Expected orientation
-    time :
-        A pandas.DatetimeIndex object, if the coordinate system is expected to
-        be time dependent. None otherwise.
-    time_ref:
-        The expected reference time
-
-    """
-    orientation_expected = np.array(orientation_expected)
-    coordinates_expected = np.array(coordinates_expected)
-
-    if time is not None:
-        assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
-        assert np.all(lcs.time == Time(time, time_ref))
-        assert lcs.reference_time == time_ref
-
-    check_coordinate_system_orientation(
-        lcs.orientation, orientation_expected, positive_orientation_expected
-    )
-
-    assert np.allclose(lcs.coordinates.values, coordinates_expected, atol=1e-9)
-
-
-def check_cs_close(lcs_0, lcs_1):
-    """Check if 2 coordinate systems are nearly identical.
-
-    Parameters
-    ----------
-    lcs_0:
-        First coordinate system.
-    lcs_1
-        Second coordinate system.
-
-    """
-    check_coordinate_system(
-        lcs_0,
-        lcs_1.orientation.data,
-        lcs_1.coordinates.data,
-        True,
-        lcs_1.time,
-        lcs_1.reference_time,
-    )
-
-
-# test functions --------------------------------------------------------------
+# --------------------------------------------------------------------------------------
+# actual tests
+# --------------------------------------------------------------------------------------
 
 
 def test_scaling_matrix():
@@ -217,7 +60,7 @@ def test_scaling_matrix():
     scale_mat = tf.scale_matrix(2, 0.5, 4)
     mat_b = np.matmul(scale_mat, mat_a)
 
-    mat_b_exp = mat_a = np.array([[2, 12, 4], [2, 5, 1], [12, 20, 8]], dtype=float)
+    mat_b_exp = np.array([[2, 12, 4], [2, 5, 1], [12, 20, 8]], dtype=float)
     assert ut.matrix_is_close(mat_b, mat_b_exp)
 
 
@@ -262,7 +105,8 @@ def test_orientation_point_plane_containing_origin():
     Additionally some exceptions and special cases are tested.
 
     """
-    [a, b, n] = rotated_positive_orthogonal_basis()
+    angles = [np.pi / 3, np.pi / 4, np.pi / 5]
+    [a, b, n] = tf.WXRotation.from_euler("xyz", angles).as_matrix()
     a *= 2.3
     b /= 1.5
 
@@ -298,7 +142,8 @@ def test_orientation_point_plane():
     Additionally, some exceptions and special cases are tested.
 
     """
-    [b, c, n] = rotated_positive_orthogonal_basis()
+    angles = [np.pi / 3, np.pi / 4, np.pi / 5]
+    [b, c, n] = tf.WXRotation.from_euler("xyz", angles).as_matrix()
     a = ut.to_float_array([3.2, -2.1, 5.4])
     b = b * 6.5 + a
     c = c * 0.3 + a
@@ -332,7 +177,8 @@ def test_is_orthogonal():
     correct results.
 
     """
-    orientation = rotated_positive_orthogonal_basis()
+    angles = [np.pi / 3, np.pi / 4, np.pi / 5]
+    orientation = tf.WXRotation.from_euler("xyz", angles).as_matrix()
     x = orientation[:, 0]
     y = orientation[:, 1]
     z = orientation[:, 2]
