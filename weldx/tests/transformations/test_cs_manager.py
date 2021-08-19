@@ -17,8 +17,8 @@ from weldx import Q_, SpatialData
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
 from weldx.time import Time, types_time_like, types_timestamp_like
-from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import CoordinateSystemManager as CSM  # noqa
+from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
 from ._util import check_coordinate_system, check_cs_close, r_mat_x, r_mat_y, r_mat_z
@@ -73,7 +73,7 @@ def list_of_csm_and_lcs_instances():
     return [csm, lcs]
 
 
-# test_init ------------------------------------------------------------------------
+# test_init ----------------------------------------------------------------------------
 
 
 def test_init():
@@ -141,7 +141,7 @@ def test_add_coordinate_system(name, parent, lcs, child_in_parent, exp_num_cs):
         assert csm.get_cs(parent, name) == lcs
 
 
-# test_add_cs_reference_time -------------------------------------------------------
+# test_add_cs_reference_time -----------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -210,7 +210,7 @@ def test_add_cs_reference_time(
         csm.add_cs("lcs_2", "root", lcs_2)
 
 
-# test_add_coordinate_system_timeseries --------------------------------------------
+# test_add_coordinate_system_timeseries ------------------------------------------------
 
 
 def test_add_coordinate_system_timeseries():
@@ -223,7 +223,7 @@ def test_add_coordinate_system_timeseries():
     csm.add_cs("cs1", "r", lcs)
 
 
-# test_add_coordinate_system_exceptions --------------------------------------------
+# test_add_coordinate_system_exceptions ------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -245,7 +245,7 @@ def test_add_coordinate_system_exceptions(
         csm_fix.add_cs(name, parent_name, lcs)
 
 
-# test_create_cs_from_axis_vectors -------------------------------------------------
+# test_create_cs_from_axis_vectors -----------------------------------------------------
 
 
 @pytest.mark.parametrize("time_dep_orient", [True, False])
@@ -289,7 +289,7 @@ def test_create_cs_from_axis_vectors(
     check_cs_close(csm.get_cs("xz"), ref)
 
 
-# test num_neighbors ---------------------------------------------------------------
+# test num_neighbors -------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -301,7 +301,7 @@ def test_num_neighbors(csm_fix, name, exp_num_neighbors):
     assert csm_fix.number_of_neighbors(name) == exp_num_neighbors
 
 
-# test is_neighbor_of --------------------------------------------------------------
+# test is_neighbor_of ------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -324,7 +324,7 @@ def test_is_neighbor_of(csm_fix, name1, name2, result_idx, exp_result):
     assert csm_fix.is_neighbor_of(name1, name2) is exp_result[result_idx]
 
 
-# test_get_child_system_names ------------------------------------------------------
+# test_get_child_system_names ----------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -354,7 +354,7 @@ def test_get_child_system_names(csm_fix, cs_name, neighbors_only, result_exp):
         assert name in result
 
 
-# test_delete_coordinate_system ----------------------------------------------------
+# test_delete_coordinate_system --------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -392,7 +392,7 @@ def test_delete_coordinate_system(
             assert lcs not in edge
 
 
-# test_delete_coordinate_system_exceptions -----------------------------------------
+# test_delete_coordinate_system_exceptions ---------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -412,7 +412,7 @@ def test_delete_coordinate_system_exceptions(
         csm_fix.delete_cs(name, delete_children)
 
 
-# test_comparison ------------------------------------------------------------------
+# test_comparison ----------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -734,7 +734,7 @@ def test_comparison(
         assert (csm_list_1[i] != csm_list_2[i]) is not exp_results[i]
 
 
-# test_comparison_wrong_type -------------------------------------------------------
+# test_comparison_wrong_type -----------------------------------------------------------
 
 
 def test_comparison_wrong_type():
@@ -744,7 +744,7 @@ def test_comparison_wrong_type():
     assert (csm != 4) is True
 
 
-# test_time_union ------------------------------------------------------------------
+# test_time_union ----------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -873,7 +873,7 @@ def test_time_union(
     assert np.all(csm.time_union(list_of_edges=edges) == exp_time)
 
 
-# test_time_union_time_series_coords -----------------------------------------------
+# test_time_union_time_series_coords ---------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -942,7 +942,7 @@ def test_time_union_time_series_coords(
     assert np.all(exp_time == csm.time_union(list_of_edges))
 
 
-# test_get_local_coordinate_system_no_time_dep -------------------------------------
+# test_get_local_coordinate_system_no_time_dep -----------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -991,7 +991,7 @@ def test_get_local_coordinate_system_no_time_dep(
     )
 
 
-# test_get_local_coordinate_system_time_dep -------------------------------------
+# test_get_local_coordinate_system_time_dep --------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -1413,7 +1413,7 @@ def test_get_local_coordinate_system_time_dep(
             csm.get_cs(*function_arguments)
 
 
-# test_get_local_coordinate_system_timeseries --------------------------------------
+# test_get_local_coordinate_system_timeseries ------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -1465,7 +1465,7 @@ def test_get_local_coordinate_system_timeseries(
     assert np.allclose(result.time.as_quantity().m, exp_time)
 
 
-# test_get_local_coordinate_system_exceptions --------------------------------------
+# test_get_local_coordinate_system_exceptions ------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -1513,7 +1513,7 @@ def test_get_local_coordinate_system_exceptions(
         csm.get_cs(*function_arguments)
 
 
-# test_get_cs_exception_timeseries -------------------------------------------------
+# test_get_cs_exception_timeseries -----------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -1560,7 +1560,7 @@ def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
         csm.get_cs(lcs, in_lcs)
 
 
-# test_merge -----------------------------------------------------------------------
+# test_merge ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("nested", [(True,), (False,)])
@@ -1602,7 +1602,7 @@ def test_merge(list_of_csm_and_lcs_instances, nested):
         assert csm_mg.get_cs(parent, child) == cur_lcs.invert()
 
 
-# test_merge_reference_times -------------------------------------------------------
+# test_merge_reference_times -----------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -1691,7 +1691,7 @@ def test_merge_reference_times(
         csm_parent.merge(csm_sub)
 
 
-# test get_subsystems_merged_serially ----------------------------------------------
+# test get_subsystems_merged_serially --------------------------------------------------
 
 
 def test_get_subsystems_merged_serially(list_of_csm_and_lcs_instances):
@@ -1721,7 +1721,7 @@ def test_get_subsystems_merged_serially(list_of_csm_and_lcs_instances):
     assert subs[4] == csm[5]
 
 
-# test get_subsystems_merged_nested ----------------------------------------------
+# test get_subsystems_merged_nested ----------------------------------------------------
 
 
 def test_get_subsystems_merged_nested(list_of_csm_and_lcs_instances):
@@ -1771,7 +1771,7 @@ def test_get_subsystems_merged_nested(list_of_csm_and_lcs_instances):
     assert sub_sub_subs[0] == csm[5]
 
 
-# test_remove_subsystems -----------------------------------------------------------
+# test_remove_subsystems ---------------------------------------------------------------
 
 
 @pytest.mark.parametrize("nested", [(True,), (False,)])
@@ -1804,7 +1804,7 @@ def test_remove_subsystems(list_of_csm_and_lcs_instances, nested):
     assert csm_mg == csm[0]
 
 
-# test_unmerge_merged_serially -----------------------------------------------------
+# test_unmerge_merged_serially ---------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -1861,7 +1861,7 @@ def test_unmerge_merged_serially(list_of_csm_and_lcs_instances, additional_cs):
         assert csm_res[i] == current_lcs
 
 
-# test_unmerge_merged_nested -------------------------------------------------------
+# test_unmerge_merged_nested -----------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -1944,7 +1944,7 @@ def test_unmerge_merged_nested(list_of_csm_and_lcs_instances, additional_cs):
     assert sub_sub_subs[0] == csm[5]
 
 
-# test_delete_cs_with_serially_merged_subsystems -----------------------------------
+# test_delete_cs_with_serially_merged_subsystems ---------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -2002,7 +2002,7 @@ def test_delete_cs_with_serially_merged_subsystems(
         assert sub_exp in csm_mg.subsystem_names
 
 
-# test_delete_cs_with_nested_subsystems --------------------------------------------
+# test_delete_cs_with_nested_subsystems ------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -2066,7 +2066,7 @@ def test_delete_cs_with_nested_subsystems(
         assert sub_exp in csm_mg.subsystem_names
 
 
-# test_plot ------------------------------------------------------------------------
+# test_plot ----------------------------------------------------------------------------
 
 
 def test_plot():
@@ -2094,7 +2094,7 @@ def test_plot():
     csm_global.plot_graph()
 
 
-# test_assign_and_get_data ---------------------------------------------------------
+# test_assign_and_get_data -------------------------------------------------------------
 
 
 def setup_csm_test_assign_data() -> tf.CoordinateSystemManager:
@@ -2203,7 +2203,7 @@ def test_data_functions(lcs_ref, data_name, data, lcs_out, exp):
     assert ut.matrix_is_close(transformed_data, exp)
 
 
-# test_assign_data_exceptions ------------------------------------------------------
+# test_assign_data_exceptions ----------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -2234,7 +2234,7 @@ def test_assign_data_exceptions(arguments, exception_type, test_name):
         csm.assign_data(*arguments)
 
 
-# test_has_data_exceptions ---------------------------------------------------------
+# test_has_data_exceptions -------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -2262,7 +2262,7 @@ def test_has_data_exceptions(arguments, exception_type, test_name):
         csm.has_data(*arguments)
 
 
-# test_get_data_exceptions ---------------------------------------------------------
+# test_get_data_exceptions -------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -2291,7 +2291,7 @@ def test_get_data_exceptions(arguments, exception_type, test_name):
         csm.get_data(*arguments)
 
 
-# test_interp_time -----------------------------------------------------------------
+# test_interp_time ---------------------------------------------------------------------
 
 
 def _orientation_from_value(val, clip_min=None, clip_max=None):
@@ -2425,7 +2425,7 @@ def test_interp_time(
         assert np.all(csm_interp.time_union() == time_exp)
 
 
-# issue 289 ------------------------------------------------------------------------
+# issue 289 ----------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize("time_dep_coords", [True, False])
