@@ -25,7 +25,7 @@ from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
 from weldx.constants import Q_
-from weldx.time import Time, types_time_like
+from weldx.time import Time, types_time_like, types_timestamp_like
 
 from .constants import WELDX_UNIT_REGISTRY as ureg
 
@@ -1085,12 +1085,13 @@ class WeldxAccessor:
         return None
 
     @time_ref.setter
-    def time_ref(self, value: pd.Timestamp):
+    def time_ref(self, value: types_timestamp_like):
         """Convert INPLACE to new reference time.
 
-        If no reference time exists, the new value will be assigned
-        TODO: should None be allowed and pass through or raise TypeError ?
+        If no reference time exists, the new value will be assigned.
         """
+        if value is None:
+            raise TypeError("'None' is not allowed as value.")
         if "time" in self._obj.coords:
             value = Time(value).as_timestamp()
             if self._obj.weldx.time_ref and is_timedelta64_dtype(self._obj.time):

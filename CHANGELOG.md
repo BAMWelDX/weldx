@@ -35,6 +35,8 @@
   overlap between the interpolation time range and the coordinate systems time range. This also affects the results of
   some `CoordinateSystemManager` methods (``get_cs``
   , ``interp_time``) [[#476]](https://github.com/BAMWelDX/weldx/pull/476)
+- `WeldxAccessor.time_ref` setter now raises a `TypeError` if `None` is passed to it
+  [[#489]](https://github.com/BAMWelDX/weldx/pull/489)
 
 ### fixes
 
