@@ -1,11 +1,6 @@
 import pytest
 
 
-@pytest.fixture
-def mock_use_weldxfile(monkeypatch):
-    pass
-
-
 @pytest.fixture(autouse=True)
 def mock_rw_buffer_weldxfile(request, monkeypatch):
     if not request.config.getoption("--weldx-file-rw-buffer"):
