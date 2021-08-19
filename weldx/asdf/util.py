@@ -108,12 +108,12 @@ def write_buffer(
             wx.show_asdf_header(False, False)
 
     if _use_weldx_file:
+        write_kwargs = dict(all_array_storage="inline")
         from weldx import WeldxFile
 
         with WeldxFile(
             tree=tree, asdffile_kwargs=asdffile_kwargs, write_kwargs=write_kwargs
         ) as wx:
-            # show(wx)
             wx.write_to()
             show(wx)
             buff = wx.file_handle
