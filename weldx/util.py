@@ -1091,7 +1091,7 @@ class WeldxAccessor:
         If no reference time exists, the new value will be assigned.
         """
         if value is None:
-            raise TypeError(f"'None' is not allowed as value.")
+            raise TypeError("'None' is not allowed as value.")
         if "time" in self._obj.coords:
             value = Time(value).as_timestamp()
             if self._obj.weldx.time_ref and is_timedelta64_dtype(self._obj.time):
