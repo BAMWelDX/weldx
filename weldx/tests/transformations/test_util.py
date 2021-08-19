@@ -14,15 +14,8 @@ import weldx.util as ut
 # --------------------------------------------------------------------------------------
 
 
-def random_vector():
-    """Get a random 3d vector.
-
-    Returns
-    -------
-    np.ndarray
-        Random 3d vector.
-
-    """
+def _random_vector():
+    """Get a random 3d vector."""
     return (
         np.array([random.random(), random.random(), random.random()])
         * 10
@@ -30,18 +23,11 @@ def random_vector():
     )
 
 
-def random_non_unit_vector():
-    """Get a random 3d vector that is not of unit length.
-
-    Returns
-    -------
-    np.ndarray
-        Random 3d vector.
-
-    """
-    vec = random_vector()
+def _random_non_unit_vector():
+    """Get a random 3d vector that is not of unit length."""
+    vec = _random_vector()
     while math.isclose(np.linalg.norm(vec), 1) or math.isclose(np.linalg.norm(vec), 0):
-        vec = random_vector()
+        vec = _random_vector()
     return vec
 
 
@@ -51,11 +37,7 @@ def random_non_unit_vector():
 
 
 def test_scaling_matrix():
-    """Test the scaling matrix.
-
-    Should be self explanatory.
-
-    """
+    """Test the scaling matrix."""
     mat_a = np.array([[1, 6, 2], [4, 10, 2], [3, 5, 2]], dtype=float)
     scale_mat = tf.scale_matrix(2, 0.5, 4)
     mat_b = np.matmul(scale_mat, mat_a)
@@ -72,7 +54,7 @@ def test_normalize():
 
     """
     for _ in range(20):
-        vec = random_non_unit_vector()
+        vec = _random_non_unit_vector()
 
         unit = tf.normalize(vec)
 

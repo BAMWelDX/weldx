@@ -1,9 +1,8 @@
 """Test the `CoordinateSystemManager` class."""
 
-import math
-import random
+
 from copy import deepcopy
-from typing import Any, Dict, List, Union
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -11,7 +10,6 @@ import pytest
 import xarray as xr
 from pandas import TimedeltaIndex as TDI  # noqa
 from pandas import Timestamp as TS  # noqa
-from pandas import date_range
 
 import weldx.transformations as tf
 import weldx.util as ut
@@ -20,19 +18,10 @@ from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
 from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
+from weldx.transformations import CoordinateSystemManager as CSM  # noqa
 from weldx.transformations import WXRotation
 
-from ._util import (
-    check_coordinate_system,
-    check_coordinate_system_orientation,
-    check_cs_close,
-    r_mat_x,
-    r_mat_y,
-    r_mat_z,
-)
-
-CSM = tf.CoordinateSystemManager
-LCS = tf.LocalCoordinateSystem
+from ._util import check_coordinate_system, check_cs_close, r_mat_x, r_mat_y, r_mat_z
 
 
 class TestCoordinateSystemManager:
