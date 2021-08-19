@@ -1,14 +1,13 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
-import copy
 import pathlib
+import copy
 from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
-
-import asdf
 import numpy as np
+
 from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
 from asdf import util
@@ -16,10 +15,9 @@ from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
 
-from weldx.asdf import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
+from .util import get_schema_path, get_yaml_header, view_tree
 __all__ = [
     "WeldxFile",
 ]
@@ -165,7 +163,7 @@ class WeldxFile(UserDict):
                 f" Should be one of {_supported}."
             )
 
-        extensions = [WeldxExtension(), WeldxAsdfExtension()]
+        extensions = None
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree or new_file_created:
             asdf_file = AsdfFile(
@@ -388,7 +386,7 @@ class WeldxFile(UserDict):
         >>> wfa.wx_meta.welder
         'Nikolai Nikolajewitsch Benardos'
 
-        We can also change theh data easily
+        We can also change the data easily
         >>> wfa.wx_meta.welder = "Myself"
         >>> wfa.wx_meta.welder
         'Myself'
@@ -479,7 +477,7 @@ class WeldxFile(UserDict):
 
 
 class _HeaderVisualizer:
-    def __init__(self, asdf_handle: asdf.AsdfFile):
+    def __init__(self, asdf_handle: AsdfFile):
         # take a copy of the handle to avoid side effects!
         copy._deepcopy_dispatch[np.ndarray] = lambda x, y: x
         try:

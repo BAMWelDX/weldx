@@ -11,6 +11,9 @@ on:
   release:
     types:
       - created
+  # Run every Monday at 6am UTC
+  schedule:
+    - cron: '0 6 * * 1'
 
 jobs:
   build:

@@ -1,50 +1,67 @@
-# Licensed under a 3-clause BSD style license - see LICENSE
-# -*- coding: utf-8 -*-
+from typing import List
 
-from asdf.extension import AsdfExtension, BuiltinExtension
+from asdf.extension import ManifestExtension
+from asdf.resource import DirectoryResourceMapping
 
-from weldx.asdf.constants import (
+from .constants import (
+    MANIFEST_PATH,
+    SCHEMA_PATH,
+    WELDX_EXTENSION_URI,
+    WELDX_EXTENSION_URI_BASE,
     WELDX_SCHEMA_URI_BASE,
-    WELDX_TAG_BASE,
-    WELDX_URL_MAPPING,
+    WELDX_TAG_URI_BASE,
 )
-
-from .types import _weldx_asdf_types, _weldx_types
-
-__all__ = ["WeldxExtension", "WeldxAsdfExtension"]
+from .types import WeldxConverter
+from .validators import wx_property_tag_validator, wx_shape_validator, wx_unit_validator
 
 
-class WxSyntaxError(Exception):
-    """Exception raising on custom weldx ASDF syntax errors."""
+# RESOURCES ----------------------------------------------------------------------------
+def get_extension_resource_mapping() -> DirectoryResourceMapping:
+    """Get the weldx manifest resource mapping."""
+    mapping = DirectoryResourceMapping(
+        MANIFEST_PATH,
+        WELDX_EXTENSION_URI_BASE,
+        recursive=True,
+        filename_pattern="*.yaml",
+        stem_filename=True,
+    )
+    return mapping
 
 
-class WeldxExtension(AsdfExtension):
-    """Extension class registering types with both tags and schemas defined by weldx."""
-
-    @property
-    def types(self):
-        # There are no types yet!
-        return _weldx_types
-
-    @property
-    def tag_mapping(self):
-        return [(WELDX_TAG_BASE, WELDX_SCHEMA_URI_BASE + "weldx{tag_suffix}")]
-
-    @property
-    def url_mapping(self):
-        return WELDX_URL_MAPPING
-
-    @property
-    def yaml_tag_handles(self):
-        return {"!weldx!": "tag:weldx.bam.de:weldx/"}
+def get_schema_resource_mapping() -> DirectoryResourceMapping:
+    """Get the weldx schema resource mapping."""
+    mapping = DirectoryResourceMapping(
+        SCHEMA_PATH,
+        WELDX_SCHEMA_URI_BASE,
+        recursive=True,
+        filename_pattern="*.yaml",
+        stem_filename=True,
+    )
+    return mapping
 
 
-class WeldxAsdfExtension(BuiltinExtension):
-    """This extension is used to register custom tag types that have schemas defined
-    by ASDF, but have tag implementations defined in the weldx package
+def get_resource_mappings() -> List[DirectoryResourceMapping]:
+    """Get list of all weldx resource mappings."""
+    return [get_extension_resource_mapping(), get_schema_resource_mapping()]
 
-    """
 
-    @property
-    def types(self):
-        return _weldx_asdf_types
+# Extension ----------------------------------------------------------------------------
+class WeldxExtension(ManifestExtension):
+    """weldx extension class"""
+
+    converters = (cls() for cls in WeldxConverter.__subclasses__())
+    legacy_class_names = [
+        "weldx.asdf.extension.WeldxAsdfExtension",
+        "weldx.asdf.extension.WeldxExtension",
+    ]
+    yaml_tag_handles = {"!weldx!": WELDX_TAG_URI_BASE}
+    validators = {  # not active yet
+        "wx_property_tag": wx_property_tag_validator,
+        "wx_unit": wx_unit_validator,
+        "wx_shape": wx_shape_validator,
+    }
+
+
+def get_extensions() -> List[ManifestExtension]:
+    """Get a list of all weldx extensions."""
+    return [WeldxExtension.from_uri(WELDX_EXTENSION_URI)]

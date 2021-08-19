@@ -48,7 +48,7 @@ this more complex example for details:
 
 .. code:: yaml
 
-   tag: "tag:weldx.bam.de:weldx/debug/test_unit_validator-1.0.0"
+   tag: "asdf://weldx.bam.de/weldx/tags/debug/test_unit_validator-1.0.0"
 
    title: |
      simple demonstration schema for wx_unit validator
