@@ -1,4 +1,5 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
+import copy
 import pathlib
 from collections import UserDict
 from collections.abc import MutableMapping
@@ -6,6 +7,8 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
+import asdf
+import numpy as np
 from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
 from asdf import util
@@ -476,17 +479,13 @@ class WeldxFile(UserDict):
 
 
 class _HeaderVisualizer:
-    def __init__(self, asdf_handle):
-        import copy
-
-        import numpy as np
-
+    def __init__(self, asdf_handle: asdf.AsdfFile):
         # take a copy of the handle to avoid side effects!
         copy._deepcopy_dispatch[np.ndarray] = lambda x, y: x
         try:
             # asdffile takes a deepcopy by default, so we fake the deep copy method of
             # ndarray to avoid bloating memory.
-            self._asdf_handle = copy.copy(asdf_handle)
+            self._asdf_handle = asdf_handle.copy()
         finally:
             del copy._deepcopy_dispatch[np.ndarray]
 
