@@ -18,12 +18,12 @@ from weldx.types import (
     types_path_like,
 )
 from weldx.util import deprecated
+from .constants import SCHEMA_PATH, WELDX_EXTENSION_URI
+from .types import WeldxConverter
 
 _USE_WELDX_FILE = False
 _INVOKE_SHOW_HEADER = False
 
-from .constants import SCHEMA_PATH, WELDX_EXTENSION_URI
-from .types import WeldxConverter
 
 __all__ = [
     "get_schema_path",
@@ -122,9 +122,7 @@ def write_buffer(
             buff = wx.file_handle
     else:
         buff = BytesIO()
-        with asdf.AsdfFile(
-            tree, extensions=None, **asdffile_kwargs
-        ) as ff:
+        with asdf.AsdfFile(tree, extensions=None, **asdffile_kwargs) as ff:
             if dummy_inline_arrays:  # lets store an empty list in the asdf file.
                 write_kwargs["all_array_storage"] = "inline"
                 from unittest.mock import patch

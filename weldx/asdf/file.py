@@ -18,6 +18,7 @@ from jsonschema import ValidationError
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 
 from .util import get_schema_path, get_yaml_header, view_tree
+
 __all__ = [
     "WeldxFile",
 ]
