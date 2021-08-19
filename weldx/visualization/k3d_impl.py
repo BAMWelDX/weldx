@@ -1,6 +1,6 @@
 """Contains some functions to help with visualization."""
 
-from typing import Dict, List, Union
+from typing import Dict, List, Tuple, Union
 
 import k3d
 import k3d.platonic as platonic
@@ -9,7 +9,7 @@ import pandas as pd
 from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
-from weldx import LocalCoordinateSystem, SpatialData
+from weldx import LocalCoordinateSystem, SpatialData, TimeSeries
 from weldx import geometry as geo
 
 from .colors import (
@@ -44,6 +44,12 @@ def _get_coordinates_and_orientation(lcs: LocalCoordinateSystem, index: int = 0)
         The orientation
 
     """
+    if isinstance(lcs.coordinates, TimeSeries):
+        raise ValueError(
+            "Can not visualize LCS with expression based coordinates. "
+            "Interpolate values before plotting to solve this issue"
+        )
+
     coordinates = lcs.coordinates.isel(time=index, missing_dims="ignore").values.astype(
         "float32"
     )
@@ -139,7 +145,7 @@ class CoordinateSystemVisualizerK3D:
             )
 
         self._trace = k3d.line(
-            np.array(lcs.coordinates.values, dtype="float32"),
+            np.array(lcs.coordinates.values, dtype="float32"),  # type: ignore
             shader="simple",
             width=0.05,
             color=color,
@@ -231,7 +237,10 @@ class CoordinateSystemVisualizerK3D:
 
         """
         self._lcs = lcs
-        self._trace.vertices = np.array(lcs.coordinates.values, dtype="float32")
+        self._trace.vertices = np.array(
+            lcs.coordinates.values,  # type: ignore[union-attr] # handled by __init__
+            dtype="float32",
+        )
         self.update_time_index(index)
 
     def update_time_index(self, index: int):
@@ -290,7 +299,7 @@ class SpatialDataVisualizer:
             triangles = data.triangles
             data = data.coordinates.data
         # k3d needs single precision data.
-        data = data.astype(np.float32)
+        data = data.astype(np.float32)  # type: ignore[union-attr] # handled above
 
         self._reference_system = reference_system
 
@@ -400,7 +409,7 @@ class CoordinateSystemManagerVisualizerK3D:
         csm,
         coordinate_systems: List[str] = None,
         data_sets: List[str] = None,
-        colors: Dict[str, int] = None,
+        colors: Dict[str, Union[int, Tuple[int, int, int]]] = None,
         reference_system: str = None,
         title: str = None,
         limits: types_limits = None,
@@ -429,7 +438,7 @@ class CoordinateSystemManagerVisualizerK3D:
         colors :
             A mapping between a coordinate system name or a data set name and a color.
             The colors must be provided as 24 bit integer values that are divided into
-            three 8 bit sections for the rgb values. For example `0xFF0000` for pure
+            three 8 bit sections for the rgb values. For example ``0xFF0000`` for pure
             red.
             Each coordinate system or data set that does not have a mapping in this
             dictionary will get a default color assigned to it.
@@ -475,14 +484,17 @@ class CoordinateSystemManagerVisualizerK3D:
             reference_system = self._csm.root_system_name
         self._current_reference_system = reference_system
 
-        grid_auto_fit = True
-        grid = (-1, -1, -1, 1, 1, 1)
         if limits is not None:
             grid_auto_fit = False
+            # INFO: The next three suppressed mypy warnings do make sense and might
+            # reveal a bug, but I couldn't resolve it in a reasonable time.
             if len(limits) == 1:
-                grid = [limits[0][int(i / 3)] for i in range(6)]
+                grid = [limits[0][int(i / 3)] for i in range(6)]  # type: ignore
             else:
-                grid = [limits[i % 3][int(i / 3)] for i in range(6)]
+                grid = [limits[i % 3][int(i / 3)] for i in range(6)]  # type: ignore
+        else:
+            grid_auto_fit = True
+            grid = (-1, -1, -1, 1, 1, 1)  # type: ignore[assignment]
 
         # create plot
         self._color_generator = color_generator_function()

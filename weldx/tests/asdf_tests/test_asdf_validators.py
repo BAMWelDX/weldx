@@ -5,49 +5,13 @@ import pytest
 from asdf import ValidationError
 
 from weldx import Q_, TimeSeries
-from weldx.asdf.extension import WxSyntaxError
-from weldx.asdf.tags.weldx.debug.test_property_tag import PropertyTagTestClass
-from weldx.asdf.tags.weldx.debug.test_shape_validator import ShapeValidatorTestClass
-from weldx.asdf.tags.weldx.debug.test_unit_validator import UnitValidatorTestClass
+from weldx.asdf.types import WxSyntaxError
 from weldx.asdf.util import write_buffer, write_read_buffer
-from weldx.asdf.validators import _compare_tag_version, _custom_shape_validator
+from weldx.asdf.validators import _custom_shape_validator
+from weldx.tags.debug.test_property_tag import PropertyTagTestClass
+from weldx.tags.debug.test_shape_validator import ShapeValidatorTestClass
+from weldx.tags.debug.test_unit_validator import UnitValidatorTestClass
 from weldx.util import compare_nested
-
-
-@pytest.mark.parametrize(
-    "instance_tag,tagname,result",
-    [
-        (None, "tag:debug.com/object-*", True),
-        ("tag:debug.com/object-1.2.3", "tag:debug.com/object-*", True),
-        ("http://debug.com/object-1.2.3", "http://debug.com/object-*", True),
-        ("http://debug.com/object-1.2.3", "http://debug.com/object-1.2.3", True),
-        ("http://debug.com/object-1.2.3", "http://debug.com/object-1.2", True),
-        ("http://debug.com/object-1.2.3", "http://debug.com/object-1", True),
-        ("http://debug.com/object-1.2.3", "http://debug.com/object-2", False),
-        ("http://debug.com/object-2.0.0", "http://debug.com/object-1", False),
-        ("http://debug.com/object-2.0.0", "http://debug.com/object-2.1", False),
-        ("http://debug.com/object-2.0.0", "http://debug.com/other-2.0.0", False),
-        ("http://debug.com/object-2.0.0", "http://other.com/object-2.0.0", False),
-        ("http://debug.com/object-1.2.3", "http://other.com/object-1.2.3", False),
-    ],
-)
-def test_wx_tag_syntax(instance_tag, tagname, result):
-    """Test ASDF tag version syntax resolving."""
-    assert _compare_tag_version(instance_tag, tagname) == result
-
-
-@pytest.mark.parametrize(
-    "instance_tag,tagname,err",
-    [
-        ("tag:debug.com/object-1.2.3", "tag:debug.com/object", WxSyntaxError),
-        ("tag:debug.com/object-1.2.3", "tag:debug.com/object-", WxSyntaxError),
-        ("tag:debug.com/object-1.2.3", "tag:debug.com/object-**", WxSyntaxError),
-    ],
-)
-def test_wx_tag_syntax_exceptions(instance_tag, tagname, err):
-    """Test custom ASDF shape validators."""
-    with pytest.raises(err):
-        _compare_tag_version(instance_tag, tagname)
 
 
 @pytest.mark.parametrize(

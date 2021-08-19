@@ -2,7 +2,7 @@
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import pint
@@ -78,6 +78,8 @@ def _compute_cross_sect_shape_points(
 
 class IsoBaseGroove(metaclass=abc.ABCMeta):
     """Generic base class for all groove types."""
+
+    _mapping: Dict[str, str] = None
 
     _AREA_RASTER_WIDTH = 0.1
     """steers the area approximation of the groove in ~cross_sect_area."""
@@ -1650,7 +1652,7 @@ def get_groove(
     special_depth: pint.Quantity = None,
     code_number=None,
 ) -> IsoBaseGroove:
-    """Create a Groove from weldx.asdf.tags.weldx.core.groove.
+    """Create a Groove from weldx.tags.core.groove.
 
     Parameters
     ----------
@@ -1705,7 +1707,7 @@ def get_groove(
     Returns
     -------
     type
-        an Groove from weldx.asdf.tags.weldx.core.groove
+        an Groove from weldx.tags.core.groove
 
     Examples
     --------
@@ -1950,7 +1952,7 @@ def get_groove(
     if _loc["code_number"] is not None:
         args["code_number"] = _loc["code_number"]
 
-    return groove_cls(**args)
+    return groove_cls(**args)  # type: ignore # ABCs confuse mypy
 
 
 def _create_test_grooves():

@@ -2,35 +2,11 @@
 py:class matplotlib.axes.Axes
 py:class matplotlib.axes._axes.Axes
 
-# networkx
-py:class networkx.DiGraph
-py:class networkx.classes.digraph.DiGraph
-
-# numpy
-py:class numpy.ndarray
-
 # pandas
 py:class pandas._libs.tslibs.timedeltas.Timedelta
 py:class pandas._libs.tslibs.timestamps.Timestamp
 py:class pandas.core.indexes.datetimes.DatetimeIndex
 py:class pandas.core.indexes.timedeltas.TimedeltaIndex
-py:class pandas.DatetimeIndex
-py:class pandas.TimedeltaIndex
-py:class pandas.Timestamp
-py:class pandas.Timedelta
-
-# pint
-py:class pint.Quantity
-py:class pint.quantity.Quantity
-
-# scipy
-py:class scipy.spatial.transform.rotation.Rotation
-py:class scipy.spatial.transform.Rotation
-
-# derived from scipy
-py:method weldx.transformations.WXRotation.from_mrp
-py:method weldx.transformations.WXRotation.random
-py:meth weldx.transformations.WXRotation.random
 
 # sympy
 py:class sympy.core.expr.Expr
@@ -68,14 +44,16 @@ py:obj vectors[i]
 py:obj (3, )
 py:obj (1, 3)
 py:obj rotated_vectors
-py:obj n
 py:obj seed
 py:obj np.random
+py:obj n
 py:obj num
 py:obj left
 py:obj right
 py:meth scipy.stats.special_ortho_group
-
-# other
-py:obj 0xFF0000
 py:obj mrp[i]
+
+# asdf
+py:class iterable of asdf.extension.Compressor instances
+py:class See the class docstring for details on keyword
+py:class iterable of str

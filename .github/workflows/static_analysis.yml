@@ -1,20 +1,22 @@
 name: static analysis
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  # Run every Monday at 6am UTC
+  schedule:
+    - cron: '0 6 * * 1'
 
 jobs:
   pydocstyle:
     name: pydocstyle
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        py: ['3.8']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.py }}
+          python-version: '3.8'
       - name: pip installs
         run: pip install pydocstyle
       - name: run pydocstyle
@@ -23,17 +25,14 @@ jobs:
 
   flake8:
     name: flake8
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        py: ['3.8']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.py }}
+          python-version: '3.8'
       - name: pip installs
         run: pip install flake8==3.8.*
       - name: run flake8
@@ -42,18 +41,15 @@ jobs:
 
   isort:
     name: isort
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
       fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-        py: ['3.8']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.py }}
+          python-version: '3.8'
       - name: pip installs
         run: pip install isort==5.*
       - name: show isort diff
@@ -67,5 +63,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: psf/black@stable
+        with:
+          options: "--check --diff --verbose"
+
+  mypy:
+    name: mypy
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
-      - uses: psf/black@20.8b1
+        with:
+          python-version: '3.9'
+      - name: pip installs
+        run: pip install mypy
+      - name: run mypy
+        run: |
+          mypy --install-types --non-interactive .

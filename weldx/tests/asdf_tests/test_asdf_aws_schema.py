@@ -1,26 +1,25 @@
 """Test ASDF serialization of AWS schema definitions."""
 import pytest
 
-# weld design -----------------------------------------------------------------
-from weldx.asdf.tags.weldx.aws.design.base_metal import BaseMetal
-from weldx.asdf.tags.weldx.aws.design.connection import Connection
-
-# weld design -----------------------------------------------------------------
-from weldx.asdf.tags.weldx.aws.design.joint_penetration import JointPenetration
-from weldx.asdf.tags.weldx.aws.design.sub_assembly import SubAssembly
-from weldx.asdf.tags.weldx.aws.design.weld_details import WeldDetails
-from weldx.asdf.tags.weldx.aws.design.weldment import Weldment
-from weldx.asdf.tags.weldx.aws.design.workpiece import Workpiece
-
-# welding process -----------------------------------------------------------------
-from weldx.asdf.tags.weldx.aws.process.arc_welding_process import ArcWeldingProcess
-from weldx.asdf.tags.weldx.aws.process.gas_component import GasComponent
-from weldx.asdf.tags.weldx.aws.process.shielding_gas_for_procedure import (
-    ShieldingGasForProcedure,
-)
-from weldx.asdf.tags.weldx.aws.process.shielding_gas_type import ShieldingGasType
 from weldx.asdf.util import write_read_buffer
 from weldx.constants import Q_
+
+# weld design -----------------------------------------------------------------
+from weldx.tags.aws.design.base_metal import BaseMetal
+from weldx.tags.aws.design.connection import Connection
+
+# weld design -----------------------------------------------------------------
+from weldx.tags.aws.design.joint_penetration import JointPenetration
+from weldx.tags.aws.design.sub_assembly import SubAssembly
+from weldx.tags.aws.design.weld_details import WeldDetails
+from weldx.tags.aws.design.weldment import Weldment
+from weldx.tags.aws.design.workpiece import Workpiece
+
+# welding process -----------------------------------------------------------------
+from weldx.tags.aws.process.arc_welding_process import ArcWeldingProcess
+from weldx.tags.aws.process.gas_component import GasComponent
+from weldx.tags.aws.process.shielding_gas_for_procedure import ShieldingGasForProcedure
+from weldx.tags.aws.process.shielding_gas_type import ShieldingGasType
 from weldx.util import compare_nested
 
 # iso groove -----------------------------------------------------------------

@@ -1693,10 +1693,9 @@ class Trace:
         if fmt is None:
             fmt = "x-"
         if axes is None:
-            from matplotlib.pyplot import figure
+            from matplotlib.pyplot import subplots
 
-            fig = figure()
-            axes = fig.gca(projection="3d", proj_type="ortho")
+            _, axes = subplots(subplot_kw=dict(projection="3d", proj_type="ortho"))
             axes.plot(data[0], data[1], data[2], fmt)
             axes.set_xlabel("x")
             axes.set_ylabel("y")
@@ -2315,7 +2314,7 @@ class SpatialData:
 
     """
 
-    coordinates: np.ndarray
+    coordinates: DataArray
     triangles: np.ndarray = None
     attributes: Dict[str, np.ndarray] = None
 
