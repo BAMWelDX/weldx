@@ -176,6 +176,49 @@ def get_default_profiles() -> List:
     return [profile_a, profile_b]
 
 
+def is_column_in_matrix(column, matrix) -> bool:
+    """Check if a column (1d array) can be found inside of a matrix.
+
+    Parameters
+    ----------
+    column :
+        Column that should be checked
+    matrix :
+        Matrix
+
+    Returns
+    -------
+    bool
+        True or False
+
+    """
+    return is_row_in_matrix(column, np.transpose(matrix))
+
+
+def is_row_in_matrix(row, matrix) -> bool:
+    """Check if a row (1d array) can be found inside of a matrix.
+
+    source: https://codereview.stackexchange.com/questions/193835
+
+    Parameters
+    ----------
+    row :
+        Row that should be checked
+    matrix :
+        Matrix
+
+    Returns
+    -------
+    bool
+        True or False
+
+    """
+    if not matrix.shape[1] == np.array(row).size:
+        return False
+    # noinspection PyUnresolvedReferences
+    return (matrix == row).all(axis=1).any()
+
+
 # helper for segment tests ----------------------------------------------------
 
 
@@ -1343,7 +1386,7 @@ def test_shape_rasterization():
     data = shape.rasterize(10)
 
     for point in points:
-        assert ut.is_column_in_matrix(point, data)
+        assert is_column_in_matrix(point, data)
 
     assert data.shape[1] == 4
 
@@ -1391,7 +1434,7 @@ def default_translation_vector():
         Translation vector
 
     """
-    return ut.to_float_array([3, 4])
+    return np.array([3, 4], dtype=float)
 
 
 def check_point_translation(point_trans, point_original):
@@ -2611,7 +2654,7 @@ def test_geometry_rasterization_trace():
     a2 = [0, 1]
     a3 = [-1, 1]
     a4 = [-1, 0]
-    profile_points = ut.to_float_array([a0, a1, a2, a2, a3, a4]).transpose()
+    profile_points = np.array([a0, a1, a2, a2, a3, a4], dtype=float).transpose()
 
     # create profile
     shape_a012 = geo.Shape().add_line_segments([a0, a1, a2])
@@ -2986,8 +3029,7 @@ class TestSpatialData:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "filename",
-        ["test.ply", "test.stl", "test.vtk", Path("test.stl")],
+        "filename", ["test.ply", "test.stl", "test.vtk", Path("test.stl")],
     )
     def test_read_write_file(filename: Union[str, Path]):
         """Test the `from_file` and `write_to_file` functions.

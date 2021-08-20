@@ -44,7 +44,7 @@ class LineSegment:
         LineSegment
 
         """
-        points = ut.to_float_array(points)
+        points = np.array(points, dtype=float)
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
         if not (points.shape[0] == 2 and points.shape[1] == 2):
@@ -288,7 +288,7 @@ class ArcSegment:
         ArcSegment
 
         """
-        points = ut.to_float_array(points)
+        points = np.array(points, dtype=float)
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
         if not (points.shape[0] == 2 and points.shape[1] == 3):
@@ -437,8 +437,8 @@ class ArcSegment:
             Arc segment
 
         """
-        point_start = ut.to_float_array(point_start)
-        point_end = ut.to_float_array(point_end)
+        point_start = np.array(point_start, dtype=float)
+        point_end = np.array(point_end, dtype=float)
 
         vec_start_end = point_end - point_start
         if center_left_of_line:
@@ -863,7 +863,7 @@ class Shape:
             self
 
         """
-        points = ut.to_float_array(points)
+        points = np.array(points, dtype=float)
         dimension = len(points.shape)
         if dimension == 1:
             points = points[np.newaxis, :]
@@ -926,8 +926,8 @@ class Shape:
             Distance of the line of reflection to the origin (Default value = 0)
 
         """
-        normal = ut.to_float_array(reflection_normal)
-        if ut.vector_is_close(normal, ut.to_float_array([0, 0])):
+        normal = np.array(reflection_normal, dtype=float)
+        if ut.vector_is_close(normal, np.array([0, 0], dtype=float)):
             raise ValueError("Normal has no length.")
 
         dot_product = np.dot(normal, normal)
@@ -952,8 +952,8 @@ class Shape:
             Line of reflection's end point
 
         """
-        point_start = ut.to_float_array(point_start)
-        point_end = ut.to_float_array(point_end)
+        point_start = np.array(point_start, dtype=float)
+        point_end = np.array(point_end, dtype=float)
 
         if ut.vector_is_close(point_start, point_end):
             raise ValueError("Line start and end point are identical.")
@@ -967,9 +967,9 @@ class Shape:
         )
 
         if tf.point_left_of_line([0, 0], point_start, point_end) > 0:
-            normal = ut.to_float_array([vector[1], -vector[0]])
+            normal = np.array([vector[1], -vector[0]], dtype=float)
         else:
-            normal = ut.to_float_array([-vector[1], vector[0]])
+            normal = np.array([-vector[1], vector[0]], dtype=float)
 
         self.apply_reflection(normal, line_distance_origin)
 
@@ -2198,15 +2198,7 @@ class Geometry:
 
     @UREG.wraps(
         None,
-        (
-            None,
-            _DEFAULT_LEN_UNIT,
-            _DEFAULT_LEN_UNIT,
-            None,
-            None,
-            None,
-            None,
-        ),
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None, None, None,),
         strict=False,
     )
     def plot(
@@ -2252,9 +2244,7 @@ class Geometry:
         )
 
     @UREG.wraps(
-        None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
-        strict=False,
+        None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=False,
     )
     def spatial_data(
         self,

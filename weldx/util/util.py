@@ -114,7 +114,7 @@ def ureg_check_class(*args):
 
     """
 
-    def inner_decorator(original_class,):
+    def _inner_decorator(original_class,):
         # Make copy of original __init__, so we can call it without recursion
         orig_init = original_class.__init__
 
@@ -125,49 +125,7 @@ def ureg_check_class(*args):
         original_class.__init__ = new_init  # Set the class' __init__ to the new one
         return original_class
 
-    return inner_decorator
-
-
-def dataclass_nested_eq(original_class):
-    """Set class :code:`__eq__` using :code:`util.compare_nested` on :code:`__dict__`.
-
-    Useful for implementing :code:`__eq__` on classes
-    created with :code:`@dataclass` decorator.
-
-    Parameters
-    ----------
-    original_class:
-        original class to decorate
-
-    Returns
-    -------
-    type
-        The class with overridden :code:`__eq__` function.
-
-    Examples
-    --------
-    A simple dataclass could look like this::
-
-        @dataclass_nested_eq
-        @dataclass
-        class A:
-            a: np.ndarray
-
-        a = A(np.arange(3))
-        b = A(np.arange(3))
-        assert a==b
-
-    """
-
-    def new_eq(self, other):
-        if not isinstance(other, type(self)):
-            return False
-
-        return compare_nested(self.__dict__, other.__dict__)
-
-    # set new eq function
-    original_class.__eq__ = new_eq  # Set the class' __eq__ to the new one
-    return original_class
+    return _inner_decorator
 
 
 def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
@@ -228,65 +186,6 @@ def inherit_docstrings(cls):
     return cls
 
 
-def is_column_in_matrix(column, matrix) -> bool:
-    """Check if a column (1d array) can be found inside of a matrix.
-
-    Parameters
-    ----------
-    column :
-        Column that should be checked
-    matrix :
-        Matrix
-
-    Returns
-    -------
-    bool
-        True or False
-
-    """
-    return is_row_in_matrix(column, np.transpose(matrix))
-
-
-def is_row_in_matrix(row, matrix) -> bool:
-    """Check if a row (1d array) can be found inside of a matrix.
-
-    source: https://codereview.stackexchange.com/questions/193835
-
-    Parameters
-    ----------
-    row :
-        Row that should be checked
-    matrix :
-        Matrix
-
-    Returns
-    -------
-    bool
-        True or False
-
-    """
-    if not matrix.shape[1] == np.array(row).size:
-        return False
-    # noinspection PyUnresolvedReferences
-    return (matrix == row).all(axis=1).any()
-
-
-def to_float_array(container) -> np.ndarray:
-    """Cast the passed container to a numpy array of floats.
-
-    Parameters
-    ----------
-    container :
-        Container which can be cast to a numpy array
-
-    Returns
-    -------
-    numpy.ndarray
-
-    """
-    return np.array(container, dtype=float)
-
-
 def to_list(var) -> list:
     """Store the passed variable into a list and return it.
 
@@ -328,8 +227,8 @@ def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
         True or False
 
     """
-    mat_a = to_float_array(mat_a)
-    mat_b = to_float_array(mat_b)
+    mat_a = np.array(mat_a, dtype=float)
+    mat_b = np.array(mat_b, dtype=float)
 
     if mat_a.shape != mat_b.shape:
         return False
@@ -354,8 +253,8 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
         True or False
 
     """
-    vec_a = to_float_array(vec_a)
-    vec_b = to_float_array(vec_b)
+    vec_a = np.array(vec_a, dtype=float)
+    vec_b = np.array(vec_b, dtype=float)
 
     if vec_a.size != vec_b.size:
         return False
@@ -514,6 +413,48 @@ class _Eq_compare_nested:
 
 
 compare_nested = _Eq_compare_nested.compare_nested
+
+
+def dataclass_nested_eq(original_class):
+    """Set class :code:`__eq__` using :code:`util.compare_nested` on :code:`__dict__`.
+
+    Useful for implementing :code:`__eq__` on classes
+    created with :code:`@dataclass` decorator.
+
+    Parameters
+    ----------
+    original_class:
+        original class to decorate
+
+    Returns
+    -------
+    type
+        The class with overridden :code:`__eq__` function.
+
+    Examples
+    --------
+    A simple dataclass could look like this::
+
+        @dataclass_nested_eq
+        @dataclass
+        class A:
+            a: np.ndarray
+
+        a = A(np.arange(3))
+        b = A(np.arange(3))
+        assert a==b
+
+    """
+
+    def _new_eq(self, other):
+        if not isinstance(other, type(self)):
+            return False
+
+        return compare_nested(self.__dict__, other.__dict__)
+
+    # set new eq function
+    original_class.__eq__ = _new_eq  # Set the class' __eq__ to the new one
+    return original_class
 
 
 def is_interactive_session() -> bool:

@@ -126,7 +126,7 @@ def test_orientation_point_plane():
     """
     angles = [np.pi / 3, np.pi / 4, np.pi / 5]
     [b, c, n] = tf.WXRotation.from_euler("xyz", angles).as_matrix()
-    a = ut.to_float_array([3.2, -2.1, 5.4])
+    a = np.array([3.2, -2.1, 5.4], dtype=float)
     b = b * 6.5 + a
     c = c * 0.3 + a
 
