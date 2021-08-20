@@ -12,6 +12,8 @@
   interpolation [[#440]](https://github.com/BAMWelDX/weldx/pull/440)
 - `LocalCoordinateSystem.from_axis_vectors`
   and `CoordinateSystemManager.create_cs_from_axis_vectors` [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
+- added PyTest flags to use ``WeldxFile`` internally in ``asdf.util.read_buffer`` and ``asdf.util.write_buffer``
+  [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
 
 ### removed
 
@@ -42,7 +44,7 @@
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
   representation. Also tweaked efficiency by not writing binary
-  blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
+  blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459), [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
 
 ### documentation
 

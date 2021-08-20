@@ -226,7 +226,7 @@ def inherit_docstrings(cls):
                 func.__doc__ = getattr(parent, name).__doc__
                 if not func.__doc__:
                     warnings.warn(
-                        f"could not derive docstring for {cls}.{name}", stacklevel=1
+                        f"could not derive docstring for {cls}.{name}", stacklevel=2
                     )
     return cls
 

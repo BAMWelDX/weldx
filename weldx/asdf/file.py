@@ -1,4 +1,5 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
+import copy
 import pathlib
 from collections import UserDict
 from collections.abc import MutableMapping
@@ -6,14 +7,15 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
+import numpy as np
 from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
 from asdf import util
 from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
-
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
+from weldx.util import inherit_docstrings
 
 from .util import get_schema_path, get_yaml_header, view_tree
 
@@ -46,6 +48,7 @@ DEFAULT_ARRAY_COPYING = True
 """Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
 
 
+@inherit_docstrings
 class WeldxFile(UserDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
 
@@ -162,12 +165,9 @@ class WeldxFile(UserDict):
                 f" Should be one of {_supported}."
             )
 
-        extensions = None
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree or new_file_created:
-            asdf_file = AsdfFile(
-                tree=tree, extensions=extensions, custom_schema=self.custom_schema
-            )
+            asdf_file = AsdfFile(tree=tree, custom_schema=self.custom_schema)
             asdf_file.write_to(filename_or_file_like, **write_kwargs)
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
                 filename_or_file_like.seek(0)
@@ -175,7 +175,6 @@ class WeldxFile(UserDict):
         asdf_file = open_asdf(
             filename_or_file_like,
             mode=self.mode,
-            extensions=extensions,
             **asdffile_kwargs,
         )
         self._asdf_handle: AsdfFile = asdf_file
@@ -475,78 +474,16 @@ class WeldxFile(UserDict):
         display(self.show_asdf_header(use_widgets=False, _interactive=True))
 
 
-class _DummyBlock:
-    def __init__(self):
-        self.array_storage = "internal"
-        self.trust_data_dtype = False
-        self.data = None
-        self.readonly = True
-
-    def __len__(self):
-        return 0
-
-
-class _DummyBlockManager:
-    array_storage = "internal"
-    lazy_load = True
-
-    def __init__(self):
-        self.default_block = _DummyBlock()
-
-    @staticmethod
-    def get_source(*args, **kwargs):
-        return 0
-
-    def get_block(self, source):
-        return self.default_block
-
-    __getitem__ = get_block
-
-    def find_or_create_block_for_array(self, *args, **kwargs):
-        return self.default_block
-
-    @staticmethod
-    def get_output_compression_extensions():
-        return ()
-
-    def add(self, *args, **kwargs):
-        pass
-
-    write_internal_blocks_random_access = (
-        write_block_index
-    ) = (
-        write_internal_blocks_serial
-    ) = write_external_blocks = finalize = set_array_storage = add
-
-
-@contextmanager
-def _fake_block_context(asdf_handle):
-    blocks_org = asdf_handle.blocks
-    asdf_handle._blocks = _DummyBlockManager()
-    yield asdf_handle
-    asdf_handle._blocks = blocks_org
-
-
 class _HeaderVisualizer:
-    def __init__(self, asdf_handle):
-        import copy
-
-        self._asdf_handle = copy.copy(asdf_handle)
-
-    def _write_to_buffer_without_blocks(self) -> BytesIO:
-        """Write an asdf file with no blocks using a fake block manager.
-
-        Returns
-        -------
-        buffer:
-            containing the header contents.
-        """
-        buff = BytesIO()
-        with _fake_block_context(self._asdf_handle) as h:
-            h.write_to(buff, include_block_index=False, all_array_storage="internal")
-        buff.seek(0)
-
-        return buff
+    def __init__(self, asdf_handle: AsdfFile):
+        # take a copy of the handle to avoid side effects!
+        copy._deepcopy_dispatch[np.ndarray] = lambda x, y: x
+        try:
+            # asdffile takes a deepcopy by default, so we fake the deep copy method of
+            # ndarray to avoid bloating memory.
+            self._asdf_handle = asdf_handle.copy()
+        finally:
+            del copy._deepcopy_dispatch[np.ndarray]
 
     def show(
         self, use_widgets=None, _interactive=None
@@ -557,7 +494,12 @@ class _HeaderVisualizer:
             use_widgets = is_jupyterlab_session()
 
         # We write the current tree to a buffer __without__ any binary data attached.
-        buff = self._write_to_buffer_without_blocks()
+        from unittest.mock import patch
+
+        buff = BytesIO()
+        with patch("asdf.tags.core.ndarray.numpy_array_to_list", lambda x: []):
+            self._asdf_handle.write_to(buff, all_array_storage="inline")
+        buff.seek(0)
 
         # automatically determine if this runs in an interactive session.
         # These methods return an IPython displayable object
