@@ -1,21 +1,21 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
-import pathlib
 import copy
+import pathlib
 from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
-import numpy as np
 
+import numpy as np
 from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
 from asdf import util
 from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
-
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
+from weldx.util import inherit_docstrings
 
 from .util import get_schema_path, get_yaml_header, view_tree
 
@@ -48,7 +48,7 @@ DEFAULT_ARRAY_COPYING = True
 """Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
 
 
-@weldx.util.inherit_docstrings
+@inherit_docstrings
 class WeldxFile(UserDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
 
