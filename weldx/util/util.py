@@ -400,6 +400,11 @@ def _array_equal(a, b):
     return np.all(a == b)
 
 
+_eq_compare_nested_input_types = Union[
+    Sequence, Mapping, Collection,
+]
+
+
 class _Eq_compare_nested:
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 

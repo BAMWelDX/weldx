@@ -731,8 +731,3 @@ class WeldxAccessor:
                 self._obj.time.attrs["time_ref"] = value  # set new time_ref value
             else:
                 self._obj.time.attrs["time_ref"] = value
-
-
-_eq_compare_nested_input_types = Union[
-    Sequence, Mapping, Collection,
-]
