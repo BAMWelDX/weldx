@@ -110,11 +110,7 @@ def test_time_warning(coordinates, orientation, time, warning):
     "time_o,  time_c,  time_exp",
     [
         (TDI([0, 1, 2], "s"), TDI([0, 1, 2], "s"), TDI([0, 1, 2], "s")),
-        (
-            TDI([0, 2, 4], "s"),
-            TDI([1, 3, 5], "s"),
-            TDI([0, 1, 2, 3, 4, 5], "s"),
-        ),
+        (TDI([0, 2, 4], "s"), TDI([1, 3, 5], "s"), TDI([0, 1, 2, 3, 4, 5], "s"),),
     ],
 )
 @pytest.mark.parametrize("time_ref", [None, TS("2020-02-02")])
@@ -153,11 +149,7 @@ def test_init_time_dsx(time_o, time_c, time_exp, time_ref):
 @pytest.mark.parametrize("time_ref", [None, TS("2020-01-01")])
 @pytest.mark.parametrize(
     "time, angles",
-    [
-        (None, None),
-        (Q_([1, 2, 3], "s"), None),
-        (Q_([1, 2, 3], "s"), [1, 2, 3]),
-    ],
+    [(None, None), (Q_([1, 2, 3], "s"), None), (Q_([1, 2, 3], "s"), [1, 2, 3]),],
 )
 def test_init_expr_time_series_as_coord(time, time_ref, angles):
     """Test if a fitting, expression based `TimeSeries` can be used as coordinates.
@@ -284,24 +276,9 @@ def test_from_axis_vectors_exceptions(kwargs, exception_type, test_name):
 @pytest.mark.parametrize(
     "time, time_ref, time_ref_new, time_exp",
     [
-        (
-            TDI([1, 2, 3], "D"),
-            TS("2020-02-02"),
-            TS("2020-02-01"),
-            TDI([2, 3, 4], "D"),
-        ),
-        (
-            TDI([1, 2, 3], "D"),
-            TS("2020-02-02"),
-            "2020-02-01",
-            TDI([2, 3, 4], "D"),
-        ),
-        (
-            TDI([1, 2, 3], "D"),
-            None,
-            "2020-02-01",
-            TDI([1, 2, 3], "D"),
-        ),
+        (TDI([1, 2, 3], "D"), TS("2020-02-02"), TS("2020-02-01"), TDI([2, 3, 4], "D"),),
+        (TDI([1, 2, 3], "D"), TS("2020-02-02"), "2020-02-01", TDI([2, 3, 4], "D"),),
+        (TDI([1, 2, 3], "D"), None, "2020-02-01", TDI([1, 2, 3], "D"),),
     ],
 )
 def test_reset_reference_time(time, time_ref, time_ref_new, time_exp):
@@ -718,10 +695,7 @@ def test_interp_time_exceptions(
         ),
         (  # 2 - left system orientation time dependent
             LCS(
-                r_mat_z([0, 0.5, 1]),
-                [1, 4, 2],
-                TDI([1, 3, 5], "D"),
-                TS("2020-02-02"),
+                r_mat_z([0, 0.5, 1]), [1, 4, 2], TDI([1, 3, 5], "D"), TS("2020-02-02"),
             ),
             LCS(r_mat_z(0.5), [3, 7, 1]),
             r_mat_z([0.5, 1, 1.5]),
@@ -745,10 +719,7 @@ def test_interp_time_exceptions(
         (  # 4 - right system orientation time dependent
             LCS(r_mat_z(0.5), [3, 7, 1]),
             LCS(
-                r_mat_z([0, 0.5, 1]),
-                [1, 4, 2],
-                TDI([1, 3, 5], "D"),
-                TS("2020-02-02"),
+                r_mat_z([0, 0.5, 1]), [1, 4, 2], TDI([1, 3, 5], "D"), TS("2020-02-02"),
             ),
             r_mat_z([0.5, 1, 1.5]),
             [[4, 11, 3], [-6, 7, 3], [-2, -3, 3]],
@@ -929,10 +900,7 @@ def test_addition(
         (  # 4 - right system orientation time dependent
             LCS(r_mat_z(0.5), [3, 7, 1]),
             LCS(
-                r_mat_z([0, 0.5, 1]),
-                [1, 4, 2],
-                TDI([1, 3, 5], "D"),
-                TS("2020-02-02"),
+                r_mat_z([0, 0.5, 1]), [1, 4, 2], TDI([1, 3, 5], "D"), TS("2020-02-02"),
             ),
             r_mat_z([0.5, 0, 1.5]),
             [[2, 3, -1], [3, -2, -1], [-2, -3, -1]],
