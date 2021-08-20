@@ -6,11 +6,11 @@ import json
 import re
 import sys
 import warnings
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 from functools import wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Collection, Dict, List, Mapping, Union
+from typing import Callable, ClassVar, Collection, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -19,14 +19,8 @@ import psutil
 import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
-from pandas.api.types import is_datetime64_dtype, is_timedelta64_dtype
-from pint import DimensionalityError
-from scipy.spatial.transform import Rotation as Rot
-from scipy.spatial.transform import Slerp
 
-from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
-from weldx.time import Time, types_time_like, types_timestamp_like
 
 
 class WeldxDeprecationWarning(DeprecationWarning):
@@ -184,113 +178,6 @@ def inherit_docstrings(cls):
                         f"could not derive docstring for {cls}.{name}", stacklevel=1
                     )
     return cls
-
-
-def to_list(var) -> list:
-    """Store the passed variable into a list and return it.
-
-    If the variable is already a list, it is returned without modification.
-    If `None` is passed, the function returns an empty list.
-
-    Parameters
-    ----------
-    var :
-        Arbitrary variable
-
-    Returns
-    -------
-    list
-
-    """
-    if isinstance(var, list):
-        return var
-    if var is None:
-        return []
-    return [var]
-
-
-def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
-    """Check if a matrix is close or equal to another matrix.
-
-    Parameters
-    ----------
-    mat_a :
-        First matrix
-    mat_b :
-        Second matrix
-    abs_tol :
-        Absolute tolerance (Default value = 1e-9)
-
-    Returns
-    -------
-    bool
-        True or False
-
-    """
-    mat_a = np.array(mat_a, dtype=float)
-    mat_b = np.array(mat_b, dtype=float)
-
-    if mat_a.shape != mat_b.shape:
-        return False
-    return np.all(np.isclose(mat_a, mat_b, atol=abs_tol)).__bool__()
-
-
-def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
-    """Check if a vector is close or equal to another vector.
-
-    Parameters
-    ----------
-    vec_a :
-        First vector
-    vec_b :
-        Second vector
-    abs_tol :
-        Absolute tolerance (Default value = 1e-9)
-
-    Returns
-    -------
-    bool
-        True or False
-
-    """
-    vec_a = np.array(vec_a, dtype=float)
-    vec_b = np.array(vec_b, dtype=float)
-
-    if vec_a.size != vec_b.size:
-        return False
-    return np.all(np.isclose(vec_a, vec_b, atol=abs_tol)).__bool__()
-
-
-# geometry --------------------------------------------------------
-def triangulate_geometry(geo_data):
-    """Stack geometry data and add simple triangulation.
-
-    Parameters
-    ----------
-    geo_data
-        list of rasterized profile data along trace from geometry
-
-    Returns
-    -------
-    numpy.ndarray, numpy.ndarray
-        3D point cloud data and triangulation indexes
-
-    """
-    nx = geo_data.shape[2]  # Points per profile
-    ny = geo_data.shape[0]  # number of profiles
-
-    data = np.swapaxes(geo_data, 1, 2).reshape((-1, 3))
-    triangle_indices = np.empty((ny - 1, nx - 1, 2, 3), dtype=int)
-    r = np.arange(nx * ny).reshape(ny, nx)
-    triangle_indices[:, :, 0, 0] = r[:-1, :-1]
-    triangle_indices[:, :, 1, 0] = r[:-1, 1:]
-    triangle_indices[:, :, 0, 1] = r[:-1, 1:]
-
-    triangle_indices[:, :, 1, 1] = r[1:, 1:]
-    triangle_indices[:, :, :, 2] = r[1:, :-1, None]
-    triangle_indices.shape = (-1, 3)
-
-    return data, triangle_indices
 
 
 def _array_equal(a, b):

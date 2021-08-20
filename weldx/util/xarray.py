@@ -2,24 +2,13 @@
 
 from __future__ import annotations
 
-import functools
-import json
-import re
-import sys
-import warnings
-from collections.abc import Iterable, Sequence
-from functools import wraps
-from inspect import getmembers, isfunction
-from pathlib import Path
-from typing import Any, Callable, ClassVar, Collection, Dict, List, Mapping, Union
+from collections.abc import Iterable
+from typing import Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
 import pint
-import psutil
 import xarray as xr
-from asdf.tags.core import NDArrayType
-from boltons import iterutils
 from pandas.api.types import is_datetime64_dtype, is_timedelta64_dtype
 from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot

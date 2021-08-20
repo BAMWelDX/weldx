@@ -21,6 +21,7 @@ from weldx.transformations import CoordinateSystemManager as CSM  # noqa
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
+from .._helpers import matrix_is_close
 from ._util import check_coordinate_system, check_cs_close, r_mat_x, r_mat_y, r_mat_z
 
 
@@ -116,10 +117,7 @@ time = pd.DatetimeIndex(["2000-01-01", "2000-01-04"])
         (
             "lcs5",
             "lcs1",
-            LCS(
-                None,
-                TimeSeries(MathematicalExpression("a*t", dict(a=Q_(1, "1/s")))),
-            ),
+            LCS(None, TimeSeries(MathematicalExpression("a*t", dict(a=Q_(1, "1/s")))),),
             True,
             6,
         ),
@@ -787,12 +785,7 @@ def test_comparison_wrong_type():
     ],
 )
 def test_time_union(
-    csm_ref_time_day,
-    lcs_times,
-    lcs_ref_time_days,
-    edges,
-    exp_time,
-    exp_ref_time_day,
+    csm_ref_time_day, lcs_times, lcs_ref_time_days, edges, exp_time, exp_ref_time_day,
 ):
     """Test the time_union function of the CSM.
 
@@ -846,12 +839,7 @@ def test_time_union(
         else:
             coordinates = [1, 2, 3]
         lcs += [
-            tf.LocalCoordinateSystem(
-                None,
-                coordinates,
-                lcs_times[i],
-                lcs_time_ref[i],
-            )
+            tf.LocalCoordinateSystem(None, coordinates, lcs_times[i], lcs_time_ref[i],)
         ]
 
     # create CSM and add coordinate systems
@@ -984,10 +972,7 @@ def test_get_local_coordinate_system_no_time_dep(
     csm.create_cs("lcs_3", "lcs_2", r_mat_x(0.5), [1, -1, 3])
 
     check_coordinate_system(
-        csm.get_cs(system_name, reference_name),
-        exp_orientation,
-        exp_coordinates,
-        True,
+        csm.get_cs(system_name, reference_name), exp_orientation, exp_coordinates, True,
     )
 
 
@@ -1237,11 +1222,7 @@ def test_get_local_coordinate_system_no_time_dep(
         # get transformed cs at specific times using a list of date strings - all
         # systems and the CSM have a reference time
         (
-            (
-                "cs_3",
-                "root",
-                ["2000-03-04", "2000-03-16", "2000-03-28"],
-            ),
+            ("cs_3", "root", ["2000-03-04", "2000-03-16", "2000-03-28"],),
             ["2000-03-08", "2000-03-04", "2000-03-10", "2000-03-16"],
             r_mat_x([0, 1, 0]),
             [[i, 0, 0] for i in [1, 1.5, 1]],
@@ -1636,11 +1617,7 @@ def test_merge(list_of_csm_and_lcs_instances, nested):
     ],
 )
 def test_merge_reference_times(
-    time_ref_day_parent,
-    time_ref_day_sub,
-    is_static_parent,
-    is_static_sub,
-    should_fail,
+    time_ref_day_parent, time_ref_day_sub, is_static_parent, is_static_sub, should_fail,
 ):
     """Test if ``merge`` raises an error for invalid reference time combinations.
 
@@ -2200,7 +2177,7 @@ def test_data_functions(lcs_ref, data_name, data, lcs_out, exp):
     else:
         transformed_data = transformed_data.data
 
-    assert ut.matrix_is_close(transformed_data, exp)
+    assert matrix_is_close(transformed_data, exp)
 
 
 # test_assign_data_exceptions ----------------------------------------------------------
@@ -2239,9 +2216,7 @@ def test_assign_data_exceptions(arguments, exception_type, test_name):
 
 @pytest.mark.parametrize(
     "arguments, exception_type, test_name",
-    [
-        (("wrong", "not there"), KeyError, "# system does not exist"),
-    ],
+    [(("wrong", "not there"), KeyError, "# system does not exist"),],
 )
 def test_has_data_exceptions(arguments, exception_type, test_name):
     """Test exceptions of the `has_data` method.
@@ -2545,31 +2520,20 @@ def test_coordinate_system_manager_create_coordinate_system():
 
     csm.create_cs("lcs_init_tdp", "root", orientations, coords, time)
     check_coordinate_system(
-        csm.get_cs("lcs_init_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
+        csm.get_cs("lcs_init_tdp"), orientations, coords, True, time=time,
     )
 
     # from euler ------------------------------------------
     csm.create_cs_from_euler("lcs_euler_default", "root", "yx", angles[0])
     check_coordinate_system(
-        csm.get_cs("lcs_euler_default"),
-        orientations[0],
-        lcs_default.coordinates,
-        True,
+        csm.get_cs("lcs_euler_default"), orientations[0], lcs_default.coordinates, True,
     )
 
     csm.create_cs_from_euler(
         "lcs_euler_tdp", "root", "yx", angles_deg, True, coords, time
     )
     check_coordinate_system(
-        csm.get_cs("lcs_euler_tdp"),
-        orientations,
-        coords,
-        True,
-        time=time,
+        csm.get_cs("lcs_euler_tdp"), orientations, coords, True, time=time,
     )
 
 
@@ -2591,12 +2555,12 @@ def test_coordinate_system_manager_transform_data():
 
     # input list
     data_list_transformed = csm.transform_data(data_list, "lcs_3", "lcs_1")
-    assert ut.matrix_is_close(data_list_transformed, data_exp)
+    assert matrix_is_close(data_list_transformed, data_exp)
 
     # input numpy array
     data_np = np.array(data_list)
     data_numpy_transformed = csm.transform_data(data_np, "lcs_3", "lcs_1")
-    assert ut.matrix_is_close(data_numpy_transformed, data_exp)
+    assert matrix_is_close(data_numpy_transformed, data_exp)
 
     # input single numpy vector
     # data_numpy_transformed = csm.transform_data(data_np[0, :], "lcs_3", "lcs_1")
@@ -2605,7 +2569,7 @@ def test_coordinate_system_manager_transform_data():
     # input xarray
     data_xr = xr.DataArray(data=data_np, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
     data_xr_transformed = csm.transform_data(data_xr, "lcs_3", "lcs_1")
-    assert ut.matrix_is_close(data_xr_transformed.data, data_exp)
+    assert matrix_is_close(data_xr_transformed.data, data_exp)
 
     # TODO: Test time dependency
 
