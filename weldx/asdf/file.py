@@ -167,9 +167,7 @@ class WeldxFile(UserDict):
 
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree or new_file_created:
-            asdf_file = AsdfFile(
-                tree=tree, custom_schema=self.custom_schema
-            )
+            asdf_file = AsdfFile(tree=tree, custom_schema=self.custom_schema)
             asdf_file.write_to(filename_or_file_like, **write_kwargs)
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
                 filename_or_file_like.seek(0)
