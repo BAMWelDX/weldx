@@ -7,7 +7,6 @@ import numpy as np
 import pytest
 
 import weldx.transformations as tf
-import weldx.util as ut
 
 from .._helpers import matrix_is_close, vector_is_close
 

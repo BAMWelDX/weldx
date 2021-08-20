@@ -334,7 +334,11 @@ def test_xr_check_coords_exception(dax, ref_dict, exception_type):
 def test_xr_time_ref():
     """Test weldx accessor functions for time handling."""
     dt = pd.TimedeltaIndex([0, 1, 2, 3], "s")
-    da1 = xr.DataArray(data=np.ones(4), dims=["time"], coords={"time": dt},)
+    da1 = xr.DataArray(
+        data=np.ones(4),
+        dims=["time"],
+        coords={"time": dt},
+    )
 
     da1.time.attrs = {"A": "B"}
 
@@ -352,7 +356,11 @@ def test_xr_time_ref():
     da = da.weldx.reset_reference_time(pd.Timestamp("2021-01-01 00:00:01"))
     assert np.all(da.time.data == pd.TimedeltaIndex([-1, 0, 1, 2], "s"))
 
-    da2 = xr.DataArray(data=np.ones(4), dims=["time"], coords={"time": t0 + dt},)
+    da2 = xr.DataArray(
+        data=np.ones(4),
+        dims=["time"],
+        coords={"time": t0 + dt},
+    )
     da2 = da2.weldx.time_ref_restore()
     assert np.all(da2.time.data == pd.TimedeltaIndex([0, 1, 2, 3], "s"))
     assert da2.time.attrs["time_ref"] == t0
@@ -368,17 +376,18 @@ class TestCompareNested:
     @pytest.fixture()
     def _default_dicts():
         """Return two equivalent deeply nested structures to be modified by tests."""
-        a = {
-            "foo": np.arange(3),
-            "x": {0: [1, 2, 3],},
-            "bar": True,
-        }
+        a = {"foo": np.arange(3), "x": {0: [1, 2, 3]}, "bar": True}
         b = copy.deepcopy(a)
         return a, b
 
     @staticmethod
     @pytest.mark.parametrize(
-        argnames=["a", "b"], argvalues=[("asdf", "foo"), (b"asdf", b"foo"), (1, 2),],
+        argnames=["a", "b"],
+        argvalues=[
+            ("asdf", "foo"),
+            (b"asdf", b"foo"),
+            (1, 2),
+        ],
     )
     def test_compare_nested_raise(a, b):  # noqa: D102
         """non-nested types should raise TypeError."""

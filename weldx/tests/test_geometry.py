@@ -14,7 +14,6 @@ from xarray import DataArray
 import weldx.geometry as geo
 import weldx.tests._helpers as helpers
 import weldx.transformations as tf
-import weldx.util as ut
 from weldx import Q_
 from weldx.geometry import SpatialData
 from weldx.transformations import WXRotation
@@ -3029,7 +3028,8 @@ class TestSpatialData:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "filename", ["test.ply", "test.stl", "test.vtk", Path("test.stl")],
+        "filename",
+        ["test.ply", "test.stl", "test.vtk", Path("test.stl")],
     )
     def test_read_write_file(filename: Union[str, Path]):
         """Test the `from_file` and `write_to_file` functions.
