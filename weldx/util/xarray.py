@@ -332,7 +332,9 @@ def xr_interp_like(
     result = da.sel(sel_coords)
     if units is not None:
         result = xr.DataArray(
-            data=result.data * units, dims=result.dims, coords=result.coords,
+            data=result.data * units,
+            dims=result.dims,
+            coords=result.coords,
         )
 
     return result
@@ -512,7 +514,9 @@ def xr_3d_vector(data: np.ndarray, time: Time = None) -> xr.DataArray:
         if isinstance(time, Time):
             time = time.as_pandas_index()
         da = xr.DataArray(
-            data=data, dims=["time", "c"], coords={"time": time, "c": ["x", "y", "z"]},
+            data=data,
+            dims=["time", "c"],
+            coords={"time": time, "c": ["x", "y", "z"]},
         )
     else:
         da = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
@@ -544,7 +548,9 @@ def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
         )
     else:
         da = xr.DataArray(
-            data=data, dims=["c", "v"], coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
+            data=data,
+            dims=["c", "v"],
+            coords={"c": ["x", "y", "z"], "v": [0, 1, 2]},
         )
     return da.astype(float).weldx.time_ref_restore()
 

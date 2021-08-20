@@ -108,7 +108,9 @@ def ureg_check_class(*args):
 
     """
 
-    def _inner_decorator(original_class,):
+    def _inner_decorator(
+        original_class,
+    ):
         # Make copy of original __init__, so we can call it without recursion
         orig_init = original_class.__init__
 
@@ -175,7 +177,7 @@ def inherit_docstrings(cls):
                 func.__doc__ = getattr(parent, name).__doc__
                 if not func.__doc__:
                     warnings.warn(
-                        f"could not derive docstring for {cls}.{name}", stacklevel=1
+                        f"could not derive docstring for {cls}.{name}", stacklevel=2
                     )
     return cls
 
@@ -187,7 +189,9 @@ def _array_equal(a, b):
 
 
 _eq_compare_nested_input_types = Union[
-    Sequence, Mapping, Collection,
+    Sequence,
+    Mapping,
+    Collection,
 ]
 
 

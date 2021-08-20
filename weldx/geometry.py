@@ -2280,7 +2280,15 @@ class Geometry:
 
     @UREG.wraps(
         None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None, None, None,),
+        (
+            None,
+            _DEFAULT_LEN_UNIT,
+            _DEFAULT_LEN_UNIT,
+            None,
+            None,
+            None,
+            None,
+        ),
         strict=False,
     )
     def plot(
@@ -2326,7 +2334,9 @@ class Geometry:
         )
 
     @UREG.wraps(
-        None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=False,
+        None,
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
+        strict=False,
     )
     def spatial_data(
         self,
