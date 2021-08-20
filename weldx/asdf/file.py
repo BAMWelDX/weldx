@@ -165,11 +165,10 @@ class WeldxFile(UserDict):
                 f" Should be one of {_supported}."
             )
 
-        extensions = [WeldxExtension(), WeldxAsdfExtension()]
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree or new_file_created:
             asdf_file = AsdfFile(
-                tree=tree, extensions=extensions, custom_schema=self.custom_schema
+                tree=tree, custom_schema=self.custom_schema
             )
             asdf_file.write_to(filename_or_file_like, **write_kwargs)
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
@@ -178,7 +177,6 @@ class WeldxFile(UserDict):
         asdf_file = open_asdf(
             filename_or_file_like,
             mode=self.mode,
-            extensions=extensions,
             **asdffile_kwargs,
         )
         self._asdf_handle: AsdfFile = asdf_file
