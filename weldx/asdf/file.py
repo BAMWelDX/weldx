@@ -48,6 +48,7 @@ DEFAULT_ARRAY_COPYING = True
 """Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
 
 
+@weldx.util.inherit_docstrings
 class WeldxFile(UserDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
 
@@ -164,7 +165,7 @@ class WeldxFile(UserDict):
                 f" Should be one of {_supported}."
             )
 
-        extensions = None
+        extensions = [WeldxExtension(), WeldxAsdfExtension()]
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree or new_file_created:
             asdf_file = AsdfFile(
