@@ -38,7 +38,7 @@ def mat_vec_mul(a, b) -> np.ndarray:
     return np.matmul(a, b[..., np.newaxis]).squeeze(axis=-1)
 
 
-def swap_list_items(arr, i1, i2) -> list:
+def _swap_list_items(arr, i1, i2) -> list:
     """Swap position of two items in a list.
 
     Parameters
@@ -80,7 +80,7 @@ def xr_transpose_matrix_data(da, dim1, dim2) -> xr.DataArray:
         xarray DataArray with transposed data at specified dimensions
 
     """
-    i = swap_list_items(da.dims, dim1, dim2)
+    i = _swap_list_items(da.dims, dim1, dim2)
 
     return da.copy(data=da.transpose(*i).data)
 
