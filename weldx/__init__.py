@@ -1,11 +1,16 @@
 """
-WelDX data format and analysis package
-======================================
+WelDX: API for data format and analysis
+=======================================
 
 The weldx package provides several tools to setup an experiment, systematically process
 measurement data, and archive it in a standardized fashion.
 
 Here we quickly list the most important functions and classes.
+
+
+**File handling**
+
+Read and write weldx files.
 
 .. autosummary::
     :toctree: _autosummary
@@ -13,12 +18,21 @@ Here we quickly list the most important functions and classes.
 
     WeldxFile
 
+**Welding**
+
+These classes and functions are used to define welding processes.
+
 .. autosummary::
     :toctree: _autosummary
     :caption: Welding
 
     GmawProcess
     get_groove
+
+
+**Geometry**
+
+These classes are used to define workpiece geometries.
 
 .. autosummary::
     :toctree: _autosummary
@@ -33,6 +47,9 @@ Here we quickly list the most important functions and classes.
     Trace
     SpatialData
 
+
+**Data handling and transformation**
+
 .. autosummary::
     :toctree: _autosummary
     :caption: Data handling and transformation
@@ -42,6 +59,40 @@ Here we quickly list the most important functions and classes.
     CoordinateSystemManager
     LocalCoordinateSystem
 
+**Full API Reference**
+
+Here you find the full documentation for all sub-modules in weldx
+including their classes and functions.
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Full API Reference
+    :template: module-template.rst
+    :recursive:
+
+    constants
+    core
+    geometry
+    measurement
+    transformations
+    util
+    time
+    types
+    visualization
+    welding
+
+
+**ASDF API Reference**
+
+.. autosummary::
+    :toctree: _autosummary/asdf
+    :caption: ASDF API Reference
+    :template: module-template.rst
+    :recursive:
+
+    asdf.extension
+    asdf.util
+    asdf.validators
 """
 # isort:skip_file
 import warnings
@@ -126,3 +177,4 @@ __all__ = (
 )
 
 weldx.config.Config.load_installed_standards()
+del warnings  # do not pollute this important namespace!
