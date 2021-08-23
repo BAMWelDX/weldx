@@ -7,7 +7,8 @@ import numpy as np
 import pytest
 
 import weldx.transformations as tf
-import weldx.util as ut
+
+from .._helpers import matrix_is_close, vector_is_close
 
 # --------------------------------------------------------------------------------------
 # helper functions
@@ -43,7 +44,7 @@ def test_scaling_matrix():
     mat_b = np.matmul(scale_mat, mat_a)
 
     mat_b_exp = np.array([[2, 12, 4], [2, 5, 1], [12, 20, 8]], dtype=float)
-    assert ut.matrix_is_close(mat_b, mat_b_exp)
+    assert matrix_is_close(mat_b, mat_b_exp)
 
 
 def test_normalize():
@@ -59,14 +60,14 @@ def test_normalize():
         unit = tf.normalize(vec)
 
         # check that vector is modified
-        assert not ut.vector_is_close(unit, vec)
+        assert not vector_is_close(unit, vec)
 
         # check length is 1
         assert math.isclose(np.linalg.norm(unit), 1)
 
         # check that both vectors point into the same direction
         vec2 = unit * np.linalg.norm(vec)
-        assert ut.vector_is_close(vec2, vec)
+        assert vector_is_close(vec2, vec)
 
     #  exception ------------------------------------------
 
@@ -126,7 +127,7 @@ def test_orientation_point_plane():
     """
     angles = [np.pi / 3, np.pi / 4, np.pi / 5]
     [b, c, n] = tf.WXRotation.from_euler("xyz", angles).as_matrix()
-    a = ut.to_float_array([3.2, -2.1, 5.4])
+    a = np.array([3.2, -2.1, 5.4], dtype=float)
     b = b * 6.5 + a
     c = c * 0.3 + a
 

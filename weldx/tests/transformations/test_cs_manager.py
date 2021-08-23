@@ -12,7 +12,6 @@ from pandas import TimedeltaIndex as TDI  # noqa
 from pandas import Timestamp as TS  # noqa
 
 import weldx.transformations as tf
-import weldx.util as ut
 from weldx import Q_, SpatialData
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
@@ -21,6 +20,7 @@ from weldx.transformations import CoordinateSystemManager as CSM  # noqa
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
+from .._helpers import matrix_is_close
 from ._util import check_coordinate_system, check_cs_close, r_mat_x, r_mat_y, r_mat_z
 
 
@@ -2200,7 +2200,7 @@ def test_data_functions(lcs_ref, data_name, data, lcs_out, exp):
     else:
         transformed_data = transformed_data.data
 
-    assert ut.matrix_is_close(transformed_data, exp)
+    assert matrix_is_close(transformed_data, exp)
 
 
 # test_assign_data_exceptions ----------------------------------------------------------
@@ -2591,12 +2591,12 @@ def test_coordinate_system_manager_transform_data():
 
     # input list
     data_list_transformed = csm.transform_data(data_list, "lcs_3", "lcs_1")
-    assert ut.matrix_is_close(data_list_transformed, data_exp)
+    assert matrix_is_close(data_list_transformed, data_exp)
 
     # input numpy array
     data_np = np.array(data_list)
     data_numpy_transformed = csm.transform_data(data_np, "lcs_3", "lcs_1")
-    assert ut.matrix_is_close(data_numpy_transformed, data_exp)
+    assert matrix_is_close(data_numpy_transformed, data_exp)
 
     # input single numpy vector
     # data_numpy_transformed = csm.transform_data(data_np[0, :], "lcs_3", "lcs_1")
@@ -2605,7 +2605,7 @@ def test_coordinate_system_manager_transform_data():
     # input xarray
     data_xr = xr.DataArray(data=data_np, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
     data_xr_transformed = csm.transform_data(data_xr, "lcs_3", "lcs_1")
-    assert ut.matrix_is_close(data_xr_transformed.data, data_exp)
+    assert matrix_is_close(data_xr_transformed.data, data_exp)
 
     # TODO: Test time dependency
 

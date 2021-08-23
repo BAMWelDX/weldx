@@ -1,7 +1,6 @@
 """Tests for the WeldxFile class."""
 import itertools
 import pathlib
-import platform
 import shutil
 import tempfile
 from io import BytesIO
@@ -343,9 +342,6 @@ class TestWeldXFile:
         assert old_pos == after_pos
 
     @staticmethod
-    @pytest.mark.skipif(
-        platform.system() == "Darwin", reason="evolution will strike on you!"
-    )
     @pytest.mark.parametrize(
         "mode",
         ("rw", "r"),
@@ -355,8 +351,6 @@ class TestWeldXFile:
 
         Also ensure the tree is still usable after showing the header.
         """
-        import gc
-
         import psutil
 
         large_array = np.ones((1000, 1000), dtype=np.float64)  # ~7.6mb
@@ -365,14 +359,14 @@ class TestWeldXFile:
         def get_mem_info():
             return proc.memory_info().rss
 
-        before = get_mem_info()
         fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
         with WeldxFile(mode=mode) as fh:
             fh["x"] = large_array
+            before = get_mem_info()
             fh.show_asdf_header(use_widgets=False, _interactive=False)
+            after = get_mem_info()
             fh.write_to(fn)
-        gc.collect()
-        after = get_mem_info()
+
         if after > before:
             diff = after - before
             # pytest increases memory a bit, but not as much as our large array would

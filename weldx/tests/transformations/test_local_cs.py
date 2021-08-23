@@ -1143,8 +1143,8 @@ def test_coordinate_system_init():
 
     orientation_fix = r_mat_z(1)
     orientation_tdp = r_mat_z([0, 0.25, 0.5])
-    coordinates_fix = ut.to_float_array([3, 7, 1])
-    coordinates_tdp = ut.to_float_array([[3, 7, 1], [4, -2, 8], [-5, 3, -1]])
+    coordinates_fix = np.array([3, 7, 1], dtype=float)
+    coordinates_tdp = np.array([[3, 7, 1], [4, -2, 8], [-5, 3, -1]], dtype=float)
 
     # numpy - no time dependency
     lcs = tf.LocalCoordinateSystem(
@@ -1216,7 +1216,7 @@ def test_coordinate_system_init():
     )
 
     time_exp = TDI([1, 2, 3, 4, 5, 6], "s")
-    coordinates_exp = ut.to_float_array(
+    coordinates_exp = np.array(
         [
             [3, 7, 1],
             [3, 7, 1],
@@ -1224,7 +1224,8 @@ def test_coordinate_system_init():
             [4, -2, 8],
             [-0.5, 0.5, 3.5],
             [-5, 3, -1],
-        ]
+        ],
+        dtype=float,
     )
     orientation_exp = r_mat_z([0, 0.125, 0.25, 0.375, 0.5, 0.5])
     check_coordinate_system(lcs, orientation_exp, coordinates_exp, True, time_exp)
@@ -1245,7 +1246,7 @@ def test_coordinate_system_init():
     check_coordinate_system(lcs, orientation_exp, coordinates_fix, True)
 
     # time dependent
-    orientation_exp = r_mat_z(1 / 3 * ut.to_float_array([1, 2, 4]))
+    orientation_exp = r_mat_z(1 / 3 * np.array([1, 2, 4], dtype=float))
     orientation_tdp_2 = deepcopy(orientation_exp)
     orientation_tdp_2[:, :, 0] *= 10
     orientation_tdp_2[:, :, 1] *= 3
