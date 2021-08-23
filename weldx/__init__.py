@@ -15,6 +15,7 @@ Read and write weldx files.
 .. autosummary::
     :toctree: _autosummary
     :caption: File handling
+    :template: module-template.rst
 
     WeldxFile
 
@@ -25,6 +26,7 @@ These classes and functions are used to define welding processes.
 .. autosummary::
     :toctree: _autosummary
     :caption: Welding
+    :template: module-template.rst
 
     GmawProcess
     get_groove
@@ -37,6 +39,7 @@ These classes are used to define workpiece geometries.
 .. autosummary::
     :toctree: _autosummary
     :caption: Geometry
+    :template: module-template.rst
 
     ArcSegment
     Geometry
@@ -53,6 +56,7 @@ These classes are used to define workpiece geometries.
 .. autosummary::
     :toctree: _autosummary
     :caption: Data handling and transformation
+    :template: module-template.rst
 
     Q_
     TimeSeries
@@ -84,6 +88,9 @@ including their classes and functions.
 
 **ASDF API Reference**
 
+Here you find the documentation of the underlying ASDF implementation. These classes
+and functions are used to read and write weldx data types in the ASDF data format.
+
 .. autosummary::
     :toctree: _autosummary/asdf
     :caption: ASDF API Reference
@@ -93,6 +100,7 @@ including their classes and functions.
     asdf.extension
     asdf.util
     asdf.validators
+
 """
 # isort:skip_file
 import warnings
