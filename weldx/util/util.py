@@ -1,4 +1,4 @@
-"""Contains package internal utility functions."""
+"""Contains general (mostly internal) utility functions."""
 from __future__ import annotations
 
 import functools
