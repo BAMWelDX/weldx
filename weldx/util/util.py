@@ -195,7 +195,7 @@ _eq_compare_nested_input_types = Union[
 ]
 
 
-class _Eq_compare_nested:
+class _EqCompareNested:
     """Compares nested data structures like lists, sets, tuples, arrays, etc."""
 
     # some types need special comparison handling.
@@ -213,11 +213,11 @@ class _Eq_compare_nested:
         # 1. strict type comparison (exceptions defined in _type_equalities).
         # 2. handle special comparison cases
         if not any(
-            (type(x) in e and type(y) in e) for e in _Eq_compare_nested._type_equalities
+            (type(x) in e and type(y) in e) for e in _EqCompareNested._type_equalities
         ) and type(x) is not type(y):
             return False
 
-        for types, func in _Eq_compare_nested.compare_funcs.items():
+        for types, func in _EqCompareNested.compare_funcs.items():
             if isinstance(x, types):
                 return func(x, y)
 
@@ -228,7 +228,7 @@ class _Eq_compare_nested:
         # Do not traverse types defined in compare_funcs. All other types are handled
         # like in boltons.iterutils.default_enter (e.g. descend into nested structures).
         # See `boltons.iterutils.remap` for details.
-        if any(isinstance(value, t) for t in _Eq_compare_nested.compare_funcs):
+        if any(isinstance(value, t) for t in _EqCompareNested.compare_funcs):
             return value, False
 
         return iterutils.default_enter(path, key, value)
@@ -247,7 +247,7 @@ class _Eq_compare_nested:
         """
         other_data_structure = iterutils.get_path(b, path)
         other_value = other_data_structure[key]
-        if not _Eq_compare_nested._enter(None, key, value)[1]:
+        if not _EqCompareNested._enter(None, key, value)[1]:
             # check lengths of Sequence types first and raise
             # prior starting a more expensive comparison!
             if isinstance(other_data_structure, Sequence) and len(
@@ -258,7 +258,7 @@ class _Eq_compare_nested:
                 other_data_structure.keys() ^ iterutils.get_path(a, path).keys()
             ):
                 raise RuntimeError("keys do not match")
-            if not _Eq_compare_nested._compare(value, other_value):
+            if not _EqCompareNested._compare(value, other_value):
                 raise RuntimeError("not equal")
         return True
 
@@ -290,7 +290,7 @@ class _Eq_compare_nested:
 
         """
         # we bind the input structures a, b to the visit function.
-        visit = functools.partial(_Eq_compare_nested._visit, a=a, b=b)
+        visit = functools.partial(_EqCompareNested._visit, a=a, b=b)
 
         try:
             iterutils.remap(a, visit=visit, reraise_visit=True)
@@ -303,7 +303,7 @@ class _Eq_compare_nested:
         return True
 
 
-compare_nested = _Eq_compare_nested.compare_nested
+compare_nested = _EqCompareNested.compare_nested
 
 
 def dataclass_nested_eq(original_class):
