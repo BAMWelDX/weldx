@@ -54,6 +54,8 @@
 
 - added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and
   solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
+- split API documentation into user classes/functions and a full API reference
+  [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
 
 ### ASDF
 
