@@ -15,7 +15,7 @@ Read and write weldx files.
 .. autosummary::
     :toctree: _autosummary
     :caption: File handling
-    :template: module-template.rst
+    :template: class-template.rst
 
     WeldxFile
 
@@ -26,7 +26,6 @@ These classes and functions are used to define welding processes.
 .. autosummary::
     :toctree: _autosummary
     :caption: Welding
-    :template: module-template.rst
 
     GmawProcess
     get_groove
@@ -39,7 +38,7 @@ These classes are used to define workpiece geometries.
 .. autosummary::
     :toctree: _autosummary
     :caption: Geometry
-    :template: module-template.rst
+    :template: class-template.rst
 
     ArcSegment
     Geometry
@@ -56,7 +55,7 @@ These classes are used to define workpiece geometries.
 .. autosummary::
     :toctree: _autosummary
     :caption: Data handling and transformation
-    :template: module-template.rst
+    :template: class-template.rst
 
     Q_
     TimeSeries
