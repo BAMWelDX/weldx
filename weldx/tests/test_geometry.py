@@ -14,10 +14,11 @@ from xarray import DataArray
 import weldx.geometry as geo
 import weldx.tests._helpers as helpers
 import weldx.transformations as tf
-import weldx.util as ut
 from weldx import Q_
 from weldx.geometry import SpatialData
 from weldx.transformations import WXRotation
+
+from ._helpers import matrix_is_close, vector_is_close
 
 # helpers ---------------------------------------------------------------------
 
@@ -34,10 +35,10 @@ def check_segments_identical(seg_a, seg_b):
 
     """
     assert isinstance(seg_a, type(seg_b))
-    assert ut.matrix_is_close(seg_a.points, seg_b.points)
+    assert matrix_is_close(seg_a.points, seg_b.points)
     if isinstance(seg_a, geo.ArcSegment):
         assert seg_a.arc_winding_ccw == seg_b.arc_winding_ccw
-        assert ut.vector_is_close(seg_a.point_center, seg_b.point_center)
+        assert vector_is_close(seg_a.point_center, seg_b.point_center)
 
 
 def check_shapes_identical(shp_a, shp_b):
@@ -147,8 +148,8 @@ def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1e-9):
         Absolute tolerance (Default value = 1e-9)
 
     """
-    assert ut.matrix_is_close(lcs_a.orientation, lcs_b.orientation, abs_tol)
-    assert ut.vector_is_close(lcs_a.coordinates, lcs_b.coordinates, abs_tol)
+    assert matrix_is_close(lcs_a.orientation, lcs_b.orientation, abs_tol)
+    assert vector_is_close(lcs_a.coordinates, lcs_b.coordinates, abs_tol)
 
 
 def get_default_profiles() -> List:
@@ -174,6 +175,49 @@ def get_default_profiles() -> List:
     shape_b12 = geo.Shape().add_line_segments([b_1, b_2])
     profile_b = geo.Profile([shape_b01, shape_b12])
     return [profile_a, profile_b]
+
+
+def is_column_in_matrix(column, matrix) -> bool:
+    """Check if a column (1d array) can be found inside of a matrix.
+
+    Parameters
+    ----------
+    column :
+        Column that should be checked
+    matrix :
+        Matrix
+
+    Returns
+    -------
+    bool
+        True or False
+
+    """
+    return is_row_in_matrix(column, np.transpose(matrix))
+
+
+def is_row_in_matrix(row, matrix) -> bool:
+    """Check if a row (1d array) can be found inside of a matrix.
+
+    source: https://codereview.stackexchange.com/questions/193835
+
+    Parameters
+    ----------
+    row :
+        Row that should be checked
+    matrix :
+        Matrix
+
+    Returns
+    -------
+    bool
+        True or False
+
+    """
+    if not matrix.shape[1] == np.array(row).size:
+        return False
+    # noinspection PyUnresolvedReferences
+    return (matrix == row).all(axis=1).any()
 
 
 # helper for segment tests ----------------------------------------------------
@@ -206,8 +250,8 @@ def default_segment_rasterization_tests(
 
     # Check if first and last point of the data are identical to the segment
     # start and end
-    assert ut.vector_is_close(data[:, 0], segment.point_start)
-    assert ut.vector_is_close(data[:, -1], segment.point_end)
+    assert vector_is_close(data[:, 0], segment.point_start)
+    assert vector_is_close(data[:, -1], segment.point_end)
 
     for i in range(num_points - 1):
         point = data[:, i]
@@ -231,8 +275,8 @@ def default_segment_rasterization_tests(
     assert num_points_200 == 2
 
     # only 2 points must be segment start and end
-    assert ut.vector_is_close(segment.point_start, data_200[:, 0])
-    assert ut.vector_is_close(segment.point_end, data_200[:, 1])
+    assert vector_is_close(segment.point_start, data_200[:, 0])
+    assert vector_is_close(segment.point_end, data_200[:, 1])
 
     # exceptions ------------------------------------------
 
@@ -298,7 +342,7 @@ def test_line_segment_rasterization():
         unit_vec_start_point = tf.normalize(vec_start_point)
         length_start_point = np.linalg.norm(vec_start_point)
 
-        assert ut.vector_is_close(unit_vec_start_point, unit_vec_start_end)
+        assert vector_is_close(unit_vec_start_point, unit_vec_start_end)
         assert length_start_point < length_start_end
 
 
@@ -345,12 +389,12 @@ def line_segment_transformation_test_case(
         segment_trans = segment.transform(transformation)
 
     # original segment not modified
-    assert ut.vector_is_close(segment.point_start, point_start)
-    assert ut.vector_is_close(segment.point_end, point_end)
+    assert vector_is_close(segment.point_start, point_start)
+    assert vector_is_close(segment.point_end, point_end)
 
     # check new segment
-    assert ut.vector_is_close(segment_trans.point_start, exp_start)
-    assert ut.vector_is_close(segment_trans.point_end, exp_end)
+    assert vector_is_close(segment_trans.point_start, exp_start)
+    assert vector_is_close(segment_trans.point_end, exp_end)
     assert math.isclose(segment_trans.length, exp_length)
 
     # apply same transformation in place
@@ -443,18 +487,18 @@ def test_line_segment_interpolation():
         segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, weight)
         exp_point_start = [1 + i, 3 - 2 * i]
         exp_point_end = [7 - 2 * i, -3 + 4 * i]
-        assert ut.vector_is_close(segment_c.point_start, exp_point_start)
-        assert ut.vector_is_close(segment_c.point_end, exp_point_end)
+        assert vector_is_close(segment_c.point_start, exp_point_start)
+        assert vector_is_close(segment_c.point_end, exp_point_end)
 
     # check weight clipped to valid range -----------------
 
     segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, -3)
-    assert ut.vector_is_close(segment_c.point_start, segment_a.point_start)
-    assert ut.vector_is_close(segment_c.point_end, segment_a.point_end)
+    assert vector_is_close(segment_c.point_start, segment_a.point_start)
+    assert vector_is_close(segment_c.point_end, segment_a.point_end)
 
     segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, 6)
-    assert ut.vector_is_close(segment_c.point_start, segment_b.point_start)
-    assert ut.vector_is_close(segment_c.point_end, segment_b.point_end)
+    assert vector_is_close(segment_c.point_start, segment_b.point_start)
+    assert vector_is_close(segment_c.point_end, segment_b.point_end)
 
     # exceptions ------------------------------------------
 
@@ -503,9 +547,9 @@ def check_arc_segment_values(
         Expected arc length
 
     """
-    assert ut.vector_is_close(segment.point_start, point_start)
-    assert ut.vector_is_close(segment.point_end, point_end)
-    assert ut.vector_is_close(segment.point_center, point_center)
+    assert vector_is_close(segment.point_start, point_start)
+    assert vector_is_close(segment.point_end, point_end)
+    assert vector_is_close(segment.point_center, point_center)
 
     assert segment.arc_winding_ccw is winding_ccw
     assert math.isclose(segment.radius, radius)
@@ -1327,11 +1371,11 @@ def test_shape_rasterization():
     num_data_points = data.shape[1]
     for i in range(num_data_points):
         if i < 6:
-            assert ut.vector_is_close([0, i * 0.2], data[:, i])
+            assert vector_is_close([0, i * 0.2], data[:, i])
         elif i < 11:
-            assert ut.vector_is_close([(i - 5) * 0.2, 1], data[:, i])
+            assert vector_is_close([(i - 5) * 0.2, 1], data[:, i])
         else:
-            assert ut.vector_is_close([1, 1 - (i - 10) * 0.2], data[:, i])
+            assert vector_is_close([1, 1 - (i - 10) * 0.2], data[:, i])
 
     # Test with too large raster width --------------------
     # The shape does not clip large values to the valid range itself. The
@@ -1343,7 +1387,7 @@ def test_shape_rasterization():
     data = shape.rasterize(10)
 
     for point in points:
-        assert ut.is_column_in_matrix(point, data)
+        assert is_column_in_matrix(point, data)
 
     assert data.shape[1] == 4
 
@@ -1391,7 +1435,7 @@ def default_translation_vector():
         Translation vector
 
     """
-    return ut.to_float_array([3, 4])
+    return np.array([3, 4], dtype=float)
 
 
 def check_point_translation(point_trans, point_original):
@@ -1405,9 +1449,7 @@ def check_point_translation(point_trans, point_original):
         Original point
 
     """
-    assert ut.vector_is_close(
-        point_trans - default_translation_vector(), point_original
-    )
+    assert vector_is_close(point_trans - default_translation_vector(), point_original)
 
 
 def check_point_rotation_90_degree(point_trans, point_original):
@@ -1954,7 +1996,7 @@ def test_profile_rasterization():
 
     # Check that all shapes are rasterized correct
     for i in range(int(round(3 / raster_width)) + 1):
-        assert ut.vector_is_close(data[:, i], [i * raster_width - 1, 0])
+        assert vector_is_close(data[:, i], [i * raster_width - 1, 0])
 
     # exceptions
     with pytest.raises(Exception):
@@ -2033,7 +2075,7 @@ def check_trace_segment_orientation(segment):
     """
     # The initial orientation of a segment must be [1, 0, 0]
     lcs = segment.local_coordinate_system(0)
-    assert ut.vector_is_close(lcs.orientation[:, 0], np.array([1, 0, 0]))
+    assert vector_is_close(lcs.orientation[:, 0], np.array([1, 0, 0]))
 
     delta = 1e-9
     for rel_pos in np.arange(0.1, 1.01, 0.1):
@@ -2042,7 +2084,7 @@ def check_trace_segment_orientation(segment):
         trace_direction_approx = tf.normalize(lcs.coordinates - lcs_d.coordinates)
 
         # Check if the x-axis is aligned with the approximate trace direction
-        assert ut.vector_is_close(lcs.orientation[:, 0], trace_direction_approx, 1e-6)
+        assert vector_is_close(lcs.orientation[:, 0], trace_direction_approx, 1e-6)
 
 
 def default_trace_segment_tests(segment, tolerance_length=1e-9):
@@ -2062,7 +2104,7 @@ def default_trace_segment_tests(segment, tolerance_length=1e-9):
     assert isinstance(lcs, tf.LocalCoordinateSystem)
 
     # check that coordinates for weight 0 are at [0, 0, 0]
-    assert ut.vector_is_close(lcs.coordinates, [0, 0, 0])
+    assert vector_is_close(lcs.coordinates, [0, 0, 0])
 
     # length and orientation tests
     check_trace_segment_length(segment, tolerance_length)
@@ -2124,8 +2166,8 @@ def test_radial_horizontal_trace_segment():
         lcs_cw = segment_cw.local_coordinate_system(weight)
         lcs_ccw = segment_ccw.local_coordinate_system(weight)
 
-        assert ut.vector_is_close(lcs_cw.coordinates, [x_exp, -y_exp, 0])
-        assert ut.vector_is_close(lcs_ccw.coordinates, [x_exp, y_exp, 0])
+        assert vector_is_close(lcs_cw.coordinates, [x_exp, -y_exp, 0])
+        assert vector_is_close(lcs_ccw.coordinates, [x_exp, y_exp, 0])
 
     # invalid inputs
     with pytest.raises(ValueError):
@@ -2311,14 +2353,14 @@ def test_trace_rasterization():
     for i in range(data.shape[1]):
         trace_location = i * raster_width_eff
         if trace_location <= 1:
-            assert ut.vector_is_close([trace_location, 0, 0], data[:, i])
+            assert vector_is_close([trace_location, 0, 0], data[:, i])
         else:
             arc_length = trace_location - 1
             angle = arc_length  # radius 1 -> arc_length = arc_angle * radius
             x = np.sin(angle) + 1  # radius 1 -> sin(arc_angle) = x / radius
             y = 1 - np.cos(angle)
 
-            assert ut.vector_is_close([x, y, 0], data[:, i])
+            assert vector_is_close([x, y, 0], data[:, i])
 
     # check with arbitrary coordinate system --------------
     orientation = WXRotation.from_euler("y", np.pi / 2).as_matrix()
@@ -2343,14 +2385,14 @@ def test_trace_rasterization():
             y = coordinates[1] + 1 - np.cos(angle)
             z = coordinates[2] - 1 - np.sin(angle)
 
-        assert ut.vector_is_close([x, y, z], data[:, i])
+        assert vector_is_close([x, y, z], data[:, i])
 
     # check if raster width is clipped to valid range -----
     data = trace.rasterize(1000)
 
     assert data.shape[1] == 2
-    assert ut.vector_is_close([-3, 2.5, 5], data[:, 0])
-    assert ut.vector_is_close([-3, 4.5, 4], data[:, 1])
+    assert vector_is_close([-3, 2.5, 5], data[:, 0])
+    assert vector_is_close([-3, 4.5, 4], data[:, 1])
 
     # exceptions ------------------------------------------
     with pytest.raises(Exception):
@@ -2377,10 +2419,10 @@ def check_interpolated_profile_points(profile, c_0, c_1, c_2):
         Third expected point
 
     """
-    assert ut.vector_is_close(profile.shapes[0].segments[0].point_start, c_0)
-    assert ut.vector_is_close(profile.shapes[0].segments[0].point_end, c_1)
-    assert ut.vector_is_close(profile.shapes[1].segments[0].point_start, c_1)
-    assert ut.vector_is_close(profile.shapes[1].segments[0].point_end, c_2)
+    assert vector_is_close(profile.shapes[0].segments[0].point_start, c_0)
+    assert vector_is_close(profile.shapes[0].segments[0].point_end, c_1)
+    assert vector_is_close(profile.shapes[1].segments[0].point_start, c_1)
+    assert vector_is_close(profile.shapes[1].segments[0].point_end, c_2)
 
 
 def test_linear_profile_interpolation_sbs():
@@ -2611,7 +2653,7 @@ def test_geometry_rasterization_trace():
     a2 = [0, 1]
     a3 = [-1, 1]
     a4 = [-1, 0]
-    profile_points = ut.to_float_array([a0, a1, a2, a2, a3, a4]).transpose()
+    profile_points = np.array([a0, a1, a2, a2, a3, a4], dtype=float).transpose()
 
     # create profile
     shape_a012 = geo.Shape().add_line_segments([a0, a1, a2])
@@ -2652,12 +2694,12 @@ def test_geometry_rasterization_trace():
                     profile_points[0, j],
                     profile_points[1, j],
                 ]
-                assert ut.vector_is_close(data[:, idx_0 + j], point_exp)
+                assert vector_is_close(data[:, idx_0 + j], point_exp)
         # check second segment (arc)
         else:
             # first 2 profile points lie on the arcs center point
-            assert ut.vector_is_close(data[:, idx_0], [1, a0[0], a0[1]])
-            assert ut.vector_is_close(data[:, idx_0 + 1], [1, a1[0], a1[1]])
+            assert vector_is_close(data[:, idx_0], [1, a0[0], a0[1]])
+            assert vector_is_close(data[:, idx_0 + 1], [1, a1[0], a1[1]])
 
             # z-values are constant
             for j in np.arange(2, 6, 1):
@@ -2766,7 +2808,7 @@ def test_geometry_rasterization_profile_interpolation():
                     profile_points[1, j] * (1 + i * 0.1),
                 ]
             )
-            assert ut.vector_is_close(data[:, idx_0 + j], point_exp)
+            assert vector_is_close(data[:, idx_0 + j], point_exp)
 
     # check second profile interpolation
     for i in range(20):
@@ -2779,7 +2821,7 @@ def test_geometry_rasterization_profile_interpolation():
                     profile_points[1, j] * (1 + i * 0.05),
                 ]
             )
-            assert ut.vector_is_close(data[:, idx_0 + j], point_exp)
+            assert vector_is_close(data[:, idx_0 + j], point_exp)
 
 
 def get_test_profile() -> geo.Profile:

@@ -18,6 +18,7 @@ from weldx.types import (
     types_path_like,
 )
 from weldx.util import deprecated
+
 from .constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from .types import WeldxConverter
 

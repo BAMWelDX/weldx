@@ -9,8 +9,8 @@ from weldx import WeldxFile
 from weldx.asdf.util import (
     dataclass_serialization_class,
     get_yaml_header,
-    write_buffer,
     read_buffer,
+    write_buffer,
 )
 
 
