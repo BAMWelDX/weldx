@@ -1,1 +1,4 @@
+API
+===
+
 .. automodule:: weldx

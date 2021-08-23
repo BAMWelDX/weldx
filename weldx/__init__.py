@@ -1,6 +1,6 @@
 """
-WelDX: API for data format and analysis
-=======================================
+WelDX - data and quality standards for welding research data
+============================================================
 
 The weldx package provides several tools to setup an experiment, systematically process
 measurement data, and archive it in a standardized fashion.
