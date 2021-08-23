@@ -26,7 +26,7 @@ if TYPE_CHECKING:  # pragma: no cover
 # helper -------------------------------------------------------------------------------
 
 
-def triangulate_geometry(geo_data):
+def _triangulate_geometry(geo_data):
     """Stack geometry data and add simple triangulation.
 
     Parameters
@@ -58,7 +58,7 @@ def triangulate_geometry(geo_data):
 
 
 # todo: Note that this is a copy of the weldx.tests._helpers.py function.
-def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
+def _vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
     """Check if a vector is close or equal to another vector.
 
     Parameters
@@ -84,7 +84,7 @@ def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
     return np.all(np.isclose(vec_a, vec_b, atol=abs_tol)).__bool__()
 
 
-def to_list(var) -> list:
+def _to_list(var) -> list:
     """Store the passed variable into a list and return it.
 
     If the variable is already a list, it is returned without modification.
@@ -808,7 +808,7 @@ class Shape:
         Shape
 
         """
-        segments = to_list(segments)
+        segments = _to_list(segments)
         self._check_segments_connected(segments)
         self._segments = segments
 
@@ -835,7 +835,7 @@ class Shape:
 
         """
         for i in range(len(segments) - 1):
-            if not vector_is_close(segments[i].point_end, segments[i + 1].point_start):
+            if not _vector_is_close(segments[i].point_end, segments[i + 1].point_start):
                 raise ValueError("Segments are not connected.")
 
     @classmethod
@@ -979,7 +979,7 @@ class Shape:
             Single segment or list of segments
 
         """
-        segments = to_list(segments)
+        segments = _to_list(segments)
         if self.num_segments > 0:
             self._check_segments_connected([self.segments[-1], segments[0]])
         self._check_segments_connected(segments)
@@ -1009,7 +1009,7 @@ class Shape:
 
         """
         normal = np.array(reflection_normal, dtype=float)
-        if vector_is_close(normal, np.array([0, 0], dtype=float)):
+        if _vector_is_close(normal, np.array([0, 0], dtype=float)):
             raise ValueError("Normal has no length.")
 
         dot_product = np.dot(normal, normal)
@@ -1037,7 +1037,7 @@ class Shape:
         point_start = np.array(point_start, dtype=float)
         point_end = np.array(point_end, dtype=float)
 
-        if vector_is_close(point_start, point_end):
+        if _vector_is_close(point_start, point_end):
             raise ValueError("Line start and end point are identical.")
 
         vector = point_end - point_start
@@ -1098,7 +1098,7 @@ class Shape:
         raster_data = np.hstack(raster_data)
 
         last_point = self.segments[-1].point_end[:, np.newaxis]
-        if not vector_is_close(last_point, self.segments[0].point_start):
+        if not _vector_is_close(last_point, self.segments[0].point_start):
             raster_data = np.hstack((raster_data, last_point))
         return raster_data
 
@@ -1573,7 +1573,7 @@ class Trace:
                 "'transformations.LocalCoordinateSystem'"
             )
 
-        self._segments = to_list(segments)
+        self._segments = _to_list(segments)
         self._create_lookups(coordinate_system)
 
         if self.length <= 0:
@@ -1850,8 +1850,8 @@ class VariableProfile:
         VariableProfile
 
         """
-        locations = to_list(locations)
-        interpolation_schemes = to_list(interpolation_schemes)
+        locations = _to_list(locations)
+        interpolation_schemes = _to_list(interpolation_schemes)
 
         if not locations[0] == 0:
             locations = [0] + locations
@@ -2461,9 +2461,9 @@ class SpatialData:
         # if not isinstance(geometry_raster, np.ndarray):
         #    geometry_raster = np.array(geometry_raster)
         if geometry_raster[0].ndim == 2:
-            return SpatialData(*triangulate_geometry(geometry_raster))
+            return SpatialData(*_triangulate_geometry(geometry_raster))
 
-        part_data = [triangulate_geometry(part) for part in geometry_raster]
+        part_data = [_triangulate_geometry(part) for part in geometry_raster]
         total_points = []
         total_triangles = []
         for i, (points, triangulation) in enumerate(part_data):
