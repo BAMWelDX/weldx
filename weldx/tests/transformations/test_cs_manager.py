@@ -14,13 +14,12 @@ from pandas import Timestamp as TS  # noqa
 import weldx.transformations as tf
 from weldx import Q_, SpatialData
 from weldx.core import MathematicalExpression, TimeSeries
-from weldx.tests._helpers import get_test_name
+from weldx.tests._helpers import get_test_name, matrix_is_close
 from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.transformations import CoordinateSystemManager as CSM  # noqa
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
-from .._helpers import matrix_is_close
 from ._util import check_coordinate_system, check_cs_close, r_mat_x, r_mat_y, r_mat_z
 
 
