@@ -174,7 +174,9 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
         True if all matrices are orthogonal.
 
     """
-    eye = np.eye(len(da.dims[dims[0]]), len(da.dims[dims[1]]))
+    if not set(dims).issubset(set(da.dims)):
+        raise ValueError(f"Could not find {dims=} in DataArray.")
+    eye = np.eye(len(da.coords[dims[0]]), len(da.coords[dims[1]]))
     return np.allclose(xr_matmul(da, da, dims, trans_b=True), eye)
 
 
