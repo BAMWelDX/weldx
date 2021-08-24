@@ -37,7 +37,7 @@ def sine(
 
     Returns
     -------
-    TimeSeries
+    ts :
 
     """
     if bias is None:
