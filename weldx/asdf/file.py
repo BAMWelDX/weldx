@@ -5,7 +5,7 @@ from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, Dict, List, Mapping, Optional, Union
+from typing import IO, Dict, List, Mapping, Optional, Union, Iterable, Any
 
 import numpy as np
 from asdf import AsdfFile, generic_io
@@ -327,6 +327,27 @@ class WeldxFile(UserDict):
 
     sync.__doc__ = AsdfFile.update.__doc__
 
+    @classmethod
+    def fromkeys(cls, iterable: Iterable, default: Optional[Any] = None) -> "WeldxFile":
+        """Create a new file with keys from iterable and values set to value.
+
+        Parameters
+        ----------
+        iterable :
+            list of key names
+        default :
+            default value to fill the keys with.
+
+        Examples
+        --------
+        >>> from collections import defaultdict
+        >>> wx = WeldxFile.fromkeys(("TCP", "wx_meta", "process"))
+        >>> wx["TCP"], wx["wx_meta"], wx["process"]
+        (None, None, None)
+        """
+        tree = dict.fromkeys(iterable, default)
+        return WeldxFile(tree=tree)
+
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
 
@@ -567,20 +588,6 @@ If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
 In either case, this is followed by: for k, v in F.items(): D[k] = v
 """
 
-# TODO: not writable
-# WeldxFile.fromkeys.__doc__ = """Constructs a file from given keys.
-"""
-Parameters
-----------
-keys :
-    list of key names
-value :
-    default value to fill the keys with.
-
-Examples
---------
-# TODO:
-"""
 
 WeldxFile.items.__doc__ = """Returns a set-like object providing a view on this files items.
 
