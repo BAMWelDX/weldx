@@ -320,11 +320,19 @@ class CoordinateSystemManagerConverter(WeldxConverter):
         ]
 
         spatial_data = None
-        if len(obj._data) > 0:
-            spatial_data = [
-                dict(name=k, coordinate_system=v.coordinate_system_name, data=v.data)
-                for k, v in obj._data.items()
-            ]
+
+        if len(obj.data_names) > 0:
+            spatial_data = []
+            for cs in obj.graph.nodes:
+                spatial_data += [
+                    dict(name=k, coordinate_system=cs, data=v)
+                    for k, v in obj.graph.nodes[cs]["data"].items()
+                ]
+
+            # spatial_data = [
+            #    dict(name=k, coordinate_system=v.coordinate_system_name, data=v.data)
+            #    for k, v in obj._data.items()
+            # ]
 
         tree = {
             "name": obj.name,

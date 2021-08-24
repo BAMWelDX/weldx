@@ -2337,6 +2337,12 @@ def test_merge_with_data(node_parent, node_child, data_parent, data_index):
         assert np.all(csm_child_unmerged.get_data(data_name) == data)
 
 
+# todo:
+#  test special case where both have data on the common node
+#  test special case where multiple systems with data are merged to the common node
+#  test name intersections during merge (test)
+
+
 # test_interp_time ---------------------------------------------------------------------
 
 
