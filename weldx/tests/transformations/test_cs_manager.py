@@ -2290,14 +2290,34 @@ def test_get_data_exceptions(arguments, exception_type, test_name):
         csm.get_data(*arguments)
 
 
-# test_merge_with_data -----------------------------------------------------------------
+# test_merge_unmerge_with_data ---------------------------------------------------------
 
 
 @pytest.mark.parametrize("node_parent", ["a", "b"])
 @pytest.mark.parametrize("node_child", ["x", "y"])
 @pytest.mark.parametrize("data_parent", [True, False])
 @pytest.mark.parametrize("data_index", [0, 1])
-def test_merge_with_data(node_parent, node_child, data_parent, data_index):
+def test_merge_unmerge_with_data(node_parent, node_child, data_parent, data_index):
+    """Test if assigned data is treated correctly during merging and unmerging.
+
+    Parameters
+    ----------
+    node_parent :
+        The node of the parant system that is merged
+    node_child :
+        The node of the child system that is merged (will be renamed to match parent)
+    data_parent :
+        If `True`, the parent CSM will have the data assigned and the child CSM
+        otherwise
+    data_index :
+        Index of the LCS that will get the data. 0 is the root LCS and 1 and 2 are the
+        other child systems
+
+    Returns
+    -------
+
+    """
+
     def _create_csm(nodes, name):
         csm = CSM(nodes[0], name)
         csm.create_cs(nodes[1], nodes[0])
@@ -2337,9 +2357,70 @@ def test_merge_with_data(node_parent, node_child, data_parent, data_index):
         assert np.all(csm_child_unmerged.get_data(data_name) == data)
 
 
+# test_unmerge_multi_data --------------------------------------------------------------
+
+
+def test_unmerge_multi_data():
+    """Test if unmerge restores multiple data on a common cs correctly.
+
+    The test creates multiple CSM instances with data on the common cs. After unmerging,
+    all data must be assigned to the original CSM and must also be removed from the
+    others.
+
+    """
+    # create CSMs
+    csm_p = CSM("m", "parent")
+    csm_p.create_cs("a", "m")
+    data_p = [[1, 2, 3]]
+    csm_p.assign_data(data_p, "parent_data", "m")
+
+    csm_c1 = CSM("m", "child1")
+    csm_c1.create_cs("b", "m")
+    data_c1 = [[4, 5, 6]]
+    csm_c1.assign_data(data_c1, "child1_data", "m")
+
+    csm_c2 = CSM("c", "child2")
+    csm_c2.create_cs("m", "c")
+    data_c2 = [[7, 8, 9]]
+    csm_c2.assign_data(data_c2, "child2_data", "m")
+
+    csm_c3 = CSM("m", "child3")
+    csm_c3.create_cs("d", "m")
+
+    # merge
+    csm_p.merge(csm_c1)
+    csm_p.merge(csm_c2)
+    csm_p.merge(csm_c3)
+
+    # check after merge
+    assert all(
+        [
+            data in ["parent_data", "child1_data", "child2_data"]
+            for data in csm_p.data_names
+        ]
+    )
+
+    # unmerge
+    unmerged = csm_p.unmerge()
+
+    # check if data is restored correctly
+    assert len(csm_p.data_names) == 1
+    assert "parent_data" in csm_p.data_names
+    assert np.all(csm_p.get_data("parent_data") == data_p)
+
+    for csm in unmerged:
+        if csm.name == "child3":
+            assert len(csm.data_names) == 0
+        else:
+            assert len(csm.data_names) == 1
+            assert f"{csm.name}_data" in csm.data_names
+            if csm.name == "child1":
+                assert np.all(csm.get_data("child1_data") == data_c1)
+            else:
+                assert np.all(csm.get_data("child2_data") == data_c2)
+
+
 # todo:
-#  test special case where both have data on the common node
-#  test special case where multiple systems with data are merged to the common node
 #  test name intersections during merge (test)
 
 

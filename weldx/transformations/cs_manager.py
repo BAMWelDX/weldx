@@ -1370,7 +1370,7 @@ class CoordinateSystemManager:
             csm_sub._graph.nodes[common_node]["data"] = {
                 k: v
                 for k, v in csm_sub._graph.nodes[common_node]["data"].items()
-                if k not in ext_sub_system_data["common node parent data"]
+                if k in ext_sub_system_data["common node child data"]
             }
 
             sub_system_list.append(csm_sub)
@@ -1552,7 +1552,7 @@ class CoordinateSystemManager:
 
         subsystem_data = {
             "common node": common_node,
-            "common node parent data": list(data_parent.keys()),
+            "common node child data": list(data_child.keys()),
             "root": other.root_system_name,
             "time_ref": other.reference_time,
             "neighbors": other.neighbors(common_node),
@@ -1824,7 +1824,7 @@ class CoordinateSystemManager:
             self._graph.nodes[common_node]["data"] = {
                 k: v
                 for k, v in self._graph.nodes[common_node]["data"].items()
-                if k in sub_system_data["common node parent data"]
+                if k not in sub_system_data["common node child data"]
             }
 
         self._sub_system_data_dict = {}

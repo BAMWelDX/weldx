@@ -329,11 +329,6 @@ class CoordinateSystemManagerConverter(WeldxConverter):
                     for k, v in obj.graph.nodes[cs]["data"].items()
                 ]
 
-            # spatial_data = [
-            #    dict(name=k, coordinate_system=v.coordinate_system_name, data=v.data)
-            #    for k, v in obj._data.items()
-            # ]
-
         tree = {
             "name": obj.name,
             "reference_time": obj.reference_time,
