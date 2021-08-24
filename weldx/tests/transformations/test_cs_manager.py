@@ -2291,6 +2291,50 @@ def test_get_data_exceptions(arguments, exception_type, test_name):
         csm.get_data(*arguments)
 
 
+# test_merge_with_data -----------------------------------------------------------------
+
+
+@pytest.mark.parametrize("node_parent", ["a", "b"])
+@pytest.mark.parametrize("node_child", ["x", "y"])
+@pytest.mark.parametrize("data_parent", [True, False])
+@pytest.mark.parametrize("data_index", [0, 1])
+def test_merge_with_data(node_parent, node_child, data_parent, data_index):
+    def _create_csm(nodes, name):
+        csm = CSM(nodes[0], name)
+        csm.create_cs(nodes[1], nodes[0])
+        csm.create_cs(nodes[2], nodes[0])
+        return csm
+
+    parent_nodes = ["a", "b", "c"]
+    csm_parent = _create_csm(parent_nodes, "csm_parent")
+
+    child_nodes = ["x", "y", "z"]
+    child_nodes = [node if node != node_child else node_parent for node in child_nodes]
+    csm_child = _create_csm(child_nodes, "csm_child")
+
+    data = [[0, 1, 2], [3, 4, 5]]
+    data_name = "data"
+    if data_parent:
+        csm_parent.assign_data(data, data_name, parent_nodes[data_index])
+    else:
+        csm_child.assign_data(data, data_name, child_nodes[data_index])
+
+    csm_parent.merge(csm_child)
+
+    assert data_name in csm_parent.data_names
+
+    csm_child_unmerged = csm_parent.unmerge()[0]
+
+    if data_parent:
+        assert data_name in csm_parent.data_names
+        assert data_name not in csm_child_unmerged.data_names
+        assert np.all(csm_parent.get_data(data_name) == data)
+    else:
+        assert data_name not in csm_parent.data_names
+        assert data_name in csm_child_unmerged.data_names
+        assert np.all(csm_child_unmerged.get_data(data_name) == data)
+
+
 # test_interp_time ---------------------------------------------------------------------
 
 

@@ -1052,6 +1052,9 @@ class CoordinateSystemManager:
 
         """
         data_struct = self._data[data_name]
+        for node in self._graph.nodes:
+            n = self._graph.nodes[node]
+
         if (
             target_coordinate_system_name is None
             or target_coordinate_system_name == data_struct.coordinate_system_name
