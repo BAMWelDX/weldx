@@ -17,7 +17,6 @@ from jsonschema import ValidationError
 
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 from weldx.util import inherit_docstrings
-
 from .util import get_schema_path, get_yaml_header, view_tree
 
 __all__ = [
@@ -187,7 +186,7 @@ class WeldxFile(UserDict):
 
     @property
     def mode(self) -> str:
-        """Open mode of file, one of read or read/write."""
+        """File operation mode: reading or reading/writing mode, one of "r" or "rw"."""
         return self._mode
 
     @property
@@ -340,7 +339,7 @@ class WeldxFile(UserDict):
             Optional software used to make the change.
 
         Notes
-        --------
+        -----
         The software entry will be inferred from the constructor or, if not defined,
         from ``software_history_entry``.
 
@@ -373,7 +372,7 @@ class WeldxFile(UserDict):
 
         Returns
         -------
-        attrdict :
+        MutableMapping :
             This dictionary wrapped such, that all of its keys can be accessed as
             properties.
 
@@ -525,3 +524,101 @@ class _HeaderVisualizer:
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
         print(get_yaml_header(buff))
+
+
+# Methods of UserDict do not follow the NumPy doc convention.
+WeldxFile.keys.__doc__ = """Return a set of keys/attributes stored in this file.
+Returns
+-------
+keys :
+    all keys stored at the root of this file.
+"""
+
+WeldxFile.clear.__doc__ = """Remove all data from file."""
+
+WeldxFile.copy.__doc__ = """Copies the file."""  # TODO: interface
+
+WeldxFile.get.__doc__ = """Gets data attached to given key from file.
+
+Parameters
+----------
+key :
+    The name of the data.
+default :
+    The default is being returned in case the given key cannot be found.
+
+Raises
+------
+KeyError
+    Raised if the given key cannot be found and no default was provided.
+"""
+
+WeldxFile.update.__doc__ = """Update D from mapping/iterable E and F.
+
+Parameters
+----------
+mapping :
+
+F:
+
+Notes
+-----
+If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
+If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+In either case, this is followed by: for k, v in F.items(): D[k] = v
+"""
+
+# TODO: not writable
+# WeldxFile.fromkeys.__doc__ = """Constructs a file from given keys.
+"""
+Parameters
+----------
+keys :
+    list of key names
+value :
+    default value to fill the keys with.
+
+Examples
+--------
+# TODO:
+"""
+
+WeldxFile.items.__doc__ = """Returns a set-like object providing a view on this files items.
+
+Returns
+-------
+items :
+    view on items.
+"""
+
+WeldxFile.setdefault.__doc__ = """Sets a default for given name.
+
+The passed default object will be returned in case the requested key is not present
+in the file.
+
+Parameters
+----------
+key :
+    key name
+default :
+    object to return in case key is not present in the file.
+"""
+
+WeldxFile.pop.__doc__ = """Get and remove the given key from the file.
+
+Parameters
+----------
+key :
+    key name
+default :
+    object to return in case key is not present in the file.
+"""
+
+WeldxFile.popitem.__doc__ = """Removes the item that was last inserted into the file.
+
+Notes
+-----
+In versions before 3.7, the popitem() method removes a random item.
+"""
+
+WeldxFile.values.__doc__ = """Returns a view list like object of the file content."""
