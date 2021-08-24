@@ -2320,10 +2320,13 @@ def test_merge_with_data(node_parent, node_child, data_parent, data_index):
 
     csm_parent.merge(csm_child)
 
+    # check data after merge
     assert data_name in csm_parent.data_names
+    assert np.all(csm_parent.get_data(data_name) == data)
 
     csm_child_unmerged = csm_parent.unmerge()[0]
 
+    # check data after unmerging
     if data_parent:
         assert data_name in csm_parent.data_names
         assert data_name not in csm_child_unmerged.data_names

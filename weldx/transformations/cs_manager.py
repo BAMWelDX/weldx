@@ -85,7 +85,6 @@ class CoordinateSystemManager:
             time_ref = pd.Timestamp(time_ref)
         self._reference_time = time_ref
 
-        self._data: Dict[str, CoordinateSystemManager.CoordinateSystemData] = {}
         self._root_system_name = root_coordinate_system_name
 
         self._sub_system_data_dict: Dict[str, Dict] = {}
@@ -142,7 +141,7 @@ class CoordinateSystemManager:
             f"<CoordinateSystemManager>\nname:\n\t{self._name}\n"
             f"reference time:\n\t {self.reference_time}\n"
             f"coordinate systems:\n\t {self.coordinate_system_names}\n"
-            f"data:\n\t {self._data!r}\n"
+            f"data:\n\t {self.data_names}\n"
             f"sub systems:\n\t {self._sub_system_data_dict.keys()}\n"
             f")"
         )
@@ -253,7 +252,7 @@ class CoordinateSystemManager:
 
     def _add_coordinate_system_node(self, coordinate_system_name):
         self._check_new_coordinate_system_name(coordinate_system_name)
-        self._graph.add_node(coordinate_system_name, data=[])
+        self._graph.add_node(coordinate_system_name, data={})
 
     def _add_edges(self, node_from: str, node_to: str, lcs: LocalCoordinateSystem):
         """Add an edge to the internal graph.
@@ -715,15 +714,14 @@ class CoordinateSystemManager:
         #   interpolated or not?
         if not isinstance(data_name, str):
             raise TypeError("The data name must be a string.")
-        if data_name in self._data:
+        if data_name in self.data_names:
             raise ValueError(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(coordinate_system_name)
 
         if not isinstance(data, (xr.DataArray, SpatialData)):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
-        self._data[data_name] = self.CoordinateSystemData(coordinate_system_name, data)
-        self._graph.nodes[coordinate_system_name]["data"].append(data_name)
+        self._graph.nodes[coordinate_system_name]["data"][data_name] = data
 
     def create_cs(
         self,
@@ -1029,7 +1027,17 @@ class CoordinateSystemManager:
             Names of the attached data sets
 
         """
-        return list(self._data.keys())
+        data_names = []
+        for node in self._graph.nodes:
+            data_names += list(self._graph.nodes[node]["data"].keys())
+        return data_names
+
+    def _find_data(self, data_name: str) -> CoordinateSystemData:
+        for node in self._graph.nodes:
+            for name, data in self._graph.nodes[node]["data"].items():
+                if name == data_name:
+                    return self.CoordinateSystemData(node, data)
+        raise KeyError(f"Could not find data with name '{data_name}'.")
 
     def get_data(
         self, data_name, target_coordinate_system_name=None
@@ -1051,9 +1059,7 @@ class CoordinateSystemManager:
             Transformed data
 
         """
-        data_struct = self._data[data_name]
-        for node in self._graph.nodes:
-            n = self._graph.nodes[node]
+        data_struct = self._find_data(data_name)
 
         if (
             target_coordinate_system_name is None
@@ -1081,7 +1087,8 @@ class CoordinateSystemManager:
             Name of the reference coordinate system
 
         """
-        return self._data[data_name].coordinate_system_name
+        data_struct = self._find_data(data_name)
+        return data_struct.coordinate_system_name
 
     def _get_cs_on_edge(
         self,
@@ -1359,6 +1366,13 @@ class CoordinateSystemManager:
                 graph=self._graph.subgraph(members).copy(),
                 subsystems=ext_sub_system_data["sub system data"],
             )
+            common_node = ext_sub_system_data["common node"]
+            csm_sub._graph.nodes[common_node]["data"] = {
+                k: v
+                for k, v in csm_sub._graph.nodes[common_node]["data"].items()
+                if k not in ext_sub_system_data["common node parent data"]
+            }
+
             sub_system_list.append(csm_sub)
 
         return sub_system_list
@@ -1523,16 +1537,25 @@ class CoordinateSystemManager:
                 "Both instances must have exactly one common coordinate system. "
                 f"Found the following common systems: {intersection}"
             )
+        common_node = intersection[0]
+
+        # todo: check for identical data names
+
+        data_parent = self._graph.nodes[common_node]["data"]
+        data_child = other.graph.nodes[common_node]["data"]
+        joined_data = {**data_parent, **data_child}
 
         from networkx import compose
 
         self._graph = compose(self._graph, other.graph)
+        self._graph.nodes[common_node]["data"] = joined_data
 
         subsystem_data = {
-            "common node": intersection[0],
+            "common node": common_node,
+            "common node parent data": list(data_parent.keys()),
             "root": other.root_system_name,
             "time_ref": other.reference_time,
-            "neighbors": other.neighbors(intersection[0]),
+            "neighbors": other.neighbors(common_node),
             "original members": other.coordinate_system_names,
             "sub system data": other.sub_system_data,
         }
@@ -1797,6 +1820,12 @@ class CoordinateSystemManager:
         for _, sub_system_data in self._sub_system_data_dict.items():
             for lcs in sub_system_data["neighbors"]:
                 cs_delete += [lcs]
+            common_node = sub_system_data["common node"]
+            self._graph.nodes[common_node]["data"] = {
+                k: v
+                for k, v in self._graph.nodes[common_node]["data"].items()
+                if k in sub_system_data["common node parent data"]
+            }
 
         self._sub_system_data_dict = {}
         for lcs in cs_delete:
