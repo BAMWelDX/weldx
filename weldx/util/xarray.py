@@ -174,6 +174,8 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
         True if all matrices are orthogonal.
 
     """
+    if not set(dims).issubset(set(da.dims)):
+        raise ValueError(f"Could not find {dims=} in DataArray.")
     eye = np.eye(len(da.coords[dims[0]]), len(da.coords[dims[1]]))
     return np.allclose(xr_matmul(da, da, dims, trans_b=True), eye)
 
@@ -556,15 +558,15 @@ def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
 
 
 def xr_interp_orientation_in_time(
-    dsx: xr.DataArray, times: types_time_like
+    da: xr.DataArray, time: types_time_like
 ) -> xr.DataArray:
     """Interpolate an xarray DataArray that represents orientation data in time.
 
     Parameters
     ----------
-    dsx :
+    da :
         xarray DataArray containing the orientation as matrix
-    times :
+    time :
         Time data
 
     Returns
@@ -573,41 +575,43 @@ def xr_interp_orientation_in_time(
         Interpolated data
 
     """
-    if "time" not in dsx.coords:
-        return dsx
+    if "time" not in da.dims:
+        return da
+    if len(da.time) == 1:  # remove "time dimension" for static case
+        return da.isel({"time": 0})
 
-    times = Time(times).as_pandas_index()
-    times_ds = Time(dsx).as_pandas_index()
-    time_ref = dsx.weldx.time_ref
+    time = Time(time).as_pandas_index()
+    time_da = Time(da).as_pandas_index()
+    time_ref = da.weldx.time_ref
 
-    if len(times_ds) > 1:
-        # extract intersecting times and add time range boundaries of the data set
-        times_ds_limits = pd.Index([times_ds.min(), times_ds.max()])
-        times_union = times.union(times_ds_limits)
-        times_intersect = times_union[
-            (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])
-        ]
+    if not len(time_da) > 1:
+        raise ValueError("Invalid time format for interpolation.")
 
-        # interpolate rotations in the intersecting time range
-        rotations_key = Rot.from_matrix(dsx.transpose(..., "c", "v").data)
-        times_key = times_ds.view(np.int64)
-        rotations_interp = Slerp(times_key, rotations_key)(
-            times_intersect.view(np.int64)
-        )
-        dsx_out = xr_3d_matrix(rotations_interp.as_matrix(), times_intersect)
-    else:
-        # TODO: this case is not really well defined, maybe avoid?
-        dsx_out = dsx
+    # extract intersecting times and add time range boundaries of the data set
+    times_ds_limits = pd.Index([time_da.min(), time_da.max()])
+    times_union = time.union(times_ds_limits)
+    times_intersect = times_union[
+        (times_union >= times_ds_limits[0]) & (times_union <= times_ds_limits[1])
+    ]
+
+    # interpolate rotations in the intersecting time range
+    rotations_key = Rot.from_matrix(da.transpose(..., "time", "c", "v").data)
+    times_key = time_da.view(np.int64)
+    rotations_interp = Slerp(times_key, rotations_key)(times_intersect.view(np.int64))
+    da = xr_3d_matrix(rotations_interp.as_matrix(), times_intersect)
 
     # use interp_like to select original time values and correctly fill time dimension
-    dsx_out = xr_interp_like(dsx_out, {"time": times}, fillna=True)
+    da = xr_interp_like(da, {"time": time}, fillna=True)
 
     # resync and reset to correct format
     if time_ref:
-        dsx_out.weldx.time_ref = time_ref
-    dsx_out = dsx_out.weldx.time_ref_restore()
+        da.weldx.time_ref = time_ref
+    da = da.weldx.time_ref_restore().transpose(..., "time", "c", "v")
 
-    return dsx_out.transpose(..., "c", "v")
+    if len(da.time) == 1:  # remove "time dimension" for static case
+        return da.isel({"time": 0})
+
+    return da
 
 
 def xr_interp_coordinates_in_time(
@@ -628,12 +632,19 @@ def xr_interp_coordinates_in_time(
         Interpolated data
 
     """
+    if "time" not in da.dims:
+        return da
+
     times = Time(times).as_pandas_index()
     da = da.weldx.time_ref_unset()
     da = xr_interp_like(
         da, {"time": times}, assume_sorted=True, broadcast_missing=False, fillna=True
     )
     da = da.weldx.time_ref_restore()
+
+    if len(da.time) == 1:  # remove "time dimension" for static cases
+        return da.isel({"time": 0})
+
     return da
 
 
@@ -678,7 +689,7 @@ class WeldxAccessor:
     def time_ref_restore(self) -> xr.DataArray:
         """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp."""
         da = self._obj.copy()
-        if "time" not in da.coords:
+        if "time" not in da.dims:
             return da
 
         if is_datetime64_dtype(da.time):
@@ -701,7 +712,7 @@ class WeldxAccessor:
     def time_ref(self) -> Union[pd.Timestamp, None]:
         """Get the time_ref value or `None` if not set."""
         da = self._obj
-        if "time" in da.coords and "time_ref" in da.time.attrs:
+        if "time" in da.dims and "time_ref" in da.time.attrs:
             return da.time.attrs["time_ref"]
 
         return None

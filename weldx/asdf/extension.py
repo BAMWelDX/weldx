@@ -1,3 +1,4 @@
+"""ASDF-extensions for weldx types."""
 from typing import List
 
 from asdf.extension import ManifestExtension

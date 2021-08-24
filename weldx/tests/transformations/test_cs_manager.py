@@ -1357,9 +1357,7 @@ def test_get_local_coordinate_system_time_dep(
     """
     # setup -------------------------------------------
     # set reference times
-    for i, _ in enumerate(time_refs):
-        if time_refs[i] is not None:
-            time_refs[i] = pd.Timestamp(time_refs[i])
+    time_refs = [t if t is None else pd.Timestamp(t) for t in time_refs]
 
     # moves in positive x-direction
     time_1 = TDI([0, 3, 12], "D")
