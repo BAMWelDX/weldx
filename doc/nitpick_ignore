@@ -1,3 +1,6 @@
+# weldx
+py:class weldx.GmawProcess
+
 # matplotlib
 py:class matplotlib.axes.Axes
 py:class matplotlib.axes._axes.Axes
