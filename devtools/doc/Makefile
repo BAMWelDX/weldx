@@ -32,7 +32,6 @@ clean:
 html:
 	mkdir -p $(BUILD_DIR)/html $(BUILD_DIR)/doctrees
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILD_DIR)/html $(FILES)
-	sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
 
 	@echo
 	@echo "Build finished. The HTML pages are in build/html."
