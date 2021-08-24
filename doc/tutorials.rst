@@ -9,7 +9,6 @@ The welding example tutorials provide an overview of common welding related task
 .. toctree::
     :numbered:
     :maxdepth: 1
-    :caption: Welding examples
 
     tutorials/welding_example_01_basics
     tutorials/custom_metadata
@@ -26,7 +25,6 @@ The API tutorials provide more detailed usages and examples of core ``WelDX`` co
 .. toctree::
     :numbered:
     :maxdepth: 1
-    :caption: API tutorials
 
     tutorials/transformations_01_coordinate_systems
     tutorials/transformations_02_coordinate_system_manager
@@ -43,6 +41,5 @@ Analysis Tutorials
 
 .. toctree::
     :maxdepth: 1
-    :caption: Analysis tutorials
 
     tutorials/experiment_design_01
