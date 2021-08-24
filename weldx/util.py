@@ -520,7 +520,7 @@ def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
         True if all matrices are orthogonal.
 
     """
-    eye = np.eye(len(da.coords[dims[0]]), len(da.coords[dims[1]]))
+    eye = np.eye(len(da.dims[dims[0]]), len(da.dims[dims[1]]))
     return np.allclose(xr_matmul(da, da, dims, trans_b=True), eye)
 
 
