@@ -35,6 +35,8 @@
   overlap between the interpolation time range and the coordinate systems time range. This also affects the results of
   some `CoordinateSystemManager` methods (``get_cs``
   , ``interp_time``) [[#476]](https://github.com/BAMWelDX/weldx/pull/476)
+- xarray implementations for the `LocalCoordinateSystem` now operate on time as a dimension instead of
+  coordinates [[#486]](https://github.com/BAMWelDX/weldx/pull/486)
 
 ### fixes
 
