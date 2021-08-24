@@ -87,3 +87,55 @@ def get_test_name(param: Any) -> str:
     if isinstance(param, str) and param[0] == "#":
         return param[1:]
     return ""
+
+
+def matrix_is_close(mat_a, mat_b, abs_tol=1e-9) -> bool:
+    """Check if a matrix is close or equal to another matrix.
+
+    Parameters
+    ----------
+    mat_a :
+        First matrix
+    mat_b :
+        Second matrix
+    abs_tol :
+        Absolute tolerance (Default value = 1e-9)
+
+    Returns
+    -------
+    bool
+        True or False
+
+    """
+    mat_a = np.array(mat_a, dtype=float)
+    mat_b = np.array(mat_b, dtype=float)
+
+    if mat_a.shape != mat_b.shape:
+        return False
+    return np.all(np.isclose(mat_a, mat_b, atol=abs_tol)).__bool__()
+
+
+def vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
+    """Check if a vector is close or equal to another vector.
+
+    Parameters
+    ----------
+    vec_a :
+        First vector
+    vec_b :
+        Second vector
+    abs_tol :
+        Absolute tolerance (Default value = 1e-9)
+
+    Returns
+    -------
+    bool
+        True or False
+
+    """
+    vec_a = np.array(vec_a, dtype=float)
+    vec_b = np.array(vec_b, dtype=float)
+
+    if vec_a.size != vec_b.size:
+        return False
+    return np.all(np.isclose(vec_a, vec_b, atol=abs_tol)).__bool__()

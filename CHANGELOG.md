@@ -12,6 +12,8 @@
   interpolation [[#440]](https://github.com/BAMWelDX/weldx/pull/440)
 - `LocalCoordinateSystem.from_axis_vectors`
   and `CoordinateSystemManager.create_cs_from_axis_vectors` [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
+- added PyTest flags to use ``WeldxFile`` internally in ``asdf.util.read_buffer`` and ``asdf.util.write_buffer``
+  [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
 
 ### removed
 
@@ -25,6 +27,8 @@
 - `create_cs_from_xyz`, `create_cs_from_xy_and_orientation`, `create_cs_from_yz_and_orientation` and
   `create_cs_from_xz_and_orientation` from `CoordinateSystemManager`. Use `create_cs_from_axis_vectors`
   instead. [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
+- `is_column_in_matrix`, `is_row_in_matrix`, `to_float_array`, `to_list`, `matrix_is_close`, `vector_is_close`
+  and `triangulate_geometry` from `weldx.util` [[#490]](https://github.com/BAMWelDX/weldx/pull/490)
 
 ### changes
 
@@ -35,6 +39,10 @@
   overlap between the interpolation time range and the coordinate systems time range. This also affects the results of
   some `CoordinateSystemManager` methods (``get_cs``
   , ``interp_time``) [[#476]](https://github.com/BAMWelDX/weldx/pull/476)
+- `WeldxAccessor.time_ref` setter now raises a `TypeError` if `None` is passed to it
+  [[#489]](https://github.com/BAMWelDX/weldx/pull/489)
+- move xarray related utility functions into `weldx.util.xarray` and all other ones into `weldx.util.util`. Content from
+  both submodules can still be accessed using `weldx.util` [[#490]](https://github.com/BAMWelDX/weldx/pull/490)
 - xarray implementations for the `LocalCoordinateSystem` now operate on time as a dimension instead of
   coordinates [[#486]](https://github.com/BAMWelDX/weldx/pull/486)
 
@@ -42,12 +50,14 @@
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
   representation. Also tweaked efficiency by not writing binary
-  blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459).
+  blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459), [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
 
 ### documentation
 
 - added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and
   solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
+- split API documentation into user classes/functions and a full API reference
+  [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
 
 ### ASDF
 
