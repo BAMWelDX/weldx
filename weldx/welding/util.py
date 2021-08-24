@@ -37,7 +37,7 @@ def sine(
 
     Returns
     -------
-    ts :
+    weldx.TimeSeries :
 
     """
     if bias is None:

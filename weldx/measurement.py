@@ -893,7 +893,7 @@ class MeasurementChain:
 
         Returns
         -------
-        data :
+        weldx.TimeSeries :
             The requested data
 
         """
