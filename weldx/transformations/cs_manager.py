@@ -1032,7 +1032,9 @@ class CoordinateSystemManager:
             data_names += list(self._graph.nodes[node]["data"].keys())
         return data_names
 
-    def _find_data(self, data_name: str) -> CoordinateSystemData:
+    def _find_data(
+        self, data_name: str
+    ) -> CoordinateSystemManager.CoordinateSystemData:
         for node in self._graph.nodes:
             for name, data in self._graph.nodes[node]["data"].items():
                 if name == data_name:

@@ -2394,10 +2394,8 @@ def test_unmerge_multi_data():
 
     # check after merge
     assert all(
-        [
-            data in ["parent_data", "child1_data", "child2_data"]
-            for data in csm_p.data_names
-        ]
+        data in ["parent_data", "child1_data", "child2_data"]
+        for data in csm_p.data_names
     )
 
     # unmerge
