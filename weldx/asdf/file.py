@@ -236,31 +236,30 @@ class WeldxFile(UserDict):
 
         Examples
         --------
+        Let us define a custom softare entry and use it during file creation.
+
         >>> import weldx
-
-        Define a custom softare entry:
-
-        >>> software = dict(name="MyFancyPackage", author="Me", \
-                homepage="https://startpage.com", version="1.0")
+        >>> software = dict(name="MyFancyPackage", author="Me",
+        ...        homepage="https://startpage.com", version="1.0")
         >>> f = weldx.WeldxFile(software_history_entry=software)
         >>> f.add_history_entry("we made some change")
         >>> f.history #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-         [{'description': 'we made some change', \
-           'time': datetime.datetime(...), \
-           'software': {'name': 'MyFancyPackage', 'author': 'Me', \
+         [{'description': 'we made some change',
+           'time': datetime.datetime(...),
+           'software': {'name': 'MyFancyPackage', 'author': 'Me',
            'homepage': 'https://startpage.com', 'version': '1.0'}}]
 
         We can also change the software on the fly:
-        >>> software_new = dict(name="MyTool", author="MeSoft", \
-                homepage="https://startpage.com", version="1.0")
+        >>> software_new = dict(name="MyTool", author="MeSoft",
+        ...                     homepage="https://startpage.com", version="1.0")
         >>> f.add_history_entry("another change using mytool", software_new)
 
         Lets inspect the last history entry:
 
         >>> f.history[-1] #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'description': 'another change using mytool', \
-         'time': datetime.datetime(...), \
-         'software': {'name': 'MyTool', 'author': 'MeSoft', \
+        {'description': 'another change using mytool',
+         'time': datetime.datetime(...),
+         'software': {'name': 'MyTool', 'author': 'MeSoft',
          'homepage': 'https://startpage.com', 'version': '1.0'}}
 
         """
@@ -404,7 +403,7 @@ class WeldxFile(UserDict):
     def write_to(
         self, fd: Optional[types_path_and_file_like] = None, **write_args
     ) -> Optional[BytesIO]:
-        """Write current weldx file to given file name or file type.
+        """Write current contents to given file name or file type.
 
         Parameters
         ----------
