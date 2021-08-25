@@ -54,42 +54,36 @@ class CoordinateSystemManager:
         time_ref: pd.Timestamp
         members: List[str]
         sub_systems: Dict[str, CoordinateSystemManager.SubsystemData]
-        nodes: List[str] = None
 
         def __eq__(self, other):
+            def _cmp_list(l1, l2):
+                if len(l1) != len(l2):
+                    return False
+                for v in l1:
+                    if v not in l2:
+                        return False
+                return True
+
             if not isinstance(other, CoordinateSystemManager.SubsystemData):
                 raise NotImplementedError
-            if self.root != other.root:
+
+            if len(self.sub_systems) != len(other.sub_systems):
                 return False
-            if self.common_node != other.common_node:
-                return False
-            for data in self.common_node_data:
-                if data not in other.common_node_data:
-                    return False
-            for neighbor in self.common_node_neighbors:
-                if neighbor not in other.common_node_neighbors:
-                    return False
-            if self.time_ref != other.time_ref:
-                return False
-            for member in self.members:
-                if member not in other.members:
-                    return False
             for k, v in self.sub_systems.items():
                 other_v = other.sub_systems.get(k)
                 if other_v is None:
                     return False
                 if v != other_v:
                     return False
-            if self.nodes is None:
-                if other.nodes is not None:
-                    return False
-            else:
-                if other.nodes is None:
-                    return False
-                for node in self.nodes:
-                    if node not in other.nodes:
-                        return False
-            return True
+
+            return (
+                self.root == other.root
+                and self.common_node == other.common_node
+                and _cmp_list(self.common_node_data, other.common_node_data)
+                and _cmp_list(self.common_node_neighbors, other.common_node_neighbors)
+                and self.time_ref == other.time_ref
+                and _cmp_list(self.members, other.members)
+            )
 
     _id_gen = itertools.count()
 
@@ -410,7 +404,7 @@ class CoordinateSystemManager:
             for cs_name in sub_system_data.common_node_neighbors:
                 potential_members += self.get_child_system_names(cs_name, False)
 
-            sub_system_data.nodes = (
+            sub_system_data.members = (
                 potential_members + sub_system_data.common_node_neighbors
             )
 
@@ -435,13 +429,13 @@ class CoordinateSystemManager:
             List of all the sub systems coordinate systems.
 
         """
-        all_members = ext_sub_system_data.nodes
+        all_members = ext_sub_system_data.members
         for _, other_sub_system_data in ext_sub_system_data_dict.items():
             if other_sub_system_data.common_node in all_members:
                 all_members = [
                     cs_name
                     for cs_name in all_members
-                    if cs_name not in other_sub_system_data.nodes
+                    if cs_name not in other_sub_system_data.members
                 ]
 
         all_members += [ext_sub_system_data.common_node]
