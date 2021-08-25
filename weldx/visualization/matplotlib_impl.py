@@ -127,7 +127,7 @@ def draw_coordinate_system_matplotlib(
     """
     if not (show_vectors or show_origin):
         return
-    if "time" in coordinate_system.dataset.coords:
+    if "time" in coordinate_system.dataset.dims:
         if time_idx is None:
             time_idx = 0
         if isinstance(time_idx, int):

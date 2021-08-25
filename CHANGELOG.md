@@ -43,6 +43,8 @@
   [[#489]](https://github.com/BAMWelDX/weldx/pull/489)
 - move xarray related utility functions into `weldx.util.xarray` and all other ones into `weldx.util.util`. Content from
   both submodules can still be accessed using `weldx.util` [[#490]](https://github.com/BAMWelDX/weldx/pull/490)
+- xarray implementations for the `LocalCoordinateSystem` now operate on time as a dimension instead of
+  coordinates [[#486]](https://github.com/BAMWelDX/weldx/pull/486)
 
 ### fixes
 

@@ -40,7 +40,7 @@ class LocalCoordinateSystemConverter(WeldxConverter):
             #         ctx.set_array_storage(coordinates.data, "inline")
             tree["coordinates"] = coordinates
 
-        if "time" in obj.dataset.coords:
+        if "time" in obj.dataset.dims:
             tree["time"] = obj.time.as_timedelta_index()
 
         if obj.reference_time is not None:
