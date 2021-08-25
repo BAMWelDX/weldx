@@ -45,13 +45,6 @@ class CoordinateSystemManager:
 
     _id_gen = itertools.count()
 
-    @dataclass
-    class CoordinateSystemData:
-        """Class that stores data and the coordinate system, the data is assigned to."""
-
-        coordinate_system_name: str
-        data: xr.DataArray
-
     def __init__(
         self,
         root_coordinate_system_name: str,
@@ -1034,11 +1027,12 @@ class CoordinateSystemManager:
 
     def _find_data(
         self, data_name: str
-    ) -> CoordinateSystemManager.CoordinateSystemData:
-        for node in self._graph.nodes:
-            for name, data in self._graph.nodes[node]["data"].items():
+    ) -> Tuple[str, Union[xr.DataArray, SpatialData]]:
+        """Get the data and its owning systems name."""
+        for cs in self._graph.nodes:
+            for name, data in self._graph.nodes[cs]["data"].items():
                 if name == data_name:
-                    return self.CoordinateSystemData(node, data)
+                    return cs, data
         raise KeyError(f"Could not find data with name '{data_name}'.")
 
     def get_data(
@@ -1061,17 +1055,17 @@ class CoordinateSystemManager:
             Transformed data
 
         """
-        data_struct = self._find_data(data_name)
+        data_cs_name, data = self._find_data(data_name)
 
         if (
             target_coordinate_system_name is None
-            or target_coordinate_system_name == data_struct.coordinate_system_name
+            or target_coordinate_system_name == data_cs_name
         ):
-            return data_struct.data
+            return data
 
         return self.transform_data(
-            data_struct.data,
-            data_struct.coordinate_system_name,
+            data,
+            data_cs_name,
             target_coordinate_system_name,
         )
 
@@ -1089,8 +1083,7 @@ class CoordinateSystemManager:
             Name of the reference coordinate system
 
         """
-        data_struct = self._find_data(data_name)
-        return data_struct.coordinate_system_name
+        return self._find_data(data_name)[0]
 
     def _get_cs_on_edge(
         self,
