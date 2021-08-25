@@ -72,7 +72,7 @@ class CoordinateSystemManager:
                 return True
 
             if not isinstance(other, CoordinateSystemManager.SubsystemData):
-                raise NotImplementedError
+                return NotImplemented
 
             if len(self.sub_systems) != len(other.sub_systems):
                 return False
