@@ -48,12 +48,19 @@ class CoordinateSystemManager:
         """Contains information about subsystems."""
 
         root: str
+        """Name of the root coordinate system"""
         common_node: str
+        """Name of the common coordinate system"""
         common_node_data: List[str]
+        """Names of the subsystems data at the common coordinate system"""
         common_node_neighbors: List[str]
+        """Names of the subsystems coordinate systems connected to the common system"""
         time_ref: pd.Timestamp
+        """The reference time of the subsystem"""
         members: List[str]
+        """Names of all coordinate systems that belong to the subsystem"""
         sub_systems: Dict[str, CoordinateSystemManager.SubsystemData]
+        """Dictionary of nested subsystems"""
 
         def __eq__(self, other):
             def _cmp_list(l1, l2):
