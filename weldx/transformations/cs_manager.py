@@ -122,17 +122,13 @@ class CoordinateSystemManager:
 
         if coordinate_system_manager_name is None:
             coordinate_system_manager_name = self._generate_default_name()
-        self._name = coordinate_system_manager_name
         if time_ref is not None and not isinstance(time_ref, pd.Timestamp):
             time_ref = pd.Timestamp(time_ref)
+
+        self._name = coordinate_system_manager_name
         self._reference_time = time_ref
-
         self._root_system_name = root_coordinate_system_name
-
-        self._sub_system_data_dict: Dict[
-            str, CoordinateSystemManager.SubsystemData
-        ] = {}
-
+        self._sub_systems: Dict[str, CoordinateSystemManager.SubsystemData] = {}
         self._graph = DiGraph()
         self._add_coordinate_system_node(root_coordinate_system_name)
 
@@ -172,7 +168,7 @@ class CoordinateSystemManager:
         csm = cls(root_coordinate_system_name, coordinate_system_manager_name, time_ref)
 
         if subsystems is not None:
-            csm._sub_system_data_dict = subsystems
+            csm._sub_systems = subsystems
 
         if graph is not None:
             csm._graph = graph
@@ -186,7 +182,7 @@ class CoordinateSystemManager:
             f"reference time:\n\t {self.reference_time}\n"
             f"coordinate systems:\n\t {self.coordinate_system_names}\n"
             f"data:\n\t {self.data_names}\n"
-            f"sub systems:\n\t {self._sub_system_data_dict.keys()}\n"
+            f"sub systems:\n\t {self._sub_systems.keys()}\n"
             f")"
         )
 
@@ -373,7 +369,6 @@ class CoordinateSystemManager:
         for subsystem_name, subsystem_data in data.items():
             if subsystem_name not in other:
                 return False
-            print(other)
             if subsystem_data != other[subsystem_name]:
                 return False
         return True
@@ -405,7 +400,7 @@ class CoordinateSystemManager:
             Extended copy of the internal sub system data.
 
         """
-        sub_system_data_dict = deepcopy(self._sub_system_data_dict)
+        sub_system_data_dict = deepcopy(self._sub_systems)
         for _, sub_system_data in sub_system_data_dict.items():
             potential_members = []
             for cs_name in sub_system_data.common_node_neighbors:
@@ -551,7 +546,7 @@ class CoordinateSystemManager:
             Number of attached subsystems.
 
         """
-        return len(self._sub_system_data_dict)
+        return len(self._sub_systems)
 
     @property
     def reference_time(self) -> pd.Timestamp:
@@ -580,7 +575,7 @@ class CoordinateSystemManager:
     @property
     def sub_system_data(self) -> Dict:
         """Get a dictionary containing data about the attached subsystems."""
-        return self._sub_system_data_dict
+        return self._sub_systems
 
     @property
     def subsystem_names(self) -> List[str]:
@@ -592,7 +587,7 @@ class CoordinateSystemManager:
             List with subsystem names.
 
         """
-        return list(self._sub_system_data_dict.keys())
+        return list(self._sub_systems.keys())
 
     def add_cs(
         self,
@@ -982,7 +977,7 @@ class CoordinateSystemManager:
         from networkx import shortest_path
 
         remove_systems = []
-        for sub_system_name, sub_system_data in self._sub_system_data_dict.items():
+        for sub_system_name, sub_system_data in self._sub_systems.items():
             if (
                 coordinate_system_name in sub_system_data.members
             ) or coordinate_system_name in shortest_path(
@@ -991,7 +986,7 @@ class CoordinateSystemManager:
                 remove_systems += [sub_system_name]
 
         for sub_system_name in remove_systems:
-            del self._sub_system_data_dict[sub_system_name]
+            del self._sub_systems[sub_system_name]
 
         # delete nodes and edges
         if delete_children:
@@ -1586,7 +1581,7 @@ class CoordinateSystemManager:
         self._graph = compose(self._graph, other.graph)
         self._graph.nodes[common_node]["data"] = joined_data
 
-        self._sub_system_data_dict[other.name] = self.SubsystemData(
+        self._sub_systems[other.name] = self.SubsystemData(
             root=other.root_system_name,
             common_node=common_node,
             common_node_data=list(data_child.keys()),
@@ -1852,7 +1847,7 @@ class CoordinateSystemManager:
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
         cs_delete = []
-        for _, sub_system_data in self._sub_system_data_dict.items():
+        for _, sub_system_data in self._sub_systems.items():
             for lcs in sub_system_data.common_node_neighbors:
                 cs_delete += [lcs]
             common_node = sub_system_data.common_node
@@ -1862,7 +1857,7 @@ class CoordinateSystemManager:
                 if k not in sub_system_data.common_node_data
             }
 
-        self._sub_system_data_dict = {}
+        self._sub_systems = {}
         for lcs in cs_delete:
             self.delete_cs(lcs, True)
 
