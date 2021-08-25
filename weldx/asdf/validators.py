@@ -8,6 +8,7 @@ from asdf.util import uri_match
 
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+
 from .types import WxSyntaxError
 from .util import _get_instance_shape
 
