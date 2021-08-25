@@ -51,6 +51,8 @@
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
   representation. Also tweaked efficiency by not writing binary
   blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459), [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
+- Merging and Unmerging multiple `CoordinateSystemManager` instances did not preserve all attached data. This is now
+  fixed [[#494]](https://github.com/BAMWelDX/weldx/pull/494).
 
 ### documentation
 
