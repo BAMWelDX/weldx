@@ -78,10 +78,8 @@ class LocalCoordinateSystem(TimeDependent):
         # warn about dropped time data
         if (
             time is not None
-            and "time" not in orientation.coords
-            and (
-                isinstance(coordinates, TimeSeries) or "time" not in coordinates.coords
-            )
+            and "time" not in orientation.dims
+            and (isinstance(coordinates, TimeSeries) or "time" not in coordinates.dims)
         ):
             warnings.warn(
                 "Provided time is dropped because of the given coordinates and "
@@ -382,8 +380,8 @@ class LocalCoordinateSystem(TimeDependent):
         """Unify time axis of orientation and coordinates if both are DataArrays."""
         if (
             not isinstance(coordinates, TimeSeries)
-            and ("time" in orientation.coords)
-            and ("time" in coordinates.coords)
+            and ("time" in orientation.dims)
+            and ("time" in coordinates.dims)
             and (not np.all(orientation.time.data == coordinates.time.data))
         ):
             time_union = Time.union([orientation.time, coordinates.time])
@@ -595,7 +593,7 @@ class LocalCoordinateSystem(TimeDependent):
             Time-like data array representing the time union of the LCS
 
         """
-        if "time" in self._dataset.coords:
+        if "time" in self._dataset.dims:
             return Time(self._dataset.time, self.reference_time)
         return None
 
@@ -664,22 +662,18 @@ class LocalCoordinateSystem(TimeDependent):
         """
         return Rot.from_matrix(self.orientation.values)
 
-    def _interp_time_orientation(self, time: Time) -> Union[xr.DataArray, np.ndarray]:
+    def _interp_time_orientation(self, time: Time) -> xr.DataArray:
         """Interpolate the orientation in time."""
-        if self.orientation.ndim == 2:  # don't interpolate static
-            orientation = self.orientation
-        elif time.max() <= self.time.min():  # only use edge timestamp
-            orientation = self.orientation.values[0]
-        elif time.min() >= self.time.max():  # only use edge timestamp
-            orientation = self.orientation.values[-1]
-        else:  # full interpolation with overlapping times
-            orientation = ut.xr_interp_orientation_in_time(self.orientation, time)
+        if "time" not in self.orientation.dims:  # don't interpolate static
+            return self.orientation
+        if time.max() <= self.time.min():  # only use edge timestamp
+            return self.orientation.values[0]
+        if time.min() >= self.time.max():  # only use edge timestamp
+            return self.orientation.values[-1]
+        # full interpolation with overlapping times
+        return ut.xr_interp_orientation_in_time(self.orientation, time)
 
-        if len(orientation) == 1:  # remove "time dimension" for single value cases
-            return orientation[0].values
-        return orientation
-
-    def _interp_time_coordinates(self, time: Time) -> Union[xr.DataArray, np.ndarray]:
+    def _interp_time_coordinates(self, time: Time) -> xr.DataArray:
         """Interpolate the coordinates in time."""
         if isinstance(self.coordinates, TimeSeries):
             time_interp = Time(time, self.reference_time)
@@ -688,18 +682,15 @@ class LocalCoordinateSystem(TimeDependent):
             )
             if self.has_reference_time:
                 coordinates.weldx.time_ref = self.reference_time
-        elif self.coordinates.ndim == 1:  # don't interpolate static
-            coordinates = self.coordinates
-        elif time.max() <= self.time.min():  # only use edge timestamp
-            coordinates = self.coordinates.values[0]
-        elif time.min() >= self.time.max():  # only use edge timestamp
-            coordinates = self.coordinates.values[-1]
-        else:  # full interpolation with overlapping times
-            coordinates = ut.xr_interp_coordinates_in_time(self.coordinates, time)
-
-        if len(coordinates) == 1:  # remove "time dimension" for single value cases
-            return coordinates[0].values
-        return coordinates
+            return coordinates
+        if "time" not in self.coordinates.dims:  # don't interpolate static
+            return self.coordinates
+        if time.max() <= self.time.min():  # only use edge timestamp
+            return self.coordinates[0]
+        if time.min() >= self.time.max():  # only use edge timestamp
+            return self.coordinates[-1]
+        # full interpolation with overlapping times
+        return ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
     def interp_time(
         self,

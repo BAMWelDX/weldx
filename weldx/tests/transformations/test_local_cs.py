@@ -1426,10 +1426,18 @@ def test_coordinate_system_time_interpolation():
     )
 
     # test xr_interp_orientation_in_time for single time point interpolation
-    orientation = ut.xr_interp_orientation_in_time(
-        lcs.orientation.isel({"time": [1]}), time_0
-    )
-    assert np.allclose(orientation, orientation[1, :, :])
+    for i, _ in enumerate(time_0):
+        # test for scalar value as coordinate
+        orientation_interp = ut.xr_interp_orientation_in_time(
+            lcs.orientation.isel({"time": i}), time_0
+        )
+        assert np.allclose(orientation_interp, lcs.orientation[i])
+
+        # test for scalar value as dimension
+        orientation_interp = ut.xr_interp_orientation_in_time(
+            lcs.orientation.isel({"time": [i]}), time_0
+        )
+        assert np.allclose(orientation_interp, lcs.orientation[i])
 
     # exceptions --------------------------------
     # wrong parameter type
