@@ -1541,7 +1541,9 @@ class CoordinateSystemManager:
             )
         common_node = intersection[0]
 
-        # todo: check for identical data names
+        for name in other.data_names:
+            if name in self.data_names:
+                raise NameError(f"Both instances contain data with name '{name}'")
 
         data_parent = self._graph.nodes[common_node]["data"]
         data_child = other.graph.nodes[common_node]["data"]

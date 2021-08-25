@@ -2418,8 +2418,24 @@ def test_unmerge_multi_data():
                 assert np.all(csm.get_data("child2_data") == data_c2)
 
 
-# todo:
-#  test name intersections during merge (test)
+# test_merge_data_name_collision -------------------------------------------------------
+
+
+@pytest.mark.parametrize("data_cs_parent", ["rp", "a", "m"])
+@pytest.mark.parametrize("data_cs_child", ["rc", "b", "m"])
+def test_merge_data_name_collision(data_cs_parent, data_cs_child):
+    csm_parent = CSM("rp", "parent")
+    csm_parent.create_cs("a", "rp")
+    csm_parent.create_cs("m", "rp")
+    csm_parent.assign_data([[1, 2, 3]], "conflict", data_cs_parent)
+
+    csm_child = CSM("rc", "child")
+    csm_child.create_cs("b", "rc")
+    csm_child.create_cs("m", "rc")
+    csm_child.assign_data([[4, 5, 6]], "conflict", data_cs_child)
+
+    with pytest.raises(NameError):
+        csm_parent.merge(csm_child)
 
 
 # test_interp_time ---------------------------------------------------------------------
