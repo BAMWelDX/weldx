@@ -296,74 +296,16 @@ class CoordinateSystemManagerConverter(WeldxConverter):
         graph = deepcopy(obj.graph)  # TODO: Check if deepcopy is necessary
 
         # remove automatically computed edges (inverted directions)
-        remove_edges = []
-        for edge in graph.edges:
-            if not graph.edges[edge]["defined"]:
-                remove_edges.append(edge)
+        remove_edges = [e for e in graph.edges if not graph.edges[e]["defined"]]
         graph.remove_edges_from(remove_edges)
-
-        coordinate_system_data = []
-        for name, reference_system in graph.edges:
-            coordinate_system_data += [
-                CoordinateTransformation(
-                    name,
-                    reference_system,
-                    graph.edges[(name, reference_system)]["lcs"],
-                )
-            ]
-
-        subsystem_data = self._extract_subsystem_data(obj)
-        subsystems = [
-            subsystem.name
-            for subsystem in subsystem_data
-            if subsystem.parent_system == obj.name
-        ]
-
-        spatial_data = None
-        if len(obj._data) > 0:
-            spatial_data = [
-                dict(name=k, coordinate_system=v.coordinate_system_name, data=v.data)
-                for k, v in obj._data.items()
-            ]
 
         tree = {
             "name": obj.name,
             "reference_time": obj.reference_time,
-            "subsystem_names": subsystems,
-            "subsystems": subsystem_data,
-            "root_system_name": obj.root_system_name,
-            "coordinate_systems": coordinate_system_data,
-            "spatial_data": spatial_data,
         }
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct from tree."""
-        reference_time = None
-        if "reference_time" in node:
-            reference_time = node["reference_time"]
-        csm = CoordinateSystemManager(
-            node["root_system_name"], node["name"], time_ref=reference_time
-        )
-
-        subsystem_data_list = node["subsystems"]
-
-        for subsystem_data in subsystem_data_list:
-            subsystem_reference_time = None
-            if "reference_time" in subsystem_data:
-                subsystem_reference_time = subsystem_data["reference_time"]
-            subsystem_data["csm"] = CoordinateSystemManager(
-                subsystem_data["root_cs"],
-                subsystem_data["name"],
-                subsystem_reference_time,
-            )
-            subsystem_data["lcs"] = []
-
-        self._add_coordinate_systems_to_subsystems(node, csm, subsystem_data_list)
-        self._merge_subsystems(node, csm, subsystem_data_list)
-
-        if (spatial_data := node.get("spatial_data")) is not None:
-            for item in spatial_data:
-                csm.assign_data(item["data"], item["name"], item["coordinate_system"])
-
+        csm = CoordinateSystemManager("dummy", node["name"])
         return csm

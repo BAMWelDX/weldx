@@ -10,62 +10,9 @@ description: |
   is a tree.
 type: object
 
-examples:
-  -
-    - A CSM with two static transformations and no subsystems.
-    - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0>
-        name: Coordinate system manager 0
-        root_system_name: base
-        subsystems: []
-        coordinate_systems:
-        - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
-          name: workpiece
-          reference_system: base
-          transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
-        - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
-          name: tcp_wire
-          reference_system: workpiece
-          transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-            time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
-              values: !core/ndarray-1.0.0
-                data: [0, 29000000000]
-                datatype: int64
-                shape: [2]
-              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-            orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-              name: orientations
-              dimensions: [c, v]
-              dtype: <f8
-              data: !core/ndarray-1.0.0
-                data:
-                - [1.0, 0.0, 0.0]
-                - [0.0, -1.0, -1.2246467991473532e-16]
-                - [0.0, 1.2246467991473532e-16, -1.0]
-                datatype: float64
-                shape: [3, 3]
-            coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-              name: coordinates
-              dimensions: [time, c]
-              dtype: <f8
-              data: !core/ndarray-1.0.0
-                data:
-                - [5.0, 0.0, 2.0]
-                - [295.0, 0.0, 2.0]
-                datatype: float64
-                shape: [2, 3]
-        subsystem_names: []
 
 properties:
   name:
-    type: string
-
-  root_system_name:
-    description: |
-      Name of the root coordinate system
     type: string
 
   reference_time:
@@ -75,49 +22,9 @@ properties:
       - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
       - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*" # legacy_tag
 
-  subsystem_names:
-    description: |
-      A list containing the names of subsystems that are directly attached to the main hierarchy. Nested subsystems
-      are excluded.
-    type: array
-    items:
-      type: string
 
-  subsystems:
-    description: |
-      A list containing the data of all subsystems including nested structures.
-    type: array
-    items:
-      oneOf:
-        - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy_subsystem-1.*"
-        - tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.*" # legacy_tag
 
-  coordinate_systems:
-    description: |
-      An array of all the coordinate systems' data. This includes their name, parent system and how they are arranged
-      towards their parent system.
-    type: array
-    items:
-      oneOf:
-        - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.*"
-        - tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.*" # legacy_tag
-
-  spatial_data:
-    type: array
-    items:
-      type: object
-      properties:
-        coordinate_system:
-          type: string
-        name:
-          type: string
-        data:
-          oneOf:
-            - tag: "asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-1.*"
-            - tag: "tag:weldx.bam.de:weldx/core/geometry/spatial_data-1.*" # legacy_tag
-      required: [coordinate_system, name, data]
-
-propertyOrder: [name, root_system_name, reference_time, subsystems, subsystem_data, coordinate_systems, spatial_data]
-required: [name, root_system_name, coordinate_systems]
+propertyOrder: [name,  reference_time]
+required: [name]
 flowStyle: block
 ...
