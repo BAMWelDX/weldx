@@ -378,9 +378,10 @@ class CoordinateSystemManager:
             for cs_name in sub_system_data.common_node_neighbors:
                 potential_members += self.get_child_system_names(cs_name, False)
 
-            sub_system_data.members = set(
-                potential_members + list(sub_system_data.common_node_neighbors)
-            )
+            sub_system_data.members = {
+                *potential_members,
+                *sub_system_data.common_node_neighbors,
+            }
 
         return sub_system_data_dict
 
