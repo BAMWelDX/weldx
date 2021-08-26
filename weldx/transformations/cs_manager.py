@@ -4,7 +4,7 @@ from __future__ import annotations
 import itertools
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -53,13 +53,13 @@ class CoordinateSystemManager:
         """Name of the root coordinate system"""
         common_node: str
         """Name of the common coordinate system"""
-        common_node_data: List[str]
+        common_node_data: Set[str]
         """Names of the subsystems data at the common coordinate system"""
-        common_node_neighbors: List[str]
+        common_node_neighbors: Set[str]
         """Names of the subsystems coordinate systems connected to the common system"""
         time_ref: pd.Timestamp
         """The reference time of the subsystem"""
-        members: List[str]
+        members: Set[str]
         """Names of all coordinate systems that belong to the subsystem"""
         sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
@@ -378,8 +378,8 @@ class CoordinateSystemManager:
             for cs_name in sub_system_data.common_node_neighbors:
                 potential_members += self.get_child_system_names(cs_name, False)
 
-            sub_system_data.members = (
-                potential_members + sub_system_data.common_node_neighbors
+            sub_system_data.members = set(
+                potential_members + list(sub_system_data.common_node_neighbors)
             )
 
         return sub_system_data_dict
@@ -403,7 +403,7 @@ class CoordinateSystemManager:
             List of all the sub systems coordinate systems.
 
         """
-        all_members = ext_sub_system_data.members
+        all_members = list(ext_sub_system_data.members)
         for _, other_sub_system_data in ext_sub_system_data_dict.items():
             if other_sub_system_data.common_node in all_members:
                 all_members = [
@@ -1556,10 +1556,10 @@ class CoordinateSystemManager:
         self._sub_systems[other.name] = self.SubsystemInfo(
             root=other.root_system_name,
             common_node=common_node,
-            common_node_data=list(data_child.keys()),
-            common_node_neighbors=other.neighbors(common_node),
+            common_node_data=set(data_child.keys()),
+            common_node_neighbors=set(other.neighbors(common_node)),
             time_ref=other.reference_time,
-            members=other.coordinate_system_names,
+            members=set(other.coordinate_system_names),
             sub_systems=other.sub_system_data,
         )
 
