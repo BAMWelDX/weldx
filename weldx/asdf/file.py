@@ -368,6 +368,17 @@ class WeldxFile(UserDict):
             raise RuntimeError("closed file, cannot access file handle.")
         return self._asdf_handle._fd._fd
 
+    def copy(self, filename_or_file_like: Optional[types_path_and_file_like] = None) -> "WeldxFile":
+        file = self.write_to(filename_or_file_like)
+        wx = WeldxFile(file, mode=self.mode, custom_schema=self.custom_schema,
+                      asdffile_kargs=self._asdffile_kwargs,
+                      write_kwargs=self._write_kwargs,
+                      sync=self._sync,
+                      software_history_entry=self.software_history_entry,
+                      compression=self.compression,
+                      copy_arrays=self.copy_arrays)
+        return wx
+
     def as_attr(self) -> MutableMapping:
         """Return the Weldx dictionary as an attributed object.
 
