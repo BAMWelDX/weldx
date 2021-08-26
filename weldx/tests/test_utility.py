@@ -376,7 +376,7 @@ class TestCompareNested:
     @pytest.fixture()
     def _default_dicts():
         """Return two equivalent deeply nested structures to be modified by tests."""
-        a = {"foo": np.arange(3), "x": {0: [1, 2, 3]}, "bar": True}
+        a = {"foo": np.arange(3), "x": {0: [1, 2, 3]}, "bar": True, "s": {1, 2, 3}}
         b = copy.deepcopy(a)
         return a, b
 
@@ -400,6 +400,11 @@ class TestCompareNested:
         argvalues=[
             ((1, 2, 3), [1, 2, 3], True),
             ((1, 2, 3), [1, 2, 0], False),
+            ({1, 2, 3}, {3, 2, 1}, True),
+            ({1, 2, 3}, [3, 2, 1], False),
+            ({1, 2, 3}, {1, 2, 0}, False),
+            ({1, 2, 3}, [1, 2, 3], True),
+            ([1, 2, 3], {1, 2, 3}, True),
             ((1, 2, 3), {"f": 0}, False),
             ((1, 2, 3), "bar", False),
             ({"x": [1, 2, 3, 4]}, {"x": [1, 2]}, False),

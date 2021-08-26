@@ -248,7 +248,10 @@ class _EqCompareNested:
            by raising a RuntimeError.
         """
         other_data_structure = iterutils.get_path(b, path)
-        other_value = other_data_structure[key]
+        if isinstance(other_data_structure, set):
+            other_value = list(other_data_structure)[key]
+        else:
+            other_value = other_data_structure[key]
         if not _EqCompareNested._enter(None, key, value)[1]:
             # check lengths of Sequence types first and raise
             # prior starting a more expensive comparison!
