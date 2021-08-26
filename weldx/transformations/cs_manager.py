@@ -15,6 +15,7 @@ from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
+from weldx.util.util import dataclass_nested_eq
 
 from .local_cs import LocalCoordinateSystem
 from .types import types_coordinates, types_orientation
@@ -43,6 +44,7 @@ class CoordinateSystemManager:
 
     """
 
+    @dataclass_nested_eq
     @dataclass
     class SubsystemInfo:
         """Contains information about subsystems."""
@@ -61,36 +63,6 @@ class CoordinateSystemManager:
         """Names of all coordinate systems that belong to the subsystem"""
         sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
-
-        def __eq__(self, other):
-            def _cmp_list(l1, l2):
-                if len(l1) != len(l2):
-                    return False
-                for v in l1:
-                    if v not in l2:
-                        return False
-                return True
-
-            if not isinstance(other, CoordinateSystemManager.SubsystemInfo):
-                return NotImplemented
-
-            if len(self.sub_systems) != len(other.sub_systems):
-                return False
-            for k, v in self.sub_systems.items():
-                other_v = other.sub_systems.get(k)
-                if other_v is None:
-                    return False
-                if v != other_v:
-                    return False
-
-            return (
-                self.root == other.root
-                and self.common_node == other.common_node
-                and _cmp_list(self.common_node_data, other.common_node_data)
-                and _cmp_list(self.common_node_neighbors, other.common_node_neighbors)
-                and self.time_ref == other.time_ref
-                and _cmp_list(self.members, other.members)
-            )
 
     _id_gen = itertools.count()
 
