@@ -94,6 +94,27 @@ class CoordinateSystemManager:
         self._add_coordinate_system_node(root_coordinate_system_name)
 
     @classmethod
+    def from_graph(
+        cls, name: str, time_ref: types_timestamp_like, graph: nx.DiGraph
+    ) -> CoordinateSystemManager:
+
+        # todo:
+        #  - copy graph before adding edges?
+        #  - check graph (only allowed fields and types)
+
+        csm = cls(tuple(graph.nodes)[0], name, time_ref)
+        for edge in graph.edges:
+            if not (edge[1], edge[0]) in graph.edges:
+                graph.add_edge(
+                    edge[1],
+                    edge[0],
+                    lcs=graph.edges[edge]["lcs"].invert(),
+                    defined=False,
+                )
+        csm._graph = graph
+        return csm
+
+    @classmethod
     def _from_subsystem_graph(
         cls,
         root_coordinate_system_name: str,
