@@ -291,6 +291,11 @@ class CoordinateSystemManagerConverter(WeldxConverter):
             leaf_nodes = leaf_nodes_next
             lcs_data_list = lcs_data_list_next
 
+    # todo
+    #  - check possible bug: WeldxFile does not clear old yaml tree when writing. It
+    #    just overwrites the bytes it needs. Write large tree first, then remove stuff
+    #    and rewrite
+
     def to_yaml_tree(self, obj: CoordinateSystemManager, tag: str, ctx) -> dict:
         """Convert to python dict."""
         graph = deepcopy(obj.graph)  # TODO: Check if deepcopy is necessary
@@ -302,6 +307,7 @@ class CoordinateSystemManagerConverter(WeldxConverter):
         tree = {
             "name": obj.name,
             "reference_time": obj.reference_time,
+            "graph": graph,
         }
         return tree
 

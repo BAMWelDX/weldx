@@ -11,20 +11,58 @@ description: |
 type: object
 
 
+definitions:
+  coordinate_system_node:
+    allOf:
+      - oneOf:
+          - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
+      - type: object
+        properties:
+          # attributes:
+          #   type: object
+          #   properties:
+          #     data:
+          #       type: array
+          edges:
+            type: array
+            items:
+              $ref: "#/definitions/coordinate_transformation_edge"
+        required: [ attributes ]
+
+  coordinate_transformation_edge:
+    allOf:
+    - oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0"
+    - type: object
+      properties:
+        attributes:
+          type: object
+          properties:
+            lcs:
+              tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
+          required: [lcs]
+        target_node:
+          $ref: "#/definitions/coordinate_system_node"
+      required: [attributes]
+
+
 properties:
   name:
     type: string
 
   reference_time:
-    description: |
-      A timestamp that serves as reference point for all attached coordinate systems.
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
-      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*" # legacy_tag
 
+  graph:
+    allOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0"
+      - type: object
+        properties:
+          root_node:
+            $ref: "#/definitions/coordinate_system_node"
 
-
-propertyOrder: [name,  reference_time]
+propertyOrder: [name, reference_time, graph]
 required: [name]
 flowStyle: block
 ...
