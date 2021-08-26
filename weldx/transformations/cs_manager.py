@@ -44,7 +44,7 @@ class CoordinateSystemManager:
     """
 
     @dataclass
-    class SubsystemData:
+    class SubsystemInfo:
         """Contains information about subsystems."""
 
         root: str
@@ -59,7 +59,7 @@ class CoordinateSystemManager:
         """The reference time of the subsystem"""
         members: List[str]
         """Names of all coordinate systems that belong to the subsystem"""
-        sub_systems: Dict[str, CoordinateSystemManager.SubsystemData]
+        sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
 
         def __eq__(self, other):
@@ -71,7 +71,7 @@ class CoordinateSystemManager:
                         return False
                 return True
 
-            if not isinstance(other, CoordinateSystemManager.SubsystemData):
+            if not isinstance(other, CoordinateSystemManager.SubsystemInfo):
                 return NotImplemented
 
             if len(self.sub_systems) != len(other.sub_systems):
@@ -128,7 +128,7 @@ class CoordinateSystemManager:
         self._name = coordinate_system_manager_name
         self._reference_time = time_ref
         self._root_system_name = root_coordinate_system_name
-        self._sub_systems: Dict[str, CoordinateSystemManager.SubsystemData] = {}
+        self._sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo] = {}
         self._graph = DiGraph()
         self._add_coordinate_system_node(root_coordinate_system_name)
 
@@ -1581,7 +1581,7 @@ class CoordinateSystemManager:
         self._graph = compose(self._graph, other.graph)
         self._graph.nodes[common_node]["data"] = joined_data
 
-        self._sub_systems[other.name] = self.SubsystemData(
+        self._sub_systems[other.name] = self.SubsystemInfo(
             root=other.root_system_name,
             common_node=common_node,
             common_node_data=list(data_child.keys()),
