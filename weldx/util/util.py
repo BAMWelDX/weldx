@@ -248,10 +248,7 @@ class _EqCompareNested:
            by raising a RuntimeError.
         """
         other_data_structure = iterutils.get_path(b, path)
-        if isinstance(other_data_structure, set):
-            other_value = list(other_data_structure)[key]
-        else:
-            other_value = other_data_structure[key]
+        other_value = other_data_structure[key]
         if not _EqCompareNested._enter(None, key, value)[1]:
             # check lengths of Sequence types first and raise
             # prior starting a more expensive comparison!
@@ -294,6 +291,18 @@ class _EqCompareNested:
             When a or b is not a nested structure.
 
         """
+
+        def _enter_replace_sets(p, k, v):
+            if isinstance(v, set):
+                return list(), [(i, j) for i, j in enumerate(sorted(list(v)))]
+            return iterutils.default_enter(p, k, v)
+
+        try:
+            a = iterutils.remap(a, enter=_enter_replace_sets)
+            b = iterutils.remap(b, enter=_enter_replace_sets)
+        except TypeError:
+            raise TypeError("either a or b are not a nested data structure.")
+
         # we bind the input structures a, b to the visit function.
         visit = functools.partial(_EqCompareNested._visit, a=a, b=b)
 
