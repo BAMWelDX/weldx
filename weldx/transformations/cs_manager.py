@@ -15,7 +15,6 @@ from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
-from weldx.util.util import dataclass_nested_eq
 
 from .local_cs import LocalCoordinateSystem
 from .types import types_coordinates, types_orientation
