@@ -294,7 +294,7 @@ class _EqCompareNested:
 
         def _enter_replace_sets(p, k, v):
             if isinstance(v, set):
-                return list(), [(i, j) for i, j in enumerate(sorted(list(v)))]
+                return list(), ((i, j) for i, j in enumerate(sorted(list(v))))
             return iterutils.default_enter(p, k, v)
 
         try:
