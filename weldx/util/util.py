@@ -252,11 +252,15 @@ class _EqCompareNested:
 
         # directly test for equality with sets
         if isinstance(data_structure, set) or isinstance(other_data_structure, set):
-            if data_structure == other_data_structure:
-                return True
-            raise RuntimeError("sets not equal")
+            if not (
+                isinstance(data_structure, set)
+                and isinstance(other_data_structure, set)
+            ):
+                raise RuntimeError("sets not equal")
+            other_value = list(other_data_structure)[key]
+        else:
+            other_value = other_data_structure[key]
 
-        other_value = other_data_structure[key]
         if not _EqCompareNested._enter(None, key, value)[1]:
             # check lengths of Sequence types first and raise
             # prior starting a more expensive comparison!
