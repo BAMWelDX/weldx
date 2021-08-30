@@ -6,7 +6,7 @@ import json
 import re
 import sys
 import warnings
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 from functools import wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
@@ -264,12 +264,12 @@ class _EqCompareNested:
         if not _EqCompareNested._enter(None, key, value)[1]:
             # check lengths of Sequence types first and raise
             # prior starting a more expensive comparison!
-            if isinstance(other_data_structure, Sequence) and len(
+            if isinstance(other_data_structure, (Sequence, Set)) and len(
                 other_data_structure
-            ) != len(iterutils.get_path(a, path)):
+            ) != len(data_structure):
                 raise RuntimeError("len does not match")
             if isinstance(other_data_structure, Mapping) and any(
-                other_data_structure.keys() ^ iterutils.get_path(a, path).keys()
+                other_data_structure.keys() ^ data_structure.keys()
             ):
                 raise RuntimeError("keys do not match")
             if not _EqCompareNested._compare(value, other_value):
