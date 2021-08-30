@@ -182,7 +182,7 @@ class WeldxFile(UserDict):
 
         # UserDict interface: we want to store a reference to the tree, but the ctor
         # of UserDict takes a copy, so we do it manually here.
-        super(WeldxFile, self).__init__()
+        super().__init__()
         self.data = self._asdf_handle.tree
 
     @property
@@ -393,7 +393,7 @@ class WeldxFile(UserDict):
 
         class AttrDict(dict):
             def __init__(self, iterable, **kwargs):
-                super(AttrDict, self).__init__(iterable, **kwargs)
+                super().__init__(iterable, **kwargs)
                 for key, value in self.items():
                     if isinstance(value, Mapping):
                         self.__dict__[key] = AttrDict(value)

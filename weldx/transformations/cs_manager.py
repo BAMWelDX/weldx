@@ -1332,7 +1332,7 @@ class CoordinateSystemManager:
         return path[1]
 
     @property
-    def subsystems(self) -> List["CoordinateSystemManager"]:
+    def subsystems(self) -> List[CoordinateSystemManager]:
         """Extract all subsystems from the CoordinateSystemManager.
 
         Returns
@@ -1400,7 +1400,7 @@ class CoordinateSystemManager:
         time_ref: types_timestamp_like = None,
         affected_coordinate_systems: Union[str, List[str]] = None,
         in_place: bool = False,
-    ) -> "CoordinateSystemManager":
+    ) -> CoordinateSystemManager:
         """Interpolates the coordinate systems in time.
 
         If no list of affected coordinate systems is provided, all systems will be
@@ -1480,7 +1480,7 @@ class CoordinateSystemManager:
 
         return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
 
-    def merge(self, other: "CoordinateSystemManager"):
+    def merge(self, other: CoordinateSystemManager):
         """Merge another coordinate system managers into the current instance.
 
         Both `CoordinateSystemManager` need to have exactly one common coordinate
@@ -1857,11 +1857,9 @@ class CoordinateSystemManager:
         reference_time = self.reference_time
         if self.uses_absolute_times and not reference_time:
             reference_time = min(
-                [
-                    lcs.reference_time
-                    for lcs in self.lcs_time_dependent
-                    if lcs.reference_time
-                ]
+                lcs.reference_time
+                for lcs in self.lcs_time_dependent
+                if lcs.reference_time
             )
 
         time_list = [Time(lcs.time, reference_time) for lcs in lcs_list]
@@ -1914,7 +1912,7 @@ class CoordinateSystemManager:
         )
         return mul + lcs.coordinates
 
-    def unmerge(self) -> List["CoordinateSystemManager"]:
+    def unmerge(self) -> List[CoordinateSystemManager]:
         """Undo previous merges and return a list of all previously merged instances.
 
         If additional coordinate systems were added after merging two instances, they
