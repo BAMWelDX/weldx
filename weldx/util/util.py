@@ -256,7 +256,7 @@ class _EqCompareNested:
                 isinstance(data_structure, set)
                 and isinstance(other_data_structure, set)
             ):
-                raise RuntimeError("sets not equal")
+                raise RuntimeError(f"compared set to type {type(other_data_structure)}")
             other_value = list(other_data_structure)[key]
         else:
             other_value = other_data_structure[key]
