@@ -400,13 +400,14 @@ class TestCompareNested:
         argvalues=[
             ((1, 2, 3), [1, 2, 3], True),
             ((1, 2, 3), [1, 2, 0], False),
-            ({1, 2, 3}, {3, 2, 1}, True),
-            ({1, 2, 3}, [3, 2, 1], False),
+            ({1, 2, 3}, {1, 2, 3}, True),  # sorted sets
+            ({1, 2, 3}, {3, 2, 1}, True),  # unsorted sets
+            ({"a", "b", "c"}, {"b", "a", "c"}, True),  # unsorted sets
             ({1, 2, 3}, {1, 2, 0}, False),
-            ({1, 2, 3}, [1, 2, 3], True),
-            ([1, 2, 3], {1, 2, 3}, True),
+            ({1, 2, 3}, [1, 2, 3], False),  # set != list
+            ([1, 2, 3], {1, 2, 3}, False),  # list != set
             ((1, 2, 3), {"f": 0}, False),
-            # ((1, 2, 3), "bar", False),
+            ((1, 2, 3), "bar", False),
             ({"x": [1, 2, 3, 4]}, {"x": [1, 2]}, False),
             ({"x": [1, 2]}, {"y": [1, 2]}, False),
         ],

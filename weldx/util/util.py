@@ -247,17 +247,25 @@ class _EqCompareNested:
            When the elements are not equal traversing `a` will be stopped
            by raising a RuntimeError.
         """
+        data_structure = iterutils.get_path(a, path)
         other_data_structure = iterutils.get_path(b, path)
-        other_value = other_data_structure[key]
+
+        # directly test for equality with sets
+        if isinstance(data_structure, set) or isinstance(other_data_structure, set):
+            if data_structure == other_data_structure:
+                return True
+            raise RuntimeError("sets not equal")
+
         if not _EqCompareNested._enter(None, key, value)[1]:
+            other_value = other_data_structure[key]
             # check lengths of Sequence types first and raise
             # prior starting a more expensive comparison!
             if isinstance(other_data_structure, Sequence) and len(
                 other_data_structure
-            ) != len(iterutils.get_path(a, path)):
+            ) != len(data_structure):
                 raise RuntimeError("len does not match")
             if isinstance(other_data_structure, Mapping) and any(
-                other_data_structure.keys() ^ iterutils.get_path(a, path).keys()
+                other_data_structure.keys() ^ data_structure.keys()
             ):
                 raise RuntimeError("keys do not match")
             if not _EqCompareNested._compare(value, other_value):
@@ -291,18 +299,6 @@ class _EqCompareNested:
             When a or b is not a nested structure.
 
         """
-
-        def _enter_replace_sets(p, k, v):
-            if isinstance(v, set):
-                return [], ((i, j) for i, j in enumerate(sorted(list(v))))
-            return iterutils.default_enter(p, k, v)
-
-        try:
-            a = iterutils.remap(a, enter=_enter_replace_sets)
-            b = iterutils.remap(b, enter=_enter_replace_sets)
-        except TypeError:
-            raise TypeError("either a or b are not a nested data structure.")
-
         # we bind the input structures a, b to the visit function.
         visit = functools.partial(_EqCompareNested._visit, a=a, b=b)
 
