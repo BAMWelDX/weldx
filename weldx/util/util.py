@@ -194,6 +194,7 @@ _eq_compare_nested_input_types = Union[
     Sequence,
     Mapping,
     Collection,
+    Set,
 ]
 
 
@@ -252,14 +253,11 @@ class _EqCompareNested:
 
         # directly test for equality with sets
         if isinstance(data_structure, set) or isinstance(other_data_structure, set):
-            if not (
-                isinstance(data_structure, set)
-                and isinstance(other_data_structure, set)
-            ):
-                raise RuntimeError(f"compared set to type {type(other_data_structure)}")
-            other_value = list(other_data_structure)[key]
-        else:
-            other_value = other_data_structure[key]
+            if data_structure == other_data_structure:
+                return True
+            raise RuntimeError("sets not equal")
+
+        other_value = other_data_structure[key]
 
         if not _EqCompareNested._enter(None, key, value)[1]:
             # check lengths of Sequence types first and raise

@@ -402,6 +402,7 @@ class TestCompareNested:
             ((1, 2, 3), [1, 2, 0], False),
             ({1, 2, 3}, {1, 2, 3}, True),  # sorted sets
             ({1, 2, 3}, {3, 2, 1}, True),  # unsorted sets
+            ({"a", "b", "c"}, {"b", "a", "c"}, True),  # unsorted sets
             ({1, 2, 3}, {1, 2, 0}, False),
             ({1, 2, 3}, [1, 2, 3], False),  # set != list
             ([1, 2, 3], {1, 2, 3}, False),  # list != set
