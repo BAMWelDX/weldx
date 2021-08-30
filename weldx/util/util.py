@@ -135,7 +135,7 @@ def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
         The jupyter notebook filename to clean.
 
     """
-    with open(file, "r", encoding="utf-8") as f:
+    with open(file, encoding="utf-8") as f:
         data = json.load(f)
 
     for cell in data["cells"]:

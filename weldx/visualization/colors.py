@@ -64,7 +64,7 @@ def _color_rgb_to_rgb_normalized(
         Color tuple with values in the range (0.0-1.0)
 
     """
-    return tuple([val / 255 for val in rgb])  # type: ignore[return-value]
+    return tuple(val / 255 for val in rgb)  # type: ignore[return-value]
 
 
 def _color_rgb_normalized_to_rgb(
@@ -83,7 +83,7 @@ def _color_rgb_normalized_to_rgb(
         Color tuple with values in the range (0-255)
 
     """
-    return tuple([int(np.round(val * 255)) for val in rgb])  # type: ignore
+    return tuple(int(np.round(val * 255)) for val in rgb)  # type: ignore
 
 
 def color_int_to_rgb_normalized(integer):
@@ -192,8 +192,7 @@ def color_generator_function() -> Generator:
 
     """
     while True:
-        for color in _color_list:
-            yield color
+        yield from _color_list
 
 
 def get_color(
