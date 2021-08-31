@@ -62,6 +62,35 @@ class CoordinateSystemManager:
         sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
 
+        def to_yaml_tree(self, name):
+            return dict(
+                name=name,
+                root_node=self.root,
+                common_node=self.common_node,
+                reference_time=self.time_ref,
+                members=list(self.members),
+                data=list(self.data),
+                subsystems=[sub.to_yaml_tree(n) for n, sub in self.sub_systems.items()],
+            )
+
+        @classmethod
+        def from_yaml_tree(cls, node):
+
+            subsystems = node.get("subsystems")
+            if subsystems:
+                subsystems = {d["name"]: cls.from_yaml_tree(d) for d in subsystems}
+            else:
+                subsystems = {}
+
+            return cls(
+                root=node["root_node"],
+                common_node=node["common_node"],
+                time_ref=node.get("reference_time"),
+                members=set(node["members"]),
+                data=set(node.get("data")),
+                sub_systems=subsystems,
+            )
+
     _id_gen = itertools.count()
 
     def __init__(
@@ -104,7 +133,11 @@ class CoordinateSystemManager:
 
     @classmethod
     def from_graph(
-        cls, name: str, time_ref: types_timestamp_like, graph: nx.DiGraph
+        cls,
+        name: str,
+        time_ref: types_timestamp_like,
+        graph: nx.DiGraph,
+        subsystem_data: dict,
     ) -> CoordinateSystemManager:
 
         # todo:
@@ -121,6 +154,13 @@ class CoordinateSystemManager:
                     defined=False,
                 )
         csm._graph = graph
+
+        if subsystem_data:
+            subsystem_data = {
+                d["name"]: cls.SubsystemInfo.from_yaml_tree(d) for d in subsystem_data
+            }
+            csm._sub_systems = subsystem_data
+
         return csm
 
     # todo: check if the following function can be removed
