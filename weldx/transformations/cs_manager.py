@@ -61,6 +61,8 @@ class CoordinateSystemManager:
         """The reference time of the subsystem"""
         members: Set[str]
         """Names of all coordinate systems that belong to the subsystem"""
+        data: Set[str]
+        """Names of all data that belongs to the subsystem"""
         sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
 
@@ -125,6 +127,7 @@ class CoordinateSystemManager:
         csm._graph = graph
         return csm
 
+    # todo: check if the following function can be removed
     @classmethod
     def _from_subsystem_graph(
         cls,
@@ -378,6 +381,12 @@ class CoordinateSystemManager:
         """
         id_ = next(CoordinateSystemManager._id_gen)  # skipcq: PTC-W0063
         return f"Coordinate system manager {id_}"
+
+    def _subsystem_common_node(self, subsystem_data):
+        pass
+
+    def _subsystem_common_node_neighbors(self, subsystem_data):
+        pass
 
     @property
     def _extended_sub_system_data(self) -> Dict:
@@ -1582,6 +1591,7 @@ class CoordinateSystemManager:
             common_node_neighbors=set(other.neighbors(common_node)),
             time_ref=other.reference_time,
             members=set(other.coordinate_system_names),
+            data=set(other.data_names),
             sub_systems=other.sub_system_data,
         )
 

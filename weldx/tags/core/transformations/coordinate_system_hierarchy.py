@@ -302,6 +302,14 @@ class CoordinateSystemManagerConverter(WeldxConverter):
         defined_edges = [e for e in obj.graph.edges if obj.graph.edges[e]["defined"]]
         graph = obj.graph.edge_subgraph(defined_edges)
 
+        # remove empty data dictionaries
+        # for n in graph.nodes:
+        #     graph.nodes[n]["data"] = (
+        #         None
+        #         if not graph.nodes[n]["data"]
+        #         else [dict(name=k, values=v) for k, v in graph.nodes[n]["data"].items()]
+        #     )
+
         tree = {
             "name": obj.name,
             "reference_time": obj.reference_time,

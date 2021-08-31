@@ -18,11 +18,11 @@ definitions:
           - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
       - type: object
         properties:
-          # attributes:
-          #   type: object
-          #   properties:
-          #     data:
-          #       type: array
+          attributes:
+            type: object
+            properties:
+              data:
+                type: object
           edges:
             type: array
             items:
