@@ -55,8 +55,6 @@ class CoordinateSystemManager:
         """Name of the common coordinate system"""
         common_node_data: Set[str]
         """Names of the subsystems data at the common coordinate system"""
-        common_node_neighbors: Set[str]
-        """Names of the subsystems coordinate systems connected to the common system"""
         time_ref: pd.Timestamp
         """The reference time of the subsystem"""
         members: Set[str]
@@ -382,11 +380,13 @@ class CoordinateSystemManager:
         id_ = next(CoordinateSystemManager._id_gen)  # skipcq: PTC-W0063
         return f"Coordinate system manager {id_}"
 
-    def _subsystem_common_node(self, subsystem_data):
-        pass
-
-    def _subsystem_common_node_neighbors(self, subsystem_data):
-        pass
+    def _subsystem_common_node_neighbors(self, subsystem_data: SubsystemInfo):
+        """Get the neighbors of the common node that belong to the subsystem."""
+        return set(
+            node
+            for node in self._graph.neighbors(subsystem_data.common_node)
+            if node in subsystem_data.members
+        )
 
     @property
     def _extended_sub_system_data(self) -> Dict:
@@ -405,13 +405,11 @@ class CoordinateSystemManager:
         sub_system_data_dict = deepcopy(self._sub_systems)
         for _, sub_system_data in sub_system_data_dict.items():
             potential_members = []
-            for cs_name in sub_system_data.common_node_neighbors:
+            cn_neighbors = self._subsystem_common_node_neighbors(sub_system_data)
+            for cs_name in cn_neighbors:
                 potential_members += self.get_child_system_names(cs_name, False)
 
-            sub_system_data.members = {
-                *potential_members,
-                *sub_system_data.common_node_neighbors,
-            }
+            sub_system_data.members = {*potential_members, *cn_neighbors}
 
         return sub_system_data_dict
 
@@ -1588,7 +1586,6 @@ class CoordinateSystemManager:
             root=other.root_system_name,
             common_node=common_node,
             common_node_data=set(data_child.keys()),
-            common_node_neighbors=set(other.neighbors(common_node)),
             time_ref=other.reference_time,
             members=set(other.coordinate_system_names),
             data=set(other.data_names),
@@ -1852,7 +1849,7 @@ class CoordinateSystemManager:
         """Remove all subsystems from the coordinate system manager."""
         cs_delete = []
         for _, sub_system_data in self._sub_systems.items():
-            for lcs in sub_system_data.common_node_neighbors:
+            for lcs in self._subsystem_common_node_neighbors(sub_system_data):
                 cs_delete += [lcs]
             common_node = sub_system_data.common_node
             self._graph.nodes[common_node]["data"] = {
