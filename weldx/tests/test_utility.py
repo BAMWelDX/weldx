@@ -13,6 +13,7 @@ from xarray import DataArray
 
 import weldx.util as ut
 from weldx.constants import Q_
+from weldx.time import Time
 
 
 def test_deprecation_decorator():
@@ -376,7 +377,13 @@ class TestCompareNested:
     @pytest.fixture()
     def _default_dicts():
         """Return two equivalent deeply nested structures to be modified by tests."""
-        a = {"foo": np.arange(3), "x": {0: [1, 2, 3]}, "bar": True, "s": {1, 2, 3}}
+        a = {
+            "foo": np.arange(3),
+            "x": {0: [1, 2, 3]},
+            "bar": True,
+            "s": {1, 2, 3},
+            "t": Time(["1s", "2s", "3s"]),
+        }
         b = copy.deepcopy(a)
         return a, b
 

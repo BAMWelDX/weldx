@@ -336,7 +336,7 @@ class Time:
 
     def __len__(self):
         """Return the length of the data."""
-        return self.length
+        return self.as_pandas_index().__len__()
 
     def __iter__(self):
         """Use generator to iterate over index values."""
@@ -345,6 +345,25 @@ class Time:
     def __getitem__(self, item) -> types_pandas_times:
         """Access pandas index."""
         return self.as_pandas_index()[item]
+
+    def __getattr__(self, item: str):
+        """Delegate unknown method calls to pandas index.
+
+        Raises
+        ------
+        AttributeError
+            When accessing a not implemented 'dunder' method or the requested method
+            can not be accessed on the pandas index type.
+
+        """
+        if item.startswith("__"):
+            raise AttributeError(f"Dunder method '{item}' not implemented for 'Time'.")
+        try:
+            return getattr(self.as_pandas_index(), item)
+        except AttributeError:
+            raise AttributeError(
+                f"Neither 'Time' object nor its pandas index has attribute '{item}'"
+            )
 
     def __repr__(self):
         """Console info."""
@@ -482,28 +501,9 @@ class Time:
         return isinstance(self._time, (Timestamp, DatetimeIndex))
 
     @property
-    def length(self) -> int:
-        """Return the length of the data."""
-        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            return len(self._time)
-        return 1
-
-    @property
     def is_timestamp(self) -> bool:
         """Return `True` if the data represents a timestamp and `False` otherwise."""
         return isinstance(self._time, pd.Timestamp)
-
-    def max(self) -> Union[Timedelta, Timestamp]:
-        """Get the maximal time of the data."""
-        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            return self._time.max()
-        return self._time
-
-    def min(self) -> Union[Timedelta, Timestamp]:
-        """Get the minimal time of the data."""
-        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            return self._time.min()
-        return self._time
 
     @property
     def index(self) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:

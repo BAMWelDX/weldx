@@ -21,6 +21,7 @@ from asdf.tags.core import NDArrayType
 from boltons import iterutils
 
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
+from weldx.time import Time
 
 
 class WeldxDeprecationWarning(DeprecationWarning):
@@ -204,6 +205,7 @@ class _EqCompareNested:
     compare_funcs: ClassVar = {
         (np.ndarray, NDArrayType, pint.Quantity, pd.Index): _array_equal,
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
+        (Time): lambda x, y: x.equals(y),
     }
     # these types will be treated as equivalent.
     _type_equalities: ClassVar = [
