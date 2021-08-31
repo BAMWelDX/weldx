@@ -30,7 +30,7 @@ Jupyter `guide <https://ipython.readthedocs.io/en/7.25.0/install/kernel_install.
 
 Create an environment named "jlab" via conda::
 
-    conda create -n jlab jupyter-lab -c conda-forge
+    conda create -n jlab jupyterlab -c conda-forge
 
 Then we switch to the weldx environment created in the first step and make it available within Jupyter::
 
@@ -84,6 +84,6 @@ using conda::
     conda create -n weldx -c conda-forge weldx
     conda activate weldx
     python -m ipykernel install --user --name weldx --display-name "Python (weldx)"
-    conda create -n jlab -c conda-forge jupyter-lab
+    conda create -n jlab -c conda-forge jupyterlab
     conda activate jlab
     jupyter labextension install @jupyter-widgets/jupyterlab-manager k3d
