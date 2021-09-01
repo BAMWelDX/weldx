@@ -565,7 +565,7 @@ class TimeSeries(TimeDependent):
 
     def interp_time(
         self, time: Union[pd.TimedeltaIndex, pint.Quantity, Time], time_unit: str = "s"
-    ) -> "TimeSeries":
+    ) -> TimeSeries:
         """Interpolate the TimeSeries in time.
 
         If the internal data consists of discrete values, an interpolation with the
@@ -612,11 +612,11 @@ class TimeSeries(TimeDependent):
     def plot(
         self,
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
-        axes: "matplotlib.pyplot.Axes" = None,
+        axes: matplotlib.pyplot.Axes = None,
         data_name: str = "values",
         time_unit: Union[str, pint.Unit] = None,
         **mpl_kwargs,
-    ) -> "matplotlib.pyplot.Axes":
+    ) -> matplotlib.pyplot.Axes:
         """Plot the `TimeSeries`.
 
         Parameters

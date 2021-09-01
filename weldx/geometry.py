@@ -155,7 +155,7 @@ class LineSegment:
 
     @classmethod
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
-    def construct_with_points(cls, point_start, point_end) -> "LineSegment":
+    def construct_with_points(cls, point_start, point_end) -> LineSegment:
         """Construct a line segment with two points.
 
         Parameters
@@ -2418,7 +2418,7 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_file(file_name: Union[str, Path]) -> "SpatialData":
+    def from_file(file_name: Union[str, Path]) -> SpatialData:
         """Create an instance from a file.
 
         Parameters
@@ -2440,7 +2440,7 @@ class SpatialData:
     @staticmethod
     def from_geometry_raster(
         geometry_raster: np.ndarray, closed_mesh: bool = True
-    ) -> "SpatialData":
+    ) -> SpatialData:
         """Triangulate rasterized Geometry Profile.
 
         Parameters

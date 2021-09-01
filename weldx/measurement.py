@@ -220,7 +220,7 @@ class MeasurementChain:
         self,
         name: str,
         source: SignalSource,
-        signal_data: "TimeSeries" = None,
+        signal_data: TimeSeries = None,
     ):
         """Create a new measurement chain.
 
@@ -278,7 +278,7 @@ class MeasurementChain:
         )
 
     @classmethod
-    def from_dict(cls, dictionary: Dict) -> "MeasurementChain":
+    def from_dict(cls, dictionary: Dict) -> MeasurementChain:
         """Create a measurement chain from a dictionary.
 
         Parameters
@@ -300,7 +300,7 @@ class MeasurementChain:
     @classmethod
     def from_equipment(
         cls, name, equipment: MeasurementEquipment, source_name=None
-    ) -> "MeasurementChain":
+    ) -> MeasurementChain:
         """Create a measurement chain from a piece of equipment that contains a source.
 
         Parameters
@@ -370,8 +370,8 @@ class MeasurementChain:
         source_error: Error,
         output_signal_type: str,
         output_signal_unit: str,
-        signal_data: "TimeSeries" = None,
-    ) -> "MeasurementChain":
+        signal_data: TimeSeries = None,
+    ) -> MeasurementChain:
         """Create a new measurement chain without providing a `SignalSource` instance.
 
         Parameters
@@ -452,7 +452,7 @@ class MeasurementChain:
         cls,
         transformation: SignalTransformation,
         input_signal: Signal,
-        data: "TimeSeries",
+        data: TimeSeries,
     ) -> Signal:
         """Create a signal that is produced by the provided transformation.
 
@@ -514,7 +514,7 @@ class MeasurementChain:
 
     @staticmethod
     def _determine_output_signal_unit(
-        func: "MathematicalExpression", input_unit: str
+        func: MathematicalExpression, input_unit: str
     ) -> str:
         """Determine the unit of a transformations' output signal.
 
@@ -589,7 +589,7 @@ class MeasurementChain:
     def add_transformation(
         self,
         transformation: SignalTransformation,
-        data: "TimeSeries" = None,
+        data: TimeSeries = None,
         input_signal_source: str = None,
     ):
         """Add a transformation from an `SignalTransformation` instance.
@@ -750,8 +750,8 @@ class MeasurementChain:
         error: Error,
         output_signal_type: str = None,
         output_signal_unit: str = None,
-        func: "MathematicalExpression" = None,
-        data: "TimeSeries" = None,
+        func: MathematicalExpression = None,
+        data: TimeSeries = None,
         input_signal_source: str = None,
     ):
         """Create and add a transformation to the measurement chain.
@@ -881,7 +881,7 @@ class MeasurementChain:
         self._raise_if_node_does_not_exist(signal_source)
         return self._graph.nodes[signal_source]["signal"]
 
-    def get_signal_data(self, source_name: str = None) -> "TimeSeries":
+    def get_signal_data(self, source_name: str = None) -> TimeSeries:
         """Get the data from a signal.
 
         Parameters

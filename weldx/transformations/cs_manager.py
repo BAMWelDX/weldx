@@ -1261,7 +1261,7 @@ class CoordinateSystemManager:
         time_ref: types_timestamp_like = None,
         affected_coordinate_systems: Union[str, List[str]] = None,
         in_place: bool = False,
-    ) -> "CoordinateSystemManager":
+    ) -> CoordinateSystemManager:
         """Interpolates the coordinate systems in time.
 
         If no list of affected coordinate systems is provided, all systems will be
@@ -1652,11 +1652,9 @@ class CoordinateSystemManager:
         reference_time = self.reference_time
         if self.uses_absolute_times and not reference_time:
             reference_time = min(
-                [
-                    lcs.reference_time
-                    for lcs in self.lcs_time_dependent
-                    if lcs.reference_time
-                ]
+                lcs.reference_time
+                for lcs in self.lcs_time_dependent
+                if lcs.reference_time
             )
 
         time_list = [Time(lcs.time, reference_time) for lcs in lcs_list]
@@ -1886,7 +1884,7 @@ class CoordinateSystemManager:
         for lcs in cs_delete:
             self.delete_cs(lcs, True)
 
-    def unmerge(self) -> List["CoordinateSystemManager"]:
+    def unmerge(self) -> List[CoordinateSystemManager]:
         """Undo previous merges and return a list of all previously merged instances.
 
         If additional coordinate systems were added after merging two instances, they
