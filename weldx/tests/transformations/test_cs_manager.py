@@ -1901,14 +1901,12 @@ def test_unmerge_merged_nested(list_of_csm_and_lcs_instances, additional_cs):
     csm_mg.merge(csm_n2)
 
     count = 0
+    # todo : Check warning on orphan node
     for parent_cs, target_csm in additional_cs.items():
         lcs = LCS(coordinates=[count, count + 1, count + 2])
         csm_mg.add_cs(f"additional_{count}", parent_cs, lcs)
-        csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
-        if target_csm in [3, 5]:
-            csm_n3.add_cs(f"additional_{count}", parent_cs, lcs)
-        if target_csm in [2, 3, 5]:
-            csm_n2.add_cs(f"additional_{count}", parent_cs, lcs)
+        if target_csm == 0:
+            csm[target_csm].add_cs(f"additional_{count}", parent_cs, lcs)
         count += 1
 
     # unmerge -----------------------------------------
