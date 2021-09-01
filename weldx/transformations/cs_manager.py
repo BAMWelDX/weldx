@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import itertools
+import warnings
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, List, Set, Tuple, Union
@@ -1899,8 +1900,21 @@ class CoordinateSystemManager:
             A list containing previously merged `CoordinateSystemManager` instances.
 
         """
+        lcs_rem = self.coordinate_system_names
+
         subsystems = self.subsystems
         self.remove_subsystems()
+
+        lcs_rem = [lcs for lcs in lcs_rem if lcs not in self.coordinate_system_names]
+        for sub in subsystems:
+            lcs_rem = [lcs for lcs in lcs_rem if lcs not in sub.coordinate_system_names]
+
+        if lcs_rem:
+            warnings.warn(
+                "The coordinate systems are not part of any subsystem and lost "
+                f"connection to the CoordinateSystemManager instance: {lcs_rem}\n"
+                "These systems are removed."
+            )
 
         return subsystems
 
