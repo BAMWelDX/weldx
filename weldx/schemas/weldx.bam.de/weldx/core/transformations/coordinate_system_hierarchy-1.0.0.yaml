@@ -45,6 +45,31 @@ definitions:
           $ref: "#/definitions/coordinate_system_node"
       required: [attributes]
 
+  subsystem_data:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        reference_time:
+          tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+        common_node:
+          type: string
+        root_node:
+          type: string
+        members:
+          type: array
+          items:
+            type: string
+        data:
+          type: array
+          items:
+            type: string
+        subsystems:
+          $ref: "#/definitions/subsystem_data"
+
+
 
 properties:
   name:
@@ -61,6 +86,9 @@ properties:
         properties:
           root_node:
             $ref: "#/definitions/coordinate_system_node"
+
+  subsystems:
+    $ref: "#/definitions/subsystem_data"
 
 propertyOrder: [name, reference_time, graph]
 required: [name]
