@@ -23,6 +23,10 @@ definitions:
             properties:
               data:
                 type: object
+                anyOf:
+                  - wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/data_array-1.0.0"
+                  - wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-1.0.0"
+
           edges:
             type: array
             items:

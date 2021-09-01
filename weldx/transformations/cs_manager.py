@@ -61,7 +61,7 @@ class CoordinateSystemManager:
         """Names of all coordinate systems that belong to the subsystem"""
         data: Set[str]
         """Names of all data that belongs to the subsystem"""
-        sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo]
+        sub_systems: List[CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
 
         def to_yaml_tree(self):
@@ -72,7 +72,7 @@ class CoordinateSystemManager:
                 reference_time=self.time_ref,
                 members=list(self.members),
                 data=list(self.data),
-                subsystems=[sub.to_yaml_tree() for _, sub in self.sub_systems.items()],
+                subsystems=[sub.to_yaml_tree() for sub in self.sub_systems],
             )
 
         @classmethod
@@ -80,9 +80,9 @@ class CoordinateSystemManager:
 
             subsystems = node.get("subsystems")
             if subsystems:
-                subsystems = {d["name"]: cls.from_yaml_tree(d) for d in subsystems}
+                subsystems = [cls.from_yaml_tree(d) for d in subsystems]
             else:
-                subsystems = {}
+                subsystems = []
 
             return cls(
                 name=node["name"],
@@ -130,7 +130,7 @@ class CoordinateSystemManager:
         self._name = coordinate_system_manager_name
         self._reference_time = time_ref
         self._root_system_name = root_coordinate_system_name
-        self._sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo] = {}
+        self._sub_systems: List[CoordinateSystemManager.SubsystemInfo] = []
         self._graph = DiGraph()
         self._add_coordinate_system_node(root_coordinate_system_name)
 
@@ -141,7 +141,7 @@ class CoordinateSystemManager:
             f"reference time:\n\t {self.reference_time}\n"
             f"coordinate systems:\n\t {self.coordinate_system_names}\n"
             f"data:\n\t {self.data_names}\n"
-            f"sub systems:\n\t {self._sub_systems.keys()}\n"
+            f"sub systems:\n\t {self.subsystem_names}\n"
             f")"
         )
 
@@ -164,8 +164,9 @@ class CoordinateSystemManager:
             return False
 
         # if self.sub_system_data != other.sub_system_data:
-        if not self._compare_subsystems_equal(
-            self.sub_system_data, other.sub_system_data
+        if not util.compare_nested(
+            {sub.name: sub for sub in self.sub_system_data},
+            {sub.name: sub for sub in other.sub_system_data},
         ):
             return False
 
@@ -824,16 +825,19 @@ class CoordinateSystemManager:
         from networkx import shortest_path
 
         remove_systems = []
-        for sub_system_name, sub_system_data in self._sub_systems.items():
+        for sub_system_data in self._sub_systems:
             if (
                 coordinate_system_name in sub_system_data.members
             ) or coordinate_system_name in shortest_path(
                 self.graph, sub_system_data.root, self._root_system_name
             ):
-                remove_systems += [sub_system_name]
+                remove_systems += [sub_system_data.name]
 
-        for sub_system_name in remove_systems:
-            del self._sub_systems[sub_system_name]
+        self._sub_systems = [
+            subsystem
+            for subsystem in self._sub_systems
+            if subsystem.name not in remove_systems
+        ]
 
         # delete nodes and edges
         if delete_children:
@@ -1708,32 +1712,6 @@ class CoordinateSystemManager:
     # subsystems -----------------------------------------------------------------------
 
     @classmethod
-    def _compare_subsystems_equal(cls, data: Dict, other: Dict) -> bool:
-        """Compare if two subsystem data dictionaries are equal.
-
-        Parameters
-        ----------
-        data:
-            First subsystem data dictionary.
-        other
-            Second subsystem data dictionary.
-
-        Returns
-        -------
-        bool:
-            `True` if both dictionaries are identical, `False` otherwise.
-
-        """
-        if len(data) != len(other):
-            return False
-        for subsystem_name, subsystem_data in data.items():
-            if subsystem_name not in other:
-                return False
-            if subsystem_data != other[subsystem_name]:
-                return False
-        return True
-
-    @classmethod
     def from_graph(
         cls,
         name: str,
@@ -1758,10 +1736,9 @@ class CoordinateSystemManager:
         csm._graph = graph
 
         if subsystem_data:
-            subsystem_data = {
-                d["name"]: cls.SubsystemInfo.from_yaml_tree(d) for d in subsystem_data
-            }
-            csm._sub_systems = subsystem_data
+            csm._sub_systems = [
+                cls.SubsystemInfo.from_yaml_tree(d) for d in subsystem_data
+            ]
 
         return csm
 
@@ -1811,19 +1788,19 @@ class CoordinateSystemManager:
 
     def _subsystem_common_node_data(self, subsystem_data: SubsystemInfo):
         """Get the names of the data at the common node that belong to the subsystem."""
-        return set(
+        return {
             data_name
             for data_name in self._graph.nodes[subsystem_data.common_node]["data"]
             if data_name in subsystem_data.data
-        )
+        }
 
     def _subsystem_common_node_neighbors(self, subsystem_data: SubsystemInfo):
         """Get the neighbors of the common node that belong to the subsystem."""
-        return set(
+        return {
             neighbor
             for neighbor in self._graph.neighbors(subsystem_data.common_node)
             if neighbor in subsystem_data.members
-        )
+        }
 
     def merge(self, other: "CoordinateSystemManager"):
         """Merge another coordinate system managers into the current instance.
@@ -1880,20 +1857,22 @@ class CoordinateSystemManager:
         self._graph = compose(self._graph, other.graph)
         self._graph.nodes[common_node]["data"] = joined_data
 
-        self._sub_systems[other.name] = self.SubsystemInfo(
-            name=other.name,
-            root=other.root_system_name,
-            common_node=common_node,
-            time_ref=other.reference_time,
-            members=set(other.coordinate_system_names),
-            data=set(other.data_names),
-            sub_systems=other.sub_system_data,
+        self._sub_systems.append(
+            self.SubsystemInfo(
+                name=other.name,
+                root=other.root_system_name,
+                common_node=common_node,
+                time_ref=other.reference_time,
+                members=set(other.coordinate_system_names),
+                data=set(other.data_names),
+                sub_systems=other.sub_system_data,
+            )
         )
 
     def remove_subsystems(self):
         """Remove all subsystems from the coordinate system manager."""
         cs_delete = []
-        for _, sub_system_data in self._sub_systems.items():
+        for sub_system_data in self._sub_systems:
             for lcs in self._subsystem_common_node_neighbors(sub_system_data):
                 cs_delete += [lcs]
             common_node = sub_system_data.common_node
@@ -1903,7 +1882,7 @@ class CoordinateSystemManager:
                 if k not in self._subsystem_common_node_data(sub_system_data)
             }
 
-        self._sub_systems = {}
+        self._sub_systems = []
         for lcs in cs_delete:
             self.delete_cs(lcs, True)
 
@@ -1940,7 +1919,7 @@ class CoordinateSystemManager:
         return len(self._sub_systems)
 
     @property
-    def sub_system_data(self) -> Dict:
+    def sub_system_data(self) -> List:
         """Get a dictionary containing data about the attached subsystems."""
         return self._sub_systems
 
@@ -1954,7 +1933,7 @@ class CoordinateSystemManager:
             List with subsystem names.
 
         """
-        return list(self._sub_systems.keys())
+        return [subsystem.name for subsystem in self._sub_systems]
 
     @property
     def subsystems(self) -> List["CoordinateSystemManager"]:
@@ -1967,10 +1946,10 @@ class CoordinateSystemManager:
 
         """
         sub_system_list = []
-        for sub_system_name, sub_data in self._sub_systems.items():
+        for sub_data in self._sub_systems:
             csm_sub = CoordinateSystemManager._from_subsystem_graph(
                 sub_data.root,
-                sub_system_name,
+                sub_data.name,
                 time_ref=sub_data.time_ref,
                 graph=self._graph.subgraph(sub_data.members).copy(),
                 subsystems=sub_data.sub_systems,
