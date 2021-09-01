@@ -20,7 +20,7 @@ class CoordinateSystemManagerConverter(WeldxConverter):
         defined_edges = [e for e in obj.graph.edges if obj.graph.edges[e]["defined"]]
         graph = obj.graph.edge_subgraph(defined_edges)
 
-        subsystem_data = [sub.to_yaml_tree(n) for n, sub in obj.sub_system_data.items()]
+        subsystem_data = [sub.to_yaml_tree() for n, sub in obj.sub_system_data.items()]
 
         tree = dict(
             name=obj.name,

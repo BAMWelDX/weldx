@@ -49,6 +49,8 @@ class CoordinateSystemManager:
     class SubsystemInfo:
         """Contains information about subsystems."""
 
+        name: str
+        """Name of the subsystem"""
         root: str
         """Name of the root coordinate system"""
         common_node: str
@@ -62,15 +64,15 @@ class CoordinateSystemManager:
         sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
 
-        def to_yaml_tree(self, name):
+        def to_yaml_tree(self):
             return dict(
-                name=name,
+                name=self.name,
                 root_node=self.root,
                 common_node=self.common_node,
                 reference_time=self.time_ref,
                 members=list(self.members),
                 data=list(self.data),
-                subsystems=[sub.to_yaml_tree(n) for n, sub in self.sub_systems.items()],
+                subsystems=[sub.to_yaml_tree() for _, sub in self.sub_systems.items()],
             )
 
         @classmethod
@@ -83,6 +85,7 @@ class CoordinateSystemManager:
                 subsystems = {}
 
             return cls(
+                name=node["name"],
                 root=node["root_node"],
                 common_node=node["common_node"],
                 time_ref=node.get("reference_time"),
@@ -1878,6 +1881,7 @@ class CoordinateSystemManager:
         self._graph.nodes[common_node]["data"] = joined_data
 
         self._sub_systems[other.name] = self.SubsystemInfo(
+            name=other.name,
             root=other.root_system_name,
             common_node=common_node,
             time_ref=other.reference_time,
