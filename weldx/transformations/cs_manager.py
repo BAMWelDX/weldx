@@ -435,62 +435,6 @@ class CoordinateSystemManager:
         )
 
     @property
-    def _extended_sub_system_data(self) -> Dict:
-        """Get an extended copy of the internal sub system data.
-
-        The function adds a list of potential child coordinate systems to each
-        sub system. Coordinate systems in this list might belong to other sub systems
-        that share a common coordinate system with the current sub system.
-
-        Returns
-        -------
-        Dict:
-            Extended copy of the internal sub system data.
-
-        """
-        sub_system_data_dict = deepcopy(self._sub_systems)
-        for _, sub_system_data in sub_system_data_dict.items():
-            potential_members = []
-            cn_neighbors = self._subsystem_common_node_neighbors(sub_system_data)
-            for cs_name in cn_neighbors:
-                potential_members += self.get_child_system_names(cs_name, False)
-
-            sub_system_data.members = {*potential_members, *cn_neighbors}
-
-        return sub_system_data_dict
-
-    @staticmethod
-    def _get_sub_system_members(
-        ext_sub_system_data, ext_sub_system_data_dict
-    ) -> List[str]:
-        """Get a list with all coordinate system names, that belong to the sub system.
-
-        Parameters
-        ----------
-        ext_sub_system_data:
-            The extended sub system data of a single sub system.
-        ext_sub_system_data_dict:
-            Dictionary containing the extended sub system data of all sub systems.
-
-        Returns
-        -------
-        List[str]:
-            List of all the sub systems coordinate systems.
-
-        """
-        all_members = list(ext_sub_system_data.members)
-        for _, other_sub_system_data in ext_sub_system_data_dict.items():
-            if other_sub_system_data.common_node in all_members:
-                all_members = [
-                    cs_name
-                    for cs_name in all_members
-                    if cs_name not in other_sub_system_data.members
-                ]
-
-        all_members += [ext_sub_system_data.common_node]
-        return all_members
-
-    @property
     def _has_lcs_with_time_ref(self):
         """Return `True` if one of the attached coordinate systems has a reference time.
 
@@ -1427,13 +1371,9 @@ class CoordinateSystemManager:
             List containing all the subsystems.
 
         """
-        ext_sub_system_data_dict = self._extended_sub_system_data
-
         sub_system_list = []
-        for sub_system_name, ext_sub_system_data in ext_sub_system_data_dict.items():
-            members = self._get_sub_system_members(
-                ext_sub_system_data, ext_sub_system_data_dict
-            )
+        for sub_system_name, ext_sub_system_data in self._sub_systems.items():
+            members = ext_sub_system_data.members
 
             csm_sub = CoordinateSystemManager._from_subsystem_graph(
                 ext_sub_system_data.root,
