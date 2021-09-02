@@ -230,7 +230,7 @@ examples:
                 direction: bwd
                 attributes:
                   defined: true
-                  lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                  transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
                 target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                   name: workpiece
                   attributes:
@@ -240,7 +240,7 @@ examples:
                     direction: bwd
                     attributes:
                       defined: true
-                      lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
+                      transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
                         time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
                           values: !core/ndarray-1.0.0
                             data: [0, 29000000000]
@@ -280,7 +280,7 @@ examples:
                         direction: bwd
                         attributes:
                           defined: true
-                          lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
+                          transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
                             coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
                               name: coordinates
                               dimensions: [c]

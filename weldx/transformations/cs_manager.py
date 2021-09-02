@@ -182,8 +182,8 @@ class CoordinateSystemManager:
 
         # check coordinate systems
         for edge in graph_0.edges:
-            lcs_0 = self.graph.edges[(edge[0], edge[1])]["lcs"]
-            lcs_1 = other.graph.edges[(edge[0], edge[1])]["lcs"]
+            lcs_0 = self.graph.edges[(edge[0], edge[1])]["transformation"]
+            lcs_1 = other.graph.edges[(edge[0], edge[1])]["transformation"]
             if lcs_0 != lcs_1:
                 return False
 
@@ -205,7 +205,7 @@ class CoordinateSystemManager:
 
         """
         return [
-            self.graph.edges[edge]["lcs"]
+            self.graph.edges[edge]["transformation"]
             for edge in self.graph.edges
             if self.graph.edges[edge]["defined"]
         ]
@@ -267,13 +267,15 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-        self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
+        self._graph.add_edge(node_from, node_to, transformation=lcs, defined=True)
 
         # only store inverted lcs if coordinates and orientations are discrete values
         lcs_invert = None
         if not isinstance(lcs.coordinates, TimeSeries):
             lcs_invert = lcs.invert()
-        self._graph.add_edge(node_to, node_from, lcs=lcs_invert, defined=False)
+        self._graph.add_edge(
+            node_to, node_from, transformation=lcs_invert, defined=False
+        )
 
     def _check_coordinate_system_exists(self, coordinate_system_name: str):
         """Raise an exception if the specified coordinate system does not exist.
@@ -368,14 +370,14 @@ class CoordinateSystemManager:
 
         """
         edge_from_to = self.graph.edges[(node_from, node_to)]
-        edge_from_to["lcs"] = lcs
+        edge_from_to["transformation"] = lcs
         edge_from_to["defined"] = True
 
         edge_to_from = self.graph.edges[(node_to, node_from)]
         if isinstance(lcs.coordinates, TimeSeries):
-            edge_to_from["lcs"] = None
+            edge_to_from["transformation"] = None
         else:
-            edge_to_from["lcs"] = lcs.invert()
+            edge_to_from["transformation"] = lcs.invert()
         edge_to_from["defined"] = False
 
     @property
@@ -979,11 +981,11 @@ class CoordinateSystemManager:
     ):
         """Get a lcs on a graph edge for the get_cs method."""
         invert = False
-        lcs: LocalCoordinateSystem = self.graph.edges[edge]["lcs"]
+        lcs: LocalCoordinateSystem = self.graph.edges[edge]["transformation"]
 
         # lcs was defined inverted
         if lcs is None:
-            lcs = self.graph.edges[(edge[1], edge[0])]["lcs"]
+            lcs = self.graph.edges[(edge[1], edge[0])]["transformation"]
             invert = True
 
         if lcs.is_time_dependent:
@@ -1305,18 +1307,20 @@ class CoordinateSystemManager:
 
             for edge in affected_edges:
                 if self._graph.edges[edge]["defined"]:
-                    lcs = self._graph.edges[edge]["lcs"]
+                    lcs = self._graph.edges[edge]["transformation"]
                     # this prevents failures when calling lcs.interp_time with reference
                     # times or DatetimeIndex.
                     if lcs.reference_time is None and self._reference_time is not None:
                         lcs.reset_reference_time(self._reference_time)
-                    self._graph.edges[edge]["lcs"] = lcs.interp_time(time, time_ref)
+                    self._graph.edges[edge]["transformation"] = lcs.interp_time(
+                        time, time_ref
+                    )
 
             for edge in affected_edges:
                 if not self._graph.edges[edge]["defined"]:
-                    self._graph.edges[edge]["lcs"] = self._graph.edges[
+                    self._graph.edges[edge]["transformation"] = self._graph.edges[
                         (edge[1], edge[0])
-                    ]["lcs"].invert()
+                    ]["transformation"].invert()
             return self
 
         return deepcopy(self).interp_time(
@@ -1437,7 +1441,7 @@ class CoordinateSystemManager:
         ]
 
         def _is_edge_time_dependent(edge):
-            lcs = self._graph.edges[edge]["lcs"]
+            lcs = self._graph.edges[edge]["transformation"]
             # inverse lcs contains a TimeSeries
             if lcs is None:
                 return True
@@ -1638,10 +1642,10 @@ class CoordinateSystemManager:
         else:
 
             def _get_lcs(edge):
-                lcs = self.graph.edges[edge]["lcs"]
+                lcs = self.graph.edges[edge]["transformation"]
                 if lcs is not None:
                     return lcs
-                return self.graph.edges[(edge[1], edge[0])]["lcs"]
+                return self.graph.edges[(edge[1], edge[0])]["transformation"]
 
             lcs_list = [_get_lcs(edge) for edge in list_of_edges]
         lcs_list = [lcs for lcs in lcs_list if lcs.time is not None]
@@ -1721,7 +1725,7 @@ class CoordinateSystemManager:
                 graph.add_edge(
                     edge[1],
                     edge[0],
-                    lcs=graph.edges[edge]["lcs"].invert(),
+                    transformation=graph.edges[edge]["transformation"].invert(),
                     defined=False,
                 )
 

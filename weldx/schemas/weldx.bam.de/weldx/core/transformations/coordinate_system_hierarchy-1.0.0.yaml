@@ -25,7 +25,7 @@ examples:
               direction: bwd
               attributes:
                 defined: true
-                lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
               target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                 name: A
                 attributes:
@@ -34,7 +34,7 @@ examples:
               direction: bwd
               attributes:
                 defined: true
-                lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
               target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                 name: B
                 attributes:
@@ -44,7 +44,7 @@ examples:
                   direction: bwd
                   attributes:
                     defined: true
-                    lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                    transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
                   target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                     name: Y
                     attributes:
@@ -54,7 +54,7 @@ examples:
                       direction: bwd
                       attributes:
                         defined: true
-                        lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                        transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
                       target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                         name: Z
                         attributes:
@@ -64,7 +64,7 @@ examples:
                           direction: bwd
                           attributes:
                             defined: true
-                            lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                            transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
                           target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                             name: V
                             attributes:
@@ -119,11 +119,11 @@ definitions:
         attributes:
           type: object
           properties:
-            lcs:
+            transformation:
               description: |
                 The transformation between two coordinate systems
               tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
-          required: [lcs]
+          required: [transformation]
         target_node:
           $ref: "#/definitions/coordinate_system_node"
       required: [attributes]
