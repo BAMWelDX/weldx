@@ -1911,8 +1911,8 @@ class CoordinateSystemManager:
 
         if lcs_rem:
             warnings.warn(
-                "The coordinate systems are not part of any subsystem and lost "
-                f"connection to the CoordinateSystemManager instance: {lcs_rem}\n"
+                "The following coordinate systems are not part of any subsystem and "
+                f"lost connection to the CoordinateSystemManager instance: {lcs_rem}\n"
                 "These systems are removed."
             )
 
