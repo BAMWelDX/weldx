@@ -13,59 +13,59 @@ examples:
   -
     - An abstract example of a coordinate system hierarchy with nested subsystems and without data
     - |
-      !weldx!core/transformations/coordinate_system_hierarchy-1.0.0
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0>
         name: CSM
-        graph: !weldx!core/graph/di_graph-1.0.0
-          root_node: !weldx!core/graph/di_node-1.0.0
+        graph: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0>
+          root_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
             name: R
             attributes:
               data: {}
             edges:
-            - !weldx!core/graph/di_edge-1.0.0
+            - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
               direction: bwd
               attributes:
                 defined: true
-                lcs: !weldx!core/transformations/local_coordinate_system-1.0.0 {}
-              target_node: !weldx!core/graph/di_node-1.0.0
+                lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+              target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                 name: A
                 attributes:
                   data: {}
-            - !weldx!core/graph/di_edge-1.0.0
+            - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
               direction: bwd
               attributes:
                 defined: true
-                lcs: !weldx!core/transformations/local_coordinate_system-1.0.0 {}
-              target_node: !weldx!core/graph/di_node-1.0.0
+                lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+              target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                 name: B
                 attributes:
                   data: {}
                 edges:
-                - !weldx!core/graph/di_edge-1.0.0
+                - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
                   direction: bwd
                   attributes:
                     defined: true
-                    lcs: !weldx!core/transformations/local_coordinate_system-1.0.0 {}
-                  target_node: !weldx!core/graph/di_node-1.0.0
+                    lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                  target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                     name: Y
                     attributes:
                       data: {}
                     edges:
-                    - !weldx!core/graph/di_edge-1.0.0
+                    - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
                       direction: bwd
                       attributes:
                         defined: true
-                        lcs: !weldx!core/transformations/local_coordinate_system-1.0.0 {}
-                      target_node: !weldx!core/graph/di_node-1.0.0
+                        lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                      target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                         name: Z
                         attributes:
                           data: {}
                         edges:
-                        - !weldx!core/graph/di_edge-1.0.0
+                        - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
                           direction: bwd
                           attributes:
                             defined: true
-                            lcs: !weldx!core/transformations/local_coordinate_system-1.0.0 {}
-                          target_node: !weldx!core/graph/di_node-1.0.0
+                            lcs: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                          target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
                             name: V
                             attributes:
                               data: {}
