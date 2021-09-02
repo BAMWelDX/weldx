@@ -47,7 +47,7 @@ definitions:
           $ref: "#/definitions/coordinate_system_node"
       required: [attributes]
 
-  subsystem_data:
+  subsystem_info:
     type: array
     items:
       type: object
@@ -69,7 +69,7 @@ definitions:
           items:
             type: string
         subsystems:
-          $ref: "#/definitions/subsystem_data"
+          $ref: "#/definitions/subsystem_info"
 
 
 
@@ -89,7 +89,7 @@ properties:
             $ref: "#/definitions/coordinate_system_node"
 
   subsystems:
-    $ref: "#/definitions/subsystem_data"
+    $ref: "#/definitions/subsystem_info"
 
 propertyOrder: [name, reference_time, graph]
 required: [name]
