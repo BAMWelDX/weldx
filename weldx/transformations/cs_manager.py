@@ -1711,19 +1711,12 @@ class CoordinateSystemManager:
     # subsystems -----------------------------------------------------------------------
 
     @classmethod
-    def from_graph(
+    def _from_yaml_tree(
         cls,
-        name: str,
-        time_ref: types_timestamp_like,
-        graph: nx.DiGraph,
-        subsystem_info: dict,
+        node: Dict,
     ) -> CoordinateSystemManager:
-
-        # todo:
-        #  - copy graph before adding edges?
-        #  - check graph (only allowed fields and types)
-
-        csm = cls(tuple(graph.nodes)[0], name, time_ref)
+        """Create a CSM from a yaml tree dictionary."""
+        graph = node["graph"]
         for edge in graph.edges:
             if not (edge[1], edge[0]) in graph.edges:
                 graph.add_edge(
@@ -1732,14 +1725,18 @@ class CoordinateSystemManager:
                     lcs=graph.edges[edge]["lcs"].invert(),
                     defined=False,
                 )
-        csm._graph = graph
 
-        if subsystem_info:
-            csm._subsystems = [
-                cls.SubsystemInfo.from_yaml_tree(d) for d in subsystem_info
-            ]
+        subsystems = node.get("subsystems")
+        if subsystems:
+            subsystems = [cls.SubsystemInfo.from_yaml_tree(d) for d in subsystems]
 
-        return csm
+        return cls._from_subsystem_graph(
+            tuple(graph.nodes)[0],
+            node["name"],
+            node.get("reference_time"),
+            graph,
+            subsystems,
+        )
 
     # todo: check if the following function can be removed
     @classmethod
@@ -1749,32 +1746,9 @@ class CoordinateSystemManager:
         coordinate_system_manager_name: str = None,
         time_ref: types_timestamp_like = None,
         graph: nx.DiGraph = None,
-        subsystems=None,
-    ):
-        """Construct a coordinate system manager from existing graph and subsystems.
-
-        This function is used internally to recreate subsystem structures.
-
-        Parameters
-        ----------
-        root_coordinate_system_name
-            Name of the root coordinate system.
-        coordinate_system_manager_name
-            Name of the coordinate system manager. If `None` is passed, a default name
-            is chosen.
-        time_ref
-            A reference timestamp. If it is defined, all time dependent information
-            returned by the CoordinateSystemManager will refer to it by default.
-        graph:
-            Pass on an existing graph.
-        subsystems:
-            A dictionary containing data about the CSMs attached subsystems.
-
-        Returns
-        -------
-        CoordinateSystemManager
-
-        """
+        subsystems: List[CoordinateSystemManager.SubsystemInfo] = None,
+    ) -> CoordinateSystemManager:
+        """Construct a coordinate system manager from existing graph and subsystems."""
         csm = cls(root_coordinate_system_name, coordinate_system_manager_name, time_ref)
 
         if subsystems is not None:
@@ -1847,9 +1821,10 @@ class CoordinateSystemManager:
             if name in self.data_names:
                 raise NameError(f"Both instances contain data with name '{name}'")
 
-        data_parent = self._graph.nodes[common_node]["data"]
-        data_child = other.graph.nodes[common_node]["data"]
-        joined_data = {**data_parent, **data_child}
+        joined_data = {
+            **self._graph.nodes[common_node]["data"],
+            **other.graph.nodes[common_node]["data"],
+        }
 
         from networkx import compose
 

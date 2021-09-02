@@ -32,10 +32,4 @@ class CoordinateSystemManagerConverter(WeldxConverter):
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct from tree."""
-        csm = CoordinateSystemManager.from_graph(
-            node["name"],
-            node.get("reference_time"),
-            node["graph"],
-            node.get("subsystems"),
-        )
-        return csm
+        return CoordinateSystemManager._from_yaml_tree(node)
