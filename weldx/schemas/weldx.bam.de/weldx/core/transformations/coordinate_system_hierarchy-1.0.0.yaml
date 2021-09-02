@@ -14,8 +14,7 @@ type: object
 definitions:
   coordinate_system_node:
     allOf:
-      - oneOf:
-          - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0"
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.*"
       - type: object
         properties:
           attributes:
@@ -24,8 +23,8 @@ definitions:
               data:
                 type: object
                 anyOf:
-                  - wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/data_array-1.0.0"
-                  - wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-1.0.0"
+                  - wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/data_array-1.*"
+                  - wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-1.*"
 
           edges:
             type: array
@@ -35,8 +34,7 @@ definitions:
 
   coordinate_transformation_edge:
     allOf:
-    - oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0"
+    - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.*"
     - type: object
       properties:
         attributes:
@@ -49,7 +47,7 @@ definitions:
           $ref: "#/definitions/coordinate_system_node"
       required: [attributes]
 
-  subsystem_data:
+  subsystem_info:
     type: array
     items:
       type: object
@@ -71,7 +69,7 @@ definitions:
           items:
             type: string
         subsystems:
-          $ref: "#/definitions/subsystem_data"
+          $ref: "#/definitions/subsystem_info"
 
 
 
@@ -80,19 +78,18 @@ properties:
     type: string
 
   reference_time:
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
 
   graph:
     allOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0"
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.*"
       - type: object
         properties:
           root_node:
             $ref: "#/definitions/coordinate_system_node"
 
   subsystems:
-    $ref: "#/definitions/subsystem_data"
+    $ref: "#/definitions/subsystem_info"
 
 propertyOrder: [name, reference_time, graph]
 required: [name]
