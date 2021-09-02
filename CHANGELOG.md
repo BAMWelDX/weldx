@@ -80,6 +80,9 @@
       and `weldx.asdf.util.get_weldx_extension`
     - add ``devtools/scripts/update_manifest.py`` to auto update manifest from extension metadata
     - custom shape validation must now be implemented via staticmethod ``WeldxConverter.shape_from_tagged``
+- rewrote `asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy-1.0.0` schema for
+  the `CoordinateSystemManager`. It uses the digraph schemas to serialize the coordinate system structure.
+  [[#497]](https://github.com/BAMWelDX/weldx/pull/497)
 
 ### deprecations
 
