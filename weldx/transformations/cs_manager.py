@@ -1801,7 +1801,7 @@ class CoordinateSystemManager:
             if neighbor in subsystem_info.members
         }
 
-    def merge(self, other: "CoordinateSystemManager"):
+    def merge(self, other: CoordinateSystemManager):
         """Merge another coordinate system managers into the current instance.
 
         Both `CoordinateSystemManager` need to have exactly one common coordinate
@@ -1948,7 +1948,7 @@ class CoordinateSystemManager:
         return [subsystem.name for subsystem in self._subsystems]
 
     @property
-    def subsystems(self) -> List["CoordinateSystemManager"]:
+    def subsystems(self) -> List[CoordinateSystemManager]:
         """Extract all subsystems from the CoordinateSystemManager.
 
         Returns
