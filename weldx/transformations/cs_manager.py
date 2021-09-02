@@ -1737,7 +1737,6 @@ class CoordinateSystemManager:
             subsystems,
         )
 
-    # todo: check if the following function can be removed
     @classmethod
     def _from_subsystem_graph(
         cls,
