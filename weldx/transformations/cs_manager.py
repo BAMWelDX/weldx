@@ -164,7 +164,6 @@ class CoordinateSystemManager:
         if len(graph_0.nodes) != len(graph_1.nodes):
             return False
 
-        # if self.subsystem_info != other.subsystem_info:
         if not util.compare_nested(
             {sub.name: sub for sub in self.subsystem_info},
             {sub.name: sub for sub in other.subsystem_info},
