@@ -205,7 +205,7 @@ class _EqCompareNested:
     compare_funcs: ClassVar = {
         (np.ndarray, NDArrayType, pint.Quantity, pd.Index): _array_equal,
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
-        (set): lambda x, y: x == y,
+        (set): lambda x, y: x == y,  # list here to prevent entering nested for sets
     }
     # these types will be treated as equivalent.
     _type_equalities: ClassVar = [
@@ -277,7 +277,9 @@ class _EqCompareNested:
         """Deeply compares [nested] data structures combined of tuples, lists, dicts...
 
         Also compares non-nested data-structures.
-        Arrays are compared using np.all and xr.DataArray.identical
+        Arrays are compared using np.all and xr.DataArray.identical.
+        Sets are compared by calling ``==`` and not traversed, hence the order of all
+        set items is important.
 
         Parameters
         ----------
