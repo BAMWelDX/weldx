@@ -205,6 +205,7 @@ class _EqCompareNested:
     compare_funcs: ClassVar = {
         (np.ndarray, NDArrayType, pint.Quantity, pd.Index): _array_equal,
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
+        (set): lambda x, y: x == y,
     }
     # these types will be treated as equivalent.
     _type_equalities: ClassVar = [
@@ -250,12 +251,6 @@ class _EqCompareNested:
         """
         data_structure = iterutils.get_path(a, path)
         other_data_structure = iterutils.get_path(b, path)
-
-        # directly test for equality with sets
-        if isinstance(data_structure, set) or isinstance(other_data_structure, set):
-            if data_structure == other_data_structure:
-                return True
-            raise RuntimeError("sets not equal")
 
         other_value = other_data_structure[key]
 
@@ -305,7 +300,9 @@ class _EqCompareNested:
         visit = functools.partial(_EqCompareNested._visit, a=a, b=b)
 
         try:
-            iterutils.remap(a, visit=visit, reraise_visit=True)
+            iterutils.remap(
+                a, visit=visit, reraise_visit=True, enter=_EqCompareNested._enter
+            )
         # Key not found in b, values not equal, more elements in a than in b
         except (KeyError, RuntimeError, IndexError):
             return False
