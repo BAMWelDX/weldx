@@ -27,7 +27,7 @@ help:
 	@echo "  latex     to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
 
 clean:
-	-rm -rf $(BUILD_DIR)/* doc/generated doc/_autosummary
+	-rm -rf $(BUILD_DIR)/* $(DOC)/generated $(DOC)/_autosummary
 
 html:
 	mkdir -p $(BUILD_DIR)/html $(BUILD_DIR)/doctrees
