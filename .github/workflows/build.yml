@@ -47,7 +47,8 @@ jobs:
           environment-file: ./devtools/conda.recipe/build_env.yml
 
       - name: activate build env
-        shell: conda activate build_env
+        shell: bash -l {0}
+        run: conda activate build_env
 
       - name: conda info
         shell: bash -l {0}
