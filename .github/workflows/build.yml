@@ -42,14 +42,12 @@ jobs:
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./devtools/conda.recipe/build_env.yml') }}
 
       - name: Setup Conda Environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: mamba-org/provision-with-micromamba@v10
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
-          activate-environment: build_env
-          auto-activate-base: false
-          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
-          channels: conda-forge, defaults
-          mamba-version: "*"
+
+      - name: activate build env
+        shell: conda activate build_env
 
       - name: conda info
         shell: bash -l {0}
@@ -65,7 +63,7 @@ jobs:
 
       - name: set package file env
         shell: bash -l {0}
-        run: echo "PACKAGE_DIR=$(conda build . --output)" >> $GITHUB_ENV
+        run: echo "PACKAGE_DIR=$(conda mambabuild . --output)" >> $GITHUB_ENV
 
       - uses: actions/upload-artifact@v2
         with:
