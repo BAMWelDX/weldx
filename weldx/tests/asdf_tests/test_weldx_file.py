@@ -15,6 +15,7 @@ from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
+from weldx.util import compare_nested
 
 
 class ReadOnlyFile:
@@ -86,13 +87,13 @@ def simple_asdf_file(request):
 
 @pytest.mark.usefixtures("simple_asdf_file")
 class TestWeldXFile:
-    """Docstring."""
+    """Tests for class WeldxFile."""
 
     @pytest.fixture(autouse=True)
     def setUp(self, *args, **kwargs):
         """Being called for every test. Creates a fresh copy of `simple_asdf_file`."""
         copy_for_test = self.make_copy(self.simple_asdf_file)
-        self.fh = WeldxFile(copy_for_test, *args, **kwargs)
+        self.fh: WeldxFile = WeldxFile(copy_for_test, *args, **kwargs)
 
     @staticmethod
     @pytest.mark.parametrize("mode", ["rb", "wb", "a"])
@@ -432,3 +433,34 @@ class TestWeldXFile:
         wx_file.close()
 
         assert size_asdf == size_rw == size_show_hdr
+
+    @pytest.mark.parametrize("file", [None, BytesIO(), "physical"])
+    def test_copy(self, file, tmpdir):
+        """Take a copy written to physical file, bytesio and check output."""
+        if file == "physical":
+            file = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+
+        wx_copy = self.fh.copy(filename_or_file_like=file)
+
+        assert wx_copy.mode == self.fh.mode
+        assert wx_copy.sync_upon_close == self.fh.sync_upon_close
+        assert wx_copy.custom_schema == self.fh.custom_schema
+        assert wx_copy.software_history_entry == self.fh.software_history_entry
+
+        assert wx_copy._asdffile_kwargs == self.fh._asdffile_kwargs
+        assert wx_copy._write_kwargs == self.fh._write_kwargs
+
+        compare_nested(self.fh, wx_copy)
+
+    @pytest.mark.parametrize("overwrite", [True, False])
+    def test_copy_overwrite_non_wx_file(self, overwrite, tmpdir):
+        """Avoid overwriting existing files."""
+        file = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+        with open(file, "w") as fh:
+            fh.write("nope")
+        if not overwrite:
+            with pytest.raises(Exception) as e:
+                self.fh.copy(file, overwrite=False)
+                assert isinstance(e.value, FileExistsError)
+        else:
+            self.fh.copy(file, overwrite=overwrite)
