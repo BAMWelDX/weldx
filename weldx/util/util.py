@@ -135,7 +135,7 @@ def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
         The jupyter notebook filename to clean.
 
     """
-    with open(file, "r", encoding="utf-8") as f:
+    with open(file, encoding="utf-8") as f:
         data = json.load(f)
 
     for cell in data["cells"]:
@@ -291,6 +291,18 @@ class _EqCompareNested:
             When a or b is not a nested structure.
 
         """
+
+        def _enter_replace_sets(p, k, v):
+            if isinstance(v, set):
+                return [], ((i, j) for i, j in enumerate(sorted(list(v))))
+            return iterutils.default_enter(p, k, v)
+
+        try:
+            a = iterutils.remap(a, enter=_enter_replace_sets)
+            b = iterutils.remap(b, enter=_enter_replace_sets)
+        except TypeError:
+            raise TypeError("either a or b are not a nested data structure.")
+
         # we bind the input structures a, b to the visit function.
         visit = functools.partial(_EqCompareNested._visit, a=a, b=b)
 

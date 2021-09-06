@@ -14,13 +14,12 @@ from pandas import Timestamp as TS  # noqa
 import weldx.transformations as tf
 from weldx import Q_, SpatialData
 from weldx.core import MathematicalExpression, TimeSeries
-from weldx.tests._helpers import get_test_name
+from weldx.tests._helpers import get_test_name, matrix_is_close
 from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.transformations import CoordinateSystemManager as CSM  # noqa
 from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
-from .._helpers import matrix_is_close
 from ._util import check_coordinate_system, check_cs_close, r_mat_x, r_mat_y, r_mat_z
 
 
@@ -2287,6 +2286,154 @@ def test_get_data_exceptions(arguments, exception_type, test_name):
     csm.assign_data([[1, 2, 3], [3, 2, 1]], "some data", "root")
     with pytest.raises(exception_type):
         csm.get_data(*arguments)
+
+
+# test_merge_unmerge_with_data ---------------------------------------------------------
+
+
+@pytest.mark.parametrize("node_parent", ["a", "b"])
+@pytest.mark.parametrize("node_child", ["x", "y"])
+@pytest.mark.parametrize("data_parent", [True, False])
+@pytest.mark.parametrize("data_index", [0, 1])
+def test_merge_unmerge_with_data(node_parent, node_child, data_parent, data_index):
+    """Test if assigned data is treated correctly during merging and unmerging.
+
+    Parameters
+    ----------
+    node_parent :
+        The node of the parant system that is merged
+    node_child :
+        The node of the child system that is merged (will be renamed to match parent)
+    data_parent :
+        If `True`, the parent CSM will have the data assigned and the child CSM
+        otherwise
+    data_index :
+        Index of the LCS that will get the data. 0 is the root LCS and 1 and 2 are the
+        other child systems
+
+    Returns
+    -------
+
+    """
+
+    def _create_csm(nodes, name):
+        csm = CSM(nodes[0], name)
+        csm.create_cs(nodes[1], nodes[0])
+        csm.create_cs(nodes[2], nodes[0])
+        return csm
+
+    parent_nodes = ["a", "b", "c"]
+    csm_parent = _create_csm(parent_nodes, "csm_parent")
+
+    child_nodes = ["x", "y", "z"]
+    child_nodes = [node if node != node_child else node_parent for node in child_nodes]
+    csm_child = _create_csm(child_nodes, "csm_child")
+
+    data = [[0, 1, 2], [3, 4, 5]]
+    data_name = "data"
+    if data_parent:
+        csm_parent.assign_data(data, data_name, parent_nodes[data_index])
+    else:
+        csm_child.assign_data(data, data_name, child_nodes[data_index])
+
+    csm_parent.merge(csm_child)
+
+    # check data after merge
+    assert data_name in csm_parent.data_names
+    assert np.all(csm_parent.get_data(data_name) == data)
+
+    csm_child_unmerged = csm_parent.unmerge()[0]
+
+    # check data after unmerging
+    if data_parent:
+        assert data_name in csm_parent.data_names
+        assert data_name not in csm_child_unmerged.data_names
+        assert np.all(csm_parent.get_data(data_name) == data)
+    else:
+        assert data_name not in csm_parent.data_names
+        assert data_name in csm_child_unmerged.data_names
+        assert np.all(csm_child_unmerged.get_data(data_name) == data)
+
+
+# test_unmerge_multi_data --------------------------------------------------------------
+
+
+def test_unmerge_multi_data():
+    """Test if unmerge restores multiple data on a common cs correctly.
+
+    The test creates multiple CSM instances with data on the common cs. After unmerging,
+    all data must be assigned to the original CSM and must also be removed from the
+    others.
+
+    """
+    # create CSMs
+    csm_p = CSM("m", "parent")
+    csm_p.create_cs("a", "m")
+    data_p = [[1, 2, 3]]
+    csm_p.assign_data(data_p, "parent_data", "m")
+
+    csm_c1 = CSM("m", "child1")
+    csm_c1.create_cs("b", "m")
+    data_c1 = [[4, 5, 6]]
+    csm_c1.assign_data(data_c1, "child1_data", "m")
+
+    csm_c2 = CSM("c", "child2")
+    csm_c2.create_cs("m", "c")
+    data_c2 = [[7, 8, 9]]
+    csm_c2.assign_data(data_c2, "child2_data", "m")
+
+    csm_c3 = CSM("m", "child3")
+    csm_c3.create_cs("d", "m")
+
+    # merge
+    csm_p.merge(csm_c1)
+    csm_p.merge(csm_c2)
+    csm_p.merge(csm_c3)
+
+    # check after merge
+    assert all(
+        data in ["parent_data", "child1_data", "child2_data"]
+        for data in csm_p.data_names
+    )
+
+    # unmerge
+    unmerged = csm_p.unmerge()
+
+    # check if data is restored correctly
+    assert len(csm_p.data_names) == 1
+    assert "parent_data" in csm_p.data_names
+    assert np.all(csm_p.get_data("parent_data") == data_p)
+
+    for csm in unmerged:
+        if csm.name == "child3":
+            assert len(csm.data_names) == 0
+        else:
+            assert len(csm.data_names) == 1
+            assert f"{csm.name}_data" in csm.data_names
+            if csm.name == "child1":
+                assert np.all(csm.get_data("child1_data") == data_c1)
+            else:
+                assert np.all(csm.get_data("child2_data") == data_c2)
+
+
+# test_merge_data_name_collision -------------------------------------------------------
+
+
+@pytest.mark.parametrize("data_cs_parent", ["rp", "a", "m"])
+@pytest.mark.parametrize("data_cs_child", ["rc", "b", "m"])
+def test_merge_data_name_collision(data_cs_parent, data_cs_child):
+    csm_parent = CSM("rp", "parent")
+    csm_parent.create_cs("a", "rp")
+    csm_parent.create_cs("m", "rp")
+    csm_parent.assign_data([[1, 2, 3]], "conflict", data_cs_parent)
+
+    csm_child = CSM("rc", "child")
+    csm_child.create_cs("b", "rc")
+    csm_child.create_cs("m", "rc")
+    csm_child.assign_data([[4, 5, 6]], "conflict", data_cs_child)
+
+    with pytest.raises(NameError):
+        csm_parent.merge(csm_child)
 
 
 # test_interp_time ---------------------------------------------------------------------

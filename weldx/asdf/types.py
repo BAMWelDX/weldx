@@ -112,7 +112,7 @@ def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="we
     """
     Format a YAML tag to new style asdf:// syntax.
     """
-    tag = "asdf://{0}/{1}/tags/{2}".format(organization, standard, tag_name)
+    tag = f"asdf://{organization}/{standard}/tags/{tag_name}"
 
     if version is None:
         return tag
@@ -120,7 +120,7 @@ def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="we
     if isinstance(version, AsdfSpec):
         version = str(version.spec)
 
-    return "{0}-{1}".format(tag, version)
+    return f"{tag}-{version}"
 
 
 def _legacy_tag_from_new_tag(tag: str):

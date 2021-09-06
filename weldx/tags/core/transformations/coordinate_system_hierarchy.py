@@ -293,14 +293,10 @@ class CoordinateSystemManagerConverter(WeldxConverter):
 
     def to_yaml_tree(self, obj: CoordinateSystemManager, tag: str, ctx) -> dict:
         """Convert to python dict."""
-        graph = deepcopy(obj.graph)  # TODO: Check if deepcopy is necessary
 
-        # remove automatically computed edges (inverted directions)
-        remove_edges = []
-        for edge in graph.edges:
-            if not graph.edges[edge]["defined"]:
-                remove_edges.append(edge)
-        graph.remove_edges_from(remove_edges)
+        # work on subgraph view containing only original defined edges
+        defined_edges = [e for e in obj.graph.edges if obj.graph.edges[e]["defined"]]
+        graph = obj.graph.edge_subgraph(defined_edges)
 
         coordinate_system_data = []
         for name, reference_system in graph.edges:
@@ -320,11 +316,14 @@ class CoordinateSystemManagerConverter(WeldxConverter):
         ]
 
         spatial_data = None
-        if len(obj._data) > 0:
-            spatial_data = [
-                dict(name=k, coordinate_system=v.coordinate_system_name, data=v.data)
-                for k, v in obj._data.items()
-            ]
+
+        if len(obj.data_names) > 0:
+            spatial_data = []
+            for cs in obj.graph.nodes:
+                spatial_data += [
+                    dict(name=k, coordinate_system=cs, data=v)
+                    for k, v in obj.graph.nodes[cs]["data"].items()
+                ]
 
         tree = {
             "name": obj.name,
