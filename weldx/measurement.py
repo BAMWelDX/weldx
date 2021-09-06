@@ -372,6 +372,7 @@ class MeasurementChain:
         output_signal_unit: str,
         signal_data: TimeSeries = None,
     ) -> "MeasurementChain":
+
         """Create a new measurement chain without providing a `SignalSource` instance.
 
         Parameters
@@ -514,7 +515,7 @@ class MeasurementChain:
 
     @staticmethod
     def _determine_output_signal_unit(
-        func: "MathematicalExpression", input_unit: str
+        func: MathematicalExpression, input_unit: str
     ) -> str:
         """Determine the unit of a transformations' output signal.
 
