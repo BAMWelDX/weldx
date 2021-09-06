@@ -310,7 +310,7 @@ class _EqCompareNested:
         except (KeyError, RuntimeError, IndexError):
             return False
         except TypeError:
-            raise TypeError("either a or b are not a nested data structure.")
+            raise TypeError("One of a or b is not a nested data structure (or a set).")
 
         return True
 
