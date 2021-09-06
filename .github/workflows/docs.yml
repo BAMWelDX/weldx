@@ -35,14 +35,14 @@ jobs:
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./doc/rtd_environment.yml', './setup.cfg') }}
 
       - name: Setup Conda Environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: mamba-org/provision-with-micromamba@v10
         with:
           environment-file: ./doc/rtd_environment.yml
-          activate-environment: weldx
-          auto-activate-base: false
-          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
-          channels: conda-forge, defaults
-          mamba-version: "*"
+          environment-name: rtd
+
+      - name: activate build env
+        shell: bash -l {0}
+        run: micromamba activate rtd
 
       - name: conda info
         shell: bash -l {0}
