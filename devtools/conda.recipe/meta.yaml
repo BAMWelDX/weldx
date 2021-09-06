@@ -31,7 +31,6 @@ test:
   requires:
     - pytest
     - pytest-xdist
-    - jupyterlab
   files:
     - conftest.py
   imports:
