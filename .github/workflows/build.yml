@@ -38,7 +38,7 @@ jobs:
           # Increase this value to reset cache if ./devtools/conda.recipe/build_env.yml has not changed
           CACHE_NUMBER: 1
         with:
-          path: ~/conda_pkgs_dir
+          path: ~/micromamba/pkgs
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./devtools/conda.recipe/build_env.yml') }}
 
       - name: Setup Conda Environment
@@ -48,7 +48,7 @@ jobs:
 
       - name: activate build env
         shell: bash -l {0}
-        run: conda activate build_env
+        run: micromamba activate build_env
 
       - name: conda info
         shell: bash -l {0}
