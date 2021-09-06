@@ -6,7 +6,7 @@ SHELL := /bin/bash
 DOC = ../../doc
 
 # You can set these variables from the command line.
-SPHINXOPTS    = -v -D nbsphinx_execute="never" -P --keep-going -W -j auto
+SPHINXOPTS    = -v -D nbsphinx_execute="never" -P --keep-going -W -n #-j auto
 SPHINXBUILD   = LANG=C sphinx-build
 PAPER         =
 
