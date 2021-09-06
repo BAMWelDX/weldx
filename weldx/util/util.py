@@ -6,7 +6,7 @@ import json
 import re
 import sys
 import warnings
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 from functools import wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
@@ -194,6 +194,7 @@ _eq_compare_nested_input_types = Union[
     Sequence,
     Mapping,
     Collection,
+    Set,
 ]
 
 
@@ -204,6 +205,7 @@ class _EqCompareNested:
     compare_funcs: ClassVar = {
         (np.ndarray, NDArrayType, pint.Quantity, pd.Index): _array_equal,
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
+        (set): lambda x, y: x == y,
     }
     # these types will be treated as equivalent.
     _type_equalities: ClassVar = [
@@ -250,17 +252,13 @@ class _EqCompareNested:
         data_structure = iterutils.get_path(a, path)
         other_data_structure = iterutils.get_path(b, path)
 
-        # directly test for equality with sets
-        if isinstance(data_structure, set) or isinstance(other_data_structure, set):
-            if data_structure == other_data_structure:
-                return True
-            raise RuntimeError("sets not equal")
+        other_value = other_data_structure[key]
 
         if not _EqCompareNested._enter(None, key, value)[1]:
             other_value = other_data_structure[key]
             # check lengths of Sequence types first and raise
             # prior starting a more expensive comparison!
-            if isinstance(other_data_structure, Sequence) and len(
+            if isinstance(other_data_structure, (Sequence, Set)) and len(
                 other_data_structure
             ) != len(data_structure):
                 raise RuntimeError("len does not match")
@@ -303,7 +301,9 @@ class _EqCompareNested:
         visit = functools.partial(_EqCompareNested._visit, a=a, b=b)
 
         try:
-            iterutils.remap(a, visit=visit, reraise_visit=True)
+            iterutils.remap(
+                a, visit=visit, reraise_visit=True, enter=_EqCompareNested._enter
+            )
         # Key not found in b, values not equal, more elements in a than in b
         except (KeyError, RuntimeError, IndexError):
             return False
