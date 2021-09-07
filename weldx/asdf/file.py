@@ -445,8 +445,8 @@ class WeldxFile(UserDict):
 
         Returns
         -------
-        fd :
-            The given input file name or a buffer, in case the input was omitted.
+        types_path_and_file_like :
+            The given input file name or a buffer, in case the input it was omitted.
 
         """
         created = False
