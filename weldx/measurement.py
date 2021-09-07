@@ -372,7 +372,6 @@ class MeasurementChain:
         output_signal_unit: str,
         signal_data: TimeSeries = None,
     ) -> "MeasurementChain":
-
         """Create a new measurement chain without providing a `SignalSource` instance.
 
         Parameters
