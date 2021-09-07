@@ -18,3 +18,15 @@ __all__ = [
     "scale_matrix",
     "vector_points_to_left_of_vector",
 ]
+
+
+def _patch_mod_all():
+    import sys
+
+    mod = sys.modules[__name__]
+    for name in __all__:
+        obj = getattr(mod, name)
+        obj.__module__ = __name__
+
+
+_patch_mod_all()
