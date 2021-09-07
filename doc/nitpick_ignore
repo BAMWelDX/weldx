@@ -27,6 +27,7 @@ py:class xarray.DataArray
 py:class xarray.Dataset
 
 # pint (0.17)
+py:class pint.quantity.build_quantity_class.<locals>.Quantity
 py:obj pint.quantity.Quantity
 py:class sequence of pint.Quantity
 py:class list of pint.Quantity
