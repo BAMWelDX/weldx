@@ -423,7 +423,7 @@ class WeldxFile(UserDict):
 
     def write_to(
         self, fd: Optional[types_path_and_file_like] = None, **write_args
-    ) -> Optional[BytesIO]:
+    ) -> Optional[types_path_and_file_like]:
         """Write current contents to given file name or file type.
 
         Parameters
@@ -594,7 +594,7 @@ WeldxFile.items.__doc__ = """Returns a set-like object providing a view on this 
 
 Returns
 -------
-items :
+dict_items :
     view on items.
 """
 
