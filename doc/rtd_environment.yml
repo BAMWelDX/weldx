@@ -2,7 +2,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.8
+  # py39 is recommended: https://github.com/sphinx-doc/sphinx/issues/8237#issuecomment-761769898
+  - python=3.9
   - setuptools_scm
   - ipykernel
   - ipywidgets
