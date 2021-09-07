@@ -97,6 +97,7 @@ extensions = [
 
 # autosummary --------------------------------------------------------------------------
 autosummary_generate = True
+# autosummary_imported_members = True
 
 # add __init__ docstrings to class documentation
 autoclass_content = "both"
@@ -287,12 +288,13 @@ intersphinx_mapping = {
 
 nitpick_ignore = []
 
-for line in open("nitpick_ignore"):
+for line in (fh := open("nitpick_ignore")):
     if line.strip() == "" or line.startswith("#"):
         continue
     dtype, target = line.split(None, 1)
     target = target.strip()
     nitpick_ignore.append((dtype, target))
+fh.close()
 
 # Enable better object linkage ---------------------------------------------------------
 
