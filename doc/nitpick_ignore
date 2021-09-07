@@ -1,5 +1,12 @@
 # weldx
-py:class weldx.GmawProcess
+py:obj weldx.GmawProcess.meta
+py:obj weldx.GmawProcess.tag
+py:obj weldx.GmawProcess.base_process
+py:obj weldx.GmawProcess.manufacturer
+py:obj weldx.GmawProcess.power_source
+py:obj weldx.GmawProcess.parameters
+
+py:class types_path_and_file_like
 
 # matplotlib
 py:class matplotlib.axes.Axes
@@ -19,9 +26,17 @@ py:class xarray.core.dataarray.DataArray
 py:class xarray.DataArray
 py:class xarray.Dataset
 
+# pint (0.17)
+py:obj pint.quantity.Quantity
+py:class sequence of pint.Quantity
+py:class list of pint.Quantity
+py:class UnitsContainer
 
 # inherited -------------------------------------------------------------------
 # here goes everything that is caused by inheriting from non-weldx types
+
+# python
+py:class dict_items
 
 # scipy
 py:class 3
