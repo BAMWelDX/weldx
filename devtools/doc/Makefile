@@ -6,7 +6,7 @@ SHELL := /bin/bash
 DOC = ../../doc
 
 # You can set these variables from the command line.
-SPHINXOPTS    = -v -D nbsphinx_execute="never" -P --keep-going -W -n #-j auto
+SPHINXOPTS    = -v -D nbsphinx_execute="never" --keep-going -W -n -w warn_err.log 
 SPHINXBUILD   = LANG=C sphinx-build
 PAPER         =
 
@@ -27,7 +27,7 @@ help:
 	@echo "  latex     to make LaTeX files, you can set PAPER=a4 or PAPER=letter"
 
 clean:
-	rm -rf $(BUILD_DIR)/* $(DOC)/generated $(DOC)/_autosummary
+	rm -rf $(BUILD_DIR)/* $(DOC)/generated/* $(DOC)/_autosummary/*
 
 html:
 	mkdir -p $(BUILD_DIR)/html $(BUILD_DIR)/doctrees
