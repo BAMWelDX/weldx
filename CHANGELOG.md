@@ -47,6 +47,9 @@
   both submodules can still be accessed using `weldx.util` [[#490]](https://github.com/BAMWelDX/weldx/pull/490)
 - xarray implementations for the `LocalCoordinateSystem` now operate on time as a dimension instead of
   coordinates [[#486]](https://github.com/BAMWelDX/weldx/pull/486)
+- `WeldxFile.copy` now creates a copy to a (optional) file. Before it just returned a dictionary
+  [[#504]](https://github.com/BAMWelDX/weldx/pull/504).
+
 
 ### fixes
 

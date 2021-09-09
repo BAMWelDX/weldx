@@ -387,6 +387,51 @@ class WeldxFile(UserDict):
             raise RuntimeError("closed file, cannot access file handle.")
         return self._asdf_handle._fd._fd
 
+    def copy(
+        self,
+        filename_or_file_like: Optional[types_path_and_file_like] = None,
+        overwrite: bool = False,
+    ) -> "WeldxFile":
+        """Take a copy of this file.
+
+        Depending on the underlying file type this does several different things.
+
+        Parameters
+        ----------
+        filename_or_file_like :
+            The desired output file. If no file is given, an in-memory file
+            will be created.
+        overwrite :
+            If `filename_or_file_like` points to a path or filename which already
+            exists, this flag determines if it would be overwritten or not.
+
+        Returns
+        -------
+        WeldxFile :
+            The new instance with the copied content.
+        """
+        # check if we would overwrite an existing path
+        if isinstance(filename_or_file_like, (str, pathlib.Path)):
+            try:
+                filename_or_file_like, _ = self._handle_path(
+                    filename_or_file_like, mode="rw"
+                )
+            except FileExistsError:
+                if not overwrite:
+                    raise
+
+        file = self.write_to(filename_or_file_like)
+        wx = WeldxFile(
+            file,
+            mode=self.mode,
+            custom_schema=self.custom_schema,
+            asdffile_kwargs=self._asdffile_kwargs,
+            write_kwargs=self._write_kwargs,
+            sync=self.sync_upon_close,
+            software_history_entry=self.software_history_entry,
+        )
+        return wx
+
     def as_attr(self) -> MutableMapping:
         """Return the Weldx dictionary as an attributed object.
 
@@ -449,10 +494,8 @@ class WeldxFile(UserDict):
             The given input file name or a buffer, in case the input it was omitted.
 
         """
-        created = False
         if fd is None:
             fd = BytesIO()
-            created = True
 
         # if no args are given, we use the specifications given in the constructor.
         if not write_args:
@@ -460,7 +503,7 @@ class WeldxFile(UserDict):
 
         self._asdf_handle.write_to(fd, **write_args)
 
-        if created:
+        if isinstance(fd, types_file_like.__args__):
             fd.seek(0)
         return fd
 
