@@ -5,7 +5,7 @@ from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, Dict, List, Mapping, Optional, Union, Iterable, Any
+from typing import IO, Dict, List, Mapping, Optional, Union
 
 import numpy as np
 from asdf import AsdfFile, generic_io
@@ -328,7 +328,7 @@ class WeldxFile(UserDict):
     sync.__doc__ = AsdfFile.update.__doc__
 
     @classmethod
-    def fromkeys(cls, iterable: Iterable, default: Optional[Any] = None) -> "WeldxFile":
+    def fromkeys(cls, iterable, default=None) -> "WeldxFile":
         """Create a new file with keys from iterable and values set to value.
 
         Parameters
