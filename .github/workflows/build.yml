@@ -38,18 +38,17 @@ jobs:
           # Increase this value to reset cache if ./devtools/conda.recipe/build_env.yml has not changed
           CACHE_NUMBER: 1
         with:
-          path: ~/conda_pkgs_dir
+          path: ~/micromamba/pkgs
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./devtools/conda.recipe/build_env.yml') }}
 
       - name: Setup Conda Environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: mamba-org/provision-with-micromamba@v10
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
-          activate-environment: build_env
-          auto-activate-base: false
-          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
-          channels: conda-forge, defaults
-          mamba-version: "*"
+
+      - name: activate build env
+        shell: bash -l {0}
+        run: micromamba activate build_env
 
       - name: conda info
         shell: bash -l {0}
@@ -62,23 +61,6 @@ jobs:
       - name: Build from local conda recipe
         shell: bash -l {0}
         run: conda mambabuild .
-
-      - name: set package file env
-        shell: bash -l {0}
-        run: echo "PACKAGE_DIR=$(conda build . --output)" >> $GITHUB_ENV
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: weldx-conda
-          path: ${{ env.PACKAGE_DIR }}
-
-      - name: upload releases to dev label on Anaconda Cloud
-        if: github.event_name == 'release' && github.event.action == 'created'
-        shell: bash -l {0}
-        env: # set access token from GitHub secrets
-          anaconda_token: ${{ secrets.Anaconda_BAMwelding }}
-        run: |
-          anaconda -t $anaconda_token upload --user BAMwelding --label dev $PACKAGE_DIR
 
   pypi:
     if: github.event.pull_request.draft == false # exclude job from draft PR
