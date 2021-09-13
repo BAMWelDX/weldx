@@ -1,0 +1,29 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
+
+title: |
+  Legacy schema that describes the transformation between 2 coordinate systems.
+
+type: object
+properties:
+  name:
+    description: |
+      Name of the coordinate system
+    type: string
+  reference_system:
+    description: |
+      Name of the parent system
+    type: string
+  transformation:
+    description: |
+      Data that describes the orientation and position of the coordinate system towards its parent system.
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
+      - tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.*" # legacy_tag
+
+propertyOrder: [name, reference_system, transformation]
+required: [name, reference_system, transformation]
+flowStyle: block
+...

@@ -3,10 +3,11 @@ from weldx.transformations import CoordinateSystemManager
 
 
 class CoordinateSystemManagerConverter(WeldxConverter):
-    """Serialization class for weldx.transformations.LocalCoordinateSystem"""
+    """Serialization class for weldx.transformations.CoordinateSystemManager"""
 
-    name = "core/transformations/coordinate_system_hierarchy"
-    version = "1.0.0"
+    tags = [
+        "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0"
+    ]
     types = [CoordinateSystemManager]
 
     # todo

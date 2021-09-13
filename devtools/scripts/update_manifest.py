@@ -36,9 +36,10 @@ def update_manifest(
             tag = uri.replace("/schemas/", "/tags/")
             if get_converter_for_tag(tag):  # check if converter is implemented
                 manifest["tags"].append(dict(tag_uri=tag, schema_uri=uri))
-                manifest["tags"].append(
-                    dict(tag_uri=_legacy_tag_from_new_tag(tag), schema_uri=uri)
-                )  # legacy_tag
+                if tag.startswith("asdf://"):
+                    manifest["tags"].append(
+                        dict(tag_uri=_legacy_tag_from_new_tag(tag), schema_uri=uri)
+                    )  # legacy_tag
             else:
                 print(f"No converter for URI: {schema}")
 
