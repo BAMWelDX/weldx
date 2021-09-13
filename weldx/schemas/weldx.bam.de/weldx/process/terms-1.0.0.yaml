@@ -20,7 +20,7 @@ base_process:
     parameters:
       type: object
       oneOf:
-        - wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-*"
+        - wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
         - wx_property_tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
     meta:
       type: object
