@@ -64,7 +64,8 @@ class CoordinateSystemManagerSubsystemConverter(WeldxConverter):
     """Legacy serialization class for a CoordinateSystemManagerSubsystem instance"""
 
     tags = [
-        "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
+        "tag:weldx.bam.de:weldx/core/transformations/"
+        "coordinate_system_hierarchy_subsystem-1.0.0"
     ]
     types = [CoordinateSystemManagerSubsystem]
 

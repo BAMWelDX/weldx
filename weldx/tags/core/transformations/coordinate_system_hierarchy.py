@@ -6,14 +6,10 @@ class CoordinateSystemManagerConverter(WeldxConverter):
     """Serialization class for weldx.transformations.CoordinateSystemManager"""
 
     tags = [
-        "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0"
+        "asdf://weldx.bam.de/weldx/tags/core/transformations/"
+        "coordinate_system_hierarchy-1.0.0"
     ]
     types = [CoordinateSystemManager]
-
-    # todo
-    #  - check possible bug: WeldxFile does not clear old yaml tree when writing. It
-    #    just overwrites the bytes it needs. Write large tree first, then remove stuff
-    #    and rewrite
 
     def to_yaml_tree(self, obj: CoordinateSystemManager, tag: str, ctx) -> dict:
         """Convert to python dict."""
