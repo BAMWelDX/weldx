@@ -1,4 +1,5 @@
 """Utilities for asdf files."""
+from distutils.version import LooseVersion
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple, Type, Union
@@ -6,6 +7,8 @@ from warnings import warn
 
 import asdf
 from asdf.asdf import SerializationContext
+from asdf.config import AsdfConfig, get_config
+from asdf.extension._extension import Extension
 from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path
@@ -435,12 +438,16 @@ def dataclass_serialization_class(
     return _SerializationClass
 
 
-def get_weldx_extension(ctx: asdf.asdf.SerializationContext):
+def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extension:
     """Grab the weldx extension from list of current active extensions."""
+    if isinstance(ctx, asdf.asdf.SerializationContext):
+        extensions = ctx.extension_manager.extensions
+    elif isinstance(ctx, asdf.config.AsdfConfig):
+        extensions = ctx.extensions
+    else:
+        raise TypeError(f"unsupported context {ctx=}")
     extensions = [
-        ext
-        for ext in ctx.extension_manager.extensions
-        if str(ext.extension_uri) == WELDX_EXTENSION_URI
+        ext for ext in extensions if str(ext.extension_uri) == WELDX_EXTENSION_URI
     ]
     if not len(extensions) == 1:
         raise ValueError("Could not determine correct weldx extension.")
@@ -468,6 +475,46 @@ def get_converter_for_tag(tag: str) -> Union[type, None]:
     if converters:
         return converters[0]
     return None
+
+
+def get_highest_tag_version(
+    pattern: str, ctx: Union[SerializationContext, AsdfConfig] = None
+) -> Union[str, None]:
+    """Get the highest available weldx extension tag version matching a pattern.
+
+    Parameters
+    ----------
+    pattern
+        The tag pattern to match against.
+    ctx
+        The asdf context containing the extension.
+        Will look in the current ``asdf_config()`` by default.
+
+    Returns
+    -------
+    str
+        The full tag string of the highest version match.
+
+    Raises
+    ------
+    ValueError
+        When the pattern matches multiple base tags in in the extension.
+
+    """
+    if ctx is None:
+        ctx = get_config()
+
+    extension = get_weldx_extension(ctx)
+
+    tags = [t._tag_uri for t in extension.tags if uri_match(pattern, t._tag_uri)]
+    if not tags:  # no match found
+        return None
+
+    tags.sort(key=LooseVersion)
+    base_tag = tags[-1].rpartition("-")[0]
+    if not all(t.startswith(base_tag) for t in tags):
+        raise ValueError("Found more than one base tag for pattern.")
+    return tags[-1]
 
 
 def _get_instance_shape(
