@@ -1,23 +1,10 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
+id: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0"
 
 title: |
-  Schema that describes a subsystem of a local coordinate system hierarchy
-description: |
-  It contains the data that is necessary to describe a subsystem.
-
-examples:
-  -
-    - A subsystem assignment of the coordinate systems workpiece, user_frame, T1 and T2.
-    - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0>
-        name: Subsystem T
-        parent_system: Base CSM
-        root_cs: workpiece
-        members: [workpiece, user_frame, T1, T2]
-        subsystem_names: []
+  Legacy schema that describes a subsystem of a local coordinate system hierarchy
 
 type: object
 properties:

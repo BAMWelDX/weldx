@@ -41,9 +41,25 @@ def get_schema_resource_mapping() -> DirectoryResourceMapping:
     return mapping
 
 
+def get_legacy_resource_mapping() -> DirectoryResourceMapping:
+    """Get the weldx schema resource mapping."""
+    mapping = DirectoryResourceMapping(
+        SCHEMA_PATH,
+        "tag:weldx.bam.de:weldx",
+        recursive=True,
+        filename_pattern="*.yaml",
+        stem_filename=True,
+    )
+    return mapping
+
+
 def get_resource_mappings() -> List[DirectoryResourceMapping]:
     """Get list of all weldx resource mappings."""
-    return [get_extension_resource_mapping(), get_schema_resource_mapping()]
+    return [
+        get_extension_resource_mapping(),
+        get_schema_resource_mapping(),
+        get_legacy_resource_mapping(),
+    ]
 
 
 # Extension ----------------------------------------------------------------------------
