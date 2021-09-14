@@ -198,10 +198,10 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     """
     if order == "bf":
         for dim in da.dims:
-            da = da.bfill(dim).ffill(dim)
+            da = da.pint.bfill(dim).pint.ffill(dim)
     elif order == "fb":
         for dim in da.dims:
-            da = da.ffill(dim).bfill(dim)
+            da = da.pint.ffill(dim).pint.bfill(dim)
     else:
         raise ValueError(f"Order {order} is not supported (use 'bf' or 'fb)")
     return da
@@ -313,9 +313,9 @@ def xr_interp_like(
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     if method == "step":
         fill_method = "ffill" if fillna else None
-        da = da1.reindex_like(da_temp, method=fill_method)
+        da = da1.pint.reindex_like(da_temp, method=fill_method)
     else:
-        da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
+        da = da1.pint.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
     # copy original variable and coord attributes
     da.attrs = da1.attrs
