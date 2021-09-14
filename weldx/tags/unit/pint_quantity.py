@@ -21,7 +21,7 @@ class PintQuantityConverter(WeldxConverter):
         if not value.shape:
             value = value.item()  # convert scalars to native Python numeric types
         tree["value"] = value
-        tree["unit"] = str(obj.units)
+        tree["unit"] = f"{obj.units:.}"  # use 'long' formatting for serialization
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
