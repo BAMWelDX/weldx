@@ -11,7 +11,10 @@ from weldx.constants import Q_, U_
 class PintQuantityConverter(WeldxConverter):
     """A simple implementation of serializing a pint quantity as asdf quantity."""
 
-    tags = ["tag:stsci.edu:asdf/unit/quantity-1.*"]
+    tags = [
+        "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*",
+        "tag:stsci.edu:asdf/unit/quantity-1.*",
+    ]
     types = ["pint.quantity.build_quantity_class.<locals>.Quantity"]
 
     def to_yaml_tree(self, obj: pint.Quantity, tag: str, ctx) -> dict:
@@ -21,13 +24,12 @@ class PintQuantityConverter(WeldxConverter):
         if not value.shape:
             value = value.item()  # convert scalars to native Python numeric types
         tree["value"] = value
-        tree["unit"] = str(obj.units)
+        tree["unit"] = obj.units
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Reconstruct from tree."""
-        quantity = Q_(node["value"], node["unit"])
-        return quantity
+        return Q_(node["value"], node["unit"])
 
     @staticmethod
     def shape_from_tagged(node: TaggedDict) -> List[int]:

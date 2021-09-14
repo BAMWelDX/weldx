@@ -9,6 +9,8 @@ tags:
   schema_uri: http://stsci.edu/schemas/asdf/unit/quantity-1.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/unit/unit-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/unit/unit-1.0.0
+- tag_uri: asdf://weldx.bam.de/weldx/tags/unit/quantity-1.0.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/unit/quantity-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/uuid-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/uuid-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/uuid-1.0.0
