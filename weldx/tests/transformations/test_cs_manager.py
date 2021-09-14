@@ -88,56 +88,45 @@ def test_init():
         CSM({})
 
 
-# test_add_coordinate_system -------------------------------------------------------
-
-# todo
-#  add time dependent systems. The problem is, that currently something messes
-#  up the comparison. The commented version of lcs_2 somehow switches the order of
-#  how 2 coordinates are stored in the Dataset. This lets the coordinate comparison
-#  fail.
-csm_acs = CSM("root")
-time = pd.DatetimeIndex(["2000-01-01", "2000-01-04"])
-# lcs_2_acs = LCS(coordinates=[[0, -1, -2], [8, 2, 7]], time=time)
+# test_add_cs --------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize(
-    "name , parent, lcs, child_in_parent, exp_num_cs",
-    [
-        ("lcs1", "root", LCS(coordinates=[0, 1, 2]), True, 2),
-        ("lcs2", "root", LCS(coordinates=[0, -1, -2]), False, 3),
-        ("lcs3", "lcs2", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 4),
-        ("lcs3", "lcs2", LCS(coordinates=[-1, -2, -3]), True, 4),
-        ("lcs2", "lcs3", LCS(coordinates=[-1, -2, -3]), False, 4),
-        ("lcs2", "lcs3", LCS(coordinates=[-1, -2, -3]), True, 4),
-        ("lcs4", "lcs2", LCS(coordinates=[0, 1, 2]), True, 5),
-        ("lcs4", "lcs2", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 5),
-        ("lcs5", "lcs1", LCS(r_mat_y(3 / 2), [2, 3, 1]), True, 6),
-        (
-            "lcs5",
-            "lcs1",
-            LCS(
-                None,
-                TimeSeries(MathematicalExpression("a*t", dict(a=Q_(1, "1/s")))),
-            ),
-            True,
-            6,
-        ),
-    ],
-)
-def test_add_coordinate_system(name, parent, lcs, child_in_parent, exp_num_cs):
+def test_add_cs():
     """Test the 'add_cs' function."""
-    csm = csm_acs
-    csm.add_cs(name, parent, lcs, child_in_parent)
+    csm = CSM("r")
+    ts = TimeSeries(MathematicalExpression("a*t", dict(a=Q_("1/s"))))
 
-    assert csm.number_of_coordinate_systems == exp_num_cs
-    if child_in_parent:
-        assert csm.get_cs(name, parent) == lcs
-        if not isinstance(lcs.coordinates, TimeSeries):
-            assert csm.get_cs(parent, name) == lcs.invert()
-    else:
-        if not isinstance(lcs.coordinates, TimeSeries):
-            assert csm.get_cs(name, parent) == lcs.invert()
-        assert csm.get_cs(parent, name) == lcs
+    lcs_data = [
+        ("a", "r", LCS(coordinates=[0, 1, 2]), True, 2),
+        ("b", "r", LCS(coordinates=[0, -1, -2]), False, 3),
+        ("c", "b", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 4),
+        ("c", "b", LCS(coordinates=[-1, -2, -3]), True, 4),
+        ("b", "c", LCS(coordinates=[-1, -2, -3]), False, 4),
+        ("b", "c", LCS(coordinates=[-1, -2, -3]), True, 4),
+        ("d", "b", LCS(coordinates=[0, 1, 2]), True, 5),
+        ("d", "b", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 5),
+        ("e", "a", LCS(r_mat_y(3 / 2), [2, 3, 1]), True, 6),
+        ("e", "a", LCS(coordinates=ts), True, 6),
+    ]
+
+    for d in lcs_data:
+        name = d[0]
+        parent = d[1]
+        lcs = d[2]
+        child_in_parent = d[3]
+        exp_num_cs = d[4]
+
+        csm.add_cs(name, parent, lcs, child_in_parent)
+
+        assert csm.number_of_coordinate_systems == exp_num_cs
+        if child_in_parent:
+            assert csm.get_cs(name, parent) == lcs
+            if not isinstance(lcs.coordinates, TimeSeries):
+                assert csm.get_cs(parent, name) == lcs.invert()
+        else:
+            if not isinstance(lcs.coordinates, TimeSeries):
+                assert csm.get_cs(name, parent) == lcs.invert()
+            assert csm.get_cs(parent, name) == lcs
 
 
 # test_add_cs_reference_time -----------------------------------------------------------
