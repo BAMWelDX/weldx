@@ -1,103 +1,128 @@
-# Licensed under a 3-clause BSD style license - see LICENSE
-# -*- coding: utf-8 -*-
-
 import functools
+import re
+from copy import copy
+from typing import List
 
-from asdf.types import CustomType, ExtensionTypeMeta
+from asdf.asdf import SerializationContext
+from asdf.extension import Converter
+from asdf.versioning import AsdfSpec
 from boltons.iterutils import remap
 
 META_ATTR = "wx_metadata"
 USER_ATTR = "wx_user"
 
 __all__ = [
-    "WeldxType",
-    "WeldxAsdfType",
-    "_weldx_types",
-    "_weldx_asdf_types",
     "META_ATTR",
     "USER_ATTR",
+    "WeldxConverter",
+    "WxSyntaxError",
 ]
 
-_weldx_types = set()
-_weldx_asdf_types = set()
+_new_tag_regex = re.compile(r"asdf://weldx.bam.de/weldx/tags/(.*)-(\d+.\d+.\d+|1.\*)")
 
 
-def to_tree_metadata(func):
-    """Wrapper that will add the metadata and userdata field for to_tree methods.
+class WxSyntaxError(Exception):
+    """Exception raising on custom weldx ASDF syntax errors."""
+
+
+def to_yaml_tree_metadata(func):
+    """Wrapper that will add the metadata and userdata field for ``to_yaml_tree`` methods.
 
     Also removes all "None" values from the initial tree.
     Behavior should be similar to ASDF defaults pre v2.8 (ASDF GH #863).
     """
 
     @functools.wraps(func)
-    def to_tree_wrapped(cls, node, ctx):  # need cls for classmethod
-        """Call default to_tree method and add metadata fields."""
-        tree = func(node, ctx)
-
-        tree = remap(tree, lambda p, k, v: v is not None)  # drop all None values
+    def to_yaml_tree_wrapped(self, obj, tag, ctx):
+        """Call default to_yaml_tree method and add metadata fields."""
+        tree = func(self, obj, tag, ctx)
 
         for key in [META_ATTR, USER_ATTR]:
-            attr = getattr(node, key, None)
+            attr = getattr(obj, key, None)
             if attr:
                 tree[key] = attr
+
+        tree = remap(tree, lambda p, k, v: v is not None)  # drop all None values
         return tree
 
-    return to_tree_wrapped
+    return to_yaml_tree_wrapped
 
 
-def from_tree_metadata(func):
+def from_yaml_tree_metadata(func):
     """Wrapper that will add reading metadata and userdata during form_tree methods."""
 
     @functools.wraps(func)
-    def from_tree_wrapped(cls, tree: dict, ctx):  # need cls for classmethod
-        """Call default from_tree method and add metadata attributes."""
+    def from_yaml_tree_wrapped(self, tree: dict, tag, ctx):
+        """Call default from_yaml_tree method and add metadata attributes."""
         meta_dict = {}
         for key in [META_ATTR, USER_ATTR]:
             value = tree.pop(key, None)
             if value:
                 meta_dict[key] = value
 
-        obj = func(tree, ctx)
+        obj = func(self, tree, tag, ctx)
         for key, value in meta_dict.items():
             setattr(obj, key, value)
         return obj
 
-    return from_tree_wrapped
+    return from_yaml_tree_wrapped
 
 
-class WeldxTypeMeta(ExtensionTypeMeta):
-    """Metaclass to populate _weldx_types and _weldx_asdf_types."""
+class WeldxConverterMeta(type(Converter)):
+    """Metaclass to modify tree methods."""
 
-    def __new__(mcls, name, bases, attrs):
-        cls = super().__new__(mcls, name, bases, attrs)
+    def __new__(mcs, name, bases, attrs):
+        cls = super().__new__(mcs, name, bases, attrs)
 
-        if cls.organization == "weldx.bam.de" and cls.standard == "weldx":
-            _weldx_types.add(cls)
-        elif cls.organization == "stsci.edu" and cls.standard == "asdf":
-            _weldx_asdf_types.add(cls)
+        # legacy tag definitions
+        if name := getattr(cls, "name", None):
+            setattr(
+                cls,
+                "tags",
+                [format_tag(name, "1.*")],
+            )
 
-        # wrap original to/from_tree method to include metadata attributes
-        cls.to_tree = classmethod(to_tree_metadata(cls.to_tree))
-        cls.from_tree = classmethod(from_tree_metadata(cls.from_tree))
+        # wrap original to/from_yaml_tree method to include metadata attributes
+        cls.to_yaml_tree = to_yaml_tree_metadata(cls.to_yaml_tree)
+        cls.from_yaml_tree = from_yaml_tree_metadata(cls.from_yaml_tree)
+
+        for tag in copy(cls.tags):
+            if tag.startswith("asdf://weldx.bam.de/weldx/tags/"):
+                cls.tags.append(_legacy_tag_from_new_tag(tag))
 
         return cls
 
 
-class WeldxType(CustomType, metaclass=WeldxTypeMeta):
-    """This class represents types that have schemas and tags that are defined
-    within weldx.
+class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
+    """Base class to inherit from for custom converter classes."""
 
+    tags: List[str] = []
+
+    def types(self):
+        raise NotImplementedError
+
+    def to_yaml_tree(self, obj, tag: str, ctx: SerializationContext):
+        raise NotImplementedError
+
+    def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
+        raise NotImplementedError
+
+
+def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="weldx"):
     """
-
-    organization = "weldx.bam.de"
-    standard = "weldx"
-
-
-class WeldxAsdfType(CustomType, metaclass=WeldxTypeMeta):
-    """This class represents types that have schemas that are defined in the ASDF
-    standard, but have tags that are implemented within weldx.
-
+    Format a YAML tag to new style asdf:// syntax.
     """
+    tag = f"asdf://{organization}/{standard}/tags/{tag_name}"
 
-    organization = "stsci.edu"
-    standard = "asdf"
+    if version is None:
+        return tag
+
+    if isinstance(version, AsdfSpec):
+        version = str(version.spec)
+
+    return f"{tag}-{version}"
+
+
+def _legacy_tag_from_new_tag(tag: str):
+    name, version = _new_tag_regex.search(tag).groups()
+    return f"tag:weldx.bam.de:weldx/{name}-{version}"

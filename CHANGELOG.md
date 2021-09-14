@@ -10,21 +10,79 @@
   [[#433]](https://github.com/BAMWelDX/weldx/pull/433)
 - `TimeSeries` now supports setting a `reference_time` absolute time values for
   interpolation [[#440]](https://github.com/BAMWelDX/weldx/pull/440)
+- `LocalCoordinateSystem.from_axis_vectors`
+  and `CoordinateSystemManager.create_cs_from_axis_vectors` [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
+- added PyTest flags to use ``WeldxFile`` internally in ``asdf.util.read_buffer`` and ``asdf.util.write_buffer``
+  [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
 
 ### removed
+
+- removed functions now covered by `Time`: ``pandas_time_delta_to_quantity``, ``to_pandas_time_index``
+  , ``get_time_union`` [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
+- removed custom ``wx_tag`` validator [[#461]](https://github.com/BAMWelDX/weldx/pull/461)
+- attrdict dependency replaced with a custom implementation of recursive dicts
+  [[#470]](https://github.com/BAMWelDX/weldx/pulls/470).
+- `from_xyz`, `from_xy_and_orientation`, `from_yz_and_orientation` and `from_xz_and_orientation`
+  from `LocalCoordinateSystem`. Use `from_axis_vectors` instead. [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
+- `create_cs_from_xyz`, `create_cs_from_xy_and_orientation`, `create_cs_from_yz_and_orientation` and
+  `create_cs_from_xz_and_orientation` from `CoordinateSystemManager`. Use `create_cs_from_axis_vectors`
+  instead. [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
+- `is_column_in_matrix`, `is_row_in_matrix`, `to_float_array`, `to_list`, `matrix_is_close`, `vector_is_close`
+  and `triangulate_geometry` from `weldx.util` [[#490]](https://github.com/BAMWelDX/weldx/pull/490)
 
 ### changes
 
 - move `sine` utility function to `weldx.welding.util` [[#439]](https://github.com/BAMWelDX/weldx/pull/439)
+- `LocalCoordinateSystem` and `CoordinateSystemManager` function parameters related to time now support all types that
+  are also supported by the new `Time` class [[#448]](https://github.com/BAMWelDX/weldx/pull/448)
+- `LocalCoordinateSystem.interp_time` returns static systems if only a single time value is passed or if there is no
+  overlap between the interpolation time range and the coordinate systems time range. This also affects the results of
+  some `CoordinateSystemManager` methods (``get_cs``
+  , ``interp_time``) [[#476]](https://github.com/BAMWelDX/weldx/pull/476)
+- `WeldxAccessor.time_ref` setter now raises a `TypeError` if `None` is passed to it
+  [[#489]](https://github.com/BAMWelDX/weldx/pull/489)
+- move xarray related utility functions into `weldx.util.xarray` and all other ones into `weldx.util.util`. Content from
+  both submodules can still be accessed using `weldx.util` [[#490]](https://github.com/BAMWelDX/weldx/pull/490)
+- xarray implementations for the `LocalCoordinateSystem` now operate on time as a dimension instead of
+  coordinates [[#486]](https://github.com/BAMWelDX/weldx/pull/486)
+- `WeldxFile.copy` now creates a copy to a (optional) file. Before it just returned a dictionary
+  [[#504]](https://github.com/BAMWelDX/weldx/pull/504).
+
 
 ### fixes
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
-  representation [[#428]](https://github.com/BAMWelDX/weldx/pull/428).
+  representation. Also tweaked efficiency by not writing binary
+  blocks [[#459]](https://github.com/BAMWelDX/weldx/pull/459), [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
+- Merging and unmerging multiple `CoordinateSystemManager` instances now correctly preserves all attached data.
+  [[#494]](https://github.com/BAMWelDX/weldx/pull/494).
+- `compare_nested` can compare sets [[#496]](https://github.com/BAMWelDX/weldx/pull/496)
 
 ### documentation
 
+- added installation guide with complete environment setup (Jupyterlab with extensions) and possible problems and
+  solutions [[#450]](https://github.com/BAMWelDX/weldx/pull/450)
+- split API documentation into user classes/functions and a full API reference
+  [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
+
 ### ASDF
+
+- add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
+- rework ASDF extension to new asdf 2.8 API [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
+    - move schema files to ``weldx/schemas``
+    - create extension manifest in ``weldx/manifests``. The manifest also contains tag mappings for legacy tag names for
+      backwards compatibility.
+    - move tag module to ``weldx/tags``
+    - refactor all asdf uris to new ``asdf://`` naming convention,
+      see https://asdf.readthedocs.io/en/latest/asdf/extending/uris.html#entities-identified-by-uri
+    - replaced all referenced weldx tag versions in schemas with ``1.*``
+    - refactor ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema``
+      to ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0`` and enable schema test
+    - add legacy class for validators support in ``weldx.asdf._extension.py``
+    - asdf utility functions `weldx.asdf.util.uri_match`, `weldx.asdf.util.get_converter_for_tag`
+      and `weldx.asdf.util.get_weldx_extension`
+    - add ``devtools/scripts/update_manifest.py`` to auto update manifest from extension metadata
+    - custom shape validation must now be implemented via staticmethod ``WeldxConverter.shape_from_tagged``
 
 ### deprecations
 
@@ -37,11 +95,15 @@
 - `closed_mesh` parameter to `Geometry.spatial_data`
   and `SpatialData.from_geometry_raster` [[#414]](https://github.com/BAMWelDX/weldx/pull/414)
 - `TimeSeries.plot` and `Signal.plot` [[#420]](https://github.com/BAMWelDX/weldx/pull/420)
+- abstract base class `TimeDependent` [[#460]](https://github.com/BAMWelDX/weldx/pull/460)
 
 ### changes
 
 - `TimeSeries.__init__` accepts `xarray.DataArray` as `data`
   parameter [[#429]](https://github.com/BAMWelDX/weldx/pull/429)
+- The `LocalCoordinateSystem.time` and `TimeSeries.time` now return an instance of `Time`
+  [[#464]](https://github.com/BAMWelDX/weldx/pull/464)
+- Fix wrong and incomplete type-hints [[#435]](https://github.com/BAMWelDX/weldx/pull/435)
 
 ### ASDF
 

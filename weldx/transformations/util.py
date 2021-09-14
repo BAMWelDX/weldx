@@ -1,16 +1,10 @@
 """Contains functions for coordinate transformations."""
 
 import math
-from typing import Tuple
 
 import numpy as np
-import pandas as pd
-
-from weldx import util
-from weldx.transformations.types import types_timeindex
 
 __all__ = [
-    "build_time_index",
     "is_orthogonal",
     "is_orthogonal_matrix",
     "normalize",
@@ -21,37 +15,6 @@ __all__ = [
     "scale_matrix",
     "vector_points_to_left_of_vector",
 ]
-
-
-def build_time_index(
-    time: types_timeindex = None,
-    time_ref: pd.Timestamp = None,
-) -> Tuple[pd.TimedeltaIndex, pd.Timestamp]:
-    """Build time index used for xarray objects.
-
-    Parameters
-    ----------
-    time:
-        Datetime- or Timedelta-like time index.
-    time_ref:
-        Reference timestamp for Timedelta inputs.
-
-    Returns
-    -------
-    pandas.TimedeltaIndex
-
-    """
-    if time is None:
-        return time, time_ref
-
-    time = util.to_pandas_time_index(time)
-
-    if isinstance(time, pd.DatetimeIndex):
-        if time_ref is None:
-            time_ref = time[0]
-        time = time - time_ref
-
-    return time, time_ref
 
 
 def scale_matrix(scale_x, scale_y, scale_z) -> np.ndarray:

@@ -220,7 +220,7 @@ class MeasurementChain:
         self,
         name: str,
         source: SignalSource,
-        signal_data: "TimeSeries" = None,
+        signal_data: TimeSeries = None,
     ):
         """Create a new measurement chain.
 
@@ -257,16 +257,18 @@ class MeasurementChain:
 
         self._name = name
         self._source = source
-        self._source_equipment = None
-        self._prev_added_signal = None
+        self._source_equipment: MeasurementEquipment = None
+        self._prev_added_signal: str = None
         self._graph = DiGraph()
 
         self._add_signal(node_id=source.name, signal=source.output_signal)
         if signal_data is not None:
             self.add_signal_data(signal_data)
 
-    def __eq__(self, other: "MeasurementChain") -> bool:
+    def __eq__(self, other: object) -> bool:
         """Return `True` if two measurement chains are equal and `False` otherwise."""
+        if not isinstance(other, MeasurementChain):
+            return False
         return (
             self._name == other._name
             and self._source == other._source
@@ -276,7 +278,7 @@ class MeasurementChain:
         )
 
     @classmethod
-    def from_dict(cls, dictionary: Dict) -> "MeasurementChain":
+    def from_dict(cls, dictionary: Dict) -> MeasurementChain:
         """Create a measurement chain from a dictionary.
 
         Parameters
@@ -298,7 +300,7 @@ class MeasurementChain:
     @classmethod
     def from_equipment(
         cls, name, equipment: MeasurementEquipment, source_name=None
-    ) -> "MeasurementChain":
+    ) -> MeasurementChain:
         """Create a measurement chain from a piece of equipment that contains a source.
 
         Parameters
@@ -368,8 +370,8 @@ class MeasurementChain:
         source_error: Error,
         output_signal_type: str,
         output_signal_unit: str,
-        signal_data: "TimeSeries" = None,
-    ) -> "MeasurementChain":
+        signal_data: TimeSeries = None,
+    ) -> MeasurementChain:
         """Create a new measurement chain without providing a `SignalSource` instance.
 
         Parameters
@@ -450,7 +452,7 @@ class MeasurementChain:
         cls,
         transformation: SignalTransformation,
         input_signal: Signal,
-        data: "TimeSeries",
+        data: TimeSeries,
     ) -> Signal:
         """Create a signal that is produced by the provided transformation.
 
@@ -512,7 +514,7 @@ class MeasurementChain:
 
     @staticmethod
     def _determine_output_signal_unit(
-        func: "MathematicalExpression", input_unit: str
+        func: MathematicalExpression, input_unit: str
     ) -> str:
         """Determine the unit of a transformations' output signal.
 
@@ -587,7 +589,7 @@ class MeasurementChain:
     def add_transformation(
         self,
         transformation: SignalTransformation,
-        data: "TimeSeries" = None,
+        data: TimeSeries = None,
         input_signal_source: str = None,
     ):
         """Add a transformation from an `SignalTransformation` instance.
@@ -748,8 +750,8 @@ class MeasurementChain:
         error: Error,
         output_signal_type: str = None,
         output_signal_unit: str = None,
-        func: "MathematicalExpression" = None,
-        data: "TimeSeries" = None,
+        func: MathematicalExpression = None,
+        data: TimeSeries = None,
         input_signal_source: str = None,
     ):
         """Create and add a transformation to the measurement chain.
@@ -831,7 +833,7 @@ class MeasurementChain:
                     )
             else:
                 if output_signal_unit == "":
-                    output_signal_unit = 1
+                    output_signal_unit = "1"
                 unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
                 func = MathematicalExpression(
                     "a*x",
@@ -879,7 +881,7 @@ class MeasurementChain:
         self._raise_if_node_does_not_exist(signal_source)
         return self._graph.nodes[signal_source]["signal"]
 
-    def get_signal_data(self, source_name: str = None) -> "TimeSeries":
+    def get_signal_data(self, source_name: str = None) -> TimeSeries:
         """Get the data from a signal.
 
         Parameters

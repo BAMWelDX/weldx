@@ -8,9 +8,6 @@ import pandas as pd
 import pytest
 import xarray as xr
 from numpy import NaN
-from pandas import DatetimeIndex as DTI
-from pandas import TimedeltaIndex as TDI
-from pandas import date_range
 from pint.errors import DimensionalityError
 from xarray import DataArray
 
@@ -27,133 +24,6 @@ def test_deprecation_decorator():
 
     with pytest.warns(ut.WeldxDeprecationWarning):
         _deprecated_function()
-
-
-def test_is_column_in_matrix():
-    """Test the is_column_in_matrix function.
-
-    Test should be self explanatory.
-
-    """
-    c_0 = [1, 5, 2]
-    c_1 = [3, 2, 2]
-    c_2 = [1, 6, 1]
-    c_3 = [1, 6, 0]
-    matrix = np.array([c_0, c_1, c_2, c_3]).transpose()
-
-    assert ut.is_column_in_matrix(c_0, matrix)
-    assert ut.is_column_in_matrix(c_1, matrix)
-    assert ut.is_column_in_matrix(c_2, matrix)
-    assert ut.is_column_in_matrix(c_3, matrix)
-
-    assert not ut.is_column_in_matrix([1, 6], matrix)
-    assert not ut.is_column_in_matrix([1, 6, 2], matrix)
-    assert not ut.is_column_in_matrix([1, 1, 3, 1], matrix)
-
-
-def test_is_row_in_matrix():
-    """Test the is_row_in_matrix function.
-
-    Test should be self explanatory.
-
-    """
-    c_0 = [1, 5, 2]
-    c_1 = [3, 2, 2]
-    c_2 = [1, 6, 1]
-    c_3 = [1, 6, 0]
-    matrix = np.array([c_0, c_1, c_2, c_3])
-
-    assert ut.is_row_in_matrix(c_0, matrix)
-    assert ut.is_row_in_matrix(c_1, matrix)
-    assert ut.is_row_in_matrix(c_2, matrix)
-    assert ut.is_row_in_matrix(c_3, matrix)
-
-    assert not ut.is_row_in_matrix([1, 6], matrix)
-    assert not ut.is_row_in_matrix([1, 6, 2], matrix)
-    assert not ut.is_row_in_matrix([1, 1, 3, 1], matrix)
-
-
-def test_matrix_is_close():
-    """Test the matrix_is_close function.
-
-    Test should be self explanatory.
-
-    """
-    mat_a = np.array([[0, 1, 2], [3, 4, 5]])
-    mat_b = np.array([[3, 5, 1], [7, 1, 9]])
-
-    assert ut.matrix_is_close(mat_a, mat_a)
-    assert ut.matrix_is_close(mat_b, mat_b)
-    assert not ut.matrix_is_close(mat_a, mat_b)
-    assert not ut.matrix_is_close(mat_b, mat_a)
-
-    # check tolerance
-    mat_c = mat_a + 0.0001
-    assert ut.matrix_is_close(mat_a, mat_c, abs_tol=0.00011)
-    assert not ut.matrix_is_close(mat_a, mat_c, abs_tol=0.00009)
-
-    # vectors have different size
-    assert not ut.matrix_is_close(mat_a, mat_a[0:2, 0:2])
-
-
-def test_vector_is_close():
-    """Test the vector_is_close function.
-
-    Test should be self explanatory.
-
-    """
-    vec_a = np.array([0, 1, 2])
-    vec_b = np.array([3, 5, 1])
-
-    assert ut.vector_is_close(vec_a, vec_a)
-    assert ut.vector_is_close(vec_b, vec_b)
-    assert not ut.vector_is_close(vec_a, vec_b)
-    assert not ut.vector_is_close(vec_b, vec_a)
-
-    # check tolerance
-    vec_c = vec_a + 0.0001
-    assert ut.vector_is_close(vec_a, vec_c, abs_tol=0.00011)
-    assert not ut.vector_is_close(vec_a, vec_c, abs_tol=0.00009)
-
-    # vectors have different size
-    assert not ut.vector_is_close(vec_a, vec_a[0:2])
-
-
-@pytest.mark.parametrize(
-    "arg, expected",
-    [
-        # timedeltas
-        (TDI([42], unit="ns"), TDI([42], unit="ns")),
-        (pd.timedelta_range("0s", "20s", 10), pd.timedelta_range("0s", "20s", 10)),
-        (np.timedelta64(42), TDI([42], unit="ns")),
-        (np.array([-10, 0, 20]).astype("timedelta64[ns]"), TDI([-10, 0, 20], "ns")),
-        (Q_(42, "ns"), TDI([42], unit="ns")),
-        ("10s", TDI(["10s"])),
-        (["5ms", "10s", "2D"], TDI(["5 ms", "10s", "2D"])),
-        # datetimes
-        (np.datetime64(50, "Y"), DTI(["2020-01-01"])),
-        ("2020-01-01", DTI(["2020-01-01"])),
-        (
-            np.array(
-                ["2012-10-02", "2012-10-05", "2012-10-11"], dtype="datetime64[ns]"
-            ),
-            DTI(["2012-10-02", "2012-10-05", "2012-10-11"]),
-        ),
-    ],
-)
-def test_to_pandas_time_index(arg, expected):
-    """Test conversion to appropriate pd.TimedeltaIndex or pd.DatetimeIndex."""
-    assert np.all(ut.to_pandas_time_index(arg) == expected)
-
-
-@pytest.mark.parametrize(
-    "arg, exception",
-    [(5, TypeError), ("string", TypeError), (Q_(10, "m"), DimensionalityError)],
-)
-def test_to_pandas_time_index_exceptions(arg, exception):
-    """Test correct exceptions on invalid inputs."""
-    with pytest.raises(exception):
-        ut.to_pandas_time_index(arg)
 
 
 class TestXarrayInterpolation:
@@ -356,34 +226,6 @@ def test_xr_interp_like():
     assert np.all(test == np.arange(3, 7, 0.125))
 
 
-@pytest.mark.parametrize(
-    "list_of_objects, time_exp",
-    [
-        (
-            [
-                date_range("2020-02-02", periods=4, freq="2D"),
-                date_range("2020-02-01", periods=4, freq="2D"),
-                date_range("2020-02-03", periods=2, freq="3D"),
-            ],
-            date_range("2020-02-01", periods=8, freq="1D"),
-        ),
-        ([TDI([1, 5]), TDI([2, 6, 7]), TDI([1, 3, 7])], TDI([1, 2, 3, 5, 6, 7])),
-    ],
-)
-def test_get_time_union(list_of_objects, time_exp):
-    """Test input types for get_time_union function.
-
-    Parameters
-    ----------
-    list_of_objects:
-        List with input objects
-    time_exp:
-        Expected result time
-
-    """
-    assert np.all(ut.get_time_union(list_of_objects) == time_exp)
-
-
 def test_xr_fill_all():
     """Test filling along all dimensions."""
     da1 = xr.DataArray(
@@ -534,13 +376,7 @@ class TestCompareNested:
     @pytest.fixture()
     def _default_dicts():
         """Return two equivalent deeply nested structures to be modified by tests."""
-        a = {
-            "foo": np.arange(3),
-            "x": {
-                0: [1, 2, 3],
-            },
-            "bar": True,
-        }
+        a = {"foo": np.arange(3), "x": {0: [1, 2, 3]}, "bar": True, "s": {1, 2, 3}}
         b = copy.deepcopy(a)
         return a, b
 
@@ -564,8 +400,13 @@ class TestCompareNested:
         argvalues=[
             ((1, 2, 3), [1, 2, 3], True),
             ((1, 2, 3), [1, 2, 0], False),
+            ({1, 2, 3}, {3, 2, 1}, True),
+            ({1, 2, 3}, [3, 2, 1], False),
+            ({1, 2, 3}, {1, 2, 0}, False),
+            ({1, 2, 3}, [1, 2, 3], True),
+            ([1, 2, 3], {1, 2, 3}, True),
             ((1, 2, 3), {"f": 0}, False),
-            ((1, 2, 3), "bar", False),
+            # ((1, 2, 3), "bar", False),
             ({"x": [1, 2, 3, 4]}, {"x": [1, 2]}, False),
             ({"x": [1, 2]}, {"y": [1, 2]}, False),
         ],

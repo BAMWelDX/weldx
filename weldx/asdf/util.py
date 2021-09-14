@@ -1,15 +1,15 @@
 """Utilities for asdf files."""
 from io import BytesIO
 from pathlib import Path
-from typing import Callable, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from warnings import warn
 
 import asdf
+from asdf.asdf import SerializationContext
+from asdf.tagged import TaggedDict
+from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path
 
-from weldx.asdf.constants import SCHEMA_PATH
-from weldx.asdf.extension import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.types import WeldxType
 from weldx.types import (
     SupportsFileReadOnly,
     SupportsFileReadWrite,
@@ -18,6 +18,13 @@ from weldx.types import (
     types_path_like,
 )
 from weldx.util import deprecated
+
+from .constants import SCHEMA_PATH, WELDX_EXTENSION_URI
+from .types import WeldxConverter
+
+_USE_WELDX_FILE = False
+_INVOKE_SHOW_HEADER = False
+
 
 __all__ = [
     "get_schema_path",
@@ -46,7 +53,7 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
     """
     schema = schema.split(".yaml")[0]
 
-    p = Path(SCHEMA_PATH)
+    p = SCHEMA_PATH
     schemas = list(p.glob(f"**/{schema}.yaml"))
     if len(schemas) == 0:
         raise ValueError(f"No matching schema for filename '{schema}'.")
@@ -59,7 +66,11 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
 
 
 def write_buffer(
-    tree: dict, asdffile_kwargs: dict = None, write_kwargs: dict = None
+    tree: dict,
+    asdffile_kwargs: dict = None,
+    write_kwargs: dict = None,
+    _use_weldx_file=None,
+    _invoke_show_header=None,
 ) -> BytesIO:
     """Write ASDF file into buffer.
 
@@ -78,22 +89,58 @@ def write_buffer(
     io.BytesIO
         Bytes buffer of the ASDF file.
 
+    Notes
+    -----
+    In addition to the usual asdf.AsdfFile.write_to arguments in write_args you can pass
+    the parameter "dummy_arrays". If set, all array data is replaced with a empty list.
     """
     if asdffile_kwargs is None:
         asdffile_kwargs = {}
     if write_kwargs is None:
         write_kwargs = {}
 
-    buff = BytesIO()
-    with asdf.AsdfFile(
-        tree, extensions=[WeldxExtension(), WeldxAsdfExtension()], **asdffile_kwargs
-    ) as ff:
-        ff.write_to(buff, **write_kwargs)
-        buff.seek(0)
+    dummy_inline_arrays = write_kwargs.pop("dummy_arrays", False)
+
+    if _use_weldx_file is None:
+        _use_weldx_file = _USE_WELDX_FILE
+
+    if _invoke_show_header is None:
+        _invoke_show_header = _INVOKE_SHOW_HEADER
+
+    def show(wx):
+        if _invoke_show_header:
+            wx.show_asdf_header(False, False)
+
+    if _use_weldx_file:
+        write_kwargs = dict(all_array_storage="inline")
+        from weldx import WeldxFile
+
+        with WeldxFile(
+            tree=tree, asdffile_kwargs=asdffile_kwargs, write_kwargs=write_kwargs
+        ) as wx:
+            wx.write_to()
+            show(wx)
+            buff = wx.file_handle
+    else:
+        buff = BytesIO()
+        with asdf.AsdfFile(tree, extensions=None, **asdffile_kwargs) as ff:
+            if dummy_inline_arrays:  # lets store an empty list in the asdf file.
+                write_kwargs["all_array_storage"] = "inline"
+                from unittest.mock import patch
+
+                with patch("asdf.tags.core.ndarray.numpy_array_to_list", lambda x: []):
+                    ff.write_to(buff, **write_kwargs)
+            else:
+                ff.write_to(buff, **write_kwargs)
+    buff.seek(0)
     return buff
 
 
-def read_buffer(buffer: BytesIO, open_kwargs: dict = None):
+def read_buffer(
+    buffer: BytesIO,
+    open_kwargs: dict = None,
+    _use_weldx_file=_USE_WELDX_FILE,
+):
     """Read ASDF file contents from buffer instance.
 
     Parameters
@@ -114,9 +161,17 @@ def read_buffer(buffer: BytesIO, open_kwargs: dict = None):
         open_kwargs = {"copy_arrays": True}
 
     buffer.seek(0)
+
+    if _use_weldx_file is None:
+        _use_weldx_file = _USE_WELDX_FILE
+    if _use_weldx_file:
+        from weldx import WeldxFile
+
+        return WeldxFile(buffer, asdffile_kwargs=open_kwargs)
+
     with asdf.open(
         buffer,
-        extensions=[WeldxExtension(), WeldxAsdfExtension()],
+        extensions=None,
         **open_kwargs,
     ) as af:
         data = af.tree
@@ -292,13 +347,24 @@ def asdf_json_repr(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs
     return view_tree(file, path, **kwargs)
 
 
+def _fullname(obj):
+    """Get the fully qualified class name of an object."""
+    if isinstance(obj, str):
+        return obj
+
+    cls = obj.__class__
+    module = cls.__module__
+    if module == "builtins":  # no need for builtin prefix
+        return cls.__qualname__
+    return module + "." + cls.__qualname__
+
+
 def dataclass_serialization_class(
     class_type: Type,
     class_name: str,
     version: str,
-    to_tree_mod: Callable = None,
-    from_tree_mod: Callable = None,
-    validators: dict = None,
+    to_yaml_tree_mod: Callable = None,
+    from_yaml_tree_mod: Callable = None,
     sort_string_lists: bool = True,
 ) -> Type:
     """Generate a asdf serialization class for a python dataclass.
@@ -311,14 +377,14 @@ def dataclass_serialization_class(
         The value that should ba stored as the classes name property
     version :
         The version number
-    to_tree_mod :
+    to_yaml_tree_mod :
         A method that applies additional modifications to the tree during the
-        ``to_tree`` function call
-    from_tree_mod :
+        ``to_yaml_tree`` function call
+    from_yaml_tree_mod :
         A method that applies additional modifications to the tree during the
-        ``from_tree`` function call
-    validators :
-        Dict of validator keys and instances.
+        ``from_yaml_tree`` function call
+    sort_string_lists :
+        Sort string lists before serialization.
 
     Returns
     -------
@@ -327,43 +393,94 @@ def dataclass_serialization_class(
 
     """
     v = version
-    if validators is None:
-        validators = {}
-    vals = validators
 
     def _noop(tree):
         return tree
 
-    if to_tree_mod is None:
-        to_tree_mod = _noop
-    if from_tree_mod is None:
-        from_tree_mod = _noop
+    if to_yaml_tree_mod is None:
+        to_yaml_tree_mod = _noop
+    if from_yaml_tree_mod is None:
+        from_yaml_tree_mod = _noop
 
     if sort_string_lists:
-        original_to_tree_mod = to_tree_mod
+        original_to_yaml_tree_mod = to_yaml_tree_mod
 
         def _sort_string_list(tree):
             for k, v in tree.items():
                 if isinstance(v, list) and all(isinstance(item, str) for item in v):
                     tree[k] = sorted(v)
-            return original_to_tree_mod(tree)
+            return original_to_yaml_tree_mod(tree)
 
-        to_tree_mod = _sort_string_list
+        to_yaml_tree_mod = _sort_string_list
 
-    class _SerializationClass(WeldxType):
+    class _SerializationClass(WeldxConverter):
         name = class_name
         version = v
         types = [class_type]
-        requires = ["weldx"]
-        handle_dynamic_subclasses = True
-        validators = vals
+        __module__ = class_type.__module__
+        __qualname__ = class_type.__qualname__ + "Converter"
 
-        @classmethod
-        def to_tree(cls, node, ctx):
-            return to_tree_mod(node.__dict__)
+        def to_yaml_tree(
+            self, obj: class_type, tag: str, ctx: SerializationContext
+        ) -> dict:
+            """Convert to python dict."""
+            return to_yaml_tree_mod(obj.__dict__)
 
-        @classmethod
-        def from_tree(cls, tree, ctx):
-            return class_type(**from_tree_mod(tree))
+        def from_yaml_tree(
+            self, node: dict, tag: str, ctx: SerializationContext
+        ) -> class_type:
+            """Reconstruct from yaml node."""
+            return class_type(**from_yaml_tree_mod(node))
 
     return _SerializationClass
+
+
+def get_weldx_extension(ctx: asdf.asdf.SerializationContext):
+    """Grab the weldx extension from list of current active extensions."""
+    extensions = [
+        ext
+        for ext in ctx.extension_manager.extensions
+        if str(ext.extension_uri) == WELDX_EXTENSION_URI
+    ]
+    if not len(extensions) == 1:
+        raise ValueError("Could not determine correct weldx extension.")
+    return extensions[0]
+
+
+def uri_match(patterns: Union[str, List[str]], uri: str) -> bool:
+    """Returns `True` if the ASDF URI matches any of the listed patterns.
+
+    See Also
+    --------
+    asdf.util.uri_match
+
+    """
+    if isinstance(patterns, str):
+        return asdf_uri_match(patterns, uri)
+    return any(asdf_uri_match(p, uri) for p in patterns)
+
+
+def get_converter_for_tag(tag: str) -> Union[type, None]:
+    """Get the converter class that handles a given tag."""
+    converters = [s for s in WeldxConverter.__subclasses__() if uri_match(s.tags, tag)]
+    if len(converters) > 1:
+        warn(f"Found more than one converter class for {tag=}", UserWarning)
+    if converters:
+        return converters[0]
+    return None
+
+
+def _get_instance_shape(
+    instance_dict: Union[TaggedDict, Dict[str, Any]]
+) -> Union[List[int], None]:
+    """Get the shape of an ASDF instance from its tagged dict form."""
+    if isinstance(instance_dict, (float, int)):  # test against [1] for scalar values
+        return [1]
+    elif "shape" in instance_dict:
+        return instance_dict["shape"]
+    elif isinstance(instance_dict, asdf.types.tagged.Tagged):
+        # try calling shape_from_tagged for custom types
+        converter = get_converter_for_tag(instance_dict._tag)
+        if hasattr(converter, "shape_from_tagged"):
+            return converter.shape_from_tagged(instance_dict)
+    return None

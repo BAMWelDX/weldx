@@ -4,7 +4,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 from warnings import warn
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pint
@@ -12,10 +11,10 @@ import xarray as xr
 
 import weldx.util as ut
 from weldx.constants import Q_
-from weldx.time import Time, pandas_time_delta_to_quantity
-from weldx.types import types_time_like
+from weldx.time import Time, TimeDependent, types_time_like
 
 if TYPE_CHECKING:
+    import matplotlib.pyplot
     import sympy
 
 __all__ = ["MathematicalExpression", "TimeSeries"]
@@ -254,7 +253,7 @@ class MathematicalExpression:
 # TimeSeries ---------------------------------------------------------------------------
 
 
-class TimeSeries:
+class TimeSeries(TimeDependent):
     """Describes the behaviour of a quantity in time."""
 
     _valid_interpolations = [
@@ -270,7 +269,7 @@ class TimeSeries:
     def __init__(
         self,
         data: Union[pint.Quantity, MathematicalExpression],
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         interpolation: str = None,
         reference_time: pd.Timestamp = None,
     ):
@@ -291,8 +290,8 @@ class TimeSeries:
             'step', 'linear'.
 
         """
-        self._data = None
-        self._time_var_name = None
+        self._data: Union[MathematicalExpression, xr.DataArray] = None
+        self._time_var_name = None  # type: str
         self._shape = None
         self._units = None
         self._interp_counter = 0
@@ -327,7 +326,7 @@ class TimeSeries:
         if not isinstance(self.data, MathematicalExpression):
             if not isinstance(other.data, pint.Quantity):
                 return False
-            return self._data.identical(other.data_array)
+            return self._data.identical(other.data_array)  # type: ignore
 
         return self._data == other.data
 
@@ -365,10 +364,20 @@ class TimeSeries:
         if not isinstance(data_array.data, pint.Quantity):
             raise TypeError("The data of the 'DataArray' must be a 'pint.Quantity'.")
 
+    @staticmethod
+    def _create_data_array(
+        data: Union[pint.Quantity, xr.DataArray], time: Time
+    ) -> xr.DataArray:
+        return (
+            xr.DataArray(data=data)
+            .rename({"dim_0": "time"})
+            .assign_coords({"time": time.as_timedelta_index()})
+        )
+
     def _initialize_discrete(
         self,
         data: Union[pint.Quantity, xr.DataArray],
-        time: Union[types_time_like, Time] = None,
+        time: types_time_like = None,
         interpolation: str = None,
     ):
         """Initialize the internal data with discrete values."""
@@ -380,6 +389,7 @@ class TimeSeries:
             self._check_data_array(data)
             data = data.transpose("time", ...)
             self._data = data
+            # todo: set _reference_time?
         else:
             # expand dim for scalar input
             data = Q_(data)
@@ -389,22 +399,10 @@ class TimeSeries:
             # constant value case
             if time is None:
                 time = pd.Timedelta(0)
-
             time = Time(time)
 
-            if time.is_absolute:
-                self._reference_time = time.reference_time
-                time = time - time.reference_time
-
-            time = time.as_pandas_index()
-
-            if not isinstance(time, pd.TimedeltaIndex):
-                raise ValueError(
-                    '"time" must be a time quantity or a "pandas.TimedeltaIndex".'
-                )
-
-            dax = xr.DataArray(data=data)
-            self._data = dax.rename({"dim_0": "time"}).assign_coords({"time": time})
+            self._reference_time = time.reference_time
+            self._data = self._create_data_array(data, time)
         self.interpolation = interpolation
 
     def _init_expression(self, data):
@@ -448,28 +446,19 @@ class TimeSeries:
                 f' "{str(e)}"'
             )
 
-    def _interp_time_discrete(self, time: pd.TimedeltaIndex) -> xr.DataArray:
-        """Interpolate the time series if its data is composed of discrete values.
-
-        See `interp_time` for interface description.
-        """
+    def _interp_time_discrete(self, time: Time) -> xr.DataArray:
+        """Interpolate the time series if its data is composed of discrete values."""
         return ut.xr_interp_like(
             self._data,
-            {"time": time},
+            {"time": time.as_timedelta()},
             method=self.interpolation,
             assume_sorted=False,
             broadcast_missing=False,
         )
 
-    def _interp_time_expression(
-        self, time: pd.TimedeltaIndex, time_unit: str
-    ) -> xr.DataArray:
-        """Interpolate the time series if its data is a mathematical expression.
-
-        See `interp_time` for interface description.
-
-        """
-        time_q = Time(time).as_quantity(unit=time_unit)
+    def _interp_time_expression(self, time: Time, time_unit: str) -> xr.DataArray:
+        """Interpolate the time series if its data is a mathematical expression."""
+        time_q = time.as_quantity(unit=time_unit)
 
         if len(self.shape) > 1 and np.iterable(time_q):
             while len(time_q.shape) < len(self.shape):
@@ -483,8 +472,7 @@ class TimeSeries:
         if not np.iterable(data):  # make sure quantity is not scalar value
             data = np.expand_dims(data, 0)
 
-        dax = xr.DataArray(data=data)  # don't know exact dimensions so far
-        return dax.rename({"dim_0": "time"}).assign_coords({"time": time})
+        return self._create_data_array(data, time)
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
@@ -557,7 +545,7 @@ class TimeSeries:
         return isinstance(self.data, MathematicalExpression)
 
     @property
-    def time(self) -> Union[None, pd.TimedeltaIndex]:
+    def time(self) -> Union[None, Time]:
         """Return the data's timestamps.
 
         Returns
@@ -567,7 +555,7 @@ class TimeSeries:
 
         """
         if isinstance(self._data, xr.DataArray) and len(self._data.time) > 1:
-            return ut.to_pandas_time_index(self._data.time.data)
+            return Time(self._data.time.data, self.reference_time)
         return None
 
     @property
@@ -577,7 +565,7 @@ class TimeSeries:
 
     def interp_time(
         self, time: Union[pd.TimedeltaIndex, pint.Quantity, Time], time_unit: str = "s"
-    ) -> "TimeSeries":
+    ) -> TimeSeries:
         """Interpolate the TimeSeries in time.
 
         If the internal data consists of discrete values, an interpolation with the
@@ -610,14 +598,7 @@ class TimeSeries:
 
         # prepare timedelta values for internal interpolation
         time = Time(time)
-        if time.is_absolute:
-            if self._reference_time is not None:
-                time_interp = time - self._reference_time
-            else:
-                time_interp = time - time.reference_time
-        else:
-            time_interp = time
-        time_interp = time_interp.as_pandas_index()
+        time_interp = Time(time, self.reference_time)
 
         if isinstance(self._data, xr.DataArray):
             dax = self._interp_time_discrete(time_interp)
@@ -631,11 +612,11 @@ class TimeSeries:
     def plot(
         self,
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
-        axes: plt.Axes = None,
+        axes: matplotlib.pyplot.Axes = None,
         data_name: str = "values",
         time_unit: Union[str, pint.Unit] = None,
         **mpl_kwargs,
-    ) -> plt.Axes:
+    ) -> matplotlib.pyplot.Axes:
         """Plot the `TimeSeries`.
 
         Parameters
@@ -659,6 +640,8 @@ class TimeSeries:
             The matplotlib axes object that was used for the plot
 
         """
+        import matplotlib.pyplot as plt
+
         if axes is None:
             _, axes = plt.subplots()
         if self.is_expression or time is not None:
@@ -666,11 +649,11 @@ class TimeSeries:
                 axes=axes, data_name=data_name, time_unit=time_unit, **mpl_kwargs
             )
 
-        time = pandas_time_delta_to_quantity(self.time)
+        time = Time(self.time, self.reference_time).as_quantity()
         if time_unit is not None:
             time = time.to(time_unit)
 
-        axes.plot(time.m, self._data.data.m, **mpl_kwargs)
+        axes.plot(time.m, self._data.data.m, **mpl_kwargs)  # type: ignore
         axes.set_xlabel(f"t in {time.u:~}")
         y_unit_label = ""
         if self.units not in ["", "dimensionless"]:

@@ -1,17 +1,21 @@
 """Tests for the WeldxFile class."""
+import itertools
 import pathlib
 import shutil
 import tempfile
 from io import BytesIO
 
 import asdf
+import numpy as np
 import pytest
+import xarray as xr
 from jsonschema import ValidationError
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
+from weldx.util import compare_nested
 
 
 class ReadOnlyFile:
@@ -27,7 +31,7 @@ class ReadOnlyFile:
     def read(self, *args, **kwargs):  # noqa: D102
         return self.file_read_only.read(*args, **kwargs)
 
-    def readline(self, limit=-1):
+    def readline(self, limit=-1):  # noqa: D102
         return self.file_read_only.readline(limit)
 
     @staticmethod
@@ -83,13 +87,13 @@ def simple_asdf_file(request):
 
 @pytest.mark.usefixtures("simple_asdf_file")
 class TestWeldXFile:
-    """Docstring."""
+    """Tests for class WeldxFile."""
 
     @pytest.fixture(autouse=True)
     def setUp(self, *args, **kwargs):
         """Being called for every test. Creates a fresh copy of `simple_asdf_file`."""
         copy_for_test = self.make_copy(self.simple_asdf_file)
-        self.fh = WeldxFile(copy_for_test, *args, **kwargs)
+        self.fh: WeldxFile = WeldxFile(copy_for_test, *args, **kwargs)
 
     @staticmethod
     @pytest.mark.parametrize("mode", ["rb", "wb", "a"])
@@ -299,17 +303,18 @@ class TestWeldXFile:
     def test_custom_schema(schema_arg):
         """Check the property complex_schema is being set."""
         buff, _ = single_pass_weld_example(None)
-        schema = get_schema_path("datamodels/single_pass_weld-1.0.0.schema.yaml")
+        schema = get_schema_path("datamodels/single_pass_weld-1.0.0.yaml")
         kwargs = {schema_arg: schema}
         if schema_arg == "asdffile_kwargs":
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
+        w.show_asdf_header()  # check for exception safety.
 
     @staticmethod
     def test_custom_schema_resolve_path():
         """Schema paths should be resolved internally."""
-        schema = "single_pass_weld-1.0.0.schema"
+        schema = "single_pass_weld-1.0.0"
         with pytest.raises(ValidationError) as e:
             WeldxFile(custom_schema=schema)
         assert "required property" in e.value.message
@@ -323,8 +328,8 @@ class TestWeldXFile:
     @staticmethod
     def test_custom_schema_real_file(tmpdir):
         """Passing real paths."""
-        assert not pathlib.Path("single_pass_weld-1.0.0.schema").exists()
-        shutil.copy(get_schema_path("single_pass_weld-1.0.0.schema"), ".")
+        assert not pathlib.Path("single_pass_weld-1.0.0").exists()
+        shutil.copy(get_schema_path("single_pass_weld-1.0.0"), ".")
         with pytest.raises(ValueError):
             WeldxFile(custom_schema="no")
 
@@ -338,16 +343,59 @@ class TestWeldXFile:
         assert old_pos == after_pos
 
     @staticmethod
+    @pytest.mark.parametrize(
+        "mode",
+        ("rw", "r"),
+    )
+    def test_show_header_memory_usage(mode, tmpdir):
+        """Check we do not significantly increase memory usage by showing the header.
+
+        Also ensure the tree is still usable after showing the header.
+        """
+        import psutil
+
+        large_array = np.ones((1000, 1000), dtype=np.float64)  # ~7.6mb
+        proc = psutil.Process()
+
+        def get_mem_info():
+            return proc.memory_info().rss
+
+        fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+        with WeldxFile(mode=mode) as fh:
+            fh["x"] = large_array
+            before = get_mem_info()
+            fh.show_asdf_header(use_widgets=False, _interactive=False)
+            after = get_mem_info()
+            fh.write_to(fn)
+
+        if after > before:
+            diff = after - before
+            # pytest increases memory a bit, but not as much as our large array would
+            # occupy in memory.
+            assert diff <= large_array.nbytes * 1.1, diff / 1024 ** 2
+        assert np.all(WeldxFile(fn)["x"] == large_array)
+
+    @staticmethod
     @pytest.mark.parametrize("mode", ("r", "rw"))
     def test_show_header_in_sync(mode, capsys):
-        """Ensure that the updated tree is displayed in show_header"""
+        """Ensure that the updated tree is displayed in show_header."""
         with WeldxFile(mode=mode) as fh:
             fh["wx_user"] = dict(test=True)
-            fh.show_asdf_header(use_widgets=False, _interactive=False)
+            fh.show_asdf_header()
 
         out, _ = capsys.readouterr()
         assert "wx_user" in out
         assert "test" in out
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ["use_widgets", "interactive"],
+        list(itertools.product([None, True, False], [True, False, None])),
+    )
+    def test_show_header_params(use_widgets, interactive, capsys):
+        """Check different inputs for show method."""
+        fh = WeldxFile()
+        fh.show_asdf_header(use_widgets=use_widgets, _interactive=interactive)
 
     def test_invalid_software_entry(self):
         """Invalid software entries should raise."""
@@ -356,3 +404,63 @@ class TestWeldXFile:
 
         with pytest.raises(ValueError):
             self.fh.software_history_entry = {"name": None}
+
+    @staticmethod
+    def test_compression(tmpdir):
+        """Check we do not modify the input during basic operations.
+
+        Even under different conditions like compression.
+        """
+        fn = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+
+        def get_size_and_mtime(fn):
+            stat = pathlib.Path(fn).stat()
+            return stat.st_size, stat.st_mtime_ns
+
+        # compressed file created with asdf
+        with asdf.AsdfFile({"data": xr.DataArray(np.ones((100, 100)))}) as af:
+            af.write_to(fn, all_array_compression="zlib")
+            af.close()
+
+        size_asdf = get_size_and_mtime(fn)
+
+        # wx file:
+        wx_file = WeldxFile(fn, "rw", compression="input")
+        size_rw = get_size_and_mtime(fn)
+
+        wx_file.show_asdf_header()
+        size_show_hdr = get_size_and_mtime(fn)
+        wx_file.close()
+
+        assert size_asdf == size_rw == size_show_hdr
+
+    @pytest.mark.parametrize("file", [None, BytesIO(), "physical"])
+    def test_copy(self, file, tmpdir):
+        """Take a copy written to physical file, bytesio and check output."""
+        if file == "physical":
+            file = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+
+        wx_copy = self.fh.copy(filename_or_file_like=file)
+
+        assert wx_copy.mode == self.fh.mode
+        assert wx_copy.sync_upon_close == self.fh.sync_upon_close
+        assert wx_copy.custom_schema == self.fh.custom_schema
+        assert wx_copy.software_history_entry == self.fh.software_history_entry
+
+        assert wx_copy._asdffile_kwargs == self.fh._asdffile_kwargs
+        assert wx_copy._write_kwargs == self.fh._write_kwargs
+
+        compare_nested(self.fh, wx_copy)
+
+    @pytest.mark.parametrize("overwrite", [True, False])
+    def test_copy_overwrite_non_wx_file(self, overwrite, tmpdir):
+        """Avoid overwriting existing files."""
+        file = tempfile.mktemp(suffix=".wx", dir=tmpdir)
+        with open(file, "w") as fh:
+            fh.write("nope")
+        if not overwrite:
+            with pytest.raises(Exception) as e:
+                self.fh.copy(file, overwrite=False)
+                assert isinstance(e.value, FileExistsError)
+        else:
+            self.fh.copy(file, overwrite=overwrite)

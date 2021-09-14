@@ -1,13 +1,13 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
-import io
+import copy
 import pathlib
-import warnings
 from collections import UserDict
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
+import numpy as np
 from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
 from asdf import util
@@ -15,15 +15,16 @@ from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
 
-from weldx.asdf import WeldxAsdfExtension, WeldxExtension
-from weldx.asdf.util import get_schema_path, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
+from weldx.util import inherit_docstrings
+
+from .util import get_schema_path, get_yaml_header, view_tree
 
 __all__ = [
     "WeldxFile",
 ]
 
-from weldx.util import is_interactive_session
+from weldx.util import is_interactive_session, is_jupyterlab_session
 
 
 @contextmanager
@@ -41,6 +42,14 @@ def reset_file_position(fh: SupportsFileReadWrite):
     fh.seek(old_pos)
 
 
+DEFAULT_ARRAY_COMPRESSION = "input"
+"""All arrays will be compressed using this algorithm, if not specified by user."""
+
+DEFAULT_ARRAY_COPYING = True
+"""Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
+
+
+@inherit_docstrings
 class WeldxFile(UserDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
 
@@ -70,6 +79,20 @@ class WeldxFile(UserDict):
         modification of the file. It has to provide the following keys:
         "name", "author", "homepage", "version"
         These should be set to string typed values. The homepage should be a URL.
+    compression :
+        If provided, set the compression type on all binary blocks
+        in the file.  Must be one of:
+
+        - ``''`` or `None`: No compression.
+        - ``zlib``: Use zlib compression.
+        - ``bzp2``: Use bzip2 compression.
+        - ``lz4``: Use lz4 compression.
+        - ``input``: Use the same compression as in the file read.
+          If there is no prior file, acts as None.
+    copy_arrays :
+        When `False`, when reading files, attempt to memory map (memmap) underlying data
+        arrays when possible. This avoids blowing the memory when working with very
+        large datasets.
 
     """
 
@@ -85,15 +108,19 @@ class WeldxFile(UserDict):
         sync: bool = True,
         custom_schema: Union[str, pathlib.Path] = None,
         software_history_entry: Mapping = None,
+        compression: str = DEFAULT_ARRAY_COMPRESSION,
+        copy_arrays: bool = DEFAULT_ARRAY_COPYING,
     ):
         if write_kwargs is None:
-            write_kwargs = {}
-        self._write_kwargs = write_kwargs
+            write_kwargs = dict(all_array_compression=compression)
 
         if asdffile_kwargs is None:
-            asdffile_kwargs = {}
+            asdffile_kwargs = dict(copy_arrays=copy_arrays)
 
+        # TODO: ensure no mismatching args for compression and copy_arrays.
+        self._write_kwargs = write_kwargs
         self._asdffile_kwargs = asdffile_kwargs
+
         if custom_schema is not None:
             _custom_schema_path = pathlib.Path(custom_schema)
             if not _custom_schema_path.exists():
@@ -126,7 +153,7 @@ class WeldxFile(UserDict):
             self._in_memory = False
             self._close = True
         elif isinstance(filename_or_file_like, types_file_like.__args__):
-            if isinstance(filename_or_file_like, io.BytesIO):
+            if isinstance(filename_or_file_like, BytesIO):
                 self._in_memory = True
             else:
                 self._in_memory = False
@@ -139,12 +166,9 @@ class WeldxFile(UserDict):
                 f" Should be one of {_supported}."
             )
 
-        extensions = [WeldxExtension(), WeldxAsdfExtension()]
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree or new_file_created:
-            asdf_file = AsdfFile(
-                tree=tree, extensions=extensions, custom_schema=self.custom_schema
-            )
+            asdf_file = AsdfFile(tree=tree, custom_schema=self.custom_schema)
             asdf_file.write_to(filename_or_file_like, **write_kwargs)
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
                 filename_or_file_like.seek(0)
@@ -152,14 +176,13 @@ class WeldxFile(UserDict):
         asdf_file = open_asdf(
             filename_or_file_like,
             mode=self.mode,
-            extensions=extensions,
             **asdffile_kwargs,
         )
         self._asdf_handle: AsdfFile = asdf_file
 
         # UserDict interface: we want to store a reference to the tree, but the ctor
         # of UserDict takes a copy, so we do it manually here.
-        super(WeldxFile, self).__init__()
+        super().__init__()
         self.data = self._asdf_handle.tree
 
     @property
@@ -278,7 +301,7 @@ class WeldxFile(UserDict):
     def close(self):
         """Close this file and sync it, if mode is read/write."""
         if self.mode == "rw" and self.sync_upon_close:
-            self._asdf_handle.update(**self._write_kwargs)
+            self.sync(**self._write_kwargs)
         fh = self.file_handle
         self._asdf_handle.close()
 
@@ -290,77 +313,21 @@ class WeldxFile(UserDict):
         self,
         all_array_storage: str = None,
         all_array_compression: str = "input",
-        auto_inline: int = None,
         pad_blocks: Union[float, bool] = False,
         include_block_index: bool = True,
         version: str = None,
+        **kwargs,
     ):
-        """Update the file on disk in place.
-
-        Parameters
-        ----------
-        all_array_storage :
-            If provided, override the array storage type of all blocks
-            in the file immediately before writing.  Must be one of:
-
-            - ``internal``: The default.  The array data will be
-              stored in a binary block in the same ASDF file.
-
-            - ``external``: Store the data in a binary block in a
-              separate ASDF file.
-
-            - ``inline``: Store the data as YAML inline in the tree.
-
-        all_array_compression :
-            If provided, set the compression type on all binary blocks
-            in the file.  Must be one of:
-
-            - ``''`` or `None`: No compression.
-
-            - ``zlib``: Use zlib compression.
-
-            - ``bzp2``: Use bzip2 compression.
-
-            - ``lz4``: Use lz4 compression.
-
-            - ``input``: Use the same compression as in the file read.
-              If there is no prior file, acts as None
-
-        auto_inline :
-            When the number of elements in an array is less than this
-            threshold, store the array as inline YAML, rather than a
-            binary block.  This only works on arrays that do not share
-            data with other arrays.  Default is 0.
-
-        pad_blocks :
-            Add extra space between blocks to allow for updating of
-            the file.  If `False` (default), add no padding (always
-            return 0).  If `True`, add a default amount of padding of
-            10% If a float, it is a factor to multiple content_size by
-            to get the new total size.
-
-        include_block_index :
-            If `False`, don't include a block index at the end of the
-            file.  (Default: `True`)  A block index is never written
-            if the file has a streamed block.
-
-        version :
-            The ASDF version to write out.  If not provided, it will
-            write out in the latest version supported by asdf.
-
-        Notes
-        -----
-        This calls `asdf.AsdfFile.update`.
-
-        """
         self._asdf_handle.update(
             all_array_storage=all_array_storage,
             all_array_compression=all_array_compression,
-            auto_inline=auto_inline,
             pad_blocks=pad_blocks,
             include_block_index=include_block_index,
             version=version,
+            **kwargs,
         )
+
+    sync.__doc__ = AsdfFile.update.__doc__
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -372,10 +339,10 @@ class WeldxFile(UserDict):
         software :
             Optional software used to make the change.
 
-        See Also
-        --------
+        Notes
+        -----
         The software entry will be inferred from the constructor or, if not defined,
-        from `software_history_entry`.
+        from ``software_history_entry``.
 
         """
         if software is None:
@@ -401,6 +368,51 @@ class WeldxFile(UserDict):
             raise RuntimeError("closed file, cannot access file handle.")
         return self._asdf_handle._fd._fd
 
+    def copy(
+        self,
+        filename_or_file_like: Optional[types_path_and_file_like] = None,
+        overwrite: bool = False,
+    ) -> "WeldxFile":
+        """Take a copy of this file.
+
+        Depending on the underlying file type this does several different things.
+
+        Parameters
+        ----------
+        filename_or_file_like :
+            The desired output file. If no file is given, an in-memory file
+            will be created.
+        overwrite :
+            If `filename_or_file_like` points to a path or filename which already
+            exists, this flag determines if it would be overwritten or not.
+
+        Returns
+        -------
+        WeldxFile :
+            The new instance with the copied content.
+        """
+        # check if we would overwrite an existing path
+        if isinstance(filename_or_file_like, (str, pathlib.Path)):
+            try:
+                filename_or_file_like, _ = self._handle_path(
+                    filename_or_file_like, mode="rw"
+                )
+            except FileExistsError:
+                if not overwrite:
+                    raise
+
+        file = self.write_to(filename_or_file_like)
+        wx = WeldxFile(
+            file,
+            mode=self.mode,
+            custom_schema=self.custom_schema,
+            asdffile_kwargs=self._asdffile_kwargs,
+            write_kwargs=self._write_kwargs,
+            sync=self.sync_upon_close,
+            software_history_entry=self.software_history_entry,
+        )
+        return wx
+
     def as_attr(self) -> MutableMapping:
         """Return the Weldx dictionary as an attributed object.
 
@@ -418,10 +430,22 @@ class WeldxFile(UserDict):
         >>> wfa.wx_meta.welder
         'Nikolai Nikolajewitsch Benardos'
 
+        We can also change the data easily
+        >>> wfa.wx_meta.welder = "Myself"
+        >>> wfa.wx_meta.welder
+        'Myself'
         """
-        import attrdict
 
-        return attrdict.AttrDict(self)
+        class AttrDict(dict):
+            def __init__(self, iterable, **kwargs):
+                super().__init__(iterable, **kwargs)
+                for key, value in self.items():
+                    if isinstance(value, Mapping):
+                        self.__dict__[key] = AttrDict(value)
+                    else:
+                        self.__dict__[key] = value
+
+        return AttrDict(self)
 
     def write_to(
         self, fd: Optional[types_path_and_file_like] = None, **write_args
@@ -450,10 +474,8 @@ class WeldxFile(UserDict):
         The given input file name or a buffer, in case the input was omitted.
 
         """
-        created = False
         if fd is None:
             fd = BytesIO()
-            created = True
 
         # if no args are given, we use the specifications given in the constructor.
         if not write_args:
@@ -461,12 +483,12 @@ class WeldxFile(UserDict):
 
         self._asdf_handle.write_to(fd, **write_args)
 
-        if created:
+        if isinstance(fd, types_file_like.__args__):
             fd.seek(0)
         return fd
 
     def show_asdf_header(
-        self, use_widgets: bool = False, _interactive: Optional[bool] = None
+        self, use_widgets: bool = None, _interactive: Optional[bool] = None
     ):
         """Show the header of the ASDF serialization.
 
@@ -480,69 +502,69 @@ class WeldxFile(UserDict):
         use_widgets :
             When in an interactive session, use widgets to traverse the header or show
             a static syntax highlighted string?
-            Currently widgets are disabled by default, as jupyter notebook lacks the
-            capability to render the header nicely.
+            Representation is determined upon the frontend. Jupyter lab supports a
+            complex widget, which does not work in plain old Jupyter notebook.
         _interactive :
             Should not be set.
-
-        Notes
-        -----
-        Since the ASDF header will be created while writing the file, it is recommended
-        to call this method only with mode='rw', e.g. read-write mode. When mode is
-        read-only, a temporary file will be created, which can cause in-efficiencies.
-
         """
-        # We need to synchronize the file contents here to make sure the header is in
-        # place.
-        if self.mode == "r":
-            with warnings.catch_warnings():
-                warnings.warn(
-                    "mode read-only, creating a temporary (in-memory) file"
-                    " to display header. Your changes will be lost! "
-                    "Use write_to(file_name) to save on disk.",
-                    stacklevel=1,
-                    category=UserWarning,
-                )
-            buff = self.write_to(**self._write_kwargs)
-            return WeldxFile(buff, mode="rw").show_asdf_header(
-                use_widgets=use_widgets, _interactive=_interactive
-            )
-        else:
-            # in write-mode, we sync to file first prior obtaining the header.
-            self.sync(**self._write_kwargs)
+        return _HeaderVisualizer(self._asdf_handle).show(
+            use_widgets=use_widgets, _interactive=_interactive
+        )
 
-        def _impl_interactive() -> Union[
-            "IPython.display.HTML", "IPython.display.JSON"  # noqa: F821
-        ]:
-            from weldx.asdf.util import notebook_fileprinter
+    def _ipython_display_(self):
+        # this will be called in Jupyter Lab, but not in a plain notebook.
+        from IPython.core.display import display
 
-            with reset_file_position(self.file_handle):
-                if use_widgets:
-                    return view_tree(self.file_handle)
-                else:
-                    return notebook_fileprinter(self.file_handle)
+        display(self.show_asdf_header(use_widgets=False, _interactive=True))
 
-        def _impl_non_interactive():
-            from asdf import info
 
-            info(self._asdf_handle)
+class _HeaderVisualizer:
+    def __init__(self, asdf_handle: AsdfFile):
+        # take a copy of the handle to avoid side effects!
+        copy._deepcopy_dispatch[np.ndarray] = lambda x, y: x
+        try:
+            # asdffile takes a deepcopy by default, so we fake the deep copy method of
+            # ndarray to avoid bloating memory.
+            self._asdf_handle = asdf_handle.copy()
+        finally:
+            del copy._deepcopy_dispatch[np.ndarray]
+
+    def show(
+        self, use_widgets=None, _interactive=None
+    ) -> Union[None, "IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
+        if _interactive is None:
+            _interactive = is_interactive_session()
+        if use_widgets is None:
+            use_widgets = is_jupyterlab_session()
+
+        # We write the current tree to a buffer __without__ any binary data attached.
+        from unittest.mock import patch
+
+        buff = BytesIO()
+        with patch("asdf.tags.core.ndarray.numpy_array_to_list", lambda x: []):
+            self._asdf_handle.write_to(buff, all_array_storage="inline")
+        buff.seek(0)
 
         # automatically determine if this runs in an interactive session.
-        if _interactive is None:
-            if is_interactive_session():
-                return _impl_interactive()
-            else:
-                return self.show_asdf_header(_interactive=False)
-        elif _interactive is False:
-            _impl_non_interactive()
-        elif _interactive is True:
-            return _impl_interactive()
+        # These methods return an IPython displayable object
+        # (passed to IPython.display()).
+        if _interactive:
+            return self._show_interactive(use_widgets=use_widgets, buff=buff)
+        else:
+            self._show_non_interactive(buff=buff)
 
-    def _repr_json_(self) -> dict:
-        """Return the headers a plain dict."""
-        # set _interactive false, to enforce a dict.
-        return self.show_asdf_header(use_widgets=False, _interactive=False)
+    @staticmethod
+    def _show_interactive(
+        use_widgets: bool, buff: BytesIO
+    ) -> Union["IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
+        from weldx.asdf.util import notebook_fileprinter
 
-    def _ipython_display(self):
-        # this will be called in Jupyter Lab, but not in a plain notebook.
-        return self.show_asdf_header(use_widgets=False, _interactive=True)
+        if use_widgets:
+            result = view_tree(buff)
+        else:
+            result = notebook_fileprinter(buff)
+        return result
+
+    @staticmethod
+    def _show_non_interactive(buff: BytesIO):
+        print(get_yaml_header(buff))

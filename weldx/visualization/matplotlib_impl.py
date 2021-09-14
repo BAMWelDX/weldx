@@ -9,7 +9,7 @@ from matplotlib.axes._axes import Axes
 from matplotlib.figure import Figure
 
 import weldx.geometry as geo
-from weldx import CoordinateSystemManager, LocalCoordinateSystem
+from weldx import CoordinateSystemManager, LocalCoordinateSystem, TimeSeries
 from weldx.visualization.colors import (
     color_generator_function,
     color_int_to_rgb_normalized,
@@ -127,7 +127,7 @@ def draw_coordinate_system_matplotlib(
     """
     if not (show_vectors or show_origin):
         return
-    if "time" in coordinate_system.dataset.coords:
+    if "time" in coordinate_system.dataset.dims:
         if time_idx is None:
             time_idx = 0
         if isinstance(time_idx, int):
@@ -248,7 +248,11 @@ def plot_local_coordinate_system_matplotlib(
             show_vectors=show_vectors,
         )
 
-    if show_trace and lcs.coordinates.values.ndim > 1:
+    if (
+        show_trace
+        and not isinstance(lcs.coordinates, TimeSeries)
+        and lcs.coordinates.values.ndim > 1
+    ):
         coords = lcs.coordinates.values
         if color is None:
             color = "k"
@@ -278,7 +282,7 @@ def _set_limits_matplotlib(
 
     """
     if limits is not None:
-        if isinstance(limits, Tuple):
+        if not isinstance(limits, List):
             limits = [limits]
         if len(limits) == 1:
             limits = [limits[0] for _ in range(3)]
@@ -349,7 +353,7 @@ def plot_coordinate_system_manager_matplotlib(
     reference_system: str = None,
     coordinate_systems: List[str] = None,
     data_sets: List[str] = None,
-    colors: Dict[str, int] = None,
+    colors: Dict[str, Union[int, Tuple[int, int, int]]] = None,
     time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
     title: str = None,
@@ -380,7 +384,7 @@ def plot_coordinate_system_manager_matplotlib(
         is plotted.
     colors :
         A mapping between a coordinate system name or a data set name and a color.
-        The colors must be provided as 24 bit integer values that are divided into
+        Integer colors must be provided as 24 bit integer values that are divided into
         three 8 bit sections for the rgb values. For example ``0xFF0000`` for pure
         red.
         Each coordinate system or data set that does not have a mapping in this
@@ -476,7 +480,7 @@ def plot_coordinate_system_manager_matplotlib(
 
 
 def plot_spatial_data_matplotlib(
-    data: geo.SpatialData,
+    data: Union[np.ndarray, geo.SpatialData],
     axes: Axes = None,
     color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
     label: str = None,

@@ -1,18 +1,18 @@
+"""ASDF-validators for weldx types."""
 import re
-from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict, Union
+from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict
 
-import asdf
 from asdf import ValidationError
 from asdf.schema import _type_to_tag
-from asdf.tagged import TaggedDict
 from asdf.util import uri_match
 
-from weldx.asdf.extension import WxSyntaxError
-from weldx.asdf.tags.weldx.time.datetimeindex import DatetimeIndexType
-from weldx.asdf.tags.weldx.time.timedeltaindex import TimedeltaIndexType
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.util import deprecated
+
+from .types import WxSyntaxError
+from .util import _get_instance_shape
+
+__all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
 
 
 def _walk_validator(
@@ -364,30 +364,6 @@ def _compare_lists(_list, list_expected):
     return dict_values
 
 
-def _get_instance_shape(instance_dict: Union[TaggedDict, Dict[str, Any]]) -> List[int]:
-    """Get the shape of an ASDF instance from its tagged dict form."""
-    if isinstance(instance_dict, (float, int)):  # test against [1] for scalar values
-        return [1]
-    elif "shape" in instance_dict:
-        return instance_dict["shape"]
-    elif isinstance(instance_dict, asdf.types.tagged.Tagged):
-        # add custom type implementations
-        if "weldx/time/timedeltaindex" in instance_dict._tag:
-            return TimedeltaIndexType.shape_from_tagged(instance_dict)
-        elif "weldx/time/datetimeindex" in instance_dict._tag:
-            return DatetimeIndexType.shape_from_tagged(instance_dict)
-        elif "weldx/core/time_series" in instance_dict._tag:
-            return [1]  # scalar
-        elif "asdf/unit/quantity" in instance_dict._tag:
-            if isinstance(instance_dict["value"], dict):  # ndarray
-                return _get_instance_shape(instance_dict["value"])
-            return [1]  # scalar
-        elif "weldx/core/variable" in instance_dict._tag:
-            return _get_instance_shape(instance_dict["data"])
-
-    return None
-
-
 def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, Any]):
     """Validate dimensions which are stored in two dictionaries dict_test and
     dict_expected.
@@ -560,86 +536,6 @@ def wx_shape_validator(
         )
 
 
-@deprecated("0.4.0", "0.5.0", " _compare_tag_version will be removed in 0.5.0")
-def _compare_tag_version(instance_tag: str, tagname: str):
-    """Compare ASDF tag-strings with flexible version syntax.
-
-    Parameters
-    ----------
-    instance_tag:
-        the full ASDF tag to validate
-    tagname:
-        tag string with custom version syntax to validate against
-
-    Returns
-    -------
-        bool
-    """
-    if instance_tag is None:
-        return True
-
-    if instance_tag.startswith("tag:yaml.org"):  # test for python builtins
-        return instance_tag == tagname
-    instance_tag_version = [int(v) for v in instance_tag.rpartition("-")[-1].split(".")]
-
-    tag_parts = tagname.rpartition("-")
-    tag_uri = tag_parts[0]
-    tag_version = [v for v in tag_parts[-1].split(".")]
-
-    if tag_version == ["*"]:
-        version_compatible = True
-    elif all([vstr.isdigit() for vstr in tag_version]):
-        vnum = [int(vstr) for vstr in tag_version]
-        version_compatible = all(
-            [v[0] == v[1] for v in zip(vnum, instance_tag_version)]
-        )
-    else:
-        raise WxSyntaxError(f"Unknown wx_tag syntax {tagname}")
-
-    if (not instance_tag.startswith(tag_uri)) or (not version_compatible):
-        return False
-    return True
-
-
-def wx_tag_validator(validator, tagname, instance, schema):
-    """Validate instance tag string with flexible version syntax.
-
-    The following syntax is allowed to validate against:
-
-    wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
-    wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version
-    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version
-    wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patch version
-
-    Parameters
-    ----------
-    validator:
-        A jsonschema.Validator instance.
-    tagname:
-        tag string with custom version syntax to validate against
-    instance:
-        Tree serialization (with default dtypes) of the instance
-    schema:
-        Dict representing the full ASDF schema.
-
-    Returns
-    -------
-        bool
-
-    """
-    if hasattr(instance, "_tag"):
-        instance_tag = instance._tag
-    else:
-        # Try tags for known Python builtins
-        instance_tag = _type_to_tag(type(instance))
-
-    if instance_tag is not None:
-        if not uri_match(tagname, instance_tag):
-            yield ValidationError(
-                "mismatched tags, wanted '{0}', got '{1}'".format(tagname, instance_tag)
-            )
-
-
 def wx_property_tag_validator(
     validator, wx_property_tag: str, instance, schema
 ) -> Iterator[ValidationError]:
@@ -661,7 +557,20 @@ def wx_property_tag_validator(
     asdf.ValidationError
 
     """
+
+    def _tag_validator(tagname, instance):
+        """Validate against a tag string using ASDF uri match patterns."""
+        if hasattr(instance, "_tag"):
+            instance_tag = instance._tag
+        else:
+            # Try tags for known Python builtins
+            instance_tag = _type_to_tag(type(instance))
+
+        if instance_tag is not None:
+            if not uri_match(tagname, instance_tag):
+                yield ValidationError(
+                    f"mismatched tags, wanted '{tagname}', got '{instance_tag}'"
+                )
+
     for _, value in instance.items():
-        yield from wx_tag_validator(
-            validator, tagname=wx_property_tag, instance=value, schema=None
-        )
+        yield from _tag_validator(tagname=wx_property_tag, instance=value)

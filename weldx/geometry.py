@@ -23,6 +23,90 @@ _DEFAULT_ANG_UNIT = UREG.rad
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
+# helper -------------------------------------------------------------------------------
+
+
+def _triangulate_geometry(geo_data):
+    """Stack geometry data and add simple triangulation.
+
+    Parameters
+    ----------
+    geo_data
+        list of rasterized profile data along trace from geometry
+
+    Returns
+    -------
+    numpy.ndarray, numpy.ndarray
+        3D point cloud data and triangulation indexes
+
+    """
+    nx = geo_data.shape[2]  # Points per profile
+    ny = geo_data.shape[0]  # number of profiles
+
+    data = np.swapaxes(geo_data, 1, 2).reshape((-1, 3))
+    triangle_indices = np.empty((ny - 1, nx - 1, 2, 3), dtype=int)
+    r = np.arange(nx * ny).reshape(ny, nx)
+    triangle_indices[:, :, 0, 0] = r[:-1, :-1]
+    triangle_indices[:, :, 1, 0] = r[:-1, 1:]
+    triangle_indices[:, :, 0, 1] = r[:-1, 1:]
+
+    triangle_indices[:, :, 1, 1] = r[1:, 1:]
+    triangle_indices[:, :, :, 2] = r[1:, :-1, None]
+    triangle_indices.shape = (-1, 3)
+
+    return data, triangle_indices
+
+
+# todo: Note that this is a copy of the weldx.tests._helpers.py function.
+def _vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
+    """Check if a vector is close or equal to another vector.
+
+    Parameters
+    ----------
+    vec_a :
+        First vector
+    vec_b :
+        Second vector
+    abs_tol :
+        Absolute tolerance (Default value = 1e-9)
+
+    Returns
+    -------
+    bool
+        True or False
+
+    """
+    vec_a = np.array(vec_a, dtype=float)
+    vec_b = np.array(vec_b, dtype=float)
+
+    if vec_a.size != vec_b.size:
+        return False
+    return np.all(np.isclose(vec_a, vec_b, atol=abs_tol)).__bool__()
+
+
+def _to_list(var) -> list:
+    """Store the passed variable into a list and return it.
+
+    If the variable is already a list, it is returned without modification.
+    If `None` is passed, the function returns an empty list.
+
+    Parameters
+    ----------
+    var :
+        Arbitrary variable
+
+    Returns
+    -------
+    list
+
+    """
+    if isinstance(var, list):
+        return var
+    if var is None:
+        return []
+    return [var]
+
+
 # LineSegment -----------------------------------------------------------------
 
 
@@ -44,7 +128,7 @@ class LineSegment:
         LineSegment
 
         """
-        points = ut.to_float_array(points)
+        points = np.array(points, dtype=float)
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
         if not (points.shape[0] == 2 and points.shape[1] == 2):
@@ -71,7 +155,7 @@ class LineSegment:
 
     @classmethod
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
-    def construct_with_points(cls, point_start, point_end) -> "LineSegment":
+    def construct_with_points(cls, point_start, point_end) -> LineSegment:
         """Construct a line segment with two points.
 
         Parameters
@@ -288,7 +372,7 @@ class ArcSegment:
         ArcSegment
 
         """
-        points = ut.to_float_array(points)
+        points = np.array(points, dtype=float)
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
         if not (points.shape[0] == 2 and points.shape[1] == 3):
@@ -437,8 +521,8 @@ class ArcSegment:
             Arc segment
 
         """
-        point_start = ut.to_float_array(point_start)
-        point_end = ut.to_float_array(point_end)
+        point_start = np.array(point_start, dtype=float)
+        point_end = np.array(point_end, dtype=float)
 
         vec_start_end = point_end - point_start
         if center_left_of_line:
@@ -724,7 +808,7 @@ class Shape:
         Shape
 
         """
-        segments = ut.to_list(segments)
+        segments = _to_list(segments)
         self._check_segments_connected(segments)
         self._segments = segments
 
@@ -751,9 +835,7 @@ class Shape:
 
         """
         for i in range(len(segments) - 1):
-            if not ut.vector_is_close(
-                segments[i].point_end, segments[i + 1].point_start
-            ):
+            if not _vector_is_close(segments[i].point_end, segments[i + 1].point_start):
                 raise ValueError("Segments are not connected.")
 
     @classmethod
@@ -863,7 +945,7 @@ class Shape:
             self
 
         """
-        points = ut.to_float_array(points)
+        points = np.array(points, dtype=float)
         dimension = len(points.shape)
         if dimension == 1:
             points = points[np.newaxis, :]
@@ -897,7 +979,7 @@ class Shape:
             Single segment or list of segments
 
         """
-        segments = ut.to_list(segments)
+        segments = _to_list(segments)
         if self.num_segments > 0:
             self._check_segments_connected([self.segments[-1], segments[0]])
         self._check_segments_connected(segments)
@@ -926,8 +1008,8 @@ class Shape:
             Distance of the line of reflection to the origin (Default value = 0)
 
         """
-        normal = ut.to_float_array(reflection_normal)
-        if ut.vector_is_close(normal, ut.to_float_array([0, 0])):
+        normal = np.array(reflection_normal, dtype=float)
+        if _vector_is_close(normal, np.array([0, 0], dtype=float)):
             raise ValueError("Normal has no length.")
 
         dot_product = np.dot(normal, normal)
@@ -952,10 +1034,10 @@ class Shape:
             Line of reflection's end point
 
         """
-        point_start = ut.to_float_array(point_start)
-        point_end = ut.to_float_array(point_end)
+        point_start = np.array(point_start, dtype=float)
+        point_end = np.array(point_end, dtype=float)
 
-        if ut.vector_is_close(point_start, point_end):
+        if _vector_is_close(point_start, point_end):
             raise ValueError("Line start and end point are identical.")
 
         vector = point_end - point_start
@@ -967,9 +1049,9 @@ class Shape:
         )
 
         if tf.point_left_of_line([0, 0], point_start, point_end) > 0:
-            normal = ut.to_float_array([vector[1], -vector[0]])
+            normal = np.array([vector[1], -vector[0]], dtype=float)
         else:
-            normal = ut.to_float_array([-vector[1], vector[0]])
+            normal = np.array([-vector[1], vector[0]], dtype=float)
 
         self.apply_reflection(normal, line_distance_origin)
 
@@ -1016,7 +1098,7 @@ class Shape:
         raster_data = np.hstack(raster_data)
 
         last_point = self.segments[-1].point_end[:, np.newaxis]
-        if not ut.vector_is_close(last_point, self.segments[0].point_start):
+        if not _vector_is_close(last_point, self.segments[0].point_start):
             raster_data = np.hstack((raster_data, last_point))
         return raster_data
 
@@ -1491,7 +1573,7 @@ class Trace:
                 "'transformations.LocalCoordinateSystem'"
             )
 
-        self._segments = ut.to_list(segments)
+        self._segments = _to_list(segments)
         self._create_lookups(coordinate_system)
 
         if self.length <= 0:
@@ -1693,10 +1775,9 @@ class Trace:
         if fmt is None:
             fmt = "x-"
         if axes is None:
-            from matplotlib.pyplot import figure
+            from matplotlib.pyplot import subplots
 
-            fig = figure()
-            axes = fig.gca(projection="3d", proj_type="ortho")
+            _, axes = subplots(subplot_kw=dict(projection="3d", proj_type="ortho"))
             axes.plot(data[0], data[1], data[2], fmt)
             axes.set_xlabel("x")
             axes.set_ylabel("y")
@@ -1769,8 +1850,8 @@ class VariableProfile:
         VariableProfile
 
         """
-        locations = ut.to_list(locations)
-        interpolation_schemes = ut.to_list(interpolation_schemes)
+        locations = _to_list(locations)
+        interpolation_schemes = _to_list(interpolation_schemes)
 
         if not locations[0] == 0:
             locations = [0] + locations
@@ -2315,7 +2396,7 @@ class SpatialData:
 
     """
 
-    coordinates: np.ndarray
+    coordinates: DataArray
     triangles: np.ndarray = None
     attributes: Dict[str, np.ndarray] = None
 
@@ -2337,7 +2418,7 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_file(file_name: Union[str, Path]) -> "SpatialData":
+    def from_file(file_name: Union[str, Path]) -> SpatialData:
         """Create an instance from a file.
 
         Parameters
@@ -2359,7 +2440,7 @@ class SpatialData:
     @staticmethod
     def from_geometry_raster(
         geometry_raster: np.ndarray, closed_mesh: bool = True
-    ) -> "SpatialData":
+    ) -> SpatialData:
         """Triangulate rasterized Geometry Profile.
 
         Parameters
@@ -2380,9 +2461,9 @@ class SpatialData:
         # if not isinstance(geometry_raster, np.ndarray):
         #    geometry_raster = np.array(geometry_raster)
         if geometry_raster[0].ndim == 2:
-            return SpatialData(*ut.triangulate_geometry(geometry_raster))
+            return SpatialData(*_triangulate_geometry(geometry_raster))
 
-        part_data = [ut.triangulate_geometry(part) for part in geometry_raster]
+        part_data = [_triangulate_geometry(part) for part in geometry_raster]
         total_points = []
         total_triangles = []
         for i, (points, triangulation) in enumerate(part_data):

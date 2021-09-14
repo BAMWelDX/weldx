@@ -1,8 +1,9 @@
 """Contains classes and functions related to time."""
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from functools import reduce
-from typing import List, Union
+from typing import List, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -12,43 +13,17 @@ from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
 from pandas.api.types import is_object_dtype
 from xarray import DataArray
 
-from weldx.types import types_time_like, types_timestamp_like
-
 from .constants import Q_
 
-__all__ = ["Time"]
-
-# list of types that are supported to be stored in Time._time
-_data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
-
-
-def pandas_time_delta_to_quantity(
-    time: Union[Timedelta, TimedeltaIndex], unit: str = "s"
-) -> pint.Quantity:
-    """Convert a pandas timedelta type into a corresponding `pint.Quantity`.
-
-    Parameters
-    ----------
-    time :
-        Instance of `pandas.TimedeltaIndex`
-    unit :
-        String that specifies the desired time unit.
-
-    Returns
-    -------
-    pint.Quantity :
-        Converted time quantity
-
-    """
-    # from pandas Timedelta documentation: "The .value attribute is always in ns."
-    # https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas
-    # .Timedelta.html
-    if isinstance(time, Timedelta):
-        time = TimedeltaIndex([time])
-    nanoseconds = time.values.astype(np.int64)
-    if len(nanoseconds) == 1:
-        nanoseconds = nanoseconds[0]
-    return Q_(nanoseconds, "ns").to(unit)
+__all__ = [
+    "Time",
+    "TimeDependent",
+    "types_timestamp_like",
+    "types_datetime_like",
+    "types_timedelta_like",
+    "types_pandas_times",
+    "types_time_like",
+]
 
 
 class Time:
@@ -86,7 +61,8 @@ class Time:
     ----------
     time :
         A supported class that represents either absolute or relative times. The
-        data must be in ascending order.
+        data must be in ascending order. All classes derived from the abstract base
+        class 'TimeDependent' are supported too.
     time_ref :
         An absolute reference point in time (timestamp). The return values of all
         accessors that return relative times will be calculated towards this
@@ -95,6 +71,11 @@ class Time:
         times are passed as ``time`` parameter. In case ``time`` already contains
         absolute values and this parameter is set to ``None``, the first value of
         the data will be used as reference time.
+
+    Raises
+    ------
+    ValueError
+        When time values passed are not sorted in monotonic increasing order.
 
     Examples
     --------
@@ -146,6 +127,17 @@ class Time:
     >>> t_abs = Time("2014-07-23")
     >>> t_abs = Time(["2000","2001","2002"])
 
+    Types that are derived from the abstract base class `TimeDependent` can also be
+    passed directly to `Time` as `time` parameter:
+
+    >>> from weldx import LocalCoordinateSystem as LCS
+    >>> lcs = LCS(coordinates=[[0, 0, 0], [1, 1, 1]], time=["1s", "2s"])
+    >>> t_from_lcs = Time(lcs)
+    >>>
+    >>> from weldx import TimeSeries
+    >>> ts = TimeSeries(Q_([4, 5, 6], "m"), ["2000", "2001", "2002"])
+    >>> t_from_ts = Time(ts)
+
     As long as one of the operands represents a timedelta, you can add two `Time`
     instances. If one of the instances is an array, the other one needs to be either a
     scalar or an array of same length. In the latter case, values are added per index:
@@ -170,6 +162,30 @@ class Time:
     >>> t_res = DatetimeIndex(["2001", "2002"]) + Time(["1d", "2d"])
     >>> t_res = "2000-01-01" + Time(["1d", "2d"])
     >>> t_res = ["3s", "4s"] + Time(["1s", "2s"])
+
+    Subtraction is possible too, but there are some restrictions. It is not possible
+    to subtract an absolute time from a time delta. Additionally, since the values of
+    a ``Time`` instance must be monotonically increasing, any subtraction that
+    produces a result that doesn't fulfill this requirement will fail. This is always
+    the case when subtracting arrays from scalars because either the array that is
+    subtracted (it is internally cast to a `Time` instance) or the resulting array
+    violates this requirement.  Apart from that, subtraction works pretty similar as
+    the addition:
+
+    >>> # absolute and time delta
+    >>> t_res = Time("2002") - "1d"
+    >>> t_res = Time(["2002", "2007", "2022"]) - "1d"
+    >>> t_res = Time(["2002", "2007", "2022"]) - ["1d", "2d", "3d"]
+    >>>
+    >>> # both absolute
+    >>> t_res = Time(["2002"]) - "2001"
+    >>> t_res = Time(["2002", "2007", "2022"]) - "2001"
+    >>> t_res = Time(["2002", "2007", "2022"]) - ["2001", "2002", "2003"]
+    >>>
+    >>> # both time delta
+    >>> t_res = Time("2d") - "1d"
+    >>> t_res = Time(["2d", "7d", "22d"]) - "1d"
+    >>> t_res = Time(["2d", "7d", "22d"]) - ["1d", "2d", "3d"]
 
     You can also compare two instances of `Time`:
 
@@ -203,18 +219,55 @@ class Time:
     >>> Time("3s") == "20d"
     False
 
-    Raises
-    ------
-    ValueError
-        When time values passed are not sorted in monotonic increasing order.
+    If you want to know how many entries are stored in a ``Time`` object, you can either
+    use the ``length`` property or use ``len``:
+
+    >>> len(Time(["1s", "3s"]))
+    2
+
+    Direct access and iteration are also supported. The return types are fitting pandas
+    types:
+
+    >>> from pandas import Timedelta
+    >>>
+    >>> t = Time(["1s", "2s", "3s"])
+    >>> t[1] == Timedelta(2, "s")
+    True
+
+    >>> isinstance(t[1], Timedelta)
+    True
+
+    >>> from pandas import Timestamp
+    >>>
+    >>> t = Time(["2000", "2001", "2002"])
+    >>> t[1] == Timestamp("2001")
+    True
+
+    >>> isinstance(t[1], Timestamp)
+    True
+
+    >>> t = Time(["1s", "2s", "3s"])
+    >>> result = Timedelta(0, "s")
+    >>>
+    >>> for value in t:
+    ...     if not isinstance(value, Timedelta):
+    ...         raise TypeError("Unexpected type")
+    ...     result += value
+    >>>
+    >>> result == Timedelta(6, "s")
+    True
 
     """
 
     def __init__(
         self,
-        time: Union[types_time_like, Time, List[str]],
-        time_ref: Union[types_timestamp_like, Time, None] = None,
+        time: types_time_like,
+        time_ref: types_timestamp_like = None,
     ):
+        # todo: update type hints (see: https://stackoverflow.com/q/46092104/6700329)
+        # problem: ring dependency needs to be solved
+        if issubclass(type(time), TimeDependent):
+            time = time.time  # type: ignore[union-attr] # mypy doesn't filter correctly
         if isinstance(time, Time):
             time_ref = time_ref if time_ref is not None else time._time_ref
             time = time._time
@@ -247,32 +300,32 @@ class Time:
         if isinstance(time, pd.Index) and not time.is_monotonic_increasing:
             raise ValueError("The time values passed are not monotonic increasing.")
 
-        self._time = time
-        self._time_ref = time_ref
+        self._time: Union[pd.TimedeltaIndex, pd.DatetimeIndex] = time
+        self._time_ref: pd.Timestamp = time_ref
 
-    def __add__(self, other: Union[types_time_like, Time]) -> Time:
+    def __add__(self, other: types_time_like) -> Time:
         """Element-wise addition between `Time` object and compatible types."""
         other = Time(other)
         time_ref = self.reference_time if self.is_absolute else other.reference_time
         return Time(self._time + other.as_pandas(), time_ref)
 
-    def __radd__(self, other: Union[types_time_like, Time]) -> Time:
+    def __radd__(self, other: types_time_like) -> Time:
         """Element-wise addition between `Time` object and compatible types."""
         return self + other
 
-    def __sub__(self, other: Union[types_time_like, Time]) -> Time:
+    def __sub__(self, other: types_time_like) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
         other = Time(other)
         time_ref = None if other.is_absolute else self.reference_time
         return Time(self._time - other.as_pandas(), time_ref)
 
-    def __rsub__(self, other: Union[types_time_like, Time]) -> Time:
+    def __rsub__(self, other: types_time_like) -> Time:
         """Element-wise subtraction between `Time` object and compatible types."""
         other = Time(other)
         time_ref = None if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
-    def __eq__(self, other: Union[types_time_like, Time]) -> Union[bool, List[bool]]:
+    def __eq__(self, other: types_time_like) -> Union[bool, List[bool]]:  # type: ignore
         """Element-wise comparisons between time object and compatible types.
 
         See Also
@@ -284,6 +337,14 @@ class Time:
     def __len__(self):
         """Return the length of the data."""
         return self.length
+
+    def __iter__(self):
+        """Use generator to iterate over index values."""
+        return (t for t in self.as_pandas_index())
+
+    def __getitem__(self, item) -> types_pandas_times:
+        """Access pandas index."""
+        return self.as_pandas_index()[item]
 
     def __repr__(self):
         """Console info."""
@@ -309,7 +370,7 @@ class Time:
         """
         return np.all(self == other) & (self._time_ref == other._time_ref)
 
-    def all_close(self, other: Union[types_time_like, Time]) -> bool:
+    def all_close(self, other: types_time_like) -> bool:
         """Return `True` if another object compares equal within a certain tolerance.
 
         Parameters
@@ -328,17 +389,48 @@ class Time:
         return np.allclose(self._time, Time(other).as_pandas())
 
     def as_quantity(self, unit: str = "s") -> pint.Quantity:
-        """Return the data as `pint.Quantity`."""
+        """Return the data as `pint.Quantity`.
+
+        Parameters
+        ----------
+        unit :
+            String that specifies the desired time unit for conversion.
+
+        Returns
+        -------
+        pint.Quantity :
+            Converted time quantity
+
+        Notes
+        -----
+        from pandas Timedelta documentation: "The .value attribute is always in ns."
+        https://pandas.pydata.org/docs/reference/api/pandas.Timedelta.html
+        """
+        nanoseconds = self.as_timedelta_index().values.astype(np.int64)
+        if len(nanoseconds) == 1:
+            nanoseconds = nanoseconds[0]
+        q = Q_(nanoseconds, "ns").to(unit)
         if self.is_absolute:
-            q = pandas_time_delta_to_quantity(self._time - self.reference_time, unit)
             setattr(q, "time_ref", self.reference_time)  # store time_ref info
-            return q
-        return pandas_time_delta_to_quantity(self._time, unit)
+        return q
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
-        """Return the data as `pandas.TimedeltaIndex`."""
+        """Return the data as `pandas.TimedeltaIndex` or `pandas.Timedelta`."""
         if self.is_absolute:
             return self._time - self.reference_time
+        return self._time
+
+    def as_timedelta_index(self) -> TimedeltaIndex:
+        """Return the data as `pandas.TimedeltaIndex`."""
+        timedelta = self.as_timedelta()
+        if isinstance(timedelta, Timedelta):
+            return TimedeltaIndex([timedelta])
+        return timedelta
+
+    def as_timestamp(self) -> Timestamp:
+        """Return a `pandas.Timestamp` if the object represents a timestamp."""
+        if not isinstance(self._time, Timestamp):
+            raise TypeError("Time object does not represent a timestamp.")
         return self._time
 
     def as_datetime(self) -> Union[Timestamp, DatetimeIndex]:
@@ -380,7 +472,7 @@ class Time:
         return None
 
     @reference_time.setter
-    def reference_time(self, time_ref: Union[types_timestamp_like, Time]):
+    def reference_time(self, time_ref: types_timestamp_like):
         """Set the reference time."""
         self._time_ref = pd.Timestamp(time_ref)
 
@@ -412,6 +504,39 @@ class Time:
         if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
             return self._time.min()
         return self._time
+
+    @property
+    def index(self) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
+        """Return a pandas index type regardless of length.
+
+        See Also
+        --------
+        `Time.as_pandas_index`
+
+        """
+        return self.as_pandas_index()
+
+    @property
+    def timedelta(self) -> pd.TimedeltaIndex:
+        """Return the timedelta values relative to the reference time (if it exists).
+
+        See Also
+        --------
+        `Time.as_timedelta_index`
+
+        """
+        return self.as_timedelta_index()
+
+    @property
+    def quantity(self) -> pint.Quantity:
+        """Return the `pint.Quantity` representation scaled to seconds.
+
+        See Also
+        --------
+        `Time.as_quantity`
+
+        """
+        return self.as_quantity(unit="s")
 
     @staticmethod
     def _convert_quantity(
@@ -468,25 +593,100 @@ class Time:
             f"to pd.DatetimeIndex or pd.TimedeltaIndex"
         )
 
+    class _UnionDescriptor:
+        """Enables different behavior of `.union` as class and instance method."""
+
+        def __get__(self, ins, typ):
+            if ins is None:
+                return typ._union_class
+            return ins._union_instance
+
+    # todo: Sphinx renders the docstring below as expected. However, the examples are
+    #       not run by doctest. A possible solution in Python 3.9 can be found here:
+    #       https://stackoverflow.com/a/8820636/6700329
+    union = _UnionDescriptor()
+    """Calculate the union of multiple time-like objects.
+
+    This method can eiter be used as a class or instance method. When used on an
+    instance, its values are included in the calculated time union.
+
+    Note that any reference time information will be dropped.
+
+    Parameters
+    ----------
+    times:
+        A list of time-like objects
+
+    Returns
+    -------
+    Time
+        The time union
+
+    Examples
+    --------
+
+    Using ``union`` as class method:
+
+    >>> from weldx import Time
+    >>> t1 = Time(["1s", "3s", "4s"])
+    >>> t2 = Time(["2s", "4s", "5s"])
+    >>>
+    >>> all(Time.union([t1, t2]) == Time(["1s", "2s", "3s", "4s", "5s"]))
+    True
+
+    Using the instance method:
+
+    >>> all(t1.union([t2]) == Time(["1s", "2s", "3s", "4s", "5s"]))
+    True
+
+    """
+
     @staticmethod
-    def union(times=List[Union[types_time_like, "Time"]]) -> Time:
-        """Calculate the union of multiple `Time` instances (or supported objects).
-
-        Any reference time information will be dropped.
-
-        Parameters
-        ----------
-        times
-            A list of time class instances
-
-        Returns
-        -------
-        Time
-            The time union
-
-        """
+    def _union_class(times: Sequence[types_time_like]) -> Time:
+        """Class version of the ``union`` method."""
         pandas_index = reduce(
             lambda x, y: x.union(y),
             (Time(time).as_pandas_index() for time in times),
         )
         return Time(pandas_index)
+
+    def _union_instance(self, times: Sequence[types_time_like]) -> Time:
+        """Instance version of the ``union`` method."""
+        return Time._union_class([self, *times])
+
+
+class TimeDependent(ABC):
+    """An abstract base class that describes a common interface of time dep. classes."""
+
+    @property
+    @abstractmethod
+    def time(self) -> Time:
+        """Get the classes time component."""
+
+    @property
+    @abstractmethod
+    def reference_time(self) -> Union[Timestamp, None]:
+        """Return the reference timestamp if the time data is absolute."""
+
+
+# list of types that are supported to be stored in Time._time
+_data_base_types = (pd.Timedelta, pd.Timestamp, pd.DatetimeIndex, pd.TimedeltaIndex)
+
+types_datetime_like = Union[DatetimeIndex, np.datetime64, List[str], Time]
+"""types that define ascending arrays of time stamps."""
+
+types_timestamp_like = Union[Timestamp, str, Time]
+"""types that define timestamps."""
+
+types_timedelta_like = Union[
+    TimedeltaIndex, pint.Quantity, np.timedelta64, List[str], Time
+]
+"""types that define ascending time delta arrays."""
+
+types_time_like = Union[
+    types_datetime_like, types_timedelta_like, types_timestamp_like, TimeDependent
+]
+"""types that represent time."""
+
+types_pandas_times = Union[Timedelta, Timestamp, DatetimeIndex, TimedeltaIndex]
+"""supported pandas time types."""
