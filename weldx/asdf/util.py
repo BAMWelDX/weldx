@@ -13,6 +13,8 @@ from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path
 
+from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
+from weldx.asdf.types import WeldxConverter
 from weldx.types import (
     SupportsFileReadOnly,
     SupportsFileReadWrite,
@@ -21,9 +23,6 @@ from weldx.types import (
     types_path_like,
 )
 from weldx.util import deprecated
-
-from .constants import SCHEMA_PATH, WELDX_EXTENSION_URI
-from .types import WeldxConverter
 
 _USE_WELDX_FILE = False
 _INVOKE_SHOW_HEADER = False
@@ -499,6 +498,12 @@ def get_highest_tag_version(
     ------
     ValueError
         When the pattern matches multiple base tags in in the extension.
+
+    Examples
+    --------
+    >>> from weldx.asdf.util import get_highest_tag_version
+    >>> get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/uuid-*")
+    'asdf://weldx.bam.de/weldx/tags/uuid-1.0.0'
 
     """
     if ctx is None:

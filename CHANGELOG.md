@@ -14,6 +14,7 @@
   and `CoordinateSystemManager.create_cs_from_axis_vectors` [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
 - added PyTest flags to use ``WeldxFile`` internally in ``asdf.util.read_buffer`` and ``asdf.util.write_buffer``
   [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
+- added `weldx.asdf.util.get_highest_tag_version` utility function [[#523]](https://github.com/BAMWelDX/weldx/pull/523).
 
 ### removed
 
@@ -47,7 +48,6 @@
   coordinates [[#486]](https://github.com/BAMWelDX/weldx/pull/486)
 - `WeldxFile.copy` now creates a copy to a (optional) file. Before it just returned a dictionary
   [[#504]](https://github.com/BAMWelDX/weldx/pull/504).
-
 
 ### fixes
 
