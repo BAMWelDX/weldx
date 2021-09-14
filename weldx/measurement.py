@@ -8,7 +8,7 @@ from warnings import warn
 
 from networkx import draw, draw_networkx_edge_labels
 
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
 
@@ -515,7 +515,7 @@ class MeasurementChain:
     @staticmethod
     def _determine_output_signal_unit(
         func: MathematicalExpression, input_unit: str
-    ) -> Unit:
+    ) -> str:
         """Determine the unit of a transformations' output signal.
 
         Parameters
@@ -545,9 +545,9 @@ class MeasurementChain:
                     "The provided function is incompatible with the input signals unit."
                     f" \nThe test raised the following exception:\n{e}"
                 )
-            return test_output.units
+            return str(test_output.units)
 
-        return input_unit
+        return str(input_unit)
 
     def _raise_if_data_exist(self, signal_source_name: str):
         """Raise an error if the signal from the passed source already has data."""
@@ -837,7 +837,7 @@ class MeasurementChain:
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
-                unit_conversion = output_signal_unit / input_signal.unit
+                unit_conversion = U_(output_signal_unit) / U_(input_signal.unit)
                 func = MathematicalExpression(
                     "a*x",
                     parameters={"a": Q_(1, unit_conversion)},
