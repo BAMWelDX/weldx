@@ -48,7 +48,6 @@
 - `WeldxFile.copy` now creates a copy to a (optional) file. Before it just returned a dictionary
   [[#504]](https://github.com/BAMWelDX/weldx/pull/504).
 
-
 ### fixes
 
 - `WeldxFile.show_asdf_header` prints output on console, before it only returned the header as parsed dict and string
@@ -86,6 +85,8 @@
 - rewrote `asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy-1.0.0` schema for
   the `CoordinateSystemManager`. It uses the digraph schemas to serialize the coordinate system structure.
   [[#497]](https://github.com/BAMWelDX/weldx/pull/497)
+- add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity-1.0.0``
+  and ``asdf://weldx.bam.de/weldx/schemas/unit/unit-1.0.0`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522)
 
 ### deprecations
 
