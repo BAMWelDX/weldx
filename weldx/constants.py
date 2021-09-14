@@ -17,10 +17,12 @@ WELDX_UNIT_REGISTRY.define("hour = 60*minute = h = hr")
 
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 Q_ = WELDX_QUANTITY
+U_ = WELDX_UNIT_REGISTRY.Unit
 
 __all__ = (
     "WELDX_PATH",
     "WELDX_QUANTITY",
     "WELDX_UNIT_REGISTRY",
     "Q_",
+    "U_",
 )

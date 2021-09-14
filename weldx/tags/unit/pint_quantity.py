@@ -5,7 +5,7 @@ from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxConverter
 from weldx.asdf.util import _get_instance_shape
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 
 
 class PintQuantityConverter(WeldxConverter):
@@ -35,3 +35,18 @@ class PintQuantityConverter(WeldxConverter):
         if isinstance(node["value"], dict):  # ndarray
             return _get_instance_shape(node["value"])
         return [1]  # scalar
+
+
+class PintUnitConverter(WeldxConverter):
+    """A simple implementation of serializing a pint unit as tagged asdf node."""
+
+    tags = ["asdf://weldx.bam.de/weldx/tags/unit/unit-1.*"]
+    types = ["pint.unit.build_unit_class.<locals>.Unit"]
+
+    def to_yaml_tree(self, obj: pint.Unit, tag: str, ctx) -> str:
+        """Convert to python dict."""
+        return str(obj)
+
+    def from_yaml_tree(self, node: str, tag: str, ctx) -> pint.Unit:
+        """Reconstruct from tree."""
+        return U_(node)
