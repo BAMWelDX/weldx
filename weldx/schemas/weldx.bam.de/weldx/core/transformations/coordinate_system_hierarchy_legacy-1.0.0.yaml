@@ -1,0 +1,71 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_legacy-1.0.0"
+
+title: |
+  Legacy schema that describes a local coordinate system hierarchy
+type: object
+
+properties:
+  name:
+    type: string
+
+  root_system_name:
+    description: |
+      Name of the root coordinate system
+    type: string
+
+  reference_time:
+    description: |
+      A timestamp that serves as reference point for all attached coordinate systems.
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
+      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*" # legacy_tag
+
+  subsystem_names:
+    description: |
+      A list containing the names of subsystems that are directly attached to the main hierarchy. Nested subsystems
+      are excluded.
+    type: array
+    items:
+      type: string
+
+  subsystems:
+    description: |
+      A list containing the data of all subsystems including nested structures.
+    type: array
+    items:
+      oneOf:
+        - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy_subsystem-1.*"
+        - tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.*" # legacy_tag
+
+  coordinate_systems:
+    description: |
+      An array of all the coordinate systems' data. This includes their name, parent system and how they are arranged
+      towards their parent system.
+    type: array
+    items:
+      oneOf:
+        - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.*"
+        - tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.*" # legacy_tag
+
+  spatial_data:
+    type: array
+    items:
+      type: object
+      properties:
+        coordinate_system:
+          type: string
+        name:
+          type: string
+        data:
+          oneOf:
+            - tag: "asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-1.*"
+            - tag: "tag:weldx.bam.de:weldx/core/geometry/spatial_data-1.*" # legacy_tag
+      required: [coordinate_system, name, data]
+
+propertyOrder: [name, root_system_name, reference_time, subsystems, subsystem_data, coordinate_systems, spatial_data]
+required: [name, root_system_name, coordinate_systems]
+flowStyle: block
+...

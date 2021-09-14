@@ -407,13 +407,8 @@ class TestCompareNested:
         argvalues=[
             ((1, 2, 3), [1, 2, 3], True),
             ((1, 2, 3), [1, 2, 0], False),
-            ({1, 2, 3}, {3, 2, 1}, True),
-            ({1, 2, 3}, [3, 2, 1], False),
-            ({1, 2, 3}, {1, 2, 0}, False),
-            ({1, 2, 3}, [1, 2, 3], True),
-            ([1, 2, 3], {1, 2, 3}, True),
             ((1, 2, 3), {"f": 0}, False),
-            # ((1, 2, 3), "bar", False),
+            ((1, 2, 3), "bar", False),
             ({"x": [1, 2, 3, 4]}, {"x": [1, 2]}, False),
             ({"x": [1, 2]}, {"y": [1, 2]}, False),
         ],
@@ -480,6 +475,17 @@ class TestCompareNested:
         a = {"l1": [np.arange(1), "foo"]}
         b = {"l1": [np.arange(2), "foo"]}
         assert not ut.compare_nested(a, b)
+
+    @staticmethod
+    def test_nested_sets():
+        a = dict(x={("bar", (1, 2)), 1, 2, 3})
+        b = dict(x={("baz", (1, 2, 3)), 1, 2, 3})
+        b1 = copy.deepcopy(b)
+        c = dict(x={((1, 2, 3), "baz"), 1, 2, 3})
+        assert not ut.compare_nested(a, b)
+        assert not ut.compare_nested(b, a)
+        assert ut.compare_nested(b, b1)
+        assert not ut.compare_nested(b, c)
 
 
 @pytest.mark.usefixtures("single_pass_weld_asdf")
