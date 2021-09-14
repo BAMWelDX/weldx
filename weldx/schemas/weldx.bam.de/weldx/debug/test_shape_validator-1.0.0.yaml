@@ -28,7 +28,9 @@ properties:
     wx_shape: [1]
 
   quantity:
-    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*"
+      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
     wx_shape: [1]
 
   timeseries:

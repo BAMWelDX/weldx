@@ -19,7 +19,9 @@ properties:
   weld_sizes:
     description: |
       Linear dimensions of cross sectional weld features. Sizes are of design and actual features. TODO CLASS
-    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*"
+      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
 
   number_of_passes:
     description: |
