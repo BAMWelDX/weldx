@@ -515,7 +515,7 @@ class MeasurementChain:
     @staticmethod
     def _determine_output_signal_unit(
         func: MathematicalExpression, input_unit: str
-    ) -> str:
+    ) -> Unit:
         """Determine the unit of a transformations' output signal.
 
         Parameters
@@ -531,6 +531,8 @@ class MeasurementChain:
             Unit of the transformations' output signal
 
         """
+        input_unit = ureg.Unit(input_unit)
+
         if func is not None:
             variables = func.get_variable_names()
             if len(variables) != 1:
@@ -543,7 +545,7 @@ class MeasurementChain:
                     "The provided function is incompatible with the input signals unit."
                     f" \nThe test raised the following exception:\n{e}"
                 )
-            return str(test_output.units)
+            return test_output.units
 
         return input_unit
 
@@ -813,6 +815,9 @@ class MeasurementChain:
         ...                          )
 
         """
+        if output_signal_unit is not None:
+            output_signal_unit = ureg.Unit(output_signal_unit)  # work with unit
+
         if output_signal_type is None and output_signal_unit is None and func is None:
             warn("The created transformation does not perform any transformations.")
 
@@ -832,9 +837,7 @@ class MeasurementChain:
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
-                if output_signal_unit == "":
-                    output_signal_unit = "1"
-                unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
+                unit_conversion = output_signal_unit / input_signal.unit
                 func = MathematicalExpression(
                     "a*x",
                     parameters={"a": Q_(1, unit_conversion)},

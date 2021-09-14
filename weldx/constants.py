@@ -19,10 +19,12 @@ WELDX_UNIT_REGISTRY.default_format = "~"
 
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 Q_ = WELDX_QUANTITY
+U_ = WELDX_UNIT_REGISTRY.Unit
 
 __all__ = (
     "WELDX_PATH",
     "WELDX_QUANTITY",
     "WELDX_UNIT_REGISTRY",
     "Q_",
+    "U_",
 )
