@@ -531,8 +531,6 @@ class MeasurementChain:
             Unit of the transformations' output signal
 
         """
-        input_unit = ureg.Unit(input_unit)
-
         if func is not None:
             variables = func.get_variable_names()
             if len(variables) != 1:
@@ -547,7 +545,7 @@ class MeasurementChain:
                 )
             return str(test_output.units)
 
-        return str(input_unit)
+        return input_unit
 
     def _raise_if_data_exist(self, signal_source_name: str):
         """Raise an error if the signal from the passed source already has data."""
@@ -815,9 +813,6 @@ class MeasurementChain:
         ...                          )
 
         """
-        if output_signal_unit is not None:
-            output_signal_unit = ureg.Unit(output_signal_unit)  # work with unit
-
         if output_signal_type is None and output_signal_unit is None and func is None:
             warn("The created transformation does not perform any transformations.")
 
