@@ -102,15 +102,11 @@ tags:
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0
-  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy-1.0.0
-- tag_uri: asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0
-  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0
+  schema_uri: tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_legacy-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0
-  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0
-- tag_uri: asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0
-  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_transformation-1.0.0
+  schema_uri: tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0
-  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_transformation-1.0.0
+  schema_uri: tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/transformations/local_coordinate_system-1.0.0
 - tag_uri: tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0
