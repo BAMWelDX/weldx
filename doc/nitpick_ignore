@@ -13,6 +13,7 @@ py:class sympy.core.expr.Expr
 
 # xarray
 py:class xarray.core.dataarray.DataArray
+py:class xarray.core.dataset.Dataset
 py:class xarray.DataArray
 py:class xarray.Dataset
 
