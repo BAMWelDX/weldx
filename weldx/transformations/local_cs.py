@@ -599,11 +599,11 @@ class LocalCoordinateSystem(TimeDependent):
 
     @property
     def dataset(self) -> xr.Dataset:
-        """Get the underlying xarray.Dataset with ordered dimensions.
+        """Get the underlying `xarray.Dataset` with ordered dimensions.
 
         Returns
         -------
-        xarray.Dataset
+        xarray.Dataset :
             xarray Dataset with coordinates and orientation as DataVariables.
 
         """

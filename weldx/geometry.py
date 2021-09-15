@@ -2320,7 +2320,7 @@ class Geometry:
         show_wireframe : bool
             If `True`, the mesh is plotted as wireframe. Otherwise only the raster
             points are visualized. Currently, the wireframe can't be visualized if a
-            `VariableProfile` is used.
+            `weldx.geometry.VariableProfile` is used.
 
         Returns
         -------
@@ -2346,7 +2346,8 @@ class Geometry:
     ):
         """Rasterize the geometry and get it as `SpatialData` instance.
 
-        If no `VariableProfile` is used, a triangulation is added automatically.
+        If no `weldx.geometry.VariableProfile` is used, a triangulation
+        is added automatically.
 
         Parameters
         ----------
@@ -2514,7 +2515,7 @@ class SpatialData:
         show_wireframe : bool
             If `True`, the mesh is plotted as wireframe. Otherwise only the raster
             points are visualized. Currently, the wireframe can't be visualized if a
-            `VariableProfile` is used.
+            `weldx.geometry.VariableProfile` is used.
 
         Returns
         -------
