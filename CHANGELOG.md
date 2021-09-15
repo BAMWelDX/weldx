@@ -16,6 +16,7 @@
   [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
 - added classes and functions at the top-level of the package to the documentation
   [[#437]](https://github.com/BAMWelDX/weldx/pulls/437).
+- added `weldx.asdf.util.get_highest_tag_version` utility function [[#523]](https://github.com/BAMWelDX/weldx/pull/523).
 
 ### removed
 
