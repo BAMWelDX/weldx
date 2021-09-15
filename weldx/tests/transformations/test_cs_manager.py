@@ -97,24 +97,28 @@ def test_add_cs():
     ts = TimeSeries(MathematicalExpression("a*t", dict(a=Q_("1/s"))))
 
     lcs_data = [
-        ("a", "r", LCS(coordinates=[0, 1, 2]), True, 2),
-        ("b", "r", LCS(coordinates=[0, -1, -2]), False, 3),
-        ("c", "b", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 4),
-        ("c", "b", LCS(coordinates=[-1, -2, -3]), True, 4),
-        ("b", "c", LCS(coordinates=[-1, -2, -3]), False, 4),
-        ("b", "c", LCS(coordinates=[-1, -2, -3]), True, 4),
-        ("d", "b", LCS(coordinates=[0, 1, 2]), True, 5),
-        ("d", "b", LCS(r_mat_y(1 / 2), [1, 2, 3]), True, 5),
-        ("e", "a", LCS(r_mat_y(3 / 2), [2, 3, 1]), True, 6),
-        ("e", "a", LCS(coordinates=ts), True, 6),
+        ("a", "r", LCS(coordinates=[0, 1, 2]), True),
+        ("b", "r", LCS(coordinates=[0, -1, -2]), False),
+        ("c", "b", LCS(r_mat_y(1 / 2), [1, 2, 3]), True),
+        ("c", "b", LCS(coordinates=[-1, -2, -3]), True),
+        ("b", "c", LCS(coordinates=[-1, -2, -3]), False),
+        ("b", "c", LCS(coordinates=[-1, -2, -3]), True),
+        ("d", "b", LCS(coordinates=[0, 1, 2]), True),
+        ("d", "b", LCS(r_mat_y(1 / 2), [1, 2, 3]), True),
+        ("e", "a", LCS(r_mat_y(3 / 2), [2, 3, 1]), True),
+        ("e", "a", LCS(coordinates=ts), True),
     ]
+    exp_num_cs = 1
+    assert csm.number_of_coordinate_systems == exp_num_cs
 
     for d in lcs_data:
         name = d[0]
         parent = d[1]
         lcs = d[2]
         child_in_parent = d[3]
-        exp_num_cs = d[4]
+
+        if name not in csm.coordinate_system_names:
+            exp_num_cs += 1
 
         csm.add_cs(name, parent, lcs, child_in_parent)
 
