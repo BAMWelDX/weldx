@@ -99,6 +99,7 @@ def test_add_cs():
     lcs_data = [
         ("a", "r", LCS(coordinates=[0, 1, 2]), True),
         ("b", "r", LCS(coordinates=[0, -1, -2]), False),
+        ("b", "r", LCS(coordinates=[[0, -1, -2], [8, 2, 7]], time=["1s", "2s"]), False),
         ("c", "b", LCS(r_mat_y(1 / 2), [1, 2, 3]), True),
         ("c", "b", LCS(coordinates=[-1, -2, -3]), True),
         ("b", "c", LCS(coordinates=[-1, -2, -3]), False),
