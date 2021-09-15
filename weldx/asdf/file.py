@@ -187,7 +187,7 @@ class WeldxFile(UserDict):
 
     @property
     def mode(self) -> str:
-        """Open mode of file, one of read or read/write."""
+        """File operation mode: reading or reading/writing mode, one of "r" or "rw"."""
         return self._mode
 
     @property
@@ -237,31 +237,30 @@ class WeldxFile(UserDict):
 
         Examples
         --------
+        Let us define a custom softare entry and use it during file creation.
+
         >>> import weldx
-
-        Define a custom softare entry:
-
-        >>> software = dict(name="MyFancyPackage", author="Me", \
-                homepage="https://startpage.com", version="1.0")
+        >>> software = dict(name="MyFancyPackage", author="Me",
+        ...        homepage="https://startpage.com", version="1.0")
         >>> f = weldx.WeldxFile(software_history_entry=software)
         >>> f.add_history_entry("we made some change")
         >>> f.history #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-         [{'description': 'we made some change', \
-           'time': datetime.datetime(...), \
-           'software': {'name': 'MyFancyPackage', 'author': 'Me', \
+         [{'description': 'we made some change',
+           'time': datetime.datetime(...),
+           'software': {'name': 'MyFancyPackage', 'author': 'Me',
            'homepage': 'https://startpage.com', 'version': '1.0'}}]
 
         We can also change the software on the fly:
-        >>> software_new = dict(name="MyTool", author="MeSoft", \
-                homepage="https://startpage.com", version="1.0")
+        >>> software_new = dict(name="MyTool", author="MeSoft",
+        ...                     homepage="https://startpage.com", version="1.0")
         >>> f.add_history_entry("another change using mytool", software_new)
 
         Lets inspect the last history entry:
 
         >>> f.history[-1] #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'description': 'another change using mytool', \
-         'time': datetime.datetime(...), \
-         'software': {'name': 'MyTool', 'author': 'MeSoft', \
+        {'description': 'another change using mytool',
+         'time': datetime.datetime(...),
+         'software': {'name': 'MyTool', 'author': 'MeSoft',
          'homepage': 'https://startpage.com', 'version': '1.0'}}
 
         """
@@ -328,6 +327,27 @@ class WeldxFile(UserDict):
         )
 
     sync.__doc__ = AsdfFile.update.__doc__
+
+    @classmethod
+    def fromkeys(cls, iterable, default=None) -> "WeldxFile":
+        """Create a new file with keys from iterable and values set to value.
+
+        Parameters
+        ----------
+        iterable :
+            list of key names
+        default :
+            default value to fill the keys with.
+
+        Examples
+        --------
+        >>> from collections import defaultdict
+        >>> wx = WeldxFile.fromkeys(("TCP", "wx_meta", "process"))
+        >>> wx["TCP"], wx["wx_meta"], wx["process"]
+        (None, None, None)
+        """
+        tree = dict.fromkeys(iterable, default)
+        return WeldxFile(tree=tree)
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -418,7 +438,7 @@ class WeldxFile(UserDict):
 
         Returns
         -------
-        attrdict :
+        MutableMapping :
             This dictionary wrapped such, that all of its keys can be accessed as
             properties.
 
@@ -449,8 +469,8 @@ class WeldxFile(UserDict):
 
     def write_to(
         self, fd: Optional[types_path_and_file_like] = None, **write_args
-    ) -> Optional[BytesIO]:
-        """Write current weldx file to given file name or file type.
+    ) -> Optional[types_path_and_file_like]:
+        """Write current contents to given file name or file type.
 
         Parameters
         ----------
@@ -471,7 +491,8 @@ class WeldxFile(UserDict):
 
         Returns
         -------
-        The given input file name or a buffer, in case the input was omitted.
+        types_path_and_file_like :
+            The given input file name or a buffer, in case the input it was omitted.
 
         """
         if fd is None:
@@ -568,3 +589,87 @@ class _HeaderVisualizer:
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
         print(get_yaml_header(buff))
+
+
+# Methods of UserDict do not follow the NumPy doc convention.
+WeldxFile.keys.__doc__ = """Return a set of keys/attributes stored in this file.
+Returns
+-------
+keys :
+    all keys stored at the root of this file.
+"""
+
+WeldxFile.clear.__doc__ = """Remove all data from file."""
+
+WeldxFile.copy.__doc__ = """Copies the file."""  # TODO: interface
+
+WeldxFile.get.__doc__ = """Gets data attached to given key from file.
+
+Parameters
+----------
+key :
+    The name of the data.
+default :
+    The default is being returned in case the given key cannot be found.
+
+Raises
+------
+KeyError
+    Raised if the given key cannot be found and no default was provided.
+"""
+
+WeldxFile.update.__doc__ = """Update D from mapping/iterable E and F.
+
+Parameters
+----------
+mapping :
+
+F:
+
+Notes
+-----
+If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
+If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+In either case, this is followed by: for k, v in F.items(): D[k] = v
+"""
+
+
+WeldxFile.items.__doc__ = """Returns a set-like object providing a view on this files items.
+
+Returns
+-------
+dict_items :
+    view on items.
+"""
+
+WeldxFile.setdefault.__doc__ = """Sets a default for given name.
+
+The passed default object will be returned in case the requested key is not present
+in the file.
+
+Parameters
+----------
+key :
+    key name
+default :
+    object to return in case key is not present in the file.
+"""
+
+WeldxFile.pop.__doc__ = """Get and remove the given key from the file.
+
+Parameters
+----------
+key :
+    key name
+default :
+    object to return in case key is not present in the file.
+"""
+
+WeldxFile.popitem.__doc__ = """Removes the item that was last inserted into the file.
+
+Notes
+-----
+In versions before 3.7, the popitem() method removes a random item.
+"""
+
+WeldxFile.values.__doc__ = """Returns a view list like object of the file content."""
