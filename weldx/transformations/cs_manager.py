@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import itertools
+import warnings
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, List, Set, Tuple, Union
@@ -49,20 +50,50 @@ class CoordinateSystemManager:
     class SubsystemInfo:
         """Contains information about subsystems."""
 
+        name: str
+        """Name of the subsystem"""
         root: str
         """Name of the root coordinate system"""
         common_node: str
         """Name of the common coordinate system"""
-        common_node_data: Set[str]
-        """Names of the subsystems data at the common coordinate system"""
-        common_node_neighbors: Set[str]
-        """Names of the subsystems coordinate systems connected to the common system"""
         time_ref: pd.Timestamp
         """The reference time of the subsystem"""
         members: Set[str]
         """Names of all coordinate systems that belong to the subsystem"""
-        sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo]
+        data: Set[str]
+        """Names of all data that belongs to the subsystem"""
+        subsystems: List[CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
+
+        def to_yaml_tree(self):
+            return dict(
+                name=self.name,
+                root_node=self.root,
+                common_node=self.common_node,
+                reference_time=self.time_ref,
+                members=list(self.members),
+                data=list(self.data),
+                subsystems=[sub.to_yaml_tree() for sub in self.subsystems],
+            )
+
+        @classmethod
+        def from_yaml_tree(cls, node):
+
+            subsystems = node.get("subsystems")
+            if subsystems:
+                subsystems = [cls.from_yaml_tree(d) for d in subsystems]
+            else:
+                subsystems = []
+
+            return cls(
+                name=node["name"],
+                root=node["root_node"],
+                common_node=node["common_node"],
+                time_ref=node.get("reference_time"),
+                members=set(node["members"]),
+                data=set(node.get("data")),
+                subsystems=subsystems,
+            )
 
     _id_gen = itertools.count()
 
@@ -100,52 +131,9 @@ class CoordinateSystemManager:
         self._name = coordinate_system_manager_name
         self._reference_time = time_ref
         self._root_system_name = root_coordinate_system_name
-        self._sub_systems: Dict[str, CoordinateSystemManager.SubsystemInfo] = {}
+        self._subsystems: List[CoordinateSystemManager.SubsystemInfo] = []
         self._graph = DiGraph()
         self._add_coordinate_system_node(root_coordinate_system_name)
-
-    @classmethod
-    def _from_subsystem_graph(
-        cls,
-        root_coordinate_system_name: str,
-        coordinate_system_manager_name: str = None,
-        time_ref: types_timestamp_like = None,
-        graph: nx.DiGraph = None,
-        subsystems=None,
-    ):
-        """Construct a coordinate system manager from existing graph and subsystems.
-
-        This function is used internally to recreate subsystem structures.
-
-        Parameters
-        ----------
-        root_coordinate_system_name
-            Name of the root coordinate system.
-        coordinate_system_manager_name
-            Name of the coordinate system manager. If `None` is passed, a default name
-            is chosen.
-        time_ref
-            A reference timestamp. If it is defined, all time dependent information
-            returned by the CoordinateSystemManager will refer to it by default.
-        graph:
-            Pass on an existing graph.
-        subsystems:
-            A dictionary containing data about the CSMs attached subsystems.
-
-        Returns
-        -------
-        CoordinateSystemManager
-
-        """
-        csm = cls(root_coordinate_system_name, coordinate_system_manager_name, time_ref)
-
-        if subsystems is not None:
-            csm._sub_systems = subsystems
-
-        if graph is not None:
-            csm._graph = graph
-
-        return csm
 
     def __repr__(self):
         """Output representation of a CoordinateSystemManager class."""
@@ -154,7 +142,7 @@ class CoordinateSystemManager:
             f"reference time:\n\t {self.reference_time}\n"
             f"coordinate systems:\n\t {self.coordinate_system_names}\n"
             f"data:\n\t {self.data_names}\n"
-            f"sub systems:\n\t {self._sub_systems.keys()}\n"
+            f"sub systems:\n\t {self.subsystem_names}\n"
             f")"
         )
 
@@ -176,9 +164,9 @@ class CoordinateSystemManager:
         if len(graph_0.nodes) != len(graph_1.nodes):
             return False
 
-        # if self.sub_system_data != other.sub_system_data:
-        if not self._compare_subsystems_equal(
-            self.sub_system_data, other.sub_system_data
+        if not util.compare_nested(
+            {sub.name: sub for sub in self.subsystem_info},
+            {sub.name: sub for sub in other.subsystem_info},
         ):
             return False
 
@@ -194,8 +182,8 @@ class CoordinateSystemManager:
 
         # check coordinate systems
         for edge in graph_0.edges:
-            lcs_0 = self.graph.edges[(edge[0], edge[1])]["lcs"]
-            lcs_1 = other.graph.edges[(edge[0], edge[1])]["lcs"]
+            lcs_0 = self.graph.edges[(edge[0], edge[1])]["transformation"]
+            lcs_1 = other.graph.edges[(edge[0], edge[1])]["transformation"]
             if lcs_0 != lcs_1:
                 return False
 
@@ -217,7 +205,7 @@ class CoordinateSystemManager:
 
         """
         return [
-            self.graph.edges[edge]["lcs"]
+            self.graph.edges[edge]["transformation"]
             for edge in self.graph.edges
             if self.graph.edges[edge]["defined"]
         ]
@@ -279,13 +267,15 @@ class CoordinateSystemManager:
             Local coordinate system
 
         """
-        self._graph.add_edge(node_from, node_to, lcs=lcs, defined=True)
+        self._graph.add_edge(node_from, node_to, transformation=lcs, defined=True)
 
         # only store inverted lcs if coordinates and orientations are discrete values
         lcs_invert = None
         if not isinstance(lcs.coordinates, TimeSeries):
             lcs_invert = lcs.invert()
-        self._graph.add_edge(node_to, node_from, lcs=lcs_invert, defined=False)
+        self._graph.add_edge(
+            node_to, node_from, transformation=lcs_invert, defined=False
+        )
 
     def _check_coordinate_system_exists(self, coordinate_system_name: str):
         """Raise an exception if the specified coordinate system does not exist.
@@ -319,32 +309,6 @@ class CoordinateSystemManager:
                 + str(coordinate_system_name)
             )
 
-    @classmethod
-    def _compare_subsystems_equal(cls, data: Dict, other: Dict) -> bool:
-        """Compare if two subsystem data dictionaries are equal.
-
-        Parameters
-        ----------
-        data:
-            First subsystem data dictionary.
-        other
-            Second subsystem data dictionary.
-
-        Returns
-        -------
-        bool:
-            `True` if both dictionaries are identical, `False` otherwise.
-
-        """
-        if len(data) != len(other):
-            return False
-        for subsystem_name, subsystem_data in data.items():
-            if subsystem_name not in other:
-                return False
-            if subsystem_data != other[subsystem_name]:
-                return False
-        return True
-
     @staticmethod
     def _generate_default_name() -> str:
         """Get a default name for the current coordinate system manager instance.
@@ -357,64 +321,6 @@ class CoordinateSystemManager:
         """
         id_ = next(CoordinateSystemManager._id_gen)  # skipcq: PTC-W0063
         return f"Coordinate system manager {id_}"
-
-    @property
-    def _extended_sub_system_data(self) -> Dict:
-        """Get an extended copy of the internal sub system data.
-
-        The function adds a list of potential child coordinate systems to each
-        sub system. Coordinate systems in this list might belong to other sub systems
-        that share a common coordinate system with the current sub system.
-
-        Returns
-        -------
-        Dict:
-            Extended copy of the internal sub system data.
-
-        """
-        sub_system_data_dict = deepcopy(self._sub_systems)
-        for _, sub_system_data in sub_system_data_dict.items():
-            potential_members = []
-            for cs_name in sub_system_data.common_node_neighbors:
-                potential_members += self.get_child_system_names(cs_name, False)
-
-            sub_system_data.members = {
-                *potential_members,
-                *sub_system_data.common_node_neighbors,
-            }
-
-        return sub_system_data_dict
-
-    @staticmethod
-    def _get_sub_system_members(
-        ext_sub_system_data, ext_sub_system_data_dict
-    ) -> List[str]:
-        """Get a list with all coordinate system names, that belong to the sub system.
-
-        Parameters
-        ----------
-        ext_sub_system_data:
-            The extended sub system data of a single sub system.
-        ext_sub_system_data_dict:
-            Dictionary containing the extended sub system data of all sub systems.
-
-        Returns
-        -------
-        List[str]:
-            List of all the sub systems coordinate systems.
-
-        """
-        all_members = list(ext_sub_system_data.members)
-        for _, other_sub_system_data in ext_sub_system_data_dict.items():
-            if other_sub_system_data.common_node in all_members:
-                all_members = [
-                    cs_name
-                    for cs_name in all_members
-                    if cs_name not in other_sub_system_data.members
-                ]
-
-        all_members += [ext_sub_system_data.common_node]
-        return all_members
 
     @property
     def _has_lcs_with_time_ref(self):
@@ -464,14 +370,14 @@ class CoordinateSystemManager:
 
         """
         edge_from_to = self.graph.edges[(node_from, node_to)]
-        edge_from_to["lcs"] = lcs
+        edge_from_to["transformation"] = lcs
         edge_from_to["defined"] = True
 
         edge_to_from = self.graph.edges[(node_to, node_from)]
         if isinstance(lcs.coordinates, TimeSeries):
-            edge_to_from["lcs"] = None
+            edge_to_from["transformation"] = None
         else:
-            edge_to_from["lcs"] = lcs.invert()
+            edge_to_from["transformation"] = lcs.invert()
         edge_to_from["defined"] = False
 
     @property
@@ -510,18 +416,6 @@ class CoordinateSystemManager:
         return self._graph.number_of_nodes()
 
     @property
-    def number_of_subsystems(self) -> int:
-        """Get the number of attached subsystems.
-
-        Returns
-        -------
-        int:
-            Number of attached subsystems.
-
-        """
-        return len(self._sub_systems)
-
-    @property
     def reference_time(self) -> pd.Timestamp:
         """Get the reference time of the `CoordinateSystemManager`.
 
@@ -544,23 +438,6 @@ class CoordinateSystemManager:
 
         """
         return self._root_system_name
-
-    @property
-    def sub_system_data(self) -> Dict:
-        """Get a dictionary containing data about the attached subsystems."""
-        return self._sub_systems
-
-    @property
-    def subsystem_names(self) -> List[str]:
-        """Get the names of all subsystems.
-
-        Returns
-        -------
-        List[str]:
-            List with subsystem names.
-
-        """
-        return list(self._sub_systems.keys())
 
     def add_cs(
         self,
@@ -950,16 +827,19 @@ class CoordinateSystemManager:
         from networkx import shortest_path
 
         remove_systems = []
-        for sub_system_name, sub_system_data in self._sub_systems.items():
+        for subsystem_info in self._subsystems:
             if (
-                coordinate_system_name in sub_system_data.members
+                coordinate_system_name in subsystem_info.members
             ) or coordinate_system_name in shortest_path(
-                self.graph, sub_system_data.root, self._root_system_name
+                self.graph, subsystem_info.root, self._root_system_name
             ):
-                remove_systems += [sub_system_name]
+                remove_systems += [subsystem_info.name]
 
-        for sub_system_name in remove_systems:
-            del self._sub_systems[sub_system_name]
+        self._subsystems = [
+            subsystem
+            for subsystem in self._subsystems
+            if subsystem.name not in remove_systems
+        ]
 
         # delete nodes and edges
         if delete_children:
@@ -1101,11 +981,11 @@ class CoordinateSystemManager:
     ):
         """Get a lcs on a graph edge for the get_cs method."""
         invert = False
-        lcs: LocalCoordinateSystem = self.graph.edges[edge]["lcs"]
+        lcs: LocalCoordinateSystem = self.graph.edges[edge]["transformation"]
 
         # lcs was defined inverted
         if lcs is None:
-            lcs = self.graph.edges[(edge[1], edge[0])]["lcs"]
+            lcs = self.graph.edges[(edge[1], edge[0])]["transformation"]
             invert = True
 
         if lcs.is_time_dependent:
@@ -1343,42 +1223,6 @@ class CoordinateSystemManager:
 
         return path[1]
 
-    @property
-    def subsystems(self) -> List[CoordinateSystemManager]:
-        """Extract all subsystems from the CoordinateSystemManager.
-
-        Returns
-        -------
-        List :
-            List containing all the subsystems.
-
-        """
-        ext_sub_system_data_dict = self._extended_sub_system_data
-
-        sub_system_list = []
-        for sub_system_name, ext_sub_system_data in ext_sub_system_data_dict.items():
-            members = self._get_sub_system_members(
-                ext_sub_system_data, ext_sub_system_data_dict
-            )
-
-            csm_sub = CoordinateSystemManager._from_subsystem_graph(
-                ext_sub_system_data.root,
-                sub_system_name,
-                time_ref=ext_sub_system_data.time_ref,
-                graph=self._graph.subgraph(members).copy(),
-                subsystems=ext_sub_system_data.sub_systems,
-            )
-            common_node = ext_sub_system_data.common_node
-            csm_sub._graph.nodes[common_node]["data"] = {
-                k: v
-                for k, v in csm_sub._graph.nodes[common_node]["data"].items()
-                if k in ext_sub_system_data.common_node_data
-            }
-
-            sub_system_list.append(csm_sub)
-
-        return sub_system_list
-
     def has_coordinate_system(self, coordinate_system_name: str) -> bool:
         """Return `True` if a coordinate system with specified name already exists.
 
@@ -1463,18 +1307,20 @@ class CoordinateSystemManager:
 
             for edge in affected_edges:
                 if self._graph.edges[edge]["defined"]:
-                    lcs = self._graph.edges[edge]["lcs"]
+                    lcs = self._graph.edges[edge]["transformation"]
                     # this prevents failures when calling lcs.interp_time with reference
                     # times or DatetimeIndex.
                     if lcs.reference_time is None and self._reference_time is not None:
                         lcs.reset_reference_time(self._reference_time)
-                    self._graph.edges[edge]["lcs"] = lcs.interp_time(time, time_ref)
+                    self._graph.edges[edge]["transformation"] = lcs.interp_time(
+                        time, time_ref
+                    )
 
             for edge in affected_edges:
                 if not self._graph.edges[edge]["defined"]:
-                    self._graph.edges[edge]["lcs"] = self._graph.edges[
+                    self._graph.edges[edge]["transformation"] = self._graph.edges[
                         (edge[1], edge[0])
-                    ]["lcs"].invert()
+                    ]["transformation"].invert()
             return self
 
         return deepcopy(self).interp_time(
@@ -1498,71 +1344,6 @@ class CoordinateSystemManager:
         self._check_coordinate_system_exists(coordinate_system_name_1)
 
         return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
-
-    def merge(self, other: CoordinateSystemManager):
-        """Merge another coordinate system managers into the current instance.
-
-        Both `CoordinateSystemManager` need to have exactly one common coordinate
-        system. They are merged at this node. Internally, information is kept
-        to undo the merge process.
-
-        Parameters
-        ----------
-        other:
-            `CoordinateSystemManager` instance that should be merged into the current
-            instance.
-
-        """
-        if other._number_of_time_dependent_lcs > 0 and (
-            (not self.uses_absolute_times and other.uses_absolute_times)
-            or (
-                (self.uses_absolute_times and not self.has_reference_time)
-                and not other.uses_absolute_times
-            )
-            or (
-                (self.has_reference_time and other.uses_absolute_times)
-                and (self.reference_time != other.reference_time)
-            )
-        ):
-            raise Exception(
-                "You can only merge subsystems with time dependent coordinate systems "
-                "if the reference times of both `CoordinateSystemManager` instances "
-                "are identical."
-            )
-
-        intersection = list(
-            set(self.coordinate_system_names) & set(other.coordinate_system_names)
-        )
-
-        if len(intersection) != 1:
-            raise ValueError(
-                "Both instances must have exactly one common coordinate system. "
-                f"Found the following common systems: {intersection}"
-            )
-        common_node = intersection[0]
-
-        for name in other.data_names:
-            if name in self.data_names:
-                raise NameError(f"Both instances contain data with name '{name}'")
-
-        data_parent = self._graph.nodes[common_node]["data"]
-        data_child = other.graph.nodes[common_node]["data"]
-        joined_data = {**data_parent, **data_child}
-
-        from networkx import compose
-
-        self._graph = compose(self._graph, other.graph)
-        self._graph.nodes[common_node]["data"] = joined_data
-
-        self._sub_systems[other.name] = self.SubsystemInfo(
-            root=other.root_system_name,
-            common_node=common_node,
-            common_node_data=set(data_child.keys()),
-            common_node_neighbors=set(other.neighbors(common_node)),
-            time_ref=other.reference_time,
-            members=set(other.coordinate_system_names),
-            sub_systems=other.sub_system_data,
-        )
 
     def neighbors(self, coordinate_system_name: str) -> List:
         """Get a list of neighbors of a certain coordinate system.
@@ -1660,7 +1441,7 @@ class CoordinateSystemManager:
         ]
 
         def _is_edge_time_dependent(edge):
-            lcs = self._graph.edges[edge]["lcs"]
+            lcs = self._graph.edges[edge]["transformation"]
             # inverse lcs contains a TimeSeries
             if lcs is None:
                 return True
@@ -1817,23 +1598,6 @@ class CoordinateSystemManager:
             )
         return vis
 
-    def remove_subsystems(self):
-        """Remove all subsystems from the coordinate system manager."""
-        cs_delete = []
-        for _, sub_system_data in self._sub_systems.items():
-            for lcs in sub_system_data.common_node_neighbors:
-                cs_delete += [lcs]
-            common_node = sub_system_data.common_node
-            self._graph.nodes[common_node]["data"] = {
-                k: v
-                for k, v in self._graph.nodes[common_node]["data"].items()
-                if k not in sub_system_data.common_node_data
-            }
-
-        self._sub_systems = {}
-        for lcs in cs_delete:
-            self.delete_cs(lcs, True)
-
     def time_union(
         self,
         list_of_edges: List = None,
@@ -1878,10 +1642,10 @@ class CoordinateSystemManager:
         else:
 
             def _get_lcs(edge):
-                lcs = self.graph.edges[edge]["lcs"]
+                lcs = self.graph.edges[edge]["transformation"]
                 if lcs is not None:
                     return lcs
-                return self.graph.edges[(edge[1], edge[0])]["lcs"]
+                return self.graph.edges[(edge[1], edge[0])]["transformation"]
 
             lcs_list = [_get_lcs(edge) for edge in list_of_edges]
         lcs_list = [lcs for lcs in lcs_list if lcs.time is not None]
@@ -1947,6 +1711,157 @@ class CoordinateSystemManager:
         )
         return mul + lcs.coordinates
 
+    # subsystems -----------------------------------------------------------------------
+
+    @classmethod
+    def _from_yaml_tree(
+        cls,
+        node: Dict,
+    ) -> CoordinateSystemManager:
+        """Create a CSM from a yaml tree dictionary."""
+        graph = node["graph"]
+        for edge in graph.edges:
+            if not (edge[1], edge[0]) in graph.edges:
+                graph.add_edge(
+                    edge[1],
+                    edge[0],
+                    transformation=graph.edges[edge]["transformation"].invert(),
+                    defined=False,
+                )
+
+        subsystems = node.get("subsystems")
+        if subsystems:
+            subsystems = [cls.SubsystemInfo.from_yaml_tree(d) for d in subsystems]
+
+        return cls._from_subsystem_graph(
+            tuple(graph.nodes)[0],
+            node["name"],
+            node.get("reference_time"),
+            graph,
+            subsystems,
+        )
+
+    @classmethod
+    def _from_subsystem_graph(
+        cls,
+        root_coordinate_system_name: str,
+        coordinate_system_manager_name: str = None,
+        time_ref: types_timestamp_like = None,
+        graph: nx.DiGraph = None,
+        subsystems: List[CoordinateSystemManager.SubsystemInfo] = None,
+    ) -> CoordinateSystemManager:
+        """Construct a coordinate system manager from existing graph and subsystems."""
+        csm = cls(root_coordinate_system_name, coordinate_system_manager_name, time_ref)
+
+        if subsystems is not None:
+            csm._subsystems = subsystems
+
+        if graph is not None:
+            csm._graph = graph
+
+        return csm
+
+    def _subsystem_common_node_data(self, subsystem_info: SubsystemInfo):
+        """Get the names of the data at the common node that belong to the subsystem."""
+        return {
+            data_name
+            for data_name in self._graph.nodes[subsystem_info.common_node]["data"]
+            if data_name in subsystem_info.data
+        }
+
+    def _subsystem_common_node_neighbors(self, subsystem_info: SubsystemInfo):
+        """Get the neighbors of the common node that belong to the subsystem."""
+        return {
+            neighbor
+            for neighbor in self._graph.neighbors(subsystem_info.common_node)
+            if neighbor in subsystem_info.members
+        }
+
+    def merge(self, other: CoordinateSystemManager):
+        """Merge another coordinate system managers into the current instance.
+
+        Both `CoordinateSystemManager` need to have exactly one common coordinate
+        system. They are merged at this node. Internally, information is kept
+        to undo the merge process.
+
+        Parameters
+        ----------
+        other:
+            `CoordinateSystemManager` instance that should be merged into the current
+            instance.
+
+        """
+        if other._number_of_time_dependent_lcs > 0 and (
+            (not self.uses_absolute_times and other.uses_absolute_times)
+            or (
+                (self.uses_absolute_times and not self.has_reference_time)
+                and not other.uses_absolute_times
+            )
+            or (
+                (self.has_reference_time and other.uses_absolute_times)
+                and (self.reference_time != other.reference_time)
+            )
+        ):
+            raise Exception(
+                "You can only merge subsystems with time dependent coordinate systems "
+                "if the reference times of both `CoordinateSystemManager` instances "
+                "are identical."
+            )
+
+        intersection = list(
+            set(self.coordinate_system_names) & set(other.coordinate_system_names)
+        )
+
+        if len(intersection) != 1:
+            raise ValueError(
+                "Both instances must have exactly one common coordinate system. "
+                f"Found the following common systems: {intersection}"
+            )
+        common_node = intersection[0]
+
+        for name in other.data_names:
+            if name in self.data_names:
+                raise NameError(f"Both instances contain data with name '{name}'")
+
+        joined_data = {
+            **self._graph.nodes[common_node]["data"],
+            **other.graph.nodes[common_node]["data"],
+        }
+
+        from networkx import compose
+
+        self._graph = compose(self._graph, other.graph)
+        self._graph.nodes[common_node]["data"] = joined_data
+
+        self._subsystems.append(
+            self.SubsystemInfo(
+                name=other.name,
+                root=other.root_system_name,
+                common_node=common_node,
+                time_ref=other.reference_time,
+                members=set(other.coordinate_system_names),
+                data=set(other.data_names),
+                subsystems=other.subsystem_info,
+            )
+        )
+
+    def remove_subsystems(self):
+        """Remove all subsystems from the coordinate system manager."""
+        cs_delete = []
+        for subsystem_info in self._subsystems:
+            for lcs in self._subsystem_common_node_neighbors(subsystem_info):
+                cs_delete += [lcs]
+            common_node = subsystem_info.common_node
+            self._graph.nodes[common_node]["data"] = {
+                k: v
+                for k, v in self._graph.nodes[common_node]["data"].items()
+                if k not in self._subsystem_common_node_data(subsystem_info)
+            }
+
+        self._subsystems = []
+        for lcs in cs_delete:
+            self.delete_cs(lcs, True)
+
     def unmerge(self) -> List[CoordinateSystemManager]:
         """Undo previous merges and return a list of all previously merged instances.
 
@@ -1962,7 +1877,78 @@ class CoordinateSystemManager:
             A list containing previously merged `CoordinateSystemManager` instances.
 
         """
+        lcs_rem = self.coordinate_system_names
+
         subsystems = self.subsystems
         self.remove_subsystems()
 
+        lcs_rem = [lcs for lcs in lcs_rem if lcs not in self.coordinate_system_names]
+        for sub in subsystems:
+            lcs_rem = [lcs for lcs in lcs_rem if lcs not in sub.coordinate_system_names]
+
+        if lcs_rem:
+            warnings.warn(
+                "The following coordinate systems are not part of any subsystem and "
+                f"lost connection to the CoordinateSystemManager instance: {lcs_rem}\n"
+                "These systems are removed."
+            )
+
         return subsystems
+
+    @property
+    def number_of_subsystems(self) -> int:
+        """Get the number of attached subsystems.
+
+        Returns
+        -------
+        int:
+            Number of attached subsystems.
+
+        """
+        return len(self._subsystems)
+
+    @property
+    def subsystem_info(self) -> List:
+        """Get a dictionary containing data about the attached subsystems."""
+        return self._subsystems
+
+    @property
+    def subsystem_names(self) -> List[str]:
+        """Get the names of all subsystems.
+
+        Returns
+        -------
+        List[str]:
+            List with subsystem names.
+
+        """
+        return [subsystem.name for subsystem in self._subsystems]
+
+    @property
+    def subsystems(self) -> List[CoordinateSystemManager]:
+        """Extract all subsystems from the CoordinateSystemManager.
+
+        Returns
+        -------
+        List :
+            List containing all the subsystems.
+
+        """
+        subsystem_list = []
+        for sub_data in self._subsystems:
+            csm_sub = CoordinateSystemManager._from_subsystem_graph(
+                sub_data.root,
+                sub_data.name,
+                time_ref=sub_data.time_ref,
+                graph=self._graph.subgraph(sub_data.members).copy(),
+                subsystems=sub_data.subsystems,
+            )
+            csm_sub._graph.nodes[sub_data.common_node]["data"] = {
+                k: v
+                for k, v in csm_sub._graph.nodes[sub_data.common_node]["data"].items()
+                if k in self._subsystem_common_node_data(sub_data)
+            }
+
+            subsystem_list.append(csm_sub)
+
+        return subsystem_list
