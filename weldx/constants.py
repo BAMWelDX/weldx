@@ -20,7 +20,7 @@ WELDX_UNIT_REGISTRY.default_format = "~"
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 Q_ = WELDX_QUANTITY
 Q_.__name__ = "Q_"
-Q_.__module_ = "pint.quantity"
+Q_.__module_ = "pint.quantity"  # skipcq: PYL-W0212
 Q_.__doc__ = """Create a quantity from a scalar or array.
 
 The quantity class supports lots of physical units and will combine them during
