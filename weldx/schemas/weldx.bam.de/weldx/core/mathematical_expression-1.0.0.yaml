@@ -32,7 +32,9 @@ properties:
     description: |
       List of constant parameters that to be set in the mathematical expression.
     type: object
-    wx_property_tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    oneOf:
+      - wx_property_tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*"
+      - wx_property_tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
 
 required: [expression]
 propertyOrder: [expression, parameters]

@@ -74,6 +74,7 @@ py:meth scipy.stats.special_ortho_group
 py:obj mrp[i]
 
 # asdf
+py:class asdf.asdf.SerializationContext
 py:class iterable of asdf.extension.Compressor instances
 py:class See the class docstring for details on keyword
 py:class iterable of str
