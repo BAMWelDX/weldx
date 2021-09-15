@@ -19,6 +19,27 @@ WELDX_UNIT_REGISTRY.default_format = "~"
 
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 Q_ = WELDX_QUANTITY
+Q_.__name__ = "Q_"
+Q_.__module_ = "pint.quantity"
+Q_.__doc__ = """Create a quantity from a scalar or array.
+
+The quantity class supports lots of physical units and will combine them during
+mathematical operations
+
+Examples
+--------
+>>> from weldx import Q_
+>>> length = Q_(10, "mm")
+>>> length
+
+define a time:
+>>> time = Q_(1, "s")
+>>> time
+
+lets combine length and time to get a velocity.
+>>> v = length / time
+>>> v
+"""
 U_ = WELDX_UNIT_REGISTRY.Unit
 
 __all__ = (
