@@ -32,7 +32,7 @@ examples:
 type: object
 properties:
   name:
-    oneOf:
+    anyOf:
       - type: string
       - tag: "asdf://weldx.bam.de/weldx/tags/uuid-1.0.0"
   edges:

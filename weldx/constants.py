@@ -38,10 +38,12 @@ lets combine length and time to get a velocity.
 >>> v = length / time
 >>> v
 """
+U_ = WELDX_UNIT_REGISTRY.Unit
 
 __all__ = (
     "WELDX_PATH",
     "WELDX_QUANTITY",
     "WELDX_UNIT_REGISTRY",
     "Q_",
+    "U_",
 )

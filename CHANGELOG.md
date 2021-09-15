@@ -88,6 +88,8 @@
 - rewrote `asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy-1.0.0` schema for
   the `CoordinateSystemManager`. It uses the digraph schemas to serialize the coordinate system structure.
   [[#497]](https://github.com/BAMWelDX/weldx/pull/497)
+- add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity-1.0.0``
+  and ``asdf://weldx.bam.de/weldx/schemas/unit/unit-1.0.0`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522)
 
 ### deprecations
 
