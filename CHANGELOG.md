@@ -50,6 +50,8 @@
   coordinates [[#486]](https://github.com/BAMWelDX/weldx/pull/486)
 - `WeldxFile.copy` now creates a copy to a (optional) file. Before it just returned a dictionary
   [[#504]](https://github.com/BAMWelDX/weldx/pull/504).
+- changed the default ``pint.Unit`` formatting to short
+  notation ``:~`` [[#519]](https://github.com/BAMWelDX/weldx/pull/519).
 
 ### fixes
 
