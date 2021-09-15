@@ -278,7 +278,7 @@ class MeasurementChain:
         )
 
     @classmethod
-    def from_dict(cls, dictionary: Dict) -> MeasurementChain:
+    def from_dict(cls, dictionary: Dict) -> "MeasurementChain":
         """Create a measurement chain from a dictionary.
 
         Parameters
@@ -300,7 +300,7 @@ class MeasurementChain:
     @classmethod
     def from_equipment(
         cls, name, equipment: MeasurementEquipment, source_name=None
-    ) -> MeasurementChain:
+    ) -> "MeasurementChain":
         """Create a measurement chain from a piece of equipment that contains a source.
 
         Parameters
@@ -371,7 +371,7 @@ class MeasurementChain:
         output_signal_type: str,
         output_signal_unit: str,
         signal_data: TimeSeries = None,
-    ) -> MeasurementChain:
+    ) -> "MeasurementChain":
         """Create a new measurement chain without providing a `SignalSource` instance.
 
         Parameters
@@ -893,7 +893,7 @@ class MeasurementChain:
 
         Returns
         -------
-        TimeSeries :
+        weldx.TimeSeries :
             The requested data
 
         """

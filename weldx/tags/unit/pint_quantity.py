@@ -15,7 +15,10 @@ class PintQuantityConverter(WeldxConverter):
         "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*",
         "tag:stsci.edu:asdf/unit/quantity-1.*",
     ]
-    types = ["pint.quantity.build_quantity_class.<locals>.Quantity"]
+    types = [
+        "pint.quantity.build_quantity_class.<locals>.Quantity",
+        "weldx.constants.Q_",
+    ]
 
     def to_yaml_tree(self, obj: pint.Quantity, tag: str, ctx) -> dict:
         """Convert to python dict."""
