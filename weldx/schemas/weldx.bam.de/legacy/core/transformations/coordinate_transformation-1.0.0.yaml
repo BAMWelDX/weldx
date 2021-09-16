@@ -1,7 +1,8 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_transformation-1.0.0"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/coordinate_transformation-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
 
 title: |
   Schema that describes the transformation between 2 coordinate systems.
@@ -12,20 +13,20 @@ examples:
   -
     - A uniform coordinate transformation between a "base" and a "workpiece" system.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
+      !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
         name: workpiece
         reference_system: base
-        transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+        transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0> {}
   -
     - |
       A coordinate transformation describing a constant offset of -10 mm in z-direction between
       the "tcp_wire" and "tcp_contact" systems
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
+      !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
         name: tcp_contact
         reference_system: tcp_wire
-        transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-          coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+        transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
+          coordinates: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
             name: coordinates
             dimensions: [c]
             dtype: <f8
@@ -47,9 +48,7 @@ properties:
   transformation:
     description: |
       Data that describes the orientation and position of the coordinate system towards its parent system.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.*" # legacy_tag
+    tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
 
 propertyOrder: [name, reference_system, transformation]
 required: [name, reference_system, transformation]

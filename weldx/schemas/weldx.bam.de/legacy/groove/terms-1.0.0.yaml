@@ -1,0 +1,55 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1_2013_12/terms-1.0.0"
+
+title: |
+  DIN EN ISO 9692-1 definitions
+
+description: |
+  Definitions of Terms used for describing groove shapes according to ISO 9692-1
+
+definitions:
+  workpiece-thickness:
+    description: |
+      Workpiece thickness
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit: "mm"
+
+  root-gap:
+    description: |
+      Root gap
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit: "mm"
+
+  groove-angle:
+    description: |
+      Groove angle
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit: "deg"
+
+  bevel-angle:
+    description: |
+      Bevel angle
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit: "deg"
+
+  bevel-radius:
+    description: |
+      Bevel radius
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit: "mm"
+
+  root-face:
+    description: |
+      Root face
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit: "mm"
+
+  special-depth:
+    description: |
+      Special depth
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit: "mm"
+
+...

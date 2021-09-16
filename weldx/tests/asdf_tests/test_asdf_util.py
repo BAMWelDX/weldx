@@ -8,6 +8,7 @@ import pytest
 from weldx import WeldxFile
 from weldx.asdf.util import (
     dataclass_serialization_class,
+    get_highest_tag_version,
     get_yaml_header,
     read_buffer,
     write_buffer,
@@ -154,3 +155,15 @@ def test_write_buffer_dummy_inline_arrays():
     restored = read_buffer(buff)[name]
     assert restored.dtype == array.dtype
     assert restored.shape == array.shape
+
+
+def test_get_highest_tag_version():
+    """Test getting some tags from the WeldxExtension."""
+    assert (
+        get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/uuid-*")
+        == "asdf://weldx.bam.de/weldx/tags/uuid-1.0.0"
+    )
+    assert get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/uuid-2.*") is None
+
+    with pytest.raises(ValueError):
+        get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/**-*")

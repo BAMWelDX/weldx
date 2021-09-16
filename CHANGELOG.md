@@ -14,6 +14,9 @@
   and `CoordinateSystemManager.create_cs_from_axis_vectors` [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
 - added PyTest flags to use ``WeldxFile`` internally in ``asdf.util.read_buffer`` and ``asdf.util.write_buffer``
   [[#469]](https://github.com/BAMWelDX/weldx/pull/469).
+- added classes and functions at the top-level of the package to the documentation
+  [[#437]](https://github.com/BAMWelDX/weldx/pulls/437).
+- added `weldx.asdf.util.get_highest_tag_version` utility function [[#523]](https://github.com/BAMWelDX/weldx/pull/523).
 
 ### removed
 
@@ -47,7 +50,8 @@
   coordinates [[#486]](https://github.com/BAMWelDX/weldx/pull/486)
 - `WeldxFile.copy` now creates a copy to a (optional) file. Before it just returned a dictionary
   [[#504]](https://github.com/BAMWelDX/weldx/pull/504).
-
+- changed the default ``pint.Unit`` formatting to short
+  notation ``:~`` [[#519]](https://github.com/BAMWelDX/weldx/pull/519).
 
 ### fixes
 
@@ -83,6 +87,13 @@
       and `weldx.asdf.util.get_weldx_extension`
     - add ``devtools/scripts/update_manifest.py`` to auto update manifest from extension metadata
     - custom shape validation must now be implemented via staticmethod ``WeldxConverter.shape_from_tagged``
+- provide legacy schema support
+  in ``weldx/schemas/weldx.bam.de/legacy`` [[#533]](https://github.com/BAMWelDX/weldx/pull/533)
+- rewrote `asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy-1.0.0` schema for
+  the `CoordinateSystemManager`. It uses the digraph schemas to serialize the coordinate system structure.
+  [[#497]](https://github.com/BAMWelDX/weldx/pull/497)
+- add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity-1.0.0``
+  and ``asdf://weldx.bam.de/weldx/schemas/unit/unit-1.0.0`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522)
 
 ### deprecations
 

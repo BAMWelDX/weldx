@@ -1,0 +1,123 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/local_coordinate_system-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
+
+title: |
+  Schema that describes a local coordinate system
+description: |
+  A local coordinate system is described by time-dependent coordinates and orientations towards a reference system.
+
+examples:
+  -
+    - A constant transformation describing a translation of 1 mm into the z direction
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
+        coordinates: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
+          name: coordinates
+          dimensions: [c]
+          dtype: <f8
+          data: !core/ndarray-1.0.0
+            data: [0.0, 0.0, 1.0]
+            datatype: float64
+            shape: [3]
+  -
+    - |
+      A time dependent transformation describing a linear movement from 5 mm to 295 mm
+      over 20 seconds along the x-axis direction.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
+        time: !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
+          values: !core/ndarray-1.0.0
+            data: [0, 20000000000]
+            datatype: int64
+            shape: [2]
+          start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+          end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M20S}
+          min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+          max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M20S}
+        coordinates: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
+          name: coordinates
+          dimensions: [time, c]
+          dtype: <f8
+          data: !core/ndarray-1.0.0
+            data:
+            - [5.0, 0.0, 0.0]
+            - [295.0, 0.0, 0.0]
+            datatype: float64
+            shape: [2, 3]
+  -
+    - A static transformation describing an euler rotation of 45 degree around the x-axis.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
+        orientations: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
+          name: orientations
+          dimensions: [c, v]
+          dtype: <f8
+          data: !core/ndarray-1.0.0
+            data:
+            - [0.7071067811865475, -0.7071067811865476, 0.0]
+            - [0.7071067811865476, 0.7071067811865475, 0.0]
+            - [0.0, 0.0, 1.0]
+            datatype: float64
+            shape: [3, 3]
+  -
+    - |
+      A time dependent transformation describing an euler rotation around the y-axis from 0 degree to 120 degree
+      over 20 seconds.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
+        time: !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
+          values: !core/ndarray-1.0.0
+            data: [0, 20000000000]
+            datatype: int64
+            shape: [2]
+          start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+          end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M20S}
+          min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+          max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M20S}
+        orientations: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
+          name: orientations
+          dimensions: [time, c, v]
+          dtype: <f8
+          data: !core/ndarray-1.0.0
+            data:
+            - - [1.0, 0.0, 0.0]
+              - [0.0, 1.0, 0.0]
+              - [0.0, 0.0, 1.0]
+            - - [-0.4999999999999998, 0.0, 0.8660254037844388]
+              - [0.0, 1.0, 0.0]
+              - [-0.8660254037844388, 0.0, -0.4999999999999998]
+            datatype: float64
+            shape: [2, 3, 3]
+
+type: object
+properties:
+  reference_time:
+    description: |
+      A timestamp that serves as reference point for the time deltas of the 'time' tag.
+    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+  time:
+    description: |
+      A list of timestamps
+    tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
+  coordinates:
+    description: |
+      An ndarray containing the coordinates.
+
+    oneOf:
+      - tag: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+  orientations:
+    description: |
+      An ndarray containing the orientations.
+    tag: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
+
+wx_shape:
+  (coordinates): [..., 3]
+  (orientations): [(t), 3, 3]
+
+propertyOrder: [reference_time, time, orientations, coordinates]
+flowStyle: block
+...

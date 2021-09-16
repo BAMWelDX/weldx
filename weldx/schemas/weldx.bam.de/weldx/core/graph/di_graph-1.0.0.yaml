@@ -51,9 +51,7 @@ examples:
 type: object
 properties:
   root_node:
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.*"
 
 required: [root_node]
 ...
