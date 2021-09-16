@@ -8,7 +8,7 @@ from warnings import warn
 
 from networkx import draw, draw_networkx_edge_labels
 
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
 
@@ -832,9 +832,7 @@ class MeasurementChain:
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
-                if output_signal_unit == "":
-                    output_signal_unit = "1"
-                unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
+                unit_conversion = U_(output_signal_unit) / U_(input_signal.unit)
                 func = MathematicalExpression(
                     "a*x",
                     parameters={"a": Q_(1, unit_conversion)},

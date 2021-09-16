@@ -30,9 +30,7 @@ properties:
     type: string
     enum: [fwd, bwd]
   target_node:
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.*"
   attributes:
     type: object
 

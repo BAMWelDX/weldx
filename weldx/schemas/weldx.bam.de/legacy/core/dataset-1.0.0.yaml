@@ -1,0 +1,41 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/dataset-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/dataset-1.0.0"
+
+title: |
+  Schema that describes a dataset
+description: |
+  A dataset is a structure that gathers multiple data with common dimensions. The corresponding Python data structure
+  is the xarray.Dataset which is inspired by the NetCDF file format
+  (See: https://www.unidata.ucar.edu/software/netcdf/docs/netcdf_data_model.html).
+type: object
+properties:
+  attributes:
+    description: |
+      An arbitrary structure containing meta data.
+    type: object
+  dimensions:
+    description: |
+      An array of dimensions.
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/core/dimension-1.0.0"
+  coordinates:
+    description: |
+      An array of variables that represent coordinates.
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
+  variables:
+    description: |
+      An array of variables.
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
+
+required: [dimensions, coordinates, variables]
+propertyOrder: [attributes, dimensions, coordinates, variables]
+flowStyle: block
+...

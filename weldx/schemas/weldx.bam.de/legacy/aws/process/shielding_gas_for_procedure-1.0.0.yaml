@@ -1,0 +1,81 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/process/shielding_gas_for_procedure-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/process/shielding_gas_for_procedure-1.0.0"
+
+title: |
+  GMAW process shielding gas
+description: |
+  Description of applicable gas composition and flowrates, including torch gas shielding, backing gas, and trailing gas.
+
+examples:
+  -
+    - A shielding gas mixture of 82% argon and 18% CO2 with 20 l/min flowrate.
+    - |
+      !<tag:weldx.bam.de:weldx/aws/process/shielding_gas_for_procedure-1.0.0>
+          use_torch_shielding_gas: true
+          torch_shielding_gas: !<tag:weldx.bam.de:weldx/aws/process/shielding_gas_type-1.0.0>
+            gas_component:
+            - !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
+              gas_chemical_name: argon
+              gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
+            - !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
+              gas_chemical_name: carbon dioxide
+              gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
+            common_name: SG
+          torch_shielding_gas_flowrate: !unit/quantity-1.1.0 {unit: liter / minute, value: 20}
+
+type: object
+properties:
+  use_torch_shielding_gas:
+    description: |
+      Torch shielding gas is/is not required or specified.
+    type: boolean
+
+  torch_shielding_gas:
+    description: |
+      Composition of shielding gas expelled from a nozzle in the welding torch.
+    $ref: shielding_gas_type-1.0.0
+
+  torch_shielding_gas_flowrate:
+    description: |
+      Flow rate of shielding gas required or specified.
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+
+  use_backing_gas:
+    description: |
+      Backing gas is/is not required or specified.
+    type: boolean
+
+  backing_gas:
+    description: |
+      Specification of the component gases of the mixture.
+    $ref: shielding_gas_type-1.0.0
+
+  backing_gas_flowrate:
+    description: |
+      Flowrate of backing gas.
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+
+  use_trailing_gas:
+    description: |
+      Trailing shielding gas is/is not required or specified.
+    type: boolean
+
+  trailing_shielding_gas:
+    description: |
+      Composition or identification of trailing gas.
+    $ref: shielding_gas_type-1.0.0
+
+  trailing_shielding_gas_flowrate:
+    description: |
+      Flowrate of trailing gas during welding.
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+
+
+
+required: [use_torch_shielding_gas, torch_shielding_gas, torch_shielding_gas_flowrate]
+propertyOrder: [use_torch_shielding_gas, torch_shielding_gas, torch_shielding_gas_flowrate, use_backing_gas, backing_gas, backing_gas_flowrate, use_trailing_gas, trailing_shielding_gas, trailing_shielding_gas_flowrate]
+flowStyle: block
+...

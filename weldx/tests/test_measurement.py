@@ -2,10 +2,11 @@
 
 from typing import Dict
 
+import numpy as np
 import pytest
 import xarray as xr
 
-from weldx import Q_
+from weldx.constants import Q_, U_
 from weldx.core import MathematicalExpression
 from weldx.measurement import (
     Error,
@@ -208,10 +209,10 @@ class TestMeasurementChain:
     @pytest.mark.parametrize(
         "tf_kwargs, exp_signal_type, exp_signal_unit",
         [
-            ({}, "digital", "dimensionless"),
-            (dict(type_transformation="AA"), "analog", "dimensionless"),
-            (dict(type_transformation=None), "analog", "dimensionless"),
-            (dict(func=None), "digital", "V"),
+            ({}, "digital", U_("")),
+            (dict(type_transformation="AA"), "analog", U_("")),
+            (dict(type_transformation=None), "analog", U_("")),
+            (dict(func=None), "digital", U_("V")),
         ],
     )
     def test_add_transformation(self, tf_kwargs, exp_signal_type, exp_signal_unit):
@@ -235,7 +236,7 @@ class TestMeasurementChain:
 
         signal = mc.output_signal
         assert signal.signal_type == exp_signal_type
-        assert signal.unit == exp_signal_unit
+        assert U_(signal.unit) == exp_signal_unit
 
     # test_add_transformation_exceptions -----------------------------------------------
 
@@ -454,7 +455,7 @@ class TestMeasurementChain:
         mc.add_transformation(self._default_transformation(), data=data)
         mc.create_transformation("transformation_2", None, output_signal_unit="A")
 
-        assert mc.get_signal_data("transformation").identical(data)
+        assert np.all(mc.get_signal_data("transformation") == data)
 
         # no data
         with pytest.raises(KeyError):

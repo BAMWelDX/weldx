@@ -1,7 +1,7 @@
 import functools
 import re
 from copy import copy
-from typing import List
+from typing import List, Union
 
 from asdf.asdf import SerializationContext
 from asdf.extension import Converter
@@ -42,7 +42,8 @@ def to_yaml_tree_metadata(func):
             if attr:
                 tree[key] = attr
 
-        tree = remap(tree, lambda p, k, v: v is not None)  # drop all None values
+        if isinstance(tree, (dict, list)):
+            tree = remap(tree, lambda p, k, v: v is not None)  # drop all None values
         return tree
 
     return to_yaml_tree_wrapped
@@ -52,13 +53,14 @@ def from_yaml_tree_metadata(func):
     """Wrapper that will add reading metadata and userdata during form_tree methods."""
 
     @functools.wraps(func)
-    def from_yaml_tree_wrapped(self, tree: dict, tag, ctx):
+    def from_yaml_tree_wrapped(self, tree: Union[dict, list, str], tag, ctx):
         """Call default from_yaml_tree method and add metadata attributes."""
         meta_dict = {}
-        for key in [META_ATTR, USER_ATTR]:
-            value = tree.pop(key, None)
-            if value:
-                meta_dict[key] = value
+        if isinstance(tree, dict):  # only valid if we serialize a dict
+            for key in [META_ATTR, USER_ATTR]:
+                value = tree.pop(key, None)
+                if value:
+                    meta_dict[key] = value
 
         obj = func(self, tree, tag, ctx)
         for key, value in meta_dict.items():
@@ -86,7 +88,7 @@ class WeldxConverterMeta(type(Converter)):
         cls.to_yaml_tree = to_yaml_tree_metadata(cls.to_yaml_tree)
         cls.from_yaml_tree = from_yaml_tree_metadata(cls.from_yaml_tree)
 
-        for tag in copy(cls.tags):
+        for tag in copy(cls.tags):  # legacy_code
             if tag.startswith("asdf://weldx.bam.de/weldx/tags/"):
                 cls.tags.append(_legacy_tag_from_new_tag(tag))
 
