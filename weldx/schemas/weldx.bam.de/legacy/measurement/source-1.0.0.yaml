@@ -1,0 +1,40 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/measurement/source-1.0.0"
+tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
+
+title: |
+  Schema that describes a measurement source.
+
+examples:
+  -
+    - The source of a current measurement outputting an analog signal.
+    - |
+      !<tag:weldx.bam.de:weldx/measurement/source-1.0.0>
+        name: Current Sensor
+        output_signal: !<tag:weldx.bam.de:weldx/measurement/signal-1.0.0>
+          signal_type: analog
+          unit: V
+        error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+          deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
+
+type: object
+properties:
+  name:
+    description: |
+      The name of the source.
+    type: string
+  output_signal:
+    description: |
+      The signal that is produced by the source.
+    tag: "tag:weldx.bam.de:weldx/measurement/signal-1.0.0"
+  error:
+    description: |
+      The error of the source.
+    tag: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
+
+required: [name, output_signal]
+propertyOrder: [name, output_signal, error]
+flowStyle: block
+...

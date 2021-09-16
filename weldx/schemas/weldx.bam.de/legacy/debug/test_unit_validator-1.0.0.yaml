@@ -1,0 +1,64 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/debug/test_unit_validator-1.0.0"
+tag: "tag:weldx.bam.de:weldx/debug/test_unit_validator-1.0.0"
+
+title: |
+  simple demonstration schema for wx_unit validator
+type: object
+properties:
+  length_prop:
+    description: |
+      a simple length quantity with unit validator
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit: "m"
+
+  velocity_prop:
+    description: |
+      a simple velocity quantity
+    allOf:
+      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+      - type: object
+        wx_unit: "m/s"
+
+  current_prop:
+    description: |
+      a current quantity of shape [2,2]
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+
+  nested_prop:
+    description: |
+      a nested object with two quantities
+    type: object
+    properties:
+      q1:
+        description: a nested length of shape [3,3]
+        tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+      q2:
+        description: a volume
+        tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit:
+      q1: "m"
+
+  simple_prop:
+    description: simple property without any references ref
+    type: object
+    properties:
+      value:
+        type: number
+      unit:
+        type: string
+    wx_unit: "m"
+
+required: [length_prop, velocity_prop, current_prop]
+propertyOrder: [length_prop, velocity_prop, current_prop]
+flowStyle: block
+additionalProperties: true
+wx_unit:
+  length_prop: "m"
+  velocity_prop: "m / s"
+  current_prop: A
+  nested_prop:
+    q2: "m*mm*cm"
+...

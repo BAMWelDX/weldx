@@ -1,0 +1,98 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/design/base_metal-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/design/base_metal-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  None
+type: object
+properties:
+  common_name:
+    description: |
+      The trade name, a name used without all the designations of the formal specification.
+    type: string
+
+  m_number:
+    description: |
+      A designation used to group base metals for procedure and performance qualifications.
+    type: string
+
+  group_number:
+    description: |
+      A classification system for metal by material properties.
+    type: string
+
+  product_form:
+    description: |
+      The form of the workpieces to be joined. TODO: ENUM
+    type: string
+
+  thickness:
+    description: |
+      Plate or sheet thickness, if tube, specifies wall thickness.
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+
+  diameter:
+    description: |
+      Outside diameter, only used if material is tube.
+    type: number
+
+  specification_number:
+    description: |
+      The standard designation of the formal material classification.
+    type: string
+
+  specification_version:
+    description: |
+      Version of the specification used.
+    type: string
+
+  specification_organization:
+    description: |
+      The organization responsible for generating the specification.
+    type: string
+
+  UNS_number:
+    description: |
+      Unified Numbering System for Metals and Alloys, managed by ASTM and SAE.
+    type: string
+
+  CAS_number:
+    description: |
+      Chemical Abstracts Service Registry Number, a unique identifier for substances issued by the Chemical Abstracts Service.
+    type: string
+
+  heat_lot_identification:
+    description: |
+      A unique identifier issued by a materials manufacturer assigned to manufacturing batches.
+    type: string
+
+  composition:
+    description: |
+      Detailed chemical composition, by elements. This Type needs expansion.
+    type: string
+
+  manufacturing_history:
+    description: |
+      Mechanical manufacturing methods used to produce the welded material. TODO: ENUM
+    type: string
+
+  service_history:
+    description: |
+      The mechanical forming and heat treatment methods used to produce the stock material.
+    type: string
+
+  applied_coating_specification:
+    description: |
+      Standard designation for the class of coating.
+    type: string
+
+
+
+required: [common_name, product_form, thickness]
+propertyOrder: [common_name, m_number, group_number, product_form, thickness, diameter, specification_number, specification_version, specification_organization, UNS_number, CAS_number, heat_lot_identification, composition, manufacturing_history, service_history, applied_coating_specification]
+flowStyle: block
+...

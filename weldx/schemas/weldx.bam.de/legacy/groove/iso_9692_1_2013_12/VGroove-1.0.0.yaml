@@ -1,0 +1,41 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0"
+tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0"
+
+title: |
+  VGroove representation.
+
+examples:
+  -
+    - A simple V-Groove
+    - |
+      !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0>
+        t: !unit/quantity-1.1.0 {unit: millimeter, value: 15}
+        alpha: !unit/quantity-1.1.0 {unit: degree, value: 40}
+        b: !unit/quantity-1.1.0 {unit: millimeter, value: 2}
+        c: !unit/quantity-1.1.0 {unit: millimeter, value: 1}
+        code_number: ['1.3', '1.5']
+
+type: object
+properties:
+  t:
+    description: |
+      The workpiece thickness.
+    $ref: "../terms-1.0.0#/definitions/workpiece-thickness"
+  alpha:
+    description: |
+      The full groove angle.
+    $ref: "../terms-1.0.0#/definitions/groove-angle"
+  b:
+    description: |
+      The root gap between both plates.
+    $ref: "../terms-1.0.0#/definitions/root-gap"
+  c:
+    description: |
+      The root face.
+    $ref: "../terms-1.0.0#/definitions/root-face"
+required: [t, alpha, b, c]
+propertyOrder: [t, alpha, b, c]
+...

@@ -55,7 +55,7 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
     """
     schema = schema.split(".yaml")[0]
 
-    p = SCHEMA_PATH
+    p = SCHEMA_PATH / ".."  # legacy_code - also look for legacy schemas
     schemas = list(p.glob(f"**/{schema}.yaml"))
     if len(schemas) == 0:
         raise ValueError(f"No matching schema for filename '{schema}'.")
@@ -518,7 +518,7 @@ def get_highest_tag_version(
     tags.sort(key=LooseVersion)
     base_tag = tags[-1].rpartition("-")[0]
     if not all(t.startswith(base_tag) for t in tags):
-        raise ValueError("Found more than one base tag for pattern.")
+        raise ValueError(f"Found more than one base tag for {pattern=}.")
     return tags[-1]
 
 

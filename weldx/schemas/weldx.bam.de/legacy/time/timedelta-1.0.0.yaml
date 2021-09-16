@@ -1,0 +1,26 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/time/timedelta-1.0.0"
+tag: "tag:weldx.bam.de:weldx/time/timedelta-1.0.0"
+
+title: |
+  Represents an instance in time.
+
+examples:
+  -
+    - A timedelta of 10 s
+    - |
+      !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+
+type: object
+properties:
+  value:
+    description: |
+      Integer representation of the timedelta full ISO format.
+    type: string
+    #pattern: TODO: correct ISO string pattern
+
+required: [value]
+propertyOrder: [value]
+...

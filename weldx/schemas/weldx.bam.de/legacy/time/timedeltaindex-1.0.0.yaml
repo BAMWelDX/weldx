@@ -1,0 +1,102 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/time/timedeltaindex-1.0.0"
+tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
+
+title: |
+  Represents an array of timedeltas following pandas.TimedeltaIndex.
+
+examples:
+  -
+    - A regular spaced timedeltaindex ranging from 0 s to 10 s with a 2 s frequency
+    - |
+      !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
+        start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+        end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+        freq: 2S
+        min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+        max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+  -
+    - An irregular timedeltaindex representing timestamps at 0 s, 4 s, 6 s and 10 s
+    - |
+      !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
+        values: !core/ndarray-1.0.0
+          data: [0, 4000000000, 6000000000, 10000000000]
+          datatype: int64
+          shape: [4]
+        start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+        end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+        min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+        max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+
+definitions:
+  values:
+    description: |
+      Integer representation of a pandas TimedeltaIndex in nanoseconds precision.
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+
+  start:
+    description: |
+      Timedelta of the first value.
+    $ref: timedelta-1.0.0
+
+  end:
+    description: |
+      Timedelta of the last value.
+    $ref: timedelta-1.0.0
+
+  freq:
+    description: |
+      Optional string to describe the frequency in pandas offset style.
+      See https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases .
+    type: string
+    # TODO: match pattern for pandas string? Maybe in pandas code?
+
+  min:
+    description: |
+      Minimum timedelta in the index.
+    $ref: timedelta-1.0.0
+
+  max:
+    description: |
+      Maximum timedelta in the index.
+    $ref: timedelta-1.0.0
+
+oneOf:
+  - type: object
+    properties:
+      values:
+        $ref: "#/definitions/values"
+      start:
+        $ref: "#/definitions/start"
+      end:
+        $ref: "#/definitions/end"
+      freq:
+        $ref: "#/definitions/freq"
+      min:
+        $ref: "#/definitions/min"
+      max:
+        $ref: "#/definitions/max"
+
+    required: [values]
+    propertyOrder: [values, start, end, freq, min, max]
+
+  - type: object
+    properties:
+      start:
+        $ref: "#/definitions/start"
+      end:
+        $ref: "#/definitions/end"
+      freq:
+        $ref: "#/definitions/freq"
+      min:
+        $ref: "#/definitions/min"
+      max:
+        $ref: "#/definitions/max"
+
+    required: [start, end, freq]
+    propertyOrder: [start, end, freq, min, max]
+...
+
+

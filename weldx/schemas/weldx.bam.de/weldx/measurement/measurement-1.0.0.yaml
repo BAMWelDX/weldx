@@ -12,14 +12,10 @@ properties:
   data:
     type: array
     items:
-      oneOf:
-        - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-        - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
+      tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
 
   measurement_chain:
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.*"
-      - tag: "tag:weldx.bam.de:weldx/measurement/measurement_chain-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-1.*"
 
 
 propertyOrder: [name, data, measurement_chain]

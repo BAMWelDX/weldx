@@ -20,15 +20,11 @@ properties:
       An array of variables that represent coordinates.
     type: array
     items:
-      oneOf:
-        - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
-        - tag: "tag:weldx.bam.de:weldx/core/variable-1.*" # legacy_tag
+      tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
   data:
     description: |
       The actual data.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/variable-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
 
 required: [attributes, coordinates, data]
 propertyOrder: [attributes, coordinates, data]
