@@ -215,7 +215,7 @@ def _prepare_list(_list, list_expected):
     return _list, list_expected
 
 
-def _is_range_format_valid(format_string: str):
+def _is_range_format_valid(format_string: str) -> bool:
     """
     Return 'True' if a string represents a valid range definition and 'False' otherwise.
 
@@ -251,12 +251,12 @@ def _validate_expected_list(list_expected):
     [1, 2, 3, 4, "5..."]
     [1, 2, 3, 4, "5(5)"]
 
-    params
-    ------
+    Parameters
+    ----------
     list_expected:
         Expected List to validate against
 
-    raises
+    Raises
     ------
     ValueError:
         ValueError will be raised if an rule violation is found
@@ -284,7 +284,7 @@ def _validate_expected_list(list_expected):
                 or not _is_range_format_valid(val.group(1))
             ):
                 raise WxSyntaxError(
-                    f'Invalid optional dimension format. Correct format is "(_)", but '
+                    f'Invalid optional dimension format. Correct format is "(~)", but '
                     f" {exp} was found."
                 )
 

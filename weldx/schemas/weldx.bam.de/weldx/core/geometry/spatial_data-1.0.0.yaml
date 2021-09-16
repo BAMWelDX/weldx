@@ -38,7 +38,7 @@ properties:
       datatype:
         type: string
         enum: [float32, float64]
-    wx_shape: [(:), 3]
+    wx_shape: [(~), 3]
   attributes:
     description: |
       An arbitrary set of attributes. For example, normals, colors or measured point data can be stored using this
@@ -52,7 +52,7 @@ properties:
       datatype:
         type: string
         enum: [uint32, uint64]
-    wx_shape: [(:), 3]
+    wx_shape: [(~), 3]
 
 propertyOrder: [coordinates, attributes, triangles]
 required: [coordinates]
