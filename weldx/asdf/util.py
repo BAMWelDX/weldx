@@ -518,7 +518,7 @@ def get_highest_tag_version(
     tags.sort(key=LooseVersion)
     base_tag = tags[-1].rpartition("-")[0]
     if not all(t.startswith(base_tag) for t in tags):
-        raise ValueError("Found more than one base tag for pattern.")
+        raise ValueError(f"Found more than one base tag for {pattern=}.")
     return tags[-1]
 
 
