@@ -2426,11 +2426,12 @@ class Geometry:
         ).tolist()
 
         tri_base = []
-        for i in range(num_profile_points - 1):
+        for i in range(num_profile_points):
             idx_0 = i
-            idx_1 = i + 1
-            idx_2 = i + num_profile_points
-            idx_3 = i + num_profile_points + 1
+            idx_1 = (i + 1) % num_profile_points
+            idx_2 = idx_0 + num_profile_points
+            idx_3 = idx_1 + num_profile_points
+
             if cw_ordering:
                 tri_base += [[idx_0, idx_2, idx_1], [idx_1, idx_2, idx_3]]
             else:
@@ -2448,16 +2449,48 @@ class Geometry:
         triangles = triangles.reshape(
             (tri_base.shape[0] * (num_profiles - 1), 3)
         ).tolist()
+
+        # closes front and back faces
+        tri_cw = []
+        tri_ccw = []
+        i_0 = 0
+        i_1 = 0
+
+        while i_0 + i_1 < num_profile_points - 2:
+            if i_1 == i_0:
+                p_0 = i_0 + offset
+                p_1 = p_0 + 1
+                p_2 = num_profile_points + offset - i_1 - 1
+                i_0 += 1
+            else:
+                p_0 = i_0 + offset
+                p_1 = num_profile_points + offset - i_1 - 2
+                p_2 = p_1 + 1
+                i_1 += 1
+            tri_cw += [[p_0, p_1, p_2]]
+            tri_ccw += [[p_0, p_2, p_1]]
+
+        if cw_ordering:
+            front = tri_cw
+            back = tri_ccw
+        else:
+            front = tri_ccw
+            back = tri_cw
+        triangles += front
+        triangles += (
+            np.array(back, int) + (num_profiles - 1) * num_profile_points
+        ).tolist()
+
         return points, triangles
 
-    def write_to_stl_file(self, file_name: str):
+    def write_to_file(self, file_name: str, profile_raster_width, trace_raster_width):
         for s in self._trace.segments:
             if isinstance(s, RadialHorizontalTraceSegment):
                 raise NotImplementedError
 
         raster_data = self._rasterize_constant_profile(
-            profile_raster_width=Q_("10mm"),
-            trace_raster_width=Q_("50mm"),
+            profile_raster_width=profile_raster_width,
+            trace_raster_width=trace_raster_width,
             stack=False,
         )
         points = []
@@ -2471,54 +2504,7 @@ class Geometry:
             points += shape_points
             triangles += shape_triangle
 
-        # sd = SpatialData(points, triangles).plot()
-        # import matplotlib.pyplot as plt
-
-        # plt.show()
         SpatialData(points, triangles).write_to_file(file_name)
-
-        # raster_data = np.array(
-        #    self._rasterize_constant_profile(
-        #        profile_raster_width=Q_("10mm"),
-        #        trace_raster_width=Q_("50mm"),
-        #        stack=False,
-        #    )
-        # ).swapaxes(2, 3)
-        # num_shapes = raster_data.shape[0]
-        # num_profiles = raster_data.shape[1]
-        # num_profile_points = raster_data.shape[2]
-
-        # shape_points = raster_data.reshape(
-        #    (
-        #        num_shapes,
-        #        num_profiles * num_profile_points,
-        #        raster_data.shape[3],
-        #    )
-        # )
-
-        # triangle_base = [[]]
-        # for i in range(num_shapes):
-        #    tri_base = [[]]
-        # iterate over shapes
-        # for si in range(raster_data.shape[0]):
-        #    srd = raster_data[si]
-        #    s_points = srd.reshape((srd.shape[0] * srd.shape[1], 3))
-        #    print(srd)
-        #    print(srd.shape)
-
-        for shape in self._profile.shapes:
-            r = shape.rasterize(Q_("1mm"))
-            # print(r)
-            print(shape.is_polygon_winding_order_cw())
-
-        # location = 0
-        # data = self._get_local_profile_data(location, Q_("10mm"))
-        # print(data)
-        # for s in self._trace.segments:
-        #    self._get_local_profile_data()
-
-        # print(self._trace.num_segments)
-        # print(pr)
 
 
 # SpatialData --------------------------------------------------------------------------
