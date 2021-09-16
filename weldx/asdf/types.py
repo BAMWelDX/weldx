@@ -88,7 +88,7 @@ class WeldxConverterMeta(type(Converter)):
         cls.to_yaml_tree = to_yaml_tree_metadata(cls.to_yaml_tree)
         cls.from_yaml_tree = from_yaml_tree_metadata(cls.from_yaml_tree)
 
-        for tag in copy(cls.tags):
+        for tag in copy(cls.tags):  # legacy_code
             if tag.startswith("asdf://weldx.bam.de/weldx/tags/"):
                 cls.tags.append(_legacy_tag_from_new_tag(tag))
 

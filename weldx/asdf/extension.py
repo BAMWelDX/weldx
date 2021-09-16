@@ -5,6 +5,7 @@ from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
 
 from .constants import (
+    LEGACY_SCHEMA_PATH,
     MANIFEST_PATH,
     SCHEMA_PATH,
     WELDX_EXTENSION_URI,
@@ -42,10 +43,10 @@ def get_schema_resource_mapping() -> DirectoryResourceMapping:
 
 
 def get_legacy_resource_mapping() -> DirectoryResourceMapping:
-    """Get the weldx schema resource mapping."""
+    """Get the weldx schema leacy resource mapping."""
     mapping = DirectoryResourceMapping(
-        SCHEMA_PATH,
-        "tag:weldx.bam.de:weldx",
+        LEGACY_SCHEMA_PATH,
+        "http://weldx.bam.de/schemas/weldx/",
         recursive=True,
         filename_pattern="*.yaml",
         stem_filename=True,

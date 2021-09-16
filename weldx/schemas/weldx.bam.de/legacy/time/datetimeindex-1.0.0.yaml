@@ -1,0 +1,90 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/time/datetimeindex-1.0.0"
+tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0"
+
+title: |
+  Represents an array of timestamps following pandas.DatetimeIndex.
+
+examples:
+  -
+    - A regular datetimeindex starting at 2020-01-01 and a 1 day interval till 2020-01-06
+    - |
+      !<tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0>
+        start: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T00:00:00'}
+        end: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-05T00:00:00'}
+        freq: D
+        min: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T00:00:00'}
+        max: !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-05T00:00:00'}
+
+definitions:
+  values:
+    description: |
+      Integer representation of a pandas DatetimeIndex in nanoseconds precision.
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+
+  start:
+    description: |
+      Timedelta of the first value.
+    $ref: timestamp-1.0.0
+
+  end:
+    description: |
+      Timestamp of the last value.
+    $ref: timestamp-1.0.0
+
+  freq:
+    description: |
+      Optional string to describe the frequency in pandas offset style.
+      See https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases .
+    type: string
+    # TODO: match pattern for pandas string? Maybe in pandas code?
+
+  min:
+    description: |
+      Minimum timestamp in the index.
+    $ref: timestamp-1.0.0
+
+  max:
+    description: |
+      Maximum timestamp in the index.
+    $ref: timestamp-1.0.0
+
+oneOf:
+  - type: object
+    properties:
+      values:
+        $ref: "#/definitions/values"
+      start:
+        $ref: "#/definitions/start"
+      end:
+        $ref: "#/definitions/end"
+      freq:
+        $ref: "#/definitions/freq"
+      min:
+        $ref: "#/definitions/min"
+      max:
+        $ref: "#/definitions/max"
+
+    required: [values]
+    propertyOrder: [values, start, end, freq, min, max]
+
+  - type: object
+    properties:
+      start:
+        $ref: "#/definitions/start"
+      end:
+        $ref: "#/definitions/end"
+      freq:
+        $ref: "#/definitions/freq"
+      min:
+        $ref: "#/definitions/min"
+      max:
+        $ref: "#/definitions/max"
+
+    required: [start, end, freq]
+    propertyOrder: [start, end, freq, min, max]
+...
+
+

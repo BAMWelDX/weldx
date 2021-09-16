@@ -1,0 +1,66 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/unit/dimension-1.0.0"
+tag: "tag:weldx.bam.de:weldx/unit/dimension-1.0.0"
+
+title: |
+  Describes the dimension of a quantity.
+type: object
+properties:
+  name:
+    description: |
+      String representation of the dimension.
+      Names follow https://github.com/hgrecco/pint/blob/master/pint/default_en.txt
+    type: string
+    enum:
+      - length
+      - time
+      - current
+      - luminosity
+      - mass
+      - substance
+      - temperature
+      - area
+      - volume
+      - frequency
+      - wavenumber
+      - velocity
+      - acceleration
+      - force
+      - energy
+      - power
+      - density
+      - pressure
+      - torque
+      - viscosity
+      - kinematic_viscosity
+      - fluidity
+      - concentration
+      - activity
+      - entropy
+      - molar_entropy
+      - heat_transmission
+      - luminance
+      - luminous_flux
+      - illuminance
+      - intensity
+      - charge
+      - electric_potential
+      - electric_field
+      - electric_displacement_field
+      - resistance
+      - resistivity
+      - conductance
+      - capacitance
+      - inductance
+      - magnetic_flux
+      - magnetic_field
+      - magnetomotive_force
+      - magnetic_field_strength
+      - electric_dipole
+      - electric_quadrupole
+      - magnetic_dipole
+
+required: [name]
+...

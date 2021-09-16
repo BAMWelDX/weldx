@@ -1,0 +1,61 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/design/joint_penetration-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/design/joint_penetration-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  Various dimensions of penetration of the weld into the base materials
+type: object
+properties:
+  complete_or_partial:
+    description: |
+      The weld design calls for partial or complete penetration.
+    type: string
+    enum:
+      - completePenetration
+      - partialPenetration
+
+  root_penetration:
+    description: |
+      The distance the weld metal extends into the root joint
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+
+  groove_weld_size:
+    description: |
+      The joint penetration of a groove weld
+    type: number
+
+  incomplete_joint_penetration:
+    description: |
+      See AWS A3.0 definition, and Figure 26 - "Joint Penetration...", Figure 30 - Fusion Welds
+    type: number
+
+  weld_size:
+    description: |
+      See AWS A3.0 definition, and Figure 26 - "Joint Penetration...", Figure 30 - Fusion Welds
+    type: number
+
+  weld_size_E1:
+    description: |
+      See AWS A3.0 definition, and Figure 26 - "Joint Penetration...", Figure 30 - Fusion Welds
+    type: number
+
+  weld_size_E2:
+    description: |
+      See AWS A3.0 definition, and Figure 26 - "Joint Penetration...", Figure 30 - Fusion Welds
+    type: number
+
+  depth_of_fusion:
+    description: |
+      The distance that fusion extends into the base metal or the previous bead from the surface melted during welding
+    type: number
+
+
+
+required: [complete_or_partial, root_penetration]
+propertyOrder: [complete_or_partial, root_penetration, groove_weld_size, incomplete_joint_penetration, weld_size, weld_size_E1, weld_size_E2, depth_of_fusion]
+flowStyle: block
+...

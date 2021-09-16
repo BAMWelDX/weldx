@@ -1,0 +1,56 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/coordinate_transformation-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
+
+title: |
+  Schema that describes the transformation between 2 coordinate systems.
+description: |
+  TODO
+
+examples:
+  -
+    - A uniform coordinate transformation between a "base" and a "workpiece" system.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
+        name: workpiece
+        reference_system: base
+        transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0> {}
+  -
+    - |
+      A coordinate transformation describing a constant offset of -10 mm in z-direction between
+      the "tcp_wire" and "tcp_contact" systems
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0>
+        name: tcp_contact
+        reference_system: tcp_wire
+        transformation: !<tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0>
+          coordinates: !<tag:weldx.bam.de:weldx/core/variable-1.0.0>
+            name: coordinates
+            dimensions: [c]
+            dtype: <f8
+            data: !core/ndarray-1.0.0
+              data: [0.0, 0.0, -10.0]
+              datatype: float64
+              shape: [3]
+
+type: object
+properties:
+  name:
+    description: |
+      Name of the coordinate system
+    type: string
+  reference_system:
+    description: |
+      Name of the parent system
+    type: string
+  transformation:
+    description: |
+      Data that describes the orientation and position of the coordinate system towards its parent system.
+    tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.0.0"
+
+propertyOrder: [name, reference_system, transformation]
+required: [name, reference_system, transformation]
+flowStyle: block
+...
