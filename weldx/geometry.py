@@ -14,6 +14,7 @@ from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.util as ut
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -1067,6 +1068,38 @@ class Shape:
         """
         for i in range(self.num_segments):
             self._segments[i].apply_translation(vector)
+
+    @property
+    def polygon(self) -> np.array:
+        """Return the points of a polygon formed by the segment start and end points."""
+        end_points = [s.point_end for s in self.segments]
+        return np.array([self.segments[0].point_start, *end_points])
+
+    def is_polygon_winding_order_cw(self) -> bool:
+        """Return `True` if the winding order of the shapes polygon is clockwise.
+
+        Returns
+        -------
+        bool :
+            `True` if the winding order of the shapes polygon is clockwise and `False`
+            otherwise
+
+        Notes
+        -----
+            The algorithm was taken from the following Stack Overflow answer:
+            https://stackoverflow.com/a/1165943/6700329
+
+        """
+        polygon_sum = sum(
+            [
+                (s.point_end[0] - s.point_start[0])
+                * (s.point_end[1] + s.point_start[1])
+                for s in self.segments
+            ]
+        )
+        if polygon_sum < 0:
+            return False
+        return True
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def rasterize(self, raster_width) -> np.ndarray:
@@ -2376,6 +2409,32 @@ class Geometry:
             profile_raster_width, trace_raster_width, stack=False
         )
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
+
+    def write_to_stl_file(self, file_name: str):
+        if isinstance(self._profile, VariableProfile):
+            raise NotImplementedError
+        for s in self._trace.segments:
+            if isinstance(s, RadialHorizontalTraceSegment):
+                raise NotImplementedError
+
+        for shape in self._profile.shapes:
+            # todo: Make shape function
+            polygon = np.array(
+                [
+                    shape.segments[0].point_start,
+                    *[s.point_end for s in shape.segments],
+                ]
+            )
+            print(shape.is_polygon_winding_order_cw())
+
+        # location = 0
+        # data = self._get_local_profile_data(location, Q_("10mm"))
+        # print(data)
+        # for s in self._trace.segments:
+        #    self._get_local_profile_data()
+
+        # print(self._trace.num_segments)
+        # print(pr)
 
 
 # SpatialData --------------------------------------------------------------------------
