@@ -10,15 +10,15 @@ examples:
   -
     - A timestamp representing the date 2020-01-01 12:00:00 (without timezone information)
     - |
-      !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-01-01T00:00:00'}
+      !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-01-01T00:00:00'}
   -
     - A timestamp representing the date 2020-01-01 12:00:00 in UTC time
     - |
-      !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-01-01T12:00:00+00:00'}
+      !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-01-01T12:00:00+00:00'}
   -
     - A timestamp representing the date 2020-01-01 12:00:00 in CET time
     - |
-      !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2020-01-01T12:00:00+01:00'}
+      !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-01-01T12:00:00+01:00'}
 
 type: object
 properties:

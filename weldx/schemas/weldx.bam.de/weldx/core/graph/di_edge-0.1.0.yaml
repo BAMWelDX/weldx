@@ -12,16 +12,16 @@ examples:
   -
     - An edge pointing to node A.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-0.1.0>
         direction: fwd
-        target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+        target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
           name: A
   -
     - An edge pointing from node B.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-0.1.0>
         direction: bwd
-        target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+        target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
           name: B
 
 type: object

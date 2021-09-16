@@ -12,19 +12,19 @@ examples:
   -
     - A simple analog-digital conversion without a function that affects the signal values
     - |
-      !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-0.1.0>
         name: AD conversion
-        error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+        error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
           deviation: !unit/quantity-1.1.0 { unit: percent, value: 0.5 }
         type_transformation: AD
   -
     - A transformation that calculates amperes based on volts using a given function
     - |
-      !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-0.1.0>
         name: Volt-Ampere-Conversion
-        error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-1.0.0>
+        error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
           deviation: !unit/quantity-1.1.0 { unit: percent, value: 1.5 }
-        func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
+        func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
           expression: a*x + b
           parameters:
             a: !unit/quantity-1.1.0 { unit: ampere / volt, value: 3 }

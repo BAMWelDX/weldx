@@ -13,12 +13,12 @@ examples:
   -
     - A shielding gas mixture of 82% argon and 18% CO2.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_type-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_type-0.1.0>
         gas_component:
-        - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
+        - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
           gas_chemical_name: argon
           gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
-        - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
+        - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
           gas_chemical_name: carbon dioxide
           gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
         common_name: SG
@@ -29,7 +29,7 @@ properties:
       A single gas element.
     type: array
     items:
-      $ref: gas_component-1.0.0
+      $ref: gas_component-0.1.0
 
   common_name:
     description: |

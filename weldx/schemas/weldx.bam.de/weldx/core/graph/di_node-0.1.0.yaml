@@ -10,23 +10,23 @@ examples:
   -
     - A simple node without any child edges.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
         name: A
   -
     - A simple node without any child edges and a simple attribute.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
         name: A
         attributes: {node_attr: 3.14}
   -
     - A node with one child node.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
         name: A
         edges:
-        - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+        - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-0.1.0>
           direction: fwd
-          target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+          target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
             name: B
 
 type: object

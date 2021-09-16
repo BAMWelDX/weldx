@@ -10,34 +10,34 @@ examples:
   -
     - A single timedelta of 2 seconds
     - |
-      !<asdf://weldx.bam.de/weldx/tags/time/time-1.0.0>
-        values: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M2S}
+      !<asdf://weldx.bam.de/weldx/tags/time/time-0.1.0>
+        values: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M2S}
   -
     - A timedelta series from 0 s to 4 s with a 2 s frequency
     - |
-      !<asdf://weldx.bam.de/weldx/tags/time/time-1.0.0>
-        values: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
-            start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-            end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M4S}
+      !<asdf://weldx.bam.de/weldx/tags/time/time-0.1.0>
+        values: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
+            start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
+            end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M4S}
             freq: 2S
-            min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-            max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M4S}
+            min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
+            max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M4S}
   -
     - A single timestamp
     - |
-      !<asdf://weldx.bam.de/weldx/tags/time/time-1.0.0>
-        values: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-08-01T00:00:00'}
+      !<asdf://weldx.bam.de/weldx/tags/time/time-0.1.0>
+        values: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2021-08-01T00:00:00'}
   -
     - An absolute time index with a 1 s frequency
     - |
-      !<asdf://weldx.bam.de/weldx/tags/time/time-1.0.0>
-        values: !<asdf://weldx.bam.de/weldx/tags/time/datetimeindex-1.0.0>
-          start: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:00'}
-          end: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:02'}
+      !<asdf://weldx.bam.de/weldx/tags/time/time-0.1.0>
+        values: !<asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.0>
+          start: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2021-01-01T00:00:00'}
+          end: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2021-01-01T00:00:02'}
           freq: S
-          min: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:00'}
-          max: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:02'}
-        reference_time: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:00'}
+          min: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2021-01-01T00:00:00'}
+          max: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2021-01-01T00:00:02'}
+        reference_time: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2021-01-01T00:00:00'}
 
 type: object
 properties:

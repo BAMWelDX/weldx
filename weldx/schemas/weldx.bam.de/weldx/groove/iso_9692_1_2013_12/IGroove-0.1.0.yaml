@@ -10,7 +10,7 @@ examples:
   -
     - A simple I-Groove
     - |
-      !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/IGroove-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/IGroove-0.1.0>
         t: !unit/quantity-1.1.0 {unit: millimeter, value: 4}
         b: !unit/quantity-1.1.0 {unit: millimeter, value: 4}
         code_number: [1.2.1, 1.2.2, '2.1']
@@ -18,9 +18,9 @@ examples:
 type: object
 properties:
   t:
-    $ref: "../terms-1.0.0#/definitions/workpiece-thickness"
+    $ref: "../terms-0.1.0#/definitions/workpiece-thickness"
   b:
-    $ref: "../terms-1.0.0#/definitions/root-gap"
+    $ref: "../terms-0.1.0#/definitions/root-gap"
 required: [t, b]
 propertyOrder: [t, b]
 ...

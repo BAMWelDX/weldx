@@ -12,7 +12,7 @@ examples:
   -
     - A single argon gas component
     - |
-      !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
         gas_chemical_name: argon
         gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
 

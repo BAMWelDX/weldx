@@ -10,7 +10,7 @@ examples:
   -
     - A timedelta of 10 s
     - |
-      !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+      !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
 
 type: object
 properties:

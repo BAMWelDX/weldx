@@ -15,7 +15,7 @@ examples:
   -
     - A linear mathematical expression
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
         expression: a*x + b
         parameters:
           a: !unit/quantity-1.1.0 {unit: volt, value: 1.2}

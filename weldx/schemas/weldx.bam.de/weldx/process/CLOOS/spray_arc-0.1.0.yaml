@@ -7,7 +7,7 @@ title: |
   CLOOS spray arc process.
 
 allOf:
-  - $ref: "../generic-1.0.0#/spray"
+  - $ref: "../generic-0.1.0#/spray"
   - type: object
     properties:
       parameters:

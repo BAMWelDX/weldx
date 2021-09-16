@@ -8,6 +8,6 @@ title: |
 
 spray:
   allOf:
-    - $ref: "./terms-1.0.0#/base_process"
-    - $ref: "./terms-1.0.0#/process/spray"
+    - $ref: "./terms-0.1.0#/base_process"
+    - $ref: "./terms-0.1.0#/process/spray"
 ...

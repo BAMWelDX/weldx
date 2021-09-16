@@ -14,12 +14,12 @@ properties:
       Describes a piece of metal, its materials and geometries.
     type: array
     items:
-      $ref: workpiece-1.0.0
+      $ref: workpiece-0.1.0
 
   connection:
     description: |
       The joint formed by edge preparation of two workpieces and the weld that joins the workpieces together.
-    $ref: connection-1.0.0
+    $ref: connection-0.1.0
 
 
 

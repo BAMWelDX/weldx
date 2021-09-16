@@ -12,14 +12,14 @@ examples:
   -
     - A shielding gas mixture of 82% argon and 18% CO2 with 20 l/min flowrate.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-0.1.0>
           use_torch_shielding_gas: true
-          torch_shielding_gas: !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_type-1.0.0>
+          torch_shielding_gas: !<asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_type-0.1.0>
             gas_component:
-            - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
+            - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
               gas_chemical_name: argon
               gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
-            - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-1.0.0>
+            - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
               gas_chemical_name: carbon dioxide
               gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
             common_name: SG
@@ -35,7 +35,7 @@ properties:
   torch_shielding_gas:
     description: |
       Composition of shielding gas expelled from a nozzle in the welding torch.
-    $ref: shielding_gas_type-1.0.0
+    $ref: shielding_gas_type-0.1.0
 
   torch_shielding_gas_flowrate:
     description: |
@@ -52,7 +52,7 @@ properties:
   backing_gas:
     description: |
       Specification of the component gases of the mixture.
-    $ref: shielding_gas_type-1.0.0
+    $ref: shielding_gas_type-0.1.0
 
   backing_gas_flowrate:
     description: |
@@ -69,7 +69,7 @@ properties:
   trailing_shielding_gas:
     description: |
       Composition or identification of trailing gas.
-    $ref: shielding_gas_type-1.0.0
+    $ref: shielding_gas_type-0.1.0
 
   trailing_shielding_gas_flowrate:
     description: |

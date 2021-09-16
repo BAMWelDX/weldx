@@ -12,14 +12,14 @@ examples:
   -
     - A time_series describing a constant value in time.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
         unit: millimeter / second
         value: 10.0
   -
     - A time_series describing a sine oscillation in 3d space along the z-axis
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0>
-        expression: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
+        expression: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
           expression: a*sin(o*t + p) + b
           parameters:
             a: !unit/quantity-1.1.0

@@ -13,7 +13,7 @@ examples:
   -
     - A version 4 UUID string
     - |
-      !<asdf://weldx.bam.de/weldx/tags/uuid-1.0.0> 448414c4-da7a-4832-9219-5e6042c2e96e
+      !<asdf://weldx.bam.de/weldx/tags/uuid-0.1.0> 448414c4-da7a-4832-9219-5e6042c2e96e
 
 
 type: string

@@ -12,8 +12,8 @@ examples:
   -
     - A constant transformation describing a translation of 1 mm into the z direction
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-        coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
+        coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
           name: coordinates
           dimensions: [c]
           dtype: <f8
@@ -26,17 +26,17 @@ examples:
       A time dependent transformation describing a linear movement from 5 mm to 295 mm
       over 20 seconds along the x-axis direction.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-        time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
+        time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
           values: !core/ndarray-1.0.0
             data: [0, 20000000000]
             datatype: int64
             shape: [2]
-          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M20S}
-          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M20S}
-        coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
+          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M20S}
+          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
+          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M20S}
+        coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
           name: coordinates
           dimensions: [time, c]
           dtype: <f8
@@ -49,8 +49,8 @@ examples:
   -
     - A static transformation describing an euler rotation of 45 degree around the x-axis.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-        orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
+        orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
           name: orientations
           dimensions: [c, v]
           dtype: <f8
@@ -66,17 +66,17 @@ examples:
       A time dependent transformation describing an euler rotation around the y-axis from 0 degree to 120 degree
       over 20 seconds.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-        time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
+        time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
           values: !core/ndarray-1.0.0
             data: [0, 20000000000]
             datatype: int64
             shape: [2]
-          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M20S}
-          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M20S}
-        orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
+          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M20S}
+          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
+          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M20S}
+        orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
           name: orientations
           dimensions: [time, c, v]
           dtype: <f8

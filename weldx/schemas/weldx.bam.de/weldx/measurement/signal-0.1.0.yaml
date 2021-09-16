@@ -11,13 +11,13 @@ examples:
   -
     - A signal representing an analog voltage measurement without data.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
         signal_type: analog
         unit: V
   -
     - A digital dimensionless signal.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/measurement/signal-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
         signal_type: digital
         unit: ''
 

@@ -14,7 +14,7 @@ properties:
       A list of assemblies composing the weldment
     type: array
     items:
-      $ref: sub_assembly-1.0.0
+      $ref: sub_assembly-0.1.0
 
 
 

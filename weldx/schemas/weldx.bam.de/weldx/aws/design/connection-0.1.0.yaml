@@ -60,12 +60,12 @@ properties:
   joint_penetration:
     description: |
       joint_penetration
-    $ref: joint_penetration-1.0.0
+    $ref: joint_penetration-0.1.0
 
   weld_details:
     description: |
       weld_details
-    $ref: weld_details-1.0.0
+    $ref: weld_details-0.1.0
 
 
 

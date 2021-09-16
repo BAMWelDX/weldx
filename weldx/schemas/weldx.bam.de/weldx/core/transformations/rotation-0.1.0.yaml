@@ -12,7 +12,7 @@ examples:
   -
     - A "xyz" euler rotation with 10, 20 and 60 degree angles as euler representation.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.0>
         angles: !unit/quantity-1.1.0
           unit: degree
           value: !core/ndarray-1.0.0
@@ -23,7 +23,7 @@ examples:
   -
     - The quaternion rotation representation
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.0>
         quaternions: !core/ndarray-1.0.0
           data: [-0.012161306594124677, 0.19272730326230897, 0.4774233251326969, 0.8571903276509837]
           datatype: float64
@@ -31,7 +31,7 @@ examples:
   -
     - The matrix rotation representation.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.0>
         matrix: !core/ndarray-1.0.0
           data:
           - [0.46984631039295427, -0.8231729446455007, 0.3187957775971679]
@@ -42,7 +42,7 @@ examples:
   -
     - The rotation vector representation.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-1.0.0>
+      !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.0>
         rotvec: !core/ndarray-1.0.0
           data: [-0.02555091083053722, 0.404920154109444, 1.0030666289407963]
           datatype: float64
