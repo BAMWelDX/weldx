@@ -2410,21 +2410,105 @@ class Geometry:
         )
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
-    def write_to_stl_file(self, file_name: str):
+    def _shape_points_and_triangles(
+        self, shape_raster_data: np.array, offset: int, cw_ordering: bool
+    ):
         if isinstance(self._profile, VariableProfile):
             raise NotImplementedError
+
+        shape_raster_data = shape_raster_data.swapaxes(1, 2)
+
+        num_profiles = shape_raster_data.shape[0]
+        num_profile_points = shape_raster_data.shape[1]
+
+        points = shape_raster_data.reshape(
+            (num_profiles * num_profile_points, 3)
+        ).tolist()
+
+        tri_base = []
+        for i in range(num_profile_points - 1):
+            idx_0 = i
+            idx_1 = i + 1
+            idx_2 = i + num_profile_points
+            idx_3 = i + num_profile_points + 1
+            if cw_ordering:
+                tri_base += [[idx_0, idx_2, idx_1], [idx_1, idx_2, idx_3]]
+            else:
+                tri_base += [[idx_0, idx_1, idx_2], [idx_1, idx_3, idx_2]]
+
+        tri_base = np.array(tri_base, dtype=int)
+        triangles = np.array(
+            [
+                tri_base + i * num_profile_points + offset
+                for i in range(num_profiles - 1)
+            ],
+            dtype=int,
+        )
+
+        triangles = triangles.reshape(
+            (tri_base.shape[0] * (num_profiles - 1), 3)
+        ).tolist()
+        return points, triangles
+
+    def write_to_stl_file(self, file_name: str):
         for s in self._trace.segments:
             if isinstance(s, RadialHorizontalTraceSegment):
                 raise NotImplementedError
 
-        for shape in self._profile.shapes:
-            # todo: Make shape function
-            polygon = np.array(
-                [
-                    shape.segments[0].point_start,
-                    *[s.point_end for s in shape.segments],
-                ]
+        raster_data = self._rasterize_constant_profile(
+            profile_raster_width=Q_("10mm"),
+            trace_raster_width=Q_("50mm"),
+            stack=False,
+        )
+        points = []
+        triangles = []
+        for i, shape_raster_data in enumerate(raster_data):
+            shape_points, shape_triangle = self._shape_points_and_triangles(
+                shape_raster_data,
+                len(points),
+                self.profile.shapes[i].is_polygon_winding_order_cw(),
             )
+            points += shape_points
+            triangles += shape_triangle
+
+        # sd = SpatialData(points, triangles).plot()
+        # import matplotlib.pyplot as plt
+
+        # plt.show()
+        SpatialData(points, triangles).write_to_file(file_name)
+
+        # raster_data = np.array(
+        #    self._rasterize_constant_profile(
+        #        profile_raster_width=Q_("10mm"),
+        #        trace_raster_width=Q_("50mm"),
+        #        stack=False,
+        #    )
+        # ).swapaxes(2, 3)
+        # num_shapes = raster_data.shape[0]
+        # num_profiles = raster_data.shape[1]
+        # num_profile_points = raster_data.shape[2]
+
+        # shape_points = raster_data.reshape(
+        #    (
+        #        num_shapes,
+        #        num_profiles * num_profile_points,
+        #        raster_data.shape[3],
+        #    )
+        # )
+
+        # triangle_base = [[]]
+        # for i in range(num_shapes):
+        #    tri_base = [[]]
+        # iterate over shapes
+        # for si in range(raster_data.shape[0]):
+        #    srd = raster_data[si]
+        #    s_points = srd.reshape((srd.shape[0] * srd.shape[1], 3))
+        #    print(srd)
+        #    print(srd.shape)
+
+        for shape in self._profile.shapes:
+            r = shape.rasterize(Q_("1mm"))
+            # print(r)
             print(shape.is_polygon_winding_order_cw())
 
         # location = 0
