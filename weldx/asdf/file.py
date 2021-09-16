@@ -18,7 +18,7 @@ from jsonschema import ValidationError
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 from weldx.util import inherit_docstrings
 
-from .util import get_schema_path, get_yaml_header, view_tree
+from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 
 __all__ = [
     "WeldxFile",
@@ -52,6 +52,22 @@ DEFAULT_ARRAY_COPYING = True
 @inherit_docstrings
 class WeldxFile(UserDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
+
+    The WeldxFile class makes it easy to work with ASDF files. Creating, validating,
+    and updating data is handled by just treating the WeldxFile object as a dictionary.
+    Every piece of data is accessible via a key, while the keys should be strings,
+    the data can be any Python object.
+
+    Creation is being done by just creating a WeldxFile with or without a filename.
+    Operation without filenames is of course non-persitant, meaning that your changes
+    will be lost upon the end of your Python session.
+
+    You can decide, whether you want to open your file with read-only (default) or
+    read and write mode. This is mainly a safety precaution, in order not to overwrite
+    or manipulate existing data by accident.
+
+    For a brief introduction into the features of this class, please have a look at the
+    :doc:`tutorial <../tutorials/weldxfile>` or the examples given here.
 
     Parameters
     ----------
@@ -93,6 +109,54 @@ class WeldxFile(UserDict):
         When `False`, when reading files, attempt to memory map (memmap) underlying data
         arrays when possible. This avoids blowing the memory when working with very
         large datasets.
+
+    Examples
+    --------
+    We define a simple data set and store it in a WeldxFile.
+
+    >>> data = {"name": "CXCOMP", "value": 42}
+    >>> wx = WeldxFile(tree=data)
+
+    If we want to persist the WeldxFile to a file on hard drive we invoke:
+
+    >>> wx2 = WeldxFile("output.wx", tree=data, mode="rw")
+
+    Or we can store the previously created file to disk:
+
+    >>> wx.write_to("output2.wx")
+    'output2.wx'
+
+    If we omit the filename, we receive an in-memory file. This is useful to create
+    quick copies without the need for physical files.
+
+    >>> wx.write_to()  # doctest: +ELLIPSIS
+    <_io.BytesIO object at 0x...>
+
+    We can also read a data set from disk and manipulate it in a dictionary like manner.
+
+    >>> with WeldxFile("output.wx", mode="rw") as wx:
+    ...    wx["name"] = "changed"
+
+    If a file name is omitted, we operate only in memory.
+
+    We can have a look at the serialized data by looking at the asdf header
+
+    >>> wx2.show_asdf_header()  # doctest: +ELLIPSIS,+NORMALIZE_WHITESPACE
+    #ASDF 1.0.0
+    #ASDF_STANDARD 1.5.0
+    %YAML 1.1
+    %TAG ! tag:stsci.edu:asdf/
+    --- !core/asdf-1.1.0
+    asdf_library: !core/software-1.0.0 {author: The ASDF Developers, homepage: 'http://github.com/asdf-format/asdf',
+      name: asdf, version: ...}
+    history:
+      extensions:
+      - !core/extension_metadata-1.0.0
+        extension_class: asdf.extension.BuiltinExtension
+        software: !core/software-1.0.0 {name: asdf, version: ...}
+    name: CXCOMP
+    value: 42
+    <BLANKLINE>
 
     """
 
