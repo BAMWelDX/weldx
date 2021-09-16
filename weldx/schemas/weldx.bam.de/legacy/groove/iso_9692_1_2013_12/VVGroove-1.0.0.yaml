@@ -1,0 +1,39 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1_2013_12/VVGroove-1.0.0"
+tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VVGroove-1.0.0"
+
+title: |
+  VVGroove representation.
+
+examples:
+  -
+    - A simple VV-Groove
+    - |
+      !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VVGroove-1.0.0>
+        t: !unit/quantity-1.1.0 {unit: millimeter, value: 12}
+        alpha: !unit/quantity-1.1.0 {unit: degree, value: 70}
+        beta: !unit/quantity-1.1.0 {unit: degree, value: 13}
+        b: !unit/quantity-1.1.0 {unit: millimeter, value: 3}
+        c: !unit/quantity-1.1.0 {unit: millimeter, value: 1}
+        h: !unit/quantity-1.1.0 {unit: millimeter, value: 5}
+        code_number: ['1.7']
+
+type: object
+properties:
+  t:
+    $ref: "../terms-1.0.0#/definitions/workpiece-thickness"
+  alpha:
+    $ref: "../terms-1.0.0#/definitions/groove-angle"
+  beta:
+    $ref: "../terms-1.0.0#/definitions/bevel-angle"
+  b:
+    $ref: "../terms-1.0.0#/definitions/root-gap"
+  c:
+    $ref: "../terms-1.0.0#/definitions/root-face"
+  h:
+    $ref: "../terms-1.0.0#/definitions/root-face"
+required: [t, alpha, beta, b, c, h]
+propertyOrder: [t, alpha, beta, b, c, h]
+...

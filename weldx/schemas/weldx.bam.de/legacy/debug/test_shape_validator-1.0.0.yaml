@@ -1,0 +1,76 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/debug/test_shape_validator-1.0.0"
+tag: "tag:weldx.bam.de:weldx/debug/test_shape_validator-1.0.0"
+
+title: |
+  simple demonstration and test schema for wx_shape validator syntax
+type: object
+properties:
+  prop1:
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape: [1,2,(3),(4)]
+
+  prop2:
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape: [~,2,1]
+
+  prop3:
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape: [2,4,6,8,...]
+
+  prop4:
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape: [~,3,5,7,9]
+
+  prop5:
+    type: number
+    wx_shape: [1]
+
+  quantity:
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_shape: [1]
+
+  timeseries:
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_shape: [1]
+
+  nested_prop:
+    type: object
+    properties:
+      p1:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [10,8,6,4,2]
+      p2:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [9,7,5,3,1]
+
+  time_prop:
+    oneOf:
+      - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/time/datetimeindex-1.0.0"
+
+  optional_prop:
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape: [1,2,(3),(4)]
+
+
+
+required: [prop1, prop2, prop3, prop4, quantity, timeseries, nested_prop, time_prop]
+propertyOrder: [prop1,prop2,prop3,prop4,nested_prop,optional_prop]
+flowStyle: block
+additionalProperties: true
+wx_shape:
+  prop1: [(~),2,n]
+  prop2: [n,2,1]
+  prop3: [2,4,5~7,...]
+  prop4: [a,3,5,k,m]
+  prop5: [a]
+  nested_prop:
+    p1: [10,1~10,6,4,2]
+    p2: [(m),7,5,3,1]
+    (p3): [a,2,n]
+  time_prop: [m]
+  (optional_prop): [a,2,n]
+...

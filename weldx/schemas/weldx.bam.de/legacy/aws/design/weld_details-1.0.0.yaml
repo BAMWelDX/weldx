@@ -1,0 +1,35 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/design/weld_details-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/design/weld_details-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  Information describing the joint and the geometric parameters of the designed weld.
+type: object
+properties:
+  joint_design:
+    description: |
+      AWS 3.0, p. 19 : "Detailed Description of mating configuration of two components, sufficient information for shop preparation of the components." TODO CLASS
+    oneOf:
+      - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/VGroove-1.0.0"
+      - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/UGroove-1.0.0"
+
+  weld_sizes:
+    description: |
+      Linear dimensions of cross sectional weld features. Sizes are of design and actual features. TODO CLASS
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+
+  number_of_passes:
+    description: |
+      Number of times needed to deposit weld metal to complete the weld.
+    type: integer
+
+
+
+required: [joint_design, weld_sizes, number_of_passes]
+propertyOrder: [joint_design, weld_sizes, number_of_passes]
+flowStyle: block
+...

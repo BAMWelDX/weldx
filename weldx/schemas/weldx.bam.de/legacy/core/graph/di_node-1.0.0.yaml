@@ -1,0 +1,47 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/graph/di_node-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0"
+
+title: |
+  Node of a directed graph.
+
+examples:
+  -
+    - A simple node without any child edges.
+    - |
+      !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+        name: A
+  -
+    - A simple node without any child edges and a simple attribute.
+    - |
+      !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+        name: A
+        attributes: {node_attr: 3.14}
+  -
+    - A node with one child node.
+    - |
+      !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+        name: A
+        edges:
+        - !<tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0>
+          direction: fwd
+          target_node: !<tag:weldx.bam.de:weldx/core/graph/di_node-1.0.0>
+            name: B
+
+type: object
+properties:
+  name:
+    oneOf:
+      - type: string
+      - tag: "tag:weldx.bam.de:weldx/uuid-1.0.0"
+  edges:
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/core/graph/di_edge-1.0.0"
+  attributes:
+    type: object
+
+propertyOrder: [name, attributes, edges]
+...

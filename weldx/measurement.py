@@ -8,7 +8,7 @@ from warnings import warn
 
 from networkx import draw, draw_networkx_edge_labels
 
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
 
@@ -220,7 +220,7 @@ class MeasurementChain:
         self,
         name: str,
         source: SignalSource,
-        signal_data: "TimeSeries" = None,
+        signal_data: TimeSeries = None,
     ):
         """Create a new measurement chain.
 
@@ -370,7 +370,7 @@ class MeasurementChain:
         source_error: Error,
         output_signal_type: str,
         output_signal_unit: str,
-        signal_data: "TimeSeries" = None,
+        signal_data: TimeSeries = None,
     ) -> "MeasurementChain":
         """Create a new measurement chain without providing a `SignalSource` instance.
 
@@ -452,7 +452,7 @@ class MeasurementChain:
         cls,
         transformation: SignalTransformation,
         input_signal: Signal,
-        data: "TimeSeries",
+        data: TimeSeries,
     ) -> Signal:
         """Create a signal that is produced by the provided transformation.
 
@@ -514,7 +514,7 @@ class MeasurementChain:
 
     @staticmethod
     def _determine_output_signal_unit(
-        func: "MathematicalExpression", input_unit: str
+        func: MathematicalExpression, input_unit: str
     ) -> str:
         """Determine the unit of a transformations' output signal.
 
@@ -589,7 +589,7 @@ class MeasurementChain:
     def add_transformation(
         self,
         transformation: SignalTransformation,
-        data: "TimeSeries" = None,
+        data: TimeSeries = None,
         input_signal_source: str = None,
     ):
         """Add a transformation from an `SignalTransformation` instance.
@@ -750,8 +750,8 @@ class MeasurementChain:
         error: Error,
         output_signal_type: str = None,
         output_signal_unit: str = None,
-        func: "MathematicalExpression" = None,
-        data: "TimeSeries" = None,
+        func: MathematicalExpression = None,
+        data: TimeSeries = None,
         input_signal_source: str = None,
     ):
         """Create and add a transformation to the measurement chain.
@@ -832,9 +832,7 @@ class MeasurementChain:
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
-                if output_signal_unit == "":
-                    output_signal_unit = "1"
-                unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
+                unit_conversion = U_(output_signal_unit) / U_(input_signal.unit)
                 func = MathematicalExpression(
                     "a*x",
                     parameters={"a": Q_(1, unit_conversion)},
@@ -881,7 +879,7 @@ class MeasurementChain:
         self._raise_if_node_does_not_exist(signal_source)
         return self._graph.nodes[signal_source]["signal"]
 
-    def get_signal_data(self, source_name: str = None) -> "TimeSeries":
+    def get_signal_data(self, source_name: str = None) -> TimeSeries:
         """Get the data from a signal.
 
         Parameters
@@ -893,7 +891,7 @@ class MeasurementChain:
 
         Returns
         -------
-        TimeSeries :
+        weldx.TimeSeries :
             The requested data
 
         """

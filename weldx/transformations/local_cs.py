@@ -119,7 +119,7 @@ class LocalCoordinateSystem(TimeDependent):
             "<xarray.Dataset", "<LocalCoordinateSystem"
         )
 
-    def __add__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
+    def __add__(self, rhs_cs: LocalCoordinateSystem) -> LocalCoordinateSystem:
         """Add 2 coordinate systems.
 
         Generates a new coordinate system by treating the left-hand side
@@ -200,7 +200,7 @@ class LocalCoordinateSystem(TimeDependent):
         )
         return LocalCoordinateSystem(orientation, coordinates, time_ref=time_ref)
 
-    def __sub__(self, rhs_cs: "LocalCoordinateSystem") -> "LocalCoordinateSystem":
+    def __sub__(self, rhs_cs: LocalCoordinateSystem) -> LocalCoordinateSystem:
         """Subtract 2 coordinate systems.
 
         Generates a new coordinate system from two local coordinate systems
@@ -399,7 +399,7 @@ class LocalCoordinateSystem(TimeDependent):
         coordinates=None,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
-    ) -> "LocalCoordinateSystem":
+    ) -> LocalCoordinateSystem:
         """Construct a local coordinate system from an euler sequence.
 
         This function uses scipy.spatial.transform.Rotation.from_euler method to define
@@ -599,11 +599,11 @@ class LocalCoordinateSystem(TimeDependent):
 
     @property
     def dataset(self) -> xr.Dataset:
-        """Get the underlying xarray.Dataset with ordered dimensions.
+        """Get the underlying `xarray.Dataset` with ordered dimensions.
 
         Returns
         -------
-        xarray.Dataset
+        xarray.Dataset :
             xarray Dataset with coordinates and orientation as DataVariables.
 
         """
@@ -743,7 +743,7 @@ class LocalCoordinateSystem(TimeDependent):
 
         return LocalCoordinateSystem(orientation, coordinates, time)
 
-    def invert(self) -> "LocalCoordinateSystem":
+    def invert(self) -> LocalCoordinateSystem:
         """Get a local coordinate system defining the parent in the child system.
 
         Inverse is defined as orientation_new=orientation.T,

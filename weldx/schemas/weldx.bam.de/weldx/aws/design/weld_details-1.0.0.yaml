@@ -12,14 +12,14 @@ properties:
   joint_design:
     description: |
       AWS 3.0, p. 19 : "Detailed Description of mating configuration of two components, sufficient information for shop preparation of the components." TODO CLASS
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/groove/**-1.*"
-      - tag: "tag:weldx.bam.de:weldx/groove/**-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/groove/**-1.*"
 
   weld_sizes:
     description: |
       Linear dimensions of cross sectional weld features. Sizes are of design and actual features. TODO CLASS
-    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*"
+      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
 
   number_of_passes:
     description: |

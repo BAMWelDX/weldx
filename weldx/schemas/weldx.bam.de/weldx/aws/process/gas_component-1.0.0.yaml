@@ -32,7 +32,9 @@ properties:
   gas_percentage:
     description: |
       Percentage by weight this gas occupies of the total gas mixture.
-    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*"
+      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
     wx_unit: "percent"
 
 

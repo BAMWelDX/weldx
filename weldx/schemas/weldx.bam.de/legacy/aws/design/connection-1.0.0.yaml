@@ -1,0 +1,76 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/design/connection-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/design/connection-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  The joint formed by edge preparation of two workpieces and the weld that joins the workpieces together.
+type: object
+properties:
+  joint_type:
+    description: |
+      A weld joint classification based the relative orientation of the members being joined.
+    type: string
+    enum:
+      - butt_joint
+      - corner_joint
+      - t_joint
+      - lap_joint
+      - edge_joint
+      - flanged_butt_joint
+      - flanged_corner_joint
+      - flanged_t_joint
+      - flanged_lap_joint
+      - flanged_edge_joint
+
+  weld_type:
+    description: |
+      A region of coalescence of materials produced by heating or pressure, that joins two pieces of metal.
+    type: string
+    enum:
+      - groove
+      - fillet
+      - plug
+      - slot
+      - spot
+      - seam
+      - flange
+      - stud
+      - surfacing
+      - upset
+      - flash
+      - bevelGroove
+      - flareBevelGroove
+      - doubleBevelGroove
+      - jGroove
+      - singleJGroove
+      - uGroove
+      - singleUGroove
+      - doubleUGroove
+      - vGroove
+      - flareVGroove
+      - singleVGroove
+      - doubleVGroove
+      - squareGroove
+      - edgeFlange
+      - braze
+
+  joint_penetration:
+    description: |
+      joint_penetration
+    $ref: joint_penetration-1.0.0
+
+  weld_details:
+    description: |
+      weld_details
+    $ref: weld_details-1.0.0
+
+
+
+required: [joint_type, weld_type, joint_penetration, weld_details]
+propertyOrder: [joint_type, weld_type, joint_penetration, weld_details]
+flowStyle: block
+...

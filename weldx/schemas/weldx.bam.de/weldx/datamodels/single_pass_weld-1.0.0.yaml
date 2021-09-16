@@ -54,15 +54,11 @@ properties:
       welding_process:
         $ref: "asdf://weldx.bam.de/weldx/schemas/process/GMAW-1.0.0"
       shielding_gas:
-        oneOf:
-          - tag: "asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-1.*"
-          - tag: "tag:weldx.bam.de:weldx/aws/process/shielding_gas_for_procedure-1.*" # legacy_tag
+        tag: "asdf://weldx.bam.de/weldx/tags/aws/process/shielding_gas_for_procedure-1.*"
       weld_speed:
         description: |
           The constant weld speed of the welding TCP movement.
-        oneOf:
-          - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
-          - tag: "tag:weldx.bam.de:weldx/core/time_series-1.*" # legacy_tag
+        tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
         wx_unit: "m/s"
         wx_shape: [1]
       welding_wire:
@@ -73,7 +69,9 @@ properties:
           diameter:
             description: |
               The diameter of the welding wire.
-            tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+            oneOf:
+              - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*"
+              - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
             wx_unit: "m"
             wx_shape: [1]
           class:
@@ -86,49 +84,37 @@ properties:
   welding_current:
     description: |
       The signal representing the welding current measurement.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
-      - tag: "tag:weldx.bam.de:weldx/measurement/signal-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
     wx_unit: "A"
   welding_voltage:
     description: |
       The signal representing the welding voltage measurement.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
-      - tag: "tag:weldx.bam.de:weldx/measurement/signal-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-1.*"
     wx_unit: "V"
   TCP:
     description: |
       Transformation describing the welding TCP movement in relation to the groove coordinates.
 
       The movement describes a linear motion between two points along the weld seam at constant velocity.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/transformations/local_coordinate_system-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.*"
     wx_shape:
       time: [2~]
   coordinate_systems:
     description: |
       The expanded coordinate system setup describing the welding experiment and associated coordinate systems in detail.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.*"
   equipment:
     description: |
       A list of equipments used for measurements and describing the weld seam.
     type: array
     items:
-      oneOf:
-        - tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.*"
-        - tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.*" # legacy_tag
+      tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.*"
   measurements:
     description: |
       List of all measurements associated with the experiment.
     type: array
     items:
-      oneOf:
-        - tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.*"
-        - tag: "tag:weldx.bam.de:weldx/measurement/measurement-1.*" # legacy_tag
+      tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement-1.*"
   workpiece:
     description: |
       The workpiece to be welded defined by the base metal and the geometric description of the weld seam.
@@ -156,22 +142,20 @@ properties:
           groove_shape:
             description: |
               Constant groove shape of the weld seam.
-            oneOf:
-              - tag: "asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*-1.*"
-              - tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/*-1.*" # legacy_tag
+            tag: "asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*-1.*"
           seam_length:
             description: |
               Length of the linear weld seam.
-            tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+            oneOf:
+              - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*"
+              - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
             wx_unit: "m"
         required: [groove_shape, seam_length]
     required: [base_metal, geometry]
   reference_timestamp:
     description: |
       An optional timestamp indicating the start of the welding process.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
-      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
   wx_metadata:
     description: |
       General metadata container.
@@ -220,60 +204,80 @@ examples:
               shape: [2, 3]
         coordinate_systems: !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-1.0.0>
           name: Coordinate system manager 0
-          root_system_name: base
+          graph: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-1.0.0>
+            root_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+              name: base
+              attributes:
+                data: {}
+              edges:
+              - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+                direction: bwd
+                attributes:
+                  defined: true
+                  transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
+                target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+                  name: workpiece
+                  attributes:
+                    data: {}
+                  edges:
+                  - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+                    direction: bwd
+                    attributes:
+                      defined: true
+                      transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
+                        time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
+                          values: !core/ndarray-1.0.0
+                            data: [0, 29000000000]
+                            datatype: int64
+                            shape: [2]
+                          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+                          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
+                          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+                          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
+                        orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                          name: orientations
+                          dimensions: [c, v]
+                          dtype: <f8
+                          data: !core/ndarray-1.0.0
+                            data:
+                            - [1.0, 0.0, 0.0]
+                            - [0.0, -1.0, -1.2246467991473532e-16]
+                            - [0.0, 1.2246467991473532e-16, -1.0]
+                            datatype: float64
+                            shape: [3, 3]
+                        coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                          name: coordinates
+                          dimensions: [time, c]
+                          dtype: <f8
+                          data: !core/ndarray-1.0.0
+                            data:
+                            - [5.0, 0.0, 2.0]
+                            - [295.0, 0.0, 2.0]
+                            datatype: float64
+                            shape: [2, 3]
+                    target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+                      name: tcp_wire
+                      attributes:
+                        data: {}
+                      edges:
+                      - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-1.0.0>
+                        direction: bwd
+                        attributes:
+                          defined: true
+                          transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
+                            coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
+                              name: coordinates
+                              dimensions: [c]
+                              dtype: <f8
+                              data: !core/ndarray-1.0.0
+                                data: [0.0, 0.0, -10.0]
+                                datatype: float64
+                                shape: [3]
+                        target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-1.0.0>
+                          name: tcp_contact
+                          attributes:
+                            data: {}
           subsystems: []
-          coordinate_systems:
-          - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
-            name: workpiece
-            reference_system: base
-            transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0> {}
-          - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
-            name: tcp_wire
-            reference_system: workpiece
-            transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-              time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
-                values: !core/ndarray-1.0.0
-                  data: [0, 29000000000]
-                  datatype: int64
-                  shape: [2]
-                start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-                end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-                min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
-                max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M29S}
-              orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-                name: orientations
-                dimensions: [c, v]
-                dtype: <f8
-                data: !core/ndarray-1.0.0
-                  data:
-                  - [1.0, 0.0, 0.0]
-                  - [0.0, -1.0, -1.2246467991473532e-16]
-                  - [0.0, 1.2246467991473532e-16, -1.0]
-                  datatype: float64
-                  shape: [3, 3]
-              coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-                name: coordinates
-                dimensions: [time, c]
-                dtype: <f8
-                data: !core/ndarray-1.0.0
-                  data:
-                  - [5.0, 0.0, 2.0]
-                  - [295.0, 0.0, 2.0]
-                  datatype: float64
-                  shape: [2, 3]
-          - !<asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_transformation-1.0.0>
-            name: tcp_contact
-            reference_system: tcp_wire
-            transformation: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-1.0.0>
-              coordinates: !<asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0>
-                name: coordinates
-                dimensions: [c]
-                dtype: <f8
-                data: !core/ndarray-1.0.0
-                  data: [0.0, 0.0, -10.0]
-                  datatype: float64
-                  shape: [3]
-          subsystem_names: []
         equipment:
         - &id008 !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-1.0.0>
           name: HKS P1000-S3

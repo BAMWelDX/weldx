@@ -6,7 +6,7 @@ import json
 import re
 import sys
 import warnings
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 from functools import wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
@@ -135,7 +135,7 @@ def _clean_notebook(file: Union[str, Path]):  # pragma: no cover
         The jupyter notebook filename to clean.
 
     """
-    with open(file, "r", encoding="utf-8") as f:
+    with open(file, encoding="utf-8") as f:
         data = json.load(f)
 
     for cell in data["cells"]:
@@ -194,6 +194,7 @@ _eq_compare_nested_input_types = Union[
     Sequence,
     Mapping,
     Collection,
+    Set,
 ]
 
 
@@ -204,6 +205,7 @@ class _EqCompareNested:
     compare_funcs: ClassVar = {
         (np.ndarray, NDArrayType, pint.Quantity, pd.Index): _array_equal,
         (xr.DataArray, xr.Dataset): lambda x, y: x.identical(y),
+        (set): lambda x, y: x == y,  # list here to prevent entering nested for sets
     }
     # these types will be treated as equivalent.
     _type_equalities: ClassVar = [
@@ -247,17 +249,21 @@ class _EqCompareNested:
            When the elements are not equal traversing `a` will be stopped
            by raising a RuntimeError.
         """
+        data_structure = iterutils.get_path(a, path)
         other_data_structure = iterutils.get_path(b, path)
+
         other_value = other_data_structure[key]
+
         if not _EqCompareNested._enter(None, key, value)[1]:
+            other_value = other_data_structure[key]
             # check lengths of Sequence types first and raise
             # prior starting a more expensive comparison!
-            if isinstance(other_data_structure, Sequence) and len(
+            if isinstance(other_data_structure, (Sequence, Set)) and len(
                 other_data_structure
-            ) != len(iterutils.get_path(a, path)):
+            ) != len(data_structure):
                 raise RuntimeError("len does not match")
             if isinstance(other_data_structure, Mapping) and any(
-                other_data_structure.keys() ^ iterutils.get_path(a, path).keys()
+                other_data_structure.keys() ^ data_structure.keys()
             ):
                 raise RuntimeError("keys do not match")
             if not _EqCompareNested._compare(value, other_value):
@@ -271,7 +277,9 @@ class _EqCompareNested:
         """Deeply compares [nested] data structures combined of tuples, lists, dicts...
 
         Also compares non-nested data-structures.
-        Arrays are compared using np.all and xr.DataArray.identical
+        Arrays are compared using np.all and xr.DataArray.identical.
+        Sets are compared by calling ``==`` and not traversed, hence the order of all
+        set items is important.
 
         Parameters
         ----------
@@ -295,12 +303,14 @@ class _EqCompareNested:
         visit = functools.partial(_EqCompareNested._visit, a=a, b=b)
 
         try:
-            iterutils.remap(a, visit=visit, reraise_visit=True)
+            iterutils.remap(
+                a, visit=visit, reraise_visit=True, enter=_EqCompareNested._enter
+            )
         # Key not found in b, values not equal, more elements in a than in b
         except (KeyError, RuntimeError, IndexError):
             return False
         except TypeError:
-            raise TypeError("either a or b are not a nested data structure.")
+            raise TypeError("One of a or b is not a nested data structure (or a set).")
 
         return True
 
