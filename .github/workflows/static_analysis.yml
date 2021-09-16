@@ -82,3 +82,15 @@ jobs:
       - name: run mypy
         run: |
           mypy --install-types --non-interactive .
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Lint
+        uses: pre-commit/action@v2
+        with:
+          extra_args: --all-files --show-diff-on-failure
