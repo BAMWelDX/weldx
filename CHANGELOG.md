@@ -32,6 +32,7 @@
   instead. [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
 - `is_column_in_matrix`, `is_row_in_matrix`, `to_float_array`, `to_list`, `matrix_is_close`, `vector_is_close`
   and `triangulate_geometry` from `weldx.util` [[#490]](https://github.com/BAMWelDX/weldx/pull/490)
+- remove the ``:`` syntax from ``wx_shape`` validation [[#537]](https://github.com/BAMWelDX/weldx/pull/537)
 
 ### changes
 
