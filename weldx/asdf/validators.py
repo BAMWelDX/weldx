@@ -1,6 +1,6 @@
 """ASDF-validators for weldx types."""
 import re
-from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict
+from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict, Union
 
 from asdf import ValidationError
 from asdf.schema import _type_to_tag
@@ -296,7 +296,7 @@ def _validate_expected_list(list_expected):
             )
 
 
-def _compare_lists(_list, list_expected):
+def _compare_lists(_list, list_expected) -> Union[bool, dict]:
     """Compare two lists.
 
     The two lists are interpreted as a list of dimensions. We compare the dimensions of
@@ -305,33 +305,36 @@ def _compare_lists(_list, list_expected):
     dictionary and this is output. The dictionary can be empty if there are no
     variables in the list_expected.
 
-    Examples:
-    ---------
-    _compare_lists([1, 2, 3], [1, 2, 3])
-    -> {}
-
-    _compare_lists([1, 2, 3], [1, n1, n2])
-    -> {n1: 2, n2: 3}
-
-    _compare_lists([1, 2, 3], [1, "..."])
-    -> {}
-
-    _compare_lists([1, 2, 3], [1, 2, 4])
-    -> False
-
-    params
-    ------
+    Parameters
+    ----------
     _list:
         List of Integer
     list_expected:
         List build by the rules in _custom_shape_validator
-    returns
+
+    Returns
     -------
-    False:
+    bool:
         when a dimension mismatch occurs
     dict_values:
         when no dimension mismatch occurs. Can be empty {}. Dictionary - keys: variable
         names in the validation schemes. values: values of the validation schemes.
+
+    Examples
+    --------
+    >>> from weldx.asdf.validators import _compare_lists
+    >>> _compare_lists([1, 2, 3], [1, 2, 3])
+    {}
+
+    >>> _compare_lists([1, 2, 3], [1, "a", "b"])
+    {'a': 2, 'b': 3}
+
+    >>> _compare_lists([1, 2, 3], [1, "..."])
+    {}
+
+    >>> _compare_lists([1, 2, 3], [1, 2, 4])
+    False
+
     """
     dict_values = dict()
 
