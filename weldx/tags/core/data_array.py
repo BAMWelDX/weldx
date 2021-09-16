@@ -9,7 +9,7 @@ class XarrayDataArrayConverter(WeldxConverter):
     """Serialization class for xarray.DataArray."""
 
     name = "core/data_array"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [DataArray]
 
     def to_yaml_tree(self, obj: DataArray, tag: str, ctx) -> dict:

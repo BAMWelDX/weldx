@@ -32,5 +32,5 @@ class BaseMetal:
 BaseMetalConverter = dataclass_serialization_class(
     class_type=BaseMetal,
     class_name="aws/design/base_metal",
-    version="1.0.0",
+    version="0.1.0",
 )

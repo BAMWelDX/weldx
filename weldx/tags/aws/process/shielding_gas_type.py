@@ -20,5 +20,5 @@ class ShieldingGasType:
 ShieldingGasTypeConverter = dataclass_serialization_class(
     class_type=ShieldingGasType,
     class_name="aws/process/shielding_gas_type",
-    version="1.0.0",
+    version="0.1.0",
 )

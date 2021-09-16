@@ -21,7 +21,7 @@ class CoordinateTransformationConverter(WeldxConverter):
     """Legacy serialization class for CoordinateTransformation"""
 
     tags = [
-        "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-1.0.0"
+        "tag:weldx.bam.de:weldx/core/transformations/coordinate_transformation-0.1.*"
     ]
     types = [CoordinateTransformation]
 
@@ -65,7 +65,7 @@ class CoordinateSystemManagerSubsystemConverter(WeldxConverter):
 
     tags = [
         "tag:weldx.bam.de:weldx/core/transformations/"
-        "coordinate_system_hierarchy_subsystem-1.0.0"
+        "coordinate_system_hierarchy_subsystem-0.1.*"
     ]
     types = [CoordinateSystemManagerSubsystem]
 
@@ -96,7 +96,7 @@ class CoordinateSystemManagerConverter(WeldxConverter):
     """Legacy serialization class for weldx.transformations.CoordinateSystemManager"""
 
     tags = [
-        "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0"
+        "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-0.1.*"
     ]
     types = [_CoordinateSystemManager]
 

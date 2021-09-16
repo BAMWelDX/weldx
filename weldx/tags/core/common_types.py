@@ -25,7 +25,7 @@ class Dimension:
 
 
 DimensionConverter = dataclass_serialization_class(
-    class_type=Dimension, class_name="core/dimension", version="1.0.0"
+    class_type=Dimension, class_name="core/dimension", version="0.1.0"
 )
 
 
@@ -44,7 +44,7 @@ class VariableConverter(WeldxConverter):
     """Serialization class for a Variable"""
 
     name = "core/variable"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [Variable]
 
     @staticmethod

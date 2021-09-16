@@ -140,7 +140,7 @@ class ExternalFileConverter(WeldxConverter):
     """Serialization class for `weldx.core.ExternalFile`."""
 
     name = "core/file"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [ExternalFile]
 
     def to_yaml_tree(self, obj: ExternalFile, tag: str, ctx) -> dict:

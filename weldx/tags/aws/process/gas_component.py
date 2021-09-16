@@ -16,5 +16,5 @@ class GasComponent:
 
 
 GasComponentConverter = dataclass_serialization_class(
-    class_type=GasComponent, class_name="aws/process/gas_component", version="1.0.0"
+    class_type=GasComponent, class_name="aws/process/gas_component", version="0.1.0"
 )

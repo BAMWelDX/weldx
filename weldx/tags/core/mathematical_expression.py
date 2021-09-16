@@ -10,7 +10,7 @@ class MathematicalExpressionConverter(WeldxConverter):
     """Serialization class for sympy style math expressions."""
 
     name = "core/mathematical_expression"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [MathematicalExpression]
 
     def to_yaml_tree(self, obj: MathematicalExpression, tag: str, ctx) -> dict:

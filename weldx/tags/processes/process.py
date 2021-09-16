@@ -10,9 +10,9 @@ class GmawProcessConverter(WeldxConverter):
     """Custom serialization class for GmawProcess."""
 
     tags = [
-        "asdf://weldx.bam.de/weldx/tags/process/GMAW-1.0.0",
-        "asdf://weldx.bam.de/weldx/tags/process/CLOOS/spray_arc-1.0.0",
-        "asdf://weldx.bam.de/weldx/tags/process/CLOOS/pulse-1.0.0",
+        "asdf://weldx.bam.de/weldx/tags/process/GMAW-0.1.*",
+        "asdf://weldx.bam.de/weldx/tags/process/CLOOS/spray_arc-0.1.*",
+        "asdf://weldx.bam.de/weldx/tags/process/CLOOS/pulse-0.1.*",
     ]
     types = [GmawProcess]
 
@@ -26,7 +26,7 @@ class GmawProcessConverter(WeldxConverter):
 
     def select_tag(self, obj: GmawProcess, tags, ctx):
         """Select new style tag according to groove name."""
-        tag = format_tag(tag_name="process/" + obj.tag, version="1.0.0")
+        tag = format_tag(tag_name="process/" + obj.tag, version="0.1.0")
         if tag not in self.tags:
             raise ValueError("The generated process tag is not supported")
         return tag
