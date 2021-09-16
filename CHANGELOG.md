@@ -71,6 +71,7 @@
 
 ### ASDF
 
+- all schema version numbers set to ``0.1.0`` [[#535]](https://github.com/BAMWelDX/weldx/pull/535).
 - add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
 - rework ASDF extension to new asdf 2.8 API [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
     - move schema files to ``weldx/schemas``
