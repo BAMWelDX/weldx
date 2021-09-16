@@ -147,7 +147,7 @@ class WeldxFile(UserDict):
     %YAML 1.1
     %TAG ! tag:stsci.edu:asdf/
     --- !core/asdf-1.1.0
-    asdf_library: !core/software-1.0.0 {author: The ASDF Developers, homepage: 'http://github.com/asdf-format/asdf',
+    asdf_library: !core/software-1.0.0 {...
       name: asdf, version: ...}
     history:
       extensions:
