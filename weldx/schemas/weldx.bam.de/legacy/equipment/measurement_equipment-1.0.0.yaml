@@ -1,0 +1,49 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/equipment/measurement_equipment-1.0.0"
+tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
+
+title: |
+  A piece of measurement equipment.
+description: |
+  This schema describes a piece of measurement equipment that is part of a measurement chain.
+  Equipments can be associated with signal sources and data transformations.
+
+examples:
+  -
+    - A analog to digital conversion equipment with a linear signal transformation.
+    - |
+      !<tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0>
+        name: Beckhoff ELM3002-0000
+        sources: []
+        transformations:
+        - &id004 !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
+          name: AD conversion current measurement
+          type_transformation: AD
+          error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+            deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.01}
+          func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+            expression: a*x + b
+            parameters:
+              a: !unit/quantity-1.1.0 {unit: 1 / volt, value: 3276.8}
+              b: !unit/quantity-1.1.0 {unit: dimensionless, value: 0.0}
+
+type: object
+properties:
+  name:
+    type: string
+  sources:
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/measurement/source-1.0.0"
+  transformations:
+    type: array
+    items:
+      tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0"
+
+propertyOrder: [name, sources, transformations]
+required: [name]
+
+flowStyle: block
+...

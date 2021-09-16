@@ -4,6 +4,7 @@ from typing import List
 from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
 
+from .constants import LEGACY_SCHEMA_PATH  # legacy_code
 from .constants import (
     MANIFEST_PATH,
     SCHEMA_PATH,
@@ -41,11 +42,11 @@ def get_schema_resource_mapping() -> DirectoryResourceMapping:
     return mapping
 
 
-def get_legacy_resource_mapping() -> DirectoryResourceMapping:
-    """Get the weldx schema resource mapping."""
+def get_legacy_resource_mapping() -> DirectoryResourceMapping:  # legacy_code
+    """Get the weldx schema legacy resource mapping."""
     mapping = DirectoryResourceMapping(
-        SCHEMA_PATH,
-        "tag:weldx.bam.de:weldx",
+        LEGACY_SCHEMA_PATH,
+        "http://weldx.bam.de/schemas/weldx/",
         recursive=True,
         filename_pattern="*.yaml",
         stem_filename=True,
@@ -58,7 +59,7 @@ def get_resource_mappings() -> List[DirectoryResourceMapping]:
     return [
         get_extension_resource_mapping(),
         get_schema_resource_mapping(),
-        get_legacy_resource_mapping(),
+        get_legacy_resource_mapping(),  # legacy_code
     ]
 
 

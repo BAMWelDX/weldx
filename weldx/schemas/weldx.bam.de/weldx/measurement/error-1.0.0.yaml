@@ -22,6 +22,7 @@ properties:
       A simple numerical representation of the error.
     oneOf:
       - type: number
+      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*"
       - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
 required: [deviation]
 flowStyle: block

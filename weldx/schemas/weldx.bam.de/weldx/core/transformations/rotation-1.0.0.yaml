@@ -93,7 +93,9 @@ oneOf:
       angles:
         description: |
           Rotation angles data.
-        tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+        oneOf:
+          - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*"
+          - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
         wx_unit: "degree"
     required: [sequence, angles]
     flowStyle: block
