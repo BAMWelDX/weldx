@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
-id: asdf://weldx.bam.de/weldx/manifests/weldx-1.0.0
-extension_uri: asdf://weldx.bam.de/weldx/extensions/weldx-1.0.0
+id: asdf://weldx.bam.de/weldx/manifests/weldx-0.1.0
+extension_uri: asdf://weldx.bam.de/weldx/extensions/weldx-0.1.0
 title: weldx extension manifest for tag mapping
 description: Manifest listing all tag URIs with schema URIs supported by weldx
 tags:
