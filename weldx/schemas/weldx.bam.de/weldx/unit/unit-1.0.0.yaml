@@ -13,5 +13,5 @@ examples:
       !<asdf://weldx.bam.de/weldx/tags/unit/unit-1.0.0> meter
 
 type: string
-tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-1.0.0"
+tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-1.*"
 ...

@@ -106,8 +106,8 @@ properties:
       An ndarray containing the coordinates.
 
     oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0"
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.*"
   orientations:
     description: |
       An ndarray containing the orientations.
