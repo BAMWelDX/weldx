@@ -375,7 +375,7 @@ examples:
                               a: !unit/quantity-1.1.0 {unit: ampere, value: 0.030517578125}
                               b: !unit/quantity-1.1.0 {unit: ampere, value: 0.0}
                           wx_metadata:
-                            software: !core/software-0.1.0 {name: Beckhoff TwinCAT ScopeView,
+                            software: !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView,
                               version: 3.4.3143}
                       target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
                         name: Calibration current measurement
@@ -438,7 +438,7 @@ examples:
                               a: !unit/quantity-1.1.0 {unit: volt, value: 0.0030517578125}
                               b: !unit/quantity-1.1.0 {unit: volt, value: 0.0}
                           wx_metadata:
-                            software: !core/software-0.1.0 {name: Beckhoff TwinCAT ScopeView,
+                            software: !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView,
                               version: 3.4.3143}
                       target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
                         name: Calibration voltage measurement
