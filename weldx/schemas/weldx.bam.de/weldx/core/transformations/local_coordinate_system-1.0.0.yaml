@@ -96,30 +96,22 @@ properties:
   reference_time:
     description: |
       A timestamp that serves as reference point for the time deltas of the 'time' tag.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
-      - tag: "tag:weldx.bam.de:weldx/time/timestamp-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-1.*"
   time:
     description: |
       A list of timestamps
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.*"
-      - tag: "tag:weldx.bam.de:weldx/time/timedeltaindex-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.*"
   coordinates:
     description: |
       An ndarray containing the coordinates.
 
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.0.0"
-      - tag: "tag:weldx.bam.de:weldx/core/variable-1.0.0" # legacy_tag
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
-      - tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0" # legacy_tag
   orientations:
     description: |
       An ndarray containing the orientations.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
-      - tag: "tag:weldx.bam.de:weldx/core/variable-1.*" # legacy_tag
+    tag: "asdf://weldx.bam.de/weldx/tags/core/variable-1.*"
 
 wx_shape:
   (coordinates): [..., 3]
