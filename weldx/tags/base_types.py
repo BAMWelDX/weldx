@@ -21,4 +21,6 @@ class UuidConverter(WeldxConverter):
 
     def from_yaml_tree(self, node: str, tag: str, ctx: SerializationContext) -> UUID:
         """Reconstruct from string."""
+        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
+            return UUID(node["uuid"])
         return UUID(node)

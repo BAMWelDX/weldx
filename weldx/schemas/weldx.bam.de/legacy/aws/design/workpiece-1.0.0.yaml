@@ -1,0 +1,26 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/design/workpiece-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/design/workpiece-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  None
+type: object
+properties:
+  geometry:
+    description: |
+      This element describes a piece of metal, its material, geometric properties and boundaries,
+        including its edge shape for the welded joint. A workpiece can be a single piece of plate, or a
+        previously assembled weldment. The scope of this data is beyond this welding data dictionary.
+        This element represents an interface with CAD applications.
+    type: string
+
+
+
+required: [geometry]
+propertyOrder: [geometry]
+flowStyle: block
+...

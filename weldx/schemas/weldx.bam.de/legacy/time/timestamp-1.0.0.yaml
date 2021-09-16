@@ -1,0 +1,41 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/time/timestamp-1.0.0"
+tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+
+title: |
+  Represents an instance in time.
+type: object
+
+examples:
+  -
+    - A timestamp representing the date 2020-01-01 12:00:00 (without timezone information)
+    - |
+      !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T00:00:00'}
+  -
+    - A timestamp representing the date 2020-01-01 12:00:00 in UTC time
+    - |
+      !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T12:00:00+00:00'}
+  -
+    - A timestamp representing the date 2020-01-01 12:00:00 in CET time
+    - |
+      !<tag:weldx.bam.de:weldx/time/timestamp-1.0.0> {value: '2020-01-01T12:00:00+01:00'}
+
+properties:
+  value:
+    description: |
+      String or integer representation of the timestamp in full ISO format.
+    type: string
+    pattern: "[0-9]{4}-(0[1-9])|(1[0-2])-(0[1-9])|([1-2][0-9])|(3[0-1])[T ]([0-1][0-9])|(2[0-4]):[0-5][0-9]:[0-5][0-9](.[0-9]+)?"# pattern string does not seem to work correctly.. ?
+    # the pattern is taken from asdf time but incomplete, still keep it for now
+    # maybe convert the following: https://www.myintervals.com/blog/2009/05/20/iso-8601-date-validation-that-doesnt-suck/
+
+  tz:
+    description: |
+      String representation of the timezone in pandas compatible format.
+    type: string
+
+required: [value]
+propertyOrder: [value, tz]
+...

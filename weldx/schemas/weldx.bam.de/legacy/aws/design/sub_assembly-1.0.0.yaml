@@ -1,0 +1,30 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/design/sub_assembly-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/design/sub_assembly-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  Two workpieces joined by a weld. Identifies simple weldments that can be joined to form a largermore complicated weldment.
+type: object
+properties:
+  workpiece:
+    description: |
+      Describes a piece of metal, its materials and geometries.
+    type: array
+    items:
+      $ref: workpiece-1.0.0
+
+  connection:
+    description: |
+      The joint formed by edge preparation of two workpieces and the weld that joins the workpieces together.
+    $ref: connection-1.0.0
+
+
+
+required: [workpiece, connection]
+propertyOrder: [workpiece, connection]
+flowStyle: block
+...
