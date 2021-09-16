@@ -1,0 +1,62 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/time/time-0.1.0"
+
+title: |
+  Represents a single or multiple timestamps or timedeltas.
+
+examples:
+  -
+    - A single timedelta of 2 seconds
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/time/time-1.0.0>
+        values: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M2S}
+  -
+    - A timedelta series from 0 s to 4 s with a 2 s frequency
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/time/time-1.0.0>
+        values: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-1.0.0>
+            start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+            end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M4S}
+            freq: 2S
+            min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+            max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-1.0.0> {value: P0DT0H0M4S}
+  -
+    - A single timestamp
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/time/time-1.0.0>
+        values: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-08-01T00:00:00'}
+  -
+    - An absolute time index with a 1 s frequency
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/time/time-1.0.0>
+        values: !<asdf://weldx.bam.de/weldx/tags/time/datetimeindex-1.0.0>
+          start: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:00'}
+          end: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:02'}
+          freq: S
+          min: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:00'}
+          max: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:02'}
+        reference_time: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-1.0.0> {value: '2021-01-01T00:00:00'}
+
+type: object
+properties:
+  values:
+    description: |
+      The time values that are represented by the Time object.
+    type: object
+    oneOf:
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.*"
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.*"
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.*"
+      - tag: "asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.*"
+
+  reference_time:
+    description: |
+      Indicates a specific reference timestamp for the time object.
+    type: object
+    tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.*"
+
+required: [values]
+propertyOrder: [values, reference_time]
+...

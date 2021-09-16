@@ -1,0 +1,24 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/measurement/measurement-0.1.0"
+
+title: |
+  Schema that describes a measurement
+type: object
+properties:
+  name:
+    type: string
+  data:
+    type: array
+    items:
+      tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
+
+  measurement_chain:
+    tag: "asdf://weldx.bam.de/weldx/tags/measurement/measurement_chain-0.1.*"
+
+
+propertyOrder: [name, data, measurement_chain]
+required: [name, data]
+flowStyle: block
+...
