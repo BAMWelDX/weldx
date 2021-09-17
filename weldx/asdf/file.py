@@ -200,6 +200,10 @@ class WeldxFile(UserDict):
             raise ValueError(
                 f'invalid mode "{mode}" given. Should be one of "r", "rw".'
             )
+        elif tree and mode != "rw":
+            raise ValueError(
+                "You cannot pass a tree (to be written) on a read-only file."
+            )
         self._mode = mode
         self.sync_upon_close = bool(sync) & (self.mode == "rw")
         self.software_history_entry = software_history_entry
@@ -221,6 +225,16 @@ class WeldxFile(UserDict):
                 self._in_memory = True
             else:
                 self._in_memory = False
+
+            # TODO: this could be inefficient for large files.
+            # For buffers is fast, but not for real files.
+            # real files should be probed over the filesystem!
+            if mode == "rw" and isinstance(
+                filename_or_file_like, SupportsFileReadWrite
+            ):
+                with reset_file_position(filename_or_file_like):
+                    new_file_created = len(filename_or_file_like.read()) == 0
+
             # the user passed a raw file handle, its their responsibility to close it.
             self._close = False
         else:
@@ -231,7 +245,6 @@ class WeldxFile(UserDict):
             )
 
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
-        # TODO: handle case of existing asdf file, write_to does not clear old blocks!
         if tree or new_file_created:
             asdf_file = self._write_tree(
                 filename_or_file_like,
@@ -258,10 +271,22 @@ class WeldxFile(UserDict):
     def _write_tree(
         self, filename_or_path_like, tree, asdffile_kwargs, write_kwargs, created
     ) -> AsdfFile:
+        # cases:
+        # 1. file is empty (use write_to)
+        # 1.a empty buffer, iobase
+        # 1.b path pointing to empty (new file)
+        # 2. file exists, but should be updated with new tree
         if created:
             asdf_file = asdf.AsdfFile(tree=tree, **asdffile_kwargs)
             asdf_file.write_to(filename_or_path_like, **write_kwargs)
+            uri = None
+            generic_file = generic_io.get_file(
+                filename_or_path_like, mode="rw", uri=uri
+            )
+            asdf_file._fd = generic_file
         else:
+            # TODO: mode here is "rw" to write tree, but user may request only "r".
+            assert self._mode == "rw"
             asdf_file = open_asdf(filename_or_path_like, **asdffile_kwargs, mode="rw")
             asdf_file.tree = tree
             asdf_file.update(**write_kwargs)
