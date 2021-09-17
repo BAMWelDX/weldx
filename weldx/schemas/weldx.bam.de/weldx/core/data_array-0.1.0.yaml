@@ -1,0 +1,32 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/data_array-0.1.0"
+
+title: |
+  Schema that describes a data_array
+description: |
+  A data_array is an array with named dimensions and coordinates. The corresponding Python data structure
+  is the xarray.DataArray which is inspired by the NetCDF file format
+  (See: https://www.unidata.ucar.edu/software/netcdf/docs/netcdf_data_model.html).
+type: object
+properties:
+  attributes:
+    description: |
+      An arbitrary structure containing meta data.
+    type: object
+  coordinates:
+    description: |
+      An array of variables that represent coordinates.
+    type: array
+    items:
+      tag: "asdf://weldx.bam.de/weldx/tags/core/variable-0.1.*"
+  data:
+    description: |
+      The actual data.
+    tag: "asdf://weldx.bam.de/weldx/tags/core/variable-0.1.*"
+
+required: [attributes, coordinates, data]
+propertyOrder: [attributes, coordinates, data]
+flowStyle: block
+...

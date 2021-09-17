@@ -21,7 +21,7 @@ class DiEdgeConverter(WeldxConverter):
     """ASDF type for `DiEdge`."""
 
     name = "core/graph/di_edge"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [DiEdge]
 
     def to_yaml_tree(self, obj: DiEdge, tag: str, ctx) -> dict:
@@ -49,7 +49,7 @@ class DiNodeConverter(WeldxConverter):
     """ASDF type for `DiNode`."""
 
     name = "core/graph/di_node"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [DiNode]
 
     def to_yaml_tree(self, obj: DiNode, tag: str, ctx) -> dict:
@@ -150,7 +150,7 @@ class DiGraphConverter(WeldxConverter):
     """Serialization class for `networkx.DiGraph`."""
 
     name = "core/graph/di_graph"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [nx.DiGraph]
 
     def to_yaml_tree(self, obj: nx.DiGraph, tag: str, ctx) -> dict:

@@ -5,5 +5,5 @@ __all__ = ["Error", "ErrorConverter"]
 
 
 ErrorConverter = dataclass_serialization_class(
-    class_type=Error, class_name="measurement/error", version="1.0.0"
+    class_type=Error, class_name="measurement/error", version="0.1.0"
 )

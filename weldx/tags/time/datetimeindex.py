@@ -13,7 +13,7 @@ class DatetimeIndexConverter(WeldxConverter):
     """A simple implementation of serializing pandas DatetimeIndex."""
 
     name = "time/datetimeindex"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [pd.DatetimeIndex]
 
     def to_yaml_tree(self, obj: pd.DatetimeIndex, tag: str, ctx) -> dict:
