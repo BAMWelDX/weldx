@@ -1,5 +1,6 @@
 """Tests for the WeldxFile class."""
 import itertools
+import os
 import pathlib
 import shutil
 import tempfile
@@ -136,7 +137,7 @@ class TestWeldXFile:
         """Test wrapper creation from a dictionary."""
         tree = dict(foo="bar")
         # creates a buffer
-        self.fh = WeldxFile(filename_or_file_like=None, tree=tree)
+        self.fh = WeldxFile(filename_or_file_like=None, tree=tree, mode="rw")
         new_file = self.make_copy(self.fh)
         assert WeldxFile(new_file)["foo"] == "bar"
 
@@ -172,11 +173,12 @@ class TestWeldXFile:
             assert fh2["foo"] == "bar"
             assert fh["another"] == "entry"
 
-    def test_create_writable_protocol(self):
+    @staticmethod
+    def test_create_writable_protocol():
         """Interface test for writable files."""
         f = WritableFile()
-        WeldxFile(f, tree=dict(test="yes"))  # this should write the tree to f.
-        new_file = self.make_copy(f.to_wrap)
+        WeldxFile(f, tree=dict(test="yes"), mode="rw")
+        new_file = TestWeldXFile.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
 
     @staticmethod
@@ -318,7 +320,7 @@ class TestWeldXFile:
         """Schema paths should be resolved internally."""
         schema = SINGLE_PASS_SCHEMA
         with pytest.raises(ValidationError) as e:
-            WeldxFile(custom_schema=schema)
+            WeldxFile(tree=dict(foo="bar"), custom_schema=schema, mode="rw")
         assert "required property" in e.value.message
 
     @staticmethod
@@ -466,3 +468,47 @@ class TestWeldXFile:
                 assert isinstance(e.value, FileExistsError)
         else:
             self.fh.copy(file, overwrite=overwrite)
+
+    @staticmethod
+    def test_update_existing_proper_update(tmpdir):
+        """Compare implementation of WeldxFile with asdf api.
+
+        WeldxFile should call update() to minimize memory usage."""
+        d1 = np.ones((10, 3)) * 2
+        d2 = np.ones(3) * 3
+        d3 = np.ones(17) * 4
+        d4 = np.ones((10, 4)) * 5
+        d5 = np.ones(14)
+        trees = [
+            {"d1": d1, "d2": d2, "d3": d3, "d4": d4},
+            {"d1": d1, "d3": d3},
+            {"d1": d1},
+            {"d1": d1, "d5": d5},
+            {"d1": d1, "d2": d2, "d5": d5},
+            {"d3": d3},
+        ]
+
+        os.chdir(tmpdir)
+        for tree in trees:
+            WeldxFile("test.wx", mode="rw", tree=tree)
+
+        # AsdfFile version
+        asdf.AsdfFile(trees[0]).write_to("test.asdf")
+
+        for tree in trees[1:]:
+            f = asdf.open("test.asdf", mode="rw")
+            f.tree = tree
+            f.update()
+            f.close()
+
+        # compare data
+        assert (
+            pathlib.Path("test.asdf").stat().st_size
+            == pathlib.Path("test.wx").stat().st_size
+        )
+
+        def _read(fn):
+            with open(fn, "br") as fh:
+                return fh.read()
+
+        assert _read("test.asdf") == _read("test.wx")

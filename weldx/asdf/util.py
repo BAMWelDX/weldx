@@ -118,7 +118,10 @@ def write_buffer(
         from weldx import WeldxFile
 
         with WeldxFile(
-            tree=tree, asdffile_kwargs=asdffile_kwargs, write_kwargs=write_kwargs
+            tree=tree,
+            asdffile_kwargs=asdffile_kwargs,
+            write_kwargs=write_kwargs,
+            mode="rw",
         ) as wx:
             wx.write_to()
             show(wx)
