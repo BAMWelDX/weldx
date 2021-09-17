@@ -39,26 +39,6 @@ jobs:
         run: |
           flake8
 
-  isort:
-    name: isort
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
-      - name: pip installs
-        run: pip install isort==5.*
-      - name: show isort diff
-        run: |
-          isort ./weldx/*.py --diff
-      - name: run isort
-        run: |
-          isort ./weldx/*.py -c
-
   black:
     runs-on: ubuntu-latest
     steps:
@@ -82,3 +62,15 @@ jobs:
       - name: run mypy
         run: |
           mypy --install-types --non-interactive .
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Lint
+        uses: pre-commit/action@v2.0.3
+        with:
+          extra_args: --all-files --show-diff-on-failure

@@ -16,7 +16,7 @@ FILES=
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d $(BUILD_DIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) $(DOC) 
+ALLSPHINXOPTS   = -d $(BUILD_DIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) $(DOC)
 .PHONY: help clean html
 
 #------------------------------------------------------------------------------
@@ -45,4 +45,3 @@ latex:
 
 html_check:
 	$(SPHINXBUILD) -b linkcheck $(ALLSPHINXOPTS) build/html $(FILES)
-

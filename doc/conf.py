@@ -179,8 +179,8 @@ nbsphinx_prolog = r"""
         :format: html
 
     .. nbinfo::
-    
-        Run the interactive online version of this notebook (takes 1-2 minutes to load): 
+
+        Run the interactive online version of this notebook (takes 1-2 minutes to load):
         :raw-html:`<a href="https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/{{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>`
 
 """
