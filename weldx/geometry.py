@@ -58,6 +58,12 @@ def _triangulate_geometry(geo_data):
     return data, triangle_indices
 
 
+def has_cw_ordering(points):
+    if sum((points[1:, 1] - points[:-1, 1]) * (points[1:, 2] + points[:-1, 2])) < 0:
+        return False
+    return True
+
+
 # todo: Note that this is a copy of the weldx.tests._helpers.py function.
 def _vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
     """Check if a vector is close or equal to another vector.
@@ -2410,79 +2416,6 @@ class Geometry:
         )
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
-    def _shape_points_and_triangles(
-        self, shape_raster_data: np.array, offset: int, cw_ordering: bool
-    ):
-        if isinstance(self._profile, VariableProfile):
-            raise NotImplementedError
-
-        shape_raster_data = shape_raster_data.swapaxes(1, 2)
-
-        num_profiles = shape_raster_data.shape[0]
-        num_profile_points = shape_raster_data.shape[1]
-
-        points = shape_raster_data.reshape(
-            (num_profiles * num_profile_points, 3)
-        ).tolist()
-
-        tri_base = []
-        for i in range(num_profile_points):
-            idx_0 = i
-            idx_1 = (i + 1) % num_profile_points
-            idx_2 = idx_0 + num_profile_points
-            idx_3 = idx_1 + num_profile_points
-
-            if cw_ordering:
-                tri_base += [[idx_0, idx_2, idx_1], [idx_1, idx_2, idx_3]]
-            else:
-                tri_base += [[idx_0, idx_1, idx_2], [idx_1, idx_3, idx_2]]
-
-        tri_base = np.array(tri_base, dtype=int)
-        triangles = np.array(
-            [
-                tri_base + i * num_profile_points + offset
-                for i in range(num_profiles - 1)
-            ],
-            dtype=int,
-        )
-
-        triangles = triangles.reshape(
-            (tri_base.shape[0] * (num_profiles - 1), 3)
-        ).tolist()
-
-        # closes front and back faces
-        tri_cw = []
-        tri_ccw = []
-        i_0 = 0
-        i_1 = 0
-
-        while i_0 + i_1 < num_profile_points - 2:
-            if i_1 == i_0:
-                p_0 = i_0 + offset
-                p_1 = p_0 + 1
-                p_2 = num_profile_points + offset - i_1 - 1
-                i_0 += 1
-            else:
-                p_0 = i_0 + offset
-                p_1 = num_profile_points + offset - i_1 - 2
-                p_2 = p_1 + 1
-                i_1 += 1
-            tri_cw += [[p_0, p_1, p_2]]
-            tri_ccw += [[p_0, p_2, p_1]]
-
-        if cw_ordering:
-            front = tri_cw
-            back = tri_ccw
-        else:
-            front = tri_ccw
-            back = tri_cw
-        triangles += front
-        triangles += (
-            np.array(back, int) + (num_profiles - 1) * num_profile_points
-        ).tolist()
-
-        return points, triangles
-
     def write_to_file(self, file_name: str, profile_raster_width, trace_raster_width):
         for s in self._trace.segments:
             if isinstance(s, RadialHorizontalTraceSegment):
@@ -2493,18 +2426,8 @@ class Geometry:
             trace_raster_width=trace_raster_width,
             stack=False,
         )
-        points = []
-        triangles = []
-        for i, shape_raster_data in enumerate(raster_data):
-            shape_points, shape_triangle = self._shape_points_and_triangles(
-                shape_raster_data,
-                len(points),
-                self.profile.shapes[i].is_polygon_winding_order_cw(),
-            )
-            points += shape_points
-            triangles += shape_triangle
 
-        SpatialData(points, triangles).write_to_file(file_name)
+        SpatialData.from_geometry_raster(raster_data).write_to_file(file_name)
 
 
 # SpatialData --------------------------------------------------------------------------
@@ -2568,8 +2491,78 @@ class SpatialData:
         return SpatialData(mesh.points, triangles)
 
     @staticmethod
+    def _shape_points_and_triangles(shape_raster_data: np.array, offset: int):
+        shape_raster_data = shape_raster_data.swapaxes(1, 2)
+
+        num_profiles = shape_raster_data.shape[0]
+        num_profile_points = shape_raster_data.shape[1]
+
+        points = shape_raster_data.reshape(
+            (num_profiles * num_profile_points, 3)
+        ).tolist()
+
+        cw_ordering = has_cw_ordering(shape_raster_data[0])
+        tri_base = []
+        for i in range(num_profile_points):
+            idx_0 = i
+            idx_1 = (i + 1) % num_profile_points
+            idx_2 = idx_0 + num_profile_points
+            idx_3 = idx_1 + num_profile_points
+
+            if cw_ordering:
+                tri_base += [[idx_0, idx_2, idx_1], [idx_1, idx_2, idx_3]]
+            else:
+                tri_base += [[idx_0, idx_1, idx_2], [idx_1, idx_3, idx_2]]
+
+        tri_base = np.array(tri_base, dtype=int)
+        triangles = np.array(
+            [
+                tri_base + i * num_profile_points + offset
+                for i in range(num_profiles - 1)
+            ],
+            dtype=int,
+        )
+
+        triangles = triangles.reshape(
+            (tri_base.shape[0] * (num_profiles - 1), 3)
+        ).tolist()
+
+        # closes front and back faces
+        tri_cw = []
+        tri_ccw = []
+        i_0 = 0
+        i_1 = 0
+
+        while i_0 + i_1 < num_profile_points - 2:
+            if i_1 == i_0:
+                p_0 = i_0 + offset
+                p_1 = p_0 + 1
+                p_2 = num_profile_points + offset - i_1 - 1
+                i_0 += 1
+            else:
+                p_0 = i_0 + offset
+                p_1 = num_profile_points + offset - i_1 - 2
+                p_2 = p_1 + 1
+                i_1 += 1
+            tri_cw += [[p_0, p_1, p_2]]
+            tri_ccw += [[p_0, p_2, p_1]]
+
+        if cw_ordering:
+            front = tri_cw
+            back = tri_ccw
+        else:
+            front = tri_ccw
+            back = tri_cw
+        triangles += front
+        triangles += (
+            np.array(back, int) + (num_profiles - 1) * num_profile_points
+        ).tolist()
+
+        return points, triangles
+
+    @classmethod
     def from_geometry_raster(
-        geometry_raster: np.ndarray, closed_mesh: bool = True
+        cls, geometry_raster: np.ndarray, closed_mesh: bool = True
     ) -> SpatialData:
         """Triangulate rasterized Geometry Profile.
 
@@ -2593,33 +2586,17 @@ class SpatialData:
         if geometry_raster[0].ndim == 2:
             return SpatialData(*_triangulate_geometry(geometry_raster))
 
-        part_data = [_triangulate_geometry(part) for part in geometry_raster]
-        total_points = []
-        total_triangles = []
-        for i, (points, triangulation) in enumerate(part_data):
-            total_triangles += (triangulation + len(total_points)).tolist()
-            if closed_mesh:
-                # closes side faces
-                i_p1 = len(total_points)
-                i_p2 = i_p1 + len(geometry_raster[i][0][0]) - 1
-                i_p3 = i_p1 + len(points) - 1
-                i_p4 = i_p3 - len(geometry_raster[i][-1][0]) + 1
-                total_triangles += [[i_p1, i_p2, i_p3], [i_p3, i_p4, i_p1]]
+        points = []
+        triangles = []
+        for i, shape_raster_data in enumerate(geometry_raster):
+            shape_points, shape_triangle = cls._shape_points_and_triangles(
+                shape_raster_data,
+                len(points),
+            )
+            points += shape_points
+            triangles += shape_triangle
 
-                # closes front and back faces
-                def _triangulate_profile(p_0, p_1):
-                    triangles = []
-                    while p_1 > p_0:
-                        triangles += [[p_0, p_1, p_1 - 1], [p_1 - 1, p_0 + 1, p_0]]
-                        p_0 += 1
-                        p_1 -= 1
-                    return triangles
-
-                total_triangles += _triangulate_profile(i_p1, i_p2)
-                total_triangles += _triangulate_profile(i_p4, i_p3)
-            total_points += points.tolist()
-
-        return SpatialData(total_points, total_triangles)
+        return SpatialData(points, triangles)
 
     def plot(
         self,
