@@ -63,7 +63,7 @@ jobs:
         run: |
           mypy --install-types --non-interactive .
 
-  pre-commit:
+  lint (pre-commit):
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
