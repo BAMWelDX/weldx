@@ -13,7 +13,7 @@ from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
 from pandas.api.types import is_object_dtype
 from xarray import DataArray
 
-from .constants import Q_
+from weldx.constants import Q_
 
 __all__ = [
     "Time",
@@ -228,24 +228,20 @@ class Time:
     Direct access and iteration are also supported. The return types are fitting pandas
     types:
 
+
+    >>> t = Time(["1s", "2s", "3s"])
+    >>> t[1]
+    Time:
+    0 days 00:00:02
+
+    >>> t = Time(["2000", "2001", "2002"])
+    >>> t[1]
+    Time:
+    2001-01-01 00:00:00
+    reference time: 2000-01-01 00:00:00
+
     >>> from pandas import Timedelta
     >>>
-    >>> t = Time(["1s", "2s", "3s"])
-    >>> t[1] == Timedelta(2, "s")
-    True
-
-    >>> isinstance(t[1], Timedelta)
-    True
-
-    >>> from pandas import Timestamp
-    >>>
-    >>> t = Time(["2000", "2001", "2002"])
-    >>> t[1] == Timestamp("2001")
-    True
-
-    >>> isinstance(t[1], Timestamp)
-    True
-
     >>> t = Time(["1s", "2s", "3s"])
     >>> result = Timedelta(0, "s")
     >>>
@@ -254,8 +250,8 @@ class Time:
     ...         raise TypeError("Unexpected type")
     ...     result += value
     >>>
-    >>> result == Timedelta(6, "s")
-    True
+    >>> result
+    Timedelta('0 days 00:00:06')
 
     """
 
