@@ -62,7 +62,8 @@
 - Merging and unmerging multiple `CoordinateSystemManager` instances now correctly preserves all attached data.
   [[#494]](https://github.com/BAMWelDX/weldx/pull/494).
 - `compare_nested` can compare sets [[#496]](https://github.com/BAMWelDX/weldx/pull/496)
-- `WeldxFile` cleans old memory blocks during file updates [[#538]](https://github.com/BAMWelDX/weldx/pull/538).
+- `WeldxFile` cleans old memory blocks during file updates [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
+- `WeldxFile` respects `mode` argument also for BytesIO and file handles [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
 
 ### documentation
 
