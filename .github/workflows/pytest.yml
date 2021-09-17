@@ -82,7 +82,7 @@ jobs:
       - name: test with WeldxFile
         if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         run: |
-          pytest -n2 --dist loadfile --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
+          pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
 
       - name: coverage xml (combination is performed by pytest-cov)
         if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
