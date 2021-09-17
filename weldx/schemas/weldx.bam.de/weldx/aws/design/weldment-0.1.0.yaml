@@ -1,0 +1,24 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/aws/design/weldment-0.1.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  An assembly whose component parts are joined by welding
+type: object
+properties:
+  sub_assembly:
+    description: |
+      A list of assemblies composing the weldment
+    type: array
+    items:
+      $ref: sub_assembly-0.1.0
+
+
+
+required: [sub_assembly]
+propertyOrder: [sub_assembly]
+flowStyle: block
+...

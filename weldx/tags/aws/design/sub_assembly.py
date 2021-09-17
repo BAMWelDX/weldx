@@ -20,5 +20,5 @@ class SubAssembly:
 SubAssemblyConverter = dataclass_serialization_class(
     class_type=SubAssembly,
     class_name="aws/design/sub_assembly",
-    version="1.0.0",
+    version="0.1.0",
 )

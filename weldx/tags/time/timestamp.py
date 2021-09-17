@@ -9,7 +9,7 @@ class TimestampConverter(WeldxConverter):
     """A simple implementation of serializing a single pandas Timestamp."""
 
     name = "time/timestamp"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [pd.Timestamp]
 
     def to_yaml_tree(self, obj: pd.Timestamp, tag: str, ctx) -> dict:

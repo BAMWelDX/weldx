@@ -12,7 +12,7 @@ __all__ = ["UuidConverter"]
 class UuidConverter(WeldxConverter):
     """Implements a version 4 UUID."""
 
-    tags = ["asdf://weldx.bam.de/weldx/tags/uuid-1.*"]
+    tags = ["asdf://weldx.bam.de/weldx/tags/uuid-0.1.*"]
     types = [UUID]
 
     def to_yaml_tree(self, obj: UUID, tag: str, ctx: SerializationContext) -> str:

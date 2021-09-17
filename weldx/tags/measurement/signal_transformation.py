@@ -7,5 +7,5 @@ __all__ = ["SignalTransformation", "SignalTransformationConverter"]
 SignalTransformationConverter = dataclass_serialization_class(
     class_type=SignalTransformation,
     class_name="measurement/signal_transformation",
-    version="1.0.0",
+    version="0.1.0",
 )

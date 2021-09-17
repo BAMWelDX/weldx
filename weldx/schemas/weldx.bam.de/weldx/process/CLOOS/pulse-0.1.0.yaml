@@ -1,0 +1,17 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/process/CLOOS/pulse-0.1.0"
+
+title: |
+  CLOOS GMAW pulsed processes.
+
+description: |
+  Base schema describing a default UI or II modulated pulsed GMAW processes.
+
+allOf:
+  - $ref: "../terms-0.1.0#/base_process"
+  - oneOf:
+    - $ref: "../terms-0.1.0#/process/pulse/UI"
+    - $ref: "../terms-0.1.0#/process/pulse/II"
+...

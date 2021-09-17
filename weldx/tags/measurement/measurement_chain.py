@@ -11,7 +11,7 @@ class MeasurementChainConverter(WeldxConverter):
     """Serialization class for measurement chains"""
 
     name = "measurement/measurement_chain"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [MeasurementChain]
 
     def to_yaml_tree(self, obj: MeasurementChain, tag: str, ctx) -> dict:
