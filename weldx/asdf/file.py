@@ -15,10 +15,9 @@ from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
 
+from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 from weldx.util import inherit_docstrings
-
-from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 
 __all__ = [
     "WeldxFile",

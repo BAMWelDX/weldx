@@ -98,5 +98,3 @@ oneOf:
     required: [start, end, freq]
     propertyOrder: [start, end, freq, min, max]
 ...
-
-
