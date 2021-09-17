@@ -22,3 +22,11 @@ repos:
     rev: 3.9.2
     hooks:
     - id: flake8
+-   repo: https://github.com/pycqa/pydocstyle
+    rev: 6.1.1
+    hooks:
+    - id: pydocstyle
+      args:
+        - --convention=numpy
+        - --match="(?!__)(?!_version)(?!conftest).*\.py"
+        - --match-dir="[^\.][^\docs][^\tags].*"
