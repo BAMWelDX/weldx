@@ -201,7 +201,7 @@ class WeldxFile(UserDict):
                 f'invalid mode "{mode}" given. Should be one of "r", "rw".'
             )
         elif tree and mode != "rw":
-            raise ValueError(
+            raise RuntimeError(
                 "You cannot pass a tree (to be written) on a read-only file."
             )
         self._mode = mode

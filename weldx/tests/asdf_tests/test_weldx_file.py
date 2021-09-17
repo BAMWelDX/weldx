@@ -135,7 +135,7 @@ class TestWeldXFile:
         """Test wrapper creation from a dictionary."""
         tree = dict(foo="bar")
         # creates a buffer
-        self.fh = WeldxFile(filename_or_file_like=None, tree=tree)
+        self.fh = WeldxFile(filename_or_file_like=None, tree=tree, mode="rw")
         new_file = self.make_copy(self.fh)
         assert WeldxFile(new_file)["foo"] == "bar"
 
@@ -318,7 +318,7 @@ class TestWeldXFile:
         """Schema paths should be resolved internally."""
         schema = "single_pass_weld-1.0.0"
         with pytest.raises(ValidationError) as e:
-            WeldxFile(tree=dict(foo="bar"), custom_schema=schema)
+            WeldxFile(tree=dict(foo="bar"), custom_schema=schema, mode="rw")
         assert "required property" in e.value.message
 
     @staticmethod
