@@ -344,7 +344,7 @@ class Time:
 
     def __getitem__(self, item) -> Time:
         """Access pandas index."""
-        return Time(self.as_pandas_index()[item], self.reference__time)
+        return Time(self.as_pandas_index()[item], self.reference_time)
 
     def __getattr__(self, item: str):
         """Delegate unknown method calls to pandas index.
