@@ -1,0 +1,25 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/process/CLOOS/spray_arc-1.0.0"
+tag: "tag:weldx.bam.de:weldx/process/CLOOS/spray_arc-1.0.0"
+
+title: |
+  CLOOS spray arc process.
+
+allOf:
+  - $ref: "../generic-1.0.0#/spray"
+  - type: object
+    properties:
+      parameters:
+        type: object
+        properties:
+          impedance:
+            tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+            wx_unit: "percent"
+          characteristic:
+            tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+            wx_unit: "V/A"
+        required: [impedance,characteristic]
+
+...

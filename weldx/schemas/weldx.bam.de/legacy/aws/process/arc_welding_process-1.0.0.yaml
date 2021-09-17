@@ -1,0 +1,57 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/process/arc_welding_process-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/process/arc_welding_process-1.0.0"
+
+title: |
+  <TODO DESCRIPTION>
+description: |
+  See AWS 3.0, Figure 54A - Master Chart of Welding and Allied Processes.
+type: object
+properties:
+  name:
+    description: |
+      Long name of the welding process.
+    type: string
+    enum:
+      - atomicHydrogenWelding
+      - bareMetalArcWelding
+      - carbonArcWelding
+      - carbonArcWeldingGas
+      - carbonArcWeldingShielded
+      - electrogasWelding
+      - electroSlagWelding
+      - gasMetalArcWelding
+      - gasTungstenArcWelding
+      - plasmaArcWelding
+      - shieldedMetalArcWelding
+      - studArcWelding
+      - submergedArcWelding
+      - submergedArcWeldingSeries
+  abbreviation:
+    description: |
+      Short form abbreviation.
+    type: string
+    enum:
+      - AHW
+      - BMAW
+      - CAW
+      - CAW-G
+      - CAW-S
+      - EGW
+      - ESW
+      - GMAW
+      - GTAW
+      - PAW
+      - SMAW
+      - SW
+      - SAW
+      - SAW-S
+
+
+
+required: [name, abbreviation]
+propertyOrder: [name, abbreviation]
+flowStyle: block
+...

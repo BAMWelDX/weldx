@@ -1,0 +1,108 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/time_series-0.1.0"
+
+title: |
+  Schema that describes a time series.
+description: |
+  Describes a time dependent quantity.
+
+examples:
+  -
+    - A time_series describing a constant value in time.
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
+        unit: millimeter / second
+        value: 10.0
+  -
+    - A time_series describing a sine oscillation in 3d space along the z-axis
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
+        expression: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
+          expression: a*sin(o*t + p) + b
+          parameters:
+            a: !unit/quantity-1.1.0
+              unit: millimeter
+              value: !core/ndarray-1.0.0
+                data:
+                - [0, 0, 1]
+                datatype: int32
+                shape: [1, 3]
+            b: !unit/quantity-1.1.0 {unit: millimeter, value: 0.0}
+            o: !unit/quantity-1.1.0 {unit: hertz * radian, value: 4.934802200544679}
+            p: !unit/quantity-1.1.0 {unit: radian, value: 0}
+        unit: millimeter
+        shape: [1, 3]
+
+oneOf:
+  - type: object
+    description: |
+      Implementation for constant values.
+    properties:
+      value:
+        description: |
+          Number or n-dimensional array that is constant in time.
+        anyOf:
+          - type: number
+          - type: integer
+          - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+      unit:
+        description: |
+          Unit of the data.
+        type: string
+    required: [value, unit]
+
+  - type: object
+    description: |
+      Implementation for expressions.
+    properties:
+      expression:
+        description: |
+          A mathematical expression that describes the time dependent behaviour.
+        tag: "asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.*"
+      unit:
+        description: |
+          Resulting unit of the data when the expression is evaluated.
+        type: string
+      shape:
+        description: |
+          (optional) Resulting shape of the data when the expression is evaluated.
+        type: array
+    required: [expression, unit]
+
+  - type: object
+    description: |
+      Implementation for discrete data.
+    properties:
+      time:
+        description: |
+          A set of time deltas.
+        tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.*"
+      unit:
+        description: |
+          Unit of the data.
+        type: string
+      shape:
+        description: |
+          Shape of the data.
+        type: array
+      interpolation:
+        description: |
+          Method how the data should be interpolated.
+        type: string
+        enum: [linear, step]
+      values:
+        description: |
+          Set of discrete n-dimensional data.
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape:
+      #description: |
+      #  The outer dimension of the data needs to be identical to the times dimension.
+      time: [t]
+      values: [t, ...]
+    required: [time, unit, shape, interpolation, values]
+
+propertyOrder: [expression, values, time, unit, shape, interpolation, values]
+flowStyle: block
+...

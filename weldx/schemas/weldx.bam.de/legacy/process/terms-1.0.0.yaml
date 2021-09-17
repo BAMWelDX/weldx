@@ -1,0 +1,149 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/process/terms-1.0.0"
+
+title: |
+  GMAW process definitions
+
+base_process:
+  description: |
+    The base metadata format for all GMAW process descriptions.
+  type: object
+  properties:
+    base_process:
+      type: string
+    manufacturer:
+      type: string
+    power_source:
+      type: string
+    parameters:
+      type: object
+      wx_property_tag: "tag:weldx.bam.de:weldx/core/time_series-*"
+    meta:
+      type: object
+  required: [base_process,manufacturer,power_source,parameters]
+
+process:
+  spray:
+    type: object
+    properties:
+      base_process:
+        type: string
+        enum: [spray]
+      parameters:
+        type: object
+        properties:
+          wire_feedrate:
+            $ref: "#/parameters/wire_feedrate"
+          voltage:
+            $ref: "#/parameters/voltage"
+        required: [wire_feedrate, voltage]
+
+  pulse:
+    UI:
+      type: object
+      properties:
+        base_process:
+          type: string
+          enum: [pulse]
+        parameters:
+          type: object
+          properties:
+            wire_feedrate:
+              $ref: "#/parameters/wire_feedrate"
+            pulse_voltage:
+              $ref: "#/parameters/pulse_voltage"
+            pulse_duration:
+              $ref: "#/parameters/pulse_duration"
+            pulse_frequency:
+              $ref: "#/parameters/pulse_frequency"
+            base_current:
+              $ref: "#/parameters/base_current"
+          required: [wire_feedrate, pulse_voltage, pulse_duration, pulse_frequency, base_current]
+        meta:
+          type: object
+          properties:
+            modulation:
+              type: string
+              enum: [UI]
+          required: [modulation]
+
+    II:
+      type: object
+      properties:
+        base_process:
+          type: string
+          enum: [pulse]
+        parameters:
+          type: object
+          properties:
+            wire_feedrate:
+              $ref: "#/parameters/wire_feedrate"
+            pulse_current:
+              $ref: "#/parameters/pulse_current"
+            pulse_duration:
+              $ref: "#/parameters/pulse_duration"
+            pulse_frequency:
+              $ref: "#/parameters/pulse_frequency"
+            base_current:
+              $ref: "#/parameters/base_current"
+          required: [wire_feedrate, pulse_current, pulse_duration, pulse_frequency, base_current]
+        meta:
+          type: object
+          properties:
+            modulation:
+              type: string
+              enum: [II]
+          required: [modulation]
+
+parameters:
+  wire_feedrate:
+    description: |
+      Nominal average wire feedrate.
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_unit: "m/s"
+
+  voltage:
+    description: |
+      Nominal target voltage for spray arc processes.
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_unit: "V"
+
+  pulse_voltage:
+    description: |
+      Nominal target pulse voltage.
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_unit: "V"
+
+  pulse_current:
+    description: |
+      Nominal target pulse current.
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_unit: "A"
+
+  pulse_duration:
+    description: |
+      Nominal target pulse duration.
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_unit: "s"
+
+  pulse_frequency:
+    description: |
+      Nominal target pulse frequency.
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_unit: "Hz"
+
+  base_voltage:
+    description: |
+      Nominal target base voltage.
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_unit: "V"
+
+  base_current:
+    description: |
+      Nominal target base current.
+    tag: "tag:weldx.bam.de:weldx/core/time_series-1.0.0"
+    wx_unit: "A"
+
+...

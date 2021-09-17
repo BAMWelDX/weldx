@@ -1,0 +1,61 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0"
+
+title: |
+  Schema that describes a subsystem of a local coordinate system hierarchy
+description: |
+  It contains the data that is necessary to describe a subsystem.
+
+examples:
+  -
+    - A subsystem assignment of the coordinate systems workpiece, user_frame, T1 and T2.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy_subsystem-1.0.0>
+        name: Subsystem T
+        parent_system: Base CSM
+        root_cs: workpiece
+        members: [workpiece, user_frame, T1, T2]
+        subsystem_names: []
+
+type: object
+properties:
+  name:
+    description: |
+      The name of the subsystem.
+    type: string
+
+  parent_system:
+    description: |
+      The name of the parent system.
+    type: string
+
+  reference_time:
+    description: |
+      A timestamp that serves as reference point for all attached coordinate systems.
+    tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
+
+  root_cs:
+    description: |
+      The name of the subsystems root coordinate system.
+    type: string
+
+  members:
+    description: |
+      The names of all coordinate systems that belong to the subsystem.
+    type: array
+    items:
+      type: string
+
+  subsystem_names:
+    description: |
+      The names of all subsystems that are attached to this subsystem.
+    type: array
+    items:
+      type: string
+
+propertyOrder: [name, parent_system, root_cs, members, subsystems]
+flowStyle: block
+...

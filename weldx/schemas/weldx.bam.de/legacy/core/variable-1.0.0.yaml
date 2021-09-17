@@ -1,0 +1,45 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/variable-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/variable-1.0.0"
+
+title: |
+  Schema that describes a variable.
+description: |
+  This class is a slight modification of the corresponding NetCDF datamodel item.
+  (See https://www.unidata.ucar.edu/software/netcdf/docs/netcdf_data_model.html)
+type: object
+properties:
+  name:
+    description: |
+      The variables name.
+    type: string
+  dimensions:
+    description: |
+      An array that contains the dimension names in the correct order (outer to inner).
+    type: array
+  dtype:
+    description: |
+      The arrays fundamental data type defined by a code of 3 characters (adapted from NumPy). For further information
+      see: https://numpy.org/doc/stable/reference/arrays.interface.html#arrays-interface
+    type: string
+  data:
+    description: |
+      An n-dimensional array that contains the data.
+    oneOf:
+      - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+      - type: number
+  unit:
+    description: |
+      Optional field describing the unit of the data as valid string representation.
+    type: string
+  attrs:
+    description: |
+      Additional attributes metadata associated with the variable.
+    type: object
+
+required: [name, dimensions, dtype, data]
+propertyOrder: [name, dimensions, dtype, unit, data]
+flowStyle: block
+...

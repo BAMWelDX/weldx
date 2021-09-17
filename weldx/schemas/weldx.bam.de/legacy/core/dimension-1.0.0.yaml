@@ -1,0 +1,27 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/dimension-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/dimension-1.0.0"
+
+title: |
+  Schema that describes a dimension
+description: |
+  This class is a slight modification of the corresponding NetCDF datamodel item.
+  (See https://www.unidata.ucar.edu/software/netcdf/docs/netcdf_data_model.html)
+type: object
+properties:
+  name:
+    description: |
+      Name of the dimension.
+    type: string
+  length:
+    description: |
+      Length of the dimension.
+    type: integer
+
+
+required: [name, length]
+propertyOrder: [name, length]
+flowStyle: block
+...

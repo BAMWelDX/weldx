@@ -1,0 +1,60 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/geometry/spatial_data-0.1.0"
+
+title: |
+  Schema for a point cloud.
+description: |
+  This schema describes a collection of data points in 3d space.
+
+examples:
+  -
+    - A simple `SpatialData` with triangulation
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.0>
+        coordinates: !core/ndarray-1.0.0
+          data:
+          - [0.0, 0.0, 0.0]
+          - [1.0, 0.0, 0.0]
+          - [1.0, 1.0, 0.0]
+          - [0.0, 1.0, 0.0]
+          datatype: float64
+          shape: [4, 3]
+        triangles: !core/ndarray-1.0.0
+          data:
+          - [0, 1, 2]
+          - [2, 3, 0]
+          datatype: uint32
+          shape: [2, 3]
+
+type: object
+properties:
+  coordinates:
+    description: |
+      The coordinates of the data points.
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    properties:
+      datatype:
+        type: string
+        enum: [float32, float64]
+    wx_shape: [(~), 3]
+  attributes:
+    description: |
+      An arbitrary set of attributes. For example, normals, colors or measured point data can be stored using this
+      field. Each added attribute is an array with a number of data points equal to the number of points.
+    type: object
+  triangles:
+    description: |
+      An array of index triplets that specify which points form a triangle
+    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    properties:
+      datatype:
+        type: string
+        enum: [uint32, uint64]
+    wx_shape: [(~), 3]
+
+propertyOrder: [coordinates, attributes, triangles]
+required: [coordinates]
+flowStyle: block
+...

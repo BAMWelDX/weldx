@@ -1,0 +1,44 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/aws/process/gas_component-1.0.0"
+tag: "tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0"
+
+title: |
+  Shielding gas component
+description: |
+  A single gas element of a mixture and its percentage of the mixture by weight.
+
+examples:
+  -
+    - A single argon gas component
+    - |
+      !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
+        gas_chemical_name: argon
+        gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
+
+type: object
+properties:
+  gas_chemical_name:
+    description: |
+      Name of a single element or compound of gas.
+    type: string
+    enum:
+      - argon
+      - carbon dioxide
+      - helium
+      - hydrogen
+      - oxygen
+
+  gas_percentage:
+    description: |
+      Percentage by weight this gas occupies of the total gas mixture.
+    tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    wx_unit: "percent"
+
+
+
+required: [gas_chemical_name, gas_percentage]
+propertyOrder: [gas_chemical_name, gas_percentage]
+flowStyle: block
+...

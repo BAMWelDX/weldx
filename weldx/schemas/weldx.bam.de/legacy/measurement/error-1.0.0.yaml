@@ -1,0 +1,29 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/measurement/error-1.0.0"
+tag: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
+
+title: |
+  Measurement error description.
+description: |
+  A basic schema to represent a measurement error.
+
+examples:
+  -
+    - An error representing a deviation of 0.1%.
+    - |
+      !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+        deviation: !unit/quantity-1.1.0 {unit: percent, value: 0.1}
+
+type: object
+properties:
+  deviation:
+    description: |
+      A simple numerical representation of the error.
+    oneOf:
+      - type: number
+      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+required: [deviation]
+flowStyle: block
+...

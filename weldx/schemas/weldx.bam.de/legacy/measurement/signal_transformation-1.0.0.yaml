@@ -1,0 +1,62 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/measurement/signal_transformation-1.0.0"
+tag: "tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0"
+
+title: |
+  Signal transformation step.
+description: |
+  Describes the transformation between an input and output signal.
+  Optionally describes the associated error of the transformation step and the mathematical formula.
+examples:
+  -
+    - A simple analog-digital conversion without a function that affects the signal values
+    - |
+      !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
+        name: AD conversion
+        error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+          deviation: !unit/quantity-1.1.0 { unit: percent, value: 0.5 }
+        type_transformation: AD
+  -
+    - A transformation that calculates amperes based on volts using a given function
+    - |
+      !<tag:weldx.bam.de:weldx/measurement/signal_transformation-1.0.0>
+        name: Volt-Ampere-Conversion
+        error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
+          deviation: !unit/quantity-1.1.0 { unit: percent, value: 1.5 }
+        func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
+          expression: a*x + b
+          parameters:
+            a: !unit/quantity-1.1.0 { unit: ampere / volt, value: 3 }
+            b: !unit/quantity-1.1.0 { unit: ampere, value: 2 }
+
+type: object
+properties:
+  name:
+    description: |
+      The name of the transformation
+    type: string
+  error:
+    description: |
+      The error caused by the transformation
+    tag: "tag:weldx.bam.de:weldx/measurement/error-1.0.0"
+  func:
+    description: |
+      A mathematical expression that describes the relation between the values of the output and input signal
+    tag: "tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0"
+  type_transformation:
+    description: |
+      A string of length 2 containing an arbitrary combination of the letters A (for analog) and D (for digital). The
+      first letter represents the type of the input signal and the second letter the type of the output signal.
+    type: string
+    enum: [AA, AD, DA, DD]
+
+anyOf:
+  - required: [name, error, func]
+  - required: [name, error, type_transformation]
+
+propertyOrder: [name, error, func, type_transformation]
+
+flowStyle: block
+...

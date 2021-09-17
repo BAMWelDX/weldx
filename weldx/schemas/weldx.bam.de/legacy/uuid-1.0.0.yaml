@@ -1,0 +1,26 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/uuid-1.0.0"
+tag: "tag:weldx.bam.de:weldx/uuid-1.0.0"
+
+title: |
+  Version 4 UUID
+description: |
+  A version 4 UUID as specified by RFC 4122.
+
+examples:
+  -
+    - A version 4 UUID string
+    - |
+      !<tag:weldx.bam.de:weldx/uuid-1.0.0>
+        uuid: 448414c4-da7a-4832-9219-5e6042c2e96e
+
+type: object
+properties:
+  uuid:
+    description: The UUID with characters in lowercase.
+    type: string
+    pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+required: [uuid]
+...

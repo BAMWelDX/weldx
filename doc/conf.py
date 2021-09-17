@@ -97,6 +97,7 @@ extensions = [
 
 # autosummary --------------------------------------------------------------------------
 autosummary_generate = True
+# autosummary_imported_members = True
 
 # add __init__ docstrings to class documentation
 autoclass_content = "both"
@@ -178,8 +179,8 @@ nbsphinx_prolog = r"""
         :format: html
 
     .. nbinfo::
-    
-        Run the interactive online version of this notebook (takes 1-2 minutes to load): 
+
+        Run the interactive online version of this notebook (takes 1-2 minutes to load):
         :raw-html:`<a href="https://mybinder.org/v2/gh/BAMWelDX/weldx/master?urlpath=lab/tree/{{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>`
 
 """
@@ -287,12 +288,13 @@ intersphinx_mapping = {
 
 nitpick_ignore = []
 
-for line in open("nitpick_ignore"):
+for line in (fh := open("nitpick_ignore")):
     if line.strip() == "" or line.startswith("#"):
         continue
     dtype, target = line.split(None, 1)
     target = target.strip()
     nitpick_ignore.append((dtype, target))
+fh.close()
 
 # Enable better object linkage ---------------------------------------------------------
 

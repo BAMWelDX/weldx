@@ -12,13 +12,15 @@ __all__ = ["UuidConverter"]
 class UuidConverter(WeldxConverter):
     """Implements a version 4 UUID."""
 
-    tags = ["asdf://weldx.bam.de/weldx/tags/uuid-1.*"]
+    tags = ["asdf://weldx.bam.de/weldx/tags/uuid-0.1.*"]
     types = [UUID]
 
-    def to_yaml_tree(self, obj: UUID, tag: str, ctx: SerializationContext) -> dict:
-        """Convert to python dict."""
-        return dict(uuid=str(obj))
+    def to_yaml_tree(self, obj: UUID, tag: str, ctx: SerializationContext) -> str:
+        """Convert to python string."""
+        return str(obj)
 
-    def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
-        """Reconstruct from tree."""
-        return UUID(node["uuid"])
+    def from_yaml_tree(self, node: str, tag: str, ctx: SerializationContext) -> UUID:
+        """Reconstruct from string."""
+        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
+            return UUID(node["uuid"])
+        return UUID(node)

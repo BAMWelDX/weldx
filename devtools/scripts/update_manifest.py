@@ -2,13 +2,12 @@ from pathlib import Path
 
 import yaml
 
-from weldx.asdf.types import _legacy_tag_from_new_tag
 from weldx.asdf.util import get_converter_for_tag
 
 
 def update_manifest(
     search_dir: str = "../../weldx/schemas",
-    out: str = "../../weldx/manifests/weldx-1.0.0.yaml",
+    out: str = "../../weldx/manifests/weldx-0.1.0.yaml",
 ):
     """Create manifest file from existing schemas."""
     # read existing manifest
@@ -33,13 +32,21 @@ def update_manifest(
         )
         if "id" in content:  # should be schema file
             uri: str = content["id"]
-            tag = uri.replace("/schemas/", "/tags/")
-            if get_converter_for_tag(tag):  # check if converter is implemented
+            if uri.startswith("asdf://weldx.bam.de"):
+                tag = uri.replace("/schemas/", "/tags/")
+            elif uri.startswith("http://weldx.bam.de"):  # legacy_code
+                if "tag" in content:
+                    tag = content["tag"]
+                else:
+                    tag = None
+                    print(f"No tag for {uri=}")
+            else:
+                raise ValueError(f"Unknown URI format {uri=}")
+
+            if tag is not None and get_converter_for_tag(
+                tag
+            ):  # check if converter is implemented
                 manifest["tags"].append(dict(tag_uri=tag, schema_uri=uri))
-                if tag.startswith("asdf://"):
-                    manifest["tags"].append(
-                        dict(tag_uri=_legacy_tag_from_new_tag(tag), schema_uri=uri)
-                    )  # legacy_tag
             else:
                 print(f"No converter for URI: {schema}")
 

@@ -24,5 +24,5 @@ class JointPenetration:
 JointPenetrationConverter = dataclass_serialization_class(
     class_type=JointPenetration,
     class_name="aws/design/joint_penetration",
-    version="1.0.0",
+    version="0.1.0",
 )

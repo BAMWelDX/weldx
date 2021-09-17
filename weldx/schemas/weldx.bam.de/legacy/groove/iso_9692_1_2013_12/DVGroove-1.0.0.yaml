@@ -1,0 +1,42 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/groove/iso_9692_1_2013_12/DVGroove-1.0.0"
+tag: "tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DVGroove-1.0.0"
+
+title: |
+  DVGroove representation.
+
+examples:
+  -
+    - A simple DV-Groove
+    - |
+      !<tag:weldx.bam.de:weldx/groove/iso_9692_1_2013_12/DVGroove-1.0.0>
+        t: !unit/quantity-1.1.0 {unit: millimeter, value: 19}
+        alpha_1: !unit/quantity-1.1.0 {unit: degree, value: 40}
+        alpha_2: !unit/quantity-1.1.0 {unit: degree, value: 60}
+        b: !unit/quantity-1.1.0 {unit: millimeter, value: 2}
+        c: !unit/quantity-1.1.0 {unit: millimeter, value: 5}
+        h1: !unit/quantity-1.1.0 {unit: millimeter, value: 7}
+        h2: !unit/quantity-1.1.0 {unit: millimeter, value: 7}
+        code_number: ['2.4', 2.5.1, 2.5.2]
+
+type: object
+properties:
+  t:
+    $ref: "../terms-1.0.0#/definitions/workpiece-thickness"
+  alpha_1:
+    $ref: "../terms-1.0.0#/definitions/groove-angle"
+  alpha_2:
+    $ref: "../terms-1.0.0#/definitions/groove-angle"
+  b:
+    $ref: "../terms-1.0.0#/definitions/root-gap"
+  c:
+    $ref: "../terms-1.0.0#/definitions/root-face"
+  h1:
+    $ref: "../terms-1.0.0#/definitions/root-face"
+  h2:
+    $ref: "../terms-1.0.0#/definitions/root-face"
+required: [t, alpha_1, alpha_2, b, c]
+propertyOrder: [t, alpha_1, alpha_2, b, c, h1, h2]
+...

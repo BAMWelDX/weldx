@@ -1,0 +1,13 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/process/generic-1.0.0"
+
+title: |
+  Generic GMAW processes
+
+spray:
+  allOf:
+    - $ref: "./terms-1.0.0#/base_process"
+    - $ref: "./terms-1.0.0#/process/spray"
+...

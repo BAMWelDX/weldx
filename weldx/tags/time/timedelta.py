@@ -8,7 +8,7 @@ __all__ = ["TimedeltaConverter"]
 class TimedeltaConverter(WeldxConverter):
     """A simple implementation of serializing a single pandas Timedelta."""
 
-    tags = ["asdf://weldx.bam.de/weldx/tags/time/timedelta-1.*"]
+    tags = ["asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.*"]
     types = [pd.Timedelta]
 
     def to_yaml_tree(self, obj: pd.Timedelta, tag, ctx) -> dict:

@@ -13,6 +13,6 @@ def _from_yaml_tree_mod(tree):
 SignalConverter = dataclass_serialization_class(
     class_type=Signal,
     class_name="measurement/signal",
-    version="1.0.0",
+    version="0.1.0",
     from_yaml_tree_mod=_from_yaml_tree_mod,
 )

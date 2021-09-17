@@ -15,10 +15,9 @@ from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
 
+from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 from weldx.util import inherit_docstrings
-
-from .util import get_schema_path, get_yaml_header, view_tree
 
 __all__ = [
     "WeldxFile",
@@ -52,6 +51,22 @@ DEFAULT_ARRAY_COPYING = True
 @inherit_docstrings
 class WeldxFile(UserDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
+
+    The WeldxFile class makes it easy to work with ASDF files. Creating, validating,
+    and updating data is handled by just treating the WeldxFile object as a dictionary.
+    Every piece of data is accessible via a key, while the keys should be strings,
+    the data can be any Python object.
+
+    Creation is being done by just creating a WeldxFile with or without a filename.
+    Operation without filenames is of course non-persitant, meaning that your changes
+    will be lost upon the end of your Python session.
+
+    You can decide, whether you want to open your file with read-only (default) or
+    read and write mode. This is mainly a safety precaution, in order not to overwrite
+    or manipulate existing data by accident.
+
+    For a brief introduction into the features of this class, please have a look at the
+    :doc:`tutorial <../tutorials/weldxfile>` or the examples given here.
 
     Parameters
     ----------
@@ -93,6 +108,54 @@ class WeldxFile(UserDict):
         When `False`, when reading files, attempt to memory map (memmap) underlying data
         arrays when possible. This avoids blowing the memory when working with very
         large datasets.
+
+    Examples
+    --------
+    We define a simple data set and store it in a WeldxFile.
+
+    >>> data = {"name": "CXCOMP", "value": 42}
+    >>> wx = WeldxFile(tree=data)
+
+    If we want to persist the WeldxFile to a file on hard drive we invoke:
+
+    >>> wx2 = WeldxFile("output.wx", tree=data, mode="rw")
+
+    Or we can store the previously created file to disk:
+
+    >>> wx.write_to("output2.wx")
+    'output2.wx'
+
+    If we omit the filename, we receive an in-memory file. This is useful to create
+    quick copies without the need for physical files.
+
+    >>> wx.write_to()  # doctest: +ELLIPSIS
+    <_io.BytesIO object at 0x...>
+
+    We can also read a data set from disk and manipulate it in a dictionary like manner.
+
+    >>> with WeldxFile("output.wx", mode="rw") as wx:
+    ...    wx["name"] = "changed"
+
+    If a file name is omitted, we operate only in memory.
+
+    We can have a look at the serialized data by looking at the asdf header
+
+    >>> wx2.show_asdf_header()  # doctest: +ELLIPSIS,+NORMALIZE_WHITESPACE
+    #ASDF 1.0.0
+    #ASDF_STANDARD 1.5.0
+    %YAML 1.1
+    %TAG ! tag:stsci.edu:asdf/
+    --- !core/asdf-1.1.0
+    asdf_library: !core/software-1.0.0 {...
+      name: asdf, version: ...}
+    history:
+      extensions:
+      - !core/extension_metadata-1.0.0
+        extension_class: asdf.extension.BuiltinExtension
+        software: !core/software-1.0.0 {name: asdf, version: ...}
+    name: CXCOMP
+    value: 42
+    <BLANKLINE>
 
     """
 
@@ -187,7 +250,7 @@ class WeldxFile(UserDict):
 
     @property
     def mode(self) -> str:
-        """Open mode of file, one of read or read/write."""
+        """File operation mode: reading or reading/writing mode, one of "r" or "rw"."""
         return self._mode
 
     @property
@@ -237,31 +300,30 @@ class WeldxFile(UserDict):
 
         Examples
         --------
+        Let us define a custom softare entry and use it during file creation.
+
         >>> import weldx
-
-        Define a custom softare entry:
-
-        >>> software = dict(name="MyFancyPackage", author="Me", \
-                homepage="https://startpage.com", version="1.0")
+        >>> software = dict(name="MyFancyPackage", author="Me",
+        ...        homepage="https://startpage.com", version="1.0")
         >>> f = weldx.WeldxFile(software_history_entry=software)
         >>> f.add_history_entry("we made some change")
         >>> f.history #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-         [{'description': 'we made some change', \
-           'time': datetime.datetime(...), \
-           'software': {'name': 'MyFancyPackage', 'author': 'Me', \
+         [{'description': 'we made some change',
+           'time': datetime.datetime(...),
+           'software': {'name': 'MyFancyPackage', 'author': 'Me',
            'homepage': 'https://startpage.com', 'version': '1.0'}}]
 
         We can also change the software on the fly:
-        >>> software_new = dict(name="MyTool", author="MeSoft", \
-                homepage="https://startpage.com", version="1.0")
+        >>> software_new = dict(name="MyTool", author="MeSoft",
+        ...                     homepage="https://startpage.com", version="1.0")
         >>> f.add_history_entry("another change using mytool", software_new)
 
         Lets inspect the last history entry:
 
         >>> f.history[-1] #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'description': 'another change using mytool', \
-         'time': datetime.datetime(...), \
-         'software': {'name': 'MyTool', 'author': 'MeSoft', \
+        {'description': 'another change using mytool',
+         'time': datetime.datetime(...),
+         'software': {'name': 'MyTool', 'author': 'MeSoft',
          'homepage': 'https://startpage.com', 'version': '1.0'}}
 
         """
@@ -328,6 +390,27 @@ class WeldxFile(UserDict):
         )
 
     sync.__doc__ = AsdfFile.update.__doc__
+
+    @classmethod
+    def fromkeys(cls, iterable, default=None) -> "WeldxFile":
+        """Create a new file with keys from iterable and values set to value.
+
+        Parameters
+        ----------
+        iterable :
+            list of key names
+        default :
+            default value to fill the keys with.
+
+        Examples
+        --------
+        >>> from collections import defaultdict
+        >>> wx = WeldxFile.fromkeys(("TCP", "wx_meta", "process"))
+        >>> wx["TCP"], wx["wx_meta"], wx["process"]
+        (None, None, None)
+        """
+        tree = dict.fromkeys(iterable, default)
+        return WeldxFile(tree=tree)
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -418,7 +501,7 @@ class WeldxFile(UserDict):
 
         Returns
         -------
-        attrdict :
+        MutableMapping :
             This dictionary wrapped such, that all of its keys can be accessed as
             properties.
 
@@ -449,8 +532,8 @@ class WeldxFile(UserDict):
 
     def write_to(
         self, fd: Optional[types_path_and_file_like] = None, **write_args
-    ) -> Optional[BytesIO]:
-        """Write current weldx file to given file name or file type.
+    ) -> Optional[types_path_and_file_like]:
+        """Write current contents to given file name or file type.
 
         Parameters
         ----------
@@ -471,7 +554,8 @@ class WeldxFile(UserDict):
 
         Returns
         -------
-        The given input file name or a buffer, in case the input was omitted.
+        types_path_and_file_like :
+            The given input file name or a buffer, in case the input it was omitted.
 
         """
         if fd is None:
@@ -568,3 +652,87 @@ class _HeaderVisualizer:
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
         print(get_yaml_header(buff))
+
+
+# Methods of UserDict do not follow the NumPy doc convention.
+WeldxFile.keys.__doc__ = """Return a set of keys/attributes stored in this file.
+Returns
+-------
+keys :
+    all keys stored at the root of this file.
+"""
+
+WeldxFile.clear.__doc__ = """Remove all data from file."""
+
+WeldxFile.copy.__doc__ = """Copies the file."""  # TODO: interface
+
+WeldxFile.get.__doc__ = """Gets data attached to given key from file.
+
+Parameters
+----------
+key :
+    The name of the data.
+default :
+    The default is being returned in case the given key cannot be found.
+
+Raises
+------
+KeyError
+    Raised if the given key cannot be found and no default was provided.
+"""
+
+WeldxFile.update.__doc__ = """Update D from mapping/iterable E and F.
+
+Parameters
+----------
+mapping :
+
+F:
+
+Notes
+-----
+If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
+If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+In either case, this is followed by: for k, v in F.items(): D[k] = v
+"""
+
+
+WeldxFile.items.__doc__ = """Returns a set-like object providing a view on this files items.
+
+Returns
+-------
+dict_items :
+    view on items.
+"""
+
+WeldxFile.setdefault.__doc__ = """Sets a default for given name.
+
+The passed default object will be returned in case the requested key is not present
+in the file.
+
+Parameters
+----------
+key :
+    key name
+default :
+    object to return in case key is not present in the file.
+"""
+
+WeldxFile.pop.__doc__ = """Get and remove the given key from the file.
+
+Parameters
+----------
+key :
+    key name
+default :
+    object to return in case key is not present in the file.
+"""
+
+WeldxFile.popitem.__doc__ = """Removes the item that was last inserted into the file.
+
+Notes
+-----
+In versions before 3.7, the popitem() method removes a random item.
+"""
+
+WeldxFile.values.__doc__ = """Returns a view list like object of the file content."""

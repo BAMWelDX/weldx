@@ -1,0 +1,102 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/core/transformations/rotation-1.0.0"
+tag: "tag:weldx.bam.de:weldx/core/transformations/rotation-1.0.0"
+
+title: |
+  Schema to describe a 3D rotation.
+description: |
+  ASDF implementation for Scipy.Rotation class.
+
+examples:
+  -
+    - A "xyz" euler rotation with 10, 20 and 60 degree angles as euler representation.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/rotation-1.0.0>
+        angles: !unit/quantity-1.1.0
+          unit: degree
+          value: !core/ndarray-1.0.0
+            data: [10.0, 20.0, 60.0]
+            datatype: float64
+            shape: [3]
+        sequence: xyz
+  -
+    - The quaternion rotation representation
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/rotation-1.0.0>
+        quaternions: !core/ndarray-1.0.0
+          data: [-0.012161306594124677, 0.19272730326230897, 0.4774233251326969, 0.8571903276509837]
+          datatype: float64
+          shape: [4]
+  -
+    - The matrix rotation representation.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/rotation-1.0.0>
+        matrix: !core/ndarray-1.0.0
+          data:
+          - [0.46984631039295427, -0.8231729446455007, 0.3187957775971679]
+          - [0.8137976813493737, 0.5438381424823258, 0.20487412870286204]
+          - [-0.3420201433256686, 0.16317591116653485, 0.9254165783983233]
+          datatype: float64
+          shape: [3, 3]
+  -
+    - The rotation vector representation.
+    - |
+      !<tag:weldx.bam.de:weldx/core/transformations/rotation-1.0.0>
+        rotvec: !core/ndarray-1.0.0
+          data: [-0.02555091083053722, 0.404920154109444, 1.0030666289407963]
+          datatype: float64
+          shape: [3]
+
+oneOf:
+  - type: object
+    description: |
+      Quaternion rotation representation.
+    properties:
+      quaternions:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [...,4]
+    required: [quaternions]
+    flowStyle: block
+    additionalProperties: false
+
+  - type: object
+    description: |
+      Matrix rotation representation.
+    properties:
+      matrix:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [...,3,3]
+    required: [matrix]
+    flowStyle: block
+    additionalProperties: false
+
+  - type: object
+    description: |
+      Rotation vector representation.
+    properties:
+      rotvec:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [...,3]
+    required: [rotvec]
+    flowStyle: block
+    additionalProperties: false
+
+  - type: object
+    description: |
+      Euler angles representation.
+    properties:
+      sequence:
+        description: |
+          Euler angles rotation sequence.
+        type: string # TODO: add enum or regex
+      angles:
+        description: |
+          Rotation angles data.
+        tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+        wx_unit: "degree"
+    required: [sequence, angles]
+    flowStyle: block
+    additionalProperties: false
+...

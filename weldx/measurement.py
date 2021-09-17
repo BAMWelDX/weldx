@@ -8,7 +8,7 @@ from warnings import warn
 
 from networkx import draw, draw_networkx_edge_labels
 
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
 
@@ -278,7 +278,7 @@ class MeasurementChain:
         )
 
     @classmethod
-    def from_dict(cls, dictionary: Dict) -> MeasurementChain:
+    def from_dict(cls, dictionary: Dict) -> "MeasurementChain":
         """Create a measurement chain from a dictionary.
 
         Parameters
@@ -300,7 +300,7 @@ class MeasurementChain:
     @classmethod
     def from_equipment(
         cls, name, equipment: MeasurementEquipment, source_name=None
-    ) -> MeasurementChain:
+    ) -> "MeasurementChain":
         """Create a measurement chain from a piece of equipment that contains a source.
 
         Parameters
@@ -371,7 +371,7 @@ class MeasurementChain:
         output_signal_type: str,
         output_signal_unit: str,
         signal_data: TimeSeries = None,
-    ) -> MeasurementChain:
+    ) -> "MeasurementChain":
         """Create a new measurement chain without providing a `SignalSource` instance.
 
         Parameters
@@ -832,9 +832,7 @@ class MeasurementChain:
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
-                if output_signal_unit == "":
-                    output_signal_unit = "1"
-                unit_conversion = f"{output_signal_unit}/{str(input_signal.unit)}"
+                unit_conversion = U_(output_signal_unit) / U_(input_signal.unit)
                 func = MathematicalExpression(
                     "a*x",
                     parameters={"a": Q_(1, unit_conversion)},
@@ -893,7 +891,7 @@ class MeasurementChain:
 
         Returns
         -------
-        TimeSeries :
+        weldx.TimeSeries :
             The requested data
 
         """

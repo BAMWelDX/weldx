@@ -1,0 +1,74 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "http://weldx.bam.de/schemas/weldx/process/GMAW-1.0.0"
+tag: "tag:weldx.bam.de:weldx/process/GMAW-1.0.0"
+
+title: |
+  Generic GMAW process definition.
+
+examples:
+  -
+    - A constant pulsed GMAW process for a CLOOS Quinto power source
+    - |
+      !<tag:weldx.bam.de:weldx/process/CLOOS/pulse-1.0.0>
+          base_process: pulse
+          manufacturer: CLOOS
+          meta: {modulation: UI}
+          parameters:
+            base_current: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+              unit: ampere
+              value: 60.0
+            pulse_duration: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+              unit: millisecond
+              value: 5.0
+            pulse_frequency: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+              unit: hertz
+              value: 100.0
+            pulse_voltage: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+              unit: volt
+              value: 40.0
+            wire_feedrate: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+              unit: meter / minute
+              value: 10.0
+          power_source: Quinto
+          tag: CLOOS/pulse
+  -
+    - A spray arc process where the voltage decreases linearly from 40 V to 20 V over 10 s
+    - |
+      !<tag:weldx.bam.de:weldx/process/CLOOS/spray_arc-1.0.0>
+        base_process: spray
+        manufacturer: CLOOS
+        parameters:
+          characteristic: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+            unit: volt / ampere
+            value: 5.0
+          impedance: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+            unit: percent
+            value: 10.0
+          voltage: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+            &id001 values: &id002 !core/ndarray-1.0.0
+              data: [40.0, 20.0]
+              datatype: float64
+              shape: [2]
+            time: !<tag:weldx.bam.de:weldx/time/timedeltaindex-1.0.0>
+              values: !core/ndarray-1.0.0
+                data: [0, 10000000000]
+                datatype: int64
+                shape: [2]
+              start: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+              end: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+              min: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M0S}
+              max: !<tag:weldx.bam.de:weldx/time/timedelta-1.0.0> {value: P0DT0H0M10S}
+            unit: volt
+            shape: [2]
+            interpolation: linear
+            *id001 : *id002
+          wire_feedrate: !<tag:weldx.bam.de:weldx/core/time_series-1.0.0>
+            unit: meter / minute
+            value: 10.0
+        power_source: Quinto
+        tag: CLOOS/spray_arc
+
+$ref: "./terms-1.0.0#/base_process"
+...
