@@ -112,7 +112,7 @@ def test_add_cs():
     exp_num_cs = 1
     assert csm.number_of_coordinate_systems == exp_num_cs
 
-    for d in lcs_data:
+    for i, d in enumerate(lcs_data):
         name = d[0]
         parent = d[1]
         lcs = d[2]
@@ -123,15 +123,15 @@ def test_add_cs():
 
         csm.add_cs(name, parent, lcs, child_in_parent)
 
-        assert csm.number_of_coordinate_systems == exp_num_cs
+        assert csm.number_of_coordinate_systems == exp_num_cs, f"Testcase {i} failed"
         if child_in_parent:
-            assert csm.get_cs(name, parent) == lcs
+            assert csm.get_cs(name, parent) == lcs, f"Testcase {i} failed"
             if not isinstance(lcs.coordinates, TimeSeries):
-                assert csm.get_cs(parent, name) == lcs.invert()
+                assert csm.get_cs(parent, name) == lcs.invert(), f"Testcase {i} failed"
         else:
             if not isinstance(lcs.coordinates, TimeSeries):
-                assert csm.get_cs(name, parent) == lcs.invert()
-            assert csm.get_cs(parent, name) == lcs
+                assert csm.get_cs(name, parent) == lcs.invert(), f"Testcase {i} failed"
+            assert csm.get_cs(parent, name) == lcs, f"Testcase {i} failed"
 
 
 # test_add_cs_reference_time -----------------------------------------------------------
