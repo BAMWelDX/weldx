@@ -26,7 +26,3 @@ repos:
     rev: 6.1.1
     hooks:
     - id: pydocstyle
-      args:
-        - --convention=numpy
-        - --match="(?!__)(?!_version)(?!conftest).*\.py"
-        - --match-dir="[^\.][^\docs][^\tags].*"
