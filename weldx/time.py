@@ -342,9 +342,9 @@ class Time:
         """Use generator to iterate over index values."""
         return (t for t in self.as_pandas_index())
 
-    def __getitem__(self, item) -> types_pandas_times:
+    def __getitem__(self, item) -> Time:
         """Access pandas index."""
-        return self.as_pandas_index()[item]
+        return Time(self.as_pandas_index()[item], self.reference__time)
 
     def __getattr__(self, item: str):
         """Delegate unknown method calls to pandas index.
