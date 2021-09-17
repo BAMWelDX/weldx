@@ -116,6 +116,7 @@ This research is funded by the Federal Ministry of Education and Research of Ger
 ### Code Status
 
 [![static analysis](https://github.com/BAMWelDX/weldx/workflows/static%20analysis/badge.svg?branch=master)](https://github.com/BAMWelDX/weldx/actions?query=workflow%3A%22static+analysis%22+branch%3Amaster)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/BAMWelDX/weldx/master.svg)](https://results.pre-commit.ci/latest/github/BAMWelDX/weldx/master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/5e7ede6d978249a781e5c580ed1c813f)](https://www.codacy.com/gh/BAMWelDX/weldx?utm_source=github.com&utm_medium=referral&utm_content=BAMWelDX/weldx&utm_campaign=Badge_Grade)
 [![codecov](https://codecov.io/gh/BAMWelDX/weldx/branch/master/graph/badge.svg)](https://codecov.io/gh/BAMWelDX/weldx)
 [![DeepSource](https://static.deepsource.io/deepsource-badge-light-mini.svg)](https://deepsource.io/gh/BAMWelDX/weldx/?ref=repository-badge)
