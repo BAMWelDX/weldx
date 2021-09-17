@@ -13,5 +13,5 @@ class Workpiece:
 
 
 WorkpieceConverter = dataclass_serialization_class(
-    class_type=Workpiece, class_name="aws/design/workpiece", version="1.0.0"
+    class_type=Workpiece, class_name="aws/design/workpiece", version="0.1.0"
 )

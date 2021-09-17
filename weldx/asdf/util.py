@@ -503,7 +503,7 @@ def get_highest_tag_version(
     --------
     >>> from weldx.asdf.util import get_highest_tag_version
     >>> get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/uuid-*")
-    'asdf://weldx.bam.de/weldx/tags/uuid-1.0.0'
+    'asdf://weldx.bam.de/weldx/tags/uuid-0.1.0'
 
     """
     if ctx is None:

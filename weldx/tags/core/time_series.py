@@ -14,7 +14,7 @@ class TimeSeriesConverter(WeldxConverter):
     """Serialization class for weldx.core.TimeSeries"""
 
     name = "core/time_series"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [TimeSeries]
 
     def to_yaml_tree(self, obj: TimeSeries, tag: str, ctx) -> dict:

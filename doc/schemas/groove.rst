@@ -8,7 +8,7 @@ Common Terms
 
 .. asdf-autoschemas::
 
-    groove/terms-1.0.0
+    groove/terms-0.1.0
 
 DIN EN ISO 9692-1
 #################

@@ -21,5 +21,5 @@ class Connection:
 ConnectionConverter = dataclass_serialization_class(
     class_type=Connection,
     class_name="aws/design/connection",
-    version="1.0.0",
+    version="0.1.0",
 )

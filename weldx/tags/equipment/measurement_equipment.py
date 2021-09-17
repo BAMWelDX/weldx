@@ -13,6 +13,6 @@ def _from_yaml_tree_mod(tree):
 MeasurementEquipmentConverter = dataclass_serialization_class(
     class_type=MeasurementEquipment,
     class_name="equipment/measurement_equipment",
-    version="1.0.0",
+    version="0.1.0",
     from_yaml_tree_mod=_from_yaml_tree_mod,
 )

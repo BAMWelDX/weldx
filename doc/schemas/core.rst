@@ -5,13 +5,13 @@ The ``core`` directory contains schema implementations for the base classes.
 
 .. asdf-autoschemas::
 
-    core/mathematical_expression-1.0.0
-    core/time_series-1.0.0
-    core/variable-1.0.0
-    core/dimension-1.0.0
-    core/data_array-1.0.0
-    core/dataset-1.0.0
-    core/file-1.0.0
+    core/mathematical_expression-0.1.0
+    core/time_series-0.1.0
+    core/variable-0.1.0
+    core/dimension-0.1.0
+    core/data_array-0.1.0
+    core/dataset-0.1.0
+    core/file-0.1.0
 
 Transformations
 ===============

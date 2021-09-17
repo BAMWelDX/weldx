@@ -66,6 +66,6 @@ def _from_yaml_tree(tree):
 ArcWeldingProcessConverter = dataclass_serialization_class(
     class_type=ArcWeldingProcess,
     class_name="aws/process/arc_welding_process",
-    version="1.0.0",
+    version="0.1.0",
     from_yaml_tree_mod=_from_yaml_tree,
 )
