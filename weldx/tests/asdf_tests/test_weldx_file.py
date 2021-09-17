@@ -1,5 +1,6 @@
 """Tests for the WeldxFile class."""
 import itertools
+import os
 import pathlib
 import shutil
 import tempfile
@@ -170,11 +171,12 @@ class TestWeldXFile:
             assert fh2["foo"] == "bar"
             assert fh["another"] == "entry"
 
-    def test_create_writable_protocol(self):
+    @staticmethod
+    def test_create_writable_protocol():
         """Interface test for writable files."""
         f = WritableFile()
-        WeldxFile(f, tree=dict(test="yes"))  # this should write the tree to f.
-        new_file = self.make_copy(f.to_wrap)
+        WeldxFile(f, tree=dict(test="yes"), mode="rw")
+        new_file = TestWeldXFile.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
 
     @staticmethod
@@ -316,7 +318,7 @@ class TestWeldXFile:
         """Schema paths should be resolved internally."""
         schema = "single_pass_weld-1.0.0"
         with pytest.raises(ValidationError) as e:
-            WeldxFile(custom_schema=schema)
+            WeldxFile(tree=dict(foo="bar"), custom_schema=schema)
         assert "required property" in e.value.message
 
     @staticmethod
@@ -466,6 +468,9 @@ class TestWeldXFile:
             self.fh.copy(file, overwrite=overwrite)
 
     def test_update_existing_proper_update(self, tmpdir):
+        """Compare implementation of WeldxFile with asdf api.
+
+        WeldxFile should call update() to minimize memory usage."""
         d1 = np.ones((10, 3)) * 2
         d2 = np.ones(3) * 3
         d3 = np.ones(17) * 4
@@ -479,16 +484,10 @@ class TestWeldXFile:
             {"d1": d1, "d2": d2, "d5": d5},
             {"d3": d3},
         ]
-        import os
 
         os.chdir(tmpdir)
         for tree in trees:
             WeldxFile("test.wx", mode="rw", tree=tree)
-            # wx.close()
-            # test
-            with WeldxFile("test.wx") as wx:
-                for k, v in tree.items():
-                    np.testing.assert_equal(v, wx[k])
 
         # AsdfFile version
         asdf.AsdfFile(trees[0]).write_to("test.asdf")
