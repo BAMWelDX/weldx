@@ -279,14 +279,11 @@ class WeldxFile(UserDict):
         if created:
             asdf_file = asdf.AsdfFile(tree=tree, **asdffile_kwargs)
             asdf_file.write_to(filename_or_path_like, **write_kwargs)
-            uri = None
-            generic_file = generic_io.get_file(
-                filename_or_path_like, mode="rw", uri=uri
-            )
+            generic_file = generic_io.get_file(filename_or_path_like, mode="rw")
             asdf_file._fd = generic_file
         else:
-            # TODO: mode here is "rw" to write tree, but user may request only "r".
-            assert self._mode == "rw"
+            if self._mode != "rw":
+                raise RuntimeError("inconsistent mode, need to write data.")
             asdf_file = open_asdf(filename_or_path_like, **asdffile_kwargs, mode="rw")
             asdf_file.tree = tree
             asdf_file.update(**write_kwargs)
