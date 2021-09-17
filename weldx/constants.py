@@ -33,10 +33,12 @@ Examples
 >>> length
 
 define a time:
+
 >>> time = Q_(1, "s")
 >>> time
 
 lets combine length and time to get a velocity.
+
 >>> v = length / time
 >>> v
 """
