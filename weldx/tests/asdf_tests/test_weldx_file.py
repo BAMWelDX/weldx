@@ -464,3 +464,49 @@ class TestWeldXFile:
                 assert isinstance(e.value, FileExistsError)
         else:
             self.fh.copy(file, overwrite=overwrite)
+
+    def test_update_existing_proper_update(self, tmpdir):
+        d1 = np.ones((10, 3)) * 2
+        d2 = np.ones(3) * 3
+        d3 = np.ones(17) * 4
+        d4 = np.ones((10, 4)) * 5
+        d5 = np.ones(14)
+        trees = [
+            {"d1": d1, "d2": d2, "d3": d3, "d4": d4},
+            {"d1": d1, "d3": d3},
+            {"d1": d1},
+            {"d1": d1, "d5": d5},
+            {"d1": d1, "d2": d2, "d5": d5},
+            {"d3": d3},
+        ]
+        import os
+
+        os.chdir(tmpdir)
+        for tree in trees:
+            WeldxFile("test.wx", mode="rw", tree=tree)
+            # wx.close()
+            # test
+            with WeldxFile("test.wx") as wx:
+                for k, v in tree.items():
+                    np.testing.assert_equal(v, wx[k])
+
+        # AsdfFile version
+        asdf.AsdfFile(trees[0]).write_to("test.asdf")
+
+        for tree in trees[1:]:
+            f = asdf.open("test.asdf", mode="rw")
+            f.tree = tree
+            f.update()
+            f.close()
+
+        # compare data
+        assert (
+            pathlib.Path("test.asdf").stat().st_size
+            == pathlib.Path("test.wx").stat().st_size
+        )
+
+        def read(fn):
+            with open(fn, "br") as fh:
+                return fh.read()
+
+        assert read("test.asdf") == read("test.wx")
