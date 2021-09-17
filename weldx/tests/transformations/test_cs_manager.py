@@ -1824,6 +1824,7 @@ def test_remove_subsystems(list_of_csm_and_lcs_instances, nested):
     ],
 )
 @pytest.mark.slow
+@pytest.mark.filterwarnings("ignore:The following coordinate systems.*:UserWarning")
 def test_unmerge_merged_serially(list_of_csm_and_lcs_instances, additional_cs):
     """Test the CSM unmerge function.
 
