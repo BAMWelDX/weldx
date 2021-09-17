@@ -469,7 +469,8 @@ class TestWeldXFile:
         else:
             self.fh.copy(file, overwrite=overwrite)
 
-    def test_update_existing_proper_update(self, tmpdir):
+    @staticmethod
+    def test_update_existing_proper_update(tmpdir):
         """Compare implementation of WeldxFile with asdf api.
 
         WeldxFile should call update() to minimize memory usage."""
@@ -506,8 +507,8 @@ class TestWeldXFile:
             == pathlib.Path("test.wx").stat().st_size
         )
 
-        def read(fn):
+        def _read(fn):
             with open(fn, "br") as fh:
                 return fh.read()
 
-        assert read("test.asdf") == read("test.wx")
+        assert _read("test.asdf") == _read("test.wx")
