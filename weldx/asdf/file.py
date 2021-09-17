@@ -115,7 +115,7 @@ class WeldxFile(UserDict):
     We define a simple data set and store it in a WeldxFile.
 
     >>> data = {"name": "CXCOMP", "value": 42}
-    >>> wx = WeldxFile(tree=data)
+    >>> wx = WeldxFile(tree=data, mode="rw")
 
     If we want to persist the WeldxFile to a file on hard drive we invoke:
 
@@ -451,7 +451,7 @@ class WeldxFile(UserDict):
         (None, None, None)
         """
         tree = dict.fromkeys(iterable, default)
-        return WeldxFile(tree=tree)
+        return WeldxFile(tree=tree, mode="rw")
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -549,7 +549,7 @@ class WeldxFile(UserDict):
         Examples
         --------
         >>> tree = dict(wx_meta={"welder": "Nikolai Nikolajewitsch Benardos"})
-        >>> wf = WeldxFile(tree=tree)
+        >>> wf = WeldxFile(tree=tree, mode="rw")
         >>> wfa = wf.as_attr()
         >>> wfa.wx_meta.welder
         'Nikolai Nikolajewitsch Benardos'
