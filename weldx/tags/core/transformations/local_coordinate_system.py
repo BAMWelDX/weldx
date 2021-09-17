@@ -8,7 +8,7 @@ class LocalCoordinateSystemConverter(WeldxConverter):
     """Serialization class for weldx.transformations.LocalCoordinateSystem"""
 
     name = "core/transformations/local_coordinate_system"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [LocalCoordinateSystem]
 
     def to_yaml_tree(self, obj: LocalCoordinateSystem, tag: str, ctx) -> dict:

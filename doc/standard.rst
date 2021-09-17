@@ -33,4 +33,3 @@ The WelDX ASDF Extension implements some additional functionalities like unit an
     standard/shape-validation
     standard/unit-validation
     standard/welding-processes
-

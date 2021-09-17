@@ -17,5 +17,5 @@ class WeldDetails:
 
 
 WeldDetailsConverter = dataclass_serialization_class(
-    class_type=WeldDetails, class_name="aws/design/weld_details", version="1.0.0"
+    class_type=WeldDetails, class_name="aws/design/weld_details", version="0.1.0"
 )

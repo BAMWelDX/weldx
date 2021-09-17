@@ -17,6 +17,8 @@ from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
 from weldx.util import compare_nested
 
+SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
+
 
 class ReadOnlyFile:
     """Simulate a read-only file."""
@@ -303,7 +305,7 @@ class TestWeldXFile:
     def test_custom_schema(schema_arg):
         """Check the property complex_schema is being set."""
         buff, _ = single_pass_weld_example(None)
-        schema = get_schema_path("datamodels/single_pass_weld-1.0.0.yaml")
+        schema = get_schema_path("datamodels/single_pass_weld-0.1.0.yaml")
         kwargs = {schema_arg: schema}
         if schema_arg == "asdffile_kwargs":
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
@@ -314,7 +316,7 @@ class TestWeldXFile:
     @staticmethod
     def test_custom_schema_resolve_path():
         """Schema paths should be resolved internally."""
-        schema = "single_pass_weld-1.0.0"
+        schema = SINGLE_PASS_SCHEMA
         with pytest.raises(ValidationError) as e:
             WeldxFile(custom_schema=schema)
         assert "required property" in e.value.message
@@ -328,8 +330,8 @@ class TestWeldXFile:
     @staticmethod
     def test_custom_schema_real_file(tmpdir):
         """Passing real paths."""
-        assert not pathlib.Path("single_pass_weld-1.0.0").exists()
-        shutil.copy(get_schema_path("single_pass_weld-1.0.0"), ".")
+        assert not pathlib.Path(SINGLE_PASS_SCHEMA).exists()
+        shutil.copy(get_schema_path(SINGLE_PASS_SCHEMA), ".")
         with pytest.raises(ValueError):
             WeldxFile(custom_schema="no")
 

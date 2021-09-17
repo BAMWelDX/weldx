@@ -27,5 +27,5 @@ class ShieldingGasForProcedure:
 ShieldingGasForProcedureConverter = dataclass_serialization_class(
     class_type=ShieldingGasForProcedure,
     class_name="aws/process/shielding_gas_for_procedure",
-    version="1.0.0",
+    version="0.1.0",
 )

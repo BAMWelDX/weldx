@@ -16,5 +16,5 @@ class Weldment:
 
 
 WeldmentConverter = dataclass_serialization_class(
-    class_type=Weldment, class_name="aws/design/weldment", version="1.0.0"
+    class_type=Weldment, class_name="aws/design/weldment", version="0.1.0"
 )

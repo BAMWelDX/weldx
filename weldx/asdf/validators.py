@@ -1,16 +1,15 @@
 """ASDF-validators for weldx types."""
 import re
-from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict
+from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict, Union
 
 from asdf import ValidationError
 from asdf.schema import _type_to_tag
 from asdf.util import uri_match
 
+from weldx.asdf.types import WxSyntaxError
+from weldx.asdf.util import _get_instance_shape
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-
-from .types import WxSyntaxError
-from .util import _get_instance_shape
 
 __all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
 
@@ -108,34 +107,10 @@ def _compare(_int, exp_string):
     """Compare helper of two strings for _custom_shape_validator.
 
     An integer and an expected string are compared so that the string either contains
-    a ":" and thus describes an interval or a string consisting of numbers. So if our
+    a "~" and thus describes an interval or a string consisting of numbers. So if our
     integer is within the interval or equal to the described number, True is returned.
-    The interval can be open, in that there is no number left or right of the ":"
+    The interval can be open, in that there is no number left or right of the "~"
     symbol.
-
-    Examples:
-    ---------
-
-    _int = 5
-    exp_string = "5"
-    -> True
-
-    _int = 5
-    exp_string = ":"
-    -> True
-
-    Open interval:
-    _int = 5
-    exp_string = "3:"
-    -> True
-
-    _int = 5
-    exp_string = "4"
-    -> False
-
-    _int = 5
-    exp_string = "6:8"
-    -> False
 
     Parameters
     ----------
@@ -148,12 +123,40 @@ def _compare(_int, exp_string):
     -------
     bool
         True or False
+
+    Examples:
+    ---------
+    >>> from weldx.asdf.validators import _compare
+    >>> _compare(5,"5")
+    True
+
+    >>> _compare(5,"~")
+    True
+
+    >>> _compare(5,"3~")
+    True
+
+    >>> _compare(5,"4")
+    False
+
+    open interval:
+    >>> _compare(5,"~")
+    True
+
+    open interval:
+    >>> _compare(5,"3~")
+    True
+
+    closed interval:
+    >>> _compare(5,"4~6")
+    True
+
     """
     if _int < 0:
         raise WxSyntaxError("Negative dimension found")
 
-    if ":" in exp_string:
-        ranges = exp_string.split(":")
+    if "~" in exp_string:
+        ranges = exp_string.split("~")
 
         if ranges[0] == "":
             ranges[0] = 0
@@ -180,8 +183,8 @@ def _prepare_list(_list, list_expected):
     """Prepare a List and an expected List for validation.
 
     The preparation of the lists consists in accepting all lists that contain
-    white spaces and rewriting all lists that contain the symbols ":" as well as "~" to
-    a ":". In addition, lists that begin with "..." or parentheses are reversed for
+    white spaces.
+    In addition, lists that begin with "..." or parentheses are reversed for
     validation to work.
 
     parameters
@@ -199,10 +202,8 @@ def _prepare_list(_list, list_expected):
     """
     # remove blank spaces in dict_test
     _list = [x.replace(" ", "") if isinstance(x, str) else x for x in _list]
-    # accept "~" additionally as input of ":". And remove blank spaces.
     list_expected = [
-        x.replace(" ", "").replace("~", ":") if isinstance(x, str) else x
-        for x in list_expected
+        x.replace(" ", "") if isinstance(x, str) else x for x in list_expected
     ]
     # turn around the list if "..." or "(" are at the beginning.
     # because the validation is made from begin -> end.
@@ -214,7 +215,7 @@ def _prepare_list(_list, list_expected):
     return _list, list_expected
 
 
-def _is_range_format_valid(format_string: str):
+def _is_range_format_valid(format_string: str) -> bool:
     """
     Return 'True' if a string represents a valid range definition and 'False' otherwise.
 
@@ -228,10 +229,10 @@ def _is_range_format_valid(format_string: str):
     bool:
         'True' if the passed string is a valid range definition, 'False' otherwise
     """
-    if ":" in format_string:
-        if len(format_string.split(":")) != 2:
+    if "~" in format_string:
+        if len(format_string.split("~")) != 2:
             return False
-        format_string = format_string.replace(":", "")
+        format_string = format_string.replace("~", "")
         return format_string.isalnum() or format_string == ""
     return format_string.isalnum()
 
@@ -250,12 +251,12 @@ def _validate_expected_list(list_expected):
     [1, 2, 3, 4, "5..."]
     [1, 2, 3, 4, "5(5)"]
 
-    params
-    ------
+    Parameters
+    ----------
     list_expected:
         Expected List to validate against
 
-    raises
+    Raises
     ------
     ValueError:
         ValueError will be raised if an rule violation is found
@@ -283,7 +284,7 @@ def _validate_expected_list(list_expected):
                 or not _is_range_format_valid(val.group(1))
             ):
                 raise WxSyntaxError(
-                    f'Invalid optional dimension format. Correct format is "(_)", but '
+                    f'Invalid optional dimension format. Correct format is "(~)", but '
                     f" {exp} was found."
                 )
 
@@ -295,7 +296,7 @@ def _validate_expected_list(list_expected):
             )
 
 
-def _compare_lists(_list, list_expected):
+def _compare_lists(_list, list_expected) -> Union[bool, dict]:
     """Compare two lists.
 
     The two lists are interpreted as a list of dimensions. We compare the dimensions of
@@ -304,33 +305,36 @@ def _compare_lists(_list, list_expected):
     dictionary and this is output. The dictionary can be empty if there are no
     variables in the list_expected.
 
-    Examples:
-    ---------
-    _compare_lists([1, 2, 3], [1, 2, 3])
-    -> {}
-
-    _compare_lists([1, 2, 3], [1, n1, n2])
-    -> {n1: 2, n2: 3}
-
-    _compare_lists([1, 2, 3], [1, "..."])
-    -> {}
-
-    _compare_lists([1, 2, 3], [1, 2, 4])
-    -> False
-
-    params
-    ------
+    Parameters
+    ----------
     _list:
         List of Integer
     list_expected:
         List build by the rules in _custom_shape_validator
-    returns
+
+    Returns
     -------
-    False:
+    bool:
         when a dimension mismatch occurs
     dict_values:
         when no dimension mismatch occurs. Can be empty {}. Dictionary - keys: variable
         names in the validation schemes. values: values of the validation schemes.
+
+    Examples
+    --------
+    >>> from weldx.asdf.validators import _compare_lists
+    >>> _compare_lists([1, 2, 3], [1, 2, 3])
+    {}
+
+    >>> _compare_lists([1, 2, 3], [1, "a", "b"])
+    {'a': 2, 'b': 3}
+
+    >>> _compare_lists([1, 2, 3], [1, "..."])
+    {}
+
+    >>> _compare_lists([1, 2, 3], [1, 2, 4])
+    False
+
     """
     dict_values = dict()
 
@@ -372,7 +376,7 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
     -----------------------------
     Items with arrays with each value having the following Syntax:
     1)  3 : an integer indicates a fix dimension for the same item in dict_test
-    2)  "~", ":" or None : this string indicates a single dimension of arbitrary length.
+    2)  "~" or None : this string indicates a single dimension of arbitrary length.
     3)  "..." : this string indicates an arbitrary number of dimensions of arbitrary
             length. Can be optional.
     4)  "2~4" : this string indicates a single dimension of length 2, 3 or 4. This

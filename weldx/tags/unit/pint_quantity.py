@@ -12,7 +12,7 @@ class PintQuantityConverter(WeldxConverter):
     """A simple implementation of serializing a pint quantity as asdf quantity."""
 
     tags = [
-        "asdf://weldx.bam.de/weldx/tags/unit/quantity-1.*",
+        "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*",
         "tag:stsci.edu:asdf/unit/quantity-1.*",
     ]
     types = [
@@ -45,7 +45,7 @@ class PintQuantityConverter(WeldxConverter):
 class PintUnitConverter(WeldxConverter):
     """A simple implementation of serializing a pint unit as tagged asdf node."""
 
-    tags = ["asdf://weldx.bam.de/weldx/tags/unit/unit-1.*"]
+    tags = ["asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"]
     types = ["pint.unit.build_unit_class.<locals>.Unit"]
 
     def to_yaml_tree(self, obj: pint.Unit, tag: str, ctx) -> str:

@@ -32,6 +32,7 @@
   instead. [[#472]](https://github.com/BAMWelDX/weldx/pulls/472)
 - `is_column_in_matrix`, `is_row_in_matrix`, `to_float_array`, `to_list`, `matrix_is_close`, `vector_is_close`
   and `triangulate_geometry` from `weldx.util` [[#490]](https://github.com/BAMWelDX/weldx/pull/490)
+- remove the ``:`` syntax from ``wx_shape`` validation [[#537]](https://github.com/BAMWelDX/weldx/pull/537)
 
 ### changes
 
@@ -71,6 +72,7 @@
 
 ### ASDF
 
+- all schema version numbers set to ``0.1.0`` [[#535]](https://github.com/BAMWelDX/weldx/pull/535).
 - add ``time/time`` schema to support `Time` class [[#463]](https://github.com/BAMWelDX/weldx/pull/463).
 - rework ASDF extension to new asdf 2.8 API [[#467]](https://github.com/BAMWelDX/weldx/pull/467)
     - move schema files to ``weldx/schemas``
@@ -79,9 +81,9 @@
     - move tag module to ``weldx/tags``
     - refactor all asdf uris to new ``asdf://`` naming convention,
       see https://asdf.readthedocs.io/en/latest/asdf/extending/uris.html#entities-identified-by-uri
-    - replaced all referenced weldx tag versions in schemas with ``1.*``
+    - replaced all referenced weldx tag versions in schemas with ``0.1.*``
     - refactor ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema``
-      to ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0`` and enable schema test
+      to ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-0.1.0`` and enable schema test
     - add legacy class for validators support in ``weldx.asdf._extension.py``
     - asdf utility functions `weldx.asdf.util.uri_match`, `weldx.asdf.util.get_converter_for_tag`
       and `weldx.asdf.util.get_weldx_extension`
@@ -89,11 +91,11 @@
     - custom shape validation must now be implemented via staticmethod ``WeldxConverter.shape_from_tagged``
 - provide legacy schema support
   in ``weldx/schemas/weldx.bam.de/legacy`` [[#533]](https://github.com/BAMWelDX/weldx/pull/533)
-- rewrote `asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy-1.0.0` schema for
+- rewrote `asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy` schema for
   the `CoordinateSystemManager`. It uses the digraph schemas to serialize the coordinate system structure.
   [[#497]](https://github.com/BAMWelDX/weldx/pull/497)
-- add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity-1.0.0``
-  and ``asdf://weldx.bam.de/weldx/schemas/unit/unit-1.0.0`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522)
+- add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity``
+  and ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522)
 
 ### deprecations
 

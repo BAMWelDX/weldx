@@ -7,7 +7,7 @@ class CoordinateSystemManagerConverter(WeldxConverter):
 
     tags = [
         "asdf://weldx.bam.de/weldx/tags/core/transformations/"
-        "coordinate_system_hierarchy-1.0.0"
+        "coordinate_system_hierarchy-0.1.*"
     ]
     types = [CoordinateSystemManager]
 
