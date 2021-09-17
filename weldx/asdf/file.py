@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
+import asdf
 import numpy as np
 from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
@@ -230,23 +231,41 @@ class WeldxFile(UserDict):
             )
 
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
+        # TODO: handle case of existing asdf file, write_to does not clear old blocks!
         if tree or new_file_created:
-            asdf_file = AsdfFile(tree=tree, custom_schema=self.custom_schema)
-            asdf_file.write_to(filename_or_file_like, **write_kwargs)
+            asdf_file = self._write_tree(
+                filename_or_file_like,
+                tree,
+                asdffile_kwargs,
+                write_kwargs,
+                new_file_created,
+            )
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
                 filename_or_file_like.seek(0)
-
-        asdf_file = open_asdf(
-            filename_or_file_like,
-            mode=self.mode,
-            **asdffile_kwargs,
-        )
+        else:
+            asdf_file = open_asdf(
+                filename_or_file_like,
+                mode=self.mode,
+                **asdffile_kwargs,
+            )
         self._asdf_handle: AsdfFile = asdf_file
 
         # UserDict interface: we want to store a reference to the tree, but the ctor
         # of UserDict takes a copy, so we do it manually here.
         super().__init__()
         self.data = self._asdf_handle.tree
+
+    def _write_tree(
+        self, filename_or_path_like, tree, asdffile_kwargs, write_kwargs, created
+    ) -> AsdfFile:
+        if created:
+            asdf_file = asdf.AsdfFile(tree=tree, **asdffile_kwargs)
+            asdf_file.write_to(filename_or_path_like, **write_kwargs)
+        else:
+            asdf_file = open_asdf(filename_or_path_like, **asdffile_kwargs, mode="rw")
+            asdf_file.tree = tree
+            asdf_file.update(**write_kwargs)
+        return asdf_file
 
     @property
     def mode(self) -> str:
