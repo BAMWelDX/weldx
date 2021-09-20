@@ -2491,17 +2491,16 @@ class SpatialData:
         return SpatialData(mesh.points, triangles)
 
     @staticmethod
-    def _shape_points_and_triangles(shape_raster_data: np.array, offset: int):
-        shape_raster_data = shape_raster_data.swapaxes(1, 2)
+    def _shape_raster_points(shape_raster_data) -> np.array:
+        return shape_raster_data.reshape(
+            (shape_raster_data.shape[0] * shape_raster_data.shape[1], 3)
+        ).tolist()
 
+    @staticmethod
+    def _shape_profile_triangles(shape_raster_data, offset, cw_ordering):
         num_profiles = shape_raster_data.shape[0]
         num_profile_points = shape_raster_data.shape[1]
 
-        points = shape_raster_data.reshape(
-            (num_profiles * num_profile_points, 3)
-        ).tolist()
-
-        cw_ordering = has_cw_ordering(shape_raster_data[0])
         tri_base = []
         for i in range(num_profile_points):
             idx_0 = i
@@ -2513,8 +2512,8 @@ class SpatialData:
                 tri_base += [[idx_0, idx_2, idx_1], [idx_1, idx_2, idx_3]]
             else:
                 tri_base += [[idx_0, idx_1, idx_2], [idx_1, idx_3, idx_2]]
-
         tri_base = np.array(tri_base, dtype=int)
+
         triangles = np.array(
             [
                 tri_base + i * num_profile_points + offset
@@ -2523,24 +2522,25 @@ class SpatialData:
             dtype=int,
         )
 
-        triangles = triangles.reshape(
-            (tri_base.shape[0] * (num_profiles - 1), 3)
-        ).tolist()
+        return triangles.reshape((tri_base.shape[0] * (num_profiles - 1), 3)).tolist()
 
-        # closes front and back faces
+    @staticmethod
+    def _shape_front_back_triangles(
+        num_profiles, num_profile_points, offset, cw_ordering
+    ):
+        triangles = []
         tri_cw = []
         tri_ccw = []
         i_0 = 0
         i_1 = 0
 
         while i_0 + i_1 < num_profile_points - 2:
+            p_0 = i_0 + offset
             if i_1 == i_0:
-                p_0 = i_0 + offset
                 p_1 = p_0 + 1
                 p_2 = num_profile_points + offset - i_1 - 1
                 i_0 += 1
             else:
-                p_0 = i_0 + offset
                 p_1 = num_profile_points + offset - i_1 - 2
                 p_2 = p_1 + 1
                 i_1 += 1
@@ -2558,7 +2558,21 @@ class SpatialData:
             np.array(back, int) + (num_profiles - 1) * num_profile_points
         ).tolist()
 
-        return points, triangles
+        return triangles
+
+    @classmethod
+    def _shape_triangles(cls, shape_raster_data: np.array, offset: int):
+
+        num_profiles = shape_raster_data.shape[0]
+        num_profile_points = shape_raster_data.shape[1]
+        cw_ordering = has_cw_ordering(shape_raster_data[0])
+
+        triangles = cls._shape_profile_triangles(shape_raster_data, offset, cw_ordering)
+        triangles += cls._shape_front_back_triangles(
+            num_profiles, num_profile_points, offset, cw_ordering
+        )
+
+        return triangles
 
     @classmethod
     def from_geometry_raster(
@@ -2589,12 +2603,9 @@ class SpatialData:
         points = []
         triangles = []
         for i, shape_raster_data in enumerate(geometry_raster):
-            shape_points, shape_triangle = cls._shape_points_and_triangles(
-                shape_raster_data,
-                len(points),
-            )
-            points += shape_points
-            triangles += shape_triangle
+            shape_raster_data = shape_raster_data.swapaxes(1, 2)
+            triangles += cls._shape_triangles(shape_raster_data, len(points))
+            points += cls._shape_raster_points(shape_raster_data)
 
         return SpatialData(points, triangles)
 
