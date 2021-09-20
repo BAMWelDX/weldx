@@ -26,7 +26,7 @@ repos:
     rev: 5.9.3
     hooks:
       - id: isort
-  - repo: https://gitlab.com/pycqa/flake8
+  - repo: https://github.com/PyCQA/flake8
     rev: 3.9.2
     hooks:
       - id: flake8
@@ -34,6 +34,16 @@ repos:
     rev: 6.1.1
     hooks:
       - id: pydocstyle
+        files: '^weldx/'
+        exclude: |
+          (?x)^(
+            ^weldx/tags|
+            ^weldx/tests|
+            ^weldx/asdf|
+            .*__.*.py
+          )
+        args:
+          - --convention=numpy
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.1.1
     hooks:

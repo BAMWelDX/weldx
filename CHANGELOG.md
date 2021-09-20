@@ -97,7 +97,8 @@
   the `CoordinateSystemManager`. It uses the digraph schemas to serialize the coordinate system structure.
   [[#497]](https://github.com/BAMWelDX/weldx/pull/497)
 - add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity``
-  and ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522)
+  and ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522).
+- use ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` instead of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#542]](https://github.com/BAMWelDX/weldx/pull/542).
 
 ### deprecations
 
