@@ -34,5 +34,5 @@ class ShapeValidatorTestClass:
 ShapeValidatorTestClassConverter = dataclass_serialization_class(
     class_type=ShapeValidatorTestClass,
     class_name="debug/test_shape_validator",
-    version="1.0.0",
+    version="0.1.0",
 )

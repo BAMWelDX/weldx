@@ -10,7 +10,7 @@ class WXRotationConverter(WeldxConverter):
     """Serialization class for the 'Scipy.Rotation' type"""
 
     name = "core/transformations/rotation"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [Rotation, WXRotation]
 
     def to_yaml_tree(self, obj: Rotation, tag: str, ctx) -> dict:

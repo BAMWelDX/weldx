@@ -21,7 +21,7 @@ class WeldxLegacyValidatorType(CustomType):
     organization = "weldx.bam.de"
     standard = "weldx"
     name = "legacy/validators"
-    version = "1.0.0"
+    version = "0.1.0"
     types = []
     validators = {
         "wx_property_tag": wx_property_tag_validator,

@@ -8,7 +8,7 @@ class TimeConverter(WeldxConverter):
     """A simple implementation of serializing a Time instance."""
 
     name = "time/time"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [Time]
 
     def to_yaml_tree(self, obj: Time, tag: str, ctx) -> dict:

@@ -18,7 +18,7 @@ __all__ = [
     "WxSyntaxError",
 ]
 
-_new_tag_regex = re.compile(r"asdf://weldx.bam.de/weldx/tags/(.*)-(\d+.\d+.\d+|1.\*)")
+_new_tag_regex = re.compile(r"asdf://weldx.bam.de/weldx/tags/(.*)-(\d+.\d+.\d+|0.1.\*)")
 
 
 class WxSyntaxError(Exception):
@@ -81,7 +81,7 @@ class WeldxConverterMeta(type(Converter)):
             setattr(
                 cls,
                 "tags",
-                [format_tag(name, "1.*")],
+                [format_tag(name, "0.1.*")],
             )
 
         # wrap original to/from_yaml_tree method to include metadata attributes
@@ -127,4 +127,5 @@ def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="we
 
 def _legacy_tag_from_new_tag(tag: str):
     name, version = _new_tag_regex.search(tag).groups()
+    version = "1.0.0"  # legacy_tag version
     return f"tag:weldx.bam.de:weldx/{name}-{version}"

@@ -118,7 +118,10 @@ def write_buffer(
         from weldx import WeldxFile
 
         with WeldxFile(
-            tree=tree, asdffile_kwargs=asdffile_kwargs, write_kwargs=write_kwargs
+            tree=tree,
+            asdffile_kwargs=asdffile_kwargs,
+            write_kwargs=write_kwargs,
+            mode="rw",
         ) as wx:
             wx.write_to()
             show(wx)
@@ -503,7 +506,7 @@ def get_highest_tag_version(
     --------
     >>> from weldx.asdf.util import get_highest_tag_version
     >>> get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/uuid-*")
-    'asdf://weldx.bam.de/weldx/tags/uuid-1.0.0'
+    'asdf://weldx.bam.de/weldx/tags/uuid-0.1.0'
 
     """
     if ctx is None:

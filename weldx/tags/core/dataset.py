@@ -8,7 +8,7 @@ class XarrayDatasetConverter(WeldxConverter):
     """Serialization class for xarray.Dataset"""
 
     name = "core/dataset"
-    version = "1.0.0"
+    version = "0.1.0"
     types = [Dataset]
 
     def to_yaml_tree(self, obj: Dataset, tag: str, ctx) -> dict:

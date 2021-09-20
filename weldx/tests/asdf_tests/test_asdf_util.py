@@ -129,7 +129,7 @@ def test_dataclass_serialization_class(
     dataclass_asdf = dataclass_serialization_class(
         class_type=_DataClass,
         class_name="Test",
-        version="1.0.0",
+        version="0.1.0",
         sort_string_lists=sort_string_lists,
         to_yaml_tree_mod=to_yaml_tree_mod,
         from_yaml_tree_mod=from_yaml_tree_mod,
@@ -161,9 +161,9 @@ def test_get_highest_tag_version():
     """Test getting some tags from the WeldxExtension."""
     assert (
         get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/uuid-*")
-        == "asdf://weldx.bam.de/weldx/tags/uuid-1.0.0"
+        == "asdf://weldx.bam.de/weldx/tags/uuid-0.1.0"
     )
-    assert get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/uuid-2.*") is None
+    assert get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/uuid-1.*") is None
 
     with pytest.raises(ValueError):
         get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/**-*")

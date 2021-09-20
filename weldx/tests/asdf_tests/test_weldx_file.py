@@ -1,5 +1,6 @@
 """Tests for the WeldxFile class."""
 import itertools
+import os
 import pathlib
 import shutil
 import tempfile
@@ -16,6 +17,8 @@ from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
 from weldx.util import compare_nested
+
+SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 
 
 class ReadOnlyFile:
@@ -134,7 +137,7 @@ class TestWeldXFile:
         """Test wrapper creation from a dictionary."""
         tree = dict(foo="bar")
         # creates a buffer
-        self.fh = WeldxFile(filename_or_file_like=None, tree=tree)
+        self.fh = WeldxFile(filename_or_file_like=None, tree=tree, mode="rw")
         new_file = self.make_copy(self.fh)
         assert WeldxFile(new_file)["foo"] == "bar"
 
@@ -170,11 +173,12 @@ class TestWeldXFile:
             assert fh2["foo"] == "bar"
             assert fh["another"] == "entry"
 
-    def test_create_writable_protocol(self):
+    @staticmethod
+    def test_create_writable_protocol():
         """Interface test for writable files."""
         f = WritableFile()
-        WeldxFile(f, tree=dict(test="yes"))  # this should write the tree to f.
-        new_file = self.make_copy(f.to_wrap)
+        WeldxFile(f, tree=dict(test="yes"), mode="rw")
+        new_file = TestWeldXFile.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
 
     @staticmethod
@@ -303,7 +307,7 @@ class TestWeldXFile:
     def test_custom_schema(schema_arg):
         """Check the property complex_schema is being set."""
         buff, _ = single_pass_weld_example(None)
-        schema = get_schema_path("datamodels/single_pass_weld-1.0.0.yaml")
+        schema = get_schema_path("datamodels/single_pass_weld-0.1.0.yaml")
         kwargs = {schema_arg: schema}
         if schema_arg == "asdffile_kwargs":
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
@@ -314,9 +318,9 @@ class TestWeldXFile:
     @staticmethod
     def test_custom_schema_resolve_path():
         """Schema paths should be resolved internally."""
-        schema = "single_pass_weld-1.0.0"
+        schema = SINGLE_PASS_SCHEMA
         with pytest.raises(ValidationError) as e:
-            WeldxFile(custom_schema=schema)
+            WeldxFile(tree=dict(foo="bar"), custom_schema=schema, mode="rw")
         assert "required property" in e.value.message
 
     @staticmethod
@@ -328,8 +332,8 @@ class TestWeldXFile:
     @staticmethod
     def test_custom_schema_real_file(tmpdir):
         """Passing real paths."""
-        assert not pathlib.Path("single_pass_weld-1.0.0").exists()
-        shutil.copy(get_schema_path("single_pass_weld-1.0.0"), ".")
+        assert not pathlib.Path(SINGLE_PASS_SCHEMA).exists()
+        shutil.copy(get_schema_path(SINGLE_PASS_SCHEMA), ".")
         with pytest.raises(ValueError):
             WeldxFile(custom_schema="no")
 
@@ -464,3 +468,47 @@ class TestWeldXFile:
                 assert isinstance(e.value, FileExistsError)
         else:
             self.fh.copy(file, overwrite=overwrite)
+
+    @staticmethod
+    def test_update_existing_proper_update(tmpdir):
+        """Compare implementation of WeldxFile with asdf api.
+
+        WeldxFile should call update() to minimize memory usage."""
+        d1 = np.ones((10, 3)) * 2
+        d2 = np.ones(3) * 3
+        d3 = np.ones(17) * 4
+        d4 = np.ones((10, 4)) * 5
+        d5 = np.ones(14)
+        trees = [
+            {"d1": d1, "d2": d2, "d3": d3, "d4": d4},
+            {"d1": d1, "d3": d3},
+            {"d1": d1},
+            {"d1": d1, "d5": d5},
+            {"d1": d1, "d2": d2, "d5": d5},
+            {"d3": d3},
+        ]
+
+        os.chdir(tmpdir)
+        for tree in trees:
+            WeldxFile("test.wx", mode="rw", tree=tree)
+
+        # AsdfFile version
+        asdf.AsdfFile(trees[0]).write_to("test.asdf")
+
+        for tree in trees[1:]:
+            f = asdf.open("test.asdf", mode="rw")
+            f.tree = tree
+            f.update()
+            f.close()
+
+        # compare data
+        assert (
+            pathlib.Path("test.asdf").stat().st_size
+            == pathlib.Path("test.wx").stat().st_size
+        )
+
+        def _read(fn):
+            with open(fn, "br") as fh:
+                return fh.read()
+
+        assert _read("test.asdf") == _read("test.wx")

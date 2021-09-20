@@ -20,7 +20,7 @@ class IsoGrooveConverter(WeldxConverter):
     """ASDF Groove type."""
 
     tags = [
-        format_tag(tag_name=_ISO_GROOVE_SCHEMA + g, version="1.*")
+        format_tag(tag_name=_ISO_GROOVE_SCHEMA + g, version="0.1.*")
         for g in _groove_name_to_type.keys()
     ]
     types = IsoBaseGroove.__subclasses__()
