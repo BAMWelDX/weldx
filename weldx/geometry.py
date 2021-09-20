@@ -57,7 +57,15 @@ def _triangulate_geometry(geo_data):
     return data, triangle_indices
 
 
-def has_cw_ordering(points):
+def has_cw_ordering(points: np.ndarray):
+    """Return `True` if a set of points has clockwise ordering, `False` otherwise.
+
+    Notes
+    -----
+        The algorithm was taken from the following Stack Overflow answer:
+        https://stackoverflow.com/a/1165943/6700329
+
+    """
     if sum((points[1:, 1] - points[:-1, 1]) * (points[1:, 2] + points[:-1, 2])) < 0:
         return False
     return True
