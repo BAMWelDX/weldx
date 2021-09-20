@@ -2392,6 +2392,7 @@ class Geometry:
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
     def write_to_file(self, file_name: str, profile_raster_width, trace_raster_width):
+        """test"""
         for s in self._trace.segments:
             if isinstance(s, RadialHorizontalTraceSegment):
                 raise NotImplementedError

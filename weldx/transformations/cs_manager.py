@@ -255,7 +255,7 @@ class CoordinateSystemManager:
         self._graph.add_node(coordinate_system_name, data={})
 
     def _add_edges(self, node_from: str, node_to: str, lcs: LocalCoordinateSystem):
-        """Add an edge to the internal graph.
+        """Add an edge to the internal graph
 
         Parameters
         ----------
