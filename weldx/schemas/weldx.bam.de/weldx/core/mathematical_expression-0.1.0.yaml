@@ -18,8 +18,8 @@ examples:
       !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
         expression: a*x + b
         parameters:
-          a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 1.2, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> volt}
-          b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 3.4, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> volt}
+          a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 1.2, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V}
+          b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 3.4, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V}
 
 type: object
 properties:
