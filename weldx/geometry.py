@@ -1082,38 +1082,6 @@ class Shape:
         for i in range(self.num_segments):
             self._segments[i].apply_translation(vector)
 
-    @property
-    def polygon(self) -> np.array:
-        """Return the points of a polygon formed by the segment start and end points."""
-        end_points = [s.point_end for s in self.segments]
-        return np.array([self.segments[0].point_start, *end_points])
-
-    def is_polygon_winding_order_cw(self) -> bool:
-        """Return `True` if the winding order of the shapes polygon is clockwise.
-
-        Returns
-        -------
-        bool :
-            `True` if the winding order of the shapes polygon is clockwise and `False`
-            otherwise
-
-        Notes
-        -----
-            The algorithm was taken from the following Stack Overflow answer:
-            https://stackoverflow.com/a/1165943/6700329
-
-        """
-        polygon_sum = sum(
-            [
-                (s.point_end[0] - s.point_start[0])
-                * (s.point_end[1] + s.point_start[1])
-                for s in self.segments
-            ]
-        )
-        if polygon_sum < 0:
-            return False
-        return True
-
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the shapes contour.
