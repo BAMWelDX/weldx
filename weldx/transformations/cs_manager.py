@@ -65,7 +65,8 @@ class CoordinateSystemManager:
         subsystems: List[CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
 
-        def to_yaml_tree(self):
+        def to_yaml_tree(self) -> dict:
+            """Store subsystem info into a nested dict."""
             return dict(
                 name=self.name,
                 root_node=self.root,
@@ -77,8 +78,8 @@ class CoordinateSystemManager:
             )
 
         @classmethod
-        def from_yaml_tree(cls, node):
-
+        def from_yaml_tree(cls, node: dict) -> CoordinateSystemManager.SubsystemInfo:
+            """Rebuild subsystem info from nested dict."""
             subsystems = node.get("subsystems")
             if subsystems:
                 subsystems = [cls.from_yaml_tree(d) for d in subsystems]

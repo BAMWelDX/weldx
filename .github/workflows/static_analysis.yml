@@ -21,7 +21,7 @@ jobs:
         run: pip install pydocstyle
       - name: run pydocstyle
         run: |
-          pydocstyle
+          pydocstyle ./weldx
 
   flake8:
     name: flake8
