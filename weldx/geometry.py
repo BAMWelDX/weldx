@@ -26,37 +26,6 @@ if TYPE_CHECKING:  # pragma: no cover
 # helper -------------------------------------------------------------------------------
 
 
-def _triangulate_geometry(geo_data):
-    """Stack geometry data and add simple triangulation.
-
-    Parameters
-    ----------
-    geo_data
-        list of rasterized profile data along trace from geometry
-
-    Returns
-    -------
-    numpy.ndarray, numpy.ndarray
-        3D point cloud data and triangulation indexes
-
-    """
-    nx = geo_data.shape[2]  # Points per profile
-    ny = geo_data.shape[0]  # number of profiles
-
-    data = np.swapaxes(geo_data, 1, 2).reshape((-1, 3))
-    triangle_indices = np.empty((ny - 1, nx - 1, 2, 3), dtype=int)
-    r = np.arange(nx * ny).reshape(ny, nx)
-    triangle_indices[:, :, 0, 0] = r[:-1, :-1]
-    triangle_indices[:, :, 1, 0] = r[:-1, 1:]
-    triangle_indices[:, :, 0, 1] = r[:-1, 1:]
-
-    triangle_indices[:, :, 1, 1] = r[1:, 1:]
-    triangle_indices[:, :, :, 2] = r[1:, :-1, None]
-    triangle_indices.shape = (-1, 3)
-
-    return data, triangle_indices
-
-
 def has_cw_ordering(points: np.ndarray):
     """Return `True` if a set of points has clockwise ordering, `False` otherwise.
 
@@ -2604,8 +2573,8 @@ class SpatialData:
         # todo: workaround ... fix the real problem
         # if not isinstance(geometry_raster, np.ndarray):
         #    geometry_raster = np.array(geometry_raster)
-        if geometry_raster[0].ndim == 2:
-            return SpatialData(*_triangulate_geometry(geometry_raster))
+        # if geometry_raster[0].ndim == 2:
+        #    geometry_raster = [geometry_raster]
 
         points = []
         triangles = []
