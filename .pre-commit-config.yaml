@@ -35,7 +35,12 @@ repos:
     hooks:
     - id: pydocstyle
       files: '^weldx/'
-      exclude: '^weldx/tags|^weldx/tests'
+      exclude: |
+        (?x)^(
+          ^weldx/tags|
+          ^weldx/tests|
+          ^weldx/asdf|
+          .*__.*.py
+        )
       args:
         - --convention=numpy
-        - --match='(?!__)(?!_version)(?!conftest).*\.py'
