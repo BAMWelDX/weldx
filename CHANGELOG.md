@@ -17,6 +17,8 @@
 - added classes and functions at the top-level of the package to the documentation
   [[#437]](https://github.com/BAMWelDX/weldx/pulls/437).
 - added `weldx.asdf.util.get_highest_tag_version` utility function [[#523]](https://github.com/BAMWelDX/weldx/pull/523).
+- `Geometry.write_to_file` function that allows to export the geometry to simple point and triangle based file formats
+  like `.stl` or `.ply` [[#536]](https://github.com/BAMWelDX/weldx/pulls/536).
 
 ### removed
 
@@ -63,7 +65,8 @@
   [[#494]](https://github.com/BAMWelDX/weldx/pull/494).
 - `compare_nested` can compare sets [[#496]](https://github.com/BAMWelDX/weldx/pull/496)
 - `WeldxFile` cleans old memory blocks during file updates [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
-- `WeldxFile` respects `mode` argument also for BytesIO and file handles [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
+- `WeldxFile` respects `mode` argument also for BytesIO and file
+  handles [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
 
 ### documentation
 
