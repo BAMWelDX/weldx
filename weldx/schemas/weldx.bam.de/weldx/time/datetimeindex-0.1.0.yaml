@@ -11,11 +11,11 @@ examples:
     - A regular datetimeindex starting at 2020-01-01 and a 1 day interval till 2020-01-06
     - |
       !<asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.0>
-        start: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-01-01T00:00:00'}
-        end: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-01-05T00:00:00'}
+        start: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-01T00:00:00'
+        end: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-05T00:00:00'
         freq: D
-        min: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-01-01T00:00:00'}
-        max: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-01-05T00:00:00'}
+        min: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-01T00:00:00'
+        max: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-05T00:00:00'
 
 definitions:
   values:
