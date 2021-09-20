@@ -2392,10 +2392,26 @@ class Geometry:
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
     def write_to_file(self, file_name: str, profile_raster_width, trace_raster_width):
-        """test"""
-        for s in self._trace.segments:
-            if isinstance(s, RadialHorizontalTraceSegment):
-                raise NotImplementedError
+        """Write the ``Geometry`` data into a CAD file.
+
+        The geometry is rasterized and triangulated before the export. All file formats
+        supported by ``meshio`` that are based on points and triangles can be used
+        (For example ``.stl`` or ``.ply``). Just add the corresponding extension to the
+        file name. For further information about supported file formats refer to the
+        [``meshio`` documentation](https://pypi.org/project/meshio/).
+
+        Parameters
+        ----------
+        file_name :
+            Name of the file. Add the extension of the desired file format.
+        profile_raster_width :
+            Target distance between the individual points of a profile
+        trace_raster_width :
+            Target distance between the individual profiles on the trace
+
+        """
+        if isinstance(self._profile, VariableProfile):
+            raise NotImplementedError
 
         raster_data = self._rasterize_constant_profile(
             profile_raster_width=profile_raster_width,
