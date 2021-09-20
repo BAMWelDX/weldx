@@ -11,13 +11,13 @@ examples:
     - A simple DHV-Groove
     - |
       !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/DHVGroove-0.1.0>
-        t: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 11}
-        beta_1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> degree, value: 35}
-        beta_2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> degree, value: 60}
-        b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 3}
-        c: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 1}
-        h1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 5}
-        h2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 5}
+        t: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 11}
+        beta_1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> degree, value: 35}
+        beta_2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> degree, value: 60}
+        b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 3}
+        c: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 1}
+        h1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 5}
+        h2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 5}
         code_number: [2.9.1, 2.9.2]
 
 type: object

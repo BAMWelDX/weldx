@@ -22,12 +22,12 @@ examples:
           name: AD conversion current measurement
           type_transformation: AD
           error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
-            deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 0.01}
+            deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 0.01}
           func: !<tag:weldx.bam.de:weldx/core/mathematical_expression-1.0.0>
             expression: a*x + b
             parameters:
-              a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> 1 / volt, value: 3276.8}
-              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> dimensionless, value: 0.0}
+              a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> 1 / volt, value: 3276.8}
+              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> dimensionless, value: 0.0}
 
 type: object
 properties:

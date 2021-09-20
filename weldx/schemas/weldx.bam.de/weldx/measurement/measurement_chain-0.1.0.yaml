@@ -25,7 +25,7 @@ example:
             signal_type: analog
             unit: V
           error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-            deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 0.2}
+            deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 0.2}
         graph: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-0.1.0>
           root_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
             name: Current sensor
@@ -38,11 +38,11 @@ example:
                 transformation: !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-0.1.0>
                   name: AD conversion
                   error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-                    deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 0.025}
+                    deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 0.025}
                   func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
                     expression: a*x
                     parameters:
-                      a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> 1 / volt, value: 1}
+                      a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> 1 / volt, value: 1}
                   type_transformation: AD
               target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
                 name: AD conversion
@@ -57,12 +57,12 @@ example:
                     transformation: !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-0.1.0>
                       name: Calibration
                       error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-                        deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 0.1}
+                        deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 0.1}
                       func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
                         expression: a*x + b
                         parameters:
-                          a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ampere, value: 75}
-                          b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ampere, value: 25}
+                          a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ampere, value: 75}
+                          b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ampere, value: 25}
                       type_transformation: DD
                   target_node: !<asdf://weldx.bam.de/weldx/tags/core/graph/di_node-0.1.0>
                     name: Calibration
