@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from io import BytesIO, IOBase
 from typing import IO, Dict, List, Mapping, Optional, Union
 
+import asdf
 import numpy as np
 from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
@@ -114,7 +115,7 @@ class WeldxFile(UserDict):
     We define a simple data set and store it in a WeldxFile.
 
     >>> data = {"name": "CXCOMP", "value": 42}
-    >>> wx = WeldxFile(tree=data)
+    >>> wx = WeldxFile(tree=data, mode="rw")
 
     If we want to persist the WeldxFile to a file on hard drive we invoke:
 
@@ -199,6 +200,10 @@ class WeldxFile(UserDict):
             raise ValueError(
                 f'invalid mode "{mode}" given. Should be one of "r", "rw".'
             )
+        elif tree and mode != "rw":
+            raise RuntimeError(
+                "You cannot pass a tree (to be written) on a read-only file."
+            )
         self._mode = mode
         self.sync_upon_close = bool(sync) & (self.mode == "rw")
         self.software_history_entry = software_history_entry
@@ -220,6 +225,16 @@ class WeldxFile(UserDict):
                 self._in_memory = True
             else:
                 self._in_memory = False
+
+            # TODO: this could be inefficient for large files.
+            # For buffers is fast, but not for real files.
+            # real files should be probed over the filesystem!
+            if mode == "rw" and isinstance(
+                filename_or_file_like, SupportsFileReadWrite
+            ):
+                with reset_file_position(filename_or_file_like):
+                    new_file_created = len(filename_or_file_like.read()) == 0
+
             # the user passed a raw file handle, its their responsibility to close it.
             self._close = False
         else:
@@ -231,22 +246,48 @@ class WeldxFile(UserDict):
 
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
         if tree or new_file_created:
-            asdf_file = AsdfFile(tree=tree, custom_schema=self.custom_schema)
-            asdf_file.write_to(filename_or_file_like, **write_kwargs)
+            asdf_file = self._write_tree(
+                filename_or_file_like,
+                tree,
+                asdffile_kwargs,
+                write_kwargs,
+                new_file_created,
+            )
             if isinstance(filename_or_file_like, SupportsFileReadWrite):
                 filename_or_file_like.seek(0)
-
-        asdf_file = open_asdf(
-            filename_or_file_like,
-            mode=self.mode,
-            **asdffile_kwargs,
-        )
+        else:
+            asdf_file = open_asdf(
+                filename_or_file_like,
+                mode=self.mode,
+                **asdffile_kwargs,
+            )
         self._asdf_handle: AsdfFile = asdf_file
 
         # UserDict interface: we want to store a reference to the tree, but the ctor
         # of UserDict takes a copy, so we do it manually here.
         super().__init__()
         self.data = self._asdf_handle.tree
+
+    def _write_tree(
+        self, filename_or_path_like, tree, asdffile_kwargs, write_kwargs, created
+    ) -> AsdfFile:
+        # cases:
+        # 1. file is empty (use write_to)
+        # 1.a empty buffer, iobase
+        # 1.b path pointing to empty (new file)
+        # 2. file exists, but should be updated with new tree
+        if created:
+            asdf_file = asdf.AsdfFile(tree=tree, **asdffile_kwargs)
+            asdf_file.write_to(filename_or_path_like, **write_kwargs)
+            generic_file = generic_io.get_file(filename_or_path_like, mode="rw")
+            asdf_file._fd = generic_file
+        else:
+            if self._mode != "rw":
+                raise RuntimeError("inconsistent mode, need to write data.")
+            asdf_file = open_asdf(filename_or_path_like, **asdffile_kwargs, mode="rw")
+            asdf_file.tree = tree
+            asdf_file.update(**write_kwargs)
+        return asdf_file
 
     @property
     def mode(self) -> str:
@@ -410,7 +451,7 @@ class WeldxFile(UserDict):
         (None, None, None)
         """
         tree = dict.fromkeys(iterable, default)
-        return WeldxFile(tree=tree)
+        return WeldxFile(tree=tree, mode="rw")
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -508,7 +549,7 @@ class WeldxFile(UserDict):
         Examples
         --------
         >>> tree = dict(wx_meta={"welder": "Nikolai Nikolajewitsch Benardos"})
-        >>> wf = WeldxFile(tree=tree)
+        >>> wf = WeldxFile(tree=tree, mode="rw")
         >>> wfa = wf.as_attr()
         >>> wfa.wx_meta.welder
         'Nikolai Nikolajewitsch Benardos'
