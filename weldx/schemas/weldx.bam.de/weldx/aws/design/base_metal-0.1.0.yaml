@@ -32,9 +32,7 @@ properties:
   thickness:
     description: |
       Plate or sheet thickness, if tube, specifies wall thickness.
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
 
   diameter:
     description: |

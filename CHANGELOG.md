@@ -62,6 +62,8 @@
 - Merging and unmerging multiple `CoordinateSystemManager` instances now correctly preserves all attached data.
   [[#494]](https://github.com/BAMWelDX/weldx/pull/494).
 - `compare_nested` can compare sets [[#496]](https://github.com/BAMWelDX/weldx/pull/496)
+- `WeldxFile` cleans old memory blocks during file updates [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
+- `WeldxFile` respects `mode` argument also for BytesIO and file handles [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
 
 ### documentation
 
@@ -95,7 +97,8 @@
   the `CoordinateSystemManager`. It uses the digraph schemas to serialize the coordinate system structure.
   [[#497]](https://github.com/BAMWelDX/weldx/pull/497)
 - add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity``
-  and ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522)
+  and ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522).
+- use ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` instead of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#542]](https://github.com/BAMWelDX/weldx/pull/542).
 
 ### deprecations
 
