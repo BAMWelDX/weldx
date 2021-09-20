@@ -13,8 +13,8 @@ examples:
     - A "xyz" euler rotation with 10, 20 and 60 degree angles as euler representation.
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.0>
-        angles: !unit/quantity-1.1.0
-          unit: degree
+        angles: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0>
+          unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> degree
           value: !core/ndarray-1.0.0
             data: [10.0, 20.0, 60.0]
             datatype: float64
@@ -93,9 +93,7 @@ oneOf:
       angles:
         description: |
           Rotation angles data.
-        oneOf:
-          - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-          - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+        tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
         wx_unit: "degree"
     required: [sequence, angles]
     flowStyle: block

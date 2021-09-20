@@ -13,57 +13,42 @@ definitions:
   workpiece-thickness:
     description: |
       Workpiece thickness
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
     wx_unit: "mm"
 
   root-gap:
     description: |
       Root gap
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
     wx_unit: "mm"
 
   groove-angle:
     description: |
       Groove angle
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
     wx_unit: "deg"
 
   bevel-angle:
     description: |
       Bevel angle
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
     wx_unit: "deg"
 
   bevel-radius:
     description: |
       Bevel radius
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
     wx_unit: "mm"
 
   root-face:
     description: |
       Root face
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
     wx_unit: "mm"
 
   special-depth:
     description: |
       Special depth
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
     wx_unit: "mm"
-
 ...
