@@ -2569,13 +2569,6 @@ class SpatialData:
             New `SpatialData` instance
 
         """
-        # todo: this needs a test
-        # todo: workaround ... fix the real problem
-        # if not isinstance(geometry_raster, np.ndarray):
-        #    geometry_raster = np.array(geometry_raster)
-        # if geometry_raster[0].ndim == 2:
-        #    geometry_raster = [geometry_raster]
-
         points = []
         triangles = []
         for shape_raster_data in geometry_raster:
