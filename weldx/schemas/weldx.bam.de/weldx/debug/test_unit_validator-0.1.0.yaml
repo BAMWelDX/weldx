@@ -10,9 +10,7 @@ properties:
   length_prop:
     description: |
       a simple length quantity with unit validator
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
     wx_unit: "m"
 
   velocity_prop:
@@ -26,9 +24,7 @@ properties:
   current_prop:
     description: |
       a current quantity of shape [2,2]
-    oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-      - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
 
   nested_prop:
     description: |
@@ -37,14 +33,10 @@ properties:
     properties:
       q1:
         description: a nested length of shape [3,3]
-        oneOf:
-          - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-          - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+        tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
       q2:
         description: a volume
-        oneOf:
-          - tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-          - tag: "tag:stsci.edu:asdf/unit/quantity-1.*"
+        tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
     wx_unit:
       q1: "m"
 

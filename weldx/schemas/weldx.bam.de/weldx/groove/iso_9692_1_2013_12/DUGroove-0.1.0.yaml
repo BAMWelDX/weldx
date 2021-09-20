@@ -11,15 +11,15 @@ examples:
     - A simple DU-Groove
     - |
       !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/DUGroove-0.1.0>
-        t: !unit/quantity-1.1.0 {unit: millimeter, value: 33}
-        beta_1: !unit/quantity-1.1.0 {unit: degree, value: 8}
-        beta_2: !unit/quantity-1.1.0 {unit: degree, value: 12}
-        R: !unit/quantity-1.1.0 {unit: millimeter, value: 6}
-        R2: !unit/quantity-1.1.0 {unit: millimeter, value: 6}
-        b: !unit/quantity-1.1.0 {unit: millimeter, value: 2}
-        c: !unit/quantity-1.1.0 {unit: millimeter, value: 3}
-        h1: !unit/quantity-1.1.0 {unit: millimeter, value: 15}
-        h2: !unit/quantity-1.1.0 {unit: millimeter, value: 15}
+        t: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 33}
+        beta_1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> degree, value: 8}
+        beta_2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> degree, value: 12}
+        R: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 6}
+        R2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 6}
+        b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 2}
+        c: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 3}
+        h1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 15}
+        h2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit:  !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 15}
         code_number: ['2.7']
 
 type: object
