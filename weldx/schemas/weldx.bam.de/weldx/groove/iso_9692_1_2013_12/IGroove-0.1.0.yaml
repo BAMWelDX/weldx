@@ -11,8 +11,8 @@ examples:
     - A simple I-Groove
     - |
       !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/IGroove-0.1.0>
-        t: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 4, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter}
-        b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 4, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter}
+        t: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 4, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+        b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 4, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
         code_number: [1.2.1, 1.2.2, '2.1']
 
 type: object

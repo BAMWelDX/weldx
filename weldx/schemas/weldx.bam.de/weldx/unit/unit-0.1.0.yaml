@@ -10,7 +10,7 @@ examples:
   -
     - A 'meter' unit.
     - |
-      !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> meter
+      !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> m
 
 type: string
 tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
