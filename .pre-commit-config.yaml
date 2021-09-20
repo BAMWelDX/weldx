@@ -34,3 +34,8 @@ repos:
     rev: 6.1.1
     hooks:
     - id: pydocstyle
+      files: '^weldx/'
+      exclude: '^weldx/tags|^weldx/tests'
+      args:
+        - --convention=numpy
+        - --match='(?!__)(?!_version)(?!conftest).*\.py'
