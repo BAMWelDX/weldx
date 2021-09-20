@@ -24,7 +24,9 @@ Q_.__module_ = "pint.quantity"  # skipcq: PYL-W0212
 Q_.__doc__ = """Create a quantity from a scalar or array.
 
 The quantity class supports lots of physical units and will combine them during
-mathematical operations
+mathematical operations.
+For extended details on working with quantities, please see the
+`pint documentation <http://https://pint.readthedocs.io/>`_
 
 Examples
 --------
