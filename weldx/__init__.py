@@ -116,7 +116,7 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 # constants - should be imported first, no internal weldx deps
-from .constants import Q_
+from .constants import Q_, U_
 
 # main modules
 import weldx.util  # import this first to avoid circular dependencies
@@ -165,6 +165,7 @@ __all__ = (
     "LocalCoordinateSystem",
     "Profile",
     "Q_",
+    "U_",
     "Shape",
     "SpatialData",
     "Trace",
