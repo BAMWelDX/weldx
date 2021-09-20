@@ -15,7 +15,7 @@ examples:
     - |
       !<tag:weldx.bam.de:weldx/aws/process/gas_component-1.0.0>
         gas_chemical_name: argon
-        gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 82}
+        gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 82, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent}
 
 type: object
 properties:

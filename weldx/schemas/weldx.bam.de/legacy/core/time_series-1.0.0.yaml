@@ -30,9 +30,9 @@ examples:
                 - [0, 0, 1]
                 datatype: int32
                 shape: [1, 3]
-            b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter, value: 0.0}
-            o: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> hertz * radian, value: 4.934802200544679}
-            p: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> radian, value: 0}
+            b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> millimeter}
+            o: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 4.934802200544679, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> hertz * radian}
+            p: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> radian}
         unit: millimeter
         shape: [1, 3]
 

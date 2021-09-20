@@ -18,12 +18,12 @@ examples:
             gas_component:
             - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
               gas_chemical_name: argon
-              gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 82}
+              gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 82, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent}
             - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
               gas_chemical_name: carbon dioxide
-              gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 18}
+              gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 18, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent}
             common_name: SG
-          torch_shielding_gas_flowrate: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> liter / minute, value: 20}
+          torch_shielding_gas_flowrate: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 20, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> liter / minute}
 
 type: object
 properties:

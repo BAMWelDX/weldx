@@ -17,7 +17,7 @@ examples:
           signal_type: analog
           unit: V
         error: !<tag:weldx.bam.de:weldx/measurement/error-1.0.0>
-          deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent, value: 0.1}
+          deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.1, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent}
 
 type: object
 properties:
