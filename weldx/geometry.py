@@ -14,7 +14,6 @@ from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.util as ut
-from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -2491,16 +2490,17 @@ class SpatialData:
         return SpatialData(mesh.points, triangles)
 
     @staticmethod
-    def _shape_raster_points(shape_raster_data) -> np.array:
+    def _shape_raster_points(shape_raster_data: np.ndarray) -> List[List[int]]:
+        """Extract all points from a shapes raster data."""
         return shape_raster_data.reshape(
             (shape_raster_data.shape[0] * shape_raster_data.shape[1], 3)
         ).tolist()
 
     @staticmethod
-    def _shape_profile_triangles(shape_raster_data, offset, cw_ordering):
-        num_profiles = shape_raster_data.shape[0]
-        num_profile_points = shape_raster_data.shape[1]
-
+    def _shape_profile_triangles(
+        num_profiles: int, num_profile_points: int, offset: int, cw_ordering: bool
+    ) -> List[List[int]]:
+        """Create the profile main surface triangles for ``_shape_triangles``."""
         tri_base = []
         for i in range(num_profile_points):
             idx_0 = i
@@ -2526,9 +2526,9 @@ class SpatialData:
 
     @staticmethod
     def _shape_front_back_triangles(
-        num_profiles, num_profile_points, offset, cw_ordering
-    ):
-        triangles = []
+        num_profiles: int, num_profile_points: int, offset: int, cw_ordering: bool
+    ) -> List[List[int]]:
+        """Create the front and back surface triangles for ``_shape_triangles``."""
         tri_cw = []
         tri_ccw = []
         i_0 = 0
@@ -2553,26 +2553,40 @@ class SpatialData:
         else:
             front = tri_ccw
             back = tri_cw
-        triangles += front
-        triangles += (
-            np.array(back, int) + (num_profiles - 1) * num_profile_points
-        ).tolist()
-
-        return triangles
+        return [
+            *front,
+            *(np.array(back, int) + (num_profiles - 1) * num_profile_points).tolist(),
+        ]
 
     @classmethod
-    def _shape_triangles(cls, shape_raster_data: np.array, offset: int):
+    def _shape_triangles(
+        cls, shape_raster_data: np.ndarray, offset: int
+    ) -> List[List[int]]:
+        """Get the triangles of a shape from its raster data.
 
-        num_profiles = shape_raster_data.shape[0]
-        num_profile_points = shape_raster_data.shape[1]
-        cw_ordering = has_cw_ordering(shape_raster_data[0])
+        The triangle data are just indices referring to a list of points.
 
-        triangles = cls._shape_profile_triangles(shape_raster_data, offset, cw_ordering)
-        triangles += cls._shape_front_back_triangles(
-            num_profiles, num_profile_points, offset, cw_ordering
-        )
+        Parameters
+        ----------
+        shape_raster_data :
+            Raster data of the shape
+        offset :
+            An offset that will be added to all indices.
 
-        return triangles
+        Returns
+        -------
+        List[List[int]] :
+            The list of triangles
+
+        """
+        n_prf = shape_raster_data.shape[0]
+        n_prf_pts = shape_raster_data.shape[1]
+        cw_ord = has_cw_ordering(shape_raster_data[0])
+
+        return [
+            *cls._shape_profile_triangles(n_prf, n_prf_pts, offset, cw_ord),
+            *cls._shape_front_back_triangles(n_prf, n_prf_pts, offset, cw_ord),
+        ]
 
     @classmethod
     def from_geometry_raster(
