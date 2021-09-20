@@ -2592,7 +2592,7 @@ class SpatialData:
 
         points = []
         triangles = []
-        for i, shape_raster_data in enumerate(geometry_raster):
+        for shape_raster_data in geometry_raster:
             shape_raster_data = shape_raster_data.swapaxes(1, 2)
             triangles += cls._shape_triangles(shape_raster_data, len(points))
             points += cls._shape_raster_points(shape_raster_data)
