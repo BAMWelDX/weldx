@@ -53,6 +53,7 @@
   [[#504]](https://github.com/BAMWelDX/weldx/pull/504).
 - changed the default ``pint.Unit`` formatting to short
   notation ``:~`` [[#519]](https://github.com/BAMWelDX/weldx/pull/519).
+- support most ``pandas.Index`` methods on `Time` instances [[#503]](https://github.com/BAMWelDX/weldx/pull/503).
 
 ### fixes
 

@@ -673,7 +673,7 @@ class TestTime:
         arr.time.weldx.time_ref = ts
         time = Time(arr)
 
-        assert time.length == len(t)
+        assert len(time) == len(t)
         assert time.equals(Time(t))
 
         time_q = time.as_quantity()
