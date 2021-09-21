@@ -50,6 +50,7 @@ lets combine length and time to get a velocity.
 __test__ = {"Q": Q_.__doc__}  # enable doctest checking.
 
 U_ = WELDX_UNIT_REGISTRY.Unit
+U_.__name__ = "U_"
 U_.__module__ = "pint.unit"  # skipcq: PYL-W0212
 
 
