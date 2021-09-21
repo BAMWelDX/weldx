@@ -57,6 +57,9 @@ class Time:
         - strings representing a date (``"2001-01-23 14:23:11"``) or a timedelta
           (``23s``)
 
+    The underlying implementation is based on the core `pandas.TimedeltaIndex` and
+    `pandas.DatetimeIndex` types, see the documentation for references.
+
     Parameters
     ----------
     time :
