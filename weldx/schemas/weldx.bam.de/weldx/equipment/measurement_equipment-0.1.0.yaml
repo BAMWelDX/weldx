@@ -21,12 +21,12 @@ examples:
           name: AD conversion current measurement
           type_transformation: AD
           error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-            deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.01, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> percent}
+            deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.01, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
           func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
             expression: a*x + b
             parameters:
               a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 3276.8, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> 1 / volt}
-              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> dimensionless}
+              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''}
 
 type: object
 properties:
