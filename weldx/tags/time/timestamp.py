@@ -8,16 +8,18 @@ __all__ = ["TimestampConverter"]
 class TimestampConverter(WeldxConverter):
     """A simple implementation of serializing a single pandas Timestamp."""
 
-    name = "time/timestamp"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.*"]
     types = [pd.Timestamp]
 
-    def to_yaml_tree(self, obj: pd.Timestamp, tag: str, ctx) -> dict:
-        """Convert to python dict."""
-        tree = {}
-        tree["value"] = obj.isoformat()
-        return tree
+    def to_yaml_tree(self, obj: pd.Timestamp, tag: str, ctx) -> str:
+        """Convert to iso format string."""
+        return obj.isoformat()
 
-    def from_yaml_tree(self, node: dict, tag: str, ctx):
-        """Construct timestamp from tree."""
-        return pd.Timestamp(node["value"])
+    def from_yaml_tree(self, node: str, tag: str, ctx) -> pd.Timestamp:
+        """Construct timestamp from node."""
+        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
+            return pd.Timestamp(node["value"])
+        # using pd.Timestamp.fromisoformat here would probably be 'better' but
+        # there is a bug/regression in some pandas versions that doesn't play nice
+        # with nanosecond precision (fails in 1.3.0, works ion 1.3.3)
+        return pd.Timestamp(node)

@@ -102,6 +102,8 @@
   and ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522).
 - use ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` instead
   of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#542]](https://github.com/BAMWelDX/weldx/pull/542).
+- changed ``time/timedelta`` and ``time/timestamp`` to be ``type: string`` instead
+  of ``object`` ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#541]](https://github.com/BAMWelDX/weldx/pull/541).
 - refactor properties named ``unit`` to ``units`` and use ``unit/unit``
   tag [[#551]](https://github.com/BAMWelDX/weldx/pull/551).
 

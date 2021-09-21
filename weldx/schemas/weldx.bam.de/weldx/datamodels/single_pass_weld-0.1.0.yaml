@@ -173,10 +173,10 @@ examples:
               data: [0, 29000000000]
               datatype: int64
               shape: [2]
-            start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-            end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M29S}
-            min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-            max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M29S}
+            start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+            end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M29S
+            min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+            max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M29S
           orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
             name: orientations
             dimensions: [c, v]
@@ -226,10 +226,10 @@ examples:
                             data: [0, 29000000000]
                             datatype: int64
                             shape: [2]
-                          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-                          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M29S}
-                          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-                          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M29S}
+                          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M29S
+                          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M29S
                         orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
                           name: orientations
                           dimensions: [c, v]
@@ -328,11 +328,11 @@ examples:
               datatype: float64
               shape: [6]
             time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
-              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
+              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
               freq: 2S
-              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
+              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
             units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A
             shape: [6]
             interpolation: step
@@ -391,11 +391,11 @@ examples:
               datatype: float64
               shape: [6]
             time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
-              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
+              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
               freq: 2S
-              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
+              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
             units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
             shape: [6]
             interpolation: step
@@ -484,7 +484,7 @@ examples:
             tag: CLOOS/pulse
           welding_wire:
             diameter: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 1.2, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        reference_timestamp: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-11-09T12:00:00'}
+        reference_timestamp: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-11-09T12:00:00'
         welding_current: *id015
         welding_voltage: *id016
         workpiece:

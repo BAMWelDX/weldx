@@ -11,10 +11,12 @@ class TimedeltaConverter(WeldxConverter):
     tags = ["asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.*"]
     types = [pd.Timedelta]
 
-    def to_yaml_tree(self, obj: pd.Timedelta, tag, ctx) -> dict:
-        """Convert to python dict."""
-        return dict(value=obj.isoformat())
+    def to_yaml_tree(self, obj: pd.Timedelta, tag, ctx) -> str:
+        """Convert to iso format string."""
+        return obj.isoformat()
 
-    def from_yaml_tree(self, node, tag, ctx):
+    def from_yaml_tree(self, node: str, tag, ctx) -> pd.Timedelta:
         """Construct timedelta from tree."""
-        return pd.Timedelta(node["value"])
+        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
+            return pd.Timedelta(node["value"])
+        return pd.Timedelta(node)
