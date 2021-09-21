@@ -3,6 +3,8 @@ from pathlib import Path as _Path
 
 from pint import UnitRegistry as _ureg
 
+UNIT_KEY = "units"  # default nomenclature for storing physical units information
+
 WELDX_PATH = _Path(__file__).parent.resolve()
 
 WELDX_UNIT_REGISTRY = _ureg(
@@ -48,4 +50,5 @@ __all__ = (
     "WELDX_UNIT_REGISTRY",
     "Q_",
     "U_",
+    "UNIT_KEY",
 )

@@ -29,16 +29,16 @@ properties:
     oneOf:
       - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
       - type: number
-  unit:
+  units:
     description: |
-      Optional field describing the unit of the data as valid string representation.
-    type: string
+      Optional field describing the unit of the data.
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
   attrs:
     description: |
       Additional attributes metadata associated with the variable.
     type: object
 
 required: [name, dimensions, dtype, data]
-propertyOrder: [name, dimensions, dtype, unit, data]
+propertyOrder: [name, dimensions, dtype, units, data]
 flowStyle: block
 ...

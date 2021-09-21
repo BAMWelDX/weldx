@@ -41,10 +41,10 @@ properties:
     oneOf:
       - type: number
       - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-  unit:
+  units:
     description: |
       The unit corresponding to the values
     tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
-required: [value, unit]
-propertyOrder: [value, unit]
+required: [value, units]
+propertyOrder: [value, units]
 ...

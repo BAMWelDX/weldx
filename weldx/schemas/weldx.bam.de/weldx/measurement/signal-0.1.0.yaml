@@ -27,17 +27,17 @@ properties:
       The type of the signal (analog or digital).
     type: string
     enum: [analog, digital]
-  unit:
+  units:
     description: |
       The unit of the signal (volt, kelvin, etc.).
-    type: string
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
   data:
     description: |
       Measurement data that was produced by the signal.
     tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
 
 
-propertyOrder: [signal_type, unit, data]
-required: [signal_type, unit]
+propertyOrder: [signal_type, units, data]
+required: [signal_type, units]
 flowStyle: block
 ...

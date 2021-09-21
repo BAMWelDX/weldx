@@ -7,6 +7,8 @@ __all__ = ["Signal", "SignalConverter"]
 def _from_yaml_tree_mod(tree):
     if "data" not in tree:
         tree["data"] = None
+    if "unit" in tree:  # legacy_code
+        tree["units"] = tree["unit"]
     return tree
 
 
