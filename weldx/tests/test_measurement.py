@@ -236,7 +236,7 @@ class TestMeasurementChain:
 
         signal = mc.output_signal
         assert signal.signal_type == exp_signal_type
-        assert U_(signal.unit) == exp_signal_unit
+        assert U_(signal.units) == exp_signal_unit
 
     # test_add_transformation_exceptions -----------------------------------------------
 

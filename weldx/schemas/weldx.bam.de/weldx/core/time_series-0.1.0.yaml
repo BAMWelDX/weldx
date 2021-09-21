@@ -13,7 +13,7 @@ examples:
     - A time_series describing a constant value in time.
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-        unit: millimeter / second
+        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm / s
         value: 10.0
   -
     - A time_series describing a sine oscillation in 3d space along the z-axis
@@ -23,16 +23,16 @@ examples:
           expression: a*sin(o*t + p) + b
           parameters:
             a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0>
-              unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm
               value: !core/ndarray-1.0.0
                 data:
                 - [0, 0, 1]
                 datatype: int32
                 shape: [1, 3]
-            b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-            o: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 4.934802200544679, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> Hz * rad}
-            p: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> radian}
-        unit: millimeter
+            b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+            o: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 4.934802200544679, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> Hz * rad}
+            p: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> radian}
+        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm
         shape: [1, 3]
 
 oneOf:
@@ -47,11 +47,11 @@ oneOf:
           - type: number
           - type: integer
           - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-      unit:
+      units:
         description: |
           Unit of the data.
-        type: string
-    required: [value, unit]
+        tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
+    required: [value, units]
 
   - type: object
     description: |
@@ -61,15 +61,15 @@ oneOf:
         description: |
           A mathematical expression that describes the time dependent behaviour.
         tag: "asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.*"
-      unit:
+      units:
         description: |
           Resulting unit of the data when the expression is evaluated.
-        type: string
+        tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
       shape:
         description: |
           (optional) Resulting shape of the data when the expression is evaluated.
         type: array
-    required: [expression, unit]
+    required: [expression, units]
 
   - type: object
     description: |
@@ -79,10 +79,10 @@ oneOf:
         description: |
           A set of time deltas.
         tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.*"
-      unit:
+      units:
         description: |
-          Unit of the data.
-        type: string
+          Units of the data.
+        tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
       shape:
         description: |
           Shape of the data.
@@ -101,8 +101,8 @@ oneOf:
       #  The outer dimension of the data needs to be identical to the times dimension.
       time: [t]
       values: [t, ...]
-    required: [time, unit, shape, interpolation, values]
+    required: [time, units, shape, interpolation, values]
 
-propertyOrder: [expression, values, time, unit, shape, interpolation, values]
+propertyOrder: [expression, values, time, units, shape, interpolation, values]
 flowStyle: block
 ...

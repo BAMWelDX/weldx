@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 from warnings import warn
 
+import pint
 from networkx import draw, draw_networkx_edge_labels
 
 from weldx.constants import Q_, U_
@@ -33,13 +34,14 @@ class Signal:
     """Simple dataclass implementation for measurement signals."""
 
     signal_type: str
-    unit: str
+    units: pint.Unit
     data: TimeSeries = None
 
     def __post_init__(self):
         """Perform some checks after construction."""
         if self.signal_type not in ["analog", "digital"]:
             raise ValueError(f"{self.signal_type} is an invalid signal type.")
+        self.units = U_(self.units)
 
     def plot(
         self,
@@ -243,7 +245,7 @@ class MeasurementChain:
         >>> current_source = SignalSource(name="Current sensor",
         ...                               error=Error(Q_(0.1, "percent")),
         ...                               output_signal=Signal(signal_type="analog",
-        ...                                                    unit="V")
+        ...                                                    units="V")
         ...                               )
 
         Create a measurement chain using the source
@@ -330,7 +332,7 @@ class MeasurementChain:
         >>> current_source = SignalSource(name="Current sensor",
         ...                               error=Error(Q_(0.1, "percent")),
         ...                               output_signal=Signal(signal_type="analog",
-        ...                                                    unit="V")
+        ...                                                    units="V")
         ...                               )
 
         Create the equipment
@@ -476,8 +478,8 @@ class MeasurementChain:
             signal_type=cls._determine_output_signal_type(
                 transformation.type_transformation, input_signal.signal_type
             ),
-            unit=cls._determine_output_signal_unit(
-                transformation.func, input_signal.unit
+            units=cls._determine_output_signal_unit(
+                transformation.func, input_signal.units
             ),
             data=data,
         )
@@ -817,7 +819,7 @@ class MeasurementChain:
             warn("The created transformation does not perform any transformations.")
 
         input_signal_source = self._check_and_get_node_name(input_signal_source)
-        input_signal = self._graph.nodes[input_signal_source]["signal"]
+        input_signal: Signal = self._graph.nodes[input_signal_source]["signal"]
         if output_signal_type is None:
             output_signal_type = input_signal.signal_type
         type_tf = f"{input_signal.signal_type[0]}{output_signal_type[0]}".upper()
@@ -825,14 +827,14 @@ class MeasurementChain:
             if func is not None:
                 if not ureg.is_compatible_with(
                     output_signal_unit,
-                    self._determine_output_signal_unit(func, input_signal.unit),
+                    self._determine_output_signal_unit(func, input_signal.units),
                 ):
                     raise ValueError(
                         "The unit of the provided functions output has not the same "
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
-                unit_conversion = U_(output_signal_unit) / U_(input_signal.unit)
+                unit_conversion = U_(output_signal_unit) / U_(input_signal.units)
                 func = MathematicalExpression(
                     "a*x",
                     parameters={"a": Q_(1, unit_conversion)},
@@ -966,8 +968,8 @@ class MeasurementChain:
 
         # walk over the graphs nodes and collect necessary data for plotting
         while True:
-            signal = graph.nodes[c_node]["signal"]
-            signal_labels[c_node] = f"{signal.signal_type}\n[{signal.unit}]"
+            signal: Signal = graph.nodes[c_node]["signal"]
+            signal_labels[c_node] = f"{signal.signal_type}\n[{signal.units}]"
             positions[c_node] = (x_pos, 0.75)
 
             if signal.data is not None:

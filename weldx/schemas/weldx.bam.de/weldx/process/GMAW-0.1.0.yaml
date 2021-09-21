@@ -16,19 +16,19 @@ examples:
           meta: {modulation: UI}
           parameters:
             base_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-              unit: ampere
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A
               value: 60.0
             pulse_duration: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-              unit: millisecond
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ms
               value: 5.0
             pulse_frequency: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-              unit: hertz
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> Hz
               value: 100.0
             pulse_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-              unit: volt
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
               value: 40.0
             wire_feedrate: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-              unit: meter / minute
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> m / min
               value: 10.0
           power_source: Quinto
           tag: CLOOS/pulse
@@ -40,10 +40,10 @@ examples:
         manufacturer: CLOOS
         parameters:
           characteristic: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-            unit: volt / ampere
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V / A
             value: 5.0
           impedance: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-            unit: percent
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'
             value: 10.0
           voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
             &id001 values: &id002 !core/ndarray-1.0.0
@@ -59,12 +59,12 @@ examples:
               end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
               min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
               max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
-            unit: volt
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
             shape: [2]
             interpolation: linear
             *id001 : *id002
           wire_feedrate: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-            unit: meter / minute
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> m / min
             value: 10.0
         power_source: Quinto
         tag: CLOOS/spray_arc

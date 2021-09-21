@@ -6,7 +6,7 @@ import pint
 from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxConverter
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.core import TimeSeries
 
 
@@ -22,27 +22,35 @@ class TimeSeriesConverter(WeldxConverter):
         if isinstance(obj.data, pint.Quantity):
             if obj.shape == tuple([1]):  # constant
                 return {
-                    "unit": str(obj.units),
+                    "units": obj.units,
                     "value": obj.data.magnitude[0],
                 }
             return {
                 "time": obj.time.as_pandas_index(),
-                "unit": str(obj.units),
+                "units": obj.units,
                 "shape": obj.shape,
                 "interpolation": obj.interpolation,
                 "values": obj.data.magnitude,
             }
-        return {"expression": obj.data, "unit": str(obj.units), "shape": obj.shape}
+        return {"expression": obj.data, "units": obj.units, "shape": obj.shape}
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct from tree."""
         if "value" in node:  # constant
-            values = Q_(np.asarray(node["value"]), node["unit"])
+            if "units" in node:
+                _units = U_(node["units"])
+            else:  # legacy_code
+                _units = U_(node["unit"])
+            values = Q_(np.asarray(node["value"]), _units)
             return TimeSeries(values)
         if "values" in node:
             time = node["time"]
             interpolation = node["interpolation"]
-            values = Q_(node["values"], node["unit"])
+            if "units" in node:
+                _units = U_(node["units"])
+            else:  # legacy_code
+                _units = U_(node["unit"])
+            values = Q_(node["values"], _units)
             return TimeSeries(values, time, interpolation)
 
         return TimeSeries(node["expression"])  # mathexpression

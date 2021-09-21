@@ -93,7 +93,10 @@ def _unit_validator(
     if not position:
         position = instance
 
-    unit = instance["unit"]
+    if "units" in instance:
+        unit = instance["units"]
+    else:  # legacy_code
+        unit = instance["unit"]
     valid = Q_(unit).check(UREG.get_dimensionality(expected_dimensionality))
     if not valid:
         yield ValidationError(

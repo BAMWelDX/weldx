@@ -104,6 +104,8 @@
   of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#542]](https://github.com/BAMWelDX/weldx/pull/542).
 - changed ``time/timedelta`` and ``time/timestamp`` to be ``type: string`` instead
   of ``object`` ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#541]](https://github.com/BAMWelDX/weldx/pull/541).
+- refactor properties named ``unit`` to ``units`` and use ``unit/unit``
+  tag [[#551]](https://github.com/BAMWelDX/weldx/pull/551).
 
 ### deprecations
 
