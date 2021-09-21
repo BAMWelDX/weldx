@@ -119,13 +119,14 @@ except ModuleNotFoundError:  # pragma: no cover
 from .constants import Q_
 
 # main modules
+import weldx.time
 import weldx.util  # import this first to avoid circular dependencies
 import weldx.core
 import weldx.transformations
 import weldx.config
 import weldx.geometry
 import weldx.welding
-import weldx.time
+
 
 # class imports to weldx namespace
 from weldx.config import Config
