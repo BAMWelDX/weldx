@@ -17,10 +17,10 @@ examples:
         gas_component:
         - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
           gas_chemical_name: argon
-          gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 82}
+          gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 82, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
         - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
           gas_chemical_name: carbon dioxide
-          gas_percentage: !unit/quantity-1.1.0 {unit: percent, value: 18}
+          gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 18, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
         common_name: SG
 
 properties:

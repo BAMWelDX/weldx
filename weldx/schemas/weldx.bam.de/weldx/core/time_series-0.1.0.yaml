@@ -22,16 +22,16 @@ examples:
         expression: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
           expression: a*sin(o*t + p) + b
           parameters:
-            a: !unit/quantity-1.1.0
-              unit: millimeter
+            a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0>
+              unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm
               value: !core/ndarray-1.0.0
                 data:
                 - [0, 0, 1]
                 datatype: int32
                 shape: [1, 3]
-            b: !unit/quantity-1.1.0 {unit: millimeter, value: 0.0}
-            o: !unit/quantity-1.1.0 {unit: hertz * radian, value: 4.934802200544679}
-            p: !unit/quantity-1.1.0 {unit: radian, value: 0}
+            b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+            o: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 4.934802200544679, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> Hz * rad}
+            p: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> radian}
         unit: millimeter
         shape: [1, 3]
 
