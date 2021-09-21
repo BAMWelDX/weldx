@@ -2360,7 +2360,7 @@ class Geometry:
         )
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
-    def write_to_file(self, file_name: str, profile_raster_width, trace_raster_width):
+    def to_file(self, file_name: str, profile_raster_width, trace_raster_width):
         """Write the ``Geometry`` data into a CAD file.
 
         The geometry is rasterized and triangulated before the export. All file formats
@@ -2388,7 +2388,7 @@ class Geometry:
             stack=False,
         )
 
-        SpatialData.from_geometry_raster(raster_data).write_to_file(file_name)
+        SpatialData.from_geometry_raster(raster_data).to_file(file_name)
 
 
 # SpatialData --------------------------------------------------------------------------
@@ -2619,7 +2619,7 @@ class SpatialData:
             show_wireframe=show_wireframe,
         )
 
-    def write_to_file(self, file_name: Union[str, Path]):
+    def to_file(self, file_name: Union[str, Path]):
         """Write spatial data into a file.
 
         The extension prescribes the output format.
