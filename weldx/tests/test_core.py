@@ -445,7 +445,7 @@ class TestTimeSeries:
         assert Q_(1, str(result.units)) == Q_(1, unit_exp)
 
         time = Time(time)
-        if time.length == 1:
+        if len(time) == 1:
             assert result.time is None
         else:
             assert np.all(Time(result.time, result._reference_time) == time)
