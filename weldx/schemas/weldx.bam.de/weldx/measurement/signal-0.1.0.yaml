@@ -13,13 +13,13 @@ examples:
     - |
       !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
         signal_type: analog
-        unit: V
+        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
   -
     - A digital dimensionless signal.
     - |
       !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
         signal_type: digital
-        unit: ''
+        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''
 
 properties:
   signal_type:

@@ -282,14 +282,14 @@ examples:
             name: Current Sensor
             output_signal: &id004 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
               signal_type: analog
-              unit: V
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
               deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.1, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
           - &id011 !<asdf://weldx.bam.de/weldx/tags/measurement/source-0.1.0>
             name: Voltage Sensor
             output_signal: &id012 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
               signal_type: analog
-              unit: V
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
               deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.1, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
           transformations: []
@@ -333,7 +333,7 @@ examples:
               freq: 2S
               min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
               max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
-            unit: ampere
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A
             shape: [6]
             interpolation: step
             *id001 : *id002
@@ -356,7 +356,7 @@ examples:
                     attributes:
                       signal: !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
                         signal_type: digital
-                        unit: dimensionless
+                        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''
                     edges:
                     - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-0.1.0>
                       direction: fwd
@@ -378,7 +378,7 @@ examples:
                         attributes:
                           signal: &id015 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
                             signal_type: digital
-                            unit: ampere
+                            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A
                             data: *id007
             source_equipment: *id008
         - !<asdf://weldx.bam.de/weldx/tags/measurement/measurement-0.1.0>
@@ -396,7 +396,7 @@ examples:
               freq: 2S
               min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
               max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
-            unit: volt
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
             shape: [6]
             interpolation: step
             *id009 : *id010
@@ -419,7 +419,7 @@ examples:
                     attributes:
                       signal: !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
                         signal_type: digital
-                        unit: dimensionless
+                        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''
                     edges:
                     - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-0.1.0>
                       direction: fwd
@@ -441,7 +441,7 @@ examples:
                         attributes:
                           signal: &id016 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
                             signal_type: digital
-                            unit: volt
+                            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
                             data: *id014
             source_equipment: *id008
         process:
@@ -458,7 +458,7 @@ examples:
               common_name: SG
             torch_shielding_gas_flowrate: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 20, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> l / min}
           weld_speed: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-            unit: millimeter / second
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm / s
             value: 10
           welding_process: !<asdf://weldx.bam.de/weldx/tags/process/CLOOS/pulse-0.1.0>
             base_process: pulse
@@ -466,19 +466,19 @@ examples:
             meta: {modulation: UI}
             parameters:
               base_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: ampere
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A
                 value: 60.0
               pulse_duration: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: millisecond
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ms
                 value: 5.0
               pulse_frequency: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: hertz
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> Hz
                 value: 100.0
               pulse_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: volt
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
                 value: 40.0
               wire_feedrate: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: meter / minute
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm / min
                 value: 10.0
             power_source: Quinto
             tag: CLOOS/pulse
