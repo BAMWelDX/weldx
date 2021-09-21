@@ -47,7 +47,7 @@ def measurement_chain_with_equipment() -> MeasurementChain:
     """Get a default measurement chain with attached equipment."""
     source = SignalSource(
         "Current measurement",
-        output_signal=Signal(signal_type="analog", unit="V"),
+        output_signal=Signal(signal_type="analog", units="V"),
         error=Error(Q_(1, "percent")),
     )
     ad_conversion = SignalTransformation(

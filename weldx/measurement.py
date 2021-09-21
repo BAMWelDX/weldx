@@ -34,7 +34,7 @@ class Signal:
     """Simple dataclass implementation for measurement signals."""
 
     signal_type: str
-    units: pint.Quantity
+    units: pint.Unit
     data: TimeSeries = None
 
     def __post_init__(self):
@@ -245,7 +245,7 @@ class MeasurementChain:
         >>> current_source = SignalSource(name="Current sensor",
         ...                               error=Error(Q_(0.1, "percent")),
         ...                               output_signal=Signal(signal_type="analog",
-        ...                                                    unit="V")
+        ...                                                    units="V")
         ...                               )
 
         Create a measurement chain using the source
@@ -332,7 +332,7 @@ class MeasurementChain:
         >>> current_source = SignalSource(name="Current sensor",
         ...                               error=Error(Q_(0.1, "percent")),
         ...                               output_signal=Signal(signal_type="analog",
-        ...                                                    unit="V")
+        ...                                                    units="V")
         ...                               )
 
         Create the equipment

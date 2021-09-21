@@ -131,7 +131,7 @@ def single_pass_weld_example(
 
     src_current = msm.SignalSource(
         name="Current Sensor",
-        output_signal=msm.Signal(signal_type="analog", unit="V", data=None),
+        output_signal=msm.Signal(signal_type="analog", units="V", data=None),
         error=msm.Error(Q_(0.1, "percent")),
     )
 
