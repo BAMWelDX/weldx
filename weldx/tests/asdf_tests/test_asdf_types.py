@@ -1,9 +1,9 @@
-import numpy as np
 import pandas as pd
 
 from weldx.asdf.types import META_ATTR, USER_ATTR
 from weldx.asdf.util import write_read_buffer
 from weldx.measurement import Error
+from weldx.util import compare_nested
 
 
 def test_meta_attr():
@@ -22,6 +22,8 @@ def test_meta_attr():
     e2 = data["Error"]
 
     assert e2 == e
-    assert np.all(getattr(e2, META_ATTR) == getattr(e, META_ATTR))
-    assert getattr(e2, USER_ATTR) == getattr(e, USER_ATTR)
-    assert getattr(getattr(e2, META_ATTR)["ts"], META_ATTR) == getattr(ts, META_ATTR)
+    assert compare_nested(getattr(e2, META_ATTR), getattr(e, META_ATTR))
+    assert compare_nested(getattr(e2, USER_ATTR), getattr(e, USER_ATTR))
+    assert compare_nested(
+        getattr(getattr(e2, META_ATTR)["ts"], META_ATTR), getattr(ts, META_ATTR)
+    )
