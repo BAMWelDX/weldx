@@ -64,7 +64,8 @@
   [[#494]](https://github.com/BAMWelDX/weldx/pull/494).
 - `compare_nested` can compare sets [[#496]](https://github.com/BAMWelDX/weldx/pull/496)
 - `WeldxFile` cleans old memory blocks during file updates [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
-- `WeldxFile` respects `mode` argument also for BytesIO and file handles [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
+- `WeldxFile` respects `mode` argument also for BytesIO and file
+  handles [[#539]](https://github.com/BAMWelDX/weldx/pull/539).
 
 ### documentation
 
@@ -99,7 +100,10 @@
   [[#497]](https://github.com/BAMWelDX/weldx/pull/497)
 - add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity``
   and ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522).
-- use ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` instead of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#542]](https://github.com/BAMWelDX/weldx/pull/542).
+- use ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` instead
+  of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#542]](https://github.com/BAMWelDX/weldx/pull/542).
+- refactor properties named ``unit`` to ``units`` and use ``unit/unit``
+  tag [[#551]](https://github.com/BAMWelDX/weldx/pull/551).
 
 ### deprecations
 
