@@ -3051,7 +3051,7 @@ class TestSpatialData:
             filepath = f"{tmpdirname}/{filename}"
             if isinstance(filename, Path):
                 filepath = Path(filepath)
-            data.write_to_file(filepath)
+            data.to_file(filepath)
             data_read = SpatialData.from_file(filepath)
 
         assert np.allclose(data.coordinates, data_read.coordinates)
