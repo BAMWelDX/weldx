@@ -55,6 +55,7 @@
   [[#504]](https://github.com/BAMWelDX/weldx/pull/504).
 - changed the default ``pint.Unit`` formatting to short
   notation ``:~`` [[#519]](https://github.com/BAMWelDX/weldx/pull/519).
+- support most ``pandas.Index`` methods on `Time` instances [[#503]](https://github.com/BAMWelDX/weldx/pull/503).
 
 ### fixes
 
@@ -101,7 +102,12 @@
   [[#497]](https://github.com/BAMWelDX/weldx/pull/497)
 - add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity``
   and ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas [[#522]](https://github.com/BAMWelDX/weldx/pull/522).
-- use ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` instead of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#542]](https://github.com/BAMWelDX/weldx/pull/542).
+- use ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` instead
+  of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#542]](https://github.com/BAMWelDX/weldx/pull/542).
+- changed ``time/timedelta`` and ``time/timestamp`` to be ``type: string`` instead
+  of ``object`` ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` [[#541]](https://github.com/BAMWelDX/weldx/pull/541).
+- refactor properties named ``unit`` to ``units`` and use ``unit/unit``
+  tag [[#551]](https://github.com/BAMWelDX/weldx/pull/551).
 
 ### deprecations
 

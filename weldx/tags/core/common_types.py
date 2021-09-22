@@ -73,7 +73,7 @@ class VariableConverter(WeldxConverter):
     def to_yaml_tree(self, obj: Variable, tag: str, ctx) -> dict:
         """Convert to python dict."""
         if isinstance(obj.data, pint.Quantity):
-            unit = str(obj.data.units)
+            unit = obj.data.units
             data = obj.data.magnitude
         else:
             unit = None
@@ -90,7 +90,7 @@ class VariableConverter(WeldxConverter):
             "attrs": obj.attrs if obj.attrs else None,
         }
         if unit:
-            tree["unit"] = unit
+            tree["units"] = unit
 
         return tree
 
@@ -103,7 +103,10 @@ class VariableConverter(WeldxConverter):
             # assert data.base is tree["data"]
         else:
             data = node["data"]  # let asdf handle np arrays with its own wrapper.
-        if "unit" in node:  # convert to pint.Quantity
+
+        if "units" in node:  # convert to pint.Quantity
+            data = Q_(data, node["units"])
+        elif "unit" in node:  # legacy_code
             data = Q_(data, node["unit"])
 
         attrs = node.get("attrs", None)

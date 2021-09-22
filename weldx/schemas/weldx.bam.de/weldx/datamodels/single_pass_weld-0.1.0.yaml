@@ -173,10 +173,10 @@ examples:
               data: [0, 29000000000]
               datatype: int64
               shape: [2]
-            start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-            end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M29S}
-            min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-            max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M29S}
+            start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+            end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M29S
+            min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+            max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M29S
           orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
             name: orientations
             dimensions: [c, v]
@@ -226,10 +226,10 @@ examples:
                             data: [0, 29000000000]
                             datatype: int64
                             shape: [2]
-                          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-                          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M29S}
-                          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-                          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M29S}
+                          start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                          end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M29S
+                          min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+                          max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M29S
                         orientations: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
                           name: orientations
                           dimensions: [c, v]
@@ -282,16 +282,16 @@ examples:
             name: Current Sensor
             output_signal: &id004 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
               signal_type: analog
-              unit: V
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-              deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.1, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
+              deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.1, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
           - &id011 !<asdf://weldx.bam.de/weldx/tags/measurement/source-0.1.0>
             name: Voltage Sensor
             output_signal: &id012 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
               signal_type: analog
-              unit: V
+              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-              deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.1, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
+              deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.1, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
           transformations: []
         - &id005 !<asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-0.1.0>
           name: Beckhoff ELM3002-0000
@@ -300,22 +300,22 @@ examples:
           - &id006 !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-0.1.0>
             name: AD conversion current measurement
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-              deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.01, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
+              deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.01, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
             func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
               expression: a*x + b
               parameters:
-                a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 3276.8, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> 1 / volt}
-                b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''}
+                a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 3276.8, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> 1 / volt}
+                b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''}
             type_transformation: AD
           - &id013 !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-0.1.0>
             name: AD conversion voltage measurement
             error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-              deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.01, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
+              deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.01, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
             func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
               expression: a*x + b
               parameters:
-                a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 3276.8, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> 1 / volt}
-                b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''}
+                a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 3276.8, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> 1 / volt}
+                b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''}
             type_transformation: AD
         measurements:
         - !<asdf://weldx.bam.de/weldx/tags/measurement/measurement-0.1.0>
@@ -328,12 +328,12 @@ examples:
               datatype: float64
               shape: [6]
             time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
-              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
+              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
               freq: 2S
-              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
-            unit: ampere
+              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A
             shape: [6]
             interpolation: step
             *id001 : *id002
@@ -356,7 +356,7 @@ examples:
                     attributes:
                       signal: !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
                         signal_type: digital
-                        unit: dimensionless
+                        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''
                     edges:
                     - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-0.1.0>
                       direction: fwd
@@ -368,8 +368,8 @@ examples:
                           func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
                             expression: a*x + b
                             parameters:
-                              a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.030517578125, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A}
-                              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A}
+                              a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.030517578125, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A}
+                              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A}
                           wx_metadata:
                             software: !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView,
                               version: 3.4.3143}
@@ -378,7 +378,7 @@ examples:
                         attributes:
                           signal: &id015 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
                             signal_type: digital
-                            unit: ampere
+                            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A
                             data: *id007
             source_equipment: *id008
         - !<asdf://weldx.bam.de/weldx/tags/measurement/measurement-0.1.0>
@@ -391,12 +391,12 @@ examples:
               datatype: float64
               shape: [6]
             time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
-              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
+              start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+              end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
               freq: 2S
-              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
-            unit: volt
+              min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+              max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
             shape: [6]
             interpolation: step
             *id009 : *id010
@@ -419,7 +419,7 @@ examples:
                     attributes:
                       signal: !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
                         signal_type: digital
-                        unit: dimensionless
+                        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''
                     edges:
                     - !<asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-0.1.0>
                       direction: fwd
@@ -431,8 +431,8 @@ examples:
                           func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
                             expression: a*x + b
                             parameters:
-                              a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0030517578125, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V}
-                              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V}
+                              a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0030517578125, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V}
+                              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V}
                           wx_metadata:
                             software: !core/software-1.0.0 {name: Beckhoff TwinCAT ScopeView,
                               version: 3.4.3143}
@@ -441,7 +441,7 @@ examples:
                         attributes:
                           signal: &id016 !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
                             signal_type: digital
-                            unit: volt
+                            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
                             data: *id014
             source_equipment: *id008
         process:
@@ -451,14 +451,14 @@ examples:
               gas_component:
               - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
                 gas_chemical_name: argon
-                gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 82, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
+                gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 82, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
               - !<asdf://weldx.bam.de/weldx/tags/aws/process/gas_component-0.1.0>
                 gas_chemical_name: carbon dioxide
-                gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 18, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
+                gas_percentage: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 18, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
               common_name: SG
-            torch_shielding_gas_flowrate: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 20, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> l / min}
+            torch_shielding_gas_flowrate: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 20, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> l / min}
           weld_speed: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-            unit: millimeter / second
+            units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm / s
             value: 10
           welding_process: !<asdf://weldx.bam.de/weldx/tags/process/CLOOS/pulse-0.1.0>
             base_process: pulse
@@ -466,36 +466,36 @@ examples:
             meta: {modulation: UI}
             parameters:
               base_current: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: ampere
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A
                 value: 60.0
               pulse_duration: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: millisecond
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ms
                 value: 5.0
               pulse_frequency: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: hertz
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> Hz
                 value: 100.0
               pulse_voltage: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: volt
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
                 value: 40.0
               wire_feedrate: !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-                unit: meter / minute
+                units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm / min
                 value: 10.0
             power_source: Quinto
             tag: CLOOS/pulse
           welding_wire:
-            diameter: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 1.2, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        reference_timestamp: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-11-09T12:00:00'}
+            diameter: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 1.2, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+        reference_timestamp: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-11-09T12:00:00'
         welding_current: *id015
         welding_voltage: *id016
         workpiece:
           base_metal: {common_name: S355J2+N, standard: 'DIN EN 10225-2:2011'}
           geometry:
             groove_shape: !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/VGroove-0.1.0>
-              t: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 5, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-              alpha: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 50, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> deg}
-              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 1, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-              c: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 1, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+              t: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 5, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+              alpha: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 50, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> deg}
+              b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 1, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+              c: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 1, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
               code_number: ['1.3', '1.5']
-            seam_length: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 300, unit: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+            seam_length: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 300, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
         wx_metadata: {welder: A.W. Elder}
 ...

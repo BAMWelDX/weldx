@@ -13,7 +13,7 @@ from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
 from pandas.api.types import is_object_dtype
 from xarray import DataArray
 
-from .constants import Q_
+from weldx.constants import Q_
 
 __all__ = [
     "Time",
@@ -56,6 +56,9 @@ class Time:
         - `pint.Quantity`
         - strings representing a date (``"2001-01-23 14:23:11"``) or a timedelta
           (``23s``)
+
+    The underlying implementation is based on the core `pandas.TimedeltaIndex` and
+    `pandas.DatetimeIndex` types, see the documentation for references.
 
     Parameters
     ----------
@@ -228,24 +231,20 @@ class Time:
     Direct access and iteration are also supported. The return types are fitting pandas
     types:
 
+
+    >>> t = Time(["1s", "2s", "3s"])
+    >>> t[1]
+    Time:
+    0 days 00:00:02
+
+    >>> t = Time(["2000", "2001", "2002"])
+    >>> t[1]
+    Time:
+    2001-01-01 00:00:00
+    reference time: 2000-01-01 00:00:00
+
     >>> from pandas import Timedelta
     >>>
-    >>> t = Time(["1s", "2s", "3s"])
-    >>> t[1] == Timedelta(2, "s")
-    True
-
-    >>> isinstance(t[1], Timedelta)
-    True
-
-    >>> from pandas import Timestamp
-    >>>
-    >>> t = Time(["2000", "2001", "2002"])
-    >>> t[1] == Timestamp("2001")
-    True
-
-    >>> isinstance(t[1], Timestamp)
-    True
-
     >>> t = Time(["1s", "2s", "3s"])
     >>> result = Timedelta(0, "s")
     >>>
@@ -254,8 +253,8 @@ class Time:
     ...         raise TypeError("Unexpected type")
     ...     result += value
     >>>
-    >>> result == Timedelta(6, "s")
-    True
+    >>> result
+    Timedelta('0 days 00:00:06')
 
     """
 
@@ -336,15 +335,34 @@ class Time:
 
     def __len__(self):
         """Return the length of the data."""
-        return self.length
+        return self.as_pandas_index().__len__()
 
     def __iter__(self):
         """Use generator to iterate over index values."""
         return (t for t in self.as_pandas_index())
 
-    def __getitem__(self, item) -> types_pandas_times:
+    def __getitem__(self, item) -> Time:
         """Access pandas index."""
-        return self.as_pandas_index()[item]
+        return Time(self.as_pandas_index()[item], self.reference_time)
+
+    def __getattr__(self, item: str):
+        """Delegate unknown method calls to pandas index.
+
+        Raises
+        ------
+        AttributeError
+            When accessing a not implemented 'dunder' method or the requested method
+            can not be accessed on the pandas index type.
+
+        """
+        if item.startswith("__"):
+            raise AttributeError(f"Dunder method '{item}' not implemented for 'Time'.")
+        try:
+            return getattr(self.as_pandas_index(), item)
+        except AttributeError:
+            raise AttributeError(
+                f"Neither 'Time' object nor its pandas index has attribute '{item}'"
+            )
 
     def __repr__(self):
         """Console info."""
@@ -482,28 +500,9 @@ class Time:
         return isinstance(self._time, (Timestamp, DatetimeIndex))
 
     @property
-    def length(self) -> int:
-        """Return the length of the data."""
-        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            return len(self._time)
-        return 1
-
-    @property
     def is_timestamp(self) -> bool:
         """Return `True` if the data represents a timestamp and `False` otherwise."""
         return isinstance(self._time, pd.Timestamp)
-
-    def max(self) -> Union[Timedelta, Timestamp]:
-        """Get the maximal time of the data."""
-        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            return self._time.max()
-        return self._time
-
-    def min(self) -> Union[Timedelta, Timestamp]:
-        """Get the minimal time of the data."""
-        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            return self._time.min()
-        return self._time
 
     @property
     def index(self) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:

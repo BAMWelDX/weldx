@@ -27,12 +27,16 @@ class PintQuantityConverter(WeldxConverter):
         if not value.shape:
             value = value.item()  # convert scalars to native Python numeric types
         tree["value"] = value
-        tree["unit"] = obj.units
+        tree["units"] = obj.units
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Reconstruct from tree."""
-        return Q_(node["value"], node["unit"])
+        if tag.startswith("tag:stsci.edu:asdf"):  # asdf compat
+            return Q_(node["value"], node["unit"])
+        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
+            return Q_(node["value"], node["unit"])
+        return Q_(node["value"], node["units"])
 
     @staticmethod
     def shape_from_tagged(node: TaggedDict) -> List[int]:
@@ -46,7 +50,10 @@ class PintUnitConverter(WeldxConverter):
     """A simple implementation of serializing a pint unit as tagged asdf node."""
 
     tags = ["asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"]
-    types = ["pint.unit.build_unit_class.<locals>.Unit"]
+    types = [
+        "pint.unit.build_unit_class.<locals>.Unit",
+        "weldx.constants.U_",
+    ]
 
     def to_yaml_tree(self, obj: pint.Unit, tag: str, ctx) -> str:
         """Convert to python dict."""
