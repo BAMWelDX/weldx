@@ -2388,7 +2388,7 @@ class Geometry:
             stack=False,
         )
 
-        SpatialData.from_geometry_raster(raster_data).to_file(file_name)
+        SpatialData.from_geometry_raster(raster_data, True).to_file(file_name)
 
 
 # SpatialData --------------------------------------------------------------------------
@@ -2522,7 +2522,7 @@ class SpatialData:
 
     @classmethod
     def _shape_triangles(
-        cls, shape_raster_data: np.ndarray, offset: int
+        cls, shape_raster_data: np.ndarray, offset: int, closed_mesh: bool
     ) -> List[List[int]]:
         """Get the triangles of a shape from its raster data.
 
@@ -2534,6 +2534,8 @@ class SpatialData:
             Raster data of the shape
         offset :
             An offset that will be added to all indices.
+        closed_mesh :
+            If `True`, the side faces of the geometry will also be triangulated.
 
         Returns
         -------
@@ -2544,7 +2546,8 @@ class SpatialData:
         n_prf = shape_raster_data.shape[0]
         n_prf_pts = shape_raster_data.shape[1]
         cw_ord = has_cw_ordering(shape_raster_data[0])
-
+        if not closed_mesh:
+            return cls._shape_profile_triangles(n_prf, n_prf_pts, offset, cw_ord)
         return [
             *cls._shape_profile_triangles(n_prf, n_prf_pts, offset, cw_ord),
             *cls._shape_front_back_triangles(n_prf, n_prf_pts, offset, cw_ord),
@@ -2571,10 +2574,10 @@ class SpatialData:
         """
         points = []
         triangles = []
-        for shape_raster_data in geometry_raster:
-            shape_raster_data = shape_raster_data.swapaxes(1, 2)
-            triangles += cls._shape_triangles(shape_raster_data, len(points))
-            points += cls._shape_raster_points(shape_raster_data)
+        for shape_data in geometry_raster:
+            shape_data = shape_data.swapaxes(1, 2)
+            triangles += cls._shape_triangles(shape_data, len(points), closed_mesh)
+            points += cls._shape_raster_points(shape_data)
 
         return SpatialData(points, triangles)
 
