@@ -26,35 +26,18 @@ if TYPE_CHECKING:  # pragma: no cover
 # helper -------------------------------------------------------------------------------
 
 
-def _triangulate_geometry(geo_data):
-    """Stack geometry data and add simple triangulation.
+def has_cw_ordering(points: np.ndarray):
+    """Return `True` if a set of points has clockwise ordering, `False` otherwise.
 
-    Parameters
-    ----------
-    geo_data
-        list of rasterized profile data along trace from geometry
-
-    Returns
-    -------
-    numpy.ndarray, numpy.ndarray
-        3D point cloud data and triangulation indexes
+    Notes
+    -----
+        The algorithm was taken from the following Stack Overflow answer:
+        https://stackoverflow.com/a/1165943/6700329
 
     """
-    nx = geo_data.shape[2]  # Points per profile
-    ny = geo_data.shape[0]  # number of profiles
-
-    data = np.swapaxes(geo_data, 1, 2).reshape((-1, 3))
-    triangle_indices = np.empty((ny - 1, nx - 1, 2, 3), dtype=int)
-    r = np.arange(nx * ny).reshape(ny, nx)
-    triangle_indices[:, :, 0, 0] = r[:-1, :-1]
-    triangle_indices[:, :, 1, 0] = r[:-1, 1:]
-    triangle_indices[:, :, 0, 1] = r[:-1, 1:]
-
-    triangle_indices[:, :, 1, 1] = r[1:, 1:]
-    triangle_indices[:, :, :, 2] = r[1:, :-1, None]
-    triangle_indices.shape = (-1, 3)
-
-    return data, triangle_indices
+    if sum((points[1:, 1] - points[:-1, 1]) * (points[1:, 2] + points[:-1, 2])) < 0:
+        return False
+    return True
 
 
 # todo: Note that this is a copy of the weldx.tests._helpers.py function.
@@ -2377,6 +2360,36 @@ class Geometry:
         )
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
+    def to_file(self, file_name: str, profile_raster_width, trace_raster_width):
+        """Write the ``Geometry`` data into a CAD file.
+
+        The geometry is rasterized and triangulated before the export. All file formats
+        supported by ``meshio`` that are based on points and triangles can be used
+        (For example ``.stl`` or ``.ply``). Just add the corresponding extension to the
+        file name. For further information about supported file formats refer to the
+        [``meshio`` documentation](https://pypi.org/project/meshio/).
+
+        Parameters
+        ----------
+        file_name :
+            Name of the file. Add the extension of the desired file format.
+        profile_raster_width :
+            Target distance between the individual points of a profile
+        trace_raster_width :
+            Target distance between the individual profiles on the trace
+
+        """
+        if isinstance(self._profile, VariableProfile):
+            raise NotImplementedError
+
+        raster_data = self._rasterize_constant_profile(
+            profile_raster_width=profile_raster_width,
+            trace_raster_width=trace_raster_width,
+            stack=False,
+        )
+
+        SpatialData.from_geometry_raster(raster_data, True).to_file(file_name)
+
 
 # SpatialData --------------------------------------------------------------------------
 
@@ -2439,8 +2452,110 @@ class SpatialData:
         return SpatialData(mesh.points, triangles)
 
     @staticmethod
+    def _shape_raster_points(shape_raster_data: np.ndarray) -> List[List[int]]:
+        """Extract all points from a shapes raster data."""
+        return shape_raster_data.reshape(
+            (shape_raster_data.shape[0] * shape_raster_data.shape[1], 3)
+        ).tolist()
+
+    @staticmethod
+    def _shape_profile_triangles(
+        num_profiles: int, num_profile_points: int, offset: int, cw_ordering: bool
+    ) -> List[List[int]]:
+        """Create the profile main surface triangles for ``_shape_triangles``."""
+        tri_base = []
+        for i in range(num_profile_points):
+            idx_0 = i
+            idx_1 = (i + 1) % num_profile_points
+            idx_2 = idx_0 + num_profile_points
+            idx_3 = idx_1 + num_profile_points
+
+            if cw_ordering:
+                tri_base += [[idx_0, idx_2, idx_1], [idx_1, idx_2, idx_3]]
+            else:
+                tri_base += [[idx_0, idx_1, idx_2], [idx_1, idx_3, idx_2]]
+        tri_base = np.array(tri_base, dtype=int)
+
+        triangles = np.array(
+            [
+                tri_base + i * num_profile_points + offset
+                for i in range(num_profiles - 1)
+            ],
+            dtype=int,
+        )
+
+        return triangles.reshape((tri_base.shape[0] * (num_profiles - 1), 3)).tolist()
+
+    @staticmethod
+    def _shape_front_back_triangles(
+        num_profiles: int, num_profile_points: int, offset: int, cw_ordering: bool
+    ) -> List[List[int]]:
+        """Create the front and back surface triangles for ``_shape_triangles``."""
+        tri_cw = []
+        tri_ccw = []
+        i_0 = 0
+        i_1 = 0
+
+        while i_0 + i_1 < num_profile_points - 2:
+            p_0 = i_0 + offset
+            if i_1 == i_0:
+                p_1 = p_0 + 1
+                p_2 = num_profile_points + offset - i_1 - 1
+                i_0 += 1
+            else:
+                p_1 = num_profile_points + offset - i_1 - 2
+                p_2 = p_1 + 1
+                i_1 += 1
+            tri_cw += [[p_0, p_1, p_2]]
+            tri_ccw += [[p_0, p_2, p_1]]
+
+        if cw_ordering:
+            front = tri_cw
+            back = tri_ccw
+        else:
+            front = tri_ccw
+            back = tri_cw
+        return [
+            *front,
+            *(np.array(back, int) + (num_profiles - 1) * num_profile_points).tolist(),
+        ]
+
+    @classmethod
+    def _shape_triangles(
+        cls, shape_raster_data: np.ndarray, offset: int, closed_mesh: bool
+    ) -> List[List[int]]:
+        """Get the triangles of a shape from its raster data.
+
+        The triangle data are just indices referring to a list of points.
+
+        Parameters
+        ----------
+        shape_raster_data :
+            Raster data of the shape
+        offset :
+            An offset that will be added to all indices.
+        closed_mesh :
+            If `True`, the side faces of the geometry will also be triangulated.
+
+        Returns
+        -------
+        List[List[int]] :
+            The list of triangles
+
+        """
+        n_prf = shape_raster_data.shape[0]
+        n_prf_pts = shape_raster_data.shape[1]
+        cw_ord = has_cw_ordering(shape_raster_data[0])
+        if not closed_mesh:
+            return cls._shape_profile_triangles(n_prf, n_prf_pts, offset, cw_ord)
+        return [
+            *cls._shape_profile_triangles(n_prf, n_prf_pts, offset, cw_ord),
+            *cls._shape_front_back_triangles(n_prf, n_prf_pts, offset, cw_ord),
+        ]
+
+    @classmethod
     def from_geometry_raster(
-        geometry_raster: np.ndarray, closed_mesh: bool = True
+        cls, geometry_raster: np.ndarray, closed_mesh: bool = True
     ) -> SpatialData:
         """Triangulate rasterized Geometry Profile.
 
@@ -2457,40 +2572,14 @@ class SpatialData:
             New `SpatialData` instance
 
         """
-        # todo: this needs a test
-        # todo: workaround ... fix the real problem
-        # if not isinstance(geometry_raster, np.ndarray):
-        #    geometry_raster = np.array(geometry_raster)
-        if geometry_raster[0].ndim == 2:
-            return SpatialData(*_triangulate_geometry(geometry_raster))
+        points = []
+        triangles = []
+        for shape_data in geometry_raster:
+            shape_data = shape_data.swapaxes(1, 2)
+            triangles += cls._shape_triangles(shape_data, len(points), closed_mesh)
+            points += cls._shape_raster_points(shape_data)
 
-        part_data = [_triangulate_geometry(part) for part in geometry_raster]
-        total_points = []
-        total_triangles = []
-        for i, (points, triangulation) in enumerate(part_data):
-            total_triangles += (triangulation + len(total_points)).tolist()
-            if closed_mesh:
-                # closes side faces
-                i_p1 = len(total_points)
-                i_p2 = i_p1 + len(geometry_raster[i][0][0]) - 1
-                i_p3 = i_p1 + len(points) - 1
-                i_p4 = i_p3 - len(geometry_raster[i][-1][0]) + 1
-                total_triangles += [[i_p1, i_p2, i_p3], [i_p3, i_p4, i_p1]]
-
-                # closes front and back faces
-                def _triangulate_profile(p_0, p_1):
-                    triangles = []
-                    while p_1 > p_0:
-                        triangles += [[p_0, p_1, p_1 - 1], [p_1 - 1, p_0 + 1, p_0]]
-                        p_0 += 1
-                        p_1 -= 1
-                    return triangles
-
-                total_triangles += _triangulate_profile(i_p1, i_p2)
-                total_triangles += _triangulate_profile(i_p4, i_p3)
-            total_points += points.tolist()
-
-        return SpatialData(total_points, total_triangles)
+        return SpatialData(points, triangles)
 
     def plot(
         self,
@@ -2533,7 +2622,7 @@ class SpatialData:
             show_wireframe=show_wireframe,
         )
 
-    def write_to_file(self, file_name: Union[str, Path]):
+    def to_file(self, file_name: Union[str, Path]):
         """Write spatial data into a file.
 
         The extension prescribes the output format.

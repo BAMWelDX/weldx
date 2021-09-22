@@ -2876,7 +2876,7 @@ class TestGeometry:
     @pytest.mark.parametrize(
         "geometry, p_rw, t_rw, exp_num_points, exp_num_triangles",
         [
-            (get_test_geometry_constant_profile(), Q_(1, "cm"), Q_(1, "cm"), 12, 8),
+            (get_test_geometry_constant_profile(), Q_(1, "cm"), Q_(1, "cm"), 12, 12),
             (get_test_geometry_variable_profile(), Q_(1, "cm"), Q_(1, "cm"), 12, 0),
         ],
     )
@@ -3051,7 +3051,7 @@ class TestSpatialData:
             filepath = f"{tmpdirname}/{filename}"
             if isinstance(filename, Path):
                 filepath = Path(filepath)
-            data.write_to_file(filepath)
+            data.to_file(filepath)
             data_read = SpatialData.from_file(filepath)
 
         assert np.allclose(data.coordinates, data_read.coordinates)
