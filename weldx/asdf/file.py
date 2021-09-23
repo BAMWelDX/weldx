@@ -555,6 +555,7 @@ class WeldxFile(UserDict):
         'Nikolai Nikolajewitsch Benardos'
 
         We can also change the data easily
+
         >>> wfa.wx_meta.welder = "Myself"
         >>> wfa.wx_meta.welder
         'Myself'
@@ -640,7 +641,7 @@ class WeldxFile(UserDict):
         # this will be called in Jupyter Lab, but not in a plain notebook.
         from IPython.core.display import display
 
-        display(self.show_asdf_header(use_widgets=False, _interactive=True))
+        display(self.show_asdf_header(use_widgets=True, _interactive=True))
 
 
 class _HeaderVisualizer:
@@ -697,15 +698,23 @@ class _HeaderVisualizer:
 
 # Methods of UserDict do not follow the NumPy doc convention.
 WeldxFile.keys.__doc__ = """Return a set of keys/attributes stored in this file.
+
 Returns
 -------
-keys :
+collections.dict_keys :
     all keys stored at the root of this file.
 """
 
 WeldxFile.clear.__doc__ = """Remove all data from file."""
 
-WeldxFile.copy.__doc__ = """Copies the file."""  # TODO: interface
+WeldxFile.copy.__doc__ = """Copies this WeldxFile object.
+
+Parameters
+----------
+filename_or_file_like :
+    optional target file to write the taken copy to.
+
+"""
 
 WeldxFile.get.__doc__ = """Gets data attached to given key from file.
 
@@ -742,7 +751,7 @@ WeldxFile.items.__doc__ = """Returns a set-like object providing a view on this 
 
 Returns
 -------
-dict_items :
+collections.dict_items :
     view on items.
 """
 
