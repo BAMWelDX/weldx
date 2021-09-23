@@ -5,18 +5,7 @@ from collections import UserDict
 from collections.abc import MutableMapping, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import (
-    IO,
-    AbstractSet,
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import IO, AbstractSet, Any, Dict, List, Mapping, Optional, Tuple, Union
 
 import asdf
 import numpy as np
@@ -488,6 +477,7 @@ class WeldxFile(UserDict):
 
     def clear(self):
         """Remove all data from file."""
+        # TODO: we do not want to delete the history, software.
         super().clear()
 
     def get(self, key, default=None):
@@ -507,7 +497,7 @@ class WeldxFile(UserDict):
         """
         return super().get(key, default=default)
 
-    def update(self, mapping: Union[Mapping, MutableMapping, Iterable], **kwargs):
+    def update(self, mapping: Mapping, **kwargs):
         """Update this file from mapping or iterable mapping and kwargs.
 
         Parameters
@@ -523,8 +513,25 @@ class WeldxFile(UserDict):
         If present and has a .keys() method, does:     for k in E: D[k] = E[k]
         If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
         In either case, this is followed by: for k, v in F.items(): D[k] = v
+
+        Examples
+        --------
+        Let us update one weldx file with another one.
+        >>> a = WeldxFile(tree=dict(x=42), mode="rw")
+        >>> b = WeldxFile(tree=dict(x=23, y=0), mode="rw")
+
+        We pass all data of ``b`` to ``a`` while adding another key value pair.
+
+        >>> a.update(b, foo="bar")
+
+        # remove asdf meta data for easy comparision
+        >>> a.pop("asdf_library"); a.pop("history")
+        >>> a.data
+        {'x': 23, 'y': 0, 'foo': 'bar'}
+
         """
-        super().update(mapping)
+        # TODO: we do not want to manipulate the history, software.
+        super().update(mapping, **kwargs)
 
     def items(self) -> AbstractSet[Tuple[Any, Any]]:
         """Return a set-like object providing a view on this files items.
@@ -565,7 +572,18 @@ class WeldxFile(UserDict):
         -------
         object :
             the object value of given key. If key was not found, return the default.
+
+        Examples
+        --------
+        Let us remove and store some data from a weldx file.
+        >>> a = WeldxFile(tree=dict(x=42, y=0), mode="rw")
+        >>> x = a.pop("x")
+        >>> x
+        42
+        >>> a.keys()
+
         """
+        # TODO: we do not want to delete the history, software.
         super().pop(key, default=default)
 
     def popitem(self) -> Any:
@@ -580,6 +598,7 @@ class WeldxFile(UserDict):
         object :
             the last item.
         """
+        # TODO: we do not want to delete the history, software.
         return super().popitem()
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
