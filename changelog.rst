@@ -8,12 +8,12 @@ added
 ~~~~~
 
 -  added “units” (exact) and “dimensionality” (dimensionality
-   compatible) checking options to `util.xr_check_coords`
+   compatible) checking options to `weldx.util.xr_check_coords`
    `[#442] <https://github.com/BAMWelDX/weldx/pull/442>`__
 -  `Time` class that can be initialized from several other time types
    and provides time related utility functions
    `[#433] <https://github.com/BAMWelDX/weldx/pull/433>`__
--  `TimeSeries` now supports setting a `reference_time` absolute
+-  `TimeSeries` now supports setting a ``reference_time`` absolute
    time values for interpolation
    `[#440] <https://github.com/BAMWelDX/weldx/pull/440>`__
 -  `LocalCoordinateSystem.from_axis_vectors` and
@@ -32,26 +32,26 @@ removed
 ~~~~~~~
 
 -  removed functions now covered by `Time`:
-   `pandas_time_delta_to_quantity`, `to_pandas_time_index` ,
-   `get_time_union`
+   ``pandas_time_delta_to_quantity``, ``to_pandas_time_index``,
+   ``get_time_union``
    `[#448] <https://github.com/BAMWelDX/weldx/pull/448>`__
--  removed custom `wx_tag` validator
+-  removed custom ``wx_tag`` validator
    `[#461] <https://github.com/BAMWelDX/weldx/pull/461>`__
 -  attrdict dependency replaced with a custom implementation of
    recursive dicts
    `[#470] <https://github.com/BAMWelDX/weldx/pulls/470>`__.
--  `from_xyz`, `from_xy_and_orientation`,
-   `from_yz_and_orientation` and `from_xz_and_orientation` from
-   `LocalCoordinateSystem`. Use `from_axis_vectors` instead.
+-  ``from_xyz``, ``from_xy_and_orientation``,
+   ``from_yz_and_orientation`` and ``from_xz_and_orientation`` from
+   `LocalCoordinateSystem`. Use ``from_axis_vectors`` instead.
    `[#472] <https://github.com/BAMWelDX/weldx/pulls/472>`__
--  `create_cs_from_xyz`, `create_cs_from_xy_and_orientation`,
-   `create_cs_from_yz_and_orientation` and
-   `create_cs_from_xz_and_orientation` from
-   `CoordinateSystemManager`. Use `create_cs_from_axis_vectors`
+-  ``create_cs_from_xyz``, ``create_cs_from_xy_and_orientation``,
+   ``create_cs_from_yz_and_orientation`` and
+   ``create_cs_from_xz_and_orientation`` from
+   `CoordinateSystemManager`. Use `CoordinateSystemManager.create_cs_from_axis_vectors`
    instead. `[#472] <https://github.com/BAMWelDX/weldx/pulls/472>`__
--  `is_column_in_matrix`, `is_row_in_matrix`, `to_float_array`,
-   `to_list`, `matrix_is_close`, `vector_is_close` and
-   `triangulate_geometry` from `weldx.util`
+-  ``is_column_in_matrix``, ``is_row_in_matrix``, ``to_float_array``,
+   ``to_list``, ``matrix_is_close``, ``vector_is_close`` and
+   ``triangulate_geometry`` from `weldx.util`
    `[#490] <https://github.com/BAMWelDX/weldx/pull/490>`__
 -  remove the `:` syntax from `wx_shape` validation
    `[#537] <https://github.com/BAMWelDX/weldx/pull/537>`__
@@ -59,7 +59,7 @@ removed
 changes
 ~~~~~~~
 
--  move `sine` utility function to `weldx.welding.util`
+-  move ``sine`` utility function to `weldx.welding.util`
    `[#439] <https://github.com/BAMWelDX/weldx/pull/439>`__
 -  `LocalCoordinateSystem` and `CoordinateSystemManager` function
    parameters related to time now support all types that are also
@@ -69,9 +69,9 @@ changes
    a single time value is passed or if there is no overlap between the
    interpolation time range and the coordinate systems time range. This
    also affects the results of some `CoordinateSystemManager` methods
-   (`get_cs` , `interp_time`)
+   (`CoordinateSystemManager.get_cs` , `CoordinateSystemManager.interp_time`)
    `[#476] <https://github.com/BAMWelDX/weldx/pull/476>`__
--  `WeldxAccessor.time_ref` setter now raises a `TypeError` if
+-  `util.xarray.WeldxAccessor.time_ref` setter now raises a `TypeError` if
    `None` is passed to it
    `[#489] <https://github.com/BAMWelDX/weldx/pull/489>`__
 -  move xarray related utility functions into `weldx.util.xarray` and
@@ -84,7 +84,7 @@ changes
 -  `WeldxFile.copy` now creates a copy to a (optional) file. Before it
    just returned a dictionary
    `[#504] <https://github.com/BAMWelDX/weldx/pull/504>`__.
--  changed the default `pint.Unit` formatting to short notation `:~`
+-  changed the default `pint.Unit` formatting to short notation ``:~``
    `[#519] <https://github.com/BAMWelDX/weldx/pull/519>`__.
 
 fixes
@@ -98,7 +98,7 @@ fixes
 -  Merging and unmerging multiple `CoordinateSystemManager` instances
    now correctly preserves all attached data.
    `[#494] <https://github.com/BAMWelDX/weldx/pull/494>`__.
--  `compare_nested` can compare sets
+-  `util.compare_nested` can compare sets
    `[#496] <https://github.com/BAMWelDX/weldx/pull/496>`__
 
 documentation
@@ -113,47 +113,47 @@ documentation
 ASDF
 ~~~~
 
--  all schema version numbers set to `0.1.0`
+-  all schema version numbers set to ``0.1.0``
    `[#535] <https://github.com/BAMWelDX/weldx/pull/535>`__.
--  add `time/time` schema to support `Time` class
+-  add ``time/time`` schema to support `Time` class
    `[#463] <https://github.com/BAMWelDX/weldx/pull/463>`__.
 -  rework ASDF extension to new asdf 2.8 API
    `[#467] <https://github.com/BAMWelDX/weldx/pull/467>`__
 
-   -  move schema files to `weldx/schemas`
-   -  create extension manifest in `weldx/manifests`. The manifest
+   -  move schema files to ``weldx/schemas``
+   -  create extension manifest in ``weldx/manifests``. The manifest
       also contains tag mappings for legacy tag names for backwards
       compatibility.
-   -  move tag module to `weldx/tags`
-   -  refactor all asdf uris to new `asdf://` naming convention, see
+   -  move tag module to ``weldx/tags``
+   -  refactor all asdf uris to new ``asdf://`` naming convention, see
       https://asdf.readthedocs.io/en/latest/asdf/extending/uris.html#entities-identified-by-uri
    -  replaced all referenced weldx tag versions in schemas with
       `0.1.*`
    -  refactor
-      `asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema`
+      ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema``
       to
-      `asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-0.1.0`
+      ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-0.1.0``
       and enable schema test
    -  add legacy class for validators support in
       `weldx.asdf._extension.py`
    -  asdf utility functions `weldx.asdf.util.uri_match`,
       `weldx.asdf.util.get_converter_for_tag` and
       `weldx.asdf.util.get_weldx_extension`
-   -  add `devtools/scripts/update_manifest.py` to auto update
+   -  add ``devtools/scripts/update_manifest.py`` to auto update
       manifest from extension metadata
    -  custom shape validation must now be implemented via staticmethod
-      `WeldxConverter.shape_from_tagged`
+      `asdf.types.WeldxConverter.shape_from_tagged`
 
 -  provide legacy schema support in
-   `weldx/schemas/weldx.bam.de/legacy`
+   ``weldx/schemas/weldx.bam.de/legacy``
    `[#533] <https://github.com/BAMWelDX/weldx/pull/533>`__
 -  rewrote
-   `asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy`
+   ``asdf://weldx.bam.de/weldx/schemas/core/transformations/coordinate_system_hierarchy``
    schema for the `CoordinateSystemManager`. It uses the digraph
    schemas to serialize the coordinate system structure.
    `[#497] <https://github.com/BAMWelDX/weldx/pull/497>`__
--  add `asdf://weldx.bam.de/weldx/schemas/unit/quantity` and
-   `asdf://weldx.bam.de/weldx/schemas/unit/unit` schemas
+-  add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` and
+   ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas
    `[#522] <https://github.com/BAMWelDX/weldx/pull/522>`__
 
 deprecations
@@ -165,23 +165,22 @@ dependencies
 0.4.1 (20.07.2021)
 ------------------
 
-
 added
 ~~~~~
 
--  `closed_mesh` parameter to `Geometry.spatial_data` and
+-  ``closed_mesh`` parameter to `Geometry.spatial_data` and
    `SpatialData.from_geometry_raster`
    `[#414] <https://github.com/BAMWelDX/weldx/pull/414>`__
--  `TimeSeries.plot` and `Signal.plot`
+-  `TimeSeries.plot` and `measurement.Signal.plot`
    `[#420] <https://github.com/BAMWelDX/weldx/pull/420>`__
--  abstract base class `TimeDependent`
+-  abstract base class `time.TimeDependent`
    `[#460] <https://github.com/BAMWelDX/weldx/pull/460>`__
 
 
 changes
 ~~~~~~~
 
--  `TimeSeries.__init__` accepts `xarray.DataArray` as `data`
+-  `TimeSeries` ``__init__`` accepts `xarray.DataArray` as ``data``
    parameter `[#429] <https://github.com/BAMWelDX/weldx/pull/429>`__
 -  The `LocalCoordinateSystem.time` and `TimeSeries.time` now return
    an instance of `Time`
@@ -193,7 +192,7 @@ changes
 ASDF
 ~~~~
 
--  sort `List[str]` before serialization of most `weldx` classes to
+-  sort `typing.List[str]` before serialization of most `weldx` classes to
    avoid random reordering in the same file and enforce consistency.
    `[#430] <https://github.com/BAMWelDX/weldx/pull/430>`__
 
@@ -201,14 +200,14 @@ ASDF
 deprecations
 ~~~~~~~~~~~~
 
--  `lcs_coords_from_ts` will be removed in version 0.5.0
+-  ``lcs_coords_from_ts`` will be removed in version 0.5.0
    `[#426] <https://github.com/BAMWelDX/weldx/pull/426>`__
 
 
 0.4.0 (13.07.2021)
 ------------------
 
-Release `0.4.0` brings many new major features to `weldx`
+Release ``0.4.0`` brings many new major features to `weldx`
 
 Highlights
 ~~~~~~~~~~
@@ -227,9 +226,9 @@ Highlights
    for `LocalCoordinateSystem`: It is now possible to define a
    time-dependent `LocalCoordinateSystem` with a simple function by
    passing a `TimeSeries` object with a `MathematicalExpression` as
-   `coordinates`. For an example, click the link above.
+   ``coordinates``. For an example, click the link above.
 -  `MeasurementChain <https://weldx.readthedocs.io/en/latest/tutorials/measurement_chain.html>`__
-   The `MeasurementChain` has been reworked to be easier and more
+   The `measurements.MeasurementChain` has been reworked to be easier and more
    flexible to use.
 
 full changelog below:
@@ -248,35 +247,35 @@ added
 -  added `WeldxFile` wrapper to handle asdf files with history and
    schemas more easily.
    `[#341] <https://github.com/BAMWelDX/weldx/pull/341>`__.
--  add `"step"` as additional method to `util.xr_interp_like`
+-  add ``"step"`` as additional method to `util.xr_interp_like`
    `[#363] <https://github.com/BAMWelDX/weldx/pull/363>`__
 -  add `util.compare_nested_eq` decorator for dataclasses with
    array-like fields
    `[#378] <https://github.com/BAMWelDX/weldx/pull/378>`__
--  adds a `dataclass_serialization_class` utility function that
+-  adds a `util.dataclass_serialization_class` utility function that
    automatically generates the asdf serialization class for python
    dataclasses. `[#380] <https://github.com/BAMWelDX/weldx/pull/380>`__
 -  Added method to set the interpolation method to the `TimeSeries`
    `[#353] <https://github.com/BAMWelDX/weldx/pull/353>`__
--  Add `is_discrete` and `is_expression` properties to
+-  Add `TimeSeries.is_discrete` and `TimeSeries.is_expression` properties to
    `TimeSeries`
    `[#366] <https://github.com/BAMWelDX/weldx/pull/366>`__
--  Add `MeasurementChain.output_signal` property that returns the
-   output signal of the `MeasurementChain`
+-  Add `measurement.MeasurementChain.output_signal` property that returns the
+   output signal of the `measurement.MeasurementChain`
    `[#394] <https://github.com/BAMWelDX/weldx/pull/394>`__
 
 
 changes
 ~~~~~~~
 
--  `WXRotation.from_euler()` now accepts a `pint.Quantity` as input.
+-  `WXRotation.from_euler` now accepts a `pint.Quantity` as input.
    `[#318] <https://github.com/BAMWelDX/weldx/pull/318>`__
--  move tests folder to `weldx/tests`
+-  move tests folder to ``weldx/tests``
    `[#323] <https://github.com/BAMWelDX/weldx/pull/323>`__
--  `get_yaml_header` received a new option parse, which optionally
+-  `asdf.util.get_yaml_header` received a new option parse, which optionally
    returns the parsed YAML header as `asdf.tagged.TaggedDict`.
    `[#338] <https://github.com/BAMWelDX/weldx/pull/338>`__
--  refactor `asdf_json_repr` into `view_tree`
+-  refactor ``asdf_json_repr`` into `asdf.util.view_tree`
    `[#339] <https://github.com/BAMWelDX/weldx/pull/339>`__
 -  `TimeSeries.interp_time`
    `[#353] <https://github.com/BAMWelDX/weldx/pull/353>`__
@@ -287,18 +286,18 @@ changes
    -  `TimeSeries` supports now all interpolation methods supported by
       xarray
 
--  The `MeasurementChain` is now internally based on a
+-  The `measurement.MeasurementChain` is now internally based on a
    `networkx.DiGraph`. New functions are also added to the class to
    simplify its usage.
    `[#326] <https://github.com/BAMWelDX/weldx/pull/326>`__ The following
    additional changes were applied during the update of the
-   `MeasurementChain`:
+   `measurement.MeasurementChain`:
 
-   -  renamed `DataTransformation` class to `SignalTransformation`
-   -  renamed `Source` to `SignalSource`
-   -  Added additional functionality to `Signal`,
-      `SignalTransformation` and `GenericEquipment`
-   -  Removed `Data` class
+   -  renamed ``DataTransformation`` class to `measurement.SignalTransformation`
+   -  renamed ``Source`` to `measurement.SignalSource`
+   -  Added additional functionality to `measurement.Signal`,
+      `measurement.SignalTransformation` and `measurement.GenericEquipment`
+   -  Removed ``Data`` class
    -  Updated asdf schemas of all modified classes and the ones that
       contained references to those classes
 
@@ -306,7 +305,7 @@ changes
    parameters and a few other places
    `[#402] <https://github.com/BAMWelDX/weldx/pull/402>`__
    `[#416] <https://github.com/BAMWelDX/weldx/pull/416>`__
--  `LocalCoordinateSystem.__init__` now accepts a `TimeSeries` as
+-  `LocalCoordinateSystem` ``__init__`` now accepts a `TimeSeries` as
    input. All methods of the `CoordinateSystemManager` also support
    this new behavior
    `[#366] <https://github.com/BAMWelDX/weldx/pull/366>`__
@@ -318,7 +317,7 @@ changes
 documentation
 ~~~~~~~~~~~~~
 
--  Add new tutorial about the `MeasurementChain`
+-  Add new tutorial about the `measurement.MeasurementChain`
    `[#326] <https://github.com/BAMWelDX/weldx/pull/326>`__
 -  Updated the measurement tutorial
    `[#326] <https://github.com/BAMWelDX/weldx/pull/326>`__
@@ -329,12 +328,12 @@ ASDF
 
 -  fix inline array serialization for new 64bit inline limit
    `[#218] <https://github.com/BAMWelDX/weldx/pull/218>`__
--  add `yaml_tag_handles` to `WeldxExtension`
+-  add `asdf.extension.WeldxExtension.yaml_tag_handles` to ``WeldxExtension``
    `[#218] <https://github.com/BAMWelDX/weldx/pull/218>`__
--  add `uuid-1.0.0.yaml` schema as basic version 4 UUID implementation
+-  add ``uuid-1.0.0.yaml`` schema as basic version 4 UUID implementation
    `[#330] <https://github.com/BAMWelDX/weldx/pull/330>`__
--  add `core/graph/di_node`, `core/graph/di_edge` &
-   `core/graph/di_graph` for implementing a generic
+-  add ``core/graph/di_node``, ``core/graph/di_edge`` &
+   ``core/graph/di_graph`` for implementing a generic
    `networkx.DiGraph`
    `[#330] <https://github.com/BAMWelDX/weldx/pull/330>`__
 -  compatibility with ASDF-2.8
@@ -342,19 +341,19 @@ ASDF
 -  data attached to an instance of the `CoordinateSystemManger` is now
    also stored in a WelDX file
    `[#364] <https://github.com/BAMWelDX/weldx/pull/339>`__
--  replace references to base asdf tags with `-1.*` version wildcard
+-  replace references to base asdf tags with ``-1.*`` version wildcard
    `[#373] <https://github.com/BAMWelDX/weldx/pull/373>`__
--  update `single-pass-weldx.1.0.0.schema` to allow groove types by
+-  update ``single-pass-weldx.1.0.0.schema`` to allow groove types by
    wildcard `[#373] <https://github.com/BAMWelDX/weldx/pull/373>`__
 -  fix attributes serialization of DataSet children
    `[#384] <https://github.com/BAMWelDX/weldx/pull/384>`__.
--  update `wx_shape` syntax in `local_coordinate_system-1.0.0`
+-  update ``wx_shape`` syntax in ``local_coordinate_system-1.0.0``
    `[#366] <https://github.com/BAMWelDX/weldx/pull/366>`__
--  add custom `wx_shape` validation to `variable-1.0.0`
+-  add custom ``wx_shape`` validation to ``variable-1.0.0``
    `[#366] <https://github.com/BAMWelDX/weldx/pull/366>`__
 -  remove outdated `TimeSeries` shape validation code
    `[#399] <https://github.com/BAMWelDX/weldx/pull/399>`__
--  use asdf tag validation pattern for `wx_property_tag`
+-  use asdf tag validation pattern for ``wx_property_tag``
    `[#410] <https://github.com/BAMWelDX/weldx/pull/410>`__
 -  update `MathematicalExpression` schema
    `[#410] <https://github.com/BAMWelDX/weldx/pull/410>`__
@@ -371,7 +370,7 @@ fixes
 deprecations
 ~~~~~~~~~~~~
 
--  deprecate `wx_tag` validator (use default asdf uri pattern
+-  deprecate ``wx_tag`` validator (use default asdf uri pattern
    matching) `[#410] <https://github.com/BAMWelDX/weldx/pull/410>`__
 
 
@@ -386,7 +385,7 @@ ASDF
 ~~~~
 
 -  fix required welding wire metadata in
-   `single-pass-weldx.1.0.0.schema`
+   ``single-pass-weldx.1.0.0.schema``
    `[#316] <https://github.com/BAMWelDX/weldx/pull/316>`__
 
 
@@ -397,39 +396,39 @@ ASDF
 added
 ~~~~~
 
--  `weldx.util.deprecated` decorator
+-  `util.deprecated` decorator
    `[#295] <https://github.com/BAMWelDX/weldx/pull/295>`__
 
 
 removed
 ~~~~~~~
 
--  `rotation_matrix_x`, `rotation_matrix_y` and
-   `rotation_matrix_z`
+-  ``rotation_matrix_x``, ``rotation_matrix_y`` and
+   ``rotation_matrix_z``
    `[#317] <https://github.com/BAMWelDX/weldx/pull/317>`__
 
 
 dependencies
 ~~~~~~~~~~~~
 
--  restrict `scipy!=1.6.0,scipy!=1.6.1`
+-  restrict ``scipy!=1.6.0,scipy!=1.6.1``
    `[#300] <https://github.com/BAMWelDX/weldx/pull/300>`__
 
 
 ASDF
 ~~~~
 
--  add validators to `rotation-1.0.0.yaml` &
-   `gas_component-1.0.0.yaml`
+-  add validators to ``rotation-1.0.0.yaml`` &
+   ``gas_component-1.0.0.yaml``
    `[#303] <https://github.com/BAMWelDX/weldx/pull/303>`__
--  update descriptions in `single-pass-weldx.1.0.0.schema`
+-  update descriptions in ``single-pass-weldx.1.0.0.schema``
    `[#308] <https://github.com/BAMWelDX/weldx/pull/308>`__
 
 
 fixes
 ~~~~~
 
--  prevent creation of `IsoBaseGroove` with negative parameters
+-  prevent creation of `welding.groove.iso_9692_1.IsoBaseGroove` with negative parameters
    `[#306] <https://github.com/BAMWelDX/weldx/pull/306>`__
 
 
@@ -440,18 +439,18 @@ fixes
 added
 ~~~~~
 
--  plot function for `MeasurementChain`
+-  plot function for `measurement.MeasurementChain`
    `[#288] <https://github.com/BAMWelDX/weldx/pull/288>`__
 
 
 ASDF
 ~~~~
 
--  remove the `additionalProperties` restriction from
-   `single_pass_weld-1.0.0.schema.yaml`
+-  remove the ``additionalProperties`` restriction from
+   ``single_pass_weld-1.0.0.schema.yaml``
    `[#283] <https://github.com/BAMWelDX/weldx/pull/283>`__
--  allow scalar `integer` value in `anyOf` of
-   `time_series-1.0.0.yaml` to fix
+-  allow scalar ``integer`` value in ``anyOf`` of
+   ``time_series-1.0.0.yaml`` to fix
    `#282 <https://github.com/BAMWelDX/weldx/pull/282>`__
    `[#286] <https://github.com/BAMWelDX/weldx/pull/286>`__
 -  add examples to schema files
@@ -461,12 +460,12 @@ ASDF
 changes
 ~~~~~~~
 
--  `plot_graph` of the CSM now renders static and time-dependent edges
+-  `CoordinateSystemManager.plot_graph` now renders static and time-dependent edges
    differently `[#291] <https://github.com/BAMWelDX/weldx/pull/291>`__
 -  use `pint` compatible array syntax in
-   `IsoBaseGroove.to_profile()` methods
+   `welding.groove.iso_9692_1.IsoBaseGroove.to_profile` methods
    `[#189] <https://github.com/BAMWelDX/weldx/pull/189>`__
--  CSM and LCS plot function get a `scale_vectors` parameter. It
+-  CSM and LCS plot function get a ``scale_vectors`` parameter. It
    scales the plotted coordinate system vectors when using matplotlib as
    backend `[#293] <https://github.com/BAMWelDX/weldx/pull/293>`__
 
@@ -487,13 +486,13 @@ fixes
 added
 ~~~~~
 
--  add `weldx.transformations.CoordinateSystemManager.relabel`
+-  add `CoordinateSystemManager.relabel`
    function `[#219] <https://github.com/BAMWelDX/weldx/pull/219>`__
--  add `SpatialDate` class for storing 3D point data with optional
+-  add `SpatialData` class for storing 3D point data with optional
    triangulation `[#234] <https://github.com/BAMWelDX/weldx/pull/234>`__
--  add `plot` function to
-   `SpatialData`\ `[#251] <https://github.com/BAMWelDX/weldx/pull/251>`__
--  add `plot` function to visualize `LocalCoordinateSystem` and
+-  add ``plot`` function to
+   `SpatialData` `[#251] <https://github.com/BAMWelDX/weldx/pull/251>`__
+-  add ``plot`` function to visualize `LocalCoordinateSystem` and
    `CoordinateSystemManager` instances in 3d space
    `[#231] <https://github.com/BAMWelDX/weldx/pull/231>`__
 -  add `weldx.welding.groove.iso_9692_1.IsoBaseGroove.cross_sect_area`
@@ -509,32 +508,32 @@ ASDF
 -  Add possibility to store meta data and content of an external file in
    an ASDF file `[#215] <https://github.com/BAMWelDX/weldx/pull/215>`__
 
-   -  Python class: `weldx.asdf.ExternalFile`
-   -  Schema: `core/file-1.0.0.yaml`
+   -  Python class: ``asdf.ExternalFile``
+   -  Schema: ``core/file-1.0.0.yaml``
 
 -  Added support for serializing generic metadata and userdata
    attributes for weldx classes.
    `[#209] <https://github.com/BAMWelDX/weldx/pull/209>`__
 
-   -  the provisional attribute names are `wx_metadata` and
-      `wx_user`
+   -  the provisional attribute names are ``wx_metadata`` and
+      ``wx_user``
 
 -  `None` values are removed from the asdf tree for all `weldx`
    classes. `[#212] <https://github.com/BAMWelDX/weldx/pull/212>`__
 -  add `datamodels` directory and example
-   `http://weldx.bam.de/schemas/weldx/datamodels/single_pass_weld-1.0.0.schema`
+   ``http://weldx.bam.de/schemas/weldx/datamodels/single_pass_weld-1.0.0.schema``
    schema `[#190] <https://github.com/BAMWelDX/weldx/pull/190>`__
 
-   -  schemas in the `datamodels` directory do not define any tags and
-      can be referenced in other schemas and as `custom_schema` when
-      reading/writing `ASDF`-files
-   -  the `single_pass_weld-1.0.0.schema` is an example schema for a
+   -  schemas in the ``datamodels`` directory do not define any tags and
+      can be referenced in other schemas and as ``custom_schema`` when
+      reading/writing ``ASDF``-files
+   -  the ``single_pass_weld-1.0.0.schema`` is an example schema for a
       simple, linear, single pass GMAW application
-   -  add `core/geometry/point_cloud-1.0.0.yaml` schema
+   -  add ``core/geometry/point_cloud-1.0.0.yaml`` schema
       `[#234] <https://github.com/BAMWelDX/weldx/pull/234>`__
 
 -  add file schema describing a simple linear welding application
-   `datamodels/single_pass_weld-1.0.0.schema`
+   ``datamodels/single_pass_weld-1.0.0.schema``
    `[#256] <https://github.com/BAMWelDX/weldx/pull/256>`__
 
 
@@ -552,37 +551,37 @@ documentation
 changes
 ~~~~~~~
 
--  pass variable names as tuple to `sympy.lambdify` in
+-  pass variable names as tuple to ``sympy.lambdify`` in
    `MathematicalExpression` to prevent sympy deprecation
    `[#214] <https://github.com/BAMWelDX/weldx/pull/214>`__
--  set `conda-forge` as primary channel in `environment.yaml` and
-   `build_env.yaml`
+-  set ``conda-forge`` as primary channel in ``environment.yaml`` and
+   ``build_env.yaml``
    `[#214] <https://github.com/BAMWelDX/weldx/pull/214>`__
 -  set minimum Python version to 3.7
    `[#220] <https://github.com/BAMWelDX/weldx/pull/220>`__
 -  `geometry.Profile.rasterize` can return list of rasterized shapes
-   instead of flat ndarray (with setting `stack=False`)
+   instead of flat ndarray (with setting ``stack=False``)
    `[#223] <https://github.com/BAMWelDX/weldx/pull/223>`__
 -  `geometry.Profile.plot` plots individual line objects for each
    shape (instead of a single line object)
    `[#223] <https://github.com/BAMWelDX/weldx/pull/223>`__
 -  remove jinja templates and related code
    `[#228] <https://github.com/BAMWelDX/weldx/pull/228>`__
--  add `stack` option to most `geometry` classes for rasterization
+-  add ``stack`` option to most `geometry` classes for rasterization
    `[#234] <https://github.com/BAMWelDX/weldx/pull/234>`__
 -  The graph of a `CoordinateSystemManager` is now plotted with
-   `plot_graph` instead of `plot`.
+   `CoordinateSystemManager.plot_graph` instead of `CoordinateSystemManager.plot`.
    `[#231] <https://github.com/BAMWelDX/weldx/pull/231>`__
--  add custom `wx_shape` validation for `TimeSeries` and
-   `Quantity` `[#256] <https://github.com/BAMWelDX/weldx/pull/256>`__
+-  add custom ``wx_shape`` validation for `TimeSeries` and
+   `pint.Quantity` `[#256] <https://github.com/BAMWelDX/weldx/pull/256>`__
 -  refactor the `transformations` and `visualization` module into
    smaller files `[#247] <https://github.com/BAMWelDX/weldx/pull/247>`__
--  refactor `weldx.utility` into `weldx.util`
+-  refactor ``weldx.utility`` into `util`
    `[#247] <https://github.com/BAMWelDX/weldx/pull/247>`__
--  refactor `weldx.asdf.utils` into `weldx.asdf.util`
+-  refactor ``weldx.asdf.utils`` into `asdf.util`
    `[#247] <https://github.com/BAMWelDX/weldx/pull/247>`__
--  it is now allowed to merge a time-dependent `timedelta` subsystem
-   into another `CSM` instance if the parent instance has set an
+-  it is now allowed to merge a time-dependent ``timedelta`` subsystem
+   into another `CoordinateSystemManager` instance if the parent instance has set an
    explicit reference time
    `[#268] <https://github.com/BAMWelDX/weldx/pull/268>`__
 
@@ -590,11 +589,11 @@ changes
 fixes
 ~~~~~
 
--  don’t inline time dependent `LCS.coordinates`
+-  don not inline time dependent `LocalCoordinateSystem.coordinates`
    `[#222] <https://github.com/BAMWelDX/weldx/pull/222>`__
--  fix “datetime64” passing for “timedelta64” in `xr_check_coords`
+-  fix “datetime64” passing for “timedelta64” in `util.xr_check_coords`
    `[#221] <https://github.com/BAMWelDX/weldx/pull/221>`__
--  fix `time_ref_restore` not working correctly if no `time_ref` was
+-  fix `util.time_ref_restore` not working correctly if no ``time_ref`` was
    set `[#221] <https://github.com/BAMWelDX/weldx/pull/221>`__
 -  fix deprecated signature in `WXRotation`
    `[#224] <https://github.com/BAMWelDX/weldx/pull/224>`__
@@ -602,23 +601,22 @@ fixes
    `[#243] <https://github.com/BAMWelDX/weldx/pull/243>`__
 -  update some documentation formatting and links
    `[#247] <https://github.com/BAMWelDX/weldx/pull/247>`__
--  fix `wx_shape` validation for scalar `Quantity` and
+-  fix ``wx_shape`` validation for scalar `pint.Quantity` and
    `TimeSeries` objects
    `[#256] <https://github.com/BAMWelDX/weldx/pull/256>`__
--  fix a case where `CSM.time_union()` would return with mixed
-   `DateTimeIndex` and `TimeDeltaIndex` types
+-  fix a case where `CoordinateSystemManager.time_union` would return with mixed
+   `pandas.DateTimeIndex` and `pandas.TimeDeltaIndex` types
    `[#268] <https://github.com/BAMWelDX/weldx/pull/268>`__
 
 
 dependencies
 ~~~~~~~~~~~~
 
--  Add
-   `PyFilesystem <https://docs.pyfilesystem.org/en/latest/>`__\ (`fs`)
+-  Add `PyFilesystem <https://docs.pyfilesystem.org/en/latest/>`__ (``fs``)
    as new dependency
 -  Add `k3d <https://github.com/K3D-tools/K3D-jupyter>`__ as new
    dependency
--  restrict `scipy<1.6` pending `ASDF
+-  restrict ``scipy<1.6`` pending `ASDF
    #916 <https://github.com/asdf-format/asdf/issues/916>`__
    `[#224] <https://github.com/BAMWelDX/weldx/pull/224>`__
 -  set minimum Python version to 3.8
@@ -636,14 +634,14 @@ dependencies
 added
 ~~~~~
 
--  Added `weldx.utility.ureg_check_class` class decorator to enable
-   `pint` dimensionality checks with `@dataclass` .
-   `[#179] <https://github.com/BAMWelDX/weldx/pull/179>`__
+-  Added `util.ureg_check_class` class decorator to enable
+   `pint` dimensionality checks with ``@dataclass``
+   `[#179] <https://github.com/BAMWelDX/weldx/pull/179>`__.
 -  Made coordinates and orientations optional for LCS schema. Missing
    values are interpreted as unity translation/rotation. An empty LCS
    object represents a unity transformation step.
    `[#177] <https://github.com/BAMWelDX/weldx/pull/177>`__
--  added `weldx.utility.lcs_coords_from_ts` function
+-  added `util.lcs_coords_from_ts` function
    `[#199] <https://github.com/BAMWelDX/weldx/pull/199>`__
 -  add a tutorial with advanced use case for combining groove
    interpolation with different TCP movements and distance calculations
@@ -658,23 +656,23 @@ changes
 
    -  refactor groove codebase to make use of subclasses and classnames
       for more generic functions
-   -  add `_meta` attribute to subclasses that map class attributes
+   -  add ``_meta`` attribute to subclasses that map class attributes
       (dataclass parameters) to common names
    -  rework `get_groove` to make use of new class layout and parse
       function arguments
 
--  create `weldx.welding` module (contains GMAW processes and groove
+-  create `welding` module (contains GMAW processes and groove
    definitions) `[#181] <https://github.com/BAMWelDX/weldx/pull/181>`__
--  move `GmawProcessTypeAsdf` to `asdf.tags` folder
+-  move ``GmawProcessTypeAsdf`` to `asdf.tags` folder
    `[#181] <https://github.com/BAMWelDX/weldx/pull/181>`__
--  reorder module imports in `weldx.__init__`
+-  reorder module imports in ``weldx.__init__``
    `[#181] <https://github.com/BAMWelDX/weldx/pull/181>`__
 -  support timedelta dtypes in ASDF `data_array/variable`
    `[#191] <https://github.com/BAMWelDX/weldx/pull/191>`__
--  add `set_axes_equal` option to some geometry plot functions (now
+-  add ``set_axes_equal`` option to some geometry plot functions (now
    defaults to `False`)
    `[#199] <https://github.com/BAMWelDX/weldx/pull/199>`__
--  make `utility.sine` public function
+-  make `util.sine` public function
    `[#199] <https://github.com/BAMWelDX/weldx/pull/199>`__
 -  switch to setuptools_scm versioning and move package metadata to
    setup.cfg `[#206] <https://github.com/BAMWelDX/weldx/pull/206>`__
@@ -686,10 +684,10 @@ ASDF
 -  refactor ISO 9692-1 groove schema definitions and classes
    `[#181] <https://github.com/BAMWelDX/weldx/pull/181>`__
 
-   -  move base schema definitions in file `terms-1.0.0.yaml` to
-      `weldx/groove`
+   -  move base schema definitions in file ``terms-1.0.0.yaml`` to
+      ``weldx/groove``
    -  split old schema into multiple files (1 per groove type) and
-      create folder `iso_9692_1_2013_12`
+      create folder ``iso_9692_1_2013_12``
 
 
 0.2.1 (26.10.2020)
@@ -712,49 +710,49 @@ changes
    -  supports multiple time formats and can get a reference time
       `[#162] <https://github.com/BAMWelDX/weldx/pull/162>`__
    -  each instance can be named
-   -  gets a `plot` function to visualize the graph
-   -  coordinate systems can be updated using `add_cs`
+   -  gets a `CoordinateSystemManager.plot` function to visualize the graph
+   -  coordinate systems can be updated using `CoordinateSystemManager.add_cs`
    -  supports deletion of coordinate systems
    -  instances can now be merged and unmerged
 
 -  `LocalCoordinateSystem`
 
-   -  `LocalCoordinateSystem` now accepts `pd.TimedeltaIndex` and
-      `pint.Quantity` as `time` inputs when provided with a
-      reference `pd.Timestamp` as `time_ref`
+   -  `LocalCoordinateSystem` now accepts `pandas.TimedeltaIndex` and
+      `pint.Quantity` as time inputs when provided with a
+      reference `panasd.Timestamp` as ``time_ref``
       `[#97] <https://github.com/BAMWelDX/weldx/pull/97>`__
-   -  `LocalCoordinateSystem` now accepts `Rotation`-Objects as
-      `orientation`
+   -  `LocalCoordinateSystem` now accepts `WXRotation`-objects as
+      ``orientation``
       `[#97] <https://github.com/BAMWelDX/weldx/pull/97>`__
    -  Internal structure of `LocalCoordinateSystem` is now based on
-      `pd.TimedeltaIndex` and a reference `pd.Timestamp` instead of
-      `pd.DatetimeIndex`. As a consequence, providing a reference
+      `pandas.TimedeltaIndex` and a reference `pandas.Timestamp` instead of
+      `pandas.DatetimeIndex`. As a consequence, providing a reference
       timestamp is now optional.
       `[#126] <https://github.com/BAMWelDX/weldx/pull/126>`__
 
--  `weldx.utility.xr_interp_like` now accepts non-iterable scalar
-   inputs for interpolation
+-  `util.xr_interp_like` now accepts non-iterable scalar
+   inputs for interpolation.
    `[#97] <https://github.com/BAMWelDX/weldx/pull/97>`__
 -  add `pint` compatibility to some `geometry` classes
    (**experimental**)
 
    -  when passing quantities to constructors (and some functions),
-      values get converted to default unit `mm` and passed on as
-      magnitude
-   -  old behavior is preserved
+      values get converted to default unit ``mm`` and passed on as
+      magnitude.
+   -  old behavior is preserved.
 
 -  add `weldx.utility.xr_check_coords` function to check coordinates
    of xarray object against dtype and value restrictions
    `[#125] <https://github.com/BAMWelDX/weldx/pull/125>`__
--  add `weldx.utility._sine` to easily create sine TimeSeries
+-  add ``weldx.utility._sine`` to easily create sine TimeSeries
    `[#168] <https://github.com/BAMWelDX/weldx/pull/168>`__
--  enable `force_ndarray_like=True` as default option when creating
+-  enable ``force_ndarray_like=True`` as default option when creating
    the global `pint.UnitRegistry`
    `[#167] <https://github.com/BAMWelDX/weldx/pull/167>`__
--  `ut.xr_interp_like` keeps variable and coordinate attributes from
+-  `util.xr_interp_like` keeps variable and coordinate attributes from
    original DataArray
    `[#174] <https://github.com/BAMWelDX/weldx/pull/174>`__
--  rework `ut.to_pandas_time_index` to accept many different formats
+-  rework `util.to_pandas_time_index` to accept many different formats
    (LCS, DataArray)
    `[#174] <https://github.com/BAMWelDX/weldx/pull/174>`__
 -  add utility functions for handling time coordinates to “weldx”
@@ -763,10 +761,10 @@ changes
 ASDF extension & schemas
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
--  add `WxSyntaxError` exception for custom weldx ASDF syntax errors
+-  add `asdf.types.WxSyntaxError` exception for custom weldx ASDF syntax errors
    `[#99] <https://github.com/BAMWelDX/weldx/pull/99>`__
 
--  | add custom `wx_tag` validation and update `wx_property_tag` to
+-  | add custom ``wx_tag`` validation and update ``wx_property_tag`` to
      allow new syntax
      `[#99] <https://github.com/BAMWelDX/weldx/pull/99>`__
    | the following syntax can be used:
@@ -785,15 +783,15 @@ ASDF extension & schemas
 -  add example notebook and documentation for arc welding process
    `[#104] <https://github.com/BAMWelDX/weldx/pull/104>`__
 
--  allow optional properties for validation with `wx_shape` by putting
+-  allow optional properties for validation with ``wx_shape`` by putting
    the name in brackets like
-   `(optional_prop)`\ `[#176] <https://github.com/BAMWelDX/weldx/pull/176>`__
+   ``(optional_prop)`` `[#176] <https://github.com/BAMWelDX/weldx/pull/176>`__
 
 
 fixes
 ~~~~~
 
--  fix propagating the `name` attribute when reading an ndarray
+-  fix propagating the ``name`` attribute when reading an ndarray
    `TimeSeries` object back from ASDF files
    `[#104] <https://github.com/BAMWelDX/weldx/pull/104>`__
 -  fix `pint` regression in `TimeSeries` when mixing integer and
@@ -807,19 +805,19 @@ fixes
 ASDF
 ~~~~
 
--  add `wx_unit` and `wx_shape` validators
+-  add ``wx_unit`` and ``wx_shape`` validators
 
--  add `doc/shape-validation.md` documentation for `wx_shape`
+-  add ``doc/shape-validation.md`` documentation for ``wx_shape``
    `[#75] <https://github.com/BAMWelDX/weldx/pull/75>`__
 
--  add `doc/unit-validation.md` documentation for `wx_unit`
+-  add `doc/unit-validation.md` documentation for ``wx_unit``
 
--  add unit validation to `iso_groove-1.0.0.yaml`
+-  add unit validation to ``iso_groove-1.0.0.yaml``
 
 -  fixed const/enum constraints and properties in
-   `iso_groove-1.0.0.yaml`
+   ``iso_groove-1.0.0.yaml``
 
--  add NetCDF inspired common types (`Dimension`,\ `Variable`) with
+-  add NetCDF inspired common types (``Dimension``, ``Variable``) with
    corresponding asdf serialization classes
 
 -  add asdf serialization classes and schemas for `xarray.DataArray`,
@@ -831,57 +829,63 @@ ASDF
    `weldx.transformations.CoordinateSystemManager` serialization.
 
 -  allow using `pint.Quantity` coordinates in
-   `weldx.transformations.LocalCoordinateSystem`
+   `LocalCoordinateSystem`
    `[#70] <https://github.com/BAMWelDX/weldx/pull/70>`__
 
 -  add measurement related ASDF serialization classes:
    `[#70] <https://github.com/BAMWelDX/weldx/pull/70>`__
 
-   -  `equipment/generic_equipment-1.0.0`
-   -  `measurement/data-1.0.0`
-   -  `data_transformation-1.0.0`
-   -  `measurement/error-1.0.0`
-   -  `measurement/measurement-1.0.0`
-   -  `measurement/measurement_chain-1.0.0`
-   -  `measurement/signal-1.0.0`
-   -  `measurement/source-1.0.0`
+   -  ``equipment/generic_equipment-1.0.0``
+   -  ``measurement/data-1.0.0``
+   -  ``data_transformation-1.0.0``
+   -  ``measurement/error-1.0.0``
+   -  ``measurement/measurement-1.0.0``
+   -  ``measurement/measurement_chain-1.0.0``
+   -  ``measurement/signal-1.0.0``
+   -  ``measurement/source-1.0.0``
 
 -  add example notebook for measurement chains in tutorials
    `[#70] <https://github.com/BAMWelDX/weldx/pull/70>`__
 
--  add support for `sympy` expressions with
+-  add support for py:module:`sympy` expressions with
    `weldx.core.MathematicalExpression` and ASDF serialization in
-   `core/mathematical_expression-1.0.0`
-   `[#70] <https://github.com/BAMWelDX/weldx/pull/70>`__ ,
+   ``core/mathematical_expression-1.0.0``
+   `[#70] <https://github.com/BAMWelDX/weldx/pull/70>`__,
    `[#76] <https://github.com/BAMWelDX/weldx/pull/76>`__
 
 -  add class to describe time series - `weldx.core.TimeSeries`
    `[#76] <https://github.com/BAMWelDX/weldx/pull/76>`__
 
--  add `wx_property_tag` validator
+-  add ``wx_property_tag`` validator
    `[#72] <https://github.com/BAMWelDX/weldx/pull/72>`__
 
-   the `wx_property_tag` validator restricts **all** properties of an
+   the ``wx_property_tag`` validator restricts **all** properties of an
    object to a single tag. For example the following object can have any
    number of properties but all must be of type
-   `tag:weldx.bam.de:weldx/time/timestamp-1.0.0`
-   `yaml   type: object   additionalProperties: true # must be true to allow any property   wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"`
-   It can be used as a “named” mapping replacement instead of YAML
-   `arrays`.
+   ``tag:weldx.bam.de:weldx/time/timestamp-1.0.0``
 
--  add `core/transformation/rotation-1.0.0` schema that implements
-   `scipy.spatial.transform.Rotation` and
-   `transformations.WXRotation` class to create custom tagged
-   `Rotation` instances for custom serialization.
+   .. code:: yaml
+
+      type: object
+      additionalProperties: true # must be true to allow any property
+      wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"`
+
+   It can be used as a “named” mapping replacement instead of YAML
+   ``arrays``.
+
+-  add ``core/transformation/rotation-1.0.0`` schema that implements
+   ``scipy.spatial.transform.Rotation`` and
+   `WXRotation` class to create custom tagged
+   ``Rotation`` instances for custom serialization.
    `[#79] <https://github.com/BAMWelDX/weldx/pull/79>`__
 
--  update requirements to `asdf>=2.7`
+-  update requirements to ``asdf>=2.7``
    `[#83] <https://github.com/BAMWelDX/weldx/pull/83>`__
 
--  update `anyOf` to `oneOf` in ASDF schemas
+-  update ``anyOf`` to ``oneOf`` in ASDF schemas
    `[#83] <https://github.com/BAMWelDX/weldx/pull/83>`__
 
--  add `__eq__` functions to `LocalCoordinateSystem` and
+-  add ``__eq__`` methods to `LocalCoordinateSystem` and
    `CoordinateSystemManager`
    `[#87] <https://github.com/BAMWelDX/weldx/pull/87>`__
 
@@ -896,8 +900,8 @@ ASDF
 -  add basic file/directory layout for asdf files
 
    -  asdf schemas are located in
-      `weldx/asdf/schemas/weldx.bam.de/weldx`
-   -  tag implementations are in `weldx/asdf/tags/weldx`
+      ``weldx/asdf/schemas/weldx.bam.de/weldx``
+   -  tag implementations are in ``weldx/asdf/tags/weldx``
 
 -  implement support for pint quantities
 -  implement support for basic pandas time class
