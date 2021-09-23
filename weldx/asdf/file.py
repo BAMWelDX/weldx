@@ -1,7 +1,7 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
 import copy
 import pathlib
-from collections import UserDict
+from collections import ItemsView, KeysView, UserDict, ValuesView  # noqa
 from collections.abc import MutableMapping
 from contextlib import contextmanager
 from io import BytesIO, IOBase
@@ -701,7 +701,7 @@ WeldxFile.keys.__doc__ = """Return a set of keys/attributes stored in this file.
 
 Returns
 -------
-collections.dict_keys :
+DictKeys :
     all keys stored at the root of this file.
 """
 
@@ -751,7 +751,7 @@ WeldxFile.items.__doc__ = """Returns a set-like object providing a view on this 
 
 Returns
 -------
-collections.dict_items :
+DictItems :
     view on items.
 """
 
@@ -785,4 +785,11 @@ Notes
 In versions before 3.7, the popitem() method removes a random item.
 """
 
-WeldxFile.values.__doc__ = """Returns a view list like object of the file content."""
+WeldxFile.values.__doc__ = """Returns a view list like object of the file content.
+
+Returns
+-------
+ValueView :
+    a view on the values.
+
+"""
