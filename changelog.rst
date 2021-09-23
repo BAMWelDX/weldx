@@ -8,7 +8,7 @@ added
 ~~~~~
 
 -  added “units” (exact) and “dimensionality” (dimensionality
-   compatible) checking options to `weldx.util.xr_check_coords`
+   compatible) checking options to `util.xr_check_coords`
    `[#442] <https://github.com/BAMWelDX/weldx/pull/442>`__
 -  `Time` class that can be initialized from several other time types
    and provides time related utility functions
@@ -42,7 +42,7 @@ removed
    `[#470] <https://github.com/BAMWelDX/weldx/pulls/470>`__.
 -  ``from_xyz``, ``from_xy_and_orientation``,
    ``from_yz_and_orientation`` and ``from_xz_and_orientation`` from
-   `LocalCoordinateSystem`. Use ``from_axis_vectors`` instead.
+   `LocalCoordinateSystem`. Use `LocalCoordinateSystem.from_axis_vectors` instead.
    `[#472] <https://github.com/BAMWelDX/weldx/pulls/472>`__
 -  ``create_cs_from_xyz``, ``create_cs_from_xy_and_orientation``,
    ``create_cs_from_yz_and_orientation`` and
@@ -53,13 +53,13 @@ removed
    ``to_list``, ``matrix_is_close``, ``vector_is_close`` and
    ``triangulate_geometry`` from `weldx.util`
    `[#490] <https://github.com/BAMWelDX/weldx/pull/490>`__
--  remove the `:` syntax from `wx_shape` validation
+-  remove the ``:`` syntax from ``wx_shape`` validation
    `[#537] <https://github.com/BAMWelDX/weldx/pull/537>`__
 
 changes
 ~~~~~~~
 
--  move ``sine`` utility function to `weldx.welding.util`
+-  move `welding.util.sine` utility function to `weldx.welding.util`
    `[#439] <https://github.com/BAMWelDX/weldx/pull/439>`__
 -  `LocalCoordinateSystem` and `CoordinateSystemManager` function
    parameters related to time now support all types that are also
@@ -129,22 +129,21 @@ ASDF
    -  move tag module to ``weldx/tags``
    -  refactor all asdf uris to new ``asdf://`` naming convention, see
       https://asdf.readthedocs.io/en/latest/asdf/extending/uris.html#entities-identified-by-uri
-   -  replaced all referenced weldx tag versions in schemas with
-      `0.1.*`
+   -  replaced all referenced weldx tag versions in schemas with ``0.1.*``
    -  refactor
       ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-1.0.0.schema``
       to
       ``asdf://weldx.bam.de/weldx/schemas/datamodels/single_pass_weld-0.1.0``
       and enable schema test
    -  add legacy class for validators support in
-      `weldx.asdf._extension.py`
+      ``weldx.asdf._extension.py``
    -  asdf utility functions `weldx.asdf.util.uri_match`,
       `weldx.asdf.util.get_converter_for_tag` and
       `weldx.asdf.util.get_weldx_extension`
    -  add ``devtools/scripts/update_manifest.py`` to auto update
       manifest from extension metadata
    -  custom shape validation must now be implemented via staticmethod
-      `asdf.types.WeldxConverter.shape_from_tagged`
+      ``weldx.asdf.types.WeldxConverter.shape_from_tagged``
 
 -  provide legacy schema support in
    ``weldx/schemas/weldx.bam.de/legacy``
@@ -198,7 +197,7 @@ changes
 ASDF
 ~~~~
 
--  sort `typing.List[str]` before serialization of most `weldx` classes to
+-  sort ``List[str]`` before serialization of most `weldx` classes to
    avoid random reordering in the same file and enforce consistency.
    `[#430] <https://github.com/BAMWelDX/weldx/pull/430>`__
 
@@ -234,7 +233,7 @@ Highlights
    passing a `TimeSeries` object with a `MathematicalExpression` as
    ``coordinates``. For an example, click the link above.
 -  `MeasurementChain <https://weldx.readthedocs.io/en/latest/tutorials/measurement_chain.html>`__
-   The `measurements.MeasurementChain` has been reworked to be easier and more
+   The `measurement.MeasurementChain` has been reworked to be easier and more
    flexible to use.
 
 full changelog below:
@@ -255,10 +254,10 @@ added
    `[#341] <https://github.com/BAMWelDX/weldx/pull/341>`__.
 -  add ``"step"`` as additional method to `util.xr_interp_like`
    `[#363] <https://github.com/BAMWelDX/weldx/pull/363>`__
--  add `util.compare_nested_eq` decorator for dataclasses with
+-  add `util.dataclass_nested_eq` decorator for dataclasses with
    array-like fields
    `[#378] <https://github.com/BAMWelDX/weldx/pull/378>`__
--  adds a `util.dataclass_serialization_class` utility function that
+-  adds a `asdf.util.dataclass_serialization_class` utility function that
    automatically generates the asdf serialization class for python
    dataclasses. `[#380] <https://github.com/BAMWelDX/weldx/pull/380>`__
 -  Added method to set the interpolation method to the `TimeSeries`
@@ -279,7 +278,7 @@ changes
 -  move tests folder to ``weldx/tests``
    `[#323] <https://github.com/BAMWelDX/weldx/pull/323>`__
 -  `asdf.util.get_yaml_header` received a new option parse, which optionally
-   returns the parsed YAML header as `asdf.tagged.TaggedDict`.
+   returns the parsed YAML header as ``asdf.tagged.TaggedDict``.
    `[#338] <https://github.com/BAMWelDX/weldx/pull/338>`__
 -  refactor ``asdf_json_repr`` into `asdf.util.view_tree`
    `[#339] <https://github.com/BAMWelDX/weldx/pull/339>`__
@@ -302,7 +301,7 @@ changes
    -  renamed ``DataTransformation`` class to `measurement.SignalTransformation`
    -  renamed ``Source`` to `measurement.SignalSource`
    -  Added additional functionality to `measurement.Signal`,
-      `measurement.SignalTransformation` and `measurement.GenericEquipment`
+      `measurement.SignalTransformation` and ``GenericEquipment``
    -  Removed ``Data`` class
    -  Updated asdf schemas of all modified classes and the ones that
       contained references to those classes
@@ -344,7 +343,7 @@ ASDF
    `[#330] <https://github.com/BAMWelDX/weldx/pull/330>`__
 -  compatibility with ASDF-2.8
    `[#355] <https://github.com/BAMWelDX/weldx/pull/355>`__
--  data attached to an instance of the `CoordinateSystemManger` is now
+-  data attached to an instance of the `CoordinateSystemManager` is now
    also stored in a WelDX file
    `[#364] <https://github.com/BAMWelDX/weldx/pull/339>`__
 -  replace references to base asdf tags with ``-1.*`` version wildcard
@@ -526,7 +525,7 @@ ASDF
 
 -  `None` values are removed from the asdf tree for all `weldx`
    classes. `[#212] <https://github.com/BAMWelDX/weldx/pull/212>`__
--  add `datamodels` directory and example
+-  add ``datamodels`` directory and example
    ``http://weldx.bam.de/schemas/weldx/datamodels/single_pass_weld-1.0.0.schema``
    schema `[#190] <https://github.com/BAMWelDX/weldx/pull/190>`__
 
@@ -599,7 +598,7 @@ fixes
    `[#222] <https://github.com/BAMWelDX/weldx/pull/222>`__
 -  fix “datetime64” passing for “timedelta64” in `util.xr_check_coords`
    `[#221] <https://github.com/BAMWelDX/weldx/pull/221>`__
--  fix `util.time_ref_restore` not working correctly if no ``time_ref`` was
+-  fix `util.WeldxAccessor.time_ref_restore` not working correctly if no ``time_ref`` was
    set `[#221] <https://github.com/BAMWelDX/weldx/pull/221>`__
 -  fix deprecated signature in `WXRotation`
    `[#224] <https://github.com/BAMWelDX/weldx/pull/224>`__
@@ -611,7 +610,7 @@ fixes
    `TimeSeries` objects
    `[#256] <https://github.com/BAMWelDX/weldx/pull/256>`__
 -  fix a case where `CoordinateSystemManager.time_union` would return with mixed
-   `pandas.DateTimeIndex` and `pandas.TimeDeltaIndex` types
+   `pandas.DatetimeIndex` and `pandas.TimedeltaIndex` types
    `[#268] <https://github.com/BAMWelDX/weldx/pull/268>`__
 
 
@@ -647,7 +646,7 @@ added
    values are interpreted as unity translation/rotation. An empty LCS
    object represents a unity transformation step.
    `[#177] <https://github.com/BAMWelDX/weldx/pull/177>`__
--  added `util.lcs_coords_from_ts` function
+-  added `welding.util.lcs_coords_from_ts` function
    `[#199] <https://github.com/BAMWelDX/weldx/pull/199>`__
 -  add a tutorial with advanced use case for combining groove
    interpolation with different TCP movements and distance calculations
@@ -669,16 +668,16 @@ changes
 
 -  create `welding` module (contains GMAW processes and groove
    definitions) `[#181] <https://github.com/BAMWelDX/weldx/pull/181>`__
--  move ``GmawProcessTypeAsdf`` to `asdf.tags` folder
+-  move ``GmawProcessTypeAsdf`` to ``asdf/tags`` folder
    `[#181] <https://github.com/BAMWelDX/weldx/pull/181>`__
 -  reorder module imports in ``weldx.__init__``
    `[#181] <https://github.com/BAMWelDX/weldx/pull/181>`__
--  support timedelta dtypes in ASDF `data_array/variable`
+-  support timedelta dtypes in ASDF ``data_array/variable``
    `[#191] <https://github.com/BAMWelDX/weldx/pull/191>`__
 -  add ``set_axes_equal`` option to some geometry plot functions (now
    defaults to `False`)
    `[#199] <https://github.com/BAMWelDX/weldx/pull/199>`__
--  make `util.sine` public function
+-  make `welding.util.sine` public function
    `[#199] <https://github.com/BAMWelDX/weldx/pull/199>`__
 -  switch to setuptools_scm versioning and move package metadata to
    setup.cfg `[#206] <https://github.com/BAMWelDX/weldx/pull/206>`__
@@ -725,7 +724,7 @@ changes
 
    -  `LocalCoordinateSystem` now accepts `pandas.TimedeltaIndex` and
       `pint.Quantity` as time inputs when provided with a
-      reference `panasd.Timestamp` as ``time_ref``
+      reference `pandas.Timestamp` as ``time_ref``
       `[#97] <https://github.com/BAMWelDX/weldx/pull/97>`__
    -  `LocalCoordinateSystem` now accepts `WXRotation`-objects as
       ``orientation``
@@ -747,7 +746,7 @@ changes
       magnitude.
    -  old behavior is preserved.
 
--  add `weldx.utility.xr_check_coords` function to check coordinates
+-  add ``weldx.utility.xr_check_coords`` function to check coordinates
    of xarray object against dtype and value restrictions
    `[#125] <https://github.com/BAMWelDX/weldx/pull/125>`__
 -  add ``weldx.utility._sine`` to easily create sine TimeSeries
@@ -758,7 +757,7 @@ changes
 -  `util.xr_interp_like` keeps variable and coordinate attributes from
    original DataArray
    `[#174] <https://github.com/BAMWelDX/weldx/pull/174>`__
--  rework `util.to_pandas_time_index` to accept many different formats
+-  rework ``util.to_pandas_time_index`` to accept many different formats
    (LCS, DataArray)
    `[#174] <https://github.com/BAMWelDX/weldx/pull/174>`__
 -  add utility functions for handling time coordinates to “weldx”
@@ -767,7 +766,7 @@ changes
 ASDF extension & schemas
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
--  add `asdf.types.WxSyntaxError` exception for custom weldx ASDF syntax errors
+-  add ``weldx.asdf.types.WxSyntaxError`` exception for custom weldx ASDF syntax errors
    `[#99] <https://github.com/BAMWelDX/weldx/pull/99>`__
 
 -  | add custom ``wx_tag`` validation and update ``wx_property_tag`` to
@@ -780,7 +779,7 @@ ASDF extension & schemas
       wx_tag: http://stsci.edu/schemas/asdf/core/software-* # allow every version
       wx_tag: http://stsci.edu/schemas/asdf/core/software-1 # fix major version
       wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2 # fix minor version
-      wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patchversion
+      wx_tag: http://stsci.edu/schemas/asdf/core/software-1.2.3 # fix patch version
 
 -  add basic schema layout and `GmawProcess` class for arc welding
    process implementation
@@ -816,7 +815,7 @@ ASDF
 -  add ``doc/shape-validation.md`` documentation for ``wx_shape``
    `[#75] <https://github.com/BAMWelDX/weldx/pull/75>`__
 
--  add `doc/unit-validation.md` documentation for ``wx_unit``
+-  add ``doc/unit-validation.md`` documentation for ``wx_unit``
 
 -  add unit validation to ``iso_groove-1.0.0.yaml``
 
@@ -853,7 +852,7 @@ ASDF
 -  add example notebook for measurement chains in tutorials
    `[#70] <https://github.com/BAMWelDX/weldx/pull/70>`__
 
--  add support for py:module:`sympy` expressions with
+-  add support for ``sympy`` expressions with
    `weldx.core.MathematicalExpression` and ASDF serialization in
    ``core/mathematical_expression-1.0.0``
    `[#70] <https://github.com/BAMWelDX/weldx/pull/70>`__,
@@ -874,7 +873,7 @@ ASDF
 
       type: object
       additionalProperties: true # must be true to allow any property
-      wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"`
+      wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
 
    It can be used as a “named” mapping replacement instead of YAML
    ``arrays``.
