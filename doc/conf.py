@@ -139,7 +139,6 @@ typehints_document_rtype = True
 # The suffix of source filenames.
 source_suffix = {
     ".rst": "restructuredtext",
-    ".md": "markdown",
 }
 
 # The encoding of source files.
