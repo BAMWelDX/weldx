@@ -413,6 +413,6 @@ def _patch_mod_all(module_name: str):
     https://github.com/sphinx-doc/sphinx/issues/2021
     """
     this_mod = sys.modules[module_name]
-    for name in this_mod.__all__:
+    for name in getattr(this_mod, "__all__", ()):
         obj = getattr(this_mod, name)
         obj.__module__ = module_name
