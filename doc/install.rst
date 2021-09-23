@@ -15,6 +15,10 @@ The package is also available on pypi and can be installed via *pip*::
 
     pip install weldx
 
+As weldx currently depends on the package `bottleneck`, which contains C/C++ code, you will need a working C/C++ compiler.
+The conda package does not have this requirement as it only installs pre-compiled binaries. So if you do not know how
+to install a working compiler, we strongly encourage using the conda package.
+
 Setting up Jupyter Lab
 ----------------------
 
