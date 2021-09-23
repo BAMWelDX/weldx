@@ -2,10 +2,21 @@
 import copy
 import pathlib
 from collections import UserDict
-from collections.abc import ItemsView, KeysView, MutableMapping, Set, ValuesView  # noqa
+from collections.abc import MutableMapping, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
+from typing import (
+    IO,
+    AbstractSet,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import asdf
 import numpy as np
@@ -459,13 +470,13 @@ class WeldxFile(UserDict):
 
         Returns
         -------
-        ValueView :
+        ValuesView :
             a view on the values.
 
         """
         return super().values()
 
-    def keys(self) -> Set:
+    def keys(self) -> AbstractSet:
         """Return a set of keys/attributes stored in this file.
 
         Returns
@@ -515,7 +526,7 @@ class WeldxFile(UserDict):
         """
         super().update(mapping)
 
-    def items(self) -> Set[Tuple[Any, Any]]:
+    def items(self) -> AbstractSet[Tuple[Any, Any]]:
         """Return a set-like object providing a view on this files items.
 
         Returns
