@@ -1,11 +1,11 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
 import copy
 import pathlib
-from collections import ItemsView, KeysView, UserDict, ValuesView  # noqa
-from collections.abc import MutableMapping, Set
+from collections import UserDict
+from collections.abc import ItemsView, KeysView, MutableMapping, Set, ValuesView  # noqa
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, Any, Dict, List, Mapping, Optional, Union
+from typing import IO, Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 import asdf
 import numpy as np
@@ -496,14 +496,15 @@ class WeldxFile(UserDict):
         """
         return super().get(key, default=default)
 
-    def update(self, mapping, **kwargs):
-        """Update this file from mapping/iterable `mapping` and `kwargs`.
+    def update(self, mapping: Union[Mapping, MutableMapping, Iterable], **kwargs):
+        """Update this file from mapping or iterable mapping and kwargs.
 
         Parameters
         ----------
         mapping :
-            a key, value paired like structure.
-        kwargs:
+            a key, value paired like structure or an iterable of keys.
+        kwargs :
+            any key value pair you can think of.
 
         Notes
         -----
@@ -514,7 +515,7 @@ class WeldxFile(UserDict):
         """
         super().update(mapping)
 
-    def items(self) -> Set[tuple[Any, Any]]:
+    def items(self) -> Set[Tuple[Any, Any]]:
         """Return a set-like object providing a view on this files items.
 
         Returns
@@ -624,7 +625,7 @@ class WeldxFile(UserDict):
             The desired output file. If no file is given, an in-memory file
             will be created.
         overwrite :
-            If `filename_or_file_like` points to a path or filename which already
+            If ``filename_or_file_like`` points to a path or filename which already
             exists, this flag determines if it would be overwritten or not.
 
         Returns
