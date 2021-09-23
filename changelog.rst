@@ -100,6 +100,8 @@ fixes
    `[#494] <https://github.com/BAMWelDX/weldx/pull/494>`__.
 -  `util.compare_nested` can compare sets
    `[#496] <https://github.com/BAMWelDX/weldx/pull/496>`__
+-  `WeldxFile` respects ``mode`` argument also for BytesIO and file
+   handles `[#539] <https://github.com/BAMWelDX/weldx/pull/539>`__.
 
 documentation
 ~~~~~~~~~~~~~
@@ -155,6 +157,10 @@ ASDF
 -  add ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` and
    ``asdf://weldx.bam.de/weldx/schemas/unit/unit`` schemas
    `[#522] <https://github.com/BAMWelDX/weldx/pull/522>`__
+-  use ``asdf://weldx.bam.de/weldx/schemas/unit/quantity`` instead
+   of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` `[#542] <https://github.com/BAMWelDX/weldx/pull/542>`__.
+-  refactor properties named ``unit`` to ``units`` and use ``unit/unit``
+   tag `[#551] <https://github.com/BAMWelDX/weldx/pull/551>`__.
 
 deprecations
 ~~~~~~~~~~~~
