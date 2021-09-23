@@ -165,7 +165,6 @@ dependencies
 0.4.1 (20.07.2021)
 ------------------
 
-.. _added-1:
 
 added
 ~~~~~
@@ -178,7 +177,6 @@ added
 -  abstract base class `TimeDependent`
    `[#460] <https://github.com/BAMWelDX/weldx/pull/460>`__
 
-.. _changes-1:
 
 changes
 ~~~~~~~
@@ -191,7 +189,6 @@ changes
 -  Fix wrong and incomplete type-hints
    `[#435] <https://github.com/BAMWelDX/weldx/pull/435>`__
 
-.. _asdf-1:
 
 ASDF
 ~~~~
@@ -200,7 +197,6 @@ ASDF
    avoid random reordering in the same file and enforce consistency.
    `[#430] <https://github.com/BAMWelDX/weldx/pull/430>`__
 
-.. _deprecations-1:
 
 deprecations
 ~~~~~~~~~~~~
@@ -208,7 +204,6 @@ deprecations
 -  `lcs_coords_from_ts` will be removed in version 0.5.0
    `[#426] <https://github.com/BAMWelDX/weldx/pull/426>`__
 
-.. _section-1:
 
 0.4.0 (13.07.2021)
 ------------------
@@ -239,7 +234,6 @@ Highlights
 
 full changelog below:
 
-.. _added-2:
 
 added
 ~~~~~
@@ -271,7 +265,6 @@ added
    output signal of the `MeasurementChain`
    `[#394] <https://github.com/BAMWelDX/weldx/pull/394>`__
 
-.. _changes-2:
 
 changes
 ~~~~~~~
@@ -321,7 +314,6 @@ changes
    schema is resolved automatically
    `[#412] <https://github.com/BAMWelDX/weldx/pull/412>`__.
 
-.. _documentation-1:
 
 documentation
 ~~~~~~~~~~~~~
@@ -331,7 +323,6 @@ documentation
 -  Updated the measurement tutorial
    `[#326] <https://github.com/BAMWelDX/weldx/pull/326>`__
 
-.. _asdf-2:
 
 ASDF
 ~~~~
@@ -368,7 +359,6 @@ ASDF
 -  update `MathematicalExpression` schema
    `[#410] <https://github.com/BAMWelDX/weldx/pull/410>`__
 
-.. _fixes-1:
 
 fixes
 ~~~~~
@@ -377,7 +367,6 @@ fixes
    `util.compare_nested`
    `[#377] <https://github.com/BAMWelDX/weldx/pull/377>`__
 
-.. _deprecations-2:
 
 deprecations
 ~~~~~~~~~~~~
@@ -385,7 +374,6 @@ deprecations
 -  deprecate `wx_tag` validator (use default asdf uri pattern
    matching) `[#410] <https://github.com/BAMWelDX/weldx/pull/410>`__
 
-.. _section-2:
 
 0.3.3 (30.03.2021)
 ------------------
@@ -393,7 +381,6 @@ deprecations
 This is a bugfix release to correctly include the asdf schema files in
 conda builds. `[#314] <https://github.com/BAMWelDX/weldx/pull/314>`__
 
-.. _asdf-3:
 
 ASDF
 ~~~~
@@ -402,12 +389,10 @@ ASDF
    `single-pass-weldx.1.0.0.schema`
    `[#316] <https://github.com/BAMWelDX/weldx/pull/316>`__
 
-.. _section-3:
 
 0.3.2 (29.03.2021)
 ------------------
 
-.. _added-3:
 
 added
 ~~~~~
@@ -415,7 +400,6 @@ added
 -  `weldx.util.deprecated` decorator
    `[#295] <https://github.com/BAMWelDX/weldx/pull/295>`__
 
-.. _removed-1:
 
 removed
 ~~~~~~~
@@ -424,7 +408,6 @@ removed
    `rotation_matrix_z`
    `[#317] <https://github.com/BAMWelDX/weldx/pull/317>`__
 
-.. _dependencies-1:
 
 dependencies
 ~~~~~~~~~~~~
@@ -432,7 +415,6 @@ dependencies
 -  restrict `scipy!=1.6.0,scipy!=1.6.1`
    `[#300] <https://github.com/BAMWelDX/weldx/pull/300>`__
 
-.. _asdf-4:
 
 ASDF
 ~~~~
@@ -443,7 +425,6 @@ ASDF
 -  update descriptions in `single-pass-weldx.1.0.0.schema`
    `[#308] <https://github.com/BAMWelDX/weldx/pull/308>`__
 
-.. _fixes-2:
 
 fixes
 ~~~~~
@@ -451,12 +432,10 @@ fixes
 -  prevent creation of `IsoBaseGroove` with negative parameters
    `[#306] <https://github.com/BAMWelDX/weldx/pull/306>`__
 
-.. _section-4:
 
 0.3.1 (21.03.2021)
 ------------------
 
-.. _added-4:
 
 added
 ~~~~~
@@ -464,7 +443,6 @@ added
 -  plot function for `MeasurementChain`
    `[#288] <https://github.com/BAMWelDX/weldx/pull/288>`__
 
-.. _asdf-5:
 
 ASDF
 ~~~~
@@ -479,7 +457,6 @@ ASDF
 -  add examples to schema files
    `[#274] <https://github.com/BAMWelDX/weldx/pull/274>`__
 
-.. _changes-3:
 
 changes
 ~~~~~~~
@@ -493,7 +470,6 @@ changes
    scales the plotted coordinate system vectors when using matplotlib as
    backend `[#293] <https://github.com/BAMWelDX/weldx/pull/293>`__
 
-.. _fixes-3:
 
 fixes
 ~~~~~
@@ -503,12 +479,10 @@ fixes
    coordinates and orientation only contain a single data point.
    `[#285] <https://github.com/BAMWelDX/weldx/pull/285>`__
 
-.. _section-5:
 
 0.3.0 (12.03.2021)
 ------------------
 
-.. _added-5:
 
 added
 ~~~~~
@@ -528,7 +502,6 @@ added
 -  add `weldx.welding.util.compute_welding_speed` function
    `[#248] <https://github.com/BAMWelDX/weldx/pull/248>`__.
 
-.. _asdf-6:
 
 ASDF
 ~~~~
@@ -564,7 +537,6 @@ ASDF
    `datamodels/single_pass_weld-1.0.0.schema`
    `[#256] <https://github.com/BAMWelDX/weldx/pull/256>`__
 
-.. _documentation-2:
 
 documentation
 ~~~~~~~~~~~~~
@@ -576,7 +548,6 @@ documentation
 -  add AWS shielding gas descriptions to documentation
    `[#270] <https://github.com/BAMWelDX/weldx/pull/270>`__
 
-.. _changes-4:
 
 changes
 ~~~~~~~
@@ -615,7 +586,6 @@ changes
    explicit reference time
    `[#268] <https://github.com/BAMWelDX/weldx/pull/268>`__
 
-.. _fixes-4:
 
 fixes
 ~~~~~
@@ -639,7 +609,6 @@ fixes
    `DateTimeIndex` and `TimeDeltaIndex` types
    `[#268] <https://github.com/BAMWelDX/weldx/pull/268>`__
 
-.. _dependencies-2:
 
 dependencies
 ~~~~~~~~~~~~
@@ -659,12 +628,10 @@ dependencies
 -  Add `meshio <https://pypi.org/project/meshio/>`__ as new dependency
    `#265 <https://github.com/BAMWelDX/weldx/pull/265>`__
 
-.. _section-6:
 
 0.2.2 (30.11.2020)
 ------------------
 
-.. _added-6:
 
 added
 ~~~~~
@@ -682,7 +649,6 @@ added
    interpolation with different TCP movements and distance calculations
    `[#199] <https://github.com/BAMWelDX/weldx/pull/199>`__
 
-.. _changes-5:
 
 changes
 ~~~~~~~
@@ -713,7 +679,6 @@ changes
 -  switch to setuptools_scm versioning and move package metadata to
    setup.cfg `[#206] <https://github.com/BAMWelDX/weldx/pull/206>`__
 
-.. _asdf-7:
 
 ASDF
 ~~~~
@@ -726,12 +691,10 @@ ASDF
    -  split old schema into multiple files (1 per groove type) and
       create folder `iso_9692_1_2013_12`
 
-.. _section-7:
 
 0.2.1 (26.10.2020)
 ------------------
 
-.. _changes-6:
 
 changes
 ~~~~~~~
@@ -826,7 +789,6 @@ ASDF extension & schemas
    the name in brackets like
    `(optional_prop)`\ `[#176] <https://github.com/BAMWelDX/weldx/pull/176>`__
 
-.. _fixes-5:
 
 fixes
 ~~~~~
@@ -837,12 +799,10 @@ fixes
 -  fix `pint` regression in `TimeSeries` when mixing integer and
    float values `[#121] <https://github.com/BAMWelDX/weldx/pull/121>`__
 
-.. _section-8:
 
 0.2.0 (30.07.2020)
 ------------------
 
-.. _asdf-8:
 
 ASDF
 ~~~~
@@ -925,12 +885,10 @@ ASDF
    `CoordinateSystemManager`
    `[#87] <https://github.com/BAMWelDX/weldx/pull/87>`__
 
-.. _section-9:
 
 0.1.0 (05.05.2020)
 ------------------
 
-.. _asdf-9:
 
 ASDF
 ~~~~
