@@ -26,11 +26,18 @@ import traitlets
 
 def _workaround_imports_typechecking():
     """Load some packages needed for type annotations."""
+    import ipywidgets  # noqa
+    import pandas  # noqa
+    import xarray  # noqa
 
 
 def _prevent_sphinx_circular_imports_bug():
     # https://github.com/sphinx-doc/sphinx/issues/9243
-    pass
+    import sphinx.builders.html  # noqa
+    import sphinx.builders.latex  # noqa
+    import sphinx.builders.texinfo  # noqa
+    import sphinx.builders.text  # noqa
+    import sphinx.ext.autodoc  # noqa
 
 
 _prevent_sphinx_circular_imports_bug()
