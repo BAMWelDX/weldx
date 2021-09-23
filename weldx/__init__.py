@@ -59,8 +59,10 @@ These classes are used to define workpiece geometries.
 
     Q_
     TimeSeries
+    MathematicalExpression
     CoordinateSystemManager
     LocalCoordinateSystem
+    WXRotation
 
 **Full API Reference**
 
