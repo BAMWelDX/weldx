@@ -26,6 +26,20 @@ __all__ = [
 ]
 
 
+class TimeDependent(ABC):
+    """An abstract base class that describes a common interface of time dep. classes."""
+
+    @property
+    @abstractmethod
+    def time(self) -> Time:
+        """Get the classes time component."""
+
+    @property
+    @abstractmethod
+    def reference_time(self) -> Union[Timestamp, None]:
+        """Return the reference timestamp if the time data is absolute."""
+
+
 class Time:
     """Provides a unified interface for time related operations.
 
@@ -130,7 +144,7 @@ class Time:
     >>> t_abs = Time("2014-07-23")
     >>> t_abs = Time(["2000","2001","2002"])
 
-    Types that are derived from the abstract base class `TimeDependent` can also be
+    Types that are derived from the abstract base class ``TimeDependent`` can also be
     passed directly to `Time` as `time` parameter:
 
     >>> from weldx import LocalCoordinateSystem as LCS
@@ -652,20 +666,6 @@ class Time:
     def _union_instance(self, times: Sequence[types_time_like]) -> Time:
         """Instance version of the ``union`` method."""
         return Time._union_class([self, *times])
-
-
-class TimeDependent(ABC):
-    """An abstract base class that describes a common interface of time dep. classes."""
-
-    @property
-    @abstractmethod
-    def time(self) -> Time:
-        """Get the classes time component."""
-
-    @property
-    @abstractmethod
-    def reference_time(self) -> Union[Timestamp, None]:
-        """Return the reference timestamp if the time data is absolute."""
 
 
 # list of types that are supported to be stored in Time._time
