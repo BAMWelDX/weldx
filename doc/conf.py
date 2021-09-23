@@ -26,18 +26,11 @@ import traitlets
 
 def _workaround_imports_typechecking():
     """Load some packages needed for type annotations."""
-    import ipywidgets
-    import pandas as _
-    import xarray
 
 
 def _prevent_sphinx_circular_imports_bug():
     # https://github.com/sphinx-doc/sphinx/issues/9243
-    import sphinx.builders.html
-    import sphinx.builders.latex
-    import sphinx.builders.texinfo
-    import sphinx.builders.text
-    import sphinx.ext.autodoc
+    pass
 
 
 _prevent_sphinx_circular_imports_bug()
@@ -82,7 +75,6 @@ pygments_style = "sphinx"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "m2r2",
     "sphinxcontrib.napoleon",
     "nbsphinx",
     "sphinx.ext.autodoc",
