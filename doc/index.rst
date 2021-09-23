@@ -2,7 +2,7 @@
 WelDX - data and quality standards for welding research data
 ============================================================
 
-.. include:: ../readme.rst
+.. include:: ../README.rst
    :start-line: 8
 
 .. toctree::

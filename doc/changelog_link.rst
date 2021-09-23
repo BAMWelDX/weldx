@@ -1,2 +1,2 @@
 .. py:currentmodule:: weldx
-.. include:: ../changelog.rst
+.. include:: ../CHANGELOG.rst
