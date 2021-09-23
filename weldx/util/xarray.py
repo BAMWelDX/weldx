@@ -424,6 +424,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     Examples
     --------
+    >>> import numpy as np
     >>> import pandas as pd
     >>> import xarray as xr
     >>> import weldx as wx
