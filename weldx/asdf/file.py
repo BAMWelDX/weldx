@@ -2,10 +2,10 @@
 import copy
 import pathlib
 from collections import ItemsView, KeysView, UserDict, ValuesView  # noqa
-from collections.abc import MutableMapping
+from collections.abc import MutableMapping, Set
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, Dict, List, Mapping, Optional, Union
+from typing import IO, Any, Dict, List, Mapping, Optional, Union
 
 import asdf
 import numpy as np
@@ -421,6 +421,7 @@ class WeldxFile(UserDict):
         version: str = None,
         **kwargs,
     ):
+        """Get this docstring overwritten by AsdfFile.update."""
         self._asdf_handle.update(
             all_array_storage=all_array_storage,
             all_array_compression=all_array_compression,
@@ -452,6 +453,122 @@ class WeldxFile(UserDict):
         """
         tree = dict.fromkeys(iterable, default)
         return WeldxFile(tree=tree, mode="rw")
+
+    def values(self) -> ValuesView:
+        """Return a view list like object of the file content.
+
+        Returns
+        -------
+        ValueView :
+            a view on the values.
+
+        """
+        return super().values()
+
+    def keys(self) -> Set:
+        """Return a set of keys/attributes stored in this file.
+
+        Returns
+        -------
+        KeysView :
+            all keys stored at the root of this file.
+        """
+        return super().keys()
+
+    def clear(self):
+        """Remove all data from file."""
+        super().clear()
+
+    def get(self, key, default=None):
+        """Get data attached to given key from file.
+
+        Parameters
+        ----------
+        key :
+            The name of the data.
+        default :
+            The default is being returned in case the given key cannot be found.
+
+        Raises
+        ------
+        KeyError
+            Raised if the given key cannot be found and no default was provided.
+        """
+        return super().get(key, default=default)
+
+    def update(self, mapping, **kwargs):
+        """Update this file from mapping/iterable `mapping` and `kwargs`.
+
+        Parameters
+        ----------
+        mapping :
+            a key, value paired like structure.
+        kwargs:
+
+        Notes
+        -----
+        Let the mapping parameter denote E, and let the kwargs parameter denote F.
+        If present and has a .keys() method, does:     for k in E: D[k] = E[k]
+        If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+        In either case, this is followed by: for k, v in F.items(): D[k] = v
+        """
+        super().update(mapping)
+
+    def items(self) -> Set[tuple[Any, Any]]:
+        """Return a set-like object providing a view on this files items.
+
+        Returns
+        -------
+        ItemsView :
+            view on items.
+        """
+        return super().items()
+
+    def setdefault(self, key, default=None):
+        """Set a default for given key.
+
+        The passed default object will be returned in case the requested key
+        is not present in the file.
+
+        Parameters
+        ----------
+        key :
+            key name
+        default :
+            object to return in case key is not present in the file.
+        """
+        super().setdefault(key, default=default)
+
+    def pop(self, key, default=None) -> Any:
+        """Get and remove the given key from the file.
+
+        Parameters
+        ----------
+        key :
+            key name
+        default :
+            object to return in case key is not present in the file.
+
+        Returns
+        -------
+        object :
+            the object value of given key. If key was not found, return the default.
+        """
+        super().pop(key, default=default)
+
+    def popitem(self) -> Any:
+        """Remove the item that was last inserted into the file.
+
+        Notes
+        -----
+        In versions before 3.7, the popitem() method removes a random item.
+
+        Returns
+        -------
+        object :
+            the last item.
+        """
+        return super().popitem()
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -694,102 +811,3 @@ class _HeaderVisualizer:
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
         print(get_yaml_header(buff))
-
-
-# Methods of UserDict do not follow the NumPy doc convention.
-WeldxFile.keys.__doc__ = """Return a set of keys/attributes stored in this file.
-
-Returns
--------
-DictKeys :
-    all keys stored at the root of this file.
-"""
-
-WeldxFile.clear.__doc__ = """Remove all data from file."""
-
-WeldxFile.copy.__doc__ = """Copies this WeldxFile object.
-
-Parameters
-----------
-filename_or_file_like :
-    optional target file to write the taken copy to.
-
-"""
-
-WeldxFile.get.__doc__ = """Gets data attached to given key from file.
-
-Parameters
-----------
-key :
-    The name of the data.
-default :
-    The default is being returned in case the given key cannot be found.
-
-Raises
-------
-KeyError
-    Raised if the given key cannot be found and no default was provided.
-"""
-
-WeldxFile.update.__doc__ = """Update D from mapping/iterable E and F.
-
-Parameters
-----------
-mapping :
-
-F:
-
-Notes
------
-If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
-If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
-In either case, this is followed by: for k, v in F.items(): D[k] = v
-"""
-
-
-WeldxFile.items.__doc__ = """Returns a set-like object providing a view on this files items.
-
-Returns
--------
-DictItems :
-    view on items.
-"""
-
-WeldxFile.setdefault.__doc__ = """Sets a default for given name.
-
-The passed default object will be returned in case the requested key is not present
-in the file.
-
-Parameters
-----------
-key :
-    key name
-default :
-    object to return in case key is not present in the file.
-"""
-
-WeldxFile.pop.__doc__ = """Get and remove the given key from the file.
-
-Parameters
-----------
-key :
-    key name
-default :
-    object to return in case key is not present in the file.
-"""
-
-WeldxFile.popitem.__doc__ = """Removes the item that was last inserted into the file.
-
-Notes
------
-In versions before 3.7, the popitem() method removes a random item.
-"""
-
-WeldxFile.values.__doc__ = """Returns a view list like object of the file content.
-
-Returns
--------
-ValueView :
-    a view on the values.
-
-"""
