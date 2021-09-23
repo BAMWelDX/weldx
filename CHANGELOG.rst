@@ -71,7 +71,7 @@ changes
    also affects the results of some `CoordinateSystemManager` methods
    (`CoordinateSystemManager.get_cs` , `CoordinateSystemManager.interp_time`)
    `[#476] <https://github.com/BAMWelDX/weldx/pull/476>`__
--  `util.xarray.WeldxAccessor.time_ref` setter now raises a `TypeError` if
+-  `util.WeldxAccessor.time_ref` setter now raises a `TypeError` if
    `None` is passed to it
    `[#489] <https://github.com/BAMWelDX/weldx/pull/489>`__
 -  move xarray related utility functions into `weldx.util.xarray` and
