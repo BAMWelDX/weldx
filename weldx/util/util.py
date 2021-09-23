@@ -412,8 +412,6 @@ def _patch_mod_all(module_name: str):
     around this situation. Can be removed up this is fixed:
     https://github.com/sphinx-doc/sphinx/issues/2021
     """
-    import sys
-
     this_mod = sys.modules[module_name]
     for name in this_mod.__all__:
         obj = getattr(this_mod, name)
