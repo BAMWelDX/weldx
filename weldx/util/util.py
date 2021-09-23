@@ -23,6 +23,17 @@ from boltons import iterutils
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.time import Time
 
+__all__ = [
+    "WeldxDeprecationWarning",
+    "deprecated",
+    "ureg_check_class",
+    "inherit_docstrings",
+    "dataclass_nested_eq",
+    "compare_nested",
+    "is_jupyterlab_session",
+    "is_interactive_session",
+]
+
 
 class WeldxDeprecationWarning(DeprecationWarning):
     """Deprecation warning type."""
