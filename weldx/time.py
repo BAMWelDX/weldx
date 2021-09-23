@@ -141,7 +141,7 @@ class Time:
     >>> t_abs = Time("2014-07-23")
     >>> t_abs = Time(["2000","2001","2002"])
 
-    Types that are derived from the abstract base class `TimeDependent` can also be
+    Types that are derived from the abstract base class ``TimeDependent`` can also be
     passed directly to `Time` as `time` parameter:
 
     >>> from weldx import LocalCoordinateSystem as LCS
