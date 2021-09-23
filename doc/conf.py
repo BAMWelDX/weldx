@@ -272,7 +272,7 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org", None),
     # "dask": ("https://docs.dask.org/en/latest", None),
     # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
-    "pint": ("https://pint.readthedocs.io/en/stable", None),
+    "pint": ("https://pint.readthedocs.io/en/latest", None),
     "jsonschema": ("https://python-jsonschema.readthedocs.io/en/stable/", None),
     "asdf": ("https://asdf.readthedocs.io/en/latest/", None),
     "networkx": ("https://networkx.org/documentation/stable/", None),

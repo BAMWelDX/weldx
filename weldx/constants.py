@@ -26,23 +26,35 @@ Q_.__module_ = "pint.quantity"  # skipcq: PYL-W0212
 Q_.__doc__ = """Create a quantity from a scalar or array.
 
 The quantity class supports lots of physical units and will combine them during
-mathematical operations
+mathematical operations.
+For extended details on working with quantities, please see the
+`pint documentation <http://https://pint.readthedocs.io/>`_
 
 Examples
 --------
 >>> from weldx import Q_
 >>> length = Q_(10, "mm")
 >>> length
+<Quantity(10, 'millimeter')>
 
 define a time:
+
 >>> time = Q_(1, "s")
 >>> time
+<Quantity(1, 'second')>
 
 lets combine length and time to get a velocity.
+
 >>> v = length / time
 >>> v
+<Quantity(10.0, 'millimeter / second')>
 """
+__test__ = {"Q": Q_.__doc__}  # enable doctest checking.
+
 U_ = WELDX_UNIT_REGISTRY.Unit
+U_.__name__ = "U_"
+U_.__module__ = "pint.unit"  # skipcq: PYL-W0212
+
 
 __all__ = (
     "WELDX_PATH",
