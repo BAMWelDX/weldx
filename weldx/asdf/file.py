@@ -525,10 +525,15 @@ class WeldxFile(UserDict):
         >>> a.update(b, foo="bar")
 
         # remove asdf meta data for easy comparision
-        >>> a.pop("asdf_library"); a.pop("history")
+        >>> del a["asdf_library"], a["history"]
         >>> a.data
         {'x': 23, 'y': 0, 'foo': 'bar'}
 
+        Or we can update with an iterable of key, value tuples.
+        >>> data = [('x', 0), ('y', -1)]
+        >>> a.update(data)
+        >>> a.data
+        {'x': 0, 'y': -1, 'foo': 'bar'}
         """
         # TODO: we do not want to manipulate the history, software.
         super().update(mapping, **kwargs)
@@ -580,11 +585,11 @@ class WeldxFile(UserDict):
         >>> x = a.pop("x")
         >>> x
         42
-        >>> a.keys()
-
+        >>> "x" not in a.keys()
+        True
         """
         # TODO: we do not want to delete the history, software.
-        super().pop(key, default=default)
+        return super().pop(key, default=default)
 
     def popitem(self) -> Any:
         """Remove the item that was last inserted into the file.
@@ -794,6 +799,7 @@ class WeldxFile(UserDict):
 
 class _HeaderVisualizer:
     def __init__(self, asdf_handle: AsdfFile):
+        # TODO: this ain't thread-safe!
         # take a copy of the handle to avoid side effects!
         copy._deepcopy_dispatch[np.ndarray] = lambda x, y: x
         try:
