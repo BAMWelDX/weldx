@@ -18,6 +18,21 @@ from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.time import Time, types_time_like, types_timestamp_like
 
+__all__ = [
+    "WeldxAccessor",
+    "mat_vec_mul",
+    "xr_3d_matrix",
+    "xr_3d_vector",
+    "xr_check_coords",
+    "xr_fill_all",
+    "xr_interp_coordinates_in_time",
+    "xr_interp_like",
+    "xr_interp_orientation_in_time",
+    "xr_is_orthogonal_matrix",
+    "xr_matmul",
+    "xr_transpose_matrix_data",
+]
+
 
 def mat_vec_mul(a, b) -> np.ndarray:
     """Matrix, Vector multiplication using matmul with newaxis for correct broadcasting.
@@ -409,6 +424,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     Examples
     --------
+    >>> import numpy as np
     >>> import pandas as pd
     >>> import xarray as xr
     >>> import weldx as wx
