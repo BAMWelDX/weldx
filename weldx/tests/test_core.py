@@ -7,7 +7,7 @@ import pint
 import pytest
 import xarray as xr
 
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
@@ -442,7 +442,7 @@ class TestTimeSeries:
         result = ts.interp_time(time)
 
         assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
-        assert Q_(1, str(result.units)) == Q_(1, unit_exp)
+        assert result.units == U_(unit_exp)
 
         time = Time(time)
         if len(time) == 1:
