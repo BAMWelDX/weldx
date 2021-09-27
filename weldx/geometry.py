@@ -1169,7 +1169,7 @@ class Shape:
 class Profile:
     """Defines a 2d profile."""
 
-    def __init__(self, shapes, units=None):
+    def __init__(self, shapes, units: pint.Unit = None):
         """Construct profile class.
 
         Parameters
@@ -1309,9 +1309,9 @@ class Profile:
         if axis_labels is not None:
             ax.set_xlabel(axis_labels[0])
             ax.set_ylabel(axis_labels[1])
-        elif "units" in self.attrs:
-            ax.set_xlabel("y in " + self.attrs["units"])
-            ax.set_ylabel("z in " + self.attrs["units"])
+        elif u := self.attrs.get("units"):
+            ax.set_xlabel(f"y in {u}")
+            ax.set_ylabel(f"z in {u}")
 
         if isinstance(color, str):  # single color
             color = [color] * len(raster_data)
