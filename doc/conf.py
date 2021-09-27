@@ -26,18 +26,18 @@ import traitlets
 
 def _workaround_imports_typechecking():
     """Load some packages needed for type annotations."""
-    import ipywidgets
-    import pandas as _
-    import xarray
+    import ipywidgets  # noqa
+    import pandas  # noqa
+    import xarray  # noqa
 
 
 def _prevent_sphinx_circular_imports_bug():
     # https://github.com/sphinx-doc/sphinx/issues/9243
-    import sphinx.builders.html
-    import sphinx.builders.latex
-    import sphinx.builders.texinfo
-    import sphinx.builders.text
-    import sphinx.ext.autodoc
+    import sphinx.builders.html  # noqa
+    import sphinx.builders.latex  # noqa
+    import sphinx.builders.texinfo  # noqa
+    import sphinx.builders.text  # noqa
+    import sphinx.ext.autodoc  # noqa
 
 
 _prevent_sphinx_circular_imports_bug()
@@ -82,7 +82,6 @@ pygments_style = "sphinx"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "m2r2",
     "sphinxcontrib.napoleon",
     "nbsphinx",
     "sphinx.ext.autodoc",
@@ -140,7 +139,6 @@ typehints_document_rtype = True
 # The suffix of source filenames.
 source_suffix = {
     ".rst": "restructuredtext",
-    ".md": "markdown",
 }
 
 # The encoding of source files.

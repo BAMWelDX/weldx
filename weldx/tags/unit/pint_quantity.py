@@ -57,7 +57,7 @@ class PintUnitConverter(WeldxConverter):
 
     def to_yaml_tree(self, obj: pint.Unit, tag: str, ctx) -> str:
         """Convert to python dict."""
-        return f"{obj:~}"  # use 'short' formatting for serialization
+        return f"{obj:.}"  # use 'long' (.) formatting for serialization (short = ~)
 
     def from_yaml_tree(self, node: str, tag: str, ctx) -> pint.Unit:
         """Reconstruct from tree."""
