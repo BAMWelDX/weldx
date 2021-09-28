@@ -50,7 +50,12 @@ properties:
         type: string
     wx_unit: "m"
 
-required: [length_prop, velocity_prop, current_prop]
+  delta_prop:
+    description: simple property with temperature deltas
+    tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
+    wx_unit: "Δ°C"
+
+required: [length_prop, velocity_prop, current_prop, delta_prop]
 propertyOrder: [length_prop, velocity_prop, current_prop]
 flowStyle: block
 additionalProperties: true
@@ -60,4 +65,5 @@ wx_unit:
   current_prop: A
   nested_prop:
     q2: "m*mm*cm"
+  delta_prop: "delta_degF"
 ...
