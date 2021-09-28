@@ -7,7 +7,7 @@ Release Notes
 added
 ~~~~~
 
--  added “units” (exact) and “dimensionality” (dimensionality
+-  added "units" (exact) and “dimensionality” (dimensionality
    compatible) checking options to `util.xr_check_coords`
    `[#442] <https://github.com/BAMWelDX/weldx/pull/442>`__
 -  `Time` class that can be initialized from several other time types
@@ -27,6 +27,8 @@ added
    `[#437] <https://github.com/BAMWelDX/weldx/pulls/437>`__.
 -  added `weldx.asdf.util.get_highest_tag_version` utility function
    `[#523] <https://github.com/BAMWelDX/weldx/pull/523>`__.
+-  added support for parsing temperature deltas with ``Δ°`` notation
+   `[#565] <https://github.com/BAMWelDX/weldx/pull/565>`__.
 
 removed
 ~~~~~~~
