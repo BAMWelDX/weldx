@@ -7,6 +7,14 @@ authors:
     family-names: Fabry
     given-names: Cagtay
     orcid: "https://orcid.org/0000-0002-0788-8079"
+  -
+    affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
+    family-names: Hirthammer
+    given-names: Volker
+  -
+    affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
+    family-names: Scherer
+    given-names: Martin K.
 cff-version: "1.1.0"
 message: "If you use this software, please cite it using these metadata."
 repository-code: "https://github.com/BAMWelDX/weldx"
