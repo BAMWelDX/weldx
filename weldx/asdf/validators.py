@@ -8,8 +8,7 @@ from asdf.util import uri_match
 
 from weldx.asdf.types import WxSyntaxError
 from weldx.asdf.util import _get_instance_shape
-from weldx.constants import Q_
-from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.constants import U_
 
 __all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
 
@@ -97,7 +96,8 @@ def _unit_validator(
         unit = instance["units"]
     else:  # legacy_code
         unit = instance["unit"]
-    valid = Q_(unit).check(UREG.get_dimensionality(expected_dimensionality))
+    unit = str(unit)  # catch TaggedString
+    valid = U_(unit).is_compatible_with(U_(expected_dimensionality))
     if not valid:
         yield ValidationError(
             f"Error validating unit dimension for property '{position}'. "

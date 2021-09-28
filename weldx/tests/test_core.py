@@ -7,8 +7,7 @@ import pint
 import pytest
 import xarray as xr
 
-from weldx.constants import Q_
-from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.constants import Q_, U_
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
 from weldx.time import Time
@@ -240,7 +239,7 @@ class TestTimeSeries:
             (Q_([3, 7, 1], ""), Q_([0, 1, 2], "s"), "step", (3,)),
         ],
     )
-    def test_construction_discrete(data, time, interpolation, shape_exp):
+    def test_construction_discrete(data: pint.Quantity, time, interpolation, shape_exp):
         """Test the construction of the TimeSeries class."""
         # set expected values
         time_exp = time
@@ -248,7 +247,7 @@ class TestTimeSeries:
             time_exp = pd.TimedeltaIndex(time_exp.m, unit="s")
 
         exp_interpolation = interpolation
-        if len(data.m.shape) == 0 and interpolation is None:
+        if len(data.shape) == 0 and interpolation is None:
             exp_interpolation = "step"
 
         # create instance
@@ -259,7 +258,7 @@ class TestTimeSeries:
         assert np.all(ts.time == time_exp)
         assert ts.interpolation == exp_interpolation
         assert ts.shape == shape_exp
-        assert data.check(UREG.get_dimensionality(ts.units))
+        assert data.is_compatible_with(ts.units)
 
         assert np.all(ts.data_array.data == data)
         assert ts.data_array.attrs["interpolation"] == exp_interpolation
@@ -291,7 +290,7 @@ class TestTimeSeries:
         assert ts.interpolation is None
         assert ts.shape == shape_exp
         assert ts.data_array is None
-        assert Q_(1, unit_exp).check(UREG.get_dimensionality(ts.units))
+        assert U_(unit_exp).is_compatible_with(ts.units)
 
     # test_init_data_array -------------------------------------------------------------
 
