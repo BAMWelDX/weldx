@@ -86,6 +86,8 @@ changes
    `[#504] <https://github.com/BAMWelDX/weldx/pull/504>`__.
 -  changed the default `pint.Unit` formatting to short notation ``:~``
    `[#519] <https://github.com/BAMWelDX/weldx/pull/519>`__.
+   (the asdf serialization still uses long notation (`[#560] <https://github.com/BAMWelDX/weldx/pull/560>`__))
+
 
 fixes
 ~~~~~
