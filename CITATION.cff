@@ -18,6 +18,6 @@ authors:
     family-names: Scherer
     given-names: Martin K.
 cff-version: "1.1.0"
-message: "If you use this software, please cite it using these metadata."
+message: "If you use this software, please cite it as below."
 repository-code: "https://github.com/BAMWelDX/weldx"
 ...
