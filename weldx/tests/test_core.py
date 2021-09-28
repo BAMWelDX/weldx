@@ -441,7 +441,7 @@ class TestTimeSeries:
         result = ts.interp_time(time)
 
         assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
-        assert Q_(1, str(result.units)) == Q_(1, unit_exp)
+        assert result.units == U_(unit_exp)
 
         time = Time(time)
         if len(time) == 1:
