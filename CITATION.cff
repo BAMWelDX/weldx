@@ -1,6 +1,8 @@
 # YAML 1.2
 ---
 title: weldx
+version:
+date-released:
 authors:
   -
     affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
