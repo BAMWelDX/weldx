@@ -2535,7 +2535,8 @@ class SpatialData:
         offset :
             An offset that will be added to all indices.
         closed_mesh :
-            If `True`, the side faces of the geometry will also be triangulated.
+            If `True`, the front and back faces of the geometry will also be
+            triangulated.
 
         Returns
         -------

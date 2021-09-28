@@ -5,7 +5,18 @@ from collections import UserDict
 from collections.abc import MutableMapping, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, AbstractSet, Any, Dict, List, Mapping, Optional, Tuple, Union
+from typing import (
+    IO,
+    AbstractSet,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import asdf
 import numpy as np
@@ -497,7 +508,7 @@ class WeldxFile(UserDict):
         """
         return super().get(key, default=default)
 
-    def update(self, mapping: Mapping, **kwargs):
+    def update(self, mapping: Union[Mapping, Iterable] = (), **kwargs):
         """Update this file from mapping or iterable mapping and kwargs.
 
         Parameters
@@ -534,6 +545,11 @@ class WeldxFile(UserDict):
         >>> a.update(data)
         >>> a.data
         {'x': 0, 'y': -1, 'foo': 'bar'}
+
+        Another possibility is to directly pass keyword arguments.
+        >>> a.update(x=-1, z=42)
+        >>> a.data
+        {'x': -1, 'y': -1, 'foo': 'bar', 'z': 42}
         """
         # TODO: we do not want to manipulate the history, software.
         super().update(mapping, **kwargs)
