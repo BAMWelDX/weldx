@@ -17,6 +17,11 @@ authors:
     affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
     family-names: Scherer
     given-names: Martin K.
+  -
+    affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
+    family-names: Pittner
+    given-names: Andreas
+    orcid: "https://orcid.org/0000-0002-5019-7775"
 cff-version: "1.1.0"
 message: "If you use this software, please cite it as below."
 repository-code: "https://github.com/BAMWelDX/weldx"
