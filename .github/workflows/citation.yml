@@ -8,12 +8,8 @@ on:
 
 jobs:
   Validate-CITATION-cff:
-    runs-on: ubuntu-latest
     name: Validate CITATION.cff
-    env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      RSPM: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
