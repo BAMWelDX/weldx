@@ -103,20 +103,18 @@ properties:
     tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.*"
   coordinates:
     description: |
-      An ndarray containing the coordinates.
+      A ndarray containing the coordinates.
 
     oneOf:
       - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-0.1.*"
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
   orientations:
     description: |
-      An ndarray containing the orientations.
+      A ndarray containing the orientations.
     tag: "asdf://weldx.bam.de/weldx/tags/core/variable-0.1.*"
-
 wx_shape:
-  (coordinates): [..., 3]
-  (orientations): [(t), 3, 3]
-
+  coordinates: [..., 3]
+  orientations: [(t), 3, 3]
 propertyOrder: [reference_time, time, orientations, coordinates]
 flowStyle: block
 ...
