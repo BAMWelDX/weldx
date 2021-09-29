@@ -142,7 +142,7 @@ We would validate this to always have shape ``[5]`` by adding the
 
 The above example shows the basic usage for a single property. We can
 use most of the syntax features like ``()``,\ ``~`` and ``...``. But be
-aware that the scope of this “inline” wx_shape validation is limited to
+aware that the scope of this "inline" wx_shape validation is limited to
 the property that it validates! So no comparison to other shapes with
 alphanumerics is possible.
 
