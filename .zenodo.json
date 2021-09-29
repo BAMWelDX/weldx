@@ -1,0 +1,31 @@
+{
+  "creators": [
+    {
+      "affiliation": "Bundesanstalt für Materialforschung und -prüfung (BAM)",
+      "name": "Fabry, Cagtay",
+      "orcid": "0000-0002-0788-8079"
+    },
+    {
+      "affiliation": "Bundesanstalt für Materialforschung und -prüfung (BAM)",
+      "name": "Hirthammer, Volker",
+      "orcid": " 0000-0002-0160-969X"
+    },
+    {
+      "affiliation": "Bundesanstalt für Materialforschung und -prüfung (BAM)",
+      "name": "Scherer, Martin K.",
+      "orcid": "0000-0002-7983-4387"
+    },
+    {
+      "affiliation": "Bundesanstalt für Materialforschung und -prüfung (BAM)",
+      "name": "Pittner, Andreas",
+      "orcid": "0000-0002-5019-7775"
+    }
+  ],
+  "description": "\"Scientific welding data covers a wide range of physical domains and\ntimescales and are measured using various different sensors. Complex and\nhighly specialized experimental setups at different welding institutes\ncomplicate the exchange of welding research data further.\n\nThe WelDX research project aims to foster the exchange of scientific\ndata inside the welding community by developing and establishing a new\nopen source file format suitable for the documentation of experimental\nwelding data and upholding associated quality standards. In addition to\nfostering scientific collaboration inside the national and international\nwelding community an associated advisory committee will be established\nto oversee the future development of the file format. The proposed file\nformat will be developed with regard to current needs of the community\nregarding interoperability, data quality and performance and will be\npublished under an appropriate open source license. By using the file\nformat objectivity, comparability and reproducibility across different\nexperimental setups can be improved.\"\n",
+  "keywords": [
+    "weldx",
+    "welding",
+    "research data"
+  ],
+  "title": "weldx"
+}
