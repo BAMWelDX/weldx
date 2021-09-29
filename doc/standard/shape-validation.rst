@@ -116,29 +116,29 @@ For the validation to work the validator has to be defined on a
 
 .. code:: yaml
 
-   # ASDF schema
-   properties:
-     array_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    # ASDF schema
+    properties:
+      array_prop:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
 
 .. code:: yaml
 
-   # ASDF file
-   array_prop: !core/ndarray-1.0.0
-     data: [0, 1, 2, 3, 4]
-     datatype: int32
-     shape: [5]
+    # ASDF file
+    array_prop: !core/ndarray-1.0.0
+      data: [0, 1, 2, 3, 4]
+      datatype: int32
+      shape: [5]
 
 We would validate this to always have shape ``[5]`` by adding the
 ``wx_shape`` keyword to the schema definition.
 
 .. code:: yaml
 
-   # ASDF schema
-   properties:
-     array_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [5]
+    # ASDF schema
+    properties:
+      array_prop:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [5]
 
 The above example shows the basic usage for a single property. We can
 use most of the syntax features like ``()``,\ ``~`` and ``...``. But be
@@ -150,26 +150,26 @@ For example, the following file would validate against the schema below:
 
 .. code:: yaml
 
-   # ASDF file
-   array_prop: !core/ndarray-1.0.0
-     data: [0, 1, 2, 3, 4]
-     datatype: int32
-     shape: [5]
-   array_prop2: !core/ndarray-1.0.0
-     data: [0, 1]
-     datatype: int32
-     shape: [2]
+    # ASDF file
+    array_prop: !core/ndarray-1.0.0
+      data: [0, 1, 2, 3, 4]
+      datatype: int32
+      shape: [5]
+    array_prop2: !core/ndarray-1.0.0
+      data: [0, 1]
+      datatype: int32
+      shape: [2]
 
 .. code:: yaml
 
-   # ASDF schema
-   properties:
-     array_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [n]
-     array_prop2:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [n]
+    # ASDF schema
+    properties:
+      array_prop:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [n]
+      array_prop2:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [n]
 
 To compare and validate shapes across multiple properties we have to use
 a nested syntax that has all necessary properties in its scope. To
@@ -178,15 +178,15 @@ following schema:
 
 .. code:: yaml
 
-   # ASDF schema
-   properties:
-     array_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-     array_prop2:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-   wx_shape:
-     array_prop: [n]
-     array_prop2: [n]
+    # ASDF schema
+    properties:
+      array_prop:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+      array_prop2:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape:
+      array_prop: [n]
+      array_prop2: [n]
 
 Note the following:
 
@@ -232,14 +232,14 @@ Here is an example defining an optional property that is allowed to not report a
 
 .. code:: yaml
 
-   # ASDF schema
-   properties:
+    # ASDF schema
+    properties:
       required_prop:
         tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
       optional_prop:
         oneOf:
           - tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
-          - tag: **/timedeltaindex-1.0.0
+          - tag: "**/timedeltaindex-1.0.0"
           - type: string
     wx_shape:
       required_prop: [n]
@@ -252,15 +252,15 @@ An alternative syntax method by enclosing the shape list:
 
    # ASDF schema
    properties:
-      required_prop:
-        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
-      optional_prop:
-        oneOf:
-          - tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
-          - tag: **/timedeltaindex-1.0.0
-          - type: string
-        wx_shape: ([5])
-    required: [required_prop]
+     required_prop:
+       tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+     optional_prop:
+       oneOf:
+         - tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+         - tag: "**/timedeltaindex-1.0.0"
+         - type: string
+       wx_shape: ([5])
+   required: [required_prop]
 
 custom types validation
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -280,7 +280,7 @@ Here is a more complex example demonstration some of the above points.
 
 .. code:: yaml
 
-   %YAML 1.1
+    %YAML 1.1
     ---
     $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
     id: "asdf://weldx.bam.de/weldx/schemas/debug/test_shape_validator-0.1.0"
@@ -337,8 +337,6 @@ Here is a more complex example demonstration some of the above points.
           - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
           - type: string
         wx_shape: ([1,2,(3),(4)])
-
-
 
     required: [prop1, prop2, prop3, prop4, quantity, timeseries, nested_prop, time_prop]
     propertyOrder: [prop1,prop2,prop3,prop4,nested_prop,optional_prop]
