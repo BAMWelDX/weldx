@@ -165,7 +165,7 @@ Code Status
 Documentation build
 ===================
 
-|Documentation Status| |documentation-gh|
+|Documentation| |documentation-gh|
 
 .. |Documentation| image:: https://readthedocs.org/projects/weldx/badge/?version=latest
    :target: https://weldx.readthedocs.io/en/latest/?badge=latest
@@ -199,9 +199,6 @@ Documentation build
 
 .. |DeepSource| image:: https://static.deepsource.io/deepsource-badge-light-mini.svg
    :target: https://deepsource.io/gh/BAMWelDX/weldx/?ref=repository-badge
-
-.. |Documentation Status| image:: https://readthedocs.org/projects/weldx/badge/?version=latest
-   :target: https://weldx.readthedocs.io/en/latest/?badge=latest
 
 .. |documentation-gh| image:: https://github.com/BAMWelDX/weldx/workflows/documentation/badge.svg?branch=master
    :target: https://github.com/BAMWelDX/weldx/actions?query=workflow%3Adocumentation+branch%3Amaster
