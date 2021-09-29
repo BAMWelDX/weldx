@@ -1,8 +1,9 @@
-generic
-=======
+#########
+ generic
+#########
 
 The ``generic`` directory contains basic schemas.
 
 .. asdf-autoschemas::
 
-    uuid-0.1.0
+   uuid-0.1.0
