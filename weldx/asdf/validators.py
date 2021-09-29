@@ -467,7 +467,7 @@ def _custom_shape_validator(
 
     if isinstance(dict_expected, str):
         # could be optional inline notation ([.....])
-        if not dict_expected.startswith("([") and dict_expected.endswith("])"):
+        if not (dict_expected.startswith("([") and dict_expected.endswith("])")):
             raise WxSyntaxError(f"Found an incorrect wx_shape object: {dict_expected}.")
         dict_expected = dict_expected[2:-2].split(",")
         optional = True
@@ -504,7 +504,7 @@ def _custom_shape_validator(
                     return False
     else:
         raise WxSyntaxError(
-            f"Found an incorrect object: {type(dict_expected)}. "
+            f"Found an incorrect wx_shape object: {type(dict_expected)}. "
             "Should be a dict or list."
         )
 
