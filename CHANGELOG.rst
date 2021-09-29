@@ -164,6 +164,7 @@ ASDF
    of ``tag:stsci.edu:asdf/unit/quantity-1.1.0`` `[#542] <https://github.com/BAMWelDX/weldx/pull/542>`__.
 -  refactor properties named ``unit`` to ``units`` and use ``unit/unit``
    tag `[#551] <https://github.com/BAMWelDX/weldx/pull/551>`__.
+-  reworked the optional syntax for ``wx_shape`` validation `[#571] <https://github.com/BAMWelDX/weldx/pull/571>`__.
 
 deprecations
 ~~~~~~~~~~~~
