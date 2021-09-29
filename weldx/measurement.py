@@ -10,7 +10,6 @@ import pint
 from networkx import draw, draw_networkx_edge_labels
 
 from weldx.constants import Q_, U_
-from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -34,7 +33,7 @@ class Signal:
     """Simple dataclass implementation for measurement signals."""
 
     signal_type: str
-    units: pint.Unit
+    units: Union[str, pint.Unit]
     data: TimeSeries = None
 
     def __post_init__(self):
@@ -371,7 +370,7 @@ class MeasurementChain:
         source_name: str,
         source_error: Error,
         output_signal_type: str,
-        output_signal_unit: str,
+        output_signal_unit: Union[str, Unit],
         signal_data: TimeSeries = None,
     ) -> "MeasurementChain":
         """Create a new measurement chain without providing a `SignalSource` instance.
@@ -412,7 +411,7 @@ class MeasurementChain:
         """
         source = SignalSource(
             source_name,
-            Signal(output_signal_type, output_signal_unit, signal_data),
+            Signal(output_signal_type, U_(output_signal_unit), signal_data),
             source_error,
         )
         return cls(name, source)
@@ -516,8 +515,8 @@ class MeasurementChain:
 
     @staticmethod
     def _determine_output_signal_unit(
-        func: MathematicalExpression, input_unit: str
-    ) -> str:
+        func: MathematicalExpression, input_unit: Union[str, Union]
+    ) -> pint.Unit:
         """Determine the unit of a transformations' output signal.
 
         Parameters
@@ -529,10 +528,12 @@ class MeasurementChain:
 
         Returns
         -------
-        str:
+        pint.Unit:
             Unit of the transformations' output signal
 
         """
+        input_unit = U_(input_unit)
+
         if func is not None:
             variables = func.get_variable_names()
             if len(variables) != 1:
@@ -545,7 +546,7 @@ class MeasurementChain:
                     "The provided function is incompatible with the input signals unit."
                     f" \nThe test raised the following exception:\n{e}"
                 )
-            return str(test_output.units)
+            return test_output.units
 
         return input_unit
 
@@ -751,7 +752,7 @@ class MeasurementChain:
         name: str,
         error: Error,
         output_signal_type: str = None,
-        output_signal_unit: str = None,
+        output_signal_unit: Union[str, Unit] = None,
         func: MathematicalExpression = None,
         data: TimeSeries = None,
         input_signal_source: str = None,
@@ -815,6 +816,9 @@ class MeasurementChain:
         ...                          )
 
         """
+        if output_signal_unit is not None:
+            output_signal_unit = U_(output_signal_unit)
+
         if output_signal_type is None and output_signal_unit is None and func is None:
             warn("The created transformation does not perform any transformations.")
 
@@ -825,8 +829,7 @@ class MeasurementChain:
         type_tf = f"{input_signal.signal_type[0]}{output_signal_type[0]}".upper()
         if output_signal_unit is not None:
             if func is not None:
-                if not ureg.is_compatible_with(
-                    output_signal_unit,
+                if not output_signal_unit.is_compatible_with(
                     self._determine_output_signal_unit(func, input_signal.units),
                 ):
                     raise ValueError(
@@ -834,7 +837,7 @@ class MeasurementChain:
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
-                unit_conversion = U_(output_signal_unit) / U_(input_signal.units)
+                unit_conversion = output_signal_unit / input_signal.units
                 func = MathematicalExpression(
                     "a*x",
                     parameters={"a": Q_(1, unit_conversion)},

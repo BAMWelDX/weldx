@@ -8,7 +8,10 @@ UNIT_KEY = "units"  # default nomenclature for storing physical units informatio
 WELDX_PATH = _Path(__file__).parent.resolve()
 
 WELDX_UNIT_REGISTRY = _ureg(
-    preprocessors=[lambda string: string.replace("%", "percent")],  # allow %-sign
+    preprocessors=[
+        lambda string: string.replace("%", "percent"),  # allow %-sign
+        lambda string: string.replace("Δ°", "delta_deg"),  # parse Δ° for temperature
+    ],
     force_ndarray_like=True,
 )
 
