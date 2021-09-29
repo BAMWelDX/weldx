@@ -1,11 +1,11 @@
+name: CITATION.cff
 on:
   push:
     paths:
       - CITATION.cff
-    workflow_dispatch:
   pull_request:
+  release:
 
-name: CITATION.cff
 jobs:
   Validate-CITATION-cff:
     runs-on: ubuntu-latest
@@ -15,21 +15,13 @@ jobs:
       RSPM: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      # This is needed for workflows running on
-      # ubuntu-20.04 or later
-      - name: Install V8
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get install -y libv8-dev
-      - name: Validate CITATION.cff
-        uses: dieghernan/cff-validator@main
-
-      # Upload artifact
-      - uses: actions/upload-artifact@v2
-        if: failure()
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: actions/cache@v2
         with:
-          name: citation-cff-errors
-          path: citation_cff_errors.md
+          path: ~/.cache/pip
+          key: pip-cffconvert-0
+      - name: pip installs
+        run: pip install cffconvert
+      - name: run cffconvert validate
+        run: cffconvert --validate
