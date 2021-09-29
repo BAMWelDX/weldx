@@ -2,7 +2,7 @@
  Grooves
 #########
 
-The ``groove`` directory contains reference implementations of welding
+The **groove** directory contains reference implementations of welding
 groove definitions for different standards.
 
 **************

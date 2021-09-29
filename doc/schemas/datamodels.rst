@@ -2,7 +2,7 @@
  Datamodels
 ############
 
-The ``Datamodels`` directory contains file schemas used for welding
+The **Datamodels** directory contains file schemas used for welding
 related applications.
 
 .. asdf-autoschemas::

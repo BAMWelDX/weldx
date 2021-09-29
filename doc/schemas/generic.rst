@@ -2,7 +2,7 @@
  generic
 #########
 
-The ``generic`` directory contains basic schemas.
+The **generic** directory contains basic schemas.
 
 .. asdf-autoschemas::
 

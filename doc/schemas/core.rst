@@ -2,7 +2,7 @@
  Core
 ######
 
-The ``core`` directory contains schema implementations for the base
+The **core** directory contains schema implementations for the base
 classes.
 
 .. asdf-autoschemas::
@@ -19,7 +19,7 @@ classes.
  Transformations
 #################
 
-The ``transformations`` directory contains schema implementations for
+The **transformations** directory contains schema implementations for
 the base classes.
 
 .. asdf-autoschemas::
@@ -30,7 +30,7 @@ the base classes.
  Geometry
 ##########
 
-The ``geometry`` directory contains schema implementations for the
+The **geometry** directory contains schema implementations for the
 geometric base classes.
 
 .. asdf-autoschemas::
@@ -41,7 +41,7 @@ geometric base classes.
  Graph
 #######
 
-The ``graph`` directory contains schema implementations for basic graph
+The **graph** directory contains schema implementations for basic graph
 types.
 
 .. asdf-autoschemas::

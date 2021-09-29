@@ -2,7 +2,7 @@
  AWS
 #####
 
-The ``AWS`` directory contains example implementations for shielding gas
+The **AWS** directory contains example implementations for shielding gas
 descriptions following NISTIR 7107.
 
 .. asdf-autoschemas::

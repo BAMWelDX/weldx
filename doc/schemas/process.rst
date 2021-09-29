@@ -2,7 +2,7 @@
  Generic Welding Processes
 ###########################
 
-The ``Process`` directory contains schema implementations for the base
+The **Process** directory contains schema implementations for the base
 classes.
 
 .. asdf-autoschemas::
