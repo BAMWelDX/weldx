@@ -165,7 +165,7 @@ Code Status
 Documentation build
 ===================
 
-|Documentation Status| |documentation|
+|Documentation Status| |documentation-gh|
 
 .. |Documentation| image:: https://readthedocs.org/projects/weldx/badge/?version=latest
    :target: https://weldx.readthedocs.io/en/latest/?badge=latest
