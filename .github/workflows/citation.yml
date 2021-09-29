@@ -25,5 +25,3 @@ jobs:
         run: pip install cffconvert
       - name: run cffconvert validate
         run: cffconvert --validate
-      - name: compare .zenodo.json contents
-        uses: citation-file-format/cffconvert-github-action@main
