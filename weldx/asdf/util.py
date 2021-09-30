@@ -1,4 +1,5 @@
 """Utilities for asdf files."""
+from collections.abc import Mapping
 from distutils.version import LooseVersion
 from io import BytesIO
 from pathlib import Path
@@ -528,10 +529,21 @@ def get_highest_tag_version(
 def _get_instance_shape(
     instance_dict: Union[TaggedDict, Dict[str, Any]]
 ) -> Union[List[int], None]:
-    """Get the shape of an ASDF instance from its tagged dict form."""
+    """Get the shape of an ASDF instance from its tagged dict form.
+
+    Parameters
+    ----------
+    instance_dict
+        The yaml node to evaluate.
+
+    Returns
+    -------
+    List
+        A numpy-style shape list or `None` if the shape could not be determined.
+    """
     if isinstance(instance_dict, (float, int)):  # test against [1] for scalar values
         return [1]
-    elif "shape" in instance_dict:
+    elif isinstance(instance_dict, Mapping) and "shape" in instance_dict:
         return instance_dict["shape"]
     elif isinstance(instance_dict, asdf.types.tagged.Tagged):
         # try calling shape_from_tagged for custom types

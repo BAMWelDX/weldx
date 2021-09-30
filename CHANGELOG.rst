@@ -209,6 +209,7 @@ ASDF
 
 -  refactor properties named ``unit`` to ``units`` and use ``unit/unit``
    tag `[#551] <https://github.com/BAMWelDX/weldx/pull/551>`__.
+-  reworked the optional syntax for ``wx_shape`` validation `[#571] <https://github.com/BAMWelDX/weldx/pull/571>`__.
 
 deprecations
 ============

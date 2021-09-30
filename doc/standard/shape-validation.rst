@@ -116,60 +116,60 @@ For the validation to work the validator has to be defined on a
 
 .. code:: yaml
 
-   # ASDF schema
-   properties:
-     array_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    # ASDF schema
+    properties:
+      array_prop:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
 
 .. code:: yaml
 
-   # ASDF file
-   array_prop: !core/ndarray-1.0.0
-     data: [0, 1, 2, 3, 4]
-     datatype: int32
-     shape: [5]
+    # ASDF file
+    array_prop: !core/ndarray-1.0.0
+      data: [0, 1, 2, 3, 4]
+      datatype: int32
+      shape: [5]
 
 We would validate this to always have shape ``[5]`` by adding the
 ``wx_shape`` keyword to the schema definition.
 
 .. code:: yaml
 
-   # ASDF schema
-   properties:
-     array_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [5]
+    # ASDF schema
+    properties:
+      array_prop:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [5]
 
 The above example shows the basic usage for a single property. We can
 use most of the syntax features like ``()``,\ ``~`` and ``...``. But be
-aware that the scope of this “inline” wx_shape validation is limited to
+aware that the scope of this "inline" wx_shape validation is limited to
 the property that it validates! So no comparison to other shapes with
 alphanumerics is possible.
 
-For example, following schema would validate and file would validate:
+For example, the following file would validate against the schema below:
 
 .. code:: yaml
 
-   # ASDF schema
-   properties:
-     array_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [n]
-     array_prop2:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [n]
+    # ASDF file
+    array_prop: !core/ndarray-1.0.0
+      data: [0, 1, 2, 3, 4]
+      datatype: int32
+      shape: [5]
+    array_prop2: !core/ndarray-1.0.0
+      data: [0, 1]
+      datatype: int32
+      shape: [2]
 
 .. code:: yaml
 
-   # ASDF file
-   array_prop: !core/ndarray-1.0.0
-     data: [0, 1, 2, 3, 4]
-     datatype: int32
-     shape: [5]
-   array_prop2: !core/ndarray-1.0.0
-     data: [0, 1]
-     datatype: int32
-     shape: [2]
+    # ASDF schema
+    properties:
+      array_prop:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [n]
+      array_prop2:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [n]
 
 To compare and validate shapes across multiple properties we have to use
 a nested syntax that has all necessary properties in its scope. To
@@ -178,15 +178,15 @@ following schema:
 
 .. code:: yaml
 
-   # ASDF schema
-   properties:
-     array_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-     array_prop2:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-   wx_shape:
-     array_prop: [n]
-     array_prop2: [n]
+    # ASDF schema
+    properties:
+      array_prop:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+      array_prop2:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape:
+      array_prop: [n]
+      array_prop2: [n]
 
 Note the following:
 
@@ -195,25 +195,71 @@ Note the following:
 -  ``wx_shape`` is no longer a shape-like list but itself a nested
    object with shape-like lists as leaves.
 
-optional properties
-~~~~~~~~~~~~~~~~~~~
+missing properties
+~~~~~~~~~~~~~~~~~~
 
-Properties that are optional (not listed as ``required``) must be
-indicated as such for shape validation by putting the name in brackets.
-In this example, both ``optional_prop`` will only get validated if it
-exists in the tree.
+Optional properties (not listed as ``required``) can be missing in the schema even if a ``wx_shape`` instance is
+defined for them. If the property that ``wx_shape`` refers to cannot be found, the validation is skipped. (Thus it is
+important to make sure property names are spelled correctly)
+
+optional shapes
+~~~~~~~~~~~~~~~
+
+By default, the ``wx_shape`` validation is required. That means if the property exists the property must report a shape
+and validate against the shape requirements.
+In the example below, the ``optional_prop`` must validate the shape requirements if it exists.
+
+.. code:: yaml
+
+    properties:
+      required_prop:
+        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+      optional_prop:
+        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+    wx_shape:
+      required_prop: [n]
+      optional_prop: [n]
+    required: [required_prop]
+
+It is possible to define the ``wx_shape`` requirement syntax as optional by enclosing the property name or shape list in
+round brackets.
+The optional shape syntax is defined as follows:
+
+- if the property exists and a shape is optional, the property must validate against the shape requirements only if it reports a shape
+- if the property exists and a shape is optional, the property passes validation if it does not report a shape
+
+Here is an example defining an optional property that is allowed to not report a shape (in the case of ``string``)
+
+.. code:: yaml
+
+    # ASDF schema
+    properties:
+      required_prop:
+        tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+      optional_prop:
+        oneOf:
+          - tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+          - tag: "**/timedeltaindex-1.0.0"
+          - type: string
+    wx_shape:
+      required_prop: [n]
+      (optional_prop): [n]
+    required: [required_prop]
+
+An alternative syntax method by enclosing the shape list:
 
 .. code:: yaml
 
    # ASDF schema
    properties:
      required_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+       tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
      optional_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-   wx_shape:
-     required_prop: [n]
-     (optional_prop): [n]
+       oneOf:
+         - tag: tag:stsci.edu:asdf/core/ndarray-1.0.0
+         - tag: "**/timedeltaindex-1.0.0"
+         - type: string
+       wx_shape: ([5])
    required: [required_prop]
 
 custom types validation
@@ -234,64 +280,78 @@ Here is a more complex example demonstration some of the above points.
 
 .. code:: yaml
 
-   %YAML 1.1
-   ---
-   $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-   id: "asdf://weldx.bam.de/weldx/schemas/debug/test_shape_validator-1.0.0"
-   tag: "asdf://weldx.bam.de/weldx/tags/debug/test_shape_validator-1.0.0"
+    %YAML 1.1
+    ---
+    $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+    id: "asdf://weldx.bam.de/weldx/schemas/debug/test_shape_validator-0.1.0"
 
-   title: |
-     simple demonstration and test schema for wx_shape validator syntax
-   type: object
-   properties:
-     prop1:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [1,2,(3),(4)]
+    title: |
+      simple demonstration and test schema for wx_shape validator syntax
+    type: object
+    properties:
+      prop1:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [1,2,(3),(4)]
 
-     prop2:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [~,2,1]
+      prop2:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [~,2,1]
 
-     prop3:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [2,4,6,8,...]
+      prop3:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [2,4,6,8,...]
 
-     prop4:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [~,3,5,7,9]
+      prop4:
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        wx_shape: [~,3,5,7,9]
 
-     prop5:
-       type: number
-       wx_shape: [1]
+      prop5:
+        type: number
+        wx_shape: [1]
 
-     nested_prop:
-       type: object
-       properties:
-         p1:
-           tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-           wx_shape: [10,8,6,4,2]
-         p2:
-           tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-           wx_shape: [9,7,5,3,1]
+      quantity:
+        tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
+        wx_shape: [1]
 
-     optional_prop:
-       tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-       wx_shape: [1,2,(3),(4)]
+      timeseries:
+        tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
+        wx_shape: [1]
 
+      nested_prop:
+        type: object
+        properties:
+          p1:
+            tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+            wx_shape: [10,8,6,4,2]
+          p2:
+            tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+            wx_shape: [9,7,5,3,1]
 
+      time_prop:
+        oneOf:
+          - tag: "asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.*"
+          - tag: "asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.*"
 
-   required: [prop1,prop2,prop3,prop4,nested_prop]
-   propertyOrder: [prop1,prop2,prop3,prop4,nested_prop,optional_prop]
-   flowStyle: block
-   additionalProperties: true
-   wx_shape:
-     prop1: [(~),2,n]
-     prop2: [n,2,1]
-     prop3: [2,4,5~7,...]
-     prop4: [a,3,5,k,m]
-     prop5: [a]
-     nested_prop:
-       p1: [10,1~10,6,4,2]
-       p2: [(m),7,5,3,1]
-       (p3): [a,2,n]
-     (optional_prop): [a,2,n]
+      optional_prop:
+        oneOf:
+          - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+          - type: string
+        wx_shape: ([1,2,(3),(4)])
+
+    required: [prop1, prop2, prop3, prop4, quantity, timeseries, nested_prop, time_prop]
+    propertyOrder: [prop1,prop2,prop3,prop4,nested_prop,optional_prop]
+    flowStyle: block
+    additionalProperties: true
+    wx_shape:
+      prop1: [(~),2,n]
+      prop2: [n,2,1]
+      prop3: [2,4,5~7,...]
+      prop4: [a,3,5,k,m]
+      prop5: [a]
+      nested_prop:
+        p1: [10,1~10,6,4,2]
+        p2: [(m),7,5,3,1]
+        (p3): [a,2,n]
+      time_prop: [m]
+      (optional_prop): [a,2,n]
+    ...
