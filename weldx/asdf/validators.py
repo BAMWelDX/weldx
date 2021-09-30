@@ -371,7 +371,57 @@ def _compare_lists(_list, list_expected) -> Union[bool, dict]:
     return dict_values
 
 
-def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, Any]):
+def _validate_instance_shape(
+    dict_test: dict, shape_expected: list, optional: bool = False
+) -> dict:
+    """Validate a node instance against a shape definition.
+
+    Parameters
+    ----------
+    dict_test
+        The node to be validated
+    shape_expected
+        List that defines the expected shape constraints.
+    optional
+        flag if validation is optional
+
+    Returns
+    -------
+    dict
+        dictionary of shape keys (empty dictionary if no variables in shape_expected)
+
+    Raises
+    ------
+    ValidationError
+        If the shape does not match the requirements or no shape could be found but
+        validation is not flagged as optional
+
+    """
+    shape = _get_instance_shape(dict_test)
+    if shape is None:  # could not determine shape of node
+        if optional:  # we are allowed to skip shape validation
+            return {}
+        raise ValidationError(f"Could not determine shape in instance {dict_test}.")
+
+    list_test, list_expected = _prepare_list(shape, shape_expected)
+
+    _validate_expected_list(list_expected)
+    _dict_values = _compare_lists(list_test, list_expected)
+
+    if _dict_values is False:
+        raise ValidationError(
+            f"Shape {list_test[::-1]} does not match requirement "
+            f"{list_expected[::-1]}"
+        )
+
+    return _dict_values
+
+
+def _custom_shape_validator(
+    dict_test: Dict[str, Any],
+    dict_expected: Union[Dict[str, Any], List],
+    optional: bool = False,
+):
     """Validate dimensions which are stored in two dictionaries dict_test and
     dict_expected.
 
@@ -394,47 +444,41 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
     Parameters
     ----------
     dict_test:
-        dictionary to test against
+        dictionary to validate
     dict_expected:
         dictionary with the expected values
 
-    raises
+    Raises
     ------
     ValueError:
         when dict_expected does violate against the Syntax rules
 
-    returns
+    Returns
     -------
     False
         when any dimension mismatch occurs
     dict_values
         Dictionary - keys: variable names in the validation schemes. values: values of
         the validation schemes.
+
     """
 
     dict_values = {}
 
-    # catch single shape definitions
+    if isinstance(dict_expected, str):
+        # could be optional inline notation ([.....])
+        if not (dict_expected.startswith("([") and dict_expected.endswith("])")):
+            raise WxSyntaxError(f"Found an incorrect wx_shape object: {dict_expected}.")
+        dict_expected = dict_expected[2:-2].split(",")
+        optional = True
+
+    # handle single shape definitions
     if isinstance(dict_expected, list):
-        # get the shape of current
-        shape = _get_instance_shape(dict_test)
-        if not shape:
-            raise ValidationError(f"Could not determine shape in instance {dict_test}.")
-
-        list_test, list_expected = _prepare_list(shape, dict_expected)
-
-        _validate_expected_list(list_expected)
-        _dict_values = _compare_lists(list_test, list_expected)
-
-        if _dict_values is False:
-            raise ValidationError(
-                f"Shape {list_test[::-1]} does not match requirement "
-                f"{list_expected[::-1]}"
-            )
-
-        return _dict_values
+        # we have reached a shape definition, try validation
+        return _validate_instance_shape(dict_test, dict_expected, optional=optional)
 
     elif isinstance(dict_expected, dict):
+        # we need to go deeper ...
         for key, item in dict_expected.items():
             # allow optional syntax
             _optional = False
@@ -447,13 +491,11 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
             # test shapes
             if key in dict_test:
                 # go one level deeper in the dictionary
-                _dict_values = _custom_shape_validator(dict_test[key], item)
-            elif _optional:
-                _dict_values = {}
-            else:
-                raise ValidationError(
-                    f"Could not access key '{key}'  in instance {dict_test}."
+                _dict_values = _custom_shape_validator(
+                    dict_test[key], item, optional=_optional
                 )
+            else:
+                return dict_values
 
             for key in _dict_values:
                 if key not in dict_values:
@@ -462,7 +504,7 @@ def _custom_shape_validator(dict_test: Dict[str, Any], dict_expected: Dict[str, 
                     return False
     else:
         raise WxSyntaxError(
-            f"Found an incorrect object: {type(dict_expected)}. "
+            f"Found an incorrect wx_shape object: {type(dict_expected)}. "
             "Should be a dict or list."
         )
 
@@ -475,7 +517,7 @@ def wx_unit_validator(
     """Custom validator for checking dimensions for objects with 'unit' property.
 
     ASDF documentation:
-    https://asdf.readthedocs.io/en/2.6.0/asdf/extensions.html#adding-custom-validators
+    https://asdf.readthedocs.io/en/2.8.1/asdf/extensions.html#adding-custom-validators
 
     Parameters
     ----------
