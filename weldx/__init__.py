@@ -41,8 +41,10 @@ These classes and functions are used to define welding processes.
     U_
     Time
     TimeSeries
+    MathematicalExpression
     CoordinateSystemManager
     LocalCoordinateSystem
+    WXRotation
 
 **Geometry**
 
@@ -120,13 +122,12 @@ from .constants import Q_, U_
 
 # main modules
 import weldx.time
-import weldx.util  # import this first to avoid circular dependencies
+import weldx.util  # import this second to avoid circular dependencies
 import weldx.core
 import weldx.transformations
 import weldx.config
 import weldx.geometry
 import weldx.welding
-
 
 # class imports to weldx namespace
 from weldx.config import Config
