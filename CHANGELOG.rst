@@ -115,6 +115,7 @@ documentation
    `[#450] <https://github.com/BAMWelDX/weldx/pull/450>`__
 -  split API documentation into user classes/functions and a full API
    reference `[#469] <https://github.com/BAMWelDX/weldx/pull/469>`__.
+-  added citation metadata in ``CITATION.cff`` `[#568] <https://github.com/BAMWelDX/weldx/pull/568>`__.
 
 ASDF
 ~~~~
