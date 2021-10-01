@@ -29,6 +29,9 @@ added
    `[#523] <https://github.com/BAMWelDX/weldx/pull/523>`__.
 -  added support for parsing temperature deltas with ``Δ°`` notation
    `[#565] <https://github.com/BAMWelDX/weldx/pull/565>`__.
+-  new tutorial series that introduces the most important WelDX features
+   step by step based on a full example file
+   `[#555] <https://github.com/BAMWelDX/weldx/pull/555>`__.
 
 removed
 ~~~~~~~
