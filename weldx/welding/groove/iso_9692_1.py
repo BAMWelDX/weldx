@@ -9,7 +9,7 @@ import pint
 from sympy import Point2D, Polygon
 
 import weldx.geometry as geo
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.util import inherit_docstrings, ureg_check_class
 
 __all__ = [
@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 
-_DEFAULT_LEN_UNIT = "mm"
+_DEFAULT_LEN_UNIT = U_("mm")
 
 
 def _set_default_heights(groove):
