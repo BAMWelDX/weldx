@@ -828,7 +828,7 @@ class WeldxFile(UserDict):
             Set to `True` if primitive values should be displayed
 
         """
-        tree = self._asdf_handle.tree.copy()
+        tree = {key:value  for key, value in self._asdf_handle.tree if key not in ["asdf_library", "history"]}
         tree.pop("asdf_library")
         tree.pop("history")
         asdf.info(tree, max_rows=max_rows, max_cols=max_length, show_values=show_values)
