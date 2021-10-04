@@ -115,9 +115,9 @@ changes
    serialization still uses long notation (`[#560]
    <https://github.com/BAMWelDX/weldx/pull/560>`__))
 
--  `welding_current` and `welding_voltage` in the single-pass weld schema
-   now expect the tag `"asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"`
-   instead of `"asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.*"` `[#578]
+-  ``welding_current`` and ``welding_voltage`` in the single-pass weld schema
+   now expect the tag ``"asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"``
+   instead of ``"asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.*"`` `[#578]
    <https://github.com/BAMWelDX/weldx/pull/578>`__.
 
 fixes
