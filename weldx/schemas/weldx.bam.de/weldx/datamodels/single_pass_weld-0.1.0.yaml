@@ -82,12 +82,12 @@ properties:
   welding_current:
     description: |
       The signal representing the welding current measurement.
-    tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
     wx_unit: "A"
   welding_voltage:
     description: |
       The signal representing the welding voltage measurement.
-    tag: "asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
     wx_unit: "V"
   TCP:
     description: |
