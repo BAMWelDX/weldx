@@ -13,5 +13,5 @@ dependencies:
   - ipympl
   - nodejs
   - k3d=2.11
-  - pip:
-    - git+https://github.com/BAMWelDX/weldx.git
+#  - pip:
+#    - git+https://github.com/BAMWelDX/weldx.git
