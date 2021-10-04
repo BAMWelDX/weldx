@@ -827,6 +827,31 @@ class WeldxFile(UserDict):
         show_values :
             Set to `True` if primitive values should be displayed
 
+        Examples
+        --------
+
+        >>> from weldx import WeldxFile
+        >>> tree = dict(
+        ...     project="Weldx",
+        ...     developers=["Cagtay Fabry", "Volker Hirthammer", "Martin Scherer"],
+        ...     meta=dict(depends_on=["ASDF", "NumPy", "some more"], is_on_github=True),
+        ... )
+        >>> wxfile = WeldxFile(tree=tree, mode="rw")
+        >>>
+        >>> wxfile.info()
+        \x1b[1mroot\x1b[0m (dict)
+        \x1b[2m\u251c\u2500\x1b[0m\x1b[1mproject\x1b[0m (str)
+        \x1b[2m\u251c\u2500\x1b[0m\x1b[1mdevelopers\x1b[0m (list)
+        \x1b[2m\u2502 \u251c\u2500\x1b[0m[\x1b[1m0\x1b[0m] (str)
+        \x1b[2m\u2502 \u251c\u2500\x1b[0m[\x1b[1m1\x1b[0m] (str)
+        \x1b[2m\u2502 \u2514\u2500\x1b[0m[\x1b[1m2\x1b[0m] (str)
+        \x1b[2m\u2514\u2500\x1b[0m\x1b[1mmeta\x1b[0m (dict)
+        \x1b[2m  \u251c\u2500\x1b[0m\x1b[1mdepends_on\x1b[0m (list)
+        \x1b[2m  \u2502 \u251c\u2500\x1b[0m[\x1b[1m0\x1b[0m] (str)
+        \x1b[2m  \u2502 \u251c\u2500\x1b[0m[\x1b[1m1\x1b[0m] (str)
+        \x1b[2m  \u2502 \u2514\u2500\x1b[0m[\x1b[1m2\x1b[0m] (str)
+        \x1b[2m  \u2514\u2500\x1b[0m\x1b[1mis_on_github\x1b[0m (bool)
+
         """
         tree = {
             key: value
