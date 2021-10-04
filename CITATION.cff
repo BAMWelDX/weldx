@@ -1,0 +1,52 @@
+# YAML 1.2
+---
+title: weldx
+#version:
+#date-released:
+authors:
+  - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
+    email: cagtay.fabry@bam.de
+    family-names: Fabry
+    given-names: Cagtay
+    orcid: "https://orcid.org/0000-0002-0788-8079"
+  - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
+    email: volker.hirthammer@bam.de
+    family-names: Hirthammer
+    given-names: Volker
+    orcid: " https://orcid.org/0000-0002-0160-969X"
+  - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
+    email: martin.scherer@bam.de
+    family-names: Scherer
+    given-names: Martin K.
+    orcid: "https://orcid.org/0000-0002-7983-4387"
+  - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
+    email: andreas.pittner@bam.de
+    family-names: Pittner
+    given-names: Andreas
+    orcid: "https://orcid.org/0000-0002-5019-7775"
+message: "If you use this software, please cite it as below."
+repository-code: "https://github.com/BAMWelDX/weldx"
+keywords:
+  - weldx
+  - welding
+  - "research data"
+abstract: |
+  "Scientific welding data covers a wide range of physical domains and
+  timescales and are measured using various different sensors. Complex and
+  highly specialized experimental setups at different welding institutes
+  complicate the exchange of welding research data further.
+
+  The WelDX research project aims to foster the exchange of scientific
+  data inside the welding community by developing and establishing a new
+  open source file format suitable for the documentation of experimental
+  welding data and upholding associated quality standards. In addition to
+  fostering scientific collaboration inside the national and international
+  welding community an associated advisory committee will be established
+  to oversee the future development of the file format. The proposed file
+  format will be developed with regard to current needs of the community
+  regarding interoperability, data quality and performance and will be
+  published under an appropriate open source license. By using the file
+  format objectivity, comparability and reproducibility across different
+  experimental setups can be improved."
+cff-version: "1.2.0"
+...
