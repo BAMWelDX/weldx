@@ -2,10 +2,21 @@
 import copy
 import pathlib
 from collections import UserDict
-from collections.abc import MutableMapping
+from collections.abc import MutableMapping, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, Dict, List, Mapping, Optional, Union
+from typing import (
+    IO,
+    AbstractSet,
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import asdf
 import numpy as np
@@ -421,6 +432,7 @@ class WeldxFile(UserDict):
         version: str = None,
         **kwargs,
     ):
+        """Get this docstring overwritten by AsdfFile.update."""
         self._asdf_handle.update(
             all_array_storage=all_array_storage,
             all_array_compression=all_array_compression,
@@ -452,6 +464,163 @@ class WeldxFile(UserDict):
         """
         tree = dict.fromkeys(iterable, default)
         return WeldxFile(tree=tree, mode="rw")
+
+    def values(self) -> ValuesView:
+        """Return a view list like object of the file content.
+
+        Returns
+        -------
+        ValuesView :
+            a view on the values.
+
+        """
+        return super().values()
+
+    def keys(self) -> AbstractSet:
+        """Return a set of keys/attributes stored in this file.
+
+        Returns
+        -------
+        KeysView :
+            all keys stored at the root of this file.
+        """
+        return super().keys()
+
+    def clear(self):
+        """Remove all data from file."""
+        # TODO: we do not want to delete the history, software.
+        super().clear()
+
+    def get(self, key, default=None):
+        """Get data attached to given key from file.
+
+        Parameters
+        ----------
+        key :
+            The name of the data.
+        default :
+            The default is being returned in case the given key cannot be found.
+
+        Raises
+        ------
+        KeyError
+            Raised if the given key cannot be found and no default was provided.
+        """
+        return super().get(key, default=default)
+
+    def update(self, mapping: Union[Mapping, Iterable] = (), **kwargs):
+        """Update this file from mapping or iterable mapping and kwargs.
+
+        Parameters
+        ----------
+        mapping :
+            a key, value paired like structure or an iterable of keys.
+        kwargs :
+            any key value pair you can think of.
+
+        Notes
+        -----
+        Let the mapping parameter denote E, and let the kwargs parameter denote F.
+        If present and has a .keys() method, does:     for k in E: D[k] = E[k]
+        If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+        In either case, this is followed by: for k, v in F.items(): D[k] = v
+
+        Examples
+        --------
+        Let us update one weldx file with another one.
+        >>> a = WeldxFile(tree=dict(x=42), mode="rw")
+        >>> b = WeldxFile(tree=dict(x=23, y=0), mode="rw")
+
+        We pass all data of ``b`` to ``a`` while adding another key value pair.
+
+        >>> a.update(b, foo="bar")
+
+        # remove asdf meta data for easy comparision
+        >>> del a["asdf_library"], a["history"]
+        >>> a.data
+        {'x': 23, 'y': 0, 'foo': 'bar'}
+
+        Or we can update with an iterable of key, value tuples.
+        >>> data = [('x', 0), ('y', -1)]
+        >>> a.update(data)
+        >>> a.data
+        {'x': 0, 'y': -1, 'foo': 'bar'}
+
+        Another possibility is to directly pass keyword arguments.
+        >>> a.update(x=-1, z=42)
+        >>> a.data
+        {'x': -1, 'y': -1, 'foo': 'bar', 'z': 42}
+        """
+        # TODO: we do not want to manipulate the history, software.
+        super().update(mapping, **kwargs)
+
+    def items(self) -> AbstractSet[Tuple[Any, Any]]:
+        """Return a set-like object providing a view on this files items.
+
+        Returns
+        -------
+        ItemsView :
+            view on items.
+        """
+        return super().items()
+
+    def setdefault(self, key, default=None):
+        """Set a default for given key.
+
+        The passed default object will be returned in case the requested key
+        is not present in the file.
+
+        Parameters
+        ----------
+        key :
+            key name
+        default :
+            object to return in case key is not present in the file.
+        """
+        super().setdefault(key, default=default)
+
+    def pop(self, key, default=None) -> Any:
+        """Get and remove the given key from the file.
+
+        Parameters
+        ----------
+        key :
+            key name
+        default :
+            object to return in case key is not present in the file.
+
+        Returns
+        -------
+        object :
+            the object value of given key. If key was not found, return the default.
+
+        Examples
+        --------
+        Let us remove and store some data from a weldx file.
+        >>> a = WeldxFile(tree=dict(x=42, y=0), mode="rw")
+        >>> x = a.pop("x")
+        >>> x
+        42
+        >>> "x" not in a.keys()
+        True
+        """
+        # TODO: we do not want to delete the history, software.
+        return super().pop(key, default=default)
+
+    def popitem(self) -> Any:
+        """Remove the item that was last inserted into the file.
+
+        Notes
+        -----
+        In versions before 3.7, the popitem() method removes a random item.
+
+        Returns
+        -------
+        object :
+            the last item.
+        """
+        # TODO: we do not want to delete the history, software.
+        return super().popitem()
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -507,7 +676,7 @@ class WeldxFile(UserDict):
             The desired output file. If no file is given, an in-memory file
             will be created.
         overwrite :
-            If `filename_or_file_like` points to a path or filename which already
+            If ``filename_or_file_like`` points to a path or filename which already
             exists, this flag determines if it would be overwritten or not.
 
         Returns
@@ -555,6 +724,7 @@ class WeldxFile(UserDict):
         'Nikolai Nikolajewitsch Benardos'
 
         We can also change the data easily
+
         >>> wfa.wx_meta.welder = "Myself"
         >>> wfa.wx_meta.welder
         'Myself'
@@ -640,11 +810,12 @@ class WeldxFile(UserDict):
         # this will be called in Jupyter Lab, but not in a plain notebook.
         from IPython.core.display import display
 
-        display(self.show_asdf_header(use_widgets=False, _interactive=True))
+        display(self.show_asdf_header(use_widgets=True, _interactive=True))
 
 
 class _HeaderVisualizer:
     def __init__(self, asdf_handle: AsdfFile):
+        # TODO: this ain't thread-safe!
         # take a copy of the handle to avoid side effects!
         copy._deepcopy_dispatch[np.ndarray] = lambda x, y: x
         try:
@@ -693,87 +864,3 @@ class _HeaderVisualizer:
     @staticmethod
     def _show_non_interactive(buff: BytesIO):
         print(get_yaml_header(buff))
-
-
-# Methods of UserDict do not follow the NumPy doc convention.
-WeldxFile.keys.__doc__ = """Return a set of keys/attributes stored in this file.
-Returns
--------
-keys :
-    all keys stored at the root of this file.
-"""
-
-WeldxFile.clear.__doc__ = """Remove all data from file."""
-
-WeldxFile.copy.__doc__ = """Copies the file."""  # TODO: interface
-
-WeldxFile.get.__doc__ = """Gets data attached to given key from file.
-
-Parameters
-----------
-key :
-    The name of the data.
-default :
-    The default is being returned in case the given key cannot be found.
-
-Raises
-------
-KeyError
-    Raised if the given key cannot be found and no default was provided.
-"""
-
-WeldxFile.update.__doc__ = """Update D from mapping/iterable E and F.
-
-Parameters
-----------
-mapping :
-
-F:
-
-Notes
------
-If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
-If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
-In either case, this is followed by: for k, v in F.items(): D[k] = v
-"""
-
-
-WeldxFile.items.__doc__ = """Returns a set-like object providing a view on this files items.
-
-Returns
--------
-dict_items :
-    view on items.
-"""
-
-WeldxFile.setdefault.__doc__ = """Sets a default for given name.
-
-The passed default object will be returned in case the requested key is not present
-in the file.
-
-Parameters
-----------
-key :
-    key name
-default :
-    object to return in case key is not present in the file.
-"""
-
-WeldxFile.pop.__doc__ = """Get and remove the given key from the file.
-
-Parameters
-----------
-key :
-    key name
-default :
-    object to return in case key is not present in the file.
-"""
-
-WeldxFile.popitem.__doc__ = """Removes the item that was last inserted into the file.
-
-Notes
------
-In versions before 3.7, the popitem() method removes a random item.
-"""
-
-WeldxFile.values.__doc__ = """Returns a view list like object of the file content."""

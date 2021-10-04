@@ -8,7 +8,10 @@ UNIT_KEY = "units"  # default nomenclature for storing physical units informatio
 WELDX_PATH = _Path(__file__).parent.resolve()
 
 WELDX_UNIT_REGISTRY = _ureg(
-    preprocessors=[lambda string: string.replace("%", "percent")],  # allow %-sign
+    preprocessors=[
+        lambda string: string.replace("%", "percent"),  # allow %-sign
+        lambda string: string.replace("Δ°", "delta_deg"),  # parse Δ° for temperature
+    ],
     force_ndarray_like=True,
 )
 
@@ -28,7 +31,7 @@ Q_.__doc__ = """Create a quantity from a scalar or array.
 The quantity class supports lots of physical units and will combine them during
 mathematical operations.
 For extended details on working with quantities, please see the
-`pint documentation <http://https://pint.readthedocs.io/>`_
+`pint documentation <https://pint.readthedocs.io/>`_
 
 Examples
 --------

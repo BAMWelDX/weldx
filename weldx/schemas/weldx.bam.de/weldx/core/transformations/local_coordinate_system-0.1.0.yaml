@@ -112,11 +112,9 @@ properties:
     description: |
       An ndarray containing the orientations.
     tag: "asdf://weldx.bam.de/weldx/tags/core/variable-0.1.*"
-
 wx_shape:
-  (coordinates): [..., 3]
-  (orientations): [(t), 3, 3]
-
+  coordinates: [..., 3]
+  orientations: [(t), 3, 3]
 propertyOrder: [reference_time, time, orientations, coordinates]
 flowStyle: block
 ...

@@ -14,9 +14,24 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.time import Time, types_time_like, types_timestamp_like
+
+__all__ = [
+    "WeldxAccessor",
+    "mat_vec_mul",
+    "xr_3d_matrix",
+    "xr_3d_vector",
+    "xr_check_coords",
+    "xr_fill_all",
+    "xr_interp_coordinates_in_time",
+    "xr_interp_like",
+    "xr_interp_orientation_in_time",
+    "xr_is_orthogonal_matrix",
+    "xr_matmul",
+    "xr_transpose_matrix_data",
+]
 
 
 def mat_vec_mul(a, b) -> np.ndarray:
@@ -409,6 +424,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     Examples
     --------
+    >>> import numpy as np
     >>> import pandas as pd
     >>> import xarray as xr
     >>> import weldx as wx
@@ -475,10 +491,10 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
         if "units" in check:
             units = coords[key].attrs.get("units", None)
-            if not units or not ureg.Unit(units) == ureg.Unit(check["units"]):
+            if not units or not U_(units) == U_(check["units"]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
-                    f"Coordinate has unit '{str(units)}', expected '{check['units']}'"
+                    f"Coordinate has unit '{units}', expected '{check['units']}'"
                 )
 
         if "dimensionality" in check:
@@ -491,7 +507,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                     units,
                     check["dimensionality"],
                     f"\nDimensionalit mismatch in coordinate '{key}'\n"
-                    f"Coordinate has unit '{str(units)}', expected '{dim}'",
+                    f"Coordinate has unit '{units}', expected '{dim}'",
                 )
 
     return True

@@ -51,8 +51,10 @@ properties:
       - tag: "asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.*"
 
   optional_prop:
-    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-    wx_shape: [1,2,(3),(4)]
+    oneOf:
+      - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+      - type: string
+    wx_shape: ([1,2,(3),(4)])
 
 
 

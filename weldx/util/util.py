@@ -23,6 +23,18 @@ from boltons import iterutils
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.time import Time
 
+__all__ = [
+    "WeldxDeprecationWarning",
+    "deprecated",
+    "ureg_check_class",
+    "inherit_docstrings",
+    "dataclass_nested_eq",
+    "compare_nested",
+    "is_jupyterlab_session",
+    "is_interactive_session",
+    "_patch_mod_all",
+]
+
 
 class WeldxDeprecationWarning(DeprecationWarning):
     """Deprecation warning type."""
@@ -385,3 +397,22 @@ def is_jupyterlab_session() -> bool:
 
     """
     return any(re.search("jupyter-lab", x) for x in psutil.Process().parent().cmdline())
+
+
+def _patch_mod_all(module_name: str):
+    """Hack the __module__ attribute of __all__ members to the given module.
+
+    Parameters
+    ----------
+    module_name :
+        the fully qualified module name.
+
+    This is needed as Sphinx currently does not respect the all variable and ignores
+    the contents. By simulating that the "all" attributes are belonging here, we work
+    around this situation. Can be removed up this is fixed:
+    https://github.com/sphinx-doc/sphinx/issues/2021
+    """
+    this_mod = sys.modules[module_name]
+    for name in getattr(this_mod, "__all__", ()):
+        obj = getattr(this_mod, name)
+        obj.__module__ = module_name
