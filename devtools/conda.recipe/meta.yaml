@@ -31,6 +31,8 @@ test:
   requires:
     - pytest
     - pytest-xdist
+    # Remove once this is fixed: https://github.com/K3D-tools/K3D-jupyter/issues/312
+    - jupyterlab
   files:
     - conftest.py
   imports:
