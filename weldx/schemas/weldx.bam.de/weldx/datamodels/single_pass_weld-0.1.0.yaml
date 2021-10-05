@@ -167,17 +167,6 @@ examples:
     - A simple welding application
     - |
       !<tag:stsci.edu:asdf/core/asdf-1.1.0>
-        asdf_library: !core/software-1.0.0 {author: The ASDF Developers, homepage: 'http://github.com/asdf-format/asdf',
-          name: asdf, version: 2.8.1}
-        history:
-          extensions:
-          - !core/extension_metadata-1.0.0
-            extension_class: asdf.extension.BuiltinExtension
-            software: !core/software-1.0.0 {name: asdf, version: 2.8.1}
-          - !core/extension_metadata-1.0.0
-            extension_class: weldx.asdf.extension.WeldxExtension
-            extension_uri: asdf://weldx.bam.de/weldx/extensions/weldx-0.1.0
-            software: !core/software-1.0.0 {name: weldx, version: 0.4.2.dev34+gf6e3c49.d20210820}
         TCP: !<asdf://weldx.bam.de/weldx/tags/core/transformations/local_coordinate_system-0.1.0>
           time: !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
             values: !core/ndarray-1.0.0
