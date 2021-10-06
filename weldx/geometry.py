@@ -2008,7 +2008,7 @@ class Geometry:
     def __init__(
         self,
         profile: Union[Profile, VariableProfile, iso.IsoBaseGroove],
-        trace: Union[Trace, pint.Quantity],
+        trace_or_length: Union[Trace, pint.Quantity],
     ):
         """Construct a geometry.
 
@@ -2017,7 +2017,7 @@ class Geometry:
         profile : Profile, VariableProfile
             Constant or variable profile that is used as cross section along the
             specified trace
-        trace :
+        trace_or_length :
             The path that is used to extrude the given profile or a quantity that
             specifies the length of a linear, horizontal extrusion
 
@@ -2027,11 +2027,11 @@ class Geometry:
             A Geometry class instance
 
         """
-        if isinstance(trace, Q_):
-            trace = Trace(LinearHorizontalTraceSegment(trace))
-        self._check_inputs(profile, trace)
+        if isinstance(trace_or_length, Q_):
+            trace_or_length = Trace(LinearHorizontalTraceSegment(trace_or_length))
+        self._check_inputs(profile, trace_or_length)
         self._profile = profile
-        self._trace = trace
+        self._trace = trace_or_length
 
     def __repr__(self):
         """Output representation of a Geometry class."""
