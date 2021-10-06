@@ -2027,8 +2027,8 @@ class Geometry:
             A Geometry class instance
 
         """
-        if isinstance(trace_or_length, Q_):
-            trace_or_length = Trace(LinearHorizontalTraceSegment(trace_or_length))
+        if not isinstance(trace_or_length, Trace):
+            trace_or_length = Trace(LinearHorizontalTraceSegment(Q_(trace_or_length)))
         self._check_inputs(profile, trace_or_length)
         self._profile = profile
         self._trace = trace_or_length
