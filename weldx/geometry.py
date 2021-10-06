@@ -14,6 +14,7 @@ from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.util as ut
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -2004,7 +2005,11 @@ class Geometry:
 
     """
 
-    def __init__(self, profile, trace):
+    def __init__(
+        self,
+        profile: Union[Profile, VariableProfile, iso.IsoBaseGroove],
+        trace: Union[Trace, pint.Quantity],
+    ):
         """Construct a geometry.
 
         Parameters
@@ -2012,8 +2017,9 @@ class Geometry:
         profile : Profile, VariableProfile
             Constant or variable profile that is used as cross section along the
             specified trace
-        trace : Trace
-            The path that is used to extrude the given profile
+        trace :
+            The path that is used to extrude the given profile or a quantity that
+            specifies the length of a linear, horizontal extrusion
 
         Returns
         -------
@@ -2021,34 +2027,11 @@ class Geometry:
             A Geometry class instance
 
         """
+        if isinstance(trace, Q_):
+            trace = Trace(LinearHorizontalTraceSegment(trace))
         self._check_inputs(profile, trace)
         self._profile = profile
         self._trace = trace
-
-    @classmethod
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def from_profile_and_length(
-        cls,
-        profile: Union[Profile, VariableProfile, iso.IsoBaseGroove],
-        length: pint.Quantity,
-    ) -> Geometry:
-        """Create a new geometry from a profile and an extrusion length.
-
-        Parameters
-        ----------
-        profile :
-            The cross section profile
-        length :
-            The length of the extrusion
-
-        Returns
-        -------
-        weldx.geometry.Geometry :
-            The new geometry
-
-        """
-        trace = Trace(LinearHorizontalTraceSegment(length))
-        return cls(profile, trace)
 
     def __repr__(self):
         """Output representation of a Geometry class."""
