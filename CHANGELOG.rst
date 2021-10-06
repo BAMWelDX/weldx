@@ -173,6 +173,10 @@ deprecations
 dependencies
 ~~~~~~~~~~~~
 
+- set ``k3d!=2.10`` because of conda dependency bugs
+  `[#577] <https://github.com/BAMWelDX/weldx/pull/577>`__
+  `[#474] <https://github.com/BAMWelDX/weldx/issues/474>`__.
+
 0.4.1 (20.07.2021)
 ------------------
 
