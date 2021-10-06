@@ -23,6 +23,8 @@ _DEFAULT_ANG_UNIT = UREG.rad
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
+    import weldx.welding.groove.iso_9692_1 as iso
+
 # helper -------------------------------------------------------------------------------
 
 
@@ -2022,6 +2024,31 @@ class Geometry:
         self._check_inputs(profile, trace)
         self._profile = profile
         self._trace = trace
+
+    @classmethod
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def from_profile_and_length(
+        cls,
+        profile: Union[Profile, VariableProfile, iso.IsoBaseGroove],
+        length: pint.Quantity,
+    ) -> Geometry:
+        """Create a new geometry from a profile and an extrusion length.
+
+        Parameters
+        ----------
+        profile :
+            The cross section profile
+        length :
+            The length of the extrusion
+
+        Returns
+        -------
+        weldx.geometry.Geometry :
+            The new geometry
+
+        """
+        trace = Trace(LinearHorizontalTraceSegment(length))
+        return cls(profile, trace)
 
     def __repr__(self):
         """Output representation of a Geometry class."""
