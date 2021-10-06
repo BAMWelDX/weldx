@@ -2009,17 +2009,20 @@ class Geometry:
         self,
         profile: Union[Profile, VariableProfile, iso.IsoBaseGroove],
         trace_or_length: Union[Trace, pint.Quantity],
+        width: pint.Quantity = None,
     ):
         """Construct a geometry.
 
         Parameters
         ----------
-        profile : Profile, VariableProfile
-            Constant or variable profile that is used as cross section along the
-            specified trace
+        profile :
+            Profile that is used as cross section along the specified trace
         trace_or_length :
             The path that is used to extrude the given profile or a quantity that
             specifies the length of a linear, horizontal extrusion
+        width :
+            If a groove type is passed as ``profile`` this parameter determines the
+            width of the generated cross-section. For all other types it has no effect.
 
         Returns
         -------
@@ -2027,6 +2030,10 @@ class Geometry:
             A Geometry class instance
 
         """
+        from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
+
+        if isinstance(profile, IsoBaseGroove):
+            profile = profile.to_profile(width)
         if not isinstance(trace_or_length, Trace):
             trace_or_length = Trace(LinearHorizontalTraceSegment(Q_(trace_or_length)))
         self._check_inputs(profile, trace_or_length)
