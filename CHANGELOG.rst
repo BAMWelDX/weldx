@@ -7,7 +7,7 @@ Release Notes
 added
 ~~~~~
 
--  added "units" (exact) and “dimensionality” (dimensionality
+-  added "units" (exact) and "dimensionality" (dimensionality
    compatible) checking options to `util.xr_check_coords`
    `[#442] <https://github.com/BAMWelDX/weldx/pull/442>`__
 -  `Time` class that can be initialized from several other time types
@@ -606,7 +606,7 @@ fixes
 
 -  don not inline time dependent `LocalCoordinateSystem.coordinates`
    `[#222] <https://github.com/BAMWelDX/weldx/pull/222>`__
--  fix “datetime64” passing for “timedelta64” in `util.xr_check_coords`
+-  fix "datetime64" passing for "timedelta64" in `util.xr_check_coords`
    `[#221] <https://github.com/BAMWelDX/weldx/pull/221>`__
 -  fix `util.WeldxAccessor.time_ref_restore` not working correctly if no ``time_ref`` was
    set `[#221] <https://github.com/BAMWelDX/weldx/pull/221>`__
@@ -770,7 +770,7 @@ changes
 -  rework ``util.to_pandas_time_index`` to accept many different formats
    (LCS, DataArray)
    `[#174] <https://github.com/BAMWelDX/weldx/pull/174>`__
--  add utility functions for handling time coordinates to “weldx”
+-  add utility functions for handling time coordinates to "weldx"
    accessor `[#174] <https://github.com/BAMWelDX/weldx/pull/174>`__
 
 ASDF extension & schemas
@@ -885,7 +885,7 @@ ASDF
       additionalProperties: true # must be true to allow any property
       wx_property_tag: "tag:weldx.bam.de:weldx/time/timestamp-1.0.0"
 
-   It can be used as a “named” mapping replacement instead of YAML
+   It can be used as a "named" mapping replacement instead of YAML
    ``arrays``.
 
 -  add ``core/transformation/rotation-1.0.0`` schema that implements
@@ -920,8 +920,8 @@ ASDF
 
 -  implement support for pint quantities
 -  implement support for basic pandas time class
--  implement base welding classes from AWS/NIST “A Welding Data
-   Dictionary”
+-  implement base welding classes from AWS/NIST "A Welding Data
+   Dictionary"
 -  add and implement ISO groove types (DIN EN ISO 9692-1:2013)
 -  add basic jinja templates and functions for adding simple dataclass
    objects
