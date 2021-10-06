@@ -70,7 +70,7 @@ jobs:
       - name: run pytest
         if: ((matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')) || (github.event.pull_request.draft == false) || (github.ref == 'refs/heads/master')
         run: |
-          pytest -n 2 --runslow
+          pytest -n 2 --runslow --junit-xml pytest.xml
           echo "Exited with '$?'"
 
       - name: run pytest on notebooks (append coverage)
@@ -91,3 +91,20 @@ jobs:
       - name: codecov.io
         if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         uses: codecov/codecov-action@v1
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: Unit Test Results
+          path: pytest.xml
+
+  event_file:
+    name: "Event File"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: Event File
+        path: ${{ github.event_path }}
