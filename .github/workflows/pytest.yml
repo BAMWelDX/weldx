@@ -73,6 +73,13 @@ jobs:
           pytest -n 2 --runslow --junit-xml pytest.xml
           echo "Exited with '$?'"
 
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: Unit Test Results
+          path: pytest.xml
+
       - name: run pytest on notebooks (append coverage)
         if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         run: |
@@ -92,12 +99,6 @@ jobs:
         if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
         uses: codecov/codecov-action@v1
 
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: Unit Test Results
-          path: pytest.xml
 
   event_file:
     name: "Event File"
