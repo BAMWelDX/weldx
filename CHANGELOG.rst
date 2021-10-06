@@ -38,6 +38,8 @@ added
 
 -  added support for parsing temperature deltas with ``Δ°`` notation
    `[#565] <https://github.com/BAMWelDX/weldx/pull/565>`__.
+-  `WeldxFile.info` to print a quick content overview to the stdout.
+   `[#576] <https://github.com/BAMWelDX/weldx/pull/576>`__.
 
 removed
 =======
@@ -114,6 +116,11 @@ changes
    `[#519] <https://github.com/BAMWelDX/weldx/pull/519>`__. (the asdf
    serialization still uses long notation (`[#560]
    <https://github.com/BAMWelDX/weldx/pull/560>`__))
+
+-  ``welding_current`` and ``welding_voltage`` in the single-pass weld schema
+   now expect the tag ``"asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"``
+   instead of ``"asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.*"`` `[#578]
+   <https://github.com/BAMWelDX/weldx/pull/578>`__.
 
 fixes
 =====

@@ -812,6 +812,29 @@ class WeldxFile(UserDict):
 
         display(self.show_asdf_header(use_widgets=True, _interactive=True))
 
+    def info(
+        self, max_rows: int = None, max_length: int = None, show_values: bool = False
+    ):
+        """Print the content to the stdout.
+
+        Parameters
+        ----------
+        max_rows :
+            The maximum number of rows that will be printed. If rows are cut, a
+            corresponding message will be printed
+        max_length :
+            The maximum line length. Longer lines will be truncated
+        show_values :
+            Set to `True` if primitive values should be displayed
+
+        """
+        tree = {
+            key: value
+            for key, value in self._asdf_handle.tree.items()
+            if key not in ["asdf_library", "history"]
+        }
+        asdf.info(tree, max_rows=max_rows, max_cols=max_length, show_values=show_values)
+
 
 class _HeaderVisualizer:
     def __init__(self, asdf_handle: AsdfFile):
