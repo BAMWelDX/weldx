@@ -6,6 +6,33 @@
  0.5.0 (08.10.2021)
 ********************
 
+Release ``0.5.0`` brings a major rework of the `weldx` standard and many
+API improvements:
+
+Highlights
+==========
+
+-  `weldx` now internally uses the reworked ASDF extension API. The
+   schema and tag naming patterns have also changed to the recommended
+   ``asdf://`` format.
+
+-  New `Time` class to make handling of time related functionality
+   easier and consistent.
+
+-  many internal reworks to streamline the code.
+
+-  rework the `API documentation
+   <https://weldx.readthedocs.io/en/latest/api.html>`__ to show the most
+   important classes.
+
+Compatibility
+=============
+
+-  the ``0.5.x`` versions will retain backwards compatibility with files
+   generated with the ``0.4.x`` versions and convert them to the new
+   naming schema on save. Support for the old schemas will be dropped in
+   the ``0.6`` release.
+
 added
 =====
 
@@ -118,10 +145,11 @@ changes
    serialization still uses long notation (`[#560]
    <https://github.com/BAMWelDX/weldx/pull/560>`__))
 
--  ``welding_current`` and ``welding_voltage`` in the single-pass weld schema
-   now expect the tag ``"asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"``
-   instead of ``"asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.*"`` `[#578]
-   <https://github.com/BAMWelDX/weldx/pull/578>`__.
+-  ``welding_current`` and ``welding_voltage`` in the single-pass weld
+   schema now expect the tag
+   ``"asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"`` instead
+   of ``"asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.*"``
+   `[#578] <https://github.com/BAMWelDX/weldx/pull/578>`__.
 
 fixes
 =====
