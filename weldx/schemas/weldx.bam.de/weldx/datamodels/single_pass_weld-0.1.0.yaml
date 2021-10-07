@@ -62,7 +62,7 @@ properties:
         wx_unit: "m/s"
         wx_shape: [1]
       welding_wire:
-        $ref: "./terms-0.1.0#/definitions/welding_wire-0.1.0"
+        $ref: "./terms-0.1.0#/definitions/welding_wire"
     required: [welding_process, shielding_gas, weld_speed, welding_wire]
   welding_current:
     description: |
@@ -104,9 +104,9 @@ properties:
     type: object
     properties:
       base_metal:
-        $ref: "./terms-0.1.0#/definitions/base_metal-0.1.0"
+        $ref: "./terms-0.1.0#/definitions/base_metal"
       geometry:
-        $ref: "./terms-0.1.0#/definitions/linear_weld_seam-0.1.0"
+        $ref: "./terms-0.1.0#/definitions/linear_weld_seam"
     required: [base_metal, geometry]
   reference_timestamp:
     description: |

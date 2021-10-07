@@ -7,7 +7,6 @@ title: |
   General welding related schema definitions to describe welding application datamodels.
 
 definitions:
-
   welding_wire:
     description: |
       Description of a simple GMAW welding wire.
@@ -26,11 +25,11 @@ definitions:
         type: string
     required: [diameter]
 
-    base_metal:
-      description: |
-        The base metal composition of a workpiece.
-      type: object
-      properties:
+  base_metal:
+    description: |
+      The base metal composition of a workpiece.
+    type: object
+    properties:
       common_name:
         description: |
           The common description of the base metal composition or classification as listed in the standard.
@@ -39,20 +38,21 @@ definitions:
         description: |
           The standard listing and describing the base metal compositions.
         type: string
-      required: [common_name, standard]
+    required: [common_name, standard]
 
-      linear_weld_seam:
+  linear_weld_seam:
+    description: |
+      Description of a linear weld seam with constant groove shape.
+    type: object
+    properties:
+      groove_shape:
         description: |
-          Description of a linear weld seam with constant groove shape.
-        type: object
-        properties:
-        groove_shape:
-          description: |
-            Constant groove shape of the weld seam.
-          tag: "asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*-0.1.*"
-        seam_length:
-          description: |
-            Length of the linear weld seam.
-          tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-          wx_unit: "m"
-        required: [groove_shape, seam_length]
+          Constant groove shape of the weld seam.
+        tag: "asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*-0.1.*"
+      seam_length:
+        description: |
+          Length of the linear weld seam.
+        tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
+        wx_unit: "m"
+    required: [groove_shape, seam_length]
+...
