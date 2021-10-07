@@ -2296,8 +2296,8 @@ class Geometry:
     )
     def plot(
         self,
-        profile_raster_width: pint.Quantity,
-        trace_raster_width: pint.Quantity,
+        profile_raster_width: pint.Quantity = Q_("1mm"),
+        trace_raster_width: pint.Quantity = Q_("50mm"),
         axes: matplotlib.axes.Axes = None,
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
