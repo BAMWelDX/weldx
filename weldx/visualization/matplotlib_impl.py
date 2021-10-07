@@ -484,6 +484,7 @@ def plot_spatial_data_matplotlib(
     axes: Axes = None,
     color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
     label: str = None,
+    limits: types_limits = None,
     show_wireframe: bool = True,
 ) -> Axes:
     """Visualize a `weldx.geometry.SpatialData` instance.
@@ -501,6 +502,10 @@ def plot_spatial_data_matplotlib(
         color
     label :
         Label of the plotted geometry
+    limits :
+        Each tuple marks lower and upper boundary of the x, y and z axis. If only a
+        single tuple is passed, the boundaries are used for all axis. If `None`
+        is provided, the axis are adjusted to be of equal length.
     show_wireframe :
         If `True`, the mesh is plotted as wireframe. Otherwise only the raster
         points are visualized. Currently, the wireframe can't be visualized if a
@@ -550,4 +555,5 @@ def plot_spatial_data_matplotlib(
                 zorder=1,
             )
 
+    _set_limits_matplotlib(axes, limits)
     return axes

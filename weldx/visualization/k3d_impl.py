@@ -22,7 +22,11 @@ from .colors import (
 )
 from .types import types_limits, types_timeindex
 
-__all__ = ["CoordinateSystemManagerVisualizerK3D", "SpatialDataVisualizer"]
+__all__ = [
+    "CoordinateSystemManagerVisualizerK3D",
+    "SpatialDataVisualizer",
+    "limited_plot",
+]
 
 
 def _get_coordinates_and_orientation(lcs: LocalCoordinateSystem, index: int = 0):
@@ -401,6 +405,40 @@ class SpatialDataVisualizer:
             )
 
 
+def limited_plot(limits: types_limits = None) -> k3d.plot:
+    """Get a new `k3d.plot` with its limits set.
+
+    Parameters
+    ----------
+    limits :
+        Either a single tuple of two float values that specifies the minimum and maximum
+        value of all 3 axis or a list containing 3 tuples to specify the limits of each
+        axis individually. If `None` is passed, the limits will be set automatically.
+
+    Returns
+    -------
+    k3d.plot :
+        New plot instance
+
+    """
+    if limits is not None:
+        if isinstance(limits, Tuple):
+            limits = [limits]
+        grid_auto_fit = False
+        # INFO: The next three suppressed mypy warnings do make sense and might
+        # reveal a bug, but I couldn't resolve it in a reasonable time.
+        if len(limits) == 1:
+            grid = [limits[0][int(i / 3)] for i in range(6)]  # type: ignore
+        else:
+            grid = [limits[i % 3][int(i / 3)] for i in range(6)]  # type: ignore
+    else:
+        grid_auto_fit = True
+        grid = (-1, -1, -1, 1, 1, 1)  # type: ignore[assignment]
+
+    # create plot
+    return k3d.plot(grid_auto_fit=grid_auto_fit, grid=grid)
+
+
 class CoordinateSystemManagerVisualizerK3D:
     """Visualizes a `weldx.transformations.CoordinateSystemManager` using k3d."""
 
@@ -484,24 +522,10 @@ class CoordinateSystemManagerVisualizerK3D:
             reference_system = self._csm.root_system_name
         self._current_reference_system = reference_system
 
-        if limits is not None:
-            grid_auto_fit = False
-            # INFO: The next three suppressed mypy warnings do make sense and might
-            # reveal a bug, but I couldn't resolve it in a reasonable time.
-            if len(limits) == 1:
-                grid = [limits[0][int(i / 3)] for i in range(6)]  # type: ignore
-            else:
-                grid = [limits[i % 3][int(i / 3)] for i in range(6)]  # type: ignore
-        else:
-            grid_auto_fit = True
-            grid = (-1, -1, -1, 1, 1, 1)  # type: ignore[assignment]
-
         # create plot
+        plot = limited_plot(limits)
         self._color_generator = color_generator_function()
-        plot = k3d.plot(
-            grid_auto_fit=grid_auto_fit,
-            grid=grid,
-        )
+
         self._lcs_vis = {
             lcs_name: CoordinateSystemVisualizerK3D(
                 self._csm.get_cs(lcs_name, reference_system),
