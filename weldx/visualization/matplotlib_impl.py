@@ -10,7 +10,6 @@ import pandas as pd
 from matplotlib.axes._axes import Axes
 from matplotlib.figure import Figure
 
-import weldx
 import weldx.geometry as geo
 from weldx.core import TimeSeries
 from weldx.visualization.colors import (
