@@ -15,7 +15,7 @@ examples:
       !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-0.1.0>
         name: AD conversion
         error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-          deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> { units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%', value: 0.5 }
+          deviation: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> { units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> '%', value: 0.5 }
         type_transformation: AD
   -
     - A transformation that calculates amperes based on volts using a given function
@@ -23,12 +23,12 @@ examples:
       !<asdf://weldx.bam.de/weldx/tags/measurement/signal_transformation-0.1.0>
         name: Volt-Ampere-Conversion
         error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-          deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> { units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%', value: 1.5 }
+          deviation: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> { units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> '%', value: 1.5 }
         func: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
           expression: a*x + b
           parameters:
-            a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> { units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A / V, value: 3 }
-            b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> { units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> A, value: 2 }
+            a: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> { units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> A / V, value: 3 }
+            b: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> { units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> A, value: 2 }
 
 type: object
 properties:

@@ -11,15 +11,15 @@ examples:
     - A simple DU-Groove
     - |
       !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/DUGroove-0.1.0>
-        t: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 33, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        beta_1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 8, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> deg}
-        beta_2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 12, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> deg}
-        R: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 6, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        R2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 6, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 2, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        c: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 3, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        h1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 15, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        h2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 15, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+        t: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 33, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        beta_1: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 8, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> deg}
+        beta_2: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 12, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> deg}
+        R: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 6, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        R2: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 6, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        b: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 2, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        c: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 3, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        h1: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 15, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        h2: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 15, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
         code_number: ['2.7']
 
 type: object

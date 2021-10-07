@@ -11,13 +11,13 @@ examples:
     - A simple DV-Groove
     - |
       !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/DVGroove-0.1.0>
-        t: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 19, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        alpha_1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 40, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> deg}
-        alpha_2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 60, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> deg}
-        b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 2, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        c: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 5, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        h1: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 7, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-        h2: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 7, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
+        t: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 19, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        alpha_1: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 40, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> deg}
+        alpha_2: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 60, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> deg}
+        b: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 2, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        c: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 5, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        h1: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 7, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        h2: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 7, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
         code_number: ['2.4', 2.5.1, 2.5.2]
 
 type: object

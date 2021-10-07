@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "asdf://weldx.bam.de/weldx/schemas/unit/dimension-0.1.0"
+id: "asdf://weldx.bam.de/weldx/schemas/units/dimension-0.1.0"
 
 title: |
   Describes the dimension of a quantity.
