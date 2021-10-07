@@ -2308,6 +2308,8 @@ class Geometry:
             The utilized matplotlib axes, if matplotlib was used as rendering backend
 
         """
+        profile_raster_width = Q_(profile_raster_width, _DEFAULT_LEN_UNIT)
+        trace_raster_width = Q_(trace_raster_width, _DEFAULT_LEN_UNIT)
         data = self.spatial_data(profile_raster_width, trace_raster_width)
         return data.plot(
             axes=axes, color=color, label=label, show_wireframe=show_wireframe

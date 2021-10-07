@@ -2673,7 +2673,7 @@ def test_geometry_rasterization_trace():
     # adjusted to the segment width. Hence, each rasterized profile has 6
     # points, which were defined at the beginning of the test (a2 is
     # included twice)
-    data = geometry.rasterize(7, 0.1)
+    data = geometry.rasterize("7mm", "0.1mm")
 
     # calculate the number of rasterized profiles
     num_raster_profiles = int(np.round(data.shape[1] / 6))
@@ -2727,7 +2727,7 @@ def test_geometry_rasterization_trace():
                     assert math.isclose(exp_point_distance[j - 2], point_distance)
 
     # check if raster width is clipped to valid range -----
-    data = geometry.rasterize(7, 1000)
+    data = geometry.rasterize("7mm", "1000mm")
 
     assert data.shape[1] == 12
 
@@ -2739,17 +2739,17 @@ def test_geometry_rasterization_trace():
 
     # exceptions ------------------------------------------
     with pytest.raises(Exception):
-        geometry.rasterize(0, 1)
+        geometry.rasterize("0mm", "1mm")
     with pytest.raises(Exception):
-        geometry.rasterize(1, 0)
+        geometry.rasterize("1mm", "0mm")
     with pytest.raises(Exception):
-        geometry.rasterize(0, 0)
+        geometry.rasterize("0mm", "0mm")
     with pytest.raises(Exception):
-        geometry.rasterize(-2.3, 1)
+        geometry.rasterize("-2.3mm", "1mm")
     with pytest.raises(Exception):
-        geometry.rasterize(1, -4.6)
+        geometry.rasterize("1mm", "-4.6mm")
     with pytest.raises(Exception):
-        geometry.rasterize(-2.3, -4.6)
+        geometry.rasterize("-2.3mm", "-4.6mm")
 
 
 @pytest.mark.slow
@@ -2792,7 +2792,7 @@ def test_geometry_rasterization_profile_interpolation():
     # adjusted to the segment width. Hence each rasterized profile has 6
     # points, which were defined at the beginning of the test (a2 is
     # included twice)
-    data = geometry.rasterize(7, 0.1)
+    data = geometry.rasterize("7mm", "0.1mm")
     assert data.shape[1] == 186
 
     profile_points = np.array([a0, a1, a2, a2, a3, a4]).transpose()
