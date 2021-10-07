@@ -38,6 +38,7 @@ added
 
 -  added support for parsing temperature deltas with ``Δ°`` notation
    `[#565] <https://github.com/BAMWelDX/weldx/pull/565>`__.
+
 -  `WeldxFile.info` to print a quick content overview to the stdout.
    `[#576] <https://github.com/BAMWelDX/weldx/pull/576>`__.
 
@@ -150,7 +151,9 @@ documentation
 
 -  split API documentation into user classes/functions and a full API
    reference `[#469] <https://github.com/BAMWelDX/weldx/pull/469>`__.
--  added citation metadata in ``CITATION.cff`` `[#568] <https://github.com/BAMWelDX/weldx/pull/568>`__.
+
+-  added citation metadata in ``CITATION.cff`` `[#568]
+   <https://github.com/BAMWelDX/weldx/pull/568>`__.
 
 ASDF
 ====
@@ -217,13 +220,19 @@ ASDF
 
 -  refactor properties named ``unit`` to ``units`` and use ``unit/unit``
    tag `[#551] <https://github.com/BAMWelDX/weldx/pull/551>`__.
--  reworked the optional syntax for ``wx_shape`` validation `[#571] <https://github.com/BAMWelDX/weldx/pull/571>`__.
+
+-  reworked the optional syntax for ``wx_shape`` validation `[#571]
+   <https://github.com/BAMWelDX/weldx/pull/571>`__.
 
 deprecations
 ============
 
 dependencies
 ============
+
+-  set ``k3d!=2.10`` because of conda dependency bugs `[#577]
+   <https://github.com/BAMWelDX/weldx/pull/577>`__ `[#474]
+   <https://github.com/BAMWelDX/weldx/issues/474>`__.
 
 ********************
  0.4.1 (20.07.2021)
