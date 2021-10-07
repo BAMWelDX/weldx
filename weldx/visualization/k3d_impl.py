@@ -1,6 +1,8 @@
 """Contains some functions to help with visualization."""
 
-from typing import Dict, List, Tuple, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import k3d
 import k3d.platonic as platonic
@@ -9,8 +11,11 @@ import pandas as pd
 from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
-from weldx import LocalCoordinateSystem, SpatialData, TimeSeries
-from weldx import geometry as geo
+import weldx.geometry as geo
+from weldx.core import TimeSeries
+
+if TYPE_CHECKING:  # pragma: no cover
+    from weldx.transformations.local_cs import LocalCoordinateSystem
 
 from .colors import (
     RGB_BLACK,
@@ -267,7 +272,7 @@ class SpatialDataVisualizer:
 
     def __init__(
         self,
-        data: Union[np.ndarray, SpatialData],
+        data: Union[np.ndarray, geo.SpatialData],
         name: str,
         reference_system: str,
         plot: k3d.Plot = None,

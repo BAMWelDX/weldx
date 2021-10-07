@@ -1,6 +1,8 @@
 """Contains some functions written in matplotlib to help with visualization."""
 
-from typing import Any, Dict, List, Tuple, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,8 +10,9 @@ import pandas as pd
 from matplotlib.axes._axes import Axes
 from matplotlib.figure import Figure
 
+import weldx
 import weldx.geometry as geo
-from weldx import CoordinateSystemManager, LocalCoordinateSystem, TimeSeries
+from weldx.core import TimeSeries
 from weldx.visualization.colors import (
     color_generator_function,
     color_int_to_rgb_normalized,
@@ -17,6 +20,9 @@ from weldx.visualization.colors import (
     get_color,
 )
 from weldx.visualization.types import types_limits, types_timeindex
+
+if TYPE_CHECKING:  # pragma: no cover
+    import weldx.transformations as tf
 
 
 def new_3d_figure_and_axes(
@@ -90,7 +96,7 @@ def axes_equal(axes: Axes):
 
 
 def draw_coordinate_system_matplotlib(
-    coordinate_system: LocalCoordinateSystem,
+    coordinate_system: tf.LocalCoordinateSystem,
     axes: Axes,
     color: Any = None,
     label: str = None,
@@ -169,7 +175,7 @@ def draw_coordinate_system_matplotlib(
 
 
 def plot_local_coordinate_system_matplotlib(
-    lcs: LocalCoordinateSystem,
+    lcs: tf.LocalCoordinateSystem,
     axes: Axes = None,
     color: Any = None,
     label: str = None,
@@ -348,7 +354,7 @@ def plot_coordinate_systems(
 
 
 def plot_coordinate_system_manager_matplotlib(
-    csm: CoordinateSystemManager,
+    csm: tf.CoordinateSystemManager,
     axes: Axes = None,
     reference_system: str = None,
     coordinate_systems: List[str] = None,

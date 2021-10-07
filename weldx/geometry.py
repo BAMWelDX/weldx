@@ -24,8 +24,8 @@ _DEFAULT_ANG_UNIT = UREG.rad
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
+    import weldx.visualization.types as vs_types
     import weldx.welding.groove.iso_9692_1 as iso
-    from weldx.visualization.types import types_limits
 
 # helper -------------------------------------------------------------------------------
 
@@ -2301,7 +2301,7 @@ class Geometry:
         axes: matplotlib.axes.Axes = None,
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
-        limits: types_limits = None,
+        limits: vs_types.types_limits = None,
         show_wireframe: bool = True,
         backend: str = "mpl",
     ) -> matplotlib.axes.Axes:
@@ -2627,7 +2627,7 @@ class SpatialData:
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-        limits: types_limits = None,
+        limits: vs_types.types_limits = None,
         backend: str = "mpl",
     ) -> matplotlib.axes.Axes:
         """Plot the spatial data.
