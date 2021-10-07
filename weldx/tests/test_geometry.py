@@ -2876,8 +2876,8 @@ class TestGeometry:
     @pytest.mark.parametrize(
         "geometry, p_rw, t_rw, exp_num_points, exp_num_triangles",
         [
-            (get_test_geometry_constant_profile(), Q_(1, "cm"), Q_(1, "cm"), 12, 12),
-            (get_test_geometry_variable_profile(), Q_(1, "cm"), Q_(1, "cm"), 12, 0),
+            (get_test_geometry_constant_profile(), "1cm", "1cm", 12, 12),
+            (get_test_geometry_variable_profile(), "1cm", "1cm", 12, 0),
         ],
     )
     def test_spatial_data(

@@ -14,6 +14,7 @@ from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.util as ut
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -2061,7 +2062,6 @@ class Geometry:
         profile = self._profile.local_profile(profile_location)
         return self._profile_raster_data_3d(profile, raster_width)
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
     def _rasterize_trace(self, raster_width) -> np.ndarray:
         """Rasterize the trace.
 
@@ -2108,7 +2108,6 @@ class Geometry:
         return local_data + local_cs.coordinates.data[:, np.newaxis]
 
     @staticmethod
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=False)
     def _profile_raster_data_3d(profile: Profile, raster_width, stack: bool = True):
         """Get the rasterized profile in 3d.
 
@@ -2134,7 +2133,6 @@ class Geometry:
             return np.insert(profile_data, 0, 0, axis=0)
         return [np.insert(p, 0, 0, axis=0) for p in profile_data]
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=False)
     def _rasterize_constant_profile(
         self, profile_raster_width, trace_raster_width, stack: bool = True
     ):
@@ -2185,7 +2183,6 @@ class Geometry:
 
         return raster_data
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
     def _rasterize_variable_profile(self, profile_raster_width, trace_raster_width):
         """Rasterize the geometry with a variable profile.
 
@@ -2234,7 +2231,7 @@ class Geometry:
         """
         return self._trace
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=True)
     def rasterize(self, profile_raster_width, trace_raster_width, stack: bool = True):
         """Rasterize the geometry.
 
@@ -2272,7 +2269,7 @@ class Geometry:
             None,
             None,
         ),
-        strict=False,
+        strict=True,
     )
     def plot(
         self,
@@ -2319,7 +2316,7 @@ class Geometry:
     @UREG.wraps(
         None,
         (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
-        strict=False,
+        strict=True,
     )
     def spatial_data(
         self,
@@ -2351,6 +2348,9 @@ class Geometry:
         #       rasterization for geometries with a VariableProfile. The stacked
         #       rasterization is needed for the triangulation performed in
         #       `from_geometry_raster`.
+        profile_raster_width = Q_(profile_raster_width, _DEFAULT_LEN_UNIT)
+        trace_raster_width = Q_(trace_raster_width, _DEFAULT_LEN_UNIT)
+
         if isinstance(self._profile, VariableProfile):
             rasterization = self.rasterize(profile_raster_width, trace_raster_width)
             return SpatialData(np.swapaxes(rasterization, 0, 1))
@@ -2360,6 +2360,7 @@ class Geometry:
         )
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
+    @UREG.wraps(None, (None, None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=True)
     def to_file(self, file_name: str, profile_raster_width, trace_raster_width):
         """Write the ``Geometry`` data into a CAD file.
 
