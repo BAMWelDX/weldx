@@ -422,7 +422,7 @@ def limited_plot(limits: types_limits = None) -> k3d.plot:
 
     """
     if limits is not None:
-        if isinstance(limits, Tuple):
+        if isinstance(limits, tuple):
             limits = [limits]
         grid_auto_fit = False
         # INFO: The next three suppressed mypy warnings do make sense and might
