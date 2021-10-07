@@ -11,12 +11,12 @@ examples:
     - A simple VV-Groove
     - |
       !<asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/VVGroove-0.1.0>
-        t: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 12, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
-        alpha: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 70, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> deg}
-        beta: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 13, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> deg}
-        b: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 3, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
-        c: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 1, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
-        h: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 5, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> mm}
+        t: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 12, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter}
+        alpha: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 70, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> degree}
+        beta: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 13, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> degree}
+        b: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 3, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter}
+        c: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 1, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter}
+        h: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 5, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter}
         code_number: ['1.7']
 
 type: object
