@@ -62,22 +62,7 @@ properties:
         wx_unit: "m/s"
         wx_shape: [1]
       welding_wire:
-        description: |
-          Object describing the welding wire used.
-        type: object
-        properties:
-          diameter:
-            description: |
-              The diameter of the welding wire.
-            tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-            wx_unit: "m"
-            wx_shape: [1]
-          class:
-            description: |
-              The wire classification according to DIN EN ISO 14341, DIN EN 12072 or similar standards.
-              Addition standard details should be stored in the wx_user property.
-            type: string
-        required: [diameter]
+        $ref: "./terms-0.1.0#/definitions/welding_wire"
     required: [welding_process, shielding_gas, weld_speed, welding_wire]
   welding_current:
     description: |
@@ -119,34 +104,9 @@ properties:
     type: object
     properties:
       base_metal:
-        description: |
-          The base metal composition of the workpiece.
-        type: object
-        properties:
-          common_name:
-            description: |
-              The common description of the base metal composition or classification as listed in the standard.
-            type: string
-          standard:
-            description: |
-              The standard listing and describing the base metal compositions.
-            type: string
-        required: [common_name, standard]
+        $ref: "./terms-0.1.0#/definitions/base_metal"
       geometry:
-        description: |
-          Description of the workpiece geometry consisting of the groove shape and the total seam length.
-        type: object
-        properties:
-          groove_shape:
-            description: |
-              Constant groove shape of the weld seam.
-            tag: "asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*-0.1.*"
-          seam_length:
-            description: |
-              Length of the linear weld seam.
-            tag: "asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.*"
-            wx_unit: "m"
-        required: [groove_shape, seam_length]
+        $ref: "./terms-0.1.0#/definitions/linear_weld_seam"
     required: [base_metal, geometry]
   reference_timestamp:
     description: |
