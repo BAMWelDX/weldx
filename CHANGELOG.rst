@@ -122,6 +122,14 @@ changes
    instead of ``"asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.*"`` `[#578]
    <https://github.com/BAMWelDX/weldx/pull/578>`__.
 
+-  ``Geometry.__init__`` now also accepts an ``iso.IsoBaseGroove`` as ``profile``
+   parameter `[#583] <https://github.com/BAMWelDX/weldx/pull/583>`__.
+
+-  Renamed ``Geometry.__init__`` parameter ``trace`` to ``trace_or_length``. A
+   `pint.Quantity` is now an accepted input. In this case the value will be used
+   to create a linear trace of the given length `[#583]
+   <https://github.com/BAMWelDX/weldx/pull/583>`__.
+
 fixes
 =====
 
