@@ -1342,7 +1342,7 @@ class Profile:
 class LinearHorizontalTraceSegment:
     """Trace segment with a linear path and constant z-component."""
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def __init__(self, length):
         """Construct linear horizontal trace segment.
 
@@ -1374,7 +1374,7 @@ class LinearHorizontalTraceSegment:
             Length of the segment
 
         """
-        return self._length
+        return Q_(self._length, _DEFAULT_LEN_UNIT)
 
     def local_coordinate_system(self, relative_position) -> tf.LocalCoordinateSystem:
         """Calculate a local coordinate system along the trace segment.
@@ -1399,7 +1399,7 @@ class LinearHorizontalTraceSegment:
 class RadialHorizontalTraceSegment:
     """Trace segment describing an arc with constant z-component."""
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_ANG_UNIT, None), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_ANG_UNIT, None), strict=True)
     def __init__(self, radius, angle, clockwise=False):
         """Construct radial horizontal trace segment.
 
@@ -1455,7 +1455,7 @@ class RadialHorizontalTraceSegment:
             Arc length
 
         """
-        return angle * radius
+        return Q_(angle * radius, _DEFAULT_LEN_UNIT)
 
     @property
     def angle(self):
@@ -1467,7 +1467,7 @@ class RadialHorizontalTraceSegment:
             Angle of the segment (rad)
 
         """
-        return self._angle
+        return Q_(self._angle, _DEFAULT_ANG_UNIT)
 
     @property
     def length(self):
@@ -1479,7 +1479,7 @@ class RadialHorizontalTraceSegment:
             Length of the segment
 
         """
-        return self._length
+        return Q_(self._length, _DEFAULT_LEN_UNIT)
 
     @property
     def radius(self):
@@ -1491,7 +1491,7 @@ class RadialHorizontalTraceSegment:
             Radius of the segment
 
         """
-        return self._radius
+        return Q_(self._radius, _DEFAULT_LEN_UNIT)
 
     @property
     def is_clockwise(self):
@@ -1586,12 +1586,12 @@ class Trace:
 
         """
         self._coordinate_system_lookup = [coordinate_system_start]
-        self._total_length_lookup = [0]
+        self._total_length_lookup = [Q_("0mm")]
         self._segment_length_lookup = []
 
         segments = self._segments
 
-        total_length = 0
+        total_length = Q_(0.0, "mm")
         for i, segment in enumerate(segments):
             # Fill coordinate system lookup
             lcs_segment_end = segments[i].local_coordinate_system(1)
@@ -1601,8 +1601,9 @@ class Trace:
             # Fill length lookups
             segment_length = segment.length
             total_length += segment_length
+
             self._segment_length_lookup += [segment_length]
-            self._total_length_lookup += [total_length]
+            self._total_length_lookup += [total_length.copy()]
 
     def _get_segment_index(self, position):
         """Get the segment index for a certain position.
@@ -1672,6 +1673,7 @@ class Trace:
         """
         return len(self._segments)
 
+    @UREG.check(None, "[length]")
     def local_coordinate_system(self, position) -> tf.LocalCoordinateSystem:
         """Get the local coordinate system at a specific position on the trace.
 
@@ -1697,7 +1699,7 @@ class Trace:
 
         return local_segment_cs + segment_start_cs
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None, _DEFAULT_LEN_UNIT), strict=True)
     def rasterize(self, raster_width):
         """Rasterize the trace.
 
@@ -1716,7 +1718,9 @@ class Trace:
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
 
-        raster_width = np.clip(raster_width, 0, self.length)
+        raster_width = Q_(raster_width, _DEFAULT_LEN_UNIT)
+
+        raster_width = np.clip(raster_width, Q_("0mm"), self.length)
         num_raster_segments = int(np.round(self.length / raster_width))
         raster_width_eff = self.length / num_raster_segments
 
@@ -1724,12 +1728,12 @@ class Trace:
         raster_data = np.empty((3, 0))
         for i in range(num_raster_segments):
             location = i * raster_width_eff
+
             while not location <= self._total_length_lookup[idx + 1]:
                 idx += 1
 
             segment_location = location - self._total_length_lookup[idx]
             weight = segment_location / self._segment_length_lookup[idx]
-
             local_segment_cs = self.segments[idx].local_coordinate_system(weight)
             segment_start_cs = self._coordinate_system_lookup[idx]
 
@@ -1856,7 +1860,7 @@ class VariableProfile:
                 raise ValueError("Locations need to be sorted in ascending order.")
 
         self._profiles = profiles
-        self._locations = locations
+        self._locations = Q_(locations, _DEFAULT_LEN_UNIT)
         self._interpolation_schemes = interpolation_schemes
 
     def __repr__(self):
@@ -1920,7 +1924,7 @@ class VariableProfile:
             Maximum location
 
         """
-        return self._locations[-1]
+        return Q_(self._locations[-1], _DEFAULT_LEN_UNIT)
 
     @property
     def num_interpolation_schemes(self) -> int:
@@ -1970,6 +1974,7 @@ class VariableProfile:
         """
         return self._profiles
 
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def local_profile(self, location):
         """Get the profile at the specified location.
 
@@ -1984,7 +1989,8 @@ class VariableProfile:
             Local profile.
 
         """
-        location = np.clip(location, 0, self.max_location)
+        print(self.max_location)
+        location = Q_(np.clip(location, 0, self.max_location.m), _DEFAULT_LEN_UNIT)
 
         idx = self._segment_index(location)
         segment_length = self._locations[idx + 1] - self._locations[idx]
@@ -2075,7 +2081,9 @@ class Geometry:
 
         """
         relative_location = trace_location / self._trace.length
-        profile_location = relative_location * self._profile.max_location
+        profile_location = relative_location * Q_(
+            self._profile.max_location, _DEFAULT_LEN_UNIT
+        )
         profile = self._profile.local_profile(profile_location)
         return self._profile_raster_data_3d(profile, raster_width)
 
@@ -2100,9 +2108,9 @@ class Geometry:
         num_raster_segments = int(np.round(self._trace.length / raster_width))
         raster_width_eff = self._trace.length / num_raster_segments
         locations = np.arange(
-            0, self._trace.length - raster_width_eff / 2, raster_width_eff
+            0, (self._trace.length - raster_width_eff / 2).m, raster_width_eff.m
         )
-        return np.hstack([locations, self._trace.length])
+        return Q_(np.hstack([locations, self._trace.length.m]), _DEFAULT_LEN_UNIT)
 
     def _get_transformed_profile_data(self, profile_raster_data, location):
         """Transform a profiles data to a specified location on the trace.
@@ -2170,7 +2178,7 @@ class Geometry:
             Raster data
 
         """
-        locations = self._rasterize_trace(trace_raster_width)
+        locations = self._rasterize_trace(Q_(trace_raster_width, _DEFAULT_LEN_UNIT))
 
         if stack:  # old behavior for 3d point cloud
             profile_data = self._profile_raster_data_3d(
@@ -2216,7 +2224,7 @@ class Geometry:
             Raster data
 
         """
-        locations = self._rasterize_trace(trace_raster_width)
+        locations = self._rasterize_trace(Q_(trace_raster_width, _DEFAULT_LEN_UNIT))
         raster_data = np.empty([3, 0])
         for _, location in enumerate(locations):
             profile_data = self._get_local_profile_data(location, profile_raster_width)
@@ -2275,7 +2283,7 @@ class Geometry:
             profile_raster_width, trace_raster_width
         )
 
-    @UREG.check(None, "[length]", "[length]", None, None, None, None)
+    @UREG.check(None, "[length]", "[length]", None, None, None, None, None, None)
     def plot(
         self,
         profile_raster_width: pint.Quantity = Q_("1mm"),
