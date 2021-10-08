@@ -14,6 +14,7 @@ from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.util as ut
+from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -22,6 +23,9 @@ _DEFAULT_ANG_UNIT = UREG.rad
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
+
+    import weldx.visualization.types as vs_types
+    import weldx.welding.groove.iso_9692_1 as iso
 
 # helper -------------------------------------------------------------------------------
 
@@ -2002,16 +2006,24 @@ class Geometry:
 
     """
 
-    def __init__(self, profile, trace):
+    def __init__(
+        self,
+        profile: Union[Profile, VariableProfile, iso.IsoBaseGroove],
+        trace_or_length: Union[Trace, pint.Quantity],
+        width: pint.Quantity = Q_(10, "mm"),
+    ):
         """Construct a geometry.
 
         Parameters
         ----------
-        profile : Profile, VariableProfile
-            Constant or variable profile that is used as cross section along the
-            specified trace
-        trace : Trace
-            The path that is used to extrude the given profile
+        profile :
+            Profile that is used as cross section along the specified trace
+        trace_or_length :
+            The path that is used to extrude the given profile or a quantity that
+            specifies the length of a linear, horizontal extrusion
+        width :
+            If a groove type is passed as ``profile`` this parameter determines the
+            width of the generated cross-section. For all other types it has no effect.
 
         Returns
         -------
@@ -2019,9 +2031,15 @@ class Geometry:
             A Geometry class instance
 
         """
-        self._check_inputs(profile, trace)
+        from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
+
+        if isinstance(profile, IsoBaseGroove):
+            profile = profile.to_profile(width)
+        if not isinstance(trace_or_length, Trace):
+            trace_or_length = Trace(LinearHorizontalTraceSegment(Q_(trace_or_length)))
+        self._check_inputs(profile, trace_or_length)
         self._profile = profile
-        self._trace = trace
+        self._trace = trace_or_length
 
     def __repr__(self):
         """Output representation of a Geometry class."""
@@ -2271,17 +2289,21 @@ class Geometry:
             None,
             None,
             None,
+            None,
+            None,
         ),
         strict=False,
     )
     def plot(
         self,
-        profile_raster_width: pint.Quantity,
-        trace_raster_width: pint.Quantity,
+        profile_raster_width: pint.Quantity = Q_("1mm"),
+        trace_raster_width: pint.Quantity = Q_("50mm"),
         axes: matplotlib.axes.Axes = None,
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
+        limits: vs_types.types_limits = None,
         show_wireframe: bool = True,
+        backend: str = "mpl",
     ) -> matplotlib.axes.Axes:
         """Plot the geometry.
 
@@ -2300,10 +2322,22 @@ class Geometry:
             color
         label : str
             Label of the plotted geometry
+        limits :
+            Either a single tuple of two float values that specifies the minimum and
+            maximum value of all 3 axis or a list containing 3 tuples to specify the
+            limits of each axis individually. If `None` is passed, the limits will be
+            set automatically.
         show_wireframe : bool
-            If `True`, the mesh is plotted as wireframe. Otherwise only the raster
-            points are visualized. Currently, the wireframe can't be visualized if a
-            `weldx.geometry.VariableProfile` is used.
+            (matplotlib only) If `True`, the mesh is plotted as wireframe. Otherwise
+            only the raster points are visualized. Currently, the wireframe can't be
+            visualized if a `weldx.geometry.VariableProfile` is used.
+        backend :
+            Select the rendering backend of the plot. The options are:
+
+            - ``k3d`` to get an interactive plot using `k3d <https://k3d-jupyter.org/>`_
+            - ``mpl`` for static plots using `matplotlib <https://matplotlib.org/>`_
+
+            Note that k3d only works inside jupyter notebooks
 
         Returns
         -------
@@ -2313,7 +2347,12 @@ class Geometry:
         """
         data = self.spatial_data(profile_raster_width, trace_raster_width)
         return data.plot(
-            axes=axes, color=color, label=label, show_wireframe=show_wireframe
+            axes=axes,
+            color=color,
+            label=label,
+            limits=limits,
+            show_wireframe=show_wireframe,
+            backend=backend,
         )
 
     @UREG.wraps(
@@ -2588,6 +2627,8 @@ class SpatialData:
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
+        limits: vs_types.types_limits = None,
+        backend: str = "mpl",
     ) -> matplotlib.axes.Axes:
         """Plot the spatial data.
 
@@ -2602,10 +2643,21 @@ class SpatialData:
             color
         label : str
             Label of the plotted geometry
+        limits :
+            Either a single tuple of two float values that specifies the minimum and
+            maximum value of all 3 axis or a list containing 3 tuples to specify the
+            limits of each axis individually. If `None` is passed, the limits will be
+            set automatically.
         show_wireframe : bool
-            If `True`, the mesh is plotted as wireframe. Otherwise only the raster
-            points are visualized. Currently, the wireframe can't be visualized if a
-            `weldx.geometry.VariableProfile` is used.
+            (Matplotlib only) If `True`, the mesh is plotted as wireframe. Otherwise
+            only the raster points are visualized.
+        backend :
+            Select the rendering backend of the plot. The options are:
+
+            - ``k3d`` to get an interactive plot using `k3d <https://k3d-jupyter.org/>`_
+            - ``mpl`` for static plots using `matplotlib <https://matplotlib.org/>`_
+
+            Note that k3d only works inside jupyter notebooks
 
         Returns
         -------
@@ -2613,15 +2665,32 @@ class SpatialData:
             The utilized matplotlib axes, if matplotlib was used as rendering backend
 
         """
+        if backend not in ("mpl", "k3d"):
+            raise ValueError(
+                f"backend has to be one of ('mpl', 'k3d'), but was {backend}"
+            )
+
         import weldx.visualization as vs
 
-        return vs.plot_spatial_data_matplotlib(
-            data=self,
-            axes=axes,
-            color=color,
-            label=label,
-            show_wireframe=show_wireframe,
-        )
+        if backend == "k3d":
+            from weldx.visualization.k3d_impl import limited_plot
+
+            plot = limited_plot(limits)
+            if color is None:
+                color = 0x999999
+            vs.SpatialDataVisualizer(
+                self, name=None, reference_system=None, color=color, plot=plot
+            )
+            plot.display()
+        else:
+            return vs.plot_spatial_data_matplotlib(
+                data=self,
+                axes=axes,
+                color=color,
+                label=label,
+                limits=limits,
+                show_wireframe=show_wireframe,
+            )
 
     def to_file(self, file_name: Union[str, Path]):
         """Write spatial data into a file.
