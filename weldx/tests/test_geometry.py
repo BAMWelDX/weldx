@@ -2849,7 +2849,7 @@ def get_test_geometry_constant_profile() -> geo.Geometry:
     """
     profile = get_test_profile()
     trace = geo.Trace([geo.LinearHorizontalTraceSegment(Q_(1, "cm"))])
-    return geo.Geometry(profile=profile, trace=trace)
+    return geo.Geometry(profile=profile, trace_or_length=trace)
 
 
 def get_test_geometry_variable_profile():
@@ -2866,7 +2866,7 @@ def get_test_geometry_variable_profile():
         [profile, profile], [0, 1], [geo.linear_profile_interpolation_sbs]
     )
     trace = geo.Trace([geo.LinearHorizontalTraceSegment(Q_(1, "cm"))])
-    return geo.Geometry(profile=variable_profile, trace=trace)
+    return geo.Geometry(profile=variable_profile, trace_or_length=trace)
 
 
 class TestGeometry:
