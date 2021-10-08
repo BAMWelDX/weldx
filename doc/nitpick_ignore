@@ -34,6 +34,9 @@ py:class sequence of pint.Quantity
 py:class list of pint.Quantity
 py:class UnitsContainer
 
+# k3d
+py:class k3d.plot
+
 # inherited -------------------------------------------------------------------
 # here goes everything that is caused by inheriting from non-weldx types
 
