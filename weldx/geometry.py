@@ -2275,21 +2275,7 @@ class Geometry:
             profile_raster_width, trace_raster_width
         )
 
-    @UREG.wraps(
-        None,
-        (
-            None,
-            _DEFAULT_LEN_UNIT,
-            _DEFAULT_LEN_UNIT,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        strict=True,
-    )
+    @UREG.check(None, "[length]", "[length]", None, None, None, None)
     def plot(
         self,
         profile_raster_width: pint.Quantity = Q_("1mm"),
@@ -2341,8 +2327,6 @@ class Geometry:
             The utilized matplotlib axes, if matplotlib was used as rendering backend
 
         """
-        profile_raster_width = Q_(profile_raster_width, _DEFAULT_LEN_UNIT)
-        trace_raster_width = Q_(trace_raster_width, _DEFAULT_LEN_UNIT)
         data = self.spatial_data(profile_raster_width, trace_raster_width)
         return data.plot(
             axes=axes,
@@ -2353,11 +2337,7 @@ class Geometry:
             backend=backend,
         )
 
-    @UREG.wraps(
-        None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
-        strict=True,
-    )
+    @UREG.check(None, "[length]", "[length]", None)
     def spatial_data(
         self,
         profile_raster_width: pint.Quantity,
@@ -2388,9 +2368,6 @@ class Geometry:
         #       rasterization for geometries with a VariableProfile. The stacked
         #       rasterization is needed for the triangulation performed in
         #       `from_geometry_raster`.
-        profile_raster_width = Q_(profile_raster_width, _DEFAULT_LEN_UNIT)
-        trace_raster_width = Q_(trace_raster_width, _DEFAULT_LEN_UNIT)
-
         if isinstance(self._profile, VariableProfile):
             rasterization = self.rasterize(profile_raster_width, trace_raster_width)
             return SpatialData(np.swapaxes(rasterization, 0, 1))
