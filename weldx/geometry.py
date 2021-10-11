@@ -915,7 +915,7 @@ class Shape:
         """
         return self._segments
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def add_line_segments(self, points):
         """Add line segments to the shape.
 
@@ -1003,13 +1003,15 @@ class Shape:
         outer_product = np.outer(normal, normal)
         householder_matrix = np.identity(2) - 2 / dot_product * outer_product
 
-        offset = normal / np.sqrt(dot_product) * distance_to_origin
+        offset = Q_(
+            normal / np.sqrt(dot_product) * distance_to_origin, _DEFAULT_LEN_UNIT
+        )
 
         self.apply_translation(-offset)
         self.apply_transformation(householder_matrix)
         self.apply_translation(offset)
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=True)
     def apply_reflection_across_line(self, point_start, point_end):
         """Apply a reflection across a line.
 
@@ -1042,7 +1044,7 @@ class Shape:
 
         self.apply_reflection(normal, line_distance_origin)
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def apply_translation(self, vector):
         """Apply a translation to the shape.
 
@@ -1055,7 +1057,7 @@ class Shape:
         for i in range(self.num_segments):
             self._segments[i].apply_translation(vector)
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def rasterize(self, raster_width) -> np.ndarray:
         """Create an array of points that describe the shapes contour.
 
@@ -1109,7 +1111,7 @@ class Shape:
         new_shape.apply_reflection(reflection_normal, distance_to_origin)
         return new_shape
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=False)
+    @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT)
     def reflect_across_line(self, point_start, point_end):
         """Get a reflected copy across a line.
 
@@ -1147,7 +1149,7 @@ class Shape:
         new_shape.apply_transformation(matrix)
         return new_shape
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=False)
+    @UREG.check(None, "[length]")
     def translate(self, vector):
         """Get a translated copy of the shape.
 
@@ -1258,6 +1260,8 @@ class Profile:
             Raster data
 
         """
+
+        raster_width = Q_(raster_width, _DEFAULT_LEN_UNIT)
         raster_data = []
         for shape in self._shapes:
             raster_data.append(shape.rasterize(raster_width))
@@ -1269,7 +1273,7 @@ class Profile:
     def plot(
         self,
         title=None,
-        raster_width=0.5,
+        raster_width=Q_(0.5, _DEFAULT_LEN_UNIT),
         label=None,
         axis="equal",
         axis_labels=None,

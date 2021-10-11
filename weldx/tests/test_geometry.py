@@ -164,15 +164,15 @@ def get_default_profiles() -> List:
     a_0 = [0, 0]
     a_1 = [8, 16]
     a_2 = [16, 0]
-    shape_a01 = geo.Shape().add_line_segments([a_0, a_1])
-    shape_a12 = geo.Shape().add_line_segments([a_1, a_2])
+    shape_a01 = geo.Shape().add_line_segments(Q_([a_0, a_1], "mm"))
+    shape_a12 = geo.Shape().add_line_segments(Q_([a_1, a_2], "mm"))
     profile_a = geo.Profile([shape_a01, shape_a12])
 
     b_0 = [-4, 8]
     b_1 = [0, 8]
     b_2 = [16, -16]
-    shape_b01 = geo.Shape().add_line_segments([b_0, b_1])
-    shape_b12 = geo.Shape().add_line_segments([b_1, b_2])
+    shape_b01 = geo.Shape().add_line_segments(Q_([b_0, b_1], "mm"))
+    shape_b12 = geo.Shape().add_line_segments(Q_([b_1, b_2], "mm"))
     profile_b = geo.Profile([shape_b01, shape_b12])
     return [profile_a, profile_b]
 
@@ -1294,32 +1294,26 @@ def test_shape_line_segment_addition():
 
     """
     shape_0 = geo.Shape()
-    shape_0.add_line_segments([[0, 0], [1, 0]])
+    shape_0.add_line_segments(Q_([[0, 0], [1, 0]], "mm"))
     assert shape_0.num_segments == 1
 
     shape_1 = geo.Shape()
-    shape_1.add_line_segments([[0, 0], [1, 0], [2, 0]])
+    shape_1.add_line_segments(Q_([[0, 0], [1, 0], [2, 0]], "mm"))
     assert shape_1.num_segments == 2
 
     # test possible formats to add single line segment ----
 
-    shape_0.add_line_segments([2, 0])
+    shape_0.add_line_segments(Q_([2, 0], "mm"))
     assert shape_0.num_segments == 2
-    shape_0.add_line_segments([[3, 0]])
+    shape_0.add_line_segments(Q_([[3, 0]], "mm"))
     assert shape_0.num_segments == 3
-    shape_0.add_line_segments(np.array([4, 0]))
-    assert shape_0.num_segments == 4
-    shape_0.add_line_segments(np.array([[5, 0]]))
-    assert shape_0.num_segments == 5
 
     # add multiple segments -------------------------------
 
-    shape_0.add_line_segments([[6, 0], [7, 0], [8, 0]])
-    assert shape_0.num_segments == 8
-    shape_0.add_line_segments(np.array([[9, 0], [10, 0], [11, 0]]))
-    assert shape_0.num_segments == 11
+    shape_0.add_line_segments(Q_([[4, 0], [5, 0], [6, 0]], "mm"))
+    assert shape_0.num_segments == 6
 
-    for i in range(11):
+    for i in range(6):
         expected_segment = geo.LineSegment.construct_with_points([i, 0], [i + 1, 0])
         check_segments_identical(shape_0.segments[i], expected_segment)
         if i < 2:
@@ -1339,12 +1333,12 @@ def test_shape_line_segment_addition():
 
     # single point with empty shape
     with pytest.raises(Exception):
-        shape_2.add_line_segments([0, 1])
+        shape_2.add_line_segments(Q_([0, 1], "mm"))
     assert shape_2.num_segments == 0
 
     # invalid point format
     with pytest.raises(Exception):
-        shape_2.add_line_segments([[0, 1, 2], [1, 2, 3]])
+        shape_2.add_line_segments(Q_([[0, 1, 2], [1, 2, 3]], "mm"))
     assert shape_2.num_segments == 0
 
 
@@ -1356,12 +1350,12 @@ def test_shape_rasterization():
     with comments.
 
     """
-    points = np.array([[0, 0], [0, 1], [1, 1], [1, 0]])
+    points = Q_([[0, 0], [0, 1], [1, 1], [1, 0]], "mm")
 
     shape = geo.Shape().add_line_segments(points)
 
     # rasterize shape
-    raster_width = 0.2
+    raster_width = Q_(0.2, "mm")
     data = shape.rasterize(raster_width)
 
     # no duplications
@@ -1384,9 +1378,9 @@ def test_shape_rasterization():
     # However, this test somewhat ensures, that each segment is rasterized
     # individually.
 
-    data = shape.rasterize(10)
+    data = shape.rasterize("10mm")
 
-    for point in points:
+    for point in points.m.tolist():
         assert is_column_in_matrix(point, data)
 
     assert data.shape[1] == 4
@@ -1395,20 +1389,20 @@ def test_shape_rasterization():
 
     shape.add_line_segments(points[0])
 
-    data = shape.rasterize(10)
+    data = shape.rasterize("10mm")
 
     assert data.shape[1] == 4
     assert helpers.are_all_columns_unique(data)
 
     # exceptions ------------------------------------------
     with pytest.raises(Exception):
-        shape.rasterize(0)
+        shape.rasterize("0mm")
     with pytest.raises(Exception):
-        shape.rasterize(-3)
+        shape.rasterize("-3mm")
     # empty shape
     shape_empty = geo.Shape()
     with pytest.raises(Exception):
-        shape_empty.rasterize(0.2)
+        shape_empty.rasterize("0.2mm")
 
 
 def default_test_shape():
@@ -1507,6 +1501,7 @@ def shape_transformation_test_case(
     shape = default_test_shape()
 
     if translation is not None:
+        translation = Q_(translation, "mm")
         shape_trans = shape.translate(translation)
     else:
         shape_trans = shape.transform(transformation)
@@ -1713,7 +1708,7 @@ def check_point_reflected_across_line(
 
     """
     vec_original_reflected = point_reflected - point_original
-    mid_point = point_original + 0.5 * vec_original_reflected
+    mid_point = Q_(point_original + 0.5 * vec_original_reflected, "mm")
 
     vec_start_mid = mid_point - point_start
     vec_start_end = point_end - point_start
@@ -1736,8 +1731,8 @@ def shape_reflection_across_line_test_case(point_start, point_end):
         Second point of the reflection axis
 
     """
-    point_start = np.array(point_start, float)
-    point_end = np.array(point_end, float)
+    point_start = Q_(point_start, "mm")
+    point_end = Q_(point_end, "mm")
 
     shape = default_test_shape()
 
@@ -1825,8 +1820,8 @@ def test_shape_interpolation_general():
 
     """
     # create shapes
-    shape_a = geo.Shape().add_line_segments([[-1, -1], [1, 1], [3, -1]])
-    shape_b = geo.Shape().add_line_segments([[-1, 4], [1, 1], [3, 4]])
+    shape_a = geo.Shape().add_line_segments(Q_([[-1, -1], [1, 1], [3, -1]], "mm"))
+    shape_b = geo.Shape().add_line_segments(Q_([[-1, 4], [1, 1], [3, 4]], "mm"))
 
     # define interpolation schemes
     interpolations = [
@@ -1846,7 +1841,7 @@ def test_shape_interpolation_general():
             last_point_exp = [3, -1]
 
         points_exp = [[-1, -1 + 5 * weight], [1, 1], last_point_exp]
-        shape_c_exp = geo.Shape().add_line_segments(points_exp)
+        shape_c_exp = geo.Shape().add_line_segments(Q_(points_exp, "mm"))
 
         check_shapes_identical(shape_c, shape_c_exp)
 
@@ -1861,12 +1856,12 @@ def test_shape_interpolation_general():
     # exceptions ------------------------------------------
 
     # interpolation destroys shape continuity
-    shape_f = geo.Shape().add_line_segments([[-1, 4], [2, 2], [3, 4]])
+    shape_f = geo.Shape().add_line_segments(Q_([[-1, 4], [2, 2], [3, 4]], "mm"))
     with pytest.raises(Exception):
         geo.Shape.interpolate(shape_a, shape_f, 0.5, interpolations)
 
     # number of segments differ
-    shape_a.add_line_segments([2, 2])
+    shape_a.add_line_segments(Q_([2, 2], "mm"))
     with pytest.raises(Exception):
         geo.Shape.linear_interpolation(shape_a, shape_b, 0.25)
 
@@ -1880,8 +1875,8 @@ def test_shape_linear_interpolation():
 
     """
     # create shapes
-    shape_a = geo.Shape().add_line_segments([[0, 0], [1, 1], [2, 0]])
-    shape_b = geo.Shape().add_line_segments([[1, 1], [2, -1], [3, 5]])
+    shape_a = geo.Shape().add_line_segments(Q_([[0, 0], [1, 1], [2, 0]], "mm"))
+    shape_b = geo.Shape().add_line_segments(Q_([[1, 1], [2, -1], [3, 5]], "mm"))
 
     for i in range(5):
         # interpolate shapes
@@ -1894,7 +1889,7 @@ def test_shape_linear_interpolation():
             [1 + weight, 1 - 2 * weight],
             [2 + weight, 5 * weight],
         ]
-        shape_c_exp = geo.Shape().add_line_segments(points_exp)
+        shape_c_exp = geo.Shape().add_line_segments(Q_(points_exp, "mm"))
 
         check_shapes_identical(shape_c, shape_c_exp)
 
@@ -1909,7 +1904,7 @@ def test_shape_linear_interpolation():
     # exceptions ------------------------------------------
 
     # number of segments differ
-    shape_a.add_line_segments([2, 2])
+    shape_a.add_line_segments(Q_([2, 2], "mm"))
     with pytest.raises(Exception):
         geo.Shape.linear_interpolation(shape_a, shape_b, 0.25)
 
@@ -1925,7 +1920,7 @@ def test_profile_construction_and_shape_addition():
     """
     arc_segment = geo.ArcSegment.construct_with_radius([-2, -2], [-1, -1], 1)
     shape = geo.Shape(arc_segment)
-    shape.add_line_segments([[0, 0], [1, 0], [2, -1], [0, -1]])
+    shape.add_line_segments(Q_([[0, 0], [1, 0], [2, -1], [0, -1]], "mm"))
 
     # Check invalid types
     with pytest.raises(TypeError):
@@ -1977,9 +1972,9 @@ def test_profile_rasterization():
     raster_width = Q_("0.1mm")
 
     # create shapes
-    shape0 = geo.Shape().add_line_segments([[-1, 0], [-raster_width.m, 0]])
-    shape1 = geo.Shape().add_line_segments([[0, 0], [1, 0]])
-    shape2 = geo.Shape().add_line_segments([[1 + raster_width.m, 0], [2, 0]])
+    shape0 = geo.Shape().add_line_segments(Q_([[-1, 0], [-raster_width.m, 0]], "mm"))
+    shape1 = geo.Shape().add_line_segments(Q_([[0, 0], [1, 0]], "mm"))
+    shape2 = geo.Shape().add_line_segments(Q_([[1 + raster_width.m, 0], [2, 0]], "mm"))
 
     # create profile
     profile = geo.Profile([shape0, shape1, shape2])
@@ -2663,8 +2658,8 @@ def test_geometry_rasterization_trace():
     profile_points = np.array([a0, a1, a2, a2, a3, a4], dtype=float).transpose()
 
     # create profile
-    shape_a012 = geo.Shape().add_line_segments([a0, a1, a2])
-    shape_a234 = geo.Shape().add_line_segments([a2, a3, a4])
+    shape_a012 = geo.Shape().add_line_segments(Q_([a0, a1, a2], "mm"))
+    shape_a234 = geo.Shape().add_line_segments(Q_([a2, a3, a4], "mm"))
     profile_a = geo.Profile([shape_a012, shape_a234])
 
     # create trace
@@ -2773,8 +2768,8 @@ def test_geometry_rasterization_profile_interpolation():
     a4 = [-1, 0]
 
     # create shapes
-    shape_a012 = geo.Shape().add_line_segments([a0, a1, a2])
-    shape_a234 = geo.Shape().add_line_segments([a2, a3, a4])
+    shape_a012 = geo.Shape().add_line_segments(Q_([a0, a1, a2], "mm"))
+    shape_a234 = geo.Shape().add_line_segments(Q_([a2, a3, a4], "mm"))
 
     shape_b012 = copy.deepcopy(shape_a012)
     shape_b234 = copy.deepcopy(shape_a234)
