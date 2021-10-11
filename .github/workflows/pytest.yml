@@ -44,13 +44,18 @@ jobs:
         run: |
           pytest -n 2 --runslow --junit-xml pytest.xml
 
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always() && (matrix.py == '3.8')
+        with:
+          files: pytest.xml
+
       - name: Upload Test Results
         if: always() && (matrix.py == '3.8')
         uses: actions/upload-artifact@v2
         with:
           name: Unit Test Results
-          path: |
-            pytest.xml
+          path: pytest.xml
 
       - name: run pytest on notebooks (append coverage)
         if: matrix.py == '3.8'
