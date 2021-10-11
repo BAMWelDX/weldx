@@ -19,7 +19,7 @@ jobs:
       triggered: ${{ steps.detect-trigger.outputs.trigger-found }}
     steps:
       - id: detect-trigger
-        run: echo "::set-output name=trigger-found::${{github.event.pull_request.draft == false || (github.ref == 'refs/heads/master' }}"
+        run: echo "::set-output name=trigger-found::${{ github.event.pull_request.draft == false || github.ref == 'refs/heads/master' }}"
 
   pytest:
     name: pytest
