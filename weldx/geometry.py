@@ -1239,7 +1239,7 @@ class Profile:
 
         self._shapes += shapes
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=False)
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=True)
     def rasterize(
         self, raster_width, stack: bool = True
     ) -> Union[np.ndarray, List[np.ndarray]]:
@@ -1265,6 +1265,7 @@ class Profile:
             return np.hstack(raster_data)
         return raster_data
 
+    @UREG.check(None, None, "[length]", None, None, None, None, None, None, None)
     def plot(
         self,
         title=None,
@@ -1745,8 +1746,8 @@ class Trace:
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None, None), strict=False)
-    def plot(self, raster_width=1, axes=None, fmt=None, axes_equal=False):
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None, None), strict=True)
+    def plot(self, raster_width="1mm", axes=None, fmt=None, axes_equal=False):
         """Plot the trace.
 
         Parameters
@@ -2277,6 +2278,7 @@ class Geometry:
             Raster data
 
         """
+        profile_raster_width = Q_(profile_raster_width, _DEFAULT_LEN_UNIT)
         if isinstance(self._profile, Profile):
             return self._rasterize_constant_profile(
                 profile_raster_width, trace_raster_width, stack=stack

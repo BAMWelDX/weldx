@@ -1974,12 +1974,12 @@ def test_profile_rasterization():
     are equidistant and can be checked easily.
 
     """
-    raster_width = 0.1
+    raster_width = Q_("0.1mm")
 
     # create shapes
-    shape0 = geo.Shape().add_line_segments([[-1, 0], [-raster_width, 0]])
+    shape0 = geo.Shape().add_line_segments([[-1, 0], [-raster_width.m, 0]])
     shape1 = geo.Shape().add_line_segments([[0, 0], [1, 0]])
-    shape2 = geo.Shape().add_line_segments([[1 + raster_width, 0], [2, 0]])
+    shape2 = geo.Shape().add_line_segments([[1 + raster_width.m, 0], [2, 0]])
 
     # create profile
     profile = geo.Profile([shape0, shape1, shape2])
@@ -1991,18 +1991,18 @@ def test_profile_rasterization():
     assert helpers.are_all_columns_unique(data)
 
     # check raster data size
-    expected_number_raster_points = int(round(3 / raster_width)) + 1
+    expected_number_raster_points = int(round(3 / raster_width.m)) + 1
     assert data.shape[1] == expected_number_raster_points
 
     # Check that all shapes are rasterized correct
-    for i in range(int(round(3 / raster_width)) + 1):
-        assert vector_is_close(data[:, i], [i * raster_width - 1, 0])
+    for i in range(int(round(3 / raster_width.m)) + 1):
+        assert vector_is_close(data[:, i], [i * raster_width.m - 1, 0])
 
     # exceptions
     with pytest.raises(Exception):
-        profile.rasterize(0)
+        profile.rasterize("0mm")
     with pytest.raises(Exception):
-        profile.rasterize(-3)
+        profile.rasterize("-3mm")
 
 
 # Test trace segment classes --------------------------------------------------
