@@ -12,8 +12,19 @@ on:
     - cron: '0 6 * * 1'
 
 jobs:
+  detect-ci-trigger:  # only run pytest job if review PR or on master
+    name: Detect CI Trigger
+    runs-on: ubuntu-latest
+    outputs:
+      triggered: ${{ steps.detect-trigger.outputs.trigger-found }}
+    steps:
+      - id: detect-trigger
+        run: echo "::set-output name=triggered::${{github.event.pull_request.draft == false) || (github.ref == 'refs/heads/master' }}"
+
   pytest:
     name: pytest
+    needs: detect-ci-trigger
+    if: needs.detect-ci-trigger.outputs.triggered == 'true'  # for explicitly enabled ci
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -50,6 +61,7 @@ jobs:
           pip install -e .[test]
 
       - name: setup matplotlib
+        if: startsWith(runner.os, 'Windows')
         run: |
             if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
             echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
