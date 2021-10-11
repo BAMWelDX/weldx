@@ -1822,6 +1822,7 @@ def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
 class VariableProfile:
     """Class to define a profile of variable shape."""
 
+    @UREG.wraps(None, (None, None, _DEFAULT_LEN_UNIT, None), strict=True)
     def __init__(self, profiles, locations, interpolation_schemes):
         """Construct variable profile.
 
@@ -1841,7 +1842,9 @@ class VariableProfile:
         VariableProfile
 
         """
-        locations = _to_list(locations)
+        locations = (
+            locations.tolist() if isinstance(locations, np.ndarray) else [locations]
+        )
         interpolation_schemes = _to_list(interpolation_schemes)
 
         if not locations[0] == 0:
@@ -1989,7 +1992,6 @@ class VariableProfile:
             Local profile.
 
         """
-        print(self.max_location)
         location = Q_(np.clip(location, 0, self.max_location.m), _DEFAULT_LEN_UNIT)
 
         idx = self._segment_index(location)

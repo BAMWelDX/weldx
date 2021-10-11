@@ -2515,31 +2515,28 @@ def test_variable_profile_construction():
     profile_a, profile_b = get_default_profiles()
 
     # construction with single location and interpolation
-    variable_profile = geo.VariableProfile([profile_a, profile_b], 1, interpol)
-    check_variable_profile_state(
-        variable_profile, [profile_a, profile_b], Q_([0, 1], "mm")
-    )
-
-    variable_profile = geo.VariableProfile([profile_a, profile_b], [1], [interpol])
+    variable_profile = geo.VariableProfile([profile_a, profile_b], "1mm", interpol)
     check_variable_profile_state(
         variable_profile, [profile_a, profile_b], Q_([0, 1], "mm")
     )
 
     # construction with location list
-    variable_profile = geo.VariableProfile([profile_a, profile_b], [0, 1], interpol)
+    variable_profile = geo.VariableProfile(
+        [profile_a, profile_b], Q_([0, 1], "mm"), interpol
+    )
     check_variable_profile_state(
         variable_profile, [profile_a, profile_b], Q_([0, 1], "mm")
     )
 
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b, profile_a], [1, 2], [interpol, interpol]
+        [profile_a, profile_b, profile_a], Q_([1, 2], "mm"), [interpol, interpol]
     )
     check_variable_profile_state(
         variable_profile, [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm")
     )
 
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b, profile_a], [0, 1, 2], [interpol, interpol]
+        [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm"), [interpol, interpol]
     )
     check_variable_profile_state(
         variable_profile, [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm")
@@ -2549,28 +2546,32 @@ def test_variable_profile_construction():
 
     # first location is not 0
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b], [1, 2], interpol)
+        geo.VariableProfile([profile_a, profile_b], Q_([1, 2], "mm"), interpol)
 
     # number of locations is not correct
     with pytest.raises(Exception):
         geo.VariableProfile(
-            [profile_a, profile_b, profile_a], [1], [interpol, interpol]
+            [profile_a, profile_b, profile_a], Q_("1mm"), [interpol, interpol]
         )
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b], [0, 1, 2], interpol)
+        geo.VariableProfile([profile_a, profile_b], Q_([0, 1, 2], "mm"), interpol)
 
     # number of interpolations is not correct
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b, profile_a], [0, 1, 2], [interpol])
+        geo.VariableProfile(
+            [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm"), [interpol]
+        )
     with pytest.raises(Exception):
         geo.VariableProfile(
-            [profile_a, profile_b, profile_a], [0, 1, 2], [interpol, interpol, interpol]
+            [profile_a, profile_b, profile_a],
+            Q_([0, 1, 2], "mm"),
+            [interpol, interpol, interpol],
         )
 
     # locations not ordered
     with pytest.raises(Exception):
         geo.VariableProfile(
-            [profile_a, profile_b, profile_a], [0, 2, 1], [interpol, interpol]
+            [profile_a, profile_b, profile_a], Q_([0, 2, 1], "mm"), [interpol, interpol]
         )
 
 
@@ -2580,7 +2581,7 @@ def test_variable_profile_local_profile():
 
     profile_a, profile_b = get_default_profiles()
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b, profile_a], [0, 1, 2], [interpol, interpol]
+        [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm"), [interpol, interpol]
     )
 
     for i in range(5):
@@ -2613,7 +2614,7 @@ def test_geometry_construction():
     """Test construction of the geometry class."""
     profile_a, profile_b = get_default_profiles()
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b], [0, 1], geo.linear_profile_interpolation_sbs
+        [profile_a, profile_b], Q_([0, 1], "mm"), geo.linear_profile_interpolation_sbs
     )
 
     radial_segment = geo.RadialHorizontalTraceSegment("1mm", Q_(np.pi, "rad"))
@@ -2785,7 +2786,7 @@ def test_geometry_rasterization_profile_interpolation():
     profile_b = geo.Profile([shape_b012, shape_b234])
 
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b, profile_a], [0, 2, 6], [interpol, interpol]
+        [profile_a, profile_b, profile_a], Q_([0, 2, 6], "mm"), [interpol, interpol]
     )
 
     linear_segment_l1 = geo.LinearHorizontalTraceSegment("1mm")
@@ -2870,8 +2871,9 @@ def get_test_geometry_variable_profile():
 
     """
     profile = get_test_profile()
+    print(Q_([0, 1], "cm")[0])
     variable_profile = geo.VariableProfile(
-        [profile, profile], [0, 1], [geo.linear_profile_interpolation_sbs]
+        [profile, profile], Q_([0, 1], "cm"), [geo.linear_profile_interpolation_sbs]
     )
     trace = geo.Trace([geo.LinearHorizontalTraceSegment(Q_(1, "cm"))])
     return geo.Geometry(profile=variable_profile, trace_or_length=trace)
