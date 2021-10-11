@@ -13,7 +13,7 @@ examples:
     - A time_series describing a constant value in time.
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0>
-        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm / s
+        units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter / second
         value: 10.0
   -
     - A time_series describing a sine oscillation in 3d space along the z-axis
@@ -22,17 +22,17 @@ examples:
         expression: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
           expression: a*sin(o*t + p) + b
           parameters:
-            a: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0>
-              units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm
+            a: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0>
+              units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
               value: !core/ndarray-1.0.0
                 data:
                 - [0, 0, 1]
                 datatype: int32
                 shape: [1, 3]
-            b: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.0, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm}
-            o: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 4.934802200544679, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> Hz * rad}
-            p: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> radian}
-        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> mm
+            b: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 0.0, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter}
+            o: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 4.934802200544679, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> hertz * radian}
+            p: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 0, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> radian}
+        units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
         shape: [1, 3]
 
 oneOf:
@@ -50,7 +50,7 @@ oneOf:
       units:
         description: |
           Unit of the data.
-        tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
+        tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
     required: [value, units]
 
   - type: object
@@ -64,7 +64,7 @@ oneOf:
       units:
         description: |
           Resulting unit of the data when the expression is evaluated.
-        tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
+        tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
       shape:
         description: |
           (optional) Resulting shape of the data when the expression is evaluated.
@@ -82,7 +82,7 @@ oneOf:
       units:
         description: |
           Units of the data.
-        tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
+        tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
       shape:
         description: |
           Shape of the data.
