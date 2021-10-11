@@ -44,11 +44,13 @@ jobs:
         run: |
           pytest -n 2 --runslow --junit-xml pytest.xml
 
-      - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
-        if: always() && (matrix.py == '3.8')
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v2
         with:
-          files: pytest.xml
+          name: Unit Test Results
+          path: |
+            pytest.xml
 
       - name: run pytest on notebooks (append coverage)
         if: matrix.py == '3.8'
@@ -67,3 +69,13 @@ jobs:
       - name: codecov.io
         if: matrix.py == '3.8'
         uses: codecov/codecov-action@v1
+
+event_file:
+  name: "Upload PR Event File"
+  runs-on: ubuntu-latest
+  steps:
+  - name: Upload
+    uses: actions/upload-artifact@v2
+    with:
+      name: Event File
+      path: ${{ github.event_path }}
