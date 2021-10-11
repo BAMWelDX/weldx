@@ -12,7 +12,26 @@ on:
     - cron: '0 6 * * 1'
 
 jobs:
-  pytest:
+  detect-ci-trigger: # only run win/max pytest job if review PR or on master
+    name: Detect CI Trigger
+    runs-on: ubuntu-latest
+    outputs:
+      triggered: ${{ steps.detect-trigger.outputs.trigger-found }}
+    steps:
+      - id: detect-trigger
+        run: echo "::set-output name=trigger-found::${{ github.event.pull_request.draft == false || github.ref == 'refs/heads/master' }}"
+
+  event_file:
+    name: "Upload PR Event File"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: Event File
+          path: ${{ github.event_path }}
+
+  main:
     name: pytest
     runs-on: ${{ matrix.os }}
     strategy:
@@ -75,12 +94,55 @@ jobs:
         if: matrix.py == '3.8'
         uses: codecov/codecov-action@v1
 
-  event_file:
-    name: "Upload PR Event File"
-    runs-on: ubuntu-latest
+  compat:
+    name: pytest
+    needs: detect-ci-trigger
+    if: needs.detect-ci-trigger.outputs.triggered == 'true'  # for explicitly enabled ci
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+        py: ['3.8']
     steps:
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: Event File
-        path: ${{ github.event_path }}
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.py }}
+
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'macOS')
+        with:
+          path: ~/Library/Caches/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'Windows')
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: pip installs
+        run: |
+          pip install wheel
+          pip install -e .[test]
+
+      - name: setup matplotlib
+        if: startsWith(runner.os, 'Windows')
+        run: |
+          if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
+          echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
+          python -c "import matplotlib as m; print(m.matplotlib_fname())"
+          python -c "import matplotlib as m; print(m.rc_params()['backend'])"
+        shell: cmd
+
+      - name: run pytest
+        run: |
+          pytest -n 2 --runslow
+          echo "Exited with '$?'"
