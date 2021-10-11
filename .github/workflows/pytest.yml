@@ -70,12 +70,12 @@ jobs:
         if: matrix.py == '3.8'
         uses: codecov/codecov-action@v1
 
-event_file:
-  name: "Upload PR Event File"
-  runs-on: ubuntu-latest
-  steps:
-  - name: Upload
-    uses: actions/upload-artifact@v2
-    with:
-      name: Event File
-      path: ${{ github.event_path }}
+  event_file:
+    name: "Upload PR Event File"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: Event File
+        path: ${{ github.event_path }}
