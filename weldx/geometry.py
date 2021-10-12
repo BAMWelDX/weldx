@@ -101,7 +101,7 @@ class LineSegment:
     """Line segment."""
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def __init__(self, points):
+    def __init__(self, points: pint.Quantity):
         """Construct line segment.
 
         Parameters
@@ -142,7 +142,9 @@ class LineSegment:
 
     @classmethod
     @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT)
-    def construct_with_points(cls, point_start, point_end) -> LineSegment:
+    def construct_with_points(
+        cls, point_start: pint.Quantity, point_end: pint.Quantity
+    ) -> LineSegment:
         """Construct a line segment with two points.
 
         Parameters
@@ -162,7 +164,9 @@ class LineSegment:
         return cls(Q_(points, _DEFAULT_LEN_UNIT))
 
     @classmethod
-    def linear_interpolation(cls, segment_a, segment_b, weight):
+    def linear_interpolation(
+        cls, segment_a: LineSegment, segment_b: LineSegment, weight: float
+    ):
         """Interpolate two line segments linearly.
 
         Parameters
@@ -189,50 +193,54 @@ class LineSegment:
         return cls(Q_(points, _DEFAULT_LEN_UNIT))
 
     @property
-    def length(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def length(self) -> pint.Quantity:
         """Get the segment length.
 
         Returns
         -------
-        float
+        pint.Quantity
             Segment length
 
         """
         return self._length
 
     @property
-    def point_end(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def point_end(self) -> pint.Quantity:
         """Get the end point of the segment.
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             End point
 
         """
         return self._points[:, 1]
 
     @property
-    def point_start(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def point_start(self) -> pint.Quantity:
         """Get the starting point of the segment.
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             Starting point
 
         """
         return self._points[:, 0]
 
     @property
-    def points(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def points(self) -> pint.Quantity:
         """Get the segments points in form of a 2x2 matrix.
 
         The first column represents the starting point and the second one the end point.
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             2x2 matrix containing the segments points
 
         """
@@ -251,7 +259,7 @@ class LineSegment:
         self._calculate_length()
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def apply_translation(self, vector):
+    def apply_translation(self, vector: pint.Quantity):
         """Apply a translation to the segment.
 
         Parameters
@@ -262,8 +270,8 @@ class LineSegment:
         """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def rasterize(self, raster_width) -> np.ndarray:
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
         """Create an array of points that describe the segments contour.
 
         The effective raster width may vary from the specified one,
@@ -277,7 +285,7 @@ class LineSegment:
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             Array of contour points
 
         """
@@ -295,7 +303,7 @@ class LineSegment:
 
         return np.matmul(self._points, weight_matrix)
 
-    def transform(self, matrix):
+    def transform(self, matrix: np.ndarray) -> LineSegment:
         """Get a transformed copy of the segment.
 
         Parameters
@@ -314,7 +322,7 @@ class LineSegment:
         return new_segment
 
     @UREG.check(None, _DEFAULT_LEN_UNIT)
-    def translate(self, vector):
+    def translate(self, vector: pint.Quantity) -> LineSegment:
         """Get a translated copy of the segment.
 
         Parameters
@@ -340,7 +348,7 @@ class ArcSegment:
     """Arc segment."""
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=True)
-    def __init__(self, points, arc_winding_ccw=True):
+    def __init__(self, points: pint.Quantity, arc_winding_ccw: bool = True):
         """Construct arc segment.
 
         Parameters
@@ -441,8 +449,12 @@ class ArcSegment:
         strict=True,
     )
     def construct_with_points(
-        cls, point_start, point_end, point_center, arc_winding_ccw=True
-    ):
+        cls,
+        point_start: pint.Quantity,
+        point_end: pint.Quantity,
+        point_center: pint.Quantity,
+        arc_winding_ccw: bool = True,
+    ) -> ArcSegment:
         """Construct an arc segment with three points (start, end, center).
 
         Parameters
@@ -476,12 +488,12 @@ class ArcSegment:
     )
     def construct_with_radius(
         cls,
-        point_start,
-        point_end,
-        radius,
-        center_left_of_line=True,
-        arc_winding_ccw=True,
-    ):
+        point_start: pint.Quantity,
+        point_end: pint.Quantity,
+        radius: pint.Quantity,
+        center_left_of_line: bool = True,
+        arc_winding_ccw: bool = True,
+    ) -> ArcSegment:
         """Construct an arc segment with a radius and the start and end points.
 
         Parameters
@@ -532,8 +544,9 @@ class ArcSegment:
         )
 
     @classmethod
-    @UREG.wraps(None, (None, None, None, ""), strict=True)
-    def linear_interpolation(cls, segment_a, segment_b, weight):
+    def linear_interpolation(
+        cls, segment_a: ArcSegment, segment_b: ArcSegment, weight: float
+    ) -> ArcSegment:
         """Interpolate two arc segments linearly.
 
         This function is not implemented, since linear interpolation of an
@@ -572,31 +585,33 @@ class ArcSegment:
         )
 
     @property
-    def arc_angle(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def arc_angle(self) -> pint.Quantity:
         """Get the arc angle.
 
         Returns
         -------
-        float
+        pint.Quantity
             Arc angle
 
         """
         return self._arc_angle
 
     @property
-    def arc_length(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def arc_length(self) -> pint.Quantity:
         """Get the arc length.
 
         Returns
         -------
-        float
+        pint.Quantity
             Arc length
 
         """
         return Q_(self._arc_length, _DEFAULT_LEN_UNIT)
 
     @property
-    def arc_winding_ccw(self):
+    def arc_winding_ccw(self) -> bool:
         """Get True if the winding order is counter-clockwise. False if clockwise.
 
         Returns
@@ -608,43 +623,47 @@ class ArcSegment:
         return self._sign_arc_winding > 0
 
     @property
-    def point_center(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def point_center(self) -> pint.Quantity:
         """Get the center point of the segment.
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             Center point
 
         """
         return self._points[:, 2]
 
     @property
-    def point_end(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def point_end(self) -> pint.Quantity:
         """Get the end point of the segment.
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             End point
 
         """
         return self._points[:, 1]
 
     @property
-    def point_start(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def point_start(self) -> pint.Quantity:
         """Get the starting point of the segment.
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             Starting point
 
         """
         return self._points[:, 0]
 
     @property
-    def points(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def points(self) -> pint.Quantity:
         """Get the segments points in form of a 2x3 matrix.
 
         The first column represents the starting point, the second one the
@@ -652,25 +671,26 @@ class ArcSegment:
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             2x3 matrix containing the segments points
 
         """
         return self._points
 
     @property
-    def radius(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def radius(self) -> pint.Quantity:
         """Get the radius.
 
         Returns
         -------
-        float
+        pint.Quantity
             Radius
 
         """
         return Q_(self._radius, _DEFAULT_LEN_UNIT)
 
-    def apply_transformation(self, matrix):
+    def apply_transformation(self, matrix: np.ndarray):
         """Apply a transformation to the segment.
 
         Parameters
@@ -684,7 +704,7 @@ class ArcSegment:
         self._calculate_arc_parameters()
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def apply_translation(self, vector):
+    def apply_translation(self, vector: pint.Quantity):
         """Apply a translation to the segment.
 
         Parameters
@@ -695,8 +715,8 @@ class ArcSegment:
         """
         self._points += np.ndarray((2, 1), float, np.array(vector, float))
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def rasterize(self, raster_width) -> np.ndarray:
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
         """Create an array of points that describe the segments contour.
 
         The effective raster width may vary from the specified one,
@@ -710,7 +730,7 @@ class ArcSegment:
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             Array of contour points
 
         """
@@ -736,7 +756,7 @@ class ArcSegment:
 
         return data.transpose()
 
-    def transform(self, matrix):
+    def transform(self, matrix) -> ArcSegment:
         """Get a transformed copy of the segment.
 
         Parameters
@@ -755,7 +775,7 @@ class ArcSegment:
         return new_segment
 
     @UREG.check(None, "[length]")
-    def translate(self, vector):
+    def translate(self, vector) -> ArcSegment:
         """Get a translated copy of the segment.
 
         Parameters
@@ -776,11 +796,13 @@ class ArcSegment:
 
 # Shape class -----------------------------------------------------------------
 
+segment_types = Union[LineSegment, ArcSegment]
+
 
 class Shape:
     """Defines a shape in 2 dimensions."""
 
-    def __init__(self, segments=None):
+    def __init__(self, segments: Union[segment_types, List[segment_types]] = None):
         """Construct a shape.
 
         Parameters
@@ -807,7 +829,7 @@ class Shape:
         return f"{shape_str}"
 
     @staticmethod
-    def _check_segments_connected(segments):
+    def _check_segments_connected(segments: Union[segment_types, List[segment_types]]):
         """Check if all segments are connected to each other.
 
         The start point of a segment must be identical to the end point of
@@ -824,7 +846,9 @@ class Shape:
                 raise ValueError("Segments are not connected.")
 
     @classmethod
-    def interpolate(cls, shape_a, shape_b, weight, interpolation_schemes):
+    def interpolate(
+        cls, shape_a: Shape, shape_b: Shape, weight: float, interpolation_schemes
+    ) -> Shape:
         """Interpolate 2 shapes.
 
         Parameters
@@ -861,7 +885,9 @@ class Shape:
         return cls(segments_c)
 
     @classmethod
-    def linear_interpolation(cls, shape_a, shape_b, weight):
+    def linear_interpolation(
+        cls, shape_a: Shape, shape_b: Shape, weight: float
+    ) -> Shape:
         """Interpolate 2 shapes linearly.
 
         Each segment is interpolated individually, using the corresponding
@@ -890,7 +916,7 @@ class Shape:
         return cls.interpolate(shape_a, shape_b, weight, interpolation_schemes)
 
     @property
-    def num_segments(self):
+    def num_segments(self) -> int:
         """Get the number of segments of the shape.
 
         Returns
@@ -902,7 +928,7 @@ class Shape:
         return len(self._segments)
 
     @property
-    def segments(self):
+    def segments(self) -> List[segment_types]:
         """Get the shape's segments.
 
         Returns
@@ -914,7 +940,7 @@ class Shape:
         return self._segments
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def add_line_segments(self, points):
+    def add_line_segments(self, points: pint.Quantity):
         """Add line segments to the shape.
 
         The line segments are constructed from the provided points.
@@ -957,7 +983,7 @@ class Shape:
 
         return self
 
-    def add_segments(self, segments):
+    def add_segments(self, segments: Union[segment_types, List[segment_types]]):
         """Add segments to the shape.
 
         Parameters
@@ -972,7 +998,7 @@ class Shape:
         self._check_segments_connected(segments)
         self._segments += segments
 
-    def apply_transformation(self, transformation_matrix):
+    def apply_transformation(self, transformation_matrix: np.ndarray):
         """Apply a transformation to the shape.
 
         Parameters
@@ -984,7 +1010,12 @@ class Shape:
         for i in range(self.num_segments):
             self._segments[i].apply_transformation(transformation_matrix)
 
-    def apply_reflection(self, reflection_normal, distance_to_origin=0):
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=True)
+    def apply_reflection(
+        self,
+        reflection_normal: pint.Quantity,
+        distance_to_origin: pint.Quantity = "0mm",
+    ):
         """Apply a reflection at the given axis to the shape.
 
         Parameters
@@ -1012,7 +1043,9 @@ class Shape:
         self.apply_translation(offset)
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=True)
-    def apply_reflection_across_line(self, point_start, point_end):
+    def apply_reflection_across_line(
+        self, point_start: pint.Quantity, point_end: pint.Quantity
+    ):
         """Apply a reflection across a line.
 
         Parameters
@@ -1045,7 +1078,7 @@ class Shape:
         self.apply_reflection(normal, line_distance_origin)
 
     @UREG.check(None, "[length]")
-    def apply_translation(self, vector):
+    def apply_translation(self, vector: pint.Quantity):
         """Apply a translation to the shape.
 
         Parameters
@@ -1057,8 +1090,8 @@ class Shape:
         for i in range(self.num_segments):
             self._segments[i].apply_translation(vector)
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def rasterize(self, raster_width) -> np.ndarray:
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
         """Create an array of points that describe the shapes contour.
 
         The effective raster width may vary from the specified one,
@@ -1093,7 +1126,12 @@ class Shape:
             raster_data = np.hstack((raster_data, last_point))
         return raster_data
 
-    def reflect(self, reflection_normal, distance_to_origin=0):
+    @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT)
+    def reflect(
+        self,
+        reflection_normal: pint.Quantity,
+        distance_to_origin: pint.Quantity = Q_("0mm"),
+    ) -> Shape:
         """Get a reflected copy of the shape.
 
         Parameters
@@ -1113,8 +1151,10 @@ class Shape:
         new_shape.apply_reflection(reflection_normal, distance_to_origin)
         return new_shape
 
-    @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT)
-    def reflect_across_line(self, point_start, point_end):
+    @UREG.check(None, "[length]", "[length]")
+    def reflect_across_line(
+        self, point_start: pint.Quantity, point_end: pint.Quantity
+    ) -> Shape:
         """Get a reflected copy across a line.
 
         Parameters
@@ -1133,7 +1173,7 @@ class Shape:
         new_shape.apply_reflection_across_line(point_start, point_end)
         return new_shape
 
-    def transform(self, matrix):
+    def transform(self, matrix: np.ndarray) -> Shape:
         """Get a transformed copy of the shape.
 
         Parameters
@@ -1152,7 +1192,7 @@ class Shape:
         return new_shape
 
     @UREG.check(None, "[length]")
-    def translate(self, vector):
+    def translate(self, vector: pint.Quantity) -> Shape:
         """Get a translated copy of the shape.
 
         Parameters
@@ -1177,7 +1217,7 @@ class Shape:
 class Profile:
     """Defines a 2d profile."""
 
-    def __init__(self, shapes, units: pint.Unit = None):
+    def __init__(self, shapes: Union[Shape, List[Shape]], units: pint.Unit = None):
         """Construct profile class.
 
         Parameters
@@ -1215,7 +1255,7 @@ class Profile:
         print(str(self))
 
     @property
-    def num_shapes(self):
+    def num_shapes(self) -> int:
         """Get the number of shapes of the profile.
 
         Returns
@@ -1226,7 +1266,7 @@ class Profile:
         """
         return len(self._shapes)
 
-    def add_shapes(self, shapes):
+    def add_shapes(self, shapes: Union[Shape, List[Shape]]):
         """Add shapes to the profile.
 
         Parameters
@@ -1245,8 +1285,8 @@ class Profile:
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=True)
     def rasterize(
-        self, raster_width, stack: bool = True
-    ) -> Union[np.ndarray, List[np.ndarray]]:
+        self, raster_width: pint.Quantity, stack: bool = True
+    ) -> Union[pint.Quantity, List[pint.Quantity]]:
         """Rasterize the profile.
 
         Parameters
@@ -1258,7 +1298,7 @@ class Profile:
 
         Returns
         -------
-        numpy.ndarray or List[numpy.ndarray]
+        Union[pint.Quantity, List[pint.Quantity]]
             Raster data
 
         """
@@ -1268,21 +1308,21 @@ class Profile:
         for shape in self._shapes:
             raster_data.append(shape.rasterize(raster_width))
         if stack:
-            return np.hstack(raster_data)
-        return raster_data
+            return Q_(np.hstack(raster_data), _DEFAULT_LEN_UNIT)
+        return [Q_(item, _DEFAULT_LEN_UNIT) for item in raster_data]
 
     @UREG.check(None, None, "[length]", None, None, None, None, None, None, None)
     def plot(
         self,
-        title=None,
-        raster_width=Q_(0.5, _DEFAULT_LEN_UNIT),
-        label=None,
-        axis="equal",
-        axis_labels=None,
-        grid=True,
-        line_style=".-",
+        title: str = None,
+        raster_width: pint.Quantity = Q_(0.5, _DEFAULT_LEN_UNIT),
+        label: str = None,
+        axis: str = "equal",
+        axis_labels: List[str] = None,
+        grid: bool = True,
+        line_style: str = ".-",
         ax=None,
-        color="k",
+        color: str = "k",
     ):
         """Plot the profile.
 
@@ -1331,7 +1371,7 @@ class Profile:
             ax.plot(segment[0], segment[1], line_style, label=label, color=c)
 
     @property
-    def shapes(self):
+    def shapes(self) -> List[Shape]:
         """Get the profiles shapes.
 
         Returns
@@ -1350,7 +1390,7 @@ class LinearHorizontalTraceSegment:
     """Trace segment with a linear path and constant z-component."""
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def __init__(self, length):
+    def __init__(self, length: pint.Quantity):
         """Construct linear horizontal trace segment.
 
         Parameters
@@ -1372,18 +1412,21 @@ class LinearHorizontalTraceSegment:
         return f"LinearHorizontalTraceSegment('length': {self.length!r})"
 
     @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def length(self):
         """Get the length of the segment.
 
         Returns
         -------
-        float
+        pint.Quantity
             Length of the segment
 
         """
-        return Q_(self._length, _DEFAULT_LEN_UNIT)
+        return self._length
 
-    def local_coordinate_system(self, relative_position) -> tf.LocalCoordinateSystem:
+    def local_coordinate_system(
+        self, relative_position: float
+    ) -> tf.LocalCoordinateSystem:
         """Calculate a local coordinate system along the trace segment.
 
         Parameters
@@ -1407,7 +1450,9 @@ class RadialHorizontalTraceSegment:
     """Trace segment describing an arc with constant z-component."""
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_ANG_UNIT, None), strict=True)
-    def __init__(self, radius, angle, clockwise=False):
+    def __init__(
+        self, radius: pint.Quantity, angle: pint.Quantity, clockwise: bool = False
+    ):
         """Construct radial horizontal trace segment.
 
         Parameters
@@ -1446,7 +1491,7 @@ class RadialHorizontalTraceSegment:
         )
 
     @staticmethod
-    def _arc_length(radius, angle):
+    def _arc_length(radius, angle) -> float:
         """Calculate the arc length.
 
         Parameters
@@ -1462,46 +1507,49 @@ class RadialHorizontalTraceSegment:
             Arc length
 
         """
-        return Q_(angle * radius, _DEFAULT_LEN_UNIT)
+        return angle * radius
 
     @property
-    def angle(self):
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def angle(self) -> pint.Quantity:
         """Get the angle of the segment.
 
         Returns
         -------
-        float
+        pint.Quantity
             Angle of the segment (rad)
 
         """
-        return Q_(self._angle, _DEFAULT_ANG_UNIT)
+        return self._angle
 
     @property
-    def length(self):
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def length(self) -> pint.Quantity:
         """Get the length of the segment.
 
         Returns
         -------
-        float
+        pint.Quantity
             Length of the segment
 
         """
-        return Q_(self._length, _DEFAULT_LEN_UNIT)
+        return self._length
 
     @property
-    def radius(self):
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def radius(self) -> pint.Quantity:
         """Get the radius of the segment.
 
         Returns
         -------
-        float
+        pint.Quantity
             Radius of the segment
 
         """
-        return Q_(self._radius, _DEFAULT_LEN_UNIT)
+        return self._radius
 
     @property
-    def is_clockwise(self):
+    def is_clockwise(self) -> bool:
         """Get True, if the segments winding is clockwise, False otherwise.
 
         Returns
@@ -1512,7 +1560,9 @@ class RadialHorizontalTraceSegment:
         """
         return self._sign_winding < 0
 
-    def local_coordinate_system(self, relative_position) -> tf.LocalCoordinateSystem:
+    def local_coordinate_system(
+        self, relative_position: float
+    ) -> tf.LocalCoordinateSystem:
         """Calculate a local coordinate system along the trace segment.
 
         Parameters
@@ -1539,11 +1589,17 @@ class RadialHorizontalTraceSegment:
 
 # Trace class -----------------------------------------------------------------
 
+trace_segment_types = Union[LinearHorizontalTraceSegment, RadialHorizontalTraceSegment]
+
 
 class Trace:
     """Defines a 3d trace."""
 
-    def __init__(self, segments, coordinate_system=None):
+    def __init__(
+        self,
+        segments: Union[trace_segment_types, List[trace_segment_types]],
+        coordinate_system: tf.LocalCoordinateSystem = None,
+    ):
         """Construct trace.
 
         Parameters
@@ -1582,7 +1638,7 @@ class Trace:
             f"'segment_length_lookup': {self._segment_length_lookup!r})"
         )
 
-    def _create_lookups(self, coordinate_system_start):
+    def _create_lookups(self, coordinate_system_start: tf.LocalCoordinateSystem):
         """Create lookup tables.
 
         Parameters
@@ -1612,7 +1668,7 @@ class Trace:
             self._segment_length_lookup += [segment_length]
             self._total_length_lookup += [total_length.copy()]
 
-    def _get_segment_index(self, position):
+    def _get_segment_index(self, position: float) -> int:
         """Get the segment index for a certain position.
 
         Parameters
@@ -1633,7 +1689,7 @@ class Trace:
         return self.num_segments - 1
 
     @property
-    def coordinate_system(self):
+    def coordinate_system(self) -> tf.LocalCoordinateSystem:
         """Get the trace's coordinate system.
 
         Returns
@@ -1645,19 +1701,20 @@ class Trace:
         return self._coordinate_system_lookup[0]
 
     @property
-    def length(self):
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def length(self) -> pint.Quantity:
         """Get the length of the trace.
 
         Returns
         -------
-        float
+        pint.Quantity
             Length of the trace.
 
         """
         return self._total_length_lookup[-1]
 
     @property
-    def segments(self):
+    def segments(self) -> List[trace_segment_types]:
         """Get the trace's segments.
 
         Returns
@@ -1669,7 +1726,7 @@ class Trace:
         return self._segments
 
     @property
-    def num_segments(self):
+    def num_segments(self) -> int:
         """Get the number of segments.
 
         Returns
@@ -1681,7 +1738,9 @@ class Trace:
         return len(self._segments)
 
     @UREG.check(None, "[length]")
-    def local_coordinate_system(self, position) -> tf.LocalCoordinateSystem:
+    def local_coordinate_system(
+        self, position: pint.Quantity
+    ) -> tf.LocalCoordinateSystem:
         """Get the local coordinate system at a specific position on the trace.
 
         Parameters
@@ -1707,7 +1766,7 @@ class Trace:
         return local_segment_cs + segment_start_cs
 
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def rasterize(self, raster_width):
+    def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
         """Rasterize the trace.
 
         Parameters
@@ -1717,7 +1776,7 @@ class Trace:
 
         Returns
         -------
-        numpy.ndarray
+        pint.Quantity
             Raster data
 
 
@@ -1753,7 +1812,13 @@ class Trace:
         return np.hstack([raster_data, last_point])
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None, None), strict=True)
-    def plot(self, raster_width="1mm", axes=None, fmt=None, axes_equal=False):
+    def plot(
+        self,
+        raster_width: pint.Quantity = "1mm",
+        axes=None,
+        fmt: str = None,
+        axes_equal: bool = False,
+    ):
         """Plot the trace.
 
         Parameters
@@ -1791,7 +1856,9 @@ class Trace:
 # Linear profile interpolation class ------------------------------------------
 
 
-def linear_profile_interpolation_sbs(profile_a, profile_b, weight):
+def linear_profile_interpolation_sbs(
+    profile_a: Profile, profile_b: Profile, weight: float
+):
     """Interpolate 2 profiles linearly, segment by segment.
 
     Parameters
@@ -1830,7 +1897,9 @@ class VariableProfile:
     """Class to define a profile of variable shape."""
 
     @UREG.wraps(None, (None, None, _DEFAULT_LEN_UNIT, None), strict=True)
-    def __init__(self, profiles, locations, interpolation_schemes):
+    def __init__(
+        self, profiles: List[Profile], locations: pint.Quantity, interpolation_schemes
+    ):
         """Construct variable profile.
 
         Parameters
@@ -1881,7 +1950,8 @@ class VariableProfile:
             f"'interpolation_schemes' {self._interpolation_schemes!r})"
         )
 
-    def _segment_index(self, location):
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def _segment_index(self, location: pint.Quantity):
         """Get the index of the segment at a certain location.
 
         Parameters
@@ -1901,7 +1971,7 @@ class VariableProfile:
         return idx
 
     @property
-    def interpolation_schemes(self):
+    def interpolation_schemes(self) -> List:
         """Get the interpolation schemes.
 
         Returns
@@ -1913,28 +1983,30 @@ class VariableProfile:
         return self._interpolation_schemes
 
     @property
-    def locations(self):
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def locations(self) -> pint.Quantity:
         """Get the locations.
 
         Returns
         -------
-        list
+        pint.Quantity
             List of locations
 
         """
         return self._locations
 
     @property
-    def max_location(self):
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def max_location(self) -> pint.Quantity:
         """Get the maximum location.
 
         Returns
         -------
-        float
+        pint.Quantity
             Maximum location
 
         """
-        return Q_(self._locations[-1], _DEFAULT_LEN_UNIT)
+        return self._locations[-1]
 
     @property
     def num_interpolation_schemes(self) -> int:
@@ -1973,7 +2045,7 @@ class VariableProfile:
         return len(self._profiles)
 
     @property
-    def profiles(self):
+    def profiles(self) -> List[Profile]:
         """Get the profiles.
 
         Returns
@@ -1985,7 +2057,7 @@ class VariableProfile:
         return self._profiles
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def local_profile(self, location):
+    def local_profile(self, location: pint.Quantity) -> Profile:
         """Get the profile at the specified location.
 
         Parameters
@@ -2061,7 +2133,7 @@ class Geometry:
         return f"Geometry('profile': {self._profile!r}, 'trace': {self._trace!r})"
 
     @staticmethod
-    def _check_inputs(profile, trace):
+    def _check_inputs(profile: Union[Profile, VariableProfile], trace: Trace):
         """Check the inputs to the constructor.
 
         Parameters
@@ -2078,7 +2150,7 @@ class Geometry:
         if not isinstance(trace, Trace):
             raise TypeError("'trace' must be a 'Trace' class")
 
-    def _get_local_profile_data(self, trace_location, raster_width):
+    def _get_local_profile_data(self, trace_location: float, raster_width: float):
         """Get a rasterized profile at a certain location on the trace.
 
         Parameters
@@ -2096,7 +2168,7 @@ class Geometry:
         profile = self._profile.local_profile(profile_location)
         return self._profile_raster_data_3d(profile, raster_width)
 
-    def _rasterize_trace(self, raster_width) -> np.ndarray:
+    def _rasterize_trace(self, raster_width: float) -> np.ndarray:
         """Rasterize the trace.
 
         Parameters
@@ -2244,7 +2316,7 @@ class Geometry:
         return raster_data
 
     @property
-    def profile(self):
+    def profile(self) -> Union[Profile, VariableProfile]:
         """Get the geometry's profile.
 
         Returns
@@ -2255,7 +2327,7 @@ class Geometry:
         return self._profile
 
     @property
-    def trace(self):
+    def trace(self) -> Trace:
         """Get the geometry's trace.
 
         Returns
@@ -2265,8 +2337,15 @@ class Geometry:
         """
         return self._trace
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=True)
-    def rasterize(self, profile_raster_width, trace_raster_width, stack: bool = True):
+    @UREG.wraps(
+        pint.Quantity, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=True
+    )
+    def rasterize(
+        self,
+        profile_raster_width: pint.Quantity,
+        trace_raster_width: pint.Quantity,
+        stack: bool = True,
+    ):
         """Rasterize the geometry.
 
         Parameters
@@ -2361,7 +2440,7 @@ class Geometry:
         profile_raster_width: pint.Quantity,
         trace_raster_width: pint.Quantity,
         closed_mesh: bool = True,
-    ):
+    ) -> SpatialData:
         """Rasterize the geometry and get it as `SpatialData` instance.
 
         If no `weldx.geometry.VariableProfile` is used, a triangulation
@@ -2396,7 +2475,12 @@ class Geometry:
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
     @UREG.wraps(None, (None, None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=True)
-    def to_file(self, file_name: str, profile_raster_width, trace_raster_width):
+    def to_file(
+        self,
+        file_name: str,
+        profile_raster_width: pint.Quantity,
+        trace_raster_width: pint.Quantity,
+    ):
         """Write the ``Geometry`` data into a CAD file.
 
         The geometry is rasterized and triangulated before the export. All file formats
