@@ -1813,7 +1813,7 @@ class Trace:
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
         return np.hstack([raster_data, last_point])
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None, None, None), strict=True)
+    @UREG.check(None, "[length]", None, None, None)
     def plot(
         self,
         raster_width: pint.Quantity = "1mm",
@@ -2472,7 +2472,7 @@ class Geometry:
         #       `from_geometry_raster`.
         if isinstance(self._profile, VariableProfile):
             rasterization = self.rasterize(profile_raster_width, trace_raster_width)
-            return SpatialData(np.swapaxes(rasterization, 0, 1))
+            return SpatialData(np.swapaxes(rasterization.m, 0, 1))
 
         rasterization = self.rasterize(
             profile_raster_width, trace_raster_width, stack=False
