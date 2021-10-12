@@ -3,7 +3,7 @@
 ###############
 
 ********************
- 0.5.0 (08.10.2021)
+ 0.5.0 (12.10.2021)
 ********************
 
 Release ``0.5.0`` brings a major rework of the `weldx` standard and many
