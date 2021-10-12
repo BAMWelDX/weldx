@@ -1,7 +1,7 @@
 name: Cancel
 on:
   workflow_run:
-    workflows: ["pytest", "pytest compat", "build", "docs"]
+    workflows: ["pytest", "build", "docs"]
     types:
       - requested
 jobs:
