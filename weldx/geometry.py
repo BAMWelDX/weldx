@@ -130,8 +130,8 @@ class LineSegment:
 
     def __str__(self):
         """Output simple string representation of a LineSegment."""
-        p1 = np.array2string(self.points[:, 0], precision=2, separator=",")
-        p2 = np.array2string(self.points[:, 1], precision=2, separator=",")
+        p1 = np.array2string(self.points[:, 0].m, precision=2, separator=",")
+        p2 = np.array2string(self.points[:, 1].m, precision=2, separator=",")
         return f"Line: {p1} -> {p2}"
 
     def _calculate_length(self):
