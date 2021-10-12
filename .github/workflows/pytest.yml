@@ -12,13 +12,32 @@ on:
     - cron: '0 6 * * 1'
 
 jobs:
-  pytest:
+  detect-ci-trigger: # only run win/mac pytest job if review PR or on master
+    name: Detect CI Trigger
+    runs-on: ubuntu-latest
+    outputs:
+      triggered: ${{ steps.detect-trigger.outputs.trigger-found }}
+    steps:
+      - id: detect-trigger
+        run: echo "::set-output name=trigger-found::${{ github.event.pull_request.draft == false || github.ref == 'refs/heads/master' }}"
+
+  event_file:
+    name: "Upload PR Event File"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: Event File
+          path: ${{ github.event_path }}
+
+  main:
     name: pytest
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
         py: ['3.8', '3.9']
     steps:
       - uses: actions/checkout@v2
@@ -29,12 +48,63 @@ jobs:
           python-version: ${{ matrix.py }}
 
       - uses: actions/cache@v2
-        if: startsWith(runner.os, 'Linux')
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+
+      - name: pip installs
+        run: |
+          pip install wheel
+          pip install -e .[test]
+
+      - name: run pytest
+        run: |
+          pytest -n 2 --runslow --junit-xml pytest.xml
+
+      - name: Upload Test Results
+        if: always() && (matrix.py == '3.8')
+        uses: actions/upload-artifact@v2
+        with:
+          name: Unit Test Results
+          path: pytest.xml
+
+      - name: run pytest on notebooks (append coverage)
+        if: matrix.py == '3.8'
+        run: |
+          pytest -n 2 --dist loadfile --nbval --current-env --cov-append tutorials/
+
+      - name: test with WeldxFile
+        if: matrix.py == '3.8'
+        run: |
+          pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
+
+      - name: coverage xml (combination is performed by pytest-cov)
+        if: matrix.py == '3.8'
+        run: coverage xml
+
+      - name: codecov.io
+        if: matrix.py == '3.8'
+        uses: codecov/codecov-action@v1
+
+  compat:
+    name: pytest
+    needs: detect-ci-trigger
+    if: needs.detect-ci-trigger.outputs.triggered == 'true'  # for explicitly enabled ci
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+        py: ['3.8']
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.py }}
 
       - uses: actions/cache@v2
         if: startsWith(runner.os, 'macOS')
@@ -53,41 +123,20 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: pip installs
-        if: ((matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')) || (github.event.pull_request.draft == false) || (github.ref == 'refs/heads/master')
         run: |
           pip install wheel
           pip install -e .[test]
 
       - name: setup matplotlib
-        if: startsWith(runner.os, 'Windows') && ((github.event.pull_request.draft == false) || (github.ref == 'refs/heads/master'))
+        if: startsWith(runner.os, 'Windows')
         run: |
-            if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
-            echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
-            python -c "import matplotlib as m; print(m.matplotlib_fname())"
-            python -c "import matplotlib as m; print(m.rc_params()['backend'])"
+          if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
+          echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
+          python -c "import matplotlib as m; print(m.matplotlib_fname())"
+          python -c "import matplotlib as m; print(m.rc_params()['backend'])"
         shell: cmd
 
       - name: run pytest
-        if: ((matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')) || (github.event.pull_request.draft == false) || (github.ref == 'refs/heads/master')
         run: |
           pytest -n 2 --runslow
           echo "Exited with '$?'"
-
-      - name: run pytest on notebooks (append coverage)
-        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
-        run: |
-          pytest -n 2 --dist loadfile --nbval --current-env --cov-append tutorials/
-          echo "Exited with '$?'"
-
-      - name: test with WeldxFile
-        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
-        run: |
-          pytest -n 2  --weldx-file-rw-buffer --weldx-file-rw-buffer-disp-header --cov-append ./weldx/tests/asdf_tests
-
-      - name: coverage xml (combination is performed by pytest-cov)
-        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
-        run: coverage xml
-
-      - name: codecov.io
-        if: (matrix.os == 'ubuntu-latest') && (matrix.py == '3.8')
-        uses: codecov/codecov-action@v1
