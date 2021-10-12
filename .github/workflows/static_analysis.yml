@@ -7,45 +7,17 @@ on:
     - cron: '0 6 * * 1'
 
 jobs:
-  pydocstyle:
-    name: pydocstyle
+  pre-commit:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
-      - name: pip installs
-        run: pip install pydocstyle
-      - name: run pydocstyle
-        run: |
-          pydocstyle ./weldx
-
-  flake8:
-    name: flake8
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+          python-version: 3.x
+      - name: Lint
+        uses: pre-commit/action@v2.0.3
         with:
-          python-version: '3.8'
-      - name: pip installs
-        run: pip install flake8==3.8.*
-      - name: run flake8
-        run: |
-          flake8
-
-  black:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: psf/black@stable
-        with:
-          options: "--check --diff --verbose"
+          extra_args: --all-files --show-diff-on-failure
 
   mypy:
     name: mypy
@@ -63,14 +35,10 @@ jobs:
         run: |
           mypy --install-types --non-interactive .
 
-  pre-commit:
+  check-notebooks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
-      - name: Lint
-        uses: pre-commit/action@v2.0.3
-        with:
-          extra_args: --all-files --show-diff-on-failure
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Check notebooks
+        uses: ResearchSoftwareActions/EnsureCleanNotebooksAction@1.1
