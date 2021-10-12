@@ -46,11 +46,11 @@ of mixed versions of extensions in lab env and weldx env!).
 Here is a guide on howto setup different kernels for Jupyter `guide
 <https://ipython.readthedocs.io/en/7.25.0/install/kernel_install.html>`__.
 
-Create an environment named "jlab" via conda:
+Create an environment named "jlab" via conda that installs ``jupyterlab`` and the ``k3d`` extension:
 
 .. code::
 
-   conda create -n jlab jupyterlab -c conda-forge
+   conda create -n jlab jupyterlab k3d -c conda-forge
 
 Then we switch to the weldx environment created in the first step and
 make it available within Jupyter:
@@ -64,16 +64,6 @@ This will enable us to select the Python interpreter installed in the
 weldx environment within Jupyter. So when a new notebook is created, we
 can choose "Python (weldx)" to access all the software bundled with the
 weldx Python package.
-
-Build and enable Jupyter lab extensions
-=======================================
-
-We need to install several different extensions for Jupyter:
-
-.. code::
-
-   conda activate jlab
-   jupyter labextension install @jupyter-widgets/jupyterlab-manager k3d
 
 fixing DLL errors on Windows systems
 ====================================
@@ -125,6 +115,5 @@ using conda:
    conda create -n weldx -c conda-forge weldx
    conda activate weldx
    python -m ipykernel install --user --name weldx --display-name "Python (weldx)"
-   conda create -n jlab -c conda-forge jupyterlab
+   conda create -n jlab -c conda-forge jupyterlab k3d
    conda activate jlab
-   jupyter labextension install @jupyter-widgets/jupyterlab-manager k3d
