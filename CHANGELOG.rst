@@ -267,6 +267,8 @@ dependencies
    <https://github.com/BAMWelDX/weldx/pull/577>`__ `[#474]
    <https://github.com/BAMWelDX/weldx/issues/474>`__.
 
+- Python 3.10 is not supported in this version. `[#575] <https://github.com/BAMWelDX/weldx/pull/575>`__
+
 ********************
  0.4.1 (20.07.2021)
 ********************
