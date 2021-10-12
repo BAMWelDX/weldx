@@ -257,16 +257,16 @@ def default_segment_rasterization_tests(
         point = data[:, i]
         next_point = data[:, i + 1]
 
-        raster_width_eff = np.linalg.norm(next_point - point)
+        raster_width_eff = np.linalg.norm(next_point.m - point.m)
 
         # effective raster width is close to specified one
         assert np.abs(raster_width_eff - raster_width.m) < 0.1 * raster_width.m
 
         # effective raster width is constant (equidistant points)
-        assert math.isclose(raster_width_eff, np.linalg.norm(data[:, 1] - data[:, 0]))
+        assert np.isclose(raster_width_eff, np.linalg.norm(data[:, 1].m - data[:, 0].m))
 
     # check that there are no duplicate points
-    assert helpers.are_all_columns_unique(data)
+    assert helpers.are_all_columns_unique(data.m)
 
     # check that rasterization with too large raster width still works
     data_200 = segment.rasterize("200mm")
@@ -294,7 +294,7 @@ def test_line_segment_construction():
     """Test constructor and factories."""
     # class constructor -----------------------------------
     segment = geo.LineSegment(Q_([[3, 5], [3, 4]], "mm"))
-    assert math.isclose(segment.length, np.sqrt(5))
+    assert np.isclose(segment.length.m, np.sqrt(5))
 
     # exceptions ------------------------------------------
     # length = 0
@@ -309,7 +309,7 @@ def test_line_segment_construction():
 
     # factories -------------------------------------------
     segment = geo.LineSegment.construct_with_points(Q_([3, 3], "mm"), Q_([4, 5], "mm"))
-    assert math.isclose(segment.length, np.sqrt(5))
+    assert np.isclose(segment.length.m, np.sqrt(5))
 
 
 def test_line_segment_rasterization():
@@ -338,7 +338,7 @@ def test_line_segment_rasterization():
     unit_vec_start_end = tf.normalize(vec_start_end.m)
     length_start_end = np.linalg.norm(vec_start_end.m)
     for i in np.arange(1, num_points - 1, 1):
-        vec_start_point = raster_data[:, i] - point_start.m
+        vec_start_point = (raster_data[:, i] - point_start).m
         unit_vec_start_point = tf.normalize(vec_start_point)
         length_start_point = np.linalg.norm(vec_start_point)
 
@@ -395,7 +395,7 @@ def line_segment_transformation_test_case(
     # check new segment
     assert vector_is_close(segment_trans.point_start, exp_start)
     assert vector_is_close(segment_trans.point_end, exp_end)
-    assert math.isclose(segment_trans.length, exp_length)
+    assert np.isclose(segment_trans.length.m, exp_length)
 
     # apply same transformation in place
     if translation is not None:
@@ -613,7 +613,7 @@ def arc_segment_rasterization_test(
 
     num_points = data.shape[1]
     for i in range(num_points):
-        point = data[:, i]
+        point = data[:, i].m
 
         # Check that winding is correct
         assert is_point_location_valid_func(point, point_center.m)
@@ -1389,7 +1389,7 @@ def test_shape_rasterization():
 
     # rasterize shape
     raster_width = Q_(0.2, "mm")
-    data = shape.rasterize(raster_width)
+    data = shape.rasterize(raster_width).m
 
     # no duplications
     assert helpers.are_all_columns_unique(data)
@@ -1411,7 +1411,7 @@ def test_shape_rasterization():
     # However, this test somewhat ensures, that each segment is rasterized
     # individually.
 
-    data = shape.rasterize("10mm")
+    data = shape.rasterize("10mm").m
 
     for point in points.m.tolist():
         assert is_column_in_matrix(point, data)
@@ -1422,7 +1422,7 @@ def test_shape_rasterization():
 
     shape.add_line_segments(points[0])
 
-    data = shape.rasterize("10mm")
+    data = shape.rasterize("10mm").m
 
     assert data.shape[1] == 4
     assert helpers.are_all_columns_unique(data)
@@ -1556,12 +1556,12 @@ def shape_transformation_test_case(
     assert arc_segment_trans.arc_winding_ccw is not exp_winding_change
 
     # check segment points
-    check_point_func(arc_segment_trans.point_start, arc_segment.point_start)
-    check_point_func(arc_segment_trans.point_end, arc_segment.point_end)
-    check_point_func(arc_segment_trans.point_center, arc_segment.point_center)
+    check_point_func(arc_segment_trans.point_start.m, arc_segment.point_start.m)
+    check_point_func(arc_segment_trans.point_end.m, arc_segment.point_end.m)
+    check_point_func(arc_segment_trans.point_center.m, arc_segment.point_center.m)
 
-    check_point_func(line_segment_trans.point_start, line_segment.point_start)
-    check_point_func(line_segment_trans.point_end, line_segment.point_end)
+    check_point_func(line_segment_trans.point_start.m, line_segment.point_start.m)
+    check_point_func(line_segment_trans.point_end.m, line_segment.point_end.m)
 
     # apply same transformation in place
     if translation is not None:
@@ -1626,8 +1626,8 @@ def check_reflected_point(
         Direction vector of the reflection axis.
 
     """
-    vec_original_reflected = point_reflected - point_original
-    midpoint = point_original + 0.5 * vec_original_reflected
+    vec_original_reflected = (point_reflected - point_original).m
+    midpoint = point_original.m + 0.5 * vec_original_reflected
     shifted_mid_point = midpoint - reflection_axis_offset
 
     determinant = np.linalg.det([shifted_mid_point, reflection_axis_direction])
@@ -1654,6 +1654,9 @@ def shape_reflection_test_case(normal, distance_to_origin):
     offset = distance_to_origin * unit_normal
 
     shape = default_test_shape()
+
+    normal = Q_(normal, "mm")
+    distance_to_origin = Q_(distance_to_origin, "mm")
 
     # create reflected shape
     shape_reflected = shape.reflect(normal, distance_to_origin)
@@ -2022,7 +2025,7 @@ def test_profile_rasterization():
     data = profile.rasterize(raster_width)
 
     # no duplications
-    assert helpers.are_all_columns_unique(data)
+    assert helpers.are_all_columns_unique(data.m)
 
     # check raster data size
     expected_number_raster_points = int(round(3 / raster_width.m)) + 1
@@ -2730,7 +2733,7 @@ def test_geometry_rasterization_trace():
         idx_0 = i * 6
 
         # check first segment (line)
-        if data[0, idx_0 + 2] <= 1:
+        if data[0, idx_0 + 2].m <= 1:
             for j in range(6):
                 point_exp = [
                     eff_raster_width.m * i,
@@ -2746,7 +2749,7 @@ def test_geometry_rasterization_trace():
 
             # z-values are constant
             for j in np.arange(2, 6, 1):
-                assert np.isclose(data[2, idx_0 + j], profile_points[1, j])
+                assert np.isclose(data[2, idx_0 + j].m, profile_points[1, j])
 
             # all profile points in a common x-y plane
             exp_radius = np.array([1, 1, 2, 2])
@@ -2758,10 +2761,10 @@ def test_geometry_rasterization_trace():
                 vec_0j = data[0:2, idx_0 + j] - data[0:2, idx_0]
                 assert np.isclose(np.linalg.norm(vec_0j.m), exp_radius[j - 2])
                 unit_vec_0j = tf.normalize(vec_0j.m)
-                assert np.isclose(np.dot(unit_vec_0j, vec_02), 1)
+                assert np.isclose(np.dot(unit_vec_0j, vec_02.m), 1)
 
             # check point distance between profiles
-            if data[1, idx_0 - 4] > 1:
+            if data[1, idx_0 - 4].m > 1:
                 exp_point_distance = arc_point_distance_on_trace * exp_radius
                 for j in np.arange(2, 6, 1):
                     point_distance = np.linalg.norm(
@@ -2776,9 +2779,9 @@ def test_geometry_rasterization_trace():
 
     for i in range(12):
         if i < 6:
-            math.isclose(data[0, i], 0)
+            np.isclose(data[0, i].m, 0)
         else:
-            assert math.isclose(data[1, i], 1)
+            assert np.isclose(data[1, i].m, 1)
 
     # exceptions ------------------------------------------
     with pytest.raises(Exception):

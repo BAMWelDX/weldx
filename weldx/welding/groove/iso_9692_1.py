@@ -201,8 +201,8 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
             points.append(shape_points)
             for seg in shape.segments:
                 if isinstance(seg, geo.LineSegment):
-                    shape_points.append(seg.point_start)
-                    shape_points.append(seg.point_end)
+                    shape_points.append(seg.point_start.m)
+                    shape_points.append(seg.point_end.m)
                 else:
                     raise RuntimeError("only for line segments!")
         return _compute_cross_sect_shape_points(points)
@@ -212,7 +212,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         # out of the rasterization points
         profile = self.to_profile()
         rasterization = profile.rasterize(self._AREA_RASTER_WIDTH, stack=False)
-        points = [[(x, y) for x, y in shape.T] for shape in rasterization]
+        points = [[(x, y) for x, y in shape.m.T] for shape in rasterization]
 
         return _compute_cross_sect_shape_points(points)
 

@@ -193,7 +193,7 @@ class LineSegment:
         return cls(Q_(points, _DEFAULT_LEN_UNIT))
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def length(self) -> pint.Quantity:
         """Get the segment length.
 
@@ -206,7 +206,7 @@ class LineSegment:
         return self._length
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_end(self) -> pint.Quantity:
         """Get the end point of the segment.
 
@@ -219,7 +219,7 @@ class LineSegment:
         return self._points[:, 1]
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_start(self) -> pint.Quantity:
         """Get the starting point of the segment.
 
@@ -232,7 +232,7 @@ class LineSegment:
         return self._points[:, 0]
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def points(self) -> pint.Quantity:
         """Get the segments points in form of a 2x2 matrix.
 
@@ -291,9 +291,9 @@ class LineSegment:
         """
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
-        raster_width = np.min([raster_width, self.length])
+        raster_width = np.min([raster_width, self.length.m])
 
-        num_raster_segments = np.round(self.length / raster_width)
+        num_raster_segments = np.round(self.length.m / raster_width)
 
         # normalized effective raster width
         nerw = 1.0 / num_raster_segments
@@ -399,9 +399,9 @@ class ArcSegment:
 
     def _calculate_arc_angle(self):
         """Calculate the arc angle."""
-        point_start = self.point_start
-        point_end = self.point_end
-        point_center = self.point_center
+        point_start = self.point_start.m
+        point_end = self.point_end.m
+        point_center = self.point_center.m
 
         # Calculate angle between vectors (always the smaller one)
         unit_center_start = tf.normalize(point_start - point_center)
@@ -429,9 +429,9 @@ class ArcSegment:
 
     def _check_valid(self):
         """Check if the segments data is valid."""
-        point_start = self.point_start
-        point_end = self.point_end
-        point_center = self.point_center
+        point_start = self.point_start.m
+        point_end = self.point_end.m
+        point_center = self.point_center.m
 
         radius_start_center = np.linalg.norm(point_start - point_center)
         radius_end_center = np.linalg.norm(point_end - point_center)
@@ -598,7 +598,7 @@ class ArcSegment:
         return self._arc_angle
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def arc_length(self) -> pint.Quantity:
         """Get the arc length.
 
@@ -623,7 +623,7 @@ class ArcSegment:
         return self._sign_arc_winding > 0
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_center(self) -> pint.Quantity:
         """Get the center point of the segment.
 
@@ -636,7 +636,7 @@ class ArcSegment:
         return self._points[:, 2]
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_end(self) -> pint.Quantity:
         """Get the end point of the segment.
 
@@ -649,7 +649,7 @@ class ArcSegment:
         return self._points[:, 1]
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_start(self) -> pint.Quantity:
         """Get the starting point of the segment.
 
@@ -662,7 +662,7 @@ class ArcSegment:
         return self._points[:, 0]
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def points(self) -> pint.Quantity:
         """Get the segments points in form of a 2x3 matrix.
 
@@ -678,7 +678,7 @@ class ArcSegment:
         return self._points
 
     @property
-    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def radius(self) -> pint.Quantity:
         """Get the radius.
 
@@ -967,7 +967,7 @@ class Shape:
             raise ValueError("Invalid point format")
 
         if len(self.segments) > 0:
-            points = np.vstack((self.segments[-1].point_end, points))
+            points = np.vstack((self.segments[-1].point_end.m, points))
         elif points.shape[0] <= 1:
             raise ValueError("Insufficient number of points provided.")
 
@@ -1075,7 +1075,9 @@ class Shape:
         else:
             normal = np.array([-vector[1], vector[0]], dtype=float)
 
-        self.apply_reflection(normal, line_distance_origin)
+        self.apply_reflection(
+            Q_(normal, _DEFAULT_LEN_UNIT), Q_(line_distance_origin, _DEFAULT_LEN_UNIT)
+        )
 
     @UREG.check(None, "[length]")
     def apply_translation(self, vector: pint.Quantity):
@@ -1939,7 +1941,7 @@ class VariableProfile:
                 raise ValueError("Locations need to be sorted in ascending order.")
 
         self._profiles = profiles
-        self._locations = Q_(locations, _DEFAULT_LEN_UNIT)
+        self._locations = locations
         self._interpolation_schemes = interpolation_schemes
 
     def __repr__(self):
@@ -1950,8 +1952,7 @@ class VariableProfile:
             f"'interpolation_schemes' {self._interpolation_schemes!r})"
         )
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def _segment_index(self, location: pint.Quantity):
+    def _segment_index(self, location: float):
         """Get the index of the segment at a certain location.
 
         Parameters
@@ -2071,12 +2072,11 @@ class VariableProfile:
             Local profile.
 
         """
-        location = Q_(np.clip(location, 0, self.max_location.m), _DEFAULT_LEN_UNIT)
+        location = np.clip(location, 0, self.max_location.m)
 
         idx = self._segment_index(location)
         segment_length = self._locations[idx + 1] - self._locations[idx]
         weight = (location - self._locations[idx]) / segment_length
-
         return self._interpolation_schemes[idx](
             self._profiles[idx], self._profiles[idx + 1], weight
         )
@@ -2267,9 +2267,11 @@ class Geometry:
             )
             raster_data = np.empty([3, 0])
             for _, location in enumerate(locations):
-                local_data = self._get_transformed_profile_data(profile_data, location)
+                local_data = self._get_transformed_profile_data(
+                    profile_data.m, location
+                )
                 raster_data = np.hstack([raster_data, local_data])
-
+            raster_data = Q_(raster_data, _DEFAULT_LEN_UNIT)
         else:
             profile_data = self._profile_raster_data_3d(
                 self._profile, profile_raster_width, stack=False
@@ -2280,7 +2282,7 @@ class Geometry:
                 raster_data.append(
                     np.stack(
                         [
-                            self._get_transformed_profile_data(data, location)
+                            self._get_transformed_profile_data(data.m, location)
                             for location in locations
                         ],
                         0,
@@ -2310,7 +2312,7 @@ class Geometry:
         for _, location in enumerate(locations):
             profile_data = self._get_local_profile_data(location, profile_raster_width)
 
-            local_data = self._get_transformed_profile_data(profile_data, location)
+            local_data = self._get_transformed_profile_data(profile_data.m, location)
             raster_data = np.hstack([raster_data, local_data])
 
         return raster_data
@@ -2338,14 +2340,16 @@ class Geometry:
         return self._trace
 
     @UREG.wraps(
-        pint.Quantity, (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None), strict=True
+        None,
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
+        strict=True,
     )
     def rasterize(
         self,
         profile_raster_width: pint.Quantity,
         trace_raster_width: pint.Quantity,
         stack: bool = True,
-    ):
+    ) -> pint.Quantity:
         """Rasterize the geometry.
 
         Parameters
@@ -2368,8 +2372,9 @@ class Geometry:
             return self._rasterize_constant_profile(
                 profile_raster_width, trace_raster_width, stack=stack
             )
-        return self._rasterize_variable_profile(
-            profile_raster_width, trace_raster_width
+        return Q_(
+            self._rasterize_variable_profile(profile_raster_width, trace_raster_width),
+            _DEFAULT_LEN_UNIT,
         )
 
     @UREG.check(None, "[length]", "[length]", None, None, None, None, None, None)
