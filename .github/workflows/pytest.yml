@@ -12,7 +12,7 @@ on:
     - cron: '0 6 * * 1'
 
 jobs:
-  detect-ci-trigger: # only run win/max pytest job if review PR or on master
+  detect-ci-trigger: # only run win/mac pytest job if review PR or on master
     name: Detect CI Trigger
     runs-on: ubuntu-latest
     outputs:
