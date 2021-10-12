@@ -260,9 +260,6 @@ ASDF
 -  reworked the optional syntax for ``wx_shape`` validation `[#571]
    <https://github.com/BAMWelDX/weldx/pull/571>`__.
 
-deprecations
-============
-
 dependencies
 ============
 
