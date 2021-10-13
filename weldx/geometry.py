@@ -63,6 +63,10 @@ def _vector_is_close(vec_a, vec_b, abs_tol=1e-9) -> bool:
         True or False
 
     """
+    if isinstance(vec_a, pint.Quantity):
+        vec_a = vec_a.m
+    if isinstance(vec_b, pint.Quantity):
+        vec_b = vec_b.m
     vec_a = np.array(vec_a, dtype=float)
     vec_b = np.array(vec_b, dtype=float)
 
@@ -115,13 +119,11 @@ class LineSegment:
         LineSegment
 
         """
-        points = np.array(points, dtype=float)
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
         if not (points.shape[0] == 2 and points.shape[1] == 2):
             raise ValueError("'points' is not a 2x2 matrix.")
-
-        self._points = points
+        self._points = np.array(points, dtype=float)
         self._calculate_length()
 
     def __repr__(self):
@@ -160,7 +162,7 @@ class LineSegment:
             Line segment
 
         """
-        points = np.transpose(np.array([point_start, point_end], dtype=float))
+        points = np.transpose(np.array([point_start.m, point_end.m], dtype=float))
         return cls(Q_(points, _DEFAULT_LEN_UNIT))
 
     @classmethod
@@ -189,7 +191,7 @@ class LineSegment:
             raise TypeError("Parameters a and b must both be line segments.")
 
         weight = np.clip(weight, 0, 1)
-        points = (1 - weight) * segment_a.points + weight * segment_b.points
+        points = (1 - weight) * segment_a.points.m + weight * segment_b.points.m
         return cls(Q_(points, _DEFAULT_LEN_UNIT))
 
     @property
@@ -364,7 +366,6 @@ class ArcSegment:
         ArcSegment
 
         """
-        points = np.array(points, dtype=float)
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
         if not (points.shape[0] == 2 and points.shape[1] == 3):
@@ -517,9 +518,6 @@ class ArcSegment:
             Arc segment
 
         """
-        point_start = np.array(point_start, dtype=float)
-        point_end = np.array(point_end, dtype=float)
-
         vec_start_end = point_end - point_start
         if center_left_of_line:
             vec_normal = np.array([-vec_start_end[1], vec_start_end[0]])
@@ -608,7 +606,7 @@ class ArcSegment:
             Arc length
 
         """
-        return Q_(self._arc_length, _DEFAULT_LEN_UNIT)
+        return self._arc_length
 
     @property
     def arc_winding_ccw(self) -> bool:
@@ -688,7 +686,7 @@ class ArcSegment:
             Radius
 
         """
-        return Q_(self._radius, _DEFAULT_LEN_UNIT)
+        return self._radius
 
     def apply_transformation(self, matrix: np.ndarray):
         """Apply a transformation to the segment.
@@ -734,10 +732,9 @@ class ArcSegment:
             Array of contour points
 
         """
-        point_start = self.point_start
-        point_center = self.point_center
+        point_start = self.point_start.m
+        point_center = self.point_center.m
         vec_center_start = point_start - point_center
-
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
         raster_width = np.clip(raster_width, None, self.arc_length.m)
@@ -956,7 +953,6 @@ class Shape:
             self
 
         """
-        points = np.array(points, dtype=float)
         dimension = len(points.shape)
         if dimension == 1:
             points = points[np.newaxis, :]
@@ -1026,7 +1022,7 @@ class Shape:
             Distance of the line of reflection to the origin (Default value = 0)
 
         """
-        normal = np.array(reflection_normal, dtype=float)
+        normal = reflection_normal
         if _vector_is_close(normal, np.array([0, 0], dtype=float)):
             raise ValueError("Normal has no length.")
 
@@ -1056,9 +1052,6 @@ class Shape:
             Line of reflection's end point
 
         """
-        point_start = np.array(point_start, dtype=float)
-        point_end = np.array(point_end, dtype=float)
-
         if _vector_is_close(point_start, point_end):
             raise ValueError("Line start and end point are identical.")
 
@@ -1117,14 +1110,13 @@ class Shape:
             raise ValueError("'raster_width' must be > 0")
 
         raster_width = Q_(raster_width, _DEFAULT_LEN_UNIT)
-
         raster_data = []
         for segment in self.segments:
-            raster_data.append(segment.rasterize(raster_width)[:, :-1])
+            raster_data.append(segment.rasterize(raster_width).m[:, :-1])
         raster_data = np.hstack(raster_data)
 
-        last_point = self.segments[-1].point_end[:, np.newaxis]
-        if not _vector_is_close(last_point, self.segments[0].point_start):
+        last_point = self.segments[-1].point_end.m[:, np.newaxis]
+        if not _vector_is_close(last_point, self.segments[0].point_start.m):
             raster_data = np.hstack((raster_data, last_point))
         return raster_data
 
@@ -1308,7 +1300,7 @@ class Profile:
         raster_width = Q_(raster_width, _DEFAULT_LEN_UNIT)
         raster_data = []
         for shape in self._shapes:
-            raster_data.append(shape.rasterize(raster_width))
+            raster_data.append(shape.rasterize(raster_width).m)
         if stack:
             return Q_(np.hstack(raster_data), _DEFAULT_LEN_UNIT)
         return [Q_(item, _DEFAULT_LEN_UNIT) for item in raster_data]
@@ -1351,6 +1343,7 @@ class Profile:
 
         """
         raster_data = self.rasterize(raster_width, stack=False)
+        raster_data = [q.m for q in raster_data]
         if ax is None:  # pragma: no cover
             from matplotlib.pyplot import subplots
 
@@ -1477,7 +1470,7 @@ class RadialHorizontalTraceSegment:
             raise ValueError("'angle' must have a positive value.")
         self._radius = float(radius)
         self._angle = float(angle)
-        self._length = self._arc_length(self.radius, self.angle)
+        self._length = self._arc_length(self._radius, self._angle)
         if clockwise:
             self._sign_winding = -1
         else:
@@ -1628,7 +1621,7 @@ class Trace:
         self._segments = _to_list(segments)
         self._create_lookups(coordinate_system)
 
-        if self.length <= 0:
+        if self.length.m <= 0:
             raise ValueError("Trace has no length.")
 
     def __repr__(self):
@@ -1713,7 +1706,7 @@ class Trace:
             Length of the trace.
 
         """
-        return self._total_length_lookup[-1]
+        return self._total_length_lookup[-1].m
 
     @property
     def segments(self) -> List[trace_segment_types]:
@@ -1811,7 +1804,7 @@ class Trace:
             raster_data = np.hstack([raster_data, data_point])
 
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
-        return np.hstack([raster_data, last_point])
+        return np.hstack([raster_data.m, last_point])
 
     @UREG.check(None, "[length]", None, None, None)
     def plot(
@@ -2162,9 +2155,7 @@ class Geometry:
 
         """
         relative_location = trace_location / self._trace.length
-        profile_location = relative_location * Q_(
-            self._profile.max_location, _DEFAULT_LEN_UNIT
-        )
+        profile_location = relative_location * self._profile.max_location
         profile = self._profile.local_profile(profile_location)
         return self._profile_raster_data_3d(profile, raster_width)
 
@@ -2211,7 +2202,10 @@ class Geometry:
         """
         local_cs = self._trace.local_coordinate_system(location)
         local_data = np.matmul(local_cs.orientation.data, profile_raster_data)
-        return local_data + local_cs.coordinates.data[:, np.newaxis]
+        coords = local_cs.coordinates.data[:, np.newaxis]
+        if isinstance(coords, pint.Quantity):
+            coords = coords.m
+        return local_data + coords
 
     @staticmethod
     def _profile_raster_data_3d(profile: Profile, raster_width, stack: bool = True):

@@ -35,10 +35,10 @@ def check_segments_identical(seg_a, seg_b):
 
     """
     assert isinstance(seg_a, type(seg_b))
-    assert matrix_is_close(seg_a.points, seg_b.points)
+    assert matrix_is_close(seg_a.points.m, seg_b.points.m)
     if isinstance(seg_a, geo.ArcSegment):
         assert seg_a.arc_winding_ccw == seg_b.arc_winding_ccw
-        assert vector_is_close(seg_a.point_center, seg_b.point_center)
+        assert vector_is_close(seg_a.point_center.m, seg_b.point_center.m)
 
 
 def check_shapes_identical(shp_a, shp_b):
@@ -149,7 +149,13 @@ def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1e-9):
 
     """
     assert matrix_is_close(lcs_a.orientation, lcs_b.orientation, abs_tol)
-    assert vector_is_close(lcs_a.coordinates, lcs_b.coordinates, abs_tol)
+    coords_a = lcs_a.coordinates.data
+    if isinstance(coords_a, pint.Quantity):
+        coords_a = coords_a.m
+    coords_b = lcs_b.coordinates.data
+    if isinstance(coords_b, pint.Quantity):
+        coords_b = coords_b.m
+    assert vector_is_close(coords_a, coords_b, abs_tol)
 
 
 def get_default_profiles() -> List:
@@ -250,8 +256,8 @@ def default_segment_rasterization_tests(
 
     # Check if first and last point of the data are identical to the segment
     # start and end
-    assert vector_is_close(data[:, 0], segment.point_start)
-    assert vector_is_close(data[:, -1], segment.point_end)
+    assert vector_is_close(data[:, 0].m, segment.point_start.m)
+    assert vector_is_close(data[:, -1].m, segment.point_end.m)
 
     for i in range(num_points - 1):
         point = data[:, i]
@@ -275,8 +281,8 @@ def default_segment_rasterization_tests(
     assert num_points_200 == 2
 
     # only 2 points must be segment start and end
-    assert vector_is_close(segment.point_start, data_200[:, 0])
-    assert vector_is_close(segment.point_end, data_200[:, 1])
+    assert vector_is_close(segment.point_start.m, data_200[:, 0].m)
+    assert vector_is_close(segment.point_end.m, data_200[:, 1].m)
 
     # exceptions ------------------------------------------
 
@@ -389,12 +395,12 @@ def line_segment_transformation_test_case(
         segment_trans = segment.transform(transformation)
 
     # original segment not modified
-    assert vector_is_close(segment.point_start, point_start)
-    assert vector_is_close(segment.point_end, point_end)
+    assert vector_is_close(segment.point_start.m, point_start.m)
+    assert vector_is_close(segment.point_end.m, point_end.m)
 
     # check new segment
-    assert vector_is_close(segment_trans.point_start, exp_start)
-    assert vector_is_close(segment_trans.point_end, exp_end)
+    assert vector_is_close(segment_trans.point_start.m, exp_start.m)
+    assert vector_is_close(segment_trans.point_end.m, exp_end.m)
     assert np.isclose(segment_trans.length.m, exp_length)
 
     # apply same transformation in place
@@ -491,18 +497,18 @@ def test_line_segment_interpolation():
         segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, weight)
         exp_point_start = Q_([1 + i, 3 - 2 * i], "mm")
         exp_point_end = Q_([7 - 2 * i, -3 + 4 * i], "mm")
-        assert vector_is_close(segment_c.point_start, exp_point_start)
-        assert vector_is_close(segment_c.point_end, exp_point_end)
+        assert vector_is_close(segment_c.point_start.m, exp_point_start.m)
+        assert vector_is_close(segment_c.point_end.m, exp_point_end.m)
 
     # check weight clipped to valid range -----------------
 
     segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, -3)
-    assert vector_is_close(segment_c.point_start, segment_a.point_start)
-    assert vector_is_close(segment_c.point_end, segment_a.point_end)
+    assert vector_is_close(segment_c.point_start.m, segment_a.point_start.m)
+    assert vector_is_close(segment_c.point_end.m, segment_a.point_end.m)
 
     segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, 6)
-    assert vector_is_close(segment_c.point_start, segment_b.point_start)
-    assert vector_is_close(segment_c.point_end, segment_b.point_end)
+    assert vector_is_close(segment_c.point_start.m, segment_b.point_start.m)
+    assert vector_is_close(segment_c.point_end.m, segment_b.point_end.m)
 
     # exceptions ------------------------------------------
 
@@ -553,14 +559,27 @@ def check_arc_segment_values(
         Expected arc length
 
     """
-    assert vector_is_close(segment.point_start, point_start)
-    assert vector_is_close(segment.point_end, point_end)
-    assert vector_is_close(segment.point_center, point_center)
+    if isinstance(point_start, pint.Quantity):
+        point_start = point_start.m
+    if isinstance(point_end, pint.Quantity):
+        point_end = point_end.m
+    if isinstance(point_center, pint.Quantity):
+        point_center = point_center.m
+    if isinstance(radius, pint.Quantity):
+        radius = radius.m
+    if isinstance(arc_angle, pint.Quantity):
+        arc_angle = arc_angle.m
+    if isinstance(arc_length, pint.Quantity):
+        arc_length = arc_length.m
+
+    assert vector_is_close(segment.point_start.m, point_start)
+    assert vector_is_close(segment.point_end.m, point_end)
+    assert vector_is_close(segment.point_center.m, point_center)
 
     assert segment.arc_winding_ccw is winding_ccw
-    assert np.isclose(segment.radius, radius)
-    assert np.isclose(segment.arc_angle, arc_angle)
-    assert np.isclose(segment.arc_length, arc_length)
+    assert np.isclose(segment.radius.m, radius)
+    assert np.isclose(segment.arc_angle.m, arc_angle)
+    assert np.isclose(segment.arc_length.m, arc_length)
 
 
 def arc_segment_rasterization_test(
@@ -1648,6 +1667,8 @@ def shape_reflection_test_case(normal, distance_to_origin):
         Distance to the origin of the reflection axis.
 
     """
+    if isinstance(normal, pint.Quantity):
+        normal = normal.m
     direction_reflection_axis = np.array([normal[1], -normal[0]])
     normal_length = np.linalg.norm(normal)
     unit_normal = np.array(normal) / normal_length
@@ -1747,8 +1768,17 @@ def check_point_reflected_across_line(
         Second point of the reflection axis
 
     """
+    if isinstance(point_original, pint.Quantity):
+        point_original = point_original.m
+    if isinstance(point_reflected, pint.Quantity):
+        point_reflected = point_reflected.m
+    if isinstance(point_start, pint.Quantity):
+        point_start = point_start.m
+    if isinstance(point_end, pint.Quantity):
+        point_end = point_end.m
+
     vec_original_reflected = point_reflected - point_original
-    mid_point = Q_(point_original + 0.5 * vec_original_reflected, "mm")
+    mid_point = point_original + 0.5 * vec_original_reflected
 
     vec_start_mid = mid_point - point_start
     vec_start_end = point_end - point_start
@@ -2033,7 +2063,7 @@ def test_profile_rasterization():
 
     # Check that all shapes are rasterized correct
     for i in range(int(round(3 / raster_width.m)) + 1):
-        assert vector_is_close(data[:, i], [i * raster_width.m - 1, 0])
+        assert vector_is_close(data[:, i].m, [i * raster_width.m - 1, 0])
 
     # exceptions
     with pytest.raises(Exception):
@@ -2390,14 +2420,13 @@ def test_trace_rasterization():
     for i in range(data.shape[1]):
         trace_location = i * raster_width_eff
         if trace_location <= Q_("1mm"):
-            assert vector_is_close(trace_location * np.array([1, 0, 0]), data[:, i])
+            assert vector_is_close(trace_location.m * np.array([1, 0, 0]), data[:, i].m)
         else:
             arc_length = trace_location - Q_("1mm")
             angle = arc_length * Q_("rad/mm")  # -> arc_length = arc_angle * radius
             x = np.sin(angle) + 1  # radius 1 -> sin(arc_angle) = x / radius
             y = 1 - np.cos(angle)
-
-            assert vector_is_close([x, y, 0], data[:, i])
+            assert vector_is_close([x.m, y.m, 0], data[:, i].m)
 
     # check with arbitrary coordinate system --------------
     orientation = WXRotation.from_euler("y", np.pi / 2).as_matrix()
@@ -2419,17 +2448,17 @@ def test_trace_rasterization():
             arc_length = trace_location - Q_("1mm")
             angle = arc_length * Q_("rad/mm")  # -> arc_length = arc_angle * radius
             x = coordinates[0].m
-            y = coordinates[1].m + 1 - np.cos(angle)
-            z = coordinates[2].m - 1 - np.sin(angle)
-        assert vector_is_close(Q_([x, y, z], "mm"), data[:, i])
+            y = coordinates[1].m + 1 - np.cos(angle.m)
+            z = coordinates[2].m - 1 - np.sin(angle.m)
+        assert vector_is_close([x, y, z], data[:, i].m)
 
     # check if raster width is clipped to valid range -----
     data = trace.rasterize("1000mm")
 
     assert data.shape[1] == 2
     print(data[:, 0])
-    assert vector_is_close(Q_([-3, 2.5, 5], "mm"), data[:, 0])
-    assert vector_is_close(Q_([-3, 4.5, 4], "mm"), data[:, 1])
+    assert vector_is_close([-3, 2.5, 5], data[:, 0].m)
+    assert vector_is_close([-3, 4.5, 4], data[:, 1].m)
 
     # exceptions ------------------------------------------
     with pytest.raises(Exception):
@@ -2456,10 +2485,17 @@ def check_interpolated_profile_points(profile, c_0, c_1, c_2):
         Third expected point
 
     """
-    assert vector_is_close(profile.shapes[0].segments[0].point_start, c_0)
-    assert vector_is_close(profile.shapes[0].segments[0].point_end, c_1)
-    assert vector_is_close(profile.shapes[1].segments[0].point_start, c_1)
-    assert vector_is_close(profile.shapes[1].segments[0].point_end, c_2)
+    if isinstance(c_0, pint.Quantity):
+        c_0 = c_0.m
+    if isinstance(c_1, pint.Quantity):
+        c_1 = c_1.m
+    if isinstance(c_2, pint.Quantity):
+        c_2 = c_2.m
+
+    assert vector_is_close(profile.shapes[0].segments[0].point_start.m, c_0)
+    assert vector_is_close(profile.shapes[0].segments[0].point_end.m, c_1)
+    assert vector_is_close(profile.shapes[1].segments[0].point_start.m, c_1)
+    assert vector_is_close(profile.shapes[1].segments[0].point_end.m, c_2)
 
 
 def test_linear_profile_interpolation_sbs():
@@ -2509,8 +2545,8 @@ def test_linear_profile_interpolation_sbs():
     # number of segments differ
     shape_b012 = geo.Shape(
         [
-            geo.LineSegment.construct_with_points(Q_(b_0, "mm"), Q_(b_1, "mm")),
-            geo.LineSegment.construct_with_points(Q_(b_1, "mm"), Q_(b_2, "mm")),
+            geo.LineSegment.construct_with_points(b_0, b_1),
+            geo.LineSegment.construct_with_points(b_1, b_2),
         ]
     )
 
@@ -2740,12 +2776,12 @@ def test_geometry_rasterization_trace():
                     profile_points[0, j],
                     profile_points[1, j],
                 ]
-                assert vector_is_close(data[:, idx_0 + j], point_exp)
+                assert vector_is_close(data[:, idx_0 + j].m, point_exp)
         # check second segment (arc)
         else:
             # first 2 profile points lie on the arcs center point
-            assert vector_is_close(data[:, idx_0], [1, a0[0], a0[1]])
-            assert vector_is_close(data[:, idx_0 + 1], [1, a1[0], a1[1]])
+            assert vector_is_close(data[:, idx_0].m, [1, a0[0], a0[1]])
+            assert vector_is_close(data[:, idx_0 + 1].m, [1, a1[0], a1[1]])
 
             # z-values are constant
             for j in np.arange(2, 6, 1):
@@ -2854,7 +2890,7 @@ def test_geometry_rasterization_profile_interpolation():
                     profile_points[1, j] * (1 + i * 0.1),
                 ]
             )
-            assert vector_is_close(data[:, idx_0 + j], point_exp)
+            assert vector_is_close(data[:, idx_0 + j].m, point_exp)
 
     # check second profile interpolation
     for i in range(20):
@@ -2867,7 +2903,7 @@ def test_geometry_rasterization_profile_interpolation():
                     profile_points[1, j] * (1 + i * 0.05),
                 ]
             )
-            assert vector_is_close(data[:, idx_0 + j], point_exp)
+            assert vector_is_close(data[:, idx_0 + j].m, point_exp)
 
 
 def get_test_profile() -> geo.Profile:
