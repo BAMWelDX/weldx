@@ -2,7 +2,7 @@
  WelDX - data and quality standards for welding research data
 ##############################################################
 
-|Documentation| |Binder| |Anaconda-Server Badge| |License|
+|Documentation| |Binder| |Anaconda-Server Badge| |Zenodo| |License|
 
 **********
  Overview
@@ -175,6 +175,9 @@ Documentation build
 
 .. |Anaconda-Server Badge| image:: https://anaconda.org/conda-forge/weldx/badges/version.svg
    :target: https://anaconda.org/conda-forge/weldx
+
+.. |Zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.5565186.svg
+   :target: https://doi.org/10.5281/zenodo.5565186
 
 .. |License| image:: https://img.shields.io/badge/License-BSD%203--Clause-orange.svg
    :target: https://opensource.org/licenses/BSD-3-Clause
