@@ -13,13 +13,13 @@ examples:
     - |
       !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
         signal_type: analog
-        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
+        units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> volt
   -
     - A digital dimensionless signal.
     - |
       !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
         signal_type: digital
-        units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> ''
+        units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> dimensionless
 
 properties:
   signal_type:
@@ -30,7 +30,7 @@ properties:
   units:
     description: |
       The unit of the signal (volt, kelvin, etc.).
-    tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
   data:
     description: |
       Measurement data that was produced by the signal.
