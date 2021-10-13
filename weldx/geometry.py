@@ -1296,7 +1296,6 @@ class Profile:
             Raster data
 
         """
-
         raster_width = Q_(raster_width, _DEFAULT_LEN_UNIT)
         raster_data = []
         for shape in self._shapes:
