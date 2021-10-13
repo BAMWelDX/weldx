@@ -24,6 +24,7 @@ A short primer in the steps needed to release a new version of the `weldx` packa
     - [ ] name the GitHub release accordingly, omitting the **v** prefix (this can be change later so don't worry, in
       doubt use **vX.Y.Z** everywhere)
     - [ ] copy the changes/release notes of the current version into the description
+      ([this website](https://mystyc.herokuapp.com/) can be used to convert rST -> MD)
 - [ ] wait for all Github Actions to finish
 
 ## ReadTheDocs update
