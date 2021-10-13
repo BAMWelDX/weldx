@@ -61,6 +61,8 @@ tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
 for f in tutorial_files:
     shutil.copy(f, tutorials_dir)
 
+# todo: Remove
+shutil.copy("./../tutorials/single_pass_weld.wx", tutorials_dir)
 
 # -- Project information -----------------------------------------------------
 _now = datetime.datetime.now().year
