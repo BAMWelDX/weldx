@@ -123,7 +123,7 @@ class LineSegment:
             raise ValueError("'points' must be a 2d array/matrix.")
         if not (points.shape[0] == 2 and points.shape[1] == 2):
             raise ValueError("'points' is not a 2x2 matrix.")
-        self._points = np.array(points, dtype=float)
+        self._points = points.astype(float)
         self._calculate_length()
 
     def __repr__(self):
