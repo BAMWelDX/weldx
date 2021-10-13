@@ -1,4 +1,7 @@
 """ISO 9692-1 welding groove type definitions."""
+
+from __future__ import annotations
+
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass, field

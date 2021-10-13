@@ -281,10 +281,10 @@ def single_pass_weld_example(
         measurements=[welding_current, welding_voltage],
         welding_current=welding_current_chain.get_signal(
             "Calibration current measurement"
-        ),
+        ).data,
         welding_voltage=welding_voltage_chain.get_signal(
             "Calibration voltage measurement"
-        ),
+        ).data,
         coordinate_systems=csm,
         TCP=TCP_reference,
         workpiece=workpiece,
