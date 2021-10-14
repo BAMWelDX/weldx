@@ -71,7 +71,7 @@ jobs:
 
       - name: set notebook execution
         if: (github.event_name == 'workflow_dispatch')
-        run: echo "nbsphinx_execute=${{ github.event.inputs.nbsphinx_execute }}"" >> $GITHUB_ENV
+        run: echo "nbsphinx_execute=${{ github.event.inputs.nbsphinx_execute }}" >> $GITHUB_ENV
 
       - name: Build docs
         shell: bash -l {0}
