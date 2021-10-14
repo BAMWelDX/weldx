@@ -104,10 +104,7 @@ class VariableConverter(WeldxConverter):
         else:
             data = node["data"]  # let asdf handle np arrays with its own wrapper.
 
-        if "units" in node:  # convert to pint.Quantity
-            data = Q_(data, node["units"])
-        elif "unit" in node:  # legacy_code
-            data = Q_(data, node["unit"])
+        data = Q_(data, node["units"])
 
         attrs = node.get("attrs", None)
 

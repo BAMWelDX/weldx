@@ -56,7 +56,7 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
     """
     schema = schema.split(".yaml")[0]
 
-    p = SCHEMA_PATH / ".."  # legacy_code - also look for legacy schemas
+    p = SCHEMA_PATH
     schemas = list(p.glob(f"**/{schema}.yaml"))
     if len(schemas) == 0:
         raise ValueError(f"No matching schema for filename '{schema}'.")

@@ -37,10 +37,7 @@ class TimeSeriesConverter(WeldxConverter):
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct from tree."""
         if "value" in node:  # constant
-            if "units" in node:
-                _units = U_(node["units"])
-            else:  # legacy_code
-                _units = U_(node["unit"])
+            _units = U_(node["units"])
             values = Q_(np.asarray(node["value"]), _units)
             return TimeSeries(values)
         if "values" in node:

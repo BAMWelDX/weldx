@@ -34,8 +34,6 @@ class PintQuantityConverter(WeldxConverter):
         """Reconstruct from tree."""
         if tag.startswith("tag:stsci.edu:asdf"):  # asdf compat
             return Q_(node["value"], node["unit"])
-        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
-            return Q_(node["value"], node["unit"])
         return Q_(node["value"], node["units"])
 
     @staticmethod

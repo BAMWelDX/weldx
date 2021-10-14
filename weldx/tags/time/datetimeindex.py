@@ -41,16 +41,7 @@ class DatetimeIndexConverter(WeldxConverter):
     @staticmethod
     def shape_from_tagged(node: TaggedDict) -> List[int]:
         """Calculate the shape (length of TDI) from static tagged tree instance."""
-        _tag: str = node._tag
-
         if "freq" in node:
-            if _tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
-                temp = pd.date_range(
-                    start=node["start"]["value"],
-                    end=node["end"]["value"],
-                    freq=node["freq"],
-                )
-                return [len(temp)]
             temp = pd.date_range(
                 start=str(node["start"]),  # can't handle TaggedString directly
                 end=str(node["end"]),
