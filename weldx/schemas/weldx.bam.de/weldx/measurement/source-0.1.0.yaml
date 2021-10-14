@@ -14,9 +14,9 @@ examples:
         name: Current Sensor
         output_signal: !<asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.0>
           signal_type: analog
-          units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> V
+          units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> volt
         error: !<asdf://weldx.bam.de/weldx/tags/measurement/error-0.1.0>
-          deviation: !<asdf://weldx.bam.de/weldx/tags/unit/quantity-0.1.0> {value: 0.1, units: !<asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.0> '%'}
+          deviation: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 0.1, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> percent}
 
 type: object
 properties:

@@ -19,9 +19,9 @@ requirements:
   build:
     - pip
     - setuptools_scm
-    - python >=3.8
+    - python >=3.8,<3.10
   run:
-    - python >=3.8
+    - python >=3.8,<3.10
     # dependencies are defined in setup.py
     {% for dep in data['install_requires'] %}
     - {{ dep.lower() }}
@@ -31,6 +31,8 @@ test:
   requires:
     - pytest
     - pytest-xdist
+    # Remove once this is fixed: https://github.com/K3D-tools/K3D-jupyter/issues/312
+    - jupyterlab
   files:
     - conftest.py
   imports:

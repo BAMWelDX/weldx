@@ -1,8 +1,8 @@
 # YAML 1.2
 ---
 title: weldx
-#version:
-#date-released:
+version: 0.5.0
+date-released: 2021-10-12
 authors:
   - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
     email: cagtay.fabry@bam.de
@@ -24,7 +24,7 @@ authors:
     family-names: Pittner
     given-names: Andreas
     orcid: "https://orcid.org/0000-0002-5019-7775"
-message: "If you use this software, please cite it as below."
+message: "If you use this software in your work, please cite it using the following metadata."
 repository-code: "https://github.com/BAMWelDX/weldx"
 keywords:
   - weldx
@@ -48,5 +48,5 @@ abstract: |
   published under an appropriate open source license. By using the file
   format objectivity, comparability and reproducibility across different
   experimental setups can be improved."
-cff-version: "1.2.0"
+cff-version: 1.2.0
 ...

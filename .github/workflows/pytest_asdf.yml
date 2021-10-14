@@ -7,7 +7,7 @@ on:
     - cron: '0 6 * * 1'
 
 jobs:
-  pytest:
+  pytest_asdf:
     name: pytest asdf
     runs-on: ubuntu-latest
     steps:
