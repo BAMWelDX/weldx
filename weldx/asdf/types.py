@@ -119,9 +119,3 @@ def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="we
         version = str(version.spec)
 
     return f"{tag}-{version}"
-
-
-def _legacy_tag_from_new_tag(tag: str):
-    name, version = _new_tag_regex.search(tag).groups()
-    version = "1.0.0"  # legacy_tag version
-    return f"tag:weldx.bam.de:weldx/{name}-{version}"
