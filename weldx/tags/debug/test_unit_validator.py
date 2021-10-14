@@ -19,7 +19,7 @@ class UnitValidatorTestClass:
     nested_prop: dict = field(
         default_factory=lambda: dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "m^3"))
     )
-    simple_prop: dict = field(default_factory=lambda: dict(value=float(3), unit="m"))
+    simple_prop: dict = field(default_factory=lambda: dict(value=float(3), units="m"))
     delta_prop: dict = Q_(100, "Δ°C")
 
 

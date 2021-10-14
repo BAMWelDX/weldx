@@ -46,9 +46,10 @@ properties:
     properties:
       value:
         type: number
-      unit:
+      units:
         type: string
     wx_unit: "m"
+    additionalProperties: false
 
   delta_prop:
     description: simple property with temperature deltas

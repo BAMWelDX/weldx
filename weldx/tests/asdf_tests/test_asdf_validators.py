@@ -208,7 +208,7 @@ def test_unit_validator(test):
             nested_prop=dict(q1=Q_(np.eye(3, 3), "m"), q2=Q_(2, "V")),  # wrong unit
         ),
         UnitValidatorTestClass(
-            simple_prop={"value": float(3), "unit": "s"},  # wrong unit
+            simple_prop={"value": float(3), "units": "s"},  # wrong unit
         ),
     ],
 )
