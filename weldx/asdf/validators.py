@@ -92,7 +92,8 @@ def _unit_validator(
     if not position:
         position = instance
 
-    unit = instance["units"]
+    if "units" in instance:
+        unit = instance["units"]
     unit = str(unit)  # catch TaggedString
     valid = U_(unit).is_compatible_with(U_(expected_dimensionality))
     if not valid:
