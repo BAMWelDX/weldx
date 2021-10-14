@@ -1,13 +1,15 @@
-arc welding description
-=======================
+#########################
+ arc welding description
+#########################
 
 This document describes the main elements and workflow when describing
 arc welding processes. The process description is entirely focused on
 the welding parameters set on the power sources and does not cover
 measurements.
 
-base GMAW process schema
-------------------------
+**************************
+ base GMAW process schema
+**************************
 
 The main layout of any GMAW process is defined in the
 ``asdf://weldx.bam.de/weldx/schemas/process/terms-1.0.0`` schema as
@@ -40,8 +42,9 @@ process. For now, these are basic string entries but will be defined
 more explicitly in later ``weldx`` iterations. The ``meta`` properties
 is an optional field that can hold additional metadata if required.
 
-power source parameters
------------------------
+*************************
+ power source parameters
+*************************
 
 The ``parameters`` property is the most important aspect of the process
 definition. This property is used to list all welding parameters that
@@ -51,8 +54,9 @@ object. This means that all welding process parameters must be defined
 as a quantity (therefor having a unit) and with a time-dependent
 behavior. We will see some examples later.
 
-simple generic GMAW process definition
---------------------------------------
+****************************************
+ simple generic GMAW process definition
+****************************************
 
 The most generic tag implementation of any arc welding process is
 provided by ``asdf://weldx.bam.de/weldx/tags/process/GMAW-1.0.0``:
@@ -77,8 +81,9 @@ to use it, it should only be used in circumstances where no explicit
 process definition exists (yet). The ``process/GMAW`` schema might be
 removed in future versions of the standard.
 
-default spray and pulse arc process definitions
------------------------------------------------
+*************************************************
+ default spray and pulse arc process definitions
+*************************************************
 
 In addition to the ``base_process`` structure, the basic process
 variations like spray and pulsed transfer modes are also defined in
@@ -126,8 +131,9 @@ that the ``parameters`` property always includes a ``wire_feedrate`` and
        tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-1.0.0"
        wx_unit: "V"
 
-combining process schemas
--------------------------
+***************************
+ combining process schemas
+***************************
 
 We combine both the ``terms-1.0.0#/base_process`` and
 ``terms-1.0.0#/process/spray`` definitions using ``allOf`` to create the
@@ -135,19 +141,20 @@ base spray arc process template:
 
 .. code:: yaml
 
-     allOf:
-       - $ref: "./terms-1.0.0#/base_process"
-       - $ref: "./terms-1.0.0#/process/spray"
+   allOf:
+     - $ref: "./terms-1.0.0#/base_process"
+     - $ref: "./terms-1.0.0#/process/spray"
 
-example spray arc definition
-----------------------------
+******************************
+ example spray arc definition
+******************************
 
 The above schemas only serve as building blocks for concrete
 manufacturer and equipment specific definitions of welding processes.
 
-Let’s take a simple spray arc process that can be used on a CLOOS Quinto
-II power source as an example. The power source settings available are
-the following:
+Let’s take a simple spray arc process that can be used on a CLOOS
+Quinto II power source as an example. The power source settings
+available are the following:
 
 -  wire feed rate
 -  welding voltage
@@ -191,8 +198,9 @@ parameters:
 
    ...
 
-use in python API
------------------
+*******************
+ use in python API
+*******************
 
 All GMAW process definitions are handle as instances of the
 ``weldx.welding.GmawProcess`` class. Here is how to create an example

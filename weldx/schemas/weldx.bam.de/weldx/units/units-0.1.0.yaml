@@ -1,0 +1,17 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/units/units-0.1.0"
+
+title: |
+  Describes a physical unit.
+
+examples:
+  -
+    - A 'meter' unit.
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> meter
+
+type: string
+tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
+...

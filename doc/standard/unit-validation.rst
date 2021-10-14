@@ -1,12 +1,13 @@
-unit validation using ``wx_unit``
-=================================
+###################################
+ unit validation using ``wx_unit``
+###################################
 
-| When using ``quantity`` properties in schemas, the dimensionality of
-  the ``unit`` attribute can be validated using the ``wx_unit``
-  validator.
-| Similar to ``wx_shape`` validation, ``wx_unit`` assumes that the
-  object it is attached to has a ``unit`` property of type ``string`` to
-  validate against.
+|  When using ``quantity`` properties in schemas, the dimensionality of
+   the ``unit`` attribute can be validated using the ``wx_unit``
+   validator.
+|  Similar to ``wx_shape`` validation, ``wx_unit`` assumes that the
+   object it is attached to has a ``unit`` property of type ``string``
+   to validate against.
 
 It is important to note that unit validation does not perform a literal
 string comparison (like can be archived with ``enum``) but checks the

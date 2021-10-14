@@ -1,6 +1,8 @@
 """Contains some functions written in matplotlib to help with visualization."""
 
-from typing import Any, Dict, List, Tuple, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +11,7 @@ from matplotlib.axes._axes import Axes
 from matplotlib.figure import Figure
 
 import weldx.geometry as geo
-from weldx import CoordinateSystemManager, LocalCoordinateSystem, TimeSeries
+from weldx.core import TimeSeries
 from weldx.visualization.colors import (
     color_generator_function,
     color_int_to_rgb_normalized,
@@ -17,6 +19,9 @@ from weldx.visualization.colors import (
     get_color,
 )
 from weldx.visualization.types import types_limits, types_timeindex
+
+if TYPE_CHECKING:  # pragma: no cover
+    import weldx.transformations as tf
 
 
 def new_3d_figure_and_axes(
@@ -90,7 +95,7 @@ def axes_equal(axes: Axes):
 
 
 def draw_coordinate_system_matplotlib(
-    coordinate_system: LocalCoordinateSystem,
+    coordinate_system: tf.LocalCoordinateSystem,
     axes: Axes,
     color: Any = None,
     label: str = None,
@@ -169,7 +174,7 @@ def draw_coordinate_system_matplotlib(
 
 
 def plot_local_coordinate_system_matplotlib(
-    lcs: LocalCoordinateSystem,
+    lcs: tf.LocalCoordinateSystem,
     axes: Axes = None,
     color: Any = None,
     label: str = None,
@@ -348,7 +353,7 @@ def plot_coordinate_systems(
 
 
 def plot_coordinate_system_manager_matplotlib(
-    csm: CoordinateSystemManager,
+    csm: tf.CoordinateSystemManager,
     axes: Axes = None,
     reference_system: str = None,
     coordinate_systems: List[str] = None,
@@ -484,6 +489,7 @@ def plot_spatial_data_matplotlib(
     axes: Axes = None,
     color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
     label: str = None,
+    limits: types_limits = None,
     show_wireframe: bool = True,
 ) -> Axes:
     """Visualize a `weldx.geometry.SpatialData` instance.
@@ -501,6 +507,10 @@ def plot_spatial_data_matplotlib(
         color
     label :
         Label of the plotted geometry
+    limits :
+        Each tuple marks lower and upper boundary of the x, y and z axis. If only a
+        single tuple is passed, the boundaries are used for all axis. If `None`
+        is provided, the axis are adjusted to be of equal length.
     show_wireframe :
         If `True`, the mesh is plotted as wireframe. Otherwise only the raster
         points are visualized. Currently, the wireframe can't be visualized if a
@@ -550,4 +560,5 @@ def plot_spatial_data_matplotlib(
                 zorder=1,
             )
 
+    _set_limits_matplotlib(axes, limits)
     return axes

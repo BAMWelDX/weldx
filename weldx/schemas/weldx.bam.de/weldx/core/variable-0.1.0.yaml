@@ -32,7 +32,7 @@ properties:
   units:
     description: |
       Optional field describing the unit of the data.
-    tag: "asdf://weldx.bam.de/weldx/tags/unit/unit-0.1.*"
+    tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
   attrs:
     description: |
       Additional attributes metadata associated with the variable.
