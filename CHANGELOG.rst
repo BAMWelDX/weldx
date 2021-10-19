@@ -25,9 +25,9 @@ changes
 -  All public interfaces of the `weldx.geometry` module classes now require
    the usage of units and support unit strings as inputs. `[#588]
    <https://github.com/BAMWelDX/weldx/pull/588>`__
-   
-- `CoordinateSystemManager.time_union` now returns a `Time` instance `[#603]
-  <https://github.com/BAMWelDX/weldx/pull/603>`__
+
+- `CoordinateSystemManager.time_union` now returns a `Time` instance instead
+  of a pandas type `[#603] <https://github.com/BAMWelDX/weldx/pull/603>`__
 
 
 fixes
