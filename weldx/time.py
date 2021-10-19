@@ -597,7 +597,7 @@ class Time:
         Time:
         TimedeltaIndex(['0 days 00:00:03', '0 days 00:00:05', '0 days 00:00:07',
                         '0 days 00:00:09'],
-                       dtype='timedelta64[ns]', freq='2S')
+                       dtype='timedelta64[ns]', freq=None)
 
         Resample with a time delta:
 
