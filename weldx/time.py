@@ -612,22 +612,20 @@ class Time:
         if len(self) <= 1:
             raise RuntimeError("Can't resample a single time delta or timestamp")
 
-        duration = self.duration.as_timedelta()
+        tdi = self.as_timedelta_index()
+        t0, t1 = tdi.min(), tdi.max()
+
+        if isinstance(number_or_interval, str):
+            number_or_interval = pd.Timedelta(number_or_interval)
         if isinstance(number_or_interval, int):
-            n = np.clip(number_or_interval, a_min=2, a_max=None)
-            interval = duration / (n - 1)
+            tdi_new = pd.timedelta_range(start=t0, end=t1, periods=number_or_interval)
         else:
-            interval = Time(number_or_interval).as_timedelta()
-            if interval <= pd.Timedelta(0):
-                raise ValueError("Interval must be larger than 0")
-            n = np.clip(int(np.ceil(duration / interval)) + 1, 2, None)
+            tdi_new = pd.timedelta_range(start=t0, end=t1, freq=number_or_interval)
 
-        limits = Time([self.min(), self.max()], self.reference_time)
-        if n <= 2:
-            return limits
+        if not tdi_new[-1] == t1:
+            tdi_new = tdi_new.append(pd.Index([t1]))
 
-        deltas = Time([v for i in range(n - 1) if (v := (i + 1) * interval) < duration])
-        return Time(limits.union(self.min() + deltas), self.reference_time)
+        return Time(tdi_new, self.reference_time)
 
     @staticmethod
     def _convert_quantity(
