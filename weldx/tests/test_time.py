@@ -707,7 +707,6 @@ class TestTime:
         "number_or_interval, exp_values",
         [
             # test clipping
-            (1, [3, 9]),
             ("10s", [3, 9]),
             # test edge case
             (2, [3, 9]),
@@ -744,6 +743,7 @@ class TestTime:
             ("4s", 2, RuntimeError),
             ("2000-02-01", 2, RuntimeError),
             (["4s", "10s"], "no time", TypeError),
+            (["4s", "10s"], 1, ValueError),
             (["4s", "10s"], "0s", ValueError),
             (["4s", "10s"], "-2s", ValueError),
         ],

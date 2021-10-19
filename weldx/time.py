@@ -615,12 +615,18 @@ class Time:
         tdi = self.as_timedelta_index()
         t0, t1 = tdi.min(), tdi.max()
 
-        if isinstance(number_or_interval, str):
-            number_or_interval = pd.Timedelta(number_or_interval)
         if isinstance(number_or_interval, int):
+            if number_or_interval < 2:
+                raise ValueError("Number of time steps must be equal or larger than 2.")
+
             tdi_new = pd.timedelta_range(start=t0, end=t1, periods=number_or_interval)
         else:
-            tdi_new = pd.timedelta_range(start=t0, end=t1, freq=number_or_interval)
+            freq = Time(number_or_interval).as_timedelta()
+
+            if freq <= pd.Timedelta(0):
+                raise ValueError("Time delta must be a positive, non-zero value.")
+
+            tdi_new = pd.timedelta_range(start=t0, end=t1, freq=freq)
 
         if not tdi_new[-1] == t1:
             tdi_new = tdi_new.append(pd.Index([t1]))
