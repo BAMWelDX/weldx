@@ -683,6 +683,76 @@ class TestTime:
         arr2 = time.as_data_array().weldx.time_ref_restore()
         assert arr.time.identical(arr2.time)
 
+    # test_duration --------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "values, exp_duration",
+        [
+            ("1s", "0s"),
+            ("2000-01-01", "0s"),
+            (Q_([3, 5, 7, 8], "s"), "5s"),
+            (["2000-01-03", "2000-01-05", "2000-01-07", "2000-01-08"], "5days"),
+        ],
+    )
+    def test_duration(values, exp_duration):
+        """Test the duration property."""
+        t = Time(values)
+        assert t.duration.all_close(exp_duration)
+
+    # test_resample --------------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "number_or_interval, exp_values",
+        [
+            # test clipping
+            ("10s", [3, 9]),
+            # test edge case
+            (2, [3, 9]),
+            ("6s", [3, 9]),
+            # test even time deltas
+            (4, [3, 5, 7, 9]),
+            ("2s", [3, 5, 7, 9]),
+            # test uneven time deltas
+            ("5s", [3, 8, 9]),
+            ("2.2s", [3, 5.2, 7.4, 9]),
+        ],
+    )
+    def test_resample(number_or_interval, exp_values):
+        """Test resample method."""
+        t_ref = "2000-01-01"
+        t_delta = Time(Q_([3, 5, 8, 9], "s"))
+        t_abs = t_delta + t_ref
+
+        exp_delta = Time(Q_(exp_values, "s"))
+        exp_abs = exp_delta + t_ref
+
+        result_delta = t_delta.resample(number_or_interval)
+        result_abs = t_abs.resample(number_or_interval)
+
+        assert result_delta.all_close(exp_delta)
+        assert result_abs.all_close(exp_abs)
+
+    # test_resample_exceptions ---------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "values,number_or_interval, raises",
+        [
+            ("4s", 2, RuntimeError),
+            ("2000-02-01", 2, RuntimeError),
+            (["4s", "10s"], "no time", TypeError),
+            (["4s", "10s"], 1, ValueError),
+            (["4s", "10s"], "0s", ValueError),
+            (["4s", "10s"], "-2s", ValueError),
+        ],
+    )
+    def test_resample_exceptions(values, number_or_interval, raises):
+        """Test possible exceptions of the resample method."""
+        with pytest.raises(raises):
+            Time(values).resample(number_or_interval)
+
     # test_union -----------------------------------------------------------------------
 
     @staticmethod

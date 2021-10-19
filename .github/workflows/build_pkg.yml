@@ -36,7 +36,7 @@ jobs:
         uses: actions/cache@v2
         env:
           # Increase this value to reset cache if ./devtools/conda.recipe/build_env.yml has not changed
-          CACHE_NUMBER: 1
+          CACHE_NUMBER: 2
         with:
           path: ~/micromamba/pkgs
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./devtools/conda.recipe/build_env.yml') }}
@@ -45,6 +45,7 @@ jobs:
         uses: mamba-org/provision-with-micromamba@v10
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
+          micromamba-version: 0.16.0
 
       - name: activate build env
         shell: bash -l {0}
