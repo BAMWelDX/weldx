@@ -25,7 +25,7 @@ changes
 
 fixes
 =====
-- `Time.all_close` which didn't work at all and didn't have a test `[#603]
+- fix broken `Time.all_close` to now work as intended `[#603]
   <https://github.com/BAMWelDX/weldx/pull/603>`__
 
 documentation
