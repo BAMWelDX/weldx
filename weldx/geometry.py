@@ -2700,6 +2700,13 @@ class SpatialData:
 
         return SpatialData(points, triangles)
 
+    def limits(self) -> List[Tuple[float, float]]:
+        """Get the xyz limits of the coordinates."""
+        return [
+            (self.coordinates.values[:, i].min(), self.coordinates.values[:, i].max())
+            for i in range(3)
+        ]
+
     def plot(
         self,
         axes: matplotlib.axes.Axes = None,

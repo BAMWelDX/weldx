@@ -3107,6 +3107,8 @@ class TestSpatialData:
 
         assert (reference == other) == expected_result
 
+        assert reference.limits() == [(0, 1), (0, 1), (0, 0)]
+
     # test_read_write_file -------------------------------------------------------------
 
     @staticmethod
