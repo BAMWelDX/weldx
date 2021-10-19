@@ -584,6 +584,29 @@ class Time:
             When the passed value is neither an integer or a supported time delta value
         ValueError :
             When the passed time delta is equal or lower than 0
+
+        Examples
+        --------
+        >>> from weldx import Time
+        >>> t = Time(["3s","6s","7s", "9s"])
+
+        Resample using an integer:
+
+        >>> t.resample(4)
+        Time:
+        TimedeltaIndex(['0 days 00:00:03', '0 days 00:00:05', '0 days 00:00:07',
+                        '0 days 00:00:09'],
+                       dtype='timedelta64[ns]', freq='2S')
+
+        Resample with a time delta:
+
+        >>> t.resample("1.5s")
+        Time:
+        TimedeltaIndex([       '0 days 00:00:03', '0 days 00:00:04.500000',
+                               '0 days 00:00:06', '0 days 00:00:07.500000',
+                               '0 days 00:00:09'],
+                       dtype='timedelta64[ns]', freq='1500L')
+
         """
         if len(self) <= 1:
             raise RuntimeError("Can't resample a single time delta or timestamp")
