@@ -9,6 +9,9 @@
 added
 =====
 
+- Added `weldx.geometry.SpatialData.limits` to calculate coordinate boundaries.
+  `[#604] <https://github.com/BAMWelDX/weldx/pull/604>`__
+
 removed
 =======
 
