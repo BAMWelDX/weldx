@@ -574,16 +574,16 @@ class Time:
 
         Returns
         -------
-        Time :
+        weldx.time.Time :
             Resampled time object
 
         Raises
         ------
-        RuntimeError :
+        RuntimeError
             When the time data consists only of a single value and has no duration.
-        TypeError :
+        TypeError
             When the passed value is neither an integer or a supported time delta value
-        ValueError :
+        ValueError
             When the passed time delta is equal or lower than 0
 
         Examples
