@@ -8,6 +8,10 @@
 
 added
 =====
+- `Time.duration` to get the covered duration of the data and `Time.resample`
+  to get a new `Time` instance with resampled time data within the same
+  boundaries as the original object `[#603]
+  <https://github.com/BAMWelDX/weldx/pull/603>`__
 
 removed
 =======
@@ -21,6 +25,8 @@ changes
 
 fixes
 =====
+- `Time.all_close` which didn't work at all and didn't have a test `[#603]
+  <https://github.com/BAMWelDX/weldx/pull/603>`__
 
 documentation
 =============
