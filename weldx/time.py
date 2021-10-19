@@ -417,9 +417,10 @@ class Time:
             otherwise
 
         """
+        other = Time(other)
         if self.is_absolute and self.reference_time != other.reference_time:
             return False
-        return np.allclose(self.as_quantity(), Time(other).as_quantity())
+        return np.allclose(self.as_quantity(), other.as_quantity())
 
     def as_quantity(self, unit: str = "s") -> pint.Quantity:
         """Return the data as `pint.Quantity`.
