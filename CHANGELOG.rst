@@ -6,12 +6,38 @@
  0.5.1 (unreleased)
 ********************
 
+added
+=====
+
+removed
+=======
+
+changes
+=======
+
+-  All public interfaces of the `weldx.geometry` module classes now require
+   the usage of units and support unit strings as inputs. `[#588]
+   <https://github.com/BAMWelDX/weldx/pull/588>`__
+
+fixes
+=====
+
 documentation
 =============
 
 -  move the schema documentation to `BAMWelDX/weldx-standard
    <https://github.com/BAMWelDX/weldx-standard>`__ `[#594]
    <https://github.com/BAMWelDX/weldx/pull/594>`__
+
+ASDF
+====
+
+deprecations
+============
+
+dependencies
+============
+
 
 ********************
  0.5.0 (12.10.2021)

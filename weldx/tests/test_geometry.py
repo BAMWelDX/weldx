@@ -35,10 +35,10 @@ def check_segments_identical(seg_a, seg_b):
 
     """
     assert isinstance(seg_a, type(seg_b))
-    assert matrix_is_close(seg_a.points, seg_b.points)
+    assert matrix_is_close(seg_a.points.m, seg_b.points.m)
     if isinstance(seg_a, geo.ArcSegment):
         assert seg_a.arc_winding_ccw == seg_b.arc_winding_ccw
-        assert vector_is_close(seg_a.point_center, seg_b.point_center)
+        assert vector_is_close(seg_a.point_center.m, seg_b.point_center.m)
 
 
 def check_shapes_identical(shp_a, shp_b):
@@ -91,7 +91,7 @@ def check_variable_profiles_identical(vp_a, vp_b):
     for i in range(vp_a.num_profiles):
         check_profiles_identical(vp_a.profiles[i], vp_b.profiles[i])
     for i in range(vp_a.num_locations):
-        assert math.isclose(vp_a.locations[i], vp_b.locations[i])
+        assert np.isclose(vp_a.locations[i], vp_b.locations[i])
     for i in range(vp_a.num_interpolation_schemes):
         assert isinstance(
             vp_a.interpolation_schemes[i], type(vp_b.interpolation_schemes[i])
@@ -114,9 +114,9 @@ def check_trace_segments_identical(seg_a, seg_b):
         assert seg_a.length == seg_b.length
     else:
         assert seg_a.is_clockwise == seg_b.is_clockwise
-        assert math.isclose(seg_a.angle, seg_b.angle)
-        assert math.isclose(seg_a.length, seg_b.length)
-        assert math.isclose(seg_a.radius, seg_b.radius)
+        assert np.isclose(seg_a.angle, seg_b.angle)
+        assert np.isclose(seg_a.length, seg_b.length)
+        assert np.isclose(seg_a.radius, seg_b.radius)
 
 
 def check_traces_identical(trc_a, trc_b):
@@ -149,7 +149,13 @@ def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1e-9):
 
     """
     assert matrix_is_close(lcs_a.orientation, lcs_b.orientation, abs_tol)
-    assert vector_is_close(lcs_a.coordinates, lcs_b.coordinates, abs_tol)
+    coords_a = lcs_a.coordinates.data
+    if isinstance(coords_a, pint.Quantity):
+        coords_a = coords_a.m
+    coords_b = lcs_b.coordinates.data
+    if isinstance(coords_b, pint.Quantity):
+        coords_b = coords_b.m
+    assert vector_is_close(coords_a, coords_b, abs_tol)
 
 
 def get_default_profiles() -> List:
@@ -164,15 +170,15 @@ def get_default_profiles() -> List:
     a_0 = [0, 0]
     a_1 = [8, 16]
     a_2 = [16, 0]
-    shape_a01 = geo.Shape().add_line_segments([a_0, a_1])
-    shape_a12 = geo.Shape().add_line_segments([a_1, a_2])
+    shape_a01 = geo.Shape().add_line_segments(Q_([a_0, a_1], "mm"))
+    shape_a12 = geo.Shape().add_line_segments(Q_([a_1, a_2], "mm"))
     profile_a = geo.Profile([shape_a01, shape_a12])
 
     b_0 = [-4, 8]
     b_1 = [0, 8]
     b_2 = [16, -16]
-    shape_b01 = geo.Shape().add_line_segments([b_0, b_1])
-    shape_b12 = geo.Shape().add_line_segments([b_1, b_2])
+    shape_b01 = geo.Shape().add_line_segments(Q_([b_0, b_1], "mm"))
+    shape_b12 = geo.Shape().add_line_segments(Q_([b_1, b_2], "mm"))
     profile_b = geo.Profile([shape_b01, shape_b12])
     return [profile_a, profile_b]
 
@@ -250,41 +256,41 @@ def default_segment_rasterization_tests(
 
     # Check if first and last point of the data are identical to the segment
     # start and end
-    assert vector_is_close(data[:, 0], segment.point_start)
-    assert vector_is_close(data[:, -1], segment.point_end)
+    assert vector_is_close(data[:, 0].m, segment.point_start.m)
+    assert vector_is_close(data[:, -1].m, segment.point_end.m)
 
     for i in range(num_points - 1):
         point = data[:, i]
         next_point = data[:, i + 1]
 
-        raster_width_eff = np.linalg.norm(next_point - point)
+        raster_width_eff = np.linalg.norm(next_point.m - point.m)
 
         # effective raster width is close to specified one
-        assert np.abs(raster_width_eff - raster_width) < 0.1 * raster_width
+        assert np.abs(raster_width_eff - raster_width.m) < 0.1 * raster_width.m
 
         # effective raster width is constant (equidistant points)
-        assert math.isclose(raster_width_eff, np.linalg.norm(data[:, 1] - data[:, 0]))
+        assert np.isclose(raster_width_eff, np.linalg.norm(data[:, 1].m - data[:, 0].m))
 
     # check that there are no duplicate points
-    assert helpers.are_all_columns_unique(data)
+    assert helpers.are_all_columns_unique(data.m)
 
     # check that rasterization with too large raster width still works
-    data_200 = segment.rasterize(200)
+    data_200 = segment.rasterize("200mm")
 
     num_points_200 = data_200.shape[1]
     assert num_points_200 == 2
 
     # only 2 points must be segment start and end
-    assert vector_is_close(segment.point_start, data_200[:, 0])
-    assert vector_is_close(segment.point_end, data_200[:, 1])
+    assert vector_is_close(segment.point_start.m, data_200[:, 0].m)
+    assert vector_is_close(segment.point_end.m, data_200[:, 1].m)
 
     # exceptions ------------------------------------------
 
     # raster width <= 0
     with pytest.raises(ValueError):
-        segment.rasterize(0)
+        segment.rasterize("0mm")
     with pytest.raises(ValueError):
-        segment.rasterize(-3)
+        segment.rasterize("-3mm")
 
 
 # test LineSegment ------------------------------------------------------------
@@ -293,23 +299,23 @@ def default_segment_rasterization_tests(
 def test_line_segment_construction():
     """Test constructor and factories."""
     # class constructor -----------------------------------
-    segment = geo.LineSegment([[3, 5], [3, 4]])
-    assert math.isclose(segment.length, np.sqrt(5))
+    segment = geo.LineSegment(Q_([[3, 5], [3, 4]], "mm"))
+    assert np.isclose(segment.length.m, np.sqrt(5))
 
     # exceptions ------------------------------------------
     # length = 0
     with pytest.raises(ValueError):
-        geo.LineSegment([[0, 0], [1, 1]])
+        geo.LineSegment(Q_([[0, 0], [1, 1]], "mm"))
     # not 2x2
     with pytest.raises(ValueError):
-        geo.LineSegment([[3, 5], [3, 4], [3, 2]])
+        geo.LineSegment(Q_([[3, 5], [3, 4], [3, 2]], "mm"))
     # not a 2d array
     with pytest.raises(ValueError):
-        geo.LineSegment([[[3, 5], [3, 4]]])
+        geo.LineSegment(Q_([[[3, 5], [3, 4]]], "mm"))
 
     # factories -------------------------------------------
-    segment = geo.LineSegment.construct_with_points([3, 3], [4, 5])
-    assert math.isclose(segment.length, np.sqrt(5))
+    segment = geo.LineSegment.construct_with_points(Q_([3, 3], "mm"), Q_([4, 5], "mm"))
+    assert np.isclose(segment.length.m, np.sqrt(5))
 
 
 def test_line_segment_rasterization():
@@ -320,10 +326,10 @@ def test_line_segment_rasterization():
     points lie between the segments start and end point.
 
     """
-    raster_width = 0.1
+    raster_width = Q_(0.1, "mm")
 
-    point_start = np.array([3, 3])
-    point_end = np.array([4, 5])
+    point_start = Q_([3, 3], "mm")
+    point_end = Q_([4, 5], "mm")
     segment = geo.LineSegment.construct_with_points(point_start, point_end)
 
     # perform default tests
@@ -335,10 +341,10 @@ def test_line_segment_rasterization():
 
     # check that points lie between start and end
     vec_start_end = point_end - point_start
-    unit_vec_start_end = tf.normalize(vec_start_end)
-    length_start_end = np.linalg.norm(vec_start_end)
+    unit_vec_start_end = tf.normalize(vec_start_end.m)
+    length_start_end = np.linalg.norm(vec_start_end.m)
     for i in np.arange(1, num_points - 1, 1):
-        vec_start_point = raster_data[:, i] - point_start
+        vec_start_point = (raster_data[:, i] - point_start).m
         unit_vec_start_point = tf.normalize(vec_start_point)
         length_start_point = np.linalg.norm(vec_start_point)
 
@@ -389,13 +395,13 @@ def line_segment_transformation_test_case(
         segment_trans = segment.transform(transformation)
 
     # original segment not modified
-    assert vector_is_close(segment.point_start, point_start)
-    assert vector_is_close(segment.point_end, point_end)
+    assert vector_is_close(segment.point_start.m, point_start.m)
+    assert vector_is_close(segment.point_end.m, point_end.m)
 
     # check new segment
-    assert vector_is_close(segment_trans.point_start, exp_start)
-    assert vector_is_close(segment_trans.point_end, exp_end)
-    assert math.isclose(segment_trans.length, exp_length)
+    assert vector_is_close(segment_trans.point_start.m, exp_start.m)
+    assert vector_is_close(segment_trans.point_end.m, exp_end.m)
+    assert np.isclose(segment_trans.length.m, exp_length)
 
     # apply same transformation in place
     if translation is not None:
@@ -414,11 +420,11 @@ def test_line_segment_transformations():
     # translation -----------------------------------------
 
     line_segment_transformation_test_case(
-        point_start=[3, 3],
-        point_end=[4, 5],
-        translation=[-1, 4],
-        exp_start=[2, 7],
-        exp_end=[3, 9],
+        point_start=Q_([3, 3], "mm"),
+        point_end=Q_([4, 5], "mm"),
+        translation=Q_([-1, 4], "mm"),
+        exp_start=Q_([2, 7], "mm"),
+        exp_end=Q_([3, 9], "mm"),
         exp_length=np.sqrt(5),
     )
 
@@ -428,11 +434,11 @@ def test_line_segment_transformations():
     rotation_matrix = [[c, -s], [s, c]]
 
     line_segment_transformation_test_case(
-        point_start=[2, 2],
-        point_end=[3, 6],
+        point_start=Q_([2, 2], "mm"),
+        point_end=Q_([3, 6], "mm"),
         transformation=rotation_matrix,
-        exp_start=[0, np.sqrt(8)],
-        exp_end=np.matmul(rotation_matrix, [3, 6]),
+        exp_start=Q_([0, np.sqrt(8)], "mm"),
+        exp_end=Q_(np.matmul(rotation_matrix, [3, 6]), "mm"),
         exp_length=np.sqrt(17),
     )
 
@@ -441,11 +447,11 @@ def test_line_segment_transformations():
     reflection_matrix = np.identity(2) - 2 / np.dot(v, v) * np.outer(v, v)
 
     line_segment_transformation_test_case(
-        point_start=[-1, 3],
-        point_end=[6, 1],
+        point_start=Q_([-1, 3], "mm"),
+        point_end=Q_([6, 1], "mm"),
         transformation=reflection_matrix,
-        exp_start=[3, -1],
-        exp_end=[1, 6],
+        exp_start=Q_([3, -1], "mm"),
+        exp_end=Q_([1, 6], "mm"),
         exp_length=np.sqrt(53),
     )
 
@@ -453,11 +459,11 @@ def test_line_segment_transformations():
     scale_matrix = [[4, 0], [0, 0.5]]
 
     line_segment_transformation_test_case(
-        point_start=[-2, 2],
-        point_end=[1, 4],
+        point_start=Q_([-2, 2], "mm"),
+        point_end=Q_([1, 4], "mm"),
         transformation=scale_matrix,
-        exp_start=[-8, 1],
-        exp_end=[4, 2],
+        exp_start=Q_([-8, 1], "mm"),
+        exp_end=Q_([4, 2], "mm"),
         exp_length=np.sqrt(145),
     )
 
@@ -465,7 +471,7 @@ def test_line_segment_transformations():
 
     # transformation results in length = 0
     zero_matrix = np.zeros((2, 2))
-    segment = geo.LineSegment.construct_with_points([0, 0], [1, 2])
+    segment = geo.LineSegment.construct_with_points(Q_([0, 0], "mm"), Q_([1, 2], "mm"))
     with pytest.raises(Exception):
         segment.apply_transformation(zero_matrix)
     with pytest.raises(Exception):
@@ -479,31 +485,37 @@ def test_line_segment_interpolation():
     result is compared to the expected values.
 
     """
-    segment_a = geo.LineSegment.construct_with_points([1, 3], [7, -3])
-    segment_b = geo.LineSegment.construct_with_points([5, -5], [-1, 13])
+    segment_a = geo.LineSegment.construct_with_points(
+        Q_([1, 3], "mm"), Q_([7, -3], "mm")
+    )
+    segment_b = geo.LineSegment.construct_with_points(
+        Q_([5, -5], "mm"), Q_([-1, 13], "mm")
+    )
 
     for i in range(5):
         weight = i / 4
         segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, weight)
-        exp_point_start = [1 + i, 3 - 2 * i]
-        exp_point_end = [7 - 2 * i, -3 + 4 * i]
-        assert vector_is_close(segment_c.point_start, exp_point_start)
-        assert vector_is_close(segment_c.point_end, exp_point_end)
+        exp_point_start = Q_([1 + i, 3 - 2 * i], "mm")
+        exp_point_end = Q_([7 - 2 * i, -3 + 4 * i], "mm")
+        assert vector_is_close(segment_c.point_start.m, exp_point_start.m)
+        assert vector_is_close(segment_c.point_end.m, exp_point_end.m)
 
     # check weight clipped to valid range -----------------
 
     segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, -3)
-    assert vector_is_close(segment_c.point_start, segment_a.point_start)
-    assert vector_is_close(segment_c.point_end, segment_a.point_end)
+    assert vector_is_close(segment_c.point_start.m, segment_a.point_start.m)
+    assert vector_is_close(segment_c.point_end.m, segment_a.point_end.m)
 
     segment_c = geo.LineSegment.linear_interpolation(segment_a, segment_b, 6)
-    assert vector_is_close(segment_c.point_start, segment_b.point_start)
-    assert vector_is_close(segment_c.point_end, segment_b.point_end)
+    assert vector_is_close(segment_c.point_start.m, segment_b.point_start.m)
+    assert vector_is_close(segment_c.point_end.m, segment_b.point_end.m)
 
     # exceptions ------------------------------------------
 
     # wrong types
-    arc_segment = geo.ArcSegment.construct_with_points([0, 0], [1, 1], [1, 0])
+    arc_segment = geo.ArcSegment.construct_with_points(
+        Q_([0, 0], "mm"), Q_([1, 1], "mm"), Q_([1, 0], "mm")
+    )
     with pytest.raises(TypeError):
         geo.LineSegment.linear_interpolation(segment_a, arc_segment, 0.5)
     with pytest.raises(TypeError):
@@ -547,14 +559,27 @@ def check_arc_segment_values(
         Expected arc length
 
     """
-    assert vector_is_close(segment.point_start, point_start)
-    assert vector_is_close(segment.point_end, point_end)
-    assert vector_is_close(segment.point_center, point_center)
+    if isinstance(point_start, pint.Quantity):
+        point_start = point_start.m
+    if isinstance(point_end, pint.Quantity):
+        point_end = point_end.m
+    if isinstance(point_center, pint.Quantity):
+        point_center = point_center.m
+    if isinstance(radius, pint.Quantity):
+        radius = radius.m
+    if isinstance(arc_angle, pint.Quantity):
+        arc_angle = arc_angle.m
+    if isinstance(arc_length, pint.Quantity):
+        arc_length = arc_length.m
+
+    assert vector_is_close(segment.point_start.m, point_start)
+    assert vector_is_close(segment.point_end.m, point_end)
+    assert vector_is_close(segment.point_center.m, point_center)
 
     assert segment.arc_winding_ccw is winding_ccw
-    assert math.isclose(segment.radius, radius)
-    assert math.isclose(segment.arc_angle, arc_angle)
-    assert math.isclose(segment.arc_length, arc_length)
+    assert np.isclose(segment.radius.m, radius)
+    assert np.isclose(segment.arc_angle.m, arc_angle)
+    assert np.isclose(segment.arc_length.m, arc_length)
 
 
 def arc_segment_rasterization_test(
@@ -588,11 +613,12 @@ def arc_segment_rasterization_test(
         point_center_arc) -> bool
 
     """
-    point_center = np.array(point_center)
-    point_start = np.array(point_start)
-    point_end = np.array(point_end)
+    point_center = Q_(point_center, "mm")
+    point_start = Q_(point_start, "mm")
+    point_end = Q_(point_end, "mm")
+    raster_width = Q_(raster_width, "mm")
 
-    radius_arc = np.linalg.norm(point_start - point_center)
+    radius_arc = np.linalg.norm(point_start.m - point_center.m)
 
     arc_segment = geo.ArcSegment.construct_with_points(
         point_start, point_end, point_center, arc_winding_ccw
@@ -606,19 +632,19 @@ def arc_segment_rasterization_test(
 
     num_points = data.shape[1]
     for i in range(num_points):
-        point = data[:, i]
+        point = data[:, i].m
 
         # Check that winding is correct
-        assert is_point_location_valid_func(point, point_center)
+        assert is_point_location_valid_func(point, point_center.m)
 
         # Check that points have the correct distance to the arcs center
-        distance_center_point = np.linalg.norm(point - point_center)
+        distance_center_point = np.linalg.norm(point - point_center.m)
         assert math.isclose(distance_center_point, radius_arc, abs_tol=1e-6)
 
 
 def test_arc_segment_constructor():
     """Test the arc segment constructor."""
-    points = [[3, 6, 6], [3, 6, 3]]
+    points = Q_([[3, 6, 6], [3, 6, 3]], "mm")
     segment_cw = geo.ArcSegment(points, False)
     segment_ccw = geo.ArcSegment(points, True)
 
@@ -628,9 +654,9 @@ def test_arc_segment_constructor():
         point_end=[6, 6],
         point_center=[6, 3],
         winding_ccw=False,
-        radius=3,
+        radius=Q_(3, "mm"),
         arc_angle=1 / 2 * np.pi,
-        arc_length=3 / 2 * np.pi,
+        arc_length=Q_(3 / 2 * np.pi, "mm"),
     )
 
     check_arc_segment_values(
@@ -639,38 +665,38 @@ def test_arc_segment_constructor():
         point_end=[6, 6],
         point_center=[6, 3],
         winding_ccw=True,
-        radius=3,
+        radius=Q_(3, "mm"),
         arc_angle=3 / 2 * np.pi,
-        arc_length=9 / 2 * np.pi,
+        arc_length=Q_(9 / 2 * np.pi, "mm"),
     )
 
     # check exceptions ------------------------------------
 
     # radius differs
-    points = [[3, 6, 6], [3, 10, 3]]
+    points = Q_([[3, 6, 6], [3, 10, 3]], "mm")
     with pytest.raises(Exception):
         geo.ArcSegment(points, False)
 
     # radius is zero
-    points = [[3, 3, 3], [3, 3, 3]]
+    points = Q_([[3, 3, 3], [3, 3, 3]], "mm")
     with pytest.raises(Exception):
         geo.ArcSegment(points, False)
 
     # arc length zero
-    points = [[3, 3, 6], [3, 3, 3]]
+    points = Q_([[3, 3, 6], [3, 3, 3]], "mm")
     with pytest.raises(Exception):
         geo.ArcSegment(points, False)
     with pytest.raises(Exception):
         geo.ArcSegment(points, True)
 
     # not 2x3
-    points = [[3, 3], [3, 3]]
+    points = Q_([[3, 3], [3, 3]], "mm")
     with pytest.raises(ValueError):
         geo.ArcSegment(points)
 
     # not a 2d array
     with pytest.raises(ValueError):
-        geo.ArcSegment([[[3, 5], [3, 4]]])
+        geo.ArcSegment(Q_([[[3, 5], [3, 4]]], "mm"))
 
 
 def test_arc_segment_factories():
@@ -681,17 +707,17 @@ def test_arc_segment_factories():
 
     """
     # construction with center point ----------------------
-    point_start = [3, 3]
-    point_end = [6, 6]
-    point_center_left = [3, 6]
-    point_center_right = [6, 3]
+    point_start = Q_([3, 3], "mm")
+    point_end = Q_([6, 6], "mm")
+    point_center_left = Q_([3, 6], "mm")
+    point_center_right = Q_([6, 3], "mm")
 
     # expected results
-    radius = 3
+    radius = Q_("3mm")
     angle_small = np.pi * 0.5
     angle_large = np.pi * 1.5
-    arc_length_small = np.pi * 1.5
-    arc_length_large = np.pi * 4.5
+    arc_length_small = Q_(np.pi * 1.5, "mm")
+    arc_length_large = Q_(np.pi * 4.5, "mm")
 
     segment_cw = geo.ArcSegment.construct_with_points(
         point_start, point_end, point_center_right, False
@@ -783,31 +809,31 @@ def test_arc_segment_factories():
 
     # check that too small radii will be clipped to minimal radius
     segment_cw = geo.ArcSegment.construct_with_radius(
-        point_start, point_end, 0.1, False, False
+        point_start, point_end, "0.1mm", False, False
     )
     segment_ccw = geo.ArcSegment.construct_with_radius(
-        point_start, point_end, 0.1, False, True
+        point_start, point_end, "0.1mm", False, True
     )
 
     check_arc_segment_values(
         segment_cw,
         point_start,
         point_end,
-        [4.5, 4.5],
+        Q_([4.5, 4.5], "mm"),
         False,
-        np.sqrt(18) / 2,
+        Q_(np.sqrt(18) / 2, "mm"),
         np.pi,
-        np.pi * np.sqrt(18) / 2,
+        Q_(np.pi * np.sqrt(18) / 2, "mm"),
     )
     check_arc_segment_values(
         segment_ccw,
         point_start,
         point_end,
-        [4.5, 4.5],
+        Q_([4.5, 4.5], "mm"),
         True,
-        np.sqrt(18) / 2,
+        Q_(np.sqrt(18) / 2, "mm"),
         np.pi,
-        np.pi * np.sqrt(18) / 2,
+        Q_(np.pi * np.sqrt(18) / 2, "mm"),
     )
 
 
@@ -1018,6 +1044,11 @@ def arc_segment_transformation_test_case(
     if translation is not None:
         assert transformation is None, "No mixed test cases supported"
 
+    point_start = Q_(point_start, "mm")
+    point_end = Q_(point_end, "mm")
+    point_center = Q_(point_center, "mm")
+    exp_radius = Q_(exp_radius, "mm")
+
     segment_cw = geo.ArcSegment.construct_with_points(
         point_start, point_end, point_center, False
     )
@@ -1033,6 +1064,7 @@ def arc_segment_transformation_test_case(
     arc_length_ccw_original = segment_ccw.arc_length
 
     if translation is not None:
+        translation = Q_(translation, "mm")
         segment_cw_trans = segment_cw.translate(translation)
         segment_ccw_trans = segment_ccw.translate(translation)
     else:
@@ -1188,14 +1220,18 @@ def test_arc_segment_transformations():
     # exceptions ------------------------------------------
 
     # transformation distorts arc
-    segment = geo.ArcSegment.construct_with_points([3, 2], [5, 4], [5, 2], False)
+    segment = geo.ArcSegment.construct_with_points(
+        Q_([3, 2], "mm"), Q_([5, 4], "mm"), Q_([5, 2], "mm"), False
+    )
     with pytest.raises(Exception):
         segment.transform(scaling_matrix)
     with pytest.raises(Exception):
         segment.apply_transformation(scaling_matrix)
 
     # transformation results in length = 0
-    segment = geo.ArcSegment.construct_with_points([3, 2], [5, 4], [5, 2], False)
+    segment = geo.ArcSegment.construct_with_points(
+        Q_([3, 2], "mm"), Q_([5, 4], "mm"), Q_([5, 2], "mm"), False
+    )
     zero_matrix = np.zeros((2, 2))
     with pytest.raises(Exception):
         segment.transform(zero_matrix)
@@ -1209,8 +1245,12 @@ def test_arc_segment_interpolation():
     Since it is not implemented, check if an exception is raised.
 
     """
-    segment_a = geo.ArcSegment.construct_with_points([0, 0], [1, 1], [1, 0])
-    segment_b = geo.ArcSegment.construct_with_points([0, 0], [2, 2], [0, 2])
+    segment_a = geo.ArcSegment.construct_with_points(
+        Q_([0, 0], "mm"), Q_([1, 1], "mm"), Q_([1, 0], "mm")
+    )
+    segment_b = geo.ArcSegment.construct_with_points(
+        Q_([0, 0], "mm"), Q_([2, 2], "mm"), Q_([0, 2], "mm")
+    )
 
     # not implemented yet
     with pytest.raises(Exception):
@@ -1226,8 +1266,12 @@ def test_shape_construction():
     Constructs some shapes in various ways and checks the results.
 
     """
-    line_segment = geo.LineSegment.construct_with_points([1, 1], [1, 2])
-    arc_segment = geo.ArcSegment.construct_with_points([0, 0], [1, 1], [0, 1])
+    line_segment = geo.LineSegment.construct_with_points(
+        Q_([1, 1], "mm"), Q_([1, 2], "mm")
+    )
+    arc_segment = geo.ArcSegment.construct_with_points(
+        Q_([0, 0], "mm"), Q_([1, 1], "mm"), Q_([0, 1], "mm")
+    )
 
     # Empty construction
     shape = geo.Shape()
@@ -1257,9 +1301,15 @@ def test_shape_segment_addition():
 
     """
     # Create shape and add segments
-    line_segment = geo.LineSegment.construct_with_points([1, 1], [0, 0])
-    arc_segment = geo.ArcSegment.construct_with_points([0, 0], [1, 1], [0, 1])
-    arc_segment2 = geo.ArcSegment.construct_with_points([1, 1], [0, 0], [0, 1])
+    line_segment = geo.LineSegment.construct_with_points(
+        Q_([1, 1], "mm"), Q_([0, 0], "mm")
+    )
+    arc_segment = geo.ArcSegment.construct_with_points(
+        Q_([0, 0], "mm"), Q_([1, 1], "mm"), Q_([0, 1], "mm")
+    )
+    arc_segment2 = geo.ArcSegment.construct_with_points(
+        Q_([1, 1], "mm"), Q_([0, 0], "mm"), Q_([0, 1], "mm")
+    )
 
     shape = geo.Shape()
     shape.add_segments(line_segment)
@@ -1294,33 +1344,29 @@ def test_shape_line_segment_addition():
 
     """
     shape_0 = geo.Shape()
-    shape_0.add_line_segments([[0, 0], [1, 0]])
+    shape_0.add_line_segments(Q_([[0, 0], [1, 0]], "mm"))
     assert shape_0.num_segments == 1
 
     shape_1 = geo.Shape()
-    shape_1.add_line_segments([[0, 0], [1, 0], [2, 0]])
+    shape_1.add_line_segments(Q_([[0, 0], [1, 0], [2, 0]], "mm"))
     assert shape_1.num_segments == 2
 
     # test possible formats to add single line segment ----
 
-    shape_0.add_line_segments([2, 0])
+    shape_0.add_line_segments(Q_([2, 0], "mm"))
     assert shape_0.num_segments == 2
-    shape_0.add_line_segments([[3, 0]])
+    shape_0.add_line_segments(Q_([[3, 0]], "mm"))
     assert shape_0.num_segments == 3
-    shape_0.add_line_segments(np.array([4, 0]))
-    assert shape_0.num_segments == 4
-    shape_0.add_line_segments(np.array([[5, 0]]))
-    assert shape_0.num_segments == 5
 
     # add multiple segments -------------------------------
 
-    shape_0.add_line_segments([[6, 0], [7, 0], [8, 0]])
-    assert shape_0.num_segments == 8
-    shape_0.add_line_segments(np.array([[9, 0], [10, 0], [11, 0]]))
-    assert shape_0.num_segments == 11
+    shape_0.add_line_segments(Q_([[4, 0], [5, 0], [6, 0]], "mm"))
+    assert shape_0.num_segments == 6
 
-    for i in range(11):
-        expected_segment = geo.LineSegment.construct_with_points([i, 0], [i + 1, 0])
+    for i in range(6):
+        expected_segment = geo.LineSegment.construct_with_points(
+            Q_([i, 0], "mm"), Q_([i + 1, 0], "mm")
+        )
         check_segments_identical(shape_0.segments[i], expected_segment)
         if i < 2:
             check_segments_identical(shape_1.segments[i], expected_segment)
@@ -1339,12 +1385,12 @@ def test_shape_line_segment_addition():
 
     # single point with empty shape
     with pytest.raises(Exception):
-        shape_2.add_line_segments([0, 1])
+        shape_2.add_line_segments(Q_([0, 1], "mm"))
     assert shape_2.num_segments == 0
 
     # invalid point format
     with pytest.raises(Exception):
-        shape_2.add_line_segments([[0, 1, 2], [1, 2, 3]])
+        shape_2.add_line_segments(Q_([[0, 1, 2], [1, 2, 3]], "mm"))
     assert shape_2.num_segments == 0
 
 
@@ -1356,13 +1402,13 @@ def test_shape_rasterization():
     with comments.
 
     """
-    points = np.array([[0, 0], [0, 1], [1, 1], [1, 0]])
+    points = Q_([[0, 0], [0, 1], [1, 1], [1, 0]], "mm")
 
     shape = geo.Shape().add_line_segments(points)
 
     # rasterize shape
-    raster_width = 0.2
-    data = shape.rasterize(raster_width)
+    raster_width = Q_(0.2, "mm")
+    data = shape.rasterize(raster_width).m
 
     # no duplications
     assert helpers.are_all_columns_unique(data)
@@ -1384,9 +1430,9 @@ def test_shape_rasterization():
     # However, this test somewhat ensures, that each segment is rasterized
     # individually.
 
-    data = shape.rasterize(10)
+    data = shape.rasterize("10mm").m
 
-    for point in points:
+    for point in points.m.tolist():
         assert is_column_in_matrix(point, data)
 
     assert data.shape[1] == 4
@@ -1395,20 +1441,20 @@ def test_shape_rasterization():
 
     shape.add_line_segments(points[0])
 
-    data = shape.rasterize(10)
+    data = shape.rasterize("10mm").m
 
     assert data.shape[1] == 4
     assert helpers.are_all_columns_unique(data)
 
     # exceptions ------------------------------------------
     with pytest.raises(Exception):
-        shape.rasterize(0)
+        shape.rasterize("0mm")
     with pytest.raises(Exception):
-        shape.rasterize(-3)
+        shape.rasterize("-3mm")
     # empty shape
     shape_empty = geo.Shape()
     with pytest.raises(Exception):
-        shape_empty.rasterize(0.2)
+        shape_empty.rasterize("0.2mm")
 
 
 def default_test_shape():
@@ -1421,8 +1467,12 @@ def default_test_shape():
 
     """
     # create shape
-    arc_segment = geo.ArcSegment.construct_with_points([3, 4], [5, 0], [6, 3])
-    line_segment = geo.LineSegment.construct_with_points([5, 0], [11, 3])
+    arc_segment = geo.ArcSegment.construct_with_points(
+        Q_([3, 4], "mm"), Q_([5, 0], "mm"), Q_([6, 3], "mm")
+    )
+    line_segment = geo.LineSegment.construct_with_points(
+        Q_([5, 0], "mm"), Q_([11, 3], "mm")
+    )
     return geo.Shape([arc_segment, line_segment])
 
 
@@ -1507,6 +1557,7 @@ def shape_transformation_test_case(
     shape = default_test_shape()
 
     if translation is not None:
+        translation = Q_(translation, "mm")
         shape_trans = shape.translate(translation)
     else:
         shape_trans = shape.transform(transformation)
@@ -1524,12 +1575,12 @@ def shape_transformation_test_case(
     assert arc_segment_trans.arc_winding_ccw is not exp_winding_change
 
     # check segment points
-    check_point_func(arc_segment_trans.point_start, arc_segment.point_start)
-    check_point_func(arc_segment_trans.point_end, arc_segment.point_end)
-    check_point_func(arc_segment_trans.point_center, arc_segment.point_center)
+    check_point_func(arc_segment_trans.point_start.m, arc_segment.point_start.m)
+    check_point_func(arc_segment_trans.point_end.m, arc_segment.point_end.m)
+    check_point_func(arc_segment_trans.point_center.m, arc_segment.point_center.m)
 
-    check_point_func(line_segment_trans.point_start, line_segment.point_start)
-    check_point_func(line_segment_trans.point_end, line_segment.point_end)
+    check_point_func(line_segment_trans.point_start.m, line_segment.point_start.m)
+    check_point_func(line_segment_trans.point_end.m, line_segment.point_end.m)
 
     # apply same transformation in place
     if translation is not None:
@@ -1594,8 +1645,8 @@ def check_reflected_point(
         Direction vector of the reflection axis.
 
     """
-    vec_original_reflected = point_reflected - point_original
-    midpoint = point_original + 0.5 * vec_original_reflected
+    vec_original_reflected = (point_reflected - point_original).m
+    midpoint = point_original.m + 0.5 * vec_original_reflected
     shifted_mid_point = midpoint - reflection_axis_offset
 
     determinant = np.linalg.det([shifted_mid_point, reflection_axis_direction])
@@ -1616,12 +1667,17 @@ def shape_reflection_test_case(normal, distance_to_origin):
         Distance to the origin of the reflection axis.
 
     """
+    if isinstance(normal, pint.Quantity):
+        normal = normal.m
     direction_reflection_axis = np.array([normal[1], -normal[0]])
     normal_length = np.linalg.norm(normal)
     unit_normal = np.array(normal) / normal_length
     offset = distance_to_origin * unit_normal
 
     shape = default_test_shape()
+
+    normal = Q_(normal, "mm")
+    distance_to_origin = Q_(distance_to_origin, "mm")
 
     # create reflected shape
     shape_reflected = shape.reflect(normal, distance_to_origin)
@@ -1712,6 +1768,15 @@ def check_point_reflected_across_line(
         Second point of the reflection axis
 
     """
+    if isinstance(point_original, pint.Quantity):
+        point_original = point_original.m
+    if isinstance(point_reflected, pint.Quantity):
+        point_reflected = point_reflected.m
+    if isinstance(point_start, pint.Quantity):
+        point_start = point_start.m
+    if isinstance(point_end, pint.Quantity):
+        point_end = point_end.m
+
     vec_original_reflected = point_reflected - point_original
     mid_point = point_original + 0.5 * vec_original_reflected
 
@@ -1736,8 +1801,8 @@ def shape_reflection_across_line_test_case(point_start, point_end):
         Second point of the reflection axis
 
     """
-    point_start = np.array(point_start, float)
-    point_end = np.array(point_end, float)
+    point_start = Q_(point_start, "mm")
+    point_end = Q_(point_end, "mm")
 
     shape = default_test_shape()
 
@@ -1825,8 +1890,8 @@ def test_shape_interpolation_general():
 
     """
     # create shapes
-    shape_a = geo.Shape().add_line_segments([[-1, -1], [1, 1], [3, -1]])
-    shape_b = geo.Shape().add_line_segments([[-1, 4], [1, 1], [3, 4]])
+    shape_a = geo.Shape().add_line_segments(Q_([[-1, -1], [1, 1], [3, -1]], "mm"))
+    shape_b = geo.Shape().add_line_segments(Q_([[-1, 4], [1, 1], [3, 4]], "mm"))
 
     # define interpolation schemes
     interpolations = [
@@ -1846,7 +1911,7 @@ def test_shape_interpolation_general():
             last_point_exp = [3, -1]
 
         points_exp = [[-1, -1 + 5 * weight], [1, 1], last_point_exp]
-        shape_c_exp = geo.Shape().add_line_segments(points_exp)
+        shape_c_exp = geo.Shape().add_line_segments(Q_(points_exp, "mm"))
 
         check_shapes_identical(shape_c, shape_c_exp)
 
@@ -1861,12 +1926,12 @@ def test_shape_interpolation_general():
     # exceptions ------------------------------------------
 
     # interpolation destroys shape continuity
-    shape_f = geo.Shape().add_line_segments([[-1, 4], [2, 2], [3, 4]])
+    shape_f = geo.Shape().add_line_segments(Q_([[-1, 4], [2, 2], [3, 4]], "mm"))
     with pytest.raises(Exception):
         geo.Shape.interpolate(shape_a, shape_f, 0.5, interpolations)
 
     # number of segments differ
-    shape_a.add_line_segments([2, 2])
+    shape_a.add_line_segments(Q_([2, 2], "mm"))
     with pytest.raises(Exception):
         geo.Shape.linear_interpolation(shape_a, shape_b, 0.25)
 
@@ -1880,8 +1945,8 @@ def test_shape_linear_interpolation():
 
     """
     # create shapes
-    shape_a = geo.Shape().add_line_segments([[0, 0], [1, 1], [2, 0]])
-    shape_b = geo.Shape().add_line_segments([[1, 1], [2, -1], [3, 5]])
+    shape_a = geo.Shape().add_line_segments(Q_([[0, 0], [1, 1], [2, 0]], "mm"))
+    shape_b = geo.Shape().add_line_segments(Q_([[1, 1], [2, -1], [3, 5]], "mm"))
 
     for i in range(5):
         # interpolate shapes
@@ -1894,7 +1959,7 @@ def test_shape_linear_interpolation():
             [1 + weight, 1 - 2 * weight],
             [2 + weight, 5 * weight],
         ]
-        shape_c_exp = geo.Shape().add_line_segments(points_exp)
+        shape_c_exp = geo.Shape().add_line_segments(Q_(points_exp, "mm"))
 
         check_shapes_identical(shape_c, shape_c_exp)
 
@@ -1909,7 +1974,7 @@ def test_shape_linear_interpolation():
     # exceptions ------------------------------------------
 
     # number of segments differ
-    shape_a.add_line_segments([2, 2])
+    shape_a.add_line_segments(Q_([2, 2], "mm"))
     with pytest.raises(Exception):
         geo.Shape.linear_interpolation(shape_a, shape_b, 0.25)
 
@@ -1923,9 +1988,11 @@ def test_profile_construction_and_shape_addition():
     Test details are explained by comments.
 
     """
-    arc_segment = geo.ArcSegment.construct_with_radius([-2, -2], [-1, -1], 1)
+    arc_segment = geo.ArcSegment.construct_with_radius(
+        Q_([-2, -2], "mm"), Q_([-1, -1], "mm"), Q_(1, "mm")
+    )
     shape = geo.Shape(arc_segment)
-    shape.add_line_segments([[0, 0], [1, 0], [2, -1], [0, -1]])
+    shape.add_line_segments(Q_([[0, 0], [1, 0], [2, -1], [0, -1]], "mm"))
 
     # Check invalid types
     with pytest.raises(TypeError):
@@ -1974,12 +2041,12 @@ def test_profile_rasterization():
     are equidistant and can be checked easily.
 
     """
-    raster_width = 0.1
+    raster_width = Q_("0.1mm")
 
     # create shapes
-    shape0 = geo.Shape().add_line_segments([[-1, 0], [-raster_width, 0]])
-    shape1 = geo.Shape().add_line_segments([[0, 0], [1, 0]])
-    shape2 = geo.Shape().add_line_segments([[1 + raster_width, 0], [2, 0]])
+    shape0 = geo.Shape().add_line_segments(Q_([[-1, 0], [-raster_width.m, 0]], "mm"))
+    shape1 = geo.Shape().add_line_segments(Q_([[0, 0], [1, 0]], "mm"))
+    shape2 = geo.Shape().add_line_segments(Q_([[1 + raster_width.m, 0], [2, 0]], "mm"))
 
     # create profile
     profile = geo.Profile([shape0, shape1, shape2])
@@ -1988,21 +2055,21 @@ def test_profile_rasterization():
     data = profile.rasterize(raster_width)
 
     # no duplications
-    assert helpers.are_all_columns_unique(data)
+    assert helpers.are_all_columns_unique(data.m)
 
     # check raster data size
-    expected_number_raster_points = int(round(3 / raster_width)) + 1
+    expected_number_raster_points = int(round(3 / raster_width.m)) + 1
     assert data.shape[1] == expected_number_raster_points
 
     # Check that all shapes are rasterized correct
-    for i in range(int(round(3 / raster_width)) + 1):
-        assert vector_is_close(data[:, i], [i * raster_width - 1, 0])
+    for i in range(int(round(3 / raster_width.m)) + 1):
+        assert vector_is_close(data[:, i].m, [i * raster_width.m - 1, 0])
 
     # exceptions
     with pytest.raises(Exception):
-        profile.rasterize(0)
+        profile.rasterize("0mm")
     with pytest.raises(Exception):
-        profile.rasterize(-3)
+        profile.rasterize("-3mm")
 
 
 # Test trace segment classes --------------------------------------------------
@@ -2056,7 +2123,7 @@ def check_trace_segment_length(segment, tolerance=1e-9):
             "Segment length could not be " "determined numerically"
         )
 
-    assert math.isclose(length_numeric, segment.length, abs_tol=tolerance)
+    assert math.isclose(length_numeric, segment.length.m, abs_tol=tolerance)
 
 
 def check_trace_segment_orientation(segment):
@@ -2117,14 +2184,14 @@ def test_linear_horizontal_trace_segment():
     Each sub test is documented by comments.
 
     """
-    length = 7.13
+    length = Q_("7.13mm")
     segment = geo.LinearHorizontalTraceSegment(length)
 
     # default tests
     default_trace_segment_tests(segment)
 
     # getter tests
-    assert math.isclose(segment.length, length)
+    assert np.isclose(segment.length, length)
 
     # invalid inputs
     with pytest.raises(ValueError):
@@ -2140,8 +2207,8 @@ def test_radial_horizontal_trace_segment():
     Each sub test is documented by comments.
 
     """
-    radius = 4.74
-    angle = np.pi / 1.23
+    radius = Q_(4.74, "mm")
+    angle = Q_(np.pi / 1.23, "rad")
     segment_cw = geo.RadialHorizontalTraceSegment(radius, angle, True)
     segment_ccw = geo.RadialHorizontalTraceSegment(radius, angle, False)
 
@@ -2150,10 +2217,10 @@ def test_radial_horizontal_trace_segment():
     default_trace_segment_tests(segment_ccw, 1e-4)
 
     # getter tests
-    assert math.isclose(segment_cw.angle, angle)
-    assert math.isclose(segment_ccw.angle, angle)
-    assert math.isclose(segment_cw.radius, radius)
-    assert math.isclose(segment_ccw.radius, radius)
+    assert np.isclose(segment_cw.angle, angle)
+    assert np.isclose(segment_ccw.angle, angle)
+    assert np.isclose(segment_cw.radius, radius)
+    assert np.isclose(segment_ccw.radius, radius)
     assert segment_cw.is_clockwise
     assert not segment_ccw.is_clockwise
 
@@ -2166,18 +2233,18 @@ def test_radial_horizontal_trace_segment():
         lcs_cw = segment_cw.local_coordinate_system(weight)
         lcs_ccw = segment_ccw.local_coordinate_system(weight)
 
-        assert vector_is_close(lcs_cw.coordinates, [x_exp, -y_exp, 0])
-        assert vector_is_close(lcs_ccw.coordinates, [x_exp, y_exp, 0])
+        assert vector_is_close(lcs_cw.coordinates, [x_exp.m, -y_exp.m, 0])
+        assert vector_is_close(lcs_ccw.coordinates, [x_exp.m, y_exp.m, 0])
 
     # invalid inputs
     with pytest.raises(ValueError):
-        geo.RadialHorizontalTraceSegment(0, np.pi)
+        geo.RadialHorizontalTraceSegment("0mm", Q_(np.pi, "rad"))
     with pytest.raises(ValueError):
-        geo.RadialHorizontalTraceSegment(-0.53, np.pi)
+        geo.RadialHorizontalTraceSegment("-0.53mm", Q_(np.pi, "rad"))
     with pytest.raises(ValueError):
-        geo.RadialHorizontalTraceSegment(1, 0)
+        geo.RadialHorizontalTraceSegment("1mm", "0rad")
     with pytest.raises(ValueError):
-        geo.RadialHorizontalTraceSegment(1, -np.pi)
+        geo.RadialHorizontalTraceSegment("1mm", Q_(-np.pi, "rad"))
 
 
 # Test trace class ------------------------------------------------------------
@@ -2188,7 +2255,7 @@ class CustomSegment:
 
     def __init__(self):
         """Construct a custom segment."""
-        self.length = None
+        self.length = Q_(0, "mm")
 
     @staticmethod
     def local_coordinate_system(*_args):
@@ -2210,14 +2277,14 @@ class CustomSegment:
 
 def test_trace_construction():
     """Test the trace's construction."""
-    linear_segment = geo.LinearHorizontalTraceSegment(1)
-    radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
+    linear_segment = geo.LinearHorizontalTraceSegment("1mm")
+    radial_segment = geo.RadialHorizontalTraceSegment("1mm", Q_(np.pi, "rad"))
     cs_coordinates = np.array([2, 3, -2])
     cs_initial = helpers.rotated_coordinate_system(coordinates=cs_coordinates)
 
     # test single segment construction --------------------
     trace = geo.Trace(linear_segment, cs_initial)
-    assert math.isclose(trace.length, linear_segment.length)
+    assert np.isclose(trace.length, linear_segment.length)
     assert trace.num_segments == 1
 
     segments = trace.segments
@@ -2229,7 +2296,7 @@ def test_trace_construction():
 
     # test multi segment construction ---------------------
     trace = geo.Trace([radial_segment, linear_segment])
-    assert math.isclose(trace.length, linear_segment.length + radial_segment.length)
+    assert np.isclose(trace.length, linear_segment.length + radial_segment.length)
     assert trace.num_segments == 2
 
     check_trace_segments_identical(trace.segments[0], radial_segment)
@@ -2249,7 +2316,7 @@ def test_trace_construction():
 
     # check construction with custom segment --------------
     custom_segment = CustomSegment()
-    custom_segment.length = 3
+    custom_segment.length = Q_("3mm")
     geo.Trace(custom_segment)
 
     # trace length <= 0
@@ -2269,8 +2336,8 @@ def test_trace_local_coordinate_system():
     and continues with a straight line of length 1.
 
     """
-    radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
-    linear_segment = geo.LinearHorizontalTraceSegment(1)
+    radial_segment = geo.RadialHorizontalTraceSegment("1mm", Q_(np.pi, "rad"))
+    linear_segment = geo.LinearHorizontalTraceSegment("1mm")
 
     # check with default coordinate system ----------------
     trace = geo.Trace([radial_segment, linear_segment])
@@ -2288,14 +2355,14 @@ def test_trace_local_coordinate_system():
     expected_orientation = radial_segment.local_coordinate_system(1).orientation
     for i in range(11):
         weight = i / 10
-        position_on_segment = linear_segment.length * weight
-        position = radial_segment.length + position_on_segment
+        position_on_segment = linear_segment.length.m * weight
+        position = radial_segment.length.m + position_on_segment
 
         expected_coordinates = np.array([-position_on_segment, 2, 0])
         cs_expected = tf.LocalCoordinateSystem(
             orientation=expected_orientation, coordinates=expected_coordinates
         )
-        cs_trace = trace.local_coordinate_system(position)
+        cs_trace = trace.local_coordinate_system(Q_(position, "mm"))
 
         check_coordinate_systems_identical(cs_trace, cs_expected)
 
@@ -2323,7 +2390,7 @@ def test_trace_local_coordinate_system():
         weight = i / 10
         position_on_segment = linear_segment.length * weight
         position = radial_segment.length + position_on_segment
-        lcs_coordinates = [position_on_segment, 0, 0]
+        lcs_coordinates = [position_on_segment.m, 0, 0]
 
         cs_exp = tf.LocalCoordinateSystem(coordinates=lcs_coordinates) + cs_start_seg2
         cs_trace = trace.local_coordinate_system(position)
@@ -2339,66 +2406,65 @@ def test_trace_rasterization():
     with a radial segment of radius 1 and counter clockwise winding.
 
     """
-    radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
-    linear_segment = geo.LinearHorizontalTraceSegment(1)
+    radial_segment = geo.RadialHorizontalTraceSegment("1mm", Q_(np.pi, "rad"))
+    linear_segment = geo.LinearHorizontalTraceSegment("1mm")
 
     # check with default coordinate system ----------------
     trace = geo.Trace([linear_segment, radial_segment])
-    data = trace.rasterize(0.1)
+    data = trace.rasterize("0.1mm")
 
     # no duplications
-    assert helpers.are_all_columns_unique(data)
+    assert helpers.are_all_columns_unique(data.m)
 
     raster_width_eff = trace.length / (data.shape[1] - 1)
     for i in range(data.shape[1]):
         trace_location = i * raster_width_eff
-        if trace_location <= 1:
-            assert vector_is_close([trace_location, 0, 0], data[:, i])
+        if trace_location <= Q_("1mm"):
+            assert vector_is_close(trace_location.m * np.array([1, 0, 0]), data[:, i].m)
         else:
-            arc_length = trace_location - 1
-            angle = arc_length  # radius 1 -> arc_length = arc_angle * radius
+            arc_length = trace_location - Q_("1mm")
+            angle = arc_length * Q_("rad/mm")  # -> arc_length = arc_angle * radius
             x = np.sin(angle) + 1  # radius 1 -> sin(arc_angle) = x / radius
             y = 1 - np.cos(angle)
-
-            assert vector_is_close([x, y, 0], data[:, i])
+            assert vector_is_close([x.m, y.m, 0], data[:, i].m)
 
     # check with arbitrary coordinate system --------------
     orientation = WXRotation.from_euler("y", np.pi / 2).as_matrix()
-    coordinates = np.array([-3, 2.5, 5])
-    cs_base = tf.LocalCoordinateSystem(orientation, coordinates)
+    coordinates = Q_([-3, 2.5, 5], "mm")
+    cs_base = tf.LocalCoordinateSystem(orientation, coordinates.m)
 
     trace = geo.Trace([linear_segment, radial_segment], cs_base)
-    data = trace.rasterize(0.1)
-
+    data = trace.rasterize("0.1mm")
+    print(data)
     raster_width_eff = trace.length / (data.shape[1] - 1)
 
     for i in range(data.shape[1]):
         trace_location = i * raster_width_eff
-        if trace_location <= 1:
-            x = coordinates[0]
-            y = coordinates[1]
-            z = coordinates[2] - trace_location
+        if trace_location <= Q_("1mm"):
+            x = coordinates[0].m
+            y = coordinates[1].m
+            z = (coordinates[2] - trace_location).m
         else:
-            arc_length = trace_location - 1
-            angle = arc_length  # radius 1 -> arc_length = arc_angle * radius
-            x = coordinates[0]
-            y = coordinates[1] + 1 - np.cos(angle)
-            z = coordinates[2] - 1 - np.sin(angle)
-
-        assert vector_is_close([x, y, z], data[:, i])
+            arc_length = trace_location - Q_("1mm")
+            angle = arc_length * Q_("rad/mm")  # -> arc_length = arc_angle * radius
+            x = coordinates[0].m
+            y = coordinates[1].m + 1 - np.cos(angle.m)
+            z = coordinates[2].m - 1 - np.sin(angle.m)
+        assert vector_is_close([x, y, z], data[:, i].m)
 
     # check if raster width is clipped to valid range -----
-    data = trace.rasterize(1000)
+    data = trace.rasterize("1000mm")
 
     assert data.shape[1] == 2
-    assert vector_is_close([-3, 2.5, 5], data[:, 0])
-    assert vector_is_close([-3, 4.5, 4], data[:, 1])
+    print(data[:, 0])
+    assert vector_is_close([-3, 2.5, 5], data[:, 0].m)
+    assert vector_is_close([-3, 4.5, 4], data[:, 1].m)
 
     # exceptions ------------------------------------------
     with pytest.raises(Exception):
-        trace.rasterize(0)
+        trace.rasterize("0mm")
     with pytest.raises(Exception):
-        trace.rasterize(-23.1)
+        trace.rasterize("-23.1mm")
 
 
 # Profile interpolation classes -----------------------------------------------
@@ -2419,10 +2485,17 @@ def check_interpolated_profile_points(profile, c_0, c_1, c_2):
         Third expected point
 
     """
-    assert vector_is_close(profile.shapes[0].segments[0].point_start, c_0)
-    assert vector_is_close(profile.shapes[0].segments[0].point_end, c_1)
-    assert vector_is_close(profile.shapes[1].segments[0].point_start, c_1)
-    assert vector_is_close(profile.shapes[1].segments[0].point_end, c_2)
+    if isinstance(c_0, pint.Quantity):
+        c_0 = c_0.m
+    if isinstance(c_1, pint.Quantity):
+        c_1 = c_1.m
+    if isinstance(c_2, pint.Quantity):
+        c_2 = c_2.m
+
+    assert vector_is_close(profile.shapes[0].segments[0].point_start.m, c_0)
+    assert vector_is_close(profile.shapes[0].segments[0].point_end.m, c_1)
+    assert vector_is_close(profile.shapes[1].segments[0].point_start.m, c_1)
+    assert vector_is_close(profile.shapes[1].segments[0].point_end.m, c_2)
 
 
 def test_linear_profile_interpolation_sbs():
@@ -2504,7 +2577,7 @@ def check_variable_profile_state(variable_profile, profiles_exp, locations_exp):
     assert variable_profile.num_profiles == num_profiles
 
     for i in range(num_profiles):
-        assert math.isclose(variable_profile.locations[i], locations_exp[i])
+        assert np.isclose(variable_profile.locations[i], locations_exp[i])
         check_profiles_identical(variable_profile.profiles[i], profiles_exp[i])
 
 
@@ -2515,56 +2588,63 @@ def test_variable_profile_construction():
     profile_a, profile_b = get_default_profiles()
 
     # construction with single location and interpolation
-    variable_profile = geo.VariableProfile([profile_a, profile_b], 1, interpol)
-    check_variable_profile_state(variable_profile, [profile_a, profile_b], [0, 1])
-
-    variable_profile = geo.VariableProfile([profile_a, profile_b], [1], [interpol])
-    check_variable_profile_state(variable_profile, [profile_a, profile_b], [0, 1])
+    variable_profile = geo.VariableProfile([profile_a, profile_b], "1mm", interpol)
+    check_variable_profile_state(
+        variable_profile, [profile_a, profile_b], Q_([0, 1], "mm")
+    )
 
     # construction with location list
-    variable_profile = geo.VariableProfile([profile_a, profile_b], [0, 1], interpol)
-    check_variable_profile_state(variable_profile, [profile_a, profile_b], [0, 1])
-
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b, profile_a], [1, 2], [interpol, interpol]
+        [profile_a, profile_b], Q_([0, 1], "mm"), interpol
     )
     check_variable_profile_state(
-        variable_profile, [profile_a, profile_b, profile_a], [0, 1, 2]
+        variable_profile, [profile_a, profile_b], Q_([0, 1], "mm")
     )
 
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b, profile_a], [0, 1, 2], [interpol, interpol]
+        [profile_a, profile_b, profile_a], Q_([1, 2], "mm"), [interpol, interpol]
     )
     check_variable_profile_state(
-        variable_profile, [profile_a, profile_b, profile_a], [0, 1, 2]
+        variable_profile, [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm")
+    )
+
+    variable_profile = geo.VariableProfile(
+        [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm"), [interpol, interpol]
+    )
+    check_variable_profile_state(
+        variable_profile, [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm")
     )
 
     # exceptions ------------------------------------------
 
     # first location is not 0
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b], [1, 2], interpol)
+        geo.VariableProfile([profile_a, profile_b], Q_([1, 2], "mm"), interpol)
 
     # number of locations is not correct
     with pytest.raises(Exception):
         geo.VariableProfile(
-            [profile_a, profile_b, profile_a], [1], [interpol, interpol]
+            [profile_a, profile_b, profile_a], Q_("1mm"), [interpol, interpol]
         )
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b], [0, 1, 2], interpol)
+        geo.VariableProfile([profile_a, profile_b], Q_([0, 1, 2], "mm"), interpol)
 
     # number of interpolations is not correct
     with pytest.raises(Exception):
-        geo.VariableProfile([profile_a, profile_b, profile_a], [0, 1, 2], [interpol])
+        geo.VariableProfile(
+            [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm"), [interpol]
+        )
     with pytest.raises(Exception):
         geo.VariableProfile(
-            [profile_a, profile_b, profile_a], [0, 1, 2], [interpol, interpol, interpol]
+            [profile_a, profile_b, profile_a],
+            Q_([0, 1, 2], "mm"),
+            [interpol, interpol, interpol],
         )
 
     # locations not ordered
     with pytest.raises(Exception):
         geo.VariableProfile(
-            [profile_a, profile_b, profile_a], [0, 2, 1], [interpol, interpol]
+            [profile_a, profile_b, profile_a], Q_([0, 2, 1], "mm"), [interpol, interpol]
         )
 
 
@@ -2574,18 +2654,18 @@ def test_variable_profile_local_profile():
 
     profile_a, profile_b = get_default_profiles()
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b, profile_a], [0, 1, 2], [interpol, interpol]
+        [profile_a, profile_b, profile_a], Q_([0, 1, 2], "mm"), [interpol, interpol]
     )
 
     for i in range(5):
         # first segment
-        location = i / 4.0
+        location = Q_(i / 4.0, "mm")
         profile = variable_profile.local_profile(location)
         check_interpolated_profile_points(
             profile, [-i, 2 * i], [8 - 2 * i, 16 - 2 * i], [16, -4 * i]
         )
         # second segment
-        location += 1
+        location += Q_(1, "mm")
         profile = variable_profile.local_profile(location)
         check_interpolated_profile_points(
             profile, [-4 + i, 8 - 2 * i], [2 * i, 8 + 2 * i], [16, -16 + 4 * i]
@@ -2593,10 +2673,10 @@ def test_variable_profile_local_profile():
 
     # check if values are clipped to valid range ----------
 
-    profile = variable_profile.local_profile(177)
+    profile = variable_profile.local_profile("177mm")
     check_interpolated_profile_points(profile, [0, 0], [8, 16], [16, 0])
 
-    profile = variable_profile.local_profile(-2)
+    profile = variable_profile.local_profile("-2mm")
     check_interpolated_profile_points(profile, [0, 0], [8, 16], [16, 0])
 
 
@@ -2607,11 +2687,11 @@ def test_geometry_construction():
     """Test construction of the geometry class."""
     profile_a, profile_b = get_default_profiles()
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b], [0, 1], geo.linear_profile_interpolation_sbs
+        [profile_a, profile_b], Q_([0, 1], "mm"), geo.linear_profile_interpolation_sbs
     )
 
-    radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi)
-    linear_segment = geo.LinearHorizontalTraceSegment(1)
+    radial_segment = geo.RadialHorizontalTraceSegment("1mm", Q_(np.pi, "rad"))
+    linear_segment = geo.LinearHorizontalTraceSegment("1mm")
     trace = geo.Trace([radial_segment, linear_segment])
 
     # single profile construction
@@ -2656,13 +2736,15 @@ def test_geometry_rasterization_trace():
     profile_points = np.array([a0, a1, a2, a2, a3, a4], dtype=float).transpose()
 
     # create profile
-    shape_a012 = geo.Shape().add_line_segments([a0, a1, a2])
-    shape_a234 = geo.Shape().add_line_segments([a2, a3, a4])
+    shape_a012 = geo.Shape().add_line_segments(Q_([a0, a1, a2], "mm"))
+    shape_a234 = geo.Shape().add_line_segments(Q_([a2, a3, a4], "mm"))
     profile_a = geo.Profile([shape_a012, shape_a234])
 
     # create trace
-    radial_segment = geo.RadialHorizontalTraceSegment(1, np.pi / 2, False)
-    linear_segment = geo.LinearHorizontalTraceSegment(1)
+    radial_segment = geo.RadialHorizontalTraceSegment(
+        "1mm", Q_(np.pi / 2, "rad"), False
+    )
+    linear_segment = geo.LinearHorizontalTraceSegment("1mm")
     trace = geo.Trace([linear_segment, radial_segment])
 
     # create geometry
@@ -2673,52 +2755,52 @@ def test_geometry_rasterization_trace():
     # adjusted to the segment width. Hence, each rasterized profile has 6
     # points, which were defined at the beginning of the test (a2 is
     # included twice)
-    data = geometry.rasterize(7, 0.1)
+    data = geometry.rasterize("7mm", "0.1mm")
 
     # calculate the number of rasterized profiles
     num_raster_profiles = int(np.round(data.shape[1] / 6))
 
     # calculate effective raster width
     eff_raster_width = trace.length / (data.shape[1] / 6 - 1)
-    arc_point_distance_on_trace = 2 * np.sin(eff_raster_width / 2)
+    arc_point_distance_on_trace = 2 * np.sin(eff_raster_width.m / 2)
 
     for i in range(num_raster_profiles):
         # get index of the current profiles first point
         idx_0 = i * 6
 
         # check first segment (line)
-        if data[0, idx_0 + 2] <= 1:
+        if data[0, idx_0 + 2].m <= 1:
             for j in range(6):
                 point_exp = [
-                    eff_raster_width * i,
+                    eff_raster_width.m * i,
                     profile_points[0, j],
                     profile_points[1, j],
                 ]
-                assert vector_is_close(data[:, idx_0 + j], point_exp)
+                assert vector_is_close(data[:, idx_0 + j].m, point_exp)
         # check second segment (arc)
         else:
             # first 2 profile points lie on the arcs center point
-            assert vector_is_close(data[:, idx_0], [1, a0[0], a0[1]])
-            assert vector_is_close(data[:, idx_0 + 1], [1, a1[0], a1[1]])
+            assert vector_is_close(data[:, idx_0].m, [1, a0[0], a0[1]])
+            assert vector_is_close(data[:, idx_0 + 1].m, [1, a1[0], a1[1]])
 
             # z-values are constant
             for j in np.arange(2, 6, 1):
-                assert math.isclose(data[2, idx_0 + j], profile_points[1, j])
+                assert np.isclose(data[2, idx_0 + j].m, profile_points[1, j])
 
             # all profile points in a common x-y plane
             exp_radius = np.array([1, 1, 2, 2])
 
             vec_02 = data[0:2, idx_0 + 2] - data[0:2, idx_0]
-            assert math.isclose(np.linalg.norm(vec_02), exp_radius[0])
+            assert np.isclose(np.linalg.norm(vec_02.m), exp_radius[0])
 
             for j in np.arange(3, 6, 1):
                 vec_0j = data[0:2, idx_0 + j] - data[0:2, idx_0]
-                assert math.isclose(np.linalg.norm(vec_0j), exp_radius[j - 2])
-                unit_vec_0j = tf.normalize(vec_0j)
-                assert math.isclose(np.dot(unit_vec_0j, vec_02), 1)
+                assert np.isclose(np.linalg.norm(vec_0j.m), exp_radius[j - 2])
+                unit_vec_0j = tf.normalize(vec_0j.m)
+                assert np.isclose(np.dot(unit_vec_0j, vec_02.m), 1)
 
             # check point distance between profiles
-            if data[1, idx_0 - 4] > 1:
+            if data[1, idx_0 - 4].m > 1:
                 exp_point_distance = arc_point_distance_on_trace * exp_radius
                 for j in np.arange(2, 6, 1):
                     point_distance = np.linalg.norm(
@@ -2727,29 +2809,29 @@ def test_geometry_rasterization_trace():
                     assert math.isclose(exp_point_distance[j - 2], point_distance)
 
     # check if raster width is clipped to valid range -----
-    data = geometry.rasterize(7, 1000)
+    data = geometry.rasterize("7mm", "1000mm")
 
     assert data.shape[1] == 12
 
     for i in range(12):
         if i < 6:
-            math.isclose(data[0, i], 0)
+            np.isclose(data[0, i].m, 0)
         else:
-            assert math.isclose(data[1, i], 1)
+            assert np.isclose(data[1, i].m, 1)
 
     # exceptions ------------------------------------------
     with pytest.raises(Exception):
-        geometry.rasterize(0, 1)
+        geometry.rasterize("0mm", "1mm")
     with pytest.raises(Exception):
-        geometry.rasterize(1, 0)
+        geometry.rasterize("1mm", "0mm")
     with pytest.raises(Exception):
-        geometry.rasterize(0, 0)
+        geometry.rasterize("0mm", "0mm")
     with pytest.raises(Exception):
-        geometry.rasterize(-2.3, 1)
+        geometry.rasterize("-2.3mm", "1mm")
     with pytest.raises(Exception):
-        geometry.rasterize(1, -4.6)
+        geometry.rasterize("1mm", "-4.6mm")
     with pytest.raises(Exception):
-        geometry.rasterize(-2.3, -4.6)
+        geometry.rasterize("-2.3mm", "-4.6mm")
 
 
 @pytest.mark.slow
@@ -2764,8 +2846,8 @@ def test_geometry_rasterization_profile_interpolation():
     a4 = [-1, 0]
 
     # create shapes
-    shape_a012 = geo.Shape().add_line_segments([a0, a1, a2])
-    shape_a234 = geo.Shape().add_line_segments([a2, a3, a4])
+    shape_a012 = geo.Shape().add_line_segments(Q_([a0, a1, a2], "mm"))
+    shape_a234 = geo.Shape().add_line_segments(Q_([a2, a3, a4], "mm"))
 
     shape_b012 = copy.deepcopy(shape_a012)
     shape_b234 = copy.deepcopy(shape_a234)
@@ -2777,11 +2859,11 @@ def test_geometry_rasterization_profile_interpolation():
     profile_b = geo.Profile([shape_b012, shape_b234])
 
     variable_profile = geo.VariableProfile(
-        [profile_a, profile_b, profile_a], [0, 2, 6], [interpol, interpol]
+        [profile_a, profile_b, profile_a], Q_([0, 2, 6], "mm"), [interpol, interpol]
     )
 
-    linear_segment_l1 = geo.LinearHorizontalTraceSegment(1)
-    linear_segment_l2 = geo.LinearHorizontalTraceSegment(2)
+    linear_segment_l1 = geo.LinearHorizontalTraceSegment("1mm")
+    linear_segment_l2 = geo.LinearHorizontalTraceSegment("2mm")
     # Note: The profile in the middle of the variable profile is not located
     # at the start of the second trace segment
     trace = geo.Trace([linear_segment_l2, linear_segment_l1])
@@ -2792,7 +2874,7 @@ def test_geometry_rasterization_profile_interpolation():
     # adjusted to the segment width. Hence each rasterized profile has 6
     # points, which were defined at the beginning of the test (a2 is
     # included twice)
-    data = geometry.rasterize(7, 0.1)
+    data = geometry.rasterize("7mm", "0.1mm")
     assert data.shape[1] == 186
 
     profile_points = np.array([a0, a1, a2, a2, a3, a4]).transpose()
@@ -2808,7 +2890,7 @@ def test_geometry_rasterization_profile_interpolation():
                     profile_points[1, j] * (1 + i * 0.1),
                 ]
             )
-            assert vector_is_close(data[:, idx_0 + j], point_exp)
+            assert vector_is_close(data[:, idx_0 + j].m, point_exp)
 
     # check second profile interpolation
     for i in range(20):
@@ -2821,7 +2903,7 @@ def test_geometry_rasterization_profile_interpolation():
                     profile_points[1, j] * (1 + i * 0.05),
                 ]
             )
-            assert vector_is_close(data[:, idx_0 + j], point_exp)
+            assert vector_is_close(data[:, idx_0 + j].m, point_exp)
 
 
 def get_test_profile() -> geo.Profile:
@@ -2862,8 +2944,9 @@ def get_test_geometry_variable_profile():
 
     """
     profile = get_test_profile()
+    print(Q_([0, 1], "cm")[0])
     variable_profile = geo.VariableProfile(
-        [profile, profile], [0, 1], [geo.linear_profile_interpolation_sbs]
+        [profile, profile], Q_([0, 1], "cm"), [geo.linear_profile_interpolation_sbs]
     )
     trace = geo.Trace([geo.LinearHorizontalTraceSegment(Q_(1, "cm"))])
     return geo.Geometry(profile=variable_profile, trace_or_length=trace)
@@ -2876,8 +2959,8 @@ class TestGeometry:
     @pytest.mark.parametrize(
         "geometry, p_rw, t_rw, exp_num_points, exp_num_triangles",
         [
-            (get_test_geometry_constant_profile(), Q_(1, "cm"), Q_(1, "cm"), 12, 12),
-            (get_test_geometry_variable_profile(), Q_(1, "cm"), Q_(1, "cm"), 12, 0),
+            (get_test_geometry_constant_profile(), "1cm", "1cm", 12, 12),
+            (get_test_geometry_variable_profile(), "1cm", "1cm", 12, 0),
         ],
     )
     def test_spatial_data(

@@ -6,12 +6,15 @@ from decorator import contextmanager
 
 from weldx.asdf.util import write_read_buffer
 from weldx.constants import Q_
+from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.geometry import Profile
 from weldx.welding.groove.iso_9692_1 import (
     IsoBaseGroove,
     _create_test_grooves,
     get_groove,
 )
+
+_DEFAULT_LEN_UNIT = UREG.millimeters
 
 test_params = _create_test_grooves()
 
@@ -116,7 +119,9 @@ def test_cross_section(groove):  # noqa
 
     groove_obj, groove_cls = groove
     # make rasterization for U-based grooves rather rough.
-    with temp_attr(groove_obj, "_AREA_RASTER_WIDTH", 0.75):  # skipcq: PYL-E1129
+    with temp_attr(
+        groove_obj, "_AREA_RASTER_WIDTH", Q_(0.75, _DEFAULT_LEN_UNIT)
+    ):  # skipcq: PYL-E1129
         try:
             A = groove_obj.cross_sect_area
         except NotImplementedError:

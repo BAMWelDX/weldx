@@ -45,6 +45,7 @@ jobs:
         uses: mamba-org/provision-with-micromamba@v10
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
+          micromamba-version: 0.16.0
 
       - name: activate build env
         shell: bash -l {0}
