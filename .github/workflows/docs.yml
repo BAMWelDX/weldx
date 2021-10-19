@@ -75,7 +75,7 @@ jobs:
 
       - name: Build docs
         shell: bash -l {0}
-        run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -D nbsphinx_execute=${{ env.nbsphinx_execute }}
+        run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -j auto -D nbsphinx_execute=${{ env.nbsphinx_execute }}
 
       - uses: actions/upload-artifact@v2
         if: |

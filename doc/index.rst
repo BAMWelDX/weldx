@@ -6,7 +6,6 @@
 
    install
    tutorials
-   standard
    api
    changelog_link
    legal-notice
