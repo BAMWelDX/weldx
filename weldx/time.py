@@ -417,8 +417,9 @@ class Time:
             otherwise
 
         """
-        # TODO: handle tolerances ?
-        return np.allclose(self._time, Time(other).as_pandas())
+        if self.is_absolute and self.reference_time != other.reference_time:
+            return False
+        return np.allclose(self.as_quantity(), Time(other).as_quantity())
 
     def as_quantity(self, unit: str = "s") -> pint.Quantity:
         """Return the data as `pint.Quantity`.
@@ -550,6 +551,53 @@ class Time:
 
         """
         return self.as_quantity(unit="s")
+
+    @property
+    def duration(self) -> Time:
+        """Get the covered time span."""
+        return Time(self.max() - self.min())
+
+    def resample(self, number_or_interval: Union[int, types_timedelta_like]):
+        """Resample the covered duration.
+
+        Parameters
+        ----------
+        number_or_interval :
+            If an integer is passed, the covered time period will be divided into
+            equally sized time steps so that the total number of time steps is equal to
+            the passed number. If a timedelta is passed, the whole period will be
+            resampled so that the difference between all time steps matches the
+            timedelta. Note that the boundaries of the time period will not change.
+            Therefore, the timedelta between the last two time values might differ from
+            the desired timedelta.
+
+        Returns
+        -------
+        Time :
+            Resampled time object
+
+        Raises
+        ------
+        RuntimeError :
+            When the time data consists only of a single value and has no duration.
+        """
+        if len(self) <= 1:
+            raise RuntimeError("Can't resample a single time delta or timestamp")
+
+        duration = self.duration.as_timedelta()
+        if isinstance(number_or_interval, int):
+            n = np.clip(number_or_interval, a_min=2, a_max=None)
+            interval = duration / (n - 1)
+        else:
+            interval = Time(number_or_interval).as_timedelta()
+            n = np.clip(int(np.ceil(duration / interval)) + 1, 2, None)
+
+        limits = Time([self.min(), self.max()], self.reference_time)
+        if n <= 2:
+            return limits
+
+        deltas = Time([v for i in range(n - 1) if (v := (i + 1) * interval) < duration])
+        return Time(limits.union(self.min() + deltas), self.reference_time)
 
     @staticmethod
     def _convert_quantity(
