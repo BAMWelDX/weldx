@@ -9,7 +9,6 @@ dependencies:
   # documentation
   - sphinx>=4.1.1
   - jinja2
-  - m2r2
   - sphinxcontrib-napoleon
   - nbsphinx
   - sphinx-copybutton
@@ -22,5 +21,4 @@ dependencies:
   # pip packages
   - pip
   - pip:
-    - git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx
     - -e ../

@@ -8,7 +8,6 @@ import k3d
 import k3d.platonic as platonic
 import numpy as np
 import pandas as pd
-from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
 import weldx.geometry as geo
@@ -595,15 +594,20 @@ class CoordinateSystemManagerVisualizerK3D:
             )
             plot += self._time_info
 
-        # display everything
-        plot.display()
-        display(self._controls)
-
         # workaround since using it inside the init method of the coordinate system
         # visualizer somehow causes the labels to be created twice with one version
         # being always visible
         self.show_data_labels(show_data_labels)
         self.show_labels(show_labels)
+
+        self._plot = plot
+
+    def _ipython_display_(self):
+        from IPython.core.display import display
+
+        # display everything
+        self._plot.display()
+        display(self._controls)
 
     def _create_controls(
         self,
