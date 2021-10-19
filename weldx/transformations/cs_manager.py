@@ -1616,7 +1616,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        Time :
+        weldx.time.Time
             Time union
 
         """
