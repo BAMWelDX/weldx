@@ -1602,30 +1602,12 @@ class CoordinateSystemManager:
     def time_union(
         self,
         list_of_edges: List = None,
-    ) -> Union[None, pd.DatetimeIndex, pd.TimedeltaIndex]:
+    ) -> Time:
         """Get the time union of all or selected local coordinate systems.
 
          If neither the `CoordinateSystemManager` nor its attached
          `~weldx.transformations.LocalCoordinateSystem` instances possess a reference
-         time, the function
-         returns a `pandas.TimedeltaIndex`. Otherwise, a `pandas.DatetimeIndex` is
-         returned. The following table gives an overview of all possible reference time
-         combinations and the corresponding return type:
-
-
-        +------------+------------------+-------------------------+
-        | CSM        | LCS              | Return type             |
-        | reference  | reference        |                         |
-        | time       | times            |                         |
-        +============+==================+=========================+
-        | True       | all/mixed/none   | `pandas.DatetimeIndex`  |
-        +------------+------------------+-------------------------+
-        | False      | all              | `pandas.DatetimeIndex`  |
-        +------------+------------------+-------------------------+
-        | False      | none             | `pandas.TimedeltaIndex` |
-        +------------+------------------+-------------------------+
-
-
+         time, the returned ``Time`` object would not contain one either.
 
         Parameters
         ----------
@@ -1634,7 +1616,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        pandas.DatetimeIndex or pandas.TimedeltaIndex
+        weldx.time.Time
             Time union
 
         """
@@ -1664,7 +1646,7 @@ class CoordinateSystemManager:
 
         time_list = [Time(lcs.time, reference_time) for lcs in lcs_list]
 
-        return Time.union(time_list).as_pandas_index()
+        return Time.union(time_list)
 
     def transform_data(
         self,
