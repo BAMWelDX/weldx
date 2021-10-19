@@ -734,7 +734,24 @@ class TestTime:
 
         assert result_delta.all_close(exp_delta)
         assert result_abs.all_close(exp_abs)
-        # assert np.all(result_abs.as_quantity(), exp_abs.as_quantity())
+
+    # test_resample_exceptions ---------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "values,number_or_interval, raises",
+        [
+            ("4s", 2, RuntimeError),
+            ("2000-02-01", 2, RuntimeError),
+            (["4s", "10s"], "no time", TypeError),
+            (["4s", "10s"], "0s", ValueError),
+            (["4s", "10s"], "-2s", ValueError),
+        ],
+    )
+    def test_resample_exceptions(values, number_or_interval, raises):
+        """Test possible exceptions of the resample method."""
+        with pytest.raises(raises):
+            Time(values).resample(number_or_interval)
 
     # test_union -----------------------------------------------------------------------
 

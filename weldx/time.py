@@ -580,6 +580,10 @@ class Time:
         ------
         RuntimeError :
             When the time data consists only of a single value and has no duration.
+        TypeError :
+            When the passed value is neither an integer or a supported time delta value
+        ValueError :
+            When the passed time delta is equal or lower than 0
         """
         if len(self) <= 1:
             raise RuntimeError("Can't resample a single time delta or timestamp")
@@ -590,6 +594,8 @@ class Time:
             interval = duration / (n - 1)
         else:
             interval = Time(number_or_interval).as_timedelta()
+            if interval <= pd.Timedelta(0):
+                raise ValueError("Interval must be larger than 0")
             n = np.clip(int(np.ceil(duration / interval)) + 1, 2, None)
 
         limits = Time([self.min(), self.max()], self.reference_time)
