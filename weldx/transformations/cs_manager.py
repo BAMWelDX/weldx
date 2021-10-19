@@ -1607,7 +1607,7 @@ class CoordinateSystemManager:
 
          If neither the `CoordinateSystemManager` nor its attached
          `~weldx.transformations.LocalCoordinateSystem` instances possess a reference
-         time, the returned `Time` object would not contain one either.
+         time, the returned ``Time`` object would not contain one either.
 
         Parameters
         ----------
