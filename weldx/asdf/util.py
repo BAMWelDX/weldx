@@ -232,7 +232,13 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
 
     def read_header(handle):
         # reads lines until the byte string "...\n" is approached.
-        return b"".join(iter(handle.readline, b"...\n"))
+        iterator = iter(handle)
+        result = []
+        for line in iterator:
+            result.append(line)
+            if line in {b"...\n", b"...\r\n"}:
+                break
+        return b"".join(result)
 
     if isinstance(file, SupportsFileReadWrite):
         file.seek(0)
