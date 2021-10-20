@@ -231,14 +231,10 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     """
 
     def read_header(handle):
-        # reads lines until the line "...\n" or "...\r\n" is reached.
-        iterator = iter(handle)
-        result = []
-        for line in iterator:
-            result.append(line)
-            if line in {b"...\n", b"...\r\n"}:
-                break
-        return b"".join(result)
+        # reads lines until the line "..." is reached.
+        def readline_and_strip_line_ending():
+            return handle.readline()[:-1]
+        return b"".join(iter(readline_and_strip_line_ending, b"..."))
 
     if isinstance(file, SupportsFileReadWrite):
         file.seek(0)
@@ -246,7 +242,7 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     elif isinstance(file, SupportsFileReadOnly):
         code = read_header(file)
     elif isinstance(file, types_path_like.__args__):
-        with open(file, "rb") as f:
+        with open(file, "rbU") as f:
             code = read_header(f)
     else:
         raise TypeError(f"cannot read yaml header from {type(file)}.")
