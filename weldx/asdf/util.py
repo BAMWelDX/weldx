@@ -246,14 +246,14 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     elif isinstance(file, SupportsFileReadOnly):
         code = read_header(file)
     elif isinstance(file, types_path_like.__args__):
-        with open(file, "r", encoding="UTF-8") as f:
+        with open(file, "rb") as f:
             code = read_header(f)
     else:
         raise TypeError(f"cannot read yaml header from {type(file)}.")
 
     if parse:
         return asdf.yamlutil.load_tree(code)
-    return code
+    return code.decode("utf-8")
 
 
 @deprecated("0.4.0", "0.5.0", " _write_buffer was renamed to write_buffer")
