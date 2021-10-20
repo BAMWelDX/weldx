@@ -231,14 +231,8 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     """
 
     def read_header(handle):
-        # reads lines until the byte string "...\n" is approached.
-        iterator = iter(handle)
-        result = []
-        for line in iterator:
-            result.append(line)
-            if line in {b"...\n", b"...\r\n"}:
-                break
-        return b"".join(result)
+        # reads lines until the line "...\n" is reached.
+        return "".join(iter(handle.readline, "...\n"))
 
     if isinstance(file, SupportsFileReadWrite):
         file.seek(0)
@@ -246,12 +240,12 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     elif isinstance(file, SupportsFileReadOnly):
         code = read_header(file)
     elif isinstance(file, types_path_like.__args__):
-        with open(file, "rb") as f:
+        with open(file, "r", encoding="UTF-8") as f:
             code = read_header(f)
 
     if parse:
         return asdf.yamlutil.load_tree(code)
-    return code.decode("utf-8")
+    return code
 
 
 @deprecated("0.4.0", "0.5.0", " _write_buffer was renamed to write_buffer")
