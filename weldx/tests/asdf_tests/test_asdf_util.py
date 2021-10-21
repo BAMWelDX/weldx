@@ -52,6 +52,20 @@ def test_get_yaml_header(create_file_and_buffer, index, parse):
         assert "asdf_library" in header
 
 
+def test_get_yaml_header_win_eol(tmpdir):
+    wx = WeldxFile(tree=dict(x=4), mode="rw")
+    buff = wx.write_to()
+    from io import StringIO
+    buff2 = StringIO()
+    buff2.write(buff.read().decode("utf-8"))
+    fn = tmpdir / "win.wx"
+    with open(fn, newline="\r\n", mode="w") as out:
+        out.writelines(buff2.readlines())
+    with open(fn) as fh:
+        print("jooo")
+        get_yaml_header(fh)
+
+
 def _to_yaml_tree_mod(tree):
     tree["a"] += ["d"]
     return tree
