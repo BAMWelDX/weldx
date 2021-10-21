@@ -239,6 +239,9 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
         return b"".join(iter(readline_replace_eol, b"...\n"))
 
     if isinstance(file, types_file_like.__args__):
+        if isinstance(file, io.TextIOBase):
+            raise ValueError("cannot read files opened in text mode. "
+                             "Please open in binary mode.")
         if isinstance(file, SupportsFileReadWrite):
             file.seek(0)
         code = read_header(file)

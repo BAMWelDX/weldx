@@ -53,6 +53,7 @@ def test_get_yaml_header(create_file_and_buffer, index, parse):
 
 
 def test_get_yaml_header_win_eol(tmpdir):
+    """Ensure we can read header of windoze borked asdf files."""
     wx = WeldxFile(tree=dict(x=4), mode="rw")
     buff = wx.write_to()
     from io import StringIO
@@ -61,8 +62,7 @@ def test_get_yaml_header_win_eol(tmpdir):
     fn = tmpdir / "win.wx"
     with open(fn, newline="\r\n", mode="w") as out:
         out.writelines(buff2.readlines())
-    with open(fn) as fh:
-        print("jooo")
+    with open(fn, mode='rb') as fh:
         get_yaml_header(fh)
 
 
