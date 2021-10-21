@@ -25,7 +25,7 @@ changes
 fixes
 =====
 
-- fix `weldx.asdf.util.read_yaml_header` to work correctly with windows lineendings.
+- fix `weldx.asdf.util.get_yaml_header` to work correctly with windows line endings.
   `[#609] <https://github.com/BAMWelDX/weldx/pull/609>`__
 
 documentation
