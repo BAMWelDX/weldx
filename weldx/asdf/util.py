@@ -233,8 +233,11 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     def read_header(handle):
         # reads lines until the line "...\n" is reached.
         def readline_replace_eol():
-            line: bytes = handle.readline()
-            return line.replace(b"\r\n", b"\n")
+            line = bytearray(handle.readline())
+            if not line:
+                raise StopIteration
+            line[-1] = ord('\n')
+            return line
 
         return b"".join(iter(readline_replace_eol, b"...\n"))
 
