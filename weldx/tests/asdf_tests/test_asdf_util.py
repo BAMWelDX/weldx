@@ -57,12 +57,13 @@ def test_get_yaml_header_win_eol(tmpdir):
     wx = WeldxFile(tree=dict(x=4), mode="rw")
     buff = wx.write_to()
     from io import StringIO
+
     buff2 = StringIO()
     buff2.write(buff.read().decode("utf-8"))
     fn = tmpdir / "win.wx"
     with open(fn, newline="\r\n", mode="w") as out:
         out.writelines(buff2.readlines())
-    with open(fn, mode='rb') as fh:
+    with open(fn, mode="rb") as fh:
         get_yaml_header(fh)
 
 

@@ -18,7 +18,6 @@ from boltons.iterutils import get_path
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
 from weldx.types import (
-    SupportsFileReadOnly,
     SupportsFileReadWrite,
     types_file_like,
     types_path_and_file_like,
@@ -230,21 +229,25 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
         return the parsed header.
 
     """
+
     def read_header(handle):
         # reads lines until the line "...\n" is reached.
         def readline_replace_eol():
             line = bytearray(handle.readline())
             if not line:
                 raise StopIteration
-            line[-1] = ord('\n')
+            if line[-2] == ord("\r") and line[-1] == ord("\n"):
+                line = line[:-2]
+                line[-1] = ord("\n")
             return line
 
         return b"".join(iter(readline_replace_eol, b"...\n"))
 
     if isinstance(file, types_file_like.__args__):
         if isinstance(file, io.TextIOBase):
-            raise ValueError("cannot read files opened in text mode. "
-                             "Please open in binary mode.")
+            raise ValueError(
+                "cannot read files opened in text mode. " "Please open in binary mode."
+            )
         if isinstance(file, SupportsFileReadWrite):
             file.seek(0)
         code = read_header(file)
