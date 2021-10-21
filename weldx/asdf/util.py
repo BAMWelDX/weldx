@@ -12,7 +12,7 @@ from asdf.config import AsdfConfig, get_config
 from asdf.extension._extension import Extension
 from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
-from boltons.iterutils import get_path
+from boltons.iterutils import get_path, remap
 
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
@@ -470,7 +470,7 @@ def uri_match(patterns: Union[str, List[str]], uri: str) -> bool:
     return any(asdf_uri_match(p, uri) for p in patterns)
 
 
-def get_converter_for_tag(tag: str) -> Union[type, None]:
+def get_converter_for_tag(tag: str) -> Union[WeldxConverter, None]:
     """Get the converter class that handles a given tag."""
     converters = [s for s in WeldxConverter.__subclasses__() if uri_match(s.tags, tag)]
     if len(converters) > 1:
@@ -551,3 +551,75 @@ def _get_instance_shape(
         if hasattr(converter, "shape_from_tagged"):
             return converter.shape_from_tagged(instance_dict)
     return None
+
+
+def display_schema_tree(filename):
+    """Display the schema requirements as an interactive tree view in JupyterLab."""
+    from IPython.display import JSON, display
+
+    schema = get_schema_path(filename)
+    contents = schema.read_text()
+    header = asdf.yamlutil.load_tree(contents)
+
+    remapped = header["properties"]
+
+    def resolve_python_classes(path, key, value):
+        """Parse the tag or type information information to the key string.
+
+        This tries to resolves to python class names from 'tag' fields."""
+        if not isinstance(value, dict):
+            return key, value
+
+        if "tag" in value:
+            converter = get_converter_for_tag(value["tag"])
+            if converter:
+                tag_str = converter.default_class_display_name()
+            else:
+                tag_str = value["tag"].split("asdf://weldx.bam.de/weldx/tags/")[-1]
+            key = f"{key} ({tag_str})"
+        elif "$ref" in value:
+            tag_str = value["$ref"].split("asdf://weldx.bam.de/weldx/schemas/")[-1]
+            key = f"{key} (${tag_str})"
+        elif value.get("type") == "object":
+            key = f"{key} (object)"
+        elif value.get("type") == "array":
+            key = f"{key} (array)"
+        elif value.get("type") == "string":
+            key = f"{key} (string)"
+        elif value.get("type") == "number":
+            key = f"{key} (number)"
+        return key, value
+
+    def convert_wx_shape(path, key, value):
+        """Parse the list information in wx_shape into a readable string."""
+        if isinstance(value, dict) and ("wx_shape" in value):
+            if isinstance(value["wx_shape"], list):
+                value = value.copy()
+                value["wx_shape"] = f"[{','.join((str(n) for n in value['wx_shape']))}]"
+        return key, value
+
+    def drop_meta(path, key, value):
+        """Drop common metadata fields form the output."""
+        return key not in {
+            "examples",
+            "description",
+            "required",
+            "tag",
+            "$ref",
+            "type",
+        }
+
+    def drop_properties(path, key, value):
+        """Drop the 'properties' field."""
+        if not isinstance(value, dict):
+            return key, value
+        if "properties" in value:
+            value = value["properties"]
+        return key, value
+
+    remapped = remap(remapped, visit=convert_wx_shape)
+    remapped = remap(remapped, visit=resolve_python_classes)
+    remapped = remap(remapped, visit=drop_meta)
+    remapped = remap(remapped, visit=drop_properties)
+
+    return JSON(remapped, expanded=False, root=schema.name)

@@ -45,3 +45,8 @@ class IsoGrooveConverter(WeldxConverter):
         ext = get_weldx_extension(ctx)
         tag = [t.tag_uri for t in ext.tags if uri_match(selection[0], t.tag_uri)]
         return tag[0]
+
+    @classmethod
+    def default_class_display_name(cls):
+        """Return custom type string."""
+        return "IsoGroove-Type"
