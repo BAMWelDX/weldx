@@ -1,4 +1,5 @@
 """Utilities for asdf files."""
+import io
 from collections.abc import Mapping
 from distutils.version import LooseVersion
 from io import BytesIO
@@ -229,18 +230,20 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
         return the parsed header.
 
     """
-
     def read_header(handle):
         # reads lines until the line "...\n" is reached.
-        return "".join(iter(handle.readline, "...\n"))
+        def readline_replace_eol():
+            line: bytes = handle.readline()
+            return line.replace(b"\r\n", b"\n")
 
-    if isinstance(file, SupportsFileReadWrite):
-        file.seek(0)
-        code = read_header(file)
-    elif isinstance(file, SupportsFileReadOnly):
+        return b"".join(iter(readline_replace_eol, b"...\n"))
+
+    if isinstance(file, types_file_like.__args__):
+        if isinstance(file, SupportsFileReadWrite):
+            file.seek(0)
         code = read_header(file)
     elif isinstance(file, types_path_like.__args__):
-        with open(file, "r", newline="\n") as f:
+        with open(file, "rb") as f:
             code = read_header(f)
     else:
         raise TypeError(f"cannot read yaml header from {type(file)}.")
