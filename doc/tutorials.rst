@@ -2,6 +2,23 @@
  Getting Started
 #################
 
+************************
+Working with WelDX files
+************************
+
+This tutorial series teaches you step by step how to access the data
+stored inside of an existing WelDX file. Furthermore, it demonstrates
+the main features of the `weldx` Python package that help you with
+data processing and visualization.
+
+.. toctree::
+   :numbered:
+   :maxdepth: 1
+   :caption: Welding examples
+
+   tutorials/01_01_introduction
+
+
 ******************
  Welding Examples
 ******************
