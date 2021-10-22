@@ -16,6 +16,7 @@ import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.time import Time
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -2531,13 +2532,24 @@ class SpatialData:
     coordinates: DataArray
     triangles: np.ndarray = None
     attributes: Dict[str, np.ndarray] = None
+    # todo remove and turn into actual class
+    time: Time = None
 
     def __post_init__(self):
         """Convert and check input values."""
         if not isinstance(self.coordinates, DataArray):
-            self.coordinates = DataArray(
-                self.coordinates, dims=["n", "c"], coords={"c": ["x", "y", "z"]}
-            )
+            self.coordinates = np.array(self.coordinates)
+            if self.coordinates.ndim == 2:
+                self.coordinates = DataArray(
+                    self.coordinates, dims=["n", "c"], coords={"c": ["x", "y", "z"]}
+                )
+            else:
+                self.time = Time(self.time)
+                self.coordinates = DataArray(
+                    self.coordinates,
+                    dims=["time", "n", "c"],
+                    coords={"c": ["x", "y", "z"], "time": self.time.as_timedelta()},
+                )
 
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
@@ -2793,3 +2805,7 @@ class SpatialData:
             points=self.coordinates.data, cells={"triangle": self.triangles}
         )
         mesh.write(file_name)
+
+    @property
+    def is_time_dependent(self):
+        return self.time is not None
