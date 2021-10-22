@@ -554,7 +554,7 @@ def _get_instance_shape(
 
 
 def get_schema_tree(filename):
-    """Display the schema requirements as an interactive tree view in JupyterLab."""
+    """Get a dictionary representation of an asdf schema file with custom formatting."""
     schema = get_schema_path(filename)
     contents = schema.read_text()
     header = asdf.yamlutil.load_tree(contents)
