@@ -167,3 +167,8 @@ def test_get_highest_tag_version():
 
     with pytest.raises(ValueError):
         get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/**-*")
+
+
+def test_get_schema_tree():
+    d = get_schema_tree("single_pass_weld-0.1.0")
+    assert isinstance(d, dict)
