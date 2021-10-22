@@ -553,10 +553,8 @@ def _get_instance_shape(
     return None
 
 
-def display_schema_tree(filename):
+def get_schema_tree(filename):
     """Display the schema requirements as an interactive tree view in JupyterLab."""
-    from IPython.display import JSON, display
-
     schema = get_schema_path(filename)
     contents = schema.read_text()
     header = asdf.yamlutil.load_tree(contents)
@@ -622,4 +620,4 @@ def display_schema_tree(filename):
     remapped = remap(remapped, visit=drop_meta)
     remapped = remap(remapped, visit=drop_properties)
 
-    return JSON(remapped, expanded=False, root=schema.name)
+    return remapped
