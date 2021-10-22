@@ -2,7 +2,7 @@
 
 from asdf.util import uri_match
 
-from weldx.asdf.types import WeldxConverter
+from weldx.asdf.types import WeldxConverter, format_tag
 from weldx.asdf.util import get_weldx_extension
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove, _groove_name_to_type
 
@@ -19,8 +19,11 @@ def _get_class_from_tag(instance_tag: str):
 class IsoGrooveConverter(WeldxConverter):
     """ASDF Groove type."""
 
-    tags = ["asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*-0.1.*"]
-    types = [IsoBaseGroove] + IsoBaseGroove.__subclasses__()
+    tags = [
+        format_tag(tag_name=_ISO_GROOVE_SCHEMA + g, version="0.1.*")
+        for g in _groove_name_to_type.keys()
+    ]
+    types = IsoBaseGroove.__subclasses__()
 
     def to_yaml_tree(self, obj: IsoBaseGroove, tag: str, ctx) -> dict:
         """Convert to python dict."""
