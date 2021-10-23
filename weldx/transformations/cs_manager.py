@@ -596,8 +596,8 @@ class CoordinateSystemManager:
             raise ValueError(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(coordinate_system_name)
 
-        if not isinstance(data, SpatialData):
-            data = SpatialData(coordinates=data)
+        if not isinstance(data, (xr.DataArray, SpatialData)):
+            data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
         self._graph.nodes[coordinate_system_name]["data"][data_name] = data
 
