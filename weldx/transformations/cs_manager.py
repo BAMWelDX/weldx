@@ -596,8 +596,8 @@ class CoordinateSystemManager:
             raise ValueError(f"There already is a dataset with the name '{data_name}'.")
         self._check_coordinate_system_exists(coordinate_system_name)
 
-        if not isinstance(data, (xr.DataArray, SpatialData)):
-            data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
+        if not isinstance(data, SpatialData):
+            data = SpatialData(coordinates=data)
 
         self._graph.nodes[coordinate_system_name]["data"][data_name] = data
 
@@ -1653,7 +1653,7 @@ class CoordinateSystemManager:
         data: types_coordinates,
         source_coordinate_system_name: str,
         target_coordinate_system_name: str,
-    ):
+    ) -> Union[SpatialData, xr.DataArray]:
         """Transform spatial data from one coordinate system to another.
 
         Parameters
@@ -1671,7 +1671,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        numpy.ndarray
+        Union[SpatialData, xarray.DataArray]
             Transformed data
 
         """

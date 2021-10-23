@@ -302,16 +302,17 @@ class SpatialDataVisualizer:
             If `True`, meshes will be drawn as wireframes
 
         """
-        triangles = None
-        if isinstance(data, geo.SpatialData):
-            triangles = data.triangles
-            data = data.coordinates.data
-        # k3d needs single precision data.
-        data = data.astype(np.float32)  # type: ignore[union-attr] # handled above
+        if not isinstance(data, geo.SpatialData):
+            data = geo.SpatialData(coordinates=data)
+
+        if not data.coordinates.dtype == "float32":
+            data.coordinates = data.coordinates.astype(np.float32)
+        if (data.triangles is not None) and (not data.triangles.dtype == "uint32"):
+            data.coordinates = data.coordinates.astype(np.uint32)
 
         self._reference_system = reference_system
 
-        self._label_pos = np.mean(data, axis=0)
+        self._label_pos = np.mean(data.coordinates.values, axis=0)
         self._label = None
         if name is not None:
             self._label = k3d.text(
@@ -323,11 +324,15 @@ class SpatialDataVisualizer:
                 label_box=True,
             )
 
-        self._points = k3d.points(data, point_size=0.05, color=color)
+        self._points = k3d.points(data.coordinates, point_size=0.05, color=color)
         self._mesh = None
-        if triangles is not None:
+        if data.triangles is not None:
             self._mesh = k3d.mesh(
-                data, triangles, side="double", color=color, wireframe=show_wireframe
+                data.coordinates,
+                data.triangles,
+                side="double",
+                color=color,
+                wireframe=show_wireframe,
             )
 
         self.set_visualization_method(visualization_method)
@@ -338,6 +343,8 @@ class SpatialDataVisualizer:
                 plot += self._mesh
             if self._label is not None:
                 plot += self._label
+
+        self.data = data
 
     @property
     def reference_system(self) -> str:
@@ -526,8 +533,8 @@ class CoordinateSystemManagerVisualizerK3D:
             reference_system = self._csm.root_system_name
         self._current_reference_system = reference_system
 
-        # create plot
-        plot = limited_plot(limits)
+        plot = k3d.plot()
+
         self._color_generator = color_generator_function()
 
         self._lcs_vis = {
@@ -601,6 +608,30 @@ class CoordinateSystemManagerVisualizerK3D:
         self.show_labels(show_labels)
 
         self._plot = plot
+        if limits is None:
+            limits = self._get_spatial_limits()
+        self.grid = limits
+
+    @property
+    def grid(self):
+        """Return the plot grid bounding box in (x0, y0, z0, x1, y1, z1) format."""
+        return self._plot.grid
+
+    @grid.setter
+    def grid(self, value):
+        """Set the plot grid bounding box in (x0, y0, z0, x1, y1, z1) format."""
+        if value is None:
+            self._plot.grid_auto_fit = True
+            self._plot.grid = (-1, -1, -1, 1, 1, 1)
+        else:
+            self._plot.grid_auto_fit = False
+            self._plot.grid = tuple(np.array(value).flatten().astype(int))
+
+    def _get_spatial_limits(self):
+        limits = np.stack([s.data.limits() for s in self._data_vis.values()])
+        mins = limits.min(axis=0)[0, :]
+        maxs = limits.max(axis=0)[1, :]
+        return np.vstack([mins, maxs])
 
     def _ipython_display_(self):
         from IPython.core.display import display

@@ -2700,12 +2700,17 @@ class SpatialData:
 
         return SpatialData(points, triangles)
 
-    def limits(self) -> List[Tuple[float, float]]:
-        """Get the xyz limits of the coordinates."""
-        return [
-            (self.coordinates.values[:, i].min(), self.coordinates.values[:, i].max())
-            for i in range(3)
-        ]
+    def limits(self) -> np.ndarray:
+        """Get the xyz limits of the coordinates.
+
+        Array format:
+        [[x0,y0,z0],
+        [x1,y1,z1]]
+        """
+        mins = self.coordinates.values.min(axis=0)
+        maxs = self.coordinates.values.max(axis=0)
+
+        return np.vstack([mins, maxs])
 
     def plot(
         self,
