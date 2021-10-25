@@ -33,6 +33,12 @@ __all__ = [
 ]
 
 
+def _get_limits_from_stack(limits):
+    mins = limits.min(axis=0)[0, :]
+    maxs = limits.max(axis=0)[1, :]
+    return np.vstack([mins, maxs])
+
+
 def _get_coordinates_and_orientation(lcs: LocalCoordinateSystem, index: int = 0):
     """Get the coordinates and orientation of a coordinate system.
 
@@ -262,6 +268,14 @@ class CoordinateSystemVisualizerK3D:
         """
         coordinates, orientation = _get_coordinates_and_orientation(self._lcs, index)
         self._update_positions(coordinates, orientation)
+
+    def limits(self):
+        lcs = self._lcs
+        if "time" in lcs.coordinates.dims:
+            mins = lcs.coordinates.values.min(axis=0)
+            maxs = lcs.coordinates.values.max(axis=0)
+            return np.vstack([mins, maxs])
+        return np.vstack([lcs.coordinates.values, lcs.coordinates.values])
 
 
 class SpatialDataVisualizer:
@@ -609,7 +623,7 @@ class CoordinateSystemManagerVisualizerK3D:
 
         self._plot = plot
         if limits is None:
-            limits = self._get_spatial_limits()
+            limits = self._get_limits()
         self.grid = limits
 
     @property
@@ -627,11 +641,27 @@ class CoordinateSystemManagerVisualizerK3D:
             self._plot.grid_auto_fit = False
             self._plot.grid = tuple(np.array(value).flatten().astype(int))
 
-    def _get_spatial_limits(self):
+    def _get_limits_spatial(self):
+        """Get the limits of all spatial data."""
+        if not self._data_vis:
+            return None
         limits = np.stack([s.data.limits() for s in self._data_vis.values()])
-        mins = limits.min(axis=0)[0, :]
-        maxs = limits.max(axis=0)[1, :]
-        return np.vstack([mins, maxs])
+        return _get_limits_from_stack(limits)
+
+    def _get_limits_trace(self):
+        """Get the limits of all LCS/traces."""
+        if not self._lcs_vis:
+            return None
+        limits = np.stack([lcs_vis.limits() for lcs_vis in self._lcs_vis.values()])
+        return _get_limits_from_stack(limits)
+
+    def _get_limits(self):
+        limits_spatial = self._get_limits_spatial()
+        limits_trace = self._get_limits_trace()
+        limits = [lims for lims in [limits_spatial, limits_trace] if lims is not None]
+        if limits:
+            return _get_limits_from_stack(np.stack(limits))
+        return None
 
     def _ipython_display_(self):
         from IPython.core.display import display
