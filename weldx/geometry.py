@@ -2772,15 +2772,15 @@ class SpatialData:
                 self, name=None, reference_system=None, color=color, plot=plot
             )
             return plot
-        else:
-            return vs.plot_spatial_data_matplotlib(
-                data=self,
-                axes=axes,
-                color=color,
-                label=label,
-                limits=limits,
-                show_wireframe=show_wireframe,
-            )
+
+        return vs.plot_spatial_data_matplotlib(
+            data=self,
+            axes=axes,
+            color=color,
+            label=label,
+            limits=limits,
+            show_wireframe=show_wireframe,
+        )
 
     def to_file(self, file_name: Union[str, Path]):
         """Write spatial data into a file.
