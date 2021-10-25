@@ -1671,7 +1671,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        Union[SpatialData, xarray.DataArray]
+        Union[weldx.geometry.SpatialData, xarray.DataArray]
             Transformed data
 
         """
