@@ -22,7 +22,7 @@ class IsoGrooveConverter(WeldxConverter):
     tags = [
         format_tag(tag_name=_ISO_GROOVE_SCHEMA + g, version="0.1.*")
         for g in _groove_name_to_type.keys()
-    ]
+    ] + ["asdf://weldx.bam.de/weldx/tags/groove/iso_9692_1_2013_12/*-0.1.*"]
     types = IsoBaseGroove.__subclasses__()
 
     def to_yaml_tree(self, obj: IsoBaseGroove, tag: str, ctx) -> dict:
@@ -38,8 +38,8 @@ class IsoGrooveConverter(WeldxConverter):
     def select_tag(self, obj, tags, ctx):
         """Select the highest supported new style tag according to groove name."""
         _snip = _ISO_GROOVE_SCHEMA + type(obj).__name__
-        # select only new style tags
-        selection = [tag for tag in self.tags if tag.startswith("asdf://")]
+        # select only new style tags and ignore glob pattern
+        selection = [tag for tag in self.tags if tag.startswith("asdf://")][:-1]
         # select the matching pattern
         selection = [tag for tag in selection if _snip in tag]
         if not len(selection) == 1:
