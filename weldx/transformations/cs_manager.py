@@ -570,36 +570,45 @@ class CoordinateSystemManager:
         self,
         data: Union[xr.DataArray, SpatialData],
         data_name: str,
-        coordinate_system_name: str,
+        reference_system: str,
+        target_system: str = None,
     ):
         """Assign spatial data to a coordinate system.
 
         Parameters
         ----------
-        data :
+        data
             Spatial data
-        data_name :
+        data_name
             Name of the data.
-        coordinate_system_name :
-            Name of the coordinate system the data should be
-            assigned to.
+        reference_system
+            Name of the coordinate system the data values are defined in.
+        target_system:
+            Name of the target system the data will be transformed and assigned to.
+            This is useful when adding time-dependent data. The provided name must match
+            an existing system. If `None` is passed (the default), data will not be
+            transformed and assigned to the 'reference_system'.
 
         """
-        # TODO: How to handle time dependent data? some things to think about:
-        # - times of coordinate system and data are not equal
-        # - which time is taken as reference? (probably the one of the data)
-        # - what happens during cal of time interpolation functions with data? Also
-        #   interpolated or not?
         if not isinstance(data_name, str):
             raise TypeError("The data name must be a string.")
         if data_name in self.data_names:
             raise ValueError(f"There already is a dataset with the name '{data_name}'.")
-        self._check_coordinate_system_exists(coordinate_system_name)
+        self._check_coordinate_system_exists(reference_system)
 
         if not isinstance(data, (xr.DataArray, SpatialData)):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
-        self._graph.nodes[coordinate_system_name]["data"][data_name] = data
+        if target_system is not None:
+            self._check_coordinate_system_exists(target_system)
+            data = self.transform_data(
+                data,
+                source_coordinate_system_name=reference_system,
+                target_coordinate_system_name=target_system,
+            )
+            reference_system = target_system
+
+        self._graph.nodes[reference_system]["data"][data_name] = data
 
     def create_cs(
         self,
