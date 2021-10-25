@@ -306,8 +306,8 @@ class SpatialDataVisualizer:
         if isinstance(data, geo.SpatialData):
             triangles = data.triangles
             data = data.coordinates.data
-        # k3d needs single precision data.
-        data = data.astype(np.float32).reshape(-1, 3)  # type: ignore[union-attr] # handled above
+        # k3d needs single precision data, reshape to (n,3)
+        data = data.astype(np.float32).reshape(-1, 3)
 
         self._reference_system = reference_system
 

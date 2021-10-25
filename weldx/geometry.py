@@ -2806,5 +2806,6 @@ class SpatialData:
         mesh.write(file_name)
 
     @property
-    def is_time_dependent(self):
+    def is_time_dependent(self) -> bool:
+        """Return `True` if the coordinates are time dependent."""
         return "time" in self.coordinates.dims
