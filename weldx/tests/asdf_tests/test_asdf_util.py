@@ -9,6 +9,7 @@ from weldx import WeldxFile
 from weldx.asdf.util import (
     dataclass_serialization_class,
     get_highest_tag_version,
+    get_schema_tree,
     get_yaml_header,
     read_buffer,
     write_buffer,

@@ -553,8 +553,22 @@ def _get_instance_shape(
     return None
 
 
-def get_schema_tree(schemafile: Union[str, Path], drop: set = None):
-    """Get a dictionary representation of an asdf schema file with custom formatting."""
+def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
+    """Get a dictionary representation of a weldx schema file with custom formatting.
+
+    Parameters
+    ----------
+    schemafile
+        Weldx schema file name or Path to parse.
+    drop
+        Set or list-like of additional keys to drop from all nested elements.
+    Returns
+    -------
+    dict
+        A reduced dictionary representation of the schema file requirements.
+        The property keys are formatted to reflect the associated Python class.
+        Some keys are dropped or reformatted for readability.
+    """
 
     if drop is None:
         drop = {}
