@@ -1687,24 +1687,16 @@ class CoordinateSystemManager:
             )
         if not isinstance(data, xr.DataArray):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
-        if "time" in data.dims:
-            csm = self.interp_time(data.time)
-            lcs = csm.get_cs(
-                source_coordinate_system_name, target_coordinate_system_name
-            )
-            mul = util.xr_matmul(
-                lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
-            )
-            return mul + lcs.coordinates
-        else:
-            lcs = self.get_cs(
-                source_coordinate_system_name, target_coordinate_system_name
-            )
 
-            mul = util.xr_matmul(
-                lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
-            )
-            return mul + lcs.coordinates
+        time = data.time if "time" in data.dims else None
+        lcs = self.get_cs(
+            source_coordinate_system_name, target_coordinate_system_name, time=time
+        )
+
+        mul = util.xr_matmul(
+            lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
+        )
+        return mul + lcs.coordinates
 
     # subsystems -----------------------------------------------------------------------
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import copy
 import math
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
@@ -2532,10 +2532,9 @@ class SpatialData:
     coordinates: DataArray
     triangles: np.ndarray = None
     attributes: Dict[str, np.ndarray] = None
-    # todo remove and turn into actual class
-    time: Time = None
+    time: InitVar[Time] = None
 
-    def __post_init__(self):
+    def __post_init__(self, time):
         """Convert and check input values."""
         if not isinstance(self.coordinates, DataArray):
             self.coordinates = np.array(self.coordinates)
@@ -2544,12 +2543,12 @@ class SpatialData:
                     self.coordinates, dims=["n", "c"], coords={"c": ["x", "y", "z"]}
                 )
             else:
-                self.time = Time(self.time)
                 self.coordinates = DataArray(
                     self.coordinates,
                     dims=["time", "n", "c"],
-                    coords={"c": ["x", "y", "z"], "time": self.time.as_timedelta()},
+                    coords={"c": ["x", "y", "z"], "time": Time(time).index},
                 )
+                self.coordinates = self.coordinates.weldx.time_ref_restore()
 
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
@@ -2808,4 +2807,4 @@ class SpatialData:
 
     @property
     def is_time_dependent(self):
-        return self.time is not None
+        return "time" in self.coordinates.dims
