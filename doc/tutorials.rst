@@ -17,6 +17,7 @@ data processing and visualization.
    :caption: Welding examples
 
    tutorials/01_01_introduction
+   tutorials/01_02_time_dependent_data
 
 
 ******************
