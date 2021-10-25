@@ -20,6 +20,7 @@ from .colors import (
     RGB_BLACK,
     RGB_BLUE,
     RGB_GREEN,
+    RGB_GREY,
     RGB_RED,
     color_generator_function,
     get_color,
@@ -29,7 +30,6 @@ from .types import types_limits, types_timeindex
 __all__ = [
     "CoordinateSystemManagerVisualizerK3D",
     "SpatialDataVisualizer",
-    "limited_plot",
 ]
 
 
@@ -289,7 +289,7 @@ class SpatialDataVisualizer:
         name: str,
         reference_system: str,
         plot: k3d.Plot = None,
-        color: int = RGB_BLACK,
+        color: int = None,
         visualization_method: str = "auto",
         show_wireframe: bool = False,
     ):
@@ -319,6 +319,12 @@ class SpatialDataVisualizer:
         if not isinstance(data, geo.SpatialData):
             data = geo.SpatialData(coordinates=data)
 
+        colors = []
+        if color is None or isinstance(color, str):
+            if isinstance(color, str):
+                colors = data.attributes[color]
+            color = RGB_GREY
+
         if not data.coordinates.dtype == "float32":
             data.coordinates = data.coordinates.astype(np.float32)
         if (data.triangles is not None) and (not data.triangles.dtype == "uint32"):
@@ -346,6 +352,8 @@ class SpatialDataVisualizer:
                 data.triangles,
                 side="double",
                 color=color,
+                attribute=colors,
+                color_map=k3d.colormaps.matplotlib_color_maps.Viridis,
                 wireframe=show_wireframe,
             )
 
@@ -428,40 +436,6 @@ class SpatialDataVisualizer:
             self._label.position = (
                 np.matmul(model_mat[0:3, 0:3], self._label_pos) + model_mat[0:3, 3]
             )
-
-
-def limited_plot(limits: types_limits = None) -> k3d.plot:
-    """Get a new `k3d.plot` with its limits set.
-
-    Parameters
-    ----------
-    limits :
-        Either a single tuple of two float values that specifies the minimum and maximum
-        value of all 3 axis or a list containing 3 tuples to specify the limits of each
-        axis individually. If `None` is passed, the limits will be set automatically.
-
-    Returns
-    -------
-    k3d.plot :
-        New plot instance
-
-    """
-    if limits is not None:
-        if isinstance(limits, tuple):
-            limits = [limits]
-        grid_auto_fit = False
-        # INFO: The next three suppressed mypy warnings do make sense and might
-        # reveal a bug, but I couldn't resolve it in a reasonable time.
-        if len(limits) == 1:
-            grid = [limits[0][int(i / 3)] for i in range(6)]  # type: ignore
-        else:
-            grid = [limits[i % 3][int(i / 3)] for i in range(6)]  # type: ignore
-    else:
-        grid_auto_fit = True
-        grid = (-1, -1, -1, 1, 1, 1)  # type: ignore[assignment]
-
-    # create plot
-    return k3d.plot(grid_auto_fit=grid_auto_fit, grid=grid)
 
 
 class CoordinateSystemManagerVisualizerK3D:
@@ -633,13 +607,16 @@ class CoordinateSystemManagerVisualizerK3D:
 
     @grid.setter
     def grid(self, value):
-        """Set the plot grid bounding box in (x0, y0, z0, x1, y1, z1) format."""
+        """Set grid bounding box in (x0, y0, z0, x1, y1, z1) or (min, max) format."""
         if value is None:
             self._plot.grid_auto_fit = True
             self._plot.grid = (-1, -1, -1, 1, 1, 1)
         else:
             self._plot.grid_auto_fit = False
-            self._plot.grid = tuple(np.array(value).flatten().astype(int))
+            grid = tuple(np.array(value).flatten().astype(int))
+            if len(grid) == 2:
+                grid = np.repeat(grid, 3)
+            self._plot.grid = grid
 
     def _get_limits_spatial(self):
         """Get the limits of all spatial data."""

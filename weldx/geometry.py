@@ -2764,15 +2764,14 @@ class SpatialData:
         import weldx.visualization as vs
 
         if backend == "k3d":
-            from weldx.visualization.k3d_impl import limited_plot
+            import k3d
 
-            plot = limited_plot(limits)
-            if color is None:
-                color = 0x999999
+            limits = tuple(self.limits().flatten())
+            plot = k3d.plot(grid=limits)
             vs.SpatialDataVisualizer(
                 self, name=None, reference_system=None, color=color, plot=plot
             )
-            plot.display()
+            return plot
         else:
             return vs.plot_spatial_data_matplotlib(
                 data=self,
