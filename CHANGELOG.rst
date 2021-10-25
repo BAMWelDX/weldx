@@ -16,6 +16,9 @@ added
 - Added `weldx.geometry.SpatialData.limits` to calculate coordinate boundaries.
   `[#604] <https://github.com/BAMWelDX/weldx/pull/604>`__
 
+- Added `weldx.asdf.util.get_schema_tree` utility to display schema files.
+  `[#610] <https://github.com/BAMWelDX/weldx/pull/610>`__
+
 removed
 =======
 
