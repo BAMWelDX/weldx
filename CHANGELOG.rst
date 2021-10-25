@@ -8,9 +8,16 @@
 
 added
 =====
+- `Time.duration` to get the covered duration of the data and `Time.resample`
+  to get a new `Time` instance with resampled time data within the same
+  boundaries as the original object `[#603]
+  <https://github.com/BAMWelDX/weldx/pull/603>`__
 
 - Added `weldx.geometry.SpatialData.limits` to calculate coordinate boundaries.
   `[#604] <https://github.com/BAMWelDX/weldx/pull/604>`__
+
+- Added `weldx.asdf.util.get_schema_tree` utility to display schema files.
+  `[#610] <https://github.com/BAMWelDX/weldx/pull/610>`__
 
 removed
 =======
@@ -22,8 +29,14 @@ changes
    the usage of units and support unit strings as inputs. `[#588]
    <https://github.com/BAMWelDX/weldx/pull/588>`__
 
+- `CoordinateSystemManager.time_union` now returns a `Time` instance instead
+  of a pandas type `[#603] <https://github.com/BAMWelDX/weldx/pull/603>`__
+
+
 fixes
 =====
+- fix broken `Time.all_close` to now work as intended `[#603]
+  <https://github.com/BAMWelDX/weldx/pull/603>`__
 
 - fix `weldx.asdf.util.get_yaml_header` to work correctly with windows line endings.
   `[#609] <https://github.com/BAMWelDX/weldx/pull/609>`__
