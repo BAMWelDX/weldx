@@ -3142,7 +3142,8 @@ class TestSpatialData:
         assert np.allclose(data.coordinates, data_read.coordinates)
         assert np.allclose(data.triangles, data_read.triangles)
 
-    def test_time_dependent_data(self):
+    @staticmethod
+    def test_time_dependent_data():
         """Simple test for assigning and transforming time dependent data."""
         time = ["0s", "3s", "6s", "9s"]
         data = np.array([[[0, 0, 0], [0, 1.0, np.sin(i)], [0, 2, 0]] for i in range(4)])
