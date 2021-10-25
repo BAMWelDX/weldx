@@ -553,13 +553,18 @@ def _get_instance_shape(
     return None
 
 
-def get_schema_tree(filename):
+def get_schema_tree(schemafile: Union[str, Path], drop: set = None):
     """Get a dictionary representation of an asdf schema file with custom formatting."""
-    schema = get_schema_path(filename)
-    contents = schema.read_text()
+
+    if drop is None:
+        drop = {}
+    if isinstance(schemafile, str):
+        schemafile = get_schema_path(schemafile)
+
+    contents = schemafile.read_text()
     header = asdf.yamlutil.load_tree(contents)
 
-    remapped = header["properties"]
+    remapped = [header]
 
     def resolve_python_classes(path, key, value):
         """Parse the tag or type information information to the key string.
@@ -579,11 +584,11 @@ def get_schema_tree(filename):
             tag_str = value["$ref"].split("asdf://weldx.bam.de/weldx/schemas/")[-1]
             key = f"{key} (${tag_str})"
         elif value.get("type") == "object":
-            key = f"{key} (object)"
+            key = f"{key} (dict)"
         elif value.get("type") == "array":
-            key = f"{key} (array)"
+            key = f"{key} (list)"
         elif value.get("type") == "string":
-            key = f"{key} (string)"
+            key = f"{key} (str)"
         elif value.get("type") == "number":
             key = f"{key} (number)"
         return key, value
@@ -596,16 +601,28 @@ def get_schema_tree(filename):
                 value["wx_shape"] = f"[{','.join((str(n) for n in value['wx_shape']))}]"
         return key, value
 
+    def mark_required(path, key, value):
+        if not isinstance(value, dict):
+            return key, value
+
+        if "required" in value:
+            reqs = value["required"]
+            props = {
+                (
+                    k[:-1] + ", required" + ")"
+                    if any(k.startswith(r) for r in reqs)
+                    else k
+                ): v
+                for k, v in value["properties"].items()
+            }
+            value["properties"] = props
+
+        return key, value
+
     def drop_meta(path, key, value):
-        """Drop common metadata fields form the output."""
-        return key not in {
-            "examples",
-            "description",
-            "required",
-            "tag",
-            "$ref",
-            "type",
-        }
+        """Drop common metadata fields from the output."""
+        default = {"examples", "description", "tag", "$ref", "type"}
+        return key not in default | set(drop)
 
     def drop_properties(path, key, value):
         """Drop the 'properties' field."""
@@ -617,7 +634,8 @@ def get_schema_tree(filename):
 
     remapped = remap(remapped, visit=convert_wx_shape)
     remapped = remap(remapped, visit=resolve_python_classes)
+    remapped = remap(remapped, visit=mark_required)
     remapped = remap(remapped, visit=drop_meta)
     remapped = remap(remapped, visit=drop_properties)
 
-    return remapped
+    return remapped[0]
