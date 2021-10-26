@@ -554,7 +554,7 @@ def xr_3d_vector(
 
     if time is not None:
         dims = ["time"] + dims
-        coords["time"] = time
+        coords["time"] = time  # type: ignore[assignment]
 
     if "time" in coords:
         coords["time"] = Time(time).index
