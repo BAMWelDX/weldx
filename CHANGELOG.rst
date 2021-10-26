@@ -35,8 +35,8 @@ changes
 - `SpatialData` now supports time dependent data. `[#612]
    <https://github.com/BAMWelDX/weldx/pull/612>`__
 
-- Renamed the parameter `coordinate_system_name` of `CoordinateSystemManager.assign_data`
-  to `reference_system` and added the parameter `target_system`. If the latter one is not
+- Renamed the parameter ``coordinate_system_name`` of `CoordinateSystemManager.assign_data`
+  to ``reference_system`` and added the parameter ``target_system``. If the latter one is not
   `None`, the data will be transformed and stored at this coordinate system. `[#612]
    <https://github.com/BAMWelDX/weldx/pull/612>`__
 
