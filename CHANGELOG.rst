@@ -16,6 +16,9 @@ added
 - Added `weldx.geometry.SpatialData.limits` to calculate coordinate boundaries.
   `[#604] <https://github.com/BAMWelDX/weldx/pull/604>`__
 
+- `SpatialData` now supports a ``time`` dimension. Time-dependent data can be transformed
+  using the `CoordinateSystemManager` `[#612] <https://github.com/BAMWelDX/weldx/pull/612>`__
+
 removed
 =======
 
@@ -28,6 +31,10 @@ changes
 
 - `CoordinateSystemManager.time_union` now returns a `Time` instance instead
   of a pandas type `[#603] <https://github.com/BAMWelDX/weldx/pull/603>`__
+
+- `CoordinateSystemManager.assign_data` has a new parameter ``target_system`` to indicate
+  data should be transformed and assigned to a different system than the data reference system.
+  `[#612] <https://github.com/BAMWelDX/weldx/pull/612>`__
 
 
 fixes
