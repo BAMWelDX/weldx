@@ -2516,39 +2516,27 @@ class Geometry:
 @ut.dataclass_nested_eq
 @dataclass
 class SpatialData:
-    """Represent 3D point cloud data with optional triangulation.
-
-    Parameters
-    ----------
-    coordinates
-        3D array of point data.
-    triangles
-        3D Array of triangulation connectivity
-    attributes
-        optional dictionary with additional attributes to store alongside data
-
-    """
+    """Represent 3D point cloud data with optional triangulation."""
 
     coordinates: DataArray
+    """3D array of point data.
+        The expected array dimension order is [("time"), "n", "c"]."""
     triangles: np.ndarray = None
+    """3D Array of triangulation connectivity.
+        Shape should be [time * n, 3]."""
     attributes: Dict[str, np.ndarray] = None
+    """optional dictionary with additional attributes to store alongside data."""
     time: InitVar[Time] = None
+    """Time axis if data is time dependent."""
 
     def __post_init__(self, time):
         """Convert and check input values."""
         if not isinstance(self.coordinates, DataArray):
-            self.coordinates = np.array(self.coordinates)
-            if self.coordinates.ndim == 2:
-                self.coordinates = DataArray(
-                    self.coordinates, dims=["n", "c"], coords={"c": ["x", "y", "z"]}
-                )
-            else:
-                self.coordinates = DataArray(
-                    self.coordinates,
-                    dims=["time", "n", "c"],
-                    coords={"c": ["x", "y", "z"], "time": Time(time).index},
-                )
-                self.coordinates = self.coordinates.weldx.time_ref_restore()
+            self.coordinates = ut.xr_3d_vector(
+                data=np.array(self.coordinates),
+                time=time,
+                add_dims=["time", "n"] if time is not None else ["n"],
+            ).transpose(..., "n", "c")
 
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
