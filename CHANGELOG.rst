@@ -16,8 +16,8 @@ added
 - Added `weldx.geometry.SpatialData.limits` to calculate coordinate boundaries.
   `[#604] <https://github.com/BAMWelDX/weldx/pull/604>`__
 
-- `SpatialData` now supports a ``time`` dimension. Time-dependent data can be transformed
-  using the `CoordinateSystemManager` `[#612] <https://github.com/BAMWelDX/weldx/pull/612>`__
+- Added `weldx.asdf.util.get_schema_tree` utility to display schema files.
+  `[#610] <https://github.com/BAMWelDX/weldx/pull/610>`__
 
 removed
 =======
@@ -32,9 +32,13 @@ changes
 - `CoordinateSystemManager.time_union` now returns a `Time` instance instead
   of a pandas type `[#603] <https://github.com/BAMWelDX/weldx/pull/603>`__
 
-- `CoordinateSystemManager.assign_data` has a new parameter ``target_system`` to indicate
-  data should be transformed and assigned to a different system than the data reference system.
-  `[#612] <https://github.com/BAMWelDX/weldx/pull/612>`__
+- `SpatialData` now supports time dependent data. `[#612]
+   <https://github.com/BAMWelDX/weldx/pull/612>`__
+
+- Renamed the parameter `coordinate_system_name` of `CoordinateSystemManager.assign_data`
+  to `reference_system` and added the parameter `target_system`. If the latter one is not
+  `None`, the data will be transformed and stored at this coordinate system. `[#612]
+   <https://github.com/BAMWelDX/weldx/pull/612>`__
 
 
 fixes

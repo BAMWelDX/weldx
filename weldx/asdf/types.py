@@ -99,15 +99,21 @@ class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
     """Base class to inherit from for custom converter classes."""
 
     tags: List[str] = []
-
-    def types(self):
-        raise NotImplementedError
+    types: List[Union[type, str]] = []
 
     def to_yaml_tree(self, obj, tag: str, ctx: SerializationContext):
         raise NotImplementedError
 
     def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
         raise NotImplementedError
+
+    @classmethod
+    def default_class_display_name(cls):
+        """The default python class name to display for this converter."""
+        if isinstance(cls.types[0], str):
+            return cls.types[0].rsplit(".", 1)[-1]
+        else:
+            return cls.types[0].__qualname__
 
 
 def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="weldx"):
