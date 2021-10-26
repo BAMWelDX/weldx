@@ -7,6 +7,7 @@ py:obj weldx.GmawProcess.power_source
 py:obj weldx.GmawProcess.parameters
 
 py:class types_path_and_file_like
+py:class weldx.asdf.types.WeldxConverter
 
 # matplotlib
 py:class matplotlib.axes.Axes
