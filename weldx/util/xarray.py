@@ -515,7 +515,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
 def xr_3d_vector(
     data: np.ndarray,
-    time: Time = None,
+    time: types_time_like = None,
     add_dims: List[str] = None,
     add_coords: Dict[str, Any] = None,
 ) -> xr.DataArray:
