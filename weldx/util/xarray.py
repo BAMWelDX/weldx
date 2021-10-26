@@ -517,7 +517,7 @@ def xr_3d_vector(
     data: np.ndarray,
     time: Time = None,
     add_dims: List[str] = None,
-    add_coords: Dict[str, any] = None,
+    add_coords: Dict[str, Any] = None,
 ) -> xr.DataArray:
     """Create an xarray 3d vector with correctly named dimensions and coordinates.
 
