@@ -2535,7 +2535,7 @@ class SpatialData:
             self.coordinates = ut.xr_3d_vector(
                 data=np.array(self.coordinates),
                 time=time,
-                add_dims=["time", "n"] if time is not None else ["n"],
+                add_dims=["n"],
             ).transpose(..., "n", "c")
 
         if self.triangles is not None:

@@ -528,7 +528,7 @@ def xr_3d_vector(
     time
         Optional values that will fill the 'time' dimension.
     add_dims
-        Addition dimensions to add along ["time", "c"].
+        Addition dimensions to add between ["time", "c"].
         If either "c" or "time" are present in add_dims they are used to locate the
         dimension position in the passed array.
     add_coords
@@ -552,15 +552,16 @@ def xr_3d_vector(
     if time is not None and Q_(data).ndim == 1:
         time = None
 
+    # remove duplicates and keep order
+    dims = list(dict.fromkeys(add_dims + dims))
+
     if time is not None:
-        dims = ["time"] + dims
+        if "time" not in dims:  # prepend to beginning if not already set
+            dims = ["time"] + dims
         coords["time"] = time  # type: ignore[assignment]
 
     if "time" in coords:
-        coords["time"] = Time(time).index
-
-    # remove duplicates and keep order
-    dims = list(dict.fromkeys(add_dims + dims))
+        coords["time"] = Time(coords["time"]).index
 
     coords = dict(add_coords, **coords)
 
