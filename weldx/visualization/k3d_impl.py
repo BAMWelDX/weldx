@@ -145,6 +145,7 @@ class CoordinateSystemVisualizerK3D:
             colors=[[RGB_RED, RGB_RED], [RGB_GREEN, RGB_GREEN], [RGB_BLUE, RGB_BLUE]],
             labels=[],
             label_size=1.5,
+            name=name if name is None else f"{name} (vectors)",
         )
         self._vectors.visible = show_vectors
 
@@ -156,15 +157,18 @@ class CoordinateSystemVisualizerK3D:
                 color=self._color,
                 size=1,
                 label_box=False,
+                name=name if name is None else f"{name} (text)",
             )
 
         self._trace = k3d.line(
             np.array(lcs.coordinates.values, dtype="float32"),  # type: ignore
-            shader="simple",
-            width=0.05,
+            shader="mesh",
             color=color,
+            name=name if name is None else f"{name} (line)",
         )
         self._trace.visible = show_trace
+        self._trace.set_trait("shader", "line")
+        self._trace.set_trait("width", 0.1)
 
         self.origin = platonic.Octahedron(size=0.1).mesh
         self.origin.color = color
@@ -342,9 +346,15 @@ class SpatialDataVisualizer:
                 color=color,
                 size=0.5,
                 label_box=True,
+                name=name if name is None else f"{name} (text)",
             )
 
-        self._points = k3d.points(data.coordinates, point_size=0.05, color=color)
+        self._points = k3d.points(
+            data.coordinates,
+            point_size=0.05,
+            color=color,
+            name=name if name is None else f"{name} (points)",
+        )
         self._mesh = None
         if data.triangles is not None:
             self._mesh = k3d.mesh(
@@ -355,6 +365,7 @@ class SpatialDataVisualizer:
                 attribute=colors,
                 color_map=k3d.colormaps.matplotlib_color_maps.Viridis,
                 wireframe=show_wireframe,
+                name=name if name is None else f"{name} (mesh)",
             )
 
         self.set_visualization_method(visualization_method)
@@ -586,6 +597,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 is_html=True,
                 size=1.0,
                 reference_point="lb",
+                name="timeline",
             )
             plot += self._time_info
 
