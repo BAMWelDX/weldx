@@ -2536,7 +2536,7 @@ class SpatialData:
                 data=np.array(self.coordinates),
                 time=time,
                 add_dims=["n"],
-            ).transpose(..., "n", "c")
+            )
 
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
