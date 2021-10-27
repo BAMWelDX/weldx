@@ -7,10 +7,11 @@ from warnings import warn
 import numpy as np
 import pandas as pd
 import pint
+import xarray
 import xarray as xr
 
 import weldx.util as ut
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.time import Time, TimeDependent, types_time_like
 
 if TYPE_CHECKING:
@@ -691,3 +692,218 @@ class TimeSeries(TimeDependent):
         if isinstance(self._data, xr.DataArray):
             return self._data.data.units
         return self._units
+
+
+# GenericSeries ------------------------------------------------------------------------
+
+
+class GenericSeries:
+    """Describes a quantity depending on one or more parameters."""
+
+    def __init__(
+        self,
+        data: Union[pint.Quantity, MathematicalExpression],
+        dims: Union[List[str], Dict[str, Union[str, pint.Unit]]] = None,
+        coordinates: Union[None, pint.Quantity, Dict[str, pint.Quantity]] = None,
+        interpolation: str = "linear",
+        parameters: Dict[str, Union[str, pint.Quantity]] = None,
+    ):
+        """Create a generic series.
+
+        Parameters
+        ----------
+        data :
+            Either a multidimensional array of discrete values or a
+            `MathematicalExpression` with one or more variables.
+        dims :
+            The names of the dimensions. The order must be adjusted to the data's shape
+            (outer dimensions first). For mathematical expressions, the dimensions
+            match the variable names and need not to be specified.
+        coordinates :
+            The coordinate values in case the data is a set of discrete values.
+        interpolation :
+            The method that should be used when interpolating between discrete values.
+
+        """
+        self._data: Union[xarray.DataArray, MathematicalExpression] = None
+        self._dimension_units: Dict[str, pint.Unit] = None
+        self._shape: Tuple = None
+        self._units: pint.Unit = None
+
+        if isinstance(data, (pint.Quantity, xr.DataArray)):
+            pass
+        elif isinstance(data, (MathematicalExpression, str)):
+            self._init_expression(data, dims, parameters)
+        else:
+            raise TypeError(f'The data type "{type(data)}" is not supported.')
+
+    def _init_expression(self, data, dims, parameters):
+        """Initialize the internal data with a mathematical expression."""
+
+        for k, v in dims.items():
+            dims[k] = U_(v)
+
+        if parameters is not None:
+            for k, v in parameters.items():
+                parameters[k] = Q_(v)
+
+        if not isinstance(data, MathematicalExpression):
+            data = MathematicalExpression(data, parameters)
+        else:
+            # todo check all parameters are units
+            pass
+
+        if data.num_variables != len(dims):
+            raise ValueError(
+                "The number of passed dimensions and the number of expression variables"
+                " does not match."
+            )
+
+        if not (len(set(data.get_variable_names()) - set(dims.keys())) == 0):
+            raise ValueError(
+                "The passed dimension names do not match the expressions variable names"
+                f"\nPassed dimensions   : {sorted(list(set(dims.keys())))}"
+                f"\nExpression variables: {sorted(data.get_variable_names())}"
+            )
+
+        try:
+            eval_params = {k: Q_(1, v) for k, v in dims.items()}
+            eval_data = data.evaluate(**eval_params)
+            self._units = eval_data.to_reduced_units().units
+            if np.iterable(eval_data):
+                self._shape = eval_data.shape
+            else:
+                self._shape = (1,)
+
+        except pint.errors.DimensionalityError:
+            raise Exception(
+                "Expression can not be evaluated with scalar quantities. Ensure that "
+                "the passed parameters and variables posses the correct units."
+            )
+
+        self._data = data
+        self._dimension_units = dims
+
+        # todo: check that all parameters of the expression support arrays?
+        #       (see TimeSeries)
+
+    def __call__(self, coordinates: Union[Dict[str, pint.Quantity]]) -> GenericSeries:
+        """Interpolate the generic series at discrete points.
+
+        Parameters
+        ----------
+        coordinates :
+            A dictionary containing discrete coordinate values to evaluate the generic
+            series. The keys must match the corresponding dimension names. If the series
+            contains only a single dimension, the coordinate values can be passed
+            directly
+
+        Returns
+        -------
+        GenericSeries :
+            A new generic series containing the discrete values at the desired
+            coordinates.
+
+        """
+        input = {}
+        for i, (k, v) in enumerate(coordinates.items()):
+            v = Q_(v)
+            if len(v.shape) == 0:
+                v = np.expand_dims(v, 0)
+
+            coordinates[k] = v.m
+            for j in range(i):
+                v = np.expand_dims(v, 0)
+            for j in range(len(self._dimension_units) - 1 - i):
+                v = np.expand_dims(v, -1)
+            input[k] = v
+
+        if isinstance(self._data, MathematicalExpression):
+            data = self._data.evaluate(**input)
+            print(data.shape)
+            print(self.dimension_names)
+            # todo: should return discrete GenericSeries once it is implemented
+            return xarray.DataArray(data, dims=self.dimension_names, coords=coordinates)
+
+        raise NotImplementedError
+
+    def interp_dim(self, dimension: str, coordinates: pint.Quantity) -> GenericSeries:
+        """Interpolate only in a single dimension.
+
+        Parameters
+        ----------
+        dimension :
+            The interpolations dimension
+        coordinates :
+            The coordinates that should be interpolated
+
+        Returns
+        -------
+        GenericSeries :
+            A new generic series containing discrete values for the interpolated
+            dimensions.
+
+        """
+
+    def interp_like(
+        self, obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
+    ) -> GenericSeries:
+        """Interpolate using the coordinates of another object.
+
+        Parameters
+        ----------
+        obj :
+            An object that provides the coordinate values.
+        dimensions :
+            The dimensions that should be interpolated. If `None` is passed, all
+            dimensions will be interpolated
+        accessor_mappings :
+            A mapping between the dimensions of the generic series and the corresponding
+            coordinate accessor of the provided object. This can be used if the
+            coordinate names do not match for the time series and the provided object.
+
+        Returns
+        -------
+        GenericSeries :
+            A new generic series containing discrete values for the interpolated
+            dimensions.
+
+        """
+
+    @property
+    def coordinates(self) -> Union[None, pint.Quantity, Dict[str, pint.Quantity]]:
+        """Get the coordinates of the generic series."""
+
+    @property
+    def coordinate_names(self) -> List[str]:
+        """Get the names of all coordinates."""
+
+    @property
+    def data(self) -> Union[pint.Quantity, MathematicalExpression]:
+        """Get the internal data."""
+        return self._data
+
+    @property
+    def data_array(self) -> Union[xr.DataArray, None]:
+        """Return the internal data as 'xarray.DataArray'."""
+
+    @property
+    def dimension_names(self) -> List[str]:
+        """Get the names of all dimensions."""
+        if self._dimension_units is not None:
+            return list(self._dimension_units.keys())
+        raise NotImplementedError
+
+    @property
+    def shape(self) -> Tuple:
+        """Get the shape of the generic series data."""
+        if self._shape is not None:
+            return self._shape
+        raise NotImplementedError
+
+    @property
+    def units(self) -> str:
+        """Get the units of the generic series data."""
+        if self._units is not None:
+            return self._units
+        raise NotImplementedError

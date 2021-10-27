@@ -8,7 +8,7 @@ import pytest
 import xarray as xr
 
 from weldx.constants import Q_, U_
-from weldx.core import MathematicalExpression, TimeSeries
+from weldx.core import GenericSeries, MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
 from weldx.time import Time
 
@@ -481,3 +481,45 @@ class TestTimeSeries:
         """Test the exceptions of the 'set_parameter' method."""
         with pytest.raises(exception_type):
             ts.interp_time(time)
+
+
+# --------------------------------------------------------------------------------------
+# GenericSeries
+# --------------------------------------------------------------------------------------
+
+
+class TestGenericSeries:
+    """Test the `GenericSeries`."""
+
+    # test_init_expression -------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "data, dims, parameters",
+        [
+            ("a*u + b*v", dict(u="m", v="m*m/K"), dict(a="3m", b="300K")),
+        ],
+    )
+    def test_init_expression(data, dims, parameters):
+        GenericSeries(data, dims=dims, parameters=parameters)
+
+    # test_call_operator_expression ----------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "u,v,w",
+        [
+            ("1m", "8K", "10m**2"),
+            (Q_([1, 2, 3], "m"), Q_([1, 2, 3, 5], "K"), Q_([1, 2], "m*m")),
+        ],
+    )
+    def test_call_operator_expression(u, v, w):
+        expression = "a*u + b*v + w"
+        dimensions = dict(u="m", v="K", w="m*m")
+        parameters = dict(a="2m", b="5m*m/K")
+
+        input = dict(u=u, v=v, w=w)
+
+        gs = GenericSeries(expression, dims=dimensions, parameters=parameters)
+        gs_interp = gs(input)
+        print(gs_interp)
