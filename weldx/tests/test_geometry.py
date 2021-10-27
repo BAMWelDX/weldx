@@ -3107,7 +3107,7 @@ class TestSpatialData:
 
         assert (reference == other) == expected_result
 
-        assert reference.limits() == [(0, 1), (0, 1), (0, 0)]
+        assert np.all(reference.limits() == np.array([[0, 0, 0], [1, 1, 0]]))
 
     # test_read_write_file -------------------------------------------------------------
 

@@ -1662,7 +1662,7 @@ class CoordinateSystemManager:
         data: types_coordinates,
         source_coordinate_system_name: str,
         target_coordinate_system_name: str,
-    ):
+    ) -> Union[SpatialData, xr.DataArray]:
         """Transform spatial data from one coordinate system to another.
 
         Parameters
@@ -1680,7 +1680,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        numpy.ndarray
+        Union[weldx.geometry.SpatialData, xarray.DataArray]
             Transformed data
 
         """

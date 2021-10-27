@@ -2699,12 +2699,17 @@ class SpatialData:
 
         return SpatialData(points, triangles)
 
-    def limits(self) -> List[Tuple[float, float]]:
-        """Get the xyz limits of the coordinates."""
-        return [
-            (self.coordinates.values[:, i].min(), self.coordinates.values[:, i].max())
-            for i in range(3)
-        ]
+    def limits(self) -> np.ndarray:
+        """Get the xyz limits of the coordinates.
+
+        Array format:
+        [[x0,y0,z0],
+        [x1,y1,z1]]
+        """
+        mins = self.coordinates.values.min(axis=0)
+        maxs = self.coordinates.values.max(axis=0)
+
+        return np.vstack([mins, maxs])
 
     def plot(
         self,
@@ -2758,24 +2763,23 @@ class SpatialData:
         import weldx.visualization as vs
 
         if backend == "k3d":
-            from weldx.visualization.k3d_impl import limited_plot
+            import k3d
 
-            plot = limited_plot(limits)
-            if color is None:
-                color = 0x999999
+            limits = tuple(self.limits().flatten())
+            plot = k3d.plot(grid=limits)
             vs.SpatialDataVisualizer(
                 self, name=None, reference_system=None, color=color, plot=plot
             )
-            plot.display()
-        else:
-            return vs.plot_spatial_data_matplotlib(
-                data=self,
-                axes=axes,
-                color=color,
-                label=label,
-                limits=limits,
-                show_wireframe=show_wireframe,
-            )
+            return plot
+
+        return vs.plot_spatial_data_matplotlib(
+            data=self,
+            axes=axes,
+            color=color,
+            label=label,
+            limits=limits,
+            show_wireframe=show_wireframe,
+        )
 
     def to_file(self, file_name: Union[str, Path]):
         """Write spatial data into a file.
