@@ -111,6 +111,7 @@ class CoordinateSystemVisualizerK3D:
         show_origin=True,
         show_trace=True,
         show_vectors=True,
+        vector_scale=2.5,
     ):
         """Create a `CoordinateSystemVisualizerK3D`.
 
@@ -138,10 +139,13 @@ class CoordinateSystemVisualizerK3D:
         coordinates, orientation = _get_coordinates_and_orientation(lcs)
         self._lcs = lcs
         self._color = color
+        self._vector_scale = vector_scale
 
         self._vectors = k3d.vectors(
             origins=[coordinates for _ in range(3)],
-            vectors=orientation.transpose(),
+            vectors=orientation.transpose() * self._vector_scale,
+            line_width=0.05,
+            head_size=3.0,
             colors=[[RGB_RED, RGB_RED], [RGB_GREEN, RGB_GREEN], [RGB_BLUE, RGB_BLUE]],
             labels=[],
             label_size=1.5,
@@ -162,7 +166,7 @@ class CoordinateSystemVisualizerK3D:
 
         self._trace = k3d.line(
             np.array(lcs.coordinates.values, dtype="float32"),  # type: ignore
-            shader="mesh",
+            shader="line",
             width=0.1,  # change with .set_trait("width", value)
             color=color,
             name=name if name is None else f"{name} (line)",
@@ -193,7 +197,7 @@ class CoordinateSystemVisualizerK3D:
 
         """
         self._vectors.origins = [coordinates for _ in range(3)]
-        self._vectors.vectors = orientation.transpose()
+        self._vectors.vectors = orientation.transpose() * self._vector_scale
         self.origin.model_matrix = _create_model_matrix(coordinates, orientation)
         if self._label is not None:
             self._label.position = coordinates + 0.05
