@@ -326,7 +326,7 @@ class SpatialDataVisualizer:
             color = RGB_GREY
 
         if data.triangles is not None:
-            triangles = data.triangles.values.astype(np.uint32)
+            triangles = data.triangles.astype(np.uint32)
         else:
             triangles = None
 
