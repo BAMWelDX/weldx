@@ -38,6 +38,14 @@ py:class UnitsContainer
 # k3d
 py:class k3d.plot
 
+# sphinx bugs -------------------------------------------------------------------
+# weird behavior with dataclasses.InitVar in weldx.geometry.SpatialData
+
+py:class np.ndarray
+py:class DataArray
+py:class InitVar
+py:class Time
+
 # inherited -------------------------------------------------------------------
 # here goes everything that is caused by inheriting from non-weldx types
 
