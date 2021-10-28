@@ -48,9 +48,8 @@ fixes
 
 -  fix broken `Time.all_close` to now work as intended `[#603]
    <https://github.com/BAMWelDX/weldx/pull/603>`__
-
-- fix `weldx.asdf.util.get_yaml_header` to work correctly with windows line endings.
-  `[#609] <https://github.com/BAMWelDX/weldx/pull/609>`__
+-  fix `weldx.asdf.util.get_yaml_header` to work correctly with windows
+   line endings. `[#609] <https://github.com/BAMWelDX/weldx/pull/609>`__
 
 documentation
 =============
@@ -64,6 +63,9 @@ ASDF
 
 deprecations
 ============
+
+-  removed ``welding.util.lcs_coords_from_ts`` `[#620]
+   <https://github.com/BAMWelDX/weldx/pull/620>`__
 
 dependencies
 ============
