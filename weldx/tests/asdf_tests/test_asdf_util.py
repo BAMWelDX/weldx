@@ -1,4 +1,5 @@
 """tests for asdf utility functions."""
+import io
 from dataclasses import dataclass
 from typing import List
 
@@ -53,19 +54,15 @@ def test_get_yaml_header(create_file_and_buffer, index, parse):
         assert "asdf_library" in header
 
 
-def test_get_yaml_header_win_eol(tmpdir):
-    """Ensure we can read header of windoze borked asdf files."""
-    wx = WeldxFile(tree=dict(x=4), mode="rw")
+def test_get_yaml_header_win_eol():
+    """Ensure we can read win and unix line endings with get_yaml_header."""
+    wx = WeldxFile(tree=dict(x=np.arange(20)), mode="rw")  # has binary blocks
     buff = wx.write_to()
-    from io import StringIO
-
-    buff2 = StringIO()
-    buff2.write(buff.read().decode("utf-8"))
-    fn = tmpdir / "win.wx"
-    with open(fn, newline="\r\n", mode="w") as out:
-        out.writelines(buff2.readlines())
-    with open(fn, mode="rb") as fh:
-        get_yaml_header(fh)
+    native = buff.read()  # could be "\r\n" or "\n"
+    unix = native.replace(b"\r\n", b"\n")
+    win = unix.replace(b"\n", b"\r\n")
+    for b in [native, unix, win]:
+        get_yaml_header(io.BytesIO(b))
 
 
 def _to_yaml_tree_mod(tree):
