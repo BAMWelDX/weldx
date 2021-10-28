@@ -1,13 +1,13 @@
 """Define constants for global library use."""
 from pathlib import Path as _Path
 
-from pint import UnitRegistry as _ureg
+import pint
 
 UNIT_KEY = "units"  # default nomenclature for storing physical units information
 
 WELDX_PATH = _Path(__file__).parent.resolve()
 
-WELDX_UNIT_REGISTRY = _ureg(
+WELDX_UNIT_REGISTRY = pint.UnitRegistry(
     preprocessors=[
         lambda string: string.replace("%", "percent"),  # allow %-sign
         lambda string: string.replace("Δ°", "delta_deg"),  # parse Δ° for temperature
@@ -20,6 +20,7 @@ WELDX_UNIT_REGISTRY.define("percent = 0.01*count = %")
 # swap plank constant for hour definition
 WELDX_UNIT_REGISTRY.define("hour = 60*minute = h = hr")
 # set default string format to short notation
+# for more info on formatting: https://pint.readthedocs.io/en/stable/formatting.html
 WELDX_UNIT_REGISTRY.default_format = "~"
 
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
