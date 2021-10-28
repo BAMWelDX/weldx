@@ -160,7 +160,7 @@ class CoordinateSystemVisualizerK3D:
 
         self._trace = k3d.line(
             np.array(lcs.coordinates.values, dtype="float32"),  # type: ignore
-            shader="simple",
+            shader="thick",
             width=0.05,
             color=color,
         )
