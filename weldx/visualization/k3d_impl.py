@@ -325,10 +325,10 @@ class SpatialDataVisualizer:
                 colors = data.attributes[color]
             color = RGB_GREY
 
-        if not data.coordinates.dtype == "float32":
-            data.coordinates = data.coordinates.astype(np.float32)
-        if (data.triangles is not None) and (not data.triangles.dtype == "uint32"):
-            data.coordinates = data.coordinates.astype(np.uint32)
+        if data.triangles is not None:
+            triangles = data.triangles.astype(np.uint32)
+        else:
+            triangles = None
 
         self._reference_system = reference_system
 
@@ -348,8 +348,8 @@ class SpatialDataVisualizer:
         self._mesh = None
         if data.triangles is not None:
             self._mesh = k3d.mesh(
-                data.coordinates,
-                data.triangles,
+                data.coordinates.values.astype(np.float32).reshape(-1, 3),
+                triangles,
                 side="double",
                 color=color,
                 attribute=colors,
