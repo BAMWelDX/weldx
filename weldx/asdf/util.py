@@ -23,7 +23,6 @@ from weldx.types import (
     types_path_and_file_like,
     types_path_like,
 )
-from weldx.util import deprecated
 
 _USE_WELDX_FILE = False
 _INVOKE_SHOW_HEADER = False
@@ -248,21 +247,6 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     return code.decode("utf-8")
 
 
-@deprecated("0.4.0", "0.5.0", " _write_buffer was renamed to write_buffer")
-def _write_buffer(*args, **kwargs):
-    return write_buffer(*args, **kwargs)
-
-
-@deprecated("0.4.0", "0.5.0", " _read_buffer was renamed to read_buffer")
-def _read_buffer(*args, **kwargs):
-    return read_buffer(*args, **kwargs)
-
-
-@deprecated("0.4.0", "0.5.0", " _write_read_buffer was renamed to write_read_buffer")
-def _write_read_buffer(*args, **kwargs):
-    return write_read_buffer(*args, **kwargs)
-
-
 def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
     """Print the code from file/BytesIO to notebook cell with syntax highlighting.
 
@@ -345,12 +329,6 @@ def view_tree(file: types_path_and_file_like, path: Tuple = None, **kwargs):
         yaml_dict = get_path(yaml_dict, path)
     kwargs["root"] = root
     return JSON(yaml_dict, **kwargs)
-
-
-@deprecated("0.4.0", "0.5.0", " asdf_json_repr was renamed to view_tree")
-def asdf_json_repr(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
-    """See `view_tree` function."""
-    return view_tree(file, path, **kwargs)
 
 
 def _fullname(obj):
