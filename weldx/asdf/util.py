@@ -1,4 +1,5 @@
 """Utilities for asdf files."""
+import io
 from collections.abc import Mapping
 from distutils.version import LooseVersion
 from io import BytesIO
@@ -17,7 +18,6 @@ from boltons.iterutils import get_path, remap
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
 from weldx.types import (
-    SupportsFileReadOnly,
     SupportsFileReadWrite,
     types_file_like,
     types_path_and_file_like,
@@ -231,17 +231,28 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     """
 
     def read_header(handle):
-        # reads lines until the byte string "...\n" is approached.
-        return b"".join(iter(handle.readline, b"...\n"))
+        # reads lines until the line "...\n" is reached.
+        def readline_replace_eol():
+            line = handle.readline()
+            if (not line) or (line in {b"...\n", b"...\r\n"}):
+                raise StopIteration
+            return line
 
-    if isinstance(file, SupportsFileReadWrite):
-        file.seek(0)
-        code = read_header(file)
-    elif isinstance(file, SupportsFileReadOnly):
+        return b"".join(iter(readline_replace_eol, None))
+
+    if isinstance(file, types_file_like.__args__):
+        if isinstance(file, io.TextIOBase):
+            raise ValueError(
+                "cannot read files opened in text mode. " "Please open in binary mode."
+            )
+        if isinstance(file, SupportsFileReadWrite):
+            file.seek(0)
         code = read_header(file)
     elif isinstance(file, types_path_like.__args__):
         with open(file, "rb") as f:
             code = read_header(f)
+    else:
+        raise TypeError(f"cannot read yaml header from {type(file)}.")
 
     if parse:
         return asdf.yamlutil.load_tree(code)
