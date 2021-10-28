@@ -56,8 +56,8 @@ deprecations
 dependencies
 ============
 
--  adjust code to support pint 0.18 unit formatting. `[#603]
-   <https://github.com/BAMWelDX/weldx/pull/603>`__
+-  adjust code to support pint 0.18 unit formatting. `[#616]
+   <https://github.com/BAMWelDX/weldx/pull/616>`__
 
 ********************
  0.5.0 (12.10.2021)
