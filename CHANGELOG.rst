@@ -3,6 +3,72 @@
 ###############
 
 ********************
+ 0.5.1 (unreleased)
+********************
+
+added
+=====
+
+-  `Time.duration` to get the covered duration of the data and
+   `Time.resample` to get a new `Time` instance with resampled time data
+   within the same boundaries as the original object `[#603]
+   <https://github.com/BAMWelDX/weldx/pull/603>`__
+
+-  Added `weldx.geometry.SpatialData.limits` to calculate coordinate
+   boundaries. `[#604] <https://github.com/BAMWelDX/weldx/pull/604>`__
+
+-  Added `weldx.asdf.util.get_schema_tree` utility to display schema
+   files. `[#610] <https://github.com/BAMWelDX/weldx/pull/610>`__
+
+removed
+=======
+
+changes
+=======
+
+-  All public interfaces of the `weldx.geometry` module classes now
+   require the usage of units and support unit strings as inputs.
+   `[#588] <https://github.com/BAMWelDX/weldx/pull/588>`__
+
+-  `CoordinateSystemManager.time_union` now returns a `Time` instance
+   instead of a pandas type `[#603]
+   <https://github.com/BAMWelDX/weldx/pull/603>`__
+
+-  `SpatialData` now supports time dependent data. `[#612]
+   <https://github.com/BAMWelDX/weldx/pull/612>`__
+
+-  Renamed the parameter ``coordinate_system_name`` of
+   `CoordinateSystemManager.assign_data` to ``reference_system`` and
+   added the parameter ``target_system``. If the latter one is not
+   `None`, the data will be transformed and stored at this coordinate
+   system. `[#612] <https://github.com/BAMWelDX/weldx/pull/612>`__
+
+fixes
+=====
+
+-  fix broken `Time.all_close` to now work as intended `[#603]
+   <https://github.com/BAMWelDX/weldx/pull/603>`__
+
+documentation
+=============
+
+-  move the schema documentation to `BAMWelDX/weldx-standard
+   <https://github.com/BAMWelDX/weldx-standard>`__ `[#594]
+   <https://github.com/BAMWelDX/weldx/pull/594>`__
+
+ASDF
+====
+
+deprecations
+============
+
+dependencies
+============
+
+-  adjust code to support pint 0.18 unit formatting. `[#616]
+   <https://github.com/BAMWelDX/weldx/pull/616>`__
+
+********************
  0.5.0 (12.10.2021)
 ********************
 
@@ -151,13 +217,14 @@ changes
    of ``"asdf://weldx.bam.de/weldx/tags/measurement/signal-0.1.*"``
    `[#578] <https://github.com/BAMWelDX/weldx/pull/578>`__.
 
--  ``Geometry.__init__`` now also accepts an ``iso.IsoBaseGroove`` as ``profile``
-   parameter `[#583] <https://github.com/BAMWelDX/weldx/pull/583>`__.
-
--  Renamed ``Geometry.__init__`` parameter ``trace`` to ``trace_or_length``. A
-   `pint.Quantity` is now an accepted input. In this case the value will be used
-   to create a linear trace of the given length `[#583]
+-  ``Geometry.__init__`` now also accepts an ``iso.IsoBaseGroove`` as
+   ``profile`` parameter `[#583]
    <https://github.com/BAMWelDX/weldx/pull/583>`__.
+
+-  Renamed ``Geometry.__init__`` parameter ``trace`` to
+   ``trace_or_length``. A `pint.Quantity` is now an accepted input. In
+   this case the value will be used to create a linear trace of the
+   given length `[#583] <https://github.com/BAMWelDX/weldx/pull/583>`__.
 
 fixes
 =====
@@ -267,7 +334,8 @@ dependencies
    <https://github.com/BAMWelDX/weldx/pull/577>`__ `[#474]
    <https://github.com/BAMWelDX/weldx/issues/474>`__.
 
-- Python 3.10 is not supported in this version. `[#575] <https://github.com/BAMWelDX/weldx/pull/575>`__
+-  Python 3.10 is not supported in this version. `[#575]
+   <https://github.com/BAMWelDX/weldx/pull/575>`__
 
 ********************
  0.4.1 (20.07.2021)

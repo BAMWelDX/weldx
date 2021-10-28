@@ -84,7 +84,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
 
     _mapping: Dict[str, str] = None
 
-    _AREA_RASTER_WIDTH = 0.1
+    _AREA_RASTER_WIDTH = Q_("0.1mm")
     """steers the area approximation of the groove in ~cross_sect_area."""
 
     def __post_init__(self):
@@ -109,7 +109,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         self,
         title=None,
         axis_label=None,
-        raster_width=0.5,
+        raster_width=Q_(0.5, _DEFAULT_LEN_UNIT),
         show_params=True,
         axis="equal",
         grid=True,
@@ -201,8 +201,8 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
             points.append(shape_points)
             for seg in shape.segments:
                 if isinstance(seg, geo.LineSegment):
-                    shape_points.append(seg.point_start)
-                    shape_points.append(seg.point_end)
+                    shape_points.append(seg.point_start.m)
+                    shape_points.append(seg.point_end.m)
                 else:
                     raise RuntimeError("only for line segments!")
         return _compute_cross_sect_shape_points(points)
@@ -212,7 +212,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         # out of the rasterization points
         profile = self.to_profile()
         rasterization = profile.rasterize(self._AREA_RASTER_WIDTH, stack=False)
-        points = [[(x, y) for x, y in shape.T] for shape in rasterization]
+        points = [[(x, y) for x, y in shape.m.T] for shape in rasterization]
 
         return _compute_cross_sect_shape_points(points)
 
@@ -265,7 +265,9 @@ class IGroove(IsoBaseGroove):
 
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
-        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -355,7 +357,9 @@ class VGroove(IsoBaseGroove):
 
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis is mirror axis
-        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -452,7 +456,9 @@ class VVGroove(IsoBaseGroove):
 
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
-        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -554,7 +560,9 @@ class UVGroove(IsoBaseGroove):
 
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
-        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -677,7 +685,9 @@ class UGroove(IsoBaseGroove):
 
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
-        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -761,7 +771,9 @@ class HVGroove(IsoBaseGroove):
         shape = _helperfunction(segment_list, [x_value, y_value])
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
-        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
         shape_h = geo.Shape()
         arr = np.stack(
             (
@@ -866,7 +878,9 @@ class HUGroove(IsoBaseGroove):
         shape = _helperfunction(segment_list, [x_value, y_value])
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
-        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
         shape_h = geo.Shape()
         arr = np.stack(
             (
@@ -984,7 +998,9 @@ class DVGroove(IsoBaseGroove):
         shape = _helperfunction(segment_list, [x_value, y_value])
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
-        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 
@@ -1117,7 +1133,9 @@ class DUGroove(IsoBaseGroove):
         shape = _helperfunction(segment_list, [x_value, y_value])
         shape = shape.translate(np.append(-b / 2, 0))
         # y-axis as mirror axis
-        shape_r = shape.reflect_across_line([0, 0], [0, 1])
+        shape_r = shape.reflect_across_line(
+            Q_([0, 0], _DEFAULT_LEN_UNIT), Q_([0, 1], _DEFAULT_LEN_UNIT)
+        )
 
         return geo.Profile([shape, shape_r], units=_DEFAULT_LEN_UNIT)
 

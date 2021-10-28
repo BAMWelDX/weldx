@@ -55,7 +55,12 @@ class PintUnitConverter(WeldxConverter):
 
     def to_yaml_tree(self, obj: pint.Unit, tag: str, ctx) -> str:
         """Convert to python dict."""
-        return f"{obj:.}"  # use 'long' (.) formatting for serialization (short = ~)
+        from packaging import version
+
+        if version.parse(pint.__version__) >= version.parse("0.18.0"):
+            return f"{obj:D}"  # use def/long (D) formatting for serialization
+        else:
+            return f"{obj:.}"  # old long formatting
 
     def from_yaml_tree(self, node: str, tag: str, ctx) -> pint.Unit:
         """Reconstruct from tree."""
