@@ -702,7 +702,7 @@ class GenericSeries:
 
     def __init__(
         self,
-        data: Union[pint.Quantity, MathematicalExpression],
+        data: Union[pint.Quantity, xr.DataArray, MathematicalExpression],
         dims: Union[List[str], Dict[str, Union[str, pint.Unit]]] = None,
         coordinates: Union[None, pint.Quantity, Dict[str, pint.Quantity]] = None,
         interpolation: str = "linear",
@@ -725,17 +725,30 @@ class GenericSeries:
             The method that should be used when interpolating between discrete values.
 
         """
-        self._data: Union[xarray.DataArray, MathematicalExpression] = None
+        self._data: Union[xr.DataArray, MathematicalExpression] = None
         self._dimension_units: Dict[str, pint.Unit] = None
         self._shape: Tuple = None
         self._units: pint.Unit = None
 
         if isinstance(data, (pint.Quantity, xr.DataArray)):
-            pass
+            self._init_discrete(data, dims, coordinates)
         elif isinstance(data, (MathematicalExpression, str)):
             self._init_expression(data, dims, parameters)
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
+
+    def _init_discrete(self, data, dims, coordinates):
+        """Initialize the internal data with discrete values."""
+
+        # todo: preserve units of coordinates somehow
+        if not isinstance(data, xr.DataArray):
+            coordinates = {k: Q_(v).m for k, v in coordinates.items()}
+            data = xr.DataArray(data=data, dims=dims, coords=coordinates)
+        else:
+            # todo check data structure
+            pass
+
+        self._data = data
 
     def _init_expression(self, data, dims, parameters):
         """Initialize the internal data with a mathematical expression."""
@@ -743,11 +756,12 @@ class GenericSeries:
         for k, v in dims.items():
             dims[k] = U_(v)
 
-        if parameters is not None:
-            for k, v in parameters.items():
-                parameters[k] = Q_(v)
-
         if not isinstance(data, MathematicalExpression):
+
+            if parameters is not None:
+                for k, v in parameters.items():
+                    parameters[k] = Q_(v)
+
             data = MathematicalExpression(data, parameters)
         else:
             # todo check all parameters are units
@@ -810,22 +824,28 @@ class GenericSeries:
             v = Q_(v)
             if len(v.shape) == 0:
                 v = np.expand_dims(v, 0)
-
-            coordinates[k] = v.m
-            for j in range(i):
-                v = np.expand_dims(v, 0)
-            for j in range(len(self._dimension_units) - 1 - i):
-                v = np.expand_dims(v, -1)
+            if isinstance(self._data, MathematicalExpression):
+                for j in range(i):
+                    v = np.expand_dims(v, 0)
+                for j in range(len(self._dimension_units) - 1 - i):
+                    v = np.expand_dims(v, -1)
+            else:
+                v = v.m
             input[k] = v
 
         if isinstance(self._data, MathematicalExpression):
             data = self._data.evaluate(**input)
-            print(data.shape)
-            print(self.dimension_names)
-            # todo: should return discrete GenericSeries once it is implemented
-            return xarray.DataArray(data, dims=self.dimension_names, coords=coordinates)
+            coords = {}
+            for k, v in coordinates.items():
+                v = Q_(v)
+                if len(v.shape) == 0:
+                    v = np.expand_dims(v, 0)
+                coords[k] = v.m
 
-        raise NotImplementedError
+            # todo: should return discrete GenericSeries once it is implemented
+            return xarray.DataArray(data, dims=self.dimension_names, coords=coords)
+
+        return ut.xr_interp_like(self._data, input)
 
     def interp_dim(self, dimension: str, coordinates: pint.Quantity) -> GenericSeries:
         """Interpolate only in a single dimension.
@@ -844,6 +864,7 @@ class GenericSeries:
             dimensions.
 
         """
+        raise NotImplementedError
 
     def interp_like(
         self, obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
@@ -869,23 +890,22 @@ class GenericSeries:
             dimensions.
 
         """
+        raise NotImplementedError
 
     @property
     def coordinates(self) -> Union[None, pint.Quantity, Dict[str, pint.Quantity]]:
         """Get the coordinates of the generic series."""
+        raise NotImplementedError
 
     @property
     def coordinate_names(self) -> List[str]:
         """Get the names of all coordinates."""
+        raise NotImplementedError
 
     @property
-    def data(self) -> Union[pint.Quantity, MathematicalExpression]:
+    def data(self) -> Union[xarray.DataArray, MathematicalExpression]:
         """Get the internal data."""
         return self._data
-
-    @property
-    def data_array(self) -> Union[xr.DataArray, None]:
-        """Return the internal data as 'xarray.DataArray'."""
 
     @property
     def dimension_names(self) -> List[str]:

@@ -491,6 +491,23 @@ class TestTimeSeries:
 class TestGenericSeries:
     """Test the `GenericSeries`."""
 
+    # test_init_discrete ---------------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "data_units, dims, coordinates",
+        [
+            ("V", ["u", "v"], dict(u=Q_([0, 1, 2], "m"), v=Q_([7, 8], "A"))),
+        ],
+    )
+    def test_init_discrete(data_units, dims, coordinates):
+        data_shape = tuple(len(v) for v in coordinates.values())
+        data = Q_(np.ones(data_shape), data_units)
+        gs = GenericSeries(data, dims, coordinates)
+
+        # todo: replace with direct comparison of both GS
+        assert GenericSeries(gs.data).data.identical(gs.data)
+
     # test_init_expression -------------------------------------------------------------
 
     @staticmethod
@@ -501,7 +518,52 @@ class TestGenericSeries:
         ],
     )
     def test_init_expression(data, dims, parameters):
-        GenericSeries(data, dims=dims, parameters=parameters)
+        gs = GenericSeries(data, dims=dims, parameters=parameters)
+
+        # todo: replace with direct comparison of both GS
+        assert GenericSeries(gs.data, dims=dims).data == gs.data
+
+    # test_call_operator_discrete ------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "u,v,w",
+        [
+            ("0.25m", "1.5", "0A"),
+            (Q_([0, 2], "m"), Q_([1, 2, 5], "K"), Q_([1, 2], "A")),
+        ],
+    )
+    def test_call_operator_discrete(u, v, w):
+        # setup
+        data = Q_(np.array(range(2 * 3 * 4)).reshape((2, 3, 4)), "V")
+        dims = ["u", "v", "w"]
+        coords = dict(u=Q_([0, 1], "m"), v=Q_([0, 1, 2], "m"), w=Q_([0, 1, 2, 3], "A"))
+
+        params = dict(u=u, v=v, w=w)
+        gs = GenericSeries(data, dims, coords)
+
+        # perform interpolation
+        gs_interp = gs(params)
+
+        # calculate expected results
+        params = {k: Q_(v) for k, v in params.items()}
+        for k, val in params.items():
+            if len(val.shape) == 0:
+                params[k] = np.expand_dims(val, 0)
+        exp_shape = tuple(len(v.m) for v in params.values())
+        exp_data = np.zeros(exp_shape)
+
+        for i, u_v in enumerate(params["u"]):
+            for j, v_v in enumerate(params["v"]):
+                for k, w_v in enumerate(params["w"]):
+                    exp_data[i, j, k] = (
+                        np.clip(u_v.m, 0, 1) * 3 * 4
+                        + np.clip(v_v.m, 0, 2) * 4
+                        + np.clip(w_v.m, 0, 3)
+                    )
+
+        # check results
+        assert np.allclose(gs_interp.data, Q_(exp_data, "V"))
 
     # test_call_operator_expression ----------------------------------------------------
 
@@ -514,12 +576,31 @@ class TestGenericSeries:
         ],
     )
     def test_call_operator_expression(u, v, w):
+        # setup
         expression = "a*u + b*v + w"
         dimensions = dict(u="m", v="K", w="m*m")
         parameters = dict(a="2m", b="5m*m/K")
 
-        input = dict(u=u, v=v, w=w)
-
+        params = dict(u=u, v=v, w=w)
         gs = GenericSeries(expression, dims=dimensions, parameters=parameters)
-        gs_interp = gs(input)
-        print(gs_interp)
+
+        # perform interpolation
+        gs_interp = gs(params)
+
+        # calculate expected result
+        params = {k: Q_(val) for k, val in params.items()}
+        for k, val in params.items():
+            if len(val.shape) == 0:
+                params[k] = np.expand_dims(val, 0)
+        exp_shape = tuple(len(val) for val in params.values())
+        exp_data = np.zeros(exp_shape)
+
+        a = Q_(parameters["a"])
+        b = Q_(parameters["b"])
+
+        for i, u_v in enumerate(params["u"]):
+            for j, v_v in enumerate(params["v"]):
+                for k, w_v in enumerate(params["w"]):
+                    exp_data[i, j, k] = (a * u_v + b * v_v + w_v).m
+
+        assert np.allclose(gs_interp.data, Q_(exp_data, "m*m"))
