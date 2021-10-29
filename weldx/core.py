@@ -56,9 +56,10 @@ class MathematicalExpression:
             raise ValueError(f'"parameters" must be dictionary, got {type(parameters)}')
         variable_names = [str(v) for v in self._expression.free_symbols]
         for k, v in parameters.items():
-            v = Q_(v)
             if k not in variable_names:
                 raise ValueError(f'The expression does not have a parameter "{k}"')
+            if not isinstance(v, xr.DataArray):
+                v = xr.DataArray(Q_(v))
 
             self._parameters[k] = v
 
@@ -239,7 +240,12 @@ class MathematicalExpression:
             raise ValueError(
                 f"The variables {intersection} are already defined as parameters."
             )
-        inputs = {**kwargs, **self._parameters}
+        variables = {}
+        for k, v in kwargs.items():
+            if not isinstance(v, xr.DataArray):
+                v = xr.DataArray(Q_(v))
+            variables[k] = v
+        inputs = {**variables, **self._parameters}
         return self.function(**inputs)
 
 
@@ -361,6 +367,8 @@ class TimeSeries(TimeDependent):
     def _create_data_array(
         data: Union[pint.Quantity, xr.DataArray], time: Time
     ) -> xr.DataArray:
+        if isinstance(data, xr.DataArray):
+            return data
         return (
             xr.DataArray(data=data)
             .rename({"dim_0": "time"})
@@ -395,6 +403,8 @@ class TimeSeries(TimeDependent):
             time = Time(time)
 
             self._reference_time = time.reference_time
+            print(data)
+            print(time)
             self._data = self._create_data_array(data, time)
         self.interpolation = interpolation
 
@@ -409,7 +419,7 @@ class TimeSeries(TimeDependent):
         # check that the expression can be evaluated with a time quantity
         time_var_name = data.get_variable_names()[0]
         try:
-            eval_data = data.evaluate(**{time_var_name: Q_(1, "second")})
+            eval_data = data.evaluate(**{time_var_name: Q_(1, "second")}).data
             self._units = eval_data.units
             if np.iterable(eval_data):
                 self._shape = eval_data.shape
@@ -451,21 +461,21 @@ class TimeSeries(TimeDependent):
 
     def _interp_time_expression(self, time: Time, time_unit: str) -> xr.DataArray:
         """Interpolate the time series if its data is a mathematical expression."""
-        time_q = time.as_quantity(unit=time_unit)
+        time_q = xr.DataArray(time.as_quantity(unit=time_unit), dims=["time"])
 
-        if len(self.shape) > 1 and np.iterable(time_q):
-            while len(time_q.shape) < len(self.shape):
-                time_q = time_q[:, np.newaxis]
+        # if len(self.shape) > 1 and np.iterable(time_q):
+        #    while len(time_q.shape) < len(self.shape):
+        #        time_q = time_q[:, np.newaxis]
 
         # evaluate expression
         data = self._data.evaluate(**{self._time_var_name: time_q})
-        data = data.astype(float).to_reduced_units()  # float conversion before reduce!
+        # data = data.astype(float).to_reduced_units()  # float conversion before reduce!
 
         # create data array
-        if not np.iterable(data):  # make sure quantity is not scalar value
-            data = np.expand_dims(data, 0)
-
-        return self._create_data_array(data, time)
+        # if not np.iterable(data):  # make sure quantity is not scalar value
+        #    data = np.expand_dims(data, 0)
+        data = data.assign_coords({"time": time.as_timedelta_index()})
+        return data  # self._create_data_array(data, time)
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
@@ -595,10 +605,11 @@ class TimeSeries(TimeDependent):
 
         if isinstance(self._data, xr.DataArray):
             dax = self._interp_time_discrete(time_interp)
+            ts = TimeSeries(data=dax.data, time=time, interpolation=self.interpolation)
         else:
             dax = self._interp_time_expression(time_interp, time_unit)
+            ts = TimeSeries(data=dax, interpolation=self.interpolation)
 
-        ts = TimeSeries(data=dax.data, time=time, interpolation=self.interpolation)
         ts._interp_counter = self._interp_counter + 1
         return ts
 
