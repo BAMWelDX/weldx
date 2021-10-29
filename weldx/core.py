@@ -49,18 +49,18 @@ class MathematicalExpression:
         )
         self._parameters = {}
         if parameters is not None:
-            if not isinstance(parameters, dict):
-                raise ValueError(
-                    f'"parameters" must be dictionary, got {type(parameters)}'
-                )
-            parameters = {k: Q_(v) for k, v in parameters.items()}
-            variable_names = self.get_variable_names()
-            for key in parameters:
-                if key not in variable_names:
-                    raise ValueError(
-                        f'The expression does not have a parameter "{key}"'
-                    )
-            self._parameters = parameters
+            self.set_parameters(parameters)
+
+    def set_parameters(self, parameters):
+        if not isinstance(parameters, dict):
+            raise ValueError(f'"parameters" must be dictionary, got {type(parameters)}')
+        variable_names = [str(v) for v in self._expression.free_symbols]
+        for k, v in parameters.items():
+            v = Q_(v)
+            if k not in variable_names:
+                raise ValueError(f'The expression does not have a parameter "{k}"')
+
+            self._parameters[k] = v
 
     def __repr__(self):
         """Give __repr__ output."""
@@ -155,14 +155,7 @@ class MathematicalExpression:
             Parameter value. This can be number, array or pint.Quantity
 
         """
-        if not isinstance(name, str):
-            raise TypeError(f'Parameter "name" must be a string, got {type(name)}')
-        if name not in str(self._expression.free_symbols):
-            raise ValueError(
-                f'The expression "{self._expression}" does not have a '
-                f'parameter with name "{name}".'
-            )
-        self._parameters[name] = value
+        self.set_parameters({name: value})
 
     @property
     def num_parameters(self):

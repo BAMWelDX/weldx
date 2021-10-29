@@ -110,7 +110,7 @@ class TestMathematicalExpression:
         "name, value, exception_type, test_name",
         [
             ("k", 1, ValueError, "# parameter not in expression"),
-            (33, 1, TypeError, "# wrong type as name #1"),
+            (33, 1, ValueError, "# wrong type as name #1"),
             ({"a": 1}, 1, TypeError, "# wrong type as name #2"),
         ],
         ids=get_test_name,
