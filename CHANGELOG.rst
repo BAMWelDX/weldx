@@ -880,7 +880,7 @@ added
    object represents a unity transformation step. `[#177]
    <https://github.com/BAMWelDX/weldx/pull/177>`__
 
--  added `welding.util.lcs_coords_from_ts` function `[#199]
+-  added ``welding.util.lcs_coords_from_ts`` function `[#199]
    <https://github.com/BAMWelDX/weldx/pull/199>`__
 
 -  add a tutorial with advanced use case for combining groove
