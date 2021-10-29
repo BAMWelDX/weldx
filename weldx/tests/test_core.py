@@ -213,23 +213,23 @@ class TestTimeSeries:
     DTI = pd.DatetimeIndex
     TDI = pd.TimedeltaIndex
     TS = TimeSeries
-    #
-    #     time_discrete = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
-    #     value_constant = Q_(1, "m")
-    #     values_discrete = Q_(np.array([10, 11, 12, 14, 16]), "mm")
-    #     me_expr_str = "a*t + b"
-    #     me_params = {"a": Q_(2, "m/s"), "b": Q_(-2, "m")}
-    #
-    #     me_params_vec = {"a": Q_([[2, 0, 1]], "m/s"), "b": Q_([[-2, 3, 0]], "m")}
-    #
-    #     ts_constant = TimeSeries(value_constant)
-    #     ts_disc_step = TimeSeries(values_discrete, time_discrete, "step")
-    #     ts_disc_linear = TimeSeries(values_discrete, time_discrete, "linear")
-    #     ts_expr = TimeSeries(ME(me_expr_str, me_params))
-    #     ts_expr_vec = TimeSeries(ME(me_expr_str, me_params_vec))
-    #
-    #     # test_construction_discrete -------------------------------------------------------
-    #
+
+    time_discrete = pd.TimedeltaIndex([0, 1, 2, 3, 4], unit="s")
+    value_constant = Q_(1, "m")
+    values_discrete = Q_(np.array([10, 11, 12, 14, 16]), "mm")
+    me_expr_str = "a*t + b"
+    me_params = {"a": Q_(2, "m/s"), "b": Q_(-2, "m")}
+
+    me_params_vec = {"a": Q_([[2, 0, 1]], "m/s"), "b": Q_([[-2, 3, 0]], "m")}
+
+    ts_constant = TimeSeries(value_constant)
+    ts_disc_step = TimeSeries(values_discrete, time_discrete, "step")
+    ts_disc_linear = TimeSeries(values_discrete, time_discrete, "linear")
+    ts_expr = TimeSeries(ME(me_expr_str, me_params))
+    ts_expr_vec = TimeSeries(ME(me_expr_str, me_params_vec))
+
+    # test_construction_discrete -------------------------------------------------------
+
     @staticmethod
     @pytest.mark.parametrize(
         "data, time, interpolation, shape_exp",
@@ -292,194 +292,192 @@ class TestTimeSeries:
         assert ts.data_array is None
         assert U_(unit_exp).is_compatible_with(ts.units)
 
+    # test_init_data_array -------------------------------------------------------------
 
-#
-#     # test_init_data_array -------------------------------------------------------------
-#
-#     @staticmethod
-#     @pytest.mark.parametrize(
-#         "data, dims, coords, exception_type",
-#         [
-#             (Q_([1, 2, 3], "m"), "time", dict(time=TDI([1, 2, 3])), None),
-#             (Q_([1, 2, 3], "m"), "a", dict(a=TDI([1, 2, 3])), KeyError),
-#             (Q_([[1, 2]], "m"), ("a", "time"), dict(a=[2], time=TDI([1, 2])), None),
-#             (Q_([1, 2, 3], "m"), "time", None, KeyError),
-#             (Q_([1, 2, 3], "m"), "time", dict(time=[1, 2, 3]), TypeError),
-#             ([1, 2, 3], "time", dict(time=TDI([1, 2, 3])), TypeError),
-#         ],
-#     )
-#     def test_init_data_array(data, dims, coords, exception_type):
-#         """Test the `__init__` method with an xarray as data parameter."""
-#         da = xr.DataArray(data=data, dims=dims, coords=coords)
-#         if exception_type is not None:
-#             with pytest.raises(exception_type):
-#                 TimeSeries(da)
-#         else:
-#             ts = TimeSeries(da)
-#             assert ts.data_array.dims[0] == "time"
-#
-#     # test_construction_exceptions -----------------------------------------------------
-#
-#     values_def = Q_([5, 7, 3, 6, 8], "m")
-#     time_def = Q_([0, 1, 2, 3, 4], "s")
-#     me_too_many_vars = ME("a*t + b", {})
-#     me_param_units = ME("a*t + b", {"a": Q_(2, "1/s"), "b": Q_(-2, "m")})
-#     me_time_vec = ME("a*t + b", {"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")})
-#
-#     @staticmethod
-#     @pytest.mark.parametrize(
-#         "data, time, interpolation, exception_type, test_name",
-#         [
-#             (values_def, time_def, "int", ValueError, "# unknown interpolation"),
-#             (values_def, time_def.magnitude, "step", TypeError, "# invalid time type"),
-#             (me_too_many_vars, None, None, Exception, "# too many free variables"),
-#             (me_param_units, None, None, Exception, "# incompatible parameter units"),
-#             (me_time_vec, None, None, Exception, "# not compatible with time vectors"),
-#             ("a string", None, None, TypeError, "# wrong data type"),
-#         ],
-#         ids=get_test_name,
-#     )
-#     def test_construction_exceptions(
-#         data, time, interpolation, exception_type, test_name
-#     ):
-#         """Test the exceptions of the 'set_parameter' method."""
-#         with pytest.raises(exception_type):
-#             TimeSeries(data=data, time=time, interpolation=interpolation)
-#
-#     # test_comparison -------------------------------------
-#
-#     time_wrong_values = TDI([0, 1, 2, 3, 5], unit="s")
-#     values_discrete_wrong = Q_(np.array([10, 11, 12, 15, 16]), "mm")
-#     values_unit_wrong = Q_(np.array([10, 11, 12, 14, 16]), "s")
-#     values_unit_prefix_wrong = Q_(np.array([10, 11, 12, 14, 16]), "m")
-#     params_wrong_values = {"a": Q_(2, "1/s"), "b": Q_(-1, "")}
-#     params_wrong_unit = {"a": Q_(2, "g/s"), "b": Q_(-2, "g")}
-#     params_wrong_unit_prefix = {"a": Q_(2, "m/ms"), "b": Q_(-2, "m")}
-#
-#     @staticmethod
-#     @pytest.mark.parametrize(
-#         "ts, ts_other, result_exp",
-#         [
-#             (ts_constant, TS(value_constant), True),
-#             (ts_disc_step, TS(values_discrete, time_discrete, "step"), True),
-#             (ts_expr, TS(ME(me_expr_str, me_params)), True),
-#             (ts_constant, ts_disc_step, False),
-#             (ts_constant, ts_expr, False),
-#             (ts_disc_step, ts_expr, False),
-#             (ts_constant, 1, False),
-#             (ts_disc_step, 1, False),
-#             (ts_expr, 1, False),
-#             (ts_constant, "wrong", False),
-#             (ts_disc_step, "wrong", False),
-#             (ts_expr, "wrong", False),
-#             (ts_constant, TS(Q_(1337, "m")), False),
-#             (ts_constant, TS(Q_(1, "mm")), False),
-#             (ts_constant, TS(Q_(1, "s")), False),
-#             (ts_disc_step, TS(values_discrete, time_wrong_values, "step"), False),
-#             (ts_disc_step, TS(values_discrete_wrong, time_discrete, "step"), False),
-#             (ts_disc_step, TS(values_unit_prefix_wrong, time_discrete, "step"), False),
-#             (ts_disc_step, TS(values_discrete, time_discrete, "linear"), False),
-#             (ts_expr, TS(ME("a*t + 2*b", me_params)), False),
-#             (ts_expr, TS(ME(me_expr_str, params_wrong_values)), False),
-#             (ts_expr, TS(ME(me_expr_str, params_wrong_unit)), False),
-#             (ts_expr, TS(ME(me_expr_str, params_wrong_unit_prefix)), False),
-#         ],
-#     )
-#     def test_comparison(ts, ts_other, result_exp):
-#         """Test the TimeSeries comparison methods."""
-#         assert (ts == ts_other) is result_exp
-#         assert (ts != ts_other) is not result_exp
-#
-#     # test_interp_time -----------------------------------------------------------------
-#
-#     time_single = pd.TimedeltaIndex([2.1], "s")
-#     time_single_q = Q_(2.1, "s")
-#     time_mul = pd.TimedeltaIndex([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
-#     time_mul_q = Q_([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
-#     results_exp_vec = [
-#         [-8, 3, -3],
-#         [-0.6, 3, 0.7],
-#         [0.2, 3, 1.1],
-#         [1.8, 3, 1.9],
-#         [3, 3, 2.5],
-#         [4, 3, 3],
-#         [6, 3, 4],
-#         [12, 3, 7],
-#     ]
-#
-#     @staticmethod
-#     @pytest.mark.parametrize(
-#         "ts, time, magnitude_exp, unit_exp",
-#         [
-#             (ts_constant, time_single, 1, "m"),
-#             (ts_constant, time_single_q, 1, "m"),
-#             (ts_constant, time_mul, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
-#             (
-#                 ts_constant,
-#                 time_mul + pd.Timestamp("2020"),
-#                 [1, 1, 1, 1, 1, 1, 1, 1],
-#                 "m",
-#             ),
-#             (ts_constant, time_mul_q, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
-#             (ts_disc_step, time_single, 12, "mm"),
-#             (ts_disc_step, time_single_q, 12, "mm"),
-#             (ts_disc_step, time_mul, [10, 10, 11, 11, 12, 14, 16, 16], "mm"),
-#             (ts_disc_step, time_mul_q, [10, 10, 11, 11, 12, 14, 16, 16], "mm"),
-#             (ts_disc_linear, time_single, 12.2, "mm"),
-#             (ts_disc_linear, time_single_q, 12.2, "mm"),
-#             (ts_disc_linear, time_mul, [10, 10.7, 11.1, 11.9, 13, 14, 16, 16], "mm"),
-#             (ts_disc_linear, time_mul_q, [10, 10.7, 11.1, 11.9, 13, 14, 16, 16], "mm"),
-#             (ts_expr, time_single, 2.2, "m"),
-#             (ts_expr, time_single_q, 2.2, "m"),
-#             (ts_expr, time_mul, [-8, -0.6, 0.2, 1.8, 3, 4, 6, 12], "m"),
-#             (ts_expr, time_mul_q, [-8, -0.6, 0.2, 1.8, 3, 4, 6, 12], "m"),
-#             (ts_expr_vec, time_single, [[2.2, 3, 2.1]], "m"),
-#             (ts_expr_vec, time_single_q, [[2.2, 3, 2.1]], "m"),
-#             (ts_expr_vec, time_mul, results_exp_vec, "m"),
-#         ],
-#     )
-#     def test_interp_time(ts, time, magnitude_exp, unit_exp):
-#         """Test the interp_time function."""
-#         result = ts.interp_time(time)
-#
-#         assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
-#         assert result.units == U_(unit_exp)
-#
-#         time = Time(time)
-#         if len(time) == 1:
-#             assert result.time is None
-#         else:
-#             assert np.all(Time(result.time, result._reference_time) == time)
-#
-#     # test_interp_time_warning ---------------------------------------------------------
-#
-#     @staticmethod
-#     def test_interp_time_warning():
-#         """Test if a warning is emitted when interpolating already interpolated data."""
-#         ts = TimeSeries(data=Q_([1, 2, 3], "m"), time=Q_([0, 1, 2], "s"))
-#         with pytest.warns(None) as recorded_warnings:
-#             ts_interp = ts.interp_time(Q_([0.25, 0.5, 0.75, 1], "s"))
-#         assert len(recorded_warnings) == 0
-#
-#         with pytest.warns(UserWarning):
-#             ts_interp.interp_time(Q_([0.4, 0.6], "s"))
-#
-#     # test_interp_time_exceptions ------------------------------------------------------
-#
-#     @staticmethod
-#     @pytest.mark.parametrize("ts", [ts_constant, ts_disc_step, ts_disc_linear, ts_expr])
-#     @pytest.mark.parametrize(
-#         "time,  exception_type, test_name",
-#         [
-#             # (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),
-#             ("a string", TypeError, "# wrong type #2"),
-#             ([1, 2, 3], TypeError, "# wrong type #3"),
-#             (1, TypeError, "# wrong type #4"),
-#             (Q_(2, "s/m"), Exception, "# wrong type #5"),
-#         ],
-#         ids=get_test_name,
-#     )
-#     def test_interp_time_exceptions(ts, time, exception_type, test_name):
-#         """Test the exceptions of the 'set_parameter' method."""
-#         with pytest.raises(exception_type):
-#             ts.interp_time(time)
+    @staticmethod
+    @pytest.mark.parametrize(
+        "data, dims, coords, exception_type",
+        [
+            (Q_([1, 2, 3], "m"), "time", dict(time=TDI([1, 2, 3])), None),
+            (Q_([1, 2, 3], "m"), "a", dict(a=TDI([1, 2, 3])), KeyError),
+            (Q_([[1, 2]], "m"), ("a", "time"), dict(a=[2], time=TDI([1, 2])), None),
+            (Q_([1, 2, 3], "m"), "time", None, KeyError),
+            (Q_([1, 2, 3], "m"), "time", dict(time=[1, 2, 3]), TypeError),
+            ([1, 2, 3], "time", dict(time=TDI([1, 2, 3])), TypeError),
+        ],
+    )
+    def test_init_data_array(data, dims, coords, exception_type):
+        """Test the `__init__` method with an xarray as data parameter."""
+        da = xr.DataArray(data=data, dims=dims, coords=coords)
+        if exception_type is not None:
+            with pytest.raises(exception_type):
+                TimeSeries(da)
+        else:
+            ts = TimeSeries(da)
+            assert ts.data_array.dims[0] == "time"
+
+    # test_construction_exceptions -----------------------------------------------------
+
+    values_def = Q_([5, 7, 3, 6, 8], "m")
+    time_def = Q_([0, 1, 2, 3, 4], "s")
+    me_too_many_vars = ME("a*t + b", {})
+    me_param_units = ME("a*t + b", {"a": Q_(2, "1/s"), "b": Q_(-2, "m")})
+    me_time_vec = ME("a*t + b", {"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")})
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "data, time, interpolation, exception_type, test_name",
+        [
+            (values_def, time_def, "int", ValueError, "# unknown interpolation"),
+            (values_def, time_def.magnitude, "step", TypeError, "# invalid time type"),
+            (me_too_many_vars, None, None, Exception, "# too many free variables"),
+            (me_param_units, None, None, Exception, "# incompatible parameter units"),
+            (me_time_vec, None, None, Exception, "# not compatible with time vectors"),
+            ("a string", None, None, TypeError, "# wrong data type"),
+        ],
+        ids=get_test_name,
+    )
+    def test_construction_exceptions(
+        data, time, interpolation, exception_type, test_name
+    ):
+        """Test the exceptions of the 'set_parameter' method."""
+        with pytest.raises(exception_type):
+            TimeSeries(data=data, time=time, interpolation=interpolation)
+
+    # test_comparison -------------------------------------
+
+    time_wrong_values = TDI([0, 1, 2, 3, 5], unit="s")
+    values_discrete_wrong = Q_(np.array([10, 11, 12, 15, 16]), "mm")
+    values_unit_wrong = Q_(np.array([10, 11, 12, 14, 16]), "s")
+    values_unit_prefix_wrong = Q_(np.array([10, 11, 12, 14, 16]), "m")
+    params_wrong_values = {"a": Q_(2, "1/s"), "b": Q_(-1, "")}
+    params_wrong_unit = {"a": Q_(2, "g/s"), "b": Q_(-2, "g")}
+    params_wrong_unit_prefix = {"a": Q_(2, "m/ms"), "b": Q_(-2, "m")}
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "ts, ts_other, result_exp",
+        [
+            (ts_constant, TS(value_constant), True),
+            (ts_disc_step, TS(values_discrete, time_discrete, "step"), True),
+            (ts_expr, TS(ME(me_expr_str, me_params)), True),
+            (ts_constant, ts_disc_step, False),
+            (ts_constant, ts_expr, False),
+            (ts_disc_step, ts_expr, False),
+            (ts_constant, 1, False),
+            (ts_disc_step, 1, False),
+            (ts_expr, 1, False),
+            (ts_constant, "wrong", False),
+            (ts_disc_step, "wrong", False),
+            (ts_expr, "wrong", False),
+            (ts_constant, TS(Q_(1337, "m")), False),
+            (ts_constant, TS(Q_(1, "mm")), False),
+            (ts_constant, TS(Q_(1, "s")), False),
+            (ts_disc_step, TS(values_discrete, time_wrong_values, "step"), False),
+            (ts_disc_step, TS(values_discrete_wrong, time_discrete, "step"), False),
+            (ts_disc_step, TS(values_unit_prefix_wrong, time_discrete, "step"), False),
+            (ts_disc_step, TS(values_discrete, time_discrete, "linear"), False),
+            (ts_expr, TS(ME("a*t + 2*b", me_params)), False),
+            (ts_expr, TS(ME(me_expr_str, params_wrong_values)), False),
+            (ts_expr, TS(ME(me_expr_str, params_wrong_unit)), False),
+            (ts_expr, TS(ME(me_expr_str, params_wrong_unit_prefix)), False),
+        ],
+    )
+    def test_comparison(ts, ts_other, result_exp):
+        """Test the TimeSeries comparison methods."""
+        assert (ts == ts_other) is result_exp
+        assert (ts != ts_other) is not result_exp
+
+    # test_interp_time -----------------------------------------------------------------
+
+    time_single = pd.TimedeltaIndex([2.1], "s")
+    time_single_q = Q_(2.1, "s")
+    time_mul = pd.TimedeltaIndex([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
+    time_mul_q = Q_([-3, 0.7, 1.1, 1.9, 2.5, 3, 4, 7], "s")
+    results_exp_vec = [
+        [-8, 3, -3],
+        [-0.6, 3, 0.7],
+        [0.2, 3, 1.1],
+        [1.8, 3, 1.9],
+        [3, 3, 2.5],
+        [4, 3, 3],
+        [6, 3, 4],
+        [12, 3, 7],
+    ]
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "ts, time, magnitude_exp, unit_exp",
+        [
+            (ts_constant, time_single, 1, "m"),
+            (ts_constant, time_single_q, 1, "m"),
+            (ts_constant, time_mul, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (
+                ts_constant,
+                time_mul + pd.Timestamp("2020"),
+                [1, 1, 1, 1, 1, 1, 1, 1],
+                "m",
+            ),
+            (ts_constant, time_mul_q, [1, 1, 1, 1, 1, 1, 1, 1], "m"),
+            (ts_disc_step, time_single, 12, "mm"),
+            (ts_disc_step, time_single_q, 12, "mm"),
+            (ts_disc_step, time_mul, [10, 10, 11, 11, 12, 14, 16, 16], "mm"),
+            (ts_disc_step, time_mul_q, [10, 10, 11, 11, 12, 14, 16, 16], "mm"),
+            (ts_disc_linear, time_single, 12.2, "mm"),
+            (ts_disc_linear, time_single_q, 12.2, "mm"),
+            (ts_disc_linear, time_mul, [10, 10.7, 11.1, 11.9, 13, 14, 16, 16], "mm"),
+            (ts_disc_linear, time_mul_q, [10, 10.7, 11.1, 11.9, 13, 14, 16, 16], "mm"),
+            (ts_expr, time_single, 2.2, "m"),
+            (ts_expr, time_single_q, 2.2, "m"),
+            (ts_expr, time_mul, [-8, -0.6, 0.2, 1.8, 3, 4, 6, 12], "m"),
+            (ts_expr, time_mul_q, [-8, -0.6, 0.2, 1.8, 3, 4, 6, 12], "m"),
+            (ts_expr_vec, time_single, [[2.2, 3, 2.1]], "m"),
+            (ts_expr_vec, time_single_q, [[2.2, 3, 2.1]], "m"),
+            (ts_expr_vec, time_mul, results_exp_vec, "m"),
+        ],
+    )
+    def test_interp_time(ts, time, magnitude_exp, unit_exp):
+        """Test the interp_time function."""
+        result = ts.interp_time(time)
+
+        assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
+        assert result.units == U_(unit_exp)
+
+        time = Time(time)
+        if len(time) == 1:
+            assert result.time is None
+        else:
+            assert np.all(Time(result.time, result._reference_time) == time)
+
+    # test_interp_time_warning ---------------------------------------------------------
+
+    @staticmethod
+    def test_interp_time_warning():
+        """Test if a warning is emitted when interpolating already interpolated data."""
+        ts = TimeSeries(data=Q_([1, 2, 3], "m"), time=Q_([0, 1, 2], "s"))
+        with pytest.warns(None) as recorded_warnings:
+            ts_interp = ts.interp_time(Q_([0.25, 0.5, 0.75, 1], "s"))
+        assert len(recorded_warnings) == 0
+
+        with pytest.warns(UserWarning):
+            ts_interp.interp_time(Q_([0.4, 0.6], "s"))
+
+    # test_interp_time_exceptions ------------------------------------------------------
+
+    @staticmethod
+    @pytest.mark.parametrize("ts", [ts_constant, ts_disc_step, ts_disc_linear, ts_expr])
+    @pytest.mark.parametrize(
+        "time,  exception_type, test_name",
+        [
+            # (DTI(["2010-10-10"]), ValueError, "# wrong type #1"),
+            ("a string", TypeError, "# wrong type #2"),
+            ([1, 2, 3], TypeError, "# wrong type #3"),
+            (1, TypeError, "# wrong type #4"),
+            (Q_(2, "s/m"), Exception, "# wrong type #5"),
+        ],
+        ids=get_test_name,
+    )
+    def test_interp_time_exceptions(ts, time, exception_type, test_name):
+        """Test the exceptions of the 'set_parameter' method."""
+        with pytest.raises(exception_type):
+            ts.interp_time(time)
