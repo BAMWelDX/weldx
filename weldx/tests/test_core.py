@@ -220,7 +220,7 @@ class TestTimeSeries:
     me_expr_str = "a*t + b"
     me_params = {"a": Q_(2, "m/s"), "b": Q_(-2, "m")}
 
-    me_params_vec = {"a": Q_([[2, 0, 1]], "m/s"), "b": Q_([[-2, 3, 0]], "m")}
+    me_params_vec = {"a": Q_([2, 0, 1], "m/s"), "b": Q_([-2, 3, 0], "m")}
 
     ts_constant = TimeSeries(value_constant)
     ts_disc_step = TimeSeries(values_discrete, time_discrete, "step")
@@ -322,7 +322,6 @@ class TestTimeSeries:
     time_def = Q_([0, 1, 2, 3, 4], "s")
     me_too_many_vars = ME("a*t + b", {})
     me_param_units = ME("a*t + b", {"a": Q_(2, "1/s"), "b": Q_(-2, "m")})
-    me_time_vec = ME("a*t + b", {"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")})
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -332,7 +331,6 @@ class TestTimeSeries:
             (values_def, time_def.magnitude, "step", TypeError, "# invalid time type"),
             (me_too_many_vars, None, None, Exception, "# too many free variables"),
             (me_param_units, None, None, Exception, "# incompatible parameter units"),
-            (me_time_vec, None, None, Exception, "# not compatible with time vectors"),
             ("a string", None, None, TypeError, "# wrong data type"),
         ],
         ids=get_test_name,

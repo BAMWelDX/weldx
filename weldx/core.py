@@ -59,7 +59,7 @@ class MathematicalExpression:
             if k not in variable_names:
                 raise ValueError(f'The expression does not have a parameter "{k}"')
             if not isinstance(v, xr.DataArray):
-                v = xr.DataArray(Q_(v))
+                v = Q_(v)
 
             self._parameters[k] = v
 
@@ -245,7 +245,14 @@ class MathematicalExpression:
             if not isinstance(v, xr.DataArray):
                 v = xr.DataArray(Q_(v))
             variables[k] = v
-        inputs = {**variables, **self._parameters}
+
+        parameters = {}
+        for k, v in self._parameters.items():
+            if not isinstance(v, xr.DataArray):
+                v = xr.DataArray(v)
+            parameters[k] = v
+
+        inputs = {**variables, **parameters}
         return self.function(**inputs)
 
 
@@ -461,21 +468,15 @@ class TimeSeries(TimeDependent):
 
     def _interp_time_expression(self, time: Time, time_unit: str) -> xr.DataArray:
         """Interpolate the time series if its data is a mathematical expression."""
-        time_q = xr.DataArray(time.as_quantity(unit=time_unit), dims=["time"])
+        time_q = time.as_quantity(unit=time_unit)
+        if len(time_q.shape) == 0:
+            time_q = np.expand_dims(time_q, 0)
 
-        # if len(self.shape) > 1 and np.iterable(time_q):
-        #    while len(time_q.shape) < len(self.shape):
-        #        time_q = time_q[:, np.newaxis]
+        time_xr = xr.DataArray(time_q, dims=["time"])
 
         # evaluate expression
-        data = self._data.evaluate(**{self._time_var_name: time_q})
-        # data = data.astype(float).to_reduced_units()  # float conversion before reduce!
-
-        # create data array
-        # if not np.iterable(data):  # make sure quantity is not scalar value
-        #    data = np.expand_dims(data, 0)
-        data = data.assign_coords({"time": time.as_timedelta_index()})
-        return data  # self._create_data_array(data, time)
+        data = self._data.evaluate(**{self._time_var_name: time_xr})
+        return data.assign_coords({"time": time.as_timedelta_index()})
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
