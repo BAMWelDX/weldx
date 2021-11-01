@@ -1438,7 +1438,7 @@ def test_get_local_coordinate_system_timeseries(
         The expected rotation angles around the z-axis
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
     ts = TimeSeries(me)
     rotation = WXRotation.from_euler("z", [0, 90], degrees=True).as_matrix()
     translation = [[1, 0, 0], [2, 0, 0]]
@@ -1535,7 +1535,7 @@ def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
         Set to `True` if the transformation should raise
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
     ts = TimeSeries(me)
     translation = [[1, 0, 0], [2, 0, 0]]
 

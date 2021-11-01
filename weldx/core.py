@@ -410,8 +410,6 @@ class TimeSeries(TimeDependent):
             time = Time(time)
 
             self._reference_time = time.reference_time
-            print(data)
-            print(time)
             self._data = self._create_data_array(data, time)
         self.interpolation = interpolation
 
