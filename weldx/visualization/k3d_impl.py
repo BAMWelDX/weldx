@@ -278,9 +278,10 @@ class CoordinateSystemVisualizerK3D:
 
     def limits(self):
         lcs = self._lcs
-        if "time" in lcs.coordinates.dims:
-            mins = lcs.coordinates.values.min(axis=0)
-            maxs = lcs.coordinates.values.max(axis=0)
+        dims = [d for d in lcs.coordinates.dims if d != "c"]
+        if dims:
+            mins = lcs.coordinates.min(dim=dims).values
+            maxs = lcs.coordinates.max(dim=dims).values
             return np.vstack([mins, maxs])
         return np.vstack([lcs.coordinates.values, lcs.coordinates.values])
 
@@ -339,7 +340,7 @@ class SpatialDataVisualizer:
 
         self._reference_system = reference_system
 
-        self._label_pos = np.mean(data.coordinates.values, axis=0)
+        self._label_pos = data.coordinates.mean(dim=data.additional_dims).values
         self._label = None
         if name is not None:
             self._label = k3d.text(
