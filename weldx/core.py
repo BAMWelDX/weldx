@@ -51,16 +51,23 @@ class MathematicalExpression:
         if parameters is not None:
             self.set_parameters(parameters)
 
-    def set_parameters(self, parameters):
-        if not isinstance(parameters, dict):
-            raise ValueError(f'"parameters" must be dictionary, got {type(parameters)}')
+    def set_parameters(self, params: Dict[str, Union[pint.Quantity, xr.DataArray]]):
+        """Set the expressions parameters.
+
+        Parameters
+        ----------
+        paras:
+            Dictionary that contains the values for the specified parameters.
+
+        """
+        if not isinstance(params, dict):
+            raise ValueError(f'"parameters" must be dictionary, got {type(params)}')
         variable_names = [str(v) for v in self._expression.free_symbols]
-        for k, v in parameters.items():
+        for k, v in params.items():
             if k not in variable_names:
                 raise ValueError(f'The expression does not have a parameter "{k}"')
             if not isinstance(v, xr.DataArray):
                 v = Q_(v)
-
             self._parameters[k] = v
 
     def __repr__(self):
