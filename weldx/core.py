@@ -47,7 +47,8 @@ class MathematicalExpression:
         self.function = sympy.lambdify(
             tuple(self._expression.free_symbols), self._expression, "numpy"
         )
-        self._parameters = {}
+
+        self._parameters: Dict[str, Union[pint.Quantity, xr.DataArray]] = {}
         if parameters is not None:
             self.set_parameters(parameters)
 
