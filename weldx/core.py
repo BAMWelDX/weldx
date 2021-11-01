@@ -57,7 +57,7 @@ class MathematicalExpression:
 
         Parameters
         ----------
-        paras:
+        params:
             Dictionary that contains the values for the specified parameters.
 
         """
