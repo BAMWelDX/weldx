@@ -14,6 +14,7 @@ from jsonschema import ValidationError
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
+from weldx.asdf.file import _PROTECTED_KEYS
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
 from weldx.util import compare_nested
@@ -513,11 +514,11 @@ class TestWeldXFile:
 
         assert _read("test.asdf") == _read("test.wx")
 
-    def test_cannot_update_del_protected_keys(self):
-        protected_key = "asdf_library"
+    @pytest.mark.parametrize("protected_key", _PROTECTED_KEYS)
+    def test_cannot_update_del_protected_keys(self, protected_key):
         expected_match = "manipulate an ASDF internal structure"
         warning_type = UserWarning
-        old_lib = self.fh._data[protected_key]
+        old_lib = self.fh._data[protected_key]  # obtain key from underlying dict.
 
         with pytest.warns(warning_type, match=expected_match):
             self.fh.update({protected_key: None})
@@ -535,15 +536,13 @@ class TestWeldXFile:
             key, value = self.fh.popitem()
             keys.append(key)
         assert keys == ["wx_metadata"]
-        # while len(self.fh) >= len(_PROTECTED_KEYS):
-        #    item = self.fh.popitem()
-        #    print(len(self.fh))
-        #    #raise
+
+    def test_len_proteced_keys(self):
+        """Should only contain key 'wx_metadata'."""
+        assert len(self.fh) == 1
 
     def test_keys_not_in_protected_keys(self):
-        from weldx.asdf.file import _PROTECTED_KEYS
-
         assert self.fh.keys() not in set(_PROTECTED_KEYS)
 
         for x in iter(self.fh):
-            print(x)
+            assert x not in _PROTECTED_KEYS

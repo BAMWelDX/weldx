@@ -776,6 +776,10 @@ class WeldxFile(_ProtectedViewDict):
             fd.seek(0)
         return fd
 
+    @property
+    def data(self):
+        raise NotImplementedError
+
     def show_asdf_header(
         self, use_widgets: bool = None, _interactive: Optional[bool] = None
     ):
