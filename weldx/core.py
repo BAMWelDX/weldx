@@ -52,25 +52,6 @@ class MathematicalExpression:
         if parameters is not None:
             self.set_parameters(parameters)
 
-    def set_parameters(self, params: Dict[str, Union[pint.Quantity, xr.DataArray]]):
-        """Set the expressions parameters.
-
-        Parameters
-        ----------
-        params:
-            Dictionary that contains the values for the specified parameters.
-
-        """
-        if not isinstance(params, dict):
-            raise ValueError(f'"parameters" must be dictionary, got {type(params)}')
-        variable_names = [str(v) for v in self._expression.free_symbols]
-        for k, v in params.items():
-            if k not in variable_names:
-                raise ValueError(f'The expression does not have a parameter "{k}"')
-            if not isinstance(v, xr.DataArray):
-                v = Q_(v)
-            self._parameters[k] = v
-
     def __repr__(self):
         """Give __repr__ output."""
         representation = (
@@ -166,6 +147,27 @@ class MathematicalExpression:
         """
         self.set_parameters({name: value})
 
+    def set_parameters(self, params: Dict[str, Union[pint.Quantity, xr.DataArray]]):
+        """Set the expressions parameters.
+
+        Parameters
+        ----------
+        params:
+            Dictionary that contains the values for the specified parameters.
+
+        """
+        if not isinstance(params, dict):
+            raise ValueError(f'"parameters" must be dictionary, got {type(params)}')
+
+        variable_names = [str(v) for v in self._expression.free_symbols]
+
+        for k, v in params.items():
+            if k not in variable_names:
+                raise ValueError(f'The expression does not have a parameter "{k}"')
+            if not isinstance(v, xr.DataArray):
+                v = Q_(v)
+            self._parameters[k] = v
+
     @property
     def num_parameters(self):
         """Get the expressions number of parameters.
@@ -248,20 +250,18 @@ class MathematicalExpression:
             raise ValueError(
                 f"The variables {intersection} are already defined as parameters."
             )
-        variables = {}
-        for k, v in kwargs.items():
-            if not isinstance(v, xr.DataArray):
-                v = xr.DataArray(Q_(v))
-            variables[k] = v
 
-        parameters = {}
-        for k, v in self._parameters.items():
-            if not isinstance(v, xr.DataArray):
-                v = xr.DataArray(v)
-            parameters[k] = v
+        variables = {
+            k: v if isinstance(v, xr.DataArray) else xr.DataArray(Q_(v))
+            for k, v in kwargs.items()
+        }
 
-        inputs = {**variables, **parameters}
-        return self.function(**inputs)
+        parameters = {
+            k: v if isinstance(v, xr.DataArray) else xr.DataArray(v)
+            for k, v in self._parameters.items()
+        }
+
+        return self.function(**variables, **parameters)
 
 
 # TimeSeries ---------------------------------------------------------------------------
