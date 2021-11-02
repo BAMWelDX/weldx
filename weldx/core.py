@@ -44,6 +44,7 @@ class MathematicalExpression:
         if not isinstance(expression, sympy.Expr):
             expression = sympy.sympify(expression)
         self._expression = expression
+
         self.function = sympy.lambdify(
             tuple(self._expression.free_symbols), self._expression, "numpy"
         )
