@@ -25,7 +25,8 @@ from asdf.tags.core import Software
 from asdf.util import get_file_type, FileType
 from jsonschema import ValidationError
 
-from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
+from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree, \
+    _ProtectedViewDict
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 from weldx.util import inherit_docstrings, is_interactive_session, is_jupyterlab_session
 
@@ -59,78 +60,7 @@ _PROTECTED_KEYS = (
     "history",
     "asdf_library",
 )
-"""These keys are not being set, when a mapping is passed to update an existing file."""
-
-
-class _ProtectedViewDict(MutableMapping):
-    def __init__(self, protected_keys, data=None):
-        super(_ProtectedViewDict, self).__init__()
-        self._data = data
-        self.protected_keys = protected_keys
-
-    def __len__(self) -> int:
-        return len(self.keys())
-
-    def __getitem__(self, key):
-        if key in self.protected_keys:
-            self._warn_protected_keys()
-            raise KeyError
-        return self._data.get(key)
-
-    def __delitem__(self, key):
-        if key in self.protected_keys:
-            self._warn_protected_keys()
-            return
-        del self._data[key]
-
-    def __setitem__(self, key, value):
-        if key in self.protected_keys:
-            self._warn_protected_keys()
-            return
-        self._data[key] = value
-
-    def keys(self) -> AbstractSet:
-        return {k for k in self._data.keys() if k not in self.protected_keys}
-
-    def __iter__(self):
-        return (k for k in self._data.keys())
-
-    def __contains__(self, item):
-        return item in self.keys()
-
-    def update(self, mapping: Mapping[Hashable, Any], **kwargs: Any):
-        _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
-        if any(key in self.protected_keys for key in _mapping.keys()):
-            self._warn_protected_keys()
-            _mapping = {k: v for k, v in _mapping.items()
-                        if k not in self.protected_keys}
-
-        self._data.update(_mapping)
-
-    def popitem(self) -> Tuple[Hashable, Any]:
-        for k in self.keys():
-            if k in self.protected_keys:
-                continue
-
-            return k, self.pop(k)
-
-        raise KeyError
-
-    def clear(self):
-        _protected_data = {k: self._data.pop(k) for k in self.protected_keys}
-        self._data.clear()
-        self._data.update(_protected_data)  # re-add protected data.
-        assert len(self) == 0
-
-    @staticmethod
-    def _warn_protected_keys():
-        import warnings
-
-        warnings.warn(
-            "You tried to manipulate an ASDF internal structure"
-            f" (currently protected: {_PROTECTED_KEYS}",
-            stacklevel=3,
-        )
+"""These keys are not not seen, nor can they be manipulated."""
 
 
 @inherit_docstrings
