@@ -1,5 +1,6 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
 import copy
+import io
 import pathlib
 from collections import UserDict
 from collections.abc import MutableMapping, ValuesView
@@ -15,7 +16,7 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
-    Union,
+    Union, Hashable,
 )
 
 import asdf
@@ -59,8 +60,29 @@ DEFAULT_ARRAY_COMPRESSION = "input"
 DEFAULT_ARRAY_COPYING = True
 """Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
 
-_PROTECTED_KEYS = ("history", "asdf_library", )
+_PROTECTED_KEYS = (
+    "history",
+    "asdf_library",
+)
 """These keys are not being set, when a mapping is passed to update an existing file."""
+
+class _ProtectedViewDict(MutableMapping):
+    def __init__(self, data):
+        pass
+    def __delitem__(self, v) -> None:
+        pass
+
+    def __getitem__(self, k):
+        pass
+
+    def __len__(self) -> int:
+        pass
+
+    def __iter__(self) :
+        pass
+
+    def __setitem__(self, k, v) -> None:
+        pass
 
 
 @inherit_docstrings
@@ -240,14 +262,12 @@ class WeldxFile(UserDict):
             else:
                 self._in_memory = False
 
-            # TODO: this could be inefficient for large files.
-            # For buffers is fast, but not for real files.
-            # real files should be probed over the filesystem!
             if mode == "rw" and isinstance(
                 filename_or_file_like, SupportsFileReadWrite
             ):
                 with reset_file_position(filename_or_file_like):
-                    new_file_created = len(filename_or_file_like.read()) == 0
+                    filename_or_file_like.seek(0, io.SEEK_END)
+                    new_file_created = filename_or_file_like.tell() == 0
 
             # the user passed a raw file handle, its their responsibility to close it.
             self._close = False
@@ -487,7 +507,13 @@ class WeldxFile(UserDict):
         KeysView :
             all keys stored at the root of this file.
         """
-        return super().keys()
+        return {k for k in super().keys() if k not in _PROTECTED_KEYS}
+
+    def __iter__(self):
+        return (k for k in self.data.keys())
+
+    def __contains__(self, item):
+        return item in self.keys()
 
     def clear(self):
         """Remove all data from file."""
@@ -609,19 +635,27 @@ class WeldxFile(UserDict):
         """
         return super().pop(key, default=default)
 
-    def popitem(self) -> Any:
+    def popitem(self) -> Tuple[Hashable, Any]:
         """Remove the item that was last inserted into the file.
-        # TODO: this is not true if the file was just loaded from disk, as we do not know in which order the keys were stored.
+
+        Notes
+        -----
+        The assumption of an ordered dictionary, that this method returns
+        the key inserted lastly, does not hold necessarily. E.g. if the file has been
+        written to disk and is loaded again the previous order has been lost eventually.
 
         Returns
         -------
         object :
             the last item.
         """
-        if self.keys() == _PROTECTED_KEYS:  # only protected keys left?
-            raise KeyError("empty")
-        # this redirects to __delitem__
-        return super().popitem()
+        for k in self.keys():
+            if k in _PROTECTED_KEYS:
+                continue
+
+            return k, self.pop(k)
+
+        raise KeyError
 
     def __delitem__(self, key):
         if key in _PROTECTED_KEYS:
@@ -658,7 +692,12 @@ class WeldxFile(UserDict):
     @property
     def history(self) -> List:
         """Return a list of all history entries in this file."""
-        return self._asdf_handle.get_history_entries()
+        return self._asdf_handle.get_history_entries().copy()
+
+    @property
+    def asdf_library(self) -> dict:
+        """Get version information about the ASDF library lastly modifying this file."""
+        return self._asdf_handle["asdf_library"].copy()
 
     @property
     def custom_schema(self) -> Optional[str]:
@@ -852,8 +891,12 @@ class WeldxFile(UserDict):
     @staticmethod
     def _warn_protected_keys():
         import warnings
-        warnings.warn("You tried to manipulate an ASDF internal structure"
-                      f" (currently protected: {_PROTECTED_KEYS}", stacklevel=3)
+
+        warnings.warn(
+            "You tried to manipulate an ASDF internal structure"
+            f" (currently protected: {_PROTECTED_KEYS}",
+            stacklevel=3,
+        )
 
 
 class _HeaderVisualizer:

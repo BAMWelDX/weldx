@@ -521,19 +521,30 @@ class TestWeldXFile:
 
         with pytest.warns(warning_type, match=expected_match):
             self.fh.update({protected_key: None})
-        with pytest.warns(warning_type,
-                              match=expected_match):
+        with pytest.warns(warning_type, match=expected_match):
             del self.fh[protected_key]
         with pytest.warns(warning_type, match=expected_match):
             self.fh.pop(protected_key)
+        self.fh[protected_key] = NotImplemented
+        assert self.fh[protected_key] == old_lib
 
+    def test_popitem_remain_protected_keys(self):
+        keys = []
         from weldx.asdf.file import _PROTECTED_KEYS
-        assert len(self.fh) > len(_PROTECTED_KEYS)
-        #while len(self.fh) >= len(_PROTECTED_KEYS):
+
+        while len(self.fh) > len(_PROTECTED_KEYS):
+            key, value = self.fh.popitem()
+        keys.append(key)
+        assert keys
+        # while len(self.fh) >= len(_PROTECTED_KEYS):
         #    item = self.fh.popitem()
         #    print(len(self.fh))
         #    #raise
-        self.fh[protected_key] = NotImplemented
 
-        assert self.fh[protected_key] == old_lib
+    def test_keys_not_in_protected_keys(self):
+        from weldx.asdf.file import _PROTECTED_KEYS
 
+        assert self.fh.keys() not in set(_PROTECTED_KEYS)
+
+        for x in iter(self.fh):
+            print(x)
