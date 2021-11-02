@@ -2,7 +2,6 @@
 import copy
 import io
 import pathlib
-from collections import UserDict
 from collections.abc import MutableMapping, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
@@ -21,22 +20,18 @@ from typing import (
 
 import asdf
 import numpy as np
-from asdf import AsdfFile, generic_io
-from asdf import open as open_asdf
-from asdf import util
+from asdf import AsdfFile, generic_io, open as open_asdf
 from asdf.tags.core import Software
-from asdf.util import get_file_type
+from asdf.util import get_file_type, FileType
 from jsonschema import ValidationError
 
 from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
-from weldx.util import inherit_docstrings
+from weldx.util import inherit_docstrings, is_interactive_session, is_jupyterlab_session
 
 __all__ = [
     "WeldxFile",
 ]
-
-from weldx.util import is_interactive_session, is_jupyterlab_session
 
 
 @contextmanager
@@ -66,27 +61,80 @@ _PROTECTED_KEYS = (
 )
 """These keys are not being set, when a mapping is passed to update an existing file."""
 
-class _ProtectedViewDict(MutableMapping):
-    def __init__(self, data):
-        pass
-    def __delitem__(self, v) -> None:
-        pass
 
-    def __getitem__(self, k):
-        pass
+class _ProtectedViewDict(MutableMapping):
+    def __init__(self, protected_keys, data=None):
+        super(_ProtectedViewDict, self).__init__()
+        self._data = data
+        self.protected_keys = protected_keys
 
     def __len__(self) -> int:
-        pass
+        return len(self.keys())
 
-    def __iter__(self) :
-        pass
+    def __getitem__(self, key):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            raise KeyError
+        return self._data.get(key)
 
-    def __setitem__(self, k, v) -> None:
-        pass
+    def __delitem__(self, key):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            return
+        del self._data[key]
+
+    def __setitem__(self, key, value):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            return
+        self._data[key] = value
+
+    def keys(self) -> AbstractSet:
+        return {k for k in self._data.keys() if k not in self.protected_keys}
+
+    def __iter__(self):
+        return (k for k in self._data.keys())
+
+    def __contains__(self, item):
+        return item in self.keys()
+
+    def update(self, mapping: Mapping[Hashable, Any], **kwargs: Any):
+        _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
+        if any(key in self.protected_keys for key in _mapping.keys()):
+            self._warn_protected_keys()
+            _mapping = {k: v for k, v in _mapping.items()
+                        if k not in self.protected_keys}
+
+        self._data.update(_mapping)
+
+    def popitem(self) -> Tuple[Hashable, Any]:
+        for k in self.keys():
+            if k in self.protected_keys:
+                continue
+
+            return k, self.pop(k)
+
+        raise KeyError
+
+    def clear(self):
+        _protected_data = {k: self._data.pop(k) for k in self.protected_keys}
+        self._data.clear()
+        self._data.update(_protected_data)  # re-add protected data.
+        assert len(self) == 0
+
+    @staticmethod
+    def _warn_protected_keys():
+        import warnings
+
+        warnings.warn(
+            "You tried to manipulate an ASDF internal structure"
+            f" (currently protected: {_PROTECTED_KEYS}",
+            stacklevel=3,
+        )
 
 
 @inherit_docstrings
-class WeldxFile(UserDict):
+class WeldxFile(_ProtectedViewDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
 
     The WeldxFile class makes it easy to work with ASDF files. Creating, validating,
@@ -297,10 +345,8 @@ class WeldxFile(UserDict):
             )
         self._asdf_handle: AsdfFile = asdf_file
 
-        # UserDict interface: we want to store a reference to the tree, but the ctor
-        # of UserDict takes a copy, so we do it manually here.
-        super().__init__()
-        self.data = self._asdf_handle.tree
+        # initialize protected key interface.
+        super().__init__(protected_keys=_PROTECTED_KEYS, data=self._asdf_handle.tree)
 
     def _write_tree(
         self, filename_or_path_like, tree, asdffile_kwargs, write_kwargs, created
@@ -356,7 +402,7 @@ class WeldxFile(UserDict):
             else:
                 generic_file = generic_io.get_file(filename, mode="r")
                 file_type = get_file_type(generic_file)
-                if not file_type == util.FileType.ASDF:
+                if not file_type == FileType.ASDF:
                     raise FileExistsError(
                         f"given file {filename} is not an ASDF file and "
                         "could be overwritten because of read/write mode!"
@@ -467,6 +513,16 @@ class WeldxFile(UserDict):
 
     sync.__doc__ = AsdfFile.update.__doc__
 
+    def keys(self) -> AbstractSet:
+        """Return a set of keys/attributes stored in this file.
+
+        Returns
+        -------
+        KeysView :
+            all keys stored at the root of this file.
+        """
+        return super(WeldxFile, self).keys()
+
     @classmethod
     def fromkeys(cls, iterable, default=None) -> "WeldxFile":
         """Create a new file with keys from iterable and values set to value.
@@ -498,28 +554,6 @@ class WeldxFile(UserDict):
 
         """
         return super().values()
-
-    def keys(self) -> AbstractSet:
-        """Return a set of keys/attributes stored in this file.
-
-        Returns
-        -------
-        KeysView :
-            all keys stored at the root of this file.
-        """
-        return {k for k in super().keys() if k not in _PROTECTED_KEYS}
-
-    def __iter__(self):
-        return (k for k in self.data.keys())
-
-    def __contains__(self, item):
-        return item in self.keys()
-
-    def clear(self):
-        """Remove all data from file."""
-        _protected_data = {k: super().pop(k) for k in _PROTECTED_KEYS}
-        super().clear()
-        super().update(_protected_data)  # re-add protected data.
 
     def get(self, key, default=None):
         """Get data attached to given key from file.
@@ -576,12 +610,7 @@ class WeldxFile(UserDict):
         >>> a["x"], a["z"]
         (-1, 42)
         """
-        _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
-        if any(key in _PROTECTED_KEYS for key in _mapping.keys()):
-            self._warn_protected_keys()
-            _mapping = {k: v for k, v in _mapping.items() if k not in _PROTECTED_KEYS}
-
-        super().update(_mapping)
+        super().update(mapping, **kwargs)
 
     def items(self) -> AbstractSet[Tuple[Any, Any]]:
         """Return a set-like object providing a view on this files items.
@@ -649,25 +678,7 @@ class WeldxFile(UserDict):
         object :
             the last item.
         """
-        for k in self.keys():
-            if k in _PROTECTED_KEYS:
-                continue
-
-            return k, self.pop(k)
-
-        raise KeyError
-
-    def __delitem__(self, key):
-        if key in _PROTECTED_KEYS:
-            self._warn_protected_keys()
-            return
-        super().__delitem__(key)
-
-    def __setitem__(self, key, value):
-        if key in _PROTECTED_KEYS:
-            self._warn_protected_keys()
-            return
-        super().__setitem__(key, value)
+        return super(WeldxFile, self).popitem()
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -887,16 +898,6 @@ class WeldxFile(UserDict):
             if key not in ["asdf_library", "history"]
         }
         asdf.info(tree, max_rows=max_rows, max_cols=max_length, show_values=show_values)
-
-    @staticmethod
-    def _warn_protected_keys():
-        import warnings
-
-        warnings.warn(
-            "You tried to manipulate an ASDF internal structure"
-            f" (currently protected: {_PROTECTED_KEYS}",
-            stacklevel=3,
-        )
 
 
 class _HeaderVisualizer:

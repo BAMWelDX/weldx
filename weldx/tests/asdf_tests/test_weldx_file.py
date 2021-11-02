@@ -517,7 +517,7 @@ class TestWeldXFile:
         protected_key = "asdf_library"
         expected_match = "manipulate an ASDF internal structure"
         warning_type = UserWarning
-        old_lib = self.fh[protected_key]
+        old_lib = self.fh._data[protected_key]
 
         with pytest.warns(warning_type, match=expected_match):
             self.fh.update({protected_key: None})
@@ -526,16 +526,15 @@ class TestWeldXFile:
         with pytest.warns(warning_type, match=expected_match):
             self.fh.pop(protected_key)
         self.fh[protected_key] = NotImplemented
-        assert self.fh[protected_key] == old_lib
+        assert self.fh._data[protected_key] == old_lib
 
     def test_popitem_remain_protected_keys(self):
         keys = []
-        from weldx.asdf.file import _PROTECTED_KEYS
 
-        while len(self.fh) > len(_PROTECTED_KEYS):
+        while len(self.fh):
             key, value = self.fh.popitem()
-        keys.append(key)
-        assert keys
+            keys.append(key)
+        assert keys == ["wx_metadata"]
         # while len(self.fh) >= len(_PROTECTED_KEYS):
         #    item = self.fh.popitem()
         #    print(len(self.fh))
