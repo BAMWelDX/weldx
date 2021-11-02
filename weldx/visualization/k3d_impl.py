@@ -280,8 +280,8 @@ class CoordinateSystemVisualizerK3D:
         lcs = self._lcs
         dims = [d for d in lcs.coordinates.dims if d != "c"]
         if dims:
-            mins = lcs.coordinates.min(dim=dims).values
-            maxs = lcs.coordinates.max(dim=dims).values
+            mins = lcs.coordinates.min(dim=dims)
+            maxs = lcs.coordinates.max(dim=dims)
             return np.vstack([mins, maxs])
         return np.vstack([lcs.coordinates.values, lcs.coordinates.values])
 
