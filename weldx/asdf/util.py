@@ -585,7 +585,7 @@ class _ProtectedViewDict(MutableMapping):
         return {k for k in self._data.keys() if k not in self.protected_keys}
 
     def __iter__(self):
-        return (k for k in self._data.keys())
+        return (k for k in self.keys())
 
     def __contains__(self, item):
         return item in self.keys()
