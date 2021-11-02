@@ -490,9 +490,22 @@ class Time:
             return pd.TimedeltaIndex([self._time])
         return self._time
 
-    def as_data_array(self) -> DataArray:
-        """Return the data as `xarray.DataArray`."""
-        da = xr.DataArray(self._time, coords={"time": self._time}, dims=["time"])
+    def as_data_array(self, timedelta_base: bool = True) -> DataArray:
+        """Return the time data as a `xarray.DataArray` coordinate.
+
+        By default the format is timedelta values with reference time as attribute.
+
+        Parameters
+        ----------
+        timedelta_base
+            If true (the default) the values of the xarray will always be timedeltas.
+
+        """
+        if timedelta_base:
+            t = self.as_timedelta_index()
+        else:
+            t = self._time
+        da = xr.DataArray(t, coords={"time": t}, dims=["time"])
         da.time.attrs["time_ref"] = self.reference_time
         return da
 
