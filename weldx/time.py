@@ -504,7 +504,7 @@ class Time:
         if timedelta_base:
             t = self.as_timedelta_index()
         else:
-            t = self._time
+            t = self.index
         da = xr.DataArray(t, coords={"time": t}, dims=["time"])
         da.time.attrs["time_ref"] = self.reference_time
         return da
