@@ -467,7 +467,7 @@ class TimeSeries(TimeDependent):
         """Interpolate the time series if its data is composed of discrete values."""
         return ut.xr_interp_like(
             self._data,
-            {"time": time.as_timedelta_index()},
+            {"time": time.as_data_array()},
             method=self.interpolation,
             assume_sorted=False,
             broadcast_missing=False,
