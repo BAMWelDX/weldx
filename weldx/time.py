@@ -492,7 +492,8 @@ class Time:
 
     def as_data_array(self) -> DataArray:
         """Return the data as `xarray.DataArray`."""
-        da = xr.DataArray(self._time, coords={"time": self._time}, dims=["time"])
+        time = self.as_pandas_index()
+        da = xr.DataArray(time, coords={"time": time}, dims=["time"])
         da.time.attrs["time_ref"] = self.reference_time
         return da
 
