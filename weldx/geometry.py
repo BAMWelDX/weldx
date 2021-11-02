@@ -2805,5 +2805,5 @@ class SpatialData:
 
     @property
     def additional_dims(self) -> List[str]:
-        """Return a the list of array dimension besides the required 'c' dimension."""
+        """Return the list of array dimension besides the required 'c' dimension."""
         return [str(d) for d in self.coordinates.dims if d != "c"]
