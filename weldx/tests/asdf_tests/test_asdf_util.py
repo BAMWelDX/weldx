@@ -1,4 +1,5 @@
 """tests for asdf utility functions."""
+import io
 from dataclasses import dataclass
 from typing import List
 
@@ -9,6 +10,7 @@ from weldx import WeldxFile
 from weldx.asdf.util import (
     dataclass_serialization_class,
     get_highest_tag_version,
+    get_schema_tree,
     get_yaml_header,
     read_buffer,
     write_buffer,
@@ -50,6 +52,17 @@ def test_get_yaml_header(create_file_and_buffer, index, parse):
     else:
         assert isinstance(header, str)
         assert "asdf_library" in header
+
+
+def test_get_yaml_header_win_eol():
+    """Ensure we can read win and unix line endings with get_yaml_header."""
+    wx = WeldxFile(tree=dict(x=np.arange(20)), mode="rw")  # has binary blocks
+    buff = wx.write_to()
+    native = buff.read()  # could be "\r\n" or "\n"
+    unix = native.replace(b"\r\n", b"\n")
+    win = unix.replace(b"\n", b"\r\n")
+    for b in [native, unix, win]:
+        get_yaml_header(io.BytesIO(b))
 
 
 def _to_yaml_tree_mod(tree):
@@ -167,3 +180,8 @@ def test_get_highest_tag_version():
 
     with pytest.raises(ValueError):
         get_highest_tag_version("asdf://weldx.bam.de/weldx/tags/**-*")
+
+
+def test_get_schema_tree():
+    d = get_schema_tree("single_pass_weld-0.1.0")
+    assert isinstance(d, dict)

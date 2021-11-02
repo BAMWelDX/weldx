@@ -8,13 +8,17 @@
 
 added
 =====
-- `Time.duration` to get the covered duration of the data and `Time.resample`
-  to get a new `Time` instance with resampled time data within the same
-  boundaries as the original object `[#603]
-  <https://github.com/BAMWelDX/weldx/pull/603>`__
 
-- Added `weldx.geometry.SpatialData.limits` to calculate coordinate boundaries.
-  `[#604] <https://github.com/BAMWelDX/weldx/pull/604>`__
+-  `Time.duration` to get the covered duration of the data and
+   `Time.resample` to get a new `Time` instance with resampled time data
+   within the same boundaries as the original object `[#603]
+   <https://github.com/BAMWelDX/weldx/pull/603>`__
+
+-  Added `weldx.geometry.SpatialData.limits` to calculate coordinate
+   boundaries. `[#604] <https://github.com/BAMWelDX/weldx/pull/604>`__
+
+-  Added `weldx.asdf.util.get_schema_tree` utility to display schema
+   files. `[#610] <https://github.com/BAMWelDX/weldx/pull/610>`__
 
 removed
 =======
@@ -22,21 +26,37 @@ removed
 changes
 =======
 
--  All public interfaces of the `weldx.geometry` module classes now require
-   the usage of units and support unit strings as inputs. `[#588]
-   <https://github.com/BAMWelDX/weldx/pull/588>`__
+-  All public interfaces of the `weldx.geometry` module classes now
+   require the usage of units and support unit strings as inputs.
+   `[#588] <https://github.com/BAMWelDX/weldx/pull/588>`__
 
-- `CoordinateSystemManager.time_union` now returns a `Time` instance instead
-  of a pandas type `[#603] <https://github.com/BAMWelDX/weldx/pull/603>`__
+-  `CoordinateSystemManager.time_union` now returns a `Time` instance
+   instead of a pandas type `[#603]
+   <https://github.com/BAMWelDX/weldx/pull/603>`__
+
+-  `SpatialData` now supports time dependent data. `[#612]
+   <https://github.com/BAMWelDX/weldx/pull/612>`__
 
 - `WeldxFile` now hides ASDF added fields like history and asdf_library from the dictionary
   interface. To access these, there are separate properties
   `[#625] <https://github.com/BAMWeldX/weldx/pull/625>`__.
 
+-  Renamed the parameter ``coordinate_system_name`` of
+   `CoordinateSystemManager.assign_data` to ``reference_system`` and
+   added the parameter ``target_system``. If the latter one is not
+   `None`, the data will be transformed and stored at this coordinate
+   system. `[#612] <https://github.com/BAMWelDX/weldx/pull/612>`__
+
+-  improve dimension handling of `SpatialData` `[#622]
+   <https://github.com/BAMWelDX/weldx/pull/622>`__
+
 fixes
 =====
-- fix broken `Time.all_close` to now work as intended `[#603]
-  <https://github.com/BAMWelDX/weldx/pull/603>`__
+
+-  fix broken `Time.all_close` to now work as intended `[#603]
+   <https://github.com/BAMWelDX/weldx/pull/603>`__
+-  fix `weldx.asdf.util.get_yaml_header` to work correctly with windows
+   line endings. `[#609] <https://github.com/BAMWelDX/weldx/pull/609>`__
 
 documentation
 =============
@@ -51,9 +71,14 @@ ASDF
 deprecations
 ============
 
+-  removed ``welding.util.lcs_coords_from_ts`` `[#620]
+   <https://github.com/BAMWelDX/weldx/pull/620>`__
+
 dependencies
 ============
 
+-  adjust code to support pint 0.18 unit formatting. `[#616]
+   <https://github.com/BAMWelDX/weldx/pull/616>`__
 
 ********************
  0.5.0 (12.10.2021)
@@ -862,7 +887,7 @@ added
    object represents a unity transformation step. `[#177]
    <https://github.com/BAMWelDX/weldx/pull/177>`__
 
--  added `welding.util.lcs_coords_from_ts` function `[#199]
+-  added ``welding.util.lcs_coords_from_ts`` function `[#199]
    <https://github.com/BAMWelDX/weldx/pull/199>`__
 
 -  add a tutorial with advanced use case for combining groove

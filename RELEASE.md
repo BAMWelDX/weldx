@@ -10,6 +10,7 @@ A short primer in the steps needed to release a new version of the `weldx` packa
     - [ ] make sure `CHANGELOG.md` is up to date and enter current date to the release version
     - [ ] add summarized release highlights where appropriate
     - [ ] update the `CITATION.cff` version number and date
+    - [ ] search the project for `deprecated` and remove deprecated code
 - [ ] wait for review and the CI jobs to finish
 - [ ] check the readthedocs PR build
 
