@@ -43,6 +43,12 @@ changes
    `None`, the data will be transformed and stored at this coordinate
    system. `[#612] <https://github.com/BAMWelDX/weldx/pull/612>`__
 
+- The `MathematicalExpression` now supports `xarray.DataArray` as
+  parameters. Furthermore, multidimensional parameters of a
+  `MathematicalExpression` that is passed to a `TimeSeries` are
+  no longer required to have an extra dimension that represents time.
+  `[#621] <https://github.com/BAMWelDX/weldx/pull/621>`__
+
 fixes
 =====
 
