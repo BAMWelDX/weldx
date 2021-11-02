@@ -43,6 +43,9 @@ changes
    `None`, the data will be transformed and stored at this coordinate
    system. `[#612] <https://github.com/BAMWelDX/weldx/pull/612>`__
 
+-  improve dimension handling of `SpatialData` `[#622]
+   <https://github.com/BAMWelDX/weldx/pull/622>`__
+
 fixes
 =====
 
