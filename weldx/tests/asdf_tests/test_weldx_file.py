@@ -512,3 +512,28 @@ class TestWeldXFile:
                 return fh.read()
 
         assert _read("test.asdf") == _read("test.wx")
+
+    def test_cannot_update_del_protected_keys(self):
+        protected_key = "asdf_library"
+        expected_match = "manipulate an ASDF internal structure"
+        warning_type = UserWarning
+        old_lib = self.fh[protected_key]
+
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.update({protected_key: None})
+        with pytest.warns(warning_type,
+                              match=expected_match):
+            del self.fh[protected_key]
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.pop(protected_key)
+
+        from weldx.asdf.file import _PROTECTED_KEYS
+        assert len(self.fh) > len(_PROTECTED_KEYS)
+        #while len(self.fh) >= len(_PROTECTED_KEYS):
+        #    item = self.fh.popitem()
+        #    print(len(self.fh))
+        #    #raise
+        self.fh[protected_key] = NotImplemented
+
+        assert self.fh[protected_key] == old_lib
+

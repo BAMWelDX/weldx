@@ -59,6 +59,9 @@ DEFAULT_ARRAY_COMPRESSION = "input"
 DEFAULT_ARRAY_COPYING = True
 """Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
 
+_PROTECTED_KEYS = ("history", "asdf_library", )
+"""These keys are not being set, when a mapping is passed to update an existing file."""
+
 
 @inherit_docstrings
 class WeldxFile(UserDict):
@@ -488,8 +491,9 @@ class WeldxFile(UserDict):
 
     def clear(self):
         """Remove all data from file."""
-        # TODO: we do not want to delete the history, software.
+        _protected_data = {k: super().pop(k) for k in _PROTECTED_KEYS}
         super().clear()
+        super().update(_protected_data)  # re-add protected data.
 
     def get(self, key, default=None):
         """Get data attached to given key from file.
@@ -535,24 +539,23 @@ class WeldxFile(UserDict):
 
         >>> a.update(b, foo="bar")
 
-        # remove asdf meta data for easy comparision
-        >>> del a["asdf_library"], a["history"]
-        >>> a.data
-        {'x': 23, 'y': 0, 'foo': 'bar'}
-
         Or we can update with an iterable of key, value tuples.
         >>> data = [('x', 0), ('y', -1)]
         >>> a.update(data)
-        >>> a.data
-        {'x': 0, 'y': -1, 'foo': 'bar'}
+        >>> a["foo"], a["x"], a["y"]
+        ('bar', 0, -1)
 
         Another possibility is to directly pass keyword arguments.
         >>> a.update(x=-1, z=42)
-        >>> a.data
-        {'x': -1, 'y': -1, 'foo': 'bar', 'z': 42}
+        >>> a["x"], a["z"]
+        (-1, 42)
         """
-        # TODO: we do not want to manipulate the history, software.
-        super().update(mapping, **kwargs)
+        _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
+        if any(key in _PROTECTED_KEYS for key in _mapping.keys()):
+            self._warn_protected_keys()
+            _mapping = {k: v for k, v in _mapping.items() if k not in _PROTECTED_KEYS}
+
+        super().update(_mapping)
 
     def items(self) -> AbstractSet[Tuple[Any, Any]]:
         """Return a set-like object providing a view on this files items.
@@ -604,23 +607,33 @@ class WeldxFile(UserDict):
         >>> "x" not in a.keys()
         True
         """
-        # TODO: we do not want to delete the history, software.
         return super().pop(key, default=default)
 
     def popitem(self) -> Any:
         """Remove the item that was last inserted into the file.
-
-        Notes
-        -----
-        In versions before 3.7, the popitem() method removes a random item.
+        # TODO: this is not true if the file was just loaded from disk, as we do not know in which order the keys were stored.
 
         Returns
         -------
         object :
             the last item.
         """
-        # TODO: we do not want to delete the history, software.
+        if self.keys() == _PROTECTED_KEYS:  # only protected keys left?
+            raise KeyError("empty")
+        # this redirects to __delitem__
         return super().popitem()
+
+    def __delitem__(self, key):
+        if key in _PROTECTED_KEYS:
+            self._warn_protected_keys()
+            return
+        super().__delitem__(key)
+
+    def __setitem__(self, key, value):
+        if key in _PROTECTED_KEYS:
+            self._warn_protected_keys()
+            return
+        super().__setitem__(key, value)
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -694,6 +707,7 @@ class WeldxFile(UserDict):
                 if not overwrite:
                     raise
 
+        # TODO: we could try to optimize this, e.g. avoid the extra copy?
         file = self.write_to(filename_or_file_like)
         wx = WeldxFile(
             file,
@@ -834,6 +848,12 @@ class WeldxFile(UserDict):
             if key not in ["asdf_library", "history"]
         }
         asdf.info(tree, max_rows=max_rows, max_cols=max_length, show_values=show_values)
+
+    @staticmethod
+    def _warn_protected_keys():
+        import warnings
+        warnings.warn("You tried to manipulate an ASDF internal structure"
+                      f" (currently protected: {_PROTECTED_KEYS}", stacklevel=3)
 
 
 class _HeaderVisualizer:
