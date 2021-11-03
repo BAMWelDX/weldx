@@ -1,7 +1,6 @@
 """Utilities for asdf files."""
 
 import io
-from collections.abc import Mapping
 from distutils.version import LooseVersion
 from io import BytesIO
 from pathlib import Path
@@ -613,6 +612,7 @@ class _ProtectedViewDict(MutableMapping):
             f" (currently protected: {self.protected_keys}",
             stacklevel=3,
         )
+
 
 def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
     """Get a dictionary representation of a weldx schema file with custom formatting.
