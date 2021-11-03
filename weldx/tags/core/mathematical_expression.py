@@ -1,3 +1,5 @@
+import warnings
+
 import sympy
 from xarray import DataArray
 
@@ -19,6 +21,8 @@ class MathematicalExpressionConverter(WeldxConverter):
         parameters = {}
         for k, v in obj.parameters.items():
             if isinstance(v, DataArray):
+                if len(v.coords) > 0:
+                    warnings.warn("Coordinates are dropped during serialization.")
                 dims = v.dims
                 v = v.data
                 v.wx_metadata = dict(dims=dims)
