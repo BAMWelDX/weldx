@@ -516,6 +516,7 @@ class TestWeldXFile:
 
     @pytest.mark.parametrize("protected_key", _PROTECTED_KEYS)
     def test_cannot_update_del_protected_keys(self, protected_key):
+        """Ensure we cannot manipulate protected keys."""
         expected_match = "manipulate an ASDF internal structure"
         warning_type = UserWarning
         old_lib = self.fh._data[protected_key]  # obtain key from underlying dict.
@@ -530,6 +531,7 @@ class TestWeldXFile:
         assert self.fh._data[protected_key] == old_lib
 
     def test_popitem_remain_protected_keys(self):
+        """Ensure we cannot manipulate protected keys."""
         keys = []
 
         while len(self.fh):
@@ -542,6 +544,7 @@ class TestWeldXFile:
         assert len(self.fh) == 1
 
     def test_keys_not_in_protected_keys(self):
+        """Protected keys do not show up in keys()."""
         assert self.fh.keys() not in set(_PROTECTED_KEYS)
 
         for x in iter(self.fh):
