@@ -24,7 +24,7 @@ import typing
 import traitlets
 from sphinx.util.logging import getLogger
 
-logger = getLogger("sphinx")
+logger = getLogger("weldx_sphinx_conf")
 
 
 def _workaround_imports_typechecking():
