@@ -2706,8 +2706,9 @@ class SpatialData:
         [[x0,y0,z0],
         [x1,y1,z1]]
         """
-        mins = self.coordinates.values.min(axis=0)
-        maxs = self.coordinates.values.max(axis=0)
+        dims = self.additional_dims
+        mins = self.coordinates.min(dim=dims)
+        maxs = self.coordinates.max(dim=dims)
 
         return np.vstack([mins, maxs])
 
@@ -2801,3 +2802,8 @@ class SpatialData:
     def is_time_dependent(self) -> bool:
         """Return `True` if the coordinates are time dependent."""
         return "time" in self.coordinates.dims
+
+    @property
+    def additional_dims(self) -> List[str]:
+        """Return the list of array dimension besides the required 'c' dimension."""
+        return [str(d) for d in self.coordinates.dims if d != "c"]
