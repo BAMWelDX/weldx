@@ -63,6 +63,7 @@ for f in tutorial_files:
 # todo: Remove
 shutil.copy("./../tutorials/single_pass_weld.wx", tutorials_dir)
 
+
 # -- Project information -----------------------------------------------------
 _now = datetime.datetime.now().year
 
