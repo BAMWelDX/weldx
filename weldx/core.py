@@ -21,13 +21,16 @@ if TYPE_CHECKING:
 __all__ = ["MathematicalExpression", "TimeSeries"]
 
 
+_me_parameter_types = Union[pint.Quantity, str, Tuple[pint.Quantity, str], xr.DataArray]
+
+
 class MathematicalExpression:
     """Mathematical expression using sympy syntax."""
 
     def __init__(
         self,
         expression: Union[sympy.Expr, str],
-        parameters: Dict[str, Union[pint.Quantity, str]] = None,
+        parameters: _me_parameter_types = None,
     ):
         """Construct a MathematicalExpression.
 
@@ -45,23 +48,14 @@ class MathematicalExpression:
         if not isinstance(expression, sympy.Expr):
             expression = sympy.sympify(expression)
         self._expression = expression
+
         self.function = sympy.lambdify(
             tuple(self._expression.free_symbols), self._expression, "numpy"
         )
-        self._parameters = {}
+
+        self._parameters: Union[pint.Quantity, xr.DataArray] = {}
         if parameters is not None:
-            if not isinstance(parameters, dict):
-                raise ValueError(
-                    f'"parameters" must be dictionary, got {type(parameters)}'
-                )
-            parameters = {k: Q_(v) for k, v in parameters.items()}
-            variable_names = self.get_variable_names()
-            for key in parameters:
-                if key not in variable_names:
-                    raise ValueError(
-                        f'The expression does not have a parameter "{key}"'
-                    )
-            self._parameters = parameters
+            self.set_parameters(parameters)
 
     def __repr__(self):
         """Give __repr__ output."""
@@ -156,14 +150,30 @@ class MathematicalExpression:
             Parameter value. This can be number, array or pint.Quantity
 
         """
-        if not isinstance(name, str):
-            raise TypeError(f'Parameter "name" must be a string, got {type(name)}')
-        if name not in str(self._expression.free_symbols):
-            raise ValueError(
-                f'The expression "{self._expression}" does not have a '
-                f'parameter with name "{name}".'
-            )
-        self._parameters[name] = value
+        self.set_parameters({name: value})
+
+    def set_parameters(self, params: _me_parameter_types):
+        """Set the expressions parameters.
+
+        Parameters
+        ----------
+        params:
+            Dictionary that contains the values for the specified parameters.
+
+        """
+        if not isinstance(params, dict):
+            raise ValueError(f'"parameters" must be dictionary, got {type(params)}')
+
+        variable_names = [str(v) for v in self._expression.free_symbols]
+
+        for k, v in params.items():
+            if k not in variable_names:
+                raise ValueError(f'The expression does not have a parameter "{k}"')
+            if isinstance(v, tuple):
+                v = xr.DataArray(v[0], dims=v[1])
+            if not isinstance(v, xr.DataArray):
+                v = Q_(v)
+            self._parameters[k] = v
 
     @property
     def num_parameters(self):
@@ -247,8 +257,18 @@ class MathematicalExpression:
             raise ValueError(
                 f"The variables {intersection} are already defined as parameters."
             )
-        inputs = {**kwargs, **self._parameters}
-        return self.function(**inputs)
+
+        variables = {
+            k: v if isinstance(v, xr.DataArray) else xr.DataArray(Q_(v))
+            for k, v in kwargs.items()
+        }
+
+        parameters = {
+            k: v if isinstance(v, xr.DataArray) else xr.DataArray(v)
+            for k, v in self._parameters.items()
+        }
+
+        return self.function(**variables, **parameters)
 
 
 # TimeSeries ---------------------------------------------------------------------------
@@ -369,6 +389,8 @@ class TimeSeries(TimeDependent):
     def _create_data_array(
         data: Union[pint.Quantity, xr.DataArray], time: Time
     ) -> xr.DataArray:
+        if isinstance(data, xr.DataArray):
+            return data
         return (
             xr.DataArray(data=data)
             .rename({"dim_0": "time"})
@@ -417,7 +439,7 @@ class TimeSeries(TimeDependent):
         # check that the expression can be evaluated with a time quantity
         time_var_name = data.get_variable_names()[0]
         try:
-            eval_data = data.evaluate(**{time_var_name: Q_(1, "second")})
+            eval_data = data.evaluate(**{time_var_name: Q_(1, "second")}).data
             self._units = eval_data.units
             if np.iterable(eval_data):
                 self._shape = eval_data.shape
@@ -451,7 +473,7 @@ class TimeSeries(TimeDependent):
         """Interpolate the time series if its data is composed of discrete values."""
         return ut.xr_interp_like(
             self._data,
-            {"time": time.as_timedelta()},
+            {"time": time.as_data_array()},
             method=self.interpolation,
             assume_sorted=False,
             broadcast_missing=False,
@@ -460,20 +482,14 @@ class TimeSeries(TimeDependent):
     def _interp_time_expression(self, time: Time, time_unit: str) -> xr.DataArray:
         """Interpolate the time series if its data is a mathematical expression."""
         time_q = time.as_quantity(unit=time_unit)
+        if len(time_q.shape) == 0:
+            time_q = np.expand_dims(time_q, 0)
 
-        if len(self.shape) > 1 and np.iterable(time_q):
-            while len(time_q.shape) < len(self.shape):
-                time_q = time_q[:, np.newaxis]
+        time_xr = xr.DataArray(time_q, dims=["time"])
 
         # evaluate expression
-        data = self._data.evaluate(**{self._time_var_name: time_q})
-        data = data.astype(float).to_reduced_units()  # float conversion before reduce!
-
-        # create data array
-        if not np.iterable(data):  # make sure quantity is not scalar value
-            data = np.expand_dims(data, 0)
-
-        return self._create_data_array(data, time)
+        data = self._data.evaluate(**{self._time_var_name: time_xr})
+        return data.assign_coords({"time": time.as_data_array()})
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
@@ -603,10 +619,11 @@ class TimeSeries(TimeDependent):
 
         if isinstance(self._data, xr.DataArray):
             dax = self._interp_time_discrete(time_interp)
+            ts = TimeSeries(data=dax.data, time=time, interpolation=self.interpolation)
         else:
             dax = self._interp_time_expression(time_interp, time_unit)
+            ts = TimeSeries(data=dax, interpolation=self.interpolation)
 
-        ts = TimeSeries(data=dax.data, time=time, interpolation=self.interpolation)
         ts._interp_counter = self._interp_counter + 1
         return ts
 

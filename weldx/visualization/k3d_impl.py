@@ -111,6 +111,7 @@ class CoordinateSystemVisualizerK3D:
         show_origin=True,
         show_trace=True,
         show_vectors=True,
+        vector_scale=2.5,
     ):
         """Create a `CoordinateSystemVisualizerK3D`.
 
@@ -138,13 +139,17 @@ class CoordinateSystemVisualizerK3D:
         coordinates, orientation = _get_coordinates_and_orientation(lcs)
         self._lcs = lcs
         self._color = color
+        self._vector_scale = vector_scale
 
         self._vectors = k3d.vectors(
             origins=[coordinates for _ in range(3)],
-            vectors=orientation.transpose(),
+            vectors=orientation.transpose() * self._vector_scale,
+            line_width=0.05,
+            head_size=3.0,
             colors=[[RGB_RED, RGB_RED], [RGB_GREEN, RGB_GREEN], [RGB_BLUE, RGB_BLUE]],
             labels=[],
             label_size=1.5,
+            name=name if name is None else f"{name} (vectors)",
         )
         self._vectors.visible = show_vectors
 
@@ -156,13 +161,15 @@ class CoordinateSystemVisualizerK3D:
                 color=self._color,
                 size=1,
                 label_box=False,
+                name=name if name is None else f"{name} (text)",
             )
 
         self._trace = k3d.line(
             np.array(lcs.coordinates.values, dtype="float32"),  # type: ignore
-            shader="simple",
-            width=0.05,
+            shader="thick",
+            width=0.1,  # change with .set_trait("width", value)
             color=color,
+            name=name if name is None else f"{name} (line)",
         )
         self._trace.visible = show_trace
 
@@ -190,7 +197,7 @@ class CoordinateSystemVisualizerK3D:
 
         """
         self._vectors.origins = [coordinates for _ in range(3)]
-        self._vectors.vectors = orientation.transpose()
+        self._vectors.vectors = orientation.transpose() * self._vector_scale
         self.origin.model_matrix = _create_model_matrix(coordinates, orientation)
         if self._label is not None:
             self._label.position = coordinates + 0.05
@@ -271,9 +278,10 @@ class CoordinateSystemVisualizerK3D:
 
     def limits(self):
         lcs = self._lcs
-        if "time" in lcs.coordinates.dims:
-            mins = lcs.coordinates.values.min(axis=0)
-            maxs = lcs.coordinates.values.max(axis=0)
+        dims = [d for d in lcs.coordinates.dims if d != "c"]
+        if dims:
+            mins = lcs.coordinates.min(dim=dims)
+            maxs = lcs.coordinates.max(dim=dims)
             return np.vstack([mins, maxs])
         return np.vstack([lcs.coordinates.values, lcs.coordinates.values])
 
@@ -325,14 +333,14 @@ class SpatialDataVisualizer:
                 colors = data.attributes[color]
             color = RGB_GREY
 
-        if not data.coordinates.dtype == "float32":
-            data.coordinates = data.coordinates.astype(np.float32)
-        if (data.triangles is not None) and (not data.triangles.dtype == "uint32"):
-            data.coordinates = data.coordinates.astype(np.uint32)
+        if data.triangles is not None:
+            triangles = data.triangles.astype(np.uint32)
+        else:
+            triangles = None
 
         self._reference_system = reference_system
 
-        self._label_pos = np.mean(data.coordinates.values, axis=0)
+        self._label_pos = data.coordinates.mean(dim=data.additional_dims).values
         self._label = None
         if name is not None:
             self._label = k3d.text(
@@ -342,19 +350,26 @@ class SpatialDataVisualizer:
                 color=color,
                 size=0.5,
                 label_box=True,
+                name=name if name is None else f"{name} (text)",
             )
 
-        self._points = k3d.points(data.coordinates, point_size=0.05, color=color)
+        self._points = k3d.points(
+            data.coordinates,
+            point_size=0.05,
+            color=color,
+            name=name if name is None else f"{name} (points)",
+        )
         self._mesh = None
         if data.triangles is not None:
             self._mesh = k3d.mesh(
-                data.coordinates,
-                data.triangles,
+                data.coordinates.values.astype(np.float32).reshape(-1, 3),
+                triangles,
                 side="double",
                 color=color,
                 attribute=colors,
                 color_map=k3d.colormaps.matplotlib_color_maps.Viridis,
                 wireframe=show_wireframe,
+                name=name if name is None else f"{name} (mesh)",
             )
 
         self.set_visualization_method(visualization_method)
@@ -586,6 +601,7 @@ class CoordinateSystemManagerVisualizerK3D:
                 is_html=True,
                 size=1.0,
                 reference_point="lb",
+                name="timeline",
             )
             plot += self._time_info
 

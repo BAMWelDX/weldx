@@ -546,7 +546,7 @@ class MeasurementChain:
                     "The provided function is incompatible with the input signals unit."
                     f" \nThe test raised the following exception:\n{e}"
                 )
-            return test_output.units
+            return test_output.data.units
 
         return input_unit
 

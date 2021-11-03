@@ -1,4 +1,5 @@
 """Utilities for asdf files."""
+import io
 from collections.abc import Mapping
 from distutils.version import LooseVersion
 from io import BytesIO
@@ -17,13 +18,11 @@ from boltons.iterutils import get_path, remap
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
 from weldx.types import (
-    SupportsFileReadOnly,
     SupportsFileReadWrite,
     types_file_like,
     types_path_and_file_like,
     types_path_like,
 )
-from weldx.util import deprecated
 
 _USE_WELDX_FILE = False
 _INVOKE_SHOW_HEADER = False
@@ -231,36 +230,32 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     """
 
     def read_header(handle):
-        # reads lines until the byte string "...\n" is approached.
-        return b"".join(iter(handle.readline, b"...\n"))
+        # reads lines until the line "...\n" is reached.
+        def readline_replace_eol():
+            line = handle.readline()
+            if (not line) or (line in {b"...\n", b"...\r\n"}):
+                raise StopIteration
+            return line
 
-    if isinstance(file, SupportsFileReadWrite):
-        file.seek(0)
-        code = read_header(file)
-    elif isinstance(file, SupportsFileReadOnly):
+        return b"".join(iter(readline_replace_eol, None))
+
+    if isinstance(file, types_file_like.__args__):
+        if isinstance(file, io.TextIOBase):
+            raise ValueError(
+                "cannot read files opened in text mode. " "Please open in binary mode."
+            )
+        if isinstance(file, SupportsFileReadWrite):
+            file.seek(0)
         code = read_header(file)
     elif isinstance(file, types_path_like.__args__):
         with open(file, "rb") as f:
             code = read_header(f)
+    else:
+        raise TypeError(f"cannot read yaml header from {type(file)}.")
 
     if parse:
         return asdf.yamlutil.load_tree(code)
     return code.decode("utf-8")
-
-
-@deprecated("0.4.0", "0.5.0", " _write_buffer was renamed to write_buffer")
-def _write_buffer(*args, **kwargs):
-    return write_buffer(*args, **kwargs)
-
-
-@deprecated("0.4.0", "0.5.0", " _read_buffer was renamed to read_buffer")
-def _read_buffer(*args, **kwargs):
-    return read_buffer(*args, **kwargs)
-
-
-@deprecated("0.4.0", "0.5.0", " _write_read_buffer was renamed to write_read_buffer")
-def _write_read_buffer(*args, **kwargs):
-    return write_read_buffer(*args, **kwargs)
 
 
 def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
@@ -345,12 +340,6 @@ def view_tree(file: types_path_and_file_like, path: Tuple = None, **kwargs):
         yaml_dict = get_path(yaml_dict, path)
     kwargs["root"] = root
     return JSON(yaml_dict, **kwargs)
-
-
-@deprecated("0.4.0", "0.5.0", " asdf_json_repr was renamed to view_tree")
-def asdf_json_repr(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
-    """See `view_tree` function."""
-    return view_tree(file, path, **kwargs)
 
 
 def _fullname(obj):

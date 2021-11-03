@@ -753,3 +753,34 @@ class TestGraph:
 
         assert all(e in g.edges for e in g2.edges)
         assert all(n in g.nodes for n in g2.nodes)
+
+
+# --------------------------------------------------------------------------------------
+# MathematicalExpression
+# --------------------------------------------------------------------------------------
+
+
+class TestMathematicalExpression:
+    @staticmethod
+    @pytest.mark.parametrize(
+        "a, b",
+        [
+            (Q_([1, 2, 3], "m"), Q_([4, 5, 6], "m")),
+            (
+                xr.DataArray(Q_([1, 2], "m"), dims=["a"]),
+                xr.DataArray(Q_([3, 4], "m"), dims=["b"]),
+            ),
+            (
+                Q_([1, 2], "m"),
+                xr.DataArray(Q_([3, 4], "m"), dims=["b"]),
+            ),
+        ],
+    )
+    def test_parameters(a, b):
+        expression = "a*x + b"
+        parameters = dict(a=a, b=b)
+
+        me = ME(expression, parameters)
+        me_2 = write_read_buffer({"me": me})["me"]
+
+        assert me == me_2
