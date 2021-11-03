@@ -46,6 +46,12 @@ changes
 -  improve dimension handling of `SpatialData` `[#622]
    <https://github.com/BAMWelDX/weldx/pull/622>`__
 
+- The `MathematicalExpression` now supports `xarray.DataArray` as
+  parameters. Furthermore, multidimensional parameters of a
+  `MathematicalExpression` that is passed to a `TimeSeries` are
+  no longer required to have an extra dimension that represents time.
+  `[#621] <https://github.com/BAMWelDX/weldx/pull/621>`__
+
 fixes
 =====
 

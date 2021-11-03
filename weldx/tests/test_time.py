@@ -680,7 +680,7 @@ class TestTime:
         assert np.all(time_q == Q_(range(10), "s"))
         assert time_q.time_ref == ts
 
-        arr2 = time.as_data_array().weldx.time_ref_restore()
+        arr2 = time.as_data_array()
         assert arr.time.identical(arr2.time)
 
     # test_duration --------------------------------------------------------------------
