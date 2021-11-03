@@ -1,8 +1,7 @@
 """Utilities for asdf files."""
 
-import io
 from distutils.version import LooseVersion
-from io import BytesIO
+from io import BytesIO, TextIOBase
 from pathlib import Path
 from typing import (
     Any,
@@ -22,7 +21,7 @@ from warnings import warn
 import asdf
 from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
-from asdf.extension._extension import Extension
+from asdf.extension import Extension
 from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
@@ -49,7 +48,6 @@ __all__ = [
     "view_tree",
     "notebook_fileprinter",
     "dataclass_serialization_class",
-    "_PROTECTED_KEYS",
 ]
 
 
@@ -253,7 +251,7 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
         return b"".join(iter(readline_replace_eol, None))
 
     if isinstance(file, types_file_like.__args__):
-        if isinstance(file, io.TextIOBase):
+        if isinstance(file, TextIOBase):
             raise ValueError(
                 "cannot read files opened in text mode. " "Please open in binary mode."
             )
