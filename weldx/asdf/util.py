@@ -4,8 +4,19 @@ import io
 from distutils.version import LooseVersion
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Type, Union, MutableMapping, \
-    AbstractSet, Mapping, Hashable
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Tuple,
+    Type,
+    Union,
+    MutableMapping,
+    AbstractSet,
+    Mapping,
+    Hashable,
+)
 from warnings import warn
 
 import asdf
@@ -38,7 +49,7 @@ __all__ = [
     "view_tree",
     "notebook_fileprinter",
     "dataclass_serialization_class",
-    "_PROTECTED_KEYS"
+    "_PROTECTED_KEYS",
 ]
 
 
@@ -584,8 +595,9 @@ class _ProtectedViewDict(MutableMapping):
         _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
         if any(key in self.protected_keys for key in _mapping.keys()):
             self._warn_protected_keys()
-            _mapping = {k: v for k, v in _mapping.items()
-                        if k not in self.protected_keys}
+            _mapping = {
+                k: v for k, v in _mapping.items() if k not in self.protected_keys
+            }
 
         self._data.update(_mapping)
 
@@ -714,4 +726,3 @@ def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
     remapped = remap(remapped, visit=drop_properties)
 
     return remapped[0]
-

@@ -15,7 +15,8 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
-    Union, Hashable,
+    Union,
+    Hashable,
 )
 
 import asdf
@@ -25,13 +26,20 @@ from asdf.tags.core import Software
 from asdf.util import get_file_type, FileType
 from jsonschema import ValidationError
 
-from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree, \
-    _ProtectedViewDict
+from weldx.asdf.util import (
+    get_schema_path,
+    get_yaml_header,
+    view_tree,
+    _ProtectedViewDict,
+)
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 from weldx.util import inherit_docstrings, is_interactive_session, is_jupyterlab_session
 
 __all__ = [
     "WeldxFile",
+    "DEFAULT_ARRAY_COMPRESSION",
+    "DEFAULT_ARRAY_COPYING",
+    "_PROTECTED_KEYS",
 ]
 
 
