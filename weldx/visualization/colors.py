@@ -12,6 +12,7 @@ RGB_GREEN = 0x00AA00
 RGB_MAGENTA = 0xFF00FF
 RGB_RED = 0xFF0000
 RGB_YELLOW = 0xAAAA00
+RGB_GREY = 0x999999
 
 
 def _color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
@@ -222,7 +223,7 @@ def get_color(
     """
     if color_dict is not None and key in color_dict:
         value = color_dict[key]
-        if isinstance(value, int):
+        if isinstance(value, (int, str)):
             return value
         return _color_rgb_to_int(value)
     try:

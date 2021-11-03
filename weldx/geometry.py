@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import copy
 import math
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
@@ -16,6 +16,7 @@ import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.time import Time
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -2515,28 +2516,26 @@ class Geometry:
 @ut.dataclass_nested_eq
 @dataclass
 class SpatialData:
-    """Represent 3D point cloud data with optional triangulation.
-
-    Parameters
-    ----------
-    coordinates
-        3D array of point data.
-    triangles
-        3D Array of triangulation connectivity
-    attributes
-        optional dictionary with additional attributes to store alongside data
-
-    """
+    """Represent 3D point cloud data with optional triangulation."""
 
     coordinates: DataArray
+    """3D array of point data.
+        The expected array dimension order is [("time"), "n", "c"]."""
     triangles: np.ndarray = None
+    """3D Array of triangulation connectivity.
+        Shape should be [time * n, 3]."""
     attributes: Dict[str, np.ndarray] = None
+    """optional dictionary with additional attributes to store alongside data."""
+    time: InitVar[Time] = None
+    """Time axis if data is time dependent."""
 
-    def __post_init__(self):
+    def __post_init__(self, time):
         """Convert and check input values."""
         if not isinstance(self.coordinates, DataArray):
-            self.coordinates = DataArray(
-                self.coordinates, dims=["n", "c"], coords={"c": ["x", "y", "z"]}
+            self.coordinates = ut.xr_3d_vector(
+                data=np.array(self.coordinates),
+                time=time,
+                add_dims=["n"],
             )
 
         if self.triangles is not None:
@@ -2700,12 +2699,18 @@ class SpatialData:
 
         return SpatialData(points, triangles)
 
-    def limits(self) -> List[Tuple[float, float]]:
-        """Get the xyz limits of the coordinates."""
-        return [
-            (self.coordinates.values[:, i].min(), self.coordinates.values[:, i].max())
-            for i in range(3)
-        ]
+    def limits(self) -> np.ndarray:
+        """Get the xyz limits of the coordinates.
+
+        Array format:
+        [[x0,y0,z0],
+        [x1,y1,z1]]
+        """
+        dims = self.additional_dims
+        mins = self.coordinates.min(dim=dims)
+        maxs = self.coordinates.max(dim=dims)
+
+        return np.vstack([mins, maxs])
 
     def plot(
         self,
@@ -2759,24 +2764,23 @@ class SpatialData:
         import weldx.visualization as vs
 
         if backend == "k3d":
-            from weldx.visualization.k3d_impl import limited_plot
+            import k3d
 
-            plot = limited_plot(limits)
-            if color is None:
-                color = 0x999999
+            limits = tuple(self.limits().flatten())
+            plot = k3d.plot(grid=limits)
             vs.SpatialDataVisualizer(
                 self, name=None, reference_system=None, color=color, plot=plot
             )
-            plot.display()
-        else:
-            return vs.plot_spatial_data_matplotlib(
-                data=self,
-                axes=axes,
-                color=color,
-                label=label,
-                limits=limits,
-                show_wireframe=show_wireframe,
-            )
+            return plot
+
+        return vs.plot_spatial_data_matplotlib(
+            data=self,
+            axes=axes,
+            color=color,
+            label=label,
+            limits=limits,
+            show_wireframe=show_wireframe,
+        )
 
     def to_file(self, file_name: Union[str, Path]):
         """Write spatial data into a file.
@@ -2793,3 +2797,13 @@ class SpatialData:
             points=self.coordinates.data, cells={"triangle": self.triangles}
         )
         mesh.write(file_name)
+
+    @property
+    def is_time_dependent(self) -> bool:
+        """Return `True` if the coordinates are time dependent."""
+        return "time" in self.coordinates.dims
+
+    @property
+    def additional_dims(self) -> List[str]:
+        """Return the list of array dimension besides the required 'c' dimension."""
+        return [str(d) for d in self.coordinates.dims if d != "c"]
