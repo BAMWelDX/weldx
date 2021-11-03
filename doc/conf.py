@@ -313,13 +313,13 @@ intersphinx_mapping = {
 
 nitpick_ignore = []
 
-with open("nitpick_ignore") as fh:
-    for line in fh.readline():
-        if line.strip() == "" or line.startswith("#"):
-            continue
-        dtype, target = line.split(None, 1)
-        target = target.strip()
-        nitpick_ignore.append((dtype, target))
+for line in (fh := open("nitpick_ignore")):
+    if line.strip() == "" or line.startswith("#"):
+        continue
+    dtype, target = line.split(None, 1)
+    target = target.strip()
+    nitpick_ignore.append((dtype, target))
+fh.close()
 
 # Enable better object linkage ---------------------------------------------------------
 
