@@ -52,7 +52,7 @@ class MathematicalExpression:
             tuple(self._expression.free_symbols), self._expression, "numpy"
         )
 
-        self._parameters: _me_parameter_types = {}
+        self._parameters: Union[pint.Quantity, xr.DataArray] = {}
         if parameters is not None:
             self.set_parameters(parameters)
 
