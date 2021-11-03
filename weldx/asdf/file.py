@@ -33,7 +33,8 @@ from weldx.asdf.util import (
     _ProtectedViewDict,
 )
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
-from weldx.util import inherit_docstrings, is_interactive_session, is_jupyterlab_session
+from weldx.util import inherit_docstrings, is_interactive_session, \
+    is_jupyterlab_session, deprecated
 
 __all__ = [
     "WeldxFile",
@@ -785,8 +786,9 @@ class WeldxFile(_ProtectedViewDict):
         return fd
 
     @property
+    @deprecated(since="0.5.1", removed="0.6", message="Please do not use this anymore.")
     def data(self):
-        raise NotImplementedError
+        return self._data
 
     def show_asdf_header(
         self, use_widgets: bool = None, _interactive: Optional[bool] = None
