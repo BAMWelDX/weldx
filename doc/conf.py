@@ -69,7 +69,7 @@ def download_tutorial_input_file():
     from urllib.request import urlretrieve
 
     # TODO: should we prefer a tagged version here?
-    url = "https://github.com/BAMWelDX/IIW2021_AA_CXII/blob/main/single_pass_weld.weldx?raw=true"
+    url = "https://github.com/BAMWelDX/IIW2021_AA_CXII/blob/weldx_0.5.0/single_pass_weld.weldx?raw=true"
     sha256sum = "29e4f11ef1185f818b4611860842ef52d386ad2866a2680257950f160e1e098a"
 
     def hash_path(path):
