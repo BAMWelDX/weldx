@@ -533,7 +533,7 @@ class TestWeldXFile:
         keys = []
 
         while len(self.fh):
-            key, value = self.fh.popitem()
+            key, _ = self.fh.popitem()
             keys.append(key)
         assert keys == ["wx_metadata"]
 
