@@ -510,7 +510,7 @@ class WeldxFile(_ProtectedViewDict):
         """
         return super().get(key, default=default)
 
-    def update(self, mapping: Union[Mapping, Iterable] = (), **kwargs):
+    def update(self, mapping: Union[Mapping, Iterable] = (), **kwargs: Any):
         """Update this file from mapping or iterable mapping and kwargs.
 
         Parameters
