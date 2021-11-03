@@ -34,7 +34,7 @@ class MathematicalExpressionConverter(WeldxConverter):
             if hasattr(v, "wx_metadata"):
                 dims = v.wx_metadata["dims"]
                 delattr(v, "wx_metadata")
-                v = DataArray(v, dims=dims)
+                v = (v, dims)
             parameters[k] = v
 
         return MathematicalExpression(

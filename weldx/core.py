@@ -20,13 +20,16 @@ if TYPE_CHECKING:
 __all__ = ["MathematicalExpression", "TimeSeries"]
 
 
+_me_parameter_types = Union[pint.Quantity, str, Tuple[pint.Quantity, str], xr.DataArray]
+
+
 class MathematicalExpression:
     """Mathematical expression using sympy syntax."""
 
     def __init__(
         self,
         expression: Union[sympy.Expr, str],
-        parameters: Dict[str, Union[pint.Quantity, str]] = None,
+        parameters: _me_parameter_types = None,
     ):
         """Construct a MathematicalExpression.
 
@@ -49,7 +52,7 @@ class MathematicalExpression:
             tuple(self._expression.free_symbols), self._expression, "numpy"
         )
 
-        self._parameters: Dict[str, Union[pint.Quantity, xr.DataArray]] = {}
+        self._parameters: _me_parameter_types = {}
         if parameters is not None:
             self.set_parameters(parameters)
 
@@ -148,7 +151,7 @@ class MathematicalExpression:
         """
         self.set_parameters({name: value})
 
-    def set_parameters(self, params: Dict[str, Union[pint.Quantity, xr.DataArray]]):
+    def set_parameters(self, params: _me_parameter_types):
         """Set the expressions parameters.
 
         Parameters
@@ -165,6 +168,8 @@ class MathematicalExpression:
         for k, v in params.items():
             if k not in variable_names:
                 raise ValueError(f'The expression does not have a parameter "{k}"')
+            if isinstance(v, tuple):
+                v = xr.DataArray(v[0], dims=v[1])
             if not isinstance(v, xr.DataArray):
                 v = Q_(v)
             self._parameters[k] = v
