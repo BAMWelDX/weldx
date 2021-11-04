@@ -78,10 +78,8 @@ class LocalCoordinateSystem(TimeDependent):
         # warn about dropped time data
         if (
             time is not None
-            and "time" not in orientation.coords
-            and (
-                isinstance(coordinates, TimeSeries) or "time" not in coordinates.coords
-            )
+            and "time" not in orientation.dims
+            and (isinstance(coordinates, TimeSeries) or "time" not in coordinates.dims)
         ):
             warnings.warn(
                 "Provided time is dropped because of the given coordinates and "
@@ -382,8 +380,8 @@ class LocalCoordinateSystem(TimeDependent):
         """Unify time axis of orientation and coordinates if both are DataArrays."""
         if (
             not isinstance(coordinates, TimeSeries)
-            and ("time" in orientation.coords)
-            and ("time" in coordinates.coords)
+            and ("time" in orientation.dims)
+            and ("time" in coordinates.dims)
             and (not np.all(orientation.time.data == coordinates.time.data))
         ):
             time_union = Time.union([orientation.time, coordinates.time])
