@@ -548,7 +548,7 @@ class LocalCoordinateSystem(TimeDependent):
             `True` if the coordinate system is time dependent, `False` otherwise.
 
         """
-        return self.time is not None or self._coord_ts is not None
+        return self._coord_ts is not None or ("time" in self._dataset.dims)
 
     @property
     def has_timeseries(self) -> bool:
@@ -667,9 +667,9 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" not in self.orientation.dims:  # don't interpolate static
             return self.orientation
         if time.max() <= self.time.min():  # only use edge timestamp
-            return self.orientation.values[0]
+            return self.orientation.isel(time=0)
         if time.min() >= self.time.max():  # only use edge timestamp
-            return self.orientation.values[-1]
+            return self.orientation.isel(time=-1)
         # full interpolation with overlapping times
         return ut.xr_interp_orientation_in_time(self.orientation, time)
 
@@ -686,9 +686,9 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" not in self.coordinates.dims:  # don't interpolate static
             return self.coordinates
         if time.max() <= self.time.min():  # only use edge timestamp
-            return self.coordinates[0]
+            return self.coordinates.isel(time=0)
         if time.min() >= self.time.max():  # only use edge timestamp
-            return self.coordinates[-1]
+            return self.coordinates.isel(time=-1)
         # full interpolation with overlapping times
         return ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
