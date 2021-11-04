@@ -22,5 +22,11 @@ sphinx:
 # Optionally set the version of Python and requirements required to build your docs
 #build:
 #  image: testing
+
+build:
+  os: "ubuntu-20.04"
+  tools:
+    python: "mambaforge-4.10"
+
 conda:
   environment: doc/rtd_environment.yml
