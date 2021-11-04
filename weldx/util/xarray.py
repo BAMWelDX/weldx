@@ -620,7 +620,7 @@ def xr_interp_orientation_in_time(
         Interpolated data
 
     """
-    if "time" not in da.dims:
+    if "time" not in da.coords:
         return da
     if len(da.time) == 1:  # remove "time dimension" for static case
         return da.isel({"time": 0})
@@ -677,7 +677,7 @@ def xr_interp_coordinates_in_time(
         Interpolated data
 
     """
-    if "time" not in da.dims:
+    if "time" not in da.coords:
         return da
 
     times = Time(times).as_pandas_index()
@@ -734,7 +734,7 @@ class WeldxAccessor:
     def time_ref_restore(self) -> xr.DataArray:
         """Convert DatetimeIndex back to TimedeltaIndex + reference Timestamp."""
         da = self._obj.copy()
-        if "time" not in da.dims:
+        if "time" not in da.coords:
             return da
 
         if is_datetime64_dtype(da.time):
@@ -757,7 +757,7 @@ class WeldxAccessor:
     def time_ref(self) -> Union[pd.Timestamp, None]:
         """Get the time_ref value or `None` if not set."""
         da = self._obj
-        if "time" in da.dims and "time_ref" in da.time.attrs:
+        if "time" in da.coords and "time_ref" in da.time.attrs:
             return da.time.attrs["time_ref"]
 
         return None

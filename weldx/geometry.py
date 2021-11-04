@@ -2801,7 +2801,7 @@ class SpatialData:
     @property
     def is_time_dependent(self) -> bool:
         """Return `True` if the coordinates are time dependent."""
-        return "time" in self.coordinates.dims
+        return "time" in self.coordinates.coords
 
     @property
     def additional_dims(self) -> List[str]:
