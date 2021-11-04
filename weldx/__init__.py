@@ -37,8 +37,6 @@ These classes and functions are used to define welding processes.
     :caption: Data handling and transformation
     :template: class-template.rst
 
-    Q_
-    U_
     Time
     TimeSeries
     MathematicalExpression
