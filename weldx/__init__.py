@@ -118,7 +118,7 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 # constants - should be imported first, no internal weldx deps
-from .constants import Q_, U_
+from weldx.constants import Q_, U_
 
 # main modules
 import weldx.time
