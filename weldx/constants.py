@@ -31,7 +31,7 @@ Q_.__doc__ = """Create a quantity from a scalar or array.
 
 The quantity class supports lots of physical units and will combine them during
 mathematical operations.
-For extended details on working with quantities, please see the
+For details on working with quantities and units, please see the
 `pint documentation <https://pint.readthedocs.io/>`_
 
 Examples
@@ -57,7 +57,10 @@ __test__ = {"Q": Q_.__doc__}  # enable doctest checking.
 
 U_ = WELDX_UNIT_REGISTRY.Unit
 U_.__name__ = "U_"
-U_.__module__ = "pint.unit"  # skipcq: PYL-W0212
+# U_.__module__ = "pint.unit"  # skipcq: PYL-W0212
+U_.__doc__ = """For details on working with quantities and units, please see the
+`pint documentation <https://pint.readthedocs.io/>`_
+"""
 
 
 __all__ = (
