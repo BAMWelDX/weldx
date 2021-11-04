@@ -23,7 +23,9 @@ jobs:
     if: |
       (github.event.pull_request.draft == false) ||
       (github.event_name == 'workflow_dispatch') ||
-      (github.ref == 'refs/heads/master')
+      (github.ref == 'refs/heads/master') ||
+      startsWith(github.ref, 'refs/tags/') ||
+      (github.event_name == 'release' && github.event.action == 'created')
     name: conda build
     runs-on: ubuntu-latest
     steps:
@@ -66,7 +68,9 @@ jobs:
   pypi:
     if: |
       (github.event.pull_request.draft == false) ||
-      (github.event_name == 'workflow_dispatch')
+      (github.event_name == 'workflow_dispatch') ||
+      startsWith(github.ref, 'refs/tags/') ||
+      (github.event_name == 'release' && github.event.action == 'created')
     name: pypi build
     runs-on: ubuntu-latest
     steps:
