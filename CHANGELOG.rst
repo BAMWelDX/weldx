@@ -3,6 +3,37 @@
 ###############
 
 ********************
+ 0.X.X (unreleased)
+********************
+
+added
+=====
+
+removed
+=======
+
+changes
+=======
+
+fixes
+=====
+
+documentation
+=============
+
+ASDF
+====
+
+deprecations
+============
+
+dependencies
+============
+
+-  Removed ``ipykernel`` dependency. `[#634]
+   <https://github.com/BAMWelDX/weldx/pull/634>`__
+
+********************
  0.5.1 (04.11.2021)
 ********************
 
