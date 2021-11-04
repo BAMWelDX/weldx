@@ -26,7 +26,7 @@ WELDX_UNIT_REGISTRY.default_format = "~"
 WELDX_QUANTITY = WELDX_UNIT_REGISTRY.Quantity
 Q_ = WELDX_QUANTITY
 Q_.__name__ = "Q_"
-# Q_.__module_ = "pint.quantity"  # skipcq: PYL-W0212
+Q_.__module_ = "pint.quantity"  # skipcq: PYL-W0212
 Q_.__doc__ = """Create a quantity from a scalar or array.
 
 The quantity class supports lots of physical units and will combine them during
@@ -57,7 +57,7 @@ __test__ = {"Q": Q_.__doc__}  # enable doctest checking.
 
 U_ = WELDX_UNIT_REGISTRY.Unit
 U_.__name__ = "U_"
-# U_.__module__ = "pint.unit"  # skipcq: PYL-W0212
+U_.__module__ = "pint.unit"  # skipcq: PYL-W0212
 U_.__doc__ = """For details on working with quantities and units, please see the
 `pint documentation <https://pint.readthedocs.io/>`_
 """
