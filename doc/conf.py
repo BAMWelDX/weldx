@@ -58,7 +58,8 @@ except Exception as ex:
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
 
 # -- copy tutorial files to doc folder -------------------------------------------------
-tutorials_dir = pathlib.Path("./tutorials")
+tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
+logger.info("tutorials dir: %s", tutorials_dir)
 # TODO: git move tutorial files to tutorials_dir!
 tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
 for f in tutorial_files:
