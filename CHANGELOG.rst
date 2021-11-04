@@ -3,7 +3,7 @@
 ###############
 
 ********************
- 0.5.1 (unreleased)
+ 0.5.1 (04.11.2021)
 ********************
 
 added
@@ -19,9 +19,6 @@ added
 
 -  Added `weldx.asdf.util.get_schema_tree` utility to display schema
    files. `[#610] <https://github.com/BAMWelDX/weldx/pull/610>`__
-
-removed
-=======
 
 changes
 =======
