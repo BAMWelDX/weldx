@@ -30,6 +30,16 @@ These classes and functions are used to define welding processes.
     GmawProcess
     get_groove
 
+**Unit handling**
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Unit handling
+    :template: class-template_docstring.rst
+
+    Q_
+    U_
+
 **Data handling and transformation**
 
 .. autosummary::
