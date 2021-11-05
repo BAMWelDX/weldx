@@ -80,7 +80,7 @@ def download_tutorial_input_file():
             h.update(fh.read())
         return h.hexdigest()
 
-    dest = tutorials_dir / "single_pass_weld.weldx"
+    dest = tutorials_dir / "single_pass_weld.wx"
 
     # check if existing files matches desired one.
     if dest.exists():
