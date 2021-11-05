@@ -622,8 +622,8 @@ def xr_interp_orientation_in_time(
     """
     if "time" not in da.coords:
         return da
-    if len(da.time) == 1:  # remove "time dimension" for static case
-        return da.isel({"time": 0})
+    # if len(da.time) == 1:  # remove "time dimension" for static case
+    #     return da.isel({"time": 0})
 
     time = Time(time).as_pandas_index()
     time_da = Time(da).as_pandas_index()
