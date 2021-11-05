@@ -1,7 +1,5 @@
 """Visualization of spatial data, coordinate systems (cs), and cs manager."""
-import importlib.util
-
-if importlib.util.find_spec("weldx_widgets"):
+try:
     from warnings import warn
 
     from weldx_widgets.visualization.csm_k3d import (
@@ -10,7 +8,7 @@ if importlib.util.find_spec("weldx_widgets"):
     )
 
     warn("Using experimental 'weldx-widgets' implementation.", UserWarning)
-else:
+except ImportError:
     from .k3d_impl import CoordinateSystemManagerVisualizerK3D, SpatialDataVisualizer
 
 from .matplotlib_impl import (
