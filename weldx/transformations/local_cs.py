@@ -78,6 +78,7 @@ class LocalCoordinateSystem(TimeDependent):
         # warn about dropped time data
         if (
             time is not None
+            and len(Time(time)) > 1
             and "time" not in orientation.dims
             and (isinstance(coordinates, TimeSeries) or "time" not in coordinates.dims)
         ):
