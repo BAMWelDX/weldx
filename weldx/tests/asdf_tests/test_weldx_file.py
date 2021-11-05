@@ -22,7 +22,7 @@ from weldx.util import compare_nested
 SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 
 
-class ReadOnlyFile:
+class _ReadOnlyFile:
     """Simulate a read-only file."""
 
     def __init__(self, tmpdir):  # noqa: D107
@@ -43,7 +43,7 @@ class ReadOnlyFile:
         return True
 
 
-class WritableFile:
+class _WritableFile:
     """Example of a class implementing SupportsFileReadWrite."""
 
     def __init__(self):  # noqa: D107
@@ -71,7 +71,7 @@ class WritableFile:
 
 def test_protocol_check(tmpdir):
     """Instance checks."""
-    assert isinstance(WritableFile(), SupportsFileReadWrite)
+    assert isinstance(_WritableFile(), SupportsFileReadWrite)
     assert isinstance(BytesIO(), SupportsFileReadWrite)
 
     # real file:
@@ -177,7 +177,7 @@ class TestWeldXFile:
     @staticmethod
     def test_create_writable_protocol():
         """Interface test for writable files."""
-        f = WritableFile()
+        f = _WritableFile()
         WeldxFile(f, tree=dict(test="yes"), mode="rw")
         new_file = TestWeldXFile.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
@@ -185,13 +185,13 @@ class TestWeldXFile:
     @staticmethod
     def test_create_readonly_protocol(tmpdir):
         """A read-only file should be supported by ASDF."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         WeldxFile(f)
 
     @staticmethod
     def test_read_only_raise_on_write(tmpdir):
         """Read-only files cannot be written to."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         with pytest.raises(ValueError):
             WeldxFile(f, mode="rw")
 
