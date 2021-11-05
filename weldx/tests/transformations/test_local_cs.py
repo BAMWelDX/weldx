@@ -519,6 +519,7 @@ def test_interp_time_discrete_single_time():
     exp_orient = WXRotation.from_euler("x", 90, degrees=True).as_matrix()
 
     lcs_interp = lcs.interp_time("2s")
+    assert lcs_interp.is_time_dependent is False
     assert lcs_interp.time.equals(Time("2s"))
     assert lcs_interp.coordinates.values.shape == (3,)
     assert lcs_interp.orientation.values.shape == (3, 3)
