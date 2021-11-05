@@ -609,6 +609,7 @@ class _ProtectedViewDict(MutableMapping):
         raise KeyError
 
     def clear(self):
+        """Clear all data except the protected keys."""
         _protected_data = {k: self._data.pop(k) for k in self.protected_keys}
         self._data.clear()
         self._data.update(_protected_data)  # re-add protected data.
