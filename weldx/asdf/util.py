@@ -589,7 +589,7 @@ class _ProtectedViewDict(MutableMapping):
     def __contains__(self, item):
         return item in self.keys()
 
-    def update(self, mapping: Mapping[Hashable, Any], **kwargs: Any):
+    def update(self, mapping: Mapping[Hashable, Any], **kwargs: Any):  # noqa: W0221
         _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
         if any(key in self.protected_keys for key in _mapping.keys()):
             self._warn_protected_keys()
@@ -615,13 +615,13 @@ class _ProtectedViewDict(MutableMapping):
         self._data.update(_protected_data)  # re-add protected data.
         assert len(self) == 0
 
-    def _warn_protected_keys(self):
+    def _warn_protected_keys(self, stacklevel=3):
         import warnings
 
         warnings.warn(
             "You tried to manipulate an ASDF internal structure"
             f" (currently protected: {self.protected_keys}",
-            stacklevel=3,
+            stacklevel=stacklevel,
         )
 
 
