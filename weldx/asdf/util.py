@@ -589,7 +589,9 @@ class _ProtectedViewDict(MutableMapping):
     def __contains__(self, item):
         return item in self.keys()
 
-    def update(self, mapping: Mapping[Hashable, Any], **kwargs: Any):  # noqa: W0221
+    def update(
+        self, mapping: Mapping[Hashable, Any], **kwargs: Any
+    ):  # pylint: disable=W0221
         _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
         if any(key in self.protected_keys for key in _mapping.keys()):
             self._warn_protected_keys()
