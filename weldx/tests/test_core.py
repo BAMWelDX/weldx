@@ -510,16 +510,21 @@ class TestGenericSeries:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "data, dims, parameters",
+        "data, dims, units,parameters",
         [
-            ("a*u + b*v", dict(u="m", v="m*m/K"), dict(a="3m", b="300K")),
+            (
+                "a*u + b*v",
+                dict(a=["d1"], b=["d2"]),
+                dict(u="m", v="m*m/K"),
+                dict(a="3m", b="300K"),
+            ),
         ],
     )
-    def test_init_expression(data, dims, parameters):
-        gs = GenericSeries(data, dims=dims, parameters=parameters)
+    def test_init_expression(data, dims, units, parameters):
+        gs = GenericSeries(data, dims=dims, parameters=parameters, units=units)
 
         # todo: replace with direct comparison of both GS
-        assert GenericSeries(gs.data, dims=dims).data == gs.data
+        assert GenericSeries(gs.data, units=units).data == gs.data
 
     # test_call_operator_discrete ------------------------------------------------------
 
@@ -580,7 +585,9 @@ class TestGenericSeries:
         parameters = dict(a="2m", b="5m*m/K")
 
         params = dict(u=u, v=v, w=w)
-        gs = GenericSeries(expression, dims=dimensions, parameters=parameters)
+        gs = GenericSeries(
+            expression, dims=dimensions, parameters=parameters, units=dimensions
+        )
 
         # perform interpolation
         gs_interp = gs(params)

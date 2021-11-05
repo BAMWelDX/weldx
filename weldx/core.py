@@ -722,6 +722,7 @@ class GenericSeries:
         data: Union[pint.Quantity, xr.DataArray, MathematicalExpression],
         dims: Union[List[str], Dict[str, Union[str, pint.Unit]]] = None,
         coordinates: Union[None, pint.Quantity, Dict[str, pint.Quantity]] = None,
+        units: Dict[str, Union[str, pint.Unit]] = None,
         interpolation: str = "linear",
         parameters: Dict[str, Union[str, pint.Quantity]] = None,
     ):
@@ -744,13 +745,14 @@ class GenericSeries:
         """
         self._data: Union[xr.DataArray, MathematicalExpression] = None
         self._dimension_units: Dict[str, pint.Unit] = None
+        self._symbol_dims: Dict[str, List[str]] = None
         self._shape: Tuple = None
         self._units: pint.Unit = None
 
         if isinstance(data, (pint.Quantity, xr.DataArray)):
             self._init_discrete(data, dims, coordinates)
         elif isinstance(data, (MathematicalExpression, str)):
-            self._init_expression(data, dims, parameters)
+            self._init_expression(data, dims, parameters, units)
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
@@ -767,11 +769,14 @@ class GenericSeries:
 
         self._data = data
 
-    def _init_expression(self, data, dims, parameters):
+    def _check_parameters(self, parameters):
+        pass
+
+    def _init_expression(self, data, dims, parameters, units):
         """Initialize the internal data with a mathematical expression."""
 
-        for k, v in dims.items():
-            dims[k] = U_(v)
+        for k, v in units.items():
+            units[k] = U_(v)
 
         if not isinstance(data, MathematicalExpression):
 
@@ -784,23 +789,23 @@ class GenericSeries:
             # todo check all parameters are units
             pass
 
-        if data.num_variables != len(dims):
+        if data.num_variables != len(units):
             raise ValueError(
                 "The number of passed dimensions and the number of expression variables"
                 " does not match."
             )
 
-        if not (len(set(data.get_variable_names()) - set(dims.keys())) == 0):
+        if not (len(set(data.get_variable_names()) - set(units.keys())) == 0):
             raise ValueError(
                 "The passed dimension names do not match the expressions variable names"
-                f"\nPassed dimensions   : {sorted(list(set(dims.keys())))}"
+                f"\nPassed dimensions   : {sorted(list(set(units.keys())))}"
                 f"\nExpression variables: {sorted(data.get_variable_names())}"
             )
 
         try:
-            eval_params = {k: Q_(1, v) for k, v in dims.items()}
+            eval_params = {k: Q_(1, v) for k, v in units.items()}
             eval_data = data.evaluate(**eval_params)
-            self._units = eval_data.to_reduced_units().units
+            self._units = eval_data.data.to_reduced_units().units
             if np.iterable(eval_data):
                 self._shape = eval_data.shape
             else:
@@ -813,7 +818,8 @@ class GenericSeries:
             )
 
         self._data = data
-        self._dimension_units = dims
+        self._dimension_units = units
+        self._symbol_dims = dims
 
         # todo: check that all parameters of the expression support arrays?
         #       (see TimeSeries)
