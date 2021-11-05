@@ -667,9 +667,9 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" not in self.orientation.dims:  # don't interpolate static
             return self.orientation
         if time.max() <= self.time.min():  # only use edge timestamp
-            return self.orientation.isel(time=0)
+            return self.orientation.isel(time=0).data
         if time.min() >= self.time.max():  # only use edge timestamp
-            return self.orientation.isel(time=-1)
+            return self.orientation.isel(time=-1).data
         # full interpolation with overlapping times
         return ut.xr_interp_orientation_in_time(self.orientation, time)
 
@@ -686,9 +686,9 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" not in self.coordinates.dims:  # don't interpolate static
             return self.coordinates
         if time.max() <= self.time.min():  # only use edge timestamp
-            return self.coordinates.isel(time=0)
+            return self.coordinates.isel(time=0).data
         if time.min() >= self.time.max():  # only use edge timestamp
-            return self.coordinates.isel(time=-1)
+            return self.coordinates.isel(time=-1).data
         # full interpolation with overlapping times
         return ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
