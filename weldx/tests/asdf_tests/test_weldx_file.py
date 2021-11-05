@@ -527,7 +527,8 @@ class TestWeldXFile:
             del self.fh[protected_key]
         with pytest.warns(warning_type, match=expected_match):
             self.fh.pop(protected_key)
-        self.fh[protected_key] = NotImplemented
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh[protected_key] = NotImplemented
         assert self.fh._data[protected_key] == old_lib
 
     def test_popitem_remain_protected_keys(self):
