@@ -581,16 +581,18 @@ class TestGenericSeries:
     def test_call_operator_expression(u, v, w):
         # setup
         expression = "a*u + b*v + w"
-        dimensions = dict(u="m", v="K", w="m*m")
+        dims = None
+        units = dict(u="m", v="K", w="m*m")
         parameters = dict(a="2m", b="5m*m/K")
 
         params = dict(u=u, v=v, w=w)
-        gs = GenericSeries(
-            expression, dims=dimensions, parameters=parameters, units=dimensions
-        )
+        gs = GenericSeries(expression, dims=dims, parameters=parameters, units=units)
+
+        print(gs.ndims)
 
         # perform interpolation
         gs_interp = gs(params)
+        print(gs_interp)
 
         # calculate expected result
         params = {k: Q_(val) for k, val in params.items()}

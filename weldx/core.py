@@ -744,7 +744,7 @@ class GenericSeries:
 
         """
         self._data: Union[xr.DataArray, MathematicalExpression] = None
-        self._dimension_units: Dict[str, pint.Unit] = None
+        self._variable_units: Dict[str, pint.Unit] = None
         self._symbol_dims: Dict[str, List[str]] = None
         self._shape: Tuple = None
         self._units: pint.Unit = None
@@ -775,6 +775,15 @@ class GenericSeries:
     def _init_expression(self, data, dims, parameters, units):
         """Initialize the internal data with a mathematical expression."""
 
+        # NOTES
+        # constraints:
+        #   - each free variable represents a coordinate, hence it must be a scalar or
+        #     1d
+        #   - parameters of the math expression need to have a dimension if they are not
+        #     scalars
+        #   - expected units for dims are set to "unitless" when not in provided dict
+        #   - dims are set to variable names if not specified in provided dict
+
         for k, v in units.items():
             units[k] = U_(v)
 
@@ -788,6 +797,13 @@ class GenericSeries:
         else:
             # todo check all parameters are units
             pass
+
+        # Update missing dims
+        if dims is None:
+            dims = {}
+        for v in data.get_variable_names():
+            if v not in dims:
+                dims[v] = v
 
         if data.num_variables != len(units):
             raise ValueError(
@@ -818,11 +834,21 @@ class GenericSeries:
             )
 
         self._data = data
-        self._dimension_units = units
+        self._variable_units = units
         self._symbol_dims = dims
 
         # todo: check that all parameters of the expression support arrays?
         #       (see TimeSeries)
+
+    def __add__(self, other):
+        # this should mostly be moved to the MathematicalExpression
+        # todo:
+        #   - for two expressions simply do: f"{exp_1} + f{exp_2}" and merge the
+        #     parameters in a new MathExpression
+        #   - for two discrete series call __add__ of the xarrays
+        #   - for mixed version add a new parameter to the expression string and set the
+        #     xarray as the parameters value
+        raise NotImplementedError
 
     def __call__(self, coordinates: Union[Dict[str, pint.Quantity]]) -> GenericSeries:
         """Interpolate the generic series at discrete points.
@@ -848,25 +874,18 @@ class GenericSeries:
             if len(v.shape) == 0:
                 v = np.expand_dims(v, 0)
             if isinstance(self._data, MathematicalExpression):
-                for j in range(i):
-                    v = np.expand_dims(v, 0)
-                for j in range(len(self._dimension_units) - 1 - i):
-                    v = np.expand_dims(v, -1)
+                v = xr.DataArray(
+                    v, dims=self._symbol_dims[k], coords={self._symbol_dims[k][0]: v.m}
+                )
             else:
                 v = v.m
             input[k] = v
 
         if isinstance(self._data, MathematicalExpression):
             data = self._data.evaluate(**input)
-            coords = {}
-            for k, v in coordinates.items():
-                v = Q_(v)
-                if len(v.shape) == 0:
-                    v = np.expand_dims(v, 0)
-                coords[k] = v.m
 
             # todo: should return discrete GenericSeries once it is implemented
-            return xarray.DataArray(data, dims=self.dimension_names, coords=coords)
+            return data
 
         return ut.xr_interp_like(self._data, input)
 
@@ -931,11 +950,32 @@ class GenericSeries:
         return self._data
 
     @property
-    def dimension_names(self) -> List[str]:
+    def dims(self) -> List[str]:
         """Get the names of all dimensions."""
-        if self._dimension_units is not None:
-            return list(self._dimension_units.keys())
-        raise NotImplementedError
+        if isinstance(self._data, MathematicalExpression):
+            dims = set()
+            for d in self._symbol_dims.values():
+                dims |= set(d)
+            return list(dims)
+
+        return self._data.dims
+
+    @property
+    def ndims(self) -> int:
+        """Get the number of dimensions."""
+        return len(self.dims)
+
+    @property
+    def parameter_names(self) -> List[str]:
+        """Get the names of all dimensions."""
+        if self._variable_units is not None:
+            return list(self._variable_units.keys())
+        return None
+
+    @property
+    def parameter_units(self) -> Dict[str, pint.Unit]:
+        """Get a dictionary that maps the parameter names to their expected units."""
+        return self._variable_units
 
     @property
     def shape(self) -> Tuple:
