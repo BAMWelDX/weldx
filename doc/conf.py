@@ -22,6 +22,9 @@ import sys
 import typing
 
 import traitlets
+from sphinx.util.logging import getLogger
+
+logger = getLogger("weldx_sphinx_conf")
 
 
 def _workaround_imports_typechecking():
@@ -56,13 +59,51 @@ except Exception as ex:
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
 
 # -- copy tutorial files to doc folder -------------------------------------------------
-tutorials_dir = pathlib.Path("./tutorials")
+tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
+logger.info("tutorials dir: %s", tutorials_dir)
+# TODO: git move tutorial files to tutorials_dir!
 tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
 for f in tutorial_files:
     shutil.copy(f, tutorials_dir)
 
-# todo: Remove
-shutil.copy("./../tutorials/single_pass_weld.wx", tutorials_dir)
+
+def download_tutorial_input_file():
+    from urllib.request import urlretrieve
+
+    url = "https://github.com/BAMWelDX/IIW2021_AA_CXII/blob/weldx_0.5.0/single_pass_weld.weldx?raw=true"
+    sha256sum = "29e4f11ef1185f818b4611860842ef52d386ad2866a2680257950f160e1e098a"
+
+    def hash_path(path):
+        import hashlib
+
+        h = hashlib.sha256()
+        with open(path, "rb") as fh:
+            h.update(fh.read())
+        return h.hexdigest()
+
+    dest = tutorials_dir / "single_pass_weld.wx"
+
+    # check if existing files matches desired one.
+    if dest.exists():
+        hash_local = hash_path(dest)
+        if hash_local == sha256sum:
+            logger.info(f"File %s already downloaded.", dest)
+            return
+
+    # does not exist or hash mismatched, so download it.
+    logger.info("trying to download: %s", url)
+    out_file, header = urlretrieve(url, dest)
+    sha256sum_actual = hash_path(out_file)
+    if not sha256sum_actual == sha256sum:
+        raise RuntimeError(
+            f"hash mismatch:\n actual = \t{sha256sum_actual}\n"
+            f"desired = \t{sha256sum}"
+        )
+
+    logger.info("download successful.")
+
+
+download_tutorial_input_file()
 
 
 # -- Project information -----------------------------------------------------
