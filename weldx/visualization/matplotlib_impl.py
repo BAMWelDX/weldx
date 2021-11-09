@@ -533,7 +533,7 @@ def plot_spatial_data_matplotlib(
     else:
         color = color_to_rgb_normalized(color)
 
-    coordinates = data.coordinates.data
+    coordinates = data.coordinates.values.reshape(-1, 3)
     triangles = data.triangles
 
     # if data is time dependent or has other extra dimensions, just take the first value

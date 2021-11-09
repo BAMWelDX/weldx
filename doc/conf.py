@@ -31,6 +31,7 @@ def _workaround_imports_typechecking():
     """Load some packages needed for type annotations."""
     import ipywidgets  # noqa
     import pandas  # noqa
+    import pint  # noqa
     import xarray  # noqa
 
 
@@ -103,6 +104,7 @@ def download_tutorial_input_file():
 
 
 download_tutorial_input_file()
+
 
 
 # -- Project information -----------------------------------------------------

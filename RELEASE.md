@@ -7,9 +7,10 @@ A short primer in the steps needed to release a new version of the `weldx` packa
 - [ ] create a PR that finalizes the code for the next version
     - [ ] name the PR according to the version `vX.Y.Z` and add the `release`
       tag ([example here](https://github.com/BAMWelDX/weldx/pull/419))
-    - [ ] make sure `CHANGELOG.md` is up to date and enter current date to the release version
+    - [ ] make sure `CHANGELOG.rst` is up to date and enter current date to the release version
     - [ ] add summarized release highlights where appropriate
     - [ ] update the `CITATION.cff` version number and date
+    - [ ] search the project for `deprecated` and remove deprecated code
 - [ ] wait for review and the CI jobs to finish
 - [ ] check the readthedocs PR build
 

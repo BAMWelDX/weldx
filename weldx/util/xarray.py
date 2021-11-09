@@ -513,31 +513,60 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
     return True
 
 
-def xr_3d_vector(data: np.ndarray, time: Time = None) -> xr.DataArray:
+def xr_3d_vector(
+    data: np.ndarray,
+    time: types_time_like = None,
+    add_dims: List[str] = None,
+    add_coords: Dict[str, Any] = None,
+) -> xr.DataArray:
     """Create an xarray 3d vector with correctly named dimensions and coordinates.
 
     Parameters
     ----------
-    data :
-        Data
-    time :
-        Optional time data (Default value = None)
+    data
+        Full data array.
+    time
+        Optional values that will fill the 'time' dimension.
+    add_dims
+        Addition dimensions to add between ["time", "c"].
+        If either "c" or "time" are present in add_dims they are used to locate the
+        dimension position in the passed array.
+    add_coords
+        Additional coordinates to assign to the xarray.
+        ("c" and "time" coordinates will be assigned automatically)
 
     Returns
     -------
     xarray.DataArray
 
     """
-    if time is not None and Q_(data).ndim == 2:
-        if isinstance(time, Time):
-            time = time.as_pandas_index()
-        da = xr.DataArray(
-            data=data,
-            dims=["time", "c"],
-            coords={"time": time, "c": ["x", "y", "z"]},
-        )
-    else:
-        da = xr.DataArray(data=data, dims=["c"], coords={"c": ["x", "y", "z"]})
+    if add_dims is None:
+        add_dims = []
+    if add_coords is None:
+        add_coords = {}
+
+    dims = ["c"]
+    coords = dict(c=["x", "y", "z"])
+
+    # if data is static but time passed we discard time information
+    if time is not None and Q_(data).ndim == 1:
+        time = None
+
+    # remove duplicates and keep order
+    dims = list(dict.fromkeys(add_dims + dims))
+
+    if time is not None:
+        if "time" not in dims:  # prepend to beginning if not already set
+            dims = ["time"] + dims
+        coords["time"] = time  # type: ignore[assignment]
+
+    if "time" in coords:
+        coords["time"] = Time(coords["time"]).index
+
+    coords = dict(add_coords, **coords)
+
+    da = xr.DataArray(data=data, dims=dims, coords=coords).transpose(..., "c")
+
     return da.astype(float).weldx.time_ref_restore()
 
 

@@ -175,7 +175,7 @@ def test_init_expr_time_series_as_coord(time, time_ref, angles):
 
     """
     coordinates = MathematicalExpression(
-        expression="a*t+b", parameters=dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 2, 3])
+        expression="a*t+b", parameters=dict(a=Q_([1, 0, 0], "1/s"), b=[1, 2, 3])
     )
 
     ts_coord = TimeSeries(data=coordinates)
@@ -607,7 +607,7 @@ def test_interp_time_timeseries_as_coords(
 
     # create expression
     expr = "a*t+b"
-    param = dict(a=Q_([[1, 0, 0]], "mm/s"), b=Q_([1, 1, 1], "mm"))
+    param = dict(a=Q_([1, 0, 0], "mm/s"), b=Q_([1, 1, 1], "mm"))
     me = MathematicalExpression(expression=expr, parameters=param)
 
     # create orientation and time of LCS

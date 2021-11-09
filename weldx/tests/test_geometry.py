@@ -14,7 +14,7 @@ from xarray import DataArray
 import weldx.geometry as geo
 import weldx.tests._helpers as helpers
 import weldx.transformations as tf
-from weldx import Q_
+from weldx import Q_, CoordinateSystemManager
 from weldx.geometry import SpatialData
 from weldx.transformations import WXRotation
 
@@ -3107,7 +3107,7 @@ class TestSpatialData:
 
         assert (reference == other) == expected_result
 
-        assert reference.limits() == [(0, 1), (0, 1), (0, 0)]
+        assert np.all(reference.limits() == np.array([[0, 0, 0], [1, 1, 0]]))
 
     # test_read_write_file -------------------------------------------------------------
 
@@ -3141,3 +3141,29 @@ class TestSpatialData:
 
         assert np.allclose(data.coordinates, data_read.coordinates)
         assert np.allclose(data.triangles, data_read.triangles)
+
+    @staticmethod
+    def test_time_dependent_data():
+        """Simple test for assigning and transforming time dependent data."""
+        time = ["0s", "3s", "6s", "9s"]
+        data = np.array([[[0, 0, 0], [0, 1.0, np.sin(i)], [0, 2, 0]] for i in range(4)])
+        transformed_x = np.repeat([0.0, 3, 6, 9], 3)
+
+        sd = SpatialData(coordinates=data, time=time)
+        csm = CoordinateSystemManager("specimen")
+        csm.create_cs(
+            "scanner",
+            "specimen",
+            coordinates=[[0, 0, 0], [15, 0, 0]],
+            time=["0s", "15s"],
+        )
+
+        # assign without transform
+        csm.assign_data(sd, "scan_data", "scanner")
+        # assign with transform
+        csm.assign_data(sd, "scan_data2", "scanner", "specimen")
+
+        for data_name in ["scan_data", "scan_data2"]:
+            test = csm.get_data(data_name, "specimen").coordinates.values.reshape(-1, 3)
+            assert np.all(test[:, 1:] == data.reshape(-1, 3)[:, 1:])
+            assert np.all(test[:, 0] == transformed_x)
