@@ -106,7 +106,6 @@ def download_tutorial_input_file():
 download_tutorial_input_file()
 
 
-
 # -- Project information -----------------------------------------------------
 _now = datetime.datetime.now().year
 
