@@ -10,34 +10,35 @@ from typing import (
     AbstractSet,
     Any,
     Dict,
+    Hashable,
     Iterable,
     List,
     Mapping,
     Optional,
     Tuple,
     Union,
-    Hashable,
 )
 
 import asdf
 import numpy as np
-from asdf import AsdfFile, generic_io, open as open_asdf
+from asdf import AsdfFile, generic_io
+from asdf import open as open_asdf
 from asdf.tags.core import Software
-from asdf.util import get_file_type, FileType
+from asdf.util import FileType, get_file_type
 from jsonschema import ValidationError
 
 from weldx.asdf.util import (
+    _ProtectedViewDict,
     get_schema_path,
     get_yaml_header,
     view_tree,
-    _ProtectedViewDict,
 )
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
 from weldx.util import (
+    deprecated,
     inherit_docstrings,
     is_interactive_session,
     is_jupyterlab_session,
-    deprecated,
 )
 
 __all__ = [
@@ -790,7 +791,7 @@ class WeldxFile(_ProtectedViewDict):
         return fd
 
     @property
-    @deprecated(since="0.5.1", removed="0.6", message="Please do not use this anymore.")
+    @deprecated(since="0.5.2", removed="0.6", message="Please do not use this anymore.")
     def data(self):
         return self._data
 

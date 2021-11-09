@@ -15,6 +15,10 @@ removed
 changes
 =======
 
+-  `WeldxFile` now hides ASDF added fields like history and asdf_library
+   from the dictionary interface. To access these, there are separate
+   properties `[#625] <https://github.com/BAMWeldX/weldx/pull/625>`__.
+
 fixes
 =====
 
@@ -64,10 +68,6 @@ changes
 
 -  `SpatialData` now supports time dependent data. `[#612]
    <https://github.com/BAMWelDX/weldx/pull/612>`__
-
-- `WeldxFile` now hides ASDF added fields like history and asdf_library from the dictionary
-  interface. To access these, there are separate properties
-  `[#625] <https://github.com/BAMWeldX/weldx/pull/625>`__.
 
 -  Renamed the parameter ``coordinate_system_name`` of
    `CoordinateSystemManager.assign_data` to ``reference_system`` and

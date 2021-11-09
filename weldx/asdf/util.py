@@ -4,17 +4,17 @@ from distutils.version import LooseVersion
 from io import BytesIO, TextIOBase
 from pathlib import Path
 from typing import (
+    AbstractSet,
     Any,
     Callable,
     Dict,
+    Hashable,
     List,
+    Mapping,
+    MutableMapping,
     Tuple,
     Type,
     Union,
-    MutableMapping,
-    AbstractSet,
-    Mapping,
-    Hashable,
 )
 from warnings import warn
 
