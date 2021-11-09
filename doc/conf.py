@@ -76,6 +76,14 @@ def _copy_tut_files():
 _copy_tut_files()
 
 
+tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
+logger.info("tutorials dir: %s", tutorials_dir)
+# TODO: git move tutorial files to tutorials_dir!
+tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
+for f in tutorial_files:
+    shutil.copy(f, tutorials_dir)
+
+
 def download_tutorial_input_file():
     from urllib.request import urlretrieve
 
