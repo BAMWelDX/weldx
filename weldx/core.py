@@ -846,8 +846,8 @@ class GenericSeries:
             raise ValueError(
                 "During the evaluation of the expression mismatching array lengths' "
                 "were detected. Some possible causes are:\n"
-                "  - expression parameters that use the same dimension name as one of "
-                "the free dimensions\n"
+                "  - expression parameters that have already assigned coordinates to a "
+                "dimension that is also used as a variable\n"
                 "  - 2 free dimensions with identical names\n"
                 "  - 2 expression parameters that use the same dimension with "
                 "different number of values\n"
