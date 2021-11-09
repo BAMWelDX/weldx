@@ -15,6 +15,11 @@ removed
 changes
 =======
 
+- `WeldxFile` now raises an exception, if a warning is emitted during loading the weldx
+  ASDF extension, this should prevent erroneous data during loading, for example
+  missing dependencies. `[#641] <https://github.com/BAMWelDX/weldx/pull/641>`__
+
+
 fixes
 =====
 
