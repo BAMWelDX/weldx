@@ -74,7 +74,7 @@ _PROTECTED_KEYS = (
     "history",
     "asdf_library",
 )
-"""These keys are not not seen, nor can they be manipulated."""
+"""These keys are not seen, nor can they be manipulated."""
 
 
 @inherit_docstrings

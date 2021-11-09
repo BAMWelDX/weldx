@@ -519,7 +519,8 @@ class TestWeldXFile:
         """Ensure we cannot manipulate protected keys."""
         expected_match = "manipulate an ASDF internal structure"
         warning_type = UserWarning
-        old_lib = self.fh._data[protected_key]  # obtain key from underlying dict.
+        with pytest.raises(KeyError):  # try to obtain key from underlying dict.
+            _ = self.fh.data[protected_key]
 
         with pytest.warns(warning_type, match=expected_match):
             self.fh.update({protected_key: None})
@@ -529,7 +530,6 @@ class TestWeldXFile:
             self.fh.pop(protected_key)
         with pytest.warns(warning_type, match=expected_match):
             self.fh[protected_key] = NotImplemented
-        assert self.fh._data[protected_key] == old_lib
 
     def test_popitem_remain_protected_keys(self):
         """Ensure we cannot manipulate protected keys."""

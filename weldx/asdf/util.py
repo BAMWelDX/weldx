@@ -556,8 +556,12 @@ def _get_instance_shape(
 class _ProtectedViewDict(MutableMapping):
     def __init__(self, protected_keys, data=None):
         super(_ProtectedViewDict, self).__init__()
-        self._data = data
+        self.__data = data
         self.protected_keys = protected_keys
+
+    @property
+    def _data(self):
+        return self
 
     def __len__(self) -> int:
         return len(self.keys())
@@ -566,22 +570,22 @@ class _ProtectedViewDict(MutableMapping):
         if key in self.protected_keys:
             self._warn_protected_keys()
             raise KeyError
-        return self._data.get(key)
+        return self.__data.get(key)
 
     def __delitem__(self, key):
         if key in self.protected_keys:
             self._warn_protected_keys()
             return
-        del self._data[key]
+        del self.__data[key]
 
     def __setitem__(self, key, value):
         if key in self.protected_keys:
             self._warn_protected_keys()
             return
-        self._data[key] = value
+        self.__data[key] = value
 
     def keys(self) -> AbstractSet:
-        return {k for k in self._data.keys() if k not in self.protected_keys}
+        return {k for k in self.__data.keys() if k not in self.protected_keys}
 
     def __iter__(self):
         return (k for k in self.keys())
@@ -599,7 +603,7 @@ class _ProtectedViewDict(MutableMapping):
                 k: v for k, v in _mapping.items() if k not in self.protected_keys
             }
 
-        self._data.update(_mapping)
+        self.__data.update(_mapping)
 
     def popitem(self) -> Tuple[Hashable, Any]:
         for k in self.keys():
@@ -610,9 +614,9 @@ class _ProtectedViewDict(MutableMapping):
 
     def clear(self):
         """Clear all data except the protected keys."""
-        _protected_data = {k: self._data.pop(k) for k in self.protected_keys}
-        self._data.clear()
-        self._data.update(_protected_data)  # re-add protected data.
+        _protected_data = {k: self.__data.pop(k) for k in self.protected_keys}
+        self.__data.clear()
+        self.__data.update(_protected_data)  # re-add protected data.
         assert len(self) == 0
 
     def _warn_protected_keys(self, stacklevel=3):
