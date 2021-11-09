@@ -603,10 +603,8 @@ class _ProtectedViewDict(MutableMapping):
 
     def popitem(self) -> Tuple[Hashable, Any]:
         for k in self.keys():
-            if k in self.protected_keys:
-                continue
-
-            return k, self.pop(k)
+            if k not in self.protected_keys:
+                return k, self.pop(k)
 
         raise KeyError
 
