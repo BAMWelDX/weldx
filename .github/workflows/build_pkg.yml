@@ -13,7 +13,7 @@ on:
       - '!.github/workflows/build.yml'
   release:
     types:
-      - created
+      - published
   schedule:
     - cron: '0 6 * * 1'
   workflow_dispatch:
@@ -25,7 +25,7 @@ jobs:
       (github.event_name == 'workflow_dispatch') ||
       (github.ref == 'refs/heads/master') ||
       startsWith(github.ref, 'refs/tags/') ||
-      (github.event_name == 'release' && github.event.action == 'created')
+      (github.event_name == 'release')
     name: conda build
     runs-on: ubuntu-latest
     steps:
@@ -70,7 +70,7 @@ jobs:
       (github.event.pull_request.draft == false) ||
       (github.event_name == 'workflow_dispatch') ||
       startsWith(github.ref, 'refs/tags/') ||
-      (github.event_name == 'release' && github.event.action == 'created')
+      (github.event_name == 'release')
     name: pypi build
     runs-on: ubuntu-latest
     steps:
@@ -124,12 +124,12 @@ jobs:
           echo "pypi_token=${{ secrets.TESTPYPI_UPLOAD }}" >> $GITHUB_ENV
 
       - name: set pypi main repo for release
-        if: github.event_name == 'release' && github.event.action == 'created'
+        if: github.event_name == 'release'
         run: |
           echo "pypi_repo=pypi" >> $GITHUB_ENV
           echo "pypi_token=${{ secrets.PYPI_UPLOAD }}" >> $GITHUB_ENV
 
       - name: pypi release
-        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'release' && github.event.action == 'created')
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'release')
         run: |
           python -m twine upload --repository $pypi_repo dist/* -u __token__ -p $pypi_token
