@@ -3,7 +3,38 @@
 ###############
 
 ********************
- 0.5.1 (unreleased)
+ 0.X.X (unreleased)
+********************
+
+added
+=====
+
+removed
+=======
+
+changes
+=======
+
+fixes
+=====
+
+documentation
+=============
+
+ASDF
+====
+
+deprecations
+============
+
+dependencies
+============
+
+-  Removed ``ipykernel`` dependency. `[#634]
+   <https://github.com/BAMWelDX/weldx/pull/634>`__
+
+********************
+ 0.5.1 (04.11.2021)
 ********************
 
 added
@@ -19,9 +50,6 @@ added
 
 -  Added `weldx.asdf.util.get_schema_tree` utility to display schema
    files. `[#610] <https://github.com/BAMWelDX/weldx/pull/610>`__
-
-removed
-=======
 
 changes
 =======
@@ -46,6 +74,12 @@ changes
 -  improve dimension handling of `SpatialData` `[#622]
    <https://github.com/BAMWelDX/weldx/pull/622>`__
 
+-  The `MathematicalExpression` now supports `xarray.DataArray` as
+   parameters. Furthermore, multidimensional parameters of a
+   `MathematicalExpression` that is passed to a `TimeSeries` are no
+   longer required to have an extra dimension that represents time.
+   `[#621] <https://github.com/BAMWelDX/weldx/pull/621>`__
+
 fixes
 =====
 
@@ -63,6 +97,10 @@ documentation
 
 ASDF
 ====
+
+-  fix ``process`` missing as required property in
+   ``single_pass_weld-0.1.0.yaml`` `[#627]
+   <https://github.com/BAMWelDX/weldx/pull/627>`__
 
 deprecations
 ============

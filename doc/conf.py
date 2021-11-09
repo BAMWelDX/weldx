@@ -28,6 +28,7 @@ def _workaround_imports_typechecking():
     """Load some packages needed for type annotations."""
     import ipywidgets  # noqa
     import pandas  # noqa
+    import pint  # noqa
     import xarray  # noqa
 
 
