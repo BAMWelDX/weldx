@@ -54,5 +54,5 @@ repos:
     rev: v1.2.1
     hooks:
       - id: jupyter-notebook-cleanup
-        #args:
-          #- --remove-kernel-metadata
+        args:
+          - --remove-kernel-metadata
