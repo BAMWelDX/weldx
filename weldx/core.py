@@ -772,73 +772,94 @@ class GenericSeries:
     def _check_parameters(self, parameters):
         pass
 
-    def _init_expression(self, data, dims, parameters, units):
+    def _init_expression(self, expr, dims, parameters, units):
         """Initialize the internal data with a mathematical expression."""
-
         # NOTES
         # constraints:
         #   - each free variable represents a coordinate, hence it must be a scalar or
         #     1d
         #   - parameters of the math expression need to have a dimension if they are not
         #     scalars
-        #   - expected units for dims are set to "unitless" when not in provided dict
-        #   - dims are set to variable names if not specified in provided dict
 
-        for k, v in units.items():
-            units[k] = U_(v)
-
-        if not isinstance(data, MathematicalExpression):
-
+        # Check and update expression
+        if not isinstance(expr, MathematicalExpression):
             if parameters is not None:
+                # todo: handle DataArray and tuples
                 for k, v in parameters.items():
                     parameters[k] = Q_(v)
-
-            data = MathematicalExpression(data, parameters)
+            expr = MathematicalExpression(expr, parameters)
         else:
-            # todo check all parameters are units
+            # todo: check all parameters are units
             pass
 
-        # Update missing dims
+        # Update units and dims
         if dims is None:
             dims = {}
-        for v in data.get_variable_names():
+        if units is None:
+            units = {}
+        else:
+            for k, v in units.items():
+                if k not in expr.get_variable_names():
+                    raise KeyError(f"{k} is not a variable of the expression:\n{expr}")
+                units[k] = U_(v)
+
+        for v in expr.get_variable_names():
             if v not in dims:
                 dims[v] = v
+            if v not in units:
+                units[v] = U_("")
 
-        if data.num_variables != len(units):
-            raise ValueError(
-                "The number of passed dimensions and the number of expression variables"
-                " does not match."
-            )
+        # check expression
+        expr_units, expr_shape = self._eval_expr(expr, dims, units)
 
-        if not (len(set(data.get_variable_names()) - set(units.keys())) == 0):
-            raise ValueError(
-                "The passed dimension names do not match the expressions variable names"
-                f"\nPassed dimensions   : {sorted(list(set(units.keys())))}"
-                f"\nExpression variables: {sorted(data.get_variable_names())}"
-            )
-
-        try:
-            eval_params = {k: Q_(1, v) for k, v in units.items()}
-            eval_data = data.evaluate(**eval_params)
-            self._units = eval_data.data.to_reduced_units().units
-            if np.iterable(eval_data):
-                self._shape = eval_data.shape
-            else:
-                self._shape = (1,)
-
-        except pint.errors.DimensionalityError:
-            raise Exception(
-                "Expression can not be evaluated with scalar quantities. Ensure that "
-                "the passed parameters and variables posses the correct units."
-            )
-
-        self._data = data
+        # save internal data
+        self._units = expr_units
+        self._shape = expr_shape
+        self._data = expr
         self._variable_units = units
         self._symbol_dims = dims
 
         # todo: check that all parameters of the expression support arrays?
         #       (see TimeSeries)
+
+    @staticmethod
+    def _eval_expr(expr, dims, units):
+        scalar_params = {k: Q_(1, v) for k, v in units.items()}
+        try:
+            result = expr.evaluate(**scalar_params)
+            expr_units = result.data.to_reduced_units().units
+        except pint.errors.DimensionalityError as e:
+            raise ValueError(
+                "Expression can not be evaluated due to a unit dimensionality error. "
+                "Ensure that the expressions parameters and the expected variable "
+                f"units are compatible. The original exception was:\n{e}"
+            )
+
+        array_params = {
+            k: xr.DataArray(Q_(range(i + 2), v), dims=dims[k])
+            for i, (k, v) in enumerate(units.items())
+        }
+        try:
+            expr.evaluate(**array_params)
+        except ValueError as e:
+            # todo: define terms
+            raise ValueError(
+                "During the evaluation of the expression mismatching array lengths' "
+                "were detected. Some possible causes are:\n"
+                "  - expression parameters that use the same dimension name as one of "
+                "the free dimensions\n"
+                "  - 2 free dimensions with identical names\n"
+                "  - 2 expression parameters that use the same dimension with "
+                "different number of values\n"
+                f"The original exception was:\n{e}"
+            )
+
+        # todo: shape should follow from dims of parameters and variables - Consider
+        #       removing shape for expressions since it does not really make sense. User
+        #       alternatives would be ndims and dims
+
+        shape = None
+        return expr_units, shape
 
     def __add__(self, other):
         # this should mostly be moved to the MathematicalExpression

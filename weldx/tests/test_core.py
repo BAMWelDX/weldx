@@ -486,6 +486,10 @@ class TestTimeSeries:
 # --------------------------------------------------------------------------------------
 
 
+# todo
+#   - check update of variable units to unitless
+
+
 class TestGenericSeries:
     """Test the `GenericSeries`."""
 
@@ -508,20 +512,35 @@ class TestGenericSeries:
 
     # test_init_expression -------------------------------------------------------------
 
+    # todo possible errors:
+    #   - expression has no variables
+
     @staticmethod
     @pytest.mark.parametrize(
-        "data, dims, units,parameters",
+        "dims, units, parameters, exception",
         [
-            (
-                "a*u + b*v",
-                dict(a=["d1"], b=["d2"]),
-                dict(u="m", v="m*m/K"),
-                dict(a="3m", b="300K"),
-            ),
+            # 4 dims without units - 0 params
+            (None, None, None, None),
+            # 4 dims without units - 0 params - custom dimension names
+            (dict(a="d1", x="d2", b="d3", y="d4"), None, None, None),
+            # ERROR - dims with identical dimension name
+            (dict(a="d1", x="d2", b="d1", y="d4"), None, None, None),
+            # 4 dims with units - 0 params
+            (None, dict(a="m", x="m", b="K", y="m*m/K"), None, None),
+            # ERROR - 4 dims with incompatible units - 0 params
+            (None, dict(a="m", x="m", b="K", y="m/K"), None, ValueError),
+            # 2 dims with dims - 2 scalar params
+            (None, dict(x="m", y="m*m/K"), dict(a="3m", b="300K"), None),
         ],
     )
-    def test_init_expression(data, dims, units, parameters):
-        gs = GenericSeries(data, dims=dims, parameters=parameters, units=units)
+    def test_init_expression(dims, units, parameters, exception):
+        expr = "a*x + b*y"
+        if exception is not None:
+            with pytest.raises(exception):
+                GenericSeries(expr, dims=dims, parameters=parameters, units=units)
+            return
+
+        gs = GenericSeries(expr, dims=dims, parameters=parameters, units=units)
 
         # todo: replace with direct comparison of both GS
         assert GenericSeries(gs.data, units=units).data == gs.data
@@ -581,12 +600,11 @@ class TestGenericSeries:
     def test_call_operator_expression(u, v, w):
         # setup
         expression = "a*u + b*v + w"
-        dims = None
         units = dict(u="m", v="K", w="m*m")
         parameters = dict(a="2m", b="5m*m/K")
 
         params = dict(u=u, v=v, w=w)
-        gs = GenericSeries(expression, dims=dims, parameters=parameters, units=units)
+        gs = GenericSeries(expression, parameters=parameters, units=units)
 
         print(gs.ndims)
 
