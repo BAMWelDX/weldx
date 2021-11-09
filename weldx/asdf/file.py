@@ -1,6 +1,7 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
 import copy
 import pathlib
+import warnings
 from collections import UserDict
 from collections.abc import MutableMapping, ValuesView
 from contextlib import contextmanager
@@ -23,6 +24,7 @@ import numpy as np
 from asdf import AsdfFile, generic_io
 from asdf import open as open_asdf
 from asdf import util
+from asdf.exceptions import AsdfWarning
 from asdf.tags.core import Software
 from asdf.util import get_file_type
 from jsonschema import ValidationError
@@ -256,22 +258,28 @@ class WeldxFile(UserDict):
             )
 
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
-        if tree or new_file_created:
-            asdf_file = self._write_tree(
-                filename_or_file_like,
-                tree,
-                asdffile_kwargs,
-                write_kwargs,
-                new_file_created,
-            )
-            if isinstance(filename_or_file_like, SupportsFileReadWrite):
-                filename_or_file_like.seek(0)
-        else:
-            asdf_file = open_asdf(
-                filename_or_file_like,
-                mode=self.mode,
-                **asdffile_kwargs,
-            )
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                category=AsdfWarning,
+                action="error",
+                message="asdf.extensions plugin from package weldx.*",
+            )  # we turn asdf warnings about loading the weldx extension into an error.
+            if tree or new_file_created:
+                asdf_file = self._write_tree(
+                    filename_or_file_like,
+                    tree,
+                    asdffile_kwargs,
+                    write_kwargs,
+                    new_file_created,
+                )
+                if isinstance(filename_or_file_like, SupportsFileReadWrite):
+                    filename_or_file_like.seek(0)
+            else:
+                asdf_file = open_asdf(
+                    filename_or_file_like,
+                    mode=self.mode,
+                    **asdffile_kwargs,
+                )
         self._asdf_handle: AsdfFile = asdf_file
 
         # UserDict interface: we want to store a reference to the tree, but the ctor
