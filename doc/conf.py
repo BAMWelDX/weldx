@@ -6,8 +6,7 @@
 
 # Local build command ------------------------------------------------------------------
 
-# sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
-# -D nbsphinx_kernel_name="weldx" -D nbsphinx_execute="never"
+# sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -D nbsphinx_execute="never"
 
 # -- Path setup --------------------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -20,8 +19,6 @@ import pathlib
 import shutil
 import sys
 import typing
-
-import traitlets
 
 
 def _workaround_imports_typechecking():
@@ -150,21 +147,9 @@ master_doc = "index"
 nbsphinx_execute = "always"
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc <figure.dpi=96>",
 ]
 
-if traitlets.__version__ < "5":
-    nbsphinx_execute_arguments.append("--InlineBackend.rc={'figure.dpi': 96}")
-else:
-    nbsphinx_execute_arguments.append("--InlineBackend.rc <figure.dpi=96>")
-
-# Select notebook kernel for nbsphinx
-# default "python3" is needed for readthedocs run
-# if building locally, this might need to be "weldx" - try setting using -D option:
-# -D nbsphinx_kernel_name="weldx"
-if os.getenv("READTHEDOCS", False):
-    nbsphinx_kernel_name = "python3"
-else:
-    nbsphinx_kernel_name = "weldx"
 
 # This is processed by Jinja2 and inserted before each notebook
 nbsphinx_prolog = r"""
