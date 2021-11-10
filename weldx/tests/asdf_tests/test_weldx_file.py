@@ -14,7 +14,7 @@ from jsonschema import ValidationError
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
-from weldx.asdf.file import _PROTECTED_KEYS
+from weldx.asdf.file import _PROTECTED_KEYS, DEFAULT_ARRAY_INLINE_THRESHOLD
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
 from weldx.util import compare_nested
@@ -550,3 +550,45 @@ class TestWeldXFile:
 
         for x in iter(self.fh):
             assert x not in _PROTECTED_KEYS
+
+    @staticmethod
+    def test_array_inline_threshold():
+        """Test array inlining threshold."""
+        x = np.arange(7)
+        buff = WeldxFile(
+            tree=dict(x=x), mode="rw", array_inline_threshold=len(x) + 1
+        ).file_handle
+        buff.seek(0)
+        assert str(list(x)).encode("utf-8") in buff.read()
+
+        # now we create an array longer than the default threshold
+        y = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+        buff2 = WeldxFile(tree=dict(x=y), mode="rw").file_handle
+        buff2.seek(0)
+        data = buff2.read()
+        assert b"BLOCK" in data
+        assert str(list(y)).encode("utf-8") not in data
+
+    @staticmethod
+    def test_array_inline_threshold_sync():
+        x = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+
+        with WeldxFile(mode="rw") as wx:
+            wx.update(x=x)
+            wx.sync(array_inline_threshold=len(x) + 1)
+            buff3 = wx.file_handle
+            buff3.seek(0)
+            data3 = buff3.read()
+            assert b"BLOCK" not in data3
+
+    @staticmethod
+    def test_array_inline_threshold_write_to():
+        x = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+        buff = WeldxFile(tree=dict(x=x), mode="rw").write_to(
+            array_inline_threshold=len(x) + 1
+        )
+        assert b"BLOCK" not in buff.read()
+
+    @staticmethod
+    def test_array_inline_threshold_():
+        pass

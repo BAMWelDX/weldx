@@ -9,6 +9,12 @@
 added
 =====
 
+- `WeldxFile` handles an ``array_inline_threshold`` parameter to indicate if short arrays
+  will be serialized as strings, or as binary block. Note that this not affect arrays,
+  which are being shared across several objects in the same file.
+  `[#643] <https://github.com/BAMWelDX/weldx/pull/643>`__
+
+
 removed
 =======
 
