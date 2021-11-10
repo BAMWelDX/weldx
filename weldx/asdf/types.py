@@ -1,6 +1,5 @@
 import functools
 import re
-from copy import copy
 from typing import List, Union
 
 from asdf.asdf import SerializationContext
