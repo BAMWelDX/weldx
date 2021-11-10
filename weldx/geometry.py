@@ -2538,6 +2538,9 @@ class SpatialData:
                 add_dims=["n"],
             )
 
+        # make sure we have correct dimension order
+        self.coordinates = self.coordinates.transpose(..., "n", "c")
+
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
                 self.triangles = np.array(self.triangles, dtype="uint")
@@ -2801,7 +2804,7 @@ class SpatialData:
     @property
     def is_time_dependent(self) -> bool:
         """Return `True` if the coordinates are time dependent."""
-        return "time" in self.coordinates.coords
+        return "time" in self.coordinates.dims
 
     @property
     def additional_dims(self) -> List[str]:
