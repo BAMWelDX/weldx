@@ -1,16 +1,27 @@
 """Utilities for asdf files."""
-import io
-from collections.abc import Mapping
+
 from distutils.version import LooseVersion
-from io import BytesIO
+from io import BytesIO, TextIOBase
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Type, Union
+from typing import (
+    AbstractSet,
+    Any,
+    Callable,
+    Dict,
+    Hashable,
+    List,
+    Mapping,
+    MutableMapping,
+    Tuple,
+    Type,
+    Union,
+)
 from warnings import warn
 
 import asdf
 from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
-from asdf.extension._extension import Extension
+from asdf.extension import Extension
 from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
@@ -240,7 +251,7 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
         return b"".join(iter(readline_replace_eol, None))
 
     if isinstance(file, types_file_like.__args__):
-        if isinstance(file, io.TextIOBase):
+        if isinstance(file, TextIOBase):
             raise ValueError(
                 "cannot read files opened in text mode. " "Please open in binary mode."
             )
@@ -540,6 +551,82 @@ def _get_instance_shape(
         if hasattr(converter, "shape_from_tagged"):
             return converter.shape_from_tagged(instance_dict)
     return None
+
+
+class _ProtectedViewDict(MutableMapping):
+    def __init__(self, protected_keys, data=None):
+        super(_ProtectedViewDict, self).__init__()
+        self.__data = data
+        self.protected_keys = protected_keys
+
+    @property
+    def _data(self):
+        return self
+
+    def __len__(self) -> int:
+        return len(self.keys())
+
+    def __getitem__(self, key):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            raise KeyError
+        return self.__data.get(key)
+
+    def __delitem__(self, key):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            return
+        del self.__data[key]
+
+    def __setitem__(self, key, value):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            return
+        self.__data[key] = value
+
+    def keys(self) -> AbstractSet:
+        return {k for k in self.__data.keys() if k not in self.protected_keys}
+
+    def __iter__(self):
+        return (k for k in self.keys())
+
+    def __contains__(self, item):
+        return item in self.keys()
+
+    def update(
+        self, mapping: Mapping[Hashable, Any], **kwargs: Any
+    ):  # pylint: disable=W0221
+        _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
+        if any(key in self.protected_keys for key in _mapping.keys()):
+            self._warn_protected_keys()
+            _mapping = {
+                k: v for k, v in _mapping.items() if k not in self.protected_keys
+            }
+
+        self.__data.update(_mapping)
+
+    def popitem(self) -> Tuple[Hashable, Any]:
+        for k in self.keys():
+            if k not in self.protected_keys:
+                return k, self.pop(k)
+
+        raise KeyError
+
+    def clear(self):
+        """Clear all data except the protected keys."""
+        _protected_data = {k: self.__data.pop(k) for k in self.protected_keys}
+        self.__data.clear()
+        self.__data.update(_protected_data)  # re-add protected data.
+        assert len(self) == 0
+
+    def _warn_protected_keys(self, stacklevel=3):
+        import warnings
+
+        warnings.warn(
+            "You tried to manipulate an ASDF internal structure"
+            f" (currently protected: {self.protected_keys}",
+            stacklevel=stacklevel,
+        )
 
 
 def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:
