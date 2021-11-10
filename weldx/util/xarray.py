@@ -677,7 +677,7 @@ def xr_interp_coordinates_in_time(
         Interpolated data
 
     """
-    if "time" not in da.coords:
+    if "time" not in da.dims:  # not time dependent
         return da
 
     times = Time(times).as_pandas_index()
