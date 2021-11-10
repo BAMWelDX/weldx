@@ -497,6 +497,7 @@ def test_issue_289_interp_outside_time_range(
     exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
     exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
 
+    assert lcs_interp.is_time_dependent is False
     assert lcs_interp.time is None
     assert lcs_interp.coordinates.values.shape == (3,)
     assert lcs_interp.orientation.values.shape == (3, 3)
@@ -518,7 +519,8 @@ def test_interp_time_discrete_single_time():
     exp_orient = WXRotation.from_euler("x", 90, degrees=True).as_matrix()
 
     lcs_interp = lcs.interp_time("2s")
-    assert lcs_interp.time is None
+    assert lcs_interp.is_time_dependent is False
+    assert lcs_interp.time.equals(Time("2s"))
     assert lcs_interp.coordinates.values.shape == (3,)
     assert lcs_interp.orientation.values.shape == (3, 3)
     assert np.all(lcs_interp.coordinates.data == exp_coords)

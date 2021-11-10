@@ -668,7 +668,10 @@ class Time:
         if "time" in time.coords:
             time = time.time
         time_ref = time.weldx.time_ref
-        time_index = pd.Index(time.values)
+        if time.shape:
+            time_index = pd.Index(time.values)
+        else:
+            time_index = pd.Index([time.values])
         if time_ref is not None:
             time_index = time_index + time_ref
         return time_index
