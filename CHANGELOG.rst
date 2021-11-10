@@ -19,8 +19,15 @@ changes
    from the dictionary interface. To access these, there are separate
    properties `[#625] <https://github.com/BAMWeldX/weldx/pull/625>`__.
 
+-  Allow handling of ``time`` values as singular coordinates without
+   dimensions in some classes `[#635]
+   <https://github.com/BAMWeldX/weldx/pull/635>`__.
+
 fixes
 =====
+
+-  Fix wrong dimension order being passed through in `SpatialData`
+   `[#635] <https://github.com/BAMWeldX/weldx/pull/635>`__.
 
 documentation
 =============
