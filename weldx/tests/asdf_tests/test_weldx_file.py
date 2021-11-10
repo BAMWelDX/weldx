@@ -588,7 +588,3 @@ class TestWeldXFile:
             array_inline_threshold=len(x) + 1
         )
         assert b"BLOCK" not in buff.read()
-
-    @staticmethod
-    def test_array_inline_threshold_():
-        pass

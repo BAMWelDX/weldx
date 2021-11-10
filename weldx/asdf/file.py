@@ -3,7 +3,6 @@ import copy
 import io
 import pathlib
 import warnings
-
 from collections.abc import MutableMapping, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
@@ -23,7 +22,7 @@ from typing import (
 
 import asdf
 import numpy as np
-from asdf import AsdfFile, generic_io, config_context
+from asdf import AsdfFile, config_context, generic_io
 from asdf import open as open_asdf
 from asdf.exceptions import AsdfWarning
 from asdf.tags.core import Software
