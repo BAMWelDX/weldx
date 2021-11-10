@@ -15,6 +15,10 @@ removed
 changes
 =======
 
+- `WeldxFile` now raises an exception, if a warning is emitted during loading the weldx
+  ASDF extension, this should prevent erroneous data during loading, for example
+  missing dependencies. `[#641] <https://github.com/BAMWelDX/weldx/pull/641>`__
+
 -  `WeldxFile` now hides ASDF added fields like history and asdf_library
    from the dictionary interface. To access these, there are separate
    properties `[#625] <https://github.com/BAMWeldX/weldx/pull/625>`__.
