@@ -3,7 +3,53 @@
 ###############
 
 ********************
- 0.5.1 (unreleased)
+ 0.X.X (unreleased)
+********************
+
+added
+=====
+
+removed
+=======
+
+changes
+=======
+
+- `WeldxFile` now raises an exception, if a warning is emitted during loading the weldx
+  ASDF extension, this should prevent erroneous data during loading, for example
+  missing dependencies. `[#641] <https://github.com/BAMWelDX/weldx/pull/641>`__
+
+-  `WeldxFile` now hides ASDF added fields like history and asdf_library
+   from the dictionary interface. To access these, there are separate
+   properties `[#625] <https://github.com/BAMWeldX/weldx/pull/625>`__.
+
+-  Allow handling of ``time`` values as singular coordinates without
+   dimensions in some classes `[#635]
+   <https://github.com/BAMWeldX/weldx/pull/635>`__.
+
+fixes
+=====
+
+-  Fix wrong dimension order being passed through in `SpatialData`
+   `[#635] <https://github.com/BAMWeldX/weldx/pull/635>`__.
+
+documentation
+=============
+
+ASDF
+====
+
+deprecations
+============
+
+dependencies
+============
+
+-  Removed ``ipykernel`` dependency. `[#634]
+   <https://github.com/BAMWelDX/weldx/pull/634>`__
+
+********************
+ 0.5.1 (04.11.2021)
 ********************
 
 added
@@ -19,9 +65,6 @@ added
 
 -  Added `weldx.asdf.util.get_schema_tree` utility to display schema
    files. `[#610] <https://github.com/BAMWelDX/weldx/pull/610>`__
-
-removed
-=======
 
 changes
 =======
@@ -43,11 +86,22 @@ changes
    `None`, the data will be transformed and stored at this coordinate
    system. `[#612] <https://github.com/BAMWelDX/weldx/pull/612>`__
 
+-  improve dimension handling of `SpatialData` `[#622]
+   <https://github.com/BAMWelDX/weldx/pull/622>`__
+
+-  The `MathematicalExpression` now supports `xarray.DataArray` as
+   parameters. Furthermore, multidimensional parameters of a
+   `MathematicalExpression` that is passed to a `TimeSeries` are no
+   longer required to have an extra dimension that represents time.
+   `[#621] <https://github.com/BAMWelDX/weldx/pull/621>`__
+
 fixes
 =====
 
 -  fix broken `Time.all_close` to now work as intended `[#603]
    <https://github.com/BAMWelDX/weldx/pull/603>`__
+-  fix `weldx.asdf.util.get_yaml_header` to work correctly with windows
+   line endings. `[#609] <https://github.com/BAMWelDX/weldx/pull/609>`__
 
 documentation
 =============
@@ -59,8 +113,15 @@ documentation
 ASDF
 ====
 
+-  fix ``process`` missing as required property in
+   ``single_pass_weld-0.1.0.yaml`` `[#627]
+   <https://github.com/BAMWelDX/weldx/pull/627>`__
+
 deprecations
 ============
+
+-  removed ``welding.util.lcs_coords_from_ts`` `[#620]
+   <https://github.com/BAMWelDX/weldx/pull/620>`__
 
 dependencies
 ============
@@ -875,7 +936,7 @@ added
    object represents a unity transformation step. `[#177]
    <https://github.com/BAMWelDX/weldx/pull/177>`__
 
--  added `welding.util.lcs_coords_from_ts` function `[#199]
+-  added ``welding.util.lcs_coords_from_ts`` function `[#199]
    <https://github.com/BAMWelDX/weldx/pull/199>`__
 
 -  add a tutorial with advanced use case for combining groove

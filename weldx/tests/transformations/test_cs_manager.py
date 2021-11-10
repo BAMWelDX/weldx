@@ -1438,7 +1438,7 @@ def test_get_local_coordinate_system_timeseries(
         The expected rotation angles around the z-axis
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
     ts = TimeSeries(me)
     rotation = WXRotation.from_euler("z", [0, 90], degrees=True).as_matrix()
     translation = [[1, 0, 0], [2, 0, 0]]
@@ -1535,7 +1535,7 @@ def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
         Set to `True` if the transformation should raise
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
     ts = TimeSeries(me)
     translation = [[1, 0, 0], [2, 0, 0]]
 
@@ -2614,6 +2614,7 @@ def test_issue_289_interp_outside_time_range(
     exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
     exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
 
+    assert cs_br.is_time_dependent is False
     assert cs_br.time is None
     assert cs_br.coordinates.values.shape == (3,)
     assert cs_br.orientation.values.shape == (3, 3)

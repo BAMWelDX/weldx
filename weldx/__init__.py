@@ -30,6 +30,16 @@ These classes and functions are used to define welding processes.
     GmawProcess
     get_groove
 
+**Unit handling**
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Unit handling
+    :template: class-template_docstring.rst
+
+    Q_
+    U_
+
 **Data handling and transformation**
 
 .. autosummary::
@@ -37,8 +47,6 @@ These classes and functions are used to define welding processes.
     :caption: Data handling and transformation
     :template: class-template.rst
 
-    Q_
-    U_
     Time
     TimeSeries
     MathematicalExpression
@@ -118,7 +126,7 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 # constants - should be imported first, no internal weldx deps
-from .constants import Q_, U_
+from weldx.constants import Q_, U_
 
 # main modules
 import weldx.time

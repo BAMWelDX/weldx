@@ -1,15 +1,27 @@
 """Utilities for asdf files."""
-from collections.abc import Mapping
+
 from distutils.version import LooseVersion
-from io import BytesIO
+from io import BytesIO, TextIOBase
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Type, Union
+from typing import (
+    AbstractSet,
+    Any,
+    Callable,
+    Dict,
+    Hashable,
+    List,
+    Mapping,
+    MutableMapping,
+    Tuple,
+    Type,
+    Union,
+)
 from warnings import warn
 
 import asdf
 from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
-from asdf.extension._extension import Extension
+from asdf.extension import Extension
 from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
@@ -17,13 +29,11 @@ from boltons.iterutils import get_path, remap
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
 from weldx.types import (
-    SupportsFileReadOnly,
     SupportsFileReadWrite,
     types_file_like,
     types_path_and_file_like,
     types_path_like,
 )
-from weldx.util import deprecated
 
 _USE_WELDX_FILE = False
 _INVOKE_SHOW_HEADER = False
@@ -231,36 +241,32 @@ def get_yaml_header(file: types_path_and_file_like, parse=False) -> Union[str, d
     """
 
     def read_header(handle):
-        # reads lines until the byte string "...\n" is approached.
-        return b"".join(iter(handle.readline, b"...\n"))
+        # reads lines until the line "...\n" is reached.
+        def readline_replace_eol():
+            line = handle.readline()
+            if (not line) or (line in {b"...\n", b"...\r\n"}):
+                raise StopIteration
+            return line
 
-    if isinstance(file, SupportsFileReadWrite):
-        file.seek(0)
-        code = read_header(file)
-    elif isinstance(file, SupportsFileReadOnly):
+        return b"".join(iter(readline_replace_eol, None))
+
+    if isinstance(file, types_file_like.__args__):
+        if isinstance(file, TextIOBase):
+            raise ValueError(
+                "cannot read files opened in text mode. " "Please open in binary mode."
+            )
+        if isinstance(file, SupportsFileReadWrite):
+            file.seek(0)
         code = read_header(file)
     elif isinstance(file, types_path_like.__args__):
         with open(file, "rb") as f:
             code = read_header(f)
+    else:
+        raise TypeError(f"cannot read yaml header from {type(file)}.")
 
     if parse:
         return asdf.yamlutil.load_tree(code)
     return code.decode("utf-8")
-
-
-@deprecated("0.4.0", "0.5.0", " _write_buffer was renamed to write_buffer")
-def _write_buffer(*args, **kwargs):
-    return write_buffer(*args, **kwargs)
-
-
-@deprecated("0.4.0", "0.5.0", " _read_buffer was renamed to read_buffer")
-def _read_buffer(*args, **kwargs):
-    return read_buffer(*args, **kwargs)
-
-
-@deprecated("0.4.0", "0.5.0", " _write_read_buffer was renamed to write_read_buffer")
-def _write_read_buffer(*args, **kwargs):
-    return write_read_buffer(*args, **kwargs)
 
 
 def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
@@ -345,12 +351,6 @@ def view_tree(file: types_path_and_file_like, path: Tuple = None, **kwargs):
         yaml_dict = get_path(yaml_dict, path)
     kwargs["root"] = root
     return JSON(yaml_dict, **kwargs)
-
-
-@deprecated("0.4.0", "0.5.0", " asdf_json_repr was renamed to view_tree")
-def asdf_json_repr(file: Union[str, Path, BytesIO], path: Tuple = None, **kwargs):
-    """See `view_tree` function."""
-    return view_tree(file, path, **kwargs)
 
 
 def _fullname(obj):
@@ -551,6 +551,82 @@ def _get_instance_shape(
         if hasattr(converter, "shape_from_tagged"):
             return converter.shape_from_tagged(instance_dict)
     return None
+
+
+class _ProtectedViewDict(MutableMapping):
+    def __init__(self, protected_keys, data=None):
+        super(_ProtectedViewDict, self).__init__()
+        self.__data = data
+        self.protected_keys = protected_keys
+
+    @property
+    def _data(self):
+        return self
+
+    def __len__(self) -> int:
+        return len(self.keys())
+
+    def __getitem__(self, key):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            raise KeyError
+        return self.__data.get(key)
+
+    def __delitem__(self, key):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            return
+        del self.__data[key]
+
+    def __setitem__(self, key, value):
+        if key in self.protected_keys:
+            self._warn_protected_keys()
+            return
+        self.__data[key] = value
+
+    def keys(self) -> AbstractSet:
+        return {k for k in self.__data.keys() if k not in self.protected_keys}
+
+    def __iter__(self):
+        return (k for k in self.keys())
+
+    def __contains__(self, item):
+        return item in self.keys()
+
+    def update(
+        self, mapping: Mapping[Hashable, Any], **kwargs: Any
+    ):  # pylint: disable=W0221
+        _mapping = dict(mapping, **kwargs)  # merge mapping and kwargs
+        if any(key in self.protected_keys for key in _mapping.keys()):
+            self._warn_protected_keys()
+            _mapping = {
+                k: v for k, v in _mapping.items() if k not in self.protected_keys
+            }
+
+        self.__data.update(_mapping)
+
+    def popitem(self) -> Tuple[Hashable, Any]:
+        for k in self.keys():
+            if k not in self.protected_keys:
+                return k, self.pop(k)
+
+        raise KeyError
+
+    def clear(self):
+        """Clear all data except the protected keys."""
+        _protected_data = {k: self.__data.pop(k) for k in self.protected_keys}
+        self.__data.clear()
+        self.__data.update(_protected_data)  # re-add protected data.
+        assert len(self) == 0
+
+    def _warn_protected_keys(self, stacklevel=3):
+        import warnings
+
+        warnings.warn(
+            "You tried to manipulate an ASDF internal structure"
+            f" (currently protected: {self.protected_keys}",
+            stacklevel=stacklevel,
+        )
 
 
 def get_schema_tree(schemafile: Union[str, Path], *, drop: set = None) -> dict:

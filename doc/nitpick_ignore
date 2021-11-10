@@ -28,12 +28,14 @@ py:class xarray.core.dataset.Dataset
 py:class xarray.DataArray
 py:class xarray.Dataset
 
-# pint (0.17)
+# pint (0.17 / 0.18)
 py:class pint.quantity.build_quantity_class.<locals>.Quantity
 py:obj pint.quantity.Quantity
 py:class sequence of pint.Quantity
 py:class list of pint.Quantity
 py:class UnitsContainer
+py:class UnitLike
+py:class pint.quantity.Magnitude
 
 # k3d
 py:class k3d.plot
