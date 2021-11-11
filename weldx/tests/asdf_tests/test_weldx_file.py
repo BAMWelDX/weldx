@@ -503,16 +503,17 @@ class TestWeldXFile:
             f.close()
 
         # file sizes should be almost equal (array inlining in wxfile).
-        assert (
-            pathlib.Path("test.asdf").stat().st_size
-            >= pathlib.Path("test.wx").stat().st_size
-        )
+        a = pathlib.Path("test.asdf").stat().st_size
+        b = pathlib.Path("test.wx").stat().st_size
+        assert a >= b
 
-        def _read(fn):
-            with open(fn, "br") as fh:
-                return fh.read()
+        if a == b:
 
-        assert _read("test.asdf") == _read("test.wx")
+            def _read(fn):
+                with open(fn, "br") as fh:
+                    return fh.read()
+
+            assert _read("test.asdf") == _read("test.wx")
 
     @pytest.mark.parametrize("protected_key", _PROTECTED_KEYS)
     def test_cannot_update_del_protected_keys(self, protected_key):
