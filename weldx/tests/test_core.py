@@ -6,6 +6,7 @@ import pandas as pd
 import pint
 import pytest
 import xarray as xr
+from xarray import DataArray
 
 from weldx.constants import Q_, U_
 from weldx.core import GenericSeries, MathematicalExpression, TimeSeries
@@ -524,16 +525,40 @@ class TestGenericSeries:
             # 4 dims without units - 0 params - custom dimension names
             (dict(a="d1", x="d2", b="d3", y="d4"), None, None, None),
             # ERROR - dims with identical dimension name
-            (dict(a="d1", x="d2", b="d1", y="d4"), None, None, None),
+            (dict(a="d1", x="d2", b="d1", y="d4"), None, None, ValueError),
             # 4 dims with units - 0 params
             (None, dict(a="m", x="m", b="K", y="m*m/K"), None, None),
             # ERROR - 4 dims with incompatible units - 0 params
             (None, dict(a="m", x="m", b="K", y="m/K"), None, ValueError),
-            # 2 dims with dims - 2 scalar params
+            # 2 dims with units - 2 scalar params
             (None, dict(x="m", y="m*m/K"), dict(a="3m", b="300K"), None),
+            # ERROR - parameter and variable units are incompatible
+            (None, dict(b="m", y="m"), dict(a="3m", x="300K"), ValueError),
+            # 3 dims with units - 1 array parameter (quantity)
+            (None, None, dict(y=Q_([1, 2], "m")), None),
+            # 3 dims with units - 1 array parameter (tuple)
+            (None, None, dict(y=(Q_([1, 2], "m"), "d1")), None),
+            # 3 dims with units - 1 array parameter (DataArray)
+            (None, None, dict(y=DataArray(Q_([1, 2], "m"))), None),
+            # ERROR - expression has no variables
+            (None, None, dict(a="3m", x="4m", b="5m", y="6m"), ValueError),
+            # ERROR - Parameter dimension is also a variable dimension (tuple)
+            (None, None, dict(y=(Q_([1, 2], "m"), "a")), ValueError),
+            # ERROR - Parameter dimension is also a variable dimension (DataArray)
+            (None, None, dict(y=DataArray(Q_([1, 2], "m"), dims=["x"])), ValueError),
+            # ERROR - Same parameter dimensions of different sizes
+            (
+                None,
+                None,
+                dict(x=(Q_([1, 2], "m"), "a"), y=(Q_([1, 2, 3], "m"), "a")),
+                ValueError,
+            ),
         ],
     )
     def test_init_expression(dims, units, parameters, exception):
+        if units is None and parameters is not None:
+            units = {k: "m" for k in ["a", "b", "x", "y"] if k not in parameters.keys()}
+
         expr = "a*x + b*y"
         if exception is not None:
             with pytest.raises(exception):
@@ -629,3 +654,5 @@ class TestGenericSeries:
                     exp_data[i, j, k] = (a * u_v + b * v_v + w_v).m
 
         assert np.allclose(gs_interp.data, Q_(exp_data, "m*m"))
+
+    # todo: 2d variables not allowed
