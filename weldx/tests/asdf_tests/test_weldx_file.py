@@ -14,6 +14,7 @@ from jsonschema import ValidationError
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
+from weldx.asdf.file import _PROTECTED_KEYS
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
 from weldx.util import compare_nested
@@ -21,7 +22,7 @@ from weldx.util import compare_nested
 SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 
 
-class ReadOnlyFile:
+class _ReadOnlyFile:
     """Simulate a read-only file."""
 
     def __init__(self, tmpdir):  # noqa: D107
@@ -42,7 +43,7 @@ class ReadOnlyFile:
         return True
 
 
-class WritableFile:
+class _WritableFile:
     """Example of a class implementing SupportsFileReadWrite."""
 
     def __init__(self):  # noqa: D107
@@ -70,7 +71,7 @@ class WritableFile:
 
 def test_protocol_check(tmpdir):
     """Instance checks."""
-    assert isinstance(WritableFile(), SupportsFileReadWrite)
+    assert isinstance(_WritableFile(), SupportsFileReadWrite)
     assert isinstance(BytesIO(), SupportsFileReadWrite)
 
     # real file:
@@ -176,7 +177,7 @@ class TestWeldXFile:
     @staticmethod
     def test_create_writable_protocol():
         """Interface test for writable files."""
-        f = WritableFile()
+        f = _WritableFile()
         WeldxFile(f, tree=dict(test="yes"), mode="rw")
         new_file = TestWeldXFile.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
@@ -184,13 +185,13 @@ class TestWeldXFile:
     @staticmethod
     def test_create_readonly_protocol(tmpdir):
         """A read-only file should be supported by ASDF."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         WeldxFile(f)
 
     @staticmethod
     def test_read_only_raise_on_write(tmpdir):
         """Read-only files cannot be written to."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         with pytest.raises(ValueError):
             WeldxFile(f, mode="rw")
 
@@ -512,3 +513,40 @@ class TestWeldXFile:
                 return fh.read()
 
         assert _read("test.asdf") == _read("test.wx")
+
+    @pytest.mark.parametrize("protected_key", _PROTECTED_KEYS)
+    def test_cannot_update_del_protected_keys(self, protected_key):
+        """Ensure we cannot manipulate protected keys."""
+        expected_match = "manipulate an ASDF internal structure"
+        warning_type = UserWarning
+        with pytest.raises(KeyError):  # try to obtain key from underlying dict.
+            _ = self.fh.data[protected_key]
+
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.update({protected_key: None})
+        with pytest.warns(warning_type, match=expected_match):
+            del self.fh[protected_key]
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.pop(protected_key)
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh[protected_key] = NotImplemented
+
+    def test_popitem_remain_protected_keys(self):
+        """Ensure we cannot manipulate protected keys."""
+        keys = []
+
+        while len(self.fh):
+            key, _ = self.fh.popitem()
+            keys.append(key)
+        assert keys == ["wx_metadata"]
+
+    def test_len_proteced_keys(self):
+        """Should only contain key 'wx_metadata'."""
+        assert len(self.fh) == 1
+
+    def test_keys_not_in_protected_keys(self):
+        """Protected keys do not show up in keys()."""
+        assert self.fh.keys() not in set(_PROTECTED_KEYS)
+
+        for x in iter(self.fh):
+            assert x not in _PROTECTED_KEYS

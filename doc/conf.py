@@ -6,8 +6,7 @@
 
 # Local build command ------------------------------------------------------------------
 
-# sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
-# -D nbsphinx_kernel_name="weldx" -D nbsphinx_execute="never"
+# sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -D nbsphinx_execute="never"
 
 # -- Path setup --------------------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -21,7 +20,6 @@ import shutil
 import sys
 import typing
 
-import traitlets
 from sphinx.util.logging import getLogger
 
 logger = getLogger("weldx_sphinx_conf")

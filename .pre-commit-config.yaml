@@ -8,7 +8,7 @@ ci:
   autoupdate_schedule: weekly
   skip: []
   submodules: false
-exclude: '.*.weldx|.*.wx|.*.asdf'
+exclude: '.*.weldx$|.*.wx$|.*.asdf$'
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
@@ -50,3 +50,9 @@ repos:
     hooks:
       - id: nbqa-black
       - id: nbqa-isort
+  - repo: https://github.com/roy-ht/pre-commit-jupyter
+    rev: v1.2.1
+    hooks:
+      - id: jupyter-notebook-cleanup
+        args:
+          - --remove-kernel-metadata

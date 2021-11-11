@@ -2614,6 +2614,7 @@ def test_issue_289_interp_outside_time_range(
     exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
     exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
 
+    assert cs_br.is_time_dependent is False
     assert cs_br.time is None
     assert cs_br.coordinates.values.shape == (3,)
     assert cs_br.orientation.values.shape == (3, 3)
