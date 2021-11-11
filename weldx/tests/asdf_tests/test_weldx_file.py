@@ -502,10 +502,10 @@ class TestWeldXFile:
             f.update()
             f.close()
 
-        # compare data
+        # file sizes should be almost equal (array inlining in wxfile).
         assert (
             pathlib.Path("test.asdf").stat().st_size
-            == pathlib.Path("test.wx").stat().st_size
+            >= pathlib.Path("test.wx").stat().st_size
         )
 
         def _read(fn):
