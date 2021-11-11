@@ -620,11 +620,12 @@ class CoordinateSystemManager:
 
         Raises
         ------
-        ValueError, if data_name has not been assigned yet.
+        ValueError
+            If data_name has not been assigned yet.
         """
         nodes = self.graph.nodes
         for cs in nodes:
-            for name, data in nodes[cs]["data"].items():
+            for name in nodes[cs]["data"].keys():
                 if name == data_name:
                     nodes[cs]["data"].pop(data_name)
                     return
