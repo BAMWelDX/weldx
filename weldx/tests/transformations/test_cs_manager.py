@@ -2230,6 +2230,15 @@ def test_assign_data_exceptions(arguments, exception_type, test_name):
         csm.assign_data(*arguments)
 
 
+def test_remove_data():
+    csm = setup_csm_test_assign_data()
+    data_name = "foo"
+    csm.assign_data([[1, 2, 3], [3, 2, 1]], data_name, "root")
+    assert data_name in csm.data_names
+    csm.remove_data(data_name)
+    assert data_name not in csm.data_names
+
+
 # test_has_data_exceptions -------------------------------------------------------------
 
 

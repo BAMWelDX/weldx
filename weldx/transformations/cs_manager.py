@@ -610,6 +610,27 @@ class CoordinateSystemManager:
 
         self._graph.nodes[reference_system]["data"][data_name] = data
 
+    def remove_data(self, data_name: str):
+        """Remove the assigned data with given name.
+
+        Parameters
+        ----------
+        data_name :
+            The previously assigned data name.
+
+        Raises
+        ------
+        ValueError, if data_name has not been assigned yet.
+        """
+        nodes = self.graph.nodes
+        for cs in nodes:
+            for name, data in nodes[cs]["data"].items():
+                if name == data_name:
+                    nodes[cs]["data"].pop(data_name)
+                    return
+
+        raise ValueError(f"Given data_name '{data_name}' has not been assigned.")
+
     def create_cs(
         self,
         coordinate_system_name: str,
