@@ -2231,6 +2231,7 @@ def test_assign_data_exceptions(arguments, exception_type, test_name):
 
 
 def test_remove_data():
+    """Test remove data."""
     csm = setup_csm_test_assign_data()
     data_name = "foo"
     csm.assign_data([[1, 2, 3], [3, 2, 1]], data_name, "root")
@@ -2430,6 +2431,7 @@ def test_unmerge_multi_data():
 @pytest.mark.parametrize("data_cs_parent", ["rp", "a", "m"])
 @pytest.mark.parametrize("data_cs_child", ["rc", "b", "m"])
 def test_merge_data_name_collision(data_cs_parent, data_cs_child):
+    """Check name collisions are handled appropriately."""
     csm_parent = CSM("rp", "parent")
     csm_parent.create_cs("a", "rp")
     csm_parent.create_cs("m", "rp")
