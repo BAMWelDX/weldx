@@ -1697,7 +1697,7 @@ class CoordinateSystemManager:
         if not isinstance(data, xr.DataArray):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
-        time = data.time if "time" in data.dims else None
+        time = data.time if "time" in data.coords else None
         lcs = self.get_cs(
             source_coordinate_system_name, target_coordinate_system_name, time=time
         )

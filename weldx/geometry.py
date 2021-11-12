@@ -2538,6 +2538,9 @@ class SpatialData:
                 add_dims=["n"],
             )
 
+        # make sure we have correct dimension order
+        self.coordinates = self.coordinates.transpose(..., "n", "c")
+
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
                 self.triangles = np.array(self.triangles, dtype="uint")
