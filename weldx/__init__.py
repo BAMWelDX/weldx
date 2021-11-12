@@ -41,6 +41,7 @@ These classes and functions are used to define welding processes.
     U_
     Time
     TimeSeries
+    GenericSeries
     MathematicalExpression
     CoordinateSystemManager
     LocalCoordinateSystem
@@ -131,7 +132,7 @@ import weldx.welding
 
 # class imports to weldx namespace
 from weldx.config import Config
-from weldx.core import MathematicalExpression, TimeSeries
+from weldx.core import GenericSeries, MathematicalExpression, TimeSeries
 from weldx.geometry import (
     ArcSegment,
     Geometry,

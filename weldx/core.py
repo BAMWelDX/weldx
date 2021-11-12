@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     import matplotlib.pyplot
     import sympy
 
-__all__ = ["MathematicalExpression", "TimeSeries"]
+__all__ = ["GenericSeries", "MathematicalExpression", "TimeSeries"]
 
 
 _me_parameter_types = Union[pint.Quantity, str, Tuple[pint.Quantity, str], xr.DataArray]
@@ -738,7 +738,7 @@ class GenericSeries:
         self,
         data: Union[pint.Quantity, xr.DataArray, MathematicalExpression],
         dims: Union[List[str], Dict[str, Union[str, pint.Unit]]] = None,
-        coordinates: Union[None, pint.Quantity, Dict[str, pint.Quantity]] = None,
+        coords: Union[None, pint.Quantity, Dict[str, pint.Quantity]] = None,
         units: Dict[str, Union[str, pint.Unit]] = None,
         interpolation: str = "linear",
         parameters: Dict[str, Union[str, pint.Quantity]] = None,
@@ -754,7 +754,7 @@ class GenericSeries:
             The names of the dimensions. The order must be adjusted to the data's shape
             (outer dimensions first). For mathematical expressions, the dimensions
             match the variable names and need not to be specified.
-        coordinates :
+        coords :
             The coordinate values in case the data is a set of discrete values.
         interpolation :
             The method that should be used when interpolating between discrete values.
@@ -767,19 +767,20 @@ class GenericSeries:
         self._units: pint.Unit = None
 
         if isinstance(data, (pint.Quantity, xr.DataArray)):
-            self._init_discrete(data, dims, coordinates)
+            self._init_discrete(data, dims, coords)
         elif isinstance(data, (MathematicalExpression, str)):
             self._init_expression(data, dims, parameters, units)
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
-    def _init_discrete(self, data, dims, coordinates):
+    def _init_discrete(self, data, dims, coords):
         """Initialize the internal data with discrete values."""
 
         # todo: preserve units of coordinates somehow
         if not isinstance(data, xr.DataArray):
-            coordinates = {k: Q_(v).m for k, v in coordinates.items()}
-            data = xr.DataArray(data=data, dims=dims, coords=coordinates)
+            if coords is not None:
+                coords = {k: Q_(v).m for k, v in coords.items()}
+            data = xr.DataArray(data=data, dims=dims, coords=coords)
         else:
             # todo check data structure
             pass
@@ -856,7 +857,6 @@ class GenericSeries:
                 }
                 expr.evaluate(**array_params)
         except ValueError as e:
-            # todo: define terms
             raise ValueError(
                 "During the evaluation of the expression mismatching array lengths' "
                 "were detected. Some possible causes are:\n"
@@ -886,6 +886,20 @@ class GenericSeries:
             else:
                 v = Q_(v)
             params[k] = v
+
+    def __repr__(self):
+        """Give __repr__ output."""
+        representation = "<GenericSeries>\n"
+        if isinstance(self._data, xr.DataArray):
+            representation += f"Values:\n{self._data.data.magnitude}\n"
+        else:
+            representation += self.data.__repr__().replace(
+                "<MathematicalExpression>", ""
+            )
+        representation += f"Dimensions:\n\t{self.dims}\n"
+        if isinstance(self._data, xr.DataArray):
+            representation += f"Coordinates:\n\t{self.coordinates}\n"
+        return representation + f"Units:\n\t{self.units}\n"
 
     def __add__(self, other):
         # this should mostly be moved to the MathematicalExpression
@@ -984,7 +998,9 @@ class GenericSeries:
     @property
     def coordinates(self) -> Union[None, pint.Quantity, Dict[str, pint.Quantity]]:
         """Get the coordinates of the generic series."""
-        raise NotImplementedError
+        if isinstance(self._data, xr.DataArray):
+            return self._data.coords
+        return None
 
     @property
     def coordinate_names(self) -> List[str]:
@@ -1036,4 +1052,4 @@ class GenericSeries:
         """Get the units of the generic series data."""
         if self._units is not None:
             return self._units
-        raise NotImplementedError
+        return self._data.data.u
