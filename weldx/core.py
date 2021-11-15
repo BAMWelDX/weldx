@@ -742,7 +742,7 @@ class GenericSeries:
         dims: Union[List[str], Dict[str, Union[str, pint.Unit]]] = None,
         coords: Union[None, pint.Quantity, Dict[str, pint.Quantity]] = None,
         units: Dict[str, Union[str, pint.Unit]] = None,
-        interpolation: str = "linear",
+        interpolation: str = None,
         parameters: Dict[str, Union[str, pint.Quantity]] = None,
     ):
         """Create a generic series.
@@ -767,6 +767,7 @@ class GenericSeries:
         self._symbol_dims: Dict[str, List[str]] = None
         self._shape: Tuple = None
         self._units: pint.Unit = None
+        self._interpolation = "linear"
 
         if isinstance(data, (pint.Quantity, xr.DataArray)):
             self._init_discrete(data, dims, coords)
@@ -941,7 +942,7 @@ class GenericSeries:
 
         if isinstance(self._data, MathematicalExpression):
             data = self._data.evaluate(**input)
-            return data
+            return GenericSeries(data)
 
         return GenericSeries(ut.xr_interp_like(self._data, input))
 
@@ -1008,11 +1009,18 @@ class GenericSeries:
         raise NotImplementedError
 
     @property
-    def data(self) -> Union[xarray.DataArray, MathematicalExpression]:
+    def data(self) -> Union[pint.Quantity, MathematicalExpression]:
         """Get the internal data."""
         if isinstance(self._data, xr.DataArray):
             return self._data.data
         return self._data
+
+    @property
+    def data_array(self) -> Union[xarray.DataArray, MathematicalExpression]:
+        """Get the internal data."""
+        if isinstance(self._data, xr.DataArray):
+            return self._data
+        raise NotImplementedError
 
     @property
     def dims(self) -> List[str]:
@@ -1024,6 +1032,17 @@ class GenericSeries:
             return list(dims)
 
         return self._data.dims
+
+    @property
+    def interpolation(self) -> str:
+        """Get the name of the used interpolation method."""
+        return self._interpolation
+
+    @interpolation.setter
+    def interpolation(self, val: str):
+        if val not in ["linear", "step"]:
+            raise ValueError(f"'{val}' is not a supported interpolation method.")
+        self._interpolation = val
 
     @property
     def ndims(self) -> int:
