@@ -590,7 +590,7 @@ class TestGenericSeries:
         gs = GenericSeries(data, dims, coords)
 
         # perform interpolation
-        gs_interp = gs(params)
+        gs_interp = gs(**params)
 
         # calculate expected results
         params = {k: Q_(v) for k, v in params.items()}
@@ -634,7 +634,7 @@ class TestGenericSeries:
         print(gs.ndims)
 
         # perform interpolation
-        gs_interp = gs(params)
+        gs_interp = gs(**params)
         print(gs_interp)
 
         # calculate expected result

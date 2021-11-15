@@ -734,6 +734,8 @@ class GenericSeries:
     _alias_names: Dict[str, List[str]] = None
     """Allowed alias names for a variable or parameter in an expression"""
 
+    # todo: add limits for dims?
+
     def __init__(
         self,
         data: Union[pint.Quantity, xr.DataArray, MathematicalExpression],
@@ -911,16 +913,11 @@ class GenericSeries:
         #     xarray as the parameters value
         raise NotImplementedError
 
-    def __call__(self, coordinates: Union[Dict[str, pint.Quantity]]) -> GenericSeries:
+    def __call__(self, **kwargs) -> GenericSeries:
         """Interpolate the generic series at discrete points.
 
         Parameters
         ----------
-        coordinates :
-            A dictionary containing discrete coordinate values to evaluate the generic
-            series. The keys must match the corresponding dimension names. If the series
-            contains only a single dimension, the coordinate values can be passed
-            directly
 
         Returns
         -------
@@ -930,7 +927,7 @@ class GenericSeries:
 
         """
         input = {}
-        for i, (k, v) in enumerate(coordinates.items()):
+        for i, (k, v) in enumerate(kwargs.items()):
             v = Q_(v)
             if len(v.shape) == 0:
                 v = np.expand_dims(v, 0)
@@ -944,11 +941,14 @@ class GenericSeries:
 
         if isinstance(self._data, MathematicalExpression):
             data = self._data.evaluate(**input)
-
-            # todo: should return discrete GenericSeries once it is implemented
             return data
 
-        return ut.xr_interp_like(self._data, input)
+        return GenericSeries(ut.xr_interp_like(self._data, input))
+
+    def __getitem__(self, *args):
+        if isinstance(self._data, xr.DataArray):
+            return self._data.__getitem__(*args)
+        return NotImplementedError
 
     def interp_dim(self, dimension: str, coordinates: pint.Quantity) -> GenericSeries:
         """Interpolate only in a single dimension.
@@ -1010,6 +1010,8 @@ class GenericSeries:
     @property
     def data(self) -> Union[xarray.DataArray, MathematicalExpression]:
         """Get the internal data."""
+        if isinstance(self._data, xr.DataArray):
+            return self._data.data
         return self._data
 
     @property
