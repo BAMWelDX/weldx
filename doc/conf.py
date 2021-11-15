@@ -20,7 +20,6 @@ import shutil
 import sys
 import typing
 
-import traitlets
 from sphinx.util.logging import getLogger
 
 logger = getLogger("weldx_sphinx_conf")
@@ -56,7 +55,24 @@ except Exception as ex:
 
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
 
+tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
+
+
 # -- copy tutorial files to doc folder -------------------------------------------------
+def _copy_tut_files():
+    # TODO: git move tutorial files to tutorials_dir, then delete this function
+    logger.info("tutorials dir: %s", tutorials_dir)
+    _exts = ("*.ipynb", "*.py")
+    tutorial_files = []
+    for ext in _exts:
+        tutorial_files.extend(pathlib.Path("./../tutorials/").glob(ext))
+    for f in tutorial_files:
+        shutil.copy(f, tutorials_dir)
+
+
+_copy_tut_files()
+
+
 tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
 logger.info("tutorials dir: %s", tutorials_dir)
 # TODO: git move tutorial files to tutorials_dir!
