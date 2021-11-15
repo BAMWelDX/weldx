@@ -9,7 +9,7 @@
 added
 =====
 
-- `CoordinateSystemManager` can now delete already assigned data with `CoordinateSystemManager.remove_data`.
+- `CoordinateSystemManager` can now delete already assigned data with `CoordinateSystemManager.delete_data`.
   `[#645] <https://github.com/BAMWelDX/weldx/pull/645>`__
 
 removed
