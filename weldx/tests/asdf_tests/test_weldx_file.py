@@ -521,9 +521,9 @@ class TestWeldXFile:
         """Ensure we cannot manipulate protected keys."""
         expected_match = "manipulate an ASDF internal structure"
         warning_type = UserWarning
-        with pytest.warns(WeldxDeprecationWarning):
-            with pytest.raises(KeyError):  # try to obtain key from underlying dict.
-                _ = self.fh.data[protected_key]
+        # try to obtain key from underlying dict.
+        with pytest.raises(KeyError), pytest.warns(WeldxDeprecationWarning):
+            _ = self.fh.data[protected_key]
 
         with pytest.warns(warning_type, match=expected_match):
             self.fh.update({protected_key: None})
