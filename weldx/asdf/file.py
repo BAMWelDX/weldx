@@ -145,8 +145,8 @@ class WeldxFile(_ProtectedViewDict):
         large datasets.
     array_inline_threshold :
         arrays below this threshold will be serialized as string, if larger as binary
-        block. Note that this does not affect arrays, which are being shared across several
-        objects in the same file.
+        block. Note that this does not affect arrays, which are being shared across
+        several objects in the same file.
 
     Examples
     --------
