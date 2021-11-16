@@ -514,6 +514,7 @@ class TestWeldXFile:
 
         assert _read("test.asdf") == _read("test.wx")
 
+    @pytest.mark.filterwarnings("ignore:You tried to manipulate an ASDF internal")
     @pytest.mark.parametrize("protected_key", _PROTECTED_KEYS)
     def test_cannot_update_del_protected_keys(self, protected_key):
         """Ensure we cannot manipulate protected keys."""
