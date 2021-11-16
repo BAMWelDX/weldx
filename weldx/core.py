@@ -941,7 +941,11 @@ class GenericSeries:
             input[k] = v
 
         if isinstance(self._data, MathematicalExpression):
+            # num_expr_sym = self._data.num_variables + len(self._data.parameters)
+            # if len(input) == num_expr_sym:
             data = self._data.evaluate(**input)
+            # else:
+            #    raise NotImplementedError
             return GenericSeries(data)
 
         return GenericSeries(ut.xr_interp_like(self._data, input))
@@ -1029,6 +1033,11 @@ class GenericSeries:
             dims = set()
             for d in self._symbol_dims.values():
                 dims |= set(d)
+            for v in self._data.parameters.values():
+                if not isinstance(v, xr.DataArray):
+                    v = xr.DataArray(v)
+                if v.size > 0:
+                    dims |= set(v.dims)
             return list(dims)
 
         return self._data.dims
