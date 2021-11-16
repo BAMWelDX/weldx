@@ -17,7 +17,7 @@ from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.file import _PROTECTED_KEYS
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
-from weldx.util import compare_nested
+from weldx.util import WeldxDeprecationWarning, compare_nested
 
 SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 
@@ -514,12 +514,15 @@ class TestWeldXFile:
 
         assert _read("test.asdf") == _read("test.wx")
 
+    @pytest.mark.filterwarnings("ignore:You tried to manipulate an ASDF internal")
+    @pytest.mark.filterwarnings("ignore:Call to deprecated function data.")
     @pytest.mark.parametrize("protected_key", _PROTECTED_KEYS)
     def test_cannot_update_del_protected_keys(self, protected_key):
         """Ensure we cannot manipulate protected keys."""
         expected_match = "manipulate an ASDF internal structure"
         warning_type = UserWarning
-        with pytest.raises(KeyError):  # try to obtain key from underlying dict.
+        # try to obtain key from underlying dict.
+        with pytest.raises(KeyError), pytest.warns(WeldxDeprecationWarning):
             _ = self.fh.data[protected_key]
 
         with pytest.warns(warning_type, match=expected_match):
