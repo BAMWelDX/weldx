@@ -22,7 +22,7 @@ from typing import (
 
 import asdf
 import numpy as np
-from asdf import AsdfFile, generic_io
+from asdf import AsdfFile, config_context, generic_io
 from asdf import open as open_asdf
 from asdf.exceptions import AsdfWarning
 from asdf.tags.core import Software
@@ -47,6 +47,7 @@ __all__ = [
     "WeldxFile",
     "DEFAULT_ARRAY_COMPRESSION",
     "DEFAULT_ARRAY_COPYING",
+    "DEFAULT_ARRAY_INLINE_THRESHOLD",
     "_PROTECTED_KEYS",
 ]
 
@@ -71,6 +72,9 @@ DEFAULT_ARRAY_COMPRESSION = "input"
 
 DEFAULT_ARRAY_COPYING = True
 """Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
+
+DEFAULT_ARRAY_INLINE_THRESHOLD = 10
+"""Arrays with less or equal elements will be inlined (stored as string, not binary)."""
 
 _PROTECTED_KEYS = (
     "history",
@@ -139,6 +143,10 @@ class WeldxFile(_ProtectedViewDict):
         When `False`, when reading files, attempt to memory map (memmap) underlying data
         arrays when possible. This avoids blowing the memory when working with very
         large datasets.
+    array_inline_threshold :
+        arrays below this threshold will be serialized as string, if larger as binary
+        block. Note that this does not affect arrays, which are being shared across
+        several objects in the same file.
 
     Examples
     --------
@@ -204,12 +212,16 @@ class WeldxFile(_ProtectedViewDict):
         software_history_entry: Mapping = None,
         compression: str = DEFAULT_ARRAY_COMPRESSION,
         copy_arrays: bool = DEFAULT_ARRAY_COPYING,
+        array_inline_threshold: int = DEFAULT_ARRAY_INLINE_THRESHOLD,
     ):
         if write_kwargs is None:
             write_kwargs = dict(all_array_compression=compression)
 
         if asdffile_kwargs is None:
             asdffile_kwargs = dict(copy_arrays=copy_arrays)
+
+        # this parameter is now (asdf-2.8) a asdf.config parameter, so we store it here.
+        self._array_inline_threshold = array_inline_threshold
 
         # TODO: ensure no mismatching args for compression and copy_arrays.
         self._write_kwargs = write_kwargs
@@ -300,6 +312,21 @@ class WeldxFile(_ProtectedViewDict):
         # initialize protected key interface.
         super().__init__(protected_keys=_PROTECTED_KEYS, data=self._asdf_handle.tree)
 
+    @contextmanager
+    def _config_context(self, **kwargs):
+        # Temporarily set (default) options in asdf.config_context. This is useful
+        # during writing/updating data.
+        if (
+            "array_inline_threshold" not in kwargs
+            or kwargs["array_inline_threshold"] is None
+        ):
+            kwargs["array_inline_threshold"] = self._array_inline_threshold
+
+        with config_context() as config:
+            for k, v in kwargs.items():
+                setattr(config, k, v)
+            yield
+
     def _write_tree(
         self, filename_or_path_like, tree, asdffile_kwargs, write_kwargs, created
     ) -> AsdfFile:
@@ -310,7 +337,8 @@ class WeldxFile(_ProtectedViewDict):
         # 2. file exists, but should be updated with new tree
         if created:
             asdf_file = asdf.AsdfFile(tree=tree, **asdffile_kwargs)
-            asdf_file.write_to(filename_or_path_like, **write_kwargs)
+            with self._config_context():
+                asdf_file.write_to(filename_or_path_like, **write_kwargs)
             generic_file = generic_io.get_file(filename_or_path_like, mode="rw")
             asdf_file._fd = generic_file
         else:
@@ -318,7 +346,8 @@ class WeldxFile(_ProtectedViewDict):
                 raise RuntimeError("inconsistent mode, need to write data.")
             asdf_file = open_asdf(filename_or_path_like, **asdffile_kwargs, mode="rw")
             asdf_file.tree = tree
-            asdf_file.update(**write_kwargs)
+            with self._config_context():
+                asdf_file.update(**write_kwargs)
         return asdf_file
 
     @property
@@ -454,14 +483,14 @@ class WeldxFile(_ProtectedViewDict):
         **kwargs,
     ):
         """Get this docstring overwritten by AsdfFile.update."""
-        self._asdf_handle.update(
-            all_array_storage=all_array_storage,
-            all_array_compression=all_array_compression,
-            pad_blocks=pad_blocks,
-            include_block_index=include_block_index,
-            version=version,
-            **kwargs,
-        )
+        with self._config_context(**kwargs):
+            self._asdf_handle.update(
+                all_array_storage=all_array_storage,
+                all_array_compression=all_array_compression,
+                pad_blocks=pad_blocks,
+                include_block_index=include_block_index,
+                version=version,
+            )
 
     sync.__doc__ = AsdfFile.update.__doc__
 
@@ -719,6 +748,7 @@ class WeldxFile(_ProtectedViewDict):
             write_kwargs=self._write_kwargs,
             sync=self.sync_upon_close,
             software_history_entry=self.software_history_entry,
+            array_inline_threshold=self._array_inline_threshold,
         )
         return wx
 
@@ -758,7 +788,10 @@ class WeldxFile(_ProtectedViewDict):
         return AttrDict(self)
 
     def write_to(
-        self, fd: Optional[types_path_and_file_like] = None, **write_args
+        self,
+        fd: Optional[types_path_and_file_like] = None,
+        array_inline_threshold=None,
+        **write_args,
     ) -> Optional[types_path_and_file_like]:
         """Write current contents to given file name or file type.
 
@@ -768,6 +801,10 @@ class WeldxFile(_ProtectedViewDict):
             May be a string path to a file, or a Python file-like
             object. If a string path, the file is automatically
             closed after writing. If `None` is given, write to a new buffer.
+
+        array_inline_threshold :
+            arrays below this threshold will be serialized as string, if
+            larger as binary block.
 
         write_args :
             Allowed parameters:
@@ -792,7 +829,8 @@ class WeldxFile(_ProtectedViewDict):
         if not write_args:
             write_args = self._write_kwargs
 
-        self._asdf_handle.write_to(fd, **write_args)
+        with self._config_context(array_inline_threshold=array_inline_threshold):
+            self._asdf_handle.write_to(fd, **write_args)
 
         if isinstance(fd, types_file_like.__args__):
             fd.seek(0)
