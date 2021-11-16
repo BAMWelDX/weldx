@@ -1829,7 +1829,7 @@ class Trace:
             Set plot axes to equal scaling (Default = False).
 
         """
-        data = self.rasterize(raster_width).to("mm")
+        data = self.rasterize(raster_width).to(_DEFAULT_LEN_UNIT)
         if fmt is None:
             fmt = "x-"
         if axes is None:
@@ -1837,9 +1837,9 @@ class Trace:
 
             _, axes = subplots(subplot_kw=dict(projection="3d", proj_type="ortho"))
             axes.plot(data[0].m, data[1].m, data[2].m, fmt)
-            axes.set_xlabel("x / mm")
-            axes.set_ylabel("y / mm")
-            axes.set_zlabel("z / mm")
+            axes.set_xlabel(f"x / {_DEFAULT_LEN_UNIT}")
+            axes.set_ylabel(f"y / {_DEFAULT_LEN_UNIT}")
+            axes.set_zlabel(f"z / {_DEFAULT_LEN_UNIT}")
             if axes_equal:
                 import weldx.visualization as vs
 
