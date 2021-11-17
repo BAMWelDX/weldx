@@ -9,6 +9,9 @@
 added
 =====
 
+- `CoordinateSystemManager` can now delete already assigned data with `CoordinateSystemManager.delete_data`.
+  `[#645] <https://github.com/BAMWelDX/weldx/pull/645>`__
+
 - `WeldxFile` handles an ``array_inline_threshold`` parameter to indicate if short arrays
   will be serialized as strings, or as binary block. Note that this does not affect arrays,
   which are being shared across several objects in the same file.
