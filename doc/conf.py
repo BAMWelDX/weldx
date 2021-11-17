@@ -24,6 +24,7 @@ from sphinx.util.logging import getLogger
 
 logger = getLogger("weldx_sphinx_conf")
 
+
 def _workaround_imports_typechecking():
     """Load some packages needed for type annotations."""
     import ipywidgets  # noqa
