@@ -737,6 +737,18 @@ def test_comparison_wrong_type():
     assert (csm != 4) is True
 
 
+def test_comparison_data():
+    csm1 = tf.CoordinateSystemManager("root", "csm")
+    csm2 = tf.CoordinateSystemManager("root", "csm")
+    data = np.arange(12).reshape((4, 3))
+    csm1.assign_data(data, data_name="foo", reference_system="root")
+    csm2.assign_data(data, data_name="foo", reference_system="root")
+
+    assert csm1 == csm2
+    csm2.assign_data(data, data_name="bar", reference_system="root")
+    assert csm1 != csm2
+
+
 # test_time_union ----------------------------------------------------------------------
 
 
