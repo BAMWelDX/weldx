@@ -9,6 +9,15 @@
 added
 =====
 
+- `CoordinateSystemManager` can now delete already assigned data with `CoordinateSystemManager.delete_data`.
+  `[#645] <https://github.com/BAMWelDX/weldx/pull/645>`__
+
+- `WeldxFile` handles an ``array_inline_threshold`` parameter to indicate if short arrays
+  will be serialized as strings, or as binary block. Note that this does not affect arrays,
+  which are being shared across several objects in the same file.
+  `[#643] <https://github.com/BAMWelDX/weldx/pull/643>`__
+
+
 removed
 =======
 
@@ -47,6 +56,10 @@ dependencies
 
 -  Removed ``ipykernel`` dependency. `[#634]
    <https://github.com/BAMWelDX/weldx/pull/634>`__
+
+-  The ``K3D`` implementation now uses the experimental
+   ``weldx-widgets`` backend if available `[#636]
+   <https://github.com/BAMWelDX/weldx/pull/636>`__
 
 ********************
  0.5.1 (04.11.2021)

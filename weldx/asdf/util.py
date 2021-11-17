@@ -380,7 +380,7 @@ def dataclass_serialization_class(
     class_type :
         The type of the dataclass
     class_name :
-        The value that should ba stored as the classes name property
+        The value that should be stored as the classes name property
     version :
         The version number
     to_yaml_tree_mod :
