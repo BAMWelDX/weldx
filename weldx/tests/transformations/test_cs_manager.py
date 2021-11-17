@@ -2257,7 +2257,7 @@ def test_delete_data(list_of_csm_and_lcs_instances):
 
 
 def test_delete_non_existent_data():
-    """Ensure we receive an exception upon deletingg non-existent data."""
+    """Ensure we receive an exception upon deleting non-existent data."""
     csm = tf.CoordinateSystemManager("root")
     with pytest.raises(ValueError):
         csm.delete_data("no")
