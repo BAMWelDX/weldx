@@ -1,6 +1,7 @@
 """Collection of common classes and functions."""
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 from warnings import warn
 
@@ -152,6 +153,7 @@ class MathematicalExpression:
         """
         self.set_parameters({name: value})
 
+    # todo: Use kwargs here???
     def set_parameters(self, params: _me_parameter_types):
         """Set the expressions parameters.
 
@@ -942,11 +944,16 @@ class GenericSeries:
 
         if isinstance(self._data, MathematicalExpression):
             # num_expr_sym = self._data.num_variables + len(self._data.parameters)
-            # if len(input) == num_expr_sym:
-            data = self._data.evaluate(**input)
-            # else:
-            #    raise NotImplementedError
-            return GenericSeries(data)
+            if len(kwargs) == self._data.num_variables:
+                data = self._data.evaluate(**input)
+                return GenericSeries(data)
+            else:
+                new_series = deepcopy(self)
+                for k, v in kwargs.items():
+                    new_series._data.set_parameter(k, (v, self._symbol_dims[k]))
+                    new_series._symbol_dims.pop(k)
+                    new_series._variable_units.pop(k)
+                return new_series
 
         return GenericSeries(ut.xr_interp_like(self._data, input))
 
