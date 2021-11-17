@@ -32,9 +32,9 @@ def download_tutorial_input_file():
 
     # does not exist or hash mismatched, so download it.
     print("trying to download: {url}")
-    out_file, header = urlretrieve(url, dest)  # skipcq: BAN-B310
+    out_file, _ = urlretrieve(url, dest)  # skipcq: BAN-B310
     sha256sum_actual = hash_path(out_file)
-    if not sha256sum_actual == sha256sum:
+    if sha256sum_actual != sha256sum:
         raise RuntimeError(
             f"hash mismatch:\n actual = \t{sha256sum_actual}\n"
             f"desired = \t{sha256sum}"
