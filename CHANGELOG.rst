@@ -3,6 +3,58 @@
 ###############
 
 ********************
+ 0.X.X (unreleased)
+********************
+
+added
+=====
+
+- `WeldxFile` handles an ``array_inline_threshold`` parameter to indicate if short arrays
+  will be serialized as strings, or as binary block. Note that this does not affect arrays,
+  which are being shared across several objects in the same file.
+  `[#643] <https://github.com/BAMWelDX/weldx/pull/643>`__
+
+
+removed
+=======
+
+changes
+=======
+
+- `WeldxFile` now raises an exception, if a warning is emitted during loading the weldx
+  ASDF extension, this should prevent erroneous data during loading, for example
+  missing dependencies. `[#641] <https://github.com/BAMWelDX/weldx/pull/641>`__
+
+-  `WeldxFile` now hides ASDF added fields like history and asdf_library
+   from the dictionary interface. To access these, there are separate
+   properties `[#625] <https://github.com/BAMWeldX/weldx/pull/625>`__.
+
+-  Allow handling of ``time`` values as singular coordinates without
+   dimensions in some classes `[#635]
+   <https://github.com/BAMWeldX/weldx/pull/635>`__.
+
+fixes
+=====
+
+-  Fix wrong dimension order being passed through in `SpatialData`
+   `[#635] <https://github.com/BAMWeldX/weldx/pull/635>`__.
+
+documentation
+=============
+
+ASDF
+====
+
+deprecations
+============
+
+dependencies
+============
+
+-  Removed ``ipykernel`` dependency. `[#634]
+   <https://github.com/BAMWelDX/weldx/pull/634>`__
+
+********************
  0.5.1 (04.11.2021)
 ********************
 

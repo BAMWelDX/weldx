@@ -1,7 +1,8 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
 import copy
+import io
 import pathlib
-from collections import UserDict
+import warnings
 from collections.abc import MutableMapping, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
@@ -10,6 +11,7 @@ from typing import (
     AbstractSet,
     Any,
     Dict,
+    Hashable,
     Iterable,
     List,
     Mapping,
@@ -20,22 +22,34 @@ from typing import (
 
 import asdf
 import numpy as np
-from asdf import AsdfFile, generic_io
+from asdf import AsdfFile, config_context, generic_io
 from asdf import open as open_asdf
-from asdf import util
+from asdf.exceptions import AsdfWarning
 from asdf.tags.core import Software
-from asdf.util import get_file_type
+from asdf.util import FileType, get_file_type
 from jsonschema import ValidationError
 
-from weldx.asdf.util import get_schema_path, get_yaml_header, view_tree
+from weldx.asdf.util import (
+    _ProtectedViewDict,
+    get_schema_path,
+    get_yaml_header,
+    view_tree,
+)
 from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
-from weldx.util import inherit_docstrings
+from weldx.util import (
+    deprecated,
+    inherit_docstrings,
+    is_interactive_session,
+    is_jupyterlab_session,
+)
 
 __all__ = [
     "WeldxFile",
+    "DEFAULT_ARRAY_COMPRESSION",
+    "DEFAULT_ARRAY_COPYING",
+    "DEFAULT_ARRAY_INLINE_THRESHOLD",
+    "_PROTECTED_KEYS",
 ]
-
-from weldx.util import is_interactive_session, is_jupyterlab_session
 
 
 @contextmanager
@@ -59,9 +73,18 @@ DEFAULT_ARRAY_COMPRESSION = "input"
 DEFAULT_ARRAY_COPYING = True
 """Stored Arrays will be copied to memory, or not. If False, use memory mapping."""
 
+DEFAULT_ARRAY_INLINE_THRESHOLD = 10
+"""Arrays with less or equal elements will be inlined (stored as string, not binary)."""
+
+_PROTECTED_KEYS = (
+    "history",
+    "asdf_library",
+)
+"""These keys are not seen, nor can they be manipulated."""
+
 
 @inherit_docstrings
-class WeldxFile(UserDict):
+class WeldxFile(_ProtectedViewDict):
     """Expose an ASDF file as a dictionary like object and handle underlying files.
 
     The WeldxFile class makes it easy to work with ASDF files. Creating, validating,
@@ -120,6 +143,10 @@ class WeldxFile(UserDict):
         When `False`, when reading files, attempt to memory map (memmap) underlying data
         arrays when possible. This avoids blowing the memory when working with very
         large datasets.
+    array_inline_threshold :
+        arrays below this threshold will be serialized as string, if larger as binary
+        block. Note that this does not affect arrays, which are being shared across
+        several objects in the same file.
 
     Examples
     --------
@@ -185,12 +212,16 @@ class WeldxFile(UserDict):
         software_history_entry: Mapping = None,
         compression: str = DEFAULT_ARRAY_COMPRESSION,
         copy_arrays: bool = DEFAULT_ARRAY_COPYING,
+        array_inline_threshold: int = DEFAULT_ARRAY_INLINE_THRESHOLD,
     ):
         if write_kwargs is None:
             write_kwargs = dict(all_array_compression=compression)
 
         if asdffile_kwargs is None:
             asdffile_kwargs = dict(copy_arrays=copy_arrays)
+
+        # this parameter is now (asdf-2.8) a asdf.config parameter, so we store it here.
+        self._array_inline_threshold = array_inline_threshold
 
         # TODO: ensure no mismatching args for compression and copy_arrays.
         self._write_kwargs = write_kwargs
@@ -237,14 +268,12 @@ class WeldxFile(UserDict):
             else:
                 self._in_memory = False
 
-            # TODO: this could be inefficient for large files.
-            # For buffers is fast, but not for real files.
-            # real files should be probed over the filesystem!
             if mode == "rw" and isinstance(
                 filename_or_file_like, SupportsFileReadWrite
             ):
                 with reset_file_position(filename_or_file_like):
-                    new_file_created = len(filename_or_file_like.read()) == 0
+                    filename_or_file_like.seek(0, io.SEEK_END)
+                    new_file_created = filename_or_file_like.tell() == 0
 
             # the user passed a raw file handle, its their responsibility to close it.
             self._close = False
@@ -256,28 +285,47 @@ class WeldxFile(UserDict):
             )
 
         # If we have data to write, we do it first, so a WeldxFile is always in sync.
-        if tree or new_file_created:
-            asdf_file = self._write_tree(
-                filename_or_file_like,
-                tree,
-                asdffile_kwargs,
-                write_kwargs,
-                new_file_created,
-            )
-            if isinstance(filename_or_file_like, SupportsFileReadWrite):
-                filename_or_file_like.seek(0)
-        else:
-            asdf_file = open_asdf(
-                filename_or_file_like,
-                mode=self.mode,
-                **asdffile_kwargs,
-            )
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                category=AsdfWarning,
+                action="error",
+                message="asdf.extensions plugin from package weldx.*",
+            )  # we turn asdf warnings about loading the weldx extension into an error.
+            if tree or new_file_created:
+                asdf_file = self._write_tree(
+                    filename_or_file_like,
+                    tree,
+                    asdffile_kwargs,
+                    write_kwargs,
+                    new_file_created,
+                )
+                if isinstance(filename_or_file_like, SupportsFileReadWrite):
+                    filename_or_file_like.seek(0)
+            else:
+                asdf_file = open_asdf(
+                    filename_or_file_like,
+                    mode=self.mode,
+                    **asdffile_kwargs,
+                )
         self._asdf_handle: AsdfFile = asdf_file
 
-        # UserDict interface: we want to store a reference to the tree, but the ctor
-        # of UserDict takes a copy, so we do it manually here.
-        super().__init__()
-        self.data = self._asdf_handle.tree
+        # initialize protected key interface.
+        super().__init__(protected_keys=_PROTECTED_KEYS, data=self._asdf_handle.tree)
+
+    @contextmanager
+    def _config_context(self, **kwargs):
+        # Temporarily set (default) options in asdf.config_context. This is useful
+        # during writing/updating data.
+        if (
+            "array_inline_threshold" not in kwargs
+            or kwargs["array_inline_threshold"] is None
+        ):
+            kwargs["array_inline_threshold"] = self._array_inline_threshold
+
+        with config_context() as config:
+            for k, v in kwargs.items():
+                setattr(config, k, v)
+            yield
 
     def _write_tree(
         self, filename_or_path_like, tree, asdffile_kwargs, write_kwargs, created
@@ -289,7 +337,8 @@ class WeldxFile(UserDict):
         # 2. file exists, but should be updated with new tree
         if created:
             asdf_file = asdf.AsdfFile(tree=tree, **asdffile_kwargs)
-            asdf_file.write_to(filename_or_path_like, **write_kwargs)
+            with self._config_context():
+                asdf_file.write_to(filename_or_path_like, **write_kwargs)
             generic_file = generic_io.get_file(filename_or_path_like, mode="rw")
             asdf_file._fd = generic_file
         else:
@@ -297,7 +346,8 @@ class WeldxFile(UserDict):
                 raise RuntimeError("inconsistent mode, need to write data.")
             asdf_file = open_asdf(filename_or_path_like, **asdffile_kwargs, mode="rw")
             asdf_file.tree = tree
-            asdf_file.update(**write_kwargs)
+            with self._config_context():
+                asdf_file.update(**write_kwargs)
         return asdf_file
 
     @property
@@ -333,7 +383,7 @@ class WeldxFile(UserDict):
             else:
                 generic_file = generic_io.get_file(filename, mode="r")
                 file_type = get_file_type(generic_file)
-                if not file_type == util.FileType.ASDF:
+                if not file_type == FileType.ASDF:
                     raise FileExistsError(
                         f"given file {filename} is not an ASDF file and "
                         "could be overwritten because of read/write mode!"
@@ -433,16 +483,26 @@ class WeldxFile(UserDict):
         **kwargs,
     ):
         """Get this docstring overwritten by AsdfFile.update."""
-        self._asdf_handle.update(
-            all_array_storage=all_array_storage,
-            all_array_compression=all_array_compression,
-            pad_blocks=pad_blocks,
-            include_block_index=include_block_index,
-            version=version,
-            **kwargs,
-        )
+        with self._config_context(**kwargs):
+            self._asdf_handle.update(
+                all_array_storage=all_array_storage,
+                all_array_compression=all_array_compression,
+                pad_blocks=pad_blocks,
+                include_block_index=include_block_index,
+                version=version,
+            )
 
     sync.__doc__ = AsdfFile.update.__doc__
+
+    def keys(self) -> AbstractSet:
+        """Return a set of keys/attributes stored in this file.
+
+        Returns
+        -------
+        KeysView :
+            all keys stored at the root of this file.
+        """
+        return super(WeldxFile, self).keys()
 
     @classmethod
     def fromkeys(cls, iterable, default=None) -> "WeldxFile":
@@ -476,21 +536,6 @@ class WeldxFile(UserDict):
         """
         return super().values()
 
-    def keys(self) -> AbstractSet:
-        """Return a set of keys/attributes stored in this file.
-
-        Returns
-        -------
-        KeysView :
-            all keys stored at the root of this file.
-        """
-        return super().keys()
-
-    def clear(self):
-        """Remove all data from file."""
-        # TODO: we do not want to delete the history, software.
-        super().clear()
-
     def get(self, key, default=None):
         """Get data attached to given key from file.
 
@@ -508,7 +553,7 @@ class WeldxFile(UserDict):
         """
         return super().get(key, default=default)
 
-    def update(self, mapping: Union[Mapping, Iterable] = (), **kwargs):
+    def update(self, mapping: Union[Mapping, Iterable] = (), **kwargs: Any):
         """Update this file from mapping or iterable mapping and kwargs.
 
         Parameters
@@ -535,23 +580,17 @@ class WeldxFile(UserDict):
 
         >>> a.update(b, foo="bar")
 
-        # remove asdf meta data for easy comparision
-        >>> del a["asdf_library"], a["history"]
-        >>> a.data
-        {'x': 23, 'y': 0, 'foo': 'bar'}
-
         Or we can update with an iterable of key, value tuples.
         >>> data = [('x', 0), ('y', -1)]
         >>> a.update(data)
-        >>> a.data
-        {'x': 0, 'y': -1, 'foo': 'bar'}
+        >>> a["foo"], a["x"], a["y"]
+        ('bar', 0, -1)
 
         Another possibility is to directly pass keyword arguments.
         >>> a.update(x=-1, z=42)
-        >>> a.data
-        {'x': -1, 'y': -1, 'foo': 'bar', 'z': 42}
+        >>> a["x"], a["z"]
+        (-1, 42)
         """
-        # TODO: we do not want to manipulate the history, software.
         super().update(mapping, **kwargs)
 
     def items(self) -> AbstractSet[Tuple[Any, Any]]:
@@ -604,23 +643,23 @@ class WeldxFile(UserDict):
         >>> "x" not in a.keys()
         True
         """
-        # TODO: we do not want to delete the history, software.
         return super().pop(key, default=default)
 
-    def popitem(self) -> Any:
+    def popitem(self) -> Tuple[Hashable, Any]:
         """Remove the item that was last inserted into the file.
 
         Notes
         -----
-        In versions before 3.7, the popitem() method removes a random item.
+        The assumption of an ordered dictionary, that this method returns
+        the key inserted lastly, does not hold necessarily. E.g. if the file has been
+        written to disk and is loaded again the previous order has been lost eventually.
 
         Returns
         -------
         object :
             the last item.
         """
-        # TODO: we do not want to delete the history, software.
-        return super().popitem()
+        return super(WeldxFile, self).popitem()
 
     def add_history_entry(self, change_desc: str, software: dict = None) -> None:
         """Add an history_entry to the file.
@@ -645,7 +684,12 @@ class WeldxFile(UserDict):
     @property
     def history(self) -> List:
         """Return a list of all history entries in this file."""
-        return self._asdf_handle.get_history_entries()
+        return self._asdf_handle.get_history_entries().copy()
+
+    @property
+    def asdf_library(self) -> dict:
+        """Get version information about the ASDF library lastly modifying this file."""
+        return self._asdf_handle["asdf_library"].copy()
 
     @property
     def custom_schema(self) -> Optional[str]:
@@ -694,6 +738,7 @@ class WeldxFile(UserDict):
                 if not overwrite:
                     raise
 
+        # TODO: we could try to optimize this, e.g. avoid the extra copy?
         file = self.write_to(filename_or_file_like)
         wx = WeldxFile(
             file,
@@ -703,6 +748,7 @@ class WeldxFile(UserDict):
             write_kwargs=self._write_kwargs,
             sync=self.sync_upon_close,
             software_history_entry=self.software_history_entry,
+            array_inline_threshold=self._array_inline_threshold,
         )
         return wx
 
@@ -742,7 +788,10 @@ class WeldxFile(UserDict):
         return AttrDict(self)
 
     def write_to(
-        self, fd: Optional[types_path_and_file_like] = None, **write_args
+        self,
+        fd: Optional[types_path_and_file_like] = None,
+        array_inline_threshold=None,
+        **write_args,
     ) -> Optional[types_path_and_file_like]:
         """Write current contents to given file name or file type.
 
@@ -752,6 +801,10 @@ class WeldxFile(UserDict):
             May be a string path to a file, or a Python file-like
             object. If a string path, the file is automatically
             closed after writing. If `None` is given, write to a new buffer.
+
+        array_inline_threshold :
+            arrays below this threshold will be serialized as string, if
+            larger as binary block.
 
         write_args :
             Allowed parameters:
@@ -776,11 +829,17 @@ class WeldxFile(UserDict):
         if not write_args:
             write_args = self._write_kwargs
 
-        self._asdf_handle.write_to(fd, **write_args)
+        with self._config_context(array_inline_threshold=array_inline_threshold):
+            self._asdf_handle.write_to(fd, **write_args)
 
         if isinstance(fd, types_file_like.__args__):
             fd.seek(0)
         return fd
+
+    @property
+    @deprecated(since="0.5.2", removed="0.6", message="Please do not use this anymore.")
+    def data(self):
+        return self._data
 
     def show_asdf_header(
         self, use_widgets: bool = None, _interactive: Optional[bool] = None
