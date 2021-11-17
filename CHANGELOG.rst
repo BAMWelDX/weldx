@@ -57,6 +57,10 @@ dependencies
 -  Removed ``ipykernel`` dependency. `[#634]
    <https://github.com/BAMWelDX/weldx/pull/634>`__
 
+-  The ``K3D`` implementation now uses the experimental
+   ``weldx-widgets`` backend if available `[#636]
+   <https://github.com/BAMWelDX/weldx/pull/636>`__
+
 ********************
  0.5.1 (04.11.2021)
 ********************
