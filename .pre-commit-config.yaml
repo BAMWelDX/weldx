@@ -56,3 +56,8 @@ repos:
       - id: jupyter-notebook-cleanup
         args:
           - --remove-kernel-metadata
+  - repo: https://github.com/codespell-project/codespell/
+    rev: v2.1.0
+    hooks:
+      - id: codespell
+        exclude: doc/legal-notice.rst

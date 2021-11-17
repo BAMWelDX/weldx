@@ -103,7 +103,7 @@ properties:
     tag: "tag:weldx.bam.de:weldx/core/transformations/coordinate_system_hierarchy-1.0.0"
   equipment:
     description: |
-      A list of equipments used for measurements and describing the weld seam.
+      A list of equipment used for measurements and describing the weld seam.
     type: array
     items:
       tag: "tag:weldx.bam.de:weldx/equipment/measurement_equipment-1.0.0"
