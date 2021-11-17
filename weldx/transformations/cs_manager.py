@@ -625,10 +625,7 @@ class CoordinateSystemManager:
         """
         # remove data from subsystems
         for s in self._subsystems:
-            try:
-                s.data.remove(data_name)
-            except KeyError:
-                pass
+            s.data.discard(data_name)
 
         nodes = self.graph.nodes
         for cs in nodes:
