@@ -611,6 +611,32 @@ class CoordinateSystemManager:
 
         self._graph.nodes[reference_system]["data"][data_name] = data
 
+    def delete_data(self, data_name: str):
+        """Remove the assigned data with given name.
+
+        Parameters
+        ----------
+        data_name :
+            The previously assigned data name.
+
+        Raises
+        ------
+        ValueError
+            If data_name has not been assigned yet.
+        """
+        # remove data from subsystems
+        for s in self._subsystems:
+            s.data.discard(data_name)
+
+        nodes = self.graph.nodes
+        for cs in nodes:
+            for name in nodes[cs]["data"].keys():
+                if name == data_name:
+                    nodes[cs]["data"].pop(data_name)
+                    return
+
+        raise ValueError(f"Given data_name '{data_name}' has not been assigned.")
+
     def create_cs(
         self,
         coordinate_system_name: str,
@@ -794,7 +820,7 @@ class CoordinateSystemManager:
         """Delete a coordinate system from the coordinate system manager.
 
         If the Coordinate system manager has attached sub system, there are multiple
-        possible  consequences.
+        possible consequences.
 
         - All subsystems attached to the deleted coordinate system or one of
           its child systems are removed from the coordinate system manager

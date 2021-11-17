@@ -2242,6 +2242,39 @@ def test_assign_data_exceptions(arguments, exception_type, test_name):
         csm.assign_data(*arguments)
 
 
+def test_delete_data(list_of_csm_and_lcs_instances):
+    """Test delete data (with subsystems)."""
+    csm = list_of_csm_and_lcs_instances[0]
+
+    data_name = "foo"
+    csm[0].assign_data([[1, 2, 3], [3, 2, 1]], data_name, "lcs0")
+    assert data_name in csm[0].data_names
+
+    csm_n3 = deepcopy(csm[3])
+    csm_n3.merge(csm[5])
+
+    csm_n2 = deepcopy(csm[2])
+    csm_n2.merge(csm_n3)
+
+    csm_mg = deepcopy(csm[0])
+    csm_mg.merge(csm[1])
+    csm_mg.merge(csm[4])
+    csm_mg.merge(csm_n2)
+
+    csm[0].delete_data(data_name)
+    csm_mg.delete_data(data_name)
+    assert data_name not in csm[0].data_names
+    for sub_sys in csm_mg.subsystems:
+        assert data_name not in sub_sys.data_names
+
+
+def test_delete_non_existent_data():
+    """Ensure we receive an exception upon deleting non-existent data."""
+    csm = tf.CoordinateSystemManager("root")
+    with pytest.raises(ValueError):
+        csm.delete_data("no")
+
+
 # test_has_data_exceptions -------------------------------------------------------------
 
 
@@ -2433,6 +2466,7 @@ def test_unmerge_multi_data():
 @pytest.mark.parametrize("data_cs_parent", ["rp", "a", "m"])
 @pytest.mark.parametrize("data_cs_child", ["rc", "b", "m"])
 def test_merge_data_name_collision(data_cs_parent, data_cs_child):
+    """Check name collisions are handled appropriately."""
     csm_parent = CSM("rp", "parent")
     csm_parent.create_cs("a", "rp")
     csm_parent.create_cs("m", "rp")
