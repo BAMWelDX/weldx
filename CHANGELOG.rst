@@ -3,7 +3,7 @@
 ###############
 
 ********************
- 0.X.X (unreleased)
+ 0.5.2 (18.11.2021)
 ********************
 
 added
@@ -16,10 +16,6 @@ added
   will be serialized as strings, or as binary block. Note that this does not affect arrays,
   which are being shared across several objects in the same file.
   `[#643] <https://github.com/BAMWelDX/weldx/pull/643>`__
-
-
-removed
-=======
 
 changes
 =======
@@ -41,15 +37,6 @@ fixes
 
 -  Fix wrong dimension order being passed through in `SpatialData`
    `[#635] <https://github.com/BAMWeldX/weldx/pull/635>`__.
-
-documentation
-=============
-
-ASDF
-====
-
-deprecations
-============
 
 dependencies
 ============
