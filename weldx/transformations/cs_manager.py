@@ -626,7 +626,7 @@ class CoordinateSystemManager:
         # remove data from subsystems
         for s in self._subsystems:
             try:
-                s.remove(data_name)
+                s.data.remove(data_name)
             except KeyError:
                 pass
 
