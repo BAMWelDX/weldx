@@ -740,7 +740,7 @@ def test_comparison_wrong_type():
 def test_comparison_data():
     csm1 = tf.CoordinateSystemManager("root", "csm")
     csm2 = tf.CoordinateSystemManager("root", "csm")
-    data = np.arange(9).reshape((3, 3))
+    data = np.arange(12).reshape((3, 4))
     csm1.assign_data(data, data_name="foo", reference_system="root")
     csm2.assign_data(data, data_name="foo", reference_system="root")
 
