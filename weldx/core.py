@@ -719,22 +719,82 @@ class TimeSeries(TimeDependent):
 class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
 
-    _allowed_variables: List = None
+    _allowed_variables: List[str] = None
     """Allowed variable names"""
-    _required_variables: List = None
-    """Required variables"""
-    _variable_units: Dict[str, pint.Unit] = None
-    """Expected units of a variable"""
+    _required_variables: List[str] = None
+    """Required variable names"""
+
+    _evaluation_preprocessor: callable = None
+    """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
+
+    _required_dimensions: List[str] = None
+    """Required dimensions"""
+
+    _required_unit_dimensionality: pint.Unit = None
+    """Required unit dimensionality of the evaluated expression/data"""
+
+    # do it later
+    # needs pint-xarray for a good implementation
+    _expected_dimension_units: Dict[str, pint.Unit] = None
+    """Expected units of a dimension"""
     _required_parameter_coordinates: Dict[str, List] = None
     """For xarray assign_coords"""
+
     _required_parameter_shape: Dict[str, int] = None
     """Size of the parameter dimensions/coordinates - (also defines parameter order)"""
-    _required_output_dimensionality: pint.Unit = None
-    """The output unit of the evaluated expression/series"""
-    _variable_preprocessor: Dict[str, callable] = None
-    """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
     _alias_names: Dict[str, List[str]] = None
     """Allowed alias names for a variable or parameter in an expression"""
+
+    # todo: other possible constraints:
+    # - allowed dimensions (not the same as allowed variables)
+
+    @classmethod
+    def _check_constraints(cls, dims, units_out: pint.Unit = None):
+        if cls._required_dimensions is not None:
+            for v in cls._required_dimensions:
+                if v not in dims:
+                    raise ValueError(f"{cls.__name__} requires dimension '{v}'.")
+        if cls._required_unit_dimensionality is not None:
+            if not units_out.dimensionality == cls._required_unit_dimensionality:
+                raise ValueError(
+                    f"{cls.__name__} requires its output unit to be of dimensionality "
+                    f"'{cls._required_unit_dimensionality}' but it actually is "
+                    f"'{units_out.dimensionality}'."
+                )
+
+    @classmethod
+    def _check_constraints_discrete(cls, data_array: xr.DataArray):
+        if cls is GenericSeries:
+            return
+
+        cls._check_constraints(data_array.dims, data_array.data.u)
+
+    @classmethod
+    def _check_constraints_expression(
+        cls,
+        expr: MathematicalExpression,
+        var_dims: Dict[str, str],
+        expr_units: pint.Unit,
+    ):
+        if cls is GenericSeries:
+            return
+
+        if cls._allowed_variables is not None:
+            for v in expr.get_variable_names():
+                if v not in cls._allowed_variables:
+                    raise ValueError(
+                        f"'{v}' is not allowed as an expression variable of class "
+                        f"{cls.__name__}"
+                    )
+        if cls._required_variables is not None:
+            for v in cls._required_variables:
+                if v not in expr.get_variable_names():
+                    raise ValueError(
+                        f"{cls.__name__} requires expression variable '{v}'."
+                    )
+
+        dims = cls._get_expression_dims(expr, var_dims)
+        cls._check_constraints(dims, expr_units)
 
     # todo: add limits for dims?
 
@@ -764,6 +824,7 @@ class GenericSeries:
             The method that should be used when interpolating between discrete values.
 
         """
+
         self._data: Union[xr.DataArray, MathematicalExpression] = None
         self._variable_units: Dict[str, pint.Unit] = None
         self._symbol_dims: Dict[str, List[str]] = None
@@ -780,7 +841,6 @@ class GenericSeries:
 
     def _init_discrete(self, data, dims, coords):
         """Initialize the internal data with discrete values."""
-
         # todo: preserve units of coordinates somehow
         if not isinstance(data, xr.DataArray):
             if coords is not None:
@@ -789,6 +849,8 @@ class GenericSeries:
         else:
             # todo check data structure
             pass
+
+        self._check_constraints_discrete(data)
 
         self._data = data
 
@@ -827,6 +889,9 @@ class GenericSeries:
 
         # check expression
         expr_units, expr_shape = self._eval_expr(expr, dims, units)
+
+        # check constraints
+        self._check_constraints_expression(expr, dims, expr_units)
 
         # save internal data
         self._units = expr_units
@@ -929,6 +994,8 @@ class GenericSeries:
             coordinates.
 
         """
+        if self._evaluation_preprocessor is not None:
+            kwargs = self._evaluation_preprocessor(**kwargs)
         input = {}
         for i, (k, v) in enumerate(kwargs.items()):
             v = Q_(v)
@@ -955,6 +1022,9 @@ class GenericSeries:
                     new_series._variable_units.pop(k)
                 return new_series
 
+        for k in input.keys():
+            if k not in self._data.dims:
+                raise KeyError(f"'{k}' is not a valid dimension.")
         return GenericSeries(ut.xr_interp_like(self._data, input))
 
     def __getitem__(self, *args):
@@ -1033,20 +1103,23 @@ class GenericSeries:
             return self._data
         raise NotImplementedError
 
+    @staticmethod
+    def _get_expression_dims(expr: MathematicalExpression, symbol_dims: Dict[str, str]):
+        dims = set()
+        for d in symbol_dims.values():
+            dims |= set(d)
+        for v in expr.parameters.values():
+            if not isinstance(v, xr.DataArray):
+                v = xr.DataArray(v)
+            if v.size > 0:
+                dims |= set(v.dims)
+        return list(dims)
+
     @property
     def dims(self) -> List[str]:
         """Get the names of all dimensions."""
         if isinstance(self._data, MathematicalExpression):
-            dims = set()
-            for d in self._symbol_dims.values():
-                dims |= set(d)
-            for v in self._data.parameters.values():
-                if not isinstance(v, xr.DataArray):
-                    v = xr.DataArray(v)
-                if v.size > 0:
-                    dims |= set(v.dims)
-            return list(dims)
-
+            return self._get_expression_dims(self._data, self._symbol_dims)
         return self._data.dims
 
     @property
