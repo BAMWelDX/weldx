@@ -844,7 +844,10 @@ class GenericSeries:
         # todo: preserve units of coordinates somehow
         if not isinstance(data, xr.DataArray):
             if coords is not None:
-                coords = {k: Q_(v).m for k, v in coords.items()}
+                coords = {
+                    k: xr.DataArray(Q_(v), dims=[k]).pint.dequantify()
+                    for k, v in coords.items()
+                }
             data = xr.DataArray(data=data, dims=dims, coords=coords)
         else:
             # todo check data structure
@@ -1006,7 +1009,8 @@ class GenericSeries:
                     v, dims=self._symbol_dims[k], coords={self._symbol_dims[k][0]: v.m}
                 )
             else:
-                v = v.m
+                ref_unit = self._data.coords[k].attrs["units"]
+                v = xr.DataArray(v.to(ref_unit), dims=[k]).pint.dequantify()
             input[k] = v
 
         if isinstance(self._data, MathematicalExpression):

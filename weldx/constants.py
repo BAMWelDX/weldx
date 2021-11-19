@@ -2,6 +2,7 @@
 from pathlib import Path as _Path
 
 import pint
+import pint_xarray
 
 UNIT_KEY = "units"  # default nomenclature for storing physical units information
 
@@ -14,6 +15,7 @@ WELDX_UNIT_REGISTRY = pint.UnitRegistry(
     ],
     force_ndarray_like=True,
 )
+
 
 # add percent unit
 WELDX_UNIT_REGISTRY.define("percent = 0.01*count = %")
@@ -59,6 +61,9 @@ U_ = WELDX_UNIT_REGISTRY.Unit
 U_.__name__ = "U_"
 U_.__module__ = "pint.unit"  # skipcq: PYL-W0212
 
+
+# set default unit registry for pint-xarray
+pint_xarray.unit_registry = WELDX_UNIT_REGISTRY
 
 __all__ = (
     "WELDX_PATH",
