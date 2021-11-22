@@ -3,6 +3,37 @@
 ###############
 
 ********************
+ 0.6.0 (unreleased)
+********************
+
+added
+=====
+
+removed
+=======
+
+changes
+=======
+
+fixes
+=====
+
+documentation
+=============
+
+ASDF
+====
+
+-  removed legacy ``weldx`` tag and schema support `[#600]
+   <https://github.com/BAMWelDX/weldx/pull/600>`__
+
+deprecations
+============
+
+dependencies
+============
+
+********************
  0.5.2 (18.11.2021)
 ********************
 

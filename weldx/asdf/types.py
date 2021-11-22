@@ -1,6 +1,5 @@
 import functools
 import re
-from copy import copy
 from typing import List, Union
 
 from asdf.asdf import SerializationContext
@@ -88,10 +87,6 @@ class WeldxConverterMeta(type(Converter)):
         cls.to_yaml_tree = to_yaml_tree_metadata(cls.to_yaml_tree)
         cls.from_yaml_tree = from_yaml_tree_metadata(cls.from_yaml_tree)
 
-        for tag in copy(cls.tags):  # legacy_code
-            if tag.startswith("asdf://weldx.bam.de/weldx/tags/"):
-                cls.tags.append(_legacy_tag_from_new_tag(tag))
-
         return cls
 
 
@@ -129,9 +124,3 @@ def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="we
         version = str(version.spec)
 
     return f"{tag}-{version}"
-
-
-def _legacy_tag_from_new_tag(tag: str):
-    name, version = _new_tag_regex.search(tag).groups()
-    version = "1.0.0"  # legacy_tag version
-    return f"tag:weldx.bam.de:weldx/{name}-{version}"

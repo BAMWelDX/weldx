@@ -34,12 +34,6 @@ def update_manifest(
             uri: str = content["id"]
             if uri.startswith("asdf://weldx.bam.de"):
                 tag = uri.replace("/schemas/", "/tags/")
-            elif uri.startswith("http://weldx.bam.de"):  # legacy_code
-                if "tag" in content:
-                    tag = content["tag"]
-                else:
-                    tag = None
-                    print(f"No tag for {uri=}")
             else:
                 raise ValueError(f"Unknown URI format {uri=}")
 
