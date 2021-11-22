@@ -3,30 +3,29 @@
 ###############
 
 ********************
- 0.X.X (unreleased)
+ 0.5.2 (18.11.2021)
 ********************
 
 added
 =====
 
-- `CoordinateSystemManager` can now delete already assigned data with `CoordinateSystemManager.delete_data`.
-  `[#645] <https://github.com/BAMWelDX/weldx/pull/645>`__
+-  `CoordinateSystemManager` can now delete already assigned data with
+   `CoordinateSystemManager.delete_data`. `[#645]
+   <https://github.com/BAMWelDX/weldx/pull/645>`__
 
-- `WeldxFile` handles an ``array_inline_threshold`` parameter to indicate if short arrays
-  will be serialized as strings, or as binary block. Note that this does not affect arrays,
-  which are being shared across several objects in the same file.
-  `[#643] <https://github.com/BAMWelDX/weldx/pull/643>`__
-
-
-removed
-=======
+-  `WeldxFile` handles an ``array_inline_threshold`` parameter to
+   indicate if short arrays will be serialized as strings, or as binary
+   block. Note that this does not affect arrays, which are being shared
+   across several objects in the same file. `[#643]
+   <https://github.com/BAMWelDX/weldx/pull/643>`__
 
 changes
 =======
 
-- `WeldxFile` now raises an exception, if a warning is emitted during loading the weldx
-  ASDF extension, this should prevent erroneous data during loading, for example
-  missing dependencies. `[#641] <https://github.com/BAMWelDX/weldx/pull/641>`__
+-  `WeldxFile` now raises an exception, if a warning is emitted during
+   loading the weldx ASDF extension, this should prevent erroneous data
+   during loading, for example missing dependencies. `[#641]
+   <https://github.com/BAMWelDX/weldx/pull/641>`__
 
 -  `WeldxFile` now hides ASDF added fields like history and asdf_library
    from the dictionary interface. To access these, there are separate
@@ -41,15 +40,6 @@ fixes
 
 -  Fix wrong dimension order being passed through in `SpatialData`
    `[#635] <https://github.com/BAMWeldX/weldx/pull/635>`__.
-
-documentation
-=============
-
-ASDF
-====
-
-deprecations
-============
 
 dependencies
 ============

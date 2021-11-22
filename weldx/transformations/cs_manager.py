@@ -149,7 +149,6 @@ class CoordinateSystemManager:
 
     def __eq__(self, other: Any):
         """Test equality of CSM instances."""
-        # todo: also check data  -> add tests
         if not isinstance(other, self.__class__):
             return False
 
@@ -175,17 +174,19 @@ class CoordinateSystemManager:
         for node in graph_0.nodes:
             if node not in graph_1.nodes:
                 return False
+            n0 = graph_0.nodes[node]
+            n1 = graph_1.nodes[node]
+            if not util.compare_nested(n0, n1):
+                return False
 
         # check edges
         for edge in graph_0.edges:
             if edge not in graph_1.edges:
                 return False
 
-        # check coordinate systems
-        for edge in graph_0.edges:
-            lcs_0 = self.graph.edges[(edge[0], edge[1])]["transformation"]
-            lcs_1 = other.graph.edges[(edge[0], edge[1])]["transformation"]
-            if lcs_0 != lcs_1:
+            e0 = graph_0.edges[edge]
+            e1 = graph_1.edges[edge]
+            if not util.compare_nested(e0, e1):
                 return False
 
         return True

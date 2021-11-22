@@ -1,8 +1,8 @@
 # YAML 1.2
 ---
 title: weldx
-version: 0.5.1
-date-released: 2021-11-04
+version: 0.5.2
+date-released: 2021-11-18
 authors:
   - affiliation: "Bundesanstalt für Materialforschung und -prüfung (BAM)"
     email: cagtay.fabry@bam.de
