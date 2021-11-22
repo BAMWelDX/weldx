@@ -1,8 +1,12 @@
 """Serialization for xarray.DataArray."""
+from typing import List
+
+from asdf.tagged import TaggedDict
 from xarray import DataArray
 
 import weldx.tags.core.common_types as ct
 from weldx.asdf.types import WeldxConverter
+from weldx.asdf.util import _get_instance_shape
 
 
 class XarrayDataArrayConverter(WeldxConverter):
@@ -41,3 +45,8 @@ class XarrayDataArrayConverter(WeldxConverter):
         # (but since it gets automatically derived if not set, we define it now.
 
         return da
+
+    @staticmethod
+    def shape_from_tagged(node: TaggedDict) -> List[int]:
+        """Calculate the shape from static tagged tree instance."""
+        return _get_instance_shape(node["data"]["data"])

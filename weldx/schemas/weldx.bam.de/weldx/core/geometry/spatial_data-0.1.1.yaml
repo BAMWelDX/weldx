@@ -31,26 +31,44 @@ examples:
     - A `SpatialData` object with data in three dimensions
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.1>
-        coordinates: !core/ndarray-1.0.0
-          data:
-          - - [0.0, 0.0, 0.0]
-            - [0.0, 1.0, 0.0]
-          - - [1.0, 0.0, 1.0]
-            - [1.0, 1.0, 1.0]
-          datatype: float64
-          shape: [2, 2, 3]
+        coordinates: !<asdf://weldx.bam.de/weldx/tags/core/data_array-0.1.0>
+          attributes: {}
+          coordinates:
+          - !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
+            name: c
+            dimensions: [c]
+            dtype: <U1
+            data: !core/ndarray-1.0.0
+              data: [x, y, z]
+              datatype: [ucs4, 1]
+              shape: [3]
+          data: !<asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0>
+            name: data
+            dimensions: [p, n, c]
+            dtype: <f8
+            data: !core/ndarray-1.0.0
+              data:
+              - - [0.0, 0.0, 0.0]
+                - [0.0, 1.0, 0.0]
+              - - [1.0, 0.0, 1.0]
+                - [0.0, 1.0, 1.0]
+              datatype: float64
+              shape: [2, 2, 3]
 
 type: object
 properties:
   coordinates:
     description: |
       The coordinates of the data points.
-    tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-    properties:
-      datatype:
-        type: string
-        enum: [float32, float64]
-    wx_shape: [..., 3]
+    oneOf:
+      - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+        properties:
+          datatype:
+            type: string
+            enum: [float32, float64]
+        wx_shape: [(~), 3]
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/data_array-0.1.*"
+        wx_shape: [..., 3]
   attributes:
     description: |
       An arbitrary set of attributes. For example, normals, colors or measured point data can be stored using this
@@ -64,7 +82,7 @@ properties:
       datatype:
         type: string
         enum: [uint32, uint64]
-    wx_shape: [..., 3]
+    wx_shape: [(~), 3]
 
 propertyOrder: [coordinates, attributes, triangles]
 required: [coordinates]

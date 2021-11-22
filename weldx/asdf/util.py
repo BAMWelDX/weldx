@@ -481,7 +481,7 @@ def get_converter_for_tag(tag: str) -> Union[WeldxConverter, None]:
 
 
 def get_highest_tag_version(
-    pattern: str, ctx: Union[SerializationContext, AsdfConfig] = None
+    pattern: Union[str, List[str]], ctx: Union[SerializationContext, AsdfConfig] = None
 ) -> Union[str, None]:
     """Get the highest available weldx extension tag version matching a pattern.
 
