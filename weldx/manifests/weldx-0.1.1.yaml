@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
-id: asdf://weldx.bam.de/weldx/manifests/weldx-0.1.0
-extension_uri: asdf://weldx.bam.de/weldx/extensions/weldx-0.1.0
+id: asdf://weldx.bam.de/weldx/manifests/weldx-0.1.1
+extension_uri: asdf://weldx.bam.de/weldx/extensions/weldx-0.1.1
 title: weldx extension manifest for tag mapping
 description: Manifest listing all tag URIs with schema URIs supported by weldx
 tags:
@@ -47,6 +47,8 @@ tags:
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/variable-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/geometry/spatial_data-0.1.0
+- tag_uri: asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.1
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/geometry/spatial_data-0.1.1
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/graph/di_edge-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/graph/di_edge-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/graph/di_graph-0.1.0
