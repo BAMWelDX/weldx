@@ -6,19 +6,20 @@ __all__ = ["SpatialDataConverter"]
 
 
 class SpatialDataConverter(WeldxConverter):
-    """Implements a version 4 UUID."""
+    """Converter for SpatialData."""
 
     tags = ["asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.*"]
     types = [SpatialData]
 
-    def to_yaml_tree(self, obj: SpatialData, tag: str, ctx) -> str:
+    def to_yaml_tree(self, obj: SpatialData, tag: str, ctx) -> dict:
+        """Serialize into tree."""
         tree = obj.__dict__
         if tree["coordinates"].ndim <= 2:
             tree["coordinates"] = tree["coordinates"].values
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx) -> SpatialData:
-        """Reconstruct from string."""
+        """Reconstruct from yaml node."""
         return SpatialData(**node)
 
     def select_tag(self, obj, tags, ctx) -> str:
