@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -17,6 +17,9 @@ from scipy.spatial.transform import Slerp
 from weldx.constants import Q_, U_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.time import Time, types_time_like, types_timestamp_like
+
+if TYPE_CHECKING:
+    import weldx.types as wxt
 
 __all__ = [
     "WeldxAccessor",
@@ -514,7 +517,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
 
 def xr_3d_vector(
-    data: np.ndarray,
+    data: wxt.ArrayLike,
     time: types_time_like = None,
     add_dims: List[str] = None,
     add_coords: Dict[str, Any] = None,
@@ -570,7 +573,7 @@ def xr_3d_vector(
     return da.astype(float).weldx.time_ref_restore()
 
 
-def xr_3d_matrix(data: np.ndarray, time: Time = None) -> xr.DataArray:
+def xr_3d_matrix(data: wxt.ArrayLike, time: Time = None) -> xr.DataArray:
     """Create an xarray 3d matrix with correctly named dimensions and coordinates.
 
     Parameters

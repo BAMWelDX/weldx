@@ -33,6 +33,8 @@ deprecations
 dependencies
 ============
 
+-  bump to numpy >=1.20 (for numpy.typing)
+
 ********************
  0.5.2 (18.11.2021)
 ********************
