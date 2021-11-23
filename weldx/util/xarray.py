@@ -290,7 +290,10 @@ def xr_interp_like(
 
     # create a new (empty) temporary dataset to use for interpolation
     # we need this if da2 is passed as an existing coordinate variable like origin.time
-    da_temp_coords = {k: (k, v.m, {"units": v.u}) for k, v in sel_coords.items()}
+    da_temp_coords = {
+        k: (k, v.m, {"units": v.u}) if isinstance(v, pint.Quantity) else v
+        for k, v in sel_coords.items()
+    }
     da_temp = xr.DataArray(dims=sel_coords.keys(), coords=da_temp_coords)
 
     # convert to base units if they exist
