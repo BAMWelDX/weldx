@@ -212,13 +212,21 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     """
     if order == "bf":
         for dim in da.dims:
-            da = da.pint.bfill(dim).pint.ffill(dim)
+            da = da.bfill(dim).ffill(dim)
     elif order == "fb":
         for dim in da.dims:
-            da = da.pint.ffill(dim).pint.bfill(dim)
+            da = da.ffill(dim).bfill(dim)
     else:
         raise ValueError(f"Order {order} is not supported (use 'bf' or 'fb)")
     return da
+
+
+def _get_coordinate_quantities(da) -> Dict[str, pint.Quantity]:
+    """Convert coordinates of an xarray object as a quantity dictionary."""
+    return {
+        k: (Q_(v.data, v.attrs.get("units")) if v.attrs.get("units", None) else v.data)
+        for k, v in da.coords.items()
+    }
 
 
 def xr_interp_like(
@@ -265,22 +273,32 @@ def xr_interp_like(
     da1 = da1.weldx.time_ref_unset()  # catch time formats
     if isinstance(da2, (xr.DataArray, xr.Dataset)):
         da2 = da2.weldx.time_ref_unset()  # catch time formats
-        sel_coords = da2.coords  # remember original interpolation coordinates
+        sel_coords = _get_coordinate_quantities(da2)
     else:  # assume da2 to be dict-like
         sel_coords = {
             k: (v if isinstance(v, Iterable) else [v]) for k, v in da2.items()
         }
 
-    # store and strip pint units at this point, since the unit is lost during
-    # interpolation and because of some other conflicts. Unit is restored before
-    # returning the result.
-    units = None
-    if isinstance(da1.data, pint.Quantity):
-        units = da1.data.units
-        da1 = xr.DataArray(data=da1.data.magnitude, dims=da1.dims, coords=da1.coords)
-
     if interp_coords is not None:
         sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
+
+    # save string representation of output coordinate units
+    coord_units = {**sel_coords, **_get_coordinate_quantities(da1)}
+    coord_units = {k: str(v.u) for k, v in coord_units.items()}
+
+    # restore all units to string attributes
+    da1 = da1.pint.dequantify()
+
+    # convert the target coordinates to the reference original units
+    for c in da1.coords:
+        if (c in sel_coords) and (unit := da1[c].attrs.get("units", None)) is not None:
+            sel_coords[c] = sel_coords[c].to(unit)
+
+    # convert everything to ndarray
+    sel_coords = {
+        k: (v.magnitude if isinstance(v, pint.Quantity) else v)
+        for k, v in sel_coords.items()
+    }
 
     # create a new (empty) temporary dataset to use for interpolation
     # we need this if da2 is passed as an existing coordinate variable like origin.time
@@ -327,14 +345,9 @@ def xr_interp_like(
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     if method == "step":
         fill_method = "ffill" if fillna else None
-        da = da1.pint.reindex_like(da_temp, method=fill_method)
+        da = da1.reindex_like(da_temp, method=fill_method)
     else:
-        da = da1.pint.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
-
-    # copy original variable and coord attributes
-    da.attrs = da1.attrs
-    for key in da1.coords:
-        da[key].attrs = da1[key].attrs
+        da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
     # fill out of range nan values for all dimensions
     if fillna:
@@ -346,12 +359,11 @@ def xr_interp_like(
         sel_coords = {d: v for d, v in sel_coords.items() if d in da1.coords}
 
     result = da.sel(sel_coords)
-    if units is not None:
-        result = xr.DataArray(
-            data=result.data * units,
-            dims=result.dims,
-            coords=result.coords,
-        )
+
+    # restore coordinate units as string attributes
+    for c, u in coord_units.items():
+        if c in result.coords:
+            result[c].attrs["units"] = coord_units[c]
 
     return result
 

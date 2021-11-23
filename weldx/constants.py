@@ -2,7 +2,7 @@
 from pathlib import Path as _Path
 
 import pint
-import pint_xarray
+import pint_xarray  # noqa: F401 # import this to register pint accessor
 
 UNIT_KEY = "units"  # default nomenclature for storing physical units information
 
@@ -54,7 +54,7 @@ lets combine length and time to get a velocity.
 >>> v
 <Quantity(10.0, 'millimeter / second')>
 """
-__test__ = {"Q": Q_.__doc__}  # enable doctest checking.
+# __test__ = {"Q": Q_.__doc__}  # enable doctest checking.
 
 U_ = WELDX_UNIT_REGISTRY.Unit
 U_.__name__ = "U_"
@@ -65,7 +65,7 @@ U_.__doc__ = """For details on working with quantities and units, please see the
 
 
 # set default unit registry for pint-xarray
-pint_xarray.unit_registry = WELDX_UNIT_REGISTRY
+pint.set_application_registry(WELDX_UNIT_REGISTRY)
 
 __all__ = (
     "WELDX_PATH",

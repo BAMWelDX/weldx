@@ -12,7 +12,7 @@ from pint.errors import DimensionalityError
 from xarray import DataArray
 
 import weldx.util as ut
-from weldx.constants import Q_
+from weldx.constants import Q_, U_
 from weldx.time import Time
 
 
@@ -141,6 +141,58 @@ class TestXarrayInterpolation:
         # check data
         assert da_interp.values.shape == np.array(exp_values).shape
         assert np.allclose(da_interp.values, exp_values, equal_nan=True)
+
+    @staticmethod
+    @pytest.mark.parametrize("format", ["dict", "xarray"])
+    @pytest.mark.parametrize("broadcast_missing", [True, False])
+    def test_xr_interp_like_pints(format, broadcast_missing):
+        # ---------- setup ----------
+        a = Q_([0.0, 1.0], "m")
+        t = Q_([-1.0, 0.0, 1.0], "s")
+        t_interp = Q_([-100.0, 0.0, 200.0], "ms")
+        b_interp = Q_([10.0, 20.0], "V")
+
+        data_units = "A"
+        data = Q_([[1, 2, 3], [4, 5, 6]], data_units)
+        result = Q_([[1.9, 2, 2.2], [4.9, 5, 5.2]], data_units)
+
+        da = xr.DataArray(
+            data,
+            dims=["a", "t"],
+            coords={
+                "t": ("t", t.m, {"units": t.u}),
+                "a": ("a", a.m, {"units": a.u}),
+            },
+            attrs={"wx_metadata": "meta"},
+        )
+
+        if format == "dict":
+            da_interp = {"t": t_interp, "b": b_interp}
+        elif format == "xarray":
+            da_interp = xr.DataArray(
+                dims=["t", "b"],
+                coords={
+                    "t": ("t", t_interp.m, {"units": t_interp.u}),
+                    "b": ("b", b_interp.m, {"units": b_interp.u}),
+                },
+            )
+
+        da2 = ut.xr_interp_like(da, da_interp, broadcast_missing=broadcast_missing)
+
+        if broadcast_missing:
+            assert isinstance(da2.b.attrs.get("units"), str)
+            assert U_(da2.b.attrs.get("units", None)) == U_(b_interp.units)
+            da2 = da2.isel(b=0)
+
+        for n in range(len(da.a)):
+            assert np.all(da2.sel(a=n).data == result[n, :].m)
+        assert U_(da2.attrs.get("units")) == U_(data_units)
+        assert da2.attrs["wx_metadata"] == "meta"
+
+        assert isinstance(da2.t.attrs.get("units"), str)
+        assert U_(da2.t.attrs.get("units", None)) == U_(t.units)
+        assert isinstance(da2.a.attrs.get("units"), str)
+        assert U_(da2.a.attrs.get("units", None)) == U_(a.units)
 
 
 def test_xr_interp_like():
