@@ -18,7 +18,7 @@ from weldx.constants import Q_, U_
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.time import Time, types_time_like, types_timestamp_like
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import weldx.types as wxt
 
 __all__ = [
