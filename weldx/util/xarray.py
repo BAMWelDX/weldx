@@ -312,6 +312,8 @@ def xr_interp_like(
             for d, val in da1.coords.items()
             if d in sel_coords
         }
+        if len(edge_dict) > 0:
+            da_temp = da_temp.combine_first(da1.isel(edge_dict))
     else:
         # select, combine with min/max values if coordinates not guaranteed to be sorted
         # maybe switch to idxmin()/idxmax() once it available
@@ -321,9 +323,8 @@ def xr_interp_like(
             for d, val in da1.coords.items()
             if d in sel_coords
         }
-
-    if len(edge_dict) > 0:
-        da_temp = da_temp.combine_first(da1.sel(edge_dict))
+        if len(edge_dict) > 0:
+            da_temp = da_temp.combine_first(da1.pint.sel(edge_dict))
 
     # handle singular dimensions in da1
     # TODO: should we handle coordinates or dimensions?
