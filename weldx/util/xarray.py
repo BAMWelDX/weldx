@@ -363,7 +363,7 @@ def xr_interp_like(
     # restore coordinate units as string attributes
     for c, u in coord_units.items():
         if c in result.coords:
-            result[c].attrs["units"] = coord_units[c]
+            result[c].attrs["units"] = u
 
     return result
 
@@ -511,7 +511,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
         if "dimensionality" in check:
             units = coords[key].attrs.get("units", None)
             dim = check["dimensionality"]
-            if not units or not (U_(units).is_compatible_with(dim)):
+            if units is None or not U_(units).is_compatible_with(dim):
                 raise DimensionalityError(
                     units,
                     check["dimensionality"],

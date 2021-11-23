@@ -143,9 +143,9 @@ class TestXarrayInterpolation:
         assert np.allclose(da_interp.values, exp_values, equal_nan=True)
 
     @staticmethod
-    @pytest.mark.parametrize("format", ["dict", "xarray"])
+    @pytest.mark.parametrize("fmt", ["dict", "xarray"])
     @pytest.mark.parametrize("broadcast_missing", [True, False])
-    def test_xr_interp_like_pints(format, broadcast_missing):
+    def test_xr_interp_like_pints(fmt, broadcast_missing):
         # ---------- setup ----------
         a = Q_([0.0, 1.0], "m")
         t = Q_([-1.0, 0.0, 1.0], "s")
@@ -166,9 +166,9 @@ class TestXarrayInterpolation:
             attrs={"wx_metadata": "meta"},
         )
 
-        if format == "dict":
+        if fmt == "dict":
             da_interp = {"t": t_interp, "b": b_interp}
-        elif format == "xarray":
+        elif fmt == "xarray":
             da_interp = xr.DataArray(
                 dims=["t", "b"],
                 coords={
