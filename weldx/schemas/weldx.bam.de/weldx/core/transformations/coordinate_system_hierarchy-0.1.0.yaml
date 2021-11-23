@@ -130,7 +130,7 @@ definitions:
 
   subsystem_info:
     description: |
-      A list of a coordinate system hierarchy's subsytems.
+      A list of a coordinate system hierarchy's subsystems.
     type: array
     items:
       type: object
@@ -167,7 +167,7 @@ definitions:
             type: string
         subsystems:
           description: |
-            A list of nested subsytems.
+            A list of nested subsystems.
           $ref: "#/definitions/subsystem_info"
 
 properties:

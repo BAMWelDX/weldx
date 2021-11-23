@@ -1829,23 +1829,23 @@ class Trace:
             Set plot axes to equal scaling (Default = False).
 
         """
-        data = self.rasterize(raster_width)
+        data = self.rasterize(raster_width).to(_DEFAULT_LEN_UNIT)
         if fmt is None:
             fmt = "x-"
         if axes is None:
             from matplotlib.pyplot import subplots
 
             _, axes = subplots(subplot_kw=dict(projection="3d", proj_type="ortho"))
-            axes.plot(data[0], data[1], data[2], fmt)
-            axes.set_xlabel("x")
-            axes.set_ylabel("y")
-            axes.set_zlabel("z")
+            axes.plot(data[0].m, data[1].m, data[2].m, fmt)
+            axes.set_xlabel(f"x / {_DEFAULT_LEN_UNIT}")
+            axes.set_ylabel(f"y / {_DEFAULT_LEN_UNIT}")
+            axes.set_zlabel(f"z / {_DEFAULT_LEN_UNIT}")
             if axes_equal:
                 import weldx.visualization as vs
 
                 vs.axes_equal(axes)
         else:
-            axes.plot(data[0], data[1], data[2], fmt)
+            axes.plot(data[0].m, data[1].m, data[2].m, fmt)
 
 
 # Linear profile interpolation class ------------------------------------------
@@ -2537,6 +2537,9 @@ class SpatialData:
                 time=time,
                 add_dims=["n"],
             )
+
+        # make sure we have correct dimension order
+        self.coordinates = self.coordinates.transpose(..., "n", "c")
 
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):

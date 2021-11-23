@@ -3,7 +3,87 @@
 ###############
 
 ********************
- 0.5.1 (unreleased)
+ 0.6.0 (unreleased)
+********************
+
+added
+=====
+
+removed
+=======
+
+changes
+=======
+
+fixes
+=====
+
+documentation
+=============
+
+ASDF
+====
+
+-  removed legacy ``weldx`` tag and schema support `[#600]
+   <https://github.com/BAMWelDX/weldx/pull/600>`__
+
+deprecations
+============
+
+dependencies
+============
+
+********************
+ 0.5.2 (18.11.2021)
+********************
+
+added
+=====
+
+-  `CoordinateSystemManager` can now delete already assigned data with
+   `CoordinateSystemManager.delete_data`. `[#645]
+   <https://github.com/BAMWelDX/weldx/pull/645>`__
+
+-  `WeldxFile` handles an ``array_inline_threshold`` parameter to
+   indicate if short arrays will be serialized as strings, or as binary
+   block. Note that this does not affect arrays, which are being shared
+   across several objects in the same file. `[#643]
+   <https://github.com/BAMWelDX/weldx/pull/643>`__
+
+changes
+=======
+
+-  `WeldxFile` now raises an exception, if a warning is emitted during
+   loading the weldx ASDF extension, this should prevent erroneous data
+   during loading, for example missing dependencies. `[#641]
+   <https://github.com/BAMWelDX/weldx/pull/641>`__
+
+-  `WeldxFile` now hides ASDF added fields like history and asdf_library
+   from the dictionary interface. To access these, there are separate
+   properties `[#625] <https://github.com/BAMWeldX/weldx/pull/625>`__.
+
+-  Allow handling of ``time`` values as singular coordinates without
+   dimensions in some classes `[#635]
+   <https://github.com/BAMWeldX/weldx/pull/635>`__.
+
+fixes
+=====
+
+-  Fix wrong dimension order being passed through in `SpatialData`
+   `[#635] <https://github.com/BAMWeldX/weldx/pull/635>`__.
+
+dependencies
+============
+
+-  Removed ``ipykernel`` dependency. `[#634]
+   <https://github.com/BAMWelDX/weldx/pull/634>`__
+
+-  The ``K3D`` implementation now uses the experimental
+   ``weldx-widgets`` backend if available `[#636]
+   <https://github.com/BAMWelDX/weldx/pull/636>`__
+
+********************
+ 0.5.1 (04.11.2021)
 ********************
 
 added
@@ -19,9 +99,6 @@ added
 
 -  Added `weldx.asdf.util.get_schema_tree` utility to display schema
    files. `[#610] <https://github.com/BAMWelDX/weldx/pull/610>`__
-
-removed
-=======
 
 changes
 =======
@@ -46,11 +123,11 @@ changes
 -  improve dimension handling of `SpatialData` `[#622]
    <https://github.com/BAMWelDX/weldx/pull/622>`__
 
-- The `MathematicalExpression` now supports `xarray.DataArray` as
-  parameters. Furthermore, multidimensional parameters of a
-  `MathematicalExpression` that is passed to a `TimeSeries` are
-  no longer required to have an extra dimension that represents time.
-  `[#621] <https://github.com/BAMWelDX/weldx/pull/621>`__
+-  The `MathematicalExpression` now supports `xarray.DataArray` as
+   parameters. Furthermore, multidimensional parameters of a
+   `MathematicalExpression` that is passed to a `TimeSeries` are no
+   longer required to have an extra dimension that represents time.
+   `[#621] <https://github.com/BAMWelDX/weldx/pull/621>`__
 
 fixes
 =====
@@ -69,6 +146,10 @@ documentation
 
 ASDF
 ====
+
+-  fix ``process`` missing as required property in
+   ``single_pass_weld-0.1.0.yaml`` `[#627]
+   <https://github.com/BAMWelDX/weldx/pull/627>`__
 
 deprecations
 ============

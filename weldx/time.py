@@ -668,7 +668,10 @@ class Time:
         if "time" in time.coords:
             time = time.time
         time_ref = time.weldx.time_ref
-        time_index = pd.Index(time.values)
+        if time.shape:
+            time_index = pd.Index(time.values)
+        else:
+            time_index = pd.Index([time.values])
         if time_ref is not None:
             time_index = time_index + time_ref
         return time_index
@@ -715,7 +718,7 @@ class Time:
     union = _UnionDescriptor()
     """Calculate the union of multiple time-like objects.
 
-    This method can eiter be used as a class or instance method. When used on an
+    This method can either be used as a class or instance method. When used on an
     instance, its values are included in the calculated time union.
 
     Note that any reference time information will be dropped.

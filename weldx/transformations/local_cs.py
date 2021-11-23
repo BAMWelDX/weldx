@@ -78,6 +78,7 @@ class LocalCoordinateSystem(TimeDependent):
         # warn about dropped time data
         if (
             time is not None
+            and len(Time(time)) > 1
             and "time" not in orientation.dims
             and (isinstance(coordinates, TimeSeries) or "time" not in coordinates.dims)
         ):
@@ -548,7 +549,7 @@ class LocalCoordinateSystem(TimeDependent):
             `True` if the coordinate system is time dependent, `False` otherwise.
 
         """
-        return self.time is not None or self._coord_ts is not None
+        return self._coord_ts is not None or ("time" in self._dataset.dims)
 
     @property
     def has_timeseries(self) -> bool:
@@ -593,7 +594,7 @@ class LocalCoordinateSystem(TimeDependent):
             Time-like data array representing the time union of the LCS
 
         """
-        if "time" in self._dataset.dims:
+        if "time" in self._dataset.coords:
             return Time(self._dataset.time, self.reference_time)
         return None
 
@@ -667,9 +668,9 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" not in self.orientation.dims:  # don't interpolate static
             return self.orientation
         if time.max() <= self.time.min():  # only use edge timestamp
-            return self.orientation.values[0]
+            return self.orientation.isel(time=0).data
         if time.min() >= self.time.max():  # only use edge timestamp
-            return self.orientation.values[-1]
+            return self.orientation.isel(time=-1).data
         # full interpolation with overlapping times
         return ut.xr_interp_orientation_in_time(self.orientation, time)
 
@@ -686,9 +687,9 @@ class LocalCoordinateSystem(TimeDependent):
         if "time" not in self.coordinates.dims:  # don't interpolate static
             return self.coordinates
         if time.max() <= self.time.min():  # only use edge timestamp
-            return self.coordinates[0]
+            return self.coordinates.isel(time=0).data
         if time.min() >= self.time.max():  # only use edge timestamp
-            return self.coordinates[-1]
+            return self.coordinates.isel(time=-1).data
         # full interpolation with overlapping times
         return ut.xr_interp_coordinates_in_time(self.coordinates, time)
 
