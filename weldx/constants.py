@@ -2,7 +2,7 @@
 from pathlib import Path as _Path
 
 import pint
-import pint_xarray  # noqa: F401 # import this to register pint accessor
+import pint_xarray  # noqa: F401 # pylint: disable=W0611
 
 UNIT_KEY = "units"  # default nomenclature for storing physical units information
 
