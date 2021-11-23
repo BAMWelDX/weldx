@@ -509,7 +509,7 @@ class TestGenericSeries:
         gs = GenericSeries(data, dims, coordinates)
 
         # todo: replace with direct comparison of both GS
-        assert GenericSeries(gs.data).data.identical(gs.data)
+        assert GenericSeries(gs.data_array).data_array.identical(gs.data_array)
 
     # test_init_expression -------------------------------------------------------------
 
@@ -576,7 +576,7 @@ class TestGenericSeries:
     @pytest.mark.parametrize(
         "u,v,w",
         [
-            ("0.25m", "1.5", "0A"),
+            ("0.25m", "1.5K", "0A"),
             (Q_([0, 2], "m"), Q_([1, 2, 5], "K"), Q_([1, 2], "A")),
         ],
     )
@@ -584,7 +584,7 @@ class TestGenericSeries:
         # setup
         data = Q_(np.array(range(2 * 3 * 4)).reshape((2, 3, 4)), "V")
         dims = ["u", "v", "w"]
-        coords = dict(u=Q_([0, 1], "m"), v=Q_([0, 1, 2], "m"), w=Q_([0, 1, 2, 3], "A"))
+        coords = dict(u=Q_([0, 1], "m"), v=Q_([0, 1, 2], "K"), w=Q_([0, 1, 2, 3], "A"))
 
         params = dict(u=u, v=v, w=w)
         gs = GenericSeries(data, dims, coords)
