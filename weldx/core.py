@@ -1009,7 +1009,7 @@ class GenericSeries:
                     v, dims=self._symbol_dims[k], coords={self._symbol_dims[k][0]: v.m}
                 )
             else:
-                ref_unit = self._data.coords[k].pint.units
+                ref_unit = self._data.coords[k].attrs.get("units", "")
                 v = xr.DataArray(v.to(ref_unit), dims=[k]).pint.dequantify()
             input[k] = v
 
