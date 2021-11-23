@@ -1,3 +1,5 @@
+from copy import copy
+
 from weldx.asdf.types import WeldxConverter
 from weldx.asdf.util import get_highest_tag_version
 from weldx.geometry import SpatialData
@@ -13,7 +15,7 @@ class SpatialDataConverter(WeldxConverter):
 
     def to_yaml_tree(self, obj: SpatialData, tag: str, ctx) -> dict:
         """Serialize into tree."""
-        tree = obj.__dict__
+        tree = copy(obj.__dict__)  # shallow copy so we dont change original object
         if tree["coordinates"].ndim <= 2:
             tree["coordinates"] = tree["coordinates"].values
         return tree
