@@ -54,7 +54,7 @@ lets combine length and time to get a velocity.
 >>> v
 <Quantity(10.0, 'millimeter / second')>
 """
-# __test__ = {"Q": Q_.__doc__}  # enable doctest checking.
+__test__ = {"Q": Q_.__doc__}  # enable doctest checking.
 
 U_ = WELDX_UNIT_REGISTRY.Unit
 U_.__name__ = "U_"

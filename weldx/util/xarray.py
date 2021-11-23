@@ -222,7 +222,7 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
 
 
 def _get_coordinate_quantities(da) -> Dict[str, pint.Quantity]:
-    """Convert coordinates of an xarray object as a quantity dictionary."""
+    """Convert coordinates of an xarray object to a quantity dictionary."""
     return {
         k: (Q_(v.data, v.attrs.get("units")) if v.attrs.get("units", None) else v.data)
         for k, v in da.coords.items()
@@ -267,7 +267,11 @@ def xr_interp_like(
     Returns
     -------
     xarray.DataArray
-        interpolated DataArray
+        The interpolated DataArray.
+        Important: All unit information (data and coordinates) is stored as string in
+        the respective ``.attrs["units"]`` field.
+        Use the ``pint.quantify()`` accessor after calling ``xr_interp_like`` to
+        convert to quantities/units.
 
     """
     da1 = da1.weldx.time_ref_unset()  # catch time formats
