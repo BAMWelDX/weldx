@@ -17,3 +17,7 @@ exclude_patterns = [
 name = "python"
 enabled = true
 runtime_version = "3.x.x"
+
+[analyzers.meta]
+# skip magic and private objects: https://discuss.deepsource.io/t/docstrings-for-private-classes-methods/259/2
+skip_doc_coverage = ["magic", "nonpublic"]

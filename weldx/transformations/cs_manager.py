@@ -149,7 +149,6 @@ class CoordinateSystemManager:
 
     def __eq__(self, other: Any):
         """Test equality of CSM instances."""
-        # todo: also check data  -> add tests
         if not isinstance(other, self.__class__):
             return False
 
@@ -175,17 +174,19 @@ class CoordinateSystemManager:
         for node in graph_0.nodes:
             if node not in graph_1.nodes:
                 return False
+            n0 = graph_0.nodes[node]
+            n1 = graph_1.nodes[node]
+            if not util.compare_nested(n0, n1):
+                return False
 
         # check edges
         for edge in graph_0.edges:
             if edge not in graph_1.edges:
                 return False
 
-        # check coordinate systems
-        for edge in graph_0.edges:
-            lcs_0 = self.graph.edges[(edge[0], edge[1])]["transformation"]
-            lcs_1 = other.graph.edges[(edge[0], edge[1])]["transformation"]
-            if lcs_0 != lcs_1:
+            e0 = graph_0.edges[edge]
+            e1 = graph_1.edges[edge]
+            if not util.compare_nested(e0, e1):
                 return False
 
         return True
@@ -570,36 +571,71 @@ class CoordinateSystemManager:
         self,
         data: Union[xr.DataArray, SpatialData],
         data_name: str,
-        coordinate_system_name: str,
+        reference_system: str,
+        target_system: str = None,
     ):
         """Assign spatial data to a coordinate system.
 
         Parameters
         ----------
-        data :
+        data
             Spatial data
-        data_name :
+        data_name
             Name of the data.
-        coordinate_system_name :
-            Name of the coordinate system the data should be
-            assigned to.
+        reference_system
+            Name of the coordinate system the data values are defined in.
+        target_system:
+            Name of the target system the data will be transformed and assigned to.
+            This is useful when adding time-dependent data. The provided name must match
+            an existing system. If `None` is passed (the default), data will not be
+            transformed and assigned to the 'reference_system'.
 
         """
-        # TODO: How to handle time dependent data? some things to think about:
-        # - times of coordinate system and data are not equal
-        # - which time is taken as reference? (probably the one of the data)
-        # - what happens during cal of time interpolation functions with data? Also
-        #   interpolated or not?
         if not isinstance(data_name, str):
             raise TypeError("The data name must be a string.")
         if data_name in self.data_names:
             raise ValueError(f"There already is a dataset with the name '{data_name}'.")
-        self._check_coordinate_system_exists(coordinate_system_name)
+        self._check_coordinate_system_exists(reference_system)
 
         if not isinstance(data, (xr.DataArray, SpatialData)):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
-        self._graph.nodes[coordinate_system_name]["data"][data_name] = data
+        if target_system is not None:
+            self._check_coordinate_system_exists(target_system)
+            data = self.transform_data(
+                data,
+                source_coordinate_system_name=reference_system,
+                target_coordinate_system_name=target_system,
+            )
+            reference_system = target_system
+
+        self._graph.nodes[reference_system]["data"][data_name] = data
+
+    def delete_data(self, data_name: str):
+        """Remove the assigned data with given name.
+
+        Parameters
+        ----------
+        data_name :
+            The previously assigned data name.
+
+        Raises
+        ------
+        ValueError
+            If data_name has not been assigned yet.
+        """
+        # remove data from subsystems
+        for s in self._subsystems:
+            s.data.discard(data_name)
+
+        nodes = self.graph.nodes
+        for cs in nodes:
+            for name in nodes[cs]["data"].keys():
+                if name == data_name:
+                    nodes[cs]["data"].pop(data_name)
+                    return
+
+        raise ValueError(f"Given data_name '{data_name}' has not been assigned.")
 
     def create_cs(
         self,
@@ -784,7 +820,7 @@ class CoordinateSystemManager:
         """Delete a coordinate system from the coordinate system manager.
 
         If the Coordinate system manager has attached sub system, there are multiple
-        possible  consequences.
+        possible consequences.
 
         - All subsystems attached to the deleted coordinate system or one of
           its child systems are removed from the coordinate system manager
@@ -1602,30 +1638,12 @@ class CoordinateSystemManager:
     def time_union(
         self,
         list_of_edges: List = None,
-    ) -> Union[None, pd.DatetimeIndex, pd.TimedeltaIndex]:
+    ) -> Time:
         """Get the time union of all or selected local coordinate systems.
 
          If neither the `CoordinateSystemManager` nor its attached
          `~weldx.transformations.LocalCoordinateSystem` instances possess a reference
-         time, the function
-         returns a `pandas.TimedeltaIndex`. Otherwise, a `pandas.DatetimeIndex` is
-         returned. The following table gives an overview of all possible reference time
-         combinations and the corresponding return type:
-
-
-        +------------+------------------+-------------------------+
-        | CSM        | LCS              | Return type             |
-        | reference  | reference        |                         |
-        | time       | times            |                         |
-        +============+==================+=========================+
-        | True       | all/mixed/none   | `pandas.DatetimeIndex`  |
-        +------------+------------------+-------------------------+
-        | False      | all              | `pandas.DatetimeIndex`  |
-        +------------+------------------+-------------------------+
-        | False      | none             | `pandas.TimedeltaIndex` |
-        +------------+------------------+-------------------------+
-
-
+         time, the returned ``Time`` object would not contain one either.
 
         Parameters
         ----------
@@ -1634,7 +1652,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        pandas.DatetimeIndex or pandas.TimedeltaIndex
+        weldx.time.Time
             Time union
 
         """
@@ -1664,14 +1682,14 @@ class CoordinateSystemManager:
 
         time_list = [Time(lcs.time, reference_time) for lcs in lcs_list]
 
-        return Time.union(time_list).as_pandas_index()
+        return Time.union(time_list)
 
     def transform_data(
         self,
         data: types_coordinates,
         source_coordinate_system_name: str,
         target_coordinate_system_name: str,
-    ):
+    ) -> Union[SpatialData, xr.DataArray]:
         """Transform spatial data from one coordinate system to another.
 
         Parameters
@@ -1689,7 +1707,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        numpy.ndarray
+        Union[weldx.geometry.SpatialData, xarray.DataArray]
             Transformed data
 
         """
@@ -1706,7 +1724,11 @@ class CoordinateSystemManager:
         if not isinstance(data, xr.DataArray):
             data = xr.DataArray(data, dims=["n", "c"], coords={"c": ["x", "y", "z"]})
 
-        lcs = self.get_cs(source_coordinate_system_name, target_coordinate_system_name)
+        time = data.time if "time" in data.coords else None
+        lcs = self.get_cs(
+            source_coordinate_system_name, target_coordinate_system_name, time=time
+        )
+
         mul = util.xr_matmul(
             lcs.orientation, data, dims_a=["c", "v"], dims_b=["c"], dims_out=["c"]
         )

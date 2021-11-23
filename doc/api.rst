@@ -1,4 +1,5 @@
-Documentation
-=============
+###############
+ Documentation
+###############
 
 .. automodule:: weldx

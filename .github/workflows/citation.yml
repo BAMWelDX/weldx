@@ -1,0 +1,23 @@
+name: CITATION.cff
+on:
+  push:
+    paths:
+      - CITATION.cff
+  pull_request:
+  release:
+
+jobs:
+  Validate-CITATION-cff:
+    name: Validate CITATION.cff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-cffconvert-0
+      - name: pip installs
+        run: pip install cffconvert
+      - name: run cffconvert validate
+        run: cffconvert --validate

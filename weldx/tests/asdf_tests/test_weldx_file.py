@@ -14,14 +14,15 @@ from jsonschema import ValidationError
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
+from weldx.asdf.file import _PROTECTED_KEYS, DEFAULT_ARRAY_INLINE_THRESHOLD
 from weldx.asdf.util import get_schema_path
 from weldx.types import SupportsFileReadWrite
-from weldx.util import compare_nested
+from weldx.util import WeldxDeprecationWarning, compare_nested
 
 SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 
 
-class ReadOnlyFile:
+class _ReadOnlyFile:
     """Simulate a read-only file."""
 
     def __init__(self, tmpdir):  # noqa: D107
@@ -42,7 +43,7 @@ class ReadOnlyFile:
         return True
 
 
-class WritableFile:
+class _WritableFile:
     """Example of a class implementing SupportsFileReadWrite."""
 
     def __init__(self):  # noqa: D107
@@ -70,7 +71,7 @@ class WritableFile:
 
 def test_protocol_check(tmpdir):
     """Instance checks."""
-    assert isinstance(WritableFile(), SupportsFileReadWrite)
+    assert isinstance(_WritableFile(), SupportsFileReadWrite)
     assert isinstance(BytesIO(), SupportsFileReadWrite)
 
     # real file:
@@ -176,7 +177,7 @@ class TestWeldXFile:
     @staticmethod
     def test_create_writable_protocol():
         """Interface test for writable files."""
-        f = WritableFile()
+        f = _WritableFile()
         WeldxFile(f, tree=dict(test="yes"), mode="rw")
         new_file = TestWeldXFile.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
@@ -184,13 +185,13 @@ class TestWeldXFile:
     @staticmethod
     def test_create_readonly_protocol(tmpdir):
         """A read-only file should be supported by ASDF."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         WeldxFile(f)
 
     @staticmethod
     def test_read_only_raise_on_write(tmpdir):
         """Read-only files cannot be written to."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         with pytest.raises(ValueError):
             WeldxFile(f, mode="rw")
 
@@ -501,14 +502,93 @@ class TestWeldXFile:
             f.update()
             f.close()
 
-        # compare data
-        assert (
-            pathlib.Path("test.asdf").stat().st_size
-            == pathlib.Path("test.wx").stat().st_size
+        # file sizes should be almost equal (array inlining in wxfile).
+        a = pathlib.Path("test.asdf").stat().st_size
+        b = pathlib.Path("test.wx").stat().st_size
+        assert a >= b
+
+        if a == b:
+
+            def _read(fn):
+                with open(fn, "br") as fh:
+                    return fh.read()
+
+            assert _read("test.asdf") == _read("test.wx")
+
+    @pytest.mark.filterwarnings("ignore:You tried to manipulate an ASDF internal")
+    @pytest.mark.filterwarnings("ignore:Call to deprecated function data.")
+    @pytest.mark.parametrize("protected_key", _PROTECTED_KEYS)
+    def test_cannot_update_del_protected_keys(self, protected_key):
+        """Ensure we cannot manipulate protected keys."""
+        expected_match = "manipulate an ASDF internal structure"
+        warning_type = UserWarning
+        # try to obtain key from underlying dict.
+        with pytest.raises(KeyError), pytest.warns(WeldxDeprecationWarning):
+            _ = self.fh.data[protected_key]
+
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.update({protected_key: None})
+        with pytest.warns(warning_type, match=expected_match):
+            del self.fh[protected_key]
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.pop(protected_key)
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh[protected_key] = NotImplemented
+
+    def test_popitem_remain_protected_keys(self):
+        """Ensure we cannot manipulate protected keys."""
+        keys = []
+
+        while len(self.fh):
+            key, _ = self.fh.popitem()
+            keys.append(key)
+        assert keys == ["wx_metadata"]
+
+    def test_len_proteced_keys(self):
+        """Should only contain key 'wx_metadata'."""
+        assert len(self.fh) == 1
+
+    def test_keys_not_in_protected_keys(self):
+        """Protected keys do not show up in keys()."""
+        assert self.fh.keys() not in set(_PROTECTED_KEYS)
+
+        for x in iter(self.fh):
+            assert x not in _PROTECTED_KEYS
+
+    @staticmethod
+    def test_array_inline_threshold():
+        """Test array inlining threshold."""
+        x = np.arange(7)
+        buff = WeldxFile(
+            tree=dict(x=x), mode="rw", array_inline_threshold=len(x) + 1
+        ).file_handle
+        buff.seek(0)
+        assert str(list(x)).encode("utf-8") in buff.read()
+
+        # now we create an array longer than the default threshold
+        y = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+        buff2 = WeldxFile(tree=dict(x=y), mode="rw").file_handle
+        buff2.seek(0)
+        data = buff2.read()
+        assert b"BLOCK" in data
+        assert str(list(y)).encode("utf-8") not in data
+
+    @staticmethod
+    def test_array_inline_threshold_sync():
+        x = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+
+        with WeldxFile(mode="rw") as wx:
+            wx.update(x=x)
+            wx.sync(array_inline_threshold=len(x) + 1)
+            buff3 = wx.file_handle
+            buff3.seek(0)
+            data3 = buff3.read()
+            assert b"BLOCK" not in data3
+
+    @staticmethod
+    def test_array_inline_threshold_write_to():
+        x = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+        buff = WeldxFile(tree=dict(x=x), mode="rw").write_to(
+            array_inline_threshold=len(x) + 1
         )
-
-        def _read(fn):
-            with open(fn, "br") as fh:
-                return fh.read()
-
-        assert _read("test.asdf") == _read("test.wx")
+        assert b"BLOCK" not in buff.read()

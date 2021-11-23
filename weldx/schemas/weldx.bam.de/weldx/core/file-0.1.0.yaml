@@ -19,8 +19,8 @@ examples:
         hostname: my_computer
         directory: C:/Users/some_user/my_files
         size: 90571
-        created: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-12-09T12:51:20.653744500'}
-        modified: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> {value: '2020-12-10T13:14:17.362481500'}
+        created: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-12-09T12:51:20.653744500'
+        modified: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-12-10T13:14:17.362481500'
         content_hash: {algorithm: SHA-256, value: 5a6270ea5e2662c6489ee9e9c2201645e1b3cdadf0e3a621cca213a29ff4ae32}
 
 type: object

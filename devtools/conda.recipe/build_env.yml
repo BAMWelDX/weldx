@@ -9,6 +9,6 @@ dependencies:
   - conda-verify
   - conda-build
   - mamba
-  - boa
+  - boa>=0.6
   - anaconda-client
   - numpydoc>=0.5

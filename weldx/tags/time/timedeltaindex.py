@@ -13,7 +13,7 @@ class TimedeltaIndexConverter(WeldxConverter):
     """A simple implementation of serializing pandas TimedeltaIndex."""
 
     name = "time/timedeltaindex"
-    version = "0.1.0"
+    version = "0.1.*"
     types = [pd.TimedeltaIndex]
 
     def to_yaml_tree(self, obj: pd.TimedeltaIndex, tag: str, ctx) -> dict:
@@ -45,8 +45,8 @@ class TimedeltaIndexConverter(WeldxConverter):
         """Calculate the shape from static tagged tree instance."""
         if "freq" in node:
             tdi_temp = pd.timedelta_range(
-                start=node["start"]["value"],
-                end=node["end"]["value"],
+                start=str(node["start"]),  # can't handle TaggedString directly
+                end=str(node["end"]),
                 freq=node["freq"],
             )
             return [len(tdi_temp)]

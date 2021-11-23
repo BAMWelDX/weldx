@@ -1,28 +1,42 @@
 """Contains some functions to help with visualization."""
 
-from typing import Dict, List, Tuple, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import k3d
 import k3d.platonic as platonic
 import numpy as np
 import pandas as pd
-from IPython.display import display
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
-from weldx import LocalCoordinateSystem, SpatialData, TimeSeries
-from weldx import geometry as geo
+import weldx.geometry as geo
+from weldx.core import TimeSeries
+
+if TYPE_CHECKING:  # pragma: no cover
+    from weldx.transformations.local_cs import LocalCoordinateSystem
 
 from .colors import (
     RGB_BLACK,
     RGB_BLUE,
     RGB_GREEN,
+    RGB_GREY,
     RGB_RED,
     color_generator_function,
     get_color,
 )
 from .types import types_limits, types_timeindex
 
-__all__ = ["CoordinateSystemManagerVisualizerK3D", "SpatialDataVisualizer"]
+__all__ = [
+    "CoordinateSystemManagerVisualizerK3D",
+    "SpatialDataVisualizer",
+]
+
+
+def _get_limits_from_stack(limits):
+    mins = limits.min(axis=0)[0, :]
+    maxs = limits.max(axis=0)[1, :]
+    return np.vstack([mins, maxs])
 
 
 def _get_coordinates_and_orientation(lcs: LocalCoordinateSystem, index: int = 0):
@@ -97,6 +111,7 @@ class CoordinateSystemVisualizerK3D:
         show_origin=True,
         show_trace=True,
         show_vectors=True,
+        vector_scale=2.5,
     ):
         """Create a `CoordinateSystemVisualizerK3D`.
 
@@ -124,13 +139,17 @@ class CoordinateSystemVisualizerK3D:
         coordinates, orientation = _get_coordinates_and_orientation(lcs)
         self._lcs = lcs
         self._color = color
+        self._vector_scale = vector_scale
 
         self._vectors = k3d.vectors(
             origins=[coordinates for _ in range(3)],
-            vectors=orientation.transpose(),
+            vectors=orientation.transpose() * self._vector_scale,
+            line_width=0.05,
+            head_size=3.0,
             colors=[[RGB_RED, RGB_RED], [RGB_GREEN, RGB_GREEN], [RGB_BLUE, RGB_BLUE]],
             labels=[],
             label_size=1.5,
+            name=name if name is None else f"{name} (vectors)",
         )
         self._vectors.visible = show_vectors
 
@@ -142,13 +161,15 @@ class CoordinateSystemVisualizerK3D:
                 color=self._color,
                 size=1,
                 label_box=False,
+                name=name if name is None else f"{name} (text)",
             )
 
         self._trace = k3d.line(
             np.array(lcs.coordinates.values, dtype="float32"),  # type: ignore
-            shader="simple",
-            width=0.05,
+            shader="thick",
+            width=0.1,  # change with .set_trait("width", value)
             color=color,
+            name=name if name is None else f"{name} (line)",
         )
         self._trace.visible = show_trace
 
@@ -176,7 +197,7 @@ class CoordinateSystemVisualizerK3D:
 
         """
         self._vectors.origins = [coordinates for _ in range(3)]
-        self._vectors.vectors = orientation.transpose()
+        self._vectors.vectors = orientation.transpose() * self._vector_scale
         self.origin.model_matrix = _create_model_matrix(coordinates, orientation)
         if self._label is not None:
             self._label.position = coordinates + 0.05
@@ -255,6 +276,15 @@ class CoordinateSystemVisualizerK3D:
         coordinates, orientation = _get_coordinates_and_orientation(self._lcs, index)
         self._update_positions(coordinates, orientation)
 
+    def limits(self):
+        lcs = self._lcs
+        dims = [d for d in lcs.coordinates.dims if d != "c"]
+        if dims:
+            mins = lcs.coordinates.min(dim=dims)
+            maxs = lcs.coordinates.max(dim=dims)
+            return np.vstack([mins, maxs])
+        return np.vstack([lcs.coordinates.values, lcs.coordinates.values])
+
 
 class SpatialDataVisualizer:
     """Visualizes spatial data."""
@@ -263,11 +293,11 @@ class SpatialDataVisualizer:
 
     def __init__(
         self,
-        data: Union[np.ndarray, SpatialData],
+        data: Union[np.ndarray, geo.SpatialData],
         name: str,
         reference_system: str,
         plot: k3d.Plot = None,
-        color: int = RGB_BLACK,
+        color: int = None,
         visualization_method: str = "auto",
         show_wireframe: bool = False,
     ):
@@ -294,16 +324,23 @@ class SpatialDataVisualizer:
             If `True`, meshes will be drawn as wireframes
 
         """
-        triangles = None
-        if isinstance(data, geo.SpatialData):
-            triangles = data.triangles
-            data = data.coordinates.data
-        # k3d needs single precision data.
-        data = data.astype(np.float32)  # type: ignore[union-attr] # handled above
+        if not isinstance(data, geo.SpatialData):
+            data = geo.SpatialData(coordinates=data)
+
+        colors = []
+        if color is None or isinstance(color, str):
+            if isinstance(color, str):
+                colors = data.attributes[color]
+            color = RGB_GREY
+
+        if data.triangles is not None:
+            triangles = data.triangles.astype(np.uint32)
+        else:
+            triangles = None
 
         self._reference_system = reference_system
 
-        self._label_pos = np.mean(data, axis=0)
+        self._label_pos = data.coordinates.mean(dim=data.additional_dims).values
         self._label = None
         if name is not None:
             self._label = k3d.text(
@@ -313,13 +350,26 @@ class SpatialDataVisualizer:
                 color=color,
                 size=0.5,
                 label_box=True,
+                name=name if name is None else f"{name} (text)",
             )
 
-        self._points = k3d.points(data, point_size=0.05, color=color)
+        self._points = k3d.points(
+            data.coordinates,
+            point_size=0.05,
+            color=color,
+            name=name if name is None else f"{name} (points)",
+        )
         self._mesh = None
-        if triangles is not None:
+        if data.triangles is not None:
             self._mesh = k3d.mesh(
-                data, triangles, side="double", color=color, wireframe=show_wireframe
+                data.coordinates.values.astype(np.float32).reshape(-1, 3),
+                triangles,
+                side="double",
+                color=color,
+                attribute=colors,
+                color_map=k3d.colormaps.matplotlib_color_maps.Viridis,
+                wireframe=show_wireframe,
+                name=name if name is None else f"{name} (mesh)",
             )
 
         self.set_visualization_method(visualization_method)
@@ -330,6 +380,8 @@ class SpatialDataVisualizer:
                 plot += self._mesh
             if self._label is not None:
                 plot += self._label
+
+        self.data = data
 
     @property
     def reference_system(self) -> str:
@@ -484,24 +536,10 @@ class CoordinateSystemManagerVisualizerK3D:
             reference_system = self._csm.root_system_name
         self._current_reference_system = reference_system
 
-        if limits is not None:
-            grid_auto_fit = False
-            # INFO: The next three suppressed mypy warnings do make sense and might
-            # reveal a bug, but I couldn't resolve it in a reasonable time.
-            if len(limits) == 1:
-                grid = [limits[0][int(i / 3)] for i in range(6)]  # type: ignore
-            else:
-                grid = [limits[i % 3][int(i / 3)] for i in range(6)]  # type: ignore
-        else:
-            grid_auto_fit = True
-            grid = (-1, -1, -1, 1, 1, 1)  # type: ignore[assignment]
+        plot = k3d.plot()
 
-        # create plot
         self._color_generator = color_generator_function()
-        plot = k3d.plot(
-            grid_auto_fit=grid_auto_fit,
-            grid=grid,
-        )
+
         self._lcs_vis = {
             lcs_name: CoordinateSystemVisualizerK3D(
                 self._csm.get_cs(lcs_name, reference_system),
@@ -563,18 +601,67 @@ class CoordinateSystemManagerVisualizerK3D:
                 is_html=True,
                 size=1.0,
                 reference_point="lb",
+                name="timeline",
             )
             plot += self._time_info
-
-        # display everything
-        plot.display()
-        display(self._controls)
 
         # workaround since using it inside the init method of the coordinate system
         # visualizer somehow causes the labels to be created twice with one version
         # being always visible
         self.show_data_labels(show_data_labels)
         self.show_labels(show_labels)
+
+        self._plot = plot
+        if limits is None:
+            limits = self._get_limits()
+        self.grid = limits
+
+    @property
+    def grid(self):
+        """Return the plot grid bounding box in (x0, y0, z0, x1, y1, z1) format."""
+        return self._plot.grid
+
+    @grid.setter
+    def grid(self, value):
+        """Set grid bounding box in (x0, y0, z0, x1, y1, z1) or (min, max) format."""
+        if value is None:
+            self._plot.grid_auto_fit = True
+            self._plot.grid = (-1, -1, -1, 1, 1, 1)
+        else:
+            self._plot.grid_auto_fit = False
+            grid = tuple(np.array(value).flatten().astype(int))
+            if len(grid) == 2:
+                grid = np.repeat(grid, 3)
+            self._plot.grid = grid
+
+    def _get_limits_spatial(self):
+        """Get the limits of all spatial data."""
+        if not self._data_vis:
+            return None
+        limits = np.stack([s.data.limits() for s in self._data_vis.values()])
+        return _get_limits_from_stack(limits)
+
+    def _get_limits_trace(self):
+        """Get the limits of all LCS/traces."""
+        if not self._lcs_vis:
+            return None
+        limits = np.stack([lcs_vis.limits() for lcs_vis in self._lcs_vis.values()])
+        return _get_limits_from_stack(limits)
+
+    def _get_limits(self):
+        limits_spatial = self._get_limits_spatial()
+        limits_trace = self._get_limits_trace()
+        limits = [lims for lims in [limits_spatial, limits_trace] if lims is not None]
+        if limits:
+            return _get_limits_from_stack(np.stack(limits))
+        return None
+
+    def _ipython_display_(self):
+        from IPython.core.display import display
+
+        # display everything
+        self._plot.display()
+        display(self._controls)
 
     def _create_controls(
         self,

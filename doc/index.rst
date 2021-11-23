@@ -1,28 +1,22 @@
-============================================================
-WelDX - data and quality standards for welding research data
-============================================================
-
-.. mdinclude:: ../README.md
-   :start-line: 8
+.. include:: ../README.rst
 
 .. toctree::
-    :hidden:
-    :maxdepth: 1
+   :hidden:
+   :maxdepth: 1
 
-    install
-    tutorials
-    standard
-    api
-    changelog_link
-    legal-notice
+   install
+   tutorials
+   api
+   changelog_link
+   legal-notice
 
+############
+ Python API
+############
 
-Python API
-----------
-
-The first core component of the ``WelDX`` project is the Python API.
-The API aims to provide a framework for describing welding experiments as well as
-working and analysing welding research data in Python.
+The first core component of the ``WelDX`` project is the Python API. The
+API aims to provide a framework for describing welding experiments as
+well as working and analysing welding research data in Python.
 
 Head over to the :doc:`tutorials` section to see some examples.
 

@@ -8,6 +8,7 @@ ci:
   autoupdate_schedule: weekly
   skip: []
   submodules: false
+exclude: '.*.weldx$|.*.wx$|.*.asdf$'
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
@@ -19,15 +20,15 @@ repos:
         exclude: devtools/conda.recipe/meta.yaml  # doesn't play nice with jinja
   #    - id: no-commit-to-branch  # only makes sense for local pre-commit hooks
   - repo: https://github.com/psf/black
-    rev: 21.9b0
+    rev: 21.11b1
     hooks:
       - id: black
   - repo: https://github.com/pycqa/isort
-    rev: 5.9.3
+    rev: 5.10.1
     hooks:
       - id: isort
   - repo: https://github.com/PyCQA/flake8
-    rev: 3.9.2
+    rev: 4.0.1
     hooks:
       - id: flake8
   - repo: https://github.com/pycqa/pydocstyle
@@ -45,7 +46,18 @@ repos:
         args:
           - --convention=numpy
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.1.1
+    rev: 1.2.1
     hooks:
       - id: nbqa-black
       - id: nbqa-isort
+  - repo: https://github.com/roy-ht/pre-commit-jupyter
+    rev: v1.2.1
+    hooks:
+      - id: jupyter-notebook-cleanup
+        args:
+          - --remove-kernel-metadata
+  - repo: https://github.com/codespell-project/codespell/
+    rev: v2.1.0
+    hooks:
+      - id: codespell
+        exclude: doc/legal-notice.rst

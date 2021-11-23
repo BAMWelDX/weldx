@@ -13,7 +13,7 @@ from pandas import DatetimeIndex, Timedelta, TimedeltaIndex, Timestamp
 from pandas.api.types import is_object_dtype
 from xarray import DataArray
 
-from .constants import Q_
+from weldx.constants import Q_
 
 __all__ = [
     "Time",
@@ -24,6 +24,20 @@ __all__ = [
     "types_pandas_times",
     "types_time_like",
 ]
+
+
+class TimeDependent(ABC):
+    """An abstract base class that describes a common interface of time dep. classes."""
+
+    @property
+    @abstractmethod
+    def time(self) -> Time:
+        """Get the classes time component."""
+
+    @property
+    @abstractmethod
+    def reference_time(self) -> Union[Timestamp, None]:
+        """Return the reference timestamp if the time data is absolute."""
 
 
 class Time:
@@ -56,6 +70,9 @@ class Time:
         - `pint.Quantity`
         - strings representing a date (``"2001-01-23 14:23:11"``) or a timedelta
           (``23s``)
+
+    The underlying implementation is based on the core `pandas.TimedeltaIndex` and
+    `pandas.DatetimeIndex` types, see the documentation for references.
 
     Parameters
     ----------
@@ -127,7 +144,7 @@ class Time:
     >>> t_abs = Time("2014-07-23")
     >>> t_abs = Time(["2000","2001","2002"])
 
-    Types that are derived from the abstract base class `TimeDependent` can also be
+    Types that are derived from the abstract base class ``TimeDependent`` can also be
     passed directly to `Time` as `time` parameter:
 
     >>> from weldx import LocalCoordinateSystem as LCS
@@ -228,24 +245,20 @@ class Time:
     Direct access and iteration are also supported. The return types are fitting pandas
     types:
 
+
+    >>> t = Time(["1s", "2s", "3s"])
+    >>> t[1]
+    Time:
+    0 days 00:00:02
+
+    >>> t = Time(["2000", "2001", "2002"])
+    >>> t[1]
+    Time:
+    2001-01-01 00:00:00
+    reference time: 2000-01-01 00:00:00
+
     >>> from pandas import Timedelta
     >>>
-    >>> t = Time(["1s", "2s", "3s"])
-    >>> t[1] == Timedelta(2, "s")
-    True
-
-    >>> isinstance(t[1], Timedelta)
-    True
-
-    >>> from pandas import Timestamp
-    >>>
-    >>> t = Time(["2000", "2001", "2002"])
-    >>> t[1] == Timestamp("2001")
-    True
-
-    >>> isinstance(t[1], Timestamp)
-    True
-
     >>> t = Time(["1s", "2s", "3s"])
     >>> result = Timedelta(0, "s")
     >>>
@@ -254,8 +267,8 @@ class Time:
     ...         raise TypeError("Unexpected type")
     ...     result += value
     >>>
-    >>> result == Timedelta(6, "s")
-    True
+    >>> result
+    Timedelta('0 days 00:00:06')
 
     """
 
@@ -336,15 +349,34 @@ class Time:
 
     def __len__(self):
         """Return the length of the data."""
-        return self.length
+        return self.as_pandas_index().__len__()
 
     def __iter__(self):
         """Use generator to iterate over index values."""
         return (t for t in self.as_pandas_index())
 
-    def __getitem__(self, item) -> types_pandas_times:
+    def __getitem__(self, item) -> Time:
         """Access pandas index."""
-        return self.as_pandas_index()[item]
+        return Time(self.as_pandas_index()[item], self.reference_time)
+
+    def __getattr__(self, item: str):
+        """Delegate unknown method calls to pandas index.
+
+        Raises
+        ------
+        AttributeError
+            When accessing a not implemented 'dunder' method or the requested method
+            can not be accessed on the pandas index type.
+
+        """
+        if item.startswith("__"):
+            raise AttributeError(f"Dunder method '{item}' not implemented for 'Time'.")
+        try:
+            return getattr(self.as_pandas_index(), item)
+        except AttributeError:
+            raise AttributeError(
+                f"Neither 'Time' object nor its pandas index has attribute '{item}'"
+            )
 
     def __repr__(self):
         """Console info."""
@@ -385,8 +417,10 @@ class Time:
             otherwise
 
         """
-        # TODO: handle tolerances ?
-        return np.allclose(self._time, Time(other).as_pandas())
+        other = Time(other)
+        if self.reference_time != other.reference_time:
+            return False
+        return np.allclose(self.as_quantity(), other.as_quantity())
 
     def as_quantity(self, unit: str = "s") -> pint.Quantity:
         """Return the data as `pint.Quantity`.
@@ -456,9 +490,22 @@ class Time:
             return pd.TimedeltaIndex([self._time])
         return self._time
 
-    def as_data_array(self) -> DataArray:
-        """Return the data as `xarray.DataArray`."""
-        da = xr.DataArray(self._time, coords={"time": self._time}, dims=["time"])
+    def as_data_array(self, timedelta_base: bool = True) -> DataArray:
+        """Return the time data as a `xarray.DataArray` coordinate.
+
+        By default the format is timedelta values with reference time as attribute.
+
+        Parameters
+        ----------
+        timedelta_base
+            If true (the default) the values of the xarray will always be timedeltas.
+
+        """
+        if timedelta_base:
+            t = self.as_timedelta_index()
+        else:
+            t = self.index
+        da = xr.DataArray(t, coords={"time": t}, dims=["time"])
         da.time.attrs["time_ref"] = self.reference_time
         return da
 
@@ -482,28 +529,9 @@ class Time:
         return isinstance(self._time, (Timestamp, DatetimeIndex))
 
     @property
-    def length(self) -> int:
-        """Return the length of the data."""
-        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            return len(self._time)
-        return 1
-
-    @property
     def is_timestamp(self) -> bool:
         """Return `True` if the data represents a timestamp and `False` otherwise."""
         return isinstance(self._time, pd.Timestamp)
-
-    def max(self) -> Union[Timedelta, Timestamp]:
-        """Get the maximal time of the data."""
-        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            return self._time.max()
-        return self._time
-
-    def min(self) -> Union[Timedelta, Timestamp]:
-        """Get the minimal time of the data."""
-        if isinstance(self._time, (pd.TimedeltaIndex, pd.DatetimeIndex)):
-            return self._time.min()
-        return self._time
 
     @property
     def index(self) -> Union[pd.TimedeltaIndex, pd.DatetimeIndex]:
@@ -538,6 +566,86 @@ class Time:
         """
         return self.as_quantity(unit="s")
 
+    @property
+    def duration(self) -> Time:
+        """Get the covered time span."""
+        return Time(self.max() - self.min())
+
+    def resample(self, number_or_interval: Union[int, types_timedelta_like]):
+        """Resample the covered duration.
+
+        Parameters
+        ----------
+        number_or_interval :
+            If an integer is passed, the covered time period will be divided into
+            equally sized time steps so that the total number of time steps is equal to
+            the passed number. If a timedelta is passed, the whole period will be
+            resampled so that the difference between all time steps matches the
+            timedelta. Note that the boundaries of the time period will not change.
+            Therefore, the timedelta between the last two time values might differ from
+            the desired timedelta.
+
+        Returns
+        -------
+        weldx.time.Time :
+            Resampled time object
+
+        Raises
+        ------
+        RuntimeError
+            When the time data consists only of a single value and has no duration.
+        TypeError
+            When the passed value is neither an integer or a supported time delta value
+        ValueError
+            When the passed time delta is equal or lower than 0
+
+        Examples
+        --------
+        >>> from weldx import Time
+        >>> t = Time(["3s","6s","7s", "9s"])
+
+        Resample using an integer:
+
+        >>> t.resample(4)
+        Time:
+        TimedeltaIndex(['0 days 00:00:03', '0 days 00:00:05', '0 days 00:00:07',
+                        '0 days 00:00:09'],
+                       dtype='timedelta64[ns]', freq=None)
+
+        Resample with a time delta:
+
+        >>> t.resample("1.5s")
+        Time:
+        TimedeltaIndex([       '0 days 00:00:03', '0 days 00:00:04.500000',
+                               '0 days 00:00:06', '0 days 00:00:07.500000',
+                               '0 days 00:00:09'],
+                       dtype='timedelta64[ns]', freq='1500L')
+
+        """
+        if len(self) <= 1:
+            raise RuntimeError("Can't resample a single time delta or timestamp")
+
+        tdi = self.as_timedelta_index()
+        t0, t1 = tdi.min(), tdi.max()
+
+        if isinstance(number_or_interval, int):
+            if number_or_interval < 2:
+                raise ValueError("Number of time steps must be equal or larger than 2.")
+
+            tdi_new = pd.timedelta_range(start=t0, end=t1, periods=number_or_interval)
+        else:
+            freq = Time(number_or_interval).as_timedelta()
+
+            if freq <= pd.Timedelta(0):
+                raise ValueError("Time delta must be a positive, non-zero value.")
+
+            tdi_new = pd.timedelta_range(start=t0, end=t1, freq=freq)
+
+        if not tdi_new[-1] == t1:
+            tdi_new = tdi_new.append(pd.Index([t1]))
+
+        return Time(tdi_new, self.reference_time)
+
     @staticmethod
     def _convert_quantity(
         time: pint.Quantity,
@@ -560,7 +668,10 @@ class Time:
         if "time" in time.coords:
             time = time.time
         time_ref = time.weldx.time_ref
-        time_index = pd.Index(time.values)
+        if time.shape:
+            time_index = pd.Index(time.values)
+        else:
+            time_index = pd.Index([time.values])
         if time_ref is not None:
             time_index = time_index + time_ref
         return time_index
@@ -607,7 +718,7 @@ class Time:
     union = _UnionDescriptor()
     """Calculate the union of multiple time-like objects.
 
-    This method can eiter be used as a class or instance method. When used on an
+    This method can either be used as a class or instance method. When used on an
     instance, its values are included in the calculated time union.
 
     Note that any reference time information will be dropped.
@@ -653,20 +764,6 @@ class Time:
     def _union_instance(self, times: Sequence[types_time_like]) -> Time:
         """Instance version of the ``union`` method."""
         return Time._union_class([self, *times])
-
-
-class TimeDependent(ABC):
-    """An abstract base class that describes a common interface of time dep. classes."""
-
-    @property
-    @abstractmethod
-    def time(self) -> Time:
-        """Get the classes time component."""
-
-    @property
-    @abstractmethod
-    def reference_time(self) -> Union[Timestamp, None]:
-        """Return the reference timestamp if the time data is absolute."""
 
 
 # list of types that are supported to be stored in Time._time

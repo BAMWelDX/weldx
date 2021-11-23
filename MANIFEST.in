@@ -1,5 +1,6 @@
 recursive-include weldx/schemas *.yaml
 recursive-include weldx/manifests *.yaml
+include CITATION.cff
 
 prune .binder
 prune .github

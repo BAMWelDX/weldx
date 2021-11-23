@@ -6,6 +6,7 @@ import numpy as np
 import pint
 from scipy.spatial.transform import Rotation as _Rotation
 
+from weldx.constants import U_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -62,7 +63,7 @@ class WXRotation(_Rotation):
         """
 
         if isinstance(angles, pint.Quantity):
-            if str(angles.u) == "dimensionless":
+            if angles.u == U_(""):
                 angles = angles.to("rad")
             degrees = "rad" not in str(angles.u)
             if degrees:

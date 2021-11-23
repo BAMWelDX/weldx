@@ -7,8 +7,7 @@ import pint
 import pytest
 import xarray as xr
 
-from weldx.constants import Q_
-from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.constants import Q_, U_
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
 from weldx.time import Time
@@ -111,7 +110,7 @@ class TestMathematicalExpression:
         "name, value, exception_type, test_name",
         [
             ("k", 1, ValueError, "# parameter not in expression"),
-            (33, 1, TypeError, "# wrong type as name #1"),
+            (33, 1, ValueError, "# wrong type as name #1"),
             ({"a": 1}, 1, TypeError, "# wrong type as name #2"),
         ],
         ids=get_test_name,
@@ -221,7 +220,7 @@ class TestTimeSeries:
     me_expr_str = "a*t + b"
     me_params = {"a": Q_(2, "m/s"), "b": Q_(-2, "m")}
 
-    me_params_vec = {"a": Q_([[2, 0, 1]], "m/s"), "b": Q_([[-2, 3, 0]], "m")}
+    me_params_vec = {"a": Q_([2, 0, 1], "m/s"), "b": Q_([-2, 3, 0], "m")}
 
     ts_constant = TimeSeries(value_constant)
     ts_disc_step = TimeSeries(values_discrete, time_discrete, "step")
@@ -240,7 +239,7 @@ class TestTimeSeries:
             (Q_([3, 7, 1], ""), Q_([0, 1, 2], "s"), "step", (3,)),
         ],
     )
-    def test_construction_discrete(data, time, interpolation, shape_exp):
+    def test_construction_discrete(data: pint.Quantity, time, interpolation, shape_exp):
         """Test the construction of the TimeSeries class."""
         # set expected values
         time_exp = time
@@ -248,7 +247,7 @@ class TestTimeSeries:
             time_exp = pd.TimedeltaIndex(time_exp.m, unit="s")
 
         exp_interpolation = interpolation
-        if len(data.m.shape) == 0 and interpolation is None:
+        if len(data.shape) == 0 and interpolation is None:
             exp_interpolation = "step"
 
         # create instance
@@ -259,7 +258,7 @@ class TestTimeSeries:
         assert np.all(ts.time == time_exp)
         assert ts.interpolation == exp_interpolation
         assert ts.shape == shape_exp
-        assert data.check(UREG.get_dimensionality(ts.units))
+        assert data.is_compatible_with(ts.units)
 
         assert np.all(ts.data_array.data == data)
         assert ts.data_array.attrs["interpolation"] == exp_interpolation
@@ -291,7 +290,7 @@ class TestTimeSeries:
         assert ts.interpolation is None
         assert ts.shape == shape_exp
         assert ts.data_array is None
-        assert Q_(1, unit_exp).check(UREG.get_dimensionality(ts.units))
+        assert U_(unit_exp).is_compatible_with(ts.units)
 
     # test_init_data_array -------------------------------------------------------------
 
@@ -323,7 +322,6 @@ class TestTimeSeries:
     time_def = Q_([0, 1, 2, 3, 4], "s")
     me_too_many_vars = ME("a*t + b", {})
     me_param_units = ME("a*t + b", {"a": Q_(2, "1/s"), "b": Q_(-2, "m")})
-    me_time_vec = ME("a*t + b", {"a": Q_([2, 3, 4], "1/s"), "b": Q_([-2, 3, 1], "")})
 
     @staticmethod
     @pytest.mark.parametrize(
@@ -333,7 +331,6 @@ class TestTimeSeries:
             (values_def, time_def.magnitude, "step", TypeError, "# invalid time type"),
             (me_too_many_vars, None, None, Exception, "# too many free variables"),
             (me_param_units, None, None, Exception, "# incompatible parameter units"),
-            (me_time_vec, None, None, Exception, "# not compatible with time vectors"),
             ("a string", None, None, TypeError, "# wrong data type"),
         ],
         ids=get_test_name,
@@ -442,10 +439,10 @@ class TestTimeSeries:
         result = ts.interp_time(time)
 
         assert np.all(np.isclose(result.data.magnitude, magnitude_exp))
-        assert Q_(1, str(result.units)) == Q_(1, unit_exp)
+        assert result.units == U_(unit_exp)
 
         time = Time(time)
-        if time.length == 1:
+        if len(time) == 1:
             assert result.time is None
         else:
             assert np.all(Time(result.time, result._reference_time) == time)

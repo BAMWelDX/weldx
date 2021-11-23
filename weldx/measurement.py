@@ -6,10 +6,10 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Tuple, Union  # noqa: F401
 from warnings import warn
 
+import pint
 from networkx import draw, draw_networkx_edge_labels
 
 from weldx.constants import Q_, U_
-from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.core import MathematicalExpression, TimeSeries
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -33,13 +33,14 @@ class Signal:
     """Simple dataclass implementation for measurement signals."""
 
     signal_type: str
-    unit: str
+    units: Union[str, pint.Unit]
     data: TimeSeries = None
 
     def __post_init__(self):
         """Perform some checks after construction."""
         if self.signal_type not in ["analog", "digital"]:
             raise ValueError(f"{self.signal_type} is an invalid signal type.")
+        self.units = U_(self.units)
 
     def plot(
         self,
@@ -243,7 +244,7 @@ class MeasurementChain:
         >>> current_source = SignalSource(name="Current sensor",
         ...                               error=Error(Q_(0.1, "percent")),
         ...                               output_signal=Signal(signal_type="analog",
-        ...                                                    unit="V")
+        ...                                                    units="V")
         ...                               )
 
         Create a measurement chain using the source
@@ -330,7 +331,7 @@ class MeasurementChain:
         >>> current_source = SignalSource(name="Current sensor",
         ...                               error=Error(Q_(0.1, "percent")),
         ...                               output_signal=Signal(signal_type="analog",
-        ...                                                    unit="V")
+        ...                                                    units="V")
         ...                               )
 
         Create the equipment
@@ -369,7 +370,7 @@ class MeasurementChain:
         source_name: str,
         source_error: Error,
         output_signal_type: str,
-        output_signal_unit: str,
+        output_signal_unit: Union[str, Unit],
         signal_data: TimeSeries = None,
     ) -> "MeasurementChain":
         """Create a new measurement chain without providing a `SignalSource` instance.
@@ -410,7 +411,7 @@ class MeasurementChain:
         """
         source = SignalSource(
             source_name,
-            Signal(output_signal_type, output_signal_unit, signal_data),
+            Signal(output_signal_type, U_(output_signal_unit), signal_data),
             source_error,
         )
         return cls(name, source)
@@ -476,8 +477,8 @@ class MeasurementChain:
             signal_type=cls._determine_output_signal_type(
                 transformation.type_transformation, input_signal.signal_type
             ),
-            unit=cls._determine_output_signal_unit(
-                transformation.func, input_signal.unit
+            units=cls._determine_output_signal_unit(
+                transformation.func, input_signal.units
             ),
             data=data,
         )
@@ -514,8 +515,8 @@ class MeasurementChain:
 
     @staticmethod
     def _determine_output_signal_unit(
-        func: MathematicalExpression, input_unit: str
-    ) -> str:
+        func: MathematicalExpression, input_unit: Union[str, Union]
+    ) -> pint.Unit:
         """Determine the unit of a transformations' output signal.
 
         Parameters
@@ -527,10 +528,12 @@ class MeasurementChain:
 
         Returns
         -------
-        str:
+        pint.Unit:
             Unit of the transformations' output signal
 
         """
+        input_unit = U_(input_unit)
+
         if func is not None:
             variables = func.get_variable_names()
             if len(variables) != 1:
@@ -543,7 +546,7 @@ class MeasurementChain:
                     "The provided function is incompatible with the input signals unit."
                     f" \nThe test raised the following exception:\n{e}"
                 )
-            return str(test_output.units)
+            return test_output.data.units
 
         return input_unit
 
@@ -749,7 +752,7 @@ class MeasurementChain:
         name: str,
         error: Error,
         output_signal_type: str = None,
-        output_signal_unit: str = None,
+        output_signal_unit: Union[str, Unit] = None,
         func: MathematicalExpression = None,
         data: TimeSeries = None,
         input_signal_source: str = None,
@@ -813,26 +816,28 @@ class MeasurementChain:
         ...                          )
 
         """
+        if output_signal_unit is not None:
+            output_signal_unit = U_(output_signal_unit)
+
         if output_signal_type is None and output_signal_unit is None and func is None:
             warn("The created transformation does not perform any transformations.")
 
         input_signal_source = self._check_and_get_node_name(input_signal_source)
-        input_signal = self._graph.nodes[input_signal_source]["signal"]
+        input_signal: Signal = self._graph.nodes[input_signal_source]["signal"]
         if output_signal_type is None:
             output_signal_type = input_signal.signal_type
         type_tf = f"{input_signal.signal_type[0]}{output_signal_type[0]}".upper()
         if output_signal_unit is not None:
             if func is not None:
-                if not ureg.is_compatible_with(
-                    output_signal_unit,
-                    self._determine_output_signal_unit(func, input_signal.unit),
+                if not output_signal_unit.is_compatible_with(
+                    self._determine_output_signal_unit(func, input_signal.units),
                 ):
                     raise ValueError(
                         "The unit of the provided functions output has not the same "
                         f"dimensionality as {output_signal_unit}"
                     )
             else:
-                unit_conversion = U_(output_signal_unit) / U_(input_signal.unit)
+                unit_conversion = output_signal_unit / input_signal.units
                 func = MathematicalExpression(
                     "a*x",
                     parameters={"a": Q_(1, unit_conversion)},
@@ -966,8 +971,8 @@ class MeasurementChain:
 
         # walk over the graphs nodes and collect necessary data for plotting
         while True:
-            signal = graph.nodes[c_node]["signal"]
-            signal_labels[c_node] = f"{signal.signal_type}\n[{signal.unit}]"
+            signal: Signal = graph.nodes[c_node]["signal"]
+            signal_labels[c_node] = f"{signal.signal_type}\n[{signal.units}]"
             positions[c_node] = (x_pos, 0.75)
 
             if signal.data is not None:

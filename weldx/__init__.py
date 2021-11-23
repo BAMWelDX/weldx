@@ -30,6 +30,29 @@ These classes and functions are used to define welding processes.
     GmawProcess
     get_groove
 
+**Unit handling**
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Unit handling
+    :template: class-template_docstring.rst
+
+    Q_
+    U_
+
+**Data handling and transformation**
+
+.. autosummary::
+    :toctree: _autosummary
+    :caption: Data handling and transformation
+    :template: class-template.rst
+
+    Time
+    TimeSeries
+    MathematicalExpression
+    CoordinateSystemManager
+    LocalCoordinateSystem
+    WXRotation
 
 **Geometry**
 
@@ -48,19 +71,6 @@ These classes are used to define workpiece geometries.
     Shape
     Trace
     SpatialData
-
-
-**Data handling and transformation**
-
-.. autosummary::
-    :toctree: _autosummary
-    :caption: Data handling and transformation
-    :template: class-template.rst
-
-    Q_
-    TimeSeries
-    CoordinateSystemManager
-    LocalCoordinateSystem
 
 **Full API Reference**
 
@@ -116,16 +126,16 @@ except ModuleNotFoundError:  # pragma: no cover
     )
 
 # constants - should be imported first, no internal weldx deps
-from .constants import Q_
+from weldx.constants import Q_, U_
 
 # main modules
-import weldx.util  # import this first to avoid circular dependencies
+import weldx.time
+import weldx.util  # import this second to avoid circular dependencies
 import weldx.core
 import weldx.transformations
 import weldx.config
 import weldx.geometry
 import weldx.welding
-import weldx.time
 
 # class imports to weldx namespace
 from weldx.config import Config
@@ -165,6 +175,7 @@ __all__ = (
     "LocalCoordinateSystem",
     "Profile",
     "Q_",
+    "U_",
     "Shape",
     "SpatialData",
     "Trace",

@@ -175,7 +175,7 @@ def test_init_expr_time_series_as_coord(time, time_ref, angles):
 
     """
     coordinates = MathematicalExpression(
-        expression="a*t+b", parameters=dict(a=Q_([[1, 0, 0]], "1/s"), b=[1, 2, 3])
+        expression="a*t+b", parameters=dict(a=Q_([1, 0, 0], "1/s"), b=[1, 2, 3])
     )
 
     ts_coord = TimeSeries(data=coordinates)
@@ -497,6 +497,7 @@ def test_issue_289_interp_outside_time_range(
     exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
     exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
 
+    assert lcs_interp.is_time_dependent is False
     assert lcs_interp.time is None
     assert lcs_interp.coordinates.values.shape == (3,)
     assert lcs_interp.orientation.values.shape == (3, 3)
@@ -518,7 +519,8 @@ def test_interp_time_discrete_single_time():
     exp_orient = WXRotation.from_euler("x", 90, degrees=True).as_matrix()
 
     lcs_interp = lcs.interp_time("2s")
-    assert lcs_interp.time is None
+    assert lcs_interp.is_time_dependent is False
+    assert lcs_interp.time.equals(Time("2s"))
     assert lcs_interp.coordinates.values.shape == (3,)
     assert lcs_interp.orientation.values.shape == (3, 3)
     assert np.all(lcs_interp.coordinates.data == exp_coords)
@@ -607,7 +609,7 @@ def test_interp_time_timeseries_as_coords(
 
     # create expression
     expr = "a*t+b"
-    param = dict(a=Q_([[1, 0, 0]], "mm/s"), b=Q_([1, 1, 1], "mm"))
+    param = dict(a=Q_([1, 0, 0], "mm/s"), b=Q_([1, 1, 1], "mm"))
     me = MathematicalExpression(expression=expr, parameters=param)
 
     # create orientation and time of LCS

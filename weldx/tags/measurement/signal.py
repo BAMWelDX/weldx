@@ -4,7 +4,7 @@ from weldx.measurement import Signal
 __all__ = ["Signal", "SignalConverter"]
 
 
-def _from_yaml_tree_mod(tree):
+def _from_yaml_tree_mod(tree: dict):
     if "data" not in tree:
         tree["data"] = None
     return tree

@@ -8,7 +8,7 @@ Closes # (add issue numbers)
 
 ## Checks
 
-- [ ] updated CHANGELOG.md
+- [ ] updated CHANGELOG.rst
 - [ ] updated tests
 - [ ] updated doc/
 - [ ] update example/tutorial notebooks

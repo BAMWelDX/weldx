@@ -11,11 +11,11 @@ examples:
     - A regular spaced timedeltaindex ranging from 0 s to 10 s with a 2 s frequency
     - |
       !<asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.0>
-        start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-        end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
+        start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+        end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
         freq: 2S
-        min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-        max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
+        min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+        max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
   -
     - An irregular timedeltaindex representing timestamps at 0 s, 4 s, 6 s and 10 s
     - |
@@ -24,10 +24,10 @@ examples:
           data: [0, 4000000000, 6000000000, 10000000000]
           datatype: int64
           shape: [4]
-        start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-        end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
-        min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M0S}
-        max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> {value: P0DT0H0M10S}
+        start: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+        end: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
+        min: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M0S
+        max: !<asdf://weldx.bam.de/weldx/tags/time/timedelta-0.1.0> P0DT0H0M10S
 
 definitions:
   values:

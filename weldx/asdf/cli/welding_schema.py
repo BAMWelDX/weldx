@@ -1,11 +1,11 @@
 """single_pass_weld schema."""
 import sys
 from io import BytesIO
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 
 def single_pass_weld_example(
-    out_file: str = "single_pass_weld_example.asdf",
+    out_file: Optional[Union[str, BytesIO]] = "single_pass_weld_example.asdf",
 ) -> Optional[Tuple[BytesIO, dict]]:
     """Create ASDF file containing all required fields of the single_pass_weld schema.
 
@@ -131,7 +131,7 @@ def single_pass_weld_example(
 
     src_current = msm.SignalSource(
         name="Current Sensor",
-        output_signal=msm.Signal(signal_type="analog", unit="V", data=None),
+        output_signal=msm.Signal(signal_type="analog", units="V", data=None),
         error=msm.Error(Q_(0.1, "percent")),
     )
 
@@ -281,10 +281,10 @@ def single_pass_weld_example(
         measurements=[welding_current, welding_voltage],
         welding_current=welding_current_chain.get_signal(
             "Calibration current measurement"
-        ),
+        ).data,
         welding_voltage=welding_voltage_chain.get_signal(
             "Calibration voltage measurement"
-        ),
+        ).data,
         coordinate_systems=csm,
         TCP=TCP_reference,
         workpiece=workpiece,
