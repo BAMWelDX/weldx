@@ -144,7 +144,7 @@ class TestXarrayInterpolation:
 
     @staticmethod
     @pytest.mark.parametrize("fmt", ["dict", "xarray"])
-    @pytest.mark.parametrize("broadcast_missing", [True, False])
+    @pytest.mark.parametrize("broadcast_missing", [False, True])
     def test_xr_interp_like_pints(fmt, broadcast_missing):
         # ---------- setup ----------
         a = Q_([0.0, 1.0], "m")
@@ -152,7 +152,7 @@ class TestXarrayInterpolation:
         t_interp = Q_([-100.0, 0.0, 200.0], "ms")
         b_interp = Q_([10.0, 20.0], "V")
 
-        data_units = "A"
+        data_units = U_("A")
         data = Q_([[1, 2, 3], [4, 5, 6]], data_units)
         result = Q_([[1.9, 2, 2.2], [4.9, 5, 5.2]], data_units)
 
@@ -180,19 +180,16 @@ class TestXarrayInterpolation:
         da2 = ut.xr_interp_like(da, da_interp, broadcast_missing=broadcast_missing)
 
         if broadcast_missing:
-            assert isinstance(da2.b.attrs.get("units"), str)
-            assert U_(da2.b.attrs.get("units", None)) == U_(b_interp.units)
+            assert da2.b.attrs.get("units", None) == b_interp.units
             da2 = da2.isel(b=0)
 
         for n in range(len(da.a)):
-            assert np.all(da2.sel(a=n).data == result[n, :].m)
-        assert U_(da2.attrs.get("units")) == U_(data_units)
+            assert np.all(da2.sel(a=n) == result[n, :])
+        assert da2.pint.units == data_units
         assert da2.attrs["wx_metadata"] == "meta"
 
-        assert isinstance(da2.t.attrs.get("units"), str)
-        assert U_(da2.t.attrs.get("units", None)) == U_(t.units)
-        assert isinstance(da2.a.attrs.get("units"), str)
-        assert U_(da2.a.attrs.get("units", None)) == U_(a.units)
+        assert da2.t.attrs.get("units", None) == t_interp.units
+        assert da2.a.attrs.get("units", None) == a.units
 
 
 def test_xr_interp_like():

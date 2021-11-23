@@ -212,10 +212,10 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     """
     if order == "bf":
         for dim in da.dims:
-            da = da.bfill(dim).ffill(dim)
+            da = da.pint.bfill(dim).pint.ffill(dim)
     elif order == "fb":
         for dim in da.dims:
-            da = da.ffill(dim).bfill(dim)
+            da = da.pint.ffill(dim).pint.bfill(dim)
     else:
         raise ValueError(f"Order {order} is not supported (use 'bf' or 'fb)")
     return da
@@ -268,10 +268,9 @@ def xr_interp_like(
     -------
     xarray.DataArray
         The interpolated DataArray.
-        Important: All unit information (data and coordinates) is stored as string in
-        the respective ``.attrs["units"]`` field.
-        Use the ``pint.quantify()`` accessor after calling ``xr_interp_like`` to
-        convert to quantities/units.
+        Important: All unit information (data and coordinates) is stored in quantified,
+        meaning: The xarray data will be a quantity and coordinates will have a ``Unit``
+        Object in their attributes.
 
     """
     da1 = da1.weldx.time_ref_unset()  # catch time formats
@@ -286,27 +285,21 @@ def xr_interp_like(
     if interp_coords is not None:
         sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
 
-    # save string representation of output coordinate units
-    coord_units = {**sel_coords, **_get_coordinate_quantities(da1)}
-    coord_units = {k: str(v.u) for k, v in coord_units.items()}
-
     # restore all units to string attributes
-    da1 = da1.pint.dequantify()
-
-    # convert the target coordinates to the reference original units
-    for c in da1.coords:
-        if (c in sel_coords) and (unit := da1[c].attrs.get("units", None)) is not None:
-            sel_coords[c] = sel_coords[c].to(unit)
-
-    # convert everything to ndarray
-    sel_coords = {
-        k: (v.magnitude if isinstance(v, pint.Quantity) else v)
-        for k, v in sel_coords.items()
-    }
+    da1 = da1.pint.dequantify().pint.quantify()
 
     # create a new (empty) temporary dataset to use for interpolation
     # we need this if da2 is passed as an existing coordinate variable like origin.time
-    da_temp = xr.DataArray(dims=sel_coords.keys(), coords=sel_coords)
+    da_temp_coords = {k: (k, v.m, {"units": v.u}) for k, v in sel_coords.items()}
+    da_temp = xr.DataArray(dims=sel_coords.keys(), coords=da_temp_coords)
+
+    # convert to base units if they exist
+    base_units = {
+        c: da1[c].attrs.get("units")
+        for c in da1.coords.keys() & da_temp.coords.keys()
+        if "units" in da1[c].attrs
+    }
+    da_temp = da_temp.pint.to(**base_units)
 
     # make sure edge coordinate values of da1 are in new coordinate axis of da_temp
     if assume_sorted:
@@ -316,8 +309,6 @@ def xr_interp_like(
             for d, val in da1.coords.items()
             if d in sel_coords
         }
-        if len(edge_dict) > 0:
-            da_temp = da_temp.combine_first(da1.isel(edge_dict))
     else:
         # select, combine with min/max values if coordinates not guaranteed to be sorted
         # maybe switch to idxmin()/idxmax() once it available
@@ -327,8 +318,9 @@ def xr_interp_like(
             for d, val in da1.coords.items()
             if d in sel_coords
         }
-        if len(edge_dict) > 0:
-            da_temp = da_temp.combine_first(da1.sel(edge_dict))
+
+    if len(edge_dict) > 0:
+        da_temp = da_temp.combine_first(da1.sel(edge_dict))
 
     # handle singular dimensions in da1
     # TODO: should we handle coordinates or dimensions?
@@ -349,9 +341,9 @@ def xr_interp_like(
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     if method == "step":
         fill_method = "ffill" if fillna else None
-        da = da1.reindex_like(da_temp, method=fill_method)
+        da = da1.pint.reindex_like(da_temp, method=fill_method)
     else:
-        da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
+        da = da1.pint.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
     # fill out of range nan values for all dimensions
     if fillna:
@@ -362,12 +354,7 @@ def xr_interp_like(
     else:  # careful not to select coordinates that are only in da_temp
         sel_coords = {d: v for d, v in sel_coords.items() if d in da1.coords}
 
-    result = da.sel(sel_coords)
-
-    # restore coordinate units as string attributes
-    for c, u in coord_units.items():
-        if c in result.coords:
-            result[c].attrs["units"] = u
+    result = da.pint.sel(sel_coords)
 
     return result
 
