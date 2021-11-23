@@ -269,8 +269,8 @@ def xr_interp_like(
     xarray.DataArray
         The interpolated DataArray.
         Important: All unit information (data and coordinates) is stored in quantified,
-        meaning: The xarray data will be a quantity and coordinates will have a ``Unit``
-        Object in their attributes.
+        form, meaning: The xarray data will be a quantity and coordinates will have a
+        ``Unit`` object in their attributes.
 
     """
     da1 = da1.weldx.time_ref_unset()  # catch time formats
@@ -285,8 +285,11 @@ def xr_interp_like(
     if interp_coords is not None:
         sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
 
-    # restore all units to string attributes
-    da1 = da1.pint.dequantify().pint.quantify()
+    # quantify xarray object
+    if not isinstance(da1.data, pint.Quantity):
+        da1 = da1.pint.quantify()
+    else:  # make sure coordinates attributes are formatted as units
+        da1 = da1.weldx.quantify_coords()
 
     # create a new (empty) temporary dataset to use for interpolation
     # we need this if da2 is passed as an existing coordinate variable like origin.time
@@ -786,3 +789,11 @@ class WeldxAccessor:
                 self._obj.time.attrs["time_ref"] = value  # set new time_ref value
             else:
                 self._obj.time.attrs["time_ref"] = value
+
+    def quantify_coords(self):
+        """Format coordinates 'units' attribute as Unit."""
+        da = self._obj.copy()
+        for c, v in da.coords.items():
+            if (units := v.attrs.get("units", None)) is not None:
+                da[c].attrs["units"] = U_(units)
+        return da

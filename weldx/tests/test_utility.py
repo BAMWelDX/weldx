@@ -145,8 +145,9 @@ class TestXarrayInterpolation:
     @staticmethod
     @pytest.mark.parametrize("fmt", ["dict", "xarray"])
     @pytest.mark.parametrize("broadcast_missing", [False, True])
-    def test_xr_interp_like_pints(fmt, broadcast_missing):
-        # ---------- setup ----------
+    @pytest.mark.parametrize("quantified", [False, True])
+    def test_xr_interp_like_pints(fmt, broadcast_missing, quantified):
+        """Test the unit aware behavior of xr_interp_like."""
         a = Q_([0.0, 1.0], "m")
         t = Q_([-1.0, 0.0, 1.0], "s")
         t_interp = Q_([-100.0, 0.0, 200.0], "ms")
@@ -176,6 +177,9 @@ class TestXarrayInterpolation:
                     "b": ("b", b_interp.m, {"units": b_interp.u}),
                 },
             )
+
+            if not quantified:
+                da_interp = da_interp.pint.dequantify()
 
         da2 = ut.xr_interp_like(da, da_interp, broadcast_missing=broadcast_missing)
 
