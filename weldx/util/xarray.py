@@ -490,7 +490,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                 )
 
         if "units" in check:
-            units = coords[key].attrs.get("units", None)
+            units = coords[key].pint.units
             if not units or not U_(units) == U_(check["units"]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
@@ -498,7 +498,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                 )
 
         if "dimensionality" in check:
-            units = coords[key].attrs.get("units", None)
+            units = coords[key].pint.units
             dim = check["dimensionality"]
             if not units or not (
                 ureg.get_dimensionality(units) == ureg.get_dimensionality(dim)
