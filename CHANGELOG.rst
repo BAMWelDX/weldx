@@ -33,6 +33,9 @@ deprecations
 dependencies
 ============
 
+-  add ``pint-xarray`` dependency `[#518
+   <https://github.com/BAMWelDX/weldx/pull/518>`__
+
 ********************
  0.5.2 (18.11.2021)
 ********************
