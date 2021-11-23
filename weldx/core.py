@@ -824,7 +824,6 @@ class GenericSeries:
             The method that should be used when interpolating between discrete values.
 
         """
-
         self._data: Union[xr.DataArray, MathematicalExpression] = None
         self._variable_units: Dict[str, pint.Unit] = None
         self._symbol_dims: Dict[str, List[str]] = None
@@ -975,6 +974,7 @@ class GenericSeries:
         return representation + f"Units:\n\t{self.units}\n"
 
     def __add__(self, other):
+        """Add two `GenericSeries`."""
         # this should mostly be moved to the MathematicalExpression
         # todo:
         #   - for two expressions simply do: f"{exp_1} + f{exp_2}" and merge the
@@ -985,10 +985,14 @@ class GenericSeries:
         raise NotImplementedError
 
     def __call__(self, **kwargs) -> GenericSeries:
-        """Interpolate the generic series at discrete points.
+        """Evaluate the generic series at discrete points.
 
         Parameters
         ----------
+        kwargs:
+            An arbitrary number of keyword arguments. The key must be a dimension name
+            of the `GenericSeries` and the values are the corresponding coordinates
+            where the `GenericSeries` should be evaluated
 
         Returns
         -------
@@ -1032,6 +1036,7 @@ class GenericSeries:
         return GenericSeries(ut.xr_interp_like(self._data, input))
 
     def __getitem__(self, *args):
+        """Get a subset of a discrete `GenericSeries` by indices."""
         if isinstance(self._data, xr.DataArray):
             return self._data.__getitem__(*args)
         return NotImplementedError
