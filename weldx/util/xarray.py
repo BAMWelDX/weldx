@@ -272,6 +272,11 @@ def xr_interp_like(
         form, meaning: The xarray data will be a quantity and coordinates will have a
         ``Unit`` object in their attributes.
 
+    See Also
+    --------
+    `xarray.DataArray.interp_like`
+    `xarray.Dataset.interp_like`
+
     """
     da1 = da1.weldx.time_ref_unset()  # catch time formats
     if isinstance(da2, (xr.DataArray, xr.Dataset)):

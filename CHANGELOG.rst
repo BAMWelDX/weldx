@@ -9,6 +9,8 @@
 added
 =====
 
+-  add experimental unit support for ``.weldx.interp_like`` accessor
+
 removed
 =======
 
