@@ -1,0 +1,12 @@
+# Set update schedule for each package manager
+
+version: 2
+updates:
+
+  # Check for updates to GitHub Actions every sunday
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      timezone: "Europe/Berlin"
