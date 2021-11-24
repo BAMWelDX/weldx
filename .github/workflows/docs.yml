@@ -42,7 +42,7 @@ jobs:
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./doc/rtd_environment.yml', './setup.cfg') }}
 
       - name: Setup Conda Environment
-        uses: mamba-org/provision-with-micromamba@v10
+        uses: mamba-org/provision-with-micromamba@v11
         with:
           environment-file: ./doc/rtd_environment.yml
           environment-name: rtd
