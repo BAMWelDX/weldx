@@ -24,8 +24,7 @@ documentation
 ASDF
 ====
 
--  removed legacy ``weldx`` tag and schema support `[#600]
-   <https://github.com/BAMWelDX/weldx/pull/600>`__
+-  removed legacy ``weldx`` tag and schema support :pull:`600`
 
 deprecations
 ============
@@ -41,14 +40,12 @@ added
 =====
 
 -  `CoordinateSystemManager` can now delete already assigned data with
-   `CoordinateSystemManager.delete_data`. `[#645]
-   <https://github.com/BAMWelDX/weldx/pull/645>`__
+   `CoordinateSystemManager.delete_data`. :pull:`645`
 
 -  `WeldxFile` handles an ``array_inline_threshold`` parameter to
    indicate if short arrays will be serialized as strings, or as binary
    block. Note that this does not affect arrays, which are being shared
-   across several objects in the same file. `[#643]
-   <https://github.com/BAMWelDX/weldx/pull/643>`__
+   across several objects in the same file. :pull:`643`
 
 changes
 =======
