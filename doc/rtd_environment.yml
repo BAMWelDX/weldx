@@ -26,7 +26,6 @@ dependencies:
   - numpydoc>=0.5
   - sphinx-autodoc-typehints
   - typing_extensions
-  - sphinx-autosummary-accessors
   # GH332
   - docutils=0.16
   # pip packages
