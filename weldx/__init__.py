@@ -95,6 +95,15 @@ including their classes and functions.
     welding
 
 
+** weldx xarray accessors**
+.. autosummary::
+   :toctree: _autosummary
+   :template: autosummary/accessor_method.rst
+
+   xarray.DataArray.weldx.interp_like
+   xarray.DataArray.weldx.quantify_coords
+
+
 **ASDF API Reference**
 
 Here you find the documentation of the underlying ASDF implementation. These classes
