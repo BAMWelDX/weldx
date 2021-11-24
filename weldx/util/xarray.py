@@ -274,8 +274,7 @@ def xr_interp_like(
 
     See Also
     --------
-    `xarray.DataArray.interp_like`
-    `xarray.Dataset.interp_like`
+    xarray.DataArray.interp_like
 
     """
     da1 = da1.weldx.time_ref_unset()  # catch time formats
