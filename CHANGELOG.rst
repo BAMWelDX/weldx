@@ -9,8 +9,7 @@
 added
 =====
 
--  add experimental unit support for ``.weldx.interp_like`` accessor
-   `[#518] <https://github.com/BAMWelDX/weldx/pull/518>`__
+-  add experimental unit support for ``.weldx.interp_like`` accessor [:pull:`518`]
 
 removed
 =======
@@ -37,8 +36,7 @@ deprecations
 dependencies
 ============
 
--  add ``pint-xarray`` dependency `[#518]
-   <https://github.com/BAMWelDX/weldx/pull/518>`__
+-  add ``pint-xarray`` dependency [:pull:`518`]
 
 ********************
  0.5.2 (18.11.2021)
