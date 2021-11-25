@@ -299,13 +299,14 @@ def xr_interp_like(
     }
     da_temp = xr.DataArray(dims=sel_coords.keys(), coords=da_temp_coords)
 
-    # convert to base units if they exist
+    # convert base array units to indexer units
+    # (needed for the indexing later and it will happen during interpolation anyway)
     base_units = {
-        c: da1[c].attrs.get("units")
+        c: da_temp[c].attrs.get("units")
         for c in da1.coords.keys() & da_temp.coords.keys()
         if "units" in da1[c].attrs
     }
-    da_temp = da_temp.pint.to(**base_units)
+    da1 = da1.pint.to(**base_units)
 
     # make sure edge coordinate values of da1 are in new coordinate axis of da_temp
     if assume_sorted:
@@ -320,7 +321,6 @@ def xr_interp_like(
     else:
         # select, combine with min/max values if coordinates not guaranteed to be sorted
         # maybe switch to idxmin()/idxmax() once it available
-        # TODO: handle non-numeric dtypes ! currently cannot work on unsorted str types
         edge_dict = {
             d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min().data])
             for d, val in da1.coords.items()
@@ -796,4 +796,12 @@ class WeldxAccessor:
         for c, v in da.coords.items():
             if (units := v.attrs.get("units", None)) is not None:
                 da[c].attrs["units"] = U_(units)
+        return da
+
+    def dequantify_coords(self):
+        """Format coordinates 'units' attribute as string."""
+        da = self._obj.copy()
+        for c, v in da.coords.items():
+            if (units := v.attrs.get("units", None)) is not None:
+                da[c].attrs["units"] = str(U_(units))
         return da

@@ -144,10 +144,21 @@ class TestXarrayInterpolation:
 
     @staticmethod
     @pytest.mark.parametrize("fmt", ["dict", "xarray"])
-    @pytest.mark.parametrize("broadcast_missing", [False, True])
-    @pytest.mark.parametrize("quantified", [False, True])
-    def test_xr_interp_like_pints(fmt, broadcast_missing, quantified):
-        """Test the unit aware behavior of xr_interp_like."""
+    @pytest.mark.parametrize("quantified", [True, False])
+    @pytest.mark.parametrize("broadcast_missing", [True, False])
+    def test_xr_interp_like_units(fmt, broadcast_missing, quantified):
+        """Test the unit aware behavior of xr_interp_like.
+
+        Parameters
+        ----------
+        fmt
+            The input format of the indexer.
+        broadcast_missing
+            Test missing coordinates broadcasting.
+        quantified
+            If True provide indexer in full quantified form.
+
+        """
         a = Q_([0.0, 1.0], "m")
         t = Q_([-1.0, 0.0, 1.0], "s")
         t_interp = Q_([-100.0, 0.0, 200.0], "ms")
@@ -169,7 +180,7 @@ class TestXarrayInterpolation:
 
         if fmt == "dict":
             da_interp = {"t": t_interp, "b": b_interp}
-        elif fmt == "xarray":
+        else:
             da_interp = xr.DataArray(
                 dims=["t", "b"],
                 coords={
@@ -195,89 +206,94 @@ class TestXarrayInterpolation:
         assert da2.t.attrs.get("units", None) == t_interp.units
         assert da2.a.attrs.get("units", None) == a.units
 
+    @staticmethod
+    def test_xr_interp_like_old():
+        """Test behaviour of custom interpolation method for xarray Objects."""
+        # basic interpolation behavior on a single coordinate
+        n_a = 5  # range of "a" coordinate in da_a
+        s_a = 0.5  # default steps in "a" coordinate in da_a
+        da_a = xr.DataArray(
+            np.arange(0, n_a + s_a, s_a),
+            dims=["a"],
+            coords={"a": np.arange(0, n_a + s_a, s_a)},
+        )
 
-def test_xr_interp_like():
-    """Test behaviour of custom interpolation method for xarray Objects."""
-    # basic interpolation behavior on a single coordinate
-    n_a = 5  # range of "a" coordinate in da_a
-    s_a = 0.5  # default steps in "a" coordinate in da_a
-    da_a = xr.DataArray(
-        np.arange(0, n_a + s_a, s_a),
-        dims=["a"],
-        coords={"a": np.arange(0, n_a + s_a, s_a)},
-    )
+        # single point to array interpolation
+        # important: da_a.loc[5] for indexing would drop coordinates (unsure why)
+        with pytest.raises(ValueError):
+            ut.xr_interp_like(da_a.loc[2:2], da_a, fillna=False)
 
-    # single point to array interpolation
-    # important: da_a.loc[5] for indexing would drop coordinates (unsure why)
-    with pytest.raises(ValueError):
-        ut.xr_interp_like(da_a.loc[2:2], da_a, fillna=False)
+        # test coordinate selection with interp_coords
+        da1 = da_a
+        test = ut.xr_interp_like(
+            da1,
+            {"b": np.arange(3), "c": np.arange(3)},
+            broadcast_missing=True,
+            interp_coords=["c"],
+        )
+        assert "b" not in test.coords
+        assert "c" in test.coords
 
-    # test coordinate selection with interp_coords
-    da1 = da_a
-    test = ut.xr_interp_like(
-        da1,
-        {"b": np.arange(3), "c": np.arange(3)},
-        broadcast_missing=True,
-        interp_coords=["c"],
-    )
-    assert "b" not in test.coords
-    assert "c" in test.coords
+        # catch error on unsorted array
+        da = xr.DataArray([0, 1, 2, 3], dims="a", coords={"a": [2, 1, 3, 0]})
+        with pytest.raises(ValueError):
+            test = ut.xr_interp_like(da, {"a": np.arange(6)}, assume_sorted=True)
 
-    # catch error on unsorted array
-    da = xr.DataArray([0, 1, 2, 3], dims="a", coords={"a": [2, 1, 3, 0]})
-    with pytest.raises(ValueError):
-        test = ut.xr_interp_like(da, {"a": np.arange(6)}, assume_sorted=True)
+        # basic interpolation behavior with different coordinates (broadcasting)
+        n_b = 3  # range of "b" coordinate in da_b
+        s_b = 1  # default steps in "b" coordinate in da_b
+        da_b = xr.DataArray(
+            np.arange(0, n_b + s_b, s_b) ** 2,
+            dims=["b"],
+            coords={"b": np.arange(0, n_b + s_b, s_b)},
+        )
 
-    # basic interpolation behavior with different coordinates (broadcasting)
-    n_b = 3  # range of "b" coordinate in da_b
-    s_b = 1  # default steps in "b" coordinate in da_b
-    da_b = xr.DataArray(
-        np.arange(0, n_b + s_b, s_b) ** 2,
-        dims=["b"],
-        coords={"b": np.arange(0, n_b + s_b, s_b)},
-    )
+        assert da_a.equals(ut.xr_interp_like(da_a, da_b))
+        assert da_a.broadcast_like(da_b).broadcast_equals(
+            ut.xr_interp_like(da_a, da_b, broadcast_missing=True)
+        )
 
-    assert da_a.equals(ut.xr_interp_like(da_a, da_b))
-    assert da_a.broadcast_like(da_b).broadcast_equals(
-        ut.xr_interp_like(da_a, da_b, broadcast_missing=True)
-    )
+        # coords syntax
+        assert da_a.broadcast_like(da_b).broadcast_equals(
+            ut.xr_interp_like(da_a, da_b.coords, broadcast_missing=True)
+        )
 
-    # coords syntax
-    assert da_a.broadcast_like(da_b).broadcast_equals(
-        ut.xr_interp_like(da_a, da_b.coords, broadcast_missing=True)
-    )
+        # sorting and interpolation with multiple dimensions
+        a = np.arange(3, 6)
+        b = np.arange(1, -3, -1)
+        da_ab = xr.DataArray(
+            a[..., np.newaxis] @ b[np.newaxis, ...],
+            dims=["a", "b"],
+            coords={"a": a, "b": b},
+        )
 
-    # sorting and interpolation with multiple dimensions
-    a = np.arange(3, 6)
-    b = np.arange(1, -3, -1)
-    da_ab = xr.DataArray(
-        a[..., np.newaxis] @ b[np.newaxis, ...],
-        dims=["a", "b"],
-        coords={"a": a, "b": b},
-    )
+        a_new = np.arange(3, 5, 0.5)
+        b_new = np.arange(-1, 1, 0.5)
+        test = ut.xr_interp_like(
+            da_ab,
+            {"a": a_new, "b": b_new, "c": np.arange(2)},
+            assume_sorted=False,
+            broadcast_missing=True,
+        )
+        assert np.all(
+            test.transpose(..., "a", "b")
+            == a_new[..., np.newaxis] @ b_new[np.newaxis, ...]
+        )
 
-    a_new = np.arange(3, 5, 0.5)
-    b_new = np.arange(-1, 1, 0.5)
-    test = ut.xr_interp_like(
-        da_ab,
-        {"a": a_new, "b": b_new, "c": np.arange(2)},
-        assume_sorted=False,
-        broadcast_missing=True,
-    )
-    assert np.all(
-        test.transpose(..., "a", "b") == a_new[..., np.newaxis] @ b_new[np.newaxis, ...]
-    )
+        # tests with time data types
+        # TODO: add more complex test examples
+        t = pd.timedelta_range(start="10s", end="0s", freq="-1s", closed="left")
+        da_t = xr.DataArray(np.arange(10, 0, -1), dims=["t"], coords={"t": t})
 
-    # tests with time data types
-    # TODO: add more complex test examples
-    t = pd.timedelta_range(start="10s", end="0s", freq="-1s", closed="left")
-    da_t = xr.DataArray(np.arange(10, 0, -1), dims=["t"], coords={"t": t})
-
-    test = ut.xr_interp_like(
-        da_t,
-        {"t": pd.timedelta_range(start="3s", end="7s", freq="125ms", closed="left")},
-    )
-    assert np.all(test == np.arange(3, 7, 0.125))
+        test = ut.xr_interp_like(
+            da_t,
+            {
+                "t": pd.timedelta_range(
+                    start="3s", end="7s", freq="125ms", closed="left"
+                )
+            },
+        )
+        assert np.all(test == np.arange(3, 7, 0.125))
 
 
 def test_xr_fill_all():
