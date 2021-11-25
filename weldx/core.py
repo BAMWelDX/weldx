@@ -765,6 +765,9 @@ class GenericSeries:
     def _check_constraints_discrete(cls, data_array: xr.DataArray):
         if cls is GenericSeries:
             return
+
+        cls._check_constraints(data_array.dims, data_array.data.u)
+
         if cls._required_dimension_units is not None:
             for k, v in cls._required_dimension_units.items():
                 if (
@@ -777,7 +780,15 @@ class GenericSeries:
                         f"unit dimensionality '{U_(v).dimensionality}'"
                     )
 
-        cls._check_constraints(data_array.dims, data_array.data.u)
+        if cls._required_dimension_coordinates is not None:
+            for k, v in cls._required_dimension_coordinates.items():
+                if k not in data_array.coords.keys() or not ut.compare_nested(
+                    data_array.coords[k].data.tolist(), v
+                ):
+                    raise ValueError(
+                        f"{cls.__name__} requires dimension {k} to have the "
+                        f"coordinates {v}"
+                    )
 
     @classmethod
     def _check_constraints_expression(
@@ -827,6 +838,18 @@ class GenericSeries:
                     raise ValueError(
                         f"{cls.__name__} requires dimension {k} to be have the "
                         f"unit dimensionality '{U_(v).dimensionality}'"
+                    )
+        if cls._required_dimension_coordinates is not None:
+            for k, v in cls._required_dimension_coordinates.items():
+                coords = None
+                if k not in var_dims:
+                    for param in expr.parameters.values():
+                        if isinstance(param, xr.DataArray) and k in param.coords.keys():
+                            coords = param.coords[k].data.tolist()
+                if coords is None or not ut.compare_nested(coords, v):
+                    raise ValueError(
+                        f"{cls.__name__} requires dimension {k} to have the "
+                        f"coordinates {v}"
                     )
 
             # todo: add limits for dims?
