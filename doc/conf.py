@@ -83,12 +83,19 @@ extensions = [
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
     "numpydoc",
     "sphinx_autodoc_typehints",  # list after napoleon
 ]
+
+# allow easy Issue/PR links
+extlinks = {
+    "issue": ("https://github.com/BAMWelDX/weldx/issues/%s", "GH"),
+    "pull": ("https://github.com/BAMWelDX/weldx/pull/%s", "PR"),
+}
 
 # autosummary --------------------------------------------------------------------------
 autosummary_generate = True
