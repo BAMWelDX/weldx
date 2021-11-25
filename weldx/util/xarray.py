@@ -229,6 +229,29 @@ def _get_coordinate_quantities(da) -> Dict[str, pint.Quantity]:
     }
 
 
+def _add_coord_edges(da1: xr.DataArray, da2: xr.DataArray, assume_sorted: bool):
+    """Add the minimum and maximum coordinates from da1 to coordinates of da2."""
+    if assume_sorted:
+        # if all coordinates are sorted,we can use integer indexing for speedups
+        edge_dict = {
+            d: ([0, -1] if len(val) > 1 else [0])
+            for d, val in da1.coords.items()
+            if d in da2.indexes
+        }
+        if len(edge_dict) > 0:
+            da2 = da2.combine_first(da1.isel(edge_dict))
+    else:
+        # select, combine with min/max values if coordinates not guaranteed to be sorted
+        edge_dict = {
+            d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min().data])
+            for d, val in da1.coords.items()
+            if d in da2.indexes
+        }
+        if len(edge_dict) > 0:
+            da2 = da2.combine_first(da1.pint.sel(edge_dict))
+    return da2
+
+
 def xr_interp_like(
     da1: xr.DataArray,
     da2: Union[xr.DataArray, Dict[str, Any]],
@@ -309,29 +332,11 @@ def xr_interp_like(
     da1 = da1.pint.to(**base_units)
 
     # make sure edge coordinate values of da1 are in new coordinate axis of da_temp
-    if assume_sorted:
-        # if all coordinates are sorted,we can use integer indexing for speedups
-        edge_dict = {
-            d: ([0, -1] if len(val) > 1 else [0])
-            for d, val in da1.coords.items()
-            if d in sel_coords
-        }
-        if len(edge_dict) > 0:
-            da_temp = da_temp.combine_first(da1.isel(edge_dict))
-    else:
-        # select, combine with min/max values if coordinates not guaranteed to be sorted
-        # maybe switch to idxmin()/idxmax() once it available
-        edge_dict = {
-            d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min().data])
-            for d, val in da1.coords.items()
-            if d in sel_coords
-        }
-        if len(edge_dict) > 0:
-            da_temp = da_temp.combine_first(da1.pint.sel(edge_dict))
+    da_temp = _add_coord_edges(da1=da1, da2=da_temp, assume_sorted=assume_sorted)
 
     # handle singular dimensions in da1
-    # TODO: should we handle coordinates or dimensions?
-    singular_dims = [d for d in da1.coords if len(da1[d]) == 1]
+    # TODO: should we handle coordinates or indexes(=dimensions)?
+    singular_dims = [d for d in da1.coords if len(da1[d]) == 1 or d not in da1.indexes]
     for dim in singular_dims:
         if dim in da_temp.coords:
             if len(da_temp.coords[dim]) > 1:
