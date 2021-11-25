@@ -729,16 +729,15 @@ class GenericSeries:
 
     _required_dimensions: List[str] = None
     """Required dimensions"""
+    _required_dimension_units: Dict[str, pint.Unit] = None
+    """Required units of a dimension"""
+    _required_dimension_coordinates: Dict[str, List] = None
+    """Required coordinates of a dimension."""
 
     _required_unit_dimensionality: pint.Unit = None
     """Required unit dimensionality of the evaluated expression/data"""
 
     # do it later
-    # needs pint-xarray for a good implementation
-    _expected_dimension_units: Dict[str, pint.Unit] = None
-    """Expected units of a dimension"""
-    _required_parameter_coordinates: Dict[str, List] = None
-    """For xarray assign_coords"""
 
     _required_parameter_shape: Dict[str, int] = None
     """Size of the parameter dimensions/coordinates - (also defines parameter order)"""
@@ -766,6 +765,17 @@ class GenericSeries:
     def _check_constraints_discrete(cls, data_array: xr.DataArray):
         if cls is GenericSeries:
             return
+        if cls._required_dimension_units is not None:
+            for k, v in cls._required_dimension_units.items():
+                if (
+                    k not in data_array.coords.keys()
+                    or U_(data_array.coords[k].attrs.get("units", "")).dimensionality
+                    != U_(v).dimensionality
+                ):
+                    raise ValueError(
+                        f"{cls.__name__} requires dimension {k} to be have the "
+                        f"unit dimensionality '{U_(v).dimensionality}'"
+                    )
 
         cls._check_constraints(data_array.dims, data_array.data.u)
 
@@ -774,6 +784,7 @@ class GenericSeries:
         cls,
         expr: MathematicalExpression,
         var_dims: Dict[str, str],
+        var_units: Dict[str, pint.Unit],
         expr_units: pint.Unit,
     ):
         if cls is GenericSeries:
@@ -796,7 +807,29 @@ class GenericSeries:
         dims = cls._get_expression_dims(expr, var_dims)
         cls._check_constraints(dims, expr_units)
 
-    # todo: add limits for dims?
+        if cls._required_dimension_units is not None:
+            expr_params = expr.parameters
+            for k, v in cls._required_dimension_units.items():
+                actual_unit = None
+                if k in var_units:
+                    actual_unit = var_units[k]
+                elif k in expr_params:
+                    param = expr_params[k]
+                    if isinstance(param, pint.Quantity):
+                        actual_unit = param.u
+                    else:
+                        actual_unit = param.data.u
+
+                if (
+                    actual_unit is None
+                    or actual_unit.dimensionality != U_(v).dimensionality
+                ):
+                    raise ValueError(
+                        f"{cls.__name__} requires dimension {k} to be have the "
+                        f"unit dimensionality '{U_(v).dimensionality}'"
+                    )
+
+            # todo: add limits for dims?
 
     def __init__(
         self,
@@ -840,7 +873,6 @@ class GenericSeries:
 
     def _init_discrete(self, data, dims, coords):
         """Initialize the internal data with discrete values."""
-        # todo: preserve units of coordinates somehow
         if not isinstance(data, xr.DataArray):
             if coords is not None:
                 coords = {
@@ -893,7 +925,7 @@ class GenericSeries:
         expr_units, expr_shape = self._eval_expr(expr, dims, units)
 
         # check constraints
-        self._check_constraints_expression(expr, dims, expr_units)
+        self._check_constraints_expression(expr, dims, units, expr_units)
 
         # save internal data
         self._units = expr_units
