@@ -831,11 +831,11 @@ class WeldxAccessor:
         da = self._obj.copy()
         if not isinstance(da.data, pint.Quantity):
             return da.pint.quantify()
-        else:  # make sure coordinates attributes are formatted as units
-            return da.weldx.quantify_coords()
+        # make sure coordinates attributes are formatted as pint.Unit
+        return da.weldx.quantify_coords()
 
     def quantify_coords(self):
-        """Format coordinates 'units' attribute as Unit."""
+        """Format coordinates 'units' attribute as `pint.Unit`."""
         da = self._obj.copy()
         for c, v in da.coords.items():
             if (units := v.attrs.get(UNITS_KEY, None)) is not None:
