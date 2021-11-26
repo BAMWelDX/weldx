@@ -12,7 +12,7 @@ from pint.errors import DimensionalityError
 from xarray import DataArray
 
 import weldx.util as ut
-from weldx.constants import Q_, U_
+from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time
 
 
@@ -172,8 +172,8 @@ class TestXarrayInterpolation:
             data,
             dims=["a", "t"],
             coords={
-                "t": ("t", t.m, {"units": t.u}),
-                "a": ("a", a.m, {"units": a.u}),
+                "t": ("t", t.m, {UNITS_KEY: t.u}),
+                "a": ("a", a.m, {UNITS_KEY: a.u}),
             },
             attrs={"wx_metadata": "meta"},
         )
@@ -184,8 +184,8 @@ class TestXarrayInterpolation:
             da_interp = xr.DataArray(
                 dims=["t", "b"],
                 coords={
-                    "t": ("t", t_interp.m, {"units": t_interp.u}),
-                    "b": ("b", b_interp.m, {"units": b_interp.u}),
+                    "t": ("t", t_interp.m, {UNITS_KEY: t_interp.u}),
+                    "b": ("b", b_interp.m, {UNITS_KEY: b_interp.u}),
                 },
             )
 
@@ -195,7 +195,7 @@ class TestXarrayInterpolation:
         da2 = ut.xr_interp_like(da, da_interp, broadcast_missing=broadcast_missing)
 
         if broadcast_missing:
-            assert da2.b.attrs.get("units", None) == b_interp.units
+            assert da2.b.attrs.get(UNITS_KEY, None) == b_interp.units
             da2 = da2.isel(b=0)
 
         for n in range(len(da.a)):
@@ -203,8 +203,8 @@ class TestXarrayInterpolation:
         assert da2.pint.units == data_units
         assert da2.attrs["wx_metadata"] == "meta"
 
-        assert da2.t.attrs.get("units", None) == t_interp.units
-        assert da2.a.attrs.get("units", None) == a.units
+        assert da2.t.attrs.get(UNITS_KEY, None) == t_interp.units
+        assert da2.a.attrs.get(UNITS_KEY, None) == a.units
 
     @staticmethod
     def test_xr_interp_like_old():
@@ -335,13 +335,13 @@ _dax_check = xr.DataArray(
         "d5": ["x", "y", "z"],
     },
 )
-_dax_check["d1"].attrs["units"] = "cm"
+_dax_check["d1"].attrs[UNITS_KEY] = "cm"
 
 _dax_ref = dict(
     d1={
         "values": np.array([-1, 1]),
         "dtype": "float",
-        "units": "cm",
+        UNITS_KEY: "cm",
         "dimensionality": "m",
     },
     d2={"values": np.array([-1, 1]), "dtype": int},
@@ -388,7 +388,7 @@ def test_xr_check_coords(dax, ref_dict):
             ValueError,
         ),
         (_dax_check, {"d1": {"dtype": [int, str, bool]}}, TypeError),
-        (_dax_check, {"d1": {"units": "dm"}}, ValueError),
+        (_dax_check, {"d1": {UNITS_KEY: "dm"}}, ValueError),
         (_dax_check, {"d1": {"dimensionality": "kg"}}, DimensionalityError),
         (_dax_check, {"d3": {"dtype": "timedelta64"}}, TypeError),
         (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
