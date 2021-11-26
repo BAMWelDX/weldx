@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -14,7 +14,7 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
-from weldx.constants import Q_, U_
+from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time, types_time_like, types_timestamp_like
 
 __all__ = [
@@ -224,8 +224,22 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
 def _get_coordinate_quantities(da) -> Dict[str, pint.Quantity]:
     """Convert coordinates of an xarray object to a quantity dictionary."""
     return {
-        k: (Q_(v.data, v.attrs.get("units")) if v.attrs.get("units", None) else v.data)
+        k: (
+            Q_(v.data, v.attrs.get(UNITS_KEY))
+            if v.attrs.get(UNITS_KEY, None)
+            else v.data
+        )
         for k, v in da.coords.items()
+    }
+
+
+def _coordinates_from_quantities(
+    q_dict: Dict[str, pint.Quantity]
+) -> dict[str, Tuple[str, np.array, Dict[str, pint.Unit]]]:
+    """Create a dict with unit information that can be passed as coords for xarray."""
+    return {
+        k: (k, v.m, {UNITS_KEY: v.u}) if isinstance(v, pint.Quantity) else v
+        for k, v in q_dict.items()
     }
 
 
@@ -299,7 +313,7 @@ def xr_interp_like(
     da1 = da1.weldx.time_ref_unset()  # catch time formats
     if isinstance(da2, (xr.DataArray, xr.Dataset)):
         da2 = da2.weldx.time_ref_unset()  # catch time formats
-        sel_coords = _get_coordinate_quantities(da2)
+        sel_coords = da2.weldx.coordinates_as_quantities()
     else:  # assume da2 to be dict-like
         sel_coords = {
             k: (v if isinstance(v, Iterable) else [v]) for k, v in da2.items()
@@ -309,25 +323,19 @@ def xr_interp_like(
         sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
 
     # quantify xarray object
-    if not isinstance(da1.data, pint.Quantity):
-        da1 = da1.pint.quantify()
-    else:  # make sure coordinates attributes are formatted as units
-        da1 = da1.weldx.quantify_coords()
+    da1 = da1.weldx.quantify()
 
     # create a new (empty) temporary dataset to use for interpolation
     # we need this if da2 is passed as an existing coordinate variable like origin.time
-    da_temp_coords = {
-        k: (k, v.m, {"units": v.u}) if isinstance(v, pint.Quantity) else v
-        for k, v in sel_coords.items()
-    }
+    da_temp_coords = _coordinates_from_quantities(sel_coords)
     da_temp = xr.DataArray(dims=sel_coords.keys(), coords=da_temp_coords)
 
     # convert base array units to indexer units
     # (needed for the indexing later and it will happen during interpolation anyway)
     base_units = {
-        c: da_temp[c].attrs.get("units")
+        c: da_temp[c].attrs.get(UNITS_KEY)
         for c in da1.coords.keys() & da_temp.coords.keys()
-        if "units" in da1[c].attrs
+        if UNITS_KEY in da1[c].attrs
     }
     da1 = da1.pint.to(**base_units)
 
@@ -503,16 +511,16 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                     f"Mismatch in the dtype of the DataArray and ref['{key}']"
                 )
 
-        if "units" in check:
-            units = coords[key].attrs.get("units", None)
-            if not units or not U_(units) == U_(check["units"]):
+        if UNITS_KEY in check:
+            units = coords[key].attrs.get(UNITS_KEY, None)
+            if not units or not U_(units) == U_(check[UNITS_KEY]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{units}', expected '{check['units']}'"
                 )
 
         if "dimensionality" in check:
-            units = coords[key].attrs.get("units", None)
+            units = coords[key].attrs.get(UNITS_KEY, None)
             dim = check["dimensionality"]
             if units is None or not U_(units).is_compatible_with(dim):
                 raise DimensionalityError(
@@ -795,18 +803,49 @@ class WeldxAccessor:
             else:
                 self._obj.time.attrs["time_ref"] = value
 
+    def coordinates_as_quantities(self) -> Dict[str, pint.Quantity]:
+        """Convert coordinates of an xarray object to a quantity dictionary."""
+        da = self._obj
+        return {
+            k: (Q_(v.data, unit) if (unit := v.attrs.get(UNITS_KEY, None)) else v.data)
+            for k, v in da.coords.items()
+        }
+
+    def indexes_as_quantities(self) -> Dict[str, pint.Quantity]:
+        """Convert indexes of an xarray object to a quantity dictionary."""
+        da = self._obj
+        return {
+            k: (Q_(v.data, unit) if (unit := v.attrs.get(UNITS_KEY, None)) else v.data)
+            for k, v in da.indexes.items()
+        }
+
+    def quantify(self):
+        """Quantify an xarray object by it's unit information.
+
+        The xarray data will be converted to a `pint.Quantity`.
+        The units attribute for coordinates will be converted to a `pint.Unit`
+
+        This function does only conversion, to attach units use pint-xarray.
+        See ``DataArray.pint.quantify`` for details.
+        """
+        da = self._obj.copy()
+        if not isinstance(da.data, pint.Quantity):
+            return da.pint.quantify()
+        else:  # make sure coordinates attributes are formatted as units
+            return da.weldx.quantify_coords()
+
     def quantify_coords(self):
         """Format coordinates 'units' attribute as Unit."""
         da = self._obj.copy()
         for c, v in da.coords.items():
-            if (units := v.attrs.get("units", None)) is not None:
-                da[c].attrs["units"] = U_(units)
+            if (units := v.attrs.get(UNITS_KEY, None)) is not None:
+                da[c].attrs[UNITS_KEY] = U_(units)
         return da
 
     def dequantify_coords(self):
         """Format coordinates 'units' attribute as string."""
         da = self._obj.copy()
         for c, v in da.coords.items():
-            if (units := v.attrs.get("units", None)) is not None:
-                da[c].attrs["units"] = str(U_(units))
+            if (units := v.attrs.get(UNITS_KEY, None)) is not None:
+                da[c].attrs[UNITS_KEY] = str(U_(units))
         return da
