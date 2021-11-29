@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -14,8 +14,7 @@ from pint import DimensionalityError
 from scipy.spatial.transform import Rotation as Rot
 from scipy.spatial.transform import Slerp
 
-from weldx.constants import Q_, U_
-from weldx.constants import WELDX_UNIT_REGISTRY as ureg
+from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time, types_time_like, types_timestamp_like
 
 __all__ = [
@@ -213,13 +212,58 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     """
     if order == "bf":
         for dim in da.dims:
-            da = da.bfill(dim).ffill(dim)
+            da = da.pint.bfill(dim).pint.ffill(dim)
     elif order == "fb":
         for dim in da.dims:
-            da = da.ffill(dim).bfill(dim)
+            da = da.pint.ffill(dim).pint.bfill(dim)
     else:
         raise ValueError(f"Order {order} is not supported (use 'bf' or 'fb)")
     return da
+
+
+def _get_coordinate_quantities(da) -> Dict[str, pint.Quantity]:
+    """Convert coordinates of an xarray object to a quantity dictionary."""
+    return {
+        k: (
+            Q_(v.data, v.attrs.get(UNITS_KEY))
+            if v.attrs.get(UNITS_KEY, None)
+            else v.data
+        )
+        for k, v in da.coords.items()
+    }
+
+
+def _coordinates_from_quantities(
+    q_dict: Dict[str, pint.Quantity]
+) -> dict[str, Tuple[str, np.array, Dict[str, pint.Unit]]]:
+    """Create a dict with unit information that can be passed as coords for xarray."""
+    return {
+        k: (k, v.m, {UNITS_KEY: v.u}) if isinstance(v, pint.Quantity) else v
+        for k, v in q_dict.items()
+    }
+
+
+def _add_coord_edges(da1: xr.DataArray, da2: xr.DataArray, assume_sorted: bool):
+    """Add the minimum and maximum coordinates from da1 to coordinates of da2."""
+    if assume_sorted:
+        # if all coordinates are sorted,we can use integer indexing for speedups
+        edge_dict = {
+            d: ([0, -1] if len(val) > 1 else [0])
+            for d, val in da1.coords.items()
+            if d in da2.indexes
+        }
+        if len(edge_dict) > 0:
+            da2 = da2.combine_first(da1.isel(edge_dict))
+    else:
+        # select, combine with min/max values if coordinates not guaranteed to be sorted
+        edge_dict = {
+            d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min().data])
+            for d, val in da1.coords.items()
+            if d in da2.indexes
+        }
+        if len(edge_dict) > 0:
+            da2 = da2.combine_first(da1.pint.sel(edge_dict))
+    return da2
 
 
 def xr_interp_like(
@@ -260,58 +304,47 @@ def xr_interp_like(
     Returns
     -------
     xarray.DataArray
-        interpolated DataArray
+        The interpolated DataArray.
+        Important: All unit information (data and coordinates) is stored in quantified,
+        form, meaning: The xarray data will be a quantity and coordinates will have a
+        ``Unit`` object in their attributes.
 
     """
     da1 = da1.weldx.time_ref_unset()  # catch time formats
     if isinstance(da2, (xr.DataArray, xr.Dataset)):
         da2 = da2.weldx.time_ref_unset()  # catch time formats
-        sel_coords = da2.coords  # remember original interpolation coordinates
+        sel_coords = da2.weldx.coordinates_as_quantities()
     else:  # assume da2 to be dict-like
         sel_coords = {
             k: (v if isinstance(v, Iterable) else [v]) for k, v in da2.items()
         }
 
-    # store and strip pint units at this point, since the unit is lost during
-    # interpolation and because of some other conflicts. Unit is restored before
-    # returning the result.
-    units = None
-    if isinstance(da1.data, pint.Quantity):
-        units = da1.data.units
-        da1 = xr.DataArray(data=da1.data.magnitude, dims=da1.dims, coords=da1.coords)
-
     if interp_coords is not None:
         sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
 
+    # quantify xarray object
+    da1 = da1.weldx.quantify()
+
     # create a new (empty) temporary dataset to use for interpolation
     # we need this if da2 is passed as an existing coordinate variable like origin.time
-    da_temp = xr.DataArray(dims=sel_coords.keys(), coords=sel_coords)
+    da_temp_coords = _coordinates_from_quantities(sel_coords)
+    da_temp = xr.DataArray(dims=sel_coords.keys(), coords=da_temp_coords)
+
+    # convert base array units to indexer units
+    # (needed for the indexing later and it will happen during interpolation anyway)
+    base_units = {
+        c: da_temp[c].attrs.get(UNITS_KEY)
+        for c in da1.coords.keys() & da_temp.coords.keys()
+        if UNITS_KEY in da1[c].attrs
+    }
+    da1 = da1.pint.to(**base_units)
 
     # make sure edge coordinate values of da1 are in new coordinate axis of da_temp
-    if assume_sorted:
-        # if all coordinates are sorted,we can use integer indexing for speedups
-        edge_dict = {
-            d: ([0, -1] if len(val) > 1 else [0])
-            for d, val in da1.coords.items()
-            if d in sel_coords
-        }
-        if len(edge_dict) > 0:
-            da_temp = da_temp.combine_first(da1.isel(edge_dict))
-    else:
-        # select, combine with min/max values if coordinates not guaranteed to be sorted
-        # maybe switch to idxmin()/idxmax() once it available
-        # TODO: handle non-numeric dtypes ! currently cannot work on unsorted str types
-        edge_dict = {
-            d: ([val.min().data, val.max().data] if len(val) > 1 else [val.min().data])
-            for d, val in da1.coords.items()
-            if d in sel_coords
-        }
-        if len(edge_dict) > 0:
-            da_temp = da_temp.combine_first(da1.sel(edge_dict))
+    da_temp = _add_coord_edges(da1=da1, da2=da_temp, assume_sorted=assume_sorted)
 
     # handle singular dimensions in da1
-    # TODO: should we handle coordinates or dimensions?
-    singular_dims = [d for d in da1.coords if len(da1[d]) == 1]
+    # TODO: should we handle coordinates or indexes(=dimensions)?
+    singular_dims = [d for d in da1.coords if len(da1[d]) == 1 or d not in da1.indexes]
     for dim in singular_dims:
         if dim in da_temp.coords:
             if len(da_temp.coords[dim]) > 1:
@@ -328,14 +361,9 @@ def xr_interp_like(
     # default interp_like will not add dimensions and fill out of range indexes with NaN
     if method == "step":
         fill_method = "ffill" if fillna else None
-        da = da1.reindex_like(da_temp, method=fill_method)
+        da = da1.pint.reindex_like(da_temp, method=fill_method)
     else:
-        da = da1.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
-
-    # copy original variable and coord attributes
-    da.attrs = da1.attrs
-    for key in da1.coords:
-        da[key].attrs = da1[key].attrs
+        da = da1.pint.interp_like(da_temp, method=method, assume_sorted=assume_sorted)
 
     # fill out of range nan values for all dimensions
     if fillna:
@@ -346,13 +374,7 @@ def xr_interp_like(
     else:  # careful not to select coordinates that are only in da_temp
         sel_coords = {d: v for d, v in sel_coords.items() if d in da1.coords}
 
-    result = da.sel(sel_coords)
-    if units is not None:
-        result = xr.DataArray(
-            data=result.data * units,
-            dims=result.dims,
-            coords=result.coords,
-        )
+    result = da.pint.sel(sel_coords)
 
     return result
 
@@ -489,24 +511,22 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                     f"Mismatch in the dtype of the DataArray and ref['{key}']"
                 )
 
-        if "units" in check:
-            units = coords[key].attrs.get("units", None)
-            if not units or not U_(units) == U_(check["units"]):
+        if UNITS_KEY in check:
+            units = coords[key].attrs.get(UNITS_KEY, None)
+            if not units or not U_(units) == U_(check[UNITS_KEY]):
                 raise ValueError(
                     f"Unit mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{units}', expected '{check['units']}'"
                 )
 
         if "dimensionality" in check:
-            units = coords[key].attrs.get("units", None)
+            units = coords[key].attrs.get(UNITS_KEY, None)
             dim = check["dimensionality"]
-            if not units or not (
-                ureg.get_dimensionality(units) == ureg.get_dimensionality(dim)
-            ):
+            if units is None or not U_(units).is_compatible_with(dim):
                 raise DimensionalityError(
                     units,
                     check["dimensionality"],
-                    f"\nDimensionalit mismatch in coordinate '{key}'\n"
+                    f"\nDimensionality mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{units}', expected '{dim}'",
                 )
 
@@ -782,3 +802,50 @@ class WeldxAccessor:
                 self._obj.time.attrs["time_ref"] = value  # set new time_ref value
             else:
                 self._obj.time.attrs["time_ref"] = value
+
+    def coordinates_as_quantities(self) -> Dict[str, pint.Quantity]:
+        """Convert coordinates of an xarray object to a quantity dictionary."""
+        da = self._obj
+        return {
+            k: (Q_(v.data, unit) if (unit := v.attrs.get(UNITS_KEY, None)) else v.data)
+            for k, v in da.coords.items()
+        }
+
+    def indexes_as_quantities(self) -> Dict[str, pint.Quantity]:
+        """Convert indexes of an xarray object to a quantity dictionary."""
+        da = self._obj
+        return {
+            k: (Q_(v.data, unit) if (unit := v.attrs.get(UNITS_KEY, None)) else v.data)
+            for k, v in da.indexes.items()
+        }
+
+    def quantify(self):
+        """Quantify an xarray object by it's unit information.
+
+        The xarray data will be converted to a `pint.Quantity`.
+        The units attribute for coordinates will be converted to a `pint.Unit`
+
+        This function does only conversion, to attach units use pint-xarray.
+        See ``DataArray.pint.quantify`` for details.
+        """
+        da = self._obj.copy()
+        if not isinstance(da.data, pint.Quantity):
+            return da.pint.quantify()
+        # make sure coordinates attributes are formatted as pint.Unit
+        return da.weldx.quantify_coords()
+
+    def quantify_coords(self):
+        """Format coordinates 'units' attribute as `pint.Unit`."""
+        da = self._obj.copy()
+        for c, v in da.coords.items():
+            if (units := v.attrs.get(UNITS_KEY, None)) is not None:
+                da[c].attrs[UNITS_KEY] = U_(units)
+        return da
+
+    def dequantify_coords(self):
+        """Format coordinates 'units' attribute as string."""
+        da = self._obj.copy()
+        for c, v in da.coords.items():
+            if (units := v.attrs.get(UNITS_KEY, None)) is not None:
+                da[c].attrs[UNITS_KEY] = str(U_(units))
+        return da
