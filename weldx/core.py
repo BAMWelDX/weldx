@@ -885,7 +885,7 @@ class GenericSeries:
         self._symbol_dims: Dict[str, List[str]] = None
         self._shape: Tuple = None
         self._units: pint.Unit = None
-        self._interpolation = "linear"
+        self._interpolation = "linear" if interpolation is None else interpolation
 
         if isinstance(data, (pint.Quantity, xr.DataArray)):
             self._init_discrete(data, dims, coords)
@@ -932,6 +932,8 @@ class GenericSeries:
             dims = {}
         if units is None:
             units = {}
+            if self._required_dimension_units is not None:
+                units.update(self._required_dimension_units)
         else:
             for k, v in units.items():
                 if k not in expr.get_variable_names():
@@ -1075,8 +1077,9 @@ class GenericSeries:
         if isinstance(self._data, MathematicalExpression):
             # num_expr_sym = self._data.num_variables + len(self._data.parameters)
             if len(kwargs) == self._data.num_variables:
-                data = self._data.evaluate(**input)
-                return GenericSeries(data)
+                coords = {k: v.pint.dequantify() for k, v in input.items()}
+                data = self._data.evaluate(**input).assign_coords(coords)
+                return type(self)(data)
             else:
                 new_series = deepcopy(self)
                 for k, v in kwargs.items():
@@ -1088,7 +1091,7 @@ class GenericSeries:
         for k in input.keys():
             if k not in self._data.dims:
                 raise KeyError(f"'{k}' is not a valid dimension.")
-        return GenericSeries(ut.xr_interp_like(self._data, input))
+        return type(self)(ut.xr_interp_like(self._data, input))
 
     def __getitem__(self, *args):
         """Get a subset of a discrete `GenericSeries` by indices."""
