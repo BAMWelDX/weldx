@@ -1165,7 +1165,7 @@ class GenericSeries:
         """Get the internal data."""
         if isinstance(self._data, xr.DataArray):
             return self._data
-        raise NotImplementedError
+        return None
 
     @staticmethod
     def _get_expression_dims(expr: MathematicalExpression, symbol_dims: Dict[str, str]):
@@ -1196,6 +1196,16 @@ class GenericSeries:
         if val not in ["linear", "step"]:
             raise ValueError(f"'{val}' is not a supported interpolation method.")
         self._interpolation = val
+
+    @property
+    def is_discrete(self) -> bool:
+        """Return `True` if the time series is described by discrete values."""
+        return not self.is_expression
+
+    @property
+    def is_expression(self) -> bool:
+        """Return `True` if the time series is described by an expression."""
+        return isinstance(self._data, MathematicalExpression)
 
     @property
     def ndims(self) -> int:
