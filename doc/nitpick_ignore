@@ -11,6 +11,7 @@ py:class weldx.asdf.types.WeldxConverter
 
 # numpy typing
 py:class numpy.typing._array_like._SupportsArray
+py:class numpy.typing._array_like._SupportsArray
 
 # matplotlib
 py:class matplotlib.axes.Axes

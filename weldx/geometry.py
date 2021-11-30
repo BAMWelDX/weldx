@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import meshio
 import numpy as np
-import numpy.typing as npt
 import pint
 from xarray import DataArray
 
@@ -25,6 +24,7 @@ _DEFAULT_ANG_UNIT = UREG.rad
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
+    import numpy.typing as npt
 
     import weldx.visualization.types as vs_types
     import weldx.welding.groove.iso_9692_1 as iso
