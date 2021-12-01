@@ -15,7 +15,7 @@ import weldx.util as ut
 from weldx.constants import Q_, U_
 from weldx.time import Time, TimeDependent, types_time_like
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot
     import sympy
 

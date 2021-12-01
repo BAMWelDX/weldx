@@ -24,6 +24,7 @@ _DEFAULT_ANG_UNIT = UREG.rad
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
+    import numpy.typing as npt
 
     import weldx.visualization.types as vs_types
     import weldx.welding.groove.iso_9692_1 as iso
@@ -2518,10 +2519,10 @@ class Geometry:
 class SpatialData:
     """Represent 3D point cloud data with optional triangulation."""
 
-    coordinates: DataArray
+    coordinates: Union[DataArray, npt.ArrayLike]
     """3D array of point data.
         The expected array dimension order is [("time"), "n", "c"]."""
-    triangles: np.ndarray = None
+    triangles: npt.ArrayLike = None
     """3D Array of triangulation connectivity.
         Shape should be [time * n, 3]."""
     attributes: Dict[str, np.ndarray] = None
