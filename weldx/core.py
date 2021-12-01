@@ -943,12 +943,14 @@ class GenericSeries:
         if units is None:
             units = {}
             if self._required_dimension_units is not None:
-                units.update(self._required_dimension_units)
+                for k, v in self._required_dimension_units.items():
+                    if k not in units and k not in expr.parameters:
+                        units[k] = v
         else:
             # todo else can be removed and the required dimension units stuff merged
             if self._required_dimension_units is not None:
                 for k, v in self._required_dimension_units.items():
-                    if k not in units and k not in parameters:
+                    if k not in units and k not in expr.parameters:
                         units[k] = v
             for k, v in units.items():
                 if k not in expr.get_variable_names():

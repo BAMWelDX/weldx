@@ -4,7 +4,6 @@ from pathlib import Path as _Path
 import pint
 import pint_xarray  # noqa: F401 # pylint: disable=W0611
 
-
 UNITS_KEY = "units"  # default nomenclature for storing physical units information
 
 WELDX_PATH = _Path(__file__).parent.resolve()
