@@ -715,6 +715,14 @@ class TimeSeries(TimeDependent):
 
 # GenericSeries ------------------------------------------------------------------------
 
+# todo
+#  - use xr_check_coords where possible
+#  - evaluate function
+#  - __init__ + class : data -> obj
+#  - __getitem__ : use DataArray.sel
+#  - pandas time types in TimeSeries vs GenericSeries
+#  - asdf base implementation -> xarray.DataArray units checken (U_ statt string)
+
 
 class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
@@ -823,14 +831,13 @@ class GenericSeries:
             for k, v in cls._required_dimension_units.items():
                 actual_unit = None
                 if k in var_units:
-                    actual_unit = var_units[k]
+                    actual_unit = U_(var_units[k])
                 elif k in expr_params:
                     param = expr_params[k]
                     if isinstance(param, pint.Quantity):
                         actual_unit = param.u
                     else:
                         actual_unit = param.data.u
-
                 if (
                     actual_unit is None
                     or actual_unit.dimensionality != U_(v).dimensionality
@@ -894,6 +901,9 @@ class GenericSeries:
         else:
             raise TypeError(f'The data type "{type(data)}" is not supported.')
 
+    def __eq__(self, other):
+        raise NotImplementedError
+
     def _init_discrete(self, data, dims, coords):
         """Initialize the internal data with discrete values."""
         if not isinstance(data, xr.DataArray):
@@ -935,6 +945,11 @@ class GenericSeries:
             if self._required_dimension_units is not None:
                 units.update(self._required_dimension_units)
         else:
+            # todo else can be removed and the required dimension units stuff merged
+            if self._required_dimension_units is not None:
+                for k, v in self._required_dimension_units.items():
+                    if k not in units and k not in parameters:
+                        units[k] = v
             for k, v in units.items():
                 if k not in expr.get_variable_names():
                     raise KeyError(f"{k} is not a variable of the expression:\n{expr}")
@@ -1018,7 +1033,7 @@ class GenericSeries:
 
     def __repr__(self):
         """Give __repr__ output."""
-        representation = "<GenericSeries>\n"
+        representation = f"<{type(self).__name__}>\n"
         if isinstance(self._data, xr.DataArray):
             representation += f"Values:\n{self._data.data.magnitude}\n"
         else:
@@ -1099,25 +1114,6 @@ class GenericSeries:
             return self._data.__getitem__(*args)
         return NotImplementedError
 
-    def interp_dim(self, dimension: str, coordinates: pint.Quantity) -> GenericSeries:
-        """Interpolate only in a single dimension.
-
-        Parameters
-        ----------
-        dimension :
-            The interpolations dimension
-        coordinates :
-            The coordinates that should be interpolated
-
-        Returns
-        -------
-        GenericSeries :
-            A new generic series containing discrete values for the interpolated
-            dimensions.
-
-        """
-        raise NotImplementedError
-
     def interp_like(
         self, obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
     ) -> GenericSeries:
@@ -1149,6 +1145,7 @@ class GenericSeries:
         """Get the coordinates of the generic series."""
         if isinstance(self._data, xr.DataArray):
             return self._data.coords
+        # todo here we should get all parameter coordinates
         return None
 
     @property
@@ -1215,6 +1212,7 @@ class GenericSeries:
         """Get the number of dimensions."""
         return len(self.dims)
 
+    # todo Name is wrong -> variable names!
     @property
     def parameter_names(self) -> List[str]:
         """Get the names of all dimensions."""
@@ -1222,11 +1220,13 @@ class GenericSeries:
             return list(self._variable_units.keys())
         return None
 
+    # todo Name is wrong -> variable units!
     @property
     def parameter_units(self) -> Dict[str, pint.Unit]:
         """Get a dictionary that maps the parameter names to their expected units."""
         return self._variable_units
 
+    # todo Expression? -> dict shape?
     @property
     def shape(self) -> Tuple:
         """Get the shape of the generic series data."""

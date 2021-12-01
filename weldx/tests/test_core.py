@@ -513,9 +513,6 @@ class TestGenericSeries:
 
     # test_init_expression -------------------------------------------------------------
 
-    # todo possible errors:
-    #   - expression has no variables
-
     @staticmethod
     @pytest.mark.parametrize(
         "dims, units, parameters, exception",
@@ -655,4 +652,184 @@ class TestGenericSeries:
 
         assert np.allclose(gs_interp.data, Q_(exp_data, "m*m"))
 
-    # todo: 2d variables not allowed
+    # todo:
+    #  - 2d variables not allowed
+    #  - test evaluation of expression with renamed dims/variables
+
+
+# --------------------------------------------------------------------------------------
+# Test series that are derived from a GenericSeries
+# --------------------------------------------------------------------------------------
+
+
+class TestDerivedFromGenericSeries:
+    @staticmethod
+    @pytest.mark.parametrize(
+        "expr, exception",
+        [
+            ("a*b", None),
+            ("a*2", None),
+            ("2*b", None),
+            ("a*y", ValueError),
+            ("x*b", ValueError),
+            ("x*b", ValueError),
+            ("x*y", ValueError),
+            ("a*b*c", ValueError),
+        ],
+    )
+    def test_allowed_variables(expr, exception):
+        """Test the allowed variables constraints."""
+
+        class _DerivedSeries(GenericSeries):
+            _allowed_variables = ["a", "b"]
+
+        if exception is None:
+            _DerivedSeries(expr)
+            return
+
+        with pytest.raises(exception):
+            _DerivedSeries(expr)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "expr, exception",
+        [
+            ("a*b", None),
+            ("a*2", ValueError),
+            ("2*b", ValueError),
+            ("a*y", ValueError),
+            ("x*b", ValueError),
+            ("x*b", ValueError),
+            ("x*y", ValueError),
+            ("a*b*c", None),
+        ],
+    )
+    def test_required_variables(expr, exception):
+        """Test the required variables constraints."""
+
+        class _DerivedSeries(GenericSeries):
+            _required_variables = ["a", "b"]
+
+        if exception is None:
+            _DerivedSeries(expr)
+            return
+
+        with pytest.raises(exception):
+            _DerivedSeries(expr)
+
+    @staticmethod
+    @pytest.mark.parametrize("use_expr", [True, False])
+    def test_evaluation_preprocessor_expression(use_expr):
+        """Test the evaluation preprocessor."""
+
+        class _DerivedSeries(GenericSeries):
+            def _preprocessor(self, a, b):
+                return dict(a=2 * a, b=5 * b)
+
+            _evaluation_preprocessor = _preprocessor
+
+        if use_expr:
+            ds = _DerivedSeries("a+b")
+        else:
+            ds = _DerivedSeries(
+                Q_([[2, 21], [11, 30]]),
+                dims=["a", "b"],
+                coords=dict(a=Q_([1, 10]), b=Q_([1, 20])),
+            )
+
+        result = ds(a=Q_([1, 3, 4]), b=Q_([3, 2, 1]))
+
+        exp_result = [[17, 12, 7], [21, 16, 11], [23, 18, 13]]
+        assert np.allclose(exp_result, result.data.m)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "expr, dims, exception",
+        [
+            ("a*b", None, None),
+            ("a*b", dict(a="x"), ValueError),
+            ("a*b", dict(b="y"), ValueError),
+            ("a*b", dict(a="x", b="y"), ValueError),
+            ("a*2", None, ValueError),
+            ("2*b", None, ValueError),
+            ("a*y", None, ValueError),
+            ("x*b", None, ValueError),
+            ("x*b", dict(x="a"), None),
+            ("x*b", dict(x="b"), ValueError),
+            ("x*y", None, ValueError),
+            ("x*y", dict(x="a"), ValueError),
+            ("x*y", dict(y="b"), ValueError),
+            ("x*y", dict(x="a", y="b"), None),
+            ("x*y", dict(x="b", y="a"), None),
+            ("a*b*c", None, None),
+        ],
+    )
+    def test_required_dimensions_expression(expr, dims, exception):
+        """Test required dimension constraint for expression based `GenericSeries`"""
+
+        class _DerivedSeries(GenericSeries):
+            _required_dimensions = ["a", "b"]
+
+        if exception is None:
+            _DerivedSeries(expr, dims)
+            return
+
+        with pytest.raises(exception):
+            _DerivedSeries(expr, dims)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "data, dims, exception",
+        [
+            (Q_(np.zeros((2, 3))), ["a", "b"], None),
+            (Q_(np.zeros((2, 3, 4))), ["a", "b", "c"], None),
+            (Q_(np.zeros((2, 3))), ["a", "y"], ValueError),
+            (Q_(np.zeros((2, 3))), ["x", "b"], ValueError),
+            (Q_(np.zeros((2, 3))), ["x", "y"], ValueError),
+        ],
+    )
+    @pytest.mark.parametrize("pass_data_array", [False, True])
+    def test_required_dimensions_discrete(data, dims, exception, pass_data_array):
+        """Test required dimension constraint for discrete `GenericSeries`"""
+
+        class _DerivedSeries(GenericSeries):
+            _required_dimensions = ["a", "b"]
+
+        if pass_data_array:
+            data = DataArray(data, dims=dims)
+            dims = None
+
+        if exception is None:
+            _DerivedSeries(data, dims)
+            return
+
+        with pytest.raises(exception):
+            _DerivedSeries(data, dims)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "expr, units, parameters, exception",
+        [
+            ("t*b", None, None, None),
+            ("t*b", dict(t="s"), None, None),
+            ("t*b", dict(b="m"), None, None),
+            ("t*b", dict(t="s", b="m"), None, None),
+            ("t*b", dict(t="m"), None, ValueError),
+            ("t*b", dict(t="m", b="m"), None, ValueError),
+            ("t*b", None, dict(t="3s"), None),
+            ("a*t + b", None, None, ValueError),
+            ("a*t + b", dict(a="m/s"), None, None),
+            ("a*t + b", dict(a="m"), None, ValueError),
+            ("a*t + b", None, None, ValueError),
+        ],
+    )
+    def test_required_dimension_units_expression(expr, units, parameters, exception):
+        class _DerivedSeries(GenericSeries):
+            _required_dimension_units = dict(t="s", b="m")
+
+        if exception is None:
+            _DerivedSeries(expr, units=units, parameters=parameters)
+            return
+
+        with pytest.raises(exception):
+            _DerivedSeries(expr, units=units, parameters=parameters)
