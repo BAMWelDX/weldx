@@ -1,4 +1,4 @@
-name: documentation
+name: documentation builds
 on:
   push:
     branches:
@@ -23,6 +23,7 @@ jobs:
       (github.event.pull_request.draft == false) ||
       (github.event_name == 'workflow_dispatch') ||
       (github.ref == 'refs/heads/master')
+    name: sphinx build
     runs-on: ubuntu-latest
     env:
       nbsphinx_execute: 'always'

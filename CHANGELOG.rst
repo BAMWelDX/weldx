@@ -38,6 +38,8 @@ dependencies
 
 -  add ``pint-xarray`` dependency [:pull:`518`]
 
+-  bump to ``numpy>=1.20`` (for numpy.typing) [:pull:`656`]
+
 ********************
  0.5.2 (18.11.2021)
 ********************
