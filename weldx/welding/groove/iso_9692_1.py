@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import numpy as np
 import pint
@@ -14,6 +14,9 @@ from sympy import Point2D, Polygon
 import weldx.geometry as geo
 from weldx.constants import Q_, U_
 from weldx.util import inherit_docstrings, ureg_check_class
+
+if TYPE_CHECKING:
+    from weldx.types import QuantityLike
 
 __all__ = [
     "IsoBaseGroove",
@@ -1658,19 +1661,19 @@ _groove_name_to_type = {cls.__name__: cls for cls in IsoBaseGroove.__subclasses_
 
 def get_groove(
     groove_type: str,
-    workpiece_thickness: pint.Quantity = None,
-    workpiece_thickness2: pint.Quantity = None,
-    root_gap: pint.Quantity = None,
-    root_face: pint.Quantity = None,
-    root_face2: pint.Quantity = None,
-    root_face3: pint.Quantity = None,
-    bevel_radius: pint.Quantity = None,
-    bevel_radius2: pint.Quantity = None,
-    bevel_angle: pint.Quantity = None,
-    bevel_angle2: pint.Quantity = None,
-    groove_angle: pint.Quantity = None,
-    groove_angle2: pint.Quantity = None,
-    special_depth: pint.Quantity = None,
+    workpiece_thickness: QuantityLike = None,
+    workpiece_thickness2: QuantityLike = None,
+    root_gap: QuantityLike = None,
+    root_face: QuantityLike = None,
+    root_face2: QuantityLike = None,
+    root_face3: QuantityLike = None,
+    bevel_radius: QuantityLike = None,
+    bevel_radius2: QuantityLike = None,
+    bevel_angle: QuantityLike = None,
+    bevel_angle2: QuantityLike = None,
+    groove_angle: QuantityLike = None,
+    groove_angle2: QuantityLike = None,
+    special_depth: QuantityLike = None,
     code_number=None,
 ) -> IsoBaseGroove:
     """Create a Groove from weldx.tags.core.groove.
