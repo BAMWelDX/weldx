@@ -720,23 +720,28 @@ class TestPointCloud:
     @staticmethod
     @pytest.mark.parametrize("copy_arrays", [True, False])
     @pytest.mark.parametrize("lazy_load", [True, False])
-    def test_asdf_serialization(copy_arrays, lazy_load):
+    @pytest.mark.parametrize("reshape", [True, False])
+    def test_asdf_serialization(copy_arrays, lazy_load, reshape):
+        time = None
         coordinates = [
             [0.0, 0.0, 0.0],
             [1.0, 0.0, 0.0],
             [1.0, 1.0, 0.0],
             [0.0, 1.0, 0.0],
         ]
-
         triangles = [[0, 1, 2], [2, 3, 0]]
 
-        pc = SpatialData(coordinates=coordinates, triangles=triangles)
+        if reshape:
+            coordinates = np.array(coordinates).reshape((2, 2, 3))
+            time = ["0s", "1s"]
+
+        pc = SpatialData(coordinates=coordinates, triangles=triangles, time=time)
         tree = {"point_cloud": pc}
         pc_file = write_read_buffer(
             tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
         )["point_cloud"]
 
-        assert np.all(pc_file.coordinates == pc.coordinates)
+        assert pc_file == pc
 
 
 # --------------------------------------------------------------------------------------
