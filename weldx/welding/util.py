@@ -10,7 +10,7 @@ from weldx.constants import Q_, WELDX_UNIT_REGISTRY
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from weldx.types import QuantityLike
 
 __all__ = ["compute_welding_speed"]

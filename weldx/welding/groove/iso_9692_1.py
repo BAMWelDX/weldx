@@ -15,7 +15,7 @@ import weldx.geometry as geo
 from weldx.constants import Q_, U_
 from weldx.util import inherit_docstrings, ureg_check_class
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from weldx.types import QuantityLike
 
 __all__ = [
@@ -1411,7 +1411,7 @@ class FFGroove(IsoBaseGroove):
 
 
         """
-        width_default = Q_(width_default)
+        width_default: pint.Quantity = Q_(width_default)
 
         if (
             self.code_number == "1.12"
