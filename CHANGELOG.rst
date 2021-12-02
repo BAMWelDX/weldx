@@ -32,7 +32,7 @@ ASDF
 
 -  removed legacy ``weldx`` tag and schema support [:pull:`600`]
 
--  update `core/geometry/spatial_data` to version `0.1.1` with support for multidimensional data [:pull:`655`]
+-  update ``core/geometry/spatial_data`` to version ``0.1.1`` with support for multidimensional data [:pull:`655`]
 
 -  add ``wx_shape`` validation support for ``core/data_array`` [:pull:`655`]
 
