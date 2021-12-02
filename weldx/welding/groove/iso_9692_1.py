@@ -1401,7 +1401,7 @@ class FFGroove(IsoBaseGroove):
         code_number="code_number",
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: QuantityLike = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1411,6 +1411,8 @@ class FFGroove(IsoBaseGroove):
 
 
         """
+        width_default = Q_(width_default)
+
         if (
             self.code_number == "1.12"
             or self.code_number == "1.13"
