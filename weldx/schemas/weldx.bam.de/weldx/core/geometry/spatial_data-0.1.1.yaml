@@ -4,9 +4,10 @@ $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
 id: "asdf://weldx.bam.de/weldx/schemas/core/geometry/spatial_data-0.1.1"
 
 title: |
-  Schema for a point cloud.
+  3D point cloud with optional triangulation.
 description: |
   This schema describes a collection of data points in 3d space.
+  Triangulation information by indizes can be added to represent a mesh.
 
 examples:
   -
