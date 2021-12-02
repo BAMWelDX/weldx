@@ -824,6 +824,8 @@ class TestDerivedFromGenericSeries:
         ],
     )
     def test_required_dimension_units_expression(expr, units, parameters, exception):
+        """Test required dimension units constraint for expr.-based `GenericSeries`"""
+
         class _DerivedSeries(GenericSeries):
             _required_dimension_units = dict(t="s", b="m")
 
@@ -833,3 +835,137 @@ class TestDerivedFromGenericSeries:
 
         with pytest.raises(exception):
             _DerivedSeries(expr, units=units, parameters=parameters)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "dims, units, exception",
+        [
+            (["t", "b"], dict(t="s", b="m"), None),
+            (["t", "b"], dict(t="m"), ValueError),
+            (["t", "b"], dict(t="m", b="m"), ValueError),
+            (["t", "b"], dict(b="s"), ValueError),
+            (["t", "b"], dict(t="s", b="s"), ValueError),
+            (["t", "b"], dict(t="m", b="s"), ValueError),
+            (["t"], dict(t="s"), None),
+            (["t"], dict(t="m"), ValueError),
+            (["b"], dict(b="m"), None),
+            (["b"], dict(b="s"), ValueError),
+            (["t", "b", "d"], dict(t="s", b="m"), None),
+            (["t", "b", "d"], dict(t="s", b="m", d="A"), None),
+            (["t", "b", "d"], dict(t="s", b="m", d="m"), None),
+            (["t", "d"], dict(t="s", d="m"), None),
+            (["t", "d"], dict(t="A", d="m"), ValueError),
+            (["b", "d"], dict(b="m", d="m"), None),
+            (["b", "d"], dict(b="s", d="m"), ValueError),
+        ],
+    )
+    def test_required_dimension_units_discrete(dims, units, exception):
+        """Test required dimension units constraint for discrete `GenericSeries`"""
+
+        class _DerivedSeries(GenericSeries):
+            _required_dimension_units = dict(t="s", b="m")
+
+        def _dim_length(i, d, c):
+            if d in c:
+                return len(c[d])
+            return i + 10
+
+        coords = {}
+        for i, (k, v) in enumerate(units.items()):
+            coords[k] = Q_(np.zeros(i + 2), v)
+
+        shape = tuple([_dim_length(i, d, coords) for i, d in enumerate(dims)])
+        data = Q_(np.ones(shape))
+
+        if exception is None:
+            _DerivedSeries(data, dims, coords)
+            return
+
+        with pytest.raises(exception):
+            _DerivedSeries(data, dims, coords)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "coords, exception",
+        [
+            (dict(a=["x", "y"]), None),
+            (dict(a=["x", "y"], b=[4, 5, 6, 7]), None),
+            (dict(b=[4, 5, 6, 7]), ValueError),
+            (dict(a=["x", "b"]), ValueError),
+            (dict(a=["a", "b"]), ValueError),
+            (dict(a=["a", "y"]), ValueError),
+            (dict(a=["a", "y"]), ValueError),
+            (dict(a=["x", "y", "z"]), ValueError),  # should fail or pass? -> crt fail
+        ],
+    )
+    def test_required_dimension_coordinates_discrete(coords, exception):
+        class _DerivedSeries(GenericSeries):
+            _required_dimension_coordinates = dict(a=["x", "y"])
+
+        num_coords = 2
+        if "a" in coords:
+            num_coords = len(coords["a"])
+
+        data = Q_(np.ones((num_coords, 4)))
+        dims = ["a", "b"]
+        if exception is None:
+            _DerivedSeries(data, dims, coords)
+            return
+
+        with pytest.raises(exception):
+            _DerivedSeries(data, dims, coords)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "coords, exception",
+        [
+            (dict(a=["x", "y"]), None),
+            (dict(a=["x", "y"], b=[4, 5, 6, 7]), None),
+            (dict(b=[4, 5, 6, 7]), ValueError),
+            (dict(a=["x", "b"]), ValueError),
+            (dict(a=["a", "b"]), ValueError),
+            (dict(a=["a", "y"]), ValueError),
+            (dict(a=["a", "y"]), ValueError),
+            (dict(a=["x", "y", "z"]), ValueError),  # should fail or pass? -> crt fail
+        ],
+    )
+    def test_required_dimension_coordinates_expression(coords, exception):
+        class _DerivedSeries(GenericSeries):
+            _required_dimension_coordinates = dict(a=["x", "y"])
+
+        expr = "a*x + b"
+        parameters = {}
+        for k, v in coords.items():
+            parameters[k] = xr.DataArray(Q_(np.zeros(len(v))), dims=[k], coords={k: v})
+
+        if exception is None:
+            _DerivedSeries(expr, parameters=parameters)
+            return
+
+        with pytest.raises(exception):
+            _DerivedSeries(expr, parameters=parameters)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "data, units, exception",
+        [
+            (Q_([[1, 2], [3, 4]], "m"), None, None),
+            (Q_([[1, 2], [3, 4]], "s"), None, ValueError),
+            ("a*b", dict(a="m"), None),
+            ("a*b", dict(b="m"), None),
+            ("a*b", dict(a="m/s", b="s"), None),
+            ("a*b", dict(a="m/s", b="m"), ValueError),
+            ("a*b", dict(a="s"), ValueError),
+            ("a*b", None, ValueError),
+        ],
+    )
+    def test_required_unit_dimensionality(data, units, exception):
+        class _DerivedSeries(GenericSeries):
+            _required_unit_dimensionality = U_("m").dimensionality
+
+        if exception is None:
+            _DerivedSeries(data, units=units)
+            return
+
+        with pytest.raises(exception):
+            _DerivedSeries(data, units=units)

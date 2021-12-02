@@ -778,7 +778,7 @@ class GenericSeries:
 
         if cls._required_dimension_units is not None:
             for k, v in cls._required_dimension_units.items():
-                if (
+                if k in data_array.dims and (
                     k not in data_array.coords.keys()
                     or U_(data_array.coords[k].attrs.get("units", "")).dimensionality
                     != U_(v).dimensionality
