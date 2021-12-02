@@ -16,6 +16,7 @@ if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot as plt
     from pandas import TimedeltaIndex
     from pint import Quantity, Unit
+    from pint._typing import UnitLike
 
 
 # measurement --------------------------------------------------------------------------
@@ -33,7 +34,7 @@ class Signal:
     """Simple dataclass implementation for measurement signals."""
 
     signal_type: str
-    units: Union[str, pint.Unit]
+    units: UnitLike
     data: TimeSeries = None
 
     def __post_init__(self):
