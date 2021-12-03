@@ -722,6 +722,7 @@ class TimeSeries(TimeDependent):
 #  - __getitem__ : use DataArray.sel
 #  - pandas time types in TimeSeries vs GenericSeries
 #  - asdf base implementation -> xarray.DataArray units checken (U_ statt string)
+#  - add doctests (examples)
 
 
 class GenericSeries:
@@ -737,7 +738,7 @@ class GenericSeries:
 
     _required_dimensions: List[str] = None
     """Required dimensions"""
-    _required_dimension_units: Dict[str, pint.Unit] = None
+    _required_dimension_units: Dict[str, pint.Unit] = {}
     """Required units of a dimension"""
     _required_dimension_coordinates: Dict[str, List] = None
     """Required coordinates of a dimension."""
@@ -942,20 +943,15 @@ class GenericSeries:
             dims = {}
         if units is None:
             units = {}
-            if self._required_dimension_units is not None:
-                for k, v in self._required_dimension_units.items():
-                    if k not in units and k not in expr.parameters:
-                        units[k] = v
-        else:
-            # todo else can be removed and the required dimension units stuff merged
-            if self._required_dimension_units is not None:
-                for k, v in self._required_dimension_units.items():
-                    if k not in units and k not in expr.parameters:
-                        units[k] = v
-            for k, v in units.items():
-                if k not in expr.get_variable_names():
-                    raise KeyError(f"{k} is not a variable of the expression:\n{expr}")
-                units[k] = U_(v)
+
+        if self._required_dimension_units is not None:
+            for k, v in self._required_dimension_units.items():
+                if k not in units and k not in expr.parameters:
+                    units[k] = v
+        for k, v in units.items():
+            if k not in expr.get_variable_names():
+                raise KeyError(f"{k} is not a variable of the expression:\n{expr}")
+            units[k] = U_(v)
 
         for v in expr.get_variable_names():
             if v not in dims:
@@ -1058,15 +1054,61 @@ class GenericSeries:
         #     xarray as the parameters value
         raise NotImplementedError
 
+    def _call_preprocess_coords(self, **kwargs) -> Dict[str, xr.DataArray]:
+        """Preprocess the coordinates passed to `__call__`."""
+        # Apply preprocessor for derived series if present
+        if self._evaluation_preprocessor is not None:
+            kwargs = self._evaluation_preprocessor(**kwargs)
+
+        # Turn coords into DataArrays
+        coords = {}
+        for i, (k, v) in enumerate(kwargs.items()):
+            v = Q_(v)
+
+            if len(v.shape) == 0:
+                v = np.expand_dims(v, 0)
+
+            if self.is_expression:
+                v = xr.DataArray(
+                    v,
+                    dims=self._symbol_dims[k],
+                    coords={self._symbol_dims[k][0]: v.m},
+                )
+            else:
+                ref_unit = self._data.coords[k].attrs.get("units", "")
+                v = xr.DataArray(v.to(ref_unit), dims=[k]).pint.dequantify()
+
+            coords[k] = v
+
+        return coords
+
+    def _call_expr(self, **kwargs) -> GenericSeries:
+        """Evaluate the expression at the passed coordinates."""
+        if len(kwargs) == self._data.num_variables:
+            # evaluate expression
+            coords = self._call_preprocess_coords(**kwargs)
+            coords_unit_adj = {k: v.pint.dequantify() for k, v in coords.items()}
+            data = self._data.evaluate(**coords).assign_coords(coords_unit_adj)
+            # todo use func of CFabry to turn coord attrs into units
+            return type(self)(data)
+        else:
+            # turn passed coords into parameters of the expression
+            new_series = deepcopy(self)
+            for k, v in kwargs.items():
+                new_series._data.set_parameter(k, (v, self._symbol_dims[k]))
+                new_series._symbol_dims.pop(k)
+                new_series._variable_units.pop(k)
+            return new_series
+
     def __call__(self, **kwargs) -> GenericSeries:
-        """Evaluate the generic series at discrete points.
+        """Evaluate the generic series at discrete coordinates.
 
         Parameters
         ----------
         kwargs:
             An arbitrary number of keyword arguments. The key must be a dimension name
             of the `GenericSeries` and the values are the corresponding coordinates
-            where the `GenericSeries` should be evaluated
+            where the `GenericSeries` should be evaluated.
 
         Returns
         -------
@@ -1075,40 +1117,14 @@ class GenericSeries:
             coordinates.
 
         """
-        if self._evaluation_preprocessor is not None:
-            kwargs = self._evaluation_preprocessor(**kwargs)
-        input = {}
-        for i, (k, v) in enumerate(kwargs.items()):
-            v = Q_(v)
-            if len(v.shape) == 0:
-                v = np.expand_dims(v, 0)
-            if isinstance(self._data, MathematicalExpression):
-                v = xr.DataArray(
-                    v, dims=self._symbol_dims[k], coords={self._symbol_dims[k][0]: v.m}
-                )
-            else:
-                ref_unit = self._data.coords[k].attrs.get("units", "")
-                v = xr.DataArray(v.to(ref_unit), dims=[k]).pint.dequantify()
-            input[k] = v
+        if self.is_expression:
+            return self._call_expr(**kwargs)
 
-        if isinstance(self._data, MathematicalExpression):
-            # num_expr_sym = self._data.num_variables + len(self._data.parameters)
-            if len(kwargs) == self._data.num_variables:
-                coords = {k: v.pint.dequantify() for k, v in input.items()}
-                data = self._data.evaluate(**input).assign_coords(coords)
-                return type(self)(data)
-            else:
-                new_series = deepcopy(self)
-                for k, v in kwargs.items():
-                    new_series._data.set_parameter(k, (v, self._symbol_dims[k]))
-                    new_series._symbol_dims.pop(k)
-                    new_series._variable_units.pop(k)
-                return new_series
-
-        for k in input.keys():
+        coords = self._call_preprocess_coords(**kwargs)
+        for k in coords.keys():
             if k not in self._data.dims:
                 raise KeyError(f"'{k}' is not a valid dimension.")
-        return type(self)(ut.xr_interp_like(self._data, input))
+        return type(self)(ut.xr_interp_like(self._data, coords))
 
     def __getitem__(self, *args):
         """Get a subset of a discrete `GenericSeries` by indices."""
