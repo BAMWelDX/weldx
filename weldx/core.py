@@ -903,6 +903,7 @@ class GenericSeries:
             raise TypeError(f'The data type "{type(obj)}" is not supported.')
 
     def __eq__(self, other):
+        """Compare the Generic Series to another object."""
         raise NotImplementedError
 
     def _init_discrete(self, data, dims, coords):
