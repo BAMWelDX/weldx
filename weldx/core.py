@@ -717,12 +717,12 @@ class TimeSeries(TimeDependent):
 
 # todo
 #  - use xr_check_coords where possible
-#  - evaluate function
-#  - __init__ + class : data -> obj
+#  - extra evaluate function
 #  - __getitem__ : use DataArray.sel
 #  - pandas time types in TimeSeries vs GenericSeries
 #  - asdf base implementation -> xarray.DataArray units checken (U_ statt string)
 #  - add doctests (examples)
+#  - use dimensionality errors
 
 
 class GenericSeries:
@@ -864,7 +864,7 @@ class GenericSeries:
 
     def __init__(
         self,
-        data: Union[pint.Quantity, xr.DataArray, MathematicalExpression],
+        obj: Union[pint.Quantity, xr.DataArray, MathematicalExpression],
         dims: Union[List[str], Dict[str, Union[str, pint.Unit]]] = None,
         coords: Union[None, pint.Quantity, Dict[str, pint.Quantity]] = None,
         units: Dict[str, Union[str, pint.Unit]] = None,
@@ -875,7 +875,7 @@ class GenericSeries:
 
         Parameters
         ----------
-        data :
+        obj :
             Either a multidimensional array of discrete values or a
             `MathematicalExpression` with one or more variables.
         dims :
@@ -888,19 +888,19 @@ class GenericSeries:
             The method that should be used when interpolating between discrete values.
 
         """
-        self._data: Union[xr.DataArray, MathematicalExpression] = None
+        self._obj: Union[xr.DataArray, MathematicalExpression] = None
         self._variable_units: Dict[str, pint.Unit] = None
         self._symbol_dims: Dict[str, List[str]] = None
         self._shape: Tuple = None
         self._units: pint.Unit = None
         self._interpolation = "linear" if interpolation is None else interpolation
 
-        if isinstance(data, (pint.Quantity, xr.DataArray)):
-            self._init_discrete(data, dims, coords)
-        elif isinstance(data, (MathematicalExpression, str)):
-            self._init_expression(data, dims, parameters, units)
+        if isinstance(obj, (pint.Quantity, xr.DataArray)):
+            self._init_discrete(obj, dims, coords)
+        elif isinstance(obj, (MathematicalExpression, str)):
+            self._init_expression(obj, dims, parameters, units)
         else:
-            raise TypeError(f'The data type "{type(data)}" is not supported.')
+            raise TypeError(f'The data type "{type(obj)}" is not supported.')
 
     def __eq__(self, other):
         raise NotImplementedError
@@ -913,6 +913,7 @@ class GenericSeries:
                     k: xr.DataArray(Q_(v), dims=[k]).pint.dequantify()
                     for k, v in coords.items()
                 }
+                # todo: use functions of CFabry to turn attrs into units
             data = xr.DataArray(data=data, dims=dims, coords=coords)
         else:
             # todo check data structure
@@ -920,25 +921,9 @@ class GenericSeries:
 
         self._check_constraints_discrete(data)
 
-        self._data = data
+        self._obj = data
 
-    def _check_parameters(self, parameters):
-        pass
-
-    def _init_expression(self, expr, dims, parameters, units):
-        """Initialize the internal data with a mathematical expression."""
-        # Check and update expression
-        if isinstance(expr, MathematicalExpression):
-            parameters = expr.parameters
-            expr = expr.expression.__repr__()
-        if parameters is not None:
-            self._update_expression_params(parameters)
-        expr = MathematicalExpression(expr, parameters)
-
-        if expr.num_variables == 0:
-            raise ValueError("The passed expression has no variables.")
-
-        # Update units and dims
+    def _init_get_updated_dims_and_units(self, expr, dims, units):
         if dims is None:
             dims = {}
         if units is None:
@@ -959,6 +944,24 @@ class GenericSeries:
             if v not in units:
                 units[v] = U_("")
 
+        return dims, units
+
+    def _init_expression(self, expr, dims, parameters, units):
+        """Initialize the internal data with a mathematical expression."""
+        # Check and update expression
+        if isinstance(expr, MathematicalExpression):
+            parameters = expr.parameters
+            expr = expr.expression.__repr__()
+        if parameters is not None:
+            self._update_expression_params(parameters)
+        expr = MathematicalExpression(expr, parameters)
+
+        if expr.num_variables == 0:
+            raise ValueError("The passed expression has no variables.")
+
+        # Update units and dims
+        dims, units = self._init_get_updated_dims_and_units(expr, dims, units)
+
         # check expression
         expr_units, expr_shape = self._eval_expr(expr, dims, units)
 
@@ -968,7 +971,7 @@ class GenericSeries:
         # save internal data
         self._units = expr_units
         self._shape = expr_shape
-        self._data = expr
+        self._obj = expr
         self._variable_units = units
         self._symbol_dims = dims
 
@@ -1019,6 +1022,9 @@ class GenericSeries:
 
     @staticmethod
     def _update_expression_params(params):
+        # todo
+        #  - enable usage of dicts for params (data, dims, coords)
+        #  - tuple should accept third element (coords)
         for k, v in params.items():
             if isinstance(v, tuple):
                 v = (Q_(v[0]), v[1])
@@ -1032,14 +1038,14 @@ class GenericSeries:
     def __repr__(self):
         """Give __repr__ output."""
         representation = f"<{type(self).__name__}>\n"
-        if isinstance(self._data, xr.DataArray):
-            representation += f"Values:\n{self._data.data.magnitude}\n"
+        if isinstance(self._obj, xr.DataArray):
+            representation += f"Values:\n{self._obj.data.magnitude}\n"
         else:
             representation += self.data.__repr__().replace(
                 "<MathematicalExpression>", ""
             )
         representation += f"Dimensions:\n\t{self.dims}\n"
-        if isinstance(self._data, xr.DataArray):
+        if isinstance(self._obj, xr.DataArray):
             representation += f"Coordinates:\n\t{self.coordinates}\n"
         return representation + f"Units:\n\t{self.units}\n"
 
@@ -1075,7 +1081,7 @@ class GenericSeries:
                     coords={self._symbol_dims[k][0]: v.m},
                 )
             else:
-                ref_unit = self._data.coords[k].attrs.get("units", "")
+                ref_unit = self._obj.coords[k].attrs.get("units", "")
                 v = xr.DataArray(v.to(ref_unit), dims=[k]).pint.dequantify()
 
             coords[k] = v
@@ -1084,11 +1090,11 @@ class GenericSeries:
 
     def _call_expr(self, **kwargs) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
-        if len(kwargs) == self._data.num_variables:
+        if len(kwargs) == self._obj.num_variables:
             # evaluate expression
             coords = self._call_preprocess_coords(**kwargs)
             coords_unit_adj = {k: v.pint.dequantify() for k, v in coords.items()}
-            data = self._data.evaluate(**coords).assign_coords(coords_unit_adj)
+            data = self._obj.evaluate(**coords).assign_coords(coords_unit_adj)
             # todo use func of CFabry to turn coord attrs into units
             return type(self)(data)
         else:
@@ -1122,14 +1128,14 @@ class GenericSeries:
 
         coords = self._call_preprocess_coords(**kwargs)
         for k in coords.keys():
-            if k not in self._data.dims:
+            if k not in self._obj.dims:
                 raise KeyError(f"'{k}' is not a valid dimension.")
-        return type(self)(ut.xr_interp_like(self._data, coords))
+        return type(self)(ut.xr_interp_like(self._obj, coords))
 
     def __getitem__(self, *args):
         """Get a subset of a discrete `GenericSeries` by indices."""
-        if isinstance(self._data, xr.DataArray):
-            return self._data.__getitem__(*args)
+        if isinstance(self._obj, xr.DataArray):
+            return self._obj.__getitem__(*args)
         return NotImplementedError
 
     def interp_like(
@@ -1161,8 +1167,8 @@ class GenericSeries:
     @property
     def coordinates(self) -> Union[None, pint.Quantity, Dict[str, pint.Quantity]]:
         """Get the coordinates of the generic series."""
-        if isinstance(self._data, xr.DataArray):
-            return self._data.coords
+        if isinstance(self._obj, xr.DataArray):
+            return self._obj.coords
         # todo here we should get all parameter coordinates
         return None
 
@@ -1174,15 +1180,15 @@ class GenericSeries:
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
         """Get the internal data."""
-        if isinstance(self._data, xr.DataArray):
-            return self._data.data
-        return self._data
+        if isinstance(self._obj, xr.DataArray):
+            return self._obj.data
+        return self._obj
 
     @property
     def data_array(self) -> Union[xarray.DataArray, MathematicalExpression]:
         """Get the internal data."""
-        if isinstance(self._data, xr.DataArray):
-            return self._data
+        if isinstance(self._obj, xr.DataArray):
+            return self._obj
         return None
 
     @staticmethod
@@ -1200,9 +1206,9 @@ class GenericSeries:
     @property
     def dims(self) -> List[str]:
         """Get the names of all dimensions."""
-        if isinstance(self._data, MathematicalExpression):
-            return self._get_expression_dims(self._data, self._symbol_dims)
-        return self._data.dims
+        if isinstance(self._obj, MathematicalExpression):
+            return self._get_expression_dims(self._obj, self._symbol_dims)
+        return self._obj.dims
 
     @property
     def interpolation(self) -> str:
@@ -1223,7 +1229,7 @@ class GenericSeries:
     @property
     def is_expression(self) -> bool:
         """Return `True` if the time series is described by an expression."""
-        return isinstance(self._data, MathematicalExpression)
+        return isinstance(self._obj, MathematicalExpression)
 
     @property
     def ndims(self) -> int:
@@ -1257,4 +1263,4 @@ class GenericSeries:
         """Get the units of the generic series data."""
         if self._units is not None:
             return self._units
-        return self._data.data.u
+        return self._obj.data.u
