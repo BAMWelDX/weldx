@@ -1166,7 +1166,7 @@ class GenericSeries:
     # constraint checks for derived series ---------------------------------------------
 
     @classmethod
-    def _check_req_item(cls, req, data, desc):
+    def _check_req_items(cls, req, data, desc):
         for v in req:
             if v not in data:
                 raise ValueError(f"{cls.__name__} requires {desc} '{v}'.")
@@ -1177,7 +1177,7 @@ class GenericSeries:
             return
 
         # check dimension constraints
-        cls._check_req_item(cls._required_dimensions, data_array.dims, "dimension")
+        cls._check_req_items(cls._required_dimensions, data_array.dims, "dimension")
 
         # check dimensionality constraint
         ut.xr_check_dimensionality(data_array, cls._required_unit_dimensionality)
@@ -1218,12 +1218,12 @@ class GenericSeries:
                         f"'{v}' is not allowed as an expression variable of class "
                         f"{cls.__name__}"
                     )
-        cls._check_req_item(
+        cls._check_req_items(
             cls._required_variables, expr.get_variable_names(), "expression variable"
         )
 
         # check dimension constraints
-        cls._check_req_item(
+        cls._check_req_items(
             cls._required_dimensions,
             cls._get_expression_dims(expr, var_dims),
             "dimension",
@@ -1266,7 +1266,7 @@ class GenericSeries:
                     f"coordinates {v}. Therefore it can't be a variable dimension."
                 )
 
-            ref = dict(k={"values": v})
+            ref = {k: {"values": v}}
             for param in expr.parameters.values():
                 if isinstance(param, xr.DataArray) and k in param.coords.keys():
                     ut.xr_check_coords(param, ref)
