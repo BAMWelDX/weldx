@@ -1258,16 +1258,17 @@ class GenericSeries:
                     f"unit dimensionality '{U_(v).dimensionality}'",
                 )
 
+        # check coords
         for k, v in cls._required_dimension_coordinates.items():
-            coords = None
-            if k not in var_dims:
-                for param in expr.parameters.values():
-                    if isinstance(param, xr.DataArray) and k in param.coords.keys():
-                        coords = param.coords[k].data.tolist()
-            if coords is None or not ut.compare_nested(coords, v):
+            if k in var_dims:
                 raise ValueError(
                     f"{cls.__name__} requires dimension {k} to have the "
-                    f"coordinates {v}"
+                    f"coordinates {v}. Therefore it can't be a variable dimension."
                 )
+
+            ref = dict(k={"values": v})
+            for param in expr.parameters.values():
+                if isinstance(param, xr.DataArray) and k in param.coords.keys():
+                    ut.xr_check_coords(param, ref)
 
             # todo: add limits for dims?
