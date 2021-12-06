@@ -46,7 +46,7 @@ dependencies
 
 -  bump to ``numpy>=1.20`` (for numpy.typing) [:pull:`656`]
 
--  bump to ``pint >=0.18`` for typing
+-  bump to ``pint >=0.18`` for typing [:pull:`664`]
 
 ********************
  0.5.2 (18.11.2021)
