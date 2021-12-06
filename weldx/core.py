@@ -728,33 +728,33 @@ class TimeSeries(TimeDependent):
 class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
 
-    _allowed_variables: List[str] = None
+    _allowed_variables: List[str] = []
     """Allowed variable names"""
-    _required_variables: List[str] = None
+    _required_variables: List[str] = []
     """Required variable names"""
 
     _evaluation_preprocessor: callable = None
     """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
 
-    _required_dimensions: List[str] = None
+    _required_dimensions: List[str] = []
     """Required dimensions"""
     _required_dimension_units: Dict[str, pint.Unit] = {}
     """Required units of a dimension"""
-    _required_dimension_coordinates: Dict[str, List] = None
+    _required_dimension_coordinates: Dict[str, List] = {}
     """Required coordinates of a dimension."""
 
+    # todo: use dimensionality class of pint if existing
     _required_unit_dimensionality: pint.Unit = None
     """Required unit dimensionality of the evaluated expression/data"""
 
     # do it later
 
-    _required_parameter_shape: Dict[str, int] = None
+    _allowed_dimensions = List[str] = NotImplemented
+    """A list of allowed dimension names."""
+    _required_parameter_shape: Dict[str, int] = NotImplemented
     """Size of the parameter dimensions/coordinates - (also defines parameter order)"""
-    _alias_names: Dict[str, List[str]] = None
+    _alias_names: Dict[str, List[str]] = NotImplemented
     """Allowed alias names for a variable or parameter in an expression"""
-
-    # todo: other possible constraints:
-    # - allowed dimensions (not the same as allowed variables)
 
     @classmethod
     def _check_constraints(cls, dims, units_out: pint.Unit = None):
