@@ -1413,11 +1413,7 @@ class FFGroove(IsoBaseGroove):
         """
         width_default: pint.Quantity = Q_(width_default)
 
-        if (
-            self.code_number == "1.12"
-            or self.code_number == "1.13"
-            or self.code_number == "2.12"
-        ):
+        if self.code_number in ("1.12", "1.13", "2.12"):
             shape1 = geo.Shape()
             arr1 = np.stack(
                 (
@@ -1503,7 +1499,7 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "3.1.3" or self.code_number == "4.1.1":
+        elif self.code_number in ("3.1.3", "4.1.1"):
             t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
             x = np.sin(alpha + np.pi / 2) * b + b
