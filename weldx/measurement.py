@@ -16,7 +16,8 @@ if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot as plt
     from pandas import TimedeltaIndex
     from pint import Quantity, Unit
-    from pint._typing import UnitLike
+
+    from weldx.types import UnitLike
 
 
 # measurement --------------------------------------------------------------------------

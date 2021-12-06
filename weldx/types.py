@@ -62,3 +62,4 @@ types_path_and_file_like = Union[types_path_like, types_file_like]
 
 ArrayLike = Union[npt.ArrayLike, xr.DataArray, pint.Quantity]
 QuantityLike = Union[pint.Quantity, str]
+UnitLike = Union[str, pint.Unit, pint.util.UnitsContainer]

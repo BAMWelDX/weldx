@@ -16,7 +16,8 @@ from weldx.time import Time, TimeDependent, types_time_like
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot
     import sympy
-    from pint._typing import UnitLike
+
+    from weldx.types import UnitLike
 
 __all__ = ["MathematicalExpression", "TimeSeries"]
 
