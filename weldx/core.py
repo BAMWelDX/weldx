@@ -749,118 +749,12 @@ class GenericSeries:
 
     # do it later
 
-    _allowed_dimensions = List[str] = NotImplemented
+    _allowed_dimensions: List[str] = NotImplemented
     """A list of allowed dimension names."""
     _required_parameter_shape: Dict[str, int] = NotImplemented
     """Size of the parameter dimensions/coordinates - (also defines parameter order)"""
     _alias_names: Dict[str, List[str]] = NotImplemented
     """Allowed alias names for a variable or parameter in an expression"""
-
-    @classmethod
-    def _check_constraints(cls, dims, units_out: pint.Unit = None):
-        if cls._required_dimensions is not None:
-            for v in cls._required_dimensions:
-                if v not in dims:
-                    raise ValueError(f"{cls.__name__} requires dimension '{v}'.")
-        if cls._required_unit_dimensionality is not None:
-            if not units_out.dimensionality == cls._required_unit_dimensionality:
-                raise ValueError(
-                    f"{cls.__name__} requires its output unit to be of dimensionality "
-                    f"'{cls._required_unit_dimensionality}' but it actually is "
-                    f"'{units_out.dimensionality}'."
-                )
-
-    @classmethod
-    def _check_constraints_discrete(cls, data_array: xr.DataArray):
-        if cls is GenericSeries:
-            return
-
-        cls._check_constraints(data_array.dims, data_array.data.u)
-
-        if cls._required_dimension_units is not None:
-            for k, v in cls._required_dimension_units.items():
-                if k in data_array.dims and (
-                    k not in data_array.coords.keys()
-                    or U_(data_array.coords[k].attrs.get("units", "")).dimensionality
-                    != U_(v).dimensionality
-                ):
-                    raise ValueError(
-                        f"{cls.__name__} requires dimension {k} to be have the "
-                        f"unit dimensionality '{U_(v).dimensionality}'"
-                    )
-
-        if cls._required_dimension_coordinates is not None:
-            for k, v in cls._required_dimension_coordinates.items():
-                if k not in data_array.coords.keys() or not ut.compare_nested(
-                    data_array.coords[k].data.tolist(), v
-                ):
-                    raise ValueError(
-                        f"{cls.__name__} requires dimension {k} to have the "
-                        f"coordinates {v}"
-                    )
-
-    @classmethod
-    def _check_constraints_expression(
-        cls,
-        expr: MathematicalExpression,
-        var_dims: Dict[str, str],
-        var_units: Dict[str, pint.Unit],
-        expr_units: pint.Unit,
-    ):
-        if cls is GenericSeries:
-            return
-
-        if cls._allowed_variables is not None:
-            for v in expr.get_variable_names():
-                if v not in cls._allowed_variables:
-                    raise ValueError(
-                        f"'{v}' is not allowed as an expression variable of class "
-                        f"{cls.__name__}"
-                    )
-        if cls._required_variables is not None:
-            for v in cls._required_variables:
-                if v not in expr.get_variable_names():
-                    raise ValueError(
-                        f"{cls.__name__} requires expression variable '{v}'."
-                    )
-
-        dims = cls._get_expression_dims(expr, var_dims)
-        cls._check_constraints(dims, expr_units)
-
-        if cls._required_dimension_units is not None:
-            expr_params = expr.parameters
-            for k, v in cls._required_dimension_units.items():
-                actual_unit = None
-                if k in var_units:
-                    actual_unit = U_(var_units[k])
-                elif k in expr_params:
-                    param = expr_params[k]
-                    if isinstance(param, pint.Quantity):
-                        actual_unit = param.u
-                    else:
-                        actual_unit = param.data.u
-                if (
-                    actual_unit is None
-                    or actual_unit.dimensionality != U_(v).dimensionality
-                ):
-                    raise ValueError(
-                        f"{cls.__name__} requires dimension {k} to be have the "
-                        f"unit dimensionality '{U_(v).dimensionality}'"
-                    )
-        if cls._required_dimension_coordinates is not None:
-            for k, v in cls._required_dimension_coordinates.items():
-                coords = None
-                if k not in var_dims:
-                    for param in expr.parameters.values():
-                        if isinstance(param, xr.DataArray) and k in param.coords.keys():
-                            coords = param.coords[k].data.tolist()
-                if coords is None or not ut.compare_nested(coords, v):
-                    raise ValueError(
-                        f"{cls.__name__} requires dimension {k} to have the "
-                        f"coordinates {v}"
-                    )
-
-            # todo: add limits for dims?
 
     def __init__(
         self,
@@ -983,10 +877,13 @@ class GenericSeries:
             result = expr.evaluate(**scalar_params)
             expr_units = result.data.to_reduced_units().units
         except pint.errors.DimensionalityError as e:
-            raise ValueError(
-                "Expression can not be evaluated due to a unit dimensionality error. "
-                "Ensure that the expressions parameters and the expected variable "
-                f"units are compatible. The original exception was:\n{e}"
+            raise pint.DimensionalityError(
+                e.units1,
+                e.units2,
+                extra_msg="\nExpression can not be evaluated due to a unit "
+                "dimensionality error. Ensure that the expressions parameters and the "
+                "expected variable units are compatible. The original exception was:\n"
+                f"{e}",
             )
         except ValueError:
             pass  # Error message will be generated by the next check
@@ -1237,7 +1134,6 @@ class GenericSeries:
         """Get the number of dimensions."""
         return len(self.dims)
 
-    # todo Name is wrong -> variable names!
     @property
     def parameter_names(self) -> List[str]:
         """Get the names of all dimensions."""
@@ -1245,13 +1141,13 @@ class GenericSeries:
             return list(self._variable_units.keys())
         return None
 
-    # todo Name is wrong -> variable units!
+    # todo Name is wrong -> variable names!
     @property
     def parameter_units(self) -> Dict[str, pint.Unit]:
         """Get a dictionary that maps the parameter names to their expected units."""
         return self._variable_units
 
-    # todo Expression? -> dict shape?
+    # todo Name is wrong -> variable units!
     @property
     def shape(self) -> Tuple:
         """Get the shape of the generic series data."""
@@ -1259,9 +1155,119 @@ class GenericSeries:
             return self._shape
         raise NotImplementedError
 
+    # todo Expression? -> dict shape?
     @property
     def units(self) -> str:
         """Get the units of the generic series data."""
         if self._units is not None:
             return self._units
         return self._obj.data.u
+
+    # constraint checks for derived series ---------------------------------------------
+
+    @classmethod
+    def _check_req_item(cls, req, data, desc):
+        for v in req:
+            if v not in data:
+                raise ValueError(f"{cls.__name__} requires {desc} '{v}'.")
+
+    @classmethod
+    def _check_constraints_discrete(cls, data_array: xr.DataArray):
+        if cls is GenericSeries:
+            return
+
+        # check dimension constraints
+        cls._check_req_item(cls._required_dimensions, data_array.dims, "dimension")
+
+        # check dimensionality constraint
+        ut.xr_check_dimensionality(data_array, cls._required_unit_dimensionality)
+
+        # check coordinate constraints
+        ref = {}
+
+        def _update_ref_coords(r, item, k, v):
+            coord = r.get(k, {})
+            coord[item] = v
+            r[k] = coord
+
+        for k, v in cls._required_dimension_units.items():
+            if k in data_array.dims:
+                _update_ref_coords(ref, "dimensionality", k, v)
+
+        for k, v in cls._required_dimension_coordinates.items():
+            _update_ref_coords(ref, "values", k, v)
+
+        ut.xr_check_coords(data_array, ref)
+
+    @classmethod
+    def _check_constraints_expression(
+        cls,
+        expr: MathematicalExpression,
+        var_dims: Dict[str, str],
+        var_units: Dict[str, pint.Unit],
+        expr_units: pint.Unit,
+    ):
+        if cls is GenericSeries:
+            return
+
+        # check variable constraints
+        if len(cls._allowed_variables) > 0:
+            for v in expr.get_variable_names():
+                if v not in cls._allowed_variables:
+                    raise ValueError(
+                        f"'{v}' is not allowed as an expression variable of class "
+                        f"{cls.__name__}"
+                    )
+        cls._check_req_item(
+            cls._required_variables, expr.get_variable_names(), "expression variable"
+        )
+
+        # check dimension constraints
+        cls._check_req_item(
+            cls._required_dimensions,
+            cls._get_expression_dims(expr, var_dims),
+            "dimension",
+        )
+
+        # check dimensionality constraint
+        if (
+            cls._required_unit_dimensionality is not None
+            and not expr_units.is_compatible_with(cls._required_unit_dimensionality)
+        ):
+            raise pint.DimensionalityError(
+                expr_units,
+                cls._required_unit_dimensionality,
+                extra_msg=f"\n{cls.__name__} requires its output unit to be of "
+                f"dimensionality '{cls._required_unit_dimensionality}' but "
+                f"it actually is '{expr_units.dimensionality}'.",
+            )
+
+        # check  units of dimensions
+        for k, v in cls._required_dimension_units.items():
+            d_units = var_units.get(k)
+            param = expr.parameters.get(k)
+
+            if d_units is None and param is not None:
+                d_units = param.u if isinstance(param, pint.Quantity) else param.data.u
+
+            if d_units is None or not U_(d_units).is_compatible_with(U_(v)):
+                raise pint.DimensionalityError(
+                    U_(v),
+                    U_(d_units),
+                    extra_msg=f"\n{cls.__name__} requires dimension {k} to have the "
+                    f"unit dimensionality '{U_(v).dimensionality}'",
+                )
+
+        for k, v in cls._required_dimension_coordinates.items():
+            coords = None
+            if k not in var_dims:
+                for param in expr.parameters.values():
+                    if isinstance(param, xr.DataArray) and k in param.coords.keys():
+                        coords = param.coords[k].data.tolist()
+            if coords is None or not ut.compare_nested(coords, v):
+                raise ValueError(
+                    f"{cls.__name__} requires dimension {k} to have the "
+                    f"coordinates {v}"
+                )
+
+            # todo: add limits for dims?

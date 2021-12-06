@@ -26,6 +26,7 @@ __all__ = [
     "xr_3d_matrix",
     "xr_3d_vector",
     "xr_check_coords",
+    "xr_check_dimensionality",
     "xr_fill_all",
     "xr_interp_coordinates_in_time",
     "xr_interp_like",
@@ -534,6 +535,25 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                 )
 
     return True
+
+
+def xr_check_dimensionality(da, units_ref: Union[str, pint.Unit]):
+    if units_ref is None:
+        return
+    if not isinstance(units_ref, pint.Unit):
+        units_ref = U_(units_ref)
+
+    units = da.attrs.get(UNITS_KEY, None)
+    if units is None and isinstance(da.data, pint.Quantity):
+        units = da.data.u
+
+    if units is None or not U_(units).is_compatible_with(units_ref):
+        raise DimensionalityError(
+            units,
+            units_ref,
+            extra_msg=f"\nDataArray units are '{units}'.  This is incompatible with "
+            f"the expected dimensionality '{units_ref.dimensionality}'",
+        )
 
 
 def xr_3d_vector(

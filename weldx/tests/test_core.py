@@ -526,11 +526,11 @@ class TestGenericSeries:
             # 4 dims with units - 0 params
             (None, dict(a="m", x="m", b="K", y="m*m/K"), None, None),
             # ERROR - 4 dims with incompatible units - 0 params
-            (None, dict(a="m", x="m", b="K", y="m/K"), None, ValueError),
+            (None, dict(a="m", x="m", b="K", y="m/K"), None, pint.DimensionalityError),
             # 2 dims with units - 2 scalar params
-            (None, dict(x="m", y="m*m/K"), dict(a="3m", b="300K"), None),
+            (None, dict(x="m", y="m*m/K"), dict(a="3m", b="30K"), None),
             # ERROR - parameter and variable units are incompatible
-            (None, dict(b="m", y="m"), dict(a="3m", x="300K"), ValueError),
+            (None, dict(b="m", y="m"), dict(a="3m", x="30K"), pint.DimensionalityError),
             # 3 dims with units - 1 array parameter (quantity)
             (None, None, dict(y=Q_([1, 2], "m")), None),
             # 3 dims with units - 1 array parameter (tuple)
@@ -814,13 +814,13 @@ class TestDerivedFromGenericSeries:
             ("t*b", dict(t="s"), None, None),
             ("t*b", dict(b="m"), None, None),
             ("t*b", dict(t="s", b="m"), None, None),
-            ("t*b", dict(t="m"), None, ValueError),
-            ("t*b", dict(t="m", b="m"), None, ValueError),
+            ("t*b", dict(t="m"), None, pint.DimensionalityError),
+            ("t*b", dict(t="m", b="m"), None, pint.DimensionalityError),
             ("t*b", None, dict(t="3s"), None),
-            ("a*t + b", None, None, ValueError),
+            ("a*t + b", None, None, pint.DimensionalityError),
             ("a*t + b", dict(a="m/s"), None, None),
-            ("a*t + b", dict(a="m"), None, ValueError),
-            ("a*t + b", None, None, ValueError),
+            ("a*t + b", dict(a="m"), None, pint.DimensionalityError),
+            ("a*t + b", None, None, pint.DimensionalityError),
         ],
     )
     def test_required_dimension_units_expression(expr, units, parameters, exception):
@@ -841,22 +841,22 @@ class TestDerivedFromGenericSeries:
         "dims, units, exception",
         [
             (["t", "b"], dict(t="s", b="m"), None),
-            (["t", "b"], dict(t="m"), ValueError),
-            (["t", "b"], dict(t="m", b="m"), ValueError),
-            (["t", "b"], dict(b="s"), ValueError),
-            (["t", "b"], dict(t="s", b="s"), ValueError),
-            (["t", "b"], dict(t="m", b="s"), ValueError),
+            (["t", "b"], dict(t="m"), pint.DimensionalityError),
+            (["t", "b"], dict(t="m", b="m"), pint.DimensionalityError),
+            (["t", "b"], dict(b="s"), KeyError),
+            (["t", "b"], dict(t="s", b="s"), pint.DimensionalityError),
+            (["t", "b"], dict(t="m", b="s"), pint.DimensionalityError),
             (["t"], dict(t="s"), None),
-            (["t"], dict(t="m"), ValueError),
+            (["t"], dict(t="m"), pint.DimensionalityError),
             (["b"], dict(b="m"), None),
-            (["b"], dict(b="s"), ValueError),
+            (["b"], dict(b="s"), pint.DimensionalityError),
             (["t", "b", "d"], dict(t="s", b="m"), None),
             (["t", "b", "d"], dict(t="s", b="m", d="A"), None),
             (["t", "b", "d"], dict(t="s", b="m", d="m"), None),
             (["t", "d"], dict(t="s", d="m"), None),
-            (["t", "d"], dict(t="A", d="m"), ValueError),
+            (["t", "d"], dict(t="A", d="m"), pint.DimensionalityError),
             (["b", "d"], dict(b="m", d="m"), None),
-            (["b", "d"], dict(b="s", d="m"), ValueError),
+            (["b", "d"], dict(b="s", d="m"), pint.DimensionalityError),
         ],
     )
     def test_required_dimension_units_discrete(dims, units, exception):
@@ -890,7 +890,8 @@ class TestDerivedFromGenericSeries:
         [
             (dict(a=["x", "y"]), None),
             (dict(a=["x", "y"], b=[4, 5, 6, 7]), None),
-            (dict(b=[4, 5, 6, 7]), ValueError),
+            (dict(b=[4, 5, 6, 7]), KeyError),
+            (dict(b=["x", "y", "a", "b"]), KeyError),
             (dict(a=["x", "b"]), ValueError),
             (dict(a=["a", "b"]), ValueError),
             (dict(a=["a", "y"]), ValueError),
@@ -950,18 +951,18 @@ class TestDerivedFromGenericSeries:
         "data, units, exception",
         [
             (Q_([[1, 2], [3, 4]], "m"), None, None),
-            (Q_([[1, 2], [3, 4]], "s"), None, ValueError),
+            (Q_([[1, 2], [3, 4]], "s"), None, pint.DimensionalityError),
             ("a*b", dict(a="m"), None),
             ("a*b", dict(b="m"), None),
             ("a*b", dict(a="m/s", b="s"), None),
-            ("a*b", dict(a="m/s", b="m"), ValueError),
-            ("a*b", dict(a="s"), ValueError),
-            ("a*b", None, ValueError),
+            ("a*b", dict(a="m/s", b="m"), pint.DimensionalityError),
+            ("a*b", dict(a="s"), pint.DimensionalityError),
+            ("a*b", None, pint.DimensionalityError),
         ],
     )
     def test_required_unit_dimensionality(data, units, exception):
         class _DerivedSeries(GenericSeries):
-            _required_unit_dimensionality = U_("m").dimensionality
+            _required_unit_dimensionality = U_("m")
 
         if exception is None:
             _DerivedSeries(data, units=units)
