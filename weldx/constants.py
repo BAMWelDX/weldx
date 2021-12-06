@@ -66,6 +66,7 @@ U_.__doc__ = """For details on working with quantities and units, please see the
 
 # set default unit registry for pint-xarray
 pint.set_application_registry(WELDX_UNIT_REGISTRY)
+pint_xarray.unit_registry = WELDX_UNIT_REGISTRY
 
 __all__ = (
     "WELDX_PATH",
