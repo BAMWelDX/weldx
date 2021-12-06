@@ -12,7 +12,7 @@ import xarray
 import xarray as xr
 
 import weldx.util as ut
-from weldx.constants import Q_, U_
+from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time, TimeDependent, types_time_like
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -979,7 +979,7 @@ class GenericSeries:
                     coords={self._symbol_dims[k][0]: v.m},
                 )
             else:
-                ref_unit = self._obj.coords[k].attrs.get("units", "")
+                ref_unit = self._obj.coords[k].attrs.get(UNITS_KEY, "")
                 v = xr.DataArray(v.to(ref_unit), dims=[k]).pint.dequantify()
 
             coords[k] = v
@@ -1167,9 +1167,8 @@ class GenericSeries:
 
     @classmethod
     def _check_req_items(cls, req, data, desc):
-        for v in req:
-            if v not in data:
-                raise ValueError(f"{cls.__name__} requires {desc} '{v}'.")
+        if not set(req).issubset(data):
+            raise ValueError(f"{cls.__name__} requires {desc} '{req}'.")
 
     @classmethod
     def _check_constraints_discrete(cls, data_array: xr.DataArray):
@@ -1177,7 +1176,7 @@ class GenericSeries:
             return
 
         # check dimension constraints
-        cls._check_req_items(cls._required_dimensions, data_array.dims, "dimension")
+        cls._check_req_items(cls._required_dimensions, data_array.dims, "dimensions")
 
         # check dimensionality constraint
         ut.xr_check_dimensionality(data_array, cls._required_unit_dimensionality)
@@ -1219,14 +1218,14 @@ class GenericSeries:
                         f"{cls.__name__}"
                     )
         cls._check_req_items(
-            cls._required_variables, expr.get_variable_names(), "expression variable"
+            cls._required_variables, expr.get_variable_names(), "expression variables"
         )
 
         # check dimension constraints
         cls._check_req_items(
             cls._required_dimensions,
             cls._get_expression_dims(expr, var_dims),
-            "dimension",
+            "dimensions",
         )
 
         # check dimensionality constraint
