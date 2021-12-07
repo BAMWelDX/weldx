@@ -1164,6 +1164,7 @@ class GenericSeries:
 
     @classmethod
     def _check_req_items(cls, req, data, desc):
+        """Check if all required items are contained in `data`."""
         if not set(req).issubset(data):
             raise ValueError(f"{cls.__name__} requires {desc} '{req}'.")
 
@@ -1181,10 +1182,11 @@ class GenericSeries:
         # check coordinate constraints
         ref = {}
 
-        def _update_ref_coords(r, item, k, v):
-            coord = r.get(k, {})
-            coord[item] = v
-            r[k] = coord
+        def _update_ref_coords(ref_dict, item, key, val):
+            """Update the coordinate reference dict `r`."""
+            coord = ref_dict.get(key, {})
+            coord[item] = val
+            ref_dict[key] = coord
 
         for k, v in cls._required_dimension_units.items():
             if k in data_array.dims:
@@ -1207,16 +1209,15 @@ class GenericSeries:
             return
 
         # check variable constraints
-        if len(cls._allowed_variables) > 0:
-            for v in expr.get_variable_names():
-                if v not in cls._allowed_variables:
-                    raise ValueError(
-                        f"'{v}' is not allowed as an expression variable of class "
-                        f"{cls.__name__}"
-                    )
-        cls._check_req_items(
-            cls._required_variables, expr.get_variable_names(), "expression variables"
-        )
+        var_names = expr.get_variable_names()
+        vars_allow = cls._allowed_variables
+
+        if len(vars_allow) > 0 and not set(var_names).issubset(vars_allow):
+            raise ValueError(
+                f"'{var_names}' is not a subset of the allowed expression variables "
+                f"{vars_allow} of class {cls.__name__}"
+            )
+        cls._check_req_items(cls._required_variables, var_names, "expression variables")
 
         # check dimension constraints
         cls._check_req_items(
@@ -1226,19 +1227,18 @@ class GenericSeries:
         )
 
         # check dimensionality constraint
-        if (
-            cls._required_unit_dimensionality is not None
-            and not expr_units.is_compatible_with(cls._required_unit_dimensionality)
-        ):
+        req_dimty = cls._required_unit_dimensionality
+
+        if req_dimty is not None and not expr_units.is_compatible_with(req_dimty):
             raise pint.DimensionalityError(
                 expr_units,
-                cls._required_unit_dimensionality,
+                req_dimty,
                 extra_msg=f"\n{cls.__name__} requires its output unit to be of "
-                f"dimensionality '{cls._required_unit_dimensionality}' but "
-                f"it actually is '{expr_units.dimensionality}'.",
+                f"dimensionality '{req_dimty.dimensionality}' but it actually is "
+                f"'{expr_units.dimensionality}'.",
             )
 
-        # check  units of dimensions
+        # check units of dimensions
         for k, v in cls._required_dimension_units.items():
             d_units = var_units.get(k)
             param = expr.parameters.get(k)
