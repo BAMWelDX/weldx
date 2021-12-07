@@ -843,7 +843,7 @@ class GenericSeries:
         # Check and update expression
         if isinstance(expr, MathematicalExpression):
             parameters = expr.parameters
-            expr = expr.expression.__repr__()
+            expr = str(expr.expression)
         if parameters is not None:
             self._update_expression_params(parameters)
         expr = MathematicalExpression(expr, parameters)
