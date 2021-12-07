@@ -215,9 +215,8 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         # out of the rasterization points
         profile = self.to_profile()
         rasterization = profile.rasterize(self._AREA_RASTER_WIDTH, stack=False)
-        points = [
-            [(x, y) for x, y in shape.m.T] for shape in rasterization
-        ]  # skipcq: PYL-R1721
+        # skipcq: PYL-R1721
+        points = [[(x, y) for x, y in shape.m.T] for shape in rasterization]
 
         return _compute_cross_sect_shape_points(points)
 
