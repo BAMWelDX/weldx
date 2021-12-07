@@ -215,7 +215,9 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         # out of the rasterization points
         profile = self.to_profile()
         rasterization = profile.rasterize(self._AREA_RASTER_WIDTH, stack=False)
-        points = [[(x, y) for x, y in shape.m.T] for shape in rasterization]
+        points = [
+            [(x, y) for x, y in shape.m.T] for shape in rasterization
+        ]  # skipcq: PYL-R1721
 
         return _compute_cross_sect_shape_points(points)
 
@@ -537,7 +539,7 @@ class UVGroove(IsoBaseGroove):
         # calculations:
         x_1 = np.tan(alpha / 2) * h
         # Center of the circle [0, y_m]
-        y_circle = np.sqrt(R ** 2 - x_1 ** 2)
+        y_circle = np.sqrt(R ** 2 - x_1 ** 2)  # skipcq: PTC-W0028
         y_m = h + y_circle
         # From next point to circle center is the vector (x,y)
         x = R * np.cos(beta)
@@ -1972,7 +1974,7 @@ def get_groove(
     _loc = locals()
 
     groove_cls = _groove_name_to_type[groove_type]
-    _mapping = groove_cls._mapping
+    _mapping = groove_cls._mapping  # skipcq: PYL-W0212
 
     # convert function arguments to groove arguments
     args = {k: Q_(_loc[v]) for k, v in _mapping.items() if _loc[v] is not None}
