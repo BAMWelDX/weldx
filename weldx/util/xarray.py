@@ -530,7 +530,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                 raise DimensionalityError(
                     units,
                     check["dimensionality"],
-                    f"\nDimensionality mismatch in coordinate '{key}'\n"
+                    extra_msg=f"\nDimensionality mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{units}', expected '{dim}'",
                 )
 
