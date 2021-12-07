@@ -1437,7 +1437,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "3.1.1":
+
+        if self.code_number == "3.1.1":
             t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
             if width_default < t_1 + Q_(1, "mm"):
@@ -1476,7 +1477,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "3.1.2":
+
+        if self.code_number == "3.1.2":
             t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
             arr1 = np.stack(
@@ -1499,7 +1501,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number in ("3.1.3", "4.1.1"):
+
+        if self.code_number in ("3.1.3", "4.1.1"):
             t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
             x = np.sin(alpha + np.pi / 2) * b + b
@@ -1535,7 +1538,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "4.1.2":
+
+        if self.code_number == "4.1.2":
             t_1, t_2, alpha, e = self.t_1, self.t_2, self.alpha, self.e
 
             x_1 = np.sin(alpha) * e
@@ -1571,7 +1575,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "4.1.3":
+
+        if self.code_number == "4.1.3":
             t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
             arr1 = np.stack(
@@ -1595,13 +1600,13 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        else:
-            raise ValueError(
-                "Wrong code_number. The Code Number has to be"
-                " one of the following strings: "
-                '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
-                ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
-            )
+
+        raise ValueError(
+            "Wrong code_number. The Code Number has to be"
+            " one of the following strings: "
+            '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
+            ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
+        )
 
     @property
     def cross_sect_area(self):  # noqa
