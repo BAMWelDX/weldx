@@ -1468,10 +1468,10 @@ class FFGroove(IsoBaseGroove):
             shape2 = geo.Shape()
             arr2 = np.stack(
                 (
-                    np.append(width_default, -b),
-                    np.append(0, -b),
-                    np.append(0, -t_2 - b),
-                    np.append(width_default, -t_2 - b),
+                    np.append(width_default, -b),  # skipcq: PYL-E1130
+                    np.append(0, -b),  # skipcq: PYL-E1130
+                    np.append(0, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(width_default, -t_2 - b),  # skipcq: PYL-E1130
                 )
             )
             shape2.add_line_segments(arr2)
@@ -1491,10 +1491,10 @@ class FFGroove(IsoBaseGroove):
             shape2 = geo.Shape()
             arr2 = np.stack(
                 (
-                    np.append(0, -b),
-                    np.append(2 * width_default, -b),
-                    np.append(2 * width_default, -t_2 - b),
-                    np.append(0, -t_2 - b),
+                    np.append(0, -b),  # skipcq: PYL-E1130
+                    np.append(2 * width_default, -b),  # skipcq: PYL-E1130
+                    np.append(2 * width_default, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(0, -t_2 - b),  # skipcq: PYL-E1130
                 )
             )
             shape2.add_line_segments(arr2)
@@ -1586,11 +1586,11 @@ class FFGroove(IsoBaseGroove):
             shape2 = geo.Shape()
             arr2 = np.stack(
                 (
-                    np.append(-width_default, -b),
-                    np.append(t_1 + width_default, -b),
-                    np.append(t_1 + width_default, -t_2 - b),
-                    np.append(-width_default, -t_2 - b),
-                    np.append(-width_default, -b),
+                    np.append(-width_default, -b),  # skipcq: PYL-E1130
+                    np.append(t_1 + width_default, -b),  # skipcq: PYL-E1130
+                    np.append(t_1 + width_default, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(-width_default, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(-width_default, -b),  # skipcq: PYL-E1130
                 )
             )
             shape2.add_line_segments(arr2)
