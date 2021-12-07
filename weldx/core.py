@@ -716,13 +716,11 @@ class TimeSeries(TimeDependent):
 # GenericSeries ------------------------------------------------------------------------
 
 # todo
-#  - use xr_check_coords where possible
 #  - extra evaluate function
 #  - __getitem__ : use DataArray.sel
 #  - pandas time types in TimeSeries vs GenericSeries
 #  - asdf base implementation -> xarray.DataArray units checken (U_ statt string)
 #  - add doctests (examples)
-#  - use dimensionality errors
 
 
 class GenericSeries:
@@ -743,7 +741,6 @@ class GenericSeries:
     _required_dimension_coordinates: Dict[str, List] = {}
     """Required coordinates of a dimension."""
 
-    # todo: use dimensionality class of pint if existing
     _required_unit_dimensionality: pint.Unit = None
     """Required unit dimensionality of the evaluated expression/data"""
 
