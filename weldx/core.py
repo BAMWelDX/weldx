@@ -17,6 +17,8 @@ if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot
     import sympy
 
+    from weldx.types import UnitLike
+
 __all__ = ["MathematicalExpression", "TimeSeries"]
 
 
@@ -631,7 +633,7 @@ class TimeSeries(TimeDependent):
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
         axes: matplotlib.pyplot.Axes = None,
         data_name: str = "values",
-        time_unit: Union[str, pint.Unit] = None,
+        time_unit: UnitLike = None,
         **mpl_kwargs,
     ) -> matplotlib.pyplot.Axes:
         """Plot the `TimeSeries`.
