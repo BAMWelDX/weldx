@@ -1659,20 +1659,20 @@ _groove_name_to_type = {cls.__name__: cls for cls in IsoBaseGroove.__subclasses_
 
 def get_groove(
     groove_type: str,
-    workpiece_thickness: QuantityLike = None,
-    workpiece_thickness2: QuantityLike = None,
-    root_gap: QuantityLike = None,
-    root_face: QuantityLike = None,
-    root_face2: QuantityLike = None,
-    root_face3: QuantityLike = None,
-    bevel_radius: QuantityLike = None,
-    bevel_radius2: QuantityLike = None,
-    bevel_angle: QuantityLike = None,
-    bevel_angle2: QuantityLike = None,
-    groove_angle: QuantityLike = None,
-    groove_angle2: QuantityLike = None,
-    special_depth: QuantityLike = None,
-    code_number=None,
+    workpiece_thickness: QuantityLike = None,  # skipcq: PYL-W0613
+    workpiece_thickness2: QuantityLike = None,  # skipcq: PYL-W0613
+    root_gap: QuantityLike = None,  # skipcq: PYL-W0613
+    root_face: QuantityLike = None,  # skipcq: PYL-W0613
+    root_face2: QuantityLike = None,  # skipcq: PYL-W0613
+    root_face3: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_radius: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_radius2: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_angle: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_angle2: QuantityLike = None,  # skipcq: PYL-W0613
+    groove_angle: QuantityLike = None,  # skipcq: PYL-W0613
+    groove_angle2: QuantityLike = None,  # skipcq: PYL-W0613
+    special_depth: QuantityLike = None,  # skipcq: PYL-W0613
+    code_number=None,  # skipcq: PYL-W0613
 ) -> IsoBaseGroove:
     """Create a Groove from weldx.tags.core.groove.
 
