@@ -7,6 +7,8 @@ from asdf.extension import Converter
 from asdf.versioning import AsdfSpec
 from boltons.iterutils import remap
 
+from weldx.constants import META_ATTR, USER_ATTR
+
 __all__ = [
     "WeldxConverter",
     "WxSyntaxError",
