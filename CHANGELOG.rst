@@ -42,6 +42,8 @@ deprecations
 dependencies
 ============
 
+-  bump to ``asdf >=2.8.2`` [:pull:``]
+
 -  add ``pint-xarray`` dependency [:pull:`518`]
 
 -  bump to ``numpy>=1.20`` (for numpy.typing) [:pull:`656`]
