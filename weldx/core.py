@@ -716,7 +716,6 @@ class TimeSeries(TimeDependent):
 # GenericSeries ------------------------------------------------------------------------
 
 # todo
-#  - extra evaluate function
 #  - __getitem__ : use DataArray.sel
 #  - pandas time types in TimeSeries vs GenericSeries
 #  - asdf base implementation -> xarray.DataArray units checken (U_ statt string)
@@ -985,9 +984,9 @@ class GenericSeries:
 
     def _call_expr(self, **kwargs) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
-        if len(kwargs) == self._obj.num_variables:
+        coords = self._call_preprocess_coords(**kwargs)
+        if len(coords) == self._obj.num_variables:
             # evaluate expression
-            coords = self._call_preprocess_coords(**kwargs)
             coords_unit_adj = {k: v.pint.dequantify() for k, v in coords.items()}
             data = self._obj.evaluate(**coords).assign_coords(coords_unit_adj)
             # todo use func of CFabry to turn coord attrs into units
@@ -995,8 +994,8 @@ class GenericSeries:
         else:
             # turn passed coords into parameters of the expression
             new_series = deepcopy(self)
-            for k, v in kwargs.items():
-                new_series._data.set_parameter(k, (v, self._symbol_dims[k]))
+            for k, v in coords.items():
+                new_series._obj.set_parameter(k, (v, self._symbol_dims[k]))
                 new_series._symbol_dims.pop(k)
                 new_series._variable_units.pop(k)
             return new_series
@@ -1028,10 +1027,14 @@ class GenericSeries:
         return type(self)(ut.xr_interp_like(self._obj, coords))
 
     def __getitem__(self, *args):
-        """Get a subset of a discrete `GenericSeries` by indices."""
+        """Get a subset of a discrete `GenericSeries` by indexing."""
         if isinstance(self._obj, xr.DataArray):
             return self._obj.__getitem__(*args)
         return NotImplementedError
+
+    def evaluate(self, **kwargs) -> GenericSeries:
+        """Copy from __call__."""
+        return self(**kwargs)
 
     def interp_like(
         self, obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
@@ -1132,19 +1135,17 @@ class GenericSeries:
         return len(self.dims)
 
     @property
-    def parameter_names(self) -> List[str]:
-        """Get the names of all dimensions."""
+    def variable_names(self) -> List[str]:
+        """Get the names of all variables."""
         if self._variable_units is not None:
             return list(self._variable_units.keys())
         return None
 
-    # todo Name is wrong -> variable names!
     @property
-    def parameter_units(self) -> Dict[str, pint.Unit]:
-        """Get a dictionary that maps the parameter names to their expected units."""
+    def variable_units(self) -> Dict[str, pint.Unit]:
+        """Get a dictionary that maps the variable names to their expected units."""
         return self._variable_units
 
-    # todo Name is wrong -> variable units!
     @property
     def shape(self) -> Tuple:
         """Get the shape of the generic series data."""

@@ -489,6 +489,7 @@ class TestTimeSeries:
 
 # todo
 #   - check update of variable units to unitless
+#   - test partial evaluation
 
 
 class TestGenericSeries:
