@@ -956,10 +956,6 @@ class GenericSeries:
 
     def _call_preprocess_coords(self, **kwargs) -> Dict[str, xr.DataArray]:
         """Preprocess the coordinates passed to `__call__`."""
-        # Apply preprocessor for derived series if present
-        if self._evaluation_preprocessor is not None:
-            kwargs = self._evaluation_preprocessor(**kwargs)
-
         # Turn coords into DataArrays
         coords = {}
         for i, (k, v) in enumerate(kwargs.items()):
@@ -984,8 +980,8 @@ class GenericSeries:
 
     def _call_expr(self, **kwargs) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
-        coords = self._call_preprocess_coords(**kwargs)
-        if len(coords) == self._obj.num_variables:
+        if len(kwargs) == self._obj.num_variables:
+            coords = self._call_preprocess_coords(**kwargs)
             # evaluate expression
             coords_unit_adj = {k: v.pint.dequantify() for k, v in coords.items()}
             data = self._obj.evaluate(**coords).assign_coords(coords_unit_adj)
@@ -994,7 +990,7 @@ class GenericSeries:
         else:
             # turn passed coords into parameters of the expression
             new_series = deepcopy(self)
-            for k, v in coords.items():
+            for k, v in kwargs.items():
                 new_series._obj.set_parameter(k, (v, self._symbol_dims[k]))
                 new_series._symbol_dims.pop(k)
                 new_series._variable_units.pop(k)
@@ -1017,6 +1013,10 @@ class GenericSeries:
             coordinates.
 
         """
+        # Apply preprocessor for derived series if present
+        if self._evaluation_preprocessor is not None:
+            kwargs = self._evaluation_preprocessor(**kwargs)
+
         if self.is_expression:
             return self._call_expr(**kwargs)
 
