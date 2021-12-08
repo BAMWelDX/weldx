@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from weldx.asdf.types import WeldxConverter
+from weldx.asdf.types import META_ATTR, WeldxConverter
 from weldx.constants import Q_
 from weldx.transformations.rotation import WXRotation
 
@@ -17,16 +17,16 @@ class WXRotationConverter(WeldxConverter):
         """Convert to python dict."""
         tree = {}
 
-        if not hasattr(obj, "wx_meta"):  # default to quaternion representation
+        if not hasattr(obj, META_ATTR):  # default to quaternion representation
             tree["quaternions"] = obj.as_quat()
-        elif obj.wx_meta["constructor"] == "from_quat":
+        elif getattr(obj, META_ATTR)["constructor"] == "from_quat":
             tree["quaternions"] = obj.as_quat()
-        elif obj.wx_meta["constructor"] == "from_matrix":
+        elif getattr(obj, META_ATTR)["constructor"] == "from_matrix":
             tree["matrix"] = obj.as_matrix()
-        elif obj.wx_meta["constructor"] == "from_rotvec":
+        elif getattr(obj, META_ATTR)["constructor"] == "from_rotvec":
             tree["rotvec"] = obj.as_rotvec()
-        elif obj.wx_meta["constructor"] == "from_euler":
-            seq_str = obj.wx_meta["seq"]
+        elif getattr(obj, META_ATTR)["constructor"] == "from_euler":
+            seq_str = getattr(obj, META_ATTR)["seq"]
             if not len(seq_str) == 3:
                 if all(c in "xyz" for c in seq_str):
                     seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])

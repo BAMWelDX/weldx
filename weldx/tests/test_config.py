@@ -5,6 +5,7 @@ import asdf
 import pytest
 
 from weldx import WeldxFile
+from weldx.asdf.types import META_ATTR
 from weldx.config import QualityStandard, add_quality_standard, enable_quality_standard
 from weldx.measurement import MeasurementEquipment
 
@@ -76,5 +77,5 @@ class TestConfig:
         else:
             WeldxFile(tree={"equipment": ge}, mode="rw")
 
-        ge.wx_metadata = {"serial_number": 42}
+        setattr(ge, META_ATTR, {"serial_number": 42})
         WeldxFile(tree={"equipment": ge}, mode="rw")

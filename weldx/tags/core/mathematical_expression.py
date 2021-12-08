@@ -3,7 +3,7 @@ import warnings
 import sympy
 from xarray import DataArray
 
-from weldx.asdf.types import WeldxConverter
+from weldx.asdf.types import META_ATTR, WeldxConverter
 from weldx.core import MathematicalExpression
 
 __all__ = ["MathematicalExpression", "MathematicalExpressionConverter"]
@@ -25,7 +25,7 @@ class MathematicalExpressionConverter(WeldxConverter):
                     warnings.warn("Coordinates are dropped during serialization.")
                 dims = v.dims
                 v = v.data
-                v.wx_metadata = dict(dims=dims)
+                setattr(v, META_ATTR, dict(dims=dims))
             parameters[k] = v
 
         return {"expression": obj.expression.__str__(), "parameters": parameters}
@@ -35,9 +35,9 @@ class MathematicalExpressionConverter(WeldxConverter):
 
         parameters = {}
         for k, v in node["parameters"].items():
-            if hasattr(v, "wx_metadata"):
-                dims = v.wx_metadata["dims"]
-                delattr(v, "wx_metadata")
+            if hasattr(v, META_ATTR):
+                dims = getattr(v, META_ATTR)["dims"]
+                delattr(v, META_ATTR)
                 v = (v, dims)
             parameters[k] = v
 

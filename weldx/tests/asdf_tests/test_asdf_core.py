@@ -13,6 +13,7 @@ from fs.osfs import OSFS
 from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
+from weldx.asdf.types import META_ATTR
 from weldx.asdf.util import write_buffer, write_read_buffer
 from weldx.constants import Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
@@ -55,8 +56,8 @@ def test_rotation(inputs):
     data = write_read_buffer({"rot": inputs})
     r = data["rot"]
     assert np.allclose(r.as_quat(), inputs.as_quat())
-    if hasattr(inputs, "wx_meta"):
-        assert r.wx_meta == inputs.wx_meta
+    if hasattr(inputs, META_ATTR):
+        assert getattr(r, META_ATTR) == getattr(inputs, META_ATTR)
 
 
 def test_rotation_euler_exception():
