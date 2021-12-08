@@ -2,8 +2,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 from weldx.asdf.types import WeldxConverter
-from weldx.constants import META_ATTR, Q_
-from weldx.transformations.rotation import WXRotation
+from weldx.constants import Q_
+from weldx.transformations.rotation import ROT_META, WXRotation
 
 
 class WXRotationConverter(WeldxConverter):
@@ -17,16 +17,16 @@ class WXRotationConverter(WeldxConverter):
         """Convert to python dict."""
         tree = {}
 
-        if not hasattr(obj, META_ATTR):  # default to quaternion representation
+        if not hasattr(obj, ROT_META):  # default to quaternion representation
             tree["quaternions"] = obj.as_quat()
-        elif getattr(obj, META_ATTR)["constructor"] == "from_quat":
+        elif getattr(obj, ROT_META)["constructor"] == "from_quat":
             tree["quaternions"] = obj.as_quat()
-        elif getattr(obj, META_ATTR)["constructor"] == "from_matrix":
+        elif getattr(obj, ROT_META)["constructor"] == "from_matrix":
             tree["matrix"] = obj.as_matrix()
-        elif getattr(obj, META_ATTR)["constructor"] == "from_rotvec":
+        elif getattr(obj, ROT_META)["constructor"] == "from_rotvec":
             tree["rotvec"] = obj.as_rotvec()
-        elif getattr(obj, META_ATTR)["constructor"] == "from_euler":
-            seq_str = getattr(obj, META_ATTR)["seq"]
+        elif getattr(obj, ROT_META)["constructor"] == "from_euler":
+            seq_str = getattr(obj, ROT_META)["seq"]
             if not len(seq_str) == 3:
                 if all(c in "xyz" for c in seq_str):
                     seq_str = seq_str + "".join([c for c in "xyz" if c not in seq_str])
@@ -35,15 +35,15 @@ class WXRotationConverter(WeldxConverter):
                 else:  # pragma: no cover
                     raise ValueError("Mix of intrinsic and extrinsic euler angles.")
 
-            angles = obj.as_euler(seq_str, degrees=getattr(obj, META_ATTR)["degrees"])
-            angles = np.squeeze(angles[..., : len(getattr(obj, META_ATTR)["seq"])])
+            angles = obj.as_euler(seq_str, degrees=getattr(obj, ROT_META)["degrees"])
+            angles = np.squeeze(angles[..., : len(getattr(obj, ROT_META)["seq"])])
 
-            if getattr(obj, META_ATTR)["degrees"]:
+            if getattr(obj, ROT_META)["degrees"]:
                 angles = Q_(angles, "degree")
             else:
                 angles = Q_(angles, "rad")
 
-            tree["sequence"] = getattr(obj, META_ATTR)["seq"]
+            tree["sequence"] = getattr(obj, ROT_META)["seq"]
             tree["angles"] = angles
 
         else:  # pragma: no cover

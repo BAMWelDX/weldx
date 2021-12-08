@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Union
 import pint
 from scipy.spatial.transform import Rotation as _Rotation
 
-from weldx.constants import META_ATTR, U_
+from weldx.constants import U_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -14,6 +14,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
+
+ROT_META = "wx_rot"
 
 
 class WXRotation(_Rotation):
@@ -29,7 +31,7 @@ class WXRotation(_Rotation):
         See `scipy.spatial.transform.Rotation.from_quat` docs for details.
         """
         rot = super().from_quat(quat)
-        setattr(rot, META_ATTR, {"constructor": "from_quat"})
+        setattr(rot, ROT_META, {"constructor": "from_quat"})
         return rot
 
     @classmethod
@@ -39,7 +41,7 @@ class WXRotation(_Rotation):
         See `scipy.spatial.transform.Rotation.from_matrix` docs for details.
         """
         rot = super().from_matrix(matrix)
-        setattr(rot, META_ATTR, {"constructor": "from_matrix"})
+        setattr(rot, ROT_META, {"constructor": "from_matrix"})
         return rot
 
     @classmethod
@@ -49,7 +51,7 @@ class WXRotation(_Rotation):
         See `scipy.spatial.transform.Rotation.from_rotvec` docs for details.
         """
         rot = super().from_rotvec(rotvec)
-        setattr(rot, META_ATTR, {"constructor": "from_rotvec"})
+        setattr(rot, ROT_META, {"constructor": "from_rotvec"})
         return rot
 
     @classmethod
@@ -78,7 +80,7 @@ class WXRotation(_Rotation):
         rot = super().from_euler(seq=seq, angles=angles, degrees=degrees)
         setattr(
             rot,
-            META_ATTR,
+            ROT_META,
             {"constructor": "from_euler", "seq": seq, "degrees": degrees},
         )
         return rot
