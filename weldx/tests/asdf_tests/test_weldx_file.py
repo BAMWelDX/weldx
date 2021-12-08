@@ -279,7 +279,7 @@ class TestWeldXFile:
             name="weldx_file_test", author="marscher", homepage="http://no", version="1"
         )
         fh = WeldxFile(
-            tree=dict(wx_metadata={}),
+            tree={META_ATTR: {}},
             software_history_entry=software,
             mode="rw",
         )

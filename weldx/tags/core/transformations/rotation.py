@@ -35,15 +35,15 @@ class WXRotationConverter(WeldxConverter):
                 else:  # pragma: no cover
                     raise ValueError("Mix of intrinsic and extrinsic euler angles.")
 
-            angles = obj.as_euler(seq_str, degrees=obj.wx_meta["degrees"])
-            angles = np.squeeze(angles[..., : len(obj.wx_meta["seq"])])
+            angles = obj.as_euler(seq_str, degrees=getattr(obj, META_ATTR)["degrees"])
+            angles = np.squeeze(angles[..., : len(getattr(obj, META_ATTR)["seq"])])
 
-            if obj.wx_meta["degrees"]:
+            if getattr(obj, META_ATTR)["degrees"]:
                 angles = Q_(angles, "degree")
             else:
                 angles = Q_(angles, "rad")
 
-            tree["sequence"] = obj.wx_meta["seq"]
+            tree["sequence"] = getattr(obj, META_ATTR)["seq"]
             tree["angles"] = angles
 
         else:  # pragma: no cover
