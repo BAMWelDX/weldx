@@ -42,7 +42,7 @@ deprecations
 dependencies
 ============
 
--  bump to ``asdf >=2.8.2`` [:pull:``]
+-  bump to ``asdf >=2.8.2`` [:pull:`668`]
 
 -  add ``pint-xarray`` dependency [:pull:`518`]
 
