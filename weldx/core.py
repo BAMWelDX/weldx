@@ -781,9 +781,9 @@ class GenericSeries:
         self._obj: Union[xr.DataArray, MathematicalExpression] = None
         self._variable_units: Dict[str, pint.Unit] = None
         self._symbol_dims: Dict[str, List[str]] = None
-        self._shape: Tuple = None
         self._units: pint.Unit = None
         self._interpolation = "linear" if interpolation is None else interpolation
+        self._shape: Tuple = None
 
         if isinstance(obj, (pint.Quantity, xr.DataArray)):
             self._init_discrete(obj, dims, coords)

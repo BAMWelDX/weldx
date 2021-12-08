@@ -1,0 +1,13 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/generic_series-0.1.0"
+
+title: |
+  Schema that describes a quantity that depends on one or more dimensions.
+description: |
+  Describes a dimension dependent quantity.
+
+type: object
+flowStyle: block
+...
