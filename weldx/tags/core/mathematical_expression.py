@@ -3,7 +3,8 @@ import warnings
 import sympy
 from xarray import DataArray
 
-from weldx.asdf.types import META_ATTR, WeldxConverter
+from weldx.asdf.types import WeldxConverter
+from weldx.constants import META_ATTR
 from weldx.core import MathematicalExpression
 
 __all__ = ["MathematicalExpression", "MathematicalExpressionConverter"]

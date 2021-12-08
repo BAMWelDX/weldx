@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from weldx.asdf.types import META_ATTR, WeldxConverter
-from weldx.constants import Q_
+from weldx.asdf.types import WeldxConverter
+from weldx.constants import META_ATTR, Q_
 from weldx.transformations.rotation import WXRotation
 
 

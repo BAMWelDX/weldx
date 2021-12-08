@@ -12,8 +12,7 @@ from pint.errors import DimensionalityError
 from xarray import DataArray
 
 import weldx.util as ut
-from weldx.asdf.types import META_ATTR
-from weldx.constants import Q_, U_, UNITS_KEY
+from weldx.constants import META_ATTR, Q_, U_, UNITS_KEY
 from weldx.time import Time
 
 

@@ -5,8 +5,8 @@ import asdf
 import pytest
 
 from weldx import WeldxFile
-from weldx.asdf.types import META_ATTR
 from weldx.config import QualityStandard, add_quality_standard, enable_quality_standard
+from weldx.constants import META_ATTR
 from weldx.measurement import MeasurementEquipment
 
 current_dir = Path(__file__).parent.absolute().as_posix()

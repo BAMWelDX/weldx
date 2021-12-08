@@ -15,8 +15,8 @@ from jsonschema import ValidationError
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.file import _PROTECTED_KEYS, DEFAULT_ARRAY_INLINE_THRESHOLD
-from weldx.asdf.types import META_ATTR
 from weldx.asdf.util import get_schema_path
+from weldx.constants import META_ATTR
 from weldx.types import SupportsFileReadWrite
 from weldx.util import WeldxDeprecationWarning, compare_nested
 

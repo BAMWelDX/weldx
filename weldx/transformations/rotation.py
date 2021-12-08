@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING, Union
 import pint
 from scipy.spatial.transform import Rotation as _Rotation
 
-from weldx.asdf.types import META_ATTR
-from weldx.constants import U_
+from weldx.constants import META_ATTR, U_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
 if TYPE_CHECKING:  # pragma: no cover

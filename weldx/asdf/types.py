@@ -7,12 +7,7 @@ from asdf.extension import Converter
 from asdf.versioning import AsdfSpec
 from boltons.iterutils import remap
 
-META_ATTR = "wx_metadata"
-USER_ATTR = "wx_user"
-
 __all__ = [
-    "META_ATTR",
-    "USER_ATTR",
     "WeldxConverter",
     "WxSyntaxError",
 ]
