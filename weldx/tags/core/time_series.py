@@ -1,7 +1,6 @@
 """Contains the serialization class for the weldx.core.TimeSeries."""
 from typing import List
 
-import numpy as np
 import pint
 from asdf.tagged import TaggedDict
 
@@ -37,8 +36,7 @@ class TimeSeriesConverter(WeldxConverter):
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct from tree."""
         if "value" in node:  # constant
-            _units = U_(node["units"])
-            values = Q_(np.asarray(node["value"]), _units)
+            values = Q_(node["value"], node["units"])
             return TimeSeries(values)
         if "values" in node:
             time = node["time"]
