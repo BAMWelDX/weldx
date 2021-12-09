@@ -112,7 +112,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         self,
         title=None,
         axis_label=None,
-        raster_width=Q_(0.5, _DEFAULT_LEN_UNIT),
+        raster_width: pint.Quantity = None,
         show_params=True,
         axis="equal",
         grid=True,
@@ -144,6 +144,8 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
             Calculate and show the groove cross section area in the plot title.
 
         """
+        if raster_width is None:
+            raster_width = Q_(0.5, _DEFAULT_LEN_UNIT)
         profile = self.to_profile()
         if title is None:
             title = _groove_type_to_name[self.__class__]
@@ -247,7 +249,7 @@ class IGroove(IsoBaseGroove):
 
     _mapping = dict(t="workpiece_thickness", b="root_gap")
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -256,6 +258,9 @@ class IGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, b, width = self.t, self.b, width_default
 
         # x-values
@@ -317,7 +322,7 @@ class VGroove(IsoBaseGroove):
         c="root_face",
     )
 
-    def to_profile(self, width_default=Q_(2, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -326,6 +331,9 @@ class VGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(2, "mm")
+
         t, alpha, b, c, width = self.t, self.alpha, self.b, self.c, width_default
 
         # Calculations:
@@ -417,7 +425,7 @@ class VVGroove(IsoBaseGroove):
         h="root_face2",
     )
 
-    def to_profile(self, width_default=Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -426,6 +434,9 @@ class VVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, b, c, h, width = self.t, self.b, self.c, self.h, width_default
         alpha, beta = self.alpha, self.beta
 
@@ -516,7 +527,7 @@ class UVGroove(IsoBaseGroove):
         h="root_face",
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(2, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -525,6 +536,9 @@ class UVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(2, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(2, "mm")
+
         t, alpha, beta, R, b, h, width = (
             self.t,
             self.alpha,
@@ -616,7 +630,7 @@ class UGroove(IsoBaseGroove):
         c="root_face",
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(3, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -625,6 +639,9 @@ class UGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(3, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(3, "mm")
+
         t, beta, R, b, c, width = (
             self.t,
             self.beta,
@@ -733,7 +750,7 @@ class HVGroove(IsoBaseGroove):
         t="workpiece_thickness", beta="bevel_angle", b="root_gap", c="root_face"
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -742,6 +759,9 @@ class HVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, beta, b, c, width = (
             self.t,
             self.beta,
@@ -837,7 +857,7 @@ class HUGroove(IsoBaseGroove):
         c="root_face",
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -846,6 +866,9 @@ class HUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, beta, R, b, c, width = (
             self.t,
             self.beta,
@@ -956,7 +979,7 @@ class DVGroove(IsoBaseGroove):
         """Calculate missing values."""
         _set_default_heights(self)
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -965,6 +988,9 @@ class DVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, alpha_1, alpha_2, b, c, h1, h2, width = (
             self.t,
             self.alpha_1,
@@ -1085,7 +1111,7 @@ class DUGroove(IsoBaseGroove):
         """Calculate missing values."""
         _set_default_heights(self)
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1094,6 +1120,9 @@ class DUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         t, beta_1, beta_2, R, R2, b, c, h1, h2, width = (
             self.t,
             self.beta_1,
@@ -1201,7 +1230,7 @@ class DHVGroove(IsoBaseGroove):
         """Calculate missing values."""
         _set_default_heights(self)
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1210,6 +1239,9 @@ class DHVGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         dv_groove = DVGroove(
             t=self.t,
             alpha_1=self.beta_1 * 2,
@@ -1312,7 +1344,7 @@ class DHUGroove(IsoBaseGroove):
         """Calculate missing values."""
         _set_default_heights(self)
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: pint.Quantity = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1321,6 +1353,9 @@ class DHUGroove(IsoBaseGroove):
              pint.Quantity (Default value = Q_(5, "mm"))
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         du_profile = DUGroove(
             t=self.t,
             beta_1=self.beta_1,
@@ -1402,7 +1437,7 @@ class FFGroove(IsoBaseGroove):
         code_number="code_number",
     )
 
-    def to_profile(self, width_default: QuantityLike = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: QuantityLike = None) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1412,6 +1447,9 @@ class FFGroove(IsoBaseGroove):
 
 
         """
+        if width_default is None:
+            width_default = Q_(5, "mm")
+
         width_default: pint.Quantity = Q_(width_default)
 
         if self.code_number in ("1.12", "1.13", "2.12"):
