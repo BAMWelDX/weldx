@@ -1,5 +1,4 @@
 """ISO 9692-1 welding groove type definitions."""
-# skipcq: PYL-E1130
 
 from __future__ import annotations
 
@@ -346,7 +345,7 @@ class VGroove(IsoBaseGroove):
             width = width - edge
 
         # Bottom segment
-        x_value = np.append(-width, 0)
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
@@ -362,7 +361,7 @@ class VGroove(IsoBaseGroove):
         segment_list.append("line")
 
         # Top segment
-        x_value = np.append(x_value, -width)
+        x_value = np.append(x_value, -width)  # skipcq: PYL-E1130
         y_value = np.append(y_value, t)
         segment_list.append("line")
 
@@ -454,7 +453,7 @@ class VVGroove(IsoBaseGroove):
             width = width - edge
 
         # x-values
-        x_value = np.append(-width, 0)
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         # y-values
         y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
@@ -464,7 +463,7 @@ class VVGroove(IsoBaseGroove):
             y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (-s_1, -s_1 - s_2, -width))
+        x_value = np.append(x_value, (-s_1, -s_1 - s_2, -width))  # skipcq: PYL-E1130
         y_value = np.append(y_value, (h + c, t, t))
         segment_list += ["line", "line", "line"]
 
@@ -570,7 +569,9 @@ class UVGroove(IsoBaseGroove):
             width = width + edge
 
         # x-values
-        x_value = np.stack((-width, 0, -x_1, 0, x_arc, x_end, -width))
+        x_value = np.stack(
+            (-width, 0, -x_1, 0, x_arc, x_end, -width)
+        )  # skipcq: PYL-E1130
         # y-values
         y_value = np.stack((0, 0, h, y_m, y_arc, t, t))
         segment_list = ["line", "line", "arc", "line", "line"]
@@ -674,7 +675,7 @@ class UGroove(IsoBaseGroove):
         segment_list = []
 
         # bottom segment
-        x_value = np.append(-width, 0)
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         y_value = Q_([0, 0], "mm")
         segment_list.append("line")
 
@@ -780,7 +781,7 @@ class HVGroove(IsoBaseGroove):
             # adjustment of the width
             width = width - edge
 
-        x_value = np.append(-width, 0)
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
@@ -789,7 +790,7 @@ class HVGroove(IsoBaseGroove):
             y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (-s, -width))
+        x_value = np.append(x_value, (-s, -width))  # skipcq: PYL-E1130
         y_value = np.append(y_value, (t, t))
         segment_list += ["line", "line"]
 
@@ -802,10 +803,10 @@ class HVGroove(IsoBaseGroove):
         shape_h = geo.Shape()
         arr = np.stack(
             (
-                np.append(-width - (b / 2), 0),
+                np.append(-width - (b / 2), 0),  # skipcq: PYL-E1130
                 np.append(-b / 2, 0),
                 np.append(-b / 2, t),
-                np.append(-width - (b / 2), t),
+                np.append(-width - (b / 2), t),  # skipcq: PYL-E1130
             )
         )
         shape_h.add_line_segments(arr)
@@ -890,7 +891,7 @@ class HUGroove(IsoBaseGroove):
             # adjustment of the width
             width = width + edge
 
-        x_value = np.append(-width, 0)
+        x_value = np.append(-width, 0)  # skipcq: PYL-E1130
         y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
@@ -899,7 +900,7 @@ class HUGroove(IsoBaseGroove):
             y_value = np.append(y_value, c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (0, -x, -x - s, -width))
+        x_value = np.append(x_value, (0, -x, -x - s, -width))  # skipcq: PYL-E1130
         y_value = np.append(y_value, (c + R, c + R - y, t, t))
         segment_list += ["arc", "line", "line"]
 
@@ -912,10 +913,10 @@ class HUGroove(IsoBaseGroove):
         shape_h = geo.Shape()
         arr = np.stack(
             (
-                np.append(-width - (b / 2), 0),
+                np.append(-width - (b / 2), 0),  # skipcq: PYL-E1130
                 np.append(-b / 2, 0),
                 np.append(-b / 2, t),
-                np.append(-width - (b / 2), t),
+                np.append(-width - (b / 2), t),  # skipcq: PYL-E1130
             )
         )
         shape_h.add_line_segments(arr)
@@ -1013,7 +1014,7 @@ class DVGroove(IsoBaseGroove):
             # adjustment of the width
             width = width - edge
 
-        x_value = np.stack((-width, -s_lower, 0))
+        x_value = np.stack((-width, -s_lower, 0))  # skipcq: PYL-E1130
         y_value = np.stack((0, 0, h2))
         segment_list = ["line", "line"]
 
@@ -1151,7 +1152,9 @@ class DUGroove(IsoBaseGroove):
             # adjustment of the width
             width = width + edge
 
-        x_value = np.stack((-width, -(s_lower + x_lower), -x_lower, 0, 0))
+        x_value = np.stack(
+            (-width, -(s_lower + x_lower), -x_lower, 0, 0)
+        )  # skipcq: PYL-E1130
         y_value = np.stack((0, 0, h2 - (R2 - y_lower), h2 - R2, h2))
         segment_list = ["line", "line", "arc"]
 
@@ -1160,7 +1163,9 @@ class DUGroove(IsoBaseGroove):
             y_value = np.append(y_value, h1 + c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (0, -x_upper, -(s_upper + x_upper), -width))
+        x_value = np.append(
+            x_value, (0, -x_upper, -(s_upper + x_upper), -width)
+        )  # skipcq: PYL-E1130
         y_value = np.append(y_value, (h2 + c + R, t - (h1 - (R - y_upper)), t, t))
         segment_list += ["arc", "line", "line"]
 
@@ -1261,7 +1266,7 @@ class DHVGroove(IsoBaseGroove):
                 np.append(-width_default - (self.b / 2), 0),  # skipcq: PYL-E1130
                 np.append(-self.b / 2, 0),
                 np.append(-self.b / 2, self.t),
-                np.append(-width_default - (self.b / 2), self.t),
+                np.append(-width_default - (self.b / 2), self.t),  # skipcq: PYL-E1130
             )
         )
         left_shape.add_line_segments(arr)
@@ -1373,10 +1378,10 @@ class DHUGroove(IsoBaseGroove):
         left_shape = geo.Shape()
         arr = np.stack(
             (
-                np.append(-width_default - (self.b / 2), 0),
+                np.append(-width_default - (self.b / 2), 0),  # skipcq: PYL-E1130
                 np.append(-self.b / 2, 0),
                 np.append(-self.b / 2, self.t),
-                np.append(-width_default - (self.b / 2), self.t),
+                np.append(-width_default - (self.b / 2), self.t),  # skipcq: PYL-E1130
             )
         )
         left_shape.add_line_segments(arr)
