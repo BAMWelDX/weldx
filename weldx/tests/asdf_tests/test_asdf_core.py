@@ -522,19 +522,25 @@ def test_time_series(ts, copy_arrays, lazy_load):
     "coords",
     [
         dict(t=Q_([1, 2, 3], "s")),
+        dict(time=Q_([1, 2, 3], "s"), space=Q_([4, 5, 6, 7], "m")),
     ],
 )
 def test_generic_series_discrete(coords, copy_arrays, lazy_load):
-    from weldx import WeldxFile
 
     shape = tuple([len(v) for v in coords.values()])
     data = Q_(np.ones(shape), "m")
 
     gs = GenericSeries(data, coords=coords)
-    WeldxFile("discrete.yaml", tree={"gs": gs}, mode="rw")
+    print(gs)
+    from weldx import WeldxFile
+
+    WeldxFile("discrete.yaml", tree={"gs": gs}, mode="rw")  # todo: remove
+
     gs_file = write_read_buffer(
         {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )["gs"]
+
+    assert gs == gs_file
 
 
 @pytest.mark.parametrize("copy_arrays", [True, False])
@@ -559,13 +565,17 @@ def test_generic_series_discrete(coords, copy_arrays, lazy_load):
     ],
 )
 def test_generic_series_expression(expr, params, units, dims, copy_arrays, lazy_load):
+    gs = GenericSeries(expr, parameters=params, units=units, dims=dims)
+
     from weldx import WeldxFile
 
-    gs = GenericSeries(expr, parameters=params, units=units, dims=dims)
-    WeldxFile("expr.yaml", tree={"gs": gs}, mode="rw")
+    WeldxFile("expr.yaml", tree={"gs": gs}, mode="rw")  # todo: remove
+
     gs_file = write_read_buffer(
         {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )["gs"]
+
+    assert gs == gs_file
 
 
 # --------------------------------------------------------------------------------------

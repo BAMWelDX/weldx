@@ -33,7 +33,9 @@ class GenericSeriesConverter(WeldxConverter):
             )
         return dict(
             data=obj.data,
+            dimensions=obj.data_array.dims,
             coordinates=_get_coordinate_quantities(obj.data_array),
+            interpolation=obj.interpolation,
         )
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
@@ -47,7 +49,7 @@ class GenericSeriesConverter(WeldxConverter):
                 if sym is None:
                     sym = k
                 else:
-                    dims[k] = sym
+                    dims[sym] = k
                 units[sym] = v["units"]
 
             if len(dims) == 0:
@@ -59,4 +61,10 @@ class GenericSeriesConverter(WeldxConverter):
                 dims=dims,
                 units=units,
             )
-        return GenericSeries(node.get("data"), node.get("coordinates"))
+
+        return GenericSeries(
+            node.get("data"),
+            dims=node.get("dimensions"),
+            coords=node.get("coordinates"),
+            interpolation=node.get("interpolation"),
+        )
