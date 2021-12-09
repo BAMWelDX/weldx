@@ -794,7 +794,23 @@ class GenericSeries:
 
     def __eq__(self, other):
         """Compare the Generic Series to another object."""
-        raise NotImplementedError
+        from weldx.util import compare_nested
+
+        if not isinstance(other, type(self)):  # todo: what about derived GS types?
+            return False
+        if self.is_expression != other.is_expression:
+            return False
+
+        if self.is_expression:
+            if not compare_nested(self._symbol_dims, other._symbol_dims):
+                return False
+            if not compare_nested(self._variable_units, other._variable_units):
+                return False
+            return self._obj == other._obj
+
+        if self.interpolation != other.interpolation:
+            return False
+        return self._obj.identical(other._obj)
 
     def _init_discrete(self, data, dims, coords):
         """Initialize the internal data with discrete values."""
