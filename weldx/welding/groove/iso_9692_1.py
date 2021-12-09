@@ -1,4 +1,5 @@
 """ISO 9692-1 welding groove type definitions."""
+# skipcq: PYL-E1130
 
 from __future__ import annotations
 
@@ -264,7 +265,7 @@ class IGroove(IsoBaseGroove):
         t, b, width = self.t, self.b, width_default
 
         # x-values
-        x_value = np.stack((-width, 0, 0, -width))
+        x_value = np.stack((-width, 0, 0, -width))  # skipcq: PYL-E1130
 
         # y-values
         y_value = np.stack((0, 0, t, t))
@@ -1257,7 +1258,7 @@ class DHVGroove(IsoBaseGroove):
         left_shape = geo.Shape()
         arr = np.stack(
             (
-                np.append(-width_default - (self.b / 2), 0),
+                np.append(-width_default - (self.b / 2), 0),  # skipcq: PYL-E1130
                 np.append(-self.b / 2, 0),
                 np.append(-self.b / 2, self.t),
                 np.append(-width_default - (self.b / 2), self.t),
