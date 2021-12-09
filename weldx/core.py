@@ -722,6 +722,7 @@ class TimeSeries(TimeDependent):
 #  - interpolation
 #  - add doctests (examples)
 #  - dataclass for serialization
+#  - swap __eq__ and evaluate
 
 
 class GenericSeries:
