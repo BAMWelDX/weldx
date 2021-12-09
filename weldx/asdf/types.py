@@ -74,11 +74,7 @@ class WeldxConverterMeta(type(Converter)):
 
         # legacy tag definitions
         if name := getattr(cls, "name", None):
-            setattr(
-                cls,
-                "tags",
-                [format_tag(name, "0.1.*")],
-            )
+            cls.tags = [format_tag(name, "0.1.*")]
 
         # wrap original to/from_yaml_tree method to include metadata attributes
         cls.to_yaml_tree = to_yaml_tree_metadata(cls.to_yaml_tree)

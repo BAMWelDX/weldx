@@ -1,3 +1,5 @@
+"""Python install setup."""
+
 from setuptools import setup
 from setuptools_scm import get_version
 
