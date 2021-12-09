@@ -718,8 +718,10 @@ class TimeSeries(TimeDependent):
 # todo
 #  - __getitem__ : use DataArray.sel
 #  - pandas time types in TimeSeries vs GenericSeries
-#  - asdf base implementation -> xarray.DataArray units checken (U_ statt string)
+#
+#  - interpolation
 #  - add doctests (examples)
+#  - dataclass for serialization
 
 
 class GenericSeries:
@@ -820,8 +822,7 @@ class GenericSeries:
                     k: xr.DataArray(Q_(v), dims=[k]).pint.dequantify()
                     for k, v in coords.items()
                 }
-                # todo: use functions of CFabry to turn attrs into units
-            data = xr.DataArray(data=data, dims=dims, coords=coords)
+            data = xr.DataArray(data=data, dims=dims, coords=coords).weldx.quantify()
         else:
             # todo check data structure
             pass
@@ -1001,8 +1002,7 @@ class GenericSeries:
             # evaluate expression
             coords_unit_adj = {k: v.pint.dequantify() for k, v in coords.items()}
             data = self._obj.evaluate(**coords).assign_coords(coords_unit_adj)
-            # todo use func of CFabry to turn coord attrs into units
-            return type(self)(data)
+            return type(self)(data.weldx.quantify())
         else:
             # turn passed coords into parameters of the expression
             new_series = deepcopy(self)

@@ -49,7 +49,7 @@ definitions:
         description: |
           A list of all dimensions that are variables of the expression.
         type: object
-        # define tagged object?
+        # define tagged object!
       parameters:
         description: |
           A list of all expression symbols that have fixed values assigned to them.
