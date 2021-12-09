@@ -700,7 +700,7 @@ class UGroove(IsoBaseGroove):
         segment_list.append("line")
 
         # top segment
-        x_value = np.append(x_value, -width)
+        x_value = np.append(x_value, -width)  # skipcq: PYL-E1130
         y_value = np.append(y_value, t)
         segment_list.append("line")
 
@@ -1023,7 +1023,7 @@ class DVGroove(IsoBaseGroove):
             y_value = np.append(y_value, h2 + c)
             segment_list.append("line")
 
-        x_value = np.append(x_value, (-s_upper, -width))
+        x_value = np.append(x_value, (-s_upper, -width))  # skipcq: PYL-E1130
         y_value = np.append(y_value, (t, t))
         segment_list += ["line", "line"]
 
@@ -1153,8 +1153,8 @@ class DUGroove(IsoBaseGroove):
             width = width + edge
 
         x_value = np.stack(
-            (-width, -(s_lower + x_lower), -x_lower, 0, 0)
-        )  # skipcq: PYL-E1130
+            (-width, -(s_lower + x_lower), -x_lower, 0, 0)  # skipcq: PYL-E1130
+        )
         y_value = np.stack((0, 0, h2 - (R2 - y_lower), h2 - R2, h2))
         segment_list = ["line", "line", "arc"]
 

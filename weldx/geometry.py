@@ -17,6 +17,7 @@ import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.time import Time
+from weldx.types import QuantityLike
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -1012,7 +1013,7 @@ class Shape:
     def apply_reflection(
         self,
         reflection_normal: pint.Quantity,
-        distance_to_origin: pint.Quantity = "0mm",
+        distance_to_origin: QuantityLike = "0mm",
     ):
         """Apply a reflection at the given axis to the shape.
 
@@ -1125,8 +1126,8 @@ class Shape:
     @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT)
     def reflect(
         self,
-        reflection_normal: pint.Quantity,
-        distance_to_origin: pint.Quantity = None,
+        reflection_normal: QuantityLike,
+        distance_to_origin: QuantityLike = "0mm",
     ) -> Shape:
         """Get a reflected copy of the shape.
 
@@ -1143,16 +1144,13 @@ class Shape:
         Shape
 
         """
-        if distance_to_origin is None:
-            distance_to_origin = Q_("0mm")
-
         new_shape = copy.deepcopy(self)
         new_shape.apply_reflection(reflection_normal, distance_to_origin)
         return new_shape
 
     @UREG.check(None, "[length]", "[length]")
     def reflect_across_line(
-        self, point_start: pint.Quantity, point_end: pint.Quantity
+        self, point_start: QuantityLike, point_end: QuantityLike
     ) -> Shape:
         """Get a reflected copy across a line.
 
@@ -1313,7 +1311,7 @@ class Profile:
     def plot(
         self,
         title: str = None,
-        raster_width: pint.Quantity = None,
+        raster_width: pint.Quantity = "0.5mm",
         label: str = None,
         axis: str = "equal",
         axis_labels: List[str] = None,
@@ -1346,9 +1344,6 @@ class Profile:
             Color of plot lines
 
         """
-        if raster_width is None:
-            raster_width = Q_(0.5, _DEFAULT_LEN_UNIT)
-
         raster_data = self.rasterize(raster_width, stack=False)
         raster_data = [q.m for q in raster_data]
         if ax is None:  # pragma: no cover
@@ -2097,7 +2092,7 @@ class Geometry:
         self,
         profile: Union[Profile, VariableProfile, iso.IsoBaseGroove],
         trace_or_length: Union[Trace, pint.Quantity],
-        width: pint.Quantity = None,
+        width: QuantityLike = "10mm",
     ):
         """Construct a geometry.
 
@@ -2120,8 +2115,7 @@ class Geometry:
         """
         from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 
-        if width is None:
-            width = Q_(10, "mm")
+        width = Q_(width)
 
         if isinstance(profile, IsoBaseGroove):
             profile = profile.to_profile(width)
@@ -2384,8 +2378,8 @@ class Geometry:
     @UREG.check(None, "[length]", "[length]", None, None, None, None, None, None)
     def plot(
         self,
-        profile_raster_width: pint.Quantity = None,
-        trace_raster_width: pint.Quantity = None,
+        profile_raster_width: QuantityLike = "1mm",
+        trace_raster_width: QuantityLike = "50mm",
         axes: matplotlib.axes.Axes = None,
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
@@ -2433,11 +2427,6 @@ class Geometry:
             The utilized matplotlib axes, if matplotlib was used as rendering backend
 
         """
-        if profile_raster_width is None:
-            profile_raster_width = Q_("1mm")
-        if trace_raster_width is None:
-            trace_raster_width = Q_("50mm")
-
         data = self.spatial_data(profile_raster_width, trace_raster_width)
         return data.plot(
             axes=axes,
