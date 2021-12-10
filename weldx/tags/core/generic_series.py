@@ -1,6 +1,24 @@
+from dataclasses import dataclass
+
+import pint
+
 from weldx.asdf.types import WeldxConverter
+from weldx.asdf.util import dataclass_serialization_class
 from weldx.core import GenericSeries
 from weldx.util.xarray import _get_coordinate_quantities
+
+
+@dataclass
+class GenericSeriesFreeDimension:
+    units: pint.Quantity
+    symbol: "str" = None
+
+
+GenericSeriesFreeDimensionConverter = dataclass_serialization_class(
+    class_type=GenericSeriesFreeDimension,
+    class_name="core/generic_series_free_dimension",
+    version="0.1.0",
+)
 
 
 class GenericSeriesConverter(WeldxConverter):
@@ -23,7 +41,7 @@ class GenericSeriesConverter(WeldxConverter):
                     dim_data["symbol"] = var
                 else:
                     dim = var
-                dims[dim] = dim_data
+                dims[dim] = GenericSeriesFreeDimension(**dim_data)
 
             return dict(
                 expression=str(obj.data.expression),
@@ -45,12 +63,12 @@ class GenericSeriesConverter(WeldxConverter):
             units = {}
             dims = {}
             for k, v in dims_asdf.items():
-                sym = v.get("symbol")
+                sym = v.symbol
                 if sym is None:
                     sym = k
                 else:
                     dims[sym] = k
-                units[sym] = v["units"]
+                units[sym] = v.units
 
             if len(dims) == 0:
                 dims = None
