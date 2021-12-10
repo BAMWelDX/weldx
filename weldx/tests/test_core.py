@@ -509,8 +509,7 @@ class TestGenericSeries:
         data = Q_(np.ones(data_shape), data_units)
         gs = GenericSeries(data, dims, coordinates)
 
-        # todo: replace with direct comparison of both GS
-        assert GenericSeries(gs.data_array).data_array.identical(gs.data_array)
+        assert GenericSeries(gs.data_array) == gs
 
     # test_init_expression -------------------------------------------------------------
 
@@ -565,8 +564,7 @@ class TestGenericSeries:
 
         gs = GenericSeries(expr, dims=dims, parameters=parameters, units=units)
 
-        # todo: replace with direct comparison of both GS
-        assert GenericSeries(gs.data, units=units).data == gs.data
+        assert GenericSeries(gs.data, dims=dims, units=units) == gs
 
     # test_call_operator_discrete ------------------------------------------------------
 
