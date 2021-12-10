@@ -721,7 +721,6 @@ class TimeSeries(TimeDependent):
 #  - pandas time types in TimeSeries vs GenericSeries
 #
 #  - add doctests (examples)
-#  - dataclass for serialization
 #  - swap __eq__ and evaluate
 
 
@@ -799,8 +798,10 @@ class GenericSeries:
         """Compare the Generic Series to another object."""
         from weldx.util import compare_nested
 
-        if not isinstance(other, type(self)):  # todo: what about derived GS types?
+        # todo: what about derived GS types? Maybe add another is_equivalent function?
+        if not isinstance(other, type(self)):
             return False
+
         if self.is_expression != other.is_expression:
             return False
 
@@ -1030,6 +1031,16 @@ class GenericSeries:
             coordinates.
 
         """
+        return self.evaluate(**kwargs)
+
+    def __getitem__(self, *args):
+        """Get a subset of a discrete `GenericSeries` by indexing."""
+        if isinstance(self._obj, xr.DataArray):
+            return self._obj.__getitem__(*args)
+        return NotImplementedError
+
+    def evaluate(self, **kwargs) -> GenericSeries:
+        """Copy from __call__."""
         # Apply preprocessor for derived series if present
         if self._evaluation_preprocessor is not None:
             kwargs = self._evaluation_preprocessor(**kwargs)
@@ -1044,16 +1055,6 @@ class GenericSeries:
         return type(self)(
             ut.xr_interp_like(self._obj, coords, method=self._interpolation)
         )
-
-    def __getitem__(self, *args):
-        """Get a subset of a discrete `GenericSeries` by indexing."""
-        if isinstance(self._obj, xr.DataArray):
-            return self._obj.__getitem__(*args)
-        return NotImplementedError
-
-    def evaluate(self, **kwargs) -> GenericSeries:
-        """Copy from __call__."""
-        return self(**kwargs)
 
     def interp_like(
         self, obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
