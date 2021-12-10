@@ -50,7 +50,6 @@ definitions:
           A list of all dimensions that are variables of the expression.
         type: object
         wx_property_tag: "asdf://weldx.bam.de/weldx/tags/core/generic_series_free_dimension-0.1.0"
-        # define tagged object!
       parameters:
         description: |
           A list of all expression symbols that have fixed values assigned to them.

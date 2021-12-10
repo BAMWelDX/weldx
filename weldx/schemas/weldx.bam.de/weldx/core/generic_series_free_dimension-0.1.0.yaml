@@ -10,11 +10,15 @@ description: |
 
 type: object
 properties:
+  symbol:
+    description: |
+      The symbol of the dimension that is used in the expression. If the dimension name and symbol are identical, this
+      property can be omitted
+    type: string
   units:
     description: |
       A unit that represents the dimensions unit dimensionality.
     tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
-  symbol:
-    description: |
-      The symbol of the dimension that is used in the expression.
-    type: string
+
+propertyOrder: [symbol, units]
+required: [units]
