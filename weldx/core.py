@@ -2,13 +2,12 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Union
 from warnings import warn
 
 import numpy as np
 import pandas as pd
 import pint
-import xarray
 import xarray as xr
 
 import weldx.util as ut
@@ -731,7 +730,7 @@ class GenericSeries:
     _required_variables: List[str] = []
     """Required variable names"""
 
-    _evaluation_preprocessor: callable = None
+    _evaluation_preprocessor: Callable = None
     """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
 
     _required_dimensions: List[str] = []
@@ -969,7 +968,7 @@ class GenericSeries:
         """Preprocess the coordinates passed to `__call__`."""
         # Turn coords into DataArrays
         coords = {}
-        for i, (k, v) in enumerate(kwargs.items()):
+        for k, v in kwargs.items():
             v = Q_(v)
 
             if len(v.shape) == 0:
@@ -997,14 +996,14 @@ class GenericSeries:
             coords_unit_adj = {k: v.pint.dequantify() for k, v in coords.items()}
             data = self._obj.evaluate(**coords).assign_coords(coords_unit_adj)
             return type(self)(data.weldx.quantify())
-        else:
-            # turn passed coords into parameters of the expression
-            new_series = deepcopy(self)
-            for k, v in kwargs.items():
-                new_series._obj.set_parameter(k, (v, self._symbol_dims[k]))
-                new_series._symbol_dims.pop(k)
-                new_series._variable_units.pop(k)
-            return new_series
+
+        # turn passed coords into parameters of the expression
+        new_series = deepcopy(self)
+        for k, v in kwargs.items():
+            new_series._obj.set_parameter(k, (v, self._symbol_dims[k]))
+            new_series._symbol_dims.pop(k)
+            new_series._variable_units.pop(k)
+        return new_series
 
     def __call__(self, **kwargs) -> GenericSeries:
         """Evaluate the generic series at discrete coordinates.
@@ -1035,7 +1034,7 @@ class GenericSeries:
             return self._call_expr(**kwargs)
 
         coords = self._call_preprocess_coords(**kwargs)
-        for k in coords.keys():
+        for k in coords:
             if k not in self._obj.dims:
                 raise KeyError(f"'{k}' is not a valid dimension.")
         return type(self)(
@@ -1089,7 +1088,7 @@ class GenericSeries:
         return self._obj
 
     @property
-    def data_array(self) -> Union[xarray.DataArray, MathematicalExpression]:
+    def data_array(self) -> Union[xr.DataArray, MathematicalExpression]:
         """Get the internal data."""
         if isinstance(self._obj, xr.DataArray):
             return self._obj

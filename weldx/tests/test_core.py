@@ -722,7 +722,8 @@ class TestDerivedFromGenericSeries:
         """Test the evaluation preprocessor."""
 
         class _DerivedSeries(GenericSeries):
-            def _preprocessor(self, a, b):
+            @staticmethod
+            def _preprocessor(a, b):
                 return dict(a=2 * a, b=5 * b)
 
             _evaluation_preprocessor = _preprocessor
