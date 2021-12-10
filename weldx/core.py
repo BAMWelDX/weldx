@@ -1042,8 +1042,10 @@ class GenericSeries:
             ut.xr_interp_like(self._obj, coords, method=self._interpolation)
         )
 
+    @staticmethod
+    # skipcq: PYL-W0613
     def interp_like(
-        self, obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
+        obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
     ) -> GenericSeries:
         """Interpolate using the coordinates of another object.
 
