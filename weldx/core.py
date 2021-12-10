@@ -717,7 +717,7 @@ class TimeSeries(TimeDependent):
 # GenericSeries ------------------------------------------------------------------------
 
 # todo
-#  - __getitem__ : use DataArray.sel
+#  - implement DataArray.sel
 #  - pandas time types in TimeSeries vs GenericSeries
 #
 #  - add doctests (examples)
@@ -1024,12 +1024,6 @@ class GenericSeries:
 
         """
         return self.evaluate(**kwargs)
-
-    def __getitem__(self, *args):
-        """Get a subset of a discrete `GenericSeries` by indexing."""
-        if isinstance(self._obj, xr.DataArray):
-            return self._obj.__getitem__(*args)
-        return NotImplementedError
 
     def evaluate(self, **kwargs) -> GenericSeries:
         """Copy from __call__."""
