@@ -54,7 +54,7 @@ class MathematicalExpression:
             tuple(self._expression.free_symbols), self._expression, "numpy"
         )
 
-        self._parameters: Union[pint.Quantity, xr.DataArray] = {}
+        self._parameters: Dict[str, Union[pint.Quantity, xr.DataArray]] = {}
         if parameters is not None:
             self.set_parameters(parameters)
 
@@ -780,7 +780,7 @@ class GenericSeries:
         """
         self._obj: Union[xr.DataArray, MathematicalExpression] = None
         self._variable_units: Dict[str, pint.Unit] = None
-        self._symbol_dims: Dict[str, List[str]] = None
+        self._symbol_dims: Dict[str, str] = None
         self._units: pint.Unit = None
         self._interpolation = "linear" if interpolation is None else interpolation
 
@@ -981,7 +981,10 @@ class GenericSeries:
                     coords={self._symbol_dims[k][0]: v.m},
                 )
             else:
-                ref_unit = self._obj.coords[k].attrs.get(UNITS_KEY, "")
+                ref_unit = self._obj.coords[k].attrs.get(  # type: ignore[union-attr]
+                    UNITS_KEY,
+                    "",
+                )
                 v = xr.DataArray(v.to(ref_unit), dims=[k]).pint.dequantify()
 
             coords[k] = v
@@ -1036,7 +1039,7 @@ class GenericSeries:
 
         coords = self._call_preprocess_coords(**kwargs)
         for k in coords:
-            if k not in self._obj.dims:
+            if k not in self._obj.dims:  # type: ignore[union-attr] # always disc. here
                 raise KeyError(f"'{k}' is not a valid dimension.")
         return type(self)(
             ut.xr_interp_like(self._obj, coords, method=self._interpolation)
@@ -1167,15 +1170,15 @@ class GenericSeries:
         """Get the shape of the generic series data."""
         if self.is_expression:
             return NotImplemented
-        raise self._obj.shape
+        raise self._obj.shape  # type: ignore[union-attr] # always discrete here
 
     # todo Expression? -> dict shape?
     @property
-    def units(self) -> str:
+    def units(self) -> pint.Unit:
         """Get the units of the generic series data."""
         if self._units is not None:
             return self._units
-        return self._obj.data.u
+        return self._obj.data.u  # type: ignore[union-attr] # always discrete here
 
     # constraint checks for derived series ---------------------------------------------
 
@@ -1197,7 +1200,7 @@ class GenericSeries:
         ut.xr_check_dimensionality(data_array, cls._required_unit_dimensionality)
 
         # check coordinate constraints
-        ref = {}
+        ref: Dict[str, Any] = {}
 
         def _update_ref_coords(ref_dict, item, key, val):
             """Update the coordinate reference dict `r`."""
