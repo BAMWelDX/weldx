@@ -962,7 +962,7 @@ class GenericSeries:
         #   - for two discrete series call __add__ of the xarrays
         #   - for mixed version add a new parameter to the expression string and set the
         #     xarray as the parameters value
-        raise NotImplementedError
+        return NotImplemented
 
     def _call_preprocess_coords(self, **kwargs) -> Dict[str, xr.DataArray]:
         """Preprocess the coordinates passed to `__call__`."""
@@ -1000,9 +1000,10 @@ class GenericSeries:
         # turn passed coords into parameters of the expression
         new_series = deepcopy(self)
         for k, v in kwargs.items():
+            # skipcq: PYL-W0212
             new_series._obj.set_parameter(k, (v, self._symbol_dims[k]))
-            new_series._symbol_dims.pop(k)
-            new_series._variable_units.pop(k)
+            new_series._symbol_dims.pop(k)  # skipcq: PYL-W0212
+            new_series._variable_units.pop(k)  # skipcq: PYL-W0212
         return new_series
 
     def __call__(self, **kwargs) -> GenericSeries:
@@ -1028,7 +1029,7 @@ class GenericSeries:
         """Copy from __call__."""
         # Apply preprocessor for derived series if present
         if self._evaluation_preprocessor is not None:
-            kwargs = self._evaluation_preprocessor(**kwargs)
+            kwargs = self._evaluation_preprocessor(**kwargs)  # skipcq PYL-E1102
 
         if self.is_expression:
             return self._call_expr(**kwargs)
@@ -1065,7 +1066,7 @@ class GenericSeries:
             dimensions.
 
         """
-        raise NotImplementedError
+        return NotImplemented
 
     @property
     def coordinates(self) -> Union[None, pint.Quantity, Dict[str, pint.Quantity]]:
@@ -1078,7 +1079,7 @@ class GenericSeries:
     @property
     def coordinate_names(self) -> List[str]:
         """Get the names of all coordinates."""
-        raise NotImplementedError
+        return NotImplemented
 
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
@@ -1163,7 +1164,7 @@ class GenericSeries:
     def shape(self) -> Tuple:
         """Get the shape of the generic series data."""
         if self.is_expression:
-            raise NotImplementedError
+            return NotImplemented
         raise self._obj.shape
 
     # todo Expression? -> dict shape?
