@@ -517,22 +517,19 @@ def test_time_series(ts, copy_arrays, lazy_load):
 @pytest.mark.parametrize("copy_arrays", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
 @pytest.mark.parametrize(
-    "coords",
+    "coords, interpolation",
     [
-        dict(t=Q_([1, 2, 3], "s")),
-        dict(time=Q_([1, 2, 3], "s"), space=Q_([4, 5, 6, 7], "m")),
+        (dict(t=Q_([1, 2, 3], "s")), None),
+        (dict(time=Q_([1, 2, 3], "s"), space=Q_([4, 5, 6, 7], "m")), None),
+        (dict(time=Q_([1, 2, 3], "s"), space=Q_([4, 5, 6, 7], "m")), "step"),
     ],
 )
-def test_generic_series_discrete(coords, copy_arrays, lazy_load):
+def test_generic_series_discrete(coords, interpolation, copy_arrays, lazy_load):
 
     shape = tuple([len(v) for v in coords.values()])
     data = Q_(np.ones(shape), "m")
 
-    gs = GenericSeries(data, coords=coords)
-    print(gs)
-    from weldx import WeldxFile
-
-    WeldxFile("discrete.yaml", tree={"gs": gs}, mode="rw")  # todo: remove
+    gs = GenericSeries(data, coords=coords, interpolation=interpolation)
 
     gs_file = write_read_buffer(
         {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
@@ -564,10 +561,6 @@ def test_generic_series_discrete(coords, copy_arrays, lazy_load):
 )
 def test_generic_series_expression(expr, params, units, dims, copy_arrays, lazy_load):
     gs = GenericSeries(expr, parameters=params, units=units, dims=dims)
-
-    from weldx import WeldxFile
-
-    WeldxFile("expr.yaml", tree={"gs": gs}, mode="rw")  # todo: remove
 
     gs_file = write_read_buffer(
         {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}

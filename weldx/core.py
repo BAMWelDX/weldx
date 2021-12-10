@@ -18,6 +18,7 @@ from weldx.time import Time, TimeDependent, types_time_like
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot
     import sympy
+
     from weldx.types import UnitLike
 
 __all__ = ["GenericSeries", "MathematicalExpression", "TimeSeries"]
@@ -719,7 +720,6 @@ class TimeSeries(TimeDependent):
 #  - __getitem__ : use DataArray.sel
 #  - pandas time types in TimeSeries vs GenericSeries
 #
-#  - interpolation
 #  - add doctests (examples)
 #  - dataclass for serialization
 #  - swap __eq__ and evaluate
@@ -1041,7 +1041,9 @@ class GenericSeries:
         for k in coords.keys():
             if k not in self._obj.dims:
                 raise KeyError(f"'{k}' is not a valid dimension.")
-        return type(self)(ut.xr_interp_like(self._obj, coords))
+        return type(self)(
+            ut.xr_interp_like(self._obj, coords, method=self._interpolation)
+        )
 
     def __getitem__(self, *args):
         """Get a subset of a discrete `GenericSeries` by indexing."""
@@ -1132,7 +1134,15 @@ class GenericSeries:
 
     @interpolation.setter
     def interpolation(self, val: str):
-        if val not in ["linear", "step"]:
+        if val not in [
+            "linear",
+            "step",
+            "nearest",
+            "zero",
+            "slinear",
+            "quadratic",
+            "cubic",
+        ]:
             raise ValueError(f"'{val}' is not a supported interpolation method.")
         self._interpolation = val
 
