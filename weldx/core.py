@@ -721,7 +721,6 @@ class TimeSeries(TimeDependent):
 #  - pandas time types in TimeSeries vs GenericSeries
 #
 #  - add doctests (examples)
-#  - swap __eq__ and evaluate
 
 
 class GenericSeries:
@@ -785,7 +784,6 @@ class GenericSeries:
         self._symbol_dims: Dict[str, List[str]] = None
         self._units: pint.Unit = None
         self._interpolation = "linear" if interpolation is None else interpolation
-        self._shape: Tuple = None
 
         if isinstance(obj, (pint.Quantity, xr.DataArray)):
             self._init_discrete(obj, dims, coords)
@@ -873,14 +871,13 @@ class GenericSeries:
         dims, units = self._init_get_updated_dims_and_units(expr, dims, units)
 
         # check expression
-        expr_units, expr_shape = self._eval_expr(expr, dims, units)
+        expr_units = self._eval_expr(expr, dims, units)
 
         # check constraints
         self._check_constraints_expression(expr, dims, units, expr_units)
 
         # save internal data
         self._units = expr_units
-        self._shape = expr_shape
         self._obj = expr
         self._variable_units = units
         self._symbol_dims = dims
@@ -926,12 +923,7 @@ class GenericSeries:
                 f"The original exception was:\n{e}"
             )
 
-        # todo: shape should follow from dims of parameters and variables - Consider
-        #       removing shape for expressions since it does not really make sense. User
-        #       alternatives would be ndims and dims
-
-        shape = None
-        return expr_units, shape
+        return expr_units
 
     @staticmethod
     def _update_expression_params(params):
@@ -1177,9 +1169,9 @@ class GenericSeries:
     @property
     def shape(self) -> Tuple:
         """Get the shape of the generic series data."""
-        if self._shape is not None:
-            return self._shape
-        raise NotImplementedError
+        if self.is_expression:
+            raise NotImplementedError
+        raise self._obj.shape
 
     # todo Expression? -> dict shape?
     @property
