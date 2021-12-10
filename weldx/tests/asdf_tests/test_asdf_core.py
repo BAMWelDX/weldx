@@ -194,12 +194,10 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
 
     """
     if not time_dep_coordinates:
-        coords = Q_(np.asarray([2.0, 5.0, 1.0]), "mm")
+        coords = Q_([2.0, 5.0, 1.0], "mm")
     else:
         coords = Q_(
-            np.asarray(
-                [[2.0, 5.0, 1.0], [1.0, -4.0, 1.2], [0.3, 4.4, 4.2], [1.1, 2.3, 0.2]]
-            ),
+            [[2.0, 5.0, 1.0], [1.0, -4.0, 1.2], [0.3, 4.4, 4.2], [1.1, 2.3, 0.2]],
             "mm",
         )
 

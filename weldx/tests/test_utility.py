@@ -599,3 +599,13 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
 def test_is_interactive():
     """Assert that the Pytest session is not recognized as interactive."""
     assert not ut.is_interactive_session()
+
+
+def test_pint_default_ureg():
+    """Test if the weldx unit registry is set as the default unit registry."""
+    da = xr.DataArray(
+        Q_([1, 2, 3, 4], "mm"),
+        dims=["a"],
+        coords={"a": ("a", [1, 2, 3, 4], {"units": U_("s")})},
+    )
+    da.pint.dequantify().pint.quantify().pint.dequantify().pint.quantify()

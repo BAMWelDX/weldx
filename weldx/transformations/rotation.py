@@ -9,7 +9,7 @@ from scipy.spatial.transform import Rotation as _Rotation
 from weldx.constants import U_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import numpy.typing as npt
 
 _DEFAULT_LEN_UNIT = UREG.millimeters

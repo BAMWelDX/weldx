@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Tuple, Union
 
 import numpy as np
 import pint
@@ -14,6 +14,9 @@ from sympy import Point2D, Polygon
 import weldx.geometry as geo
 from weldx.constants import Q_, U_
 from weldx.util import inherit_docstrings, ureg_check_class
+
+if TYPE_CHECKING:  # pragma: no cover
+    from weldx.types import QuantityLike
 
 __all__ = [
     "IsoBaseGroove",
@@ -212,6 +215,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         # out of the rasterization points
         profile = self.to_profile()
         rasterization = profile.rasterize(self._AREA_RASTER_WIDTH, stack=False)
+        # skipcq: PYL-R1721
         points = [[(x, y) for x, y in shape.m.T] for shape in rasterization]
 
         return _compute_cross_sect_shape_points(points)
@@ -534,7 +538,7 @@ class UVGroove(IsoBaseGroove):
         # calculations:
         x_1 = np.tan(alpha / 2) * h
         # Center of the circle [0, y_m]
-        y_circle = np.sqrt(R ** 2 - x_1 ** 2)
+        y_circle = np.sqrt(R ** 2 - x_1 ** 2)  # skipcq: PTC-W0028
         y_m = h + y_circle
         # From next point to circle center is the vector (x,y)
         x = R * np.cos(beta)
@@ -1398,7 +1402,7 @@ class FFGroove(IsoBaseGroove):
         code_number="code_number",
     )
 
-    def to_profile(self, width_default: pint.Quantity = Q_(5, "mm")) -> geo.Profile:
+    def to_profile(self, width_default: QuantityLike = Q_(5, "mm")) -> geo.Profile:
         """Calculate a Profile.
 
         Parameters
@@ -1408,11 +1412,9 @@ class FFGroove(IsoBaseGroove):
 
 
         """
-        if (
-            self.code_number == "1.12"
-            or self.code_number == "1.13"
-            or self.code_number == "2.12"
-        ):
+        width_default: pint.Quantity = Q_(width_default)
+
+        if self.code_number in ("1.12", "1.13", "2.12"):
             shape1 = geo.Shape()
             arr1 = np.stack(
                 (
@@ -1436,7 +1438,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "3.1.1":
+
+        if self.code_number == "3.1.1":
             t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
             if width_default < t_1 + Q_(1, "mm"):
@@ -1467,15 +1470,16 @@ class FFGroove(IsoBaseGroove):
             shape2 = geo.Shape()
             arr2 = np.stack(
                 (
-                    np.append(width_default, -b),
-                    np.append(0, -b),
-                    np.append(0, -t_2 - b),
-                    np.append(width_default, -t_2 - b),
+                    np.append(width_default, -b),  # skipcq: PYL-E1130
+                    np.append(0, -b),  # skipcq: PYL-E1130
+                    np.append(0, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(width_default, -t_2 - b),  # skipcq: PYL-E1130
                 )
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "3.1.2":
+
+        if self.code_number == "3.1.2":
             t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
             arr1 = np.stack(
@@ -1490,15 +1494,16 @@ class FFGroove(IsoBaseGroove):
             shape2 = geo.Shape()
             arr2 = np.stack(
                 (
-                    np.append(0, -b),
-                    np.append(2 * width_default, -b),
-                    np.append(2 * width_default, -t_2 - b),
-                    np.append(0, -t_2 - b),
+                    np.append(0, -b),  # skipcq: PYL-E1130
+                    np.append(2 * width_default, -b),  # skipcq: PYL-E1130
+                    np.append(2 * width_default, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(0, -t_2 - b),  # skipcq: PYL-E1130
                 )
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "3.1.3" or self.code_number == "4.1.1":
+
+        if self.code_number in ("3.1.3", "4.1.1"):
             t_1, t_2, alpha, b = self.t_1, self.t_2, self.alpha, self.b
 
             x = np.sin(alpha + np.pi / 2) * b + b
@@ -1534,7 +1539,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "4.1.2":
+
+        if self.code_number == "4.1.2":
             t_1, t_2, alpha, e = self.t_1, self.t_2, self.alpha, self.e
 
             x_1 = np.sin(alpha) * e
@@ -1570,7 +1576,8 @@ class FFGroove(IsoBaseGroove):
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        elif self.code_number == "4.1.3":
+
+        if self.code_number == "4.1.3":
             t_1, t_2, b = self.t_1, self.t_2, self.b
             shape1 = geo.Shape()
             arr1 = np.stack(
@@ -1585,22 +1592,22 @@ class FFGroove(IsoBaseGroove):
             shape2 = geo.Shape()
             arr2 = np.stack(
                 (
-                    np.append(-width_default, -b),
-                    np.append(t_1 + width_default, -b),
-                    np.append(t_1 + width_default, -t_2 - b),
-                    np.append(-width_default, -t_2 - b),
-                    np.append(-width_default, -b),
+                    np.append(-width_default, -b),  # skipcq: PYL-E1130
+                    np.append(t_1 + width_default, -b),  # skipcq: PYL-E1130
+                    np.append(t_1 + width_default, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(-width_default, -t_2 - b),  # skipcq: PYL-E1130
+                    np.append(-width_default, -b),  # skipcq: PYL-E1130
                 )
             )
             shape2.add_line_segments(arr2)
             return geo.Profile([shape1, shape2], units=_DEFAULT_LEN_UNIT)
-        else:
-            raise ValueError(
-                "Wrong code_number. The Code Number has to be"
-                " one of the following strings: "
-                '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
-                ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
-            )
+
+        raise ValueError(
+            "Wrong code_number. The Code Number has to be"
+            " one of the following strings: "
+            '"1.12", "1.13", "2.12", "3.1.1", "3.1.2",'
+            ' "3.1.3", "4.1.1", "4.1.2", "4.1.3"'
+        )
 
     @property
     def cross_sect_area(self):  # noqa
@@ -1658,20 +1665,20 @@ _groove_name_to_type = {cls.__name__: cls for cls in IsoBaseGroove.__subclasses_
 
 def get_groove(
     groove_type: str,
-    workpiece_thickness: pint.Quantity = None,
-    workpiece_thickness2: pint.Quantity = None,
-    root_gap: pint.Quantity = None,
-    root_face: pint.Quantity = None,
-    root_face2: pint.Quantity = None,
-    root_face3: pint.Quantity = None,
-    bevel_radius: pint.Quantity = None,
-    bevel_radius2: pint.Quantity = None,
-    bevel_angle: pint.Quantity = None,
-    bevel_angle2: pint.Quantity = None,
-    groove_angle: pint.Quantity = None,
-    groove_angle2: pint.Quantity = None,
-    special_depth: pint.Quantity = None,
-    code_number=None,
+    workpiece_thickness: QuantityLike = None,  # skipcq: PYL-W0613
+    workpiece_thickness2: QuantityLike = None,  # skipcq: PYL-W0613
+    root_gap: QuantityLike = None,  # skipcq: PYL-W0613
+    root_face: QuantityLike = None,  # skipcq: PYL-W0613
+    root_face2: QuantityLike = None,  # skipcq: PYL-W0613
+    root_face3: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_radius: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_radius2: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_angle: QuantityLike = None,  # skipcq: PYL-W0613
+    bevel_angle2: QuantityLike = None,  # skipcq: PYL-W0613
+    groove_angle: QuantityLike = None,  # skipcq: PYL-W0613
+    groove_angle2: QuantityLike = None,  # skipcq: PYL-W0613
+    special_depth: QuantityLike = None,  # skipcq: PYL-W0613
+    code_number=None,  # skipcq: PYL-W0613
 ) -> IsoBaseGroove:
     """Create a Groove from weldx.tags.core.groove.
 
@@ -1966,7 +1973,7 @@ def get_groove(
     _loc = locals()
 
     groove_cls = _groove_name_to_type[groove_type]
-    _mapping = groove_cls._mapping
+    _mapping = groove_cls._mapping  # skipcq: PYL-W0212
 
     # convert function arguments to groove arguments
     args = {k: Q_(_loc[v]) for k, v in _mapping.items() if _loc[v] is not None}
