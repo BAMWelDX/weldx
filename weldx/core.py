@@ -988,28 +988,28 @@ class GenericSeries:
     def __repr__(self):
         """Give __repr__ output."""
         # todo: remove scalar dims?
-        repr = f"<{type(self).__name__}>\n"
+        rep = f"<{type(self).__name__}>\n"
         if self.is_discrete:
             arr_str = np.array2string(
                 self._obj.data.magnitude, threshold=3, precision=4, prefix="        "
             )
-            repr += f"\nValues:\n\t{arr_str}\n"
-            repr += f"\nDimensions:\n\t{self.dims}\n"
-            repr += "\nCoordinates:\n"
+            rep += f"\nValues:\n\t{arr_str}\n"
+            rep += f"\nDimensions:\n\t{self.dims}\n"
+            rep += "\nCoordinates:\n"
             for coord, val in self.coordinates.items():
                 c_d = np.array2string(val.data, threshold=3, precision=4)
-                repr += f"\t{coord}".ljust(7)
-                repr += f" = {c_d}"
-                repr += f" {val.attrs.get(UNITS_KEY)}\n"
+                rep += f"\t{coord}".ljust(7)
+                rep += f" = {c_d}"
+                rep += f" {val.attrs.get(UNITS_KEY)}\n"
         else:
-            repr += self.data.__repr__().replace("<MathematicalExpression>\n", "")
-            repr += "\nFree Dimensions:\n"
+            rep += self.data.__repr__().replace("<MathematicalExpression>\n", "")
+            rep += "\nFree Dimensions:\n"
             for k, v in self._variable_units.items():
-                repr += f"\t{k} in {v}\n"
-            repr += "\nOther Dimensions:\n"
-            repr += f"\t{[v for v in self.dims if v not in self._variable_units]}\n"
+                rep += f"\t{k} in {v}\n"
+            rep += "\nOther Dimensions:\n"
+            rep += f"\t{[v for v in self.dims if v not in self._variable_units]}\n"
 
-        return repr + f"\nUnits:\n\t{self.units}\n"
+        return rep + f"\nUnits:\n\t{self.units}\n"
 
     def __add__(self, other):
         """Add two `GenericSeries`."""
