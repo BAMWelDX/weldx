@@ -549,7 +549,7 @@ def xr_check_dimensionality(da: xr.DataArray, units_ref: Union[str, pint.Unit]):
 
     Raises
     ------
-    pint.DimensionalityError:
+    pint.DimensionalityError
         The error is raised if the check fails
 
     """

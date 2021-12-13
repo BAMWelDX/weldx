@@ -754,7 +754,7 @@ class GenericSeries:
 
     def __init__(
         self,
-        obj: Union[pint.Quantity, xr.DataArray, MathematicalExpression],
+        obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
         dims: Union[List[str], Dict[str, Union[str, pint.Unit]]] = None,
         coords: Union[None, pint.Quantity, Dict[str, pint.Quantity]] = None,
         units: Dict[str, Union[str, pint.Unit]] = None,
@@ -767,7 +767,9 @@ class GenericSeries:
         ----------
         obj :
             Either a multidimensional array of discrete values or a
-            `MathematicalExpression` with one or more variables.
+            `MathematicalExpression` with one or more variables. The expression can also
+            be provided as string. In this case, you need to provide all parameters
+            using the corresponding interface variable (see below).
         dims :
             The names of the dimensions. The order must be adjusted to the data's shape
             (outer dimensions first). For mathematical expressions, the dimensions
