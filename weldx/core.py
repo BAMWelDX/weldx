@@ -755,8 +755,8 @@ class GenericSeries:
     def __init__(
         self,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
-        dims: Union[List[str], Dict[str, Union[str, pint.Unit]]] = None,
-        coords: Union[None, pint.Quantity, Dict[str, pint.Quantity]] = None,
+        dims: Union[List[str], Dict[str, str]] = None,
+        coords: Dict[str, pint.Quantity] = None,
         units: Dict[str, Union[str, pint.Unit]] = None,
         interpolation: str = None,
         parameters: Dict[str, Union[str, pint.Quantity]] = None,
@@ -771,13 +771,39 @@ class GenericSeries:
             be provided as string. In this case, you need to provide all parameters
             using the corresponding interface variable (see below).
         dims :
-            The names of the dimensions. The order must be adjusted to the data's shape
-            (outer dimensions first). For mathematical expressions, the dimensions
-            match the variable names and need not to be specified.
+            For discrete data, a list is expected that provides the dimension names.
+            The first name refers to the outer most dimension. If an expression is used,
+            this parameter is optional. It can be used to have a dimension name that
+            differs from the symbol of the expression. To do so, you need to provide a
+            mapping between the symbol and the dimension name. For example, you could
+            use ``dict(t="time")`` to tell the `GenericSeries` that the symbol `t`
+            refers to the dimension `time`.
         coords :
-            The coordinate values in case the data is a set of discrete values.
+            (Only for discrete values) A mapping that specifies the coordinate values
+            for each dimension.
+        units :
+            (Only for expressions) A mapping that specifies the expected unit for a
+            free dimension/expression variable. During evaluation, it is not necessary
+            that the provided data points have the exact same unit, but it must be a
+            compatible unit. For example, if we use `dict(t="s")` we can use minutes,
+            hours or any other time unit for `t` during evaluation, but using meters
+            would cause an error.
         interpolation :
-            The method that should be used when interpolating between discrete values.
+            (Only for discrete values) The interpolating method that should be used
+            during evaluation.
+
+        Raises
+        ------
+        TypeError :
+            If ``obj`` is any other type than the ones defined in the type hints.
+        KeyError :
+            If one of the provided mappings refers to a symbol that is not part of the
+            expression
+        ValueError :
+            Can be raised for multiple reasons related to incompatible or invalid values
+        pint.DimensionalityError :
+            If an expression can not be evaluated due to a unit conflict caused by
+            the provided parameters and and dimension units
 
         """
         self._obj: Union[xr.DataArray, MathematicalExpression] = None
@@ -828,11 +854,13 @@ class GenericSeries:
             # todo check data structure
             pass
 
+        # check the constraints of derived types
         self._check_constraints_discrete(data)
 
         self._obj = data
 
     def _init_get_updated_dims_and_units(self, expr, dims, units):
+        """Cast dimensions and units into the internally used, unified format."""
         if dims is None:
             dims = {}
         if units is None:
@@ -885,6 +913,12 @@ class GenericSeries:
 
     @staticmethod
     def _eval_expr(expr, dims, units):
+        """Perform a test evaluation of the expression to.
+
+        This function assures that all of the provided information are compatible
+        (units, array lengths, etc.). It also determines the output unit of the
+        expression.
+        """
         try:
             scalar_params = {k: Q_(1, v) for k, v in units.items()}
             result = expr.evaluate(**scalar_params)
@@ -928,6 +962,13 @@ class GenericSeries:
 
     @staticmethod
     def _update_expression_params(params):
+        """Check and update the expression parameters to a valid internal type.
+
+        Valid types are all input types for the `MathematicalExpression`, with the
+        limitation that every parameter needs a unit. The passed dictionary is modified
+        in place, therefore the function returns nothing.
+
+        """
         # todo
         #  - enable usage of dicts for params (data, dims, coords)
         #  - tuple should accept third element (coords)
@@ -966,8 +1007,8 @@ class GenericSeries:
         #     xarray as the parameters value
         return NotImplemented
 
-    def _call_preprocess_coords(self, **kwargs) -> Dict[str, xr.DataArray]:
-        """Preprocess the coordinates passed to `__call__`."""
+    def _evaluate_preprocess_coords(self, **kwargs) -> Dict[str, xr.DataArray]:
+        """Preprocess the coordinates passed to `evaluate`."""
         # Turn coords into DataArrays
         coords = {}
         for k, v in kwargs.items():
@@ -993,10 +1034,10 @@ class GenericSeries:
 
         return coords
 
-    def _call_expr(self, **kwargs) -> GenericSeries:
+    def _evaluate_expr(self, **kwargs) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(kwargs) == self._obj.num_variables:
-            coords = self._call_preprocess_coords(**kwargs)
+            coords = self._evaluate_preprocess_coords(**kwargs)
             # evaluate expression
             coords_unit_adj = {k: v.pint.dequantify() for k, v in coords.items()}
             data = self._obj.evaluate(**coords).assign_coords(coords_unit_adj)
@@ -1014,33 +1055,46 @@ class GenericSeries:
     def __call__(self, **kwargs) -> GenericSeries:
         """Evaluate the generic series at discrete coordinates.
 
-        Parameters
-        ----------
-        kwargs:
-            An arbitrary number of keyword arguments. The key must be a dimension name
-            of the `GenericSeries` and the values are the corresponding coordinates
-            where the `GenericSeries` should be evaluated.
-
-        Returns
-        -------
-        GenericSeries :
-            A new generic series containing the discrete values at the desired
-            coordinates.
+        For a detailed description read the documentation of the`evaluate` function.
 
         """
         return self.evaluate(**kwargs)
 
     def evaluate(self, **kwargs) -> GenericSeries:
-        """Copy from __call__."""
+        """Evaluate the generic series at discrete coordinates.
+
+        If the `GenericSeries` is composed of discrete values, the data is interpolated
+        using the specified interpolation method.
+
+        Expressions are simply evaluated if coordinates for all dimensions are provided
+        which results in a new discrete `GenericSeries`. In case that some dimensions
+        are left without coordinates, a new expression based `GenericSeries` is
+        returned. The provided coordinates are stored as parameters and the
+        corresponding dimensions are no longer variables of the new `GenericSeries`.
+
+        Parameters
+        ----------
+        kwargs:
+            An arbitrary number of keyword arguments. The key must be a dimension name
+            of the `GenericSeries` and the values are the corresponding coordinates
+            where the `GenericSeries` should be evaluated. It is not necessary to
+            provide values for all dimensions. Partial evaluation is also possible.
+
+        Returns
+        -------
+        GenericSeries :
+            A new generic series with the (partially) evaluated data.
+
+        """
         # Apply preprocessor for derived series if present
         if self._evaluation_preprocessor is not None:
             # pylint: disable=not-callable
             kwargs = self._evaluation_preprocessor(**kwargs)  # skipcq PYL-E1102
 
         if self.is_expression:
-            return self._call_expr(**kwargs)
+            return self._evaluate_expr(**kwargs)
 
-        coords = self._call_preprocess_coords(**kwargs)
+        coords = self._evaluate_preprocess_coords(**kwargs)
         for k in coords:
             if k not in self._obj.dims:  # type: ignore[union-attr] # always disc. here
                 raise KeyError(f"'{k}' is not a valid dimension.")
@@ -1092,19 +1146,24 @@ class GenericSeries:
     @property
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
         """Get the internal data."""
-        if isinstance(self._obj, xr.DataArray):
+        if self.is_discrete:
             return self._obj.data
         return self._obj
 
     @property
     def data_array(self) -> Union[xr.DataArray, MathematicalExpression]:
-        """Get the internal data."""
-        if isinstance(self._obj, xr.DataArray):
+        """Get the internal data as `xarray.DataArray`."""
+        if self.is_discrete:
             return self._obj
         return None
 
     @staticmethod
     def _get_expression_dims(expr: MathematicalExpression, symbol_dims: Dict[str, str]):
+        """Get the dimensions of an expression based `GenericSeries`.
+
+        This is the union of parameter dimensions and free dimensions.
+
+        """
         dims = set()
         for d in symbol_dims.values():
             dims |= set(d)
@@ -1118,7 +1177,7 @@ class GenericSeries:
     @property
     def dims(self) -> List[str]:
         """Get the names of all dimensions."""
-        if isinstance(self._obj, MathematicalExpression):
+        if self.is_expression:
             return self._get_expression_dims(self._obj, self._symbol_dims)
         return self._obj.dims
 
@@ -1159,7 +1218,7 @@ class GenericSeries:
     @property
     def variable_names(self) -> List[str]:
         """Get the names of all variables."""
-        if self._variable_units is not None:
+        if self.is_expression:
             return list(self._variable_units.keys())
         return None
 
@@ -1174,12 +1233,12 @@ class GenericSeries:
         if self.is_expression:
             return NotImplemented
         raise self._obj.shape  # type: ignore[union-attr] # always discrete here
+        # todo Expression? -> dict shape?
 
-    # todo Expression? -> dict shape?
     @property
     def units(self) -> pint.Unit:
         """Get the units of the generic series data."""
-        if self._units is not None:
+        if self.is_expression:
             return self._units
         return self._obj.data.u  # type: ignore[union-attr] # always discrete here
 
@@ -1193,6 +1252,7 @@ class GenericSeries:
 
     @classmethod
     def _check_constraints_discrete(cls, data_array: xr.DataArray):
+        """Check if the constraints of a discrete derived type are met."""
         if cls is GenericSeries:
             return
 
@@ -1228,6 +1288,7 @@ class GenericSeries:
         var_units: Dict[str, pint.Unit],
         expr_units: pint.Unit,
     ):
+        """Check if the constraints of an expression based derived type are met."""
         if cls is GenericSeries:
             return
 
