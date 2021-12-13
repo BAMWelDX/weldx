@@ -538,7 +538,7 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
 
 def xr_check_dimensionality(da: xr.DataArray, units_ref: Union[str, pint.Unit]):
-    """Check if a `DataArray`\s dimensionality matches the one of a reference unit.
+    """Check if the dimensionality of a `DataArray` matches the one of a reference unit.
 
     Parameters
     ----------
