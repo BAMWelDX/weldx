@@ -60,13 +60,16 @@ class MathematicalExpression:
 
     def __repr__(self):
         """Give __repr__ output."""
+        # todo: Add covered dimensions to parameters - coordinates as well?
         representation = (
             f"<MathematicalExpression>\n"
-            f"Expression:\n\t {self._expression.__repr__()}"
+            f"\nExpression:\n\t{self._expression.__repr__()}\n"
             f"\nParameters:\n"
         )
         if len(self._parameters) > 0:
             for parameter, value in self._parameters.items():
+                if isinstance(value, xr.DataArray):
+                    value = value.data
                 representation += f"\t{parameter} = {value}\n"
         else:
             representation += "\tNone"
@@ -984,17 +987,33 @@ class GenericSeries:
 
     def __repr__(self):
         """Give __repr__ output."""
+        # todo: remove scalar dims?
         representation = f"<{type(self).__name__}>\n"
-        if isinstance(self._obj, xr.DataArray):
-            representation += f"Values:\n{self._obj.data.magnitude}\n"
+        if self.is_discrete:
+            arr_str = np.array2string(
+                self._obj.data.magnitude, threshold=3, precision=4, prefix="        "
+            )
+            representation += f"\nValues:\n\t{arr_str}\n"
+            representation += f"\nDimensions:\n\t{self.dims}\n"
+            representation += f"\nCoordinates:\n"
+            for coo, val in self.coordinates.items():
+                c_d = np.array2string(val.data, threshold=3, precision=4)
+                representation += f"\t{coo}".ljust(7)
+                representation += f" = {c_d}"
+                representation += f" {val.attrs.get(UNITS_KEY)}\n"
         else:
             representation += self.data.__repr__().replace(
-                "<MathematicalExpression>", ""
+                "<MathematicalExpression>\n", ""
             )
-        representation += f"Dimensions:\n\t{self.dims}\n"
-        if isinstance(self._obj, xr.DataArray):
-            representation += f"Coordinates:\n\t{self.coordinates}\n"
-        return representation + f"Units:\n\t{self.units}\n"
+            representation += f"\nFree Dimensions:\n"
+            for k, v in self._variable_units.items():
+                representation += f"\t{k} in {v}\n"
+            representation += f"\nOther Dimensions:\n"
+            representation += (
+                f"\t{[v for v in self.dims if v not in self._variable_units]}\n"
+            )
+
+        return representation + f"\nUnits:\n\t{self.units}\n"
 
     def __add__(self, other):
         """Add two `GenericSeries`."""
