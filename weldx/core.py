@@ -1032,7 +1032,7 @@ class GenericSeries:
         """Copy from __call__."""
         # Apply preprocessor for derived series if present
         if self._evaluation_preprocessor is not None:
-
+            # pylint: disable=not-callable
             kwargs = self._evaluation_preprocessor(**kwargs)  # skipcq PYL-E1102
 
         if self.is_expression:
