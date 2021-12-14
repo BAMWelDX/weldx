@@ -1355,13 +1355,9 @@ class GenericSeries:
                     f"coordinates {v}. Therefore it can't be a variable dimension."
                 )
 
-        ref = {
-            k: {"values": v, "optional": False}
-            for k, v in cls._required_dimension_coordinates.items()
-        }
-        coords = {
-            k: v[k] for k, v in expr.parameters.items() if isinstance(v, xr.DataArray)
-        }
-        ut.xr_check_coords(coords, ref)
+            ref = {k: {"values": v}}
+            for param in expr.parameters.values():
+                if isinstance(param, xr.DataArray) and k in param.coords.keys():
+                    ut.xr_check_coords(param, ref)
 
-        # todo: add limits for dims?
+            # todo: add limits for dims?
