@@ -17,6 +17,7 @@ from weldx.time import Time, TimeDependent, types_time_like
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot
     import sympy
+    from xarray.core.coordinates import DataArrayCoordinates
 
     from weldx.types import UnitLike
 
@@ -872,7 +873,10 @@ class GenericSeries:
         return data
 
     def _init_get_updated_dims_and_units(
-        self, expr: MathematicalExpression, dims, units
+        self,
+        expr: MathematicalExpression,
+        dims: Dict[str, str],
+        units: Dict[str, pint.Unit],
     ) -> Tuple[Dict[str, str], Dict[str, pint.Unit]]:
         """Cast dimensions and units into the internally used, unified format."""
         if dims is None:
@@ -1141,11 +1145,10 @@ class GenericSeries:
         return NotImplemented
 
     @property
-    def coordinates(self) -> Union[None, pint.Quantity, Dict[str, pint.Quantity]]:
+    def coordinates(self) -> Union[DataArrayCoordinates, None]:
         """Get the coordinates of the generic series."""
         if self.is_discrete:
-            return self._obj.coords  # type: ignore[union-attr] # always discrete here
-        # todo here we should get all parameter coordinates
+            return self.data_array.coords
         return None
 
     @property
@@ -1157,11 +1160,11 @@ class GenericSeries:
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
         """Get the internal data."""
         if self.is_discrete:
-            return self._obj.data  # type: ignore[union-attr] # always discrete here
+            return self.data_array.data
         return self._obj
 
     @property
-    def data_array(self) -> Union[xr.DataArray, MathematicalExpression]:
+    def data_array(self) -> Union[xr.DataArray, None]:
         """Get the internal data as `xarray.DataArray`."""
         if self.is_discrete:
             return self._obj
@@ -1189,7 +1192,7 @@ class GenericSeries:
         """Get the names of all dimensions."""
         if self.is_expression:
             return self._get_expression_dims(self._obj, self._symbol_dims)
-        return self._obj.dims  # type: ignore[union-attr] # always discrete here
+        return self.data_array.dims
 
     @property
     def interpolation(self) -> str:
@@ -1226,7 +1229,7 @@ class GenericSeries:
         return len(self.dims)
 
     @property
-    def variable_names(self) -> List[str]:
+    def variable_names(self) -> Union[List[str], None]:
         """Get the names of all variables."""
         if self.is_expression:
             return list(self._variable_units.keys())
