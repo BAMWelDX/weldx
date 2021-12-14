@@ -725,6 +725,10 @@ class TimeSeries(TimeDependent):
 #  - add doctests (examples)
 
 
+def _pass_kwargs(**kwargs):
+    return kwargs
+
+
 class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
 
@@ -733,7 +737,7 @@ class GenericSeries:
     _required_variables: List[str] = []
     """Required variable names"""
 
-    _evaluation_preprocessor: Callable = None
+    _evaluation_preprocessor: Callable = _pass_kwargs
     """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
 
     _required_dimensions: List[str] = []
@@ -1022,41 +1026,20 @@ class GenericSeries:
         #     xarray as the parameters value
         return NotImplemented
 
-    def _evaluate_preprocess_coords(self, **kwargs) -> Dict[str, xr.DataArray]:
-        """Preprocess the coordinates passed to `evaluate`."""
-        # Turn coords into DataArrays
-        coords = {}
-        for k, v in kwargs.items():
-            v = Q_(v)
-
-            if len(v.shape) == 0:
-                v = np.expand_dims(v, 0)
-
-            if self.is_expression:
-                v = xr.DataArray(
-                    v,
-                    dims=self._symbol_dims[k],
-                    coords={self._symbol_dims[k][0]: v.m},
-                )
-            else:
-                ref_unit = self._obj.coords[k].attrs.get(  # type: ignore[union-attr]
-                    UNITS_KEY,
-                    "",
-                )
-                v = xr.DataArray(v.to(ref_unit), dims=[k]).pint.dequantify()
-
-            coords[k] = v
-
-        return coords
-
     def _evaluate_expr(self, **kwargs) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(kwargs) == self._obj.num_variables:
-            coords = self._evaluate_preprocess_coords(**kwargs)
-            # evaluate expression
-            coords_unit_adj = {k: v.pint.dequantify() for k, v in coords.items()}
-            data = self._obj.evaluate(**coords).assign_coords(coords_unit_adj)
-            return type(self)(data.weldx.quantify())
+            # build the coordinate objects to pass
+            _dims = self._symbol_dims
+            coords = {
+                k: xr.DataArray(
+                    v, {_dims[k]: (_dims[k], v.m, {UNITS_KEY: v.u})}, dims=_dims[k]
+                )
+                for k, v in kwargs.items()
+            }
+
+            data = self._obj.evaluate(**coords)
+            return self.__class__(data)
 
         # turn passed coords into parameters of the expression
         new_series = deepcopy(self)
@@ -1101,20 +1084,23 @@ class GenericSeries:
             A new generic series with the (partially) evaluated data.
 
         """
-        # Apply preprocessor for derived series if present
-        if self._evaluation_preprocessor is not None:
-            # pylint: disable=not-callable
-            kwargs = self._evaluation_preprocessor(**kwargs)  # skipcq PYL-E1102
+        # Apply preprocessor to arguments
+        kwargs = self.__class__._evaluation_preprocessor(**kwargs)
+
+        # interpret strings as Quantities and add singular dimension
+        kwargs = {
+            k: (np.expand_dims(Q_(v), 0) if isinstance(v, str) else v)
+            for k, v in kwargs.items()
+        }
 
         if self.is_expression:
             return self._evaluate_expr(**kwargs)
 
-        coords = self._evaluate_preprocess_coords(**kwargs)
-        for k in coords:
+        for k in kwargs:
             if k not in self._obj.dims:  # type: ignore[union-attr] # always disc. here
                 raise KeyError(f"'{k}' is not a valid dimension.")
-        return type(self)(
-            ut.xr_interp_like(self._obj, coords, method=self._interpolation)
+        return self.__class__(
+            ut.xr_interp_like(self._obj, da2=kwargs, method=self._interpolation)
         )
 
     @staticmethod

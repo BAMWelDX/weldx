@@ -319,8 +319,10 @@ def xr_interp_like(
         da2 = da2.weldx.time_ref_unset()  # catch time formats
         sel_coords = da2.weldx.coordinates_as_quantities()
     else:  # assume da2 to be dict-like
+        # expand singular values to arrays
         sel_coords = {
-            k: (v if isinstance(v, Iterable) else [v]) for k, v in da2.items()
+            k: (v if isinstance(v, Iterable) else np.expand_dims(v, 0))
+            for k, v in da2.items()
         }
 
     if interp_coords is not None:
