@@ -1148,8 +1148,8 @@ class GenericSeries:
     @property
     def coordinates(self) -> Union[None, pint.Quantity, Dict[str, pint.Quantity]]:
         """Get the coordinates of the generic series."""
-        if isinstance(self._obj, xr.DataArray):
-            return self._obj.coords
+        if self.is_discrete:
+            return self._obj.coords  # type: ignore[union-attr] # always discrete here
         # todo here we should get all parameter coordinates
         return None
 
@@ -1162,7 +1162,7 @@ class GenericSeries:
     def data(self) -> Union[pint.Quantity, MathematicalExpression]:
         """Get the internal data."""
         if self.is_discrete:
-            return self._obj.data
+            return self._obj.data  # type: ignore[union-attr] # always discrete here
         return self._obj
 
     @property
@@ -1194,7 +1194,7 @@ class GenericSeries:
         """Get the names of all dimensions."""
         if self.is_expression:
             return self._get_expression_dims(self._obj, self._symbol_dims)
-        return self._obj.dims
+        return self._obj.dims  # type: ignore[union-attr] # always discrete here
 
     @property
     def interpolation(self) -> str:
