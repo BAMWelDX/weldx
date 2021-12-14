@@ -737,7 +737,7 @@ class GenericSeries:
     _required_variables: List[str] = []
     """Required variable names"""
 
-    _evaluation_preprocessor: Callable = _pass_kwargs
+    _evaluation_preprocessor: Dict[str, Callable] = {}
     """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
 
     _required_dimensions: List[str] = []
@@ -820,7 +820,7 @@ class GenericSeries:
         self._interpolation = "linear" if interpolation is None else interpolation
 
         if isinstance(obj, (pint.Quantity, xr.DataArray)):
-            self._obj = self._init_discrete(obj, dims, coords)
+            self._init_discrete(obj, dims, coords)
         elif isinstance(obj, (MathematicalExpression, str)):
             self._init_expression(obj, dims, parameters, units)
         else:
@@ -853,12 +853,16 @@ class GenericSeries:
         data: Union[pint.Quantity, xr.DataArray],
         dims: List[str],
         coords: Dict[str, pint.Quantity],
-    ) -> xr.DataArray:
+    ):
         """Initialize the internal data with discrete values."""
         if not isinstance(data, xr.DataArray):
             if coords is not None:
                 coords = {
-                    k: xr.DataArray(Q_(v), dims=[k]).pint.dequantify()
+                    k: (
+                        xr.DataArray(Q_(v), dims=[k]).pint.dequantify()
+                        if not isinstance(v, xr.DataArray)
+                        else v
+                    )
                     for k, v in coords.items()
                 }
             data = xr.DataArray(data=data, dims=dims, coords=coords).weldx.quantify()
@@ -868,9 +872,7 @@ class GenericSeries:
 
         # check the constraints of derived types
         self._check_constraints_discrete(data)
-
         self._obj = data
-        return data
 
     def _init_get_updated_dims_and_units(
         self,
@@ -1097,20 +1099,22 @@ class GenericSeries:
             A new generic series with the (partially) evaluated data.
 
         """
-        # Apply preprocessor to arguments
-        kwargs = self.__class__._evaluation_preprocessor(**kwargs)
+        # Apply preprocessors to arguments
+        kwargs = ut.apply_func_by_mapping(
+            self.__class__._evaluation_preprocessor, kwargs
+        )
 
         # interpret strings as Quantities and add singular dimension
+        kwargs = {k: (Q_(v) if isinstance(v, str) else v) for k, v in kwargs.items()}
         kwargs = {
-            k: (np.expand_dims(Q_(v), 0) if isinstance(v, str) else v)
-            for k, v in kwargs.items()
+            k: (np.expand_dims(v, 0) if not v.shape else v) for k, v in kwargs.items()
         }
 
         if self.is_expression:
             return self._evaluate_expr(**kwargs)
 
         for k in kwargs:
-            if k not in self._obj.dims:  # type: ignore[union-attr] # always disc. here
+            if k not in self.data_array.dims:
                 raise KeyError(f"'{k}' is not a valid dimension.")
         return self.__class__(
             ut.xr_interp_like(self._obj, da2=kwargs, method=self._interpolation)

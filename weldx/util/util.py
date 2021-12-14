@@ -33,7 +33,7 @@ __all__ = [
     "is_jupyterlab_session",
     "is_interactive_session",
     "_patch_mod_all",
-    "_apply_func_by_mapping",
+    "apply_func_by_mapping",
 ]
 
 
@@ -419,6 +419,6 @@ def _patch_mod_all(module_name: str):
         obj.__module__ = module_name
 
 
-def _apply_func_by_mapping(func_map: Dict[Hashable, Callable], inputs):
+def apply_func_by_mapping(func_map: Dict[Hashable, Callable], inputs):
     """Transform a dict by running functions mapped by keys over its values."""
     return {k: (func_map[k](v) if k in func_map else v) for k, v in inputs.items()}
