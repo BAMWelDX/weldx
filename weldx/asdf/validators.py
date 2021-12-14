@@ -4,10 +4,9 @@ from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict, Un
 
 from asdf import ValidationError
 from asdf.schema import _type_to_tag
-from asdf.util import uri_match
 
 from weldx.asdf.types import WxSyntaxError
-from weldx.asdf.util import _get_instance_shape
+from weldx.asdf.util import _get_instance_shape, uri_match
 from weldx.constants import U_
 
 __all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
@@ -583,7 +582,7 @@ def wx_shape_validator(
 
 
 def wx_property_tag_validator(
-    validator, wx_property_tag: str, instance, schema
+    validator, wx_property_tag: Union[str, List[str]], instance, schema
 ) -> Iterator[ValidationError]:
     """
 
@@ -617,6 +616,11 @@ def wx_property_tag_validator(
                 yield ValidationError(
                     f"mismatched tags, wanted '{tagname}', got '{instance_tag}'"
                 )
+
+    if not isinstance(wx_property_tag, (str, list)):
+        raise WxSyntaxError(
+            f"'wx_property_tag' must be str or List[str], got {wx_property_tag}"
+        )
 
     for _, value in instance.items():
         yield from _tag_validator(tagname=wx_property_tag, instance=value)

@@ -17,6 +17,9 @@ removed
 changes
 =======
 
+-  The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
+   When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
+
 fixes
 =====
 
