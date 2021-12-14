@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import numpy as np
@@ -417,7 +417,7 @@ def _check_dtype(var_dtype, ref_dtype: str) -> bool:
     return True
 
 
-def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
+def xr_check_coords(coords: Union[xr.DataArray, Mapping[str, Any]], ref: dict) -> bool:
     """Validate the coordinates of the DataArray against a reference dictionary.
 
     The reference dictionary should have the dimensions as keys and those contain
@@ -440,9 +440,9 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     Parameters
     ----------
-    dax : xarray.DataArray
-        xarray object which should be validated
-    ref : dict
+    coords
+        xarray object or coordinate mapping that should be validated
+    ref
         reference dictionary
 
     Returns
@@ -478,18 +478,8 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     """
     # only process the coords of the xarray
-    if isinstance(dax, (xr.DataArray, xr.Dataset)):
-        coords = dax.coords
-    elif isinstance(
-        dax,
-        (
-            xr.core.coordinates.DataArrayCoordinates,
-            xr.core.coordinates.DatasetCoordinates,
-        ),
-    ):
-        coords = dax
-    else:
-        raise ValueError("Input variable is not an xarray object")
+    if isinstance(coords, (xr.DataArray, xr.Dataset)):
+        coords = coords.coords
 
     for key, check in ref.items():
         # check if the optional key is set to true
@@ -502,8 +492,12 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
             raise KeyError(f"Could not find required coordinate '{key}'.")
 
         # only if the key "values" is given do the validation
-        if "values" in check and not (coords[key].values == check["values"]).all():
-            raise ValueError(f"Value mismatch in DataArray and ref['{key}']")
+        if "values" in check and not np.all(coords[key].values == check["values"]):
+            raise ValueError(
+                f"Value mismatch in DataArray and ref['{key}']"
+                f"\n{coords[key].values}"
+                f"\n{check['values']}"
+            )
 
         # only if the key "dtype" is given do the validation
         if "dtype" in check:
@@ -560,9 +554,7 @@ def xr_check_dimensionality(da: xr.DataArray, units_ref: Union[str, pint.Unit]):
     if not isinstance(units_ref, pint.Unit):
         units_ref = U_(units_ref)
 
-    units = da.attrs.get(UNITS_KEY, None)
-    if units is None and isinstance(da.data, pint.Quantity):
-        units = da.data.u
+    units = da.weldx.units
 
     if units is None or not U_(units).is_compatible_with(units_ref):
         raise DimensionalityError(
@@ -889,3 +881,14 @@ class WeldxAccessor:
             if (units := v.attrs.get(UNITS_KEY, None)) is not None:
                 da[c].attrs[UNITS_KEY] = str(U_(units))
         return da
+
+    @property
+    def units(self) -> Union[pint.Unit, None]:
+        """Get the unit of the data array values.
+
+        Other than the pint-xarray accessor ``.pint.units`` this will also return units
+        Stored in the attributes.
+        """
+        da = self._obj
+        units = da.attrs.get(UNITS_KEY, da.pint.units)
+        return U_(units) if units is not None else units

@@ -53,6 +53,8 @@ dependencies
 
 -  bump to ``pint >=0.18`` for typing [:pull:`664`]
 
+-  bump to ``xarray >=0.19`` for array creation compatibility [:pull:`618`]
+
 ********************
  0.5.2 (18.11.2021)
 ********************

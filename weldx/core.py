@@ -217,7 +217,7 @@ class MathematicalExpression:
         return self._expression
 
     @property
-    def parameters(self) -> Dict:
+    def parameters(self) -> Dict[str, Union[pint.Quantity, xr.DataArray]]:
         """Return the internal parameters dictionary.
 
         Returns
@@ -228,7 +228,7 @@ class MathematicalExpression:
         """
         return self._parameters
 
-    def get_variable_names(self) -> List:
+    def get_variable_names(self) -> List[str]:
         """Get a list of all expression variables.
 
         Returns
@@ -719,7 +719,6 @@ class TimeSeries(TimeDependent):
 # GenericSeries ------------------------------------------------------------------------
 
 # todo
-#  - implement DataArray.sel
 #  - pandas time types in TimeSeries vs GenericSeries
 #
 #  - add doctests (examples)
@@ -820,13 +819,13 @@ class GenericSeries:
         self._interpolation = "linear" if interpolation is None else interpolation
 
         if isinstance(obj, (pint.Quantity, xr.DataArray)):
-            self._init_discrete(obj, dims, coords)
+            self._obj = self._init_discrete(obj, dims, coords)
         elif isinstance(obj, (MathematicalExpression, str)):
             self._init_expression(obj, dims, parameters, units)
         else:
             raise TypeError(f'The data type "{type(obj)}" is not supported.')
 
-    def __eq__(self, other):
+    def __eq__(self, other: GenericSeries):
         """Compare the Generic Series to another object."""
         from weldx.util import compare_nested
 
@@ -848,7 +847,12 @@ class GenericSeries:
             return False
         return self._obj.identical(other._obj)
 
-    def _init_discrete(self, data, dims, coords):
+    def _init_discrete(
+        self,
+        data: Union[pint.Quantity, xr.DataArray],
+        dims: List[str],
+        coords: Dict[str, pint.Quantity],
+    ) -> xr.DataArray:
         """Initialize the internal data with discrete values."""
         if not isinstance(data, xr.DataArray):
             if coords is not None:
@@ -865,8 +869,11 @@ class GenericSeries:
         self._check_constraints_discrete(data)
 
         self._obj = data
+        return data
 
-    def _init_get_updated_dims_and_units(self, expr, dims, units):
+    def _init_get_updated_dims_and_units(
+        self, expr: MathematicalExpression, dims, units
+    ) -> Tuple[Dict[str, str], Dict[str, pint.Unit]]:
         """Cast dimensions and units into the internally used, unified format."""
         if dims is None:
             dims = {}
@@ -890,7 +897,9 @@ class GenericSeries:
 
         return dims, units
 
-    def _init_expression(self, expr, dims, parameters, units):
+    def _init_expression(
+        self, expr: Union[str, MathematicalExpression], dims, parameters, units
+    ):
         """Initialize the internal data with a mathematical expression."""
         # Check and update expression
         if isinstance(expr, MathematicalExpression):
@@ -983,7 +992,7 @@ class GenericSeries:
             if isinstance(v, tuple):
                 v = (Q_(v[0]), v[1])
             elif isinstance(v, xr.DataArray):
-                if not isinstance(v.data, pint.Quantity):
+                if v.pint.units is None:
                     raise ValueError(f"Value for parameter {k} is not a quantity.")
             else:
                 v = Q_(v)
@@ -1204,7 +1213,7 @@ class GenericSeries:
     @property
     def is_discrete(self) -> bool:
         """Return `True` if the time series is described by discrete values."""
-        return not self.is_expression
+        return isinstance(self._obj, xr.DataArray)
 
     @property
     def is_expression(self) -> bool:
@@ -1264,20 +1273,16 @@ class GenericSeries:
         ut.xr_check_dimensionality(data_array, cls._required_unit_dimensionality)
 
         # check coordinate constraints
-        ref: Dict[str, Any] = {}
+        _units = cls._required_dimension_units
+        _vals = cls._required_dimension_coordinates
+        _keys = (set(_units.keys()) & set(data_array.dims)) | set(_vals.keys())
 
-        def _update_ref_coords(ref_dict, item, key, val):
-            """Update the coordinate reference dict `r`."""
-            coord = ref_dict.get(key, {})
-            coord[item] = val
-            ref_dict[key] = coord
-
-        for k, v in cls._required_dimension_units.items():
-            if k in data_array.dims:
-                _update_ref_coords(ref, "dimensionality", k, v)
-
-        for k, v in cls._required_dimension_coordinates.items():
-            _update_ref_coords(ref, "values", k, v)
+        ref = {k: {} for k in _keys}
+        for k in ref.keys():
+            if k in _units:
+                ref[k]["dimensionality"] = _units[k]
+            if k in _vals:
+                ref[k]["values"] = _vals[k]
 
         ut.xr_check_coords(data_array, ref)
 
@@ -1347,9 +1352,13 @@ class GenericSeries:
                     f"coordinates {v}. Therefore it can't be a variable dimension."
                 )
 
-            ref = {k: {"values": v}}
-            for param in expr.parameters.values():
-                if isinstance(param, xr.DataArray) and k in param.coords.keys():
-                    ut.xr_check_coords(param, ref)
+        ref = {
+            k: {"values": v, "optional": False}
+            for k, v in cls._required_dimension_coordinates.items()
+        }
+        coords = {
+            k: v[k] for k, v in expr.parameters.items() if isinstance(v, xr.DataArray)
+        }
+        ut.xr_check_coords(coords, ref)
 
-            # todo: add limits for dims?
+        # todo: add limits for dims?

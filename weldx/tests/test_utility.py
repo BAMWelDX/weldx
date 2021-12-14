@@ -358,7 +358,7 @@ _dax_ref = dict(
 
 
 @pytest.mark.parametrize(
-    "dax, ref_dict",
+    "coords, ref_dict",
     [
         (_dax_check, _dax_ref),
         (_dax_check.coords, _dax_ref),
@@ -371,9 +371,9 @@ _dax_ref = dict(
         (_dax_check, {"d3": {"dtype": ["datetime64", "timedelta64"]}}),
     ],
 )
-def test_xr_check_coords(dax, ref_dict):
+def test_xr_check_coords(coords, ref_dict):
     """Test weldx.utility.xr_check_coords function."""
-    assert ut.xr_check_coords(dax, ref_dict)
+    assert ut.xr_check_coords(coords, ref_dict)
 
 
 @pytest.mark.parametrize(
@@ -392,7 +392,6 @@ def test_xr_check_coords(dax, ref_dict):
         (_dax_check, {"d1": {"dimensionality": "kg"}}, DimensionalityError),
         (_dax_check, {"d3": {"dtype": "timedelta64"}}, TypeError),
         (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
-        ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):

@@ -841,9 +841,9 @@ class TestDerivedFromGenericSeries:
         "dims, units, exception",
         [
             (["t", "b"], dict(t="s", b="m"), None),
-            (["t", "b"], dict(t="m"), pint.DimensionalityError),
+            (["t", "b"], dict(t="m"), (pint.DimensionalityError, KeyError)),
             (["t", "b"], dict(t="m", b="m"), pint.DimensionalityError),
-            (["t", "b"], dict(b="s"), KeyError),
+            (["t", "b"], dict(b="m"), KeyError),
             (["t", "b"], dict(t="s", b="s"), pint.DimensionalityError),
             (["t", "b"], dict(t="m", b="s"), pint.DimensionalityError),
             (["t"], dict(t="s"), None),
