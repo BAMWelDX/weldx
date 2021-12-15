@@ -798,6 +798,8 @@ class GenericSeries:
         interpolation :
             (Only for discrete values) The interpolating method that should be used
             during evaluation.
+        parameters :
+            (Only for expressions) Parameters to set in the math expression.
 
         Raises
         ------
@@ -820,8 +822,12 @@ class GenericSeries:
         self._interpolation = "linear" if interpolation is None else interpolation
 
         if isinstance(obj, (pint.Quantity, xr.DataArray)):
+            if not isinstance(dims, list):
+                raise ValueError(f"Expected 'dims' to be a list but got {dims}")
             self._init_discrete(obj, dims, coords)
         elif isinstance(obj, (MathematicalExpression, str)):
+            if not isinstance(dims, dict):
+                raise ValueError(f"Expected 'dims' to be a mapping but got {dims}")
             self._init_expression(obj, dims, parameters, units)
         else:
             raise TypeError(f'The data type "{type(obj)}" is not supported.')
@@ -846,7 +852,7 @@ class GenericSeries:
 
         if self.interpolation != other.interpolation:
             return False
-        return self._obj.identical(other._obj)
+        return self.data_array.identical(other._obj)
 
     def _init_discrete(
         self,
@@ -904,7 +910,11 @@ class GenericSeries:
         return dims, units
 
     def _init_expression(
-        self, expr: Union[str, MathematicalExpression], dims, parameters, units
+        self,
+        expr: Union[str, MathematicalExpression],
+        dims: Dict[str, str],
+        parameters,
+        units: Dict[str, pint.Unit],
     ):
         """Initialize the internal data with a mathematical expression."""
         # Check and update expression
@@ -912,7 +922,7 @@ class GenericSeries:
             parameters = expr.parameters
             expr = str(expr.expression)
         if parameters is not None:
-            self._update_expression_params(parameters)
+            parameters = self._update_expression_params(parameters)
         expr = MathematicalExpression(expr, parameters)
 
         if expr.num_variables == 0:
@@ -1013,8 +1023,8 @@ class GenericSeries:
                 self._obj.data.magnitude, threshold=3, precision=4, prefix="        "
             )
             rep += f"\nValues:\n\t{arr_str}\n"
-            rep += f"\nDimensions:\n\t{self.dims}\n"
-            rep += "\nCoordinates:\n"
+            rep += f"Dimensions:\n\t{self.dims}\n"
+            rep += "Coordinates:\n"
             for coord, val in self.coordinates.items():
                 c_d = np.array2string(val.data, threshold=3, precision=4)
                 rep += f"\t{coord}".ljust(7)
@@ -1022,13 +1032,13 @@ class GenericSeries:
                 rep += f" {val.attrs.get(UNITS_KEY)}\n"
         else:
             rep += self.data.__repr__().replace("<MathematicalExpression>\n", "")
-            rep += "\nFree Dimensions:\n"
+            rep += "Free Dimensions:\n"
             for k, v in self._variable_units.items():
                 rep += f"\t{k} in {v}\n"
-            rep += "\nOther Dimensions:\n"
+            rep += "Other Dimensions:\n"
             rep += f"\t{[v for v in self.dims if v not in self._variable_units]}\n"
 
-        return rep + f"\nUnits:\n\t{self.units}\n"
+        return rep + f"Units:\n\t{self.units}\n"
 
     def __add__(self, other):
         """Add two `GenericSeries`."""
@@ -1287,7 +1297,7 @@ class GenericSeries:
         _vals = cls._required_dimension_coordinates
         _keys = (set(_units.keys()) & set(data_array.dims)) | set(_vals.keys())
 
-        ref = {k: {} for k in _keys}
+        ref: Dict[str, Dict] = {k: {} for k in _keys}
         for k in ref.keys():
             if k in _units:
                 ref[k]["dimensionality"] = _units[k]
