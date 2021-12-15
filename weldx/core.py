@@ -1148,19 +1148,21 @@ class GenericSeries:
         #     xarray as the parameters value
         return NotImplemented
 
-    def _evaluate_expr(self, **kwargs: Dict[str, xr.DataArray]) -> GenericSeries:
+    def _evaluate_expr(self, coords: List[SeriesParameter]) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
-        if len(kwargs) == self._obj.num_variables:
-            data = self._obj.evaluate(**kwargs)
+        if len(coords) == self._obj.num_variables:
+            coords = {v.symbol: v.data_array for v in coords}
+            data = self._obj.evaluate(**coords)
             return self.__class__(data)
 
         # turn passed coords into parameters of the expression
         new_series = deepcopy(self)
-        for k, v in kwargs.items():
-            # skipcq: PYL-W0212
-            new_series._obj.set_parameter(k, (v, self._symbol_dims[k]))
-            new_series._symbol_dims.pop(k)  # skipcq: PYL-W0212
-            new_series._variable_units.pop(k)  # skipcq: PYL-W0212
+        for p in coords:
+            new_series._obj.set_parameter(  # skipcq: PYL-W0212
+                p.symbol, (p.quantity, p.dim)
+            )
+            new_series._symbol_dims.pop(p.symbol)  # skipcq: PYL-W0212
+            new_series._variable_units.pop(p.symbol)  # skipcq: PYL-W0212
         return new_series
 
     def __call__(self, **kwargs) -> GenericSeries:
@@ -1208,8 +1210,7 @@ class GenericSeries:
         ]
 
         if self.is_expression:
-            coords = {v.symbol: v.data_array for v in coords}
-            return self._evaluate_expr(**coords)
+            return self._evaluate_expr(coords)
 
         coords = {v.dim: v.data_array.pint.dequantify() for v in coords}
         for k in coords:
