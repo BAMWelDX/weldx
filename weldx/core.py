@@ -811,6 +811,14 @@ class SeriesParameter:
         if isinstance(self.values, pint.Quantity):
             return self.values
 
+    @property
+    def coord_tuple(self) -> Tuple[str, np.array, Dict[str, pint.Unit]]:
+        """Get the parameter in xarray coordinate tuple format."""
+        if isinstance(self.values, pint.Quantity):
+            return _quantity_to_coord_tuple(self.values, self.dim)
+        da: xr.DataArray = self.values.pint.dequantify()
+        return self.dim, da.data, da.weldx.units
+
 
 class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
@@ -943,12 +951,7 @@ class GenericSeries:
         if not isinstance(data, xr.DataArray):
             if coords is not None:
                 coords = {
-                    k: (
-                        xr.DataArray(Q_(v), dims=[k]).pint.dequantify()
-                        if not isinstance(v, xr.DataArray)
-                        else v
-                    )
-                    for k, v in coords.items()
+                    k: SeriesParameter(v, k).coord_tuple for k, v in coords.items()
                 }
             data = xr.DataArray(data=data, dims=dims, coords=coords).weldx.quantify()
         else:
