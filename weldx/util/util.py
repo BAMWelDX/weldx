@@ -10,7 +10,7 @@ from collections.abc import Sequence, Set
 from functools import wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
-from typing import Callable, ClassVar, Collection, Dict, Hashable, Mapping, Tuple, Union
+from typing import Callable, ClassVar, Collection, Dict, Hashable, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -20,7 +20,6 @@ import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
 
-from weldx.constants import UNITS_KEY
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.time import Time
 
@@ -423,19 +422,3 @@ def _patch_mod_all(module_name: str):
 def apply_func_by_mapping(func_map: Dict[Hashable, Callable], inputs):
     """Transform a dict by running functions mapped by keys over its values."""
     return {k: (func_map[k](v) if k in func_map else v) for k, v in inputs.items()}
-
-
-def _quantity_to_coord_tuple(
-    v: pint.Quantity, dim
-) -> Tuple[str, np.array, Dict[str, pint.Unit]]:
-    return (dim, v.m, {UNITS_KEY: v.u})
-
-
-def _quantity_to_xarray(v: pint.Quantity, dim: str) -> xr.DataArray:
-    """Convert a single quantity into a formatted xarray dataarray."""
-    return xr.DataArray(v, dims=[dim], coords={dim: (dim, v.m, {UNITS_KEY: v.u})})
-
-
-def _quantities_to_xarray(q_dict: Dict[str, pint.Quantity]) -> Dict[str, xr.DataArray]:
-    """Convert a str:Quantity mapping into a mapping of xarray Datarrays."""
-    return {k: _quantity_to_xarray(v, k) for k, v in q_dict.items()}

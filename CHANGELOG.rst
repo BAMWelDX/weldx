@@ -55,6 +55,8 @@ dependencies
 
 -  bump to ``xarray >=0.19`` for array creation compatibility [:pull:`618`]
 
+-  add ``bidict`` dependency [:pull:``]
+
 ********************
  0.5.2 (18.11.2021)
 ********************
