@@ -725,10 +725,6 @@ class TimeSeries(TimeDependent):
 #  - add doctests (examples)
 
 
-def _pass_kwargs(**kwargs):
-    return kwargs
-
-
 class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
 
@@ -766,7 +762,7 @@ class GenericSeries:
         coords: Dict[str, pint.Quantity] = None,
         units: Dict[str, Union[str, pint.Unit]] = None,
         interpolation: str = None,
-        parameters: Dict[str, Union[str, pint.Quantity]] = None,
+        parameters: Dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
     ):
         """Create a generic series.
 
@@ -822,12 +818,8 @@ class GenericSeries:
         self._interpolation = "linear" if interpolation is None else interpolation
 
         if isinstance(obj, (pint.Quantity, xr.DataArray)):
-            if not isinstance(dims, (list, type(None))):
-                raise ValueError(f"Expected 'dims' to be a list but got {dims}")
             self._init_discrete(obj, dims, coords)
         elif isinstance(obj, (MathematicalExpression, str)):
-            if not isinstance(dims, (dict, type(None))):
-                raise ValueError(f"Expected 'dims' to be a mapping but got {dims}")
             self._init_expression(obj, dims, parameters, units)
         else:
             raise TypeError(f'The data type "{type(obj)}" is not supported.')
@@ -913,7 +905,7 @@ class GenericSeries:
         self,
         expr: Union[str, MathematicalExpression],
         dims: Dict[str, str],
-        parameters,
+        parameters: Dict[str, Union[str, pint.Quantity, xr.DataArray]],
         units: Dict[str, pint.Unit],
     ):
         """Initialize the internal data with a mathematical expression."""
@@ -922,7 +914,7 @@ class GenericSeries:
             parameters = expr.parameters
             expr = str(expr.expression)
         if parameters is not None:
-            self._update_expression_params(parameters)
+            parameters = self._update_expression_params(parameters)
         expr = MathematicalExpression(expr, parameters)
 
         if expr.num_variables == 0:
@@ -993,17 +985,20 @@ class GenericSeries:
         return expr_units
 
     @staticmethod
-    def _update_expression_params(params):
-        """Check and update the expression parameters to a valid internal type.
+    def _update_expression_params(
+        parameters: Dict[str, Union[str, pint.Quantity, xr.DataArray]]
+    ) -> Dict[str, Union[pint.Quantity, xr.DataArray]]:
+        """Create expression parameters as a valid internal type.
 
         Valid types are all input types for the `MathematicalExpression`, with the
-        limitation that every parameter needs a unit. The passed dictionary is modified
-        in place, therefore the function returns nothing.
-
+        limitation that every parameter needs a unit.
         """
         # todo
         #  - enable usage of dicts for params (data, dims, coords)
         #  - tuple should accept third element (coords)
+
+        params = parameters.copy()
+
         for k, v in params.items():
             if isinstance(v, tuple):
                 v = (Q_(v[0]), v[1])
@@ -1013,6 +1008,8 @@ class GenericSeries:
             else:
                 v = Q_(v)
             params[k] = v
+
+        return params
 
     def __repr__(self):
         """Give __repr__ output."""
