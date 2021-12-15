@@ -822,11 +822,11 @@ class GenericSeries:
         self._interpolation = "linear" if interpolation is None else interpolation
 
         if isinstance(obj, (pint.Quantity, xr.DataArray)):
-            if not isinstance(dims, list):
+            if not isinstance(dims, (list, type(None))):
                 raise ValueError(f"Expected 'dims' to be a list but got {dims}")
             self._init_discrete(obj, dims, coords)
         elif isinstance(obj, (MathematicalExpression, str)):
-            if not isinstance(dims, dict):
+            if not isinstance(dims, (dict, type(None))):
                 raise ValueError(f"Expected 'dims' to be a mapping but got {dims}")
             self._init_expression(obj, dims, parameters, units)
         else:
@@ -922,7 +922,7 @@ class GenericSeries:
             parameters = expr.parameters
             expr = str(expr.expression)
         if parameters is not None:
-            parameters = self._update_expression_params(parameters)
+            self._update_expression_params(parameters)
         expr = MathematicalExpression(expr, parameters)
 
         if expr.num_variables == 0:
