@@ -734,9 +734,9 @@ def _quantity_to_coord_tuple(
     return (dim, v.m, {UNITS_KEY: v.u})
 
 
-def _quantity_to_xarray(v: pint.Quantity, dim: str) -> xr.DataArray:
+def _quantity_to_xarray(v: pint.Quantity, dim: str = None) -> xr.DataArray:
     """Convert a single quantity into a formatted xarray dataarray."""
-    return xr.DataArray(v, dims=[dim], coords={dim: (dim, v.m, {UNITS_KEY: v.u})})
+    return xr.DataArray(v, dims=dim)
 
 
 def _quantities_to_xarray(q_dict: Dict[str, pint.Quantity]) -> Dict[str, xr.DataArray]:
@@ -756,6 +756,7 @@ class SeriesParameter:
     """The math expression symbol associated with the parameter."""
 
     def __post_init__(self):
+        """Convert inputs and validate values."""
         if isinstance(self.values, SeriesParameter):
             self.dim = self.values.dim
             self.symbol = self.values.symbol
@@ -772,15 +773,15 @@ class SeriesParameter:
         if not self.values.shape:
             self.values = np.expand_dims(self.values, 0)
 
-        if (
-            isinstance(self.values, pint.Quantity)
-            and self.dim is None
-            and self.symbol is not None
-        ):
-            self.dim = self.symbol
-
-        if not isinstance(self.values, xr.DataArray) and self.dim is None:
-            raise ValueError("Must provide dimensions if input is not DataArray.")
+        # if (
+        #     isinstance(self.values, pint.Quantity)
+        #     and self.dim is None
+        #     and self.symbol is not None
+        # ):
+        #     self.dim = self.symbol
+        #
+        # if not isinstance(self.values, xr.DataArray) and self.dim is None:
+        #     raise ValueError("Must provide dimensions if input is not DataArray.")
 
         if self.symbol is None:
             self.symbol = self.dim
@@ -1197,7 +1198,7 @@ class GenericSeries:
             coords = {v.symbol: v.data_array for v in coords}
             return self._evaluate_expr(**coords)
 
-        coords = {v.dim: v.data_array for v in coords}
+        coords = {v.dim: v.data_array.pint.dequantify() for v in coords}
         for k in coords:
             if k not in self.data_array.dims:
                 raise KeyError(f"'{k}' is not a valid dimension.")
@@ -1336,7 +1337,7 @@ class GenericSeries:
         """Get the shape of the generic series data."""
         if self.is_expression:
             return NotImplemented
-        raise self._obj.shape  # type: ignore[union-attr] # always discrete here
+        return self.data_array.shape
         # todo Expression? -> dict shape?
 
     @property
@@ -1344,7 +1345,7 @@ class GenericSeries:
         """Get the units of the generic series data."""
         if self.is_expression:
             return self._units
-        return self._obj.data.u  # type: ignore[union-attr] # always discrete here
+        return self.data_array.pint.units
 
     # constraint checks for derived series ---------------------------------------------
 

@@ -324,6 +324,11 @@ def xr_interp_like(
             k: (v if isinstance(v, Iterable) else np.expand_dims(v, 0))
             for k, v in da2.items()
         }
+        # if single coordinates as xarray we must dequantify
+        sel_coords = {
+            k: (v.pint.dequantify() if isinstance(v, xr.DataArray) else v)
+            for k, v in sel_coords.items()
+        }
 
     if interp_coords is not None:
         sel_coords = {k: v for k, v in sel_coords.items() if k in interp_coords}
