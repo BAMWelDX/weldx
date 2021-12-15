@@ -746,7 +746,16 @@ def _quantities_to_xarray(q_dict: Dict[str, pint.Quantity]) -> Dict[str, xr.Data
 
 @dataclass
 class SeriesParameter:
-    """Describes a parameter/coordinate of a Series."""
+    """Describes a parameter/coordinate of a Series and convert between formats.
+
+    The input value gets stored as either quantity or DataArray.
+    (DataArray is stored 'as is', other inputs will be converted to quantities).
+
+    In addition, the desired dimension on the Parameter and an optional symbol
+    representation for mathexpressions can be added.
+
+    The stored value can be converted to different formats available as properties.
+    """
 
     values: Union[xr.DataArray, pint.Quantity]
     """The values of the parameter are stored as quantities or DataArrays"""
@@ -770,8 +779,8 @@ class SeriesParameter:
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
             self.values = Q_(self.values)
 
-        if not self.values.shape:
-            self.values = np.expand_dims(self.values, 0)
+        # if not self.values.shape:
+        #     self.values = np.expand_dims(self.values, 0)
 
         # if (
         #     isinstance(self.values, pint.Quantity)
@@ -804,7 +813,11 @@ class SeriesParameter:
         """Get the parameter formatted as xarray."""
         if isinstance(self.values, xr.DataArray):
             return self.values
-        return _quantity_to_xarray(self.values, self.dim)
+        # we cannot have scalar values here
+        values = self.values
+        if not values.shape:
+            values = np.expand_dims(values, 0)
+        return _quantity_to_xarray(values, self.dim)
 
     @property
     def quantity(self):
