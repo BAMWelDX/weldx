@@ -824,7 +824,7 @@ class GenericSeries:
         else:
             raise TypeError(f'The data type "{type(obj)}" is not supported.')
 
-    def __eq__(self, other: GenericSeries):
+    def __eq__(self, other):
         """Compare the Generic Series to another object."""
         from weldx.util import compare_nested
 
