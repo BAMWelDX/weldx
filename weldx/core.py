@@ -1104,8 +1104,11 @@ class GenericSeries:
             self.__class__._evaluation_preprocessor, kwargs
         )
 
-        # interpret strings as Quantities and add singular dimension
-        kwargs = {k: (Q_(v) if isinstance(v, str) else v) for k, v in kwargs.items()}
+        # interpret strings etc. as Quantities and add singular dimension
+        kwargs = {
+            k: (Q_(v) if not isinstance(v, (pint.Quantity, xr.DataArray)) else v)
+            for k, v in kwargs.items()
+        }
         kwargs = {
             k: (np.expand_dims(v, 0) if not v.shape else v) for k, v in kwargs.items()
         }
