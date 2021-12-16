@@ -12,7 +12,7 @@ from pint.errors import DimensionalityError
 from xarray import DataArray
 
 import weldx.util as ut
-from weldx.constants import Q_, U_, UNITS_KEY
+from weldx.constants import META_ATTR, Q_, U_, UNITS_KEY
 from weldx.time import Time
 
 
@@ -175,7 +175,7 @@ class TestXarrayInterpolation:
                 "t": ("t", t.m, {UNITS_KEY: t.u}),
                 "a": ("a", a.m, {UNITS_KEY: a.u}),
             },
-            attrs={"wx_metadata": "meta"},
+            attrs={META_ATTR: "meta"},
         )
 
         if fmt == "dict":
@@ -201,7 +201,7 @@ class TestXarrayInterpolation:
         for n in range(len(da.a)):
             assert np.all(da2.sel(a=n) == result[n, :])
         assert da2.pint.units == data_units
-        assert da2.attrs["wx_metadata"] == "meta"
+        assert da2.attrs[META_ATTR] == "meta"
 
         assert da2.t.attrs.get(UNITS_KEY, None) == t_interp.units
         assert da2.a.attrs.get(UNITS_KEY, None) == a.units
@@ -572,7 +572,7 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         assert ut.compare_nested(self.a, self.b)
 
     def test_metadata_modified(self):  # noqa: D102
-        self.b["wx_metadata"]["welder"] = "anonymous"
+        self.b[META_ATTR]["welder"] = "anonymous"
         assert not ut.compare_nested(self.a, self.b)
 
     def test_measurements_modified(self):  # noqa: D102

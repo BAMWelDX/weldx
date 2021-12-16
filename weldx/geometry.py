@@ -17,6 +17,7 @@ import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.time import Time
+from weldx.types import QuantityLike
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
 _DEFAULT_ANG_UNIT = UREG.rad
@@ -1012,7 +1013,7 @@ class Shape:
     def apply_reflection(
         self,
         reflection_normal: pint.Quantity,
-        distance_to_origin: pint.Quantity = "0mm",
+        distance_to_origin: QuantityLike = "0mm",
     ):
         """Apply a reflection at the given axis to the shape.
 
@@ -1125,8 +1126,8 @@ class Shape:
     @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT)
     def reflect(
         self,
-        reflection_normal: pint.Quantity,
-        distance_to_origin: pint.Quantity = Q_("0mm"),
+        reflection_normal: QuantityLike,
+        distance_to_origin: QuantityLike = "0mm",
     ) -> Shape:
         """Get a reflected copy of the shape.
 
@@ -1149,7 +1150,7 @@ class Shape:
 
     @UREG.check(None, "[length]", "[length]")
     def reflect_across_line(
-        self, point_start: pint.Quantity, point_end: pint.Quantity
+        self, point_start: QuantityLike, point_end: QuantityLike
     ) -> Shape:
         """Get a reflected copy across a line.
 
@@ -1310,7 +1311,7 @@ class Profile:
     def plot(
         self,
         title: str = None,
-        raster_width: pint.Quantity = Q_(0.5, _DEFAULT_LEN_UNIT),
+        raster_width: pint.Quantity = "0.5mm",
         label: str = None,
         axis: str = "equal",
         axis_labels: List[str] = None,
@@ -2091,7 +2092,7 @@ class Geometry:
         self,
         profile: Union[Profile, VariableProfile, iso.IsoBaseGroove],
         trace_or_length: Union[Trace, pint.Quantity],
-        width: pint.Quantity = Q_(10, "mm"),
+        width: QuantityLike = "10mm",
     ):
         """Construct a geometry.
 
@@ -2113,6 +2114,8 @@ class Geometry:
 
         """
         from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
+
+        width = Q_(width)
 
         if isinstance(profile, IsoBaseGroove):
             profile = profile.to_profile(width)
@@ -2375,8 +2378,8 @@ class Geometry:
     @UREG.check(None, "[length]", "[length]", None, None, None, None, None, None)
     def plot(
         self,
-        profile_raster_width: pint.Quantity = Q_("1mm"),
-        trace_raster_width: pint.Quantity = Q_("50mm"),
+        profile_raster_width: QuantityLike = "1mm",
+        trace_raster_width: QuantityLike = "50mm",
         axes: matplotlib.axes.Axes = None,
         color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
         label: str = None,
