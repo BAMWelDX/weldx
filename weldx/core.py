@@ -802,14 +802,14 @@ class SeriesParameter:
             raise ValueError(f"Cannot set parameter as {self.values}")
 
     @property
-    def units(self):
+    def units(self) -> pint.Unit:
         """Get the units information of the parameter."""
         if isinstance(self.values, pint.Quantity):
             return self.values.units
         return self.values.weldx.units
 
     @property
-    def data_array(self):
+    def data_array(self) -> xr.DataArray:
         """Get the parameter formatted as xarray."""
         if isinstance(self.values, xr.DataArray):
             return self.values
@@ -820,10 +820,11 @@ class SeriesParameter:
         return _quantity_to_xarray(values, self.dim)
 
     @property
-    def quantity(self):
+    def quantity(self) -> pint.Quantity:
         """Get the parameter formatted as a quantity."""
         if isinstance(self.values, pint.Quantity):
             return self.values
+        return self.values.weldx.quantify().data
 
     @property
     def coord_tuple(self) -> Tuple[str, np.array, Dict[str, pint.Unit]]:
@@ -976,8 +977,9 @@ class GenericSeries:
         self._check_constraints_discrete(data)
         self._obj = data
 
+    @staticmethod
     def _init_get_updated_dims(
-        self, expr: MathematicalExpression, dims: Dict[str, str] = None
+        expr: MathematicalExpression, dims: Dict[str, str] = None
     ) -> Dict[str, str]:
         if dims is None:
             dims = {}
