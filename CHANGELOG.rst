@@ -11,6 +11,9 @@ added
 
 -  add experimental unit support for ``.weldx.interp_like`` accessor [:pull:`518`]
 
+-  new tutorial series that introduces the most important WelDX features
+   step by step based on a full example file [:pull:`555`]
+
 removed
 =======
 

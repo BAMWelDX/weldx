@@ -119,9 +119,9 @@ def test_cross_section(groove):  # noqa
 
     groove_obj, groove_cls = groove
     # make rasterization for U-based grooves rather rough.
-    with temp_attr(
+    with temp_attr(  # skipcq: PYL-E1129
         groove_obj, "_AREA_RASTER_WIDTH", Q_(0.75, _DEFAULT_LEN_UNIT)
-    ):  # skipcq: PYL-E1129
+    ):
         try:
             A = groove_obj.cross_sect_area
         except NotImplementedError:
