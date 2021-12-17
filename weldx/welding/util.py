@@ -20,7 +20,7 @@ def sine(
     f: QuantityLike,
     amp: QuantityLike,
     bias: QuantityLike = None,
-    phase: QuantityLike = Q_(0, "rad"),
+    phase: QuantityLike = None,
 ) -> TimeSeries:
     """Create a simple sine TimeSeries from quantity parameters.
 
@@ -42,6 +42,9 @@ def sine(
     weldx.TimeSeries :
 
     """
+    if phase is None:
+        phase = Q_(0, "rad")
+
     if bias is None:
         amp = Q_(amp)
         bias = 0.0 * amp.u

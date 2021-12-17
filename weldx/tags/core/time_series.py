@@ -19,7 +19,7 @@ class TimeSeriesConverter(WeldxConverter):
     def to_yaml_tree(self, obj: TimeSeries, tag: str, ctx) -> dict:
         """Convert to python dict."""
         if isinstance(obj.data, pint.Quantity):
-            if obj.shape == tuple([1]):  # constant
+            if obj.shape == (1,):  # constant
                 return {
                     "units": obj.units,
                     "value": obj.data.magnitude[0],
