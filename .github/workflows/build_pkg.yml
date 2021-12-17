@@ -1,4 +1,4 @@
-name: build
+name: package builds
 on:
   push:
     branches:
@@ -44,7 +44,7 @@ jobs:
           key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./devtools/conda.recipe/build_env.yml') }}
 
       - name: Setup Conda Environment
-        uses: mamba-org/provision-with-micromamba@v10
+        uses: mamba-org/provision-with-micromamba@v11
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
           micromamba-version: 0.16.0

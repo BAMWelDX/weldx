@@ -2,12 +2,17 @@ from pathlib import Path
 
 import yaml
 
+from weldx.asdf.constants import (
+    WELDX_EXTENSION_URI,
+    WELDX_EXTENSION_VERSION,
+    WELDX_MANIFEST_URI,
+)
 from weldx.asdf.util import get_converter_for_tag
 
 
 def update_manifest(
     search_dir: str = "../../weldx/schemas",
-    out: str = "../../weldx/manifests/weldx-0.1.0.yaml",
+    out: str = f"../../weldx/manifests/weldx-{WELDX_EXTENSION_VERSION}.yaml",
 ):
     """Create manifest file from existing schemas."""
     # read existing manifest
@@ -15,6 +20,9 @@ def update_manifest(
         Path(out).read_text(),
         Loader=yaml.SafeLoader,
     )
+
+    manifest["id"] = WELDX_MANIFEST_URI
+    manifest["extension_uri"] = WELDX_EXTENSION_URI
 
     # keep only ASDF schema mappings
     manifest["tags"] = [
@@ -34,12 +42,6 @@ def update_manifest(
             uri: str = content["id"]
             if uri.startswith("asdf://weldx.bam.de"):
                 tag = uri.replace("/schemas/", "/tags/")
-            elif uri.startswith("http://weldx.bam.de"):  # legacy_code
-                if "tag" in content:
-                    tag = content["tag"]
-                else:
-                    tag = None
-                    print(f"No tag for {uri=}")
             else:
                 raise ValueError(f"Unknown URI format {uri=}")
 

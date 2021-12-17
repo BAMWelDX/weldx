@@ -14,7 +14,7 @@ from scipy.spatial.transform import Rotation
 
 import weldx.transformations as tf
 from weldx.asdf.util import write_buffer, write_read_buffer
-from weldx.constants import Q_
+from weldx.constants import META_ATTR, Q_
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
@@ -55,8 +55,8 @@ def test_rotation(inputs):
     data = write_read_buffer({"rot": inputs})
     r = data["rot"]
     assert np.allclose(r.as_quat(), inputs.as_quat())
-    if hasattr(inputs, "wx_meta"):
-        assert r.wx_meta == inputs.wx_meta
+    if hasattr(inputs, META_ATTR):
+        assert getattr(r, META_ATTR) == getattr(inputs, META_ATTR)
 
 
 def test_rotation_euler_exception():
@@ -193,12 +193,10 @@ def get_local_coordinate_system(time_dep_orientation: bool, time_dep_coordinates
 
     """
     if not time_dep_coordinates:
-        coords = Q_(np.asarray([2.0, 5.0, 1.0]), "mm")
+        coords = Q_([2.0, 5.0, 1.0], "mm")
     else:
         coords = Q_(
-            np.asarray(
-                [[2.0, 5.0, 1.0], [1.0, -4.0, 1.2], [0.3, 4.4, 4.2], [1.1, 2.3, 0.2]]
-            ),
+            [[2.0, 5.0, 1.0], [1.0, -4.0, 1.2], [0.3, 4.4, 4.2], [1.1, 2.3, 0.2]],
             "mm",
         )
 
@@ -720,23 +718,28 @@ class TestPointCloud:
     @staticmethod
     @pytest.mark.parametrize("copy_arrays", [True, False])
     @pytest.mark.parametrize("lazy_load", [True, False])
-    def test_asdf_serialization(copy_arrays, lazy_load):
+    @pytest.mark.parametrize("reshape", [True, False])
+    def test_asdf_serialization(copy_arrays, lazy_load, reshape):
+        time = None
         coordinates = [
             [0.0, 0.0, 0.0],
             [1.0, 0.0, 0.0],
             [1.0, 1.0, 0.0],
             [0.0, 1.0, 0.0],
         ]
-
         triangles = [[0, 1, 2], [2, 3, 0]]
 
-        pc = SpatialData(coordinates=coordinates, triangles=triangles)
+        if reshape:
+            coordinates = np.array(coordinates).reshape((2, 2, 3))
+            time = ["0s", "1s"]
+
+        pc = SpatialData(coordinates=coordinates, triangles=triangles, time=time)
         tree = {"point_cloud": pc}
         pc_file = write_read_buffer(
             tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
         )["point_cloud"]
 
-        assert np.all(pc_file.coordinates == pc.coordinates)
+        assert pc_file == pc
 
 
 # --------------------------------------------------------------------------------------

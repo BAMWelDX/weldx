@@ -445,7 +445,7 @@ class Time:
             nanoseconds = nanoseconds[0]
         q = Q_(nanoseconds, "ns").to(unit)
         if self.is_absolute:
-            setattr(q, "time_ref", self.reference_time)  # store time_ref info
+            q.time_ref = self.reference_time  # store time_ref info
         return q
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
@@ -718,7 +718,7 @@ class Time:
     union = _UnionDescriptor()
     """Calculate the union of multiple time-like objects.
 
-    This method can eiter be used as a class or instance method. When used on an
+    This method can either be used as a class or instance method. When used on an
     instance, its values are included in the calculated time union.
 
     Note that any reference time information will be dropped.

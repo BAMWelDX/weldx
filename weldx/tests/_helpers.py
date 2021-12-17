@@ -11,7 +11,7 @@ def rotated_coordinate_system(
     angle_x=np.pi / 3,
     angle_y=np.pi / 4,
     angle_z=np.pi / 5,
-    coordinates=np.array([0, 0, 0]),
+    coordinates=np.array([0, 0, 0]),  # noqa B008
 ) -> LocalCoordinateSystem:
     """Get a coordinate system with rotated orientation.
 

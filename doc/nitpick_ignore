@@ -9,6 +9,10 @@ py:obj weldx.GmawProcess.parameters
 py:class types_path_and_file_like
 py:class weldx.asdf.types.WeldxConverter
 
+# numpy typing
+py:class numpy.typing._array_like._SupportsArray
+py:class npt.ArrayLike
+
 # matplotlib
 py:class matplotlib.axes.Axes
 py:class matplotlib.axes._axes.Axes

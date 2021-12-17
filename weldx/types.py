@@ -3,6 +3,10 @@ import pathlib
 from io import IOBase
 from typing import Protocol, Union, runtime_checkable
 
+import numpy.typing as npt
+import pint
+import xarray as xr
+
 __all__ = [
     "SupportsFileReadOnly",
     "SupportsFileReadWrite",
@@ -55,3 +59,7 @@ types_path_like = Union[str, pathlib.Path]
 
 types_path_and_file_like = Union[types_path_like, types_file_like]
 """types to handle paths and file handles."""
+
+ArrayLike = Union[npt.ArrayLike, xr.DataArray, pint.Quantity]
+QuantityLike = Union[pint.Quantity, str]
+UnitLike = Union[str, pint.Unit, pint.util.UnitsContainer]

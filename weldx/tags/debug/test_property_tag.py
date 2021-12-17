@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 
 import pandas as pd
+import pint
 
 from weldx.asdf.util import dataclass_serialization_class
+from weldx.constants import Q_
 
 __all__ = ["PropertyTagTestClass", "PropertyTagTestClassConverter"]
 
@@ -13,7 +15,7 @@ class PropertyTagTestClass:
 
     prop1: pd.Timestamp = pd.Timestamp("2020-01-01")
     prop2: pd.Timestamp = pd.Timestamp("2020-01-02")
-    prop3: pd.Timestamp = pd.Timestamp("2020-01-03")
+    prop3: pint.Quantity = Q_("3m")
 
 
 PropertyTagTestClassConverter = dataclass_serialization_class(

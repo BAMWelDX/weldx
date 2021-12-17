@@ -45,7 +45,7 @@ def _initialize_datetime_type(cls_type, values):
 def _initialize_date_time_quantity(timedelta, unit, time_ref):
     """Initialize a quantity that represents a datetime by adding a ``time_ref``."""
     quantity = Q_(timedelta, unit)
-    setattr(quantity, "time_ref", Timestamp(time_ref))
+    quantity.time_ref = Timestamp(time_ref)
     return quantity
 
 

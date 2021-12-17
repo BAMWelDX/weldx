@@ -16,6 +16,7 @@ from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
 from weldx.asdf.file import _PROTECTED_KEYS, DEFAULT_ARRAY_INLINE_THRESHOLD
 from weldx.asdf.util import get_schema_path
+from weldx.constants import META_ATTR
 from weldx.types import SupportsFileReadWrite
 from weldx.util import WeldxDeprecationWarning, compare_nested
 
@@ -83,7 +84,7 @@ def test_protocol_check(tmpdir):
 @pytest.fixture(scope="class")
 def simple_asdf_file(request):
     """Create an ASDF file with a very simple tree and attaches it to cls."""
-    f = asdf.AsdfFile(tree=dict(wx_metadata=dict(welder="anonymous")))
+    f = asdf.AsdfFile(tree={META_ATTR: dict(welder="anonymous")})
     buff = BytesIO()
     f.write_to(buff)
     request.cls.simple_asdf_file = buff
@@ -209,10 +210,10 @@ class TestWeldXFile:
         f = tempfile.mktemp(dir=tmpdir)
         self.fh.write_to(f)
         with WeldxFile(f, mode="rw") as fh:
-            fh["wx_metadata"]["key"] = True
+            fh[META_ATTR]["key"] = True
 
         with WeldxFile(f, mode="r") as fh:
-            assert fh["wx_metadata"]["key"]
+            assert fh[META_ATTR]["key"]
 
     @staticmethod
     def make_copy(fh):
@@ -229,7 +230,7 @@ class TestWeldXFile:
     def test_operation_on_closed(self):
         """Accessing the file_handle after closing is illegal."""
         self.fh.close()
-        assert self.fh["wx_metadata"]
+        assert self.fh[META_ATTR]
 
         # cannot access closed handles
         with pytest.raises(RuntimeError):
@@ -261,16 +262,16 @@ class TestWeldXFile:
         """Check the file handle gets closed."""
         copy = self.fh.write_to()
         with WeldxFile(copy, mode="rw", sync=sync) as fh:
-            assert "something" not in fh["wx_metadata"]
-            fh["wx_metadata"]["something"] = True
+            assert "something" not in fh[META_ATTR]
+            fh[META_ATTR]["something"] = True
 
         copy.seek(0)
         # check if changes have been written back according to sync flag.
         with WeldxFile(copy, mode="r") as fh2:
             if sync:
-                assert fh2["wx_metadata"]["something"]
+                assert fh2[META_ATTR]["something"]
             else:
-                assert "something" not in fh2["wx_metadata"]
+                assert "something" not in fh2[META_ATTR]
 
     def test_history(self):
         """Test custom software specs for history entries."""
@@ -278,22 +279,22 @@ class TestWeldXFile:
             name="weldx_file_test", author="marscher", homepage="http://no", version="1"
         )
         fh = WeldxFile(
-            tree=dict(wx_metadata={}),
+            tree={META_ATTR: {}},
             software_history_entry=software,
             mode="rw",
         )
-        fh["wx_metadata"]["something"] = True
+        fh[META_ATTR]["something"] = True
         desc = "added some metadata"
         fh.add_history_entry(desc)
         fh.sync()
         buff = self.make_copy(fh)
 
         new_fh = WeldxFile(buff)
-        assert new_fh["wx_metadata"]["something"]
+        assert new_fh[META_ATTR]["something"]
         assert new_fh.history[-1]["description"] == desc
         assert new_fh.history[-1]["software"] == software
 
-        del new_fh["wx_metadata"]["something"]
+        del new_fh[META_ATTR]["something"]
         other_software = dict(
             name="software name", version="42", homepage="no", author="anon"
         )
@@ -542,7 +543,7 @@ class TestWeldXFile:
         while len(self.fh):
             key, _ = self.fh.popitem()
             keys.append(key)
-        assert keys == ["wx_metadata"]
+        assert keys == [META_ATTR]
 
     def test_len_proteced_keys(self):
         """Should only contain key 'wx_metadata'."""

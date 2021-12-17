@@ -2,8 +2,14 @@
 from pathlib import Path as _Path
 
 import pint
+import pint_xarray  # noqa: F401 # pylint: disable=W0611
 
-UNIT_KEY = "units"  # default nomenclature for storing physical units information
+META_ATTR = "wx_metadata"
+"""The default attribute to store weldx metadata."""
+USER_ATTR = "wx_user"
+"""The default attribute to store user metadata."""
+UNITS_KEY = "units"
+"""default nomenclature for storing physical units information"""
 
 WELDX_PATH = _Path(__file__).parent.resolve()
 
@@ -63,11 +69,17 @@ U_.__doc__ = """For details on working with quantities and units, please see the
 """
 
 
+# set default unit registry for pint-xarray
+pint.set_application_registry(WELDX_UNIT_REGISTRY)
+pint_xarray.unit_registry = WELDX_UNIT_REGISTRY
+
 __all__ = (
+    "META_ATTR",
+    "USER_ATTR",
     "WELDX_PATH",
     "WELDX_QUANTITY",
     "WELDX_UNIT_REGISTRY",
     "Q_",
     "U_",
-    "UNIT_KEY",
+    "UNITS_KEY",
 )

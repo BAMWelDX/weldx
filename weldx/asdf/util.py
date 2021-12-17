@@ -66,7 +66,7 @@ def get_schema_path(schema: str) -> Path:  # pragma: no cover
     """
     schema = schema.split(".yaml")[0]
 
-    p = SCHEMA_PATH / ".."  # legacy_code - also look for legacy schemas
+    p = SCHEMA_PATH
     schemas = list(p.glob(f"**/{schema}.yaml"))
     if len(schemas) == 0:
         raise ValueError(f"No matching schema for filename '{schema}'.")
@@ -380,7 +380,7 @@ def dataclass_serialization_class(
     class_type :
         The type of the dataclass
     class_name :
-        The value that should ba stored as the classes name property
+        The value that should be stored as the classes name property
     version :
         The version number
     to_yaml_tree_mod :
@@ -481,7 +481,7 @@ def get_converter_for_tag(tag: str) -> Union[WeldxConverter, None]:
 
 
 def get_highest_tag_version(
-    pattern: str, ctx: Union[SerializationContext, AsdfConfig] = None
+    pattern: Union[str, List[str]], ctx: Union[SerializationContext, AsdfConfig] = None
 ) -> Union[str, None]:
     """Get the highest available weldx extension tag version matching a pattern.
 

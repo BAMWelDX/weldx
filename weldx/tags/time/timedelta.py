@@ -17,6 +17,4 @@ class TimedeltaConverter(WeldxConverter):
 
     def from_yaml_tree(self, node: str, tag, ctx) -> pd.Timedelta:
         """Construct timedelta from tree."""
-        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
-            return pd.Timedelta(node["value"])
         return pd.Timedelta(node)

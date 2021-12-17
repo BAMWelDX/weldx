@@ -149,7 +149,6 @@ class CoordinateSystemManager:
 
     def __eq__(self, other: Any):
         """Test equality of CSM instances."""
-        # todo: also check data  -> add tests
         if not isinstance(other, self.__class__):
             return False
 
@@ -175,17 +174,19 @@ class CoordinateSystemManager:
         for node in graph_0.nodes:
             if node not in graph_1.nodes:
                 return False
+            n0 = graph_0.nodes[node]
+            n1 = graph_1.nodes[node]
+            if not util.compare_nested(n0, n1):
+                return False
 
         # check edges
         for edge in graph_0.edges:
             if edge not in graph_1.edges:
                 return False
 
-        # check coordinate systems
-        for edge in graph_0.edges:
-            lcs_0 = self.graph.edges[(edge[0], edge[1])]["transformation"]
-            lcs_1 = other.graph.edges[(edge[0], edge[1])]["transformation"]
-            if lcs_0 != lcs_1:
+            e0 = graph_0.edges[edge]
+            e1 = graph_1.edges[edge]
+            if not util.compare_nested(e0, e1):
                 return False
 
         return True
@@ -610,6 +611,32 @@ class CoordinateSystemManager:
 
         self._graph.nodes[reference_system]["data"][data_name] = data
 
+    def delete_data(self, data_name: str):
+        """Remove the assigned data with given name.
+
+        Parameters
+        ----------
+        data_name :
+            The previously assigned data name.
+
+        Raises
+        ------
+        ValueError
+            If data_name has not been assigned yet.
+        """
+        # remove data from subsystems
+        for s in self._subsystems:
+            s.data.discard(data_name)
+
+        nodes = self.graph.nodes
+        for cs in nodes:
+            for name in nodes[cs]["data"].keys():
+                if name == data_name:
+                    nodes[cs]["data"].pop(data_name)
+                    return
+
+        raise ValueError(f"Given data_name '{data_name}' has not been assigned.")
+
     def create_cs(
         self,
         coordinate_system_name: str,
@@ -793,7 +820,7 @@ class CoordinateSystemManager:
         """Delete a coordinate system from the coordinate system manager.
 
         If the Coordinate system manager has attached sub system, there are multiple
-        possible  consequences.
+        possible consequences.
 
         - All subsystems attached to the deleted coordinate system or one of
           its child systems are removed from the coordinate system manager

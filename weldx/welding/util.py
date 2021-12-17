@@ -1,5 +1,7 @@
 """Collection of welding utilities."""
-from typing import Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pint
@@ -8,14 +10,17 @@ from weldx.constants import Q_, WELDX_UNIT_REGISTRY
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.welding.groove.iso_9692_1 import IsoBaseGroove
 
+if TYPE_CHECKING:  # pragma: no cover
+    from weldx.types import QuantityLike
+
 __all__ = ["compute_welding_speed"]
 
 
 def sine(
-    f: Union[pint.Quantity, str],
-    amp: Union[pint.Quantity, str],
-    bias: Union[pint.Quantity, str] = None,
-    phase: Union[pint.Quantity, str] = Q_(0, "rad"),
+    f: QuantityLike,
+    amp: QuantityLike,
+    bias: QuantityLike = None,
+    phase: QuantityLike = None,
 ) -> TimeSeries:
     """Create a simple sine TimeSeries from quantity parameters.
 
@@ -37,6 +42,9 @@ def sine(
     weldx.TimeSeries :
 
     """
+    if phase is None:
+        phase = Q_(0, "rad")
+
     if bias is None:
         amp = Q_(amp)
         bias = 0.0 * amp.u
@@ -49,8 +57,8 @@ def sine(
 @WELDX_UNIT_REGISTRY.check(None, "[length]/[time]", "[length]")
 def compute_welding_speed(
     groove: IsoBaseGroove,
-    wire_feed: Union[pint.Quantity, str],
-    wire_diameter: Union[pint.Quantity, str],
+    wire_feed: QuantityLike,
+    wire_diameter: QuantityLike,
 ) -> pint.Quantity:
     """Compute how fast the torch has to be moved to fill the given groove.
 
