@@ -28,6 +28,8 @@ dependencies:
   - typing_extensions
   # GH332
   - docutils=0.16
+  # GH672
+  - meshio<5.2
   # pip packages
   - pip
   - pip:
