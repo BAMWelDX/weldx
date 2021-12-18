@@ -773,8 +773,8 @@ class SeriesParameter:
             return
 
         if isinstance(self.values, tuple):
-            self.values = Q_(self.values[0])
             self.dim = self.values[1]
+            self.values = Q_(self.values[0])
 
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
             self.values = Q_(self.values)
@@ -928,11 +928,11 @@ class GenericSeries:
         self._interpolation = "linear" if interpolation is None else interpolation
 
         if isinstance(obj, (pint.Quantity, xr.DataArray)):
-            if not isinstance(dims, list):
+            if dims is not None and not isinstance(dims, list):
                 raise ValueError(f"Argument 'dims' must be list of strings, not {dims}")
             self._init_discrete(obj, dims, coords)
         elif isinstance(obj, (MathematicalExpression, str)):
-            if not isinstance(dims, dict):
+            if dims is not None and not isinstance(dims, dict):
                 raise ValueError(f"Argument 'dims' must be dict, not {dims}")
             self._init_expression(obj, dims, parameters, units)
         else:
@@ -1115,7 +1115,14 @@ class GenericSeries:
             if v.units is None:
                 raise ValueError(f"Value for parameter {v} is not a quantity.")
 
-        return {p.symbol: p.values for p in params}
+        return {
+            p.symbol: (
+                (p.values, p.dim)  # need to preserve tuple format (quantity, dim)
+                if isinstance(p.values, pint.Quantity) and p.dim != p.symbol
+                else p.values
+            )
+            for p in params
+        }
 
     def __repr__(self):
         """Give __repr__ output."""
