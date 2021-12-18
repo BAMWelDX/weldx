@@ -928,8 +928,12 @@ class GenericSeries:
         self._interpolation = "linear" if interpolation is None else interpolation
 
         if isinstance(obj, (pint.Quantity, xr.DataArray)):
+            if not isinstance(dims, list):
+                raise ValueError(f"Argument 'dims' must be list of strings, not {dims}")
             self._init_discrete(obj, dims, coords)
         elif isinstance(obj, (MathematicalExpression, str)):
+            if not isinstance(dims, dict):
+                raise ValueError(f"Argument 'dims' must be dict, not {dims}")
             self._init_expression(obj, dims, parameters, units)
         else:
             raise TypeError(f'The data type "{type(obj)}" is not supported.')
@@ -1153,8 +1157,8 @@ class GenericSeries:
     def _evaluate_expr(self, coords: List[SeriesParameter]) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(coords) == self._obj.num_variables:
-            coords = {v.symbol: v.data_array for v in coords}
-            data = self._obj.evaluate(**coords)
+            eval_args = {v.symbol: v.data_array for v in coords}
+            data = self._obj.evaluate(**eval_args)
             return self.__class__(data)
 
         # turn passed coords into parameters of the expression
@@ -1203,7 +1207,7 @@ class GenericSeries:
         """
         # Apply preprocessors to arguments
         kwargs = ut.apply_func_by_mapping(
-            self.__class__._evaluation_preprocessor, kwargs
+            self.__class__._evaluation_preprocessor, kwargs  # type: ignore
         )
 
         coords = [
