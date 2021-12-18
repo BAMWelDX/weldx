@@ -1214,7 +1214,8 @@ class GenericSeries:
         """
         # Apply preprocessors to arguments
         kwargs = ut.apply_func_by_mapping(
-            self.__class__._evaluation_preprocessor, kwargs  # type: ignore
+            self.__class__._evaluation_preprocessor,  # type: ignore # skipcq: PYL-W0212
+            kwargs,
         )
 
         coords = [
