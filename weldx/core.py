@@ -792,10 +792,10 @@ class SeriesParameter:
         # if not isinstance(self.values, xr.DataArray) and self.dim is None:
         #     raise ValueError("Must provide dimensions if input is not DataArray.")
 
-        if self.symbol is None:
-            self.symbol = self.dim
+        # if self.symbol is None:
+        #     self.symbol = self.dim
 
-        if len(self.symbol) > 1:
+        if self.symbol is not None and len(self.symbol) > 1:
             raise ValueError(f"Cannot use symbol {self.symbol}")
 
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
