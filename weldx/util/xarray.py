@@ -556,12 +556,11 @@ def xr_check_dimensionality(da: xr.DataArray, units_ref: Union[str, pint.Unit]):
     """
     if units_ref is None:
         return
-    if not isinstance(units_ref, pint.Unit):
-        units_ref = U_(units_ref)
 
+    units_ref = U_(units_ref)
     units = da.weldx.units
 
-    if units is None or not U_(units).is_compatible_with(units_ref):
+    if units is None or not units.is_compatible_with(units_ref):
         raise DimensionalityError(
             units,
             units_ref,
@@ -895,5 +894,7 @@ class WeldxAccessor:
         Stored in the attributes.
         """
         da = self._obj
-        units = da.attrs.get(UNITS_KEY, da.pint.units)
+        units = da.pint.units
+        if units is None:
+            units = da.attrs.get(UNITS_KEY, None)
         return U_(units) if units is not None else units
