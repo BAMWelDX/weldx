@@ -779,22 +779,6 @@ class SeriesParameter:
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
             self.values = Q_(self.values)
 
-        # if not self.values.shape:
-        #     self.values = np.expand_dims(self.values, 0)
-
-        # if (
-        #     isinstance(self.values, pint.Quantity)
-        #     and self.dim is None
-        #     and self.symbol is not None
-        # ):
-        #     self.dim = self.symbol
-        #
-        # if not isinstance(self.values, xr.DataArray) and self.dim is None:
-        #     raise ValueError("Must provide dimensions if input is not DataArray.")
-
-        # if self.symbol is None:
-        #     self.symbol = self.dim
-
         if self.symbol is not None and len(self.symbol) > 1:
             raise ValueError(f"Cannot use symbol {self.symbol}")
 
