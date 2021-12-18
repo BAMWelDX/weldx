@@ -56,7 +56,7 @@ jobs:
         # There is a bug in micromamba, which cd's out of the working-directory during the pip install of weldx.
         # So the initial env creation lacks weldx, so we install it here.
         shell: bash -l {0}
-        run: pwd && pip install -e . && pip install git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx
+        run: pwd && pip install -e .
 
       - name: conda info
         shell: bash -l {0}
