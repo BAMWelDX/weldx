@@ -827,7 +827,7 @@ class SeriesParameter:
         return self.values.weldx.quantify().data
 
     @property
-    def coord_tuple(self) -> Tuple[str, np.array, Dict[str, pint.Unit]]:
+    def coord_tuple(self) -> Tuple[str, np.ndarray, Dict[str, pint.Unit]]:
         """Get the parameter in xarray coordinate tuple format."""
         if isinstance(self.values, pint.Quantity):
             return _quantity_to_coord_tuple(self.values, self.dim)
@@ -889,8 +889,8 @@ class GenericSeries:
             this parameter is optional. It can be used to have a dimension name that
             differs from the symbol of the expression. To do so, you need to provide a
             mapping between the symbol and the dimension name. For example, you could
-            use ``dict(t="time")`` to tell the `GenericSeries` that the symbol `t`
-            refers to the dimension `time`.
+            use ``dict(t="time")`` to tell the `GenericSeries` that the symbol ``t``
+            refers to the dimension ``time``.
         coords :
             (Only for discrete values) A mapping that specifies the coordinate values
             for each dimension.
@@ -898,8 +898,8 @@ class GenericSeries:
             (Only for expressions) A mapping that specifies the expected unit for a
             free dimension/expression variable. During evaluation, it is not necessary
             that the provided data points have the exact same unit, but it must be a
-            compatible unit. For example, if we use `dict(t="s")` we can use minutes,
-            hours or any other time unit for `t` during evaluation, but using meters
+            compatible unit. For example, if we use ``dict(t="s")`` we can use minutes,
+            hours or any other time unit for ``t`` during evaluation, but using meters
             would cause an error.
         interpolation :
             (Only for discrete values) The interpolating method that should be used
@@ -909,14 +909,14 @@ class GenericSeries:
 
         Raises
         ------
-        TypeError :
+        TypeError
             If ``obj`` is any other type than the ones defined in the type hints.
-        KeyError :
+        KeyError
             If one of the provided mappings refers to a symbol that is not part of the
             expression
-        ValueError :
+        ValueError
             Can be raised for multiple reasons related to incompatible or invalid values
-        pint.DimensionalityError :
+        pint.DimensionalityError
             If an expression can not be evaluated due to a unit conflict caused by
             the provided parameters and and dimension units
 

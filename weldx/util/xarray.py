@@ -539,7 +539,7 @@ def xr_check_coords(coords: Union[xr.DataArray, Mapping[str, Any]], ref: dict) -
 
 
 def xr_check_dimensionality(da: xr.DataArray, units_ref: Union[str, pint.Unit]):
-    """Check if the dimensionality of a `DataArray` matches the one of a reference unit.
+    """Check if the dimensionality of a ``DataArray`` matches the one of a reference unit.
 
     Parameters
     ----------
@@ -550,7 +550,7 @@ def xr_check_dimensionality(da: xr.DataArray, units_ref: Union[str, pint.Unit]):
 
     Raises
     ------
-    pint.DimensionalityError:
+    pint.DimensionalityError
         The error is raised if the check fails
 
     """
