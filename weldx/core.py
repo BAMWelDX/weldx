@@ -1134,17 +1134,6 @@ class GenericSeries:
 
         return rep + f"Units:\n\t{self.units}\n"
 
-    def __add__(self, other):
-        """Add two `GenericSeries`."""
-        # this should mostly be moved to the MathematicalExpression
-        # todo:
-        #   - for two expressions simply do: f"{exp_1} + f{exp_2}" and merge the
-        #     parameters in a new MathExpression
-        #   - for two discrete series call __add__ of the xarrays
-        #   - for mixed version add a new parameter to the expression string and set the
-        #     xarray as the parameters value
-        return NotImplemented
-
     def _evaluate_expr(self, coords: List[SeriesParameter]) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(coords) == self._obj.num_variables:
@@ -1217,34 +1206,6 @@ class GenericSeries:
         return self.__class__(
             ut.xr_interp_like(self._obj, da2=coords, method=self._interpolation)
         )
-
-    @staticmethod
-    # skipcq: PYL-W0613
-    def interp_like(
-        obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
-    ) -> GenericSeries:
-        """Interpolate using the coordinates of another object.
-
-        Parameters
-        ----------
-        obj :
-            An object that provides the coordinate values.
-        dimensions :
-            The dimensions that should be interpolated. If `None` is passed, all
-            dimensions will be interpolated
-        accessor_mappings :
-            A mapping between the dimensions of the generic series and the corresponding
-            coordinate accessor of the provided object. This can be used if the
-            coordinate names do not match for the time series and the provided object.
-
-        Returns
-        -------
-        GenericSeries :
-            A new generic series containing discrete values for the interpolated
-            dimensions.
-
-        """
-        return NotImplemented
 
     @property
     def coordinates(self) -> Union[DataArrayCoordinates, None]:
@@ -1465,3 +1426,44 @@ class GenericSeries:
                     ut.xr_check_coords(param, ref)
 
             # todo: add limits for dims?
+
+    # not yet implemented ---------------------------------------------
+
+    def __add__(self, other):
+        """Add two `GenericSeries`."""
+        # this should mostly be moved to the MathematicalExpression
+        # todo:
+        #   - for two expressions simply do: f"{exp_1} + f{exp_2}" and merge the
+        #     parameters in a new MathExpression
+        #   - for two discrete series call __add__ of the xarrays
+        #   - for mixed version add a new parameter to the expression string and set the
+        #     xarray as the parameters value
+        return NotImplemented
+
+    @staticmethod
+    # skipcq: PYL-W0613
+    def interp_like(
+        obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
+    ) -> GenericSeries:
+        """Interpolate using the coordinates of another object.
+
+        Parameters
+        ----------
+        obj :
+            An object that provides the coordinate values.
+        dimensions :
+            The dimensions that should be interpolated. If `None` is passed, all
+            dimensions will be interpolated
+        accessor_mappings :
+            A mapping between the dimensions of the generic series and the corresponding
+            coordinate accessor of the provided object. This can be used if the
+            coordinate names do not match for the time series and the provided object.
+
+        Returns
+        -------
+        GenericSeries :
+            A new generic series containing discrete values for the interpolated
+            dimensions.
+
+        """
+        return NotImplemented
