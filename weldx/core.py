@@ -1151,6 +1151,30 @@ class GenericSeries:
             new_series._variable_units.pop(p.symbol)  # skipcq: PYL-W0212
         return new_series
 
+    def _evaluate_array(self, coords: List[SeriesParameter]) -> GenericSeries:
+        """Evaluate (interpolate) discrete Series object at the coordinates."""
+        eval_args = {v.dim: v.data_array.pint.dequantify() for v in coords}
+        for k in eval_args:
+            if k not in self.data_array.dims:
+                raise KeyError(f"'{k}' is not a valid dimension.")
+        return self.__class__(
+            ut.xr_interp_like(self._obj, da2=eval_args, method=self._interpolation)
+        )
+
+    def _evaluate_preprocessor(self, **kwargs) -> List[SeriesParameter]:
+        """Preprocess the passed parameters into coordinates for evaluation."""
+        kwargs = ut.apply_func_by_mapping(
+            self.__class__._evaluation_preprocessor,  # type: ignore # skipcq: PYL-W0212
+            kwargs,
+        )
+
+        coords = [
+            SeriesParameter(v, k, symbol=self._symbol_dims.inverse.get(k, None))
+            for k, v in kwargs.items()
+        ]
+
+        return coords
+
     def __call__(self, **kwargs) -> GenericSeries:
         """Evaluate the generic series at discrete coordinates.
 
@@ -1185,27 +1209,11 @@ class GenericSeries:
             A new generic series with the (partially) evaluated data.
 
         """
-        # Apply preprocessors to arguments
-        kwargs = ut.apply_func_by_mapping(
-            self.__class__._evaluation_preprocessor,  # type: ignore # skipcq: PYL-W0212
-            kwargs,
-        )
-
-        coords = [
-            SeriesParameter(v, k, symbol=self._symbol_dims.inverse.get(k, None))
-            for k, v in kwargs.items()
-        ]
+        coords = self._evaluate_preprocessor(**kwargs)
 
         if self.is_expression:
             return self._evaluate_expr(coords)
-
-        coords = {v.dim: v.data_array.pint.dequantify() for v in coords}
-        for k in coords:
-            if k not in self.data_array.dims:
-                raise KeyError(f"'{k}' is not a valid dimension.")
-        return self.__class__(
-            ut.xr_interp_like(self._obj, da2=coords, method=self._interpolation)
-        )
+        return self._evaluate_array(coords)
 
     @property
     def coordinates(self) -> Union[DataArrayCoordinates, None]:
@@ -1236,7 +1244,7 @@ class GenericSeries:
     @staticmethod
     def _get_expression_dims(
         expr: MathematicalExpression, symbol_dims: Mapping[str, str]
-    ):
+    ) -> List[str]:
         """Get the dimensions of an expression based `GenericSeries`.
 
         This is the union of parameter dimensions and free dimensions.
