@@ -1176,7 +1176,7 @@ class GenericSeries:
         )
 
         coords = [
-            SeriesParameter(v, k, symbol=self._symbol_dims.inverse.get(k, None))
+            SeriesParameter(v, k, symbol=self._symbol_dims.inverse.get(k, k))
             for k, v in kwargs.items()
         ]
 
