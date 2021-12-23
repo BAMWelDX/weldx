@@ -910,7 +910,7 @@ class GenericSeries:
         starting at point ``[0, 2 ,2] cm``
 
         >>> from weldx import GenericSeries, Q_
-        >>> GenericSeries(
+        >>> GenericSeries(  # doctest: +NORMALIZE_WHITESPACE
         ...     "a*t + b",
         ...     parameters=dict(a=Q_([3, 0, 0], "mm/s"), b=Q_([0, 2, 2], "cm")),
         ...     units=dict(t="s"),
@@ -931,7 +931,7 @@ class GenericSeries:
         The same `GenericSeries` from above but assigning the ``t`` parameter to the
         output dimension ``time``.
 
-        >>> GenericSeries(
+        >>> GenericSeries(  # doctest: +NORMALIZE_WHITESPACE
         ...     "a*t + b",
         ...     parameters=dict(a=Q_([3, 0, 0], "mm/s"), b=Q_([0, 2, 2], "cm")),
         ...     units=dict(t="s"),
@@ -946,14 +946,14 @@ class GenericSeries:
         Free Dimensions:
            t in s
         Other Dimensions:
-           ['time', 'dim_0']
+           ['dim_0']
         Units:
            mm
 
         A `GenericSeries` describing linear interpolation between the values 10 V and
         20 V over a period of 5 seconds.
 
-        >>> GenericSeries(
+        >>> GenericSeries(  # doctest: +NORMALIZE_WHITESPACE
         ...     Q_([10, 20], "V"),
         ...     dims=["t"],
         ...     coords={"t": Q_([0, 5], "s")},
