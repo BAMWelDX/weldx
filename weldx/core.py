@@ -904,6 +904,71 @@ class GenericSeries:
             If an expression can not be evaluated due to a unit conflict caused by
             the provided parameters and and dimension units
 
+        Examples
+        --------
+        Create a `GenericSeries` representing a translation with 3 m/s in x-direction
+        starting at point ``[0, 2 ,2] cm``
+
+        >>> from weldx import GenericSeries, Q_
+        >>> GenericSeries(
+        ...     "a*t + b",
+        ...     parameters=dict(a=Q_([3, 0, 0], "mm/s"), b=Q_([0, 2, 2], "cm")),
+        ...     units=dict(t="s"),
+        ... )
+        <GenericSeries>
+        Expression:
+            a*t + b
+        Parameters:
+            a = [3 0 0] mm / s
+            b = [0 2 2] cm
+        Free Dimensions:
+            t in s
+        Other Dimensions:
+            ['dim_0']
+        Units:
+            m
+
+        The same `GenericSeries` from above but assigning the ``t`` parameter to the
+        output dimension ``time``.
+
+        >>> GenericSeries(
+        ...     "a*t + b",
+        ...     parameters=dict(a=Q_([3, 0, 0], "mm/s"), b=Q_([0, 2, 2], "cm")),
+        ...     units=dict(t="s"),
+        ...     dims=dict(t="time"),
+        ... )
+        <GenericSeries>
+        Expression:
+            a*t + b
+        Parameters:
+            a = [3 0 0] mm / s
+            b = [0 2 2] cm
+        Free Dimensions:
+            t in s
+        Other Dimensions:
+            ['time', 'dim_0']
+        Units:
+            mm
+
+        A `GenericSeries` describing linear interpolation between the values 10 V and
+        20 V over a period of 5 seconds.
+
+        >>> GenericSeries(
+        ...     Q_([10, 20], "V"),
+        ...     dims=["t"],
+        ...     coords={"t": Q_([0, 5], "s")},
+        ... )
+        <GenericSeries>
+        Values:
+            [10 20]
+        Dimensions:
+            ('t',)
+        Coordinates:
+            t      = [0 5] s
+        Units:
+            V
+
+
         """
         self._obj: Union[xr.DataArray, MathematicalExpression] = None
         self._variable_units: Dict[str, pint.Unit] = None
@@ -1116,7 +1181,7 @@ class GenericSeries:
             arr_str = np.array2string(
                 self._obj.data.magnitude, threshold=3, precision=4, prefix="        "
             )
-            rep += f"\nValues:\n\t{arr_str}\n"
+            rep += f"Values:\n\t{arr_str}\n"
             rep += f"Dimensions:\n\t{self.dims}\n"
             rep += "Coordinates:\n"
             for coord, val in self.coordinates.items():
