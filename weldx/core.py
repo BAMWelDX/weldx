@@ -1195,7 +1195,10 @@ class GenericSeries:
             for k, v in self._variable_units.items():
                 rep += f"\t{k} in {v}\n"
             rep += "Other Dimensions:\n"
-            rep += f"\t{[v for v in self.dims if v not in self._variable_units]}\n"
+            _variable_units_replaced = {
+                self._symbol_dims.get(k, k): u for k, u in self._variable_units.items()
+            }
+            rep += f"\t{[v for v in self.dims if v not in _variable_units_replaced]}\n"
 
         return rep + f"Units:\n\t{self.units}\n"
 
