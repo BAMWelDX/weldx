@@ -917,16 +917,17 @@ class GenericSeries:
         ... )
         <GenericSeries>
         Expression:
-           a*t + b
+            a*t + b
         Parameters:
-           a = [3 0 0] mm / s
-           b = [0 2 2] cm
+            a = [3 0 0] mm / s
+            b = [0 2 2] cm
         Free Dimensions:
-           t in s
+            t in s
         Other Dimensions:
-           ['dim_0']
+            ['dim_0']
         Units:
-           m
+            mm
+
 
         The same `GenericSeries` from above but assigning the ``t`` parameter to the
         output dimension ``time``.
@@ -939,16 +940,16 @@ class GenericSeries:
         ... )
         <GenericSeries>
         Expression:
-           a*t + b
+            a*t + b
         Parameters:
-           a = [3 0 0] mm / s
-           b = [0 2 2] cm
+            a = [3 0 0] mm / s
+            b = [0 2 2] cm
         Free Dimensions:
-           t in s
+            t in s
         Other Dimensions:
-           ['dim_0']
+            ['dim_0']
         Units:
-           mm
+            mm
 
         A `GenericSeries` describing linear interpolation between the values 10 V and
         20 V over a period of 5 seconds.
@@ -960,13 +961,13 @@ class GenericSeries:
         ... )
         <GenericSeries>
         Values:
-           [10 20]
+            [10 20]
         Dimensions:
-           ('t',)
+            ('t',)
         Coordinates:
-           t      = [0 5] s
+            t      = [0 5] s
         Units:
-           V
+            V
 
 
         """
