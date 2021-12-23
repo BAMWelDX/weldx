@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
 
 import numpy as np
@@ -26,6 +26,7 @@ __all__ = [
     "xr_3d_matrix",
     "xr_3d_vector",
     "xr_check_coords",
+    "xr_check_dimensionality",
     "xr_fill_all",
     "xr_interp_coordinates_in_time",
     "xr_interp_like",
@@ -318,8 +319,15 @@ def xr_interp_like(
         da2 = da2.weldx.time_ref_unset()  # catch time formats
         sel_coords = da2.weldx.coordinates_as_quantities()
     else:  # assume da2 to be dict-like
+        # expand singular values to arrays
         sel_coords = {
-            k: (v if isinstance(v, Iterable) else [v]) for k, v in da2.items()
+            k: (v if isinstance(v, Iterable) else np.expand_dims(v, 0))
+            for k, v in da2.items()
+        }
+        # if single coordinates as xarray we must dequantify
+        sel_coords = {
+            k: (v.pint.dequantify() if isinstance(v, xr.DataArray) else v)
+            for k, v in sel_coords.items()
         }
 
     if interp_coords is not None:
@@ -414,7 +422,7 @@ def _check_dtype(var_dtype, ref_dtype: str) -> bool:
     return True
 
 
-def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
+def xr_check_coords(coords: Union[xr.DataArray, Mapping[str, Any]], ref: dict) -> bool:
     """Validate the coordinates of the DataArray against a reference dictionary.
 
     The reference dictionary should have the dimensions as keys and those contain
@@ -437,9 +445,9 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     Parameters
     ----------
-    dax : xarray.DataArray
-        xarray object which should be validated
-    ref : dict
+    coords
+        xarray object or coordinate mapping that should be validated
+    ref
         reference dictionary
 
     Returns
@@ -475,18 +483,8 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
 
     """
     # only process the coords of the xarray
-    if isinstance(dax, (xr.DataArray, xr.Dataset)):
-        coords = dax.coords
-    elif isinstance(
-        dax,
-        (
-            xr.core.coordinates.DataArrayCoordinates,
-            xr.core.coordinates.DatasetCoordinates,
-        ),
-    ):
-        coords = dax
-    else:
-        raise ValueError("Input variable is not an xarray object")
+    if isinstance(coords, (xr.DataArray, xr.Dataset)):
+        coords = coords.coords
 
     for key, check in ref.items():
         # check if the optional key is set to true
@@ -499,8 +497,12 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
             raise KeyError(f"Could not find required coordinate '{key}'.")
 
         # only if the key "values" is given do the validation
-        if "values" in check and not (coords[key].values == check["values"]).all():
-            raise ValueError(f"Value mismatch in DataArray and ref['{key}']")
+        if "values" in check and not np.all(coords[key].values == check["values"]):
+            raise ValueError(
+                f"Value mismatch in DataArray and ref['{key}']"
+                f"\n{coords[key].values}"
+                f"\n{check['values']}"
+            )
 
         # only if the key "dtype" is given do the validation
         if "dtype" in check:
@@ -529,11 +531,42 @@ def xr_check_coords(dax: xr.DataArray, ref: dict) -> bool:
                 raise DimensionalityError(
                     units,
                     check["dimensionality"],
-                    f"\nDimensionality mismatch in coordinate '{key}'\n"
+                    extra_msg=f"\nDimensionality mismatch in coordinate '{key}'\n"
                     f"Coordinate has unit '{units}', expected '{dim}'",
                 )
 
     return True
+
+
+def xr_check_dimensionality(da: xr.DataArray, units_ref: Union[str, pint.Unit]):
+    """Check if the dimensionality of a ``DataArray`` is compatible with reference unit.
+
+    Parameters
+    ----------
+    da:
+        The data array that should be checked.
+    units_ref:
+        The reference unit
+
+    Raises
+    ------
+    pint.DimensionalityError
+        The error is raised if the check fails
+
+    """
+    if units_ref is None:
+        return
+
+    units_ref = U_(units_ref)
+    units = da.weldx.units
+
+    if units is None or not units.is_compatible_with(units_ref):
+        raise DimensionalityError(
+            units,
+            units_ref,
+            extra_msg=f"\nDataArray units are '{units}'.  This is incompatible with "
+            f"the expected dimensionality '{units_ref.dimensionality}'",
+        )
 
 
 def xr_3d_vector(
@@ -852,3 +885,16 @@ class WeldxAccessor:
             if (units := v.attrs.get(UNITS_KEY, None)) is not None:
                 da[c].attrs[UNITS_KEY] = str(U_(units))
         return da
+
+    @property
+    def units(self) -> Union[pint.Unit, None]:
+        """Get the unit of the data array values.
+
+        Other than the pint-xarray accessor ``.pint.units`` this will also return units
+        Stored in the attributes.
+        """
+        da = self._obj
+        units = da.pint.units
+        if units is None:
+            units = da.attrs.get(UNITS_KEY, None)
+        return U_(units) if units is not None else units

@@ -55,6 +55,7 @@ The API tutorials provide more detailed usages and examples of core
    tutorials/transformations_02_coordinate_system_manager
    tutorials/geometry_01_profiles
    tutorials/geometry_02_geometry
+   tutorials/generic_series
    tutorials/timeseries_01
    tutorials/measurement_chain
    tutorials/weldxfile

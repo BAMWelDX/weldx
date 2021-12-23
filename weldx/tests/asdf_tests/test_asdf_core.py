@@ -15,6 +15,7 @@ from scipy.spatial.transform import Rotation
 import weldx.transformations as tf
 from weldx.asdf.util import write_buffer, write_read_buffer
 from weldx.constants import META_ATTR, Q_
+from weldx.core import GenericSeries
 from weldx.core import MathematicalExpression as ME  # nopep8
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
@@ -496,7 +497,7 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
         TimeSeries(ME("a*t+b", parameters={"a": Q_(2, "1/s"), "b": Q_(5, "")})),
     ],
 )
-def test_time_series_discrete(ts, copy_arrays, lazy_load):
+def test_time_series(ts, copy_arrays, lazy_load):
     ts_file = write_read_buffer(
         {"ts": ts}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
     )["ts"]
@@ -506,6 +507,66 @@ def test_time_series_discrete(ts, copy_arrays, lazy_load):
         assert np.all(ts_file.data == ts.data)
     assert np.all(ts_file.time == ts.time)
     assert ts_file.interpolation == ts.interpolation
+
+
+# --------------------------------------------------------------------------------------
+# GenericSeries
+# --------------------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("lazy_load", [True, False])
+@pytest.mark.parametrize(
+    "coords, interpolation",
+    [
+        (dict(t=Q_([1, 2, 3], "s")), None),
+        (dict(time=Q_([1, 2, 3], "s"), space=Q_([4, 5, 6, 7], "m")), None),
+        (dict(time=Q_([1, 2, 3], "s"), space=Q_([4, 5, 6, 7], "m")), "step"),
+    ],
+)
+def test_generic_series_discrete(coords, interpolation, copy_arrays, lazy_load):
+
+    shape = tuple([len(v) for v in coords.values()])
+    data = Q_(np.ones(shape), "m")
+
+    gs = GenericSeries(data, coords=coords, interpolation=interpolation)
+
+    gs_file = write_read_buffer(
+        {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )["gs"]
+
+    assert gs == gs_file
+
+
+@pytest.mark.parametrize("copy_arrays", [True, False])
+@pytest.mark.parametrize("lazy_load", [True, False])
+@pytest.mark.parametrize(
+    "expr, params, units, dims",
+    [
+        ("a*t +c", None, None, None),
+        ("a*t + c*x", dict(a="3m/s", c="2"), dict(t="s", x="m"), None),
+        (
+            "a*t + c*x",
+            dict(a=Q_([1, 2], "m/s"), c=Q_([2, 4])),
+            dict(t="s", x="m"),
+            None,
+        ),
+        (
+            "a*t + c*x",
+            dict(a=(Q_([1, 2], "m/s"), "velocity"), c=Q_([2, 4])),
+            dict(t="s", x="m"),
+            dict(t="time", x="space"),
+        ),
+    ],
+)
+def test_generic_series_expression(expr, params, units, dims, copy_arrays, lazy_load):
+    gs = GenericSeries(expr, parameters=params, units=units, dims=dims)
+
+    gs_file = write_read_buffer(
+        {"gs": gs}, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
+    )["gs"]
+
+    assert gs == gs_file
 
 
 # --------------------------------------------------------------------------------------

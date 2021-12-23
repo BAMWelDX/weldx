@@ -21,6 +21,7 @@ WELDX_UNIT_REGISTRY = pint.UnitRegistry(
     force_ndarray_like=True,
 )
 
+
 # add percent unit
 WELDX_UNIT_REGISTRY.define("percent = 0.01*count = %")
 # swap plank constant for hour definition
@@ -72,6 +73,7 @@ U_.__doc__ = """For details on working with quantities and units, please see the
 # set default unit registry for pint-xarray
 pint.set_application_registry(WELDX_UNIT_REGISTRY)
 pint_xarray.unit_registry = WELDX_UNIT_REGISTRY
+
 
 __all__ = (
     "META_ATTR",

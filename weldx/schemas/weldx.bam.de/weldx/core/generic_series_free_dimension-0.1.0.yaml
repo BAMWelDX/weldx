@@ -1,0 +1,24 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/generic_series_free_dimension-0.1.0"
+
+title: |
+  Schema that describes a free dimension of an expression based generic series.
+description: |
+  Description of a dimension.
+
+type: object
+properties:
+  symbol:
+    description: |
+      The symbol of the dimension that is used in the expression. If the dimension name and symbol are identical, this
+      property can be omitted
+    type: string
+  units:
+    description: |
+      A unit that represents the dimensions unit dimensionality.
+    tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
+
+propertyOrder: [symbol, units]
+required: [units]

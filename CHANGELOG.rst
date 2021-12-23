@@ -9,6 +9,8 @@
 added
 =====
 
+-  add `GenericSeries` as base class supporting arrays and equations [:pull:`618`]
+
 -  add experimental unit support for ``.weldx.interp_like`` accessor [:pull:`518`]
 
 -  new tutorial series that introduces the most important WelDX features
@@ -55,6 +57,10 @@ dependencies
 -  bump to ``numpy>=1.20`` (for numpy.typing) [:pull:`656`]
 
 -  bump to ``pint >=0.18`` for typing [:pull:`664`]
+
+-  bump to ``xarray >=0.19`` for array creation compatibility [:pull:`618`]
+
+-  add ``bidict`` dependency [:pull:`618`]
 
 ********************
  0.5.2 (18.11.2021)
