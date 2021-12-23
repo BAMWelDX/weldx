@@ -67,8 +67,8 @@ class MathematicalExpression:
         # todo: Add covered dimensions to parameters - coordinates as well?
         representation = (
             f"<MathematicalExpression>\n"
-            f"\nExpression:\n\t{self._expression.__repr__()}\n"
-            f"\nParameters:\n"
+            f"Expression:\n\t{self._expression.__repr__()}\n"
+            f"Parameters:\n"
         )
         if len(self._parameters) > 0:
             for parameter, value in self._parameters.items():
@@ -1254,9 +1254,7 @@ class GenericSeries:
         This is the union of parameter dimensions and free dimensions.
 
         """
-        dims = set()
-        for d in symbol_dims.values():
-            dims |= set(d)
+        dims = set(symbol_dims.values())
         for v in expr.parameters.values():
             if not isinstance(v, xr.DataArray):
                 v = xr.DataArray(v)
