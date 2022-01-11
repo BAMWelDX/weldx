@@ -26,8 +26,16 @@ logger = getLogger("weldx_sphinx_conf")
 
 
 def _workaround_imports_typechecking():
-    """Load some packages needed for type annotations."""
+    """Load some packages needed for type annotations.
+
+    If these packages are imported implicitly via the import of weldx,
+    we see circular import errors within these packages. This could be due to
+    the fact, that Sphinx `exec` this config file with its own globals dictionary.
+
+    So this workaround function has to be executed prior importing weldx.
+    """
     import ipywidgets  # noqa
+    import meshio  # noqa
     import pandas  # noqa
     import pint  # noqa
     import xarray  # noqa
@@ -43,7 +51,7 @@ def _prevent_sphinx_circular_imports_bug():
 
 
 _prevent_sphinx_circular_imports_bug()
-_workaround_imports_typechecking()
+_workaround_imports_typechecking()  # needs to be called prior importing weldx.
 
 typing.TYPE_CHECKING = True
 try:
@@ -57,6 +65,7 @@ except Exception as ex:
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
 
 tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
+logger.info("tutorials dir: %s", tutorials_dir)
 
 
 # -- copy tutorial files to doc folder -------------------------------------------------
@@ -74,8 +83,6 @@ def _copy_tut_files():
 _copy_tut_files()
 
 
-tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
-logger.info("tutorials dir: %s", tutorials_dir)
 # TODO: git move tutorial files to tutorials_dir!
 tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
 for f in tutorial_files:
