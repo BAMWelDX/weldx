@@ -495,6 +495,14 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
         TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 4])),
         TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 5])),
         TimeSeries(ME("a*t+b", parameters={"a": Q_(2, "1/s"), "b": Q_(5, "")})),
+        TimeSeries(
+            Q_([1, 2, 3], "m"),
+            time=pd.date_range(start="2020-01-01", freq="1D", periods=3),
+        ),
+        TimeSeries(
+            Q_([1, 2, 3], "m"),
+            time=pd.DatetimeIndex(["2020", "2021", "2024"]),
+        ),
     ],
 )
 def test_time_series(ts, copy_arrays, lazy_load):
