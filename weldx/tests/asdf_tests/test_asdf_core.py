@@ -342,7 +342,7 @@ def test_coordinate_system_manager(copy_arrays, lazy_load):
 def get_coordinate_system_manager_with_subsystems(nested: bool):
     lcs = [tf.LocalCoordinateSystem(coordinates=[i, -i, -i]) for i in range(12)]
 
-    # global system
+    # create global system
     csm_global = tf.CoordinateSystemManager("base", "Global System", "2000-06-08")
     csm_global.add_cs("robot", "base", lcs[0])
     csm_global.add_cs("specimen", "base", lcs[1])

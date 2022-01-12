@@ -16,6 +16,22 @@ examples:
         units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter / second
         value: 10.0
   -
+    - A time series of 4 discrete points
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+        values: !core/ndarray-1.0.0
+          data: [1, 2, 3, 8]
+          datatype: int32
+          shape: [4]
+        time: !<asdf://weldx.bam.de/weldx/tags/time/time-0.1.0>
+          values: !<asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.0> {start: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-01T00:00:00',
+            end: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-04T00:00:00', freq: D, min: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-01T00:00:00',
+            max: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-04T00:00:00'}
+          reference_time: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> 2020-01-01T00:00:00
+        units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> meter
+        shape: [4]
+        interpolation: step
+  -
     - A time_series describing a sine oscillation in 3d space along the z-axis
     - |
       !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
