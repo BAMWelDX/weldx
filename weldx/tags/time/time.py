@@ -27,6 +27,4 @@ class TimeConverter(WeldxConverter):
         """Calculate the shape from static tagged tree instance."""
         from weldx.asdf.util import _get_instance_shape
 
-        if "freq" in node["values"]:
-            return _get_instance_shape(node["values"])
-        return node["values"]["shape"]
+        return _get_instance_shape(node["values"])
