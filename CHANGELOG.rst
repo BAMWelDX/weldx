@@ -28,6 +28,8 @@ changes
 fixes
 =====
 
+-  `TimeSeries` can now be serialized correctly when using absolute times [:pull:`677`]
+
 documentation
 =============
 
@@ -43,6 +45,8 @@ ASDF
 -  update ``core/geometry/spatial_data`` to version ``0.1.1`` with support for multidimensional data [:pull:`655`]
 
 -  add ``wx_shape`` validation support for ``core/data_array`` [:pull:`655`]
+
+-  update ``core/time_series`` schema to use ``time/time`` [:pull:`677`]
 
 deprecations
 ============

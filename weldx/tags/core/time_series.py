@@ -5,15 +5,15 @@ import pint
 from asdf.tagged import TaggedDict
 
 from weldx.asdf.types import WeldxConverter
-from weldx.constants import Q_, U_
+from weldx.asdf.util import get_highest_tag_version
+from weldx.constants import Q_
 from weldx.core import TimeSeries
 
 
 class TimeSeriesConverter(WeldxConverter):
     """Serialization class for weldx.core.TimeSeries"""
 
-    name = "core/time_series"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"]
     types = [TimeSeries]
 
     def to_yaml_tree(self, obj: TimeSeries, tag: str, ctx) -> dict:
@@ -25,7 +25,7 @@ class TimeSeriesConverter(WeldxConverter):
                     "value": obj.data.magnitude[0],
                 }
             return {
-                "time": obj.time.as_pandas_index(),
+                "time": obj.time,
                 "units": obj.units,
                 "shape": obj.shape,
                 "interpolation": obj.interpolation,
@@ -41,14 +41,14 @@ class TimeSeriesConverter(WeldxConverter):
         if "values" in node:
             time = node["time"]
             interpolation = node["interpolation"]
-            if "units" in node:
-                _units = U_(node["units"])
-            else:  # legacy_code
-                _units = U_(node["unit"])
-            values = Q_(node["values"], _units)
+            values = Q_(node["values"], node["units"])
             return TimeSeries(values, time, interpolation)
 
         return TimeSeries(node["expression"])  # mathexpression
+
+    def select_tag(self, obj, tags, ctx) -> str:
+        """Determine the output tag for serialization."""
+        return get_highest_tag_version(self.tags)
 
     @staticmethod
     def shape_from_tagged(node: TaggedDict) -> List[int]:

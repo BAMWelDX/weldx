@@ -342,7 +342,7 @@ def test_coordinate_system_manager(copy_arrays, lazy_load):
 def get_coordinate_system_manager_with_subsystems(nested: bool):
     lcs = [tf.LocalCoordinateSystem(coordinates=[i, -i, -i]) for i in range(12)]
 
-    # global system
+    # create global system
     csm_global = tf.CoordinateSystemManager("base", "Global System", "2000-06-08")
     csm_global.add_cs("robot", "base", lcs[0])
     csm_global.add_cs("specimen", "base", lcs[1])
@@ -495,6 +495,14 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
         TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 4])),
         TimeSeries(Q_([42, 23, 12], "m"), time=pd.TimedeltaIndex([0, 2, 5])),
         TimeSeries(ME("a*t+b", parameters={"a": Q_(2, "1/s"), "b": Q_(5, "")})),
+        TimeSeries(
+            Q_([1, 2, 3], "m"),
+            time=pd.date_range(start="2020-01-01", freq="1D", periods=3),
+        ),
+        TimeSeries(
+            Q_([1, 2, 3], "m"),
+            time=pd.DatetimeIndex(["2020", "2021", "2024"]),
+        ),
     ],
 )
 def test_time_series(ts, copy_arrays, lazy_load):
