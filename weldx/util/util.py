@@ -10,7 +10,7 @@ from collections.abc import Sequence, Set
 from functools import wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
-from typing import Callable, ClassVar, Collection, Mapping, Union
+from typing import Callable, ClassVar, Collection, Dict, Hashable, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -33,6 +33,7 @@ __all__ = [
     "is_jupyterlab_session",
     "is_interactive_session",
     "_patch_mod_all",
+    "apply_func_by_mapping",
 ]
 
 
@@ -416,3 +417,8 @@ def _patch_mod_all(module_name: str):
     for name in getattr(this_mod, "__all__", ()):
         obj = getattr(this_mod, name)
         obj.__module__ = module_name
+
+
+def apply_func_by_mapping(func_map: Dict[Hashable, Callable], inputs):
+    """Transform a dict by running functions mapped by keys over its values."""
+    return {k: (func_map[k](v) if k in func_map else v) for k, v in inputs.items()}

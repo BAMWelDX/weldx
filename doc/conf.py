@@ -6,8 +6,7 @@
 
 # Local build command ------------------------------------------------------------------
 
-# sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going
-# -D nbsphinx_kernel_name="weldx" -D nbsphinx_execute="never"
+# sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -D nbsphinx_execute="never"
 
 # -- Path setup --------------------------------------------------------------
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -21,13 +20,24 @@ import shutil
 import sys
 import typing
 
-import traitlets
+from sphinx.util.logging import getLogger
+
+logger = getLogger("weldx_sphinx_conf")
 
 
 def _workaround_imports_typechecking():
-    """Load some packages needed for type annotations."""
+    """Load some packages needed for type annotations.
+
+    If these packages are imported implicitly via the import of weldx,
+    we see circular import errors within these packages. This could be due to
+    the fact, that Sphinx `exec` this config file with its own globals dictionary.
+
+    So this workaround function has to be executed prior importing weldx.
+    """
     import ipywidgets  # noqa
+    import meshio  # noqa
     import pandas  # noqa
+    import pint  # noqa
     import xarray  # noqa
 
 
@@ -41,7 +51,7 @@ def _prevent_sphinx_circular_imports_bug():
 
 
 _prevent_sphinx_circular_imports_bug()
-_workaround_imports_typechecking()
+_workaround_imports_typechecking()  # needs to be called prior importing weldx.
 
 typing.TYPE_CHECKING = True
 try:
@@ -53,13 +63,69 @@ except Exception as ex:
     raise
 
 import weldx.visualization  # load visualization (currently no auto-import in pkg).
-from weldx.asdf.constants import SCHEMA_PATH, WELDX_TAG_URI_BASE
+
+tutorials_dir = (pathlib.Path(__file__).parent / "./tutorials").absolute()
+logger.info("tutorials dir: %s", tutorials_dir)
+
 
 # -- copy tutorial files to doc folder -------------------------------------------------
-tutorials_dir = pathlib.Path("./tutorials")
+def _copy_tut_files():
+    # TODO: git move tutorial files to tutorials_dir, then delete this function
+    logger.info("tutorials dir: %s", tutorials_dir)
+    _exts = ("*.ipynb", "*.py")
+    tutorial_files = []
+    for ext in _exts:
+        tutorial_files.extend(pathlib.Path("./../tutorials/").glob(ext))
+    for f in tutorial_files:
+        shutil.copy(f, tutorials_dir)
+
+
+_copy_tut_files()
+
+
+# TODO: git move tutorial files to tutorials_dir!
 tutorial_files = pathlib.Path("./../tutorials/").glob("*.ipynb")
 for f in tutorial_files:
     shutil.copy(f, tutorials_dir)
+
+
+def download_tutorial_input_file():
+    from urllib.request import urlretrieve
+
+    url = "https://github.com/BAMWelDX/IIW2021_AA_CXII/blob/weldx_0.5.0/single_pass_weld.weldx?raw=true"
+    sha256sum = "29e4f11ef1185f818b4611860842ef52d386ad2866a2680257950f160e1e098a"
+
+    def hash_path(path):
+        import hashlib
+
+        h = hashlib.sha256()
+        with open(path, "rb") as fh:
+            h.update(fh.read())
+        return h.hexdigest()
+
+    dest = tutorials_dir / "single_pass_weld.wx"
+
+    # check if existing files matches desired one.
+    if dest.exists():
+        hash_local = hash_path(dest)
+        if hash_local == sha256sum:
+            logger.info(f"File %s already downloaded.", dest)
+            return
+
+    # does not exist or hash mismatched, so download it.
+    logger.info("trying to download: %s", url)
+    out_file, header = urlretrieve(url, dest)
+    sha256sum_actual = hash_path(out_file)
+    if not sha256sum_actual == sha256sum:
+        raise RuntimeError(
+            f"hash mismatch:\n actual = \t{sha256sum_actual}\n"
+            f"desired = \t{sha256sum}"
+        )
+
+    logger.info("download successful.")
+
+
+download_tutorial_input_file()
 
 
 # -- Project information -----------------------------------------------------
@@ -86,13 +152,19 @@ extensions = [
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx_copybutton",
-    "sphinx_asdf",
     "numpydoc",
     "sphinx_autodoc_typehints",  # list after napoleon
 ]
+
+# allow easy Issue/PR links
+extlinks = {
+    "issue": ("https://github.com/BAMWelDX/weldx/issues/%s", "GH"),
+    "pull": ("https://github.com/BAMWelDX/weldx/pull/%s", "PR"),
+}
 
 # autosummary --------------------------------------------------------------------------
 autosummary_generate = True
@@ -151,21 +223,9 @@ master_doc = "index"
 nbsphinx_execute = "always"
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'svg', 'pdf'}",
+    "--InlineBackend.rc <figure.dpi=96>",
 ]
 
-if traitlets.__version__ < "5":
-    nbsphinx_execute_arguments.append("--InlineBackend.rc={'figure.dpi': 96}")
-else:
-    nbsphinx_execute_arguments.append("--InlineBackend.rc <figure.dpi=96>")
-
-# Select notebook kernel for nbsphinx
-# default "python3" is needed for readthedocs run
-# if building locally, this might need to be "weldx" - try setting using -D option:
-# -D nbsphinx_kernel_name="weldx"
-if os.getenv("READTHEDOCS", False):
-    nbsphinx_kernel_name = "python3"
-else:
-    nbsphinx_kernel_name = "weldx"
 
 # This is processed by Jinja2 and inserted before each notebook
 nbsphinx_prolog = r"""
@@ -191,26 +251,6 @@ Generated by nbsphinx_ from a Jupyter_ notebook.
 .. _nbsphinx: https://nbsphinx.readthedocs.io/
 .. _Jupyter: https://jupyter.org/
 """
-
-# -- sphinx-asdf configuration -------------------------------------------------
-# This variable indicates the top-level directory containing schemas.
-# The path is relative to the location of conf.py in the package
-asdf_schema_path = os.path.relpath(str(SCHEMA_PATH))
-# This variable indicates the standard prefix that is common to all schemas
-# provided by the package.
-asdf_schema_standard_prefix = ""  # SCHEMA_PATH already points to final schema dir
-
-# enable references to the ASDF Standard documentation
-asdf_schema_reference_mappings = [
-    (
-        "tag:stsci.edu:asdf",
-        "http://asdf-standard.readthedocs.io/en/latest/generated/stsci.edu/asdf/",
-    ),
-    (
-        WELDX_TAG_URI_BASE,
-        "http://weldx.readthedocs.io/en/latest/generated/weldx.bam.de/weldx/",
-    ),
-]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -241,7 +281,13 @@ html_favicon = "_static/WelDX_notext.ico"
 html_static_path = ["_static"]
 
 html_theme_options = {
-    #  "external_links": [{"url": "https://asdf.readthedocs.io/", "name": "ASDF"}],
+    "external_links": [
+        {
+            "url": "https://weldx.readthedocs.io/projects/weldx-standard/en/latest/schemas.html",
+            "name": "WelDX Standard",
+        },
+        # {"url": "https://asdf.readthedocs.io/", "name": "ASDF"},
+    ],
     "github_url": "https://github.com/BAMWelDX/weldx",
     "twitter_url": "https://twitter.com/BAMweldx",
     "use_edit_page_button": False,
@@ -266,7 +312,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "numpy": ("https://numpy.org/doc/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
-    "xarray": ("http://xarray.pydata.org/en/stable", None),
+    "xarray": ("https://xarray.pydata.org/en/stable", None),
     "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "matplotlib": ("https://matplotlib.org", None),
     # "dask": ("https://docs.dask.org/en/latest", None),

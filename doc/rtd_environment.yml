@@ -4,12 +4,21 @@ channels:
 dependencies:
   - python=3.9
   - setuptools_scm
+  # weldx base dependencies
+  - numpy>=1.18
+  - pandas>=1.0
+  - xarray>=0.15
+  - pint>=0.11
+  - scipy>=1.6.2
+  - sympy>=1.6
+  - asdf >=2.8
+  - bottleneck>=1.3
+  # notebook execution
   - ipykernel
   - ipywidgets
   # documentation
   - sphinx>=4.1.1
   - jinja2
-  - m2r2
   - sphinxcontrib-napoleon
   - nbsphinx
   - sphinx-copybutton
@@ -22,5 +31,4 @@ dependencies:
   # pip packages
   - pip
   - pip:
-    - git+https://github.com/CagtayFabry/sphinx-asdf.git@sphinx-weldx
     - -e ../

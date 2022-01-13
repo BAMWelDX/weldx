@@ -16,10 +16,10 @@ build:
     - {{ e }}
   {% endfor %}
 requirements:
-  build:
+  host:
     - pip
     - setuptools_scm
-    - python >=3.8,<3.10
+    - python
   run:
     - python >=3.8,<3.10
     # dependencies are defined in setup.py
@@ -29,6 +29,7 @@ requirements:
 
 test:
   requires:
+    - pip
     - pytest
     - pytest-xdist
     # Remove once this is fixed: https://github.com/K3D-tools/K3D-jupyter/issues/312

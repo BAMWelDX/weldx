@@ -17,6 +17,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from pandas import TimedeltaIndex
     from pint import Quantity, Unit
 
+    from weldx.types import UnitLike
+
 
 # measurement --------------------------------------------------------------------------
 
@@ -33,7 +35,7 @@ class Signal:
     """Simple dataclass implementation for measurement signals."""
 
     signal_type: str
-    units: Union[str, pint.Unit]
+    units: UnitLike
     data: TimeSeries = None
 
     def __post_init__(self):
@@ -546,7 +548,7 @@ class MeasurementChain:
                     "The provided function is incompatible with the input signals unit."
                     f" \nThe test raised the following exception:\n{e}"
                 )
-            return test_output.units
+            return test_output.data.units
 
         return input_unit
 

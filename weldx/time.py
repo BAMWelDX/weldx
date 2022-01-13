@@ -417,8 +417,10 @@ class Time:
             otherwise
 
         """
-        # TODO: handle tolerances ?
-        return np.allclose(self._time, Time(other).as_pandas())
+        other = Time(other)
+        if self.reference_time != other.reference_time:
+            return False
+        return np.allclose(self.as_quantity(), other.as_quantity())
 
     def as_quantity(self, unit: str = "s") -> pint.Quantity:
         """Return the data as `pint.Quantity`.
@@ -443,7 +445,7 @@ class Time:
             nanoseconds = nanoseconds[0]
         q = Q_(nanoseconds, "ns").to(unit)
         if self.is_absolute:
-            setattr(q, "time_ref", self.reference_time)  # store time_ref info
+            q.time_ref = self.reference_time  # store time_ref info
         return q
 
     def as_timedelta(self) -> Union[Timedelta, TimedeltaIndex]:
@@ -488,9 +490,22 @@ class Time:
             return pd.TimedeltaIndex([self._time])
         return self._time
 
-    def as_data_array(self) -> DataArray:
-        """Return the data as `xarray.DataArray`."""
-        da = xr.DataArray(self._time, coords={"time": self._time}, dims=["time"])
+    def as_data_array(self, timedelta_base: bool = True) -> DataArray:
+        """Return the time data as a `xarray.DataArray` coordinate.
+
+        By default the format is timedelta values with reference time as attribute.
+
+        Parameters
+        ----------
+        timedelta_base
+            If true (the default) the values of the xarray will always be timedeltas.
+
+        """
+        if timedelta_base:
+            t = self.as_timedelta_index()
+        else:
+            t = self.index
+        da = xr.DataArray(t, coords={"time": t}, dims=["time"])
         da.time.attrs["time_ref"] = self.reference_time
         return da
 
@@ -551,6 +566,86 @@ class Time:
         """
         return self.as_quantity(unit="s")
 
+    @property
+    def duration(self) -> Time:
+        """Get the covered time span."""
+        return Time(self.max() - self.min())
+
+    def resample(self, number_or_interval: Union[int, types_timedelta_like]):
+        """Resample the covered duration.
+
+        Parameters
+        ----------
+        number_or_interval :
+            If an integer is passed, the covered time period will be divided into
+            equally sized time steps so that the total number of time steps is equal to
+            the passed number. If a timedelta is passed, the whole period will be
+            resampled so that the difference between all time steps matches the
+            timedelta. Note that the boundaries of the time period will not change.
+            Therefore, the timedelta between the last two time values might differ from
+            the desired timedelta.
+
+        Returns
+        -------
+        weldx.time.Time :
+            Resampled time object
+
+        Raises
+        ------
+        RuntimeError
+            When the time data consists only of a single value and has no duration.
+        TypeError
+            When the passed value is neither an integer or a supported time delta value
+        ValueError
+            When the passed time delta is equal or lower than 0
+
+        Examples
+        --------
+        >>> from weldx import Time
+        >>> t = Time(["3s","6s","7s", "9s"])
+
+        Resample using an integer:
+
+        >>> t.resample(4)
+        Time:
+        TimedeltaIndex(['0 days 00:00:03', '0 days 00:00:05', '0 days 00:00:07',
+                        '0 days 00:00:09'],
+                       dtype='timedelta64[ns]', freq=None)
+
+        Resample with a time delta:
+
+        >>> t.resample("1.5s")
+        Time:
+        TimedeltaIndex([       '0 days 00:00:03', '0 days 00:00:04.500000',
+                               '0 days 00:00:06', '0 days 00:00:07.500000',
+                               '0 days 00:00:09'],
+                       dtype='timedelta64[ns]', freq='1500L')
+
+        """
+        if len(self) <= 1:
+            raise RuntimeError("Can't resample a single time delta or timestamp")
+
+        tdi = self.as_timedelta_index()
+        t0, t1 = tdi.min(), tdi.max()
+
+        if isinstance(number_or_interval, int):
+            if number_or_interval < 2:
+                raise ValueError("Number of time steps must be equal or larger than 2.")
+
+            tdi_new = pd.timedelta_range(start=t0, end=t1, periods=number_or_interval)
+        else:
+            freq = Time(number_or_interval).as_timedelta()
+
+            if freq <= pd.Timedelta(0):
+                raise ValueError("Time delta must be a positive, non-zero value.")
+
+            tdi_new = pd.timedelta_range(start=t0, end=t1, freq=freq)
+
+        if not tdi_new[-1] == t1:
+            tdi_new = tdi_new.append(pd.Index([t1]))
+
+        return Time(tdi_new, self.reference_time)
+
     @staticmethod
     def _convert_quantity(
         time: pint.Quantity,
@@ -573,7 +668,10 @@ class Time:
         if "time" in time.coords:
             time = time.time
         time_ref = time.weldx.time_ref
-        time_index = pd.Index(time.values)
+        if time.shape:
+            time_index = pd.Index(time.values)
+        else:
+            time_index = pd.Index([time.values])
         if time_ref is not None:
             time_index = time_index + time_ref
         return time_index
@@ -620,7 +718,7 @@ class Time:
     union = _UnionDescriptor()
     """Calculate the union of multiple time-like objects.
 
-    This method can eiter be used as a class or instance method. When used on an
+    This method can either be used as a class or instance method. When used on an
     instance, its values are included in the calculated time union.
 
     Note that any reference time information will be dropped.

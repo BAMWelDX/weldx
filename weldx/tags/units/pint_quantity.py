@@ -34,8 +34,6 @@ class PintQuantityConverter(WeldxConverter):
         """Reconstruct from tree."""
         if tag.startswith("tag:stsci.edu:asdf"):  # asdf compat
             return Q_(node["value"], node["unit"])
-        if tag.startswith("tag:weldx.bam.de:weldx"):  # legacy_code
-            return Q_(node["value"], node["unit"])
         return Q_(node["value"], node["units"])
 
     @staticmethod
@@ -57,7 +55,7 @@ class PintUnitConverter(WeldxConverter):
 
     def to_yaml_tree(self, obj: pint.Unit, tag: str, ctx) -> str:
         """Convert to python dict."""
-        return f"{obj:.}"  # use 'long' (.) formatting for serialization (short = ~)
+        return f"{obj:D}"  # use def/long (D) formatting for serialization
 
     def from_yaml_tree(self, node: str, tag: str, ctx) -> pint.Unit:
         """Reconstruct from tree."""

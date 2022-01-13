@@ -103,7 +103,7 @@ properties:
     tag: "asdf://weldx.bam.de/weldx/tags/core/transformations/coordinate_system_hierarchy-0.1.*"
   equipment:
     description: |
-      A list of equipments used for measurements and describing the weld seam.
+      A list of equipment used for measurements and describing the weld seam.
     type: array
     items:
       tag: "asdf://weldx.bam.de/weldx/tags/equipment/measurement_equipment-0.1.*"
@@ -160,7 +160,7 @@ properties:
     description: |
       Metadata container for additional user documentation of the experiment.
     type: object
-required: [equipment,workpiece,measurements,welding_current,welding_voltage,TCP]
+required: [process, equipment, workpiece, measurements, welding_current, welding_voltage, TCP]
 
 examples:
   -

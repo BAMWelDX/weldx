@@ -14,14 +14,16 @@ from jsonschema import ValidationError
 
 from weldx import WeldxFile
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
+from weldx.asdf.file import _PROTECTED_KEYS, DEFAULT_ARRAY_INLINE_THRESHOLD
 from weldx.asdf.util import get_schema_path
+from weldx.constants import META_ATTR
 from weldx.types import SupportsFileReadWrite
-from weldx.util import compare_nested
+from weldx.util import WeldxDeprecationWarning, compare_nested
 
 SINGLE_PASS_SCHEMA = "single_pass_weld-0.1.0"
 
 
-class ReadOnlyFile:
+class _ReadOnlyFile:
     """Simulate a read-only file."""
 
     def __init__(self, tmpdir):  # noqa: D107
@@ -42,7 +44,7 @@ class ReadOnlyFile:
         return True
 
 
-class WritableFile:
+class _WritableFile:
     """Example of a class implementing SupportsFileReadWrite."""
 
     def __init__(self):  # noqa: D107
@@ -70,7 +72,7 @@ class WritableFile:
 
 def test_protocol_check(tmpdir):
     """Instance checks."""
-    assert isinstance(WritableFile(), SupportsFileReadWrite)
+    assert isinstance(_WritableFile(), SupportsFileReadWrite)
     assert isinstance(BytesIO(), SupportsFileReadWrite)
 
     # real file:
@@ -82,7 +84,7 @@ def test_protocol_check(tmpdir):
 @pytest.fixture(scope="class")
 def simple_asdf_file(request):
     """Create an ASDF file with a very simple tree and attaches it to cls."""
-    f = asdf.AsdfFile(tree=dict(wx_metadata=dict(welder="anonymous")))
+    f = asdf.AsdfFile(tree={META_ATTR: dict(welder="anonymous")})
     buff = BytesIO()
     f.write_to(buff)
     request.cls.simple_asdf_file = buff
@@ -176,7 +178,7 @@ class TestWeldXFile:
     @staticmethod
     def test_create_writable_protocol():
         """Interface test for writable files."""
-        f = WritableFile()
+        f = _WritableFile()
         WeldxFile(f, tree=dict(test="yes"), mode="rw")
         new_file = TestWeldXFile.make_copy(f.to_wrap)
         assert WeldxFile(new_file)["test"] == "yes"
@@ -184,13 +186,13 @@ class TestWeldXFile:
     @staticmethod
     def test_create_readonly_protocol(tmpdir):
         """A read-only file should be supported by ASDF."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         WeldxFile(f)
 
     @staticmethod
     def test_read_only_raise_on_write(tmpdir):
         """Read-only files cannot be written to."""
-        f = ReadOnlyFile(tmpdir)
+        f = _ReadOnlyFile(tmpdir)
         with pytest.raises(ValueError):
             WeldxFile(f, mode="rw")
 
@@ -208,10 +210,10 @@ class TestWeldXFile:
         f = tempfile.mktemp(dir=tmpdir)
         self.fh.write_to(f)
         with WeldxFile(f, mode="rw") as fh:
-            fh["wx_metadata"]["key"] = True
+            fh[META_ATTR]["key"] = True
 
         with WeldxFile(f, mode="r") as fh:
-            assert fh["wx_metadata"]["key"]
+            assert fh[META_ATTR]["key"]
 
     @staticmethod
     def make_copy(fh):
@@ -228,7 +230,7 @@ class TestWeldXFile:
     def test_operation_on_closed(self):
         """Accessing the file_handle after closing is illegal."""
         self.fh.close()
-        assert self.fh["wx_metadata"]
+        assert self.fh[META_ATTR]
 
         # cannot access closed handles
         with pytest.raises(RuntimeError):
@@ -260,16 +262,16 @@ class TestWeldXFile:
         """Check the file handle gets closed."""
         copy = self.fh.write_to()
         with WeldxFile(copy, mode="rw", sync=sync) as fh:
-            assert "something" not in fh["wx_metadata"]
-            fh["wx_metadata"]["something"] = True
+            assert "something" not in fh[META_ATTR]
+            fh[META_ATTR]["something"] = True
 
         copy.seek(0)
         # check if changes have been written back according to sync flag.
         with WeldxFile(copy, mode="r") as fh2:
             if sync:
-                assert fh2["wx_metadata"]["something"]
+                assert fh2[META_ATTR]["something"]
             else:
-                assert "something" not in fh2["wx_metadata"]
+                assert "something" not in fh2[META_ATTR]
 
     def test_history(self):
         """Test custom software specs for history entries."""
@@ -277,22 +279,22 @@ class TestWeldXFile:
             name="weldx_file_test", author="marscher", homepage="http://no", version="1"
         )
         fh = WeldxFile(
-            tree=dict(wx_metadata={}),
+            tree={META_ATTR: {}},
             software_history_entry=software,
             mode="rw",
         )
-        fh["wx_metadata"]["something"] = True
+        fh[META_ATTR]["something"] = True
         desc = "added some metadata"
         fh.add_history_entry(desc)
         fh.sync()
         buff = self.make_copy(fh)
 
         new_fh = WeldxFile(buff)
-        assert new_fh["wx_metadata"]["something"]
+        assert new_fh[META_ATTR]["something"]
         assert new_fh.history[-1]["description"] == desc
         assert new_fh.history[-1]["software"] == software
 
-        del new_fh["wx_metadata"]["something"]
+        del new_fh[META_ATTR]["something"]
         other_software = dict(
             name="software name", version="42", homepage="no", author="anon"
         )
@@ -501,14 +503,93 @@ class TestWeldXFile:
             f.update()
             f.close()
 
-        # compare data
-        assert (
-            pathlib.Path("test.asdf").stat().st_size
-            == pathlib.Path("test.wx").stat().st_size
+        # file sizes should be almost equal (array inlining in wxfile).
+        a = pathlib.Path("test.asdf").stat().st_size
+        b = pathlib.Path("test.wx").stat().st_size
+        assert a >= b
+
+        if a == b:
+
+            def _read(fn):
+                with open(fn, "br") as fh:
+                    return fh.read()
+
+            assert _read("test.asdf") == _read("test.wx")
+
+    @pytest.mark.filterwarnings("ignore:You tried to manipulate an ASDF internal")
+    @pytest.mark.filterwarnings("ignore:Call to deprecated function data.")
+    @pytest.mark.parametrize("protected_key", _PROTECTED_KEYS)
+    def test_cannot_update_del_protected_keys(self, protected_key):
+        """Ensure we cannot manipulate protected keys."""
+        expected_match = "manipulate an ASDF internal structure"
+        warning_type = UserWarning
+        # try to obtain key from underlying dict.
+        with pytest.raises(KeyError), pytest.warns(WeldxDeprecationWarning):
+            _ = self.fh.data[protected_key]
+
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.update({protected_key: None})
+        with pytest.warns(warning_type, match=expected_match):
+            del self.fh[protected_key]
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh.pop(protected_key)
+        with pytest.warns(warning_type, match=expected_match):
+            self.fh[protected_key] = NotImplemented
+
+    def test_popitem_remain_protected_keys(self):
+        """Ensure we cannot manipulate protected keys."""
+        keys = []
+
+        while len(self.fh):
+            key, _ = self.fh.popitem()
+            keys.append(key)
+        assert keys == [META_ATTR]
+
+    def test_len_proteced_keys(self):
+        """Should only contain key 'wx_metadata'."""
+        assert len(self.fh) == 1
+
+    def test_keys_not_in_protected_keys(self):
+        """Protected keys do not show up in keys()."""
+        assert self.fh.keys() not in set(_PROTECTED_KEYS)
+
+        for x in iter(self.fh):
+            assert x not in _PROTECTED_KEYS
+
+    @staticmethod
+    def test_array_inline_threshold():
+        """Test array inlining threshold."""
+        x = np.arange(7)
+        buff = WeldxFile(
+            tree=dict(x=x), mode="rw", array_inline_threshold=len(x) + 1
+        ).file_handle
+        buff.seek(0)
+        assert str(list(x)).encode("utf-8") in buff.read()
+
+        # now we create an array longer than the default threshold
+        y = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+        buff2 = WeldxFile(tree=dict(x=y), mode="rw").file_handle
+        buff2.seek(0)
+        data = buff2.read()
+        assert b"BLOCK" in data
+        assert str(list(y)).encode("utf-8") not in data
+
+    @staticmethod
+    def test_array_inline_threshold_sync():
+        x = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+
+        with WeldxFile(mode="rw") as wx:
+            wx.update(x=x)
+            wx.sync(array_inline_threshold=len(x) + 1)
+            buff3 = wx.file_handle
+            buff3.seek(0)
+            data3 = buff3.read()
+            assert b"BLOCK" not in data3
+
+    @staticmethod
+    def test_array_inline_threshold_write_to():
+        x = np.arange(DEFAULT_ARRAY_INLINE_THRESHOLD + 3)
+        buff = WeldxFile(tree=dict(x=x), mode="rw").write_to(
+            array_inline_threshold=len(x) + 1
         )
-
-        def _read(fn):
-            with open(fn, "br") as fh:
-                return fh.read()
-
-        assert _read("test.asdf") == _read("test.wx")
+        assert b"BLOCK" not in buff.read()

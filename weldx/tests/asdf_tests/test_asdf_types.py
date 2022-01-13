@@ -1,7 +1,7 @@
 import pandas as pd
 
-from weldx.asdf.types import META_ATTR, USER_ATTR
 from weldx.asdf.util import write_read_buffer
+from weldx.constants import META_ATTR, USER_ATTR
 from weldx.measurement import Error
 from weldx.util import compare_nested
 

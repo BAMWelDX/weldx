@@ -1,11 +1,11 @@
 """single_pass_weld schema."""
 import sys
 from io import BytesIO
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 
 def single_pass_weld_example(
-    out_file: str = "single_pass_weld_example.asdf",
+    out_file: Optional[Union[str, BytesIO]] = "single_pass_weld_example.asdf",
 ) -> Optional[Tuple[BytesIO, dict]]:
     """Create ASDF file containing all required fields of the single_pass_weld schema.
 
@@ -34,6 +34,7 @@ def single_pass_weld_example(
     from weldx import LocalCoordinateSystem as lcs
     from weldx import TimeSeries, WXRotation, get_groove
     from weldx.asdf.util import get_schema_path, write_buffer
+    from weldx.constants import META_ATTR
     from weldx.core import MathematicalExpression
     from weldx.tags.aws.process.gas_component import GasComponent
     from weldx.tags.aws.process.shielding_gas_for_procedure import (
@@ -189,8 +190,8 @@ def single_pass_weld_example(
     )
 
     twincat_scope = Software(name="Beckhoff TwinCAT ScopeView", version="3.4.3143")
-    current_calib_transform.wx_metadata = dict(software=twincat_scope)
-    voltage_calib_transform.wx_metadata = dict(software=twincat_scope)
+    setattr(current_calib_transform, META_ATTR, dict(software=twincat_scope))
+    setattr(voltage_calib_transform, META_ATTR, dict(software=twincat_scope))
 
     # Define current measurement chain
 
@@ -289,8 +290,8 @@ def single_pass_weld_example(
         TCP=TCP_reference,
         workpiece=workpiece,
         process=process,
-        wx_metadata={"welder": "A.W. Elder"},
     )
+    tree[META_ATTR] = {"welder": "A.W. Elder"}
 
     model_path = get_schema_path("single_pass_weld-0.1.0.yaml")
 

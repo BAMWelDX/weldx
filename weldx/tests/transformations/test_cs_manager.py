@@ -737,6 +737,18 @@ def test_comparison_wrong_type():
     assert (csm != 4) is True
 
 
+def test_comparison_data():
+    csm1 = tf.CoordinateSystemManager("root", "csm")
+    csm2 = tf.CoordinateSystemManager("root", "csm")
+    data = np.arange(12).reshape((4, 3))
+    csm1.assign_data(data, data_name="foo", reference_system="root")
+    csm2.assign_data(data, data_name="foo", reference_system="root")
+
+    assert csm1 == csm2
+    csm2.assign_data(data, data_name="bar", reference_system="root")
+    assert csm1 != csm2
+
+
 # test_time_union ----------------------------------------------------------------------
 
 
@@ -1438,7 +1450,7 @@ def test_get_local_coordinate_system_timeseries(
         The expected rotation angles around the z-axis
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
     ts = TimeSeries(me)
     rotation = WXRotation.from_euler("z", [0, 90], degrees=True).as_matrix()
     translation = [[1, 0, 0], [2, 0, 0]]
@@ -1535,7 +1547,7 @@ def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
         Set to `True` if the transformation should raise
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([[0, 1, 0]], "mm/s")})
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
     ts = TimeSeries(me)
     translation = [[1, 0, 0], [2, 0, 0]]
 
@@ -2230,6 +2242,39 @@ def test_assign_data_exceptions(arguments, exception_type, test_name):
         csm.assign_data(*arguments)
 
 
+def test_delete_data(list_of_csm_and_lcs_instances):
+    """Test delete data (with subsystems)."""
+    csm = list_of_csm_and_lcs_instances[0]
+
+    data_name = "foo"
+    csm[0].assign_data([[1, 2, 3], [3, 2, 1]], data_name, "lcs0")
+    assert data_name in csm[0].data_names
+
+    csm_n3 = deepcopy(csm[3])
+    csm_n3.merge(csm[5])
+
+    csm_n2 = deepcopy(csm[2])
+    csm_n2.merge(csm_n3)
+
+    csm_mg = deepcopy(csm[0])
+    csm_mg.merge(csm[1])
+    csm_mg.merge(csm[4])
+    csm_mg.merge(csm_n2)
+
+    csm[0].delete_data(data_name)
+    csm_mg.delete_data(data_name)
+    assert data_name not in csm[0].data_names
+    for sub_sys in csm_mg.subsystems:
+        assert data_name not in sub_sys.data_names
+
+
+def test_delete_non_existent_data():
+    """Ensure we receive an exception upon deleting non-existent data."""
+    csm = tf.CoordinateSystemManager("root")
+    with pytest.raises(ValueError):
+        csm.delete_data("no")
+
+
 # test_has_data_exceptions -------------------------------------------------------------
 
 
@@ -2421,6 +2466,7 @@ def test_unmerge_multi_data():
 @pytest.mark.parametrize("data_cs_parent", ["rp", "a", "m"])
 @pytest.mark.parametrize("data_cs_child", ["rc", "b", "m"])
 def test_merge_data_name_collision(data_cs_parent, data_cs_child):
+    """Check name collisions are handled appropriately."""
     csm_parent = CSM("rp", "parent")
     csm_parent.create_cs("a", "rp")
     csm_parent.create_cs("m", "rp")
@@ -2614,6 +2660,7 @@ def test_issue_289_interp_outside_time_range(
     exp_orient = WXRotation.from_euler("x", exp_angle, degrees=True).as_matrix()
     exp_coords = [0, 0, 0] if time_dep_coords and all_less else [1, 1, 1]
 
+    assert cs_br.is_time_dependent is False
     assert cs_br.time is None
     assert cs_br.coordinates.values.shape == (3,)
     assert cs_br.orientation.values.shape == (3, 3)
