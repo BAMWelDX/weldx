@@ -41,8 +41,6 @@ class XarrayDataArrayConverter(WeldxConverter):
         attrs = node["attributes"]
 
         da = DataArray(data=data, coords=coords, dims=dims, attrs=attrs)
-        da.name = None  # we currently do not use the name attribute
-        # (but since it gets automatically derived if not set, we define it now.
 
         return da
 

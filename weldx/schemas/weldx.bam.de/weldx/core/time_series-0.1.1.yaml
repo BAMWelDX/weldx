@@ -1,0 +1,124 @@
+%YAML 1.1
+---
+$schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
+id: "asdf://weldx.bam.de/weldx/schemas/core/time_series-0.1.1"
+
+title: |
+  Schema that describes a time series.
+description: |
+  Describes a time dependent quantity.
+
+examples:
+  -
+    - A time_series describing a constant value in time.
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+        units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter / second
+        value: 10.0
+  -
+    - A time series of 4 discrete points
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+        values: !core/ndarray-1.0.0
+          data: [1, 2, 3, 8]
+          datatype: int32
+          shape: [4]
+        time: !<asdf://weldx.bam.de/weldx/tags/time/time-0.1.0>
+          values: !<asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.0> {start: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-01T00:00:00',
+            end: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-04T00:00:00', freq: D, min: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-01T00:00:00',
+            max: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> '2020-01-04T00:00:00'}
+          reference_time: !<asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.0> 2020-01-01T00:00:00
+        units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> meter
+        shape: [4]
+        interpolation: step
+  -
+    - A time_series describing a sine oscillation in 3d space along the z-axis
+    - |
+      !<asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1>
+        expression: !<asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0>
+          expression: a*sin(o*t + p) + b
+          parameters:
+            a: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0>
+              units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
+              value: !core/ndarray-1.0.0
+                data:
+                - [0, 0, 1]
+                datatype: int32
+                shape: [1, 3]
+            b: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 0.0, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter}
+            o: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 4.934802200544679, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> hertz * radian}
+            p: !<asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0> {value: 0, units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> radian}
+        units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
+        shape: [1, 3]
+
+oneOf:
+  - type: object
+    description: |
+      Implementation for constant values.
+    properties:
+      value:
+        description: |
+          Number or n-dimensional array that is constant in time.
+        anyOf:
+          - type: number
+          - type: integer
+          - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+      units:
+        description: |
+          Units of the data.
+        tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
+    required: [value, units]
+
+  - type: object
+    description: |
+      Implementation for expressions.
+    properties:
+      expression:
+        description: |
+          A mathematical expression that describes the time dependent behaviour.
+        tag: "asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.*"
+      units:
+        description: |
+          Resulting units of the data when the expression is evaluated.
+        tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
+      shape:
+        description: |
+          (optional) Resulting shape of the data when the expression is evaluated.
+        type: array
+    required: [expression, units]
+
+  - type: object
+    description: |
+      Implementation for discrete data.
+    properties:
+      time:
+        description: |
+          The time axis associated with the data.
+        tag: "asdf://weldx.bam.de/weldx/tags/time/time-0.1.*"
+      units:
+        description: |
+          Units of the data.
+        tag: "asdf://weldx.bam.de/weldx/tags/units/units-0.1.*"
+      shape:
+        description: |
+          Shape of the data.
+        type: array
+      interpolation:
+        description: |
+          Method how the data should be interpolated.
+        type: string
+        enum: [linear, step]
+      values:
+        description: |
+          Set of discrete n-dimensional data.
+        tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
+    wx_shape:
+      #description: |
+      #  The outer dimension of the data needs to be identical to the times dimension.
+      time: [t]
+      values: [t, ...]
+    required: [time, units, shape, interpolation, values]
+
+propertyOrder: [expression, values, time, units, shape, interpolation, values]
+flowStyle: block
+...

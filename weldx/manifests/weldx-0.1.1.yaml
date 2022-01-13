@@ -39,10 +39,16 @@ tags:
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/dimension-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/file-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/file-0.1.0
+- tag_uri: asdf://weldx.bam.de/weldx/tags/core/generic_series-0.1.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/generic_series-0.1.0
+- tag_uri: asdf://weldx.bam.de/weldx/tags/core/generic_series_free_dimension-0.1.0
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/generic_series_free_dimension-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/mathematical_expression-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/time_series-0.1.0
+- tag_uri: asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.1
+  schema_uri: asdf://weldx.bam.de/weldx/schemas/core/time_series-0.1.1
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/variable-0.1.0
   schema_uri: asdf://weldx.bam.de/weldx/schemas/core/variable-0.1.0
 - tag_uri: asdf://weldx.bam.de/weldx/tags/core/geometry/spatial_data-0.1.0

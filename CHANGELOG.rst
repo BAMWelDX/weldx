@@ -9,7 +9,12 @@
 added
 =====
 
+-  add `GenericSeries` as base class supporting arrays and equations [:pull:`618`]
+
 -  add experimental unit support for ``.weldx.interp_like`` accessor [:pull:`518`]
+
+-  new tutorial series that introduces the most important WelDX features
+   step by step based on a full example file [:pull:`555`]
 
 removed
 =======
@@ -17,8 +22,13 @@ removed
 changes
 =======
 
+-  The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
+   When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
+
 fixes
 =====
+
+-  `TimeSeries` can now be serialized correctly when using absolute times [:pull:`677`]
 
 documentation
 =============
@@ -36,17 +46,25 @@ ASDF
 
 -  add ``wx_shape`` validation support for ``core/data_array`` [:pull:`655`]
 
+-  update ``core/time_series`` schema to use ``time/time`` [:pull:`677`]
+
 deprecations
 ============
 
 dependencies
 ============
 
+-  bump to ``asdf >=2.8.2`` [:pull:`668`]
+
 -  add ``pint-xarray`` dependency [:pull:`518`]
 
 -  bump to ``numpy>=1.20`` (for numpy.typing) [:pull:`656`]
 
 -  bump to ``pint >=0.18`` for typing [:pull:`664`]
+
+-  bump to ``xarray >=0.19`` for array creation compatibility [:pull:`618`]
+
+-  add ``bidict`` dependency [:pull:`618`]
 
 ********************
  0.5.2 (18.11.2021)

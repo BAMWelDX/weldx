@@ -4,7 +4,12 @@ from pathlib import Path as _Path
 import pint
 import pint_xarray  # noqa: F401 # pylint: disable=W0611
 
-UNITS_KEY = "units"  # default nomenclature for storing physical units information
+META_ATTR = "wx_metadata"
+"""The default attribute to store weldx metadata."""
+USER_ATTR = "wx_user"
+"""The default attribute to store user metadata."""
+UNITS_KEY = "units"
+"""default nomenclature for storing physical units information"""
 
 WELDX_PATH = _Path(__file__).parent.resolve()
 
@@ -15,6 +20,7 @@ WELDX_UNIT_REGISTRY = pint.UnitRegistry(
     ],
     force_ndarray_like=True,
 )
+
 
 # add percent unit
 WELDX_UNIT_REGISTRY.define("percent = 0.01*count = %")
@@ -68,7 +74,10 @@ U_.__doc__ = """For details on working with quantities and units, please see the
 pint.set_application_registry(WELDX_UNIT_REGISTRY)
 pint_xarray.unit_registry = WELDX_UNIT_REGISTRY
 
+
 __all__ = (
+    "META_ATTR",
+    "USER_ATTR",
     "WELDX_PATH",
     "WELDX_QUANTITY",
     "WELDX_UNIT_REGISTRY",

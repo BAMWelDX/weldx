@@ -24,7 +24,7 @@ class TestDiGraph(unittest.TestCase):
 
         id_a, id_c = uuid4(), uuid4()
         g2 = nx.relabel.relabel_nodes(g, {"A": id_a, "C": id_c}, copy=True)
-        setattr(g2, "_wx_keep_uuid_name", True)
+        g2._wx_keep_uuid_name = True
         self.graph_uuid = g2
 
     @staticmethod
@@ -56,6 +56,6 @@ class TestDiGraph(unittest.TestCase):
             write_read_buffer(dict(graph=self.graph))
 
         with pytest.raises(KeyError):
-            setattr(self.graph_uuid, "_wx_keep_uuid_name", False)
+            self.graph_uuid._wx_keep_uuid_name = False
             g = self.graph_uuid
             self._assert_roundtrip(g)

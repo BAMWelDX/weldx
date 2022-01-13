@@ -21,3 +21,10 @@ class TimeConverter(WeldxConverter):
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct Time from tree."""
         return Time(node["values"], node.get("reference_time"))
+
+    @staticmethod
+    def shape_from_tagged(node):
+        """Calculate the shape from static tagged tree instance."""
+        from weldx.asdf.util import _get_instance_shape
+
+        return _get_instance_shape(node["values"])

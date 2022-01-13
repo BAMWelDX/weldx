@@ -12,7 +12,7 @@ from pint.errors import DimensionalityError
 from xarray import DataArray
 
 import weldx.util as ut
-from weldx.constants import Q_, U_, UNITS_KEY
+from weldx.constants import META_ATTR, Q_, U_, UNITS_KEY
 from weldx.time import Time
 
 
@@ -175,7 +175,7 @@ class TestXarrayInterpolation:
                 "t": ("t", t.m, {UNITS_KEY: t.u}),
                 "a": ("a", a.m, {UNITS_KEY: a.u}),
             },
-            attrs={"wx_metadata": "meta"},
+            attrs={META_ATTR: "meta"},
         )
 
         if fmt == "dict":
@@ -201,7 +201,7 @@ class TestXarrayInterpolation:
         for n in range(len(da.a)):
             assert np.all(da2.sel(a=n) == result[n, :])
         assert da2.pint.units == data_units
-        assert da2.attrs["wx_metadata"] == "meta"
+        assert da2.attrs[META_ATTR] == "meta"
 
         assert da2.t.attrs.get(UNITS_KEY, None) == t_interp.units
         assert da2.a.attrs.get(UNITS_KEY, None) == a.units
@@ -358,7 +358,7 @@ _dax_ref = dict(
 
 
 @pytest.mark.parametrize(
-    "dax, ref_dict",
+    "coords, ref_dict",
     [
         (_dax_check, _dax_ref),
         (_dax_check.coords, _dax_ref),
@@ -371,9 +371,9 @@ _dax_ref = dict(
         (_dax_check, {"d3": {"dtype": ["datetime64", "timedelta64"]}}),
     ],
 )
-def test_xr_check_coords(dax, ref_dict):
+def test_xr_check_coords(coords, ref_dict):
     """Test weldx.utility.xr_check_coords function."""
-    assert ut.xr_check_coords(dax, ref_dict)
+    assert ut.xr_check_coords(coords, ref_dict)
 
 
 @pytest.mark.parametrize(
@@ -392,7 +392,6 @@ def test_xr_check_coords(dax, ref_dict):
         (_dax_check, {"d1": {"dimensionality": "kg"}}, DimensionalityError),
         (_dax_check, {"d3": {"dtype": "timedelta64"}}, TypeError),
         (_dax_check, {"d4": {"dtype": "datetime64"}}, TypeError),
-        ({"d4": np.arange(4)}, {"d4": {"dtype": "int"}}, ValueError),
     ],
 )
 def test_xr_check_coords_exception(dax, ref_dict, exception_type):
@@ -572,7 +571,7 @@ class TestWeldxExampleCompareNested(unittest.TestCase):
         assert ut.compare_nested(self.a, self.b)
 
     def test_metadata_modified(self):  # noqa: D102
-        self.b["wx_metadata"]["welder"] = "anonymous"
+        self.b[META_ATTR]["welder"] = "anonymous"
         assert not ut.compare_nested(self.a, self.b)
 
     def test_measurements_modified(self):  # noqa: D102
