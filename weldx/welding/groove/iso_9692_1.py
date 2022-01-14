@@ -1412,7 +1412,8 @@ class FFGroove(IsoBaseGroove):
     e :
         special depth
     code_number :
-        Numbers of the standard
+        Numbers of the standard, allowed values are
+        ["1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"]
 
     """
 
