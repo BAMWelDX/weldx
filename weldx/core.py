@@ -1,10 +1,10 @@
 """Collection of common classes and functions."""
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Tuple, Union
 from warnings import warn
 
 import numpy as np
@@ -58,7 +58,7 @@ class MathematicalExpression:
             tuple(self._expression.free_symbols), self._expression, "numpy"
         )
 
-        self._parameters: Dict[str, Union[pint.Quantity, xr.DataArray]] = {}
+        self._parameters: dict[str, Union[pint.Quantity, xr.DataArray]] = {}
         if parameters is not None:
             self.set_parameters(parameters)
 
@@ -221,7 +221,7 @@ class MathematicalExpression:
         return self._expression
 
     @property
-    def parameters(self) -> Dict[str, Union[pint.Quantity, xr.DataArray]]:
+    def parameters(self) -> dict[str, Union[pint.Quantity, xr.DataArray]]:
         """Return the internal parameters dictionary.
 
         Returns
@@ -232,7 +232,7 @@ class MathematicalExpression:
         """
         return self._parameters
 
-    def get_variable_names(self) -> List[str]:
+    def get_variable_names(self) -> list[str]:
         """Get a list of all expression variables.
 
         Returns
@@ -690,7 +690,7 @@ class TimeSeries(TimeDependent):
         return axes
 
     @property
-    def shape(self) -> Tuple:
+    def shape(self) -> tuple:
         """Return the shape of the TimeSeries data.
 
         For mathematical expressions, the shape does not contain the time axis.
@@ -730,7 +730,7 @@ class TimeSeries(TimeDependent):
 
 def _quantity_to_coord_tuple(
     v: pint.Quantity, dim
-) -> Tuple[str, np.array, Dict[str, pint.Unit]]:
+) -> tuple[str, np.array, dict[str, pint.Unit]]:
     return (dim, v.m, {UNITS_KEY: v.u})
 
 
@@ -739,7 +739,7 @@ def _quantity_to_xarray(v: pint.Quantity, dim: str = None) -> xr.DataArray:
     return xr.DataArray(v, dims=dim)
 
 
-def _quantities_to_xarray(q_dict: Dict[str, pint.Quantity]) -> Dict[str, xr.DataArray]:
+def _quantities_to_xarray(q_dict: dict[str, pint.Quantity]) -> dict[str, xr.DataArray]:
     """Convert a str:Quantity mapping into a mapping of xarray Datarrays."""
     return {k: _quantity_to_xarray(v, k) for k, v in q_dict.items()}
 
@@ -811,7 +811,7 @@ class SeriesParameter:
         return self.values.weldx.quantify().data
 
     @property
-    def coord_tuple(self) -> Tuple[str, np.ndarray, Dict[str, pint.Unit]]:
+    def coord_tuple(self) -> tuple[str, np.ndarray, dict[str, pint.Unit]]:
         """Get the parameter in xarray coordinate tuple format."""
         if isinstance(self.values, pint.Quantity):
             return _quantity_to_coord_tuple(self.values, self.dim)
@@ -822,19 +822,19 @@ class SeriesParameter:
 class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
 
-    _allowed_variables: List[str] = []
+    _allowed_variables: list[str] = []
     """Allowed variable names"""
-    _required_variables: List[str] = []
+    _required_variables: list[str] = []
     """Required variable names"""
 
-    _evaluation_preprocessor: Dict[str, Callable] = {}
+    _evaluation_preprocessor: dict[str, Callable] = {}
     """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
 
-    _required_dimensions: List[str] = []
+    _required_dimensions: list[str] = []
     """Required dimensions"""
-    _required_dimension_units: Dict[str, pint.Unit] = {}
+    _required_dimension_units: dict[str, pint.Unit] = {}
     """Required units of a dimension"""
-    _required_dimension_coordinates: Dict[str, List] = {}
+    _required_dimension_coordinates: dict[str, list] = {}
     """Required coordinates of a dimension."""
 
     _required_unit_dimensionality: pint.Unit = None
@@ -842,21 +842,21 @@ class GenericSeries:
 
     # do it later
 
-    _allowed_dimensions: List[str] = NotImplemented
+    _allowed_dimensions: list[str] = NotImplemented
     """A list of allowed dimension names."""
-    _required_parameter_shape: Dict[str, int] = NotImplemented
+    _required_parameter_shape: dict[str, int] = NotImplemented
     """Size of the parameter dimensions/coordinates - (also defines parameter order)"""
-    _alias_names: Dict[str, List[str]] = NotImplemented
+    _alias_names: dict[str, list[str]] = NotImplemented
     """Allowed alias names for a variable or parameter in an expression"""
 
     def __init__(
         self,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
-        dims: Union[List[str], Dict[str, str]] = None,
-        coords: Dict[str, pint.Quantity] = None,
-        units: Dict[str, Union[str, pint.Unit]] = None,
+        dims: Union[list[str], dict[str, str]] = None,
+        coords: dict[str, pint.Quantity] = None,
+        units: dict[str, Union[str, pint.Unit]] = None,
         interpolation: str = None,
-        parameters: Dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
+        parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]] = None,
     ):
         """Create a generic series.
 
@@ -972,7 +972,7 @@ class GenericSeries:
 
         """
         self._obj: Union[xr.DataArray, MathematicalExpression] = None
-        self._variable_units: Dict[str, pint.Unit] = None
+        self._variable_units: dict[str, pint.Unit] = None
         self._symbol_dims: bidict = bidict({})
         self._units: pint.Unit = None
         self._interpolation = "linear" if interpolation is None else interpolation
@@ -1013,8 +1013,8 @@ class GenericSeries:
     def _init_discrete(
         self,
         data: Union[pint.Quantity, xr.DataArray],
-        dims: List[str],
-        coords: Dict[str, pint.Quantity],
+        dims: list[str],
+        coords: dict[str, pint.Quantity],
     ):
         """Initialize the internal data with discrete values."""
         if not isinstance(data, xr.DataArray):
@@ -1033,8 +1033,8 @@ class GenericSeries:
 
     @staticmethod
     def _init_get_updated_dims(
-        expr: MathematicalExpression, dims: Dict[str, str] = None
-    ) -> Dict[str, str]:
+        expr: MathematicalExpression, dims: dict[str, str] = None
+    ) -> dict[str, str]:
         if dims is None:
             dims = {}
         return {v: dims.get(v, v) for v in expr.get_variable_names()}
@@ -1042,8 +1042,8 @@ class GenericSeries:
     def _init_get_updated_units(
         self,
         expr: MathematicalExpression,
-        units: Dict[str, pint.Unit],
-    ) -> Dict[str, pint.Unit]:
+        units: dict[str, pint.Unit],
+    ) -> dict[str, pint.Unit]:
         """Cast dimensions and units into the internally used, unified format."""
         if units is None:
             units = {}
@@ -1066,9 +1066,9 @@ class GenericSeries:
     def _init_expression(
         self,
         expr: Union[str, MathematicalExpression],
-        dims: Dict[str, str],
-        parameters: Dict[str, Union[str, pint.Quantity, xr.DataArray]],
-        units: Dict[str, pint.Unit],
+        dims: dict[str, str],
+        parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]],
+        units: dict[str, pint.Unit],
     ):
         """Initialize the internal data with a mathematical expression."""
         # Check and update expression
@@ -1149,8 +1149,8 @@ class GenericSeries:
 
     @staticmethod
     def _format_expression_params(
-        parameters: Dict[str, Union[str, pint.Quantity, xr.DataArray]]
-    ) -> Dict[str, Union[pint.Quantity, xr.DataArray]]:
+        parameters: dict[str, Union[str, pint.Quantity, xr.DataArray]]
+    ) -> dict[str, Union[pint.Quantity, xr.DataArray]]:
         """Create expression parameters as a valid internal type.
 
         Valid types are all input types for the `MathematicalExpression`, with the
@@ -1237,7 +1237,7 @@ class GenericSeries:
             return self._evaluate_expr(coords)
         return self._evaluate_array(coords)
 
-    def _evaluate_preprocessor(self, **kwargs) -> List[SeriesParameter]:
+    def _evaluate_preprocessor(self, **kwargs) -> list[SeriesParameter]:
         """Preprocess the passed parameters into coordinates for evaluation."""
         kwargs = ut.apply_func_by_mapping(
             self.__class__._evaluation_preprocessor,  # type: ignore # skipcq: PYL-W0212
@@ -1251,7 +1251,7 @@ class GenericSeries:
 
         return coords
 
-    def _evaluate_expr(self, coords: List[SeriesParameter]) -> GenericSeries:
+    def _evaluate_expr(self, coords: list[SeriesParameter]) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(coords) == self._obj.num_variables:
             eval_args = {v.symbol: v.data_array for v in coords}
@@ -1268,7 +1268,7 @@ class GenericSeries:
             new_series._variable_units.pop(p.symbol)  # skipcq: PYL-W0212
         return new_series
 
-    def _evaluate_array(self, coords: List[SeriesParameter]) -> GenericSeries:
+    def _evaluate_array(self, coords: list[SeriesParameter]) -> GenericSeries:
         """Evaluate (interpolate) discrete Series object at the coordinates."""
         eval_args = {v.dim: v.data_array.pint.dequantify() for v in coords}
         for k in eval_args:
@@ -1296,7 +1296,7 @@ class GenericSeries:
         return None
 
     @property
-    def coordinate_names(self) -> List[str]:
+    def coordinate_names(self) -> list[str]:
         """Get the names of all coordinates."""
         return NotImplemented
 
@@ -1317,7 +1317,7 @@ class GenericSeries:
     @staticmethod
     def _get_expression_dims(
         expr: MathematicalExpression, symbol_dims: Mapping[str, str]
-    ) -> List[str]:
+    ) -> list[str]:
         """Get the dimensions of an expression based `GenericSeries`.
 
         This is the union of parameter dimensions and free dimensions.
@@ -1332,7 +1332,7 @@ class GenericSeries:
         return list(dims)
 
     @property
-    def dims(self) -> List[str]:
+    def dims(self) -> list[str]:
         """Get the names of all dimensions."""
         if self.is_expression:
             return self._get_expression_dims(self._obj, self._symbol_dims)
@@ -1373,19 +1373,19 @@ class GenericSeries:
         return len(self.dims)
 
     @property
-    def variable_names(self) -> Union[List[str], None]:
+    def variable_names(self) -> Union[list[str], None]:
         """Get the names of all variables."""
         if self.is_expression:
             return list(self._variable_units.keys())
         return None
 
     @property
-    def variable_units(self) -> Dict[str, pint.Unit]:
+    def variable_units(self) -> dict[str, pint.Unit]:
         """Get a dictionary that maps the variable names to their expected units."""
         return self._variable_units
 
     @property
-    def shape(self) -> Tuple:
+    def shape(self) -> tuple:
         """Get the shape of the generic series data."""
         if self.is_expression:
             return NotImplemented
@@ -1424,7 +1424,7 @@ class GenericSeries:
         _vals = cls._required_dimension_coordinates
         _keys = (set(_units.keys()) & set(data_array.dims)) | set(_vals.keys())
 
-        ref: Dict[str, Dict] = {k: {} for k in _keys}
+        ref: dict[str, dict] = {k: {} for k in _keys}
         for k in ref.keys():
             if k in _units:
                 ref[k]["dimensionality"] = _units[k]
@@ -1437,8 +1437,8 @@ class GenericSeries:
     def _check_constraints_expression(
         cls,
         expr: MathematicalExpression,
-        var_dims: Dict[str, str],
-        var_units: Dict[str, pint.Unit],
+        var_dims: dict[str, str],
+        var_units: dict[str, pint.Unit],
         expr_units: pint.Unit,
     ):
         """Check if the constraints of an expression based derived type are met."""
@@ -1522,7 +1522,7 @@ class GenericSeries:
     @staticmethod
     # skipcq: PYL-W0613
     def interp_like(
-        obj: Any, dimensions: List[str] = None, accessor_mappings: Dict = None
+        obj: Any, dimensions: list[str] = None, accessor_mappings: dict = None
     ) -> GenericSeries:
         """Interpolate using the coordinates of another object.
 

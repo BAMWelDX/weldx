@@ -1,6 +1,8 @@
 """Color related tools."""
+from __future__ import annotations
 
-from typing import Dict, Generator, List, Sized, Tuple, Union
+from collections.abc import Generator
+from typing import Sized, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +17,7 @@ RGB_YELLOW = 0xAAAA00
 RGB_GREY = 0x999999
 
 
-def _color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
+def _color_rgb_to_int(rgb_color_tuple: tuple[int, int, int]) -> int:
     """Convert an RGB color tuple to an 24 bit integer.
 
     Parameters
@@ -32,7 +34,7 @@ def _color_rgb_to_int(rgb_color_tuple: Tuple[int, int, int]) -> int:
     return int("0x{:02x}{:02x}{:02x}".format(*rgb_color_tuple), 0)
 
 
-def _color_int_to_rgb(integer: int) -> Tuple[int, int, int]:
+def _color_int_to_rgb(integer: int) -> tuple[int, int, int]:
     """Convert an 24 bit integer into a RGB color tuple with the value range (0-255).
 
     Parameters
@@ -50,8 +52,8 @@ def _color_int_to_rgb(integer: int) -> Tuple[int, int, int]:
 
 
 def _color_rgb_to_rgb_normalized(
-    rgb: Tuple[int, int, int]
-) -> Tuple[float, float, float]:
+    rgb: tuple[int, int, int]
+) -> tuple[float, float, float]:
     """Normalize an RGB color tuple with the range (0-255) to the range (0.0-1.0).
 
     Parameters
@@ -69,8 +71,8 @@ def _color_rgb_to_rgb_normalized(
 
 
 def _color_rgb_normalized_to_rgb(
-    rgb: Tuple[float, float, float]
-) -> Tuple[int, int, int]:
+    rgb: tuple[float, float, float]
+) -> tuple[int, int, int]:
     """Normalize an RGB color tuple with the range (0.0-1.0) to the range (0-255).
 
     Parameters
@@ -105,7 +107,7 @@ def color_int_to_rgb_normalized(integer):
     return _color_rgb_to_rgb_normalized(rgb)
 
 
-def _color_rgb_normalized_to_int(rgb: Tuple[float, float, float]) -> int:
+def _color_rgb_normalized_to_int(rgb: tuple[float, float, float]) -> int:
     """Convert a normalized RGB color tuple to an 24 bit integer.
 
     Parameters
@@ -122,7 +124,7 @@ def _color_rgb_normalized_to_int(rgb: Tuple[float, float, float]) -> int:
     return _color_rgb_to_int(_color_rgb_normalized_to_rgb(rgb))
 
 
-def _shuffled_tab20_colors() -> List[int]:
+def _shuffled_tab20_colors() -> list[int]:
     """Get a shuffled list of matplotlib 'tab20' colors.
 
     Returns
@@ -143,8 +145,8 @@ def _shuffled_tab20_colors() -> List[int]:
 
 
 def color_to_rgb_normalized(
-    color: Union[int, Tuple[int, int, int], Tuple[float, float, float]]
-) -> Tuple[float, float, float]:
+    color: Union[int, tuple[int, int, int], tuple[float, float, float]]
+) -> tuple[float, float, float]:
     """Convert an arbitrary RGB color representation into a normalized RGB triplet.
 
     Parameters
@@ -198,7 +200,7 @@ def color_generator_function() -> Generator:
 
 def get_color(
     key: str,
-    color_dict: Dict[str, Union[int, Tuple[int, int, int]]],
+    color_dict: dict[str, Union[int, tuple[int, int, int]]],
     color_generator: Generator,
 ) -> int:
     """Get a 24 bit RGB color from a dictionary or generator function.

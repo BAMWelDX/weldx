@@ -1,7 +1,8 @@
 """tests for asdf utility functions."""
+from __future__ import annotations
+
 import io
 from dataclasses import dataclass
-from typing import List
 
 import numpy as np
 import pytest
@@ -134,7 +135,7 @@ def test_dataclass_serialization_class(
 
     @dataclass
     class _DataClass:
-        a: List[str]
+        a: list[str]
         b: int = 1
 
     dc = _DataClass(a=val_a, b=2)

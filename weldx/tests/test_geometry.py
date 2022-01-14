@@ -1,10 +1,11 @@
 """Tests the geometry package."""
+from __future__ import annotations
 
 import copy
 import math
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Dict, List, Union
+from typing import Union
 
 import numpy as np
 import pint
@@ -158,7 +159,7 @@ def check_coordinate_systems_identical(lcs_a, lcs_b, abs_tol=1e-9):
     assert vector_is_close(coords_a, coords_b, abs_tol)
 
 
-def get_default_profiles() -> List:
+def get_default_profiles() -> list:
     """Get 2 profiles.
 
     Returns
@@ -3079,7 +3080,7 @@ class TestSpatialData:
             (dict(attributes=None), False),
         ],
     )
-    def test_comparison(kwargs_mod: Dict, expected_result: bool):
+    def test_comparison(kwargs_mod: dict, expected_result: bool):
         """Test the comparison operator by comparing two instances.
 
         Parameters

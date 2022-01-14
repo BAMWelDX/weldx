@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
@@ -39,7 +39,7 @@ class DatetimeIndexConverter(WeldxConverter):
         return pd.DatetimeIndex(node["values"])
 
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape (length of TDI) from static tagged tree instance."""
         if "freq" in node:
             temp = pd.date_range(

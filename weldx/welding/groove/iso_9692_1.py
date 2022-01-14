@@ -5,7 +5,7 @@ from __future__ import annotations
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Union
 
 import numpy as np
 import pint
@@ -57,7 +57,7 @@ def _get_bounds(points):
 
 
 def _compute_cross_sect_shape_points(
-    points: List[List[Union[Point2D, Tuple]]]
+    points: list[list[Union[Point2D, tuple]]]
 ) -> pint.Quantity:  # noqa
     # Assumes that we have two separate shapes for each workpiece
     # 1. compute the total area of all workpieces
@@ -85,7 +85,7 @@ def _compute_cross_sect_shape_points(
 class IsoBaseGroove(metaclass=abc.ABCMeta):
     """Generic base class for all groove types."""
 
-    _mapping: Dict[str, str] = None
+    _mapping: dict[str, str] = None
 
     _AREA_RASTER_WIDTH = Q_("0.1mm")
     """steers the area approximation of the groove in ~cross_sect_area."""
@@ -245,7 +245,7 @@ class IGroove(IsoBaseGroove):
 
     t: pint.Quantity
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
+    code_number: list[str] = field(default_factory=lambda: ["1.2.1", "1.2.2", "2.1"])
 
     _mapping = dict(t="workpiece_thickness", b="root_gap")
 
@@ -313,7 +313,7 @@ class VGroove(IsoBaseGroove):
     alpha: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.3", "1.5"])
+    code_number: list[str] = field(default_factory=lambda: ["1.3", "1.5"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -414,7 +414,7 @@ class VVGroove(IsoBaseGroove):
     h: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.7"])
+    code_number: list[str] = field(default_factory=lambda: ["1.7"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -516,7 +516,7 @@ class UVGroove(IsoBaseGroove):
     R: pint.Quantity
     h: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.6"])
+    code_number: list[str] = field(default_factory=lambda: ["1.6"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -622,7 +622,7 @@ class UGroove(IsoBaseGroove):
     R: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.8"])
+    code_number: list[str] = field(default_factory=lambda: ["1.8"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -746,7 +746,7 @@ class HVGroove(IsoBaseGroove):
     beta: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
+    code_number: list[str] = field(default_factory=lambda: ["1.9.1", "1.9.2", "2.8"])
 
     _mapping = dict(
         t="workpiece_thickness", beta="bevel_angle", b="root_gap", c="root_face"
@@ -849,7 +849,7 @@ class HUGroove(IsoBaseGroove):
     R: pint.Quantity
     c: pint.Quantity = Q_(0, "mm")
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["1.11", "2.10"])
+    code_number: list[str] = field(default_factory=lambda: ["1.11", "2.10"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -965,7 +965,7 @@ class DVGroove(IsoBaseGroove):
     h1: pint.Quantity = None
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
+    code_number: list[str] = field(default_factory=lambda: ["2.4", "2.5.1", "2.5.2"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -1095,7 +1095,7 @@ class DUGroove(IsoBaseGroove):
     h1: pint.Quantity = None
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["2.7"])
+    code_number: list[str] = field(default_factory=lambda: ["2.7"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -1220,7 +1220,7 @@ class DHVGroove(IsoBaseGroove):
     h1: pint.Quantity = None
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
+    code_number: list[str] = field(default_factory=lambda: ["2.9.1", "2.9.2"])
 
     _mapping = dict(
         t="workpiece_thickness",
@@ -1332,7 +1332,7 @@ class DHUGroove(IsoBaseGroove):
     h1: pint.Quantity = None
     h2: pint.Quantity = None
     b: pint.Quantity = Q_(0, "mm")
-    code_number: List[str] = field(default_factory=lambda: ["2.11"])
+    code_number: list[str] = field(default_factory=lambda: ["2.11"])
 
     _mapping = dict(
         t="workpiece_thickness",

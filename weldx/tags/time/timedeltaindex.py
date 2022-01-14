@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
@@ -41,7 +41,7 @@ class TimedeltaIndexConverter(WeldxConverter):
         return pd.TimedeltaIndex(values)
 
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
         if "freq" in node:
             tdi_temp = pd.timedelta_range(

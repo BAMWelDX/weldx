@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List
 
 from weldx.asdf.util import dataclass_serialization_class
 
@@ -12,7 +13,7 @@ __all__ = ["Weldment", "WeldmentConverter"]
 class Weldment:
     """<CLASS DOCSTRING>"""
 
-    sub_assembly: List[SubAssembly]
+    sub_assembly: list[SubAssembly]
 
 
 WeldmentConverter = dataclass_serialization_class(
