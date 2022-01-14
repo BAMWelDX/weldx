@@ -263,10 +263,8 @@ class IGroove(IsoBaseGroove):
 
         t, b, width = self.t, self.b, width_default
 
-        # x-values
         x_value = np.stack((-width, 0, 0, -width))  # skipcq: PYL-E1130
 
-        # y-values
         y_value = np.stack((0, 0, t, t))
         segment_list = ["line", "line", "line"]
 
@@ -452,9 +450,7 @@ class VVGroove(IsoBaseGroove):
             # adjustment of the width
             width = width - edge
 
-        # x-values
         x_value = np.append(-width, 0)  # skipcq: PYL-E1130
-        # y-values
         y_value = Q_([0, 0], "mm")
         segment_list = ["line"]
 
@@ -568,11 +564,9 @@ class UVGroove(IsoBaseGroove):
             # adjustment of the width
             width = width + edge
 
-        # x-values
         x_value = np.stack(
             (-width, 0, -x_1, 0, x_arc, x_end, -width)  # skipcq: PYL-E1130
         )
-        # y-values
         y_value = np.stack((0, 0, h, y_m, y_arc, t, t))
         segment_list = ["line", "line", "arc", "line", "line"]
 
@@ -668,10 +662,6 @@ class UGroove(IsoBaseGroove):
             # adjustment of the width
             width = width + edge
 
-        # x-values
-        x_value = []
-        # y-values
-        y_value = []
         segment_list = []
 
         # bottom segment
@@ -1429,7 +1419,6 @@ class FFGroove(IsoBaseGroove):
     t_1: pint.Quantity
     t_2: pint.Quantity = None
     alpha: pint.Quantity = None
-    # ["1.12", "1.13", "2.12", "3.1.1", "3.1.2", "3.1.3", "4.1.1", "4.1.2", "4.1.3"]
     code_number: str = None
     b: pint.Quantity = None
     e: pint.Quantity = None
@@ -1488,9 +1477,6 @@ class FFGroove(IsoBaseGroove):
 
             if width_default < t_1 + Q_(1, "mm"):
                 width_default = t_1 + width_default
-
-            # x = t_1
-            # y = 0
 
             x_1 = np.cos(alpha) * width_default
             y_1 = np.sin(alpha) * width_default
