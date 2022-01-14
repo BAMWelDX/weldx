@@ -1,11 +1,11 @@
 """Utilities for asdf files."""
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping, Set
+from collections.abc import Mapping, Set
 from distutils.version import LooseVersion
 from io import BytesIO, TextIOBase
 from pathlib import Path
-from typing import Any, Hashable, MutableMapping, Union
+from typing import Any, Callable, Hashable, MutableMapping, Union
 from warnings import warn
 
 import asdf
