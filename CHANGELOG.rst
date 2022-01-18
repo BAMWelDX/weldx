@@ -35,6 +35,8 @@ documentation
 
 -  update PR link format in the changelog [:pull:`658`]
 
+-  new tutorial that describes how to work with workpiece data from a WelDX file [:pull:`681`]
+
 ASDF
 ====
 
