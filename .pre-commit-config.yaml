@@ -59,7 +59,7 @@ repos:
         args:
           - --convention=numpy
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.2.2
+    rev: 1.2.3
     hooks:
       - id: nbqa-black
       - id: nbqa-isort
