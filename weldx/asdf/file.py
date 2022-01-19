@@ -1,4 +1,6 @@
 """`WeldxFile` wraps creation and updating of ASDF files and underlying files."""
+from __future__ import annotations
+
 import copy
 import io
 import pathlib
@@ -27,6 +29,7 @@ from asdf import open as open_asdf
 from asdf.exceptions import AsdfWarning
 from asdf.tags.core import Software
 from asdf.util import FileType, get_file_type
+from boltons.iterutils import get_path
 from jsonschema import ValidationError
 
 from weldx.asdf.util import (
@@ -842,7 +845,10 @@ class WeldxFile(_ProtectedViewDict):
         return self._data
 
     def show_asdf_header(
-        self, use_widgets: bool = None, _interactive: Optional[bool] = None
+        self,
+        use_widgets: bool = None,
+        path: tuple = None,
+        _interactive: Optional[bool] = None,
     ):
         """Show the header of the ASDF serialization.
 
@@ -858,11 +864,13 @@ class WeldxFile(_ProtectedViewDict):
             a static syntax highlighted string?
             Representation is determined upon the frontend. Jupyter lab supports a
             complex widget, which does not work in plain old Jupyter notebook.
+        path :
+            tuple representing the lookup path in the yaml/asdf tree
         _interactive :
             Should not be set.
         """
         return _HeaderVisualizer(self._asdf_handle).show(
-            use_widgets=use_widgets, _interactive=_interactive
+            use_widgets=use_widgets, path=path, _interactive=_interactive
         )
 
     def _ipython_display_(self):
@@ -872,7 +880,11 @@ class WeldxFile(_ProtectedViewDict):
         display(self.show_asdf_header(use_widgets=True, _interactive=True))
 
     def info(
-        self, max_rows: int = None, max_length: int = None, show_values: bool = False
+        self,
+        max_rows: int = None,
+        max_length: int = None,
+        show_values: bool = False,
+        path: tuple = None,
     ):
         """Print the content to the stdout.
 
@@ -885,6 +897,8 @@ class WeldxFile(_ProtectedViewDict):
             The maximum line length. Longer lines will be truncated
         show_values :
             Set to `True` if primitive values should be displayed
+        path
+            tuple representing the lookup path in the yaml/asdf tree
 
         """
         tree = {
@@ -892,6 +906,8 @@ class WeldxFile(_ProtectedViewDict):
             for key, value in self._asdf_handle.tree.items()
             if key not in ["asdf_library", "history"]
         }
+        if path is not None:
+            tree = get_path(tree, path)
         asdf.info(tree, max_rows=max_rows, max_cols=max_length, show_values=show_values)
 
 
@@ -908,7 +924,7 @@ class _HeaderVisualizer:
             del copy._deepcopy_dispatch[np.ndarray]
 
     def show(
-        self, use_widgets=None, _interactive=None
+        self, use_widgets=None, path=None, _interactive=None
     ) -> Union[None, "IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
         if _interactive is None:
             _interactive = is_interactive_session()
@@ -927,18 +943,18 @@ class _HeaderVisualizer:
         # These methods return an IPython displayable object
         # (passed to IPython.display()).
         if _interactive:
-            return self._show_interactive(use_widgets=use_widgets, buff=buff)
+            return self._show_interactive(use_widgets=use_widgets, buff=buff, path=path)
         else:
             self._show_non_interactive(buff=buff)
 
     @staticmethod
     def _show_interactive(
-        use_widgets: bool, buff: BytesIO
+        use_widgets: bool, buff: BytesIO, path: tuple = None
     ) -> Union["IPython.display.HTML", "IPython.display.JSON"]:  # noqa: F821
         from weldx.asdf.util import notebook_fileprinter
 
         if use_widgets:
-            result = view_tree(buff)
+            result = view_tree(buff, path=path)
         else:
             result = notebook_fileprinter(buff)
         return result
