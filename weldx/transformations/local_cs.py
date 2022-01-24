@@ -13,6 +13,7 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
+from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import TimeSeries
 from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.transformations.types import types_coordinates, types_orientation
@@ -22,6 +23,9 @@ if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
 __all__ = ("LocalCoordinateSystem",)
+
+
+_DEFAULT_LEN_UNIT = UREG.millimeters
 
 
 class LocalCoordinateSystem(TimeDependent):
@@ -292,7 +296,17 @@ class LocalCoordinateSystem(TimeDependent):
         if not isinstance(coordinates, xr.DataArray):
             if not isinstance(coordinates, (np.ndarray, pint.Quantity)):
                 coordinates = np.array(coordinates)
+
             coordinates = ut.xr_3d_vector(coordinates, time)
+
+        if isinstance(
+            coordinates.data, pint.Quantity
+        ) and not coordinates.data.is_compatible_with(_DEFAULT_LEN_UNIT):
+            raise pint.DimensionalityError(
+                coordinates.data.u,
+                _DEFAULT_LEN_UNIT,
+                extra_msg="\nThe coordinates require units that represent a length.",
+            )
 
         # make sure we have correct "time" format
         coordinates = coordinates.weldx.time_ref_restore()

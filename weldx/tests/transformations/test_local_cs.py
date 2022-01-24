@@ -11,6 +11,7 @@ import xarray as xr
 from pandas import TimedeltaIndex as TDI  # noqa
 from pandas import Timestamp as TS  # noqa
 from pandas import date_range
+from pint import DimensionalityError
 
 import weldx.transformations as tf
 import weldx.util as ut
@@ -22,6 +23,34 @@ from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
 from ._util import check_coordinate_system, check_cs_close, r_mat_y, r_mat_z
+
+# test_init ----------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "orient, coords, time, time_ref, exception",
+    [
+        (None, [1, 2, 3], None, None, None),
+        (None, Q_([1, 2, 3], "m"), None, None, None),
+        (None, np.zeros((2, 3)), Q_([1, 2], "s"), None, None),
+        (None, [[1, 2, 3], [4, 5, 6]], Q_([1, 2], "s"), None, None),
+        (None, Q_([1, 2, 3], "s"), None, None, DimensionalityError),
+    ],
+)
+@pytest.mark.parametrize("data_array_coords", [True, False])
+def test_init(orient, coords, time, time_ref, exception, data_array_coords):
+    """Test the ´__init__´ method."""
+    print(coords)
+    if data_array_coords:
+        coords = ut.xr_3d_vector(coords, time)
+
+    if exception:
+        with pytest.raises(exception):
+            LCS(orient, coords, time, time_ref)
+        return
+
+    LCS(orient, coords, time, time_ref)
+
 
 # test_init_time_formats ---------------------------------------------------------------
 
