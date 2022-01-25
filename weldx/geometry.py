@@ -2530,7 +2530,7 @@ class SpatialData:
         Shape should be [time * n, 3]."""
     attributes: Dict[str, np.ndarray] = None
     """optional dictionary with additional attributes to store alongside data."""
-    time: InitVar[Time] = None
+    time: InitVar = None
     """The time axis if data is time dependent."""
 
     def __post_init__(self, time):
