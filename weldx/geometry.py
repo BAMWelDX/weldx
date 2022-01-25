@@ -16,7 +16,6 @@ import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.time import Time
 from weldx.types import QuantityLike
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
