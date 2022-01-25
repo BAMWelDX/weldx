@@ -26,21 +26,23 @@ def single_pass_weld_example(
     import pandas as pd
     from asdf.tags.core import Software
 
-    # importing the weldx package with prevalent default abbreviations
-    import weldx
     import weldx.geometry as geo
     import weldx.measurement as msm
-    from weldx import Q_, GmawProcess
-    from weldx import LocalCoordinateSystem as lcs
-    from weldx import TimeSeries, WXRotation, get_groove
-    from weldx.asdf.util import get_schema_path, write_buffer
-    from weldx.constants import META_ATTR
-    from weldx.core import MathematicalExpression
+
+    # importing the weldx package with prevalent default abbreviations
+    import weldx.transformations as tf
+    from weldx.asdf.util import get_schema_path, write_buffer, write_read_buffer
+    from weldx.constants import META_ATTR, Q_
+    from weldx.core import MathematicalExpression, TimeSeries
     from weldx.tags.aws.process.gas_component import GasComponent
     from weldx.tags.aws.process.shielding_gas_for_procedure import (
         ShieldingGasForProcedure,
     )
     from weldx.tags.aws.process.shielding_gas_type import ShieldingGasType
+    from weldx.tags.processes.process import GmawProcess
+    from weldx.transformations.local_cs import LocalCoordinateSystem as lcs
+    from weldx.transformations.rotation import WXRotation
+    from weldx.welding.groove.iso_9692_1 import get_groove
     from weldx.welding.util import sine
 
     # Timestamp
@@ -71,7 +73,7 @@ def single_pass_weld_example(
 
     # Setup the Coordinate System Manager (CSM)
     # crete a new coordinate system manager with default base coordinate system
-    csm = weldx.transformations.CoordinateSystemManager("base")
+    csm = tf.CoordinateSystemManager("base")
 
     # add the workpiece coordinate system
     csm.add_cs(
@@ -296,7 +298,7 @@ def single_pass_weld_example(
     model_path = get_schema_path("single_pass_weld-0.1.0.yaml")
 
     # pre-validate?
-    weldx.asdf.util.write_read_buffer(
+    write_read_buffer(
         tree,
         asdffile_kwargs=dict(custom_schema=str(model_path)),
     )

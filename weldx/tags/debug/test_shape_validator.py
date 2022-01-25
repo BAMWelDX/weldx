@@ -4,8 +4,9 @@ import numpy as np
 import pandas as pd
 import pint
 
-from weldx import Q_, TimeSeries
 from weldx.asdf.util import dataclass_serialization_class
+from weldx.constants import Q_
+from weldx.core import TimeSeries
 
 __all__ = ["ShapeValidatorTestClass", "ShapeValidatorTestClassConverter"]
 

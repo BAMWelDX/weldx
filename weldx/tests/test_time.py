@@ -12,8 +12,10 @@ from pandas import TimedeltaIndex as TDI
 from pandas import Timestamp, date_range
 from pint import DimensionalityError
 
-from weldx import Q_, LocalCoordinateSystem, TimeSeries
+from weldx.constants import Q_
+from weldx.core import TimeSeries
 from weldx.time import Time, types_time_like
+from weldx.transformations.local_cs import LocalCoordinateSystem
 
 
 def _initialize_delta_type(cls_type, values, unit):

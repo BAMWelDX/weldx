@@ -6,7 +6,7 @@ from typing import List
 import numpy as np
 import pytest
 
-from weldx import WeldxFile
+from weldx.asdf.file import WeldxFile
 from weldx.asdf.util import (
     dataclass_serialization_class,
     get_highest_tag_version,

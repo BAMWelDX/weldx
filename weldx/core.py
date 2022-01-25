@@ -909,7 +909,8 @@ class GenericSeries:
         Create a `GenericSeries` representing a translation with 3 m/s in x-direction
         starting at point ``[0, 2 ,2] cm``
 
-        >>> from weldx import GenericSeries, Q_
+        >>> from weldx.core import GenericSeries
+        >>> from weldx.constants import Q_
         >>> GenericSeries(  # doctest: +NORMALIZE_WHITESPACE
         ...     "a*t + b",
         ...     parameters=dict(a=Q_([3, 0, 0], "mm/s"), b=Q_([0, 2, 2], "cm")),

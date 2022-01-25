@@ -238,7 +238,7 @@ class MeasurementChain:
 
         Examples
         --------
-        >>> from weldx import Q_
+        >>> from weldx.constants import Q_
         >>> from weldx.measurement import Error, MeasurementChain, Signal, SignalSource
 
         Create a signal source
@@ -324,7 +324,7 @@ class MeasurementChain:
 
         Examples
         --------
-        >>> from weldx import Q_
+        >>> from weldx.constants import Q_
         >>> from weldx.measurement import Error, MeasurementChain,\
         MeasurementEquipment, Signal, SignalSource
 
@@ -399,7 +399,7 @@ class MeasurementChain:
 
         Examples
         --------
-        >>> from weldx import Q_
+        >>> from weldx.constants import Q_
         >>> from weldx.measurement import Error, MeasurementChain
 
         >>> mc = MeasurementChain.from_parameters(
@@ -613,7 +613,7 @@ class MeasurementChain:
 
         Examples
         --------
-        >>> from weldx import Q_
+        >>> from weldx.constants import Q_
         >>> from weldx.core import MathematicalExpression
         >>> from weldx.measurement import Error, MeasurementChain, SignalTransformation
 
@@ -689,7 +689,7 @@ class MeasurementChain:
 
         Examples
         --------
-        >>> from weldx import Q_
+        >>> from weldx.constants import Q_
         >>> from weldx.core import MathematicalExpression
         >>> from weldx.measurement import Error, MeasurementChain,\
         MeasurementEquipment, SignalTransformation
@@ -789,7 +789,7 @@ class MeasurementChain:
 
         Examples
         --------
-        >>> from weldx import Q_
+        >>> from weldx.constants import Q_
         >>> from weldx.core import MathematicalExpression
         >>> from weldx.measurement import Error, MeasurementChain, SignalTransformation
 
