@@ -246,11 +246,12 @@ def test_init_discrete_time_series_as_coord(data, time, conversion_factor):
     ts_coords = TimeSeries(data, time)
     lcs = LCS(coordinates=ts_coords)
 
-    assert np.allclose(lcs.coordinates, data.m * conversion_factor)
+    assert np.allclose(lcs.coordinates.data, data)
     if len(time) == 1:
         assert lcs.time is None
     else:
         assert np.all(lcs.time.as_quantity() == time)
+    print(lcs.coordinates.data)
 
 
 # test_from_axis_vectors ---------------------------------------------------------------
