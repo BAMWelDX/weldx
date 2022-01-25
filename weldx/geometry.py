@@ -2531,7 +2531,7 @@ class SpatialData:
     attributes: Dict[str, np.ndarray] = None
     """optional dictionary with additional attributes to store alongside data."""
     time: InitVar[Time] = None
-    """Time axis if data is time dependent."""
+    """The time axis if data is time dependent."""
 
     def __post_init__(self, time):
         """Convert and check input values."""
