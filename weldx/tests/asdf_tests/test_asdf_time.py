@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from weldx import Time
 from weldx.asdf.util import write_buffer, write_read_buffer
+from weldx.time import Time
 
 
 @pytest.mark.parametrize(

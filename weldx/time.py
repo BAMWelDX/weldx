@@ -98,7 +98,8 @@ class Time:
     --------
     Creation from a quantity:
 
-    >>> from weldx import Q_, Time
+    >>> from weldx import Q_
+    >>> from weldx.time import Time
     >>>
     >>> quantity = Q_("10s")
     >>> t_rel = Time(quantity)
@@ -601,7 +602,7 @@ class Time:
 
         Examples
         --------
-        >>> from weldx import Time
+        >>> from weldx.time import Time
         >>> t = Time(["3s","6s","7s", "9s"])
 
         Resample using an integer:
@@ -738,7 +739,7 @@ class Time:
 
     Using ``union`` as class method:
 
-    >>> from weldx import Time
+    >>> from weldx.time import Time
     >>> t1 = Time(["1s", "3s", "4s"])
     >>> t2 = Time(["2s", "4s", "5s"])
     >>>
