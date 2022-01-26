@@ -38,10 +38,9 @@ definitions:
   weld_bead:
     description: |
       A single weld bead consisting of one or more weldments.
-    weld_layers:
-      type: array
-      items:
-        $ref: "#/definitions/weldment"
+    type: array
+    items:
+      $ref: "#/definitions/weldment"
 
   weldment:
     description: |
