@@ -16,7 +16,6 @@ import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.time import Time
 from weldx.types import QuantityLike
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -2530,8 +2529,8 @@ class SpatialData:
         Shape should be [time * n, 3]."""
     attributes: dict[str, np.ndarray] = None
     """optional dictionary with additional attributes to store alongside data."""
-    time: InitVar[Time] = None
-    """Time axis if data is time dependent."""
+    time: InitVar = None
+    """The time axis if data is time dependent."""
 
     def __post_init__(self, time):
         """Convert and check input values."""
