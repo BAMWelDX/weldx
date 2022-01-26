@@ -19,6 +19,11 @@ repos:
       - id: check-yaml
         exclude: devtools/conda.recipe/meta.yaml  # doesn't play nice with jinja
   #    - id: no-commit-to-branch  # only makes sense for local pre-commit hooks
+  - repo: https://github.com/sondrelg/pep585-upgrade
+    rev: v1.0.1
+    hooks:
+    - id: upgrade-type-hints
+      args: [ '--futures=true' ]
   - repo: https://github.com/psf/black
     rev: 21.12b0
     hooks:

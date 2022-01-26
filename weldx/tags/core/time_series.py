@@ -1,5 +1,5 @@
 """Contains the serialization class for the weldx.core.TimeSeries."""
-from typing import List
+from __future__ import annotations
 
 import pint
 from asdf.tagged import TaggedDict
@@ -51,7 +51,7 @@ class TimeSeriesConverter(WeldxConverter):
         return get_highest_tag_version(self.tags)
 
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
         if "shape" in node:  # this should not be reached but lets make sure
             return node["shape"]

@@ -1,7 +1,8 @@
 """Test the internal utility functions."""
+from __future__ import annotations
+
 import copy
 import unittest
-from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -77,11 +78,11 @@ class TestXarrayInterpolation:
         ],
     )
     def test_xr_interp_like(
-        data: List,
-        coords: Dict,
-        coords_ref: Dict,
-        exp_values: List,
-        kwargs: Dict,
+        data: list,
+        coords: dict,
+        coords_ref: dict,
+        exp_values: list,
+        kwargs: dict,
         use_dict_ref: bool,
         assume_sorted: bool,
     ):

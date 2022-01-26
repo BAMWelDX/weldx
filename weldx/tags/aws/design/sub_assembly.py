@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List
 
 from weldx.asdf.util import dataclass_serialization_class
 
@@ -13,7 +14,7 @@ __all__ = ["SubAssembly", "SubAssemblyConverter"]
 class SubAssembly:
     """<CLASS DOCSTRING>"""
 
-    workpiece: List[Workpiece]
+    workpiece: list[Workpiece]
     connection: Connection
 
 

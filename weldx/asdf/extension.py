@@ -1,5 +1,5 @@
 """ASDF-extensions for weldx types."""
-from typing import List
+from __future__ import annotations
 
 from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
@@ -41,7 +41,7 @@ def get_schema_resource_mapping() -> DirectoryResourceMapping:
     return mapping
 
 
-def get_resource_mappings() -> List[DirectoryResourceMapping]:
+def get_resource_mappings() -> list[DirectoryResourceMapping]:
     """Get list of all weldx resource mappings."""
     return [
         get_extension_resource_mapping(),
@@ -66,6 +66,6 @@ class WeldxExtension(ManifestExtension):
     }
 
 
-def get_extensions() -> List[ManifestExtension]:
+def get_extensions() -> list[ManifestExtension]:
     """Get a list of all weldx extensions."""
     return [WeldxExtension.from_uri(WELDX_EXTENSION_URI)]

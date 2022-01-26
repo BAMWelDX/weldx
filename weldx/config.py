@@ -1,7 +1,8 @@
 """Classes and functions to configure the WelDX package."""
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import List, Union
 
 import asdf
 import pkg_resources
@@ -68,7 +69,7 @@ class QualityStandard:
                 }
 
     def _map_file_content(
-        self, file_mapping: Dict, directory: str, version: AsdfVersion
+        self, file_mapping: dict, directory: str, version: AsdfVersion
     ) -> ResourceMappingProxy:
         """Get a mapping between an URI and a file content.
 
@@ -136,7 +137,7 @@ class QualityStandard:
 class Config:
     """Manages the global configuration."""
 
-    _standards: Dict[str, QualityStandard] = {}
+    _standards: dict[str, QualityStandard] = {}
 
     @staticmethod
     def add_quality_standard(standard: QualityStandard):

@@ -1,6 +1,5 @@
 """Test the measurement package."""
-
-from typing import Dict
+from __future__ import annotations
 
 import numpy as np
 import pytest
@@ -26,7 +25,7 @@ class TestMeasurementChain:
     # helper functions -----------------------------------------------------------------
 
     @staticmethod
-    def _default_source_kwargs(kwargs: Dict = None) -> Dict:
+    def _default_source_kwargs(kwargs: dict = None) -> dict:
         """Update a dict with default keyword arguments to create a `SignalSource`."""
         default_kwargs = dict(
             name="source", output_signal=Signal("analog", "V"), error=Error(0.01)
@@ -39,8 +38,8 @@ class TestMeasurementChain:
 
     @classmethod
     def _default_init_kwargs(
-        cls, kwargs: Dict = None, source_kwargs: Dict = None
-    ) -> Dict:
+        cls, kwargs: dict = None, source_kwargs: dict = None
+    ) -> dict:
         """Return a dictionary of keyword arguments required by the `__init__` method.
 
         Parameters
@@ -71,7 +70,7 @@ class TestMeasurementChain:
         return default_kwargs
 
     @staticmethod
-    def _default_transformation(kwargs: Dict = None) -> SignalTransformation:
+    def _default_transformation(kwargs: dict = None) -> SignalTransformation:
         """Return a default `SignalTransformation`.
 
         Use the kwargs parameter to modify the default values.
@@ -89,7 +88,7 @@ class TestMeasurementChain:
         return SignalTransformation(**default_kwargs)
 
     @classmethod
-    def _default_add_transformation_kwargs(cls, kwargs: Dict = None) -> Dict:
+    def _default_add_transformation_kwargs(cls, kwargs: dict = None) -> dict:
         """Update a dict with default keyword arguments to call `add_transformation`."""
         default_kwargs = dict(
             transformation=cls._default_transformation(),
@@ -112,7 +111,7 @@ class TestMeasurementChain:
             (dict(signal_data=None), dict(output_signal=Signal("analog", "V", [1]))),
         ],
     )
-    def test_init(kwargs: Dict, source_kwargs: Dict):
+    def test_init(kwargs: dict, source_kwargs: dict):
         """Test the `__init__` method of the `MeasurementChain`.
 
         Parameters
@@ -138,7 +137,7 @@ class TestMeasurementChain:
         ids=get_test_name,
     )
     def test_init_exceptions(
-        kwargs: Dict, source_kwargs: Dict, exception_type, test_name: str
+        kwargs: dict, source_kwargs: dict, exception_type, test_name: str
     ):
         """Test the exceptions of the `__init__` method.
 
@@ -257,7 +256,7 @@ class TestMeasurementChain:
         ids=get_test_name,
     )
     def test_add_transformation_exceptions(
-        self, tf_kwargs: Dict, input_signal_source: str, exception_type, test_name: str
+        self, tf_kwargs: dict, input_signal_source: str, exception_type, test_name: str
     ):
         """Test the exceptions of the `add_transformation` method.
 
@@ -366,7 +365,7 @@ class TestMeasurementChain:
         ids=get_test_name,
     )
     def test_add_signal_data_exceptions(
-        self, kwargs: Dict, exception_type, test_name: str
+        self, kwargs: dict, exception_type, test_name: str
     ):
         """Test the exceptions of the `add_signal_data` method.
 
