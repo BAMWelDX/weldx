@@ -1,6 +1,10 @@
 """ASDF-validators for weldx types."""
+from __future__ import annotations
+
 import re
-from typing import Any, Callable, Dict, Iterator, List, Mapping, OrderedDict, Union
+from collections import OrderedDict
+from collections.abc import Callable, Iterator, Mapping
+from typing import Any, Union
 
 from asdf import ValidationError
 from asdf.schema import _type_to_tag
@@ -70,7 +74,7 @@ def _walk_validator(
 
 
 def _unit_validator(
-    instance: Mapping, expected_dimensionality: str, position: List[str]
+    instance: Mapping, expected_dimensionality: str, position: list[str]
 ) -> Iterator[ValidationError]:
     """Validate the 'unit' key of the instance against the given string.
 
@@ -414,8 +418,8 @@ def _validate_instance_shape(
 
 
 def _custom_shape_validator(
-    dict_test: Dict[str, Any],
-    dict_expected: Union[Dict[str, Any], List],
+    dict_test: dict[str, Any],
+    dict_expected: Union[dict[str, Any], list],
     optional: bool = False,
 ):
     """Validate dimensions which are stored in two dictionaries dict_test and
@@ -582,7 +586,7 @@ def wx_shape_validator(
 
 
 def wx_property_tag_validator(
-    validator, wx_property_tag: Union[str, List[str]], instance, schema
+    validator, wx_property_tag: Union[str, list[str]], instance, schema
 ) -> Iterator[ValidationError]:
     """
 

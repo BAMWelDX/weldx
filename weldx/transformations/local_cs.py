@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Union
 
 import numpy as np
 import pandas as pd
@@ -388,7 +388,7 @@ class LocalCoordinateSystem(TimeDependent):
     @staticmethod
     def _unify_time_axis(
         orientation: xr.DataArray, coordinates: Union[xr.DataArray, TimeSeries]
-    ) -> Tuple:
+    ) -> tuple:
         """Unify time axis of orientation and coordinates if both are DataArrays."""
         if (
             not isinstance(coordinates, TimeSeries)
@@ -792,7 +792,7 @@ class LocalCoordinateSystem(TimeDependent):
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         time_index: int = None,
-        scale_vectors: Union[float, List, np.ndarray] = None,
+        scale_vectors: Union[float, list, np.ndarray] = None,
         show_origin: bool = True,
         show_trace: bool = True,
         show_vectors: bool = True,

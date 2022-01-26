@@ -1,8 +1,7 @@
 """Test the `CoordinateSystemManager` class."""
-
+from __future__ import annotations
 
 from copy import deepcopy
-from typing import List
 
 import numpy as np
 import pandas as pd
@@ -2542,7 +2541,7 @@ def _coordinates_from_value(val, clip_min=None, clip_max=None):
 def test_interp_time(
     time: types_time_like,
     time_ref: types_timestamp_like,
-    systems: List[str],
+    systems: list[str],
     csm_has_time_ref: bool,
     num_abs_systems: int,
 ):

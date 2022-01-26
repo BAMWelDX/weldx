@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import pint
 from asdf.tagged import TaggedDict
@@ -37,7 +37,7 @@ class PintQuantityConverter(WeldxConverter):
         return Q_(node["value"], node["units"])
 
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
         if isinstance(node["value"], dict):  # ndarray
             return _get_instance_shape(node["value"])
