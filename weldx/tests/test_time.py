@@ -336,6 +336,8 @@ class TestTime:
             np.ndarray,
             np.timedelta64,
             np.datetime64,
+            DTI,
+            TDI,
         ):
             return
 
@@ -419,7 +421,7 @@ class TestTime:
             return
 
         # skip __radd__ cases where we got conflicts with the other types' __add__
-        if not other_on_rhs and other_type in (Q_, np.ndarray, np.timedelta64):
+        if not other_on_rhs and other_type in (Q_, np.ndarray, np.timedelta64, TDI):
             return
 
         # setup rhs
@@ -535,6 +537,8 @@ class TestTime:
             np.ndarray,
             np.timedelta64,
             np.datetime64,
+            DTI,
+            TDI,
         ):
             return
 
