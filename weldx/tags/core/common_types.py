@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import dataclasses
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Hashable, List, Mapping
+from typing import Any, Hashable
 
 import numpy as np
 import pint
@@ -35,7 +38,7 @@ class Variable:
     """Represents an n-dimensional piece of data."""
 
     name: str
-    dimensions: List
+    dimensions: list
     data: np.ndarray
     attrs: Mapping[Hashable, Any] = dataclasses.field(default_factory=dict)
 
@@ -112,6 +115,6 @@ class VariableConverter(WeldxConverter):
         return Variable(node["name"], node["dimensions"], data, attrs)
 
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
         return _get_instance_shape(node["data"])

@@ -5,7 +5,7 @@ import copy
 import math
 from dataclasses import InitVar, dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Union
 
 import meshio
 import numpy as np
@@ -16,7 +16,6 @@ import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.time import Time
 from weldx.types import QuantityLike
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -802,7 +801,7 @@ segment_types = Union[LineSegment, ArcSegment]
 class Shape:
     """Defines a shape in 2 dimensions."""
 
-    def __init__(self, segments: Union[segment_types, List[segment_types]] = None):
+    def __init__(self, segments: Union[segment_types, list[segment_types]] = None):
         """Construct a shape.
 
         Parameters
@@ -829,7 +828,7 @@ class Shape:
         return f"{shape_str}"
 
     @staticmethod
-    def _check_segments_connected(segments: Union[segment_types, List[segment_types]]):
+    def _check_segments_connected(segments: Union[segment_types, list[segment_types]]):
         """Check if all segments are connected to each other.
 
         The start point of a segment must be identical to the end point of
@@ -928,7 +927,7 @@ class Shape:
         return len(self._segments)
 
     @property
-    def segments(self) -> List[segment_types]:
+    def segments(self) -> list[segment_types]:
         """Get the shape's segments.
 
         Returns
@@ -982,7 +981,7 @@ class Shape:
 
         return self
 
-    def add_segments(self, segments: Union[segment_types, List[segment_types]]):
+    def add_segments(self, segments: Union[segment_types, list[segment_types]]):
         """Add segments to the shape.
 
         Parameters
@@ -1214,7 +1213,7 @@ class Shape:
 class Profile:
     """Defines a 2d profile."""
 
-    def __init__(self, shapes: Union[Shape, List[Shape]], units: pint.Unit = None):
+    def __init__(self, shapes: Union[Shape, list[Shape]], units: pint.Unit = None):
         """Construct profile class.
 
         Parameters
@@ -1263,7 +1262,7 @@ class Profile:
         """
         return len(self._shapes)
 
-    def add_shapes(self, shapes: Union[Shape, List[Shape]]):
+    def add_shapes(self, shapes: Union[Shape, list[Shape]]):
         """Add shapes to the profile.
 
         Parameters
@@ -1283,7 +1282,7 @@ class Profile:
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=True)
     def rasterize(
         self, raster_width: pint.Quantity, stack: bool = True
-    ) -> Union[pint.Quantity, List[pint.Quantity]]:
+    ) -> Union[pint.Quantity, list[pint.Quantity]]:
         """Rasterize the profile.
 
         Parameters
@@ -1314,7 +1313,7 @@ class Profile:
         raster_width: pint.Quantity = "0.5mm",
         label: str = None,
         axis: str = "equal",
-        axis_labels: List[str] = None,
+        axis_labels: list[str] = None,
         grid: bool = True,
         line_style: str = ".-",
         ax=None,
@@ -1368,7 +1367,7 @@ class Profile:
             ax.plot(segment[0], segment[1], line_style, label=label, color=c)
 
     @property
-    def shapes(self) -> List[Shape]:
+    def shapes(self) -> list[Shape]:
         """Get the profiles shapes.
 
         Returns
@@ -1594,7 +1593,7 @@ class Trace:
 
     def __init__(
         self,
-        segments: Union[trace_segment_types, List[trace_segment_types]],
+        segments: Union[trace_segment_types, list[trace_segment_types]],
         coordinate_system: tf.LocalCoordinateSystem = None,
     ):
         """Construct trace.
@@ -1711,7 +1710,7 @@ class Trace:
         return self._total_length_lookup[-1].m
 
     @property
-    def segments(self) -> List[trace_segment_types]:
+    def segments(self) -> list[trace_segment_types]:
         """Get the trace's segments.
 
         Returns
@@ -1895,7 +1894,7 @@ class VariableProfile:
 
     @UREG.wraps(None, (None, None, _DEFAULT_LEN_UNIT, None), strict=True)
     def __init__(
-        self, profiles: List[Profile], locations: pint.Quantity, interpolation_schemes
+        self, profiles: list[Profile], locations: pint.Quantity, interpolation_schemes
     ):
         """Construct variable profile.
 
@@ -1967,7 +1966,7 @@ class VariableProfile:
         return idx
 
     @property
-    def interpolation_schemes(self) -> List:
+    def interpolation_schemes(self) -> list:
         """Get the interpolation schemes.
 
         Returns
@@ -2041,7 +2040,7 @@ class VariableProfile:
         return len(self._profiles)
 
     @property
-    def profiles(self) -> List[Profile]:
+    def profiles(self) -> list[Profile]:
         """Get the profiles.
 
         Returns
@@ -2381,7 +2380,7 @@ class Geometry:
         profile_raster_width: QuantityLike = "1mm",
         trace_raster_width: QuantityLike = "50mm",
         axes: matplotlib.axes.Axes = None,
-        color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+        color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         limits: vs_types.types_limits = None,
         show_wireframe: bool = True,
@@ -2528,10 +2527,10 @@ class SpatialData:
     triangles: npt.ArrayLike = None
     """3D Array of triangulation connectivity.
         Shape should be [time * n, 3]."""
-    attributes: Dict[str, np.ndarray] = None
+    attributes: dict[str, np.ndarray] = None
     """optional dictionary with additional attributes to store alongside data."""
-    time: InitVar[Time] = None
-    """Time axis if data is time dependent."""
+    time: InitVar = None
+    """The time axis if data is time dependent."""
 
     def __post_init__(self, time):
         """Convert and check input values."""
@@ -2576,7 +2575,7 @@ class SpatialData:
         return SpatialData(mesh.points, triangles)
 
     @staticmethod
-    def _shape_raster_points(shape_raster_data: np.ndarray) -> List[List[int]]:
+    def _shape_raster_points(shape_raster_data: np.ndarray) -> list[list[int]]:
         """Extract all points from a shapes raster data."""
         return shape_raster_data.reshape(
             (shape_raster_data.shape[0] * shape_raster_data.shape[1], 3)
@@ -2585,7 +2584,7 @@ class SpatialData:
     @staticmethod
     def _shape_profile_triangles(
         num_profiles: int, num_profile_points: int, offset: int, cw_ordering: bool
-    ) -> List[List[int]]:
+    ) -> list[list[int]]:
         """Create the profile main surface triangles for ``_shape_triangles``."""
         tri_base = []
         for i in range(num_profile_points):
@@ -2613,7 +2612,7 @@ class SpatialData:
     @staticmethod
     def _shape_front_back_triangles(
         num_profiles: int, num_profile_points: int, offset: int, cw_ordering: bool
-    ) -> List[List[int]]:
+    ) -> list[list[int]]:
         """Create the front and back surface triangles for ``_shape_triangles``."""
         tri_cw = []
         tri_ccw = []
@@ -2647,7 +2646,7 @@ class SpatialData:
     @classmethod
     def _shape_triangles(
         cls, shape_raster_data: np.ndarray, offset: int, closed_mesh: bool
-    ) -> List[List[int]]:
+    ) -> list[list[int]]:
         """Get the triangles of a shape from its raster data.
 
         The triangle data are just indices referring to a list of points.
@@ -2722,7 +2721,7 @@ class SpatialData:
     def plot(
         self,
         axes: matplotlib.axes.Axes = None,
-        color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+        color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
         limits: vs_types.types_limits = None,
@@ -2811,6 +2810,6 @@ class SpatialData:
         return "time" in self.coordinates.dims
 
     @property
-    def additional_dims(self) -> List[str]:
+    def additional_dims(self) -> list[str]:
         """Return the list of array dimension besides the required 'c' dimension."""
         return [str(d) for d in self.coordinates.dims if d != "c"]

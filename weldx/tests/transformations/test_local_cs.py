@@ -1,8 +1,7 @@
 """Test the `LocalCoordinateSystem` class."""
-
+from __future__ import annotations
 
 from copy import deepcopy
-from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -569,7 +568,7 @@ def test_interp_time_discrete_outside_value_range_both_sides():
 )
 @pytest.mark.filterwarnings("ignore:Provided time is dropped")
 def test_interp_time_timeseries_as_coords(
-    seconds: List[float],
+    seconds: list[float],
     lcs_ref_sec: float,
     ref_sec: float,
     time_dep_orientation: bool,
@@ -1087,9 +1086,9 @@ def test_subtraction(
     ],
 )
 def test_comparison_coords_timeseries(
-    kwargs_me_other_upd: Dict,
-    kwargs_ts_other_upd: Dict,
-    kwargs_other_upd: Dict,
+    kwargs_me_other_upd: dict,
+    kwargs_ts_other_upd: dict,
+    kwargs_other_upd: dict,
     exp_result: bool,
 ):
     """Test the comparison operator with a TimeSeries as coordinates.

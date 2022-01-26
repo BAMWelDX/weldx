@@ -1,5 +1,5 @@
 """Serialization for xarray.DataArray."""
-from typing import List
+from __future__ import annotations
 
 from asdf.tagged import TaggedDict
 from xarray import DataArray
@@ -45,6 +45,6 @@ class XarrayDataArrayConverter(WeldxConverter):
         return da
 
     @staticmethod
-    def shape_from_tagged(node: TaggedDict) -> List[int]:
+    def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
         return _get_instance_shape(node["data"]["data"])

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,7 +26,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 def new_3d_figure_and_axes(
     num_subplots: int = 1, height: int = 500, width: int = 500, pixel_per_inch: int = 50
-) -> Tuple[Figure, Axes]:
+) -> tuple[Figure, Axes]:
     """Get a matplotlib figure and axes for 3d plots.
 
     Parameters
@@ -100,7 +100,7 @@ def draw_coordinate_system_matplotlib(
     color: Any = None,
     label: str = None,
     time_idx: int = None,
-    scale_vectors: Union[float, List, np.ndarray] = None,
+    scale_vectors: Union[float, list, np.ndarray] = None,
     show_origin: bool = True,
     show_vectors: bool = True,
 ):
@@ -181,7 +181,7 @@ def plot_local_coordinate_system_matplotlib(
     time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
     time_index: int = None,
-    scale_vectors: Union[float, List, np.ndarray] = None,
+    scale_vectors: Union[float, list, np.ndarray] = None,
     show_origin: bool = True,
     show_trace: bool = True,
     show_vectors: bool = True,
@@ -299,7 +299,7 @@ def _set_limits_matplotlib(
 
 
 def plot_coordinate_systems(
-    cs_data: Tuple[str, Dict],
+    cs_data: tuple[str, dict],
     axes: Axes = None,
     title: str = None,
     limits: types_limits = None,
@@ -356,14 +356,14 @@ def plot_coordinate_system_manager_matplotlib(
     csm: tf.CoordinateSystemManager,
     axes: Axes = None,
     reference_system: str = None,
-    coordinate_systems: List[str] = None,
-    data_sets: List[str] = None,
-    colors: Dict[str, Union[int, Tuple[int, int, int]]] = None,
+    coordinate_systems: list[str] = None,
+    data_sets: list[str] = None,
+    colors: dict[str, Union[int, tuple[int, int, int]]] = None,
     time: types_timeindex = None,
     time_ref: pd.Timestamp = None,
     title: str = None,
     limits: types_limits = None,
-    scale_vectors: Union[float, List, np.ndarray] = None,
+    scale_vectors: Union[float, list, np.ndarray] = None,
     set_axes_equal: bool = False,
     show_origins: bool = True,
     show_trace: bool = True,
@@ -487,7 +487,7 @@ def plot_coordinate_system_manager_matplotlib(
 def plot_spatial_data_matplotlib(
     data: Union[np.ndarray, geo.SpatialData],
     axes: Axes = None,
-    color: Union[int, Tuple[int, int, int], Tuple[float, float, float]] = None,
+    color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
     label: str = None,
     limits: types_limits = None,
     show_wireframe: bool = True,

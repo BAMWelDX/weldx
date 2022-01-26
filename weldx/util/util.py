@@ -6,11 +6,11 @@ import json
 import re
 import sys
 import warnings
-from collections.abc import Sequence, Set
+from collections.abc import Callable, Sequence, Set
 from functools import wraps
 from inspect import getmembers, isfunction
 from pathlib import Path
-from typing import Callable, ClassVar, Collection, Dict, Hashable, Mapping, Union
+from typing import ClassVar, Collection, Hashable, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -419,6 +419,6 @@ def _patch_mod_all(module_name: str):
         obj.__module__ = module_name
 
 
-def apply_func_by_mapping(func_map: Dict[Hashable, Callable], inputs):
+def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
     """Transform a dict by running functions mapped by keys over its values."""
     return {k: (func_map[k](v) if k in func_map else v) for k, v in inputs.items()}
