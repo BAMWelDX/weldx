@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from functools import reduce
-from typing import List, Sequence, Union
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -338,7 +339,7 @@ class Time:
         time_ref = None if self.is_absolute else other.reference_time
         return Time(other.as_pandas() - self._time, time_ref)
 
-    def __eq__(self, other: types_time_like) -> Union[bool, List[bool]]:  # type: ignore
+    def __eq__(self, other: types_time_like) -> Union[bool, list[bool]]:  # type: ignore
         """Element-wise comparisons between time object and compatible types.
 
         See Also

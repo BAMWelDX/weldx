@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import functools
 import re
-from typing import List, Union
+from typing import Union
 
 from asdf.asdf import SerializationContext
 from asdf.extension import Converter
@@ -86,8 +88,8 @@ class WeldxConverterMeta(type(Converter)):
 class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
     """Base class to inherit from for custom converter classes."""
 
-    tags: List[str] = []
-    types: List[Union[type, str]] = []
+    tags: list[str] = []
+    types: list[Union[type, str]] = []
 
     def to_yaml_tree(self, obj, tag: str, ctx: SerializationContext):
         raise NotImplementedError

@@ -5,22 +5,10 @@ import copy
 import io
 import pathlib
 import warnings
-from collections.abc import MutableMapping, ValuesView
+from collections.abc import Iterable, Mapping, MutableMapping, Set, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import (
-    IO,
-    AbstractSet,
-    Any,
-    Dict,
-    Hashable,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import IO, Any, Dict, Hashable, Optional, Union
 
 import asdf
 import numpy as np
@@ -497,7 +485,7 @@ class WeldxFile(_ProtectedViewDict):
 
     sync.__doc__ = AsdfFile.update.__doc__
 
-    def keys(self) -> AbstractSet:
+    def keys(self) -> Set:
         """Return a set of keys/attributes stored in this file.
 
         Returns
@@ -596,7 +584,7 @@ class WeldxFile(_ProtectedViewDict):
         """
         super().update(mapping, **kwargs)
 
-    def items(self) -> AbstractSet[Tuple[Any, Any]]:
+    def items(self) -> Set[tuple[Any, Any]]:
         """Return a set-like object providing a view on this files items.
 
         Returns
@@ -648,7 +636,7 @@ class WeldxFile(_ProtectedViewDict):
         """
         return super().pop(key, default=default)
 
-    def popitem(self) -> Tuple[Hashable, Any]:
+    def popitem(self) -> tuple[Hashable, Any]:
         """Remove the item that was last inserted into the file.
 
         Notes
@@ -685,7 +673,7 @@ class WeldxFile(_ProtectedViewDict):
         self._asdf_handle.add_history_entry(change_desc, software)
 
     @property
-    def history(self) -> List:
+    def history(self) -> list:
         """Return a list of all history entries in this file."""
         return self._asdf_handle.get_history_entries().copy()
 
