@@ -5,7 +5,7 @@ import itertools
 import warnings
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, List, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Union
 
 import numpy as np
 import pandas as pd
@@ -56,11 +56,11 @@ class CoordinateSystemManager:
         """Name of the common coordinate system"""
         time_ref: pd.Timestamp
         """The reference time of the subsystem"""
-        members: Set[str]
+        members: set[str]
         """Names of all coordinate systems that belong to the subsystem"""
-        data: Set[str]
+        data: set[str]
         """Names of all data that belongs to the subsystem"""
-        subsystems: List[CoordinateSystemManager.SubsystemInfo]
+        subsystems: list[CoordinateSystemManager.SubsystemInfo]
         """Dictionary of nested subsystems"""
 
         def to_yaml_tree(self) -> dict:
@@ -130,7 +130,7 @@ class CoordinateSystemManager:
         self._name = coordinate_system_manager_name
         self._reference_time = time_ref
         self._root_system_name = root_coordinate_system_name
-        self._subsystems: List[CoordinateSystemManager.SubsystemInfo] = []
+        self._subsystems: list[CoordinateSystemManager.SubsystemInfo] = []
         self._graph = DiGraph()
         self._add_coordinate_system_node(root_coordinate_system_name)
 
@@ -190,7 +190,7 @@ class CoordinateSystemManager:
         return True
 
     @property
-    def lcs(self) -> List[LocalCoordinateSystem]:
+    def lcs(self) -> list[LocalCoordinateSystem]:
         """Get a list of all attached `~weldx.transformations.LocalCoordinateSystem` \
         instances.
 
@@ -537,7 +537,7 @@ class CoordinateSystemManager:
                     lcs,
                 )
 
-    def relabel(self, mapping: Dict[str, str]):
+    def relabel(self, mapping: dict[str, str]):
         """Rename one or more nodes of the graph.
 
         See `networkx.relabel.relabel_nodes` for details.
@@ -875,7 +875,7 @@ class CoordinateSystemManager:
 
     def get_child_system_names(
         self, coordinate_system_name: str, neighbors_only: bool = True
-    ) -> List[str]:
+    ) -> list[str]:
         """Get a list with the passed coordinate systems children.
 
         Parameters
@@ -912,7 +912,7 @@ class CoordinateSystemManager:
         return all_children
 
     @property
-    def coordinate_system_names(self) -> List:
+    def coordinate_system_names(self) -> list:
         """Get the names of all contained coordinate systems.
 
         Returns
@@ -924,7 +924,7 @@ class CoordinateSystemManager:
         return list(self.graph.nodes)
 
     @property
-    def data_names(self) -> List[str]:
+    def data_names(self) -> list[str]:
         """Get the names of the attached data sets.
 
         Returns
@@ -940,7 +940,7 @@ class CoordinateSystemManager:
 
     def _find_data(
         self, data_name: str
-    ) -> Tuple[str, Union[xr.DataArray, SpatialData]]:
+    ) -> tuple[str, Union[xr.DataArray, SpatialData]]:
         """Get the data and its owning systems name."""
         for cs in self._graph.nodes:
             for name, data in self._graph.nodes[cs]["data"].items():
@@ -1000,7 +1000,7 @@ class CoordinateSystemManager:
 
     def _get_cs_on_edge(
         self,
-        edge: Tuple[str, str],
+        edge: tuple[str, str],
         time: types_time_like,
         time_ref: types_timestamp_like,
         use_lcs_time_ref: bool = False,
@@ -1286,7 +1286,7 @@ class CoordinateSystemManager:
         self,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
-        affected_coordinate_systems: Union[str, List[str]] = None,
+        affected_coordinate_systems: Union[str, list[str]] = None,
         in_place: bool = False,
     ) -> CoordinateSystemManager:
         """Interpolates the coordinate systems in time.
@@ -1370,7 +1370,7 @@ class CoordinateSystemManager:
 
         return coordinate_system_name_1 in self.neighbors(coordinate_system_name_0)
 
-    def neighbors(self, coordinate_system_name: str) -> List:
+    def neighbors(self, coordinate_system_name: str) -> list:
         """Get a list of neighbors of a certain coordinate system.
 
         Parameters
@@ -1498,15 +1498,15 @@ class CoordinateSystemManager:
         backend: str = "mpl",
         axes: matplotlib.axes.Axes = None,
         reference_system: str = None,
-        coordinate_systems: List[str] = None,
-        data_sets: List[str] = None,
-        colors: Dict[str, Union[int, Tuple[int, int, int]]] = None,
+        coordinate_systems: list[str] = None,
+        data_sets: list[str] = None,
+        colors: dict[str, Union[int, tuple[int, int, int]]] = None,
         title: str = None,
-        limits: List[Tuple[float, float]] = None,
+        limits: list[tuple[float, float]] = None,
         time: types_time_like = None,
         time_ref: types_timestamp_like = None,
         axes_equal: bool = False,
-        scale_vectors: Union[float, List, np.ndarray] = None,
+        scale_vectors: Union[float, list, np.ndarray] = None,
         show_data_labels: bool = True,
         show_labels: bool = True,
         show_origins: bool = True,
@@ -1625,7 +1625,7 @@ class CoordinateSystemManager:
 
     def time_union(
         self,
-        list_of_edges: List = None,
+        list_of_edges: list = None,
     ) -> Time:
         """Get the time union of all or selected local coordinate systems.
 
@@ -1727,7 +1727,7 @@ class CoordinateSystemManager:
     @classmethod
     def _from_yaml_tree(
         cls,
-        node: Dict,
+        node: dict,
     ) -> CoordinateSystemManager:
         """Create a CSM from a yaml tree dictionary."""
         graph = node["graph"]
@@ -1759,7 +1759,7 @@ class CoordinateSystemManager:
         coordinate_system_manager_name: str = None,
         time_ref: types_timestamp_like = None,
         graph: nx.DiGraph = None,
-        subsystems: List[CoordinateSystemManager.SubsystemInfo] = None,
+        subsystems: list[CoordinateSystemManager.SubsystemInfo] = None,
     ) -> CoordinateSystemManager:
         """Construct a coordinate system manager from existing graph and subsystems."""
         csm = cls(root_coordinate_system_name, coordinate_system_manager_name, time_ref)
@@ -1873,7 +1873,7 @@ class CoordinateSystemManager:
         for lcs in cs_delete:
             self.delete_cs(lcs, True)
 
-    def unmerge(self) -> List[CoordinateSystemManager]:
+    def unmerge(self) -> list[CoordinateSystemManager]:
         """Undo previous merges and return a list of all previously merged instances.
 
         If additional coordinate systems were added after merging two instances, they
@@ -1919,12 +1919,12 @@ class CoordinateSystemManager:
         return len(self._subsystems)
 
     @property
-    def subsystem_info(self) -> List:
+    def subsystem_info(self) -> list:
         """Get a dictionary containing data about the attached subsystems."""
         return self._subsystems
 
     @property
-    def subsystem_names(self) -> List[str]:
+    def subsystem_names(self) -> list[str]:
         """Get the names of all subsystems.
 
         Returns
@@ -1936,7 +1936,7 @@ class CoordinateSystemManager:
         return [subsystem.name for subsystem in self._subsystems]
 
     @property
-    def subsystems(self) -> List[CoordinateSystemManager]:
+    def subsystems(self) -> list[CoordinateSystemManager]:
         """Extract all subsystems from the CoordinateSystemManager.
 
         Returns

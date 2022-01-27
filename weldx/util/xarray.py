@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Union
 
 import numpy as np
 import pandas as pd
@@ -174,7 +174,7 @@ def xr_matmul(
     )
 
 
-def xr_is_orthogonal_matrix(da: xr.DataArray, dims: List[str]) -> bool:
+def xr_is_orthogonal_matrix(da: xr.DataArray, dims: list[str]) -> bool:
     """Check if  matrix along specific dimensions in a DataArray is orthogonal.
 
     TODO: make more general
@@ -225,7 +225,7 @@ def xr_fill_all(da: xr.DataArray, order="bf") -> xr.DataArray:
     return da
 
 
-def _get_coordinate_quantities(da) -> Dict[str, pint.Quantity]:
+def _get_coordinate_quantities(da) -> dict[str, pint.Quantity]:
     """Convert coordinates of an xarray object to a quantity dictionary."""
     return {
         k: (
@@ -238,8 +238,8 @@ def _get_coordinate_quantities(da) -> Dict[str, pint.Quantity]:
 
 
 def _coordinates_from_quantities(
-    q_dict: Dict[str, pint.Quantity]
-) -> dict[str, Tuple[str, np.array, Dict[str, pint.Unit]]]:
+    q_dict: dict[str, pint.Quantity]
+) -> dict[str, tuple[str, np.array, dict[str, pint.Unit]]]:
     """Create a dict with unit information that can be passed as coords for xarray."""
     return {
         k: (k, v.m, {UNITS_KEY: v.u}) if isinstance(v, pint.Quantity) else v
@@ -272,8 +272,8 @@ def _add_coord_edges(da1: xr.DataArray, da2: xr.DataArray, assume_sorted: bool):
 
 def xr_interp_like(
     da1: xr.DataArray,
-    da2: Union[xr.DataArray, Dict[str, Any]],
-    interp_coords: List[str] = None,
+    da2: Union[xr.DataArray, dict[str, Any]],
+    interp_coords: list[str] = None,
     broadcast_missing: bool = False,
     fillna: bool = True,
     method: str = "linear",
@@ -572,8 +572,8 @@ def xr_check_dimensionality(da: xr.DataArray, units_ref: Union[str, pint.Unit]):
 def xr_3d_vector(
     data: wxt.ArrayLike,
     time: types_time_like = None,
-    add_dims: List[str] = None,
-    add_coords: Dict[str, Any] = None,
+    add_dims: list[str] = None,
+    add_coords: dict[str, Any] = None,
 ) -> xr.DataArray:
     """Create an xarray 3d vector with correctly named dimensions and coordinates.
 
@@ -839,7 +839,7 @@ class WeldxAccessor:
             else:
                 self._obj.time.attrs["time_ref"] = value
 
-    def coordinates_as_quantities(self) -> Dict[str, pint.Quantity]:
+    def coordinates_as_quantities(self) -> dict[str, pint.Quantity]:
         """Convert coordinates of an xarray object to a quantity dictionary."""
         da = self._obj
         return {
@@ -847,7 +847,7 @@ class WeldxAccessor:
             for k, v in da.coords.items()
         }
 
-    def indexes_as_quantities(self) -> Dict[str, pint.Quantity]:
+    def indexes_as_quantities(self) -> dict[str, pint.Quantity]:
         """Convert indexes of an xarray object to a quantity dictionary."""
         da = self._obj
         return {

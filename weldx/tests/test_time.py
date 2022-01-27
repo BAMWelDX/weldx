@@ -1,6 +1,7 @@
 """Test the `Time` class."""
+from __future__ import annotations
 
-from typing import List, Tuple, Type, Union
+from typing import List, Union
 
 import numpy as np
 import pandas as pd
@@ -97,7 +98,7 @@ class TestTime:
     @staticmethod
     def _parse_time_type_test_input(
         type_input,
-    ) -> Tuple[Union[types_time_like, Time], bool]:
+    ) -> tuple[Union[types_time_like, Time], bool]:
         """Return the time type and a bool that defines if the returned type is a delta.
 
         This is mainly used in generalized tests where a type like `Time` itself can
@@ -105,7 +106,7 @@ class TestTime:
         to extract the information from a tuple.
 
         """
-        if isinstance(type_input, Tuple):
+        if isinstance(type_input, tuple):
             # to avoid wrong test setups due to spelling mistakes
             assert type_input[1] in ["timedelta", "datetime"]
             time_type = type_input[0]
@@ -183,7 +184,7 @@ class TestTime:
     )
     def test_init(
         self,
-        input_vals: Union[Type, Tuple[Type, str]],
+        input_vals: Union[type, tuple[type, str]],
         set_time_ref: bool,
         scl: bool,
         arr: bool,

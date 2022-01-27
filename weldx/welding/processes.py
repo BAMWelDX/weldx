@@ -1,7 +1,7 @@
 """Welding process classes."""
+from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
 
 from weldx.core import TimeSeries
 
@@ -16,7 +16,7 @@ class GmawProcess:
     """Manufacturer of the power source."""
     power_source: str
     """Power source model used in the process."""
-    parameters: Dict[str, TimeSeries]
+    parameters: dict[str, TimeSeries]
     """Process parameters, like U, I or pulsed versions of it."""
     tag: str = None
     """optional tag."""

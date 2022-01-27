@@ -1,21 +1,11 @@
 """Utilities for asdf files."""
+from __future__ import annotations
 
+from collections.abc import Callable, Mapping, Set
 from distutils.version import LooseVersion
 from io import BytesIO, TextIOBase
 from pathlib import Path
-from typing import (
-    AbstractSet,
-    Any,
-    Callable,
-    Dict,
-    Hashable,
-    List,
-    Mapping,
-    MutableMapping,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import Any, Hashable, MutableMapping, Union
 from warnings import warn
 
 import asdf
@@ -302,7 +292,7 @@ def notebook_fileprinter(file: types_path_and_file_like, lexer="YAML"):
     )
 
 
-def view_tree(file: types_path_and_file_like, path: Tuple = None, **kwargs):
+def view_tree(file: types_path_and_file_like, path: tuple = None, **kwargs):
     """Display YAML header using IPython JSON display repr.
 
     This function works in JupyterLab.
@@ -366,13 +356,13 @@ def _fullname(obj):
 
 
 def dataclass_serialization_class(
-    class_type: Type,
+    class_type: type,
     class_name: str,
     version: str,
     to_yaml_tree_mod: Callable = None,
     from_yaml_tree_mod: Callable = None,
     sort_string_lists: bool = True,
-) -> Type:
+) -> type:
     """Generate a asdf serialization class for a python dataclass.
 
     Parameters
@@ -457,7 +447,7 @@ def get_weldx_extension(ctx: Union[SerializationContext, AsdfConfig]) -> Extensi
     return extensions[0]
 
 
-def uri_match(patterns: Union[str, List[str]], uri: str) -> bool:
+def uri_match(patterns: Union[str, list[str]], uri: str) -> bool:
     """Returns `True` if the ASDF URI matches any of the listed patterns.
 
     See Also
@@ -481,7 +471,7 @@ def get_converter_for_tag(tag: str) -> Union[WeldxConverter, None]:
 
 
 def get_highest_tag_version(
-    pattern: Union[str, List[str]], ctx: Union[SerializationContext, AsdfConfig] = None
+    pattern: Union[str, list[str]], ctx: Union[SerializationContext, AsdfConfig] = None
 ) -> Union[str, None]:
     """Get the highest available weldx extension tag version matching a pattern.
 
@@ -527,8 +517,8 @@ def get_highest_tag_version(
 
 
 def _get_instance_shape(
-    instance_dict: Union[TaggedDict, Dict[str, Any]]
-) -> Union[List[int], None]:
+    instance_dict: Union[TaggedDict, dict[str, Any]]
+) -> Union[list[int], None]:
     """Get the shape of an ASDF instance from its tagged dict form.
 
     Parameters
@@ -584,7 +574,7 @@ class _ProtectedViewDict(MutableMapping):
             return
         self.__data[key] = value
 
-    def keys(self) -> AbstractSet:
+    def keys(self) -> Set:
         return {k for k in self.__data.keys() if k not in self.protected_keys}
 
     def __iter__(self):
@@ -605,7 +595,7 @@ class _ProtectedViewDict(MutableMapping):
 
         self.__data.update(_mapping)
 
-    def popitem(self) -> Tuple[Hashable, Any]:
+    def popitem(self) -> tuple[Hashable, Any]:
         for k in self.keys():
             if k not in self.protected_keys:
                 return k, self.pop(k)

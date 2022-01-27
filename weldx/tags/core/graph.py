@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import List
 from uuid import UUID, uuid4
 
 import networkx as nx
@@ -40,7 +41,7 @@ class DiEdgeConverter(WeldxConverter):
 class DiNode:
     """Generic directed graph node type."""
 
-    edges: List["DiEdge"] = field(default_factory=list)
+    edges: list["DiEdge"] = field(default_factory=list)
     name: str = field(default_factory=uuid4)
     attributes: dict = field(default_factory=dict)
 

@@ -9,6 +9,9 @@ py:obj weldx.GmawProcess.parameters
 py:class types_path_and_file_like
 py:class weldx.asdf.types.WeldxConverter
 
+# python
+py:data collections.abc.Callable
+
 # numpy typing
 py:class numpy.typing._array_like._SupportsArray
 py:class numpy.typing._nested_sequence._NestedSequence

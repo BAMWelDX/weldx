@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Union
 
 import k3d
 import k3d.platonic as platonic
@@ -459,9 +459,9 @@ class CoordinateSystemManagerVisualizerK3D:
     def __init__(
         self,
         csm,
-        coordinate_systems: List[str] = None,
-        data_sets: List[str] = None,
-        colors: Dict[str, Union[int, Tuple[int, int, int]]] = None,
+        coordinate_systems: list[str] = None,
+        data_sets: list[str] = None,
+        colors: dict[str, Union[int, tuple[int, int, int]]] = None,
         reference_system: str = None,
         title: str = None,
         limits: types_limits = None,
