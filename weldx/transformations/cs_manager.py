@@ -191,7 +191,7 @@ class CoordinateSystemManager:
 
     @property
     def lcs(self) -> list[LocalCoordinateSystem]:
-        """Get a list of all attached `~weldx.transformations.LocalCoordinateSystem` \
+        """Get a list of all attached `LocalCoordinateSystem` \
         instances.
 
         Only the defined systems and not the automatically generated inverse systems
@@ -199,7 +199,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[LocalCoordinateSystem] :
+        list[LocalCoordinateSystem] :
            List of all attached `LocalCoordinateSystem` instances.
 
         """
@@ -215,7 +215,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[LocalCoordinateSystem] :
+        list[LocalCoordinateSystem] :
             List of all attached time dependent `LocalCoordinateSystem` instances
 
         """
@@ -889,7 +889,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[str]:
+        list[str]:
             List of child systems.
 
         """
@@ -917,7 +917,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List :
+        list :
             List of coordinate system names.
 
         """
@@ -929,7 +929,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[str] :
+        list[str] :
             Names of the attached data sets
 
         """
@@ -1884,7 +1884,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[`~weldx.transformations.CoordinateSystemManager`] :
+        list[`CoordinateSystemManager`] :
             A list containing previously merged `CoordinateSystemManager` instances.
 
         """
@@ -1929,7 +1929,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[str]:
+        list[str]:
             List with subsystem names.
 
         """
@@ -1941,7 +1941,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List :
+        list :
             List containing all the subsystems.
 
         """
