@@ -16,6 +16,8 @@ added
 -  new tutorial series that introduces the most important WelDX features
    step by step based on a full example file [:pull:`555`]
 
+-  add ``path`` option to `WeldxFile.info` and `WeldxFile.show_asdf_header` [:pull:`555`]
+
 removed
 =======
 
@@ -34,6 +36,8 @@ documentation
 =============
 
 -  update PR link format in the changelog [:pull:`658`]
+
+-  new tutorial that describes how to work with workpiece data from a WelDX file [:pull:`681`]
 
 ASDF
 ====

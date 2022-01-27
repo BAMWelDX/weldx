@@ -2165,7 +2165,8 @@ class Geometry:
         profile = self._profile.local_profile(profile_location)
         return self._profile_raster_data_3d(profile, raster_width)
 
-    def _rasterize_trace(self, raster_width: float) -> np.ndarray:
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def _rasterize_trace(self, raster_width: pint.Quantity) -> pint.Quantity:
         """Rasterize the trace.
 
         Parameters
@@ -2179,16 +2180,17 @@ class Geometry:
             Raster data
 
         """
+        trace_length = self._trace.length.m
+
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
-        raster_width = np.clip(raster_width, None, self._trace.length)
+        raster_width = np.clip(raster_width, None, trace_length)
 
-        num_raster_segments = int(np.round(self._trace.length / raster_width))
-        raster_width_eff = self._trace.length / num_raster_segments
-        locations = np.arange(
-            0, (self._trace.length - raster_width_eff / 2).m, raster_width_eff.m
-        )
-        return Q_(np.hstack([locations, self._trace.length.m]), _DEFAULT_LEN_UNIT)
+        num_raster_segments = int(np.round(trace_length / raster_width))
+        width_eff = trace_length / num_raster_segments
+        locations = np.arange(0, (trace_length - width_eff / 2), width_eff)
+
+        return np.hstack([locations, trace_length])
 
     def _get_transformed_profile_data(self, profile_raster_data, location):
         """Transform a profiles data to a specified location on the trace.
@@ -2259,7 +2261,7 @@ class Geometry:
             Raster data
 
         """
-        locations = self._rasterize_trace(Q_(trace_raster_width, _DEFAULT_LEN_UNIT))
+        locations = self._rasterize_trace(trace_raster_width)
 
         if stack:  # old behavior for 3d point cloud
             profile_data = self._profile_raster_data_3d(
@@ -2307,7 +2309,7 @@ class Geometry:
             Raster data
 
         """
-        locations = self._rasterize_trace(Q_(trace_raster_width, _DEFAULT_LEN_UNIT))
+        locations = self._rasterize_trace(trace_raster_width)
         raster_data = np.empty([3, 0])
         for _, location in enumerate(locations):
             profile_data = self._get_local_profile_data(location, profile_raster_width)
@@ -2339,11 +2341,7 @@ class Geometry:
         """
         return self._trace
 
-    @UREG.wraps(
-        None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
-        strict=True,
-    )
+    @UREG.check(None, "[length]", "[length]", None)
     def rasterize(
         self,
         profile_raster_width: pint.Quantity,
@@ -2367,7 +2365,6 @@ class Geometry:
             Raster data
 
         """
-        profile_raster_width = Q_(profile_raster_width, _DEFAULT_LEN_UNIT)
         if isinstance(self._profile, Profile):
             return self._rasterize_constant_profile(
                 profile_raster_width, trace_raster_width, stack=stack
@@ -2479,7 +2476,7 @@ class Geometry:
         )
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
-    @UREG.wraps(None, (None, None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=True)
+    @UREG.check(None, None, "[length]", "[length]")
     def to_file(
         self,
         file_name: str,
