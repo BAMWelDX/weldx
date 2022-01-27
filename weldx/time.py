@@ -99,7 +99,7 @@ class Time:
     --------
     Creation from a quantity:
 
-    >>> from weldx.constants import Q_, Time
+    >>> from weldx import Q_, Time
     >>>
     >>> quantity = Q_("10s")
     >>> t_rel = Time(quantity)
