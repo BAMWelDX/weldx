@@ -210,7 +210,7 @@ class CoordinateSystemManager:
         ]
 
     @property
-    def lcs_time_dependent(self) -> List[LocalCoordinateSystem]:
+    def lcs_time_dependent(self) -> list[LocalCoordinateSystem]:
         """Get a list of all attached time dependent `LocalCoordinateSystem` instances.
 
         Returns
