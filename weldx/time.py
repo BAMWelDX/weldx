@@ -99,8 +99,7 @@ class Time:
     --------
     Creation from a quantity:
 
-    >>> from weldx.constants import Q_
-    >>> from weldx.time import Time
+    >>> from weldx.constants import Q_, Time
     >>>
     >>> quantity = Q_("10s")
     >>> t_rel = Time(quantity)
@@ -149,11 +148,11 @@ class Time:
     Types that are derived from the abstract base class ``TimeDependent`` can also be
     passed directly to `Time` as `time` parameter:
 
-    >>> from weldx.transformations.local_cs import LocalCoordinateSystem as LCS
+    >>> from weldx import LocalCoordinateSystem as LCS
     >>> lcs = LCS(coordinates=[[0, 0, 0], [1, 1, 1]], time=["1s", "2s"])
     >>> t_from_lcs = Time(lcs)
     >>>
-    >>> from weldx.core import TimeSeries
+    >>> from weldx import TimeSeries
     >>> ts = TimeSeries(Q_([4, 5, 6], "m"), ["2000", "2001", "2002"])
     >>> t_from_ts = Time(ts)
 
@@ -603,7 +602,7 @@ class Time:
 
         Examples
         --------
-        >>> from weldx.time import Time
+        >>> from weldx import Time
         >>> t = Time(["3s","6s","7s", "9s"])
 
         Resample using an integer:
@@ -740,7 +739,7 @@ class Time:
 
     Using ``union`` as class method:
 
-    >>> from weldx.time import Time
+    >>> from weldx import Time
     >>> t1 = Time(["1s", "3s", "4s"])
     >>> t2 = Time(["2s", "4s", "5s"])
     >>>

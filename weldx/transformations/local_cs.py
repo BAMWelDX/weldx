@@ -486,7 +486,7 @@ class LocalCoordinateSystem(TimeDependent):
         --------
         Create a coordinate system from 3 orthogonal vectors:
 
-        >>> from weldx.transformations.local_cs import LocalCoordinateSystem
+        >>> from weldx import LocalCoordinateSystem
         >>>
         >>> x = [2, 2, 0]
         >>> y = [-8, 8, 0]

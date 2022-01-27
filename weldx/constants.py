@@ -43,7 +43,7 @@ For details on working with quantities and units, please see the
 
 Examples
 --------
->>> from weldx.constants import Q_
+>>> from weldx import Q_
 >>> length = Q_(10, "mm")
 >>> length
 <Quantity(10, 'millimeter')>

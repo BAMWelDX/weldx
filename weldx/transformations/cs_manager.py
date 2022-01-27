@@ -783,7 +783,7 @@ class CoordinateSystemManager:
         --------
         Create a coordinate system from 3 orthogonal vectors:
 
-        >>> from weldx.transformations.cs_manager import CoordinateSystemManager
+        >>> from weldx import CoordinateSystemManager
         >>>
         >>> x = [2, 2, 0]
         >>> y = [-8, 8, 0]
