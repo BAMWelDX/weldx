@@ -116,7 +116,7 @@ def write_buffer(
 
     if _use_weldx_file:
         write_kwargs = dict(all_array_storage="inline")
-        from weldx import WeldxFile
+        from weldx.asdf.file import WeldxFile
 
         with WeldxFile(
             tree=tree,
@@ -171,7 +171,7 @@ def read_buffer(
     if _use_weldx_file is None:
         _use_weldx_file = _USE_WELDX_FILE
     if _use_weldx_file:
-        from weldx import WeldxFile
+        from weldx.asdf.file import WeldxFile
 
         return WeldxFile(buffer, asdffile_kwargs=open_kwargs)
 

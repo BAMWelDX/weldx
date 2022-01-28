@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 import numpy as np
 import pint
 
-from weldx import Q_
 from weldx.asdf.util import dataclass_serialization_class
+from weldx.constants import Q_
 
 __all__ = ["UnitValidatorTestClass", "UnitValidatorTestClassConverter"]
 
