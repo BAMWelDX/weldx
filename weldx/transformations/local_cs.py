@@ -310,6 +310,13 @@ class LocalCoordinateSystem(TimeDependent):
                     extra_msg="\nThe coordinates require units representing a length.",
                 )
 
+        if not isinstance(coordinates.data, pint.Quantity):
+            warnings.warn(
+                "Coordinates without units are deprecated and won't be supported in "
+                "the future",
+                DeprecationWarning,
+            )
+
         # make sure we have correct "time" format
         coordinates = coordinates.weldx.time_ref_restore()
 
