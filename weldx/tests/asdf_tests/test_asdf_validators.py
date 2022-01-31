@@ -4,10 +4,11 @@ import pandas as pd
 import pytest
 from asdf import ValidationError
 
-from weldx import Q_, TimeSeries
 from weldx.asdf.types import WxSyntaxError
 from weldx.asdf.util import write_buffer, write_read_buffer
 from weldx.asdf.validators import _custom_shape_validator
+from weldx.constants import Q_
+from weldx.core import TimeSeries
 from weldx.tags.debug.test_property_tag import PropertyTagTestClass
 from weldx.tags.debug.test_shape_validator import ShapeValidatorTestClass
 from weldx.tags.debug.test_unit_validator import UnitValidatorTestClass

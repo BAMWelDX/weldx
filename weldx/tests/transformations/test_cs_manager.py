@@ -11,8 +11,9 @@ from pandas import TimedeltaIndex as TDI  # noqa
 from pandas import Timestamp as TS  # noqa
 
 import weldx.transformations as tf
-from weldx import Q_, SpatialData
+from weldx.constants import Q_
 from weldx.core import MathematicalExpression, TimeSeries
+from weldx.geometry import SpatialData
 from weldx.tests._helpers import get_test_name, matrix_is_close
 from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.transformations import CoordinateSystemManager as CSM  # noqa

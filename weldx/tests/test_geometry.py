@@ -15,9 +15,10 @@ from xarray import DataArray
 import weldx.geometry as geo
 import weldx.tests._helpers as helpers
 import weldx.transformations as tf
-from weldx import Q_, CoordinateSystemManager
+from weldx.constants import Q_
 from weldx.geometry import SpatialData
 from weldx.transformations import WXRotation
+from weldx.transformations.cs_manager import CoordinateSystemManager
 
 from ._helpers import matrix_is_close, vector_is_close
 

@@ -14,7 +14,7 @@ from pint import DimensionalityError
 
 import weldx.transformations as tf
 import weldx.util as ut
-from weldx import Q_
+from weldx.constants import Q_
 from weldx.core import MathematicalExpression, TimeSeries
 from weldx.tests._helpers import get_test_name
 from weldx.time import Time
