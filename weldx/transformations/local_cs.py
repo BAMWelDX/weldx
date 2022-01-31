@@ -318,6 +318,7 @@ class LocalCoordinateSystem(TimeDependent):
                 "Coordinates without units are deprecated and won't be supported in "
                 "the future",
                 DeprecationWarning,
+                stacklevel=2,
             )
 
         # make sure we have correct "time" format
