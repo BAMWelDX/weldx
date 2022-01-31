@@ -2288,7 +2288,7 @@ class Geometry:
                             for location in locations
                         ],
                         0,
-                    ).tolist()
+                    )
                 )
 
         return raster_data
