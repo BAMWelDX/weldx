@@ -170,7 +170,7 @@ class WeldxFile(_ProtectedViewDict):
 
     We can have a look at the serialized data by looking at the asdf header
 
-    >>> wx2.show_asdf_header()  # doctest: +ELLIPSIS,+NORMALIZE_WHITESPACE
+    >>> wx2.header()  # doctest: +ELLIPSIS,+NORMALIZE_WHITESPACE
     #ASDF 1.0.0
     #ASDF_STANDARD 1.5.0
     %YAML 1.1
@@ -832,7 +832,7 @@ class WeldxFile(_ProtectedViewDict):
     def data(self):
         return self._data
 
-    def show_asdf_header(
+    def header(
         self,
         use_widgets: bool = None,
         path: tuple = None,
@@ -858,14 +858,18 @@ class WeldxFile(_ProtectedViewDict):
             Should not be set.
         """
         return _HeaderVisualizer(self._asdf_handle).show(
-            use_widgets=use_widgets, path=path, _interactive=_interactive
+            use_widgets=use_widgets, _interactive=_interactive
         )
+
+    @deprecated("0.6", "0.7", "Please use file.header() instead.")
+    def show_asdf_header(self, *args, **kwargs):
+        return self.header(*args, **kwargs)
 
     def _ipython_display_(self):
         # this will be called in Jupyter Lab, but not in a plain notebook.
         from IPython.core.display import display
 
-        display(self.show_asdf_header(use_widgets=True, _interactive=True))
+        display(self.header(use_widgets=True, _interactive=True))
 
     def info(
         self,

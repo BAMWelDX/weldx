@@ -112,7 +112,7 @@ def write_buffer(
 
     def show(wx):
         if _invoke_show_header:
-            wx.show_asdf_header(False, False)
+            wx.header(False, False)
 
     if _use_weldx_file:
         write_kwargs = dict(all_array_storage="inline")
