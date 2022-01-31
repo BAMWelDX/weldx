@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Set
-from distutils.version import LooseVersion
 from io import BytesIO, TextIOBase
 from pathlib import Path
 from typing import Any, Hashable, MutableMapping, Union
@@ -15,6 +14,7 @@ from asdf.extension import Extension
 from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
+from packaging.version import Version
 
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
@@ -509,7 +509,11 @@ def get_highest_tag_version(
     if not tags:  # no match found
         return None
 
-    tags.sort(key=LooseVersion)
+    def _get_version(tag_name: str):
+        # we assume, that the version of the tag is separated by a right-most '-' char.
+        return Version(tag_name[tag_name.rfind("-") + 1 :])
+
+    tags.sort(key=_get_version)
     base_tag = tags[-1].rpartition("-")[0]
     if not all(t.startswith(base_tag) for t in tags):
         raise ValueError(f"Found more than one base tag for {pattern=}.")
