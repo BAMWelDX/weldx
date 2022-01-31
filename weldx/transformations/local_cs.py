@@ -310,7 +310,10 @@ class LocalCoordinateSystem(TimeDependent):
                     extra_msg="\nThe coordinates require units representing a length.",
                 )
 
-        if not isinstance(coordinates.data, pint.Quantity):
+        if not isinstance(coordinates.data, pint.Quantity) and not (
+            coordinates.shape == (3,) and np.allclose(coordinates.data, np.zeros(3))
+        ):
+
             warnings.warn(
                 "Coordinates without units are deprecated and won't be supported in "
                 "the future",
