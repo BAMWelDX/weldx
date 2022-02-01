@@ -509,11 +509,8 @@ def get_highest_tag_version(
     if not tags:  # no match found
         return None
 
-    def _get_version(tag_name: str):
-        # we assume, that the version of the tag is separated by a right-most '-' char.
-        return Version(tag_name[tag_name.rfind("-") + 1 :])
-
-    tags.sort(key=_get_version)
+    # we assume, that the version of the tag is separated by a right-most '-' char.
+    tags.sort(key=lambda t: Version(t.rpartition("-")[-1]))
     base_tag = tags[-1].rpartition("-")[0]
     if not all(t.startswith(base_tag) for t in tags):
         raise ValueError(f"Found more than one base tag for {pattern=}.")
