@@ -858,7 +858,7 @@ class WeldxFile(_ProtectedViewDict):
             Should not be set.
         """
         return _HeaderVisualizer(self._asdf_handle).show(
-            use_widgets=use_widgets, _interactive=_interactive
+            use_widgets=use_widgets, path=path, _interactive=_interactive
         )
 
     @deprecated("0.6", "0.7", "Please use file.header() instead.")
