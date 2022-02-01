@@ -14,8 +14,8 @@ import asdf
 import numpy as np
 from asdf import AsdfFile, config_context, generic_io
 from asdf import open as open_asdf
+from asdf.core import Software
 from asdf.exceptions import AsdfWarning
-from asdf.tags.core import Software
 from asdf.util import FileType, get_file_type
 from boltons.iterutils import get_path
 from jsonschema import ValidationError

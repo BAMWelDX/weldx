@@ -4,6 +4,13 @@ from __future__ import annotations
 from asdf.extension import ManifestExtension
 from asdf.resource import DirectoryResourceMapping
 
+from weldx.asdf.types import WeldxConverter
+from weldx.asdf.validators import (
+    WxPropertyTagValidator,
+    WxShapeValidator,
+    WxUnitValidator,
+)
+
 from .constants import (
     MANIFEST_PATH,
     SCHEMA_PATH,
@@ -12,8 +19,6 @@ from .constants import (
     WELDX_SCHEMA_URI_BASE,
     WELDX_TAG_URI_BASE,
 )
-from .types import WeldxConverter
-from .validators import wx_property_tag_validator, wx_shape_validator, wx_unit_validator
 
 
 # RESOURCES ----------------------------------------------------------------------------
@@ -59,11 +64,7 @@ class WeldxExtension(ManifestExtension):
         "weldx.asdf.extension.WeldxExtension",
     ]
     yaml_tag_handles = {"!weldx!": WELDX_TAG_URI_BASE}
-    validators = {  # not active yet
-        "wx_property_tag": wx_property_tag_validator,
-        "wx_unit": wx_unit_validator,
-        "wx_shape": wx_shape_validator,
-    }
+    validators = [WxShapeValidator(), WxUnitValidator(), WxPropertyTagValidator()]
 
 
 def get_extensions() -> list[ManifestExtension]:
