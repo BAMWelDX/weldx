@@ -1546,3 +1546,28 @@ class GenericSeries:
 
         """
         return NotImplemented
+
+
+# --------------------------------------------------------------------------------------
+# SpatialSeries
+# --------------------------------------------------------------------------------------
+
+
+class SpatialSeries(GenericSeries):
+    _allowed_variables: list[str] = ["x"]
+    """Allowed variable names"""
+    _required_variables: list[str] = ["x"]
+    """Required variable names"""
+
+    # _evaluation_preprocessor: dict[str, Callable] = {}
+    # """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
+
+    _required_dimensions: list[str] = ["x"]
+    """Required dimensions"""
+    _required_dimension_units: dict[str, pint.Unit] = {"x": "mm"}
+    """Required units of a dimension"""
+    _required_dimension_coordinates: dict[str, list] = {"x": ["x", "y", "z"]}
+    """Required coordinates of a dimension."""
+
+    # _required_unit_dimensionality: pint.Unit = None
+    # """Required unit dimensionality of the evaluated expression/data"""
