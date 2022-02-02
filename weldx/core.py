@@ -1554,19 +1554,39 @@ class GenericSeries:
 
 
 class SpatialSeries(GenericSeries):
-    _allowed_variables: list[str] = ["x"]
+    _allowed_variables: list[str] = ["x", "y", "z"]
     """Allowed variable names"""
-    _required_variables: list[str] = ["x"]
+    # _required_variables: list[str] = []
+    # """Required variable names"""
+
+    # _evaluation_preprocessor: dict[str, Callable] = {}
+    # """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
+
+    _required_dimensions: list[str] = ["x", "y", "z"]
+    """Required dimensions"""
+    # _required_dimension_units: dict[str, pint.Unit] = {"x": "mm", "y": "mm", "z": "mm"}
+    # """Required units of a dimension"""
+    # _required_dimension_coordinates: dict[str, list] = {"x": ["x", "y", "z"]}
+    # """Required coordinates of a dimension."""
+
+    # _required_unit_dimensionality: pint.Unit = None
+    # """Required unit dimensionality of the evaluated expression/data"""
+
+
+class SpatialSeries2(GenericSeries):
+    _allowed_variables: list[str] = ["s"]
+    """Allowed variable names"""
+    _required_variables: list[str] = ["s"]
     """Required variable names"""
 
     # _evaluation_preprocessor: dict[str, Callable] = {}
     # """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
 
-    _required_dimensions: list[str] = ["x"]
+    _required_dimensions: list[str] = ["s", "c"]
     """Required dimensions"""
-    _required_dimension_units: dict[str, pint.Unit] = {"x": "mm"}
+    _required_dimension_units: dict[str, pint.Unit] = {"s": ""}
     """Required units of a dimension"""
-    _required_dimension_coordinates: dict[str, list] = {"x": ["x", "y", "z"]}
+    _required_dimension_coordinates: dict[str, list] = {"c": ["x", "y", "z"]}
     """Required coordinates of a dimension."""
 
     # _required_unit_dimensionality: pint.Unit = None
