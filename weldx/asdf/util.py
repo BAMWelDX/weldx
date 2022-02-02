@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Set
-from distutils.version import LooseVersion
 from io import BytesIO, TextIOBase
 from pathlib import Path
 from typing import Any, Hashable, MutableMapping, Union
@@ -15,6 +14,7 @@ from asdf.extension import Extension
 from asdf.tagged import TaggedDict
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
+from packaging.version import Version
 
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
@@ -112,7 +112,7 @@ def write_buffer(
 
     def show(wx):
         if _invoke_show_header:
-            wx.show_asdf_header(False, False)
+            wx.header(False, False)
 
     if _use_weldx_file:
         write_kwargs = dict(all_array_storage="inline")
@@ -509,7 +509,8 @@ def get_highest_tag_version(
     if not tags:  # no match found
         return None
 
-    tags.sort(key=LooseVersion)
+    # we assume, that the version of the tag is separated by a right-most '-' char.
+    tags.sort(key=lambda t: Version(t.rpartition("-")[-1]))
     base_tag = tags[-1].rpartition("-")[0]
     if not all(t.startswith(base_tag) for t in tags):
         raise ValueError(f"Found more than one base tag for {pattern=}.")
