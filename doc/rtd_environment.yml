@@ -31,4 +31,5 @@ dependencies:
   # pip packages
   - pip
   - pip:
+    - git+https://github.com/K3D-tools/K3D-jupyter.git@devel
     - -e ../
