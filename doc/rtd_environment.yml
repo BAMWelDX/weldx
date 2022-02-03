@@ -28,6 +28,8 @@ dependencies:
   - typing_extensions
   # GH332
   - docutils=0.16
+  # k3d build
+  - nodejs
   # pip packages
   - pip
   - pip:
