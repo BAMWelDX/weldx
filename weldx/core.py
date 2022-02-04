@@ -1255,6 +1255,7 @@ class GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(coords) == self._obj.num_variables:
             eval_args = {v.symbol: v.data_array for v in coords}
+            print(eval_args)
             data = self._obj.evaluate(**eval_args)
             return self.__class__(data)
 
@@ -1430,7 +1431,6 @@ class GenericSeries:
                 ref[k]["dimensionality"] = _units[k]
             if k in _vals:
                 ref[k]["values"] = _vals[k]
-
         ut.xr_check_coords(data_array, ref)
 
     @classmethod
@@ -1554,26 +1554,6 @@ class GenericSeries:
 
 
 class SpatialSeries(GenericSeries):
-    _allowed_variables: list[str] = ["x", "y", "z"]
-    """Allowed variable names"""
-    # _required_variables: list[str] = []
-    # """Required variable names"""
-
-    # _evaluation_preprocessor: dict[str, Callable] = {}
-    # """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
-
-    _required_dimensions: list[str] = ["x", "y", "z"]
-    """Required dimensions"""
-    # _required_dimension_units: dict[str, pint.Unit] = {"x": "mm", "y": "mm", "z": "mm"}
-    # """Required units of a dimension"""
-    # _required_dimension_coordinates: dict[str, list] = {"x": ["x", "y", "z"]}
-    # """Required coordinates of a dimension."""
-
-    # _required_unit_dimensionality: pint.Unit = None
-    # """Required unit dimensionality of the evaluated expression/data"""
-
-
-class SpatialSeries2(GenericSeries):
     _allowed_variables: list[str] = ["s"]
     """Allowed variable names"""
     _required_variables: list[str] = ["s"]
