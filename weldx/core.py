@@ -276,7 +276,6 @@ class MathematicalExpression:
             k: v if isinstance(v, xr.DataArray) else xr.DataArray(v)
             for k, v in self._parameters.items()
         }
-
         return self.function(**variables, **parameters)
 
 
@@ -1026,7 +1025,6 @@ class GenericSeries:
         else:
             # todo check data structure
             pass
-
         # check the constraints of derived types
         self._check_constraints_discrete(data)
         self._obj = data
@@ -1255,8 +1253,15 @@ class GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(coords) == self._obj.num_variables:
             eval_args = {v.symbol: v.data_array for v in coords}
-            print(eval_args)
+            # for k, v in eval_args.items():
+            #    v.assign_coords(dict(k=v))
             data = self._obj.evaluate(**eval_args)
+
+            # TODO: Discuss - This might be done before by assigning coords to the
+            #       eval_args that go into the math expression. Might need tweaks in
+            #       `SeriesParameter`
+            for k, v in eval_args.items():
+                data = data.assign_coords({k: v.pint.dequantify()})
             return self.__class__(data)
 
         # turn passed coords into parameters of the expression
