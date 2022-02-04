@@ -52,6 +52,7 @@ jobs:
         shell: bash -l {0}
         run: micromamba activate rtd
 
+      # TODO: this should be fixed upstream, try to remove it.
       - name: install dev version again
         # There is a bug in micromamba, which cd's out of the working-directory during the pip install of weldx.
         # So the initial env creation lacks weldx, so we install it here.
