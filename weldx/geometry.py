@@ -1805,7 +1805,7 @@ class Trace:
             raster_data = np.hstack([raster_data, data_point])
 
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
-        return np.hstack([raster_data.m, last_point])
+        return np.hstack([raster_data, last_point])
 
     @UREG.check(None, "[length]", None, None, None)
     def plot(
