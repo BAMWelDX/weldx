@@ -1587,28 +1587,56 @@ class RadialHorizontalTraceSegment:
 class DynamicTraceSegment:
     """Trace segment that can be defined by a ``SpatialSeries``."""
 
-    def __init__(self, series):
-        self._series = series
+    def __init__(self, series, max_s=1):
+        from weldx.core import SpatialSeries
 
-    def _get_squared_derivative(self, i):
+        self._series: SpatialSeries = series
+        self._max_s = max_s
+        self._length = self._len_expr() if series.is_expression else self._len_disc()
+
+    def _get_derivative(self, i):
         me = self._series.data
         exp = me.expression
         # todo unit stripped -> how to proceed? how to cast all length units to mm?
         subs = [(k, v[i].data.to_base_units().m) for k, v in me.parameters.items()]
-        return exp.subs(subs).diff("s") ** 2
+        return exp.subs(subs).diff("s")
+
+    def _get_squared_derivative(self, i):
+        return self._get_derivative(i) ** 2
+
+    def _len_expr(self):
+        der_sq = [self._get_squared_derivative(i) for i in range(3)]
+        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
+        mag = float(sympy.integrate(expr, ("s", 0, self._max_s)).evalf())
+
+        return Q_(mag, Q_(1, "mm").to_base_units().u).to("mm")
+
+    def _len_disc(self):
+        return Q_(10, "mm")
+
+    def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
+        coords = self._series.evaluate(s=position * self._max_s).data.transpose()[0]
+        x = [
+            self._get_derivative(i).subs("s", position * self._max_s).evalf()
+            for i in range(3)
+        ]
+        z_fake = [0, 0, 1]
+        y = np.cross(z_fake, x)
+        return tf.LocalCoordinateSystem.from_axis_vectors(x=x, y=y, coordinates=coords)
+
+    def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
+        coords = self._series.evaluate(s=position).data[0]
+        return tf.LocalCoordinateSystem(coordinates=coords)
 
     @property
     def length(self) -> float:
         """Get the length of the segment."""
-        der_sq = [self._get_squared_derivative(i) for i in range(3)]
-        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
-        mag = float(sympy.integrate(expr, ("s", 0, 1)).evalf())
+        return self._length
 
-        return Q_(mag, Q_(1, "mm").to_base_units().u).to("mm")
-
-    def local_coordinate_system(self, position: float) -> LocalCoordinateSystem:
-        coords = self._series.evaluate(s=position).data.transpose()[0]
-        return LocalCoordinateSystem(coordinates=coords)
+    def local_coordinate_system(self, position: float) -> tf.LocalCoordinateSystem:
+        if self._series.is_expression:
+            return self._lcs_expr(position)
+        return self._lcs_disc(position)
 
 
 # Trace class -----------------------------------------------------------------
