@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Union
 import meshio
 import numpy as np
 import pint
+import sympy
 from xarray import DataArray
 
 import weldx.transformations as tf
@@ -1438,7 +1439,7 @@ class LinearHorizontalTraceSegment:
         """
         relative_position = np.clip(relative_position, 0, 1)
 
-        coordinates = np.array([1, 0, 0]) * relative_position * self._length
+        coordinates = np.array([1, 0, 0]) * relative_position * self.length
         return tf.LocalCoordinateSystem(coordinates=coordinates)
 
 
@@ -1577,10 +1578,37 @@ class RadialHorizontalTraceSegment:
         orientation = tf.WXRotation.from_euler(
             "z", self._angle * relative_position * self._sign_winding
         ).as_matrix()
-        translation = np.array([0, -1, 0]) * self._radius * self._sign_winding
+        translation = np.array([0, -1, 0]) * self.radius * self._sign_winding
 
         coordinates = np.matmul(orientation, translation) - translation
         return tf.LocalCoordinateSystem(orientation, coordinates)
+
+
+class DynamicTraceSegment:
+    """Trace segment that can be defined by a ``SpatialSeries``."""
+
+    def __init__(self, series):
+        self._series = series
+
+    def _get_squared_derivative(self, i):
+        me = self._series.data
+        exp = me.expression
+        # todo unit stripped -> how to proceed? how to cast all length units to mm?
+        subs = [(k, v[i].data.to_base_units().m) for k, v in me.parameters.items()]
+        return exp.subs(subs).diff("s") ** 2
+
+    @property
+    def length(self) -> float:
+        """Get the length of the segment."""
+        der_sq = [self._get_squared_derivative(i) for i in range(3)]
+        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
+        mag = float(sympy.integrate(expr, ("s", 0, 1)).evalf())
+
+        return Q_(mag, Q_(1, "mm").to_base_units().u).to("mm")
+
+    def local_coordinate_system(self, position: float) -> LocalCoordinateSystem:
+        coords = self._series.evaluate(s=position).data.transpose()[0]
+        return LocalCoordinateSystem(coordinates=coords)
 
 
 # Trace class -----------------------------------------------------------------
@@ -1707,7 +1735,7 @@ class Trace:
             Length of the trace.
 
         """
-        return self._total_length_lookup[-1].m
+        return self._total_length_lookup[-1]
 
     @property
     def segments(self) -> list[trace_segment_types]:
@@ -1777,6 +1805,7 @@ class Trace:
 
 
         """
+
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
 

@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import sympy
 from xarray import DataArray
 
@@ -11,6 +12,7 @@ from weldx import (
     Trace,
 )
 from weldx.core import SpatialSeries
+from weldx.geometry import RadialHorizontalTraceSegment
 
 
 class SDTraceSegment:
@@ -47,8 +49,10 @@ params = dict(
 series = SpatialSeries(expr, parameters=params)
 
 segment = SDTraceSegment(series)
+segment = LinearHorizontalTraceSegment("10mm")
+segment2 = RadialHorizontalTraceSegment("1mm", Q_(np.pi, "rad"))
 print(segment.length)
-trace = Trace([segment, segment])
+trace = Trace([segment, segment2])
 print(trace.length)
 trace.plot(Q_(0.1, "mm"))
 plt.show()
