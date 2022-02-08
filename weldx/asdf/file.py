@@ -402,10 +402,9 @@ class WeldxFile(_ProtectedViewDict):
         >>> f = weldx.WeldxFile(software_history_entry=software)
         >>> f.add_history_entry("we made some change")
         >>> f.history #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-         [{'description': 'we made some change',
-           'time': datetime.datetime(...),
-           'software': {'name': 'MyFancyPackage', 'author': 'Me',
-           'homepage': 'https://startpage.com', 'version': '1.0'}}]
+        [HistoryEntry(description='we made some change', time=datetime.datetime(...),
+        software=[Software(name='MyFancyPackage', version='1.0',
+        author='Me', homepage='https://startpage.com', extra={})], extra={})]
 
         We can also change the software on the fly:
         >>> software_new = dict(name="MyTool", author="MeSoft",
@@ -415,10 +414,10 @@ class WeldxFile(_ProtectedViewDict):
         Lets inspect the last history entry:
 
         >>> f.history[-1] #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'description': 'another change using mytool',
-         'time': datetime.datetime(...),
-         'software': {'name': 'MyTool', 'author': 'MeSoft',
-         'homepage': 'https://startpage.com', 'version': '1.0'}}
+        HistoryEntry(description='another change using mytool',
+        time=datetime.datetime(...),
+        software=[Software(name='MyTool', version='1.0', author='MeSoft',
+        homepage='https://startpage.com', extra={})], extra={})
 
         """
         return self._DEFAULT_SOFTWARE_ENTRY
@@ -656,7 +655,7 @@ class WeldxFile(_ProtectedViewDict):
         return super(WeldxFile, self).popitem()
 
     def add_history_entry(
-        self, change_desc: str, software: Union[Software, list[Software]] = None
+        self, change_desc: str, software: Union[Software, list[Software], dict] = None
     ) -> None:
         """Add an history_entry to the file.
 
@@ -675,6 +674,9 @@ class WeldxFile(_ProtectedViewDict):
         """
         if software is None:
             software = self.software_history_entry
+
+        if isinstance(software, dict):
+            software = Software(**software)
 
         if not isinstance(software, list):
             software = [software]
