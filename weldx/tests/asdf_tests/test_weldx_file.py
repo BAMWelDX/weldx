@@ -314,7 +314,7 @@ class TestWeldXFile:
             kwargs = {"asdffile_kwargs": {"custom_schema": schema}}
         w = WeldxFile(buff, **kwargs)
         assert w.custom_schema == schema
-        w.show_asdf_header()  # check for exception safety.
+        w.header()  # check for exception safety.
 
     @staticmethod
     def test_custom_schema_resolve_path():
@@ -343,7 +343,7 @@ class TestWeldXFile:
         """Check displaying the header."""
         file = WeldxFile(tree={"sensor": "HKS_sensor"}, mode="rw")
         old_pos = file.file_handle.tell()
-        file.show_asdf_header()
+        file.header()
         after_pos = file.file_handle.tell()
         assert old_pos == after_pos
 
@@ -369,7 +369,7 @@ class TestWeldXFile:
         with WeldxFile(mode=mode) as fh:
             fh["x"] = large_array
             before = get_mem_info()
-            fh.show_asdf_header(use_widgets=False, _interactive=False)
+            fh.header(use_widgets=False, _interactive=False)
             after = get_mem_info()
             fh.write_to(fn)
 
@@ -386,7 +386,7 @@ class TestWeldXFile:
         """Ensure that the updated tree is displayed in show_header."""
         with WeldxFile(mode=mode) as fh:
             fh["wx_user"] = dict(test=True)
-            fh.show_asdf_header()
+            fh.header()
 
         out, _ = capsys.readouterr()
         assert "wx_user" in out
@@ -400,7 +400,7 @@ class TestWeldXFile:
     def test_show_header_params(use_widgets, interactive, capsys):
         """Check different inputs for show method."""
         fh = WeldxFile()
-        fh.show_asdf_header(use_widgets=use_widgets, _interactive=interactive)
+        fh.header(use_widgets=use_widgets, _interactive=interactive)
 
     def test_invalid_software_entry(self):
         """Invalid software entries should raise."""
@@ -433,7 +433,7 @@ class TestWeldXFile:
         wx_file = WeldxFile(fn, "rw", compression="input")
         size_rw = get_size_and_mtime(fn)
 
-        wx_file.show_asdf_header()
+        wx_file.header()
         size_show_hdr = get_size_and_mtime(fn)
         wx_file.close()
 
