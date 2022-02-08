@@ -436,10 +436,12 @@ class WeldxFile(_ProtectedViewDict):
                 version=version,
             )
         else:
-            if not isinstance(value, Dict):
-                raise ValueError("expected a dictionary type")
+            if not isinstance(value, (Software, Dict)):
+                raise ValueError("expected a 'asdf.core.Software' or dict type")
+            if isinstance(value, Dict):
+                value = Software(**value)
             try:
-                test = AsdfFile(tree=dict(software=Software(**value)))
+                test = AsdfFile(tree=dict(software=value))
                 test.validate()
             except ValidationError as ve:
                 raise ValueError(f"Given value has invalid format: {ve}")

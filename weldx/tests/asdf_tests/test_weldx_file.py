@@ -10,6 +10,7 @@ import asdf
 import numpy as np
 import pytest
 import xarray as xr
+from asdf.core import Software
 from jsonschema import ValidationError
 
 from weldx.asdf.cli.welding_schema import single_pass_weld_example
@@ -274,7 +275,7 @@ class TestWeldXFile:
 
     def test_history(self):
         """Test custom software specs for history entries."""
-        software = dict(
+        software = Software(
             name="weldx_file_test", author="marscher", homepage="http://no", version="1"
         )
         fh = WeldxFile(
@@ -290,17 +291,17 @@ class TestWeldXFile:
 
         new_fh = WeldxFile(buff)
         assert new_fh[META_ATTR]["something"]
-        assert new_fh.history[-1]["description"] == desc
-        assert new_fh.history[-1]["software"] == software
+        assert new_fh.history[-1].description == desc
+        assert new_fh.history[-1].software == [software]
 
         del new_fh[META_ATTR]["something"]
-        other_software = dict(
+        other_software = Software(
             name="software name", version="42", homepage="no", author="anon"
         )
         new_fh.add_history_entry("removed some metadata", software=other_software)
         buff2 = self.make_copy(new_fh)
         fh3 = WeldxFile(buff2)
-        assert "removed" in fh3.history[-1]["description"]
+        assert "removed" in fh3.history[-1].description
         assert len(fh3.history) == 2
 
     @staticmethod
@@ -404,11 +405,11 @@ class TestWeldXFile:
 
     def test_invalid_software_entry(self):
         """Invalid software entries should raise."""
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             self.fh.software_history_entry = {"invalid": None}
 
         with pytest.raises(ValueError):
-            self.fh.software_history_entry = {"name": None}
+            self.fh.software_history_entry = {"name": None, "version": "1.2.3"}
 
     @staticmethod
     def test_compression(tmpdir):
