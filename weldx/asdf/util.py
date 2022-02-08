@@ -129,7 +129,7 @@ def write_buffer(
             buff = wx.file_handle
     else:
         buff = BytesIO()
-        with asdf.AsdfFile(tree, extensions=None, **asdffile_kwargs) as ff:
+        with asdf.AsdfFile(tree, **asdffile_kwargs) as ff:
             if dummy_inline_arrays:  # lets store an empty list in the asdf file.
                 write_kwargs["all_array_storage"] = "inline"
                 from unittest.mock import patch
@@ -177,7 +177,6 @@ def read_buffer(
 
     with asdf.open(
         buffer,
-        extensions=None,
         **open_kwargs,
     ) as af:
         data = af.tree
