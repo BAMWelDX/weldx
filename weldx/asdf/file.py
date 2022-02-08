@@ -429,17 +429,17 @@ class WeldxFile(_ProtectedViewDict):
         if value is None:
             from weldx._version import __version__ as version
 
-            self._DEFAULT_SOFTWARE_ENTRY = {
-                "name": "weldx",
-                "author": "BAM",
-                "homepage": "https://www.bam.de/Content/EN/Projects/WelDX/weldx.html",
-                "version": version,
-            }
+            self._DEFAULT_SOFTWARE_ENTRY = Software(
+                name="weldx",
+                author="BAM",
+                homepage="https://www.bam.de/Content/EN/Projects/WelDX/weldx.html",
+                version=version,
+            )
         else:
             if not isinstance(value, Dict):
                 raise ValueError("expected a dictionary type")
             try:
-                test = AsdfFile(tree=dict(software=Software(value, version="unknown")))
+                test = AsdfFile(tree=dict(software=Software(**value)))
                 test.validate()
             except ValidationError as ve:
                 raise ValueError(f"Given value has invalid format: {ve}")
@@ -653,7 +653,9 @@ class WeldxFile(_ProtectedViewDict):
         """
         return super(WeldxFile, self).popitem()
 
-    def add_history_entry(self, change_desc: str, software: dict = None) -> None:
+    def add_history_entry(
+        self, change_desc: str, software: Union[Software, list[Software]] = None
+    ) -> None:
         """Add an history_entry to the file.
 
         Parameters
@@ -671,6 +673,10 @@ class WeldxFile(_ProtectedViewDict):
         """
         if software is None:
             software = self.software_history_entry
+
+        if not isinstance(software, list):
+            software = [software]
+
         self._asdf_handle.add_history_entry(change_desc, software)
 
     @property
