@@ -26,7 +26,7 @@ def single_pass_weld_example(
     import asdf
     import numpy as np
     import pandas as pd
-    from asdf.tags.core import Software
+    from asdf.core import Software
 
     import weldx.geometry as geo
     import weldx.measurement as msm
