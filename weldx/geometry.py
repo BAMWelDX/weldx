@@ -1904,6 +1904,13 @@ class Trace:
         else:
             axes.plot(data[0].m, data[1].m, data[2].m, fmt)
 
+    def _k3d_line(self, raster_width: pint.Quantity = "1mm"):
+        """Get (or show) a k3d line from of the trace."""
+        import k3d
+
+        r = self.rasterize(raster_width).to(_DEFAULT_LEN_UNIT).magnitude
+        return k3d.line(r.astype("float32").T)
+
 
 # Linear profile interpolation class ------------------------------------------
 
