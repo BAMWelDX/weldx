@@ -546,7 +546,10 @@ class WxUnitValidator(Validator):
     """Validate the 'wx_unit' property of an object."""
 
     schema_property = "wx_unit"
-    tags = ["asdf://weldx.bam.de/weldx/tags/**"]
+    tags = [
+        "**",  # enable on all objects (tagged and default types)
+        "asdf://weldx.bam.de/weldx/tags/**",  # weldx tags (already covered by "**")
+    ]
 
     def validate(
         self, schema_property_value: list[str], node: asdf.tagged.Tagged, schema: dict
@@ -595,7 +598,10 @@ class WxShapeValidator(Validator):
     """Validate the 'wx_shape' property of an object."""
 
     schema_property = "wx_shape"
-    tags = ["asdf://weldx.bam.de/weldx/tags/**"]
+    tags = [
+        "**",  # enable on all objects (tagged and default types)
+        "asdf://weldx.bam.de/weldx/tags/**",  # weldx tags (already covered by "**")
+    ]
 
     def validate(
         self,
@@ -653,7 +659,10 @@ class WxPropertyTagValidator(Validator):
     """Validate the 'wx_shape' property of an object."""
 
     schema_property = "wx_property_tag"
-    tags = ["asdf://weldx.bam.de/weldx/tags/**"]
+    tags = [
+        "**",  # enable on all objects (tagged and default types)
+        "asdf://weldx.bam.de/weldx/tags/**",  # weldx tags (already covered by "**")
+    ]
 
     def validate(
         self,
