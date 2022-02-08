@@ -1,5 +1,7 @@
 import sympy
 
+from weldx import MathematicalExpression
+
 s = sympy.symbols("s")
 exp1 = 1 * s**2 + 0 * s + 0
 exp2 = 0 * s**2 + 1 * s + 0
@@ -10,8 +12,6 @@ temp = sympy.sqrt(exp1.diff(s) ** 2 + exp2.diff(s) ** 2 + exp3.diff(s) ** 2)
 print(temp)
 print(sympy.integrate(temp, (s, 0, 1)).evalf())
 
-
-from weldx import MathematicalExpression
 
 params = dict(a=[1, 0, 0], b=[0, 1, 0], c=[0, 0, 1])
 me = MathematicalExpression("a * s**2 + b * s + c", parameters=params)

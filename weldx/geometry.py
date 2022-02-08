@@ -1634,6 +1634,7 @@ class DynamicTraceSegment:
         return self._length
 
     def local_coordinate_system(self, position: float) -> tf.LocalCoordinateSystem:
+        """Calculate a local coordinate system at a position of the trace segment."""
         if self._series.is_expression:
             return self._lcs_expr(position)
         return self._lcs_disc(position)
@@ -1831,9 +1832,7 @@ class Trace:
         pint.Quantity
             Raster data
 
-
         """
-
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
 

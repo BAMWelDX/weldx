@@ -3,14 +3,7 @@ import numpy as np
 import sympy
 from xarray import DataArray
 
-from weldx import (
-    Q_,
-    U_,
-    GenericSeries,
-    LinearHorizontalTraceSegment,
-    LocalCoordinateSystem,
-    Trace,
-)
+from weldx import Q_, LinearHorizontalTraceSegment, LocalCoordinateSystem, Trace
 from weldx.core import SpatialSeries
 from weldx.geometry import RadialHorizontalTraceSegment
 
