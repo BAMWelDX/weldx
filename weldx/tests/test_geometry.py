@@ -2433,11 +2433,10 @@ def test_trace_rasterization():
     # check with arbitrary coordinate system --------------
     orientation = WXRotation.from_euler("y", np.pi / 2).as_matrix()
     coordinates = Q_([-3, 2.5, 5], "mm")
-    cs_base = tf.LocalCoordinateSystem(orientation, coordinates.m)
+    cs_base = tf.LocalCoordinateSystem(orientation, coordinates)
 
     trace = geo.Trace([linear_segment, radial_segment], cs_base)
     data = trace.rasterize("0.1mm")
-    print(data)
     raster_width_eff = trace.length / (data.shape[1] - 1)
 
     for i in range(data.shape[1]):
