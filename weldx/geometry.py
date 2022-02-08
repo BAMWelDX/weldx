@@ -1642,7 +1642,9 @@ class DynamicTraceSegment:
 
 # Trace class -----------------------------------------------------------------
 
-trace_segment_types = Union[LinearHorizontalTraceSegment, RadialHorizontalTraceSegment]
+trace_segment_types = Union[
+    LinearHorizontalTraceSegment, RadialHorizontalTraceSegment, DynamicTraceSegment
+]
 
 
 class Trace:
