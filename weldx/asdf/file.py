@@ -181,7 +181,8 @@ class WeldxFile(_ProtectedViewDict):
     history:
       extensions:
       - !core/extension_metadata-1.0.0
-        extension_class: asdf.extension.BuiltinExtension
+        extension_class: asdf.extension._manifest.ManifestExtension
+        extension_uri: asdf://asdf-format.org/core/extensions/...
         software: !core/software-1.0.0 {name: asdf, version: ...}
     name: CXCOMP
     value: 42
