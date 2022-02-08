@@ -2281,7 +2281,7 @@ def test_trace_construction():
     """Test the trace's construction."""
     linear_segment = geo.LinearHorizontalTraceSegment("1mm")
     radial_segment = geo.RadialHorizontalTraceSegment("1mm", Q_(np.pi, "rad"))
-    cs_coordinates = np.array([2, 3, -2])
+    cs_coordinates = Q_([2, 3, -2], "mm")
     cs_initial = helpers.rotated_coordinate_system(coordinates=cs_coordinates)
 
     # test single segment construction --------------------
@@ -2370,7 +2370,7 @@ def test_trace_local_coordinate_system():
 
     # check with arbitrary coordinate system --------------
     orientation = WXRotation.from_euler("x", np.pi / 2).as_matrix()
-    coordinates = np.array([-3, 2.5, 5])
+    coordinates = Q_([-3, 2.5, 5], "mm")
     cs_base = tf.LocalCoordinateSystem(orientation, coordinates)
 
     trace = geo.Trace([radial_segment, linear_segment], cs_base)
@@ -2392,7 +2392,7 @@ def test_trace_local_coordinate_system():
         weight = i / 10
         position_on_segment = linear_segment.length * weight
         position = radial_segment.length + position_on_segment
-        lcs_coordinates = [position_on_segment.m, 0, 0]
+        lcs_coordinates = Q_([position_on_segment.m, 0, 0], "mm")
 
         cs_exp = tf.LocalCoordinateSystem(coordinates=lcs_coordinates) + cs_start_seg2
         cs_trace = trace.local_coordinate_system(position)

@@ -1639,7 +1639,8 @@ class Trace:
 
         """
         if coordinate_system is None:
-            coordinate_system = tf.LocalCoordinateSystem()
+            default_coords = Q_([0, 0, 0], _DEFAULT_LEN_UNIT)
+            coordinate_system = tf.LocalCoordinateSystem(coordinates=default_coords)
 
         if not isinstance(coordinate_system, tf.LocalCoordinateSystem):
             raise TypeError(
@@ -1688,7 +1689,6 @@ class Trace:
             # Fill length lookups
             segment_length = segment.length
             total_length += segment_length
-
             self._segment_length_lookup += [segment_length]
             self._total_length_lookup += [total_length.copy()]
 
