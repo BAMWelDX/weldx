@@ -14,8 +14,8 @@ import asdf
 import numpy as np
 from asdf import AsdfFile, config_context, generic_io
 from asdf import open as open_asdf
+from asdf.core import Software
 from asdf.exceptions import AsdfWarning
-from asdf.tags.core import Software
 from asdf.util import FileType, get_file_type
 from boltons.iterutils import get_path
 from jsonschema import ValidationError
@@ -181,7 +181,8 @@ class WeldxFile(_ProtectedViewDict):
     history:
       extensions:
       - !core/extension_metadata-1.0.0
-        extension_class: asdf.extension.BuiltinExtension
+        extension_class: asdf.extension._manifest.ManifestExtension
+        extension_uri: asdf://asdf-format.org/core/extensions/...
         software: !core/software-1.0.0 {name: asdf, version: ...}
     name: CXCOMP
     value: 42
@@ -401,10 +402,9 @@ class WeldxFile(_ProtectedViewDict):
         >>> f = weldx.WeldxFile(software_history_entry=software)
         >>> f.add_history_entry("we made some change")
         >>> f.history #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-         [{'description': 'we made some change',
-           'time': datetime.datetime(...),
-           'software': {'name': 'MyFancyPackage', 'author': 'Me',
-           'homepage': 'https://startpage.com', 'version': '1.0'}}]
+        [HistoryEntry(description='we made some change', time=datetime.datetime(...),
+        software=[Software(name='MyFancyPackage', version='1.0',
+        author='Me', homepage='https://startpage.com', extra={})], extra={})]
 
         We can also change the software on the fly:
         >>> software_new = dict(name="MyTool", author="MeSoft",
@@ -414,10 +414,10 @@ class WeldxFile(_ProtectedViewDict):
         Lets inspect the last history entry:
 
         >>> f.history[-1] #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'description': 'another change using mytool',
-         'time': datetime.datetime(...),
-         'software': {'name': 'MyTool', 'author': 'MeSoft',
-         'homepage': 'https://startpage.com', 'version': '1.0'}}
+        HistoryEntry(description='another change using mytool',
+        time=datetime.datetime(...),
+        software=[Software(name='MyTool', version='1.0', author='MeSoft',
+        homepage='https://startpage.com', extra={})], extra={})
 
         """
         return self._DEFAULT_SOFTWARE_ENTRY
@@ -428,17 +428,19 @@ class WeldxFile(_ProtectedViewDict):
         if value is None:
             from weldx._version import __version__ as version
 
-            self._DEFAULT_SOFTWARE_ENTRY = {
-                "name": "weldx",
-                "author": "BAM",
-                "homepage": "https://www.bam.de/Content/EN/Projects/WelDX/weldx.html",
-                "version": version,
-            }
+            self._DEFAULT_SOFTWARE_ENTRY = Software(
+                name="weldx",
+                author="BAM",
+                homepage="https://www.bam.de/Content/EN/Projects/WelDX/weldx.html",
+                version=version,
+            )
         else:
-            if not isinstance(value, Dict):
-                raise ValueError("expected a dictionary type")
+            if not isinstance(value, (Software, Dict)):
+                raise ValueError("expected a 'asdf.core.Software' or dict type")
+            if isinstance(value, Dict):
+                value = Software(**value)
             try:
-                test = AsdfFile(tree=dict(software=Software(value)))
+                test = AsdfFile(tree=dict(software=value))
                 test.validate()
             except ValidationError as ve:
                 raise ValueError(f"Given value has invalid format: {ve}")
@@ -652,7 +654,9 @@ class WeldxFile(_ProtectedViewDict):
         """
         return super(WeldxFile, self).popitem()
 
-    def add_history_entry(self, change_desc: str, software: dict = None) -> None:
+    def add_history_entry(
+        self, change_desc: str, software: Union[Software, list[Software], dict] = None
+    ) -> None:
         """Add an history_entry to the file.
 
         Parameters
@@ -670,6 +674,13 @@ class WeldxFile(_ProtectedViewDict):
         """
         if software is None:
             software = self.software_history_entry
+
+        if isinstance(software, dict):
+            software = Software(**software)
+
+        if not isinstance(software, list):
+            software = [software]
+
         self._asdf_handle.add_history_entry(change_desc, software)
 
     @property

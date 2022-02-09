@@ -19,6 +19,7 @@ jobs:
           python-version: '3.8'
       - name: pip installs
         run: |
+          pip install pip install git+git://github.com/asdf-format/asdf.git@asdf-3.0-epic
           pip install -e .[test]
       - name: run asdf schema pytest
         run: |

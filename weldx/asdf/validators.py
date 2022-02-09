@@ -6,14 +6,16 @@ from collections import OrderedDict
 from collections.abc import Callable, Iterator, Mapping
 from typing import Any, Union
 
+import asdf.tagged
 from asdf import ValidationError
+from asdf.extension import Validator
 from asdf.schema import _type_to_tag
 
 from weldx.asdf.types import WxSyntaxError
 from weldx.asdf.util import _get_instance_shape, uri_match
 from weldx.constants import U_
 
-__all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
+__all__ = ["WxPropertyTagValidator", "WxShapeValidator", "WxUnitValidator"]
 
 
 def _walk_validator(
@@ -511,9 +513,7 @@ def _custom_shape_validator(
     return dict_values
 
 
-def wx_unit_validator(
-    validator, wx_unit, instance, schema
-) -> Iterator[ValidationError]:
+def wx_unit_validator(wx_unit, instance, schema) -> Iterator[ValidationError]:
     """Custom validator for checking dimensions for objects with 'unit' property.
 
     ASDF documentation:
@@ -521,8 +521,6 @@ def wx_unit_validator(
 
     Parameters
     ----------
-    validator:
-        A jsonschema.Validator instance.
     wx_unit:
         Enable unit validation for this schema.
     instance:
@@ -544,9 +542,22 @@ def wx_unit_validator(
     )
 
 
-def wx_shape_validator(
-    validator, wx_shape, instance, schema
-) -> Iterator[ValidationError]:
+class WxUnitValidator(Validator):
+    """Validate the 'wx_unit' property of an object."""
+
+    schema_property = "wx_unit"
+    tags = [
+        "**",  # enable on all objects (tagged and default types)
+        "asdf://weldx.bam.de/weldx/tags/**",  # weldx tags (already covered by "**")
+    ]
+
+    def validate(
+        self, schema_property_value: list[str], node: asdf.tagged.Tagged, schema: dict
+    ):
+        yield from wx_unit_validator(schema_property_value, node, schema)
+
+
+def wx_shape_validator(wx_shape, instance, schema) -> Iterator[ValidationError]:
     """Custom validator for checking dimensions for objects with 'shape' property.
 
     ASDF documentation:
@@ -554,8 +565,6 @@ def wx_shape_validator(
 
     Parameters
     ----------
-    validator:
-        A jsonschema.Validator instance.
     wx_shape:
         Enable shape validation for this schema.
     instance:
@@ -585,15 +594,31 @@ def wx_shape_validator(
         )
 
 
+class WxShapeValidator(Validator):
+    """Validate the 'wx_shape' property of an object."""
+
+    schema_property = "wx_shape"
+    tags = [
+        "**",  # enable on all objects (tagged and default types)
+        "asdf://weldx.bam.de/weldx/tags/**",  # weldx tags (already covered by "**")
+    ]
+
+    def validate(
+        self,
+        schema_property_value: Union[dict, list],
+        node: asdf.tagged.Tagged,
+        schema: dict,
+    ):
+        return wx_shape_validator(schema_property_value, node, schema)
+
+
 def wx_property_tag_validator(
-    validator, wx_property_tag: Union[str, list[str]], instance, schema
+    wx_property_tag: Union[str, list[str]], instance, schema
 ) -> Iterator[ValidationError]:
     """
 
     Parameters
     ----------
-    validator
-        A jsonschema.Validator instance.
     wx_property_tag
         The tag to test all object properties against.
     instance
@@ -623,8 +648,26 @@ def wx_property_tag_validator(
 
     if not isinstance(wx_property_tag, (str, list)):
         raise WxSyntaxError(
-            f"'wx_property_tag' must be str or List[str], got {wx_property_tag}"
+            f"'wx_property_tag' must be str or list[str], got {wx_property_tag}"
         )
 
     for _, value in instance.items():
         yield from _tag_validator(tagname=wx_property_tag, instance=value)
+
+
+class WxPropertyTagValidator(Validator):
+    """Validate the 'wx_shape' property of an object."""
+
+    schema_property = "wx_property_tag"
+    tags = [
+        "**",  # enable on all objects (tagged and default types)
+        "asdf://weldx.bam.de/weldx/tags/**",  # weldx tags (already covered by "**")
+    ]
+
+    def validate(
+        self,
+        schema_property_value: Union[str, list[str]],
+        node: asdf.tagged.Tagged,
+        schema: dict,
+    ):
+        yield from wx_property_tag_validator(schema_property_value, node, schema)
