@@ -11,7 +11,7 @@ dependencies:
   - pint>=0.11
   - scipy>=1.6.2
   - sympy>=1.6
-  - asdf >=2.8
+#  - asdf >=2.8
   - bottleneck>=1.3
   # notebook execution
   - ipykernel
@@ -31,4 +31,5 @@ dependencies:
   # pip packages
   - pip
   - pip:
+    - git+https://github.com/asdf-format/asdf.git@asdf-3.0-epic
     - -e ../

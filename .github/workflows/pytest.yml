@@ -115,6 +115,7 @@ jobs:
       - name: pip installs
         run: |
           pip install wheel
+          pip install pip install git+https://github.com/asdf-format/asdf.git@asdf-3.0-epic
           pip install -e .[test]
 
       - name: setup matplotlib
