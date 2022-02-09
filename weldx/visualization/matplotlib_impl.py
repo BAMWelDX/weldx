@@ -25,6 +25,9 @@ if TYPE_CHECKING:  # pragma: no cover
     import weldx.transformations as tf
 
 
+# todo coordinates.data -> convert to default units
+
+
 def new_3d_figure_and_axes(
     num_subplots: int = 1, height: int = 500, width: int = 500, pixel_per_inch: int = 50
 ) -> tuple[Figure, Axes]:
@@ -536,7 +539,7 @@ def plot_spatial_data_matplotlib(
     else:
         color = color_to_rgb_normalized(color)
 
-    coordinates = data.coordinates.data.reshape(-1, 3)
+    coordinates = data.coordinates.data.m.reshape(-1, 3)
     triangles = data.triangles
 
     # if data is time dependent or has other extra dimensions, just take the first value

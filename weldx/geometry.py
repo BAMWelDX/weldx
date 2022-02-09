@@ -2725,8 +2725,10 @@ class SpatialData:
         dims = self.additional_dims
         mins = self.coordinates.min(dim=dims)
         maxs = self.coordinates.max(dim=dims)
+        print(mins)
+        print(maxs)
 
-        return np.vstack([mins, maxs])
+        return np.vstack([mins.data, maxs.data])
 
     def plot(
         self,

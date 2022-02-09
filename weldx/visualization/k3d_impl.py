@@ -340,7 +340,7 @@ class SpatialDataVisualizer:
 
         self._reference_system = reference_system
 
-        self._label_pos = data.coordinates.mean(dim=data.additional_dims).values
+        self._label_pos = data.coordinates.mean(dim=data.additional_dims).data.m
         self._label = None
         if name is not None:
             self._label = k3d.text(
@@ -354,7 +354,7 @@ class SpatialDataVisualizer:
             )
 
         self._points = k3d.points(
-            data.coordinates,
+            data.coordinates.data.m,
             point_size=0.05,
             color=color,
             name=name if name is None else f"{name} (points)",
