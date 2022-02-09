@@ -11,6 +11,7 @@ from matplotlib.axes._axes import Axes
 from matplotlib.figure import Figure
 
 import weldx.geometry as geo
+from weldx.constants import Q_
 from weldx.core import TimeSeries
 from weldx.visualization.colors import (
     color_generator_function,
@@ -142,7 +143,9 @@ def draw_coordinate_system_matplotlib(
     else:
         dsx = coordinate_system.dataset
 
-    p_0 = dsx.coordinates
+    p_0 = dsx.coordinates.data
+    if isinstance(p_0, Q_):
+        p_0 = p_0.m
 
     if show_vectors:
         if scale_vectors is None:
@@ -256,9 +259,9 @@ def plot_local_coordinate_system_matplotlib(
     if (
         show_trace
         and not isinstance(lcs.coordinates, TimeSeries)
-        and lcs.coordinates.values.ndim > 1
+        and lcs.coordinates.data.ndim > 1
     ):
-        coords = lcs.coordinates.values
+        coords = lcs.coordinates.data
         if color is None:
             color = "k"
         axes.plot(coords[:, 0], coords[:, 1], coords[:, 2], ":", color=color)
@@ -533,7 +536,7 @@ def plot_spatial_data_matplotlib(
     else:
         color = color_to_rgb_normalized(color)
 
-    coordinates = data.coordinates.values.reshape(-1, 3)
+    coordinates = data.coordinates.data.reshape(-1, 3)
     triangles = data.triangles
 
     # if data is time dependent or has other extra dimensions, just take the first value
