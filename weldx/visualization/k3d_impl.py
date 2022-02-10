@@ -340,7 +340,7 @@ class SpatialDataVisualizer:
 
         self._reference_system = reference_system
 
-        self._label_pos = data.coordinates.mean(dim=data.additional_dims).values
+        self._label_pos = data.coordinates.mean(dim=data.additional_dims).data.m
         self._label = None
         if name is not None:
             self._label = k3d.text(
@@ -353,8 +353,9 @@ class SpatialDataVisualizer:
                 name=name if name is None else f"{name} (text)",
             )
 
+        print(color)
         self._points = k3d.points(
-            data.coordinates,
+            data.coordinates.data.m,
             point_size=0.05,
             color=color,
             name=name if name is None else f"{name} (points)",
@@ -362,7 +363,7 @@ class SpatialDataVisualizer:
         self._mesh = None
         if data.triangles is not None:
             self._mesh = k3d.mesh(
-                data.coordinates.values.astype(np.float32).reshape(-1, 3),
+                data.coordinates.data.m.astype(np.float32).reshape(-1, 3),
                 triangles,
                 side="double",
                 color=color,
