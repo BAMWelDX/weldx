@@ -667,9 +667,9 @@ def test_interp_time_timeseries_as_coords(
     assert np.all(lcs_interp.time == Time(time, ref_time))
 
     # check coordinates
-    exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
+    exp_vals = Q_([[s + time_offset + 1, 1, 1] for s in seconds], "mm")
     assert isinstance(lcs_interp.coordinates, xr.DataArray)
-    assert np.allclose(lcs_interp.coordinates, exp_vals)
+    assert np.allclose(lcs_interp.coordinates.data, exp_vals)
 
     # check orientation
     seconds_offset = np.array(seconds) + time_offset
