@@ -35,6 +35,9 @@ changes
 
 - Renamed show_asdf_header of `WeldxFile` to `WeldxFile.header`. [:pull:`694`]
 
+- `WeldxFile.custom_schema` now accepts an optional tuple with the first element being a schema to validate upon read,
+  the second upon writing the data. [:pull:`697`]
+
 
 fixes
 =====
