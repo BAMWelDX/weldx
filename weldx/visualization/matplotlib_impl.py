@@ -265,6 +265,8 @@ def plot_local_coordinate_system_matplotlib(
         and lcs.coordinates.data.ndim > 1
     ):
         coords = lcs.coordinates.data
+        if isinstance(coords, Q_):
+            coords = coords.m
         if color is None:
             color = "k"
         axes.plot(coords[:, 0], coords[:, 1], coords[:, 2], ":", color=color)
