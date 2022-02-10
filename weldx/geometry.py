@@ -2725,8 +2725,6 @@ class SpatialData:
         dims = self.additional_dims
         mins = self.coordinates.min(dim=dims)
         maxs = self.coordinates.max(dim=dims)
-        print(mins)
-        print(maxs)
 
         return np.vstack([mins.data, maxs.data])
 
@@ -2784,7 +2782,10 @@ class SpatialData:
         if backend == "k3d":
             import k3d
 
-            limits = tuple(self.limits().flatten())
+            limits = self.limits()
+            if isinstance(limits, Q_):
+                limits = limits.m
+            limits = tuple(limits.flatten())
             plot = k3d.plot(grid=limits)
             vs.SpatialDataVisualizer(
                 self, name=None, reference_system=None, color=color, plot=plot
