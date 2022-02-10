@@ -339,7 +339,7 @@ class TestWeldXFile:
             WeldxFile(custom_schema="no")
 
     @staticmethod
-    def _get_schema_file(arg, mismatch: bool) -> (str, np.ndarray):
+    def _get_schema_file(arg, mismatch: bool, tmp_path) -> (str, np.ndarray):
         data = np.arange(6)
         if not arg or not isinstance(arg, (list, tuple)):
             return None, data
@@ -358,25 +358,23 @@ properties:
     tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
     wx_shape: [{shape}]
         """
-        d = pathlib.Path(tempfile.gettempdir())
 
         if isinstance(arg, (list, tuple)):
             a, b = arg
-            if a is not None:
-                fname = str(d / "a")
-                shape = [2, 3]
-                shape_s = ",".join(str(s) for s in shape)
-                with open(fname, "w+") as fh:
-                    fh.write(schema.format(shape=shape_s))
-                result[0] = fname
-            if b is not None:
-                fname = str(d / "b")
-                shape = [3, 2]
-                shape_s = ",".join(str(s) for s in shape)
 
-                with open(fname, "w+") as fh:
+            def _create_schema(shape_, name):
+                file_name = tmp_path / name
+                shape_s = ",".join(str(s) for s in shape_)
+                with open(file_name, "w+") as fh:
                     fh.write(schema.format(shape=shape_s))
-                result[1] = fname
+                return file_name
+
+            if a is not None:
+                shape = [2, 3]
+                result[0] = _create_schema(shape, name="a")
+            if b is not None:
+                shape = [3, 2]
+                result[1] = _create_schema(shape, name="b")
 
             return result, data.reshape(shape) if not mismatch else data
 
@@ -392,9 +390,9 @@ properties:
             (("A", None), False),  # validate with A on read, no validation on write
         ),
     )
-    def test_custom_schema_modes(self, custom_schema, mismatch):
+    def test_custom_schema_modes(self, custom_schema, mismatch, tmp_path):
         """Checks we can have separate read/write arguments for custom_schema."""
-        schema_resolved, data = self._get_schema_file(custom_schema, mismatch)
+        schema_resolved, data = self._get_schema_file(custom_schema, mismatch, tmp_path)
         tree = {"prop1": data}
 
         if mismatch:
