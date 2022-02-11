@@ -548,7 +548,7 @@ class UVGroove(IsoBaseGroove):
         # calculations:
         x_1 = np.tan(alpha / 2) * h
         # Center of the circle [0, y_m]
-        y_circle = np.sqrt(R**2 - x_1**2)  # skipcq: PTC-W0028
+        y_circle = np.sqrt(R ** 2 - x_1 ** 2)  # skipcq: PTC-W0028
         y_m = h + y_circle
         # From next point to circle center is the vector (x,y)
         x = R * np.cos(beta)

@@ -13,7 +13,7 @@ import xarray as xr
 from scipy.spatial.transform import Rotation as Rot
 
 import weldx.util as ut
-from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.constants import _DEFAULT_LEN_UNIT
 from weldx.core import TimeSeries
 from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_like
 from weldx.transformations.types import types_coordinates, types_orientation
@@ -23,9 +23,6 @@ if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
 
 __all__ = ("LocalCoordinateSystem",)
-
-
-_DEFAULT_LEN_UNIT = UREG.millimeters
 
 
 class LocalCoordinateSystem(TimeDependent):

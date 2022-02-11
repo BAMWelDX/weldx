@@ -11,7 +11,7 @@ import pandas as pd
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
 import weldx.geometry as geo
-from weldx.constants import Q_
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -49,7 +49,7 @@ def _get_unitless_coordinates(lcs: LocalCoordinateSystem):
         )
     coordinates = lcs.coordinates.data
     if isinstance(coordinates, Q_):
-        coordinates = coordinates.m
+        coordinates = coordinates.to(_DEFAULT_LEN_UNIT).m
     return coordinates.astype("float32")
 
 
@@ -79,7 +79,7 @@ def _get_coordinates_and_orientation(lcs: LocalCoordinateSystem, index: int = 0)
         )
     coordinates = lcs.coordinates.isel(time=index, missing_dims="ignore").data
     if isinstance(coordinates, Q_):
-        coordinates = coordinates.m
+        coordinates = coordinates.to(_DEFAULT_LEN_UNIT).m
     coordinates = coordinates.astype("float32")
 
     orientation = lcs.orientation.isel(time=index, missing_dims="ignore").values.astype(
@@ -353,7 +353,7 @@ class SpatialDataVisualizer:
 
         self._label_pos = data.coordinates.mean(dim=data.additional_dims).data
         if isinstance(self._label_pos, Q_):
-            self._label_pos = self._label_pos.m
+            self._label_pos = self._label_pos.to(_DEFAULT_LEN_UNIT).m
         self._label = None
         if name is not None:
             self._label = k3d.text(
@@ -368,7 +368,7 @@ class SpatialDataVisualizer:
 
         coordinates = data.coordinates.data
         if isinstance(coordinates, Q_):
-            coordinates = coordinates.m
+            coordinates = coordinates.to(_DEFAULT_LEN_UNIT).m
 
         self._points = k3d.points(
             coordinates,
@@ -668,7 +668,7 @@ class CoordinateSystemManagerVisualizerK3D:
     def _get_limits(self):
         limits_spatial = self._get_limits_spatial()
         if isinstance(limits_spatial, Q_):
-            limits_spatial = limits_spatial.m
+            limits_spatial = limits_spatial.to(_DEFAULT_LEN_UNIT).m
         limits_trace = self._get_limits_trace()
         limits = [lims for lims in [limits_spatial, limits_trace] if lims is not None]
         if limits:

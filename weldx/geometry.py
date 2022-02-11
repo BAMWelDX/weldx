@@ -14,12 +14,9 @@ from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.util as ut
-from weldx.constants import Q_
+from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.types import QuantityLike
-
-_DEFAULT_LEN_UNIT = UREG.millimeters
-_DEFAULT_ANG_UNIT = UREG.rad
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
