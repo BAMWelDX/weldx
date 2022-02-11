@@ -27,8 +27,11 @@ changes
 - The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
    When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
 
-- Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
-  now only works if the `Time` instance is on the left-hand side. [:pull:`684`]
+-  Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
+   now only works if the `Time` instance is on the left-hand side. [:pull:`684`]
+
+-  `LocalCoordinateSystem` and `CoordinateSystemManager` now support `pint.Quantity` as coordinates.
+   Types without units are still supported but are deprecated. [:pull:`683`]
 
 - Renamed show_asdf_header of `WeldxFile` to `WeldxFile.header`. [:pull:`694`]
 
@@ -63,6 +66,8 @@ ASDF
 
 deprecations
 ============
+
+-  Coordinates without units for `LocalCoordinateSystem` and `CoordinateSystemManager`
 
 dependencies
 ============
