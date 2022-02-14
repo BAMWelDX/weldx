@@ -17,6 +17,7 @@ import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.core import MathematicalExpression
 from weldx.types import QuantityLike
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -1593,6 +1594,8 @@ class DynamicTraceSegment:
         self._series: SpatialSeries = series
         self._max_s = max_s
         self._length = self._len_expr() if series.is_expression else self._len_disc()
+        if series.is_expression:
+            self._derivative = self._get_derivative_expression()
 
     def _get_derivative(self, i):
         me = self._series.data
@@ -1600,6 +1603,15 @@ class DynamicTraceSegment:
         # todo unit stripped -> how to proceed? how to cast all length units to mm?
         subs = [(k, v[i].data.to_base_units().m) for k, v in me.parameters.items()]
         return exp.subs(subs).diff("s")
+
+    def _get_derivative_expression(self):
+        params = self._series.data.parameters
+        expr = MathematicalExpression(self._series.data.expression.diff("s"))
+        vars = expr.get_variable_names()
+        for k, v in params.items():
+            if k in vars:
+                expr.set_parameter(k, v)
+        return expr
 
     def _get_squared_derivative(self, i):
         return self._get_derivative(i) ** 2
@@ -1616,10 +1628,7 @@ class DynamicTraceSegment:
 
     def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
         coords = self._series.evaluate(s=position * self._max_s).data.transpose()[0]
-        x = [
-            self._get_derivative(i).subs("s", position * self._max_s).evalf()
-            for i in range(3)
-        ]
+        x = self._derivative.evaluate(s=position * self._max_s)
         z_fake = [0, 0, 1]
         y = np.cross(z_fake, x)
         return tf.LocalCoordinateSystem.from_axis_vectors(x=x, y=y, coordinates=coords)

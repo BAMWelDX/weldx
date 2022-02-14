@@ -3,9 +3,9 @@ import sympy
 from weldx import MathematicalExpression
 
 s = sympy.symbols("s")
-exp1 = 1 * s**2 + 0 * s + 0
-exp2 = 0 * s**2 + 1 * s + 0
-exp3 = 0 * s**2 + 0 * s + 1
+exp1 = 1 * s ** 2 + 0 * s + 0
+exp2 = 0 * s ** 2 + 1 * s + 0
+exp3 = 0 * s ** 2 + 0 * s + 1
 
 
 temp = sympy.sqrt(exp1.diff(s) ** 2 + exp2.diff(s) ** 2 + exp3.diff(s) ** 2)
