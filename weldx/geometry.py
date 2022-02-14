@@ -1593,9 +1593,10 @@ class DynamicTraceSegment:
 
         self._series: SpatialSeries = series
         self._max_s = max_s
-        self._length = self._len_expr() if series.is_expression else self._len_disc()
         if series.is_expression:
             self._derivative = self._get_derivative_expression()
+
+        self._length = self._len_expr() if series.is_expression else self._len_disc()
 
     def _get_derivative(self, i):
         me = self._series.data
@@ -1620,6 +1621,21 @@ class DynamicTraceSegment:
         der_sq = [self._get_squared_derivative(i) for i in range(3)]
         expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
         mag = float(sympy.integrate(expr, ("s", 0, self._max_s)).evalf())
+
+        # params_vec = self._derivative.parameters
+        # params = {}
+        # expressions = [self._derivative.expression for _ in range(3)]
+        # for k, v in params_vec.items():
+        #    for i in range(3):
+        #        new_name = f"{k}{i}"
+        #        expressions[i] = expressions[i].subs(k, sympy.symbols(new_name))
+        #        params[new_name] = v[i]
+
+        # expr = sympy.sqrt(
+        #    expressions[0] ** 2 + expressions[1] ** 2 + expressions[2] ** 2
+        # )
+        # expr = sympy.integrate(expr, ("s", 0, self._max_s))
+        # MathematicalExpression(expr).evaluate(**params)
 
         return Q_(mag, Q_(1, "mm").to_base_units().u).to("mm")
 
