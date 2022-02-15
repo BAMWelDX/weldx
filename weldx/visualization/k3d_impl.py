@@ -11,6 +11,7 @@ import pandas as pd
 from ipywidgets import Checkbox, Dropdown, HBox, IntSlider, Layout, Play, VBox, jslink
 
 import weldx.geometry as geo
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -39,6 +40,19 @@ def _get_limits_from_stack(limits):
     return np.vstack([mins, maxs])
 
 
+def _get_unitless_coordinates(lcs: LocalCoordinateSystem):
+    """Get the coordinates of a LocalCoordinateSystem without units."""
+    if isinstance(lcs.coordinates, TimeSeries):
+        raise ValueError(
+            "Can not visualize LCS with expression based coordinates. "
+            "Interpolate values before plotting to solve this issue"
+        )
+    coordinates = lcs.coordinates.data
+    if isinstance(coordinates, Q_):
+        coordinates = coordinates.to(_DEFAULT_LEN_UNIT).m
+    return coordinates.astype("float32")
+
+
 def _get_coordinates_and_orientation(lcs: LocalCoordinateSystem, index: int = 0):
     """Get the coordinates and orientation of a coordinate system.
 
@@ -63,10 +77,10 @@ def _get_coordinates_and_orientation(lcs: LocalCoordinateSystem, index: int = 0)
             "Can not visualize LCS with expression based coordinates. "
             "Interpolate values before plotting to solve this issue"
         )
-
-    coordinates = lcs.coordinates.isel(time=index, missing_dims="ignore").values.astype(
-        "float32"
-    )
+    coordinates = lcs.coordinates.isel(time=index, missing_dims="ignore").data
+    if isinstance(coordinates, Q_):
+        coordinates = coordinates.to(_DEFAULT_LEN_UNIT).m
+    coordinates = coordinates.astype("float32")
 
     orientation = lcs.orientation.isel(time=index, missing_dims="ignore").values.astype(
         "float32"
@@ -165,7 +179,7 @@ class CoordinateSystemVisualizerK3D:
             )
 
         self._trace = k3d.line(
-            np.array(lcs.coordinates.values, dtype="float32"),  # type: ignore
+            _get_unitless_coordinates(lcs),  # type: ignore
             shader="thick",
             width=0.1,  # change with .set_trait("width", value)
             color=color,
@@ -258,10 +272,7 @@ class CoordinateSystemVisualizerK3D:
 
         """
         self._lcs = lcs
-        self._trace.vertices = np.array(
-            lcs.coordinates.values,  # type: ignore[union-attr] # handled by __init__
-            dtype="float32",
-        )
+        self._trace.vertices = _get_unitless_coordinates(lcs)
         self.update_time_index(index)
 
     def update_time_index(self, index: int):
@@ -340,7 +351,9 @@ class SpatialDataVisualizer:
 
         self._reference_system = reference_system
 
-        self._label_pos = data.coordinates.mean(dim=data.additional_dims).values
+        self._label_pos = data.coordinates.mean(dim=data.additional_dims).data
+        if isinstance(self._label_pos, Q_):
+            self._label_pos = self._label_pos.to(_DEFAULT_LEN_UNIT).m
         self._label = None
         if name is not None:
             self._label = k3d.text(
@@ -353,8 +366,12 @@ class SpatialDataVisualizer:
                 name=name if name is None else f"{name} (text)",
             )
 
+        coordinates = data.coordinates.data
+        if isinstance(coordinates, Q_):
+            coordinates = coordinates.to(_DEFAULT_LEN_UNIT).m
+
         self._points = k3d.points(
-            data.coordinates,
+            coordinates,
             point_size=0.05,
             color=color,
             name=name if name is None else f"{name} (points)",
@@ -362,7 +379,7 @@ class SpatialDataVisualizer:
         self._mesh = None
         if data.triangles is not None:
             self._mesh = k3d.mesh(
-                data.coordinates.values.astype(np.float32).reshape(-1, 3),
+                coordinates.astype(np.float32).reshape(-1, 3),
                 triangles,
                 side="double",
                 color=color,
@@ -650,6 +667,8 @@ class CoordinateSystemManagerVisualizerK3D:
 
     def _get_limits(self):
         limits_spatial = self._get_limits_spatial()
+        if isinstance(limits_spatial, Q_):
+            limits_spatial = limits_spatial.to(_DEFAULT_LEN_UNIT).m
         limits_trace = self._get_limits_trace()
         limits = [lims for lims in [limits_spatial, limits_trace] if lims is not None]
         if limits:

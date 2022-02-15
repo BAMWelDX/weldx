@@ -14,12 +14,9 @@ from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.util as ut
-from weldx.constants import Q_
+from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.types import QuantityLike
-
-_DEFAULT_LEN_UNIT = UREG.millimeters
-_DEFAULT_ANG_UNIT = UREG.rad
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
@@ -1439,6 +1436,9 @@ class LinearHorizontalTraceSegment:
         relative_position = np.clip(relative_position, 0, 1)
 
         coordinates = np.array([1, 0, 0]) * relative_position * self._length
+        if isinstance(coordinates, pint.Quantity):
+            coordinates = coordinates.m
+
         return tf.LocalCoordinateSystem(coordinates=coordinates)
 
 
@@ -1805,7 +1805,7 @@ class Trace:
             raster_data = np.hstack([raster_data, data_point])
 
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
-        return np.hstack([raster_data.m, last_point])
+        return np.hstack([raster_data, last_point])
 
     @UREG.check(None, "[length]", None, None, None)
     def plot(
@@ -2162,7 +2162,8 @@ class Geometry:
         profile = self._profile.local_profile(profile_location)
         return self._profile_raster_data_3d(profile, raster_width)
 
-    def _rasterize_trace(self, raster_width: float) -> np.ndarray:
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def _rasterize_trace(self, raster_width: pint.Quantity) -> pint.Quantity:
         """Rasterize the trace.
 
         Parameters
@@ -2176,16 +2177,17 @@ class Geometry:
             Raster data
 
         """
+        trace_length = self._trace.length.m
+
         if not raster_width > 0:
             raise ValueError("'raster_width' must be > 0")
-        raster_width = np.clip(raster_width, None, self._trace.length)
+        raster_width = np.clip(raster_width, None, trace_length)
 
-        num_raster_segments = int(np.round(self._trace.length / raster_width))
-        raster_width_eff = self._trace.length / num_raster_segments
-        locations = np.arange(
-            0, (self._trace.length - raster_width_eff / 2).m, raster_width_eff.m
-        )
-        return Q_(np.hstack([locations, self._trace.length.m]), _DEFAULT_LEN_UNIT)
+        num_raster_segments = int(np.round(trace_length / raster_width))
+        width_eff = trace_length / num_raster_segments
+        locations = np.arange(0, (trace_length - width_eff / 2), width_eff)
+
+        return np.hstack([locations, trace_length])
 
     def _get_transformed_profile_data(self, profile_raster_data, location):
         """Transform a profiles data to a specified location on the trace.
@@ -2256,7 +2258,7 @@ class Geometry:
             Raster data
 
         """
-        locations = self._rasterize_trace(Q_(trace_raster_width, _DEFAULT_LEN_UNIT))
+        locations = self._rasterize_trace(trace_raster_width)
 
         if stack:  # old behavior for 3d point cloud
             profile_data = self._profile_raster_data_3d(
@@ -2304,7 +2306,7 @@ class Geometry:
             Raster data
 
         """
-        locations = self._rasterize_trace(Q_(trace_raster_width, _DEFAULT_LEN_UNIT))
+        locations = self._rasterize_trace(trace_raster_width)
         raster_data = np.empty([3, 0])
         for _, location in enumerate(locations):
             profile_data = self._get_local_profile_data(location, profile_raster_width)
@@ -2336,11 +2338,7 @@ class Geometry:
         """
         return self._trace
 
-    @UREG.wraps(
-        None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
-        strict=True,
-    )
+    @UREG.check(None, "[length]", "[length]", None)
     def rasterize(
         self,
         profile_raster_width: pint.Quantity,
@@ -2364,7 +2362,6 @@ class Geometry:
             Raster data
 
         """
-        profile_raster_width = Q_(profile_raster_width, _DEFAULT_LEN_UNIT)
         if isinstance(self._profile, Profile):
             return self._rasterize_constant_profile(
                 profile_raster_width, trace_raster_width, stack=stack
@@ -2474,9 +2471,11 @@ class Geometry:
         rasterization = self.rasterize(
             profile_raster_width, trace_raster_width, stack=False
         )
+        rasterization = [Q_(r, _DEFAULT_LEN_UNIT) for r in rasterization]
+
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
-    @UREG.wraps(None, (None, None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT), strict=True)
+    @UREG.check(None, None, "[length]", "[length]")
     def to_file(
         self,
         file_name: str,
@@ -2536,7 +2535,7 @@ class SpatialData:
         """Convert and check input values."""
         if not isinstance(self.coordinates, DataArray):
             self.coordinates = ut.xr_3d_vector(
-                data=np.array(self.coordinates),
+                data=self.coordinates,
                 time=time,
                 add_dims=["n"],
             )
@@ -2575,8 +2574,12 @@ class SpatialData:
         return SpatialData(mesh.points, triangles)
 
     @staticmethod
-    def _shape_raster_points(shape_raster_data: np.ndarray) -> list[list[int]]:
+    def _shape_raster_points(
+        shape_raster_data: Union[np.ndarray, pint.Quantity]
+    ) -> list[list[int]]:
         """Extract all points from a shapes raster data."""
+        if isinstance(shape_raster_data, Q_):
+            shape_raster_data = shape_raster_data.m
         return shape_raster_data.reshape(
             (shape_raster_data.shape[0] * shape_raster_data.shape[1], 3)
         ).tolist()
@@ -2696,12 +2699,16 @@ class SpatialData:
             New `SpatialData` instance
 
         """
+        units = None if not isinstance(geometry_raster[0], Q_) else geometry_raster[0].u
         points = []
         triangles = []
         for shape_data in geometry_raster:
             shape_data = shape_data.swapaxes(1, 2)
             triangles += cls._shape_triangles(shape_data, len(points), closed_mesh)
             points += cls._shape_raster_points(shape_data)
+
+        if units:
+            points = Q_(points, units)
 
         return SpatialData(points, triangles)
 
@@ -2716,7 +2723,7 @@ class SpatialData:
         mins = self.coordinates.min(dim=dims)
         maxs = self.coordinates.max(dim=dims)
 
-        return np.vstack([mins, maxs])
+        return np.vstack([mins.data, maxs.data])
 
     def plot(
         self,
@@ -2772,7 +2779,10 @@ class SpatialData:
         if backend == "k3d":
             import k3d
 
-            limits = tuple(self.limits().flatten())
+            limits = self.limits()
+            if isinstance(limits, Q_):
+                limits = limits.m
+            limits = tuple(limits.flatten())
             plot = k3d.plot(grid=limits)
             vs.SpatialDataVisualizer(
                 self, name=None, reference_system=None, color=color, plot=plot

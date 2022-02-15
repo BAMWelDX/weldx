@@ -1,7 +1,7 @@
 import pytest
 
-from weldx import Q_
 from weldx.asdf.util import write_read_buffer
+from weldx.constants import Q_
 from weldx.core import MathematicalExpression
 from weldx.measurement import (
     Error,

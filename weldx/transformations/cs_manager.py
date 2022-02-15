@@ -12,7 +12,6 @@ import pandas as pd
 import xarray as xr
 
 from weldx import util
-from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
@@ -26,11 +25,6 @@ if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
     import networkx as nx
 
-    import weldx  # noqa
-
-
-_DEFAULT_LEN_UNIT = UREG.millimeters
-_DEFAULT_ANG_UNIT = UREG.rad
 
 __all__ = ["CoordinateSystemManager"]
 
@@ -193,7 +187,7 @@ class CoordinateSystemManager:
 
     @property
     def lcs(self) -> list[LocalCoordinateSystem]:
-        """Get a list of all attached `~weldx.transformations.LocalCoordinateSystem` \
+        """Get a list of all attached `LocalCoordinateSystem` \
         instances.
 
         Only the defined systems and not the automatically generated inverse systems
@@ -201,9 +195,8 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[~weldx.transformations.LocalCoordinateSystem] :
-           List of all attached `~weldx.transformations.LocalCoordinateSystem`
-           instances.
+        list[LocalCoordinateSystem] :
+           List of all attached `LocalCoordinateSystem` instances.
 
         """
         return [
@@ -214,14 +207,12 @@ class CoordinateSystemManager:
 
     @property
     def lcs_time_dependent(self) -> list[LocalCoordinateSystem]:
-        """Get a list of all attached time dependent \
-        `~weldx.transformations.LocalCoordinateSystem` instances.
+        """Get a list of all attached time dependent `LocalCoordinateSystem` instances.
 
         Returns
         -------
-        List[~weldx.transformations.LocalCoordinateSystem] :
-            List of all attached time dependent
-            `~weldx.transformations.LocalCoordinateSystem` instances
+        list[LocalCoordinateSystem] :
+            List of all attached time dependent `LocalCoordinateSystem` instances
 
         """
         return [lcs for lcs in self.lcs if lcs.is_time_dependent]
@@ -473,19 +464,17 @@ class CoordinateSystemManager:
             Name of the parent system. This must have been already added.
         lcs
             An instance of
-            `~weldx.transformations.LocalCoordinateSystem` that describes how the new
+            `LocalCoordinateSystem` that describes how the new
             coordinate system is oriented in its parent system.
         lsc_child_in_parent
-            If set to `True`, the passed
-            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            If set to `True`, the passed `LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
         """
         if not isinstance(lcs, LocalCoordinateSystem):
             raise TypeError(
-                "'local_coordinate_system' must be an instance of "
-                + "weldx.transformations.LocalCoordinateSystem"
+                "'local_coordinate_system' must be an instance of LocalCoordinateSystem"
             )
 
         if (
@@ -650,7 +639,7 @@ class CoordinateSystemManager:
         """Create a coordinate system and add it to the coordinate system manager.
 
         This function uses the ``__init__`` method of the
-        `~weldx.transformations.LocalCoordinateSystem` class.
+        `LocalCoordinateSystem` class.
 
         Parameters
         ----------
@@ -672,8 +661,7 @@ class CoordinateSystemManager:
         time_ref :
             Reference time for time dependent coordinate systems
         lsc_child_in_parent :
-            If set to `True`, the passed
-            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            If set to `True`, the passed `LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
@@ -697,8 +685,8 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the coordinate system manager.
 
-        This function uses the `~weldx.transformations.LocalCoordinateSystem.from_euler`
-        method of the `~weldx.transformations.LocalCoordinateSystem` class.
+        This function uses the `LocalCoordinateSystem.from_euler` method of the
+        `LocalCoordinateSystem` class.
 
         Parameters
         ----------
@@ -734,8 +722,7 @@ class CoordinateSystemManager:
         time_ref :
             Reference time for time dependent coordinate systems
         lsc_child_in_parent :
-            If set to `True`, the passed
-            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            If set to `True`, the passed `LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
@@ -762,9 +749,8 @@ class CoordinateSystemManager:
     ):
         """Create a coordinate system and add it to the `CoordinateSystemManager`.
 
-        This function uses the
-        `~weldx.transformations.LocalCoordinateSystem.from_axis_vectors`
-        method of the `~weldx.transformations.LocalCoordinateSystem` class.
+        This function uses the `LocalCoordinateSystem.from_axis_vectors`
+        method of the `LocalCoordinateSystem` class.
 
         Parameters
         ----------
@@ -785,8 +771,7 @@ class CoordinateSystemManager:
         time_ref :
             Optional reference timestamp if ``time`` is a time delta.
         lsc_child_in_parent :
-            If set to `True`, the passed
-            `~weldx.transformations.LocalCoordinateSystem` instance describes
+            If set to `True`, the passed `LocalCoordinateSystem` instance describes
             the new system orientation towards is parent. If `False`, it describes
             how the parent system is positioned in its new child system.
 
@@ -900,7 +885,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[str]:
+        list[str]:
             List of child systems.
 
         """
@@ -928,7 +913,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List :
+        list :
             List of coordinate system names.
 
         """
@@ -940,7 +925,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[str] :
+        list[str] :
             Names of the attached data sets
 
         """
@@ -1084,7 +1069,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        `~weldx.transformations.LocalCoordinateSystem` :
+        `LocalCoordinateSystem` :
             The requested coordinate system.
 
         Notes
@@ -1150,15 +1135,14 @@ class CoordinateSystemManager:
            reference times. Therefore an exception is raised. If your intention is to
            add a reference time to the resulting coordinate system, you should call this
            function without a specified reference time and add it explicitly to the
-           returned `~weldx.transformations.LocalCoordinateSystem`.
+           returned `LocalCoordinateSystem`.
 
 
         **Information regarding the implementation:**
 
         It is important to mention that all coordinate systems that are involved in the
         transformation should be interpolated to a common time line before they are
-        combined using the `~weldx.transformations.LocalCoordinateSystem` 's __add__
-        and __sub__ functions.
+        combined using the `LocalCoordinateSystem` 's __add__ and __sub__ functions.
         If this is not done before, serious interpolation errors for rotations can
         occur. The reason is, that those operators also perform time interpolations
         if the timestamps of 2 systems do not match. When chaining multiple
@@ -1642,7 +1626,7 @@ class CoordinateSystemManager:
         """Get the time union of all or selected local coordinate systems.
 
          If neither the `CoordinateSystemManager` nor its attached
-         `~weldx.transformations.LocalCoordinateSystem` instances possess a reference
+         `LocalCoordinateSystem` instances possess a reference
          time, the returned ``Time`` object would not contain one either.
 
         Parameters
@@ -1896,7 +1880,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[`~weldx.transformations.CoordinateSystemManager`] :
+        list[`CoordinateSystemManager`] :
             A list containing previously merged `CoordinateSystemManager` instances.
 
         """
@@ -1941,7 +1925,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List[str]:
+        list[str]:
             List with subsystem names.
 
         """
@@ -1953,7 +1937,7 @@ class CoordinateSystemManager:
 
         Returns
         -------
-        List :
+        list :
             List containing all the subsystems.
 
         """

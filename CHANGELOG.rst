@@ -16,14 +16,28 @@ added
 -  new tutorial series that introduces the most important WelDX features
    step by step based on a full example file [:pull:`555`]
 
+-  add ``path`` option to `WeldxFile.info` and `WeldxFile.show_asdf_header` [:pull:`555`]
+
 removed
 =======
 
 changes
 =======
 
--  The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
+- The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
    When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
+
+-  Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
+   now only works if the `Time` instance is on the left-hand side. [:pull:`684`]
+
+-  `LocalCoordinateSystem` and `CoordinateSystemManager` now support `pint.Quantity` as coordinates.
+   Types without units are still supported but are deprecated. [:pull:`683`]
+
+- Renamed show_asdf_header of `WeldxFile` to `WeldxFile.header`. [:pull:`694`]
+
+- `WeldxFile.custom_schema` now accepts an optional tuple with the first element being a schema to validate upon read,
+  the second upon writing the data. [:pull:`697`]
+
 
 fixes
 =====
@@ -34,6 +48,8 @@ documentation
 =============
 
 -  update PR link format in the changelog [:pull:`658`]
+
+-  new tutorial that describes how to work with workpiece data from a WelDX file [:pull:`681`]
 
 ASDF
 ====
@@ -50,6 +66,8 @@ ASDF
 
 deprecations
 ============
+
+-  Coordinates without units for `LocalCoordinateSystem` and `CoordinateSystemManager`
 
 dependencies
 ============

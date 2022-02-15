@@ -11,8 +11,9 @@ from pandas import TimedeltaIndex as TDI  # noqa
 from pandas import Timestamp as TS  # noqa
 
 import weldx.transformations as tf
-from weldx import Q_, SpatialData
+from weldx.constants import Q_
 from weldx.core import MathematicalExpression, TimeSeries
+from weldx.geometry import SpatialData
 from weldx.tests._helpers import get_test_name, matrix_is_close
 from weldx.time import Time, types_time_like, types_timestamp_like
 from weldx.transformations import CoordinateSystemManager as CSM  # noqa
@@ -1430,8 +1431,9 @@ def test_get_local_coordinate_system_time_dep(
         ("trl", "r", [[1, 1, 1], [-2, 1, 1], [-3, 2, 1]], [1, 2, 3], [0, 90, 90]),
     ],
 )
+@pytest.mark.parametrize("units", [None, "inch", "mm"])
 def test_get_local_coordinate_system_timeseries(
-    lcs, in_lcs, exp_coords, exp_time, exp_angles
+    lcs, in_lcs, exp_coords, exp_time, exp_angles, units
 ):
     """Test the get_cs method with one lcs having a `TimeSeries` as coordinates.
 
@@ -1449,21 +1451,30 @@ def test_get_local_coordinate_system_timeseries(
         The expected rotation angles around the z-axis
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
+    me_units = f"{units}/s" if units else "1/s"
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], me_units)})
     ts = TimeSeries(me)
     rotation = WXRotation.from_euler("z", [0, 90], degrees=True).as_matrix()
-    translation = [[1, 0, 0], [2, 0, 0]]
+    translation = Q_([[1, 0, 0], [2, 0, 0]], units)
     exp_orient = WXRotation.from_euler("z", exp_angles, degrees=True).as_matrix()
+    coords_1 = [0, 0, 1]
+    coords_2 = [1, 0, 0]
+
+    if units:
+        translation = Q_(translation, units)
+        exp_coords = Q_(exp_coords, units)
+        coords_1 = Q_(coords_1, units)
+        coords_2 = Q_(coords_2, units)
 
     csm = CSM("r")
-    csm.create_cs("rot", "r", rotation, [0, 0, 1], time=Q_([1, 2], "s"))
+    csm.create_cs("rot", "r", rotation, coords_1, time=Q_([1, 2], "s"))
     csm.create_cs("ts", "rot", coordinates=ts)
-    csm.create_cs("s", "ts", coordinates=[1, 0, 0])
+    csm.create_cs("s", "ts", coordinates=coords_2)
     csm.create_cs("trl", "ts", coordinates=translation, time=Q_([2, 3], "s"))
 
     result = csm.get_cs(lcs, in_lcs)
     assert np.allclose(result.orientation, exp_orient)
-    assert np.allclose(result.coordinates, exp_coords)
+    assert np.allclose(result.coordinates.data, exp_coords)
     assert np.allclose(result.time.as_quantity().m, exp_time)
 
 
@@ -1533,7 +1544,8 @@ def test_get_local_coordinate_system_exceptions(
         ("r", "s", False),
     ],
 )
-def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
+@pytest.mark.parametrize("units", [None, "inch", "mm"])
+def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception, units):
     """Test exceptions of get_cs method if 1 lcs has a `TimeSeries` as coordinates.
 
     Parameters
@@ -1544,16 +1556,24 @@ def test_get_cs_exception_timeseries(lcs, in_lcs, exp_exception):
         The target lcs
     exp_exception :
         Set to `True` if the transformation should raise
+    units :
+        The length unit that should be used
 
     """
-    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], "mm/s")})
+    me_units = f"{units}/s" if units else "1/s"
+    me = MathematicalExpression("a*t", {"a": Q_([0, 1, 0], me_units)})
     ts = TimeSeries(me)
     translation = [[1, 0, 0], [2, 0, 0]]
+    coords_1 = [1, 0, 0]
+
+    if units:
+        translation = Q_(translation, units)
+        coords_1 = Q_(coords_1, units)
 
     csm = CSM("r")
     csm.create_cs("trl1", "r", coordinates=translation, time=Q_([1, 2], "s"))
     csm.create_cs("ts", "trl1", coordinates=ts)
-    csm.create_cs("s", "ts", coordinates=[1, 0, 0])
+    csm.create_cs("s", "ts", coordinates=coords_1)
     csm.create_cs("trl2", "ts", coordinates=translation, time=Q_([2, 3], "s"))
     if exp_exception:
         with pytest.raises(Exception):

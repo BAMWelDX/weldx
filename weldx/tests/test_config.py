@@ -4,7 +4,7 @@ from pathlib import Path
 import asdf
 import pytest
 
-from weldx import WeldxFile
+from weldx.asdf.file import WeldxFile
 from weldx.config import QualityStandard, add_quality_standard, enable_quality_standard
 from weldx.constants import META_ATTR
 from weldx.measurement import MeasurementEquipment
