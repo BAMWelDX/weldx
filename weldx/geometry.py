@@ -1588,11 +1588,13 @@ class RadialHorizontalTraceSegment:
 class DynamicTraceSegment:
     """Trace segment that can be defined by a ``SpatialSeries``."""
 
-    def __init__(self, series, max_s=1):
+    def __init__(self, series, max_s=1, limit_orientation_to_xy=False):
         from weldx.core import SpatialSeries
 
         self._series: SpatialSeries = series
         self._max_s = max_s
+        self._limit_orientation = limit_orientation_to_xy
+
         if series.is_expression:
             self._derivative = self._get_derivative_expression()
 
@@ -1647,6 +1649,10 @@ class DynamicTraceSegment:
         x = self._derivative.evaluate(s=position * self._max_s)
         z_fake = [0, 0, 1]
         y = np.cross(z_fake, x)
+        if self._limit_orientation:
+            return tf.LocalCoordinateSystem.from_axis_vectors(
+                y=y, z=z_fake, coordinates=coords
+            )
         return tf.LocalCoordinateSystem.from_axis_vectors(x=x, y=y, coordinates=coords)
 
     def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
