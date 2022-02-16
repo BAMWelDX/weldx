@@ -17,7 +17,7 @@ import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
-from weldx.core import MathematicalExpression
+from weldx.core import MathematicalExpression, SpatialSeries
 from weldx.types import QuantityLike
 
 _DEFAULT_LEN_UNIT = UREG.millimeters
@@ -1588,8 +1588,25 @@ class RadialHorizontalTraceSegment:
 class DynamicTraceSegment:
     """Trace segment that can be defined by a ``SpatialSeries``."""
 
-    def __init__(self, series, max_s=1, limit_orientation_to_xy=False):
-        from weldx.core import SpatialSeries
+    def __init__(
+        self,
+        series: SpatialSeries,
+        max_s: float = 1,
+        limit_orientation_to_xy: bool = False,
+    ):
+        """Initialize a `DynamicTraceSegment`
+
+        Parameters
+        ----------
+        series:
+            A `SpatialSeries` that describes the trajectory of the trace segment.
+        max_s:
+            [only expression based `SpatialSeries`] The maximum value of the passed
+            series `s` parameter. The value defines the segments length by evaluating
+            the expression on the interval [0, `max_s`]
+        limit_orientation_to_xy:
+            If t
+        """
 
         self._series: SpatialSeries = series
         self._max_s = max_s
@@ -1615,6 +1632,14 @@ class DynamicTraceSegment:
             if k in vars:
                 expr.set_parameter(k, v)
         return expr
+
+    def _get_tangent_vec_discrete(self, position):
+        coords_s = self._series.coordinates["s"].data
+        idx_low = np.abs(coords_s - position).argmin()
+        if coords_s[idx_low] > position or idx_low + 1 == len(coords_s):
+            idx_low -= 1
+        vals = self._series.evaluate(s=[coords_s[idx_low], coords_s[idx_low + 1]]).data
+        return (vals[1] - vals[0]).m
 
     def _get_squared_derivative(self, i):
         return self._get_derivative(i) ** 2
@@ -1642,7 +1667,20 @@ class DynamicTraceSegment:
         return Q_(mag, Q_(1, "mm").to_base_units().u).to("mm")
 
     def _len_disc(self):
-        return Q_(10, "mm")
+        diff = self._series.data[1:] - self._series.data[:-1]
+        length = np.sum(np.linalg.norm(diff.m, axis=1))
+        return Q_(length, diff.u)
+
+    def _get_lcs_from_coords_and_tangent(self, coords, tangent):
+        z_fake = [0, 0, 1]
+        y = np.cross(z_fake, tangent)
+        if self._limit_orientation:
+            return tf.LocalCoordinateSystem.from_axis_vectors(
+                y=y, z=z_fake, coordinates=coords
+            )
+        return tf.LocalCoordinateSystem.from_axis_vectors(
+            x=tangent, y=y, coordinates=coords
+        )
 
     def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
         coords = self._series.evaluate(s=position * self._max_s).data.transpose()[0]
@@ -1657,7 +1695,8 @@ class DynamicTraceSegment:
 
     def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
         coords = self._series.evaluate(s=position).data[0]
-        return tf.LocalCoordinateSystem(coordinates=coords)
+        x = self._get_tangent_vec_discrete(position)
+        return self._get_lcs_from_coords_and_tangent(coords, x)
 
     @property
     def length(self) -> float:
