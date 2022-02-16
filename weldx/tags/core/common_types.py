@@ -46,9 +46,14 @@ class Variable:
 class VariableConverter(WeldxConverter):
     """Serialization class for a Variable"""
 
-    name = "core/variable"
-    version = "0.1.0"
+    tags = [
+        "asdf://weldx.bam.de/weldx/tags/core/variable-0.1.*",
+    ]
     types = [Variable]
+
+    def select_tag(self, obj, tags, ctx):
+        """Set highest available weldx tag for deserialization."""
+        return sorted(tags)[-1]
 
     @staticmethod
     def convert_time_dtypes(data: np.ndarray):

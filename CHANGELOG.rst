@@ -64,6 +64,8 @@ ASDF
 
 -  update ``core/time_series`` schema to use ``time/time`` [:pull:`677`]
 
+-  update ``core/variable`` schema to allow single string as data [:pull:`707`]
+
 deprecations
 ============
 

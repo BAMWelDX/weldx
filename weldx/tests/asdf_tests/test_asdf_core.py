@@ -98,15 +98,23 @@ def get_xarray_example_data_array():
 
     """
     data = np.array([[0, 1], [2, 3]])
-    data = np.repeat(data[:, :, np.newaxis], 3, axis=-1)
+    data = np.repeat(data[..., np.newaxis], 3, axis=-1)
+    data = np.repeat(data[..., np.newaxis], 3, axis=-1)
 
     time_labels = ["2020-05-01", "2020-05-03"]
     d1 = np.array([-1, 1])
     d2 = pd.DatetimeIndex(time_labels)
     d3 = pd.timedelta_range("0s", "2s", freq="1s")
-    coords = {"d1": d1, "d2": d2, "d3": d3, "time_labels": (["d2"], time_labels)}
+    d4 = ["x", "y", "z"]
+    coords = {
+        "d1": d1,
+        "d2": d2,
+        "d3": d3,
+        "d4": d4,
+        "time_labels": (["d2"], time_labels),
+    }
 
-    dax = xr.DataArray(data=data, dims=["d1", "d2", "d3"], coords=coords)
+    dax = xr.DataArray(data=data, dims=["d1", "d2", "d3", "d4"], coords=coords)
 
     dax.attrs = {"answer": 42}
 
@@ -115,9 +123,10 @@ def get_xarray_example_data_array():
 
 @pytest.mark.parametrize("copy_arrays", [True, False])
 @pytest.mark.parametrize("lazy_load", [True, False])
-def test_xarray_data_array(copy_arrays, lazy_load):
+@pytest.mark.parametrize("select", [{}, {"d4": "z"}])
+def test_xarray_data_array(copy_arrays, lazy_load, select):
     """Test ASDF read/write of xarray.DataArray."""
-    dax = get_xarray_example_data_array()
+    dax = get_xarray_example_data_array().sel(**select)
     tree = {"dax": dax}
     dax_file = write_read_buffer(
         tree, open_kwargs={"copy_arrays": copy_arrays, "lazy_load": lazy_load}
