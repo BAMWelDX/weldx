@@ -46,8 +46,9 @@ class Variable:
 class VariableConverter(WeldxConverter):
     """Serialization class for a Variable"""
 
-    name = "core/variable"
-    version = "0.1.0"
+    tags = [
+        "asdf://weldx.bam.de/weldx/tags/core/variable-0.1.*",
+    ]
     types = [Variable]
 
     @staticmethod
