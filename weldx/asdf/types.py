@@ -105,10 +105,6 @@ class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
         else:
             return cls.types[0].__qualname__
 
-    def select_tag(self, obj, tags, ctx):
-        """Set the tag for deserialization"""
-        return sorted(tags)[-1]
-
 
 def format_tag(tag_name, version=None, organization="weldx.bam.de", standard="weldx"):
     """

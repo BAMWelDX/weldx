@@ -51,6 +51,10 @@ class VariableConverter(WeldxConverter):
     ]
     types = [Variable]
 
+    def select_tag(self, obj, tags, ctx):
+        """Set highest available weldx tag for deserialization."""
+        return sorted(tags)[-1]
+
     @staticmethod
     def convert_time_dtypes(data: np.ndarray):
         """
