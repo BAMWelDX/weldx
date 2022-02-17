@@ -10,6 +10,7 @@ import xarray as xr
 from pandas import TimedeltaIndex as TDI  # noqa
 from pandas import Timestamp as TS  # noqa
 from pandas import date_range
+from pint import DimensionalityError
 
 import weldx.transformations as tf
 import weldx.util as ut
@@ -21,6 +22,34 @@ from weldx.transformations import LocalCoordinateSystem as LCS  # noqa
 from weldx.transformations import WXRotation
 
 from ._util import check_coordinate_system, check_cs_close, r_mat_y, r_mat_z
+
+# test_init ----------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "orient, coords, time, time_ref, exception",
+    [
+        (None, [1, 2, 3], None, None, None),
+        (None, Q_([1, 2, 3], "m"), None, None, None),
+        (None, np.zeros((2, 3)), Q_([1, 2], "s"), None, None),
+        (None, [[1, 2, 3], [4, 5, 6]], Q_([1, 2], "s"), None, None),
+        (None, Q_([1, 2, 3], "s"), None, None, DimensionalityError),
+    ],
+)
+@pytest.mark.parametrize("data_array_coords", [True, False])
+def test_init(orient, coords, time, time_ref, exception, data_array_coords):
+    """Test the ´__init__´ method."""
+    print(coords)
+    if data_array_coords:
+        coords = ut.xr_3d_vector(coords, time)
+
+    if exception:
+        with pytest.raises(exception):
+            LCS(orient, coords, time, time_ref)
+        return
+
+    LCS(orient, coords, time, time_ref)
+
 
 # test_init_time_formats ---------------------------------------------------------------
 
@@ -216,11 +245,12 @@ def test_init_discrete_time_series_as_coord(data, time, conversion_factor):
     ts_coords = TimeSeries(data, time)
     lcs = LCS(coordinates=ts_coords)
 
-    assert np.allclose(lcs.coordinates, data.m * conversion_factor)
+    assert np.allclose(lcs.coordinates.data, data)
     if len(time) == 1:
         assert lcs.time is None
     else:
         assert np.all(lcs.time.as_quantity() == time)
+    print(lcs.coordinates.data)
 
 
 # test_from_axis_vectors ---------------------------------------------------------------
@@ -637,9 +667,9 @@ def test_interp_time_timeseries_as_coords(
     assert np.all(lcs_interp.time == Time(time, ref_time))
 
     # check coordinates
-    exp_vals = [[s + time_offset + 1, 1, 1] for s in seconds]
+    exp_vals = Q_([[s + time_offset + 1, 1, 1] for s in seconds], "mm")
     assert isinstance(lcs_interp.coordinates, xr.DataArray)
-    assert np.allclose(lcs_interp.coordinates, exp_vals)
+    assert np.allclose(lcs_interp.coordinates.data, exp_vals)
 
     # check orientation
     seconds_offset = np.array(seconds) + time_offset

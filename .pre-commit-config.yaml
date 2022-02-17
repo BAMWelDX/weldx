@@ -10,6 +10,7 @@ ci:
   submodules: false
 exclude: '.*.weldx$|.*.wx$|.*.asdf$'
 repos:
+  # ----- general formatting -----
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.1.0
     hooks:
@@ -18,7 +19,15 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
         exclude: devtools/conda.recipe/meta.yaml  # doesn't play nice with jinja
-  #    - id: no-commit-to-branch  # only makes sense for local pre-commit hooks
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.13
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-black
+          - mdformat-config
+  # ----- Python formatting -----
   - repo: https://github.com/sondrelg/pep585-upgrade
     rev: v1.0.1
     hooks:
@@ -58,6 +67,7 @@ repos:
           )
         args:
           - --convention=numpy
+  # ----- Jupyter Notebooks -----
   - repo: https://github.com/nbQA-dev/nbQA
     rev: 1.2.3
     hooks:
@@ -69,6 +79,7 @@ repos:
       - id: jupyter-notebook-cleanup
         args:
           - --remove-kernel-metadata
+  # ----- spellchecking -----
   - repo: https://github.com/codespell-project/codespell/
     rev: v2.1.0
     hooks:

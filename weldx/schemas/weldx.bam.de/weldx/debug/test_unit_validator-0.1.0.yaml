@@ -41,7 +41,7 @@ properties:
       q1: "m"
 
   simple_prop:
-    description: simple property without any references ref
+    description: simple property without any tag or reference
     type: object
     properties:
       value:
