@@ -12,7 +12,6 @@ import pandas as pd
 import xarray as xr
 
 from weldx import util
-from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
@@ -26,9 +25,6 @@ if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.axes
     import networkx as nx
 
-
-_DEFAULT_LEN_UNIT = UREG.millimeters
-_DEFAULT_ANG_UNIT = UREG.rad
 
 __all__ = ["CoordinateSystemManager"]
 

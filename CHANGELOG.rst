@@ -9,6 +9,8 @@
 added
 =====
 
+-  first draft of the ``multi_pass_weld`` schema for WelDX files [:pull:`667`]
+
 -  add `GenericSeries` as base class supporting arrays and equations [:pull:`618`]
 
 -  add experimental unit support for ``.weldx.interp_like`` accessor [:pull:`518`]
@@ -27,10 +29,16 @@ changes
 - The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
    When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
 
-- Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
-  now only works if the `Time` instance is on the left-hand side. [:pull:`684`]
+-  Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
+   now only works if the `Time` instance is on the left-hand side. [:pull:`684`]
+
+-  `LocalCoordinateSystem` and `CoordinateSystemManager` now support `pint.Quantity` as coordinates.
+   Types without units are still supported but are deprecated. [:pull:`683`]
 
 - Renamed show_asdf_header of `WeldxFile` to `WeldxFile.header`. [:pull:`694`]
+
+- `WeldxFile.custom_schema` now accepts an optional tuple with the first element being a schema to validate upon read,
+  the second upon writing the data. [:pull:`697`]
 
 
 fixes
@@ -58,8 +66,12 @@ ASDF
 
 -  update ``core/time_series`` schema to use ``time/time`` [:pull:`677`]
 
+-  update ``core/variable`` schema to allow single string as data [:pull:`707`]
+
 deprecations
 ============
+
+-  Coordinates without units for `LocalCoordinateSystem` and `CoordinateSystemManager`
 
 dependencies
 ============

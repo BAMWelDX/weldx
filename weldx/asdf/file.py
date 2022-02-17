@@ -26,7 +26,12 @@ from weldx.asdf.util import (
     get_yaml_header,
     view_tree,
 )
-from weldx.types import SupportsFileReadWrite, types_file_like, types_path_and_file_like
+from weldx.types import (
+    SupportsFileReadWrite,
+    types_file_like,
+    types_path_and_file_like,
+    types_path_like,
+)
 from weldx.util import (
     deprecated,
     inherit_docstrings,
@@ -113,8 +118,21 @@ class WeldxFile(_ProtectedViewDict):
         If True, the changes to file will be written upon closing this. This is only
         relevant, if the file has been opened in write mode.
     custom_schema :
-        A path-like object to a custom schema which validates the tree. All schemas
-        provided by weldx can be given by name as well.
+        Either a path-like object to a custom schema which validates the tree
+        or a tuple of these objects. This tuple is allowed of lengths two and the first
+        element will be used to validate the file contents upon reading, the second
+        upon writing. For example:
+
+            (None, "A")
+
+        will not run validation upon reading, but for writing will use "A". Likewise
+
+            ("A", "B")
+
+        will use schema "A" to validate after reading, and "B" for writing again.
+
+        Note that all schemas provided by weldx can be given by name as well.
+
     software_history_entry :
         An optional dictionary which will be used to add history entries upon
         modification of the file. It has to provide the following keys:
@@ -191,15 +209,16 @@ class WeldxFile(_ProtectedViewDict):
 
     def __init__(
         self,
-        filename_or_file_like: Optional[
-            Union[str, pathlib.Path, types_file_like]
-        ] = None,
+        filename_or_file_like: Optional[Union[types_path_like, types_file_like]] = None,
         mode: str = "r",
         asdffile_kwargs: Mapping = None,
         write_kwargs: Mapping = None,
         tree: Mapping = None,
         sync: bool = True,
-        custom_schema: Union[str, pathlib.Path] = None,
+        custom_schema: Optional[
+            types_path_like,
+            tuple[None, types_path_like],
+        ] = None,
         software_history_entry: Mapping = None,
         compression: str = DEFAULT_ARRAY_COMPRESSION,
         copy_arrays: bool = DEFAULT_ARRAY_COPYING,
@@ -218,16 +237,9 @@ class WeldxFile(_ProtectedViewDict):
         self._write_kwargs = write_kwargs
         self._asdffile_kwargs = asdffile_kwargs
 
-        if custom_schema is not None:
-            _custom_schema_path = pathlib.Path(custom_schema)
-            if not _custom_schema_path.exists():
-                try:
-                    custom_schema = get_schema_path(custom_schema)
-                except ValueError:
-                    raise ValueError(
-                        f"provided custom_schema {custom_schema} " "does not exist."
-                    )
-            asdffile_kwargs["custom_schema"] = custom_schema
+        if "custom_schema" in asdffile_kwargs:
+            custom_schema = asdffile_kwargs.pop("custom_schema", None)
+        self._handle_custom_schema(custom_schema)
 
         if mode not in ("r", "rw"):
             raise ValueError(
@@ -247,7 +259,7 @@ class WeldxFile(_ProtectedViewDict):
             new_file_created = True
             self._in_memory = True
             self._close = False  # we want buffers to be usable later on.
-        elif isinstance(filename_or_file_like, (str, pathlib.Path)):
+        elif isinstance(filename_or_file_like, types_path_like.__args__):
             filename_or_file_like, new_file_created = self._handle_path(
                 filename_or_file_like, mode
             )
@@ -283,6 +295,8 @@ class WeldxFile(_ProtectedViewDict):
                 message="asdf.extensions plugin from package weldx.*",
             )  # we turn asdf warnings about loading the weldx extension into an error.
             if tree or new_file_created:
+                if self._schema_on_write:
+                    asdffile_kwargs["custom_schema"] = self._schema_on_write
                 asdf_file = self._write_tree(
                     filename_or_file_like,
                     tree,
@@ -293,6 +307,8 @@ class WeldxFile(_ProtectedViewDict):
                 if isinstance(filename_or_file_like, SupportsFileReadWrite):
                     filename_or_file_like.seek(0)
             else:
+                if self._schema_on_read:
+                    asdffile_kwargs["custom_schema"] = self._schema_on_read
                 asdf_file = open_asdf(
                     filename_or_file_like,
                     mode=self.mode,
@@ -302,6 +318,32 @@ class WeldxFile(_ProtectedViewDict):
 
         # initialize protected key interface.
         super().__init__(protected_keys=_PROTECTED_KEYS, data=self._asdf_handle.tree)
+
+    def _handle_custom_schema(self, custom_schema):
+        self._schema_on_read = self._schema_on_write = None
+
+        def resolve_schema(schema):
+            if schema is None:
+                return
+
+            _custom_schema_path = pathlib.Path(schema)
+            if not _custom_schema_path.exists():
+                try:
+                    schema = get_schema_path(schema)
+                except ValueError:
+                    raise ValueError(
+                        f"provided custom_schema '{schema}' " "does not exist."
+                    )
+            return schema
+
+        if isinstance(custom_schema, (list, tuple)):
+            if len(custom_schema) == 2:
+                self._schema_on_read = resolve_schema(custom_schema[0])
+                self._schema_on_write = resolve_schema(custom_schema[1])
+            else:
+                raise ValueError("custom_schema should be sequence of length two.")
+        elif isinstance(custom_schema, types_path_like.__args__):
+            self._schema_on_read = self._schema_on_write = resolve_schema(custom_schema)
 
     @contextmanager
     def _config_context(self, **kwargs):
@@ -330,6 +372,8 @@ class WeldxFile(_ProtectedViewDict):
             asdf_file = asdf.AsdfFile(tree=tree, **asdffile_kwargs)
             with self._config_context():
                 asdf_file.write_to(filename_or_path_like, **write_kwargs)
+            # Now set the file handle to the newly created AsdfFile instance.
+            # That way the handle will be closed by the asdf library later on.
             generic_file = generic_io.get_file(filename_or_path_like, mode="rw")
             asdf_file._fd = generic_file
         else:
@@ -683,9 +727,12 @@ class WeldxFile(_ProtectedViewDict):
         return self._asdf_handle["asdf_library"].copy()
 
     @property
-    def custom_schema(self) -> Optional[str]:
+    def custom_schema(self) -> Optional[str, tuple[Optional[str]]]:
         """Return schema used to validate the structure and types of the tree."""
-        return self._asdffile_kwargs.get("custom_schema", None)
+        if self._schema_on_read == self._schema_on_write:
+            return self._schema_on_read
+
+        return self._schema_on_read, self._schema_on_write
 
     @property
     # TODO: should we actually expose this? It allows advanced operations for adults.
