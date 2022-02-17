@@ -9,7 +9,7 @@
 added
 =====
 
--  first draft of the ``multi_pass_weld`` schema for WelDX files
+-  first draft of the ``multi_pass_weld`` schema for WelDX files [:pull:`667`]
 
 -  add `GenericSeries` as base class supporting arrays and equations [:pull:`618`]
 
