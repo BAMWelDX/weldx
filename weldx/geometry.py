@@ -1685,13 +1685,7 @@ class DynamicTraceSegment:
     def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
         coords = self._series.evaluate(s=position * self._max_s).data.transpose()[0]
         x = self._derivative.evaluate(s=position * self._max_s)
-        z_fake = [0, 0, 1]
-        y = np.cross(z_fake, x)
-        if self._limit_orientation:
-            return tf.LocalCoordinateSystem.from_axis_vectors(
-                y=y, z=z_fake, coordinates=coords
-            )
-        return tf.LocalCoordinateSystem.from_axis_vectors(x=x, y=y, coordinates=coords)
+        return self._get_lcs_from_coords_and_tangent(coords, x)
 
     def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
         coords = self._series.evaluate(s=position).data[0]
