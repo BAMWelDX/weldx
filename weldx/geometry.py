@@ -1592,7 +1592,7 @@ class DynamicTraceSegment:
         max_s: float = 1,
         limit_orientation_to_xy: bool = False,
     ):
-        """Initialize a `DynamicTraceSegment`
+        """Initialize a `DynamicTraceSegment`.
 
         Parameters
         ----------
@@ -1605,7 +1605,6 @@ class DynamicTraceSegment:
         limit_orientation_to_xy:
             If t
         """
-
         self._series: SpatialSeries = series
         self._max_s = max_s
         self._limit_orientation = limit_orientation_to_xy
@@ -1670,7 +1669,7 @@ class DynamicTraceSegment:
         return Q_(mag, Q_(1, "mm").to_base_units().u).to("mm")
 
     def _len_disc(self) -> pint.Quantity:
-        """Get the length of a segment based on discrete values"""
+        """Get the length of a segment based on discrete values."""
         diff = self._series.data[1:] - self._series.data[:-1]
         length = np.sum(np.linalg.norm(diff.m, axis=1))
         return Q_(length, diff.u)
