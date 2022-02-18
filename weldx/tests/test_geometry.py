@@ -2096,7 +2096,8 @@ def check_trace_segment_length(segment, tolerance=1e-9):
 
     """
     lcs = segment.local_coordinate_system(1)
-    length_numeric_prev = np.linalg.norm(lcs.coordinates)
+
+    length_numeric_prev = np.linalg.norm(lcs.coordinates.data.m)
 
     # calculate numerical length by linearization
     num_segments = 2.0
@@ -2111,7 +2112,9 @@ def check_trace_segment_length(segment, tolerance=1e-9):
         cs_0 = segment.local_coordinate_system(0)
         for rel_pos in np.arange(increment, 1.0 + increment / 2, increment):
             cs_1 = segment.local_coordinate_system(rel_pos)
-            length_numeric += np.linalg.norm(cs_1.coordinates - cs_0.coordinates)
+            length_numeric += np.linalg.norm(
+                cs_1.coordinates.data.m - cs_0.coordinates.data.m
+            )
             cs_0 = copy.deepcopy(cs_1)
 
         relative_change = length_numeric / length_numeric_prev
@@ -2150,7 +2153,9 @@ def check_trace_segment_orientation(segment):
     for rel_pos in np.arange(0.1, 1.01, 0.1):
         lcs = segment.local_coordinate_system(rel_pos)
         lcs_d = segment.local_coordinate_system(rel_pos - delta)
-        trace_direction_approx = tf.normalize(lcs.coordinates - lcs_d.coordinates)
+        trace_direction_approx = tf.normalize(
+            lcs.coordinates.data.m - lcs_d.coordinates.data.m
+        )
 
         # Check if the x-axis is aligned with the approximate trace direction
         assert vector_is_close(lcs.orientation[:, 0], trace_direction_approx, 1e-6)
@@ -2173,7 +2178,10 @@ def default_trace_segment_tests(segment, tolerance_length=1e-9):
     assert isinstance(lcs, tf.LocalCoordinateSystem)
 
     # check that coordinates for weight 0 are at [0, 0, 0]
-    assert vector_is_close(lcs.coordinates, [0, 0, 0])
+    coords = lcs.coordinates.data
+    if isinstance(coords, Q_):
+        coords = coords.m
+    assert vector_is_close(coords, [0, 0, 0])
 
     # length and orientation tests
     check_trace_segment_length(segment, tolerance_length)
@@ -2235,8 +2243,8 @@ def test_radial_horizontal_trace_segment():
         lcs_cw = segment_cw.local_coordinate_system(weight)
         lcs_ccw = segment_ccw.local_coordinate_system(weight)
 
-        assert vector_is_close(lcs_cw.coordinates, [x_exp.m, -y_exp.m, 0])
-        assert vector_is_close(lcs_ccw.coordinates, [x_exp.m, y_exp.m, 0])
+        assert vector_is_close(lcs_cw.coordinates.data.m, [x_exp.m, -y_exp.m, 0])
+        assert vector_is_close(lcs_ccw.coordinates.data.m, [x_exp.m, y_exp.m, 0])
 
     # invalid inputs
     with pytest.raises(ValueError):

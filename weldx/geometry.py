@@ -1437,9 +1437,7 @@ class LinearHorizontalTraceSegment:
         """
         relative_position = np.clip(relative_position, 0, 1)
 
-        coordinates = np.array([1, 0, 0]) * relative_position * self._length
-        if isinstance(coordinates, pint.Quantity):
-            coordinates = coordinates.m
+        coordinates = np.array([1, 0, 0]) * relative_position * self.length
 
         return tf.LocalCoordinateSystem(coordinates=coordinates)
 
