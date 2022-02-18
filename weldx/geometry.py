@@ -1381,7 +1381,7 @@ class Profile:
 # Trace segment classes -------------------------------------------------------
 
 
-class RadialHorizontalTraceSegment:
+class RadialHorizontalTraceSegmentOld:
     """Trace segment describing an arc with constant z-component."""
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_ANG_UNIT, None), strict=True)
@@ -1558,7 +1558,15 @@ class DynamicTraceSegment:
         me = self._series.data
         exp = me.expression
         # todo unit stripped -> how to proceed? how to cast all length units to mm?
-        subs = [(k, v[i].data.to_base_units().m) for k, v in me.parameters.items()]
+        def _get_component(v, i):
+            if isinstance(v, Q_):
+                v = v.to_base_units().m
+            if v.size == 3:
+                return v[i]
+            return float(v)
+
+        subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
+        print(subs)
         return exp.subs(subs).diff("s")
 
     def _get_component_derivative_squared(self, i):
@@ -1599,7 +1607,7 @@ class DynamicTraceSegment:
         return Q_(length, diff.u)
 
     def _get_lcs_from_coords_and_tangent(
-        self, coords: pint.Quantity, tangent: pint.Quantity
+        self, coords: pint.Quantity, tangent: np.ndarray
     ) -> tf.LocalCoordinateSystem:
         """Create a `LocalCoordinateSystem` from coordinates and tangent vector."""
         z_fake = [0, 0, 1]
@@ -1615,7 +1623,7 @@ class DynamicTraceSegment:
     def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
         """Get a `LocalCoordinateSystem` at the passed rel. position (expression)."""
         coords = self._series.evaluate(s=position * self._max_s).data.transpose()[0]
-        x = self._derivative.evaluate(s=position * self._max_s)
+        x = self._derivative.evaluate(s=position * self._max_s).data.m
         return self._get_lcs_from_coords_and_tangent(coords, x)
 
     def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
@@ -1678,6 +1686,83 @@ class LinearHorizontalTraceSegment(DynamicTraceSegment):
         )
         series_disc = SpatialSeries(data)
         super().__init__(series_disc)
+
+
+class RadialHorizontalTraceSegment(DynamicTraceSegment):
+    """Trace segment describing an arc with constant z-component."""
+
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_ANG_UNIT, None), strict=True)
+    def __init__(
+        self, radius: pint.Quantity, angle: pint.Quantity, clockwise: bool = False
+    ):
+        """Construct radial horizontal trace segment.
+
+        Parameters
+        ----------
+        radius :
+            Radius of the arc
+        angle :
+            Angle of the arc
+        clockwise :
+            If True, the rotation is clockwise. Otherwise it is counter-clockwise.
+
+        Returns
+        -------
+        RadialHorizontalTraceSegment
+
+        """
+        if radius <= 0:
+            raise ValueError("'radius' must have a positive value.")
+        if angle <= 0:
+            raise ValueError("'angle' must have a positive value.")
+        self._radius = float(radius)
+        self._angle = float(angle)
+
+        if clockwise:
+            self._sign_winding = -1
+        else:
+            self._sign_winding = 1
+
+        # todo change sign sign back to + and correct winding signs
+        expr = "(x*sin(s)-w*y*(cos(s)-1))*r "
+        params = dict(
+            x=DataArray(
+                Q_([1, 0, 0], "mm"), dims=["c"], coords=dict(c=["x", "y", "z"])
+            ),
+            y=DataArray(
+                Q_([0, 1, 0], "mm"), dims=["c"], coords=dict(c=["x", "y", "z"])
+            ),
+            r=self._radius,
+            w=self._sign_winding,
+        )
+        sps = SpatialSeries(expr, parameters=params)
+        super().__init__(sps, max_s=self._angle)
+
+    def __repr__(self):
+        """Output representation of a RadialHorizontalTraceSegment."""
+        return (
+            f"RadialHorizontalTraceSegment('radius': {self._radius!r}, "
+            f"'angle': {self._angle!r}, "
+            f"'length': {self._length!r}, "
+            f"'sign_winding': {self._sign_winding!r})"
+        )
+
+    @property
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def angle(self) -> pint.Quantity:
+        """Get the angle of the segment."""
+        return self._angle
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def radius(self) -> pint.Quantity:
+        """Get the radius of the segment."""
+        return self._radius
+
+    @property
+    def is_clockwise(self) -> bool:
+        """Get True, if the segments winding is clockwise, False otherwise."""
+        return self._sign_winding < 0
 
 
 # Trace class -----------------------------------------------------------------
