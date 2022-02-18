@@ -1381,67 +1381,6 @@ class Profile:
 # Trace segment classes -------------------------------------------------------
 
 
-class LinearHorizontalTraceSegment:
-    """Trace segment with a linear path and constant z-component."""
-
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def __init__(self, length: pint.Quantity):
-        """Construct linear horizontal trace segment.
-
-        Parameters
-        ----------
-        length :
-            Length of the segment
-
-        Returns
-        -------
-        LinearHorizontalTraceSegment
-
-        """
-        if length <= 0:
-            raise ValueError("'length' must have a positive value.")
-        self._length = float(length)
-
-    def __repr__(self):
-        """Output representation of a LinearHorizontalTraceSegment."""
-        return f"LinearHorizontalTraceSegment('length': {self.length!r})"
-
-    @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def length(self):
-        """Get the length of the segment.
-
-        Returns
-        -------
-        pint.Quantity
-            Length of the segment
-
-        """
-        return self._length
-
-    def local_coordinate_system(
-        self, relative_position: float
-    ) -> tf.LocalCoordinateSystem:
-        """Calculate a local coordinate system along the trace segment.
-
-        Parameters
-        ----------
-        relative_position :
-            Relative position on the trace [0 .. 1]
-
-        Returns
-        -------
-        weldx.transformations.LocalCoordinateSystem
-            Local coordinate system
-
-        """
-        relative_position = np.clip(relative_position, 0, 1)
-
-        coordinates = np.array([1, 0, 0]) * relative_position * self.length
-
-        return tf.LocalCoordinateSystem(coordinates=coordinates)
-
-
 class RadialHorizontalTraceSegment:
     """Trace segment describing an arc with constant z-component."""
 
@@ -1651,7 +1590,7 @@ class DynamicTraceSegment:
         expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
         mag = float(sympy.integrate(expr, ("s", 0, self._max_s)).evalf())
 
-        return Q_(mag, Q_(1, "mm").to_base_units().u).to("mm")
+        return Q_(mag, Q_(1, "mm").to_base_units().u).to(_DEFAULT_LEN_UNIT)
 
     def _len_disc(self) -> pint.Quantity:
         """Get the length of a segment based on discrete values."""
@@ -1708,6 +1647,37 @@ class DynamicTraceSegment:
         if self._series.is_expression:
             return self._lcs_expr(position)
         return self._lcs_disc(position)
+
+
+class LinearHorizontalTraceSegment(DynamicTraceSegment):
+    """Trace segment with a linear path and constant z-component."""
+
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def __init__(self, length: pint.Quantity):
+        """Construct linear horizontal trace segment.
+
+        Parameters
+        ----------
+        length :
+            Length of the segment
+
+        Returns
+        -------
+        LinearHorizontalTraceSegment
+
+        """
+        if length <= 0:
+            raise ValueError("'length' must have a positive value.")
+        data = DataArray(
+            Q_([[0, 0, 0], [length, 0, 0]], _DEFAULT_LEN_UNIT),
+            dims=["s", "c"],
+            coords=dict(
+                c=["x", "y", "z"],
+                s=DataArray(Q_([0, 1], ""), dims=["s"]).pint.dequantify(),
+            ),
+        )
+        series_disc = SpatialSeries(data)
+        super().__init__(series_disc)
 
 
 # Trace class -----------------------------------------------------------------
