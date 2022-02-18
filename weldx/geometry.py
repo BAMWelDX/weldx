@@ -1636,7 +1636,7 @@ class DynamicTraceSegment:
                 expr.set_parameter(k, v)
         return expr
 
-    def _get_tangent_vec_discrete(self, position: float) -> np.array():
+    def _get_tangent_vec_discrete(self, position: float) -> np.ndarray:
         """Get the segments tangent vector at the given position (discrete case)."""
         coords_s = self._series.coordinates["s"].data
         idx_low = np.abs(coords_s - position).argmin()
