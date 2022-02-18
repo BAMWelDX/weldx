@@ -1615,14 +1615,20 @@ class DynamicTraceSegment:
 
         self._length = self._len_expr() if series.is_expression else self._len_disc()
 
-    def _get_derivative(self, i):
+    def _get_component_derivative(self, i: int):
+        """Get the derivative of an expression for the i-th vector component."""
         me = self._series.data
         exp = me.expression
         # todo unit stripped -> how to proceed? how to cast all length units to mm?
         subs = [(k, v[i].data.to_base_units().m) for k, v in me.parameters.items()]
         return exp.subs(subs).diff("s")
 
-    def _get_derivative_expression(self):
+    def _get_component_derivative_squared(self, i):
+        """Get the squared derivative of an expression for the i-th vector component."""
+        return self._get_component_derivative(i) ** 2
+
+    def _get_derivative_expression(self) -> MathematicalExpression:
+        """Get the derivative of an expression as 'MathematicalExpression'."""
         params = self._series.data.parameters
         expr = MathematicalExpression(self._series.data.expression.diff("s"))
         vars = expr.get_variable_names()
@@ -1631,7 +1637,8 @@ class DynamicTraceSegment:
                 expr.set_parameter(k, v)
         return expr
 
-    def _get_tangent_vec_discrete(self, position):
+    def _get_tangent_vec_discrete(self, position: float) -> np.array():
+        """Get the segments tangent vector at the given position (discrete case)."""
         coords_s = self._series.coordinates["s"].data
         idx_low = np.abs(coords_s - position).argmin()
         if coords_s[idx_low] > position or idx_low + 1 == len(coords_s):
@@ -1639,11 +1646,9 @@ class DynamicTraceSegment:
         vals = self._series.evaluate(s=[coords_s[idx_low], coords_s[idx_low + 1]]).data
         return (vals[1] - vals[0]).m
 
-    def _get_squared_derivative(self, i):
-        return self._get_derivative(i) ** 2
-
-    def _len_expr(self):
-        der_sq = [self._get_squared_derivative(i) for i in range(3)]
+    def _len_expr(self) -> pint.Quantity:
+        """Get the length of an expression based segment."""
+        der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
         expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
         mag = float(sympy.integrate(expr, ("s", 0, self._max_s)).evalf())
 
@@ -1664,12 +1669,16 @@ class DynamicTraceSegment:
 
         return Q_(mag, Q_(1, "mm").to_base_units().u).to("mm")
 
-    def _len_disc(self):
+    def _len_disc(self) -> pint.Quantity:
+        """Get the length of a segment based on discrete values"""
         diff = self._series.data[1:] - self._series.data[:-1]
         length = np.sum(np.linalg.norm(diff.m, axis=1))
         return Q_(length, diff.u)
 
-    def _get_lcs_from_coords_and_tangent(self, coords, tangent):
+    def _get_lcs_from_coords_and_tangent(
+        self, coords: pint.Quantity, tangent: pint.Quantity
+    ) -> tf.LocalCoordinateSystem:
+        """Create a `LocalCoordinateSystem` from coordinates and tangent vector."""
         z_fake = [0, 0, 1]
         y = np.cross(z_fake, tangent)
         if self._limit_orientation:
@@ -1681,22 +1690,37 @@ class DynamicTraceSegment:
         )
 
     def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
+        """Get a `LocalCoordinateSystem` at the passed rel. position (expression)."""
         coords = self._series.evaluate(s=position * self._max_s).data.transpose()[0]
         x = self._derivative.evaluate(s=position * self._max_s)
         return self._get_lcs_from_coords_and_tangent(coords, x)
 
     def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
+        """Get a `LocalCoordinateSystem` at the passed rel. position (discrete)."""
         coords = self._series.evaluate(s=position).data[0]
         x = self._get_tangent_vec_discrete(position)
         return self._get_lcs_from_coords_and_tangent(coords, x)
 
     @property
-    def length(self) -> float:
+    def length(self) -> pint.Quantity:
         """Get the length of the segment."""
         return self._length
 
     def local_coordinate_system(self, position: float) -> tf.LocalCoordinateSystem:
-        """Calculate a local coordinate system at a position of the trace segment."""
+        """Calculate a `LocalCoordinateSystem` at a position of the trace segment.
+
+        Parameters
+        ----------
+        position:
+            The relative position on the segment (interval [0, 1]). 0 is the start of
+            the segment and 1 its end
+
+        Returns
+        -------
+        LocalCoordinateSystem:
+            The coordinate system and the specified position.
+
+        """
         if self._series.is_expression:
             return self._lcs_expr(position)
         return self._lcs_disc(position)
