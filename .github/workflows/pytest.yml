@@ -44,6 +44,7 @@ jobs:
       - name: pip installs
         run: |
           pip install wheel
+          pip install --pre "bottleneck==1.3.3rc13"
           pip install -e .[test]
 
       - name: run pytest
