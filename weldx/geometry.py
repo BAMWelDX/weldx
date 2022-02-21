@@ -1416,7 +1416,7 @@ class DynamicTraceSegment:
         """Get the derivative of an expression for the i-th vector component."""
         me = self._series.data
         exp = me.expression
-        # todo unit stripped -> how to proceed? how to cast all length units to mm?
+
         def _get_component(v, i):
             if isinstance(v, Q_):
                 v = v.to_base_units().m
@@ -1425,7 +1425,6 @@ class DynamicTraceSegment:
             return float(v)
 
         subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
-        print(subs)
         return exp.subs(subs).diff("s")
 
     def _get_component_derivative_squared(self, i):
