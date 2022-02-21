@@ -1586,8 +1586,8 @@ class SpatialSeries(GenericSeries):
             parameters = self._process_parameters(parameters)
         super().__init__(obj, dims, coords, units, interpolation, parameters)
 
+    @staticmethod
     def _process_quantity(
-        self,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
         dims: Union[list[str], dict[str, str]],
         coords: dict[str, pint.Quantity],
@@ -1608,7 +1608,8 @@ class SpatialSeries(GenericSeries):
 
         return xr.DataArray(obj, dims=dims, coords=coords)
 
-    def _process_parameters(self, params):
+    @staticmethod
+    def _process_parameters(params):
         """Turn quantity parameters into the correctly formatted data arrays."""
         for k, v in params.items():
             if isinstance(v, Q_) and v.size == 3:
