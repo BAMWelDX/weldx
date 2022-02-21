@@ -1467,7 +1467,7 @@ class DynamicTraceSegment:
     def _get_lcs_from_coords_and_tangent(
         self, coords: pint.Quantity, tangent: np.ndarray
     ) -> tf.LocalCoordinateSystem:
-        """Create a `LocalCoordinateSystem` from coordinates and tangent vector."""
+        """Create a ``LocalCoordinateSystem`` from coordinates and tangent vector."""
         z_fake = [0, 0, 1]
         y = np.cross(z_fake, tangent)
         if self._limit_orientation:
@@ -1479,13 +1479,13 @@ class DynamicTraceSegment:
         )
 
     def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
-        """Get a `LocalCoordinateSystem` at the passed rel. position (expression)."""
+        """Get a ``LocalCoordinateSystem`` at the passed rel. position (expression)."""
         coords = self._series.evaluate(s=position * self._max_s).data.transpose()[0]
         x = self._derivative.evaluate(s=position * self._max_s).data.m
         return self._get_lcs_from_coords_and_tangent(coords, x)
 
     def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
-        """Get a `LocalCoordinateSystem` at the passed rel. position (discrete)."""
+        """Get a ``LocalCoordinateSystem`` at the passed rel. position (discrete)."""
         coords = self._series.evaluate(s=position).data[0]
         x = self._get_tangent_vec_discrete(position)
         return self._get_lcs_from_coords_and_tangent(coords, x)
