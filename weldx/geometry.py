@@ -1435,9 +1435,9 @@ class DynamicTraceSegment:
         """Get the derivative of an expression as 'MathematicalExpression'."""
         params = self._series.data.parameters
         expr = MathematicalExpression(self._series.data.expression.diff("s"))
-        vars = expr.get_variable_names()
+        var_names = expr.get_variable_names()
         for k, v in params.items():
-            if k in vars:
+            if k in var_names:
                 expr.set_parameter(k, v)
         return expr
 
