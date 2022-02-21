@@ -1253,8 +1253,6 @@ class GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(coords) == self._obj.num_variables:
             eval_args = {v.symbol: v.data_array for v in coords}
-            # for k, v in eval_args.items():
-            #    v.assign_coords(dict(k=v))
             data = self._obj.evaluate(**eval_args)
 
             # TODO: Discuss - This might be done before by assigning coords to the
@@ -1564,15 +1562,9 @@ class SpatialSeries(GenericSeries):
     _required_variables: list[str] = ["s"]
     """Required variable names"""
 
-    # _evaluation_preprocessor: dict[str, Callable] = {}
-    # """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
-
     _required_dimensions: list[str] = ["s", "c"]
     """Required dimensions"""
     _required_dimension_units: dict[str, pint.Unit] = {"s": ""}
     """Required units of a dimension"""
     _required_dimension_coordinates: dict[str, list] = {"c": ["x", "y", "z"]}
     """Required coordinates of a dimension."""
-
-    # _required_unit_dimensionality: pint.Unit = None
-    # """Required unit dimensionality of the evaluated expression/data"""
