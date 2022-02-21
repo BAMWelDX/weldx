@@ -4,7 +4,7 @@ from pathlib import Path
 tutorials_dir = Path(__file__).parent.absolute()
 
 
-def download_tutorial_input_file():
+def download_tutorial_input_file(print_status=True):
     from urllib.request import urlretrieve
 
     url = (
@@ -27,11 +27,13 @@ def download_tutorial_input_file():
     if dest.exists():
         hash_local = hash_path(dest)
         if hash_local == sha256sum:
-            print(f"File {dest} already downloaded.")
+            if print_status:
+                print(f"File {dest} already downloaded.")
             return
 
     # does not exist or hash mismatched, so download it.
-    print("trying to download: {url}")
+    if print_status:
+        print("trying to download: {url}")
     out_file, _ = urlretrieve(url, dest)  # skipcq: BAN-B310
     sha256sum_actual = hash_path(out_file)
     if sha256sum_actual != sha256sum:
@@ -39,5 +41,5 @@ def download_tutorial_input_file():
             f"hash mismatch:\n actual = \t{sha256sum_actual}\n"
             f"desired = \t{sha256sum}"
         )
-
-    print("download successful.")
+    if print_status:
+        print("download successful.")

@@ -17,6 +17,7 @@ examples:
           name: coordinates
           dimensions: [c]
           dtype: <f8
+          units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
           data: !core/ndarray-1.0.0
             data: [0.0, 0.0, 1.0]
             datatype: float64
@@ -40,6 +41,7 @@ examples:
           name: coordinates
           dimensions: [time, c]
           dtype: <f8
+          units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
           data: !core/ndarray-1.0.0
             data:
             - [5.0, 0.0, 0.0]

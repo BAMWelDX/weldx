@@ -14,12 +14,9 @@ from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.util as ut
-from weldx.constants import Q_
+from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
 from weldx.types import QuantityLike
-
-_DEFAULT_LEN_UNIT = UREG.millimeters
-_DEFAULT_ANG_UNIT = UREG.rad
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
@@ -1439,6 +1436,9 @@ class LinearHorizontalTraceSegment:
         relative_position = np.clip(relative_position, 0, 1)
 
         coordinates = np.array([1, 0, 0]) * relative_position * self._length
+        if isinstance(coordinates, pint.Quantity):
+            coordinates = coordinates.m
+
         return tf.LocalCoordinateSystem(coordinates=coordinates)
 
 
@@ -1805,7 +1805,7 @@ class Trace:
             raster_data = np.hstack([raster_data, data_point])
 
         last_point = self._coordinate_system_lookup[-1].coordinates.data[:, np.newaxis]
-        return np.hstack([raster_data.m, last_point])
+        return np.hstack([raster_data, last_point])
 
     @UREG.check(None, "[length]", None, None, None)
     def plot(
@@ -2471,6 +2471,8 @@ class Geometry:
         rasterization = self.rasterize(
             profile_raster_width, trace_raster_width, stack=False
         )
+        rasterization = [Q_(r, _DEFAULT_LEN_UNIT) for r in rasterization]
+
         return SpatialData.from_geometry_raster(rasterization, closed_mesh)
 
     @UREG.check(None, None, "[length]", "[length]")
@@ -2533,7 +2535,7 @@ class SpatialData:
         """Convert and check input values."""
         if not isinstance(self.coordinates, DataArray):
             self.coordinates = ut.xr_3d_vector(
-                data=np.array(self.coordinates),
+                data=self.coordinates,
                 time=time,
                 add_dims=["n"],
             )
@@ -2572,8 +2574,12 @@ class SpatialData:
         return SpatialData(mesh.points, triangles)
 
     @staticmethod
-    def _shape_raster_points(shape_raster_data: np.ndarray) -> list[list[int]]:
+    def _shape_raster_points(
+        shape_raster_data: Union[np.ndarray, pint.Quantity]
+    ) -> list[list[int]]:
         """Extract all points from a shapes raster data."""
+        if isinstance(shape_raster_data, Q_):
+            shape_raster_data = shape_raster_data.m
         return shape_raster_data.reshape(
             (shape_raster_data.shape[0] * shape_raster_data.shape[1], 3)
         ).tolist()
@@ -2693,12 +2699,16 @@ class SpatialData:
             New `SpatialData` instance
 
         """
+        units = None if not isinstance(geometry_raster[0], Q_) else geometry_raster[0].u
         points = []
         triangles = []
         for shape_data in geometry_raster:
             shape_data = shape_data.swapaxes(1, 2)
             triangles += cls._shape_triangles(shape_data, len(points), closed_mesh)
             points += cls._shape_raster_points(shape_data)
+
+        if units:
+            points = Q_(points, units)
 
         return SpatialData(points, triangles)
 
@@ -2713,7 +2723,7 @@ class SpatialData:
         mins = self.coordinates.min(dim=dims)
         maxs = self.coordinates.max(dim=dims)
 
-        return np.vstack([mins, maxs])
+        return np.vstack([mins.data, maxs.data])
 
     def plot(
         self,
@@ -2769,7 +2779,10 @@ class SpatialData:
         if backend == "k3d":
             import k3d
 
-            limits = tuple(self.limits().flatten())
+            limits = self.limits()
+            if isinstance(limits, Q_):
+                limits = limits.m
+            limits = tuple(limits.flatten())
             plot = k3d.plot(grid=limits)
             vs.SpatialDataVisualizer(
                 self, name=None, reference_system=None, color=color, plot=plot
