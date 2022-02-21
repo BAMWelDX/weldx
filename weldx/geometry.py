@@ -1401,7 +1401,8 @@ class DynamicTraceSegment:
             series `s` parameter. The value defines the segments length by evaluating
             the expression on the interval [0, `max_s`]
         limit_orientation_to_xy:
-            If t
+            If `True`, the orientation vectors of the coordinate systems along the trace
+            are confined to the xy-plane.
         """
         self._series: SpatialSeries = series
         self._max_s = max_s
@@ -1496,7 +1497,7 @@ class DynamicTraceSegment:
         return self._length
 
     def local_coordinate_system(self, position: float) -> tf.LocalCoordinateSystem:
-        """Calculate a `LocalCoordinateSystem` at a position of the trace segment.
+        """Calculate a `tf.LocalCoordinateSystem` at a position of the trace segment.
 
         Parameters
         ----------
@@ -1506,7 +1507,7 @@ class DynamicTraceSegment:
 
         Returns
         -------
-        LocalCoordinateSystem:
+        tf.LocalCoordinateSystem:
             The coordinate system and the specified position.
 
         """
