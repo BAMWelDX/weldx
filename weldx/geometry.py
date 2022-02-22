@@ -1397,6 +1397,8 @@ class DynamicTraceSegment:
         ----------
         series:
             A `SpatialSeries` that describes the trajectory of the trace segment.
+            Alternatively, one can pass every other object that is valid as first
+            argument to `SpatialSeries.__init__`.
         max_s:
             [only expression based `SpatialSeries`] The maximum value of the passed
             series `s` parameter. The value defines the segments length by evaluating
@@ -1404,6 +1406,10 @@ class DynamicTraceSegment:
         limit_orientation_to_xy:
             If `True`, the orientation vectors of the coordinate systems along the trace
             are confined to the xy-plane.
+        kwargs:
+            A set of keyword arguments that will be forwarded to the ``__init__`` method
+            of the `SpatialSeries` in case the ``series`` parameter isn't already a
+            `SpatialSeries`.
         """
         if not isinstance(series, SpatialSeries):
             series = SpatialSeries(series, **kwargs)
@@ -1538,17 +1544,11 @@ class LinearHorizontalTraceSegment(DynamicTraceSegment):
 
         """
         if length <= 0:
-            raise ValueError("'length' must have a positive value.")
-        data = DataArray(
-            Q_([[0, 0, 0], [length, 0, 0]], _DEFAULT_LEN_UNIT),
-            dims=["s", "c"],
-            coords=dict(
-                c=["x", "y", "z"],
-                s=DataArray(Q_([0, 1], ""), dims=["s"]).pint.dequantify(),
-            ),
+            raise ValueError("'length' must be a positive value.")
+
+        super().__init__(
+            Q_([[0, 0, 0], [length, 0, 0]], _DEFAULT_LEN_UNIT), coords=[0, 1]
         )
-        series_disc = SpatialSeries(data)
-        super().__init__(series_disc)
 
 
 class RadialHorizontalTraceSegment(DynamicTraceSegment):
@@ -1578,6 +1578,7 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
             raise ValueError("'radius' must have a positive value.")
         if angle <= 0:
             raise ValueError("'angle' must have a positive value.")
+
         self._radius = float(radius)
         self._angle = float(angle)
 
@@ -1589,17 +1590,12 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
         # todo change sign sign back to + and correct winding signs
         expr = "(x*sin(s)-w*y*(cos(s)-1))*r "
         params = dict(
-            x=DataArray(
-                Q_([1, 0, 0], "mm"), dims=["c"], coords=dict(c=["x", "y", "z"])
-            ),
-            y=DataArray(
-                Q_([0, 1, 0], "mm"), dims=["c"], coords=dict(c=["x", "y", "z"])
-            ),
+            x=Q_([1, 0, 0], "mm"),
+            y=Q_([0, 1, 0], "mm"),
             r=self._radius,
             w=self._sign_winding,
         )
-        sps = SpatialSeries(expr, parameters=params)
-        super().__init__(sps, max_s=self._angle)
+        super().__init__(expr, max_s=self._angle, parameters=params)
 
     def __repr__(self):
         """Output representation of a RadialHorizontalTraceSegment."""
