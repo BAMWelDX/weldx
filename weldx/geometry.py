@@ -1386,7 +1386,9 @@ class DynamicTraceSegment:
 
     def __init__(
         self,
-        series: SpatialSeries,
+        series: Union[
+            SpatialSeries, pint.Quantity, DataArray, str, MathematicalExpression
+        ],
         max_s: float = 1,
         limit_orientation_to_xy: bool = False,
         **kwargs,
@@ -1414,19 +1416,19 @@ class DynamicTraceSegment:
         if not isinstance(series, SpatialSeries):
             series = SpatialSeries(series, **kwargs)
 
-        self._series: SpatialSeries = series
+        self._series = series
         self._max_s = max_s
         self._limit_orientation = limit_orientation_to_xy
 
         if series.is_expression:
             self._derivative = self._get_derivative_expression()
+            self._length = self._len_expr()
+        else:
+            self._derivative = None
+            self._length = self._len_disc()
 
-        self._length = self._len_expr() if series.is_expression else self._len_disc()
-
-    def _get_component_derivative(self, i: int):
+    def _get_component_derivative_squared(self, i: int):
         """Get the derivative of an expression for the i-th vector component."""
-        me = self._series.data
-        exp = me.expression
 
         def _get_component(v, i):
             if isinstance(v, Q_):
@@ -1435,21 +1437,22 @@ class DynamicTraceSegment:
                 return v[i]
             return float(v)
 
+        me = self._series.data
         subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
-        return exp.subs(subs).diff("s")
-
-    def _get_component_derivative_squared(self, i):
-        """Get the squared derivative of an expression for the i-th vector component."""
-        return self._get_component_derivative(i) ** 2
+        return me.expression.subs(subs).diff("s") ** 2
 
     def _get_derivative_expression(self) -> MathematicalExpression:
         """Get the derivative of an expression as 'MathematicalExpression'."""
-        params = self._series.data.parameters
         expr = MathematicalExpression(self._series.data.expression.diff("s"))
-        var_names = expr.get_variable_names()
-        for k, v in params.items():
-            if k in var_names:
-                expr.set_parameter(k, v)
+
+        # parameters might not be present anymore in the derived expression
+        params = {
+            k: v
+            for k, v in self._series.data.parameters.items()
+            if k in expr.get_variable_names()
+        }
+        expr.set_parameters(params)
+
         return expr
 
     def _get_tangent_vec_discrete(self, position: float) -> np.ndarray:
@@ -1479,15 +1482,16 @@ class DynamicTraceSegment:
         self, coords: pint.Quantity, tangent: np.ndarray
     ) -> tf.LocalCoordinateSystem:
         """Create a ``LocalCoordinateSystem`` from coordinates and tangent vector."""
-        z_fake = [0, 0, 1]
-        y = np.cross(z_fake, tangent)
+        x = tangent
+        z = [0, 0, 1]
+        y = np.cross(z, x)
+
         if self._limit_orientation:
-            return tf.LocalCoordinateSystem.from_axis_vectors(
-                y=y, z=z_fake, coordinates=coords
-            )
-        return tf.LocalCoordinateSystem.from_axis_vectors(
-            x=tangent, y=y, coordinates=coords
-        )
+            x = None
+        else:
+            z = None
+
+        return tf.LocalCoordinateSystem.from_axis_vectors(x, y, z, coords)
 
     def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
         """Get a ``LocalCoordinateSystem`` at the passed rel. position (expression)."""
@@ -1521,6 +1525,9 @@ class DynamicTraceSegment:
             The coordinate system and the specified position.
 
         """
+        if not isinstance(position, (float, int, Q_)):
+            position = np.array(position)
+
         if self._series.is_expression:
             return self._lcs_expr(position)
         return self._lcs_disc(position)
@@ -1587,7 +1594,7 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
         else:
             self._sign_winding = 1
 
-        # todo change sign sign back to + and correct winding signs
+        # todo change sign sign back to + and correct winding signs?
         expr = "(x*sin(s)-w*y*(cos(s)-1))*r "
         params = dict(
             x=Q_([1, 0, 0], "mm"),
