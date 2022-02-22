@@ -1389,6 +1389,7 @@ class DynamicTraceSegment:
         series: SpatialSeries,
         max_s: float = 1,
         limit_orientation_to_xy: bool = False,
+        **kwargs,
     ):
         """Initialize a `DynamicTraceSegment`.
 
@@ -1404,6 +1405,9 @@ class DynamicTraceSegment:
             If `True`, the orientation vectors of the coordinate systems along the trace
             are confined to the xy-plane.
         """
+        if not isinstance(series, SpatialSeries):
+            series = SpatialSeries(series, **kwargs)
+
         self._series: SpatialSeries = series
         self._max_s = max_s
         self._limit_orientation = limit_orientation_to_xy

@@ -1593,7 +1593,12 @@ class SpatialSeries(GenericSeries):
         coords: dict[str, pint.Quantity],
     ) -> xr.DataArray:
         """Turn a quantity into a a correctly formatted data array."""
-        s = coords["s"]
+        if isinstance(coords, dict):
+            s = coords["s"]
+        else:
+            s = coords
+            coords = dict(s=s)
+
         if not isinstance(s, xr.DataArray):
             if not isinstance(s, Q_):
                 s = Q_(s, "")
