@@ -1561,8 +1561,6 @@ class SpatialSeries(GenericSeries):
 
     _parameter_name = "s"
 
-    # _allowed_variables: list[str] = ["s"]
-    # """Allowed variable names"""
     _required_variables: list[str] = [_parameter_name]
     """Required variable names"""
 
