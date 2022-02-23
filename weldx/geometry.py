@@ -1487,7 +1487,7 @@ class DynamicTraceSegment:
             coords = coords.isel(n=0)
 
         x = tangent
-        z = np.array([0, 0, 1])
+        z = [0, 0, 1] if x.size == 3 else [[0, 0, 1] for _ in range(x.shape[0])]
         y = np.cross(z, x)
 
         if self._limit_orientation:
@@ -1495,14 +1495,21 @@ class DynamicTraceSegment:
         else:
             z = np.cross(x, y)
 
-        orient = np.array([x, y, z]).transpose()
+        if x.size == 3:
+            orient = np.array([x, y, z]).transpose()
+        else:
+            orient = DataArray(
+                np.array([x, y, z]),
+                dims=["v", "n", "c"],
+                coords={"c": ["x", "y", "z"], "v": [0, 1, 2], "n": coords.coords["n"]},
+            )
 
         return tf.LocalCoordinateSystem(orient, coords)
 
     def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
         """Get a ``LocalCoordinateSystem`` at the passed rel. position (expression)."""
         coords = self._series.evaluate(s=position * self._max_s).data_array
-        x = self._derivative.evaluate(s=position * self._max_s).data.m
+        x = self._derivative.evaluate(s=position * self._max_s).data.m.transpose()
 
         return self._get_lcs_from_coords_and_tangent(coords, x)
 
