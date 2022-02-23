@@ -1559,14 +1559,16 @@ class GenericSeries:
 class SpatialSeries(GenericSeries):
     """Describes a line in 3d space depending on the positional coordinate ``s``."""
 
-    _allowed_variables: list[str] = ["s"]
-    """Allowed variable names"""
-    _required_variables: list[str] = ["s"]
+    _parameter_name = "s"
+
+    # _allowed_variables: list[str] = ["s"]
+    # """Allowed variable names"""
+    _required_variables: list[str] = [_parameter_name]
     """Required variable names"""
 
-    _required_dimensions: list[str] = ["s", "c"]
+    _required_dimensions: list[str] = [_parameter_name, "c"]
     """Required dimensions"""
-    _required_dimension_units: dict[str, pint.Unit] = {"s": ""}
+    _required_dimension_units: dict[str, pint.Unit] = {_parameter_name: ""}
     """Required units of a dimension"""
     _required_dimension_coordinates: dict[str, list] = {"c": ["x", "y", "z"]}
     """Required coordinates of a dimension."""
@@ -1596,22 +1598,22 @@ class SpatialSeries(GenericSeries):
     ) -> xr.DataArray:
         """Turn a quantity into a a correctly formatted data array."""
         if isinstance(coords, dict):
-            s = coords["s"]
+            s = coords[SpatialSeries._parameter_name]
         else:
             s = coords
-            coords = dict(s=s)
+            coords = {SpatialSeries._parameter_name: s}
 
         if not isinstance(s, xr.DataArray):
             if not isinstance(s, Q_):
                 s = Q_(s, "")
-            s = xr.DataArray(s, dims=["s"]).pint.dequantify()
-            coords["s"] = s
+            s = xr.DataArray(s, dims=[SpatialSeries._parameter_name]).pint.dequantify()
+            coords[SpatialSeries._parameter_name] = s
 
         if "c" not in coords:
             coords["c"] = ["x", "y", "z"]
 
         if dims is None:
-            dims = ["s", "c"]
+            dims = [SpatialSeries._parameter_name, "c"]
 
         return xr.DataArray(obj, dims=dims, coords=coords)
 

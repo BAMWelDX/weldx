@@ -1482,9 +1482,8 @@ class DynamicTraceSegment:
         self, coords: pint.Quantity, tangent: np.ndarray
     ) -> tf.LocalCoordinateSystem:
         """Create a ``LocalCoordinateSystem`` from coordinates and tangent vector."""
-        coords = coords.rename({"s": "n"})
-        if coords.coords["n"].size == 1:
-            coords = coords.isel(n=0)
+        if coords.coords["s"].size == 1:
+            coords = coords.isel(s=0)
 
         x = tangent
         z = [0, 0, 1] if x.size == 3 else [[0, 0, 1] for _ in range(x.shape[0])]
@@ -1500,8 +1499,8 @@ class DynamicTraceSegment:
         else:
             orient = DataArray(
                 np.array([x, y, z]),
-                dims=["v", "n", "c"],
-                coords={"c": ["x", "y", "z"], "v": [0, 1, 2], "n": coords.coords["n"]},
+                dims=["v", "s", "c"],
+                coords={"c": ["x", "y", "z"], "v": [0, 1, 2], "s": coords.coords["s"]},
             )
 
         return tf.LocalCoordinateSystem(orient, coords)
@@ -1516,8 +1515,10 @@ class DynamicTraceSegment:
     def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
         """Get a ``LocalCoordinateSystem`` at the passed rel. position (discrete)."""
         coords = self._series.evaluate(s=position).data_array
-        x = self._get_tangent_vec_discrete(position)
-
+        if coords.coords["s"].size == 1:
+            x = self._get_tangent_vec_discrete(position)
+        else:
+            x = np.array([self._get_tangent_vec_discrete(p) for p in position])
         return self._get_lcs_from_coords_and_tangent(coords, x)
 
     @property
