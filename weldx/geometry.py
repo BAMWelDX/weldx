@@ -1422,9 +1422,11 @@ class DynamicTraceSegment:
 
         if series.is_expression:
             self._derivative = self._get_derivative_expression()
-            self._length = self._len_expr()
+            self._primitive = self._get_primitive()
+            self._length = self.get_section_length(self._max_s)
         else:
             self._derivative = None
+            self._primitive = None
             self._length = self._len_disc()
 
     def _get_component_derivative_squared(self, i: int):
@@ -1464,13 +1466,34 @@ class DynamicTraceSegment:
         vals = self._series.evaluate(s=[coords_s[idx_low], coords_s[idx_low + 1]]).data
         return (vals[1] - vals[0]).m
 
-    def _len_expr(self) -> pint.Quantity:
-        """Get the length of an expression based segment."""
+    def _get_primitive(self) -> MathematicalExpression:
+        """Get the primitive of a the trace function if it is expression based."""
         der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
         expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
-        mag = float(sympy.integrate(expr, ("s", 0, self._max_s)).evalf())
+        smax, unit = sympy.symbols("smax, unit")
+        primitive = sympy.integrate(expr, ("s", 0, smax)) * unit
+        params = dict(unit=Q_(1, Q_("1mm").to_base_units().u).to(_DEFAULT_LEN_UNIT))
 
-        return Q_(mag, Q_(1, "mm").to_base_units().u).to(_DEFAULT_LEN_UNIT)
+        return MathematicalExpression(primitive, params)
+
+    def get_section_length(self, s: float) -> pint.Quantity:
+        """Get the length from the start of the segment to the passed value of ``s``.
+
+        Parameters
+        ----------
+        s:
+            The value of the relative coordinate `s`.
+
+        Returns
+        -------
+        pint.Quantity:
+            The length at the specified value.
+
+        """
+        if self._series.is_expression:
+            return self._primitive.evaluate(smax=s).data
+        else:
+            raise NotImplementedError
 
     def _len_disc(self) -> pint.Quantity:
         """Get the length of a segment based on discrete values."""
