@@ -1502,7 +1502,7 @@ class DynamicTraceSegment:
         return Q_(length, diff.u)
 
     def _len_section_disc(self, s: float) -> pint.Quantity:
-        """Get the length until a specific value of ``s`` (discrete version)."""
+        """Get the length until a specific position on the trace (discrete version)."""
         if s >= self._max_s:
             diff = self._series.data[1:] - self._series.data[:-1]
         else:
