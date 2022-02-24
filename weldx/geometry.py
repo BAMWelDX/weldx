@@ -1568,7 +1568,7 @@ class DynamicTraceSegment:
         return self._length
 
     def local_coordinate_system(self, position: float) -> tf.LocalCoordinateSystem:
-        """Calculate a `tf.LocalCoordinateSystem` at a position of the trace segment.
+        """Calculate a local coordinate system at a position of the trace segment.
 
         Parameters
         ----------
@@ -1578,7 +1578,7 @@ class DynamicTraceSegment:
 
         Returns
         -------
-        tf.LocalCoordinateSystem:
+        weldx.transformations.LocalCoordinateSystem:
             The coordinate system and the specified position.
 
         """
