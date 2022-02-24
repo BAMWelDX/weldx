@@ -1422,11 +1422,11 @@ class DynamicTraceSegment:
 
         if series.is_expression:
             self._derivative = self._get_derivative_expression()
-            self._primitive = self._get_primitive()
+            self._length_expr = self._get_length_expr()
             self._length = self.get_section_length(self._max_s)
         else:
             self._derivative = None
-            self._primitive = None
+            self._length_expr = None
             self._length = self._len_disc()
 
     def _get_component_derivative_squared(self, i: int):
@@ -1466,7 +1466,7 @@ class DynamicTraceSegment:
         vals = self._series.evaluate(s=[coords_s[idx_low], coords_s[idx_low + 1]]).data
         return (vals[1] - vals[0]).m
 
-    def _get_primitive(self) -> MathematicalExpression:
+    def _get_length_expr(self) -> MathematicalExpression:
         """Get the primitive of a the trace function if it is expression based."""
         der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
         expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
@@ -1491,7 +1491,7 @@ class DynamicTraceSegment:
 
         """
         if self._series.is_expression:
-            return self._primitive.evaluate(smax=s).data
+            return self._length_expr.evaluate(smax=s).data
         else:
             raise NotImplementedError
 
