@@ -1423,11 +1423,11 @@ class DynamicTraceSegment:
         if series.is_expression:
             self._derivative = self._get_derivative_expression()
             self._length_expr = self._get_length_expr()
-            self._length = self.get_section_length(self._max_s)
         else:
             self._derivative = None
             self._length_expr = None
-            self._length = self._len_disc()
+
+        self._length = self.get_section_length(self._max_s)
 
     def _get_component_derivative_squared(self, i: int):
         """Get the derivative of an expression for the i-th vector component."""
@@ -1493,11 +1493,29 @@ class DynamicTraceSegment:
         if self._series.is_expression:
             return self._length_expr.evaluate(smax=s).data
         else:
-            raise NotImplementedError
+            return self._len_section_disc(s=s)
 
     def _len_disc(self) -> pint.Quantity:
         """Get the length of a segment based on discrete values."""
         diff = self._series.data[1:] - self._series.data[:-1]
+        length = np.sum(np.linalg.norm(diff.m, axis=1))
+        return Q_(length, diff.u)
+
+    def _len_section_disc(self, s: float) -> pint.Quantity:
+        """Get the length until a specific value of ``s`` (discrete version)."""
+        if s >= self._max_s:
+            diff = self._series.data[1:] - self._series.data[:-1]
+        else:
+            coords = self._series.coordinates["s"].data
+            idx_s_upper = np.abs(coords - s).argmin()
+            if coords[idx_s_upper] < s:
+                idx_s_upper = idx_s_upper + 1
+
+            s_eval = np.append(coords[:idx_s_upper], s)
+            vecs = self._series.evaluate(s=s_eval).data
+
+            diff = vecs[1:] - vecs[:-1]
+
         length = np.sum(np.linalg.norm(diff.m, axis=1))
         return Q_(length, diff.u)
 
