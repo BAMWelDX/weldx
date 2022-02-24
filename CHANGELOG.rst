@@ -37,10 +37,12 @@ changes
 -  `LocalCoordinateSystem` and `CoordinateSystemManager` now support `pint.Quantity` as coordinates.
    Types without units are still supported but are deprecated. [:pull:`683`]
 
-- Renamed show_asdf_header of `WeldxFile` to `WeldxFile.header`. [:pull:`694`]
+-  Renamed show_asdf_header of `WeldxFile` to `WeldxFile.header`. [:pull:`694`]
 
-- `WeldxFile.custom_schema` now accepts an optional tuple with the first element being a schema to validate upon read,
-  the second upon writing the data. [:pull:`697`]
+-  `WeldxFile.custom_schema` now accepts an optional tuple with the first element being a schema to validate upon read,
+   the second upon writing the data. [:pull:`697`]
+
+-  Weldx now works with Python-3.10. [:pull:`696`]
 
 
 fixes
