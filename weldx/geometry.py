@@ -1549,9 +1549,9 @@ class DynamicTraceSegment:
     def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
         """Get a ``LocalCoordinateSystem`` at the passed rel. position (expression)."""
         coords = self._series.evaluate(s=position * self._max_s).data_array
-        x = self._derivative.evaluate(s=position * self._max_s).data.m.transpose()
+        x = self._derivative.evaluate(s=position * self._max_s).transpose(..., "c")
 
-        return self._get_lcs_from_coords_and_tangent(coords, x)
+        return self._get_lcs_from_coords_and_tangent(coords, x.data.m)
 
     def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
         """Get a ``LocalCoordinateSystem`` at the passed rel. position (discrete)."""

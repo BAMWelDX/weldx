@@ -24,7 +24,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from weldx.types import UnitLike
 
-__all__ = ["GenericSeries", "MathematicalExpression", "TimeSeries"]
+__all__ = ["GenericSeries", "MathematicalExpression", "TimeSeries", "SpatialSeries"]
 
 _me_parameter_types = Union[pint.Quantity, str, Tuple[pint.Quantity, str], xr.DataArray]
 

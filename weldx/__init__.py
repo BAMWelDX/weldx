@@ -140,7 +140,7 @@ import weldx.welding
 
 # class imports to weldx namespace
 from weldx.config import Config
-from weldx.core import GenericSeries, MathematicalExpression, TimeSeries
+from weldx.core import GenericSeries, MathematicalExpression, TimeSeries, SpatialSeries
 from weldx.geometry import (
     ArcSegment,
     Geometry,
@@ -150,6 +150,7 @@ from weldx.geometry import (
     Shape,
     Trace,
     SpatialData,
+    DynamicTraceSegment,
 )
 from weldx.transformations import (
     CoordinateSystemManager,
@@ -190,6 +191,7 @@ __all__ = (
     "util",
     "welding",
     "TimeSeries",
+    "DynamicTraceSegment",
     "LinearHorizontalTraceSegment",
     "Config",
     "Time",
