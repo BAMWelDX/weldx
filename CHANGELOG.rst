@@ -9,7 +9,7 @@
 added
 =====
 
--  ``SpatialSeries`` and ``DynamicTraceSegment`` [:pull:`699`]
+-  `SpatialSeries` and `DynamicTraceSegment` [:pull:`699`]
 
 -  first draft of the ``multi_pass_weld`` schema for WelDX files [:pull:`667`]
 

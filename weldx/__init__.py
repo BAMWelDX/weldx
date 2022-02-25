@@ -50,6 +50,7 @@ These classes and functions are used to define welding processes.
     Time
     TimeSeries
     GenericSeries
+    SpatialSeries
     MathematicalExpression
     CoordinateSystemManager
     LocalCoordinateSystem
@@ -72,6 +73,7 @@ These classes are used to define workpiece geometries.
     Shape
     Trace
     SpatialData
+    DynamicTraceSegment
 
 **Full API Reference**
 
