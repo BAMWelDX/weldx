@@ -1398,20 +1398,21 @@ class DynamicTraceSegment:
         Parameters
         ----------
         series:
-            A `SpatialSeries` that describes the trajectory of the trace segment.
-            Alternatively, one can pass every other object that is valid as first
-            argument to `SpatialSeries.__init__`.
+            A `~weldx.core.SpatialSeries` that describes the trajectory of the trace
+            segment. Alternatively, one can pass every other object that is valid as
+            first argument to of the ``__init__`` method of the
+            `~weldx.core.SpatialSeries`.
         max_s:
             [only expression based `SpatialSeries`] The maximum value of the passed
-            series `s` parameter. The value defines the segments length by evaluating
-            the expression on the interval [0, `max_s`]
+            series ``s`` parameter. The value defines the segments length by evaluating
+            the expression on the interval [0, ``max_s``]
         limit_orientation_to_xy:
             If `True`, the orientation vectors of the coordinate systems along the trace
             are confined to the xy-plane.
         kwargs:
             A set of keyword arguments that will be forwarded to the ``__init__`` method
-            of the `SpatialSeries` in case the ``series`` parameter isn't already a
-            `SpatialSeries`.
+            of the `~weldx.core.SpatialSeries` in case the ``series`` parameter isn't
+            already a `~weldx.core.SpatialSeries`.
         """
         if not isinstance(series, SpatialSeries):
             series = SpatialSeries(series, **kwargs)
@@ -1444,7 +1445,7 @@ class DynamicTraceSegment:
         return me.expression.subs(subs).diff("s") ** 2
 
     def _get_derivative_expression(self) -> MathematicalExpression:
-        """Get the derivative of an expression as 'MathematicalExpression'."""
+        """Get the derivative of an expression as `MathematicalExpression`."""
         expr = MathematicalExpression(self._series.data.expression.diff("s"))
 
         # parameters might not be present anymore in the derived expression
@@ -1482,7 +1483,7 @@ class DynamicTraceSegment:
         Parameters
         ----------
         s:
-            The value of the relative coordinate `s`.
+            The value of the relative coordinate ``s``.
 
         Returns
         -------
