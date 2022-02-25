@@ -1252,15 +1252,14 @@ class GenericSeries:
     def _evaluate_expr(self, coords: list[SeriesParameter]) -> GenericSeries:
         """Evaluate the expression at the passed coordinates."""
         if len(coords) == self._obj.num_variables:
-            eval_args = {v.symbol: v.data_array for v in coords}
-            data = self._obj.evaluate(**eval_args)
-
-            # TODO: Discuss - This might be done before by assigning coords to the
-            #       eval_args that go into the math expression. Might need tweaks in
-            #       `SeriesParameter`
-            for k, v in eval_args.items():
-                data = data.assign_coords({k: v.pint.dequantify()})
-            return self.__class__(data)
+            eval_args = {
+                v.symbol: v.data_array.assign_coords(
+                    {v.dim: v.data_array.pint.dequantify()}
+                )
+                for v in coords
+            }
+            da = self._obj.evaluate(**eval_args)
+            return self.__class__(da)
 
         # turn passed coords into parameters of the expression
         new_series = deepcopy(self)
