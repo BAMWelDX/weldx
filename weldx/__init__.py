@@ -130,16 +130,20 @@ except ModuleNotFoundError:  # pragma: no cover
 from weldx.constants import Q_, U_
 
 # main modules
-import weldx.time
+import weldx.time  # skipcq: PY-W2000
+
+# skipcq: PY-W2000
 import weldx.util  # import this second to avoid circular dependencies
-import weldx.core
-import weldx.transformations
+import weldx.core  # skipcq: PY-W2000
+import weldx.transformations  # skipcq: PY-W2000
 import weldx.config
-import weldx.geometry
-import weldx.welding
+import weldx.geometry  # skipcq: PY-W2000
+import weldx.welding  # skipcq: PY-W2000
 
 # class imports to weldx namespace
 from weldx.config import Config
+
+# skipcq: PY-W2000
 from weldx.core import GenericSeries, MathematicalExpression, TimeSeries, SpatialSeries
 from weldx.geometry import (
     ArcSegment,
@@ -152,7 +156,7 @@ from weldx.geometry import (
     SpatialData,
     DynamicTraceSegment,
 )
-from weldx.transformations import (
+from weldx.transformations import (  # skipcq: PY-W2000
     CoordinateSystemManager,
     LocalCoordinateSystem,
     WXRotation,
@@ -162,10 +166,10 @@ from weldx.welding.groove.iso_9692_1 import get_groove
 from weldx.time import Time
 
 # tags (this will partially import weldx.asdf but not the extension)
-from weldx import tags
+from weldx import tags  # skipcq: PY-W2000
 
 # asdf extensions
-import weldx.asdf
+import weldx.asdf  # skipcq: PY-W2000
 from weldx.asdf.file import WeldxFile
 
 __all__ = (

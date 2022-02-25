@@ -1493,8 +1493,7 @@ class DynamicTraceSegment:
         """
         if self._series.is_expression:
             return self._length_expr.evaluate(smax=s).data
-        else:
-            return self._len_section_disc(s=s)
+        return self._len_section_disc(s=s)
 
     def _len_disc(self) -> pint.Quantity:
         """Get the length of a segment based on discrete values."""
