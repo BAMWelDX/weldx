@@ -1398,12 +1398,11 @@ class DynamicTraceSegment:
         Parameters
         ----------
         series:
-            A `~weldx.core.SpatialSeries` that describes the trajectory of the trace
-            segment. Alternatively, one can pass every other object that is valid as
-            first argument to of the ``__init__`` method of the
-            `~weldx.core.SpatialSeries`.
+            A `SpatialSeries` that describes the trajectory of the trace segment.
+            Alternatively, one can pass every other object that is valid as
+            first argument to of the ``__init__`` method of the `SpatialSeries`.
         max_s:
-            [only expression based `~weldx.core.SpatialSeries`] The maximum value of
+            [only expression based `SpatialSeries`] The maximum value of
             the passed series ``s`` parameter. The value defines the segments length by
             evaluating the expression on the interval [0, ``max_s``]
         limit_orientation_to_xy:
@@ -1411,8 +1410,8 @@ class DynamicTraceSegment:
             are confined to the xy-plane.
         kwargs:
             A set of keyword arguments that will be forwarded to the ``__init__`` method
-            of the `~weldx.core.SpatialSeries` in case the ``series`` parameter isn't
-            already a `~weldx.core.SpatialSeries`.
+            of the `SpatialSeries` in case the ``series`` parameter isn't
+            already a `SpatialSeries`.
         """
         if not isinstance(series, SpatialSeries):
             series = SpatialSeries(series, **kwargs)
