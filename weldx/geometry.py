@@ -1403,9 +1403,9 @@ class DynamicTraceSegment:
             first argument to of the ``__init__`` method of the
             `~weldx.core.SpatialSeries`.
         max_s:
-            [only expression based `SpatialSeries`] The maximum value of the passed
-            series ``s`` parameter. The value defines the segments length by evaluating
-            the expression on the interval [0, ``max_s``]
+            [only expression based `~weldx.core.SpatialSeries`] The maximum value of
+            the passed series ``s`` parameter. The value defines the segments length by
+            evaluating the expression on the interval [0, ``max_s``]
         limit_orientation_to_xy:
             If `True`, the orientation vectors of the coordinate systems along the trace
             are confined to the xy-plane.
