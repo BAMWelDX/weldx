@@ -1498,13 +1498,6 @@ class DynamicTraceSegment:
             return self._length_expr.evaluate(max_coord=position).data
         return self._len_section_disc(position=position)
 
-    # todo: remove
-    def _len_disc(self) -> pint.Quantity:
-        """Get the length of a segment based on discrete values."""
-        diff = self._series.data[1:] - self._series.data[:-1]
-        length = np.sum(np.linalg.norm(diff.m, axis=1))
-        return Q_(length, diff.u)
-
     def _len_section_disc(self, position: float) -> pint.Quantity:
         """Get the length until a specific position on the trace (discrete version)."""
         if position >= self._max_coord:
