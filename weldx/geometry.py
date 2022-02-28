@@ -1654,12 +1654,11 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
         self._angle = float(angle)
 
         if clockwise:
-            self._sign_winding = -1
-        else:
             self._sign_winding = 1
+        else:
+            self._sign_winding = -1
 
-        # todo change sign sign back to + and correct winding signs?
-        expr = "(x*sin(s)-w*y*(cos(s)-1))*r "
+        expr = "(x*sin(s)+w*y*(cos(s)-1))*r "
         params = dict(
             x=Q_([1, 0, 0], "mm"),
             y=Q_([0, 1, 0], "mm"),
@@ -1692,7 +1691,7 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
     @property
     def is_clockwise(self) -> bool:
         """Get True, if the segments winding is clockwise, False otherwise."""
-        return self._sign_winding < 0
+        return self._sign_winding > 0
 
 
 # Trace class -----------------------------------------------------------------
