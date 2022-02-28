@@ -1430,7 +1430,7 @@ class DynamicTraceSegment:
 
         self._length = self.get_section_length(self._max_s)
 
-    def _get_component_derivative_squared(self, i: int):
+    def _get_component_derivative_squared(self, i: int) -> sympy.Expr:
         """Get the derivative of an expression for the i-th vector component."""
 
         def _get_component(v, i):
