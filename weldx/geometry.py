@@ -1442,11 +1442,13 @@ class DynamicTraceSegment:
 
         me = self._series.data
         subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
-        return me.expression.subs(subs).diff("s") ** 2
+        return me.expression.subs(subs).diff(self._series.position_dim_name) ** 2
 
     def _get_derivative_expression(self) -> MathematicalExpression:
         """Get the derivative of an expression as `MathematicalExpression`."""
-        expr = MathematicalExpression(self._series.data.expression.diff("s"))
+        expr = MathematicalExpression(
+            self._series.data.expression.diff(self._series.position_dim_name)
+        )
 
         # parameters might not be present anymore in the derived expression
         params = {
@@ -1460,7 +1462,7 @@ class DynamicTraceSegment:
 
     def _get_tangent_vec_discrete(self, position: float) -> np.ndarray:
         """Get the segments tangent vector at the given position (discrete case)."""
-        coords_s = self._series.coordinates["s"].data
+        coords_s = self._series.coordinates[self._series.position_dim_name].data
         idx_low = np.abs(coords_s - position).argmin()
         if coords_s[idx_low] > position or idx_low + 1 == len(coords_s):
             idx_low -= 1
@@ -1471,8 +1473,8 @@ class DynamicTraceSegment:
         """Get the primitive of a the trace function if it is expression based."""
         der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
         expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
-        smax, unit = sympy.symbols("smax, unit")
-        primitive = sympy.integrate(expr, ("s", 0, smax)) * unit
+        s, u = sympy.symbols("smax, unit")
+        primitive = sympy.integrate(expr, (self._series.position_dim_name, 0, s)) * u
         params = dict(unit=Q_(1, Q_("1mm").to_base_units().u).to(_DEFAULT_LEN_UNIT))
 
         return MathematicalExpression(primitive, params)
@@ -1506,7 +1508,7 @@ class DynamicTraceSegment:
         if s >= self._max_s:
             diff = self._series.data[1:] - self._series.data[:-1]
         else:
-            coords = self._series.coordinates["s"].data
+            coords = self._series.coordinates[self._series.position_dim_name].data
             idx_s_upper = np.abs(coords - s).argmin()
             if coords[idx_s_upper] < s:
                 idx_s_upper = idx_s_upper + 1
@@ -1523,7 +1525,9 @@ class DynamicTraceSegment:
         self, coords: pint.Quantity, tangent: np.ndarray
     ) -> tf.LocalCoordinateSystem:
         """Create a ``LocalCoordinateSystem`` from coordinates and tangent vector."""
-        if coords.coords["s"].size == 1:
+        pdn = self._series.position_dim_name
+
+        if coords.coords[pdn].size == 1:
             coords = coords.isel(s=0)
 
         x = tangent
@@ -1540,8 +1544,8 @@ class DynamicTraceSegment:
         else:
             orient = DataArray(
                 np.array([x, y, z]),
-                dims=["v", "s", "c"],
-                coords={"c": ["x", "y", "z"], "v": [0, 1, 2], "s": coords.coords["s"]},
+                dims=["v", pdn, "c"],
+                coords={"c": ["x", "y", "z"], "v": [0, 1, 2], pdn: coords.coords[pdn]},
             )
 
         return tf.LocalCoordinateSystem(orient, coords)
@@ -1555,8 +1559,10 @@ class DynamicTraceSegment:
 
     def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
         """Get a ``LocalCoordinateSystem`` at the passed rel. position (discrete)."""
-        coords = self._series.evaluate(s=position).data_array
-        if coords.coords["s"].size == 1:
+        pdn = self._series.position_dim_name
+
+        coords = self._series.evaluate(**{pdn: position}).data_array
+        if coords.coords[pdn].size == 1:
             x = self._get_tangent_vec_discrete(position)
         else:
             x = np.array([self._get_tangent_vec_discrete(p) for p in position])
