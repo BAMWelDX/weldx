@@ -4,6 +4,7 @@ from typing import Any
 
 import numpy as np
 
+from weldx.constants import Q_
 from weldx.transformations import LocalCoordinateSystem, WXRotation
 
 
@@ -46,7 +47,9 @@ def rotated_coordinate_system(
 
     rotated_orientation = np.matmul(r_tot, orientation)
 
-    return LocalCoordinateSystem(rotated_orientation, np.array(coordinates))
+    if not isinstance(coordinates, Q_):
+        coordinates = np.array(coordinates)
+    return LocalCoordinateSystem(rotated_orientation, coordinates)
 
 
 def are_all_columns_unique(matrix, decimals=3):
