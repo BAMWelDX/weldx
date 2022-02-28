@@ -1595,7 +1595,9 @@ class LinearHorizontalTraceSegment(DynamicTraceSegment):
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def __init__(self, length: pint.Quantity):
-        """Construct linear horizontal trace segment.
+        """Construct linear horizontal trace segment of length `length` in `x`-direction.
+        
+        The trace will run between the points `[0, 0, 0]` and `[length, 0, 0]`
 
         Parameters
         ----------
