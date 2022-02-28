@@ -1558,14 +1558,14 @@ class GenericSeries:
 class SpatialSeries(GenericSeries):
     """Describes a line in 3d space depending on the positional coordinate ``s``."""
 
-    _parameter_name = "s"
+    _position_dim_name = "s"
 
-    _required_variables: list[str] = [_parameter_name]
+    _required_variables: list[str] = [_position_dim_name]
     """Required variable names"""
 
-    _required_dimensions: list[str] = [_parameter_name, "c"]
+    _required_dimensions: list[str] = [_position_dim_name, "c"]
     """Required dimensions"""
-    _required_dimension_units: dict[str, pint.Unit] = {_parameter_name: ""}
+    _required_dimension_units: dict[str, pint.Unit] = {_position_dim_name: ""}
     """Required units of a dimension"""
     _required_dimension_coordinates: dict[str, list] = {"c": ["x", "y", "z"]}
     """Required coordinates of a dimension."""
@@ -1596,22 +1596,22 @@ class SpatialSeries(GenericSeries):
     ) -> xr.DataArray:
         """Turn a quantity into a a correctly formatted data array."""
         if isinstance(coords, dict):
-            s = coords[cls._parameter_name]
+            s = coords[cls._position_dim_name]
         else:
             s = coords
-            coords = {cls._parameter_name: s}
+            coords = {cls._position_dim_name: s}
 
         if not isinstance(s, xr.DataArray):
             if not isinstance(s, Q_):
                 s = Q_(s, "")
-            s = xr.DataArray(s, dims=[SpatialSeries._parameter_name]).pint.dequantify()
-            coords[SpatialSeries._parameter_name] = s
+            s = xr.DataArray(s, dims=[cls._position_dim_name]).pint.dequantify()
+            coords[cls._position_dim_name] = s
 
         if "c" not in coords:
             coords["c"] = ["x", "y", "z"]
 
         if dims is None:
-            dims = [SpatialSeries._parameter_name, "c"]
+            dims = [cls._position_dim_name, "c"]
 
         return xr.DataArray(obj, dims=dims, coords=coords)
 
@@ -1622,3 +1622,8 @@ class SpatialSeries(GenericSeries):
             if isinstance(v, Q_) and v.size == 3:
                 params[k] = xr.DataArray(v, dims=["c"], coords=dict(c=["x", "y", "z"]))
         return params
+
+    @property
+    def position_dim_name(self):
+        """Return the name of the dimension that determines the position on the line."""
+        return self._position_dim_name
