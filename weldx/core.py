@@ -1587,18 +1587,19 @@ class SpatialSeries(GenericSeries):
             parameters = self._process_parameters(parameters)
         super().__init__(obj, dims, coords, units, interpolation, parameters)
 
-    @staticmethod
+    @classmethod
     def _process_quantity(
+        cls,
         obj: Union[pint.Quantity, xr.DataArray, str, MathematicalExpression],
         dims: Union[list[str], dict[str, str]],
         coords: dict[str, pint.Quantity],
     ) -> xr.DataArray:
         """Turn a quantity into a a correctly formatted data array."""
         if isinstance(coords, dict):
-            s = coords[SpatialSeries._parameter_name]
+            s = coords[cls._parameter_name]
         else:
             s = coords
-            coords = {SpatialSeries._parameter_name: s}
+            coords = {cls._parameter_name: s}
 
         if not isinstance(s, xr.DataArray):
             if not isinstance(s, Q_):
