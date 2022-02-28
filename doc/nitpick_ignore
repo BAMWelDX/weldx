@@ -19,7 +19,9 @@ py:class npt.ArrayLike
 
 # matplotlib
 py:class matplotlib.axes.Axes
+py:obj matplotlib.axes.Axes
 py:class matplotlib.axes._axes.Axes
+py:class matplotlib.figure.Figure
 
 # pandas
 py:class pandas._libs.tslibs.timedeltas.Timedelta
