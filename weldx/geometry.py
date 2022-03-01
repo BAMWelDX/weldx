@@ -99,6 +99,116 @@ def _to_list(var) -> list:
     return [var]
 
 
+# DynamicShapeSegment ---------------------------------------------------------
+
+
+class DynamicShapeSegment:
+    def __init__(
+        self,
+        series: Union[
+            SpatialSeries, pint.Quantity, DataArray, str, MathematicalExpression
+        ],
+        max_coord: float = 1,
+        **kwargs,
+    ):
+        if not isinstance(series, SpatialSeries):
+            series = SpatialSeries(series, **kwargs)
+
+        self._series = series
+        self._max_coord = max_coord
+
+        self._length_expr = self._get_length_expr()
+
+        self._length = self.get_section_length(self._max_coord)
+
+    def _get_component_derivative_squared(self, i: int) -> sympy.Expr:
+        """Get the derivative of an expression for the i-th vector component."""
+
+        def _get_component(v, i):
+            if isinstance(v, Q_):
+                v = v.to_base_units().m
+            if v.size == 3:
+                return v[i]
+            return float(v)
+
+        me = self._series.data
+        subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
+        return me.expression.subs(subs).diff(self._series.position_dim_name) ** 2
+
+    def _get_length_expr(self) -> MathematicalExpression:
+        """Get the primitive of a the trace function if it is expression based."""
+        der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
+        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
+        mc, u = sympy.symbols("max_coord, unit")
+        primitive = sympy.integrate(expr, (self._series.position_dim_name, 0, mc)) * u
+        params = dict(unit=Q_(1, Q_("1mm").to_base_units().u).to(_DEFAULT_LEN_UNIT))
+
+        return MathematicalExpression(primitive, params)
+
+    def get_section_length(self, position: float) -> pint.Quantity:
+        """Get the length from the start of the segment to the passed relative position.
+
+        Parameters
+        ----------
+        position:
+            The value of the relative position coordinate.
+
+        Returns
+        -------
+        pint.Quantity:
+            The length at the specified value.
+
+        """
+        if self._series.is_expression:
+            return self._length_expr.evaluate(max_coord=position).data
+        return self._len_section_disc(position=position)
+
+    def _len_section_disc(self, position: float) -> pint.Quantity:
+        """Get the length until a specific position on the trace (discrete version)."""
+        if position >= self._max_coord:
+            diff = self._series.data[1:] - self._series.data[:-1]
+        else:
+            pdn = self._series.position_dim_name
+            coords = self._series.coordinates[pdn].data
+            idx_coord_upper = np.abs(coords - position).argmin()
+            if coords[idx_coord_upper] < position:
+                idx_coord_upper = idx_coord_upper + 1
+
+            coords_eval = np.append(coords[:idx_coord_upper], position)
+            vecs = self._series.evaluate(**{pdn: coords_eval}).data
+
+            diff = vecs[1:] - vecs[:-1]
+
+        length = np.sum(np.linalg.norm(diff.m, axis=1))
+        return Q_(length, diff.u)
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def point_start(self):
+        p = self._series.evaluate(**{self._series.position_dim_name: 0})
+        return p.data_array.transpose(..., "c").data[0, :2]
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def point_end(self):
+        p = self._series.evaluate(**{self._series.position_dim_name: self._max_coord})
+        return p.data_array.transpose(..., "c").data[0, :2]
+
+    @property
+    def length(self) -> pint.Quantity:
+        return self._length
+
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def rasterize(self, raster_width):
+        num_points = int(np.ceil(self._length.to(_DEFAULT_LEN_UNIT).m / raster_width))
+        vals = np.array([i / (num_points - 1) for i in range(num_points)])
+        vals[-1] = 1.0
+        p = self._series.evaluate(
+            **{self._series.position_dim_name: vals * self._max_coord}
+        )
+        return p.data_array.transpose(..., "c").data[:, :2].transpose()
+
+
 # LineSegment -----------------------------------------------------------------
 
 
