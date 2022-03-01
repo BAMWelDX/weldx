@@ -10,12 +10,14 @@ from typing import TYPE_CHECKING, Union
 import meshio
 import numpy as np
 import pint
+import sympy
 from xarray import DataArray
 
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
 from weldx.constants import WELDX_UNIT_REGISTRY as UREG
+from weldx.core import MathematicalExpression, SpatialSeries
 from weldx.types import QuantityLike
 
 # only import heavy-weight packages on type checking
@@ -1379,12 +1381,228 @@ class Profile:
 # Trace segment classes -------------------------------------------------------
 
 
-class LinearHorizontalTraceSegment:
+class DynamicTraceSegment:
+    """Trace segment that can be defined by a ``SpatialSeries``."""
+
+    def __init__(
+        self,
+        series: Union[
+            SpatialSeries, pint.Quantity, DataArray, str, MathematicalExpression
+        ],
+        max_coord: float = 1,
+        limit_orientation_to_xy: bool = False,
+        **kwargs,
+    ):
+        """Initialize a `DynamicTraceSegment`.
+
+        Parameters
+        ----------
+        series:
+            A `~weldx.core.SpatialSeries` that describes the trajectory of the trace
+            segment. Alternatively, one can pass every other object that is valid as
+            first argument to of the ``__init__`` method of the
+            `~weldx.core.SpatialSeries`.
+        max_coord:
+            [only expression based `~weldx.core.SpatialSeries`] The maximum coordinate
+            value of the passed series dimension that specifies the position on the 3d
+            line. The value defines the segments length by evaluating the expression on
+            the interval [0, ``max_coord``]
+        limit_orientation_to_xy:
+            If `True`, the orientation vectors of the coordinate systems along the trace
+            are confined to the xy-plane.
+        kwargs:
+            A set of keyword arguments that will be forwarded to the ``__init__`` method
+            of the `~weldx.core.SpatialSeries` in case the ``series`` parameter isn't
+            already a `~weldx.core.SpatialSeries`.
+        """
+        if not isinstance(series, SpatialSeries):
+            series = SpatialSeries(series, **kwargs)
+
+        self._series = series
+        self._max_coord = max_coord
+        self._limit_orientation = limit_orientation_to_xy
+
+        if series.is_expression:
+            self._derivative = self._get_derivative_expression()
+            self._length_expr = self._get_length_expr()
+        else:
+            self._derivative = None
+            self._length_expr = None
+
+        self._length = self.get_section_length(self._max_coord)
+
+    def _get_component_derivative_squared(self, i: int) -> sympy.Expr:
+        """Get the derivative of an expression for the i-th vector component."""
+
+        def _get_component(v, i):
+            if isinstance(v, Q_):
+                v = v.to_base_units().m
+            if v.size == 3:
+                return v[i]
+            return float(v)
+
+        me = self._series.data
+        subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
+        return me.expression.subs(subs).diff(self._series.position_dim_name) ** 2
+
+    def _get_derivative_expression(self) -> MathematicalExpression:
+        """Get the derivative of an expression as `MathematicalExpression`."""
+        expr = MathematicalExpression(
+            self._series.data.expression.diff(self._series.position_dim_name)
+        )
+
+        # parameters might not be present anymore in the derived expression
+        params = {
+            k: v
+            for k, v in self._series.data.parameters.items()
+            if k in expr.get_variable_names()
+        }
+        expr.set_parameters(params)
+
+        return expr
+
+    def _get_tangent_vec_discrete(self, position: float) -> np.ndarray:
+        """Get the segments tangent vector at the given position (discrete case)."""
+        pos_data = self._series.coordinates[self._series.position_dim_name].data
+        idx_low = np.abs(pos_data - position).argmin()
+        if pos_data[idx_low] > position or idx_low + 1 == len(pos_data):
+            idx_low -= 1
+        vals = self._series.evaluate(s=[pos_data[idx_low], pos_data[idx_low + 1]]).data
+        return (vals[1] - vals[0]).m
+
+    def _get_length_expr(self) -> MathematicalExpression:
+        """Get the primitive of a the trace function if it is expression based."""
+        der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
+        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
+        mc, u = sympy.symbols("max_coord, unit")
+        primitive = sympy.integrate(expr, (self._series.position_dim_name, 0, mc)) * u
+        params = dict(unit=Q_(1, Q_("1mm").to_base_units().u).to(_DEFAULT_LEN_UNIT))
+
+        return MathematicalExpression(primitive, params)
+
+    def get_section_length(self, position: float) -> pint.Quantity:
+        """Get the length from the start of the segment to the passed relative position.
+
+        Parameters
+        ----------
+        position:
+            The value of the relative position coordinate.
+
+        Returns
+        -------
+        pint.Quantity:
+            The length at the specified value.
+
+        """
+        if self._series.is_expression:
+            return self._length_expr.evaluate(max_coord=position).data
+        return self._len_section_disc(position=position)
+
+    def _len_section_disc(self, position: float) -> pint.Quantity:
+        """Get the length until a specific position on the trace (discrete version)."""
+        if position >= self._max_coord:
+            diff = self._series.data[1:] - self._series.data[:-1]
+        else:
+            pdn = self._series.position_dim_name
+            coords = self._series.coordinates[pdn].data
+            idx_coord_upper = np.abs(coords - position).argmin()
+            if coords[idx_coord_upper] < position:
+                idx_coord_upper = idx_coord_upper + 1
+
+            coords_eval = np.append(coords[:idx_coord_upper], position)
+            vecs = self._series.evaluate(**{pdn: coords_eval}).data
+
+            diff = vecs[1:] - vecs[:-1]
+
+        length = np.sum(np.linalg.norm(diff.m, axis=1))
+        return Q_(length, diff.u)
+
+    def _get_lcs_from_coords_and_tangent(
+        self, coords: pint.Quantity, tangent: np.ndarray
+    ) -> tf.LocalCoordinateSystem:
+        """Create a ``LocalCoordinateSystem`` from coordinates and tangent vector."""
+        pdn = self._series.position_dim_name
+
+        if coords.coords[pdn].size == 1:
+            coords = coords.isel(s=0)
+
+        x = tangent
+        z = [0, 0, 1] if x.size == 3 else [[0, 0, 1] for _ in range(x.shape[0])]
+        y = np.cross(z, x)
+
+        if self._limit_orientation:
+            x = np.cross(y, z)
+        else:
+            z = np.cross(x, y)
+
+        if x.size == 3:
+            orient = np.array([x, y, z]).transpose()
+        else:
+            orient = DataArray(
+                np.array([x, y, z]),
+                dims=["v", pdn, "c"],
+                coords={"c": ["x", "y", "z"], "v": [0, 1, 2], pdn: coords.coords[pdn]},
+            )
+
+        return tf.LocalCoordinateSystem(orient, coords)
+
+    def _lcs_expr(self, position: float) -> tf.LocalCoordinateSystem:
+        """Get a ``LocalCoordinateSystem`` at the passed rel. position (expression)."""
+        pdn = self._series.position_dim_name
+        eval_pos = {pdn: position * self._max_coord}
+
+        coords = self._series.evaluate(**eval_pos).data_array
+        x = self._derivative.evaluate(**eval_pos).transpose(..., "c")
+
+        return self._get_lcs_from_coords_and_tangent(coords, x.data.m)
+
+    def _lcs_disc(self, position: float) -> tf.LocalCoordinateSystem:
+        """Get a ``LocalCoordinateSystem`` at the passed rel. position (discrete)."""
+        pdn = self._series.position_dim_name
+
+        coords = self._series.evaluate(**{pdn: position}).data_array
+        if coords.coords[pdn].size == 1:
+            x = self._get_tangent_vec_discrete(position)
+        else:
+            x = np.array([self._get_tangent_vec_discrete(p) for p in position])
+        return self._get_lcs_from_coords_and_tangent(coords, x)
+
+    @property
+    def length(self) -> pint.Quantity:
+        """Get the length of the segment."""
+        return self._length
+
+    def local_coordinate_system(self, position: float) -> tf.LocalCoordinateSystem:
+        """Calculate a local coordinate system at a position of the trace segment.
+
+        Parameters
+        ----------
+        position:
+            The relative position on the segment (interval [0, 1]). 0 is the start of
+            the segment and 1 its end
+
+        Returns
+        -------
+        weldx.transformations.LocalCoordinateSystem:
+            The coordinate system and the specified position.
+
+        """
+        if not isinstance(position, (float, int, Q_)):
+            position = np.array(position)
+
+        if self._series.is_expression:
+            return self._lcs_expr(position)
+        return self._lcs_disc(position)
+
+
+class LinearHorizontalTraceSegment(DynamicTraceSegment):
     """Trace segment with a linear path and constant z-component."""
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def __init__(self, length: pint.Quantity):
-        """Construct linear horizontal trace segment.
+        """Construct linear trace segment of length ``length`` in ``x``-direction.
+
+        The trace will run between the points ``[0, 0, 0]`` and ``[length, 0, 0]``
 
         Parameters
         ----------
@@ -1397,52 +1615,14 @@ class LinearHorizontalTraceSegment:
 
         """
         if length <= 0:
-            raise ValueError("'length' must have a positive value.")
-        self._length = float(length)
+            raise ValueError("'length' must be a positive value.")
 
-    def __repr__(self):
-        """Output representation of a LinearHorizontalTraceSegment."""
-        return f"LinearHorizontalTraceSegment('length': {self.length!r})"
-
-    @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def length(self):
-        """Get the length of the segment.
-
-        Returns
-        -------
-        pint.Quantity
-            Length of the segment
-
-        """
-        return self._length
-
-    def local_coordinate_system(
-        self, relative_position: float
-    ) -> tf.LocalCoordinateSystem:
-        """Calculate a local coordinate system along the trace segment.
-
-        Parameters
-        ----------
-        relative_position :
-            Relative position on the trace [0 .. 1]
-
-        Returns
-        -------
-        weldx.transformations.LocalCoordinateSystem
-            Local coordinate system
-
-        """
-        relative_position = np.clip(relative_position, 0, 1)
-
-        coordinates = np.array([1, 0, 0]) * relative_position * self._length
-        if isinstance(coordinates, pint.Quantity):
-            coordinates = coordinates.m
-
-        return tf.LocalCoordinateSystem(coordinates=coordinates)
+        super().__init__(
+            Q_([[0, 0, 0], [length, 0, 0]], _DEFAULT_LEN_UNIT), coords=[0, 1]
+        )
 
 
-class RadialHorizontalTraceSegment:
+class RadialHorizontalTraceSegment(DynamicTraceSegment):
     """Trace segment describing an arc with constant z-component."""
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, _DEFAULT_ANG_UNIT, None), strict=True)
@@ -1469,13 +1649,23 @@ class RadialHorizontalTraceSegment:
             raise ValueError("'radius' must have a positive value.")
         if angle <= 0:
             raise ValueError("'angle' must have a positive value.")
+
         self._radius = float(radius)
         self._angle = float(angle)
-        self._length = self._arc_length(self._radius, self._angle)
+
         if clockwise:
-            self._sign_winding = -1
-        else:
             self._sign_winding = 1
+        else:
+            self._sign_winding = -1
+
+        expr = "(x*sin(s)+w*y*(cos(s)-1))*r "
+        params = dict(
+            x=Q_([1, 0, 0], "mm"),
+            y=Q_([0, 1, 0], "mm"),
+            r=self._radius,
+            w=self._sign_winding,
+        )
+        super().__init__(expr, max_coord=self._angle, parameters=params)
 
     def __repr__(self):
         """Output representation of a RadialHorizontalTraceSegment."""
@@ -1486,106 +1676,29 @@ class RadialHorizontalTraceSegment:
             f"'sign_winding': {self._sign_winding!r})"
         )
 
-    @staticmethod
-    def _arc_length(radius, angle) -> float:
-        """Calculate the arc length.
-
-        Parameters
-        ----------
-        radius :
-            Radius
-        angle :
-            Angle (rad)
-
-        Returns
-        -------
-        float
-            Arc length
-
-        """
-        return angle * radius
-
     @property
     @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
     def angle(self) -> pint.Quantity:
-        """Get the angle of the segment.
-
-        Returns
-        -------
-        pint.Quantity
-            Angle of the segment (rad)
-
-        """
+        """Get the angle of the segment."""
         return self._angle
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def length(self) -> pint.Quantity:
-        """Get the length of the segment.
-
-        Returns
-        -------
-        pint.Quantity
-            Length of the segment
-
-        """
-        return self._length
-
-    @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def radius(self) -> pint.Quantity:
-        """Get the radius of the segment.
-
-        Returns
-        -------
-        pint.Quantity
-            Radius of the segment
-
-        """
+        """Get the radius of the segment."""
         return self._radius
 
     @property
     def is_clockwise(self) -> bool:
-        """Get True, if the segments winding is clockwise, False otherwise.
-
-        Returns
-        -------
-        bool
-            True or False
-
-        """
-        return self._sign_winding < 0
-
-    def local_coordinate_system(
-        self, relative_position: float
-    ) -> tf.LocalCoordinateSystem:
-        """Calculate a local coordinate system along the trace segment.
-
-        Parameters
-        ----------
-        relative_position :
-            Relative position on the trace [0 .. 1]
-
-        Returns
-        -------
-        weldx.transformations.LocalCoordinateSystem
-            Local coordinate system
-
-        """
-        relative_position = np.clip(relative_position, 0, 1)
-
-        orientation = tf.WXRotation.from_euler(
-            "z", self._angle * relative_position * self._sign_winding
-        ).as_matrix()
-        translation = np.array([0, -1, 0]) * self._radius * self._sign_winding
-
-        coordinates = np.matmul(orientation, translation) - translation
-        return tf.LocalCoordinateSystem(orientation, coordinates)
+        """Get True, if the segments winding is clockwise, False otherwise."""
+        return self._sign_winding > 0
 
 
 # Trace class -----------------------------------------------------------------
 
-trace_segment_types = Union[LinearHorizontalTraceSegment, RadialHorizontalTraceSegment]
+trace_segment_types = Union[
+    LinearHorizontalTraceSegment, RadialHorizontalTraceSegment, DynamicTraceSegment
+]
 
 
 class Trace:
@@ -1611,7 +1724,8 @@ class Trace:
 
         """
         if coordinate_system is None:
-            coordinate_system = tf.LocalCoordinateSystem()
+            default_coords = Q_([0, 0, 0], _DEFAULT_LEN_UNIT)
+            coordinate_system = tf.LocalCoordinateSystem(coordinates=default_coords)
 
         if not isinstance(coordinate_system, tf.LocalCoordinateSystem):
             raise TypeError(
@@ -1660,7 +1774,6 @@ class Trace:
             # Fill length lookups
             segment_length = segment.length
             total_length += segment_length
-
             self._segment_length_lookup += [segment_length]
             self._total_length_lookup += [total_length.copy()]
 
@@ -1707,7 +1820,7 @@ class Trace:
             Length of the trace.
 
         """
-        return self._total_length_lookup[-1].m
+        return self._total_length_lookup[-1]
 
     @property
     def segments(self) -> list[trace_segment_types]:
@@ -1774,7 +1887,6 @@ class Trace:
         -------
         pint.Quantity
             Raster data
-
 
         """
         if not raster_width > 0:
@@ -1847,6 +1959,13 @@ class Trace:
                 vs.axes_equal(axes)
         else:
             axes.plot(data[0].m, data[1].m, data[2].m, fmt)
+
+    def _k3d_line(self, raster_width: pint.Quantity = "1mm"):
+        """Get (or show) a k3d line from of the trace."""
+        import k3d
+
+        r = self.rasterize(raster_width).to(_DEFAULT_LEN_UNIT).magnitude
+        return k3d.line(r.astype("float32").T)
 
 
 # Linear profile interpolation class ------------------------------------------

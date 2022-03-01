@@ -2096,7 +2096,8 @@ def check_trace_segment_length(segment, tolerance=1e-9):
 
     """
     lcs = segment.local_coordinate_system(1)
-    length_numeric_prev = np.linalg.norm(lcs.coordinates)
+
+    length_numeric_prev = np.linalg.norm(lcs.coordinates.data.m)
 
     # calculate numerical length by linearization
     num_segments = 2.0
@@ -2111,7 +2112,9 @@ def check_trace_segment_length(segment, tolerance=1e-9):
         cs_0 = segment.local_coordinate_system(0)
         for rel_pos in np.arange(increment, 1.0 + increment / 2, increment):
             cs_1 = segment.local_coordinate_system(rel_pos)
-            length_numeric += np.linalg.norm(cs_1.coordinates - cs_0.coordinates)
+            length_numeric += np.linalg.norm(
+                cs_1.coordinates.data.m - cs_0.coordinates.data.m
+            )
             cs_0 = copy.deepcopy(cs_1)
 
         relative_change = length_numeric / length_numeric_prev
@@ -2150,7 +2153,9 @@ def check_trace_segment_orientation(segment):
     for rel_pos in np.arange(0.1, 1.01, 0.1):
         lcs = segment.local_coordinate_system(rel_pos)
         lcs_d = segment.local_coordinate_system(rel_pos - delta)
-        trace_direction_approx = tf.normalize(lcs.coordinates - lcs_d.coordinates)
+        trace_direction_approx = tf.normalize(
+            lcs.coordinates.data.m - lcs_d.coordinates.data.m
+        )
 
         # Check if the x-axis is aligned with the approximate trace direction
         assert vector_is_close(lcs.orientation[:, 0], trace_direction_approx, 1e-6)
@@ -2173,7 +2178,10 @@ def default_trace_segment_tests(segment, tolerance_length=1e-9):
     assert isinstance(lcs, tf.LocalCoordinateSystem)
 
     # check that coordinates for weight 0 are at [0, 0, 0]
-    assert vector_is_close(lcs.coordinates, [0, 0, 0])
+    coords = lcs.coordinates.data
+    if isinstance(coords, Q_):
+        coords = coords.m
+    assert vector_is_close(coords, [0, 0, 0])
 
     # length and orientation tests
     check_trace_segment_length(segment, tolerance_length)
@@ -2235,8 +2243,8 @@ def test_radial_horizontal_trace_segment():
         lcs_cw = segment_cw.local_coordinate_system(weight)
         lcs_ccw = segment_ccw.local_coordinate_system(weight)
 
-        assert vector_is_close(lcs_cw.coordinates, [x_exp.m, -y_exp.m, 0])
-        assert vector_is_close(lcs_ccw.coordinates, [x_exp.m, y_exp.m, 0])
+        assert vector_is_close(lcs_cw.coordinates.data.m, [x_exp.m, -y_exp.m, 0])
+        assert vector_is_close(lcs_ccw.coordinates.data.m, [x_exp.m, y_exp.m, 0])
 
     # invalid inputs
     with pytest.raises(ValueError):
@@ -2281,7 +2289,7 @@ def test_trace_construction():
     """Test the trace's construction."""
     linear_segment = geo.LinearHorizontalTraceSegment("1mm")
     radial_segment = geo.RadialHorizontalTraceSegment("1mm", Q_(np.pi, "rad"))
-    cs_coordinates = np.array([2, 3, -2])
+    cs_coordinates = Q_([2, 3, -2], "mm")
     cs_initial = helpers.rotated_coordinate_system(coordinates=cs_coordinates)
 
     # test single segment construction --------------------
@@ -2370,7 +2378,7 @@ def test_trace_local_coordinate_system():
 
     # check with arbitrary coordinate system --------------
     orientation = WXRotation.from_euler("x", np.pi / 2).as_matrix()
-    coordinates = np.array([-3, 2.5, 5])
+    coordinates = Q_([-3, 2.5, 5], "mm")
     cs_base = tf.LocalCoordinateSystem(orientation, coordinates)
 
     trace = geo.Trace([radial_segment, linear_segment], cs_base)
@@ -2392,7 +2400,7 @@ def test_trace_local_coordinate_system():
         weight = i / 10
         position_on_segment = linear_segment.length * weight
         position = radial_segment.length + position_on_segment
-        lcs_coordinates = [position_on_segment.m, 0, 0]
+        lcs_coordinates = Q_([position_on_segment.m, 0, 0], "mm")
 
         cs_exp = tf.LocalCoordinateSystem(coordinates=lcs_coordinates) + cs_start_seg2
         cs_trace = trace.local_coordinate_system(position)
@@ -2433,11 +2441,10 @@ def test_trace_rasterization():
     # check with arbitrary coordinate system --------------
     orientation = WXRotation.from_euler("y", np.pi / 2).as_matrix()
     coordinates = Q_([-3, 2.5, 5], "mm")
-    cs_base = tf.LocalCoordinateSystem(orientation, coordinates.m)
+    cs_base = tf.LocalCoordinateSystem(orientation, coordinates)
 
     trace = geo.Trace([linear_segment, radial_segment], cs_base)
     data = trace.rasterize("0.1mm")
-    print(data)
     raster_width_eff = trace.length / (data.shape[1] - 1)
 
     for i in range(data.shape[1]):
