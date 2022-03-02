@@ -10,6 +10,7 @@ from warnings import warn
 import numpy as np
 import pandas as pd
 import pint
+import sympy
 import xarray as xr
 from bidict import bidict
 
@@ -19,7 +20,6 @@ from weldx.time import Time, TimeDependent, types_time_like
 
 if TYPE_CHECKING:  # pragma: no cover
     import matplotlib.pyplot
-    import sympy
     from xarray.core.coordinates import DataArrayCoordinates
 
     from weldx.types import UnitLike
@@ -778,8 +778,9 @@ class SeriesParameter:
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
             self.values = Q_(self.values)
 
-        if self.symbol is not None and len(self.symbol) > 1:
-            raise ValueError(f"Cannot use symbol {self.symbol}")
+        # todo: double-check this -> sympy can handle this if expression isn't a string
+        # if self.symbol is not None and len(self.symbol) > 1:
+        #    raise ValueError(f"Cannot use symbol {self.symbol}")
 
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
             raise ValueError(f"Cannot set parameter as {self.values}")
@@ -980,7 +981,7 @@ class GenericSeries:
             if dims is not None and not isinstance(dims, list):
                 raise ValueError(f"Argument 'dims' must be list of strings, not {dims}")
             self._init_discrete(obj, dims, coords)
-        elif isinstance(obj, (MathematicalExpression, str)):
+        elif isinstance(obj, (MathematicalExpression, str, sympy.Expr)):
             if dims is not None and not isinstance(dims, dict):
                 raise ValueError(f"Argument 'dims' must be dict, not {dims}")
             self._init_expression(obj, dims, parameters, units)

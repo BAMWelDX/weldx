@@ -117,7 +117,7 @@ class DynamicShapeSegment:
         self._series = series
         self._max_coord = max_coord
 
-        self._length_expr = self._get_length_expr()
+        self._length_expr = self._get_length_expr() if series.is_expression else None
 
         self._length = self.get_section_length(self._max_coord)
 
@@ -207,6 +207,49 @@ class DynamicShapeSegment:
             **{self._series.position_dim_name: vals * self._max_coord}
         )
         return p.data_array.transpose(..., "c").data[:, :2].transpose()
+
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
+    def apply_translation(self, vector):
+        if self._series.is_expression:
+            exp = self._series.data.expression
+            params = self._series.data.parameters
+
+            p_idx = 0
+            p_name = f"translation_{p_idx}"
+            while p_name in params:
+                p_name = f"translation{(p_idx:= p_idx +1)}"
+                print(p_idx)
+            p = sympy.symbols(p_name)
+            params[p_name] = vector
+            self._series = SpatialSeries(exp + p, parameters=params)
+        else:
+            self._series = SpatialSeries(self._series.data_array + vector)
+        return self
+
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
+    def translate(self, vector):
+        new_segment = copy.deepcopy(self)
+        return new_segment.apply_translation(vector)
+
+    def apply_transformation(self, matrix):
+        if self._series.is_expression:
+            raise NotImplementedError
+
+        if not isinstance(matrix, DataArray):
+            matrix = ut.xr_3d_matrix(matrix)
+
+        dat = ut.xr_matmul(
+            matrix, self._series.data_array, dims_a=["c", "v"], dims_b=["c"]
+        )
+        print(dat)
+        self._series = SpatialSeries(
+            dat.transpose(..., "c").data, coords={"s": dat.coords["s"].data}
+        )
+        return self
+
+    def transform(self, matrix):
+        new_segment = copy.deepcopy(self)
+        return new_segment.apply_transformation(matrix)
 
 
 # LineSegment -----------------------------------------------------------------
