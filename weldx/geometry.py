@@ -160,8 +160,13 @@ class DynamicShapeSegment:
 
         """
         if self._series.is_expression:
-            return self._length_expr.evaluate(max_coord=position).data
-        return self._len_section_disc(position=position)
+            l = self._length_expr.evaluate(max_coord=position).data
+        else:
+            l = self._len_section_disc(position=position)
+        if l.m <= 0:
+            raise ValueError("Segment has no length.")
+
+        return l
 
     def _len_section_disc(self, position: float) -> pint.Quantity:
         """Get the length until a specific position on the trace (discrete version)."""
@@ -200,8 +205,12 @@ class DynamicShapeSegment:
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def rasterize(self, raster_width):
-        num_points = int(np.ceil(self._length.to(_DEFAULT_LEN_UNIT).m / raster_width))
-        vals = np.array([i / (num_points - 1) for i in range(num_points)])
+        if raster_width <= 0:
+            raise ValueError("'raster_width' must be a number greater than 0.")
+        num_pts = int(np.round(self._length.to(_DEFAULT_LEN_UNIT).m / raster_width)) + 1
+        if num_pts < 2:
+            num_pts = 2
+        vals = np.array([i / (num_pts - 1) for i in range(num_pts)])
         vals[-1] = 1.0
         p = self._series.evaluate(
             **{self._series.position_dim_name: vals * self._max_coord}
@@ -210,6 +219,8 @@ class DynamicShapeSegment:
 
     @UREG.check(None, _DEFAULT_LEN_UNIT)
     def apply_translation(self, vector):
+        vector = Q_([*vector.m, 0], _DEFAULT_LEN_UNIT)
+
         if self._series.is_expression:
             exp = self._series.data.expression
             params = self._series.data.parameters
@@ -218,7 +229,7 @@ class DynamicShapeSegment:
             p_name = f"translation_{p_idx}"
             while p_name in params:
                 p_name = f"translation{(p_idx:= p_idx +1)}"
-                print(p_idx)
+
             p = sympy.symbols(p_name)
             params[p_name] = vector
             self._series = SpatialSeries(exp + p, parameters=params)
@@ -232,6 +243,10 @@ class DynamicShapeSegment:
         return new_segment.apply_translation(vector)
 
     def apply_transformation(self, matrix):
+        tmp = matrix
+        matrix = np.eye(3)
+        matrix[:2, :2] = tmp
+
         if self._series.is_expression:
             raise NotImplementedError
 
@@ -241,10 +256,10 @@ class DynamicShapeSegment:
         dat = ut.xr_matmul(
             matrix, self._series.data_array, dims_a=["c", "v"], dims_b=["c"]
         )
-        print(dat)
         self._series = SpatialSeries(
             dat.transpose(..., "c").data, coords={"s": dat.coords["s"].data}
         )
+        self._length = self.get_section_length(self._max_coord)
         return self
 
     def transform(self, matrix):
@@ -255,7 +270,112 @@ class DynamicShapeSegment:
 # LineSegment -----------------------------------------------------------------
 
 
-class LineSegment:
+class LineSegment(DynamicShapeSegment):
+    """Line segment."""
+
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
+    def __init__(self, points: pint.Quantity):
+        """Construct line segment.
+
+        Parameters
+        ----------
+        points :
+            2x2 matrix of points. The first column is the
+            starting point and the second column the end point.
+
+        Returns
+        -------
+        LineSegment
+
+        """
+        if not len(points.shape) == 2:
+            raise ValueError("'points' must be a 2d array/matrix.")
+        if not (points.shape[0] == 2 and points.shape[1] == 2):
+            raise ValueError("'points' is not a 2x2 matrix.")
+
+        dat = np.zeros((2, 3))
+        dat[:, :2] = points.transpose()
+        super().__init__(Q_(dat, _DEFAULT_LEN_UNIT), coords={"s": [0, 1]})
+
+    def __repr__(self):
+        """Output representation of a LineSegment."""
+        return f"LineSegment('points'={self.points!r}, 'length'={self._length!r})"
+
+    def __str__(self):
+        """Output simple string representation of a LineSegment."""
+        p1 = np.array2string(self.points[:, 0].m, precision=2, separator=",")
+        p2 = np.array2string(self.points[:, 1].m, precision=2, separator=",")
+        return f"Line: {p1} -> {p2}"
+
+    @classmethod
+    @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT)
+    def construct_with_points(
+        cls, point_start: pint.Quantity, point_end: pint.Quantity
+    ) -> LineSegment:
+        """Construct a line segment with two points.
+
+        Parameters
+        ----------
+        point_start :
+            Starting point of the segment
+        point_end :
+            End point of the segment
+
+        Returns
+        -------
+        LineSegment
+            Line segment
+
+        """
+        points = np.transpose(np.array([point_start.m, point_end.m], dtype=float))
+        return cls(Q_(points, _DEFAULT_LEN_UNIT))
+
+    @classmethod
+    def linear_interpolation(
+        cls, segment_a: LineSegment, segment_b: LineSegment, weight: float
+    ):
+        """Interpolate two line segments linearly.
+
+        Parameters
+        ----------
+        segment_a :
+            First segment
+        segment_b :
+            Second segment
+        weight :
+            Weighting factor in the range [0 .. 1] where 0 is
+            segment a and 1 is segment b
+
+        Returns
+        -------
+        LineSegment
+            Interpolated segment
+
+        """
+        if not isinstance(segment_a, cls) or not isinstance(segment_b, cls):
+            raise TypeError("Parameters a and b must both be line segments.")
+
+        weight = np.clip(weight, 0, 1)
+        points = (1 - weight) * segment_a.points.m + weight * segment_b.points.m
+        return cls(Q_(points, _DEFAULT_LEN_UNIT))
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def points(self) -> pint.Quantity:
+        """Get the segments points in form of a 2x2 matrix.
+
+        The first column represents the starting point and the second one the end point.
+
+        Returns
+        -------
+        pint.Quantity
+            2x2 matrix containing the segments points
+
+        """
+        return self._series.data[:, :2].transpose()
+
+
+class LineSegmentOld:
     """Line segment."""
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
