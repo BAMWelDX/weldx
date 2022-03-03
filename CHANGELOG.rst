@@ -92,6 +92,8 @@ dependencies
 
 -  add ``bidict`` dependency [:pull:`618`]
 
+-  set ``networkx <2.7`` for plotting compatibility (for now) [:pull:`714`]
+
 ********************
  0.5.2 (18.11.2021)
 ********************
