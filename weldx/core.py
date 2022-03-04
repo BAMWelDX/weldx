@@ -831,11 +831,10 @@ class GenericSeries:
     as parameters.
     """
     _required_variables: list[str] = []
-    """A list of required variable names.
+    """A list of required variable names. (only expression)
 
-    The names are only relevant if the created `GenericSeries` is based on expressions.
     If one or more variables are missing in the expression, an exceptions is raised.
-    Note, that the required symbols must be variables of the expression. Using one or
+    Note that the required symbols must be variables of the expression. Using one or
     more as a parameter will also trigger an exception.
     """
 
