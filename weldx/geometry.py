@@ -378,7 +378,383 @@ class LineSegment(DynamicShapeSegment):
 # ArcSegment ------------------------------------------------------------------
 
 
-class ArcSegment:
+class ArcSegment(DynamicShapeSegment):
+    """Arc segment."""
+
+    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=True)
+    def __init__(self, points: pint.Quantity, arc_winding_ccw: bool = True):
+        """Construct arc segment.
+
+        Parameters
+        ----------
+        points :
+            2x3 matrix of points. The first column is the starting point,
+            the second column the end point and the last the center point.
+        arc_winding_ccw :
+            Specifies if the arcs winding order is counter-clockwise
+
+        Returns
+        -------
+        ArcSegment
+
+        """
+        if not len(points.shape) == 2:
+            raise ValueError("'points' must be a 2d array/matrix.")
+        if not (points.shape[0] == 2 and points.shape[1] == 3):
+            raise ValueError("'points' is not a 2x3 matrix.")
+
+        if arc_winding_ccw:
+            self._sign_arc_winding = 1
+        else:
+            self._sign_arc_winding = -1
+        self._points = points
+
+        ps = points[:, 0]
+        pe = points[:, 1]
+        pc = points[:, 2]
+
+        print(f"--> ps: {ps}, pe: {pe}, pc: {pc}")
+        self._angle = self._calculate_arc_angle(ps, pe, pc)
+        self._radius = np.linalg.norm(self._points[:, 0] - self._points[:, 2])
+
+        if arc_winding_ccw:
+            self._sign_winding = 1
+        else:
+            self._sign_winding = -1
+
+        expr = "(x*cos(a+s*w)+y*sin(a+s*w))*r + o"
+        v = ps - pc
+        sign = -1 if np.cross([1, 0], v) < 0 else 1
+        a = np.arccos(np.dot([1, 0], v) / np.linalg.norm(v)) * sign
+        print(np.dot([1, 0], v) / np.linalg.norm(v))
+        print(a)
+        print(self._radius)
+        params = dict(
+            x=Q_([1, 0, 0], "mm"),
+            y=Q_([0, 1, 0], "mm"),
+            o=Q_([*pc, 0], "mm"),
+            r=self._radius,
+            a=a,
+            w=self._sign_winding,
+        )
+        super().__init__(expr, max_coord=self._angle, parameters=params)
+        self._check_valid()
+
+    def __repr__(self):
+        """Output representation of an ArcSegment."""
+        return (
+            f"ArcSegment('points': {self._points!r}, 'arc_angle': {self._angle!r}, "
+            f"'radius': {self._radius!r}, "
+            f"'sign_arc_winding': {self._sign_arc_winding!r}, "
+            f"'arc_length': {self._length!r})"
+        )
+
+    def __str__(self):
+        """Output simple string representation of an ArcSegment."""
+        values = np.array([self._radius, self._angle / np.pi * 180, self._length])
+        return f"Arc : {np.array2string(values, precision=2, separator=',')}"
+
+    def _calculate_arc_angle(self, point_start, point_end, point_center):
+        """Calculate the arc angle."""
+        # Calculate angle between vectors (always the smaller one)
+        unit_center_start = tf.normalize(point_start - point_center)
+        unit_center_end = tf.normalize(point_end - point_center)
+
+        dot_unit = np.dot(unit_center_start, unit_center_end)
+        angle_vecs = np.arccos(np.clip(dot_unit, -1, 1))
+
+        sign_winding_points = tf.vector_points_to_left_of_vector(
+            unit_center_end, unit_center_start
+        )
+
+        if np.abs(sign_winding_points + self._sign_arc_winding) > 0:
+            return angle_vecs
+        return 2 * np.pi - angle_vecs
+
+    def _check_valid(self):
+        """Check if the segments data is valid."""
+        point_start = self.points[:, 0].m
+        point_end = self.points[:, 1].m
+        point_center = self.points[:, 2].m
+
+        radius_start_center = np.linalg.norm(point_start - point_center)
+        radius_end_center = np.linalg.norm(point_end - point_center)
+        radius_diff = radius_end_center - radius_start_center
+
+        if not math.isclose(radius_diff, 0, abs_tol=1e-9):
+            raise ValueError("Radius is not constant.")
+        if math.isclose(self._length.m, 0):
+            raise ValueError("Arc length is 0.")
+
+    @classmethod
+    @UREG.wraps(
+        None,
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
+        strict=True,
+    )
+    def construct_with_points(
+        cls,
+        point_start: pint.Quantity,
+        point_end: pint.Quantity,
+        point_center: pint.Quantity,
+        arc_winding_ccw: bool = True,
+    ) -> ArcSegment:
+        """Construct an arc segment with three points (start, end, center).
+
+        Parameters
+        ----------
+        point_start :
+            Starting point of the segment
+        point_end :
+            End point of the segment
+        point_center :
+            Center point of the arc
+        arc_winding_ccw :
+            Specifies if the arcs winding order is
+            counter-clockwise (Default value = True)
+
+        Returns
+        -------
+        ArcSegment
+            Arc segment
+
+        """
+        points = np.transpose(
+            np.array([point_start, point_end, point_center], dtype=float)
+        )
+        return cls(Q_(points, _DEFAULT_LEN_UNIT), arc_winding_ccw)
+
+    @classmethod
+    @UREG.wraps(
+        None,
+        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None),
+        strict=True,
+    )
+    def construct_with_radius(
+        cls,
+        point_start: pint.Quantity,
+        point_end: pint.Quantity,
+        radius: pint.Quantity,
+        center_left_of_line: bool = True,
+        arc_winding_ccw: bool = True,
+    ) -> ArcSegment:
+        """Construct an arc segment with a radius and the start and end points.
+
+        Parameters
+        ----------
+        point_start :
+            Starting point of the segment
+        point_end :
+            End point of the segment
+        radius :
+            Radius
+        center_left_of_line :
+            Specifies if the center point is located
+            to the left of the vector point_start -> point_end (Default value = True)
+        arc_winding_ccw :
+            Specifies if the arcs winding order is
+            counter-clockwise (Default value = True)
+
+        Returns
+        -------
+        ArcSegment
+            Arc segment
+
+        """
+        vec_start_end = point_end - point_start
+        if center_left_of_line:
+            vec_normal = np.array([-vec_start_end[1], vec_start_end[0]])
+        else:
+            vec_normal = np.array([vec_start_end[1], -vec_start_end[0]])
+
+        squared_length = np.dot(vec_start_end, vec_start_end)
+        squared_radius = radius * radius
+
+        normal_scaling = np.sqrt(
+            np.clip(squared_radius / squared_length - 0.25, 0, None)
+        )
+
+        vec_start_center = 0.5 * vec_start_end + vec_normal * normal_scaling
+        point_center = point_start + vec_start_center
+        print(f"ps: {point_start}, pe: {point_end}, pc: {point_center}")
+        return cls.construct_with_points(
+            Q_(point_start, _DEFAULT_LEN_UNIT),
+            Q_(point_end, _DEFAULT_LEN_UNIT),
+            Q_(point_center, _DEFAULT_LEN_UNIT),
+            arc_winding_ccw,
+        )
+
+    @classmethod
+    def linear_interpolation(
+        cls, segment_a: ArcSegment, segment_b: ArcSegment, weight: float
+    ) -> ArcSegment:
+        """Interpolate two arc segments linearly.
+
+        This function is not implemented, since linear interpolation of an
+        arc segment is not unique. The 'Shape' class requires succeeding
+        segments to be connected through a common point. Therefore two
+        connected segments must interpolate the connecting point in the same
+        way. Connecting an arc segment to two line segments would enforce a
+        linear interpolation of the start and end points. If the centre
+        point is also interpolated in a linear way, might (or might not)
+        result in different distances of start and end point to the center,
+        which invalidates the arc segment. Alternatively, one can
+        interpolate the radius linearly which guarantees a valid arc
+        segment, but this can cause the center point to vary even though it
+        is the same in both interpolated segments. To ensure the desired
+        interpolation behavior, you have to provide a custom interpolation.
+
+        Parameters
+        ----------
+        segment_a :
+            First segment
+        segment_b :
+            Second segment
+        weight :
+            Weighting factor in the range [0 .. 1] where 0 is
+            segment a and 1 is segment b
+
+        Returns
+        -------
+        ArcSegment
+            Interpolated segment
+
+        """
+        raise NotImplementedError(
+            "Linear interpolation of an arc segment is not unique (see "
+            "docstring). You need to provide a custom interpolation."
+        )
+
+    @property
+    @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
+    def arc_angle(self) -> pint.Quantity:
+        """Get the arc angle.
+
+        Returns
+        -------
+        pint.Quantity
+            Arc angle
+
+        """
+        return self._angle
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def arc_length(self) -> pint.Quantity:
+        """Get the arc length.
+
+        Returns
+        -------
+        pint.Quantity
+            Arc length
+
+        """
+        return self._length
+
+    @property
+    def arc_winding_ccw(self) -> bool:
+        """Get True if the winding order is counter-clockwise. False if clockwise.
+
+        Returns
+        -------
+        bool
+            True or False
+
+        """
+        return self._sign_arc_winding > 0
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def point_center(self) -> pint.Quantity:
+        """Get the center point of the segment.
+
+        Returns
+        -------
+        pint.Quantity
+            Center point
+
+        """
+        return self._points[:, 2]
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def points(self) -> pint.Quantity:
+        """Get the segments points in form of a 2x3 matrix.
+
+        The first column represents the starting point, the second one the
+        end and the third one the center.
+
+        Returns
+        -------
+        pint.Quantity
+            2x3 matrix containing the segments points
+
+        """
+        return self._points
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def radius(self) -> pint.Quantity:
+        """Get the radius.
+
+        Returns
+        -------
+        pint.Quantity
+            Radius
+
+        """
+        return self._radius
+
+    def apply_transformation(self, matrix: np.ndarray):
+        """Apply a transformation to the segment.
+
+        Parameters
+        ----------
+        matrix :
+            Transformation matrix
+
+        """
+        raise NotImplementedError
+
+    def transform(self, matrix) -> ArcSegment:
+        """Get a transformed copy of the segment.
+
+        Parameters
+        ----------
+        matrix :
+            Transformation matrix
+
+        Returns
+        -------
+        ArcSegment
+            Transformed copy
+
+        """
+        new_segment = copy.deepcopy(self)
+        new_segment.apply_transformation(matrix)
+        return new_segment
+
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
+    def apply_translation(self, vector):
+        self._points = (self._points.transpose() + vector.m).transpose()
+        return super().apply_translation(vector)
+
+    def apply_transformation(self, matrix):
+        self._points = np.matmul(np.array(matrix), self._points)
+        print(self._points)
+        self._sign_arc_winding *= tf.reflection_sign(np.array(matrix))
+        dummy = ArcSegment(Q_(self._points, _DEFAULT_LEN_UNIT), self.arc_winding_ccw)
+        self._series = dummy._series
+        print(self._series)
+        self._angle = dummy._angle
+        self._length = dummy._length
+        self._sign_arc_winding = dummy._sign_arc_winding
+        self._radius = dummy._radius
+        self._max_coord = self._angle
+        return self
+
+
+class ArcSegmentOld:
     """Arc segment."""
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=True)
