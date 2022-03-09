@@ -1443,13 +1443,15 @@ class DynamicTraceSegment:
 
         me = self._series.data
         subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
-        return me.expression.subs(subs).diff(self._series.position_dim_name) ** 2
+
+        sym = sympy.sympify(self._series.position_dim_name)
+        return me.expression.subs(subs).diff(sym) ** 2
 
     def _get_derivative_expression(self) -> MathematicalExpression:
         """Get the derivative of an expression as `MathematicalExpression`."""
-        expr = MathematicalExpression(
-            self._series.data.expression.diff(self._series.position_dim_name)
-        )
+        sym = sympy.sympify(self._series.position_dim_name)
+        der = self._series.data.expression.diff(sym)
+        expr = MathematicalExpression(der)
 
         # parameters might not be present anymore in the derived expression
         params = {
@@ -1467,7 +1469,10 @@ class DynamicTraceSegment:
         idx_low = np.abs(pos_data - position).argmin()
         if pos_data[idx_low] > position or idx_low + 1 == len(pos_data):
             idx_low -= 1
-        vals = self._series.evaluate(s=[pos_data[idx_low], pos_data[idx_low + 1]]).data
+
+        pdn = self._series.position_dim_name
+        coords = {pdn: [pos_data[idx_low], pos_data[idx_low + 1]]}
+        vals = self._series.evaluate(**coords).data
         return (vals[1] - vals[0]).m
 
     def _get_length_expr(self) -> MathematicalExpression:
@@ -1524,7 +1529,7 @@ class DynamicTraceSegment:
         pdn = self._series.position_dim_name
 
         if coords.coords[pdn].size == 1:
-            coords = coords.isel(s=0)
+            coords = coords.isel(**{pdn: 0})
 
         x = tangent
         z = [0, 0, 1] if x.size == 3 else [[0, 0, 1] for _ in range(x.shape[0])]
@@ -1658,7 +1663,8 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
         else:
             self._sign_winding = -1
 
-        expr = "(x*sin(s)+w*y*(cos(s)-1))*r "
+        pdn = SpatialSeries._position_dim_name
+        expr = f"(x*sin({pdn})+w*y*(cos({pdn})-1))*r "
         params = dict(
             x=Q_([1, 0, 0], "mm"),
             y=Q_([0, 1, 0], "mm"),
