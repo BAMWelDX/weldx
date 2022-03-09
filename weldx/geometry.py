@@ -250,8 +250,7 @@ class DynamicShapeSegment:
         if raster_width <= 0:
             raise ValueError("'raster_width' must be a number greater than 0.")
         num_pts = int(np.round(self._length.to(_DEFAULT_LEN_UNIT).m / raster_width)) + 1
-        if num_pts < 2:
-            num_pts = 2
+        num_pts = max(num_pts, 2)
         vals = np.array([i / (num_pts - 1) for i in range(num_pts)])
         vals[-1] = 1.0
         p = self._series.evaluate(

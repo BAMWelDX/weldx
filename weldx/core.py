@@ -48,8 +48,6 @@ class MathematicalExpression:
             expression.
 
         """
-        import sympy
-
         if not isinstance(expression, sympy.Expr):
             expression = sympy.sympify(expression)
         self._expression = expression
