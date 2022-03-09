@@ -162,13 +162,13 @@ class DynamicShapeSegment:
 
         """
         if self._series.is_expression:
-            l = self._length_expr.evaluate(max_coord=position).data
+            length = self._length_expr.evaluate(max_coord=position).data
         else:
-            l = self._len_section_disc(position=position)
-        if l.m <= 0:
+            length = self._len_section_disc(position=position)
+        if length.m <= 0:
             raise ValueError("Segment has no length.")
 
-        return l
+        return length
 
     def _len_section_disc(self, position: float) -> pint.Quantity:
         """Get the length until a specific position on the trace (discrete version)."""
@@ -716,7 +716,18 @@ class ArcSegment(DynamicShapeSegment):
             Transformation matrix
 
         """
-        raise NotImplementedError
+        self._points = np.matmul(np.array(matrix), self._points)
+        print(self._points)
+        self._sign_arc_winding *= tf.reflection_sign(np.array(matrix))
+        dummy = ArcSegment(Q_(self._points, _DEFAULT_LEN_UNIT), self.arc_winding_ccw)
+        self._series = dummy._series
+        print(self._series)
+        self._angle = dummy._angle
+        self._length = dummy._length
+        self._sign_arc_winding = dummy._sign_arc_winding
+        self._radius = dummy._radius
+        self._max_coord = self._angle
+        return self
 
     def transform(self, matrix) -> ArcSegment:
         """Get a transformed copy of the segment.
@@ -740,20 +751,6 @@ class ArcSegment(DynamicShapeSegment):
     def apply_translation(self, vector):
         self._points = (self._points.transpose() + vector.m).transpose()
         return super().apply_translation(vector)
-
-    def apply_transformation(self, matrix):
-        self._points = np.matmul(np.array(matrix), self._points)
-        print(self._points)
-        self._sign_arc_winding *= tf.reflection_sign(np.array(matrix))
-        dummy = ArcSegment(Q_(self._points, _DEFAULT_LEN_UNIT), self.arc_winding_ccw)
-        self._series = dummy._series
-        print(self._series)
-        self._angle = dummy._angle
-        self._length = dummy._length
-        self._sign_arc_winding = dummy._sign_arc_winding
-        self._radius = dummy._radius
-        self._max_coord = self._angle
-        return self
 
 
 # Shape class -----------------------------------------------------------------
