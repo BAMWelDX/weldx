@@ -38,6 +38,7 @@ def _workaround_imports_typechecking():
     import meshio  # noqa
     import pandas  # noqa
     import pint  # noqa
+    import sympy  # noqa
     import xarray  # noqa
 
 
