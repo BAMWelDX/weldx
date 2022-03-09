@@ -1443,11 +1443,14 @@ class DynamicTraceSegment:
 
         me = self._series.data
         subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
-        return me.expression.subs(subs).diff(self._series.position_dim_name) ** 2
+
+        sym = sympy.sympify(self._series.position_dim_name)
+        return me.expression.subs(subs).diff(sym) ** 2
 
     def _get_derivative_expression(self) -> MathematicalExpression:
         """Get the derivative of an expression as `MathematicalExpression`."""
-        der = self._series.data.expression.diff(self._series.position_dim_name)
+        sym = sympy.sympify(self._series.position_dim_name)
+        der = self._series.data.expression.diff(sym)
         expr = MathematicalExpression(der)
 
         # parameters might not be present anymore in the derived expression
