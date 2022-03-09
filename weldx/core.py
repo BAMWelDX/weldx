@@ -1558,7 +1558,7 @@ class GenericSeries:
 class SpatialSeries(GenericSeries):
     """Describes a line in 3d space depending on the positional coordinate ``s``."""
 
-    _position_dim_name = "s"
+    _position_dim_name = "l"
 
     _required_variables: list[str] = [_position_dim_name]
     """Required variable names"""
