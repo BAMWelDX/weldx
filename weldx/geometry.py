@@ -133,7 +133,9 @@ class DynamicShapeSegment:
 
         me = self._series.data
         subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
-        return me.expression.subs(subs).diff(self._series.position_dim_name) ** 2
+
+        sym = sympy.sympify(self._series.position_dim_name)
+        return me.expression.subs(subs).diff(sym) ** 2
 
     def _get_length_expr(self) -> MathematicalExpression:
         """Get the primitive of a the trace function if it is expression based."""
