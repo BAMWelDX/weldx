@@ -103,6 +103,8 @@ def _to_list(var) -> list:
 
 
 class DynamicShapeSegment:
+    """Shape segment class to define arbitrary 2d shapes using the `SpatialSeries`."""
+
     def __init__(
         self,
         series: Union[
@@ -111,6 +113,26 @@ class DynamicShapeSegment:
         max_coord: float = 1,
         **kwargs,
     ):
+        """Initialize a `DynamicShapeSegment`.
+
+        Parameters
+        ----------
+        series:
+            A `~weldx.core.SpatialSeries` that describes the trajectory of the shape
+            segment. Alternatively, one can pass every other object that is valid as
+            first argument to of the ``__init__`` method of the
+            `~weldx.core.SpatialSeries`.
+        max_coord:
+            [only expression based `~weldx.core.SpatialSeries`] The maximum coordinate
+            value of the passed series dimension that specifies the position on the 2d
+            line. The value defines the segments length by evaluating the expression on
+            the interval [0, ``max_coord``]
+        kwargs:
+            A set of keyword arguments that will be forwarded to the ``__init__`` method
+            of the `~weldx.core.SpatialSeries` in case the ``series`` parameter isn't
+            already a `~weldx.core.SpatialSeries`.
+
+        """
         if not isinstance(series, SpatialSeries):
             series = SpatialSeries(series, **kwargs)
 
@@ -191,22 +213,40 @@ class DynamicShapeSegment:
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def point_start(self):
+    def point_start(self) -> pint.Quantity:
+        """Get the starting point of the segment."""
         p = self._series.evaluate(**{self._series.position_dim_name: 0})
         return p.data_array.transpose(..., "c").data[0, :2]
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def point_end(self):
+    def point_end(self) -> pint.Quantity:
+        """Get the end point of the segment."""
         p = self._series.evaluate(**{self._series.position_dim_name: self._max_coord})
         return p.data_array.transpose(..., "c").data[0, :2]
 
     @property
     def length(self) -> pint.Quantity:
+        """Get the length of the segment."""
         return self._length
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def rasterize(self, raster_width):
+    def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
+        """Get an array of discrete raster points of the segment.
+
+        Parameters
+        ----------
+        raster_width:
+            The desired distance between two raster points. The actual distance will be
+            the closest possible value to the desired one that guarantees an equal
+            distance between all raster points.
+
+        Returns
+        -------
+        pint.Quantity:
+            Array of raster points
+
+        """
         if raster_width <= 0:
             raise ValueError("'raster_width' must be a number greater than 0.")
         num_pts = int(np.round(self._length.to(_DEFAULT_LEN_UNIT).m / raster_width)) + 1
@@ -220,7 +260,20 @@ class DynamicShapeSegment:
         return p.data_array.transpose(..., "c").data[:, :2].transpose()
 
     @UREG.check(None, _DEFAULT_LEN_UNIT)
-    def apply_translation(self, vector):
+    def apply_translation(self, vector: pint.Quantity) -> DynamicShapeSegment:
+        """Apply a translation in place.
+
+        Parameters
+        ----------
+        vector:
+            The translation vector.
+
+        Returns
+        -------
+        DynamicShapeSegment:
+            A self-reference to the modified segment
+
+        """
         vector = Q_([*vector.m, 0], _DEFAULT_LEN_UNIT)
 
         if self._series.is_expression:
@@ -240,11 +293,37 @@ class DynamicShapeSegment:
         return self
 
     @UREG.check(None, _DEFAULT_LEN_UNIT)
-    def translate(self, vector):
+    def translate(self, vector: pint.Quantity) -> DynamicShapeSegment:
+        """Create a new segment translated by the passed vector.
+
+        Parameters
+        ----------
+        vector:
+            The translation vector.
+
+        Returns
+        -------
+        DynamicShapeSegment:
+            The translated segment
+
+        """
         new_segment = copy.deepcopy(self)
         return new_segment.apply_translation(vector)
 
-    def apply_transformation(self, matrix):
+    def apply_transformation(self, matrix: np.ndarray) -> DynamicShapeSegment:
+        """Apply an in-place transformation to the segment using a matrix.
+
+        Parameters
+        ----------
+        matrix:
+            The transformation matrix
+
+        Returns
+        -------
+        DynamicShapeSegment:
+            A self-reference to the modified segment
+
+        """
         tmp = matrix
         matrix = np.eye(3)
         matrix[:2, :2] = tmp
@@ -265,6 +344,19 @@ class DynamicShapeSegment:
         return self
 
     def transform(self, matrix):
+        """Create a new segment transformed by the passed matrix.
+
+        Parameters
+        ----------
+        matrix:
+            The transformation matrix
+
+        Returns
+        -------
+        DynamicShapeSegment:
+            The transformed segment
+
+        """
         new_segment = copy.deepcopy(self)
         return new_segment.apply_transformation(matrix)
 
@@ -749,6 +841,19 @@ class ArcSegment(DynamicShapeSegment):
 
     @UREG.check(None, _DEFAULT_LEN_UNIT)
     def apply_translation(self, vector):
+        """Apply a translation in place.
+
+        Parameters
+        ----------
+        vector:
+            The translation vector.
+
+        Returns
+        -------
+        DynamicShapeSegment:
+            A self-reference to the modified segment
+
+        """
         self._points = (self._points.transpose() + vector.m).transpose()
         return super().apply_translation(vector)
 
