@@ -1517,8 +1517,8 @@ def check_point_rotation_90_degree(point_trans, point_original):
         Original point
 
     """
-    assert point_trans[0] == point_original[1]
-    assert point_trans[1] == -point_original[0]
+    assert np.allclose(point_trans[0], point_original[1])
+    assert np.allclose(point_trans[1], -point_original[0])
 
 
 def check_point_reflection_at_line_with_slope_1(point_trans, point_original):
@@ -1532,8 +1532,8 @@ def check_point_reflection_at_line_with_slope_1(point_trans, point_original):
         Original point
 
     """
-    assert point_trans[0] == point_original[1]
-    assert point_trans[1] == point_original[0]
+    assert np.allclose(point_trans[0], point_original[1])
+    assert np.allclose(point_trans[1], point_original[0])
 
 
 def shape_transformation_test_case(
