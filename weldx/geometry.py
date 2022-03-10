@@ -99,10 +99,10 @@ def _to_list(var) -> list:
     return [var]
 
 
-# DynamicShapeSegment ---------------------------------------------------------
+# DynamicBaseSegment ----------------------------------------------------------
 
 
-class DynamicShapeSegment:
+class DynamicBaseSegment:
     """Shape segment class to define arbitrary 2d shapes using the `SpatialSeries`."""
 
     def __init__(
@@ -169,6 +169,25 @@ class DynamicShapeSegment:
 
         return MathematicalExpression(primitive, params)
 
+    def _len_section_disc(self, position: float) -> pint.Quantity:
+        """Get the length until a specific position on the trace (discrete version)."""
+        if position >= self._max_coord:
+            diff = self._series.data[1:] - self._series.data[:-1]
+        else:
+            pdn = self._series.position_dim_name
+            coords = self._series.coordinates[pdn].data
+            idx_coord_upper = np.abs(coords - position).argmin()
+            if coords[idx_coord_upper] < position:
+                idx_coord_upper = idx_coord_upper + 1
+
+            coords_eval = np.append(coords[:idx_coord_upper], position)
+            vecs = self._series.evaluate(**{pdn: coords_eval}).data
+
+            diff = vecs[1:] - vecs[:-1]
+
+        length = np.sum(np.linalg.norm(diff.m, axis=1))
+        return Q_(length, diff.u)
+
     def get_section_length(self, position: float) -> pint.Quantity:
         """Get the length from the start of the segment to the passed relative position.
 
@@ -192,24 +211,17 @@ class DynamicShapeSegment:
 
         return length
 
-    def _len_section_disc(self, position: float) -> pint.Quantity:
-        """Get the length until a specific position on the trace (discrete version)."""
-        if position >= self._max_coord:
-            diff = self._series.data[1:] - self._series.data[:-1]
-        else:
-            pdn = self._series.position_dim_name
-            coords = self._series.coordinates[pdn].data
-            idx_coord_upper = np.abs(coords - position).argmin()
-            if coords[idx_coord_upper] < position:
-                idx_coord_upper = idx_coord_upper + 1
+    @property
+    def length(self) -> pint.Quantity:
+        """Get the length of the segment."""
+        return self._length
 
-            coords_eval = np.append(coords[:idx_coord_upper], position)
-            vecs = self._series.evaluate(**{pdn: coords_eval}).data
 
-            diff = vecs[1:] - vecs[:-1]
+# DynamicShapeSegment ---------------------------------------------------------
 
-        length = np.sum(np.linalg.norm(diff.m, axis=1))
-        return Q_(length, diff.u)
+
+class DynamicShapeSegment(DynamicBaseSegment):
+    """Shape segment class to define arbitrary 2d shapes using the `SpatialSeries`."""
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
@@ -224,11 +236,6 @@ class DynamicShapeSegment:
         """Get the end point of the segment."""
         p = self._series.evaluate(**{self._series.position_dim_name: self._max_coord})
         return p.data_array.transpose(..., "c").data[0, :2]
-
-    @property
-    def length(self) -> pint.Quantity:
-        """Get the length of the segment."""
-        return self._length
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
@@ -1446,7 +1453,7 @@ class Profile:
 # Trace segment classes -------------------------------------------------------
 
 
-class DynamicTraceSegment:
+class DynamicTraceSegment(DynamicBaseSegment):
     """Trace segment that can be defined by a ``SpatialSeries``."""
 
     def __init__(
@@ -1480,37 +1487,14 @@ class DynamicTraceSegment:
             of the `~weldx.core.SpatialSeries` in case the ``series`` parameter isn't
             already a `~weldx.core.SpatialSeries`.
         """
-        if not isinstance(series, SpatialSeries):
-            series = SpatialSeries(series, **kwargs)
+        super().__init__(series, max_coord, **kwargs)
 
-        self._series = series
-        self._max_coord = max_coord
         self._limit_orientation = limit_orientation_to_xy
 
-        if series.is_expression:
+        if self._series.is_expression:
             self._derivative = self._get_derivative_expression()
-            self._length_expr = self._get_length_expr()
         else:
             self._derivative = None
-            self._length_expr = None
-
-        self._length = self.get_section_length(self._max_coord)
-
-    def _get_component_derivative_squared(self, i: int) -> sympy.Expr:
-        """Get the derivative of an expression for the i-th vector component."""
-
-        def _get_component(v, i):
-            if isinstance(v, Q_):
-                v = v.to_base_units().m
-            if v.size == 3:
-                return v[i]
-            return float(v)
-
-        me = self._series.data
-        subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
-
-        sym = sympy.sympify(self._series.position_dim_name)
-        return me.expression.subs(subs).diff(sym) ** 2
 
     def _get_derivative_expression(self) -> MathematicalExpression:
         """Get the derivative of an expression as `MathematicalExpression`."""
@@ -1539,53 +1523,6 @@ class DynamicTraceSegment:
         coords = {pdn: [pos_data[idx_low], pos_data[idx_low + 1]]}
         vals = self._series.evaluate(**coords).data
         return (vals[1] - vals[0]).m
-
-    def _get_length_expr(self) -> MathematicalExpression:
-        """Get the primitive of a the trace function if it is expression based."""
-        der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
-        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
-        mc, u = sympy.symbols("max_coord, unit")
-        primitive = sympy.integrate(expr, (self._series.position_dim_name, 0, mc)) * u
-        params = dict(unit=Q_(1, Q_("1mm").to_base_units().u).to(_DEFAULT_LEN_UNIT))
-
-        return MathematicalExpression(primitive, params)
-
-    def get_section_length(self, position: float) -> pint.Quantity:
-        """Get the length from the start of the segment to the passed relative position.
-
-        Parameters
-        ----------
-        position:
-            The value of the relative position coordinate.
-
-        Returns
-        -------
-        pint.Quantity:
-            The length at the specified value.
-
-        """
-        if self._series.is_expression:
-            return self._length_expr.evaluate(max_coord=position).data
-        return self._len_section_disc(position=position)
-
-    def _len_section_disc(self, position: float) -> pint.Quantity:
-        """Get the length until a specific position on the trace (discrete version)."""
-        if position >= self._max_coord:
-            diff = self._series.data[1:] - self._series.data[:-1]
-        else:
-            pdn = self._series.position_dim_name
-            coords = self._series.coordinates[pdn].data
-            idx_coord_upper = np.abs(coords - position).argmin()
-            if coords[idx_coord_upper] < position:
-                idx_coord_upper = idx_coord_upper + 1
-
-            coords_eval = np.append(coords[:idx_coord_upper], position)
-            vecs = self._series.evaluate(**{pdn: coords_eval}).data
-
-            diff = vecs[1:] - vecs[:-1]
-
-        length = np.sum(np.linalg.norm(diff.m, axis=1))
-        return Q_(length, diff.u)
 
     def _get_lcs_from_coords_and_tangent(
         self, coords: pint.Quantity, tangent: np.ndarray
@@ -1636,11 +1573,6 @@ class DynamicTraceSegment:
         else:
             x = np.array([self._get_tangent_vec_discrete(p) for p in position])
         return self._get_lcs_from_coords_and_tangent(coords, x)
-
-    @property
-    def length(self) -> pint.Quantity:
-        """Get the length of the segment."""
-        return self._length
 
     def local_coordinate_system(self, position: float) -> tf.LocalCoordinateSystem:
         """Calculate a local coordinate system at a position of the trace segment.
