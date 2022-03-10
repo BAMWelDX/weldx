@@ -139,8 +139,16 @@ class DynamicBaseSegment:
         self._series = series
         self._max_coord = max_coord
 
-        self._length_expr = self._get_length_expr() if series.is_expression else None
+        self._length_expr = None
+        self._length = None
 
+        self._update_internals()
+
+    def _update_internals(self):
+        """Update all internal variables that can be calculated from assigned values."""
+        self._length_expr = (
+            self._get_length_expr() if self._series.is_expression else None
+        )
         self._length = self.get_section_length(self._max_coord)
 
     def _get_component_derivative_squared(self, i: int) -> sympy.Expr:
@@ -211,6 +219,23 @@ class DynamicBaseSegment:
 
         return length
 
+    def get_points(self, positions: float) -> pint.Quantity:
+        """Get an array of the points at the specified relative positions.
+
+        Parameters
+        ----------
+        positions:
+            A single position or an array of positions
+
+        Returns
+        -------
+        pint.Quantity:
+            The points at the specified positions
+
+        """
+        p = self._series.evaluate(**{self._series.position_dim_name: positions})
+        return p.data_array.transpose(..., "c").data
+
     @property
     def length(self) -> pint.Quantity:
         """Get the length of the segment."""
@@ -227,15 +252,13 @@ class DynamicShapeSegment(DynamicBaseSegment):
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_start(self) -> pint.Quantity:
         """Get the starting point of the segment."""
-        p = self._series.evaluate(**{self._series.position_dim_name: 0})
-        return p.data_array.transpose(..., "c").data[0, :2]
+        return self.get_points(0)[0, :2]
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_end(self) -> pint.Quantity:
         """Get the end point of the segment."""
-        p = self._series.evaluate(**{self._series.position_dim_name: self._max_coord})
-        return p.data_array.transpose(..., "c").data[0, :2]
+        return self.get_points(self._max_coord)[0, :2]
 
     @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
     def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
@@ -258,12 +281,11 @@ class DynamicShapeSegment(DynamicBaseSegment):
             raise ValueError("'raster_width' must be a number greater than 0.")
         num_pts = int(np.round(self._length.to(_DEFAULT_LEN_UNIT).m / raster_width)) + 1
         num_pts = max(num_pts, 2)
+
         vals = np.array([i / (num_pts - 1) for i in range(num_pts)])
         vals[-1] = 1.0
-        p = self._series.evaluate(
-            **{self._series.position_dim_name: vals * self._max_coord}
-        )
-        return p.data_array.transpose(..., "c").data[:, :2].transpose()
+
+        return self.get_points(vals * self._max_coord)[:, :2].transpose()
 
     @UREG.check(None, _DEFAULT_LEN_UNIT)
     def apply_translation(self, vector: pint.Quantity) -> DynamicShapeSegment:
@@ -330,18 +352,15 @@ class DynamicShapeSegment(DynamicBaseSegment):
             A self-reference to the modified segment
 
         """
-        tmp = matrix
-        matrix = np.eye(3)
-        matrix[:2, :2] = tmp
-
         if self._series.is_expression:
             raise NotImplementedError
 
-        if not isinstance(matrix, DataArray):
-            matrix = ut.xr_3d_matrix(matrix)
+        matrix_33 = np.eye(3)
+        matrix_33[:2, :2] = matrix
+        matrix_33 = ut.xr_3d_matrix(matrix_33)
 
         dat = ut.xr_matmul(
-            matrix, self._series.data_array, dims_a=["c", "v"], dims_b=["c"]
+            matrix_33, self._series.data_array, dims_a=["c", "v"], dims_b=["c"]
         )
         self._series = SpatialSeries(
             dat.transpose(..., "c").data, coords={"s": dat.coords["s"].data}
@@ -403,8 +422,8 @@ class LineSegment(DynamicShapeSegment):
 
     def __str__(self):
         """Output simple string representation of a LineSegment."""
-        p1 = np.array2string(self.points[:, 0].m, precision=2, separator=",")
-        p2 = np.array2string(self.points[:, 1].m, precision=2, separator=",")
+        p1 = np.array2string(self.point_start.m, precision=2, separator=",")
+        p2 = np.array2string(self.point_end.m, precision=2, separator=",")
         return f"Line: {p1} -> {p2}"
 
     @classmethod
@@ -427,13 +446,12 @@ class LineSegment(DynamicShapeSegment):
             Line segment
 
         """
-        points = np.transpose(np.array([point_start.m, point_end.m], dtype=float))
-        return cls(Q_(points, _DEFAULT_LEN_UNIT))
+        return cls(np.vstack([point_start, point_end]).transpose())
 
     @classmethod
     def linear_interpolation(
         cls, segment_a: LineSegment, segment_b: LineSegment, weight: float
-    ):
+    ) -> LineSegment:
         """Interpolate two line segments linearly.
 
         Parameters
@@ -456,8 +474,7 @@ class LineSegment(DynamicShapeSegment):
             raise TypeError("Parameters a and b must both be line segments.")
 
         weight = np.clip(weight, 0, 1)
-        points = (1 - weight) * segment_a.points.m + weight * segment_b.points.m
-        return cls(Q_(points, _DEFAULT_LEN_UNIT))
+        return cls((1 - weight) * segment_a.points + weight * segment_b.points)
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
@@ -503,36 +520,21 @@ class ArcSegment(DynamicShapeSegment):
         if not (points.shape[0] == 2 and points.shape[1] == 3):
             raise ValueError("'points' is not a 2x3 matrix.")
 
-        if arc_winding_ccw:
-            self._sign_arc_winding = 1
-        else:
-            self._sign_arc_winding = -1
+        self._sign_winding = 1 if arc_winding_ccw else -1
         self._points = points
 
-        ps = points[:, 0]
-        pe = points[:, 1]
-        pc = points[:, 2]
-
-        print(f"--> ps: {ps}, pe: {pe}, pc: {pc}")
-        self._angle = self._calculate_arc_angle(ps, pe, pc)
-        self._radius = np.linalg.norm(self._points[:, 0] - self._points[:, 2])
-
-        if arc_winding_ccw:
-            self._sign_winding = 1
-        else:
-            self._sign_winding = -1
+        diff = points[:, 0] - points[:, 2]
+        self._angle = self._calculate_arc_angle(points)
+        self._radius = np.linalg.norm(diff)
 
         expr = "(x*cos(a+s*w)+y*sin(a+s*w))*r + o"
-        v = ps - pc
-        sign = -1 if np.cross([1, 0], v) < 0 else 1
-        a = np.arccos(np.dot([1, 0], v) / np.linalg.norm(v)) * sign
-        print(np.dot([1, 0], v) / np.linalg.norm(v))
-        print(a)
-        print(self._radius)
+        sign = -1 if np.cross([1, 0], diff) < 0 else 1
+        a = np.arccos(np.dot([1, 0], diff) / self._radius) * sign
+
         params = dict(
             x=Q_([1, 0, 0], "mm"),
             y=Q_([0, 1, 0], "mm"),
-            o=Q_([*pc, 0], "mm"),
+            o=Q_([*points[:, 2], 0], "mm"),
             r=self._radius,
             a=a,
             w=self._sign_winding,
@@ -545,7 +547,7 @@ class ArcSegment(DynamicShapeSegment):
         return (
             f"ArcSegment('points': {self._points!r}, 'arc_angle': {self._angle!r}, "
             f"'radius': {self._radius!r}, "
-            f"'sign_arc_winding': {self._sign_arc_winding!r}, "
+            f"'sign_arc_winding': {self._sign_winding!r}, "
             f"'arc_length': {self._length!r})"
         )
 
@@ -554,11 +556,11 @@ class ArcSegment(DynamicShapeSegment):
         values = np.array([self._radius, self._angle / np.pi * 180, self._length])
         return f"Arc : {np.array2string(values, precision=2, separator=',')}"
 
-    def _calculate_arc_angle(self, point_start, point_end, point_center):
+    def _calculate_arc_angle(self, points):
         """Calculate the arc angle."""
         # Calculate angle between vectors (always the smaller one)
-        unit_center_start = tf.normalize(point_start - point_center)
-        unit_center_end = tf.normalize(point_end - point_center)
+        unit_center_start = tf.normalize(points[:, 0] - points[:, 2])
+        unit_center_end = tf.normalize(points[:, 1] - points[:, 2])
 
         dot_unit = np.dot(unit_center_start, unit_center_end)
         angle_vecs = np.arccos(np.clip(dot_unit, -1, 1))
@@ -567,7 +569,7 @@ class ArcSegment(DynamicShapeSegment):
             unit_center_end, unit_center_start
         )
 
-        if np.abs(sign_winding_points + self._sign_arc_winding) > 0:
+        if np.abs(sign_winding_points + self._sign_winding) > 0:
             return angle_vecs
         return 2 * np.pi - angle_vecs
 
@@ -587,11 +589,7 @@ class ArcSegment(DynamicShapeSegment):
             raise ValueError("Arc length is 0.")
 
     @classmethod
-    @UREG.wraps(
-        None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
-        strict=True,
-    )
+    @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None)
     def construct_with_points(
         cls,
         point_start: pint.Quantity,
@@ -619,10 +617,8 @@ class ArcSegment(DynamicShapeSegment):
             Arc segment
 
         """
-        points = np.transpose(
-            np.array([point_start, point_end, point_center], dtype=float)
-        )
-        return cls(Q_(points, _DEFAULT_LEN_UNIT), arc_winding_ccw)
+        points = np.vstack([point_start, point_end, point_center]).transpose()
+        return cls(points, arc_winding_ccw)
 
     @classmethod
     @UREG.wraps(
@@ -676,7 +672,6 @@ class ArcSegment(DynamicShapeSegment):
 
         vec_start_center = 0.5 * vec_start_end + vec_normal * normal_scaling
         point_center = point_start + vec_start_center
-        print(f"ps: {point_start}, pe: {point_end}, pc: {point_center}")
         return cls.construct_with_points(
             Q_(point_start, _DEFAULT_LEN_UNIT),
             Q_(point_end, _DEFAULT_LEN_UNIT),
@@ -761,7 +756,7 @@ class ArcSegment(DynamicShapeSegment):
             True or False
 
         """
-        return self._sign_arc_winding > 0
+        return self._sign_winding > 0
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
@@ -815,35 +810,18 @@ class ArcSegment(DynamicShapeSegment):
 
         """
         self._points = np.matmul(np.array(matrix), self._points)
-        print(self._points)
-        self._sign_arc_winding *= tf.reflection_sign(np.array(matrix))
+        self._sign_winding *= tf.reflection_sign(np.array(matrix))
+
+        diff = self._points[:, 0] - self._points[:, 2]
+        self._angle = self._calculate_arc_angle(self._points)
+        self._radius = np.linalg.norm(diff)
+        self._max_coord = self._angle
+
         dummy = ArcSegment(Q_(self._points, _DEFAULT_LEN_UNIT), self.arc_winding_ccw)
         self._series = dummy._series
-        print(self._series)
-        self._angle = dummy._angle
-        self._length = dummy._length
-        self._sign_arc_winding = dummy._sign_arc_winding
-        self._radius = dummy._radius
-        self._max_coord = self._angle
+        self._update_internals()
+
         return self
-
-    def transform(self, matrix) -> ArcSegment:
-        """Get a transformed copy of the segment.
-
-        Parameters
-        ----------
-        matrix :
-            Transformation matrix
-
-        Returns
-        -------
-        ArcSegment
-            Transformed copy
-
-        """
-        new_segment = copy.deepcopy(self)
-        new_segment.apply_transformation(matrix)
-        return new_segment
 
     @UREG.check(None, _DEFAULT_LEN_UNIT)
     def apply_translation(self, vector):
