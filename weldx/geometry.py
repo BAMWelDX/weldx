@@ -308,6 +308,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
             exp = self._series.data.expression
             params = self._series.data.parameters
 
+            # Segment might have been translated already
             p_idx = 0
             p_name = f"translation_{p_idx}"
             while p_name in params:
@@ -522,30 +523,17 @@ class ArcSegment(DynamicShapeSegment):
 
         self._sign_winding = 1 if arc_winding_ccw else -1
         self._points = points
+        self._radius = None
 
-        diff = points[:, 0] - points[:, 2]
-        self._angle = self._calculate_arc_angle(points)
-        self._radius = np.linalg.norm(diff)
+        series = self._update_internals_and_get_series()
+        super().__init__(series, max_coord=self._max_coord)
 
-        expr = "(x*cos(a+s*w)+y*sin(a+s*w))*r + o"
-        sign = -1 if np.cross([1, 0], diff) < 0 else 1
-        a = np.arccos(np.dot([1, 0], diff) / self._radius) * sign
-
-        params = dict(
-            x=Q_([1, 0, 0], "mm"),
-            y=Q_([0, 1, 0], "mm"),
-            o=Q_([*points[:, 2], 0], "mm"),
-            r=self._radius,
-            a=a,
-            w=self._sign_winding,
-        )
-        super().__init__(expr, max_coord=self._angle, parameters=params)
         self._check_valid()
 
     def __repr__(self):
         """Output representation of an ArcSegment."""
         return (
-            f"ArcSegment('points': {self._points!r}, 'arc_angle': {self._angle!r}, "
+            f"ArcSegment('points': {self._points!r}, 'arc_angle': {self._max_coord!r}, "
             f"'radius': {self._radius!r}, "
             f"'sign_arc_winding': {self._sign_winding!r}, "
             f"'arc_length': {self._length!r})"
@@ -553,7 +541,7 @@ class ArcSegment(DynamicShapeSegment):
 
     def __str__(self):
         """Output simple string representation of an ArcSegment."""
-        values = np.array([self._radius, self._angle / np.pi * 180, self._length])
+        values = np.array([self._radius, self._max_coord / np.pi * 180, self._length])
         return f"Arc : {np.array2string(values, precision=2, separator=',')}"
 
     def _calculate_arc_angle(self, points):
@@ -575,18 +563,34 @@ class ArcSegment(DynamicShapeSegment):
 
     def _check_valid(self):
         """Check if the segments data is valid."""
-        point_start = self.points[:, 0].m
-        point_end = self.points[:, 1].m
-        point_center = self.points[:, 2].m
+        radius_start = np.linalg.norm(self.points[:, 0].m - self.points[:, 2].m)
+        radius_end = np.linalg.norm(self.points[:, 1].m - self.points[:, 2].m)
 
-        radius_start_center = np.linalg.norm(point_start - point_center)
-        radius_end_center = np.linalg.norm(point_end - point_center)
-        radius_diff = radius_end_center - radius_start_center
-
-        if not math.isclose(radius_diff, 0, abs_tol=1e-9):
+        if not np.isclose(radius_end - radius_start, 0):
             raise ValueError("Radius is not constant.")
-        if math.isclose(self._length.m, 0):
+        if self._length <= 0:
             raise ValueError("Arc length is 0.")
+
+    def _update_internals_and_get_series(self) -> SpatialSeries:
+        diff = self._points[:, 0] - self._points[:, 2]
+        self._max_coord = self._calculate_arc_angle(self._points)
+        self._radius = np.linalg.norm(diff)
+
+        expr = "(x*cos(a+s*w)+y*sin(a+s*w))*r + o"
+        sign = -1 if np.cross([1, 0], diff) < 0 else 1
+        a = np.arccos(np.dot([1, 0], diff) / self._radius) * sign
+
+        print(self._points[:, 2])
+        params = dict(
+            x=Q_([1, 0, 0], _DEFAULT_LEN_UNIT),
+            y=Q_([0, 1, 0], _DEFAULT_LEN_UNIT),
+            o=Q_([*self._points[:, 2], 0], _DEFAULT_LEN_UNIT),
+            r=self._radius,
+            a=a,
+            w=self._sign_winding,
+        )
+
+        return SpatialSeries(expr, parameters=params)
 
     @classmethod
     @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None)
@@ -621,10 +625,8 @@ class ArcSegment(DynamicShapeSegment):
         return cls(points, arc_winding_ccw)
 
     @classmethod
-    @UREG.wraps(
-        None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None),
-        strict=True,
+    @UREG.check(
+        None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None
     )
     def construct_with_radius(
         cls,
@@ -657,25 +659,25 @@ class ArcSegment(DynamicShapeSegment):
             Arc segment
 
         """
+        if not isinstance(radius, pint.Quantity):
+            radius = Q_(radius)
+
         vec_start_end = point_end - point_start
-        if center_left_of_line:
-            vec_normal = np.array([-vec_start_end[1], vec_start_end[0]])
-        else:
-            vec_normal = np.array([vec_start_end[1], -vec_start_end[0]])
+        s = -1 if center_left_of_line else 1
+        vec_normal = np.hstack([s * vec_start_end[1], -s * vec_start_end[0]])
 
-        squared_length = np.dot(vec_start_end, vec_start_end)
-        squared_radius = radius * radius
+        length_sq = np.dot(vec_start_end, vec_start_end)
+        radius_sq = radius * radius
 
-        normal_scaling = np.sqrt(
-            np.clip(squared_radius / squared_length - 0.25, 0, None)
-        )
-
+        normal_scaling = np.sqrt(np.clip(radius_sq / length_sq - 0.25, 0, None))
         vec_start_center = 0.5 * vec_start_end + vec_normal * normal_scaling
+
         point_center = point_start + vec_start_center
+
         return cls.construct_with_points(
-            Q_(point_start, _DEFAULT_LEN_UNIT),
-            Q_(point_end, _DEFAULT_LEN_UNIT),
-            Q_(point_center, _DEFAULT_LEN_UNIT),
+            point_start,
+            point_end,
+            point_center,
             arc_winding_ccw,
         )
 
@@ -731,7 +733,7 @@ class ArcSegment(DynamicShapeSegment):
             Arc angle
 
         """
-        return self._angle
+        return self._max_coord
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
@@ -812,14 +814,9 @@ class ArcSegment(DynamicShapeSegment):
         self._points = np.matmul(np.array(matrix), self._points)
         self._sign_winding *= tf.reflection_sign(np.array(matrix))
 
-        diff = self._points[:, 0] - self._points[:, 2]
-        self._angle = self._calculate_arc_angle(self._points)
-        self._radius = np.linalg.norm(diff)
-        self._max_coord = self._angle
-
-        dummy = ArcSegment(Q_(self._points, _DEFAULT_LEN_UNIT), self.arc_winding_ccw)
-        self._series = dummy._series
+        self._series = self._update_internals_and_get_series()
         self._update_internals()
+        self._check_valid()
 
         return self
 
