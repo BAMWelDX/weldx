@@ -1466,10 +1466,9 @@ class DynamicTraceSegment(DynamicBaseSegment):
 
         self._limit_orientation = limit_orientation_to_xy
 
+        self._derivative = None
         if self._series.is_expression:
             self._derivative = self._get_derivative_expression()
-        else:
-            self._derivative = None
 
     def _get_derivative_expression(self) -> MathematicalExpression:
         """Get the derivative of an expression as `MathematicalExpression`."""
@@ -1628,12 +1627,7 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
             raise ValueError("'angle' must have a positive value.")
 
         self._radius = float(radius)
-        self._angle = float(angle)
-
-        if clockwise:
-            self._sign_winding = 1
-        else:
-            self._sign_winding = -1
+        self._sign_winding = 1 if clockwise else -1
 
         pdn = SpatialSeries._position_dim_name
         expr = f"(x*sin({pdn})+w*y*(cos({pdn})-1))*r "
@@ -1643,14 +1637,14 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
             r=self._radius,
             w=self._sign_winding,
         )
-        super().__init__(expr, max_coord=self._angle, parameters=params)
+        super().__init__(expr, max_coord=float(angle), parameters=params)
 
     def __repr__(self):
         """Output representation of a RadialHorizontalTraceSegment."""
         return (
             f"RadialHorizontalTraceSegment('radius': {self._radius!r}, "
-            f"'angle': {self._angle!r}, "
-            f"'length': {self._length!r}, "
+            f"'angle': {self.angle!r}, "
+            f"'length': {self.length!r}, "
             f"'sign_winding': {self._sign_winding!r})"
         )
 
@@ -1658,7 +1652,7 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
     @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
     def angle(self) -> pint.Quantity:
         """Get the angle of the segment."""
-        return self._angle
+        return self._max_coord
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
