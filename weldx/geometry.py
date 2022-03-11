@@ -102,7 +102,7 @@ def _to_list(var) -> list:
 
 
 class DynamicBaseSegment:
-    """Shape segment class to define arbitrary 2d shapes using the `SpatialSeries`."""
+    """Segment class to define arbitrary lines using the `~weldx.core.SpatialSeries`."""
 
     def __init__(
         self,
@@ -245,7 +245,7 @@ class DynamicBaseSegment:
 
 
 class DynamicShapeSegment(DynamicBaseSegment):
-    """Shape segment class to define arbitrary 2d shapes using the `SpatialSeries`."""
+    """Shape segment class to define arbitrary 2d shapes."""
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
@@ -1428,7 +1428,7 @@ class Profile:
 
 
 class DynamicTraceSegment(DynamicBaseSegment):
-    """Trace segment that can be defined by a ``SpatialSeries``."""
+    """Trace segment that can be defined by a `~weldx.core.SpatialSeries`."""
 
     def __init__(
         self,

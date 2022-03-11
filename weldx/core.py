@@ -776,10 +776,6 @@ class SeriesParameter:
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
             self.values = Q_(self.values)
 
-        # todo: double-check this -> sympy can handle this if expression isn't a string
-        # if self.symbol is not None and len(self.symbol) > 1:
-        #    raise ValueError(f"Cannot use symbol {self.symbol}")
-
         if not isinstance(self.values, (pint.Quantity, xr.DataArray)):
             raise ValueError(f"Cannot set parameter as {self.values}")
 

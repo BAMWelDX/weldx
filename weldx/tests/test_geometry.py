@@ -575,8 +575,6 @@ def check_arc_segment_values(
         arc_length = arc_length.m
 
     assert vector_is_close(segment.point_start.m, point_start)
-    print(point_end)
-    print(segment.point_end.m)
     assert vector_is_close(segment.point_end.m, point_end)
     assert vector_is_close(segment.point_center.m, point_center)
 
