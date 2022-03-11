@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import copy
-import math
 from dataclasses import InitVar, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
