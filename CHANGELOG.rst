@@ -42,8 +42,7 @@ changes
 -  `WeldxFile.custom_schema` now accepts an optional tuple with the first element being a schema to validate upon read,
    the second upon writing the data. [:pull:`697`]
 
--  Weldx now works with Python-3.10. [:pull:`696`]
-
+-  Reshape `SpatialData` coordiantes to ``(-1, 3)`` before exporting with ``meshio`` for compatibility. [:pull:`723`]
 
 fixes
 =====
@@ -79,6 +78,8 @@ deprecations
 
 dependencies
 ============
+
+-  ``weldx`` now works with Python-3.10. [:pull:`696`]
 
 -  bump to ``asdf >=2.8.2`` [:pull:`668`]
 
