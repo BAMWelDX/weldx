@@ -758,7 +758,6 @@ class ArcSegment(DynamicShapeSegment):
         return self._sign_winding > 0
 
     @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_center(self) -> pint.Quantity:
         """Get the center point of the segment.
 
@@ -771,7 +770,6 @@ class ArcSegment(DynamicShapeSegment):
         return self._points[:, 2]
 
     @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def points(self) -> pint.Quantity:
         """Get the segments points in form of a 2x3 matrix.
 
@@ -831,9 +829,7 @@ class ArcSegment(DynamicShapeSegment):
             A self-reference to the modified segment
 
         """
-        self._points = (
-            (self.points.transpose() + vector).transpose().to(_DEFAULT_LEN_UNIT)
-        )
+        self._points = (self.points.transpose() + vector).transpose()
         return super().apply_translation(vector)
 
 
