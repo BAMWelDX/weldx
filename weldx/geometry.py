@@ -112,7 +112,7 @@ class DynamicBaseSegment:
         max_coord: float = 1,
         **kwargs,
     ):
-        """Initialize a `DynamicShapeSegment`.
+        """Initialize a `DynamicBaseSegment`.
 
         Parameters
         ----------
