@@ -422,9 +422,7 @@ class LineSegment(DynamicShapeSegment):
 
     def __str__(self):
         """Output simple string representation of a LineSegment."""
-        p1 = np.array2string(self.point_start.m, precision=2, separator=",")
-        p2 = np.array2string(self.point_end.m, precision=2, separator=",")
-        return f"Line: {p1} -> {p2}"
+        return f"Line: {self.point_start:.2f} -> {self.point_end:.2f}"
 
     @classmethod
     @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT)
