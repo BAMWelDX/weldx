@@ -9,7 +9,7 @@
 added
 =====
 
-- `DynamicShapeSegment` [:pull:`713`]
+- ``DynamicShapeSegment`` [:pull:`713`]
 
 -  `SpatialSeries` and `DynamicTraceSegment` [:pull:`699`]
 
