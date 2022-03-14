@@ -67,6 +67,7 @@ These classes are used to define workpiece geometries.
 
     ArcSegment
     Geometry
+    DynamicBaseSegment
     DynamicShapeSegment
     LineSegment
     LinearHorizontalTraceSegment
