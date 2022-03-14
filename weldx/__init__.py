@@ -67,6 +67,7 @@ These classes are used to define workpiece geometries.
 
     ArcSegment
     Geometry
+    DynamicShapeSegment
     LineSegment
     LinearHorizontalTraceSegment
     Profile
@@ -150,6 +151,7 @@ from weldx.core import GenericSeries, MathematicalExpression, TimeSeries, Spatia
 from weldx.geometry import (
     ArcSegment,
     Geometry,
+    DynamicShapeSegment,
     LineSegment,
     LinearHorizontalTraceSegment,
     Profile,
@@ -179,6 +181,7 @@ __all__ = (
     "CoordinateSystemManager",
     "Geometry",
     "GmawProcess",
+    "DynamicShapeSegment",
     "LineSegment",
     "LocalCoordinateSystem",
     "Profile",
