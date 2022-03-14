@@ -281,7 +281,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
         num_pts = int(np.round(self._length.to(_DEFAULT_LEN_UNIT).m / raster_width)) + 1
         num_pts = max(num_pts, 2)
 
-        vals = np.linspace(0., 1.0, num=num_pts, endpoint=True)
+        vals = np.linspace(0.0, 1.0, num=num_pts, endpoint=True)
 
         return self.get_points(vals * self._max_coord)[:, :2].transpose()
 
