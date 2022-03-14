@@ -297,7 +297,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
 
         Returns
         -------
-        DynamicShapeSegment:
+        ~weldx.geometry.DynamicShapeSegment:
             A self-reference to the modified segment
 
         """
@@ -331,7 +331,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
 
         Returns
         -------
-        DynamicShapeSegment:
+        ~weldx.geometry.DynamicShapeSegment:
             The translated segment
 
         """
@@ -348,7 +348,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
 
         Returns
         -------
-        DynamicShapeSegment:
+        ~weldx.geometry.DynamicShapeSegment:
             A self-reference to the modified segment
 
         """
@@ -378,7 +378,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
 
         Returns
         -------
-        DynamicShapeSegment:
+        ~weldx.geometry.DynamicShapeSegment:
             The transformed segment
 
         """
