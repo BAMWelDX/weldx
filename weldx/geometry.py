@@ -301,7 +301,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
             A self-reference to the modified segment
 
         """
-        vector = Q_([*vector.m, 0], _DEFAULT_LEN_UNIT)
+        vector = np.append(vector, 0)
 
         if self._series.is_expression:
             exp = self._series.data.expression
