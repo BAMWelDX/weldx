@@ -392,7 +392,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
 class LineSegment(DynamicShapeSegment):
     """Line segment."""
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
     def __init__(self, points: pint.Quantity):
         """Construct line segment.
 
@@ -413,7 +413,7 @@ class LineSegment(DynamicShapeSegment):
             raise ValueError("'points' is not a 2x2 matrix.")
 
         super().__init__(
-            np.vstack(points.T, Q_([0.0, 0.0], _DEFAULT_LEN_UNIT)),
+            np.vstack([points, Q_([0.0, 0.0], points.u)]).T,
             coords={"s": [0, 1]},
         )
 
