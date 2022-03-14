@@ -476,7 +476,6 @@ class LineSegment(DynamicShapeSegment):
         return cls((1 - weight) * segment_a.points + weight * segment_b.points)
 
     @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def points(self) -> pint.Quantity:
         """Get the segments points in form of a 2x2 matrix.
 
