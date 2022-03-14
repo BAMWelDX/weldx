@@ -832,7 +832,9 @@ class ArcSegment(DynamicShapeSegment):
             A self-reference to the modified segment
 
         """
-        self._points = (self._points.transpose() + vector.m).transpose()
+        self._points = (
+            (self.points.transpose() + vector).transpose().to(_DEFAULT_LEN_UNIT).m
+        )
         return super().apply_translation(vector)
 
 
