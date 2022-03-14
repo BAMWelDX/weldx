@@ -412,9 +412,10 @@ class LineSegment(DynamicShapeSegment):
         if not (points.shape[0] == 2 and points.shape[1] == 2):
             raise ValueError("'points' is not a 2x2 matrix.")
 
-        dat = np.zeros((2, 3))
-        dat[:, :2] = points.transpose()
-        super().__init__(Q_(dat, _DEFAULT_LEN_UNIT), coords={"s": [0, 1]})
+        super().__init__(
+            np.vstack(points.T, Q_([0.0, 0.0], _DEFAULT_LEN_UNIT)),
+            coords={"s": [0, 1]},
+        )
 
     def __repr__(self):
         """Output representation of a LineSegment."""
