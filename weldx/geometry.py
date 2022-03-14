@@ -496,7 +496,7 @@ class LineSegment(DynamicShapeSegment):
 class ArcSegment(DynamicShapeSegment):
     """Arc segment."""
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=True)
+    @UREG.check(None, _DEFAULT_LEN_UNIT, None)
     def __init__(self, points: pint.Quantity, arc_winding_ccw: bool = True):
         """Construct arc segment.
 
@@ -544,6 +544,7 @@ class ArcSegment(DynamicShapeSegment):
     def _calculate_arc_angle(self, points):
         """Calculate the arc angle."""
         # Calculate angle between vectors (always the smaller one)
+        points = points.m
         unit_center_start = tf.normalize(points[:, 0] - points[:, 2])
         unit_center_end = tf.normalize(points[:, 1] - points[:, 2])
 
@@ -571,17 +572,16 @@ class ArcSegment(DynamicShapeSegment):
     def _update_internals_and_get_series(self) -> SpatialSeries:
         diff = self._points[:, 0] - self._points[:, 2]
         self._max_coord = self._calculate_arc_angle(self._points)
-        self._radius = np.linalg.norm(diff)
+        self._radius = Q_(np.linalg.norm(diff.m), self._points.u)
 
         expr = "(x*cos(a+s*w)+y*sin(a+s*w))*r + o"
         sign = -1 if np.cross([1, 0], diff) < 0 else 1
         a = np.arccos(np.dot([1, 0], diff) / self._radius) * sign
 
-        print(self._points[:, 2])
         params = dict(
-            x=Q_([1, 0, 0], _DEFAULT_LEN_UNIT),
-            y=Q_([0, 1, 0], _DEFAULT_LEN_UNIT),
-            o=Q_([*self._points[:, 2], 0], _DEFAULT_LEN_UNIT),
+            x=Q_([1, 0, 0], ""),
+            y=Q_([0, 1, 0], ""),
+            o=np.append(self._points[:, 2], 0),
             r=self._radius,
             a=a,
             w=self._sign_winding,
@@ -787,7 +787,6 @@ class ArcSegment(DynamicShapeSegment):
         return self._points
 
     @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def radius(self) -> pint.Quantity:
         """Get the radius.
 
@@ -833,7 +832,7 @@ class ArcSegment(DynamicShapeSegment):
 
         """
         self._points = (
-            (self.points.transpose() + vector).transpose().to(_DEFAULT_LEN_UNIT).m
+            (self.points.transpose() + vector).transpose().to(_DEFAULT_LEN_UNIT)
         )
         return super().apply_translation(vector)
 
