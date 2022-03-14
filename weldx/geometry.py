@@ -259,7 +259,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
         """Get the end point of the segment."""
         return self.get_points(self._max_coord)[0, :2]
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
     def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
         """Get an array of discrete raster points of the segment.
 
@@ -276,11 +276,10 @@ class DynamicShapeSegment(DynamicBaseSegment):
             Array of raster points
 
         """
+        raster_width = Q_(raster_width)
         if raster_width <= 0:
             raise ValueError("'raster_width' must be a number greater than 0.")
-        num_pts = (
-            np.round((self._length / raster_width).to_base_units()).astype(int) + 1
-        )
+        num_pts = np.round((self._length / raster_width).m).astype(int) + 1
         num_pts = max(num_pts, 2)
 
         vals = np.linspace(0.0, 1.0, num=num_pts, endpoint=True)
