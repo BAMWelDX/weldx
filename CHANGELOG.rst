@@ -42,7 +42,7 @@ changes
 -  `WeldxFile.custom_schema` now accepts an optional tuple with the first element being a schema to validate upon read,
    the second upon writing the data. [:pull:`697`]
 
--  Reshape `SpatialData` coordiantes to ``(-1, 3)`` before exporting with ``meshio`` for compatibility. [:pull:`723`]
+-  Reshape `SpatialData` coordinates to ``(-1, 3)`` before exporting with ``meshio`` for compatibility. [:pull:`723`]
 
 fixes
 =====
