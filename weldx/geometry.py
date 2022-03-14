@@ -278,7 +278,7 @@ class DynamicShapeSegment(DynamicBaseSegment):
         """
         if raster_width <= 0:
             raise ValueError("'raster_width' must be a number greater than 0.")
-        num_pts = int(np.round(self._length.to(_DEFAULT_LEN_UNIT).m / raster_width)) + 1
+        num_pts = np.round((self._length / raster_width).to_base_units()).astype(int) + 1
         num_pts = max(num_pts, 2)
 
         vals = np.linspace(0.0, 1.0, num=num_pts, endpoint=True)
