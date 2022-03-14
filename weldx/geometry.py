@@ -213,7 +213,7 @@ class DynamicBaseSegment:
             length = self._length_expr.evaluate(max_coord=position).data
         else:
             length = self._len_section_disc(position=position)
-        if length.m <= 0:
+        if length <= 0:
             raise ValueError("Segment has no length.")
 
         return length
