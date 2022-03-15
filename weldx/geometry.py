@@ -2934,7 +2934,8 @@ class SpatialData:
 
         """
         mesh = meshio.Mesh(
-            points=self.coordinates.data, cells={"triangle": self.triangles}
+            points=self.coordinates.data.reshape(-1, 3),
+            cells={"triangle": self.triangles},
         )
         mesh.write(file_name)
 
