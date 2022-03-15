@@ -169,7 +169,7 @@ class DynamicBaseSegment:
     def _get_length_expr(self) -> MathematicalExpression:
         """Get the primitive of a the trace function if it is expression based."""
         der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
-        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
+        expr = sympy.simplify(sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2]))
         mc, u = sympy.symbols("max_coord, unit")
         primitive = sympy.integrate(expr, (self._series.position_dim_name, 0, mc)) * u
         params = dict(unit=Q_(1, Q_("1mm").to_base_units().u).to(_DEFAULT_LEN_UNIT))
@@ -529,6 +529,26 @@ class ArcSegment(DynamicShapeSegment):
         -------
         ArcSegment
 
+                Examples
+        --------
+        Create a ̧̧`LineSegment` starting at ``x=3``,``y=4`` and ending at ``x=1``,
+        ``y=6`` with the center point ``x=1``,``y=4``
+
+        >>> from weldx import Q_, ArcSegment
+        >>> point_data = Q_([[3, 1, 1], [4, 6, 4]], "mm")
+        >>> ArcSegment(point_data)
+        <ArcSegment>
+        Line:
+            [3.00 4.00] mm -> [1.00 6.00] mm
+        Center:
+            [1 4] mm
+        Radius:
+            2.00 mm
+        Length:
+            3.14 mm
+        Winding order:
+            counter-clock-wise
+
         """
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
@@ -546,11 +566,13 @@ class ArcSegment(DynamicShapeSegment):
 
     def __repr__(self):
         """Output representation of an ArcSegment."""
+        ws = "counter-clock-wise" if self.arc_winding_ccw else "clock-wise"
         return (
-            f"ArcSegment('points': {self._points!r}, 'arc_angle': {self._max_coord!r}, "
-            f"'radius': {self._radius!r}, "
-            f"'sign_arc_winding': {self._sign_winding!r}, "
-            f"'arc_length': {self._length!r})"
+            f"<ArcSegment>\nLine:\n    {self.point_start:.2f} -> {self.point_end:.2f}"
+            f"\nCenter:\n    {self.point_center:.2f}"
+            f"\nRadius:\n    {self.radius:.2f}"
+            f"\nLength:\n    {self.length:.2f}"
+            f"\nWinding order:\n    {ws}"
         )
 
     def __str__(self):
