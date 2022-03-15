@@ -169,7 +169,7 @@ class DynamicBaseSegment:
     def _get_length_expr(self) -> MathematicalExpression:
         """Get the primitive of a the trace function if it is expression based."""
         der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
-        expr = sympy.simplify(sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2]))
+        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
         mc, u = sympy.symbols("max_coord, unit")
         primitive = sympy.integrate(expr, (self._series.position_dim_name, 0, mc)) * u
         params = dict(unit=Q_(1, Q_("1mm").to_base_units().u).to(_DEFAULT_LEN_UNIT))
@@ -529,7 +529,7 @@ class ArcSegment(DynamicShapeSegment):
         -------
         ArcSegment
 
-                Examples
+        Examples
         --------
         Create a ̧̧`LineSegment` starting at ``x=3``,``y=4`` and ending at ``x=1``,
         ``y=6`` with the center point ``x=1``,``y=4``
