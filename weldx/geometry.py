@@ -406,6 +406,16 @@ class LineSegment(DynamicShapeSegment):
         -------
         LineSegment
 
+        Examples
+        --------
+        Create a ̧̧`LineSegment` starting at ``x=-1``,``y=-2`` and ending at ``x=1``,
+        ``y=2``
+
+        >>> from weldx import Q_, LineSegment
+        >>> point_data = Q_([[-1, 1], [-2, 2]], "mm"))
+        >>> LineSegment(point_data)
+        Line: [-1.00 -2.00] mm -> [1.00 2.00] mm
+
         """
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
