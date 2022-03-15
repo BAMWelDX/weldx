@@ -412,9 +412,13 @@ class LineSegment(DynamicShapeSegment):
         ``y=2``
 
         >>> from weldx import Q_, LineSegment
-        >>> point_data = Q_([[-1, 1], [-2, 2]], "mm"))
+        >>> point_data = Q_([[-1, 1], [-2, 2]], "mm")
         >>> LineSegment(point_data)
-        Line: [-1.00 -2.00] mm -> [1.00 2.00] mm
+        <LineSegment>
+        Line:
+            [-1.00 -2.00] mm -> [1.00 2.00] mm
+        Length:
+            4.47 mm
 
         """
         if not len(points.shape) == 2:
@@ -429,7 +433,10 @@ class LineSegment(DynamicShapeSegment):
 
     def __repr__(self):
         """Output representation of a LineSegment."""
-        return f"LineSegment('points'={self.points!r}, 'length'={self._length!r})"
+        return (
+            f"<LineSegment>\nLine:\n    {self.point_start:.2f} -> {self.point_end:.2f}"
+            f"\nLength:\n    {self._length:.2f}"
+        )
 
     def __str__(self):
         """Output simple string representation of a LineSegment."""
