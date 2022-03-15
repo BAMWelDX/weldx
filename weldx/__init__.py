@@ -152,6 +152,7 @@ from weldx.core import GenericSeries, MathematicalExpression, TimeSeries, Spatia
 from weldx.geometry import (
     ArcSegment,
     Geometry,
+    DynamicBaseSegment,
     DynamicShapeSegment,
     LineSegment,
     LinearHorizontalTraceSegment,
@@ -182,6 +183,7 @@ __all__ = (
     "CoordinateSystemManager",
     "Geometry",
     "GmawProcess",
+    "DynamicBaseSegment",
     "DynamicShapeSegment",
     "LineSegment",
     "LocalCoordinateSystem",
