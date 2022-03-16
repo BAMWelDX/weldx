@@ -822,9 +822,8 @@ class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
 
     _allowed_variables: list[str] = []
-    """A list of allowed variable names.
+    """A list of allowed variable names. (only expression)
 
-    The names are only relevant if the created `GenericSeries` is based on expressions.
     If the expression contains any other variable name that is not part of the list an,
     an exception is raised. It is not required that an expression includes all these
     variables. Additionally, the expression can contain other symbols if they are used
