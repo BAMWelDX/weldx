@@ -817,22 +817,62 @@ class GenericSeries:
     """Describes a quantity depending on one or more parameters."""
 
     _allowed_variables: list[str] = []
-    """Allowed variable names"""
+    """A list of allowed variable names. (only expression)
+
+    If the expression contains any other variable name that is not part of the list,
+    an exception is raised. It is not required that an expression includes all these
+    variables. Additionally, the expression can contain other symbols if they are used
+    as parameters.
+    """
     _required_variables: list[str] = []
-    """Required variable names"""
+    """A list of required variable names. (only expression)
+
+    If one or more variables are missing in the expression, an exceptions is raised.
+    Note that the required symbols must be variables of the expression. Using one or
+    more as a parameter will also trigger an exception.
+    """
 
     _evaluation_preprocessor: dict[str, Callable] = {}
-    """Function that should be used to adjust a var. input - (f.e. convert to Time)"""
+    """Mapping of variable names to functions that are applied prior to evaluation.
+
+    When calling `GenericSeries.evaluate`, the passed keyword arguments are checked
+    against the dictionaries keys. If a match is found, the corresponding preprocessor
+    function is called with the variables value and returns the updated value. As an
+    example, this can be used to support multiple time formats. The key might be ``t``
+    and the preprocessor function would turn the original time data into an equivalent
+    `xarray.DataArray`.
+    """
 
     _required_dimensions: list[str] = []
-    """Required dimensions"""
+    """A list of required dimension names.
+
+    Explicit `GenericSeries` need all of the listed dimensions. Otherwise an exception
+    is raised. If the series is based on an expression, the dimension can either be
+    represented by a variable or be part of one of the expressions parameters.
+    """
+
     _required_dimension_units: dict[str, pint.Unit] = {}
-    """Required units of a dimension"""
+    """A dictionary that maps a required unit dimensionality to a dimension.
+
+    If a dimension matches one of the keys of this dictionary, its dimensionality
+    is checked against the listed requirement.
+    """
     _required_dimension_coordinates: dict[str, list] = {}
-    """Required coordinates of a dimension."""
+    """A dictionary that maps required coordinate values to a dimension.
+
+    If a dimension matches one of the keys of this dictionary, it is checked if it has
+    the specified coordinate values. An example use-case would be a 3d-space where the
+    coordinates "x", "y" and "z" are required for a spatial dimension.
+    """
 
     _required_unit_dimensionality: pint.Unit = None
-    """Required unit dimensionality of the evaluated expression/data"""
+    """Required unit dimensionality of the evaluated expression/data.
+
+    If the defined unit does not result from the evaluation of the series, an exception
+    is raised. Note that this already checked during construction. If `None`, no
+    specific unit is required. A unit-less series can be enforced by setting this
+    setup variable to ``""``.
+    """
 
     # do it later
 
