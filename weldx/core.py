@@ -824,7 +824,7 @@ class GenericSeries:
     _allowed_variables: list[str] = []
     """A list of allowed variable names. (only expression)
 
-    If the expression contains any other variable name that is not part of the list an,
+    If the expression contains any other variable name that is not part of the list,
     an exception is raised. It is not required that an expression includes all these
     variables. Additionally, the expression can contain other symbols if they are used
     as parameters.
