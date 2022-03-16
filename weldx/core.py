@@ -857,10 +857,10 @@ class GenericSeries:
     """
 
     _required_dimension_units: dict[str, pint.Unit] = {}
-    """A dictionary that maps required units to a dimension.
+    """A dictionary that maps required unit dimensionality to a dimension.
 
-    If a dimension matches one of the keys of this dictionary, it is checked that the
-    units are identical to the requirement. If not, an exception is raised.
+    If a dimension matches one of the keys of this dictionary, its dimensionality
+    is checked against the requirement listed.
     """
     _required_dimension_coordinates: dict[str, list] = {}
     """A dictionary that maps required coordinates to a dimension.
