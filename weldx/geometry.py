@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import copy
-import math
 from dataclasses import InitVar, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Union
@@ -99,13 +98,301 @@ def _to_list(var) -> list:
     return [var]
 
 
+# DynamicBaseSegment ----------------------------------------------------------
+
+
+class DynamicBaseSegment:
+    """Segment class to define arbitrary lines using the `~weldx.core.SpatialSeries`."""
+
+    def __init__(
+        self,
+        series: Union[
+            SpatialSeries, pint.Quantity, DataArray, str, MathematicalExpression
+        ],
+        max_coord: float = 1,
+        **kwargs,
+    ):
+        """Initialize a `DynamicBaseSegment`.
+
+        Parameters
+        ----------
+        series:
+            A `~weldx.core.SpatialSeries` that describes the trajectory of the shape
+            segment. Alternatively, one can pass every other object that is valid as
+            first argument to of the ``__init__`` method of the
+            `~weldx.core.SpatialSeries`.
+        max_coord:
+            [only expression based `~weldx.core.SpatialSeries`] The maximum coordinate
+            value of the passed series dimension that specifies the position on the 2d
+            line. The value defines the segments length by evaluating the expression on
+            the interval [0, ``max_coord``]
+        kwargs:
+            A set of keyword arguments that will be forwarded to the ``__init__`` method
+            of the `~weldx.core.SpatialSeries` in case the ``series`` parameter isn't
+            already a `~weldx.core.SpatialSeries`.
+
+        """
+        if not isinstance(series, SpatialSeries):
+            series = SpatialSeries(series, **kwargs)
+
+        self._series = series
+        self._max_coord = max_coord
+
+        self._length_expr = None
+        self._length = None
+
+        self._update_internals()
+
+    def _update_internals(self):
+        """Update all internal variables that can be calculated from assigned values."""
+        self._length_expr = (
+            self._get_length_expr() if self._series.is_expression else None
+        )
+        self._length = self.get_section_length(self._max_coord)
+
+    def _get_component_derivative_squared(self, i: int) -> sympy.Expr:
+        """Get the derivative of an expression for the i-th vector component."""
+
+        def _get_component(v, i):
+            if isinstance(v, Q_):
+                v = v.to_base_units().m
+            if v.size == 3:
+                return v[i]
+            return float(v)
+
+        me = self._series.data
+        subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
+
+        sym = sympy.sympify(self._series.position_dim_name)
+        return me.expression.subs(subs).diff(sym) ** 2
+
+    def _get_length_expr(self) -> MathematicalExpression:
+        """Get the primitive of a the trace function if it is expression based."""
+        der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
+        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
+        mc, u = sympy.symbols("max_coord, unit")
+        primitive = sympy.integrate(expr, (self._series.position_dim_name, 0, mc)) * u
+        params = dict(unit=Q_(1, Q_("1mm").to_base_units().u).to(_DEFAULT_LEN_UNIT))
+
+        return MathematicalExpression(primitive, params)
+
+    def _len_section_disc(self, position: float) -> pint.Quantity:
+        """Get the length until a specific position on the trace (discrete version)."""
+        if position >= self._max_coord:
+            diff = self._series.data[1:] - self._series.data[:-1]
+        else:
+            pdn = self._series.position_dim_name
+            coords = self._series.coordinates[pdn].data
+            idx_coord_upper = np.abs(coords - position).argmin()
+            if coords[idx_coord_upper] < position:
+                idx_coord_upper = idx_coord_upper + 1
+
+            coords_eval = np.append(coords[:idx_coord_upper], position)
+            vecs = self._series.evaluate(**{pdn: coords_eval}).data
+
+            diff = vecs[1:] - vecs[:-1]
+
+        length = np.sum(np.linalg.norm(diff.m, axis=1))
+        return Q_(length, diff.u)
+
+    def get_section_length(self, position: float) -> pint.Quantity:
+        """Get the length from the start of the segment to the passed relative position.
+
+        Parameters
+        ----------
+        position:
+            The value of the relative position coordinate.
+
+        Returns
+        -------
+        pint.Quantity:
+            The length at the specified value.
+
+        """
+        if self._series.is_expression:
+            length = self._length_expr.evaluate(max_coord=position).data
+        else:
+            length = self._len_section_disc(position=position)
+        if length <= 0:
+            raise ValueError("Segment has no length.")
+
+        return length
+
+    def get_points(self, positions: float) -> pint.Quantity:
+        """Get an array of the points at the specified relative positions.
+
+        Parameters
+        ----------
+        positions:
+            A single position or an array of positions
+
+        Returns
+        -------
+        pint.Quantity:
+            The points at the specified positions
+
+        """
+        p = self._series.evaluate(**{self._series.position_dim_name: positions})
+        return p.data_array.transpose(..., "c").data
+
+    @property
+    def length(self) -> pint.Quantity:
+        """Get the length of the segment."""
+        return self._length
+
+
+# DynamicShapeSegment ---------------------------------------------------------
+
+
+class DynamicShapeSegment(DynamicBaseSegment):
+    """Shape segment class to define arbitrary 2d shapes."""
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def point_start(self) -> pint.Quantity:
+        """Get the starting point of the segment."""
+        return self.get_points(0)[0, :2]
+
+    @property
+    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
+    def point_end(self) -> pint.Quantity:
+        """Get the end point of the segment."""
+        return self.get_points(self._max_coord)[0, :2]
+
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
+    def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
+        """Get an array of discrete raster points of the segment.
+
+        Parameters
+        ----------
+        raster_width:
+            The desired distance between two raster points. The actual distance will be
+            the closest possible value to the desired one that guarantees an equal
+            distance between all raster points.
+
+        Returns
+        -------
+        pint.Quantity:
+            Array of raster points
+
+        """
+        raster_width = Q_(raster_width)
+        if raster_width <= 0:
+            raise ValueError("'raster_width' must be a number greater than 0.")
+        num_pts = np.round((self._length / raster_width).to("").m).astype(int) + 1
+        num_pts = max(num_pts, 2)
+
+        vals = np.linspace(0.0, 1.0, num=num_pts, endpoint=True)
+
+        return self.get_points(vals * self._max_coord)[:, :2].transpose()
+
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
+    def apply_translation(self, vector: pint.Quantity) -> DynamicShapeSegment:
+        """Apply a translation in place.
+
+        Parameters
+        ----------
+        vector:
+            The translation vector.
+
+        Returns
+        -------
+        ~weldx.geometry.DynamicShapeSegment:
+            A self-reference to the modified segment
+
+        """
+        vector = np.append(vector, 0)
+
+        if self._series.is_expression:
+            exp = self._series.data.expression
+            params = self._series.data.parameters
+
+            # Segment might have been translated already
+            p_idx = 0
+            p_name = f"translation_{p_idx}"
+            while p_name in params:
+                p_name = f"translation{(p_idx:= p_idx +1)}"
+
+            p = sympy.symbols(p_name)
+            params[p_name] = vector
+            self._series = SpatialSeries(exp + p, parameters=params)
+        else:
+            self._series = SpatialSeries(self._series.data_array + vector)
+        return self
+
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
+    def translate(self, vector: pint.Quantity) -> DynamicShapeSegment:
+        """Create a new segment translated by the passed vector.
+
+        Parameters
+        ----------
+        vector:
+            The translation vector.
+
+        Returns
+        -------
+        ~weldx.geometry.DynamicShapeSegment:
+            The translated segment
+
+        """
+        new_segment = copy.deepcopy(self)
+        return new_segment.apply_translation(vector)
+
+    def apply_transformation(self, matrix: np.ndarray) -> DynamicShapeSegment:
+        """Apply an in-place transformation to the segment using a matrix.
+
+        Parameters
+        ----------
+        matrix:
+            The transformation matrix
+
+        Returns
+        -------
+        ~weldx.geometry.DynamicShapeSegment:
+            A self-reference to the modified segment
+
+        """
+        if self._series.is_expression:
+            raise NotImplementedError
+
+        matrix_33 = np.eye(3)
+        matrix_33[:2, :2] = matrix
+        matrix_33 = ut.xr_3d_matrix(matrix_33)
+
+        dat = ut.xr_matmul(
+            matrix_33, self._series.data_array, dims_a=["c", "v"], dims_b=["c"]
+        )
+        self._series = SpatialSeries(
+            dat.transpose(..., "c").data, coords={"s": dat.coords["s"].data}
+        )
+        self._length = self.get_section_length(self._max_coord)
+        return self
+
+    def transform(self, matrix):
+        """Create a new segment transformed by the passed matrix.
+
+        Parameters
+        ----------
+        matrix:
+            The transformation matrix
+
+        Returns
+        -------
+        ~weldx.geometry.DynamicShapeSegment:
+            The transformed segment
+
+        """
+        new_segment = copy.deepcopy(self)
+        return new_segment.apply_transformation(matrix)
+
+
 # LineSegment -----------------------------------------------------------------
 
 
-class LineSegment:
+class LineSegment(DynamicShapeSegment):
     """Line segment."""
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
     def __init__(self, points: pint.Quantity):
         """Construct line segment.
 
@@ -119,29 +406,41 @@ class LineSegment:
         -------
         LineSegment
 
+        Examples
+        --------
+        Create a ̧̧`LineSegment` starting at ``x=-1``,``y=-2`` and ending at ``x=1``,
+        ``y=2``
+
+        >>> from weldx import Q_, LineSegment
+        >>> point_data = Q_([[-1, 1], [-2, 2]], "mm")
+        >>> LineSegment(point_data)
+        <LineSegment>
+        Line:
+            [-1.00 -2.00] mm -> [1.00 2.00] mm
+        Length:
+            4.47 mm
+
         """
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
         if not (points.shape[0] == 2 and points.shape[1] == 2):
             raise ValueError("'points' is not a 2x2 matrix.")
-        self._points = points.astype(float)
-        self._calculate_length()
+
+        super().__init__(
+            np.vstack([points, Q_([0.0, 0.0], points.u)]).T,
+            coords={"s": [0, 1]},
+        )
 
     def __repr__(self):
         """Output representation of a LineSegment."""
-        return f"LineSegment('points'={self._points!r}, 'length'={self._length!r})"
+        return (
+            f"<LineSegment>\nLine:\n    {self.point_start:.2f} -> {self.point_end:.2f}"
+            f"\nLength:\n    {self._length:.2f}"
+        )
 
     def __str__(self):
         """Output simple string representation of a LineSegment."""
-        p1 = np.array2string(self.points[:, 0].m, precision=2, separator=",")
-        p2 = np.array2string(self.points[:, 1].m, precision=2, separator=",")
-        return f"Line: {p1} -> {p2}"
-
-    def _calculate_length(self):
-        """Calculate the segment length from its points."""
-        self._length = np.linalg.norm(self._points[:, 1] - self._points[:, 0])
-        if math.isclose(self._length, 0):
-            raise ValueError("Segment length is 0.")
+        return f"Line: {self.point_start:.2f} -> {self.point_end:.2f}"
 
     @classmethod
     @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT)
@@ -163,13 +462,12 @@ class LineSegment:
             Line segment
 
         """
-        points = np.transpose(np.array([point_start.m, point_end.m], dtype=float))
-        return cls(Q_(points, _DEFAULT_LEN_UNIT))
+        return cls(np.vstack([point_start, point_end]).transpose())
 
     @classmethod
     def linear_interpolation(
         cls, segment_a: LineSegment, segment_b: LineSegment, weight: float
-    ):
+    ) -> LineSegment:
         """Interpolate two line segments linearly.
 
         Parameters
@@ -192,50 +490,9 @@ class LineSegment:
             raise TypeError("Parameters a and b must both be line segments.")
 
         weight = np.clip(weight, 0, 1)
-        points = (1 - weight) * segment_a.points.m + weight * segment_b.points.m
-        return cls(Q_(points, _DEFAULT_LEN_UNIT))
+        return cls((1 - weight) * segment_a.points + weight * segment_b.points)
 
     @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def length(self) -> pint.Quantity:
-        """Get the segment length.
-
-        Returns
-        -------
-        pint.Quantity
-            Segment length
-
-        """
-        return self._length
-
-    @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def point_end(self) -> pint.Quantity:
-        """Get the end point of the segment.
-
-        Returns
-        -------
-        pint.Quantity
-            End point
-
-        """
-        return self._points[:, 1]
-
-    @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def point_start(self) -> pint.Quantity:
-        """Get the starting point of the segment.
-
-        Returns
-        -------
-        pint.Quantity
-            Starting point
-
-        """
-        return self._points[:, 0]
-
-    @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def points(self) -> pint.Quantity:
         """Get the segments points in form of a 2x2 matrix.
 
@@ -247,110 +504,16 @@ class LineSegment:
             2x2 matrix containing the segments points
 
         """
-        return self._points
-
-    def apply_transformation(self, matrix):
-        """Apply a transformation matrix to the segment.
-
-        Parameters
-        ----------
-        matrix :
-            Transformation matrix
-
-        """
-        self._points = np.matmul(matrix, self._points)
-        self._calculate_length()
-
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def apply_translation(self, vector: pint.Quantity):
-        """Apply a translation to the segment.
-
-        Parameters
-        ----------
-        vector :
-            Translation vector
-
-        """
-        self._points += np.ndarray((2, 1), float, np.array(vector, float))
-
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
-        """Create an array of points that describe the segments contour.
-
-        The effective raster width may vary from the specified one,
-        since the algorithm enforces constant distances between two
-        raster points.
-
-        Parameters
-        ----------
-        raster_width :
-            The desired distance between two raster points
-
-        Returns
-        -------
-        pint.Quantity
-            Array of contour points
-
-        """
-        if not raster_width > 0:
-            raise ValueError("'raster_width' must be > 0")
-        raster_width = np.min([raster_width, self.length.m])
-
-        num_raster_segments = np.round(self.length.m / raster_width)
-
-        # normalized effective raster width
-        nerw = 1.0 / num_raster_segments
-
-        multiplier = np.arange(0, 1 + 0.5 * nerw, nerw)
-        weight_matrix = np.array([1 - multiplier, multiplier])
-
-        return np.matmul(self._points, weight_matrix)
-
-    def transform(self, matrix: np.ndarray) -> LineSegment:
-        """Get a transformed copy of the segment.
-
-        Parameters
-        ----------
-        matrix :
-            Transformation matrix
-
-        Returns
-        -------
-        LineSegment
-            Transformed copy
-
-        """
-        new_segment = copy.deepcopy(self)
-        new_segment.apply_transformation(matrix)
-        return new_segment
-
-    @UREG.check(None, _DEFAULT_LEN_UNIT)
-    def translate(self, vector: pint.Quantity) -> LineSegment:
-        """Get a translated copy of the segment.
-
-        Parameters
-        ----------
-        vector :
-            Translation vector
-
-        Returns
-        -------
-        LineSegment
-            Transformed copy
-
-        """
-        new_segment = copy.deepcopy(self)
-        new_segment.apply_translation(vector)
-        return new_segment
+        return self._series.data[:, :2].transpose()
 
 
 # ArcSegment ------------------------------------------------------------------
 
 
-class ArcSegment:
+class ArcSegment(DynamicShapeSegment):
     """Arc segment."""
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT, None), strict=True)
+    @UREG.check(None, _DEFAULT_LEN_UNIT, None)
     def __init__(self, points: pint.Quantity, arc_winding_ccw: bool = True):
         """Construct arc segment.
 
@@ -366,48 +529,63 @@ class ArcSegment:
         -------
         ArcSegment
 
+        Examples
+        --------
+        Create a ̧̧`LineSegment` starting at ``x=3``,``y=4`` and ending at ``x=1``,
+        ``y=6`` with the center point ``x=1``,``y=4``
+
+        >>> from weldx import Q_, ArcSegment
+        >>> point_data = Q_([[3, 1, 1], [4, 6, 4]], "mm")
+        >>> ArcSegment(point_data)
+        <ArcSegment>
+        Line:
+            [3.00 4.00] mm -> [1.00 6.00] mm
+        Center:
+            [1 4] mm
+        Radius:
+            2.00 mm
+        Length:
+            3.14 mm
+        Winding order:
+            counter-clock-wise
+
         """
         if not len(points.shape) == 2:
             raise ValueError("'points' must be a 2d array/matrix.")
         if not (points.shape[0] == 2 and points.shape[1] == 3):
             raise ValueError("'points' is not a 2x3 matrix.")
 
-        if arc_winding_ccw:
-            self._sign_arc_winding = 1
-        else:
-            self._sign_arc_winding = -1
+        self._sign_winding = 1 if arc_winding_ccw else -1
         self._points = points
-
-        self._arc_angle = None
-        self._arc_length = None
         self._radius = None
-        self._calculate_arc_parameters()
+
+        series = self._update_internals_and_get_series()
+        super().__init__(series, max_coord=self._max_coord)
+
+        self._check_valid()
 
     def __repr__(self):
         """Output representation of an ArcSegment."""
+        ws = "counter-clock-wise" if self.arc_winding_ccw else "clock-wise"
         return (
-            f"ArcSegment('points': {self._points!r}, 'arc_angle': {self._arc_angle!r}, "
-            f"'radius': {self._radius!r}, "
-            f"'sign_arc_winding': {self._sign_arc_winding!r}, "
-            f"'arc_length': {self._arc_length!r})"
+            f"<ArcSegment>\nLine:\n    {self.point_start:.2f} -> {self.point_end:.2f}"
+            f"\nCenter:\n    {self.point_center:.2f}"
+            f"\nRadius:\n    {self.radius:.2f}"
+            f"\nLength:\n    {self.length:.2f}"
+            f"\nWinding order:\n    {ws}"
         )
 
     def __str__(self):
         """Output simple string representation of an ArcSegment."""
-        values = np.array(
-            [self._radius, self._arc_angle / np.pi * 180, self._arc_length]
-        )
+        values = np.array([self._radius, self._max_coord / np.pi * 180, self._length])
         return f"Arc : {np.array2string(values, precision=2, separator=',')}"
 
-    def _calculate_arc_angle(self):
+    def _calculate_arc_angle(self, points):
         """Calculate the arc angle."""
-        point_start = self.point_start.m
-        point_end = self.point_end.m
-        point_center = self.point_center.m
-
         # Calculate angle between vectors (always the smaller one)
-        unit_center_start = tf.normalize(point_start - point_center)
-        unit_center_end = tf.normalize(point_end - point_center)
+        points = points.m
+        unit_center_start = tf.normalize(points[:, 0] - points[:, 2])
+        unit_center_end = tf.normalize(points[:, 1] - points[:, 2])
 
         dot_unit = np.dot(unit_center_start, unit_center_end)
         angle_vecs = np.arccos(np.clip(dot_unit, -1, 1))
@@ -416,40 +594,42 @@ class ArcSegment:
             unit_center_end, unit_center_start
         )
 
-        if np.abs(sign_winding_points + self._sign_arc_winding) > 0:
-            self._arc_angle = angle_vecs
-        else:
-            self._arc_angle = 2 * np.pi - angle_vecs
-
-    def _calculate_arc_parameters(self):
-        """Calculate radius, arc length and arc angle from the segments points."""
-        self._radius = np.linalg.norm(self._points[:, 0] - self._points[:, 2])
-        self._calculate_arc_angle()
-        self._arc_length = self._arc_angle * self._radius
-
-        self._check_valid()
+        if np.abs(sign_winding_points + self._sign_winding) > 0:
+            return angle_vecs
+        return 2 * np.pi - angle_vecs
 
     def _check_valid(self):
         """Check if the segments data is valid."""
-        point_start = self.point_start.m
-        point_end = self.point_end.m
-        point_center = self.point_center.m
+        radius_start = np.linalg.norm(self.points[:, 0].m - self.points[:, 2].m)
+        radius_end = np.linalg.norm(self.points[:, 1].m - self.points[:, 2].m)
 
-        radius_start_center = np.linalg.norm(point_start - point_center)
-        radius_end_center = np.linalg.norm(point_end - point_center)
-        radius_diff = radius_end_center - radius_start_center
-
-        if not math.isclose(radius_diff, 0, abs_tol=1e-9):
+        if not np.isclose(radius_end - radius_start, 0):
             raise ValueError("Radius is not constant.")
-        if math.isclose(self._arc_length, 0):
+        if self._length <= 0:
             raise ValueError("Arc length is 0.")
 
+    def _update_internals_and_get_series(self) -> SpatialSeries:
+        diff = self._points[:, 0] - self._points[:, 2]
+        self._max_coord = self._calculate_arc_angle(self._points)
+        self._radius = Q_(np.linalg.norm(diff.m), self._points.u)
+
+        expr = "(x*cos(a+s*w)+y*sin(a+s*w))*r + o"
+        sign = -1 if np.cross([1, 0], diff) < 0 else 1
+        a = np.arccos(np.dot([1, 0], diff) / self._radius) * sign
+
+        params = dict(
+            x=Q_([1, 0, 0], ""),
+            y=Q_([0, 1, 0], ""),
+            o=np.append(self._points[:, 2], 0),
+            r=self._radius,
+            a=a,
+            w=self._sign_winding,
+        )
+
+        return SpatialSeries(expr, parameters=params)
+
     @classmethod
-    @UREG.wraps(
-        None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None),
-        strict=True,
-    )
+    @UREG.check(None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None)
     def construct_with_points(
         cls,
         point_start: pint.Quantity,
@@ -477,16 +657,12 @@ class ArcSegment:
             Arc segment
 
         """
-        points = np.transpose(
-            np.array([point_start, point_end, point_center], dtype=float)
-        )
-        return cls(Q_(points, _DEFAULT_LEN_UNIT), arc_winding_ccw)
+        points = np.vstack([point_start, point_end, point_center]).transpose()
+        return cls(points, arc_winding_ccw)
 
     @classmethod
-    @UREG.wraps(
-        None,
-        (None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None),
-        strict=True,
+    @UREG.check(
+        None, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, _DEFAULT_LEN_UNIT, None, None
     )
     def construct_with_radius(
         cls,
@@ -519,26 +695,25 @@ class ArcSegment:
             Arc segment
 
         """
+        if not isinstance(radius, pint.Quantity):
+            radius = Q_(radius)
+
         vec_start_end = point_end - point_start
-        if center_left_of_line:
-            vec_normal = np.array([-vec_start_end[1], vec_start_end[0]])
-        else:
-            vec_normal = np.array([vec_start_end[1], -vec_start_end[0]])
+        s = -1 if center_left_of_line else 1
+        vec_normal = np.hstack([s * vec_start_end[1], -s * vec_start_end[0]])
 
-        squared_length = np.dot(vec_start_end, vec_start_end)
-        squared_radius = radius * radius
+        length_sq = np.dot(vec_start_end, vec_start_end)
+        radius_sq = radius * radius
 
-        normal_scaling = np.sqrt(
-            np.clip(squared_radius / squared_length - 0.25, 0, None)
-        )
-
+        normal_scaling = np.sqrt(np.clip(radius_sq / length_sq - 0.25, 0, None))
         vec_start_center = 0.5 * vec_start_end + vec_normal * normal_scaling
+
         point_center = point_start + vec_start_center
 
         return cls.construct_with_points(
-            Q_(point_start, _DEFAULT_LEN_UNIT),
-            Q_(point_end, _DEFAULT_LEN_UNIT),
-            Q_(point_center, _DEFAULT_LEN_UNIT),
+            point_start,
+            point_end,
+            point_center,
             arc_winding_ccw,
         )
 
@@ -594,7 +769,7 @@ class ArcSegment:
             Arc angle
 
         """
-        return self._arc_angle
+        return self._max_coord
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
@@ -607,7 +782,7 @@ class ArcSegment:
             Arc length
 
         """
-        return self._arc_length
+        return self._length
 
     @property
     def arc_winding_ccw(self) -> bool:
@@ -619,10 +794,9 @@ class ArcSegment:
             True or False
 
         """
-        return self._sign_arc_winding > 0
+        return self._sign_winding > 0
 
     @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def point_center(self) -> pint.Quantity:
         """Get the center point of the segment.
 
@@ -635,33 +809,6 @@ class ArcSegment:
         return self._points[:, 2]
 
     @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def point_end(self) -> pint.Quantity:
-        """Get the end point of the segment.
-
-        Returns
-        -------
-        pint.Quantity
-            End point
-
-        """
-        return self._points[:, 1]
-
-    @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
-    def point_start(self) -> pint.Quantity:
-        """Get the starting point of the segment.
-
-        Returns
-        -------
-        pint.Quantity
-            Starting point
-
-        """
-        return self._points[:, 0]
-
-    @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def points(self) -> pint.Quantity:
         """Get the segments points in form of a 2x3 matrix.
 
@@ -677,7 +824,6 @@ class ArcSegment:
         return self._points
 
     @property
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
     def radius(self) -> pint.Quantity:
         """Get the radius.
 
@@ -698,98 +844,32 @@ class ArcSegment:
             Transformation matrix
 
         """
-        self._points = np.matmul(matrix, self._points)
-        self._sign_arc_winding *= tf.reflection_sign(matrix)
-        self._calculate_arc_parameters()
+        self._points = np.matmul(np.array(matrix), self._points)
+        self._sign_winding *= tf.reflection_sign(np.array(matrix))
 
-    @UREG.wraps(None, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def apply_translation(self, vector: pint.Quantity):
-        """Apply a translation to the segment.
+        self._series = self._update_internals_and_get_series()
+        self._update_internals()
+        self._check_valid()
 
-        Parameters
-        ----------
-        vector :
-            Translation vector
+        return self
 
-        """
-        self._points += np.ndarray((2, 1), float, np.array(vector, float))
-
-    @UREG.wraps(_DEFAULT_LEN_UNIT, (None, _DEFAULT_LEN_UNIT), strict=True)
-    def rasterize(self, raster_width: pint.Quantity) -> pint.Quantity:
-        """Create an array of points that describe the segments contour.
-
-        The effective raster width may vary from the specified one,
-        since the algorithm enforces constant distances between two
-        raster points.
+    @UREG.check(None, _DEFAULT_LEN_UNIT)
+    def apply_translation(self, vector):
+        """Apply a translation in place.
 
         Parameters
         ----------
-        raster_width :
-            The desired distance between two raster points
+        vector:
+            The translation vector.
 
         Returns
         -------
-        pint.Quantity
-            Array of contour points
+        DynamicShapeSegment:
+            A self-reference to the modified segment
 
         """
-        point_start = self.point_start.m
-        point_center = self.point_center.m
-        vec_center_start = point_start - point_center
-        if not raster_width > 0:
-            raise ValueError("'raster_width' must be > 0")
-        raster_width = np.clip(raster_width, None, self.arc_length.m)
-
-        num_raster_segments = int(np.round(self._arc_length / raster_width))
-        delta_angle = self._arc_angle / num_raster_segments
-
-        max_angle = self._sign_arc_winding * (self._arc_angle + 0.5 * delta_angle)
-        angles = np.arange(0, max_angle, self._sign_arc_winding * delta_angle)
-
-        rotation_matrices = tf.WXRotation.from_euler("z", angles).as_matrix()[
-            :, 0:2, 0:2
-        ]
-
-        data = np.matmul(rotation_matrices, vec_center_start) + point_center
-
-        return data.transpose()
-
-    def transform(self, matrix) -> ArcSegment:
-        """Get a transformed copy of the segment.
-
-        Parameters
-        ----------
-        matrix :
-            Transformation matrix
-
-        Returns
-        -------
-        ArcSegment
-            Transformed copy
-
-        """
-        new_segment = copy.deepcopy(self)
-        new_segment.apply_transformation(matrix)
-        return new_segment
-
-    @UREG.check(None, "[length]")
-    def translate(self, vector) -> ArcSegment:
-        """Get a translated copy of the segment.
-
-        Parameters
-        ----------
-        vector :
-            Translation vector
-
-        Returns
-        -------
-        ArcSegment
-            Transformed copy
-
-        """
-        new_segment = copy.deepcopy(self)
-        new_segment.apply_translation(vector)
-        return new_segment
+        self._points = (self.points.transpose() + vector).transpose()
+        return super().apply_translation(vector)
 
 
 # Shape class -----------------------------------------------------------------
@@ -1381,8 +1461,8 @@ class Profile:
 # Trace segment classes -------------------------------------------------------
 
 
-class DynamicTraceSegment:
-    """Trace segment that can be defined by a ``SpatialSeries``."""
+class DynamicTraceSegment(DynamicBaseSegment):
+    """Trace segment that can be defined by a `~weldx.core.SpatialSeries`."""
 
     def __init__(
         self,
@@ -1415,37 +1495,13 @@ class DynamicTraceSegment:
             of the `~weldx.core.SpatialSeries` in case the ``series`` parameter isn't
             already a `~weldx.core.SpatialSeries`.
         """
-        if not isinstance(series, SpatialSeries):
-            series = SpatialSeries(series, **kwargs)
+        super().__init__(series, max_coord, **kwargs)
 
-        self._series = series
-        self._max_coord = max_coord
         self._limit_orientation = limit_orientation_to_xy
 
-        if series.is_expression:
+        self._derivative = None
+        if self._series.is_expression:
             self._derivative = self._get_derivative_expression()
-            self._length_expr = self._get_length_expr()
-        else:
-            self._derivative = None
-            self._length_expr = None
-
-        self._length = self.get_section_length(self._max_coord)
-
-    def _get_component_derivative_squared(self, i: int) -> sympy.Expr:
-        """Get the derivative of an expression for the i-th vector component."""
-
-        def _get_component(v, i):
-            if isinstance(v, Q_):
-                v = v.to_base_units().m
-            if v.size == 3:
-                return v[i]
-            return float(v)
-
-        me = self._series.data
-        subs = [(k, _get_component(v.data, i)) for k, v in me.parameters.items()]
-
-        sym = sympy.sympify(self._series.position_dim_name)
-        return me.expression.subs(subs).diff(sym) ** 2
 
     def _get_derivative_expression(self) -> MathematicalExpression:
         """Get the derivative of an expression as `MathematicalExpression`."""
@@ -1474,53 +1530,6 @@ class DynamicTraceSegment:
         coords = {pdn: [pos_data[idx_low], pos_data[idx_low + 1]]}
         vals = self._series.evaluate(**coords).data
         return (vals[1] - vals[0]).m
-
-    def _get_length_expr(self) -> MathematicalExpression:
-        """Get the primitive of a the trace function if it is expression based."""
-        der_sq = [self._get_component_derivative_squared(i) for i in range(3)]
-        expr = sympy.sqrt(der_sq[0] + der_sq[1] + der_sq[2])
-        mc, u = sympy.symbols("max_coord, unit")
-        primitive = sympy.integrate(expr, (self._series.position_dim_name, 0, mc)) * u
-        params = dict(unit=Q_(1, Q_("1mm").to_base_units().u).to(_DEFAULT_LEN_UNIT))
-
-        return MathematicalExpression(primitive, params)
-
-    def get_section_length(self, position: float) -> pint.Quantity:
-        """Get the length from the start of the segment to the passed relative position.
-
-        Parameters
-        ----------
-        position:
-            The value of the relative position coordinate.
-
-        Returns
-        -------
-        pint.Quantity:
-            The length at the specified value.
-
-        """
-        if self._series.is_expression:
-            return self._length_expr.evaluate(max_coord=position).data
-        return self._len_section_disc(position=position)
-
-    def _len_section_disc(self, position: float) -> pint.Quantity:
-        """Get the length until a specific position on the trace (discrete version)."""
-        if position >= self._max_coord:
-            diff = self._series.data[1:] - self._series.data[:-1]
-        else:
-            pdn = self._series.position_dim_name
-            coords = self._series.coordinates[pdn].data
-            idx_coord_upper = np.abs(coords - position).argmin()
-            if coords[idx_coord_upper] < position:
-                idx_coord_upper = idx_coord_upper + 1
-
-            coords_eval = np.append(coords[:idx_coord_upper], position)
-            vecs = self._series.evaluate(**{pdn: coords_eval}).data
-
-            diff = vecs[1:] - vecs[:-1]
-
-        length = np.sum(np.linalg.norm(diff.m, axis=1))
-        return Q_(length, diff.u)
 
     def _get_lcs_from_coords_and_tangent(
         self, coords: pint.Quantity, tangent: np.ndarray
@@ -1571,11 +1580,6 @@ class DynamicTraceSegment:
         else:
             x = np.array([self._get_tangent_vec_discrete(p) for p in position])
         return self._get_lcs_from_coords_and_tangent(coords, x)
-
-    @property
-    def length(self) -> pint.Quantity:
-        """Get the length of the segment."""
-        return self._length
 
     def local_coordinate_system(self, position: float) -> tf.LocalCoordinateSystem:
         """Calculate a local coordinate system at a position of the trace segment.
@@ -1656,12 +1660,7 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
             raise ValueError("'angle' must have a positive value.")
 
         self._radius = float(radius)
-        self._angle = float(angle)
-
-        if clockwise:
-            self._sign_winding = 1
-        else:
-            self._sign_winding = -1
+        self._sign_winding = 1 if clockwise else -1
 
         pdn = SpatialSeries._position_dim_name
         expr = f"(x*sin({pdn})+w*y*(cos({pdn})-1))*r "
@@ -1671,14 +1670,14 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
             r=self._radius,
             w=self._sign_winding,
         )
-        super().__init__(expr, max_coord=self._angle, parameters=params)
+        super().__init__(expr, max_coord=float(angle), parameters=params)
 
     def __repr__(self):
         """Output representation of a RadialHorizontalTraceSegment."""
         return (
             f"RadialHorizontalTraceSegment('radius': {self._radius!r}, "
-            f"'angle': {self._angle!r}, "
-            f"'length': {self._length!r}, "
+            f"'angle': {self.angle!r}, "
+            f"'length': {self.length!r}, "
             f"'sign_winding': {self._sign_winding!r})"
         )
 
@@ -1686,7 +1685,7 @@ class RadialHorizontalTraceSegment(DynamicTraceSegment):
     @UREG.wraps(_DEFAULT_ANG_UNIT, (None,), strict=True)
     def angle(self) -> pint.Quantity:
         """Get the angle of the segment."""
-        return self._angle
+        return self._max_coord
 
     @property
     @UREG.wraps(_DEFAULT_LEN_UNIT, (None,), strict=True)
@@ -2935,7 +2934,8 @@ class SpatialData:
 
         """
         mesh = meshio.Mesh(
-            points=self.coordinates.data, cells={"triangle": self.triangles}
+            points=self.coordinates.data.reshape(-1, 3),
+            cells={"triangle": self.triangles},
         )
         mesh.write(file_name)
 
