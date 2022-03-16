@@ -838,9 +838,9 @@ class GenericSeries:
     """
 
     _evaluation_preprocessor: dict[str, Callable] = {}
-    """A dictionary of preprocessor functions for input variables during evaluation.
+    """A mapping of variable names to preprocessor functions are applied prior to evaluation.
 
-    When evaluating a `GenericSeries`, the passed keyword arguments are checked against
+    When calling a `GenericSeries.evaluate`, the passed keyword arguments are checked against
     the dictionaries keys. If a match is found, the corresponding preprocessor function
     is called with the variables value and returns the updated value. As an example,
     this can be used to support multiple time formats. The key might be ``t`` and the
