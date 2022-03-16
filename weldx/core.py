@@ -838,7 +838,7 @@ class GenericSeries:
     """
 
     _evaluation_preprocessor: dict[str, Callable] = {}
-    """A mapping of variable names to preprocessor functions are applied prior to evaluation.
+    """Mapping of variable names to preprocessor functions that are applied prior to evaluation.
 
     When calling a `GenericSeries.evaluate`, the passed keyword arguments are checked against
     the dictionaries keys. If a match is found, the corresponding preprocessor function
