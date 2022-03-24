@@ -9,6 +9,8 @@
 added
 =====
 
+- `DynamicShapeSegment` [:pull:`713`]
+
 -  `SpatialSeries` and `DynamicTraceSegment` [:pull:`699`]
 
 -  first draft of the ``multi_pass_weld`` schema for WelDX files [:pull:`667`]
@@ -42,8 +44,7 @@ changes
 -  `WeldxFile.custom_schema` now accepts an optional tuple with the first element being a schema to validate upon read,
    the second upon writing the data. [:pull:`697`]
 
--  Weldx now works with Python-3.10. [:pull:`696`]
-
+-  Reshape `SpatialData` coordinates to ``(-1, 3)`` before exporting with ``meshio`` for compatibility. [:pull:`723`]
 
 fixes
 =====
@@ -79,6 +80,8 @@ deprecations
 
 dependencies
 ============
+
+-  ``weldx`` now works with Python-3.10. [:pull:`696`]
 
 -  bump to ``asdf >=2.8.2`` [:pull:`668`]
 
