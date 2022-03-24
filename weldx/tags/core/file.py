@@ -1,6 +1,5 @@
 """Contains classes for the asdf serialization of an external file."""
-
-
+import mimetypes
 import socket
 from copy import deepcopy
 from dataclasses import dataclass
@@ -24,6 +23,7 @@ class ExternalFile:
 
     filename: str = None
     suffix: str = None
+    mimetype: str = None
     directory: str = None
     hostname: str = None
 
@@ -49,6 +49,7 @@ class ExternalFile:
             self.filename = self.path.name
             self.suffix = "".join(self.path.suffixes)[1:]
             self.directory = self.path.parent.absolute().as_posix()
+            self.mimetype = mimetypes.guess_type(self.path)[0]
             if self.hostname is None:
                 self.hostname = socket.gethostname()
 

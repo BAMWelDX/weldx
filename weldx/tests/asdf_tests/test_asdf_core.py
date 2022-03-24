@@ -769,6 +769,7 @@ class TestExternalFile:
 
         assert ef.filename == ef_file.filename
         assert ef.suffix == ef_file.suffix
+        assert ef.mimetype == ef_file.mimetype == "image/svg+xml"
         assert ef.directory == ef_file.directory
         assert ef.hostname == ef_file.hostname
 
