@@ -49,12 +49,12 @@ jobs:
       - name: pip installs
         run: |
           pip install asdf>=2.10
-      - uses: technote-space/get-diff-action@v6
       - name: git commit to branch
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git switch -c _test
+          git add .
           git commit -m "test"
       - uses: jannekem/run-python-script-action@v1
         with:
