@@ -31,7 +31,7 @@ def update_manifest(
         if mapping["schema_uri"].startswith("http://stsci.edu/schemas")
     ]
 
-    schemas = Path(search_dir).rglob("*.yaml")
+    schemas = sorted(Path(search_dir).rglob("*.yaml"))
 
     for schema in schemas:
         content = yaml.load(
