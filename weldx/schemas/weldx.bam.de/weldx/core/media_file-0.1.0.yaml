@@ -12,6 +12,8 @@ description: |
 
 examples:
   -
+    - foo
+    - bar
 
 type: object
 properties:
