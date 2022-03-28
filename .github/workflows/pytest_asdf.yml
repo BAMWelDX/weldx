@@ -52,6 +52,8 @@ jobs:
       - uses: technote-space/get-diff-action@v6
       - name: git commit to branch
         run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git switch -c _test
           git commit -m "test"
       - uses: jannekem/run-python-script-action@v1
