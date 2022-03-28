@@ -1,3 +1,4 @@
+"""Update the manifest file with schema files found in this directory."""
 from pathlib import Path
 
 import yaml
@@ -52,7 +53,7 @@ def update_manifest(
             else:
                 print(f"No converter for URI: {schema}")
 
-    with open(Path(out), "w") as outfile:
+    with open(Path(out), "w") as outfile:  # skipcq: PTC-W6004
         outfile.write("%YAML 1.1\n---\n")
         yaml.dump(
             manifest,
