@@ -29,6 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
       - uses: actions/setup-python@v3
         with:
           python-version: '3.10'
@@ -37,7 +39,7 @@ jobs:
           pip install asdf>=2.10
       - name: git check
         run: |
-          git diff-index --quiet HEAD
+          git diff-index HEAD
       - name: check git diff
         run: |
           git diff ./weldx/manifests/
@@ -55,7 +57,7 @@ jobs:
                 asdf.schema.validate(manifest, schema=schema)
       - name: git check
         run: |
-          git diff-index --quiet HEAD
+          git diff-index HEAD
       - name: check git diff
         run: |
           git diff ./weldx/manifests/
