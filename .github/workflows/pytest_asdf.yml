@@ -31,16 +31,21 @@ jobs:
       - name: run asdf schema pytest
         run: |
           pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/
+      - name: git diff
+        run: |
+          git diff
       - name: check manifest diff
+        if: always()
         run: |
           cd ./devtools/scripts/
           python ./update_manifest.py
-      - name: git status
+      - name: git diff-index
+        if: always()
         run: |
-          git status
+          git diff-index HEAD --exit-code
       - name: git diff
+        if: always()
         run: |
-          git diff-index HEAD
           git diff --exit-code
 
 
