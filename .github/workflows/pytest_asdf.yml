@@ -14,6 +14,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
       - uses: actions/setup-python@v3
         with:
           python-version: '3.10'
@@ -29,6 +31,16 @@ jobs:
       - name: run asdf schema pytest
         run: |
           pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/
+      - name: check manifest diff
+        run: |
+          cd ./devtools/scripts/
+          python ./update_manifest.py
+      - name: git status
+        run: |
+          git status
+      - name: git check
+        run: |
+          git diff-index HEAD
 
   validate_manifest:
     name: validate weldx manifest
@@ -48,7 +60,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-0
+          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: pip installs
@@ -75,4 +87,3 @@ jobs:
       - name: check git diff
         run: |
           git diff ./weldx/manifests/
-      - uses: technote-space/get-diff-action@v6
