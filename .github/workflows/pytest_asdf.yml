@@ -34,7 +34,7 @@ jobs:
           python-version: '3.10'
       - name: pip installs
         run: |
-          install asdf>=2.10
+          pip install asdf>=2.10
       - name: git check
         run: |
           git diff-index --quiet HEAD
