@@ -49,6 +49,7 @@ jobs:
       - name: pip installs
         run: |
           pip install asdf>=2.10
+      - uses: technote-space/get-diff-action@v6
       - name: git commit to branch
         run: |
           git switch -c _test
