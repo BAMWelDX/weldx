@@ -31,18 +31,11 @@ jobs:
       - name: run asdf schema pytest
         run: |
           pytest --asdf-tests --ignore=weldx/tests/ --no-cov weldx/schemas/
-      - name: git diff
-        run: |
-          git diff --color
       - name: check manifest diff
         if: always()
         run: |
           cd ./devtools/scripts/
           python ./update_manifest.py
-      - name: git diff-index
-        if: always()
-        run: |
-          git diff-index --color HEAD --exit-code
       - name: git diff
         if: always()
         run: |
@@ -54,10 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
       - name: git status
         run: |
           git status
@@ -85,12 +74,3 @@ jobs:
             for f in Path("./weldx/manifests/").glob("*.yaml"):
                 manifest = yaml.safe_load(open(f).read())
                 asdf.schema.validate(manifest, schema=schema)
-      - name: git status
-        run: |
-          git status
-      - name: git check
-        run: |
-          git diff-index HEAD
-      - name: check git diff
-        run: |
-          git diff ./weldx/manifests/
