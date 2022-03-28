@@ -38,9 +38,11 @@ jobs:
       - name: git status
         run: |
           git status
-      - name: git check
+      - name: git diff
         run: |
           git diff-index HEAD
+          git diff
+
 
   validate_manifest:
     name: validate weldx manifest
