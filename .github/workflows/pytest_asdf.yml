@@ -47,3 +47,6 @@ jobs:
             for f in Path("./weldx/manifests/").glob("*.yaml"):
                 manifest = yaml.safe_load(open(f).read())
                 asdf.schema.validate(manifest, schema=schema)
+      - name: check git diff
+        run: |
+          git diff ./weldx/manifests/
