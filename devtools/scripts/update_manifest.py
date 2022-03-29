@@ -1,3 +1,4 @@
+"""Update the manifest file with schema files found in this directory."""
 from pathlib import Path
 
 import yaml
@@ -31,7 +32,7 @@ def update_manifest(
         if mapping["schema_uri"].startswith("http://stsci.edu/schemas")
     ]
 
-    schemas = Path(search_dir).rglob("*.yaml")
+    schemas = sorted(Path(search_dir).rglob("*.yaml"))
 
     for schema in schemas:
         content = yaml.load(
@@ -52,7 +53,7 @@ def update_manifest(
             else:
                 print(f"No converter for URI: {schema}")
 
-    with open(Path(out), "w") as outfile:
+    with open(Path(out), "w") as outfile:  # skipcq: PTC-W6004
         outfile.write("%YAML 1.1\n---\n")
         yaml.dump(
             manifest,
