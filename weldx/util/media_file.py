@@ -15,7 +15,7 @@ types_media_input = Union[types_path_like, np.ndarray]
 
 
 @contextlib.contextmanager
-def _CloseableVideoCapture(file_name):
+def _closeable_video_capture(file_name):
     import cv2
 
     cap = cv2.VideoCapture(file_name)
@@ -54,7 +54,7 @@ class MediaFile:
     def _get_fps(self, fn) -> float:
         import cv2
 
-        with _CloseableVideoCapture(fn) as cap:
+        with _closeable_video_capture(fn) as cap:
             # TODO: we have a plethora of properties from opencv.
             # expose them in a sane way
             # and further serialize them in a dict like structure.
