@@ -16,7 +16,7 @@ examples:
       !<asdf://weldx.bam.de/weldx/tags/core/file-0.1.1>
         filename: file.pdf
         suffix: pdf
-        mime: application/pdf
+        mimetype: application/pdf
         hostname: my_computer
         directory: C:/Users/some_user/my_files
         size: 90571
