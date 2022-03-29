@@ -41,11 +41,11 @@ class MediaFile:
                 dict(dim_0="frames", dim_1="height", dim_2="width", dim_3="rgb")
             )
             self._array = da.assign_coords(frames=t_s)
-            self._captured_at = Path(path_or_array).stat().st_mtime
+            self._recorded_at = Path(path_or_array).stat().st_mtime
         elif isinstance(path_or_array, np.ndarray):
             self._handle = path_or_array
             self._fps = None
-            self._captured_at = NotImplemented
+            self._recorded_at = NotImplemented
         else:
             raise ValueError(f"unsupported input: {path_or_array}")
 
@@ -63,10 +63,10 @@ class MediaFile:
         return fps
 
     @property
-    def captured_at(self) -> pd.Timestamp:
+    def recorded_at(self) -> pd.Timestamp:
         """Time of recording this media."""
         # TODO: EXIF tag, plain m-time?
-        return self._captured_at
+        return self._recorded_at
 
     @property
     def fps(self) -> float:

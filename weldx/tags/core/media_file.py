@@ -13,13 +13,14 @@ class MediaFileConverter(WeldxConverter):
 
     def to_yaml_tree(self, obj: MediaFile, tag: str, ctx) -> dict:
         """Convert to python dict."""
-        tree = dict(external_file=obj.file())
+        tree = dict(file=obj.file(), recorded_at=obj.recorded_at)
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):
         """Construct from tree."""
         from weldx.tags.core.file import ExternalFile
 
-        file: ExternalFile = node["external_file"]
+        file: ExternalFile = node["file"]
         result = MediaFile(file.path)
+        assert result.recorded_at == node["recorded_at"]
         return result

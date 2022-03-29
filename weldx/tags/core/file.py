@@ -143,7 +143,6 @@ class ExternalFileConverter(WeldxConverter):
     name = "core/file"
     version = "0.1.1"
     types = [ExternalFile]
-    tags = ("asdf://weldx.bam.de/weldx/tags/core/file-0.1.*",)
 
     def to_yaml_tree(self, obj: ExternalFile, tag: str, ctx) -> dict:
         """Convert to python dict."""
