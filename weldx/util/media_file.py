@@ -34,14 +34,16 @@ class MediaFile:
             self._handle = imread(path_or_array)
             self._fps = self._get_fps(path_or_array)
 
-            self._length_in_seconds = len(self._handle) / self._fps * Q_("s")
-            t_s = np.linspace(0, self._length_in_seconds, len(self._handle))
+            length_in_seconds = len(self._handle) / self._fps
+            t_s = np.linspace(0, length_in_seconds, len(self._handle))
+            self._length_in_seconds = length_in_seconds * Q_("s")
 
             da = xr.DataArray(self._handle, name=path_or_array).rename(
                 dict(dim_0="frames", dim_1="height", dim_2="width", dim_3="rgb")
             )
             self._array = da.assign_coords(frames=t_s)
-            self._recorded_at = Path(path_or_array).stat().st_mtime
+            self._array.frames.attrs["units"] = "s"
+            self._recorded_at = pd.Timestamp(Path(path_or_array).stat().st_mtime_ns)
         elif isinstance(path_or_array, np.ndarray):
             self._handle = path_or_array
             self._fps = None
