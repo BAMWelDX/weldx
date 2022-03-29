@@ -8,7 +8,7 @@ import warnings
 from collections.abc import Iterable, Mapping, MutableMapping, Set, ValuesView
 from contextlib import contextmanager
 from io import BytesIO, IOBase
-from typing import IO, Any, Dict, Hashable, Optional, Union
+from typing import IO, Any, Dict, Hashable, Optional, Union, get_args
 
 import asdf
 import numpy as np
@@ -259,13 +259,13 @@ class WeldxFile(_ProtectedViewDict):
             new_file_created = True
             self._in_memory = True
             self._close = False  # we want buffers to be usable later on.
-        elif isinstance(filename_or_file_like, types_path_like.__args__):
+        elif isinstance(filename_or_file_like, get_args(types_path_like)):
             filename_or_file_like, new_file_created = self._handle_path(
                 filename_or_file_like, mode
             )
             self._in_memory = False
             self._close = True
-        elif isinstance(filename_or_file_like, types_file_like.__args__):
+        elif isinstance(filename_or_file_like, get_args(types_file_like)):
             if isinstance(filename_or_file_like, BytesIO):
                 self._in_memory = True
             else:

@@ -1,7 +1,7 @@
 """Media file."""
 import contextlib
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, get_args
 
 import numpy as np
 import pandas as pd
@@ -28,7 +28,7 @@ class MediaFile:
     """Should support both external files (dirs???) and in-memory data."""
 
     def __init__(self, path_or_array: types_media_input):
-        if isinstance(path_or_array, types_path_like.__args__):
+        if isinstance(path_or_array, get_args(types_path_like)):
             from dask_image.imread import imread
 
             self._handle = imread(path_or_array)
@@ -53,7 +53,8 @@ class MediaFile:
 
         self._path_or_array = path_or_array
 
-    def _get_fps(self, fn) -> float:
+    @staticmethod
+    def _get_fps(fn) -> float:
         import cv2
 
         with _closeable_video_capture(fn) as cap:
