@@ -1,28 +1,10 @@
 """Contains classes for the asdf serialization of media files."""
 
-from dataclasses import dataclass
-
-import pandas as pd
-
-from weldx import Time
 from weldx.asdf.types import WeldxConverter
-
-from weldx.tags.core.file import ExternalFile
-
-
-@dataclass
-class MediaFile:
-    """Handles the asdf serialization of media files."""
-
-    file: ExternalFile = None
-    fps: Time = None
-    captured_at: pd.Timestamp = None
-
-    def __post_init__(self):
-        """Initialize the internal values."""
+from weldx.util.media_file import MediaFile
 
 
-class ExternalFileConverter(WeldxConverter):
+class MediaFileConverter(WeldxConverter):
     """Serialization class for `weldx.util.MediaFile`."""
 
     name = "core/media_file"
