@@ -23,7 +23,7 @@ class ExternalFile:
 
     filename: str = None
     suffix: str = None
-    mime: str = None
+    mimetype: str = None
     directory: str = None
     hostname: str = None
 
