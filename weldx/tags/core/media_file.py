@@ -22,5 +22,4 @@ class MediaFileConverter(WeldxConverter):
 
         file: ExternalFile = node["file"]
         result = MediaFile(file.path)
-        assert result.recorded_at == node["recorded_at"]
         return result
