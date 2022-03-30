@@ -9,6 +9,7 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 
 import weldx.transformations as tf
 import weldx.visualization as vs
+from weldx.constants import Q_
 
 # pylint: enable=W0611
 
@@ -23,7 +24,7 @@ def test_plot_coordinate_system():
         [[0, 1, 0], [-1, 0, 0], [0, 0, 1]],
         [[-1, 0, 0], [0, -1, 0], [0, 0, 1]],
     ]
-    coordinates_tdp = [[0, 0, 1], [0, 0, 2], [0, -1, 0]]
+    coordinates_tdp = Q_([[0, 0, 1], [0, 0, 2], [0, -1, 0]], "mm")
     lcs_tdp = tf.LocalCoordinateSystem(
         orientation=orientation_tdp, coordinates=coordinates_tdp, time=time
     )
