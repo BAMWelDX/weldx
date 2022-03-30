@@ -67,7 +67,6 @@ def check_coordinate_system(
 
     """
     orientation_expected = np.array(orientation_expected)
-    coordinates_expected = coordinates_expected
 
     if time is not None:
         assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
