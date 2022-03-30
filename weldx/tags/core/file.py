@@ -13,6 +13,7 @@ import pandas as pd
 from weldx.asdf.types import WeldxConverter
 
 # Python class -------------------------------------------------------------------------
+from weldx.asdf.util import get_highest_tag_version
 
 
 @dataclass
@@ -188,3 +189,6 @@ class ExternalFileConverter(WeldxConverter):
                     "The stored hash does not match the stored contents' hash."
                 )
         return ExternalFile(**node)
+
+    def select_tag(self, obj, tags, ctx):
+        return get_highest_tag_version(tags)
