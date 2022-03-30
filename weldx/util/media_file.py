@@ -18,7 +18,7 @@ types_media_input = Union[types_path_like, np.ndarray]
 def _closeable_video_capture(file_name):
     import cv2
 
-    cap = cv2.VideoCapture(file_name)
+    cap = cv2.VideoCapture(str(file_name))
 
     yield cap
     cap.release()
@@ -83,8 +83,10 @@ class MediaFile:
 
     def file(self) -> ExternalFile:
         """File reference to underlying file/directory."""
+        # TODO: this will rehash every time we serialize
+        # even if the underlying path is unchanged.
         if isinstance(self._path_or_array, np.ndarray):
-            return ExternalFile(buffer=self._path_or_array.astype(bytes))
+            return ExternalFile(buffer=bytes(self._path_or_array.astype(np.int8)))
         else:
             return ExternalFile(self._path_or_array)
 
