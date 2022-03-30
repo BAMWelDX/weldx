@@ -491,7 +491,7 @@ def get_highest_tag_version(
     Raises
     ------
     ValueError
-        When the pattern matches multiple base tags in in the extension.
+        When the pattern matches multiple base tags in the extension.
 
     Examples
     --------
