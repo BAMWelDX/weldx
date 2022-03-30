@@ -35,7 +35,7 @@ def to_yaml_tree_metadata(func):
         """Call default to_yaml_tree method and add metadata fields."""
         tree = func(self, obj, tag, ctx)
 
-        for key in [META_ATTR, USER_ATTR]:
+        for key in (META_ATTR, USER_ATTR):
             attr = getattr(obj, key, None)
             if attr:
                 tree[key] = attr
