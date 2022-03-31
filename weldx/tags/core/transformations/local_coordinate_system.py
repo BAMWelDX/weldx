@@ -1,4 +1,7 @@
+import pint
+
 from weldx.asdf.types import WeldxConverter
+from weldx.constants import Q_
 from weldx.core import TimeSeries
 from weldx.tags.core.common_types import Variable
 from weldx.transformations import LocalCoordinateSystem
@@ -57,6 +60,11 @@ class LocalCoordinateSystemConverter(WeldxConverter):
         coordinates = node.get("coordinates")
         if coordinates is not None and not isinstance(coordinates, TimeSeries):
             coordinates = node["coordinates"].data
+
+        # workaround until the single_pass_weld.wx file needed it the tutorials is
+        # adjusted
+        if coordinates is not None and not isinstance(coordinates, pint.Quantity):
+            coordinates = Q_(coordinates, "mm")
 
         return LocalCoordinateSystem(
             orientation=orientations,

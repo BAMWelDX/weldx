@@ -4,14 +4,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import pytest
 
-# pylint: disable=W0611
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
-
 import weldx.transformations as tf
 import weldx.visualization as vs
 from weldx.constants import Q_
-
-# pylint: enable=W0611
 
 
 def test_plot_coordinate_system():
