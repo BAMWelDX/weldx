@@ -205,7 +205,8 @@ def test_init_expr_time_series_as_coord(time, time_ref, angles):
 
     """
     coordinates = MathematicalExpression(
-        expression="a*t+b", parameters=dict(a=Q_([1, 0, 0], "1/s"), b=[1, 2, 3])
+        expression="a*t+b",
+        parameters=dict(a=Q_([1, 0, 0], "m/s"), b=Q_([1, 2, 3], "m")),
     )
 
     ts_coord = TimeSeries(data=coordinates)
@@ -1114,7 +1115,7 @@ def test_subtraction(
     [
         ({}, {}, {}, True),
         (dict(expression="2*a*t"), {}, {}, False),
-        (dict(parameters=dict(a=Q_([[2, 0, 0]], "1/s"))), {}, {}, False),
+        (dict(parameters=dict(a=Q_([[2, 0, 0]], "m/s"))), {}, {}, False),
         ({}, dict(data=Q_(np.ones((2, 3)), "mm"), time=Q_([1, 2], "s")), {}, False),
         ({}, {}, dict(orientation=[[0, -1, 0], [1, 0, 0], [0, 0, 1]]), False),
         ({}, {}, dict(time_ref=TS("11:12")), False),
@@ -1145,7 +1146,7 @@ def test_comparison_coords_timeseries(
         Expected result of the comparison
 
     """
-    me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+    me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "m/s")))
     ts = TimeSeries(data=me)
     lcs = LCS(coordinates=ts)
 

@@ -250,7 +250,7 @@ def test_local_coordinate_system_coords_timeseries(
 ):
     """Test reading and writing a LCS with a `TimeSeries` as coordinates to asdf."""
     # create inputs to lcs __init__
-    me = ME("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+    me = ME("a*t", dict(a=Q_([[1, 0, 0]], "m/s")))
     ts = TimeSeries(data=me)
 
     ref_time = None

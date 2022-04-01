@@ -94,7 +94,7 @@ def test_init():
 def test_add_cs():
     """Test the 'add_cs' function."""
     csm = CSM("r")
-    ts = TimeSeries(MathematicalExpression("a*t", dict(a=Q_("1/s"))))
+    ts = TimeSeries(MathematicalExpression("a*t", dict(a=Q_("m/s"))))
 
     lcs_data = [
         ("a", "r", LCS(coordinates=Q_([0, 1, 2], "mm")), True),
@@ -214,7 +214,7 @@ def test_add_cs_reference_time(
 def test_add_coordinate_system_timeseries():
     """Test if adding an LCS with a `TimeSeries` as coordinates is possible."""
     csm = CSM("r")
-    me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+    me = MathematicalExpression("a*t", dict(a=Q_([[1, 0, 0]], "m/s")))
     ts = TimeSeries(me)
     lcs = LCS(coordinates=ts)
 

@@ -284,6 +284,13 @@ class LocalCoordinateSystem(TimeDependent):
         """Create xarray coordinates from different formats and time-inputs."""
         if isinstance(coordinates, TimeSeries):
             if coordinates.is_expression:
+                if not coordinates.units.is_compatible_with(_DEFAULT_LEN_UNIT):
+                    raise pint.DimensionalityError(
+                        coordinates.units,
+                        _DEFAULT_LEN_UNIT,
+                        extra_msg="\nThe units resulting from the expression must "
+                        "represent a length.",
+                    )
                 return coordinates
             coordinates = cls._coords_from_discrete_time_series(coordinates)
 
