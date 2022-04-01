@@ -463,15 +463,16 @@ def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
     csm.create_cs("cs_2", "root", coordinates=Q_([-1, -1, -1], "mm"))
     csm.create_cs("cs_11", "cs_1", coordinates=Q_([1, 1, 1], "mm"))
 
-    data_11 = SpatialData(coordinates=np.array([[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]]))
+    data_11 = SpatialData(coordinates=Q_([[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]], "mm"))
     data_2 = SpatialData(
-        coordinates=np.array(
+        coordinates=Q_(
             [
                 [0.0, 0.0, 0.0],
                 [1.0, 0.0, 0.0],
                 [1.0, 1.0, 0.0],
                 [0.0, 1.0, 0.0],
-            ]
+            ],
+            "mm",
         ),
         triangles=np.array([[0, 1, 2], [0, 2, 3]], dtype="uint32"),
     )
@@ -812,6 +813,7 @@ class TestPointCloud:
         if reshape:
             coordinates = np.array(coordinates).reshape((2, 2, 3))
             time = ["0s", "1s"]
+        coordinates = Q_(coordinates, "mm")
 
         pc = SpatialData(coordinates=coordinates, triangles=triangles, time=time)
         tree = {"point_cloud": pc}

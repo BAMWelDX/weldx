@@ -3033,6 +3033,10 @@ class TestSpatialData:
             Tuple of arguments that are passed to the `__init__` method
 
         """
+        a = list(arguments)
+        a[0] = Q_(a[0], "mm")
+        arguments = tuple(a)
+
         pc = SpatialData(*arguments)
         assert isinstance(pc.coordinates, DataArray)
         assert np.allclose(pc.coordinates.data, arguments[0])
@@ -3064,6 +3068,10 @@ class TestSpatialData:
             A string starting with an `#` that describes the test.
 
         """
+        a = list(arguments)
+        a[0] = Q_(a[0], "mm")
+        arguments = tuple(a)
+
         with pytest.raises(exception_type):
             SpatialData(*arguments)
 
@@ -3103,8 +3111,11 @@ class TestSpatialData:
         """
         from copy import deepcopy
 
+        if "coordinates" in kwargs_mod:
+            kwargs_mod["coordinates"] = Q_(kwargs_mod["coordinates"], "mm")
+
         default_kwargs = dict(
-            coordinates=[[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]],
+            coordinates=Q_([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], "mm"),
             triangles=[[0, 1, 2], [2, 3, 0]],
             attributes=dict(data=[1, 2, 3]),
         )
@@ -3116,7 +3127,7 @@ class TestSpatialData:
 
         assert (reference == other) == expected_result
 
-        assert np.all(reference.limits() == np.array([[0, 0, 0], [1, 1, 0]]))
+        assert np.all(reference.limits() == Q_([[0, 0, 0], [1, 1, 0]], "mm"))
 
     # test_read_write_file -------------------------------------------------------------
 
@@ -3137,7 +3148,7 @@ class TestSpatialData:
             Name of the file
 
         """
-        points = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
+        points = Q_([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], "mm")
         triangles = [[0, 1, 2], [2, 3, 0]]
 
         data = SpatialData(points, triangles)
@@ -3148,7 +3159,7 @@ class TestSpatialData:
             data.to_file(filepath)
             data_read = SpatialData.from_file(filepath)
 
-        assert np.allclose(data.coordinates, data_read.coordinates)
+        assert np.allclose(data.coordinates.data, data_read.coordinates.data)
         assert np.allclose(data.triangles, data_read.triangles)
 
     @staticmethod

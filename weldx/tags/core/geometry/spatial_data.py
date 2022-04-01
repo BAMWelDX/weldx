@@ -17,7 +17,7 @@ class SpatialDataConverter(WeldxConverter):
         """Serialize into tree."""
         tree = copy(obj.__dict__)  # shallow copy so we dont change original object
         if tree["coordinates"].ndim <= 2:
-            tree["coordinates"] = tree["coordinates"].values
+            tree["coordinates"] = tree["coordinates"].data
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx) -> SpatialData:

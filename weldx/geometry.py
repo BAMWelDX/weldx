@@ -2590,7 +2590,7 @@ class Geometry:
         #       `from_geometry_raster`.
         if isinstance(self._profile, VariableProfile):
             rasterization = self.rasterize(profile_raster_width, trace_raster_width)
-            return SpatialData(np.swapaxes(rasterization.m, 0, 1))
+            return SpatialData(np.swapaxes(rasterization, 0, 1))
 
         rasterization = self.rasterize(
             profile_raster_width, trace_raster_width, stack=False
@@ -2667,6 +2667,15 @@ class SpatialData:
         # make sure we have correct dimension order
         self.coordinates = self.coordinates.transpose(..., "n", "c")
 
+        if not isinstance(self.coordinates.data, pint.Quantity):
+            raise TypeError("Coordinates need to be quantities")
+        if not self.coordinates.data.u.is_compatible_with(_DEFAULT_LEN_UNIT):
+            raise pint.DimensionalityError(
+                self.coordinates.units,
+                _DEFAULT_LEN_UNIT,
+                extra_msg="\nThe coordinates units must represent a length.",
+            )
+
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
                 self.triangles = np.array(self.triangles, dtype="uint")
@@ -2695,7 +2704,7 @@ class SpatialData:
         mesh = meshio.read(file_name)
         triangles = mesh.cells_dict.get("triangle")
 
-        return SpatialData(mesh.points, triangles)
+        return SpatialData(Q_(mesh.points, "mm"), triangles)
 
     @staticmethod
     def _shape_raster_points(
@@ -2934,7 +2943,7 @@ class SpatialData:
 
         """
         mesh = meshio.Mesh(
-            points=self.coordinates.data.reshape(-1, 3),
+            points=self.coordinates.data.to("mm").m.reshape(-1, 3),
             cells={"triangle": self.triangles},
         )
         mesh.write(file_name)
