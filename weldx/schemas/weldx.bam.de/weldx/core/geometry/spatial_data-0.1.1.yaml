@@ -19,8 +19,9 @@ examples:
             data:
             - [0.0, 0.0, 0.0]
             - [1.0, 0.0, 0.0]
+            - [1.0, 1.0, 0.0]
             datatype: float64
-            shape: [2, 3]
+            shape: [3, 3]
           units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> millimeter
         triangles: !core/ndarray-1.0.0
           data:
