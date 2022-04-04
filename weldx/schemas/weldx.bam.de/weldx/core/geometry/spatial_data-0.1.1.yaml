@@ -49,6 +49,7 @@ examples:
             name: data
             dimensions: [p, n, c]
             dtype: <f8
+            units: !weldx!units/units-0.1.0 millimeter
             data: !core/ndarray-1.0.0
               data:
               - - [0.0, 0.0, 0.0]
