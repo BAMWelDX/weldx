@@ -46,6 +46,8 @@ changes
 
 -  Reshape `SpatialData` coordinates to ``(-1, 3)`` before exporting with ``meshio`` for compatibility. [:pull:`723`]
 
+-  `SpatialData`, `LocalCoordinateSystem` and `CoordinateSystemManager` now require units [:pull:`731`]
+
 fixes
 =====
 
