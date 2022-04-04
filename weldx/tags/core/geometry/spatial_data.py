@@ -22,6 +22,15 @@ class SpatialDataConverter(WeldxConverter):
 
     def from_yaml_tree(self, node: dict, tag: str, ctx) -> SpatialData:
         """Reconstruct from yaml node."""
+        # TODO: This is a workaround until the single_pass_weld.wx file is adjusted,
+        #  that is needed for the tutorials
+        from pint import Quantity
+        from xarray import DataArray
+
+        from weldx.constants import Q_
+
+        if not isinstance(node["coordinates"], (Quantity, DataArray)):
+            node["coordinates"] = Q_(node["coordinates"], "mm")
         return SpatialData(**node)
 
     def select_tag(self, obj, tags, ctx) -> str:

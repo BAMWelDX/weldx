@@ -2627,10 +2627,13 @@ class Geometry:
         if isinstance(self._profile, VariableProfile):
             raise NotImplementedError
 
-        raster_data = self._rasterize_constant_profile(
-            profile_raster_width=profile_raster_width,
-            trace_raster_width=trace_raster_width,
-            stack=False,
+        raster_data = Q_(
+            self._rasterize_constant_profile(
+                profile_raster_width=profile_raster_width,
+                trace_raster_width=trace_raster_width,
+                stack=False,
+            ),
+            _DEFAULT_LEN_UNIT,
         )
 
         SpatialData.from_geometry_raster(raster_data, True).to_file(file_name)
