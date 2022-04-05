@@ -13,7 +13,7 @@ class MediaFileConverter(WeldxConverter):
 
     def to_yaml_tree(self, obj: MediaFile, tag: str, ctx) -> dict:
         """Convert to python dict."""
-        tree = dict(file=obj.file(), recorded_at=obj.recorded_at)
+        tree = dict(file=obj.file(), reference_time=obj.reference_time)
         return tree
 
     def from_yaml_tree(self, node: dict, tag: str, ctx):

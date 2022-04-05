@@ -30,9 +30,9 @@ properties:
       In case of time-dynamic media, the time resolution (frames per second).
     tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0"
 
-propertyOrder: [file, recorded_at, fps]
+propertyOrder: [file, reference_time, fps]
 anyOf:
-  - required: [file, recorded_at]
+  - required: [file, reference_time]
 
 flowStyle: block
 ...
