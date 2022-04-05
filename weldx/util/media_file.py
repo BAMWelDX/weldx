@@ -1,19 +1,21 @@
 """Media file."""
 import typing
 from pathlib import Path
-from typing import Optional, Union, get_args
+from typing import Optional, Sequence, Union, get_args
 
 import numpy as np
 import pandas as pd
 import pint
 import xarray as xr
-from numpy.typing import ArrayLike
 
 from weldx import Q_
 from weldx.tags.core.file import ExternalFile
 from weldx.types import types_path_like
 
-types_media_input = Union[types_path_like, ArrayLike]
+types_media_input = Union[
+    types_path_like,
+    Sequence[Sequence[int]],
+]
 
 
 # _pts_to_frame, _get_frame_rate, _get_frame_count taken from
@@ -55,14 +57,14 @@ class MediaFile:
         if isinstance(path_or_array, get_args(types_path_like)):
             from dask_image.imread import imread
 
+            path = Path(path_or_array)  # type: ignore[arg-type]
+
             self._handle = imread(path_or_array)
-            self._metadata = self._get_video_properties(path_or_array)
+            self._metadata = self._get_video_properties(str(path))
             self._wrap_data_array(path_or_array)
 
             if reference_time is None:
-                self._reference_time = pd.Timestamp(
-                    Path(path_or_array).stat().st_mtime_ns
-                )
+                self._reference_time = pd.Timestamp(path.stat().st_mtime_ns)
             self._from_file = True
         elif isinstance(path_or_array, list):
             self._handle = path_or_array
@@ -97,7 +99,7 @@ class MediaFile:
         self._array.frames.attrs["units"] = "s"
 
     @staticmethod
-    def _get_video_properties(fn) -> dict:
+    def _get_video_properties(fn: str) -> dict:
         import av
 
         v = av.open(fn)
@@ -109,7 +111,7 @@ class MediaFile:
         metadata = dict(
             fps=_get_frame_rate(stream),
             nframes=_get_frame_count(
-                fn,
+                frame,
                 stream,
             ),
             resolution=resolution,
@@ -155,7 +157,7 @@ class MediaFile:
                 buffer=one_buff, filename="<in-memory-source>", asdf_save_content=True
             )
         else:
-            return ExternalFile(self._path_or_array)
+            return ExternalFile(self._path_or_array)  # type: ignore[arg-type]
 
     @property
     def data(self) -> xr.DataArray:
