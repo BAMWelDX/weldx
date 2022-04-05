@@ -434,8 +434,9 @@ class LineSegment(DynamicShapeSegment):
     def __repr__(self):
         """Output representation of a LineSegment."""
         return (
-            f"<LineSegment>\nLine:\n    {self.point_start:.2f} -> {self.point_end:.2f}"
-            f"\nLength:\n    {self._length:.2f}"
+            f"<LineSegment>\nLine:\n"
+            f"    {self.point_start:~.2f} -> {self.point_end:~.2f}"
+            f"\nLength:\n    {self._length:~.2f}"
         )
 
     def __str__(self):
@@ -568,10 +569,10 @@ class ArcSegment(DynamicShapeSegment):
         """Output representation of an ArcSegment."""
         ws = "counter-clock-wise" if self.arc_winding_ccw else "clock-wise"
         return (
-            f"<ArcSegment>\nLine:\n    {self.point_start:.2f} -> {self.point_end:.2f}"
-            f"\nCenter:\n    {self.point_center:.2f}"
-            f"\nRadius:\n    {self.radius:.2f}"
-            f"\nLength:\n    {self.length:.2f}"
+            f"<ArcSegment>\nLine:\n    {self.point_start:~.2f} -> {self.point_end:~.2f}"
+            f"\nCenter:\n    {self.point_center:~.2f}"
+            f"\nRadius:\n    {self.radius:~.2f}"
+            f"\nLength:\n    {self.length:~.2f}"
             f"\nWinding order:\n    {ws}"
         )
 
