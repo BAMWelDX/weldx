@@ -44,7 +44,7 @@ jobs:
       - name: pip installs
         run: |
           pip install wheel
-          pip install -e .[test]
+          pip install -e .[media_file,test]
 
       - name: run pytest
         run: |
