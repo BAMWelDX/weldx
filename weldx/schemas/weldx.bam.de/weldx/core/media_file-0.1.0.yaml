@@ -31,8 +31,6 @@ properties:
     tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0"
 
 propertyOrder: [file, reference_time, fps]
-anyOf:
-  - required: [file, reference_time]
 
 flowStyle: block
 ...
