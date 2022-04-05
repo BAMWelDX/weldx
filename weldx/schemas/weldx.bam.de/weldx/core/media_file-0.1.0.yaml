@@ -21,7 +21,7 @@ properties:
     description: |
       The basic file information/content.
     tag: "asdf://weldx.bam.de/weldx/tags/core/file-0.1.1"
-  recorded_at:
+  reference_time:
     description: |
       Time when this media was recorded.
     tag: "asdf://weldx.bam.de/weldx/tags/time/timestamp-0.1.*"
@@ -29,8 +29,12 @@ properties:
     description: |
       In case of time-dynamic media, the time resolution (frames per second).
     tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0"
+  resolution:
+    description: |
+      Media resolution in pixels.
+    type: array
 
 propertyOrder: [file, reference_time, fps]
-
+required: [file, fps, resolution]
 flowStyle: block
 ...
