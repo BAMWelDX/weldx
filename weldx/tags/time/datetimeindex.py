@@ -12,8 +12,7 @@ __all__ = ["DatetimeIndexConverter"]
 class DatetimeIndexConverter(WeldxConverter):
     """A simple implementation of serializing pandas DatetimeIndex."""
 
-    name = "time/datetimeindex"
-    version = "0.1.*"
+    tags = ["asdf://weldx.bam.de/weldx/tags/time/datetimeindex-0.1.*"]
     types = [pd.DatetimeIndex]
 
     def to_yaml_tree(self, obj: pd.DatetimeIndex, tag: str, ctx) -> dict:

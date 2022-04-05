@@ -12,8 +12,7 @@ __all__ = ["TimedeltaIndexConverter"]
 class TimedeltaIndexConverter(WeldxConverter):
     """A simple implementation of serializing pandas TimedeltaIndex."""
 
-    name = "time/timedeltaindex"
-    version = "0.1.*"
+    tags = ["asdf://weldx.bam.de/weldx/tags/time/timedeltaindex-0.1.*"]
     types = [pd.TimedeltaIndex]
 
     def to_yaml_tree(self, obj: pd.TimedeltaIndex, tag: str, ctx) -> dict:
