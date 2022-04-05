@@ -5,6 +5,7 @@ from typing import Optional, Union, get_args
 
 import numpy as np
 import pandas as pd
+import pint
 import xarray as xr
 
 from weldx import Q_
@@ -32,9 +33,9 @@ class MediaFile:
             from dask_image.imread import imread
 
             self._handle = imread(path_or_array)
-            self._fps = self._get_fps(path_or_array)
+            self._metadata = self._get_video_properties(path_or_array)
 
-            length_in_seconds = len(self._handle) / self._fps
+            length_in_seconds = len(self._handle) / self.fps
             t_s = np.linspace(0, length_in_seconds, len(self._handle))
             self._length_in_seconds = length_in_seconds * Q_("s")
 
@@ -54,16 +55,19 @@ class MediaFile:
         self._path_or_array = path_or_array
 
     @staticmethod
-    def _get_fps(fn) -> float:
+    def _get_video_properties(fn) -> dict:
         import cv2
 
         with _closeable_video_capture(fn) as cap:
-            # TODO: we have a plethora of properties from opencv.
-            # expose them in a sane way
-            # and further serialize them in a dict like structure.
-            fps = cap.get(cv2.CAP_PROP_FPS)
-
-        return fps
+            metadata = dict(
+                fps=cap.get(cv2.CAP_PROP_FPS),
+                resolution=(
+                    cap.get(cv2.CAP_PROP_FRAME_WIDTH),
+                    cap.get(cv2.CAP_PROP_FRAME_HEIGHT),
+                ),
+                nframes=cap.get(cv2.CAP_PROP_POS_FRAMES),
+            )
+        return metadata
 
     @property
     def recorded_at(self) -> pd.Timestamp:
@@ -74,10 +78,10 @@ class MediaFile:
     @property
     def fps(self) -> float:
         """Frames per second."""
-        return self._fps
+        return self._metadata["fps"]
 
     @property
-    def duration(self) -> Optional[Q_]:
+    def duration(self) -> Optional[pint.Quantity]:
         """In case of time-dynamic data, return its duration."""
         return self._length_in_seconds
 
