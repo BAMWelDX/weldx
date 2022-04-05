@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from weldx import WeldxFile
+from weldx import Q_, U_, WeldxFile
 from weldx.util.media_file import MediaFile
 
 
@@ -67,9 +67,21 @@ def test_media_file_external(external, tmp_path, create_video):
 
     wf = WeldxFile(tree=dict(mf=mf), mode="rw")
     restored = wf["mf"]
-    assert mf.fps == restored.fps == fps
-    assert mf.duration == restored.duration
+    assert restored.fps.u == U_("1/s")
+    assert mf.fps.m == restored.fps.m == fps
+
+    assert mf.duration == restored.duration == Q_(n_frames / fps, "s")
+    assert restored.duration.u == U_("s")
+
+    assert mf.resolution == restored.resolution == (width, height)
+
     if external:
         assert str(mf.file().path) == data
 
-    xr.testing.assert_equal(mf[0].compute(), restored[0].compute())
+    # compare content
+    first_frame_input = data[0]
+    first_frame_restored = restored[0].compute()
+    if not external:  # data are frames!
+        np.testing.assert_equal(first_frame_input, first_frame_restored)
+    # compare first frames...
+    xr.testing.assert_equal(mf[0].compute(), first_frame_restored)
