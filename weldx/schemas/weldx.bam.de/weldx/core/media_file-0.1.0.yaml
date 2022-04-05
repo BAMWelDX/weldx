@@ -33,6 +33,12 @@ properties:
     description: |
       Media resolution in pixels.
     type: array
+  n_frames:
+    description: |
+      Number of frames.
+    type: integer
+
+
 
 propertyOrder: [file, reference_time, fps]
 required: [file, fps, resolution]
