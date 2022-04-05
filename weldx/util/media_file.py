@@ -1,5 +1,4 @@
 """Media file."""
-import contextlib
 import typing
 from pathlib import Path
 from typing import Optional, Union, get_args
@@ -17,14 +16,36 @@ from weldx.types import types_path_like
 types_media_input = Union[types_path_like, ArrayLike]
 
 
-@contextlib.contextmanager
-def _closeable_video_capture(file_name):
-    import cv2
+# _pts_to_frame, _get_frame_rate, _get_frame_count taken from
+# https://github.com/PyAV-Org/PyAV/blob/v9.1.1/scratchpad/frame_seek_example.py
 
-    cap = cv2.VideoCapture(str(file_name))
 
-    yield cap
-    cap.release()
+def _pts_to_frame(pts, time_base, frame_rate, start_time):
+    return int(pts * time_base * frame_rate) - int(start_time * time_base * frame_rate)
+
+
+def _get_frame_rate(stream):
+    if stream.average_rate.denominator and stream.average_rate.numerator:
+        return float(stream.average_rate)
+    if stream.time_base.denominator and stream.time_base.numerator:
+        return 1.0 / float(stream.time_base)
+    else:
+        raise ValueError("Unable to determine FPS")
+
+
+def _get_frame_count(f, stream):
+    AV_TIME_BASE = 1000000
+
+    if stream.frames:
+        return stream.frames
+    elif stream.duration:
+        return _pts_to_frame(
+            stream.duration, float(stream.time_base), _get_frame_rate(stream), 0
+        )
+    elif f.duration:
+        return _pts_to_frame(
+            f.duration, 1 / float(AV_TIME_BASE), _get_frame_rate(stream), 0
+        )
 
 
 class MediaFile:
@@ -77,17 +98,23 @@ class MediaFile:
 
     @staticmethod
     def _get_video_properties(fn) -> dict:
-        import cv2
+        import av
 
-        with _closeable_video_capture(fn) as cap:
-            metadata = dict(
-                fps=cap.get(cv2.CAP_PROP_FPS),
-                resolution=(
-                    cap.get(cv2.CAP_PROP_FRAME_WIDTH),
-                    cap.get(cv2.CAP_PROP_FRAME_HEIGHT),
-                ),
-                nframes=cap.get(cv2.CAP_PROP_POS_FRAMES),
-            )
+        v = av.open(fn)
+        frame = next(v.decode())
+        resolution = frame.width, frame.height
+
+        stream = next(s for s in v.streams if s.type == "video")
+
+        metadata = dict(
+            fps=_get_frame_rate(stream),
+            nframes=_get_frame_count(
+                fn,
+                stream,
+            ),
+            resolution=resolution,
+        )
+
         return metadata
 
     @property
