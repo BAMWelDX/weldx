@@ -10,8 +10,9 @@ build:
   os: "ubuntu-20.04"
   tools:
     python: "mambaforge-4.10"
-  post_checkout:
-    - git fetch --unshallow
+  jobs:
+    post_checkout:
+      - git fetch --unshallow
 
 # Build documentation in the doc/ directory with Sphinx
 sphinx:
