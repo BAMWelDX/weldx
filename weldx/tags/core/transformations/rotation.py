@@ -9,8 +9,7 @@ from weldx.transformations.rotation import ROT_META, WXRotation
 class WXRotationConverter(WeldxConverter):
     """Serialization class for the 'Scipy.Rotation' type"""
 
-    name = "core/transformations/rotation"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/transformations/rotation-0.1.*"]
     types = [Rotation, WXRotation]
 
     def to_yaml_tree(self, obj: Rotation, tag: str, ctx) -> dict:

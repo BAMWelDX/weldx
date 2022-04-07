@@ -88,14 +88,17 @@ class WeldxConverterMeta(type(Converter)):
 class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
     """Base class to inherit from for custom converter classes."""
 
-    tags: list[str] = []
-    types: list[Union[type, str]] = []
+    tags: tuple[str] = None  # note: this will be updated by WeldxConverterMeta.
+    types: tuple[Union[type, str]] = ()
 
     def to_yaml_tree(self, obj, tag: str, ctx: SerializationContext):
         raise NotImplementedError
 
     def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
         raise NotImplementedError
+
+    def select_tag(self, obj, tags, ctx):
+        return sorted(tags)[-1]
 
     @classmethod
     def default_class_display_name(cls):

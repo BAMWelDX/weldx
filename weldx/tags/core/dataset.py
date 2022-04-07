@@ -7,8 +7,7 @@ from weldx.asdf.types import WeldxConverter
 class XarrayDatasetConverter(WeldxConverter):
     """Serialization class for xarray.Dataset"""
 
-    name = "core/dataset"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/dataset-0.1.*"]
     types = [Dataset]
 
     def to_yaml_tree(self, obj: Dataset, tag: str, ctx) -> dict:

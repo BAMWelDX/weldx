@@ -1,3 +1,4 @@
+from weldx.asdf.constants import WELDX_TAG_URI_BASE
 from weldx.asdf.types import WeldxConverter
 from weldx.core import TimeSeries
 from weldx.tags.core.common_types import Variable
@@ -7,8 +8,7 @@ from weldx.transformations import LocalCoordinateSystem
 class LocalCoordinateSystemConverter(WeldxConverter):
     """Serialization class for weldx.transformations.LocalCoordinateSystem"""
 
-    name = "core/transformations/local_coordinate_system"
-    version = "0.1.0"
+    tags = [WELDX_TAG_URI_BASE + "core/transformations/local_coordinate_system-0.1.*"]
     types = [LocalCoordinateSystem]
 
     def to_yaml_tree(self, obj: LocalCoordinateSystem, tag: str, ctx) -> dict:
