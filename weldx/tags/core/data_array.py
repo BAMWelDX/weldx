@@ -12,8 +12,7 @@ from weldx.asdf.util import _get_instance_shape
 class XarrayDataArrayConverter(WeldxConverter):
     """Serialization class for xarray.DataArray."""
 
-    name = "core/data_array"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/data_array-0.1.*"]
     types = [DataArray]
 
     def to_yaml_tree(self, obj: DataArray, tag: str, ctx) -> dict:

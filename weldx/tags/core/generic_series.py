@@ -24,8 +24,7 @@ GenericSeriesFreeDimensionConverter = dataclass_serialization_class(
 class GenericSeriesConverter(WeldxConverter):
     """Serialization class for weldx.core.GenericSeries"""
 
-    name = "core/generic_series"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/generic_series-0.1.*"]
     types = [GenericSeries]
 
     def to_yaml_tree(self, obj: GenericSeries, tag: str, ctx) -> dict:

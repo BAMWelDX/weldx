@@ -13,8 +13,7 @@ __all__ = ["MathematicalExpression", "MathematicalExpressionConverter"]
 class MathematicalExpressionConverter(WeldxConverter):
     """Serialization class for sympy style math expressions."""
 
-    name = "core/mathematical_expression"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/mathematical_expression-0.1.*"]
     types = [MathematicalExpression]
 
     def to_yaml_tree(self, obj: MathematicalExpression, tag: str, ctx) -> dict:

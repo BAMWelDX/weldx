@@ -7,8 +7,7 @@ __all__ = ["TimeConverter"]
 class TimeConverter(WeldxConverter):
     """A simple implementation of serializing a Time instance."""
 
-    name = "time/time"
-    version = "0.1.0"
+    tags = ["asdf://weldx.bam.de/weldx/tags/time/time-0.1.*"]
     types = [Time]
 
     def to_yaml_tree(self, obj: Time, tag: str, ctx) -> dict:

@@ -75,6 +75,8 @@ ASDF
 
 -  update ``core/variable`` schema to allow single string as data [:pull:`707`]
 
+-  update the default sorting order of ``select_tag`` for ``WeldxConverter`` [:pull:`733`]
+
 deprecations
 ============
 
