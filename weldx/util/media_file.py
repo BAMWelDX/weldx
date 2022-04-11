@@ -29,10 +29,10 @@ def _pts_to_frame(pts, time_base, frame_rate, start_time):
 def _get_frame_rate(stream):
     if stream.average_rate.denominator and stream.average_rate.numerator:
         return float(stream.average_rate)
+
     if stream.time_base.denominator and stream.time_base.numerator:
         return 1.0 / float(stream.time_base)
-    else:
-        raise ValueError("Unable to determine FPS")
+    raise ValueError("Unable to determine FPS")
 
 
 def _get_frame_count(f, stream):
@@ -40,20 +40,45 @@ def _get_frame_count(f, stream):
 
     if stream.frames:
         return stream.frames
-    elif stream.duration:
+    if stream.duration:
         return _pts_to_frame(
             stream.duration, float(stream.time_base), _get_frame_rate(stream), 0
         )
-    elif f.duration:
+    if f.duration:
         return _pts_to_frame(
             f.duration, 1 / float(AV_TIME_BASE), _get_frame_rate(stream), 0
         )
 
 
 class MediaFile:
-    """Should support both external files (dirs???) and in-memory data."""
+    """Encapsulates a media file, like video or image stacks making them accessible.
 
-    def __init__(self, path_or_array: types_media_input, reference_time=None, fps=None):
+    The underlying images are encapsulated to be loaded lazily (via Dask) and can be
+    accessed by a time coordinate in case of videos.
+
+
+    Examples
+    --------
+    tODO: where to get example data?
+
+    Parameters
+    ----------
+    path_or_array :
+        Path pointing towards a video, or tiff stack. If an array is given, it will be
+        treated as a video.
+    reference_time :
+        A reference time, when this media was recorded. Useful, when passing arrays.
+    fps :
+        Frames per second in case of a video. Has to be passed in case `path_or_array`
+        was given as list of frames.
+    """
+
+    def __init__(
+        self,
+        path_or_array: types_media_input,
+        reference_time: pd.Timestamp = None,
+        fps: float = None,
+    ):
         if isinstance(path_or_array, get_args(types_path_like)):
             from dask_image.imread import imread
 
@@ -70,7 +95,7 @@ class MediaFile:
             self._handle = path_or_array
             if fps is None:
                 raise ValueError(
-                    "fps is needed to determine lengths," " but was not given."
+                    "fps is needed to determine duration, but was not given."
                 )
             from PIL.Image import fromarray
 
