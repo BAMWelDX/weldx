@@ -97,6 +97,9 @@ class WeldxConverter(Converter, metaclass=WeldxConverterMeta):
     def from_yaml_tree(self, node: dict, tag: str, ctx: SerializationContext):
         raise NotImplementedError
 
+    def select_tag(self, obj, tags, ctx):
+        return sorted(tags)[-1]
+
     @classmethod
     def default_class_display_name(cls):
         """The default python class name to display for this converter."""

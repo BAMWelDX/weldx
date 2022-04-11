@@ -140,8 +140,7 @@ class ExternalFile:
 class ExternalFileConverter(WeldxConverter):
     """Serialization class for `weldx.core.ExternalFile`."""
 
-    name = "core/file"
-    version = "0.1.1"
+    tags = ["asdf://weldx.bam.de/weldx/tags/core/file-0.1.*"]
     types = [ExternalFile]
 
     def to_yaml_tree(self, obj: ExternalFile, tag: str, ctx) -> dict:
@@ -188,6 +187,3 @@ class ExternalFileConverter(WeldxConverter):
                     "The stored hash does not match the stored contents' hash."
                 )
         return ExternalFile(**node)
-
-    def select_tag(self, obj, tags, ctx):
-        return sorted(tags)[-1]

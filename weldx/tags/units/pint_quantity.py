@@ -3,6 +3,7 @@ from __future__ import annotations
 import pint
 from asdf.tagged import TaggedDict
 
+from weldx.asdf.constants import WELDX_TAG_URI_BASE
 from weldx.asdf.types import WeldxConverter
 from weldx.asdf.util import _get_instance_shape
 from weldx.constants import Q_, U_
@@ -35,6 +36,10 @@ class PintQuantityConverter(WeldxConverter):
         if tag.startswith("tag:stsci.edu:asdf"):  # asdf compat
             return Q_(node["value"], node["unit"])
         return Q_(node["value"], node["units"])
+
+    def select_tag(self, obj, tags, ctx):
+        tags = [tag for tag in tags if tag.startswith(WELDX_TAG_URI_BASE)]
+        return sorted(tags)[-1]
 
     @staticmethod
     def shape_from_tagged(node: TaggedDict) -> list[int]:
