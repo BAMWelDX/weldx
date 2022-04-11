@@ -73,7 +73,7 @@ jobs:
 
       - name: codecov.io
         if: matrix.py == '3.8'
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v3.0.0
 
   compat:
     name: pytest
