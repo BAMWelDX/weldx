@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Upload
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Event File
           path: ${{ github.event_path }}
@@ -52,7 +52,7 @@ jobs:
 
       - name: Upload Test Results
         if: always() && (matrix.py == '3.10')
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Unit Test Results
           path: pytest.xml
@@ -73,7 +73,7 @@ jobs:
 
       - name: codecov.io
         if: matrix.py == '3.8'
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v3.0.0
 
   compat:
     name: pytest
