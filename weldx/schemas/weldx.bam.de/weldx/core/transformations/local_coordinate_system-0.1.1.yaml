@@ -1,7 +1,7 @@
 %YAML 1.1
 ---
 $schema: "http://stsci.edu/schemas/yaml-schema/draft-01"
-id: "asdf://weldx.bam.de/weldx/schemas/core/transformations/local_coordinate_system-0.1.0"
+id: "asdf://weldx.bam.de/weldx/schemas/core/transformations/local_coordinate_system-0.1.1"
 
 title: |
   Schema that describes a local coordinate system
@@ -108,8 +108,10 @@ properties:
       An ndarray containing the coordinates.
 
     oneOf:
-      - tag: "asdf://weldx.bam.de/weldx/tags/core/units/quantity-0.1.*"
+      - tag: "asdf://weldx.bam.de/weldx/tags/core/variable-0.1.*"
+        wx_unit: "m"
       - tag: "asdf://weldx.bam.de/weldx/tags/core/time_series-0.1.*"
+        wx_unit: "m"
   orientations:
     description: |
       An ndarray containing the orientations.
