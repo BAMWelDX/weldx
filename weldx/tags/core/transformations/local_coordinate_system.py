@@ -1,6 +1,5 @@
 import pint
 
-from weldx.asdf.constants import WELDX_TAG_URI_BASE
 from weldx.asdf.types import WeldxConverter
 from weldx.asdf.util import get_highest_tag_version
 from weldx.constants import Q_
