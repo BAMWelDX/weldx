@@ -21,6 +21,8 @@ properties:
     description: |
       The basic file information/content.
     tag: "asdf://weldx.bam.de/weldx/tags/core/file-0.1.1"
+    mime_type:
+      pattern: "image\/.*|video\/|application/mp4|application/mpeg4-.*"
   reference_time:
     description: |
       Time when this media was recorded.
@@ -29,15 +31,16 @@ properties:
     description: |
       In case of time-dynamic media, the time resolution (frames per second).
     tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.0"
+    wx_unit: "1/s"
   resolution:
     description: |
       Media resolution in pixels.
     type: array
+    wx_shape: [n. m]
   n_frames:
     description: |
       Number of frames.
     type: integer
-
 
 
 propertyOrder: [file, reference_time, fps]
