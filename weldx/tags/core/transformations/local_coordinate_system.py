@@ -20,7 +20,6 @@ class LocalCoordinateSystemConverter(WeldxConverter):
 
     def select_tag(self, obj, tags, ctx) -> str:
         """Determine the output tag for serialization."""
-        print(get_highest_tag_version(self.tags))
         return get_highest_tag_version(self.tags)
 
     def to_yaml_tree(self, obj: LocalCoordinateSystem, tag: str, ctx) -> dict:
