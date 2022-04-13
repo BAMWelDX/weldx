@@ -1,5 +1,7 @@
 from copy import copy
 
+from xarray import DataArray
+
 from weldx.asdf.types import WeldxConverter
 from weldx.asdf.util import get_highest_tag_version
 from weldx.geometry import SpatialData
