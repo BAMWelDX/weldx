@@ -10,7 +10,7 @@ from asdf import ValidationError
 from asdf.schema import _type_to_tag
 
 from weldx.asdf.types import WxSyntaxError
-from weldx.asdf.util import _get_instance_shape, uri_match
+from weldx.asdf.util import _get_instance_shape, _get_instance_units, uri_match
 from weldx.constants import U_
 
 __all__ = ["wx_unit_validator", "wx_shape_validator", "wx_property_tag_validator"]
@@ -95,14 +95,13 @@ def _unit_validator(
     if not position:
         position = instance
 
-    unit = instance["units"]
-    unit = str(unit)  # catch TaggedString
-    valid = U_(unit).is_compatible_with(U_(expected_dimensionality))
+    units = _get_instance_units(instance)
+    valid = units.is_compatible_with(U_(expected_dimensionality))
     if not valid:
         yield ValidationError(
             f"Error validating unit dimension for property '{position}'. "
             f"Expected unit of dimension '{expected_dimensionality}' "
-            f"but got unit '{unit}'"
+            f"but got unit '{units}'"
         )
 
 

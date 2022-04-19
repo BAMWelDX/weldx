@@ -1,12 +1,13 @@
 """Serialization for xarray.DataArray."""
 from __future__ import annotations
 
+import pint
 from asdf.tagged import TaggedDict
 from xarray import DataArray
 
 import weldx.tags.core.common_types as ct
 from weldx.asdf.types import WeldxConverter
-from weldx.asdf.util import _get_instance_shape
+from weldx.asdf.util import _get_instance_shape, _get_instance_units
 
 
 class XarrayDataArrayConverter(WeldxConverter):
@@ -47,3 +48,8 @@ class XarrayDataArrayConverter(WeldxConverter):
     def shape_from_tagged(node: TaggedDict) -> list[int]:
         """Calculate the shape from static tagged tree instance."""
         return _get_instance_shape(node["data"]["data"])
+
+    @staticmethod
+    def units_from_tagged(node: TaggedDict) -> pint.Unit:
+        """Calculate the shape from static tagged tree instance."""
+        return _get_instance_units(node["data"])

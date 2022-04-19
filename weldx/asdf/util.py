@@ -8,6 +8,7 @@ from typing import Any, Hashable, MutableMapping, Union
 from warnings import warn
 
 import asdf
+import pint
 from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
 from asdf.extension import Extension
@@ -18,6 +19,7 @@ from packaging.version import Version
 
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
+from weldx.constants import U_, UNITS_KEY
 from weldx.types import (
     SupportsFileReadWrite,
     types_file_like,
@@ -541,6 +543,33 @@ def _get_instance_shape(
         converter = get_converter_for_tag(instance_dict._tag)
         if hasattr(converter, "shape_from_tagged"):
             return converter.shape_from_tagged(instance_dict)
+    return None
+
+
+def _get_instance_units(
+    instance_dict: Union[TaggedDict, dict[str, Any]]
+) -> Union[pint.Unit, None]:
+    """Get the units of an ASDF instance from its tagged dict form.
+
+    Parameters
+    ----------
+    instance_dict
+        The yaml node to evaluate.
+
+    Returns
+    -------
+    pint.Unit
+        The pint unit or `None` if no unit information is present.
+    """
+    if isinstance(instance_dict, (float, int)):  # test against [1] for scalar values
+        return U_.dimensionless
+    elif isinstance(instance_dict, Mapping) and UNITS_KEY in instance_dict:
+        return U_(str(instance_dict[UNITS_KEY]))  # catch TaggedString as str
+    elif isinstance(instance_dict, asdf.types.tagged.Tagged):
+        # try calling shape_from_tagged for custom types
+        converter = get_converter_for_tag(instance_dict._tag)
+        if hasattr(converter, "units_from_tagged"):
+            return converter.units_from_tagged(instance_dict)
     return None
 
 
