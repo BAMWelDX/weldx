@@ -568,7 +568,7 @@ def _get_instance_units(
     elif isinstance(instance_dict, Mapping) and UNITS_KEY in instance_dict:
         return U_(str(instance_dict[UNITS_KEY]))  # catch TaggedString as str
     elif isinstance(instance_dict, asdf.types.tagged.Tagged):
-        # try calling shape_from_tagged for custom types
+        # try calling units_from_tagged for custom types
         converter = get_converter_for_tag(instance_dict._tag)
         if hasattr(converter, "units_from_tagged"):
             return converter.units_from_tagged(instance_dict)

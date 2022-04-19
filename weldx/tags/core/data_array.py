@@ -51,5 +51,5 @@ class XarrayDataArrayConverter(WeldxConverter):
 
     @staticmethod
     def units_from_tagged(node: TaggedDict) -> pint.Unit:
-        """Calculate the shape from static tagged tree instance."""
+        """Get the units information from static tagged tree instance."""
         return _get_instance_units(node["data"])
