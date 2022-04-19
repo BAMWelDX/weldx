@@ -36,7 +36,9 @@ properties:
     description: |
       Media resolution in pixels.
     type: array
-    wx_shape: [n. m]
+    items:
+      type: integer
+      number: 2
   n_frames:
     description: |
       Number of frames.
