@@ -8,11 +8,13 @@ from typing import Any, Hashable, MutableMapping, Union
 from warnings import warn
 
 import asdf
+import numpy as np
 import pint
 from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
 from asdf.extension import Extension
 from asdf.tagged import TaggedDict
+from asdf.tags.core.ndarray import NDArrayType
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
 from packaging.version import Version
@@ -561,7 +563,7 @@ def _get_instance_units(
     pint.Unit
         The pint unit or `None` if no unit information is present.
     """
-    if isinstance(instance_dict, (float, int)):  # test against [1] for scalar values
+    if isinstance(instance_dict, (float, int, np.ndarray, NDArrayType)):  # base types
         return U_.dimensionless
     elif isinstance(instance_dict, Mapping) and UNITS_KEY in instance_dict:
         return U_(str(instance_dict[UNITS_KEY]))  # catch TaggedString as str
