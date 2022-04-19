@@ -96,13 +96,20 @@ def _unit_validator(
         position = instance
 
     units = _get_instance_units(instance)
-    valid = units.is_compatible_with(U_(expected_dimensionality))
-    if not valid:
+    if units is None:
         yield ValidationError(
             f"Error validating unit dimension for property '{position}'. "
             f"Expected unit of dimension '{expected_dimensionality}' "
-            f"but got unit '{units}'"
+            "but found no unit information"
         )
+    else:
+        valid = units.is_compatible_with(U_(expected_dimensionality))
+        if not valid:
+            yield ValidationError(
+                f"Error validating unit dimension for property '{position}'. "
+                f"Expected unit of dimension '{expected_dimensionality}' "
+                f"but got unit '{units}'"
+            )
 
 
 def _compare(_int, exp_string):
