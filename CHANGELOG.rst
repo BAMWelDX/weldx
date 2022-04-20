@@ -75,7 +75,7 @@ ASDF
 
 -  update the default sorting order of ``select_tag`` for ``WeldxConverter`` [:pull:`733`]
 
--  add custom validation behavior to `wx_unit` [:pull:`739`]
+-  add custom validation behavior to ``wx_unit`` [:pull:`739`]
 
 deprecations
 ============
