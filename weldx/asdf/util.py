@@ -8,20 +8,18 @@ from typing import Any, Hashable, MutableMapping, Union
 from warnings import warn
 
 import asdf
-import numpy as np
 import pint
 from asdf.asdf import SerializationContext
 from asdf.config import AsdfConfig, get_config
 from asdf.extension import Extension
 from asdf.tagged import TaggedDict
-from asdf.tags.core.ndarray import NDArrayType
 from asdf.util import uri_match as asdf_uri_match
 from boltons.iterutils import get_path, remap
 from packaging.version import Version
 
 from weldx.asdf.constants import SCHEMA_PATH, WELDX_EXTENSION_URI
 from weldx.asdf.types import WeldxConverter
-from weldx.constants import U_, UNITS_KEY
+from weldx.constants import U_, UNITS_KEY, WELDX_UNIT_REGISTRY
 from weldx.types import (
     SupportsFileReadWrite,
     types_file_like,
@@ -563,12 +561,14 @@ def _get_instance_units(
     pint.Unit
         The pint unit or `None` if no unit information is present.
     """
-    if isinstance(instance_dict, (float, int, np.ndarray, NDArrayType)):  # base types
-        return U_.dimensionless
+    if isinstance(instance_dict, (float, int)):  # base types
+        return WELDX_UNIT_REGISTRY.dimensionless
     elif isinstance(instance_dict, Mapping) and UNITS_KEY in instance_dict:
         return U_(str(instance_dict[UNITS_KEY]))  # catch TaggedString as str
     elif isinstance(instance_dict, asdf.types.tagged.Tagged):
         # try calling units_from_tagged for custom types
+        if instance_dict._tag.startswith("tag:stsci.edu:asdf/core/ndarray"):
+            return WELDX_UNIT_REGISTRY.dimensionless
         converter = get_converter_for_tag(instance_dict._tag)
         if hasattr(converter, "units_from_tagged"):
             return converter.units_from_tagged(instance_dict)
