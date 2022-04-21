@@ -34,20 +34,11 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
 
-      - name: Cache conda
-        uses: actions/cache@v3
-        env:
-          # Increase this value to reset cache if ./devtools/conda.recipe/build_env.yml has not changed
-          CACHE_NUMBER: 2
-        with:
-          path: ~/micromamba/pkgs
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./devtools/conda.recipe/build_env.yml') }}
-
       - name: Setup Conda Environment
         uses: mamba-org/provision-with-micromamba@v11
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
-          micromamba-version: 0.16.0
+          cache-env: true
 
       - name: activate build env
         shell: bash -l {0}
