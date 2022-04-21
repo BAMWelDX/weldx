@@ -35,7 +35,7 @@ jobs:
           fetch-depth: 0 # Fetch all history for all tags and branches
 
       - name: Setup Conda Environment
-        uses: mamba-org/provision-with-micromamba@v11
+        uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
           cache-env: true
