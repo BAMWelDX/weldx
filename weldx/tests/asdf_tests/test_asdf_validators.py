@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+import xarray as xr
 from asdf import ValidationError
 
 from weldx.asdf.types import WxSyntaxError
@@ -179,6 +180,9 @@ def test_shape_validator_exceptions(test_input):
     [
         UnitValidatorTestClass(),
         UnitValidatorTestClass(length_prop=Q_(1, "inch")),
+        UnitValidatorTestClass(dimensionless=Q_(1, " ")),
+        UnitValidatorTestClass(dimensionless=np.ones(3)),
+        UnitValidatorTestClass(dimensionless=xr.DataArray(data=Q_(np.ones(3)))),
     ],
 )
 def test_unit_validator(test):
@@ -210,6 +214,12 @@ def test_unit_validator(test):
         ),
         UnitValidatorTestClass(
             simple_prop={"value": float(3), "units": "s"},  # wrong unit
+        ),
+        UnitValidatorTestClass(
+            dimensionless=Q_(1, "s"),  # wrong unit
+        ),
+        UnitValidatorTestClass(
+            dimensionless=xr.DataArray(data=np.ones(3)),  # xarray must be quantity
         ),
     ],
 )
