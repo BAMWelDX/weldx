@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
+from typing import Union
 
 import numpy as np
 import pint
+import xarray as xr
 
 from weldx.asdf.util import dataclass_serialization_class
 from weldx.constants import Q_
@@ -21,6 +23,7 @@ class UnitValidatorTestClass:
     )
     simple_prop: dict = field(default_factory=lambda: dict(value=float(3), units="m"))
     delta_prop: dict = Q_(100, "Δ°C")
+    dimensionless: Union[float, int, np.ndarray, pint.Quantity, xr.DataArray] = 3.14
 
 
 UnitValidatorTestClassConverter = dataclass_serialization_class(
