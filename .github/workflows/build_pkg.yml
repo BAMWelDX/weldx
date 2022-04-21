@@ -38,7 +38,7 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
-          cache-env: true
+          cache-downloads: true
 
       - name: activate build env
         shell: bash -l {0}
