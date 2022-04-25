@@ -56,6 +56,10 @@ properties:
     tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.*"
     wx_unit: "Δ°C"
 
+  dimensionless:
+    description: a basic numeric type without any units or dimensionless quantity
+    wx_unit: " "
+
 required: [length_prop, velocity_prop, current_prop, delta_prop]
 propertyOrder: [length_prop, velocity_prop, current_prop]
 flowStyle: block
