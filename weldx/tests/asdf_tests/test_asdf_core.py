@@ -136,8 +136,7 @@ def test_xarray_data_array(copy_arrays, lazy_load, select):
 
 # xarray.Dataset ---------------------------------------------------------------------
 def get_xarray_example_dataset():
-    """
-    Get an xarray.Dataset for test purposes.
+    """Get a xarray.Dataset for test purposes.
 
     Returns
     -------
