@@ -85,3 +85,10 @@ def test_media_file_external(external, tmp_path, create_video):
         np.testing.assert_equal(first_frame_input, first_frame_restored)
     # compare first frames...
     xr.testing.assert_equal(mf[0].compute(), first_frame_restored)
+
+
+def test_unknown_file_format(tmp_path):
+    """Ensure video decoder cannot be determined from the file extension raises."""
+    f = tmp_path / "some_file.bin"
+    with pytest.raises(Exception):
+        MediaFile(f)
