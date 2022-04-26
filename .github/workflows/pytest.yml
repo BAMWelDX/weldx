@@ -40,12 +40,16 @@ jobs:
       - uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: ./environment.yml
-          environment-name: demo
+          environment-name: weldx
           cache-env: true
           extra-specs: |
             python=${{ matrix.py }}
             wheel
             pip
+
+      - name: activate env
+        shell: bash -l {0}
+        run: micromamba activate weldx
 
       - name: pip installs
         run: |
@@ -106,12 +110,16 @@ jobs:
       - uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: ./environment.yml
-          environment-name: demo
+          environment-name: weldx
           cache-env: true
           extra-specs: |
             python=${{ matrix.py }}
             wheel
             pip
+
+      - name: activate env
+        shell: bash -l {0}
+        run: micromamba activate weldx
 
       - name: pip installs
         run: |
