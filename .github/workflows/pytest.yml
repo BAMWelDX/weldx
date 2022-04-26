@@ -30,20 +30,24 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
-      - uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.py }}
 
-      - uses: actions/cache@v3
+      - uses: CagtayFabry/pydeps2env@main
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          channels: 'conda-forge defaults'
+          extras: 'test'
+          setup_requires: 'include'
+
+      - uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: ./environment.yml
+          environment-name: demo
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.py }}
+            wheel
 
       - name: pip installs
         run: |
-          pip install wheel
           pip install -e .[test]
 
       - name: run pytest
@@ -91,29 +95,24 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
-      - uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.py }}
 
-      - uses: actions/cache@v3
-        if: startsWith(runner.os, 'macOS')
+      - uses: CagtayFabry/pydeps2env@main
         with:
-          path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          channels: 'conda-forge defaults'
+          extras: 'test'
+          setup_requires: 'include'
 
-      - uses: actions/cache@v3
-        if: startsWith(runner.os, 'Windows')
+      - uses: mamba-org/provision-with-micromamba@main
         with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          environment-file: ./environment.yml
+          environment-name: demo
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.py }}
+            wheel
 
       - name: pip installs
         run: |
-          pip install wheel
           pip install -e .[test]
 
       - name: setup matplotlib
