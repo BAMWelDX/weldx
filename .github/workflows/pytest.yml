@@ -45,10 +45,11 @@ jobs:
           extra-specs: |
             python=${{ matrix.py }}
             wheel
+            pip
 
       - name: pip installs
         run: |
-          pip install -e .[test]
+          pip install .
 
       - name: run pytest
         run: |
@@ -90,7 +91,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
-        py: ['3.8']
+        py: ['3.9']
     steps:
       - uses: actions/checkout@v3
         with:
@@ -110,10 +111,11 @@ jobs:
           extra-specs: |
             python=${{ matrix.py }}
             wheel
+            pip
 
       - name: pip installs
         run: |
-          pip install -e .[test]
+          pip install .
 
       - name: setup matplotlib
         if: startsWith(runner.os, 'Windows')
