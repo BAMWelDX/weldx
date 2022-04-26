@@ -57,7 +57,7 @@ jobs:
 
       - name: pip installs
         run: |
-          python -m pip install .
+          python -m pip install -e .
 
       - name: run pytest
         run: |
@@ -126,7 +126,7 @@ jobs:
 
       - name: pip installs
         run: |
-          python -m pip install .
+          python -m pip install -e .
 
       - name: setup matplotlib
         if: startsWith(runner.os, 'Windows')
@@ -135,7 +135,6 @@ jobs:
           echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
           python -c "import matplotlib as m; print(m.matplotlib_fname())"
           python -c "import matplotlib as m; print(m.rc_params()['backend'])"
-        shell: cmd
 
       - name: run pytest
         run: |
