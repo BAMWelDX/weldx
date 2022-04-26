@@ -131,7 +131,7 @@ jobs:
       - name: setup matplotlib
         if: startsWith(runner.os, 'Windows')
         run: |
-          if not exist $env:USERPROFILE\.matplotlib\ ( mkdir $env:USERPROFILE\.matplotlib\ )
+          mkdir $env:USERPROFILE\.matplotlib\
           echo backend: Agg > $env:USERPROFILE\.matplotlib\matplotlibrc
           python -c "import matplotlib as m; print(m.matplotlib_fname())"
           python -c "import matplotlib as m; print(m.rc_params()['backend'])"
