@@ -7,6 +7,11 @@ on:
     - cron: '0 6 * * 1'
   workflow_dispatch:
 
+# execute commands with conda aware shell by default:
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   event_file:
     name: "Upload PR Event File"
@@ -30,21 +35,29 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
-      - uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.py }}
 
-      - uses: actions/cache@v3
+      - uses: CagtayFabry/pydeps2env@main
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          channels: 'conda-forge defaults'
+          extras: 'test'
+          setup_requires: 'include'
+
+      - uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: ./environment.yml
+          environment-name: weldx
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.py }}
+            wheel
+            pip
+
+      - name: activate env
+        run: micromamba activate weldx
 
       - name: pip installs
         run: |
-          pip install wheel
-          pip install -e .[test]
+          python -m pip install -e .
 
       - name: run pytest
         run: |
@@ -86,43 +99,40 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
-        py: ['3.8']
+        py: ['3.9']
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
-      - uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.py }}
 
-      - uses: actions/cache@v3
-        if: startsWith(runner.os, 'macOS')
+      - uses: CagtayFabry/pydeps2env@main
         with:
-          path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          channels: 'conda-forge defaults'
+          extras: 'test'
+          setup_requires: 'include'
 
-      - uses: actions/cache@v3
-        if: startsWith(runner.os, 'Windows')
+      - uses: mamba-org/provision-with-micromamba@main
         with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          environment-file: ./environment.yml
+          environment-name: weldx
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.py }}
+            wheel
+            pip
+
+      - name: activate env
+        run: micromamba activate weldx
 
       - name: pip installs
         run: |
-          pip install wheel
-          pip install -e .[test]
+          python -m pip install -e .
 
       - name: setup matplotlib
         if: startsWith(runner.os, 'Windows')
         run: |
           if not exist %userprofile%\.matplotlib\ ( mkdir %userprofile%\.matplotlib\ )
           echo backend: Agg > %userprofile%\.matplotlib\matplotlibrc
-          python -c "import matplotlib as m; print(m.matplotlib_fname())"
-          python -c "import matplotlib as m; print(m.rc_params()['backend'])"
         shell: cmd
 
       - name: run pytest
