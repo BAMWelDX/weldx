@@ -67,7 +67,7 @@ properties:
           datatype:
             type: string
             enum: [float32, float64]
-        wx_shape: [(~), 3]
+        wx_shape: [..., 3]
       - tag: "asdf://weldx.bam.de/weldx/tags/core/data_array-0.1.*"
         wx_shape: [..., 3]
   attributes:
