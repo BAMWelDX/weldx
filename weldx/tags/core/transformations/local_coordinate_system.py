@@ -2,7 +2,7 @@ import pint
 
 from weldx.asdf.types import WeldxConverter
 from weldx.asdf.util import get_highest_tag_version
-from weldx.constants import Q_
+from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
 from weldx.tags.core.common_types import Variable
 from weldx.transformations import LocalCoordinateSystem
@@ -70,7 +70,7 @@ class LocalCoordinateSystemConverter(WeldxConverter):
             # workaround until the single_pass_weld.wx file needed it the tutorials is
             # adjusted
             if not isinstance(coordinates, pint.Quantity):
-                coordinates = Q_(coordinates, "mm")
+                coordinates = Q_(coordinates, _DEFAULT_LEN_UNIT)
 
         return LocalCoordinateSystem(
             orientation=orientations,
