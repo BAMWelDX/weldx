@@ -1,7 +1,4 @@
-import pint
-
 from weldx.asdf.types import WeldxConverter
-from weldx.asdf.util import get_highest_tag_version
 from weldx.constants import _DEFAULT_LEN_UNIT, Q_
 from weldx.core import TimeSeries
 from weldx.tags.core.common_types import Variable
@@ -16,10 +13,6 @@ class LocalCoordinateSystemConverter(WeldxConverter):
         "core/transformations/local_coordinate_system-0.1.*"
     ]
     types = [LocalCoordinateSystem]
-
-    def select_tag(self, obj, tags, ctx) -> str:
-        """Determine the output tag for serialization."""
-        return get_highest_tag_version(self.tags)
 
     def to_yaml_tree(self, obj: LocalCoordinateSystem, tag: str, ctx) -> dict:
         """Convert to python dict."""
@@ -67,9 +60,11 @@ class LocalCoordinateSystemConverter(WeldxConverter):
         coordinates = node.get("coordinates")
         if coordinates is not None and not isinstance(coordinates, TimeSeries):
             coordinates = node["coordinates"].data
-            # workaround until the single_pass_weld.wx file needed it the tutorials is
-            # adjusted
-            if not isinstance(coordinates, pint.Quantity):
+
+            if (
+                tag == "asdf://weldx.bam.de/weldx/tags/core/transformations"
+                "/local_coordinate_system-0.1.0"
+            ):  # legacy
                 coordinates = Q_(coordinates, _DEFAULT_LEN_UNIT)
 
         return LocalCoordinateSystem(
