@@ -27,6 +27,8 @@ added
 removed
 =======
 
+-  removed access to ``WeldxFile.data`` [:pull:`744`]
+
 changes
 =======
 
