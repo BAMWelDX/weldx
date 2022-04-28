@@ -58,6 +58,7 @@ examples:
                 - [0.0, 1.0, 1.0]
               datatype: float64
               shape: [2, 2, 3]
+            units: !<asdf://weldx.bam.de/weldx/tags/units/units-0.1.0> inch
 
 type: object
 properties:
@@ -65,17 +66,11 @@ properties:
     description: |
       The coordinates of the data points.
     oneOf:
-      - tag: "tag:stsci.edu:asdf/core/ndarray-1.*"
-        properties:
-          datatype:
-            type: string
-            enum: [float32, float64]
-        wx_shape: [(~), 3]
       - tag: "asdf://weldx.bam.de/weldx/tags/core/data_array-0.1.*"
         wx_shape: [..., 3]
         wx_unit: "m"
       - tag: "asdf://weldx.bam.de/weldx/tags/units/quantity-0.1.*"
-        wx_shape: [..., 3]
+        wx_shape: [(~), 3]
         wx_unit: "m"
   attributes:
     description: |
