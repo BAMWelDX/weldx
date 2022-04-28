@@ -149,7 +149,7 @@ class Time:
     passed directly to `Time` as `time` parameter:
 
     >>> from weldx import LocalCoordinateSystem as LCS
-    >>> lcs = LCS(coordinates=[[0, 0, 0], [1, 1, 1]], time=["1s", "2s"])
+    >>> lcs = LCS(coordinates=Q_([[0, 0, 0], [1, 1, 1]], "mm"), time=["1s", "2s"])
     >>> t_from_lcs = Time(lcs)
     >>>
     >>> from weldx import TimeSeries

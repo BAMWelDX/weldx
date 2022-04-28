@@ -244,8 +244,12 @@ class TestTime:
     @pytest.mark.parametrize(
         "time_dep_type",
         [
-            LocalCoordinateSystem(coordinates=np.zeros((2, 3)), time=["2s", "3s"]),
-            LocalCoordinateSystem(coordinates=np.zeros((2, 3)), time=["2000", "2001"]),
+            LocalCoordinateSystem(
+                coordinates=Q_(np.zeros((2, 3)), "mm"), time=["2s", "3s"]
+            ),
+            LocalCoordinateSystem(
+                coordinates=Q_(np.zeros((2, 3)), "mm"), time=["2000", "2001"]
+            ),
             TimeSeries(Q_([2, 4, 1], "m"), TDI([1, 2, 3], "s")),
             TimeSeries(Q_([2, 4, 1], "m"), ["2001", "2002", "2003"]),
         ],

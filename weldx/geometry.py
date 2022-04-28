@@ -2591,7 +2591,7 @@ class Geometry:
         #       `from_geometry_raster`.
         if isinstance(self._profile, VariableProfile):
             rasterization = self.rasterize(profile_raster_width, trace_raster_width)
-            return SpatialData(np.swapaxes(rasterization.m, 0, 1))
+            return SpatialData(np.swapaxes(rasterization, 0, 1))
 
         rasterization = self.rasterize(
             profile_raster_width, trace_raster_width, stack=False
@@ -2633,6 +2633,7 @@ class Geometry:
             trace_raster_width=trace_raster_width,
             stack=False,
         )
+        raster_data = raster_data * _DEFAULT_LEN_UNIT
 
         SpatialData.from_geometry_raster(raster_data, True).to_file(file_name)
 
@@ -2668,6 +2669,15 @@ class SpatialData:
         # make sure we have correct dimension order
         self.coordinates = self.coordinates.transpose(..., "n", "c")
 
+        if not isinstance(self.coordinates.data, pint.Quantity):
+            raise TypeError("Coordinates need to be quantities")
+        if not self.coordinates.data.u.is_compatible_with(_DEFAULT_LEN_UNIT):
+            raise pint.DimensionalityError(
+                self.coordinates.units,
+                _DEFAULT_LEN_UNIT,
+                extra_msg="\nThe coordinates units must represent a length.",
+            )
+
         if self.triangles is not None:
             if not isinstance(self.triangles, np.ndarray):
                 self.triangles = np.array(self.triangles, dtype="uint")
@@ -2679,13 +2689,15 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_file(file_name: Union[str, Path]) -> SpatialData:
+    def from_file(file_name: Union[str, Path], units: str = "mm") -> SpatialData:
         """Create an instance from a file.
 
         Parameters
         ----------
         file_name :
             Name of the source file.
+        units :
+            Length unit assigned to data.
 
         Returns
         -------
@@ -2696,7 +2708,7 @@ class SpatialData:
         mesh = meshio.read(file_name)
         triangles = mesh.cells_dict.get("triangle")
 
-        return SpatialData(mesh.points, triangles)
+        return SpatialData(Q_(mesh.points, units), triangles)
 
     @staticmethod
     def _shape_raster_points(
@@ -2923,7 +2935,7 @@ class SpatialData:
             show_wireframe=show_wireframe,
         )
 
-    def to_file(self, file_name: Union[str, Path]):
+    def to_file(self, file_name: Union[str, Path], units: str = "mm"):
         """Write spatial data into a file.
 
         The extension prescribes the output format.
@@ -2932,10 +2944,12 @@ class SpatialData:
         ----------
         file_name :
             Name of the file
+        units :
+            Conversion target for length unit before export.
 
         """
         mesh = meshio.Mesh(
-            points=self.coordinates.data.reshape(-1, 3),
+            points=self.coordinates.data.to(units).m.reshape(-1, 3),
             cells={"triangle": self.triangles},
         )
         mesh.write(file_name)

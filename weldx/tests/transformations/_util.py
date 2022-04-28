@@ -67,7 +67,6 @@ def check_coordinate_system(
 
     """
     orientation_expected = np.array(orientation_expected)
-    coordinates_expected = np.array(coordinates_expected)
 
     if time is not None:
         assert orientation_expected.ndim == 3 or coordinates_expected.ndim == 2
@@ -78,7 +77,7 @@ def check_coordinate_system(
         lcs.orientation, orientation_expected, positive_orientation_expected
     )
 
-    assert np.allclose(lcs.coordinates.values, coordinates_expected, atol=1e-9)
+    assert np.allclose(lcs.coordinates.data, coordinates_expected, atol=1e-9)
 
 
 def check_cs_close(lcs_0, lcs_1):

@@ -250,7 +250,7 @@ def test_local_coordinate_system_coords_timeseries(
 ):
     """Test reading and writing a LCS with a `TimeSeries` as coordinates to asdf."""
     # create inputs to lcs __init__
-    me = ME("a*t", dict(a=Q_([[1, 0, 0]], "1/s")))
+    me = ME("a*t", dict(a=Q_([[1, 0, 0]], "m/s")))
     ts = TimeSeries(data=me)
 
     ref_time = None
@@ -284,7 +284,7 @@ def test_local_coordinate_system_shape_violation():
         coords={"u": ["x", "y", "z"], "v": [0, 1, 2]},
     )
     coordinates = xr.DataArray(
-        data=[1, 2],
+        data=Q_([1, 2], "mm"),
         dims=["c"],
         coords={"c": ["x", "y"]},
     )
@@ -302,7 +302,7 @@ def test_local_coordinate_system_shape_violation():
         coords={"c": ["x", "y"], "v": [0, 1]},
     )
     coordinates = xr.DataArray(
-        data=[1, 2, 3],
+        data=Q_([1, 2, 3], "mm"),
         dims=["u"],
         coords={"u": ["x", "y", "z"]},
     )
@@ -320,18 +320,18 @@ def test_local_coordinate_system_shape_violation():
 def get_example_coordinate_system_manager():
     """Get a consistent CoordinateSystemManager instance for test purposes."""
     csm = tf.CoordinateSystemManager("root")
-    csm.create_cs("lcs_01", "root", coordinates=[1, 2, 3])
+    csm.create_cs("lcs_01", "root", coordinates=Q_([1, 2, 3], "mm"))
     csm.create_cs(
         "lcs_02",
         "root",
         orientation=WXRotation.from_euler("z", np.pi / 3).as_matrix(),
-        coordinates=[4, -7, 8],
+        coordinates=Q_([4, -7, 8], "mm"),
     )
     csm.create_cs(
         "lcs_03",
         "lcs_02",
         orientation=WXRotation.from_euler("y", np.pi / 11),
-        coordinates=[4, -7, 8],
+        coordinates=Q_([4, -7, 8], "mm"),
     )
     return csm
 
@@ -349,7 +349,9 @@ def test_coordinate_system_manager(copy_arrays, lazy_load):
 
 
 def get_coordinate_system_manager_with_subsystems(nested: bool):
-    lcs = [tf.LocalCoordinateSystem(coordinates=[i, -i, -i]) for i in range(12)]
+    lcs = [
+        tf.LocalCoordinateSystem(coordinates=Q_([i, -i, -i], "mm")) for i in range(12)
+    ]
 
     # create global system
     csm_global = tf.CoordinateSystemManager("base", "Global System", "2000-06-08")
@@ -421,12 +423,12 @@ def test_coordinate_system_manager_time_dependencies(
     if csm_time_ref is None:
         lcs_tdp_1_time_ref = pd.Timestamp("2000-03-17")
     lcs_tdp_1 = tf.LocalCoordinateSystem(
-        coordinates=[[1, 2, 3], [4, 5, 6]],
+        coordinates=Q_([[1, 2, 3], [4, 5, 6]], "mm"),
         time=pd.TimedeltaIndex([1, 2], "D"),
         time_ref=lcs_tdp_1_time_ref,
     )
     lcs_tdp_2 = tf.LocalCoordinateSystem(
-        coordinates=[[3, 7, 3], [9, 5, 8]],
+        coordinates=Q_([[3, 7, 3], [9, 5, 8]], "mm"),
         time=pd.TimedeltaIndex([1, 2], "D"),
         time_ref=pd.Timestamp("2000-03-21"),
     )
@@ -457,19 +459,20 @@ def test_coordinate_system_manager_time_dependencies(
 def test_coordinate_system_manager_with_data(copy_arrays, lazy_load):
     """Test if data attached to a CSM is stored and read correctly."""
     csm = tf.CoordinateSystemManager("root", "csm")
-    csm.create_cs("cs_1", "root", coordinates=[1, 1, 1])
-    csm.create_cs("cs_2", "root", coordinates=[-1, -1, -1])
-    csm.create_cs("cs_11", "cs_1", coordinates=[1, 1, 1])
+    csm.create_cs("cs_1", "root", coordinates=Q_([1, 1, 1], "mm"))
+    csm.create_cs("cs_2", "root", coordinates=Q_([-1, -1, -1], "mm"))
+    csm.create_cs("cs_11", "cs_1", coordinates=Q_([1, 1, 1], "mm"))
 
-    data_11 = SpatialData(coordinates=np.array([[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]]))
+    data_11 = SpatialData(coordinates=Q_([[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]], "mm"))
     data_2 = SpatialData(
-        coordinates=np.array(
+        coordinates=Q_(
             [
                 [0.0, 0.0, 0.0],
                 [1.0, 0.0, 0.0],
                 [1.0, 1.0, 0.0],
                 [0.0, 1.0, 0.0],
-            ]
+            ],
+            "mm",
         ),
         triangles=np.array([[0, 1, 2], [0, 2, 3]], dtype="uint32"),
     )
@@ -810,6 +813,7 @@ class TestPointCloud:
         if reshape:
             coordinates = np.array(coordinates).reshape((2, 2, 3))
             time = ["0s", "1s"]
+        coordinates = Q_(coordinates, "mm")
 
         pc = SpatialData(coordinates=coordinates, triangles=triangles, time=time)
         tree = {"point_cloud": pc}
