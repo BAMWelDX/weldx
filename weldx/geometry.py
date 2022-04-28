@@ -2689,7 +2689,7 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_file(file_name: Union[str, Path], units: str= "mm") -> SpatialData:
+    def from_file(file_name: Union[str, Path], units: str = "mm") -> SpatialData:
         """Create an instance from a file.
 
         Parameters
@@ -2935,7 +2935,7 @@ class SpatialData:
             show_wireframe=show_wireframe,
         )
 
-    def to_file(self, file_name: Union[str, Path]):
+    def to_file(self, file_name: Union[str, Path], units: str = "mm"):
         """Write spatial data into a file.
 
         The extension prescribes the output format.
@@ -2944,10 +2944,12 @@ class SpatialData:
         ----------
         file_name :
             Name of the file
+        units :
+            Conversion target for length unit before export.
 
         """
         mesh = meshio.Mesh(
-            points=self.coordinates.data.to("mm").m.reshape(-1, 3),
+            points=self.coordinates.data.to(units).m.reshape(-1, 3),
             cells={"triangle": self.triangles},
         )
         mesh.write(file_name)
