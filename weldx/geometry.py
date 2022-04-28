@@ -2689,13 +2689,15 @@ class SpatialData:
                 raise ValueError("SpatialData triangulation must be a 2d array")
 
     @staticmethod
-    def from_file(file_name: Union[str, Path]) -> SpatialData:
+    def from_file(file_name: Union[str, Path], units: str= "mm") -> SpatialData:
         """Create an instance from a file.
 
         Parameters
         ----------
         file_name :
             Name of the source file.
+        units :
+            Length unit assigned to data.
 
         Returns
         -------
@@ -2706,7 +2708,7 @@ class SpatialData:
         mesh = meshio.read(file_name)
         triangles = mesh.cells_dict.get("triangle")
 
-        return SpatialData(Q_(mesh.points, "mm"), triangles)
+        return SpatialData(Q_(mesh.points, units), triangles)
 
     @staticmethod
     def _shape_raster_points(
