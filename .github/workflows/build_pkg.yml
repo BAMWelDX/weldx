@@ -20,6 +20,9 @@ on:
 
 jobs:
   conda:
+    defaults:
+      run:
+        shell: bash -l {0}
     if: |
       (github.event.pull_request.draft == false) ||
       (github.event_name == 'workflow_dispatch') ||
@@ -34,35 +37,22 @@ jobs:
         with:
           fetch-depth: 0 # Fetch all history for all tags and branches
 
-      - name: Cache conda
-        uses: actions/cache@v3
-        env:
-          # Increase this value to reset cache if ./devtools/conda.recipe/build_env.yml has not changed
-          CACHE_NUMBER: 2
-        with:
-          path: ~/micromamba/pkgs
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./devtools/conda.recipe/build_env.yml') }}
-
       - name: Setup Conda Environment
-        uses: mamba-org/provision-with-micromamba@v11
+        uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: ./devtools/conda.recipe/build_env.yml
-          micromamba-version: 0.16.0
+          cache-downloads: true
 
       - name: activate build env
-        shell: bash -l {0}
         run: micromamba activate build_env
 
       - name: conda info
-        shell: bash -l {0}
         run: conda info
 
       - name: conda list
-        shell: bash -l {0}
         run: conda list
 
       - name: Build from local conda recipe
-        shell: bash -l {0}
         run: conda mambabuild .
 
   pypi:

@@ -17,6 +17,11 @@ on:
         required: true
         default: 'always'
 
+# execute commands with conda aware shell by default:
+defaults:
+  run:
+    shell: bash -l {0}
+
 jobs:
   build:
     if: |
@@ -31,37 +36,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Cache conda
-        uses: actions/cache@v3
-        env:
-          # Increase this value to reset cache if ./environment.yml has not changed
-          CACHE_NUMBER: 0
-        with:
-          path: |
-            ~/conda_pkgs_dir
-            ~/.cache/pip
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('./doc/rtd_environment.yml', './setup.cfg') }}
-
       - name: Setup Conda Environment
-        uses: mamba-org/provision-with-micromamba@v11
+        uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: ./doc/rtd_environment.yml
           environment-name: rtd
+          cache-env: true
 
       - name: activate build env
-        shell: bash -l {0}
         run: micromamba activate rtd
 
       - name: conda info
-        shell: bash -l {0}
         run: conda info
 
       - name: conda list
-        shell: bash -l {0}
         run: conda list
 
       - name: install weldx kernel
-        shell: bash -l {0}
         run: ipython kernel install --user --name=weldx
 
       - name: set notebook execution
@@ -69,7 +60,6 @@ jobs:
         run: echo "nbsphinx_execute=${{ github.event.inputs.nbsphinx_execute }}" >> $GITHUB_ENV
 
       - name: Build docs
-        shell: bash -l {0}
         run: sphinx-build -W -n -b html -d build/doctrees doc build/html --keep-going -j auto -D nbsphinx_execute=${{ env.nbsphinx_execute }}
 
       - uses: actions/upload-artifact@v3

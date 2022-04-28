@@ -31,4 +31,4 @@ dependencies:
   # pip packages
   - pip
   - pip:
-    - -e ../
+    - ../
