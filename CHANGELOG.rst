@@ -6,7 +6,15 @@
  0.6.0 (29.04.2022)
 ********************
 
-This release includes major changes to the handling and support of units in the API and ASDF schemas. All classes now support and require quantities where appropriate. Pure unitless numbers are no longer supported.
+This release includes major changes to the handling and support of units in the API and ASDF schemas.
+All classes now support and require quantities where appropriate. Plain numbers without units are no longer supported
+and will raise an exception. If the number is truly dimensionless, you still have to wrap it with
+the quantity class `weldx.Q_` like this:
+
+.. code-block:: python
+    my_number = 42.0
+    my_number_wrapped = weldx.Q_(my_number, "")
+
 
 added
 =====
