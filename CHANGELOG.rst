@@ -14,13 +14,14 @@ the quantity class `weldx.Q_` like this:
 .. code-block:: python
 
     my_number = 42.0
-    my_number_wrapped = weldx.Q_(my_number, "")
+    my_number_wrapped = weldx.Q_(my_number, "meter")
 
+Furthermore, a new class called `GenericSeries` was added. It provides a common interface to describe coordinate-based data either by discrete values or mathematical expressions. A built-in mechanism lets you derive specialized series with specific requirements. For more information, have a look `at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0/tutorials/generic_series.html>`__ .
 
 added
 =====
 
-- `DynamicShapeSegment` [:pull:`713`]
+-  `DynamicShapeSegment` [:pull:`713`]
 
 -  `SpatialSeries` and `DynamicTraceSegment` [:pull:`699`]
 
