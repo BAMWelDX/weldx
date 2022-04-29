@@ -34,7 +34,7 @@ removed
 changes
 =======
 
-- The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
+-  The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
    When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
 
 -  Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
