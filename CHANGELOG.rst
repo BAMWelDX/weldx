@@ -12,6 +12,7 @@ and will raise an exception. If the number is truly dimensionless, you still hav
 the quantity class `weldx.Q_` like this:
 
 .. code-block:: python
+
     my_number = 42.0
     my_number_wrapped = weldx.Q_(my_number, "")
 
