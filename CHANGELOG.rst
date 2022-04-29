@@ -6,6 +6,8 @@
  0.6.0 (29.04.2022)
 ********************
 
+This release includes major changes to the handling and support of units in the API and ASDF schemas. All classes now support and require quantities where appropriate. Pure unitless numbers are no longer supported.
+
 added
 =====
 
