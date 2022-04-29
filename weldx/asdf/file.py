@@ -874,11 +874,6 @@ class WeldxFile(_ProtectedViewDict):
             fd.seek(0)
         return fd
 
-    @property
-    @deprecated(since="0.5.2", removed="0.6", message="Please do not use this anymore.")
-    def data(self):
-        return self._data
-
     def header(
         self,
         use_widgets: bool = None,

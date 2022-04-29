@@ -3,13 +3,25 @@
 ###############
 
 ********************
- 0.6.0 (unreleased)
+ 0.6.0 (29.04.2022)
 ********************
+
+This release includes major changes to the handling and support of units in the API and ASDF schemas.
+All classes now support and require quantities where appropriate. Plain numbers without units are no longer supported
+and will raise an exception. If the number is truly dimensionless, you still have to wrap it with
+the quantity class `weldx.Q_` like this:
+
+.. code-block:: python
+
+    my_number = 42.0
+    my_number_wrapped = weldx.Q_(my_number, "meter")
+
+Furthermore, a new class called `GenericSeries` was added. It provides a common interface to describe coordinate-based data either by discrete values or mathematical expressions. A built-in mechanism lets you derive specialized series with specific requirements. For more information, have a look `at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0/tutorials/generic_series.html>`__ .
 
 added
 =====
 
-- `DynamicShapeSegment` [:pull:`713`]
+-  `DynamicShapeSegment` [:pull:`713`]
 
 -  `SpatialSeries` and `DynamicTraceSegment` [:pull:`699`]
 
@@ -27,10 +39,12 @@ added
 removed
 =======
 
+-  removed access to ``WeldxFile.data`` [:pull:`744`]
+
 changes
 =======
 
-- The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
+-  The ``wx_property_tag`` validator now also accepts lists of different tags. [:pull:`670`]
    When multiple tags are passed, validation will fail if *none* of the supplied patterns match.
 
 -  Due to a `pandas` update, using the + operator with `Time` and either a `pandas.TimedeltaIndex` or `pandas.DatetimeIndex`
