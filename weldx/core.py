@@ -19,7 +19,6 @@ from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time, TimeDependent, types_time_like
 
 if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.pyplot
     from xarray.core.coordinates import DataArrayCoordinates
 
     from weldx.types import UnitLike
@@ -636,11 +635,11 @@ class TimeSeries(TimeDependent):
     def plot(
         self,
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
-        axes: matplotlib.pyplot.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         data_name: str = "values",
         time_unit: UnitLike = None,
         **mpl_kwargs,
-    ) -> matplotlib.pyplot.Axes:
+    ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the `TimeSeries`.
 
         Parameters
