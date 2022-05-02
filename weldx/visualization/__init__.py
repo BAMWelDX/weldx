@@ -1,18 +1,13 @@
-"""Visualization of spatial data, coordinate systems (cs), and cs manager."""
-try:
-    from warnings import warn
+"""Visualization of spatial data, coordinate systems (cs), and cs manager.
 
-    from weldx_widgets.visualization.csm_k3d import (
-        CoordinateSystemManagerVisualizerK3D,
-        SpatialDataVisualizer,
-    )
+The implementation details are now served by the "weldx-widgets" package (since 0.6.1).
+"""
 
-    warn("Using experimental 'weldx-widgets' implementation.", UserWarning)
-except ImportError:
-    raise
-    from .k3d_impl import CoordinateSystemManagerVisualizerK3D, SpatialDataVisualizer
-
-from .matplotlib_impl import (
+from weldx_widgets.visualization.csm_k3d import (
+    CoordinateSystemManagerVisualizerK3D,
+    SpatialDataVisualizer,
+)
+from weldx_widgets.visualization.csm_mpl import (
     axes_equal,
     draw_coordinate_system_matplotlib,
     new_3d_figure_and_axes,
