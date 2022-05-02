@@ -9,6 +9,7 @@ try:
 
     warn("Using experimental 'weldx-widgets' implementation.", UserWarning)
 except ImportError:
+    raise
     from .k3d_impl import CoordinateSystemManagerVisualizerK3D, SpatialDataVisualizer
 
 from .matplotlib_impl import (
