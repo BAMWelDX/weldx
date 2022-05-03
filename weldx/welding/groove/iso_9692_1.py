@@ -14,6 +14,7 @@ from sympy import Point2D, Polygon
 import weldx.geometry as geo
 from weldx.constants import Q_, U_
 from weldx.util import inherit_docstrings, ureg_check_class
+from weldx.util.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
     from weldx.types import QuantityLike
@@ -108,6 +109,7 @@ class IsoBaseGroove(metaclass=abc.ABCMeta):
         """Display the Groove as plot in notebooks."""
         self.plot()
 
+    @check_matplotlib_available
     def plot(
         self,
         title=None,

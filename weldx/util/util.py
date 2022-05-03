@@ -19,6 +19,7 @@ import psutil
 import xarray as xr
 from asdf.tags.core import NDArrayType
 from boltons import iterutils
+from decorator import decorator
 
 from weldx.constants import WELDX_UNIT_REGISTRY as ureg
 from weldx.time import Time
@@ -422,3 +423,16 @@ def _patch_mod_all(module_name: str):
 def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
     """Transform a dict by running functions mapped by keys over its values."""
     return {k: (func_map[k](v) if k in func_map else v) for k, v in inputs.items()}
+
+@decorator
+def check_matplotlib_available(func):
+    def dummy(*args, **kwargs):
+        pass
+
+    try:
+        import matplotlib.pyplot as plt
+    except ModuleNotFoundError:
+        warnings.warn("Matplotlib unavailable! Cannot plot.")
+        return dummy
+
+    return func

@@ -20,8 +20,9 @@ from weldx.core import MathematicalExpression, SpatialSeries
 from weldx.types import QuantityLike
 
 # only import heavy-weight packages on type checking
+from weldx.util.util import check_matplotlib_available
+
 if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.axes
     import numpy.typing as npt
 
     import weldx.visualization.types as vs_types
@@ -1387,6 +1388,7 @@ class Profile:
         return [Q_(item, _DEFAULT_LEN_UNIT) for item in raster_data]
 
     @UREG.check(None, None, "[length]", None, None, None, None, None, None, None)
+    @check_matplotlib_available
     def plot(
         self,
         title: str = None,
@@ -2501,13 +2503,13 @@ class Geometry:
         self,
         profile_raster_width: QuantityLike = "1mm",
         trace_raster_width: QuantityLike = "50mm",
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         limits: vs_types.types_limits = None,
         show_wireframe: bool = True,
         backend: str = "mpl",
-    ) -> matplotlib.axes.Axes:
+    ) -> "matplotlib.axes.Axes":
         """Plot the geometry.
 
         Parameters
@@ -2864,13 +2866,13 @@ class SpatialData:
 
     def plot(
         self,
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
         limits: vs_types.types_limits = None,
         backend: str = "mpl",
-    ) -> matplotlib.axes.Axes:
+    ) -> "matplotlib.axes.Axes":
         """Plot the spatial data.
 
         Parameters

@@ -13,7 +13,6 @@ from weldx.constants import Q_, U_
 from weldx.core import MathematicalExpression, TimeSeries
 
 if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.pyplot as plt
     from pandas import TimedeltaIndex
     from pint import Quantity, Unit
 
@@ -47,11 +46,11 @@ class Signal:
     def plot(
         self,
         time: Union[TimedeltaIndex, Quantity] = None,
-        axes: plt.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,
         data_name: str = "values",
         time_unit: Union[str, Unit] = None,
         **mpl_kwargs,
-    ) -> plt.Axes:
+    ) -> "matplotlib.axes.Axes":
         """Plot the time dependent data of the `Signal`.
 
         Parameters

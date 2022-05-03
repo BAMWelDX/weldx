@@ -22,7 +22,6 @@ from .types import types_coordinates, types_orientation
 
 # only import heavy-weight packages on type checking
 if TYPE_CHECKING:  # pragma: no cover
-    import matplotlib.axes
     import networkx as nx
 
 
@@ -1492,7 +1491,7 @@ class CoordinateSystemManager:
     def plot(
         self,
         backend: str = "mpl",
-        axes: matplotlib.axes.Axes = None,
+        axes: "matplotlib.axes.Axes" = None,
         reference_system: str = None,
         coordinate_systems: list[str] = None,
         data_sets: list[str] = None,
