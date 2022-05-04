@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import warnings
 from copy import deepcopy
-from typing import Any, Union, TYPE_CHECKING, ForwardRef
+from typing import Any, Union
 
 import numpy as np
 import pandas as pd
@@ -19,11 +19,9 @@ from weldx.time import Time, TimeDependent, types_time_like, types_timestamp_lik
 from weldx.transformations.types import types_coordinates, types_orientation
 from weldx.transformations.util import normalize
 
-if TYPE_CHECKING:
-    matplotlib = ForwardRef("matplotlib")
-
-
 __all__ = ("LocalCoordinateSystem",)
+
+from weldx.util.util import check_matplotlib_available
 
 
 class LocalCoordinateSystem(TimeDependent):
@@ -789,9 +787,10 @@ class LocalCoordinateSystem(TimeDependent):
             orientation, coordinates, self.time, self.reference_time
         )
 
+    @check_matplotlib_available
     def plot(
         self,
-        axes: "matplotlib.axes.Axes" = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: str = None,
         label: str = None,
         time: types_time_like = None,

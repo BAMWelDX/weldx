@@ -15,7 +15,7 @@ from weldx import util
 from weldx.core import TimeSeries
 from weldx.geometry import SpatialData
 from weldx.time import Time, types_time_like, types_timestamp_like
-from weldx.util.util import dataclass_nested_eq
+from weldx.util.util import check_matplotlib_available, dataclass_nested_eq
 
 from .local_cs import LocalCoordinateSystem
 from .types import types_coordinates, types_orientation
@@ -1431,6 +1431,7 @@ class CoordinateSystemManager:
             pos[child] = data["position"]
         return pos
 
+    @check_matplotlib_available
     def plot_graph(self, ax=None):
         """Plot the graph of the coordinate system manager.
 
@@ -1491,7 +1492,7 @@ class CoordinateSystemManager:
     def plot(
         self,
         backend: str = "mpl",
-        axes: "matplotlib.axes.Axes" = None,
+        axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         reference_system: str = None,
         coordinate_systems: list[str] = None,
         data_sets: list[str] = None,

@@ -17,6 +17,7 @@ from bidict import bidict
 import weldx.util as ut
 from weldx.constants import Q_, U_, UNITS_KEY
 from weldx.time import Time, TimeDependent, types_time_like
+from weldx.util.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
     from xarray.core.coordinates import DataArrayCoordinates
@@ -632,6 +633,7 @@ class TimeSeries(TimeDependent):
         ts._interp_counter = self._interp_counter + 1
         return ts
 
+    @check_matplotlib_available
     def plot(
         self,
         time: Union[pd.TimedeltaIndex, pint.Quantity] = None,
