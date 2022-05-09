@@ -1,6 +1,8 @@
 import pytest
 
-# TODO: can we merge this with weldx.tests.conftest ???
+collect_ignore_glob = [
+    "weldx/visualization/*.py",
+]
 
 
 @pytest.fixture(autouse=True)
