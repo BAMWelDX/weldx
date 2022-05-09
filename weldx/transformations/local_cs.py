@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import typing
 import warnings
 from copy import deepcopy
 from typing import Any, Union
@@ -20,6 +21,9 @@ from weldx.transformations.types import types_coordinates, types_orientation
 from weldx.transformations.util import normalize
 
 __all__ = ("LocalCoordinateSystem",)
+
+if typing.TYPE_CHECKING:
+    import matplotlib
 
 
 class LocalCoordinateSystem(TimeDependent):
