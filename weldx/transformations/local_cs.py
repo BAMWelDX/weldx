@@ -21,8 +21,6 @@ from weldx.transformations.util import normalize
 
 __all__ = ("LocalCoordinateSystem",)
 
-from weldx.util.util import check_matplotlib_available
-
 
 class LocalCoordinateSystem(TimeDependent):
     """Defines a local cartesian coordinate system in 3d.
@@ -787,7 +785,6 @@ class LocalCoordinateSystem(TimeDependent):
             orientation, coordinates, self.time, self.reference_time
         )
 
-    @check_matplotlib_available
     def plot(
         self,
         axes: "matplotlib.axes.Axes" = None,  # noqa: F821
