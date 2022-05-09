@@ -72,7 +72,7 @@ class Signal:
 
         Returns
         -------
-        matplotlib.axes._axes.Axes :
+         matplotlib.axes.Axes :
             The matplotlib axes object that was used for the plot
 
         """
