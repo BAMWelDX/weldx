@@ -16,7 +16,10 @@ the quantity class `weldx.Q_` like this:
     my_number = 42.0
     my_number_wrapped = weldx.Q_(my_number, "meter")
 
-Furthermore, a new class called `GenericSeries` was added. It provides a common interface to describe coordinate-based data either by discrete values or mathematical expressions. A built-in mechanism lets you derive specialized series with specific requirements. For more information, have a look `at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0_a/tutorials/generic_series.html>`__ .
+Furthermore, a new class called `GenericSeries` was added. It provides a common interface to describe coordinate-based
+data either by discrete values or mathematical expressions. A built-in mechanism lets you derive specialized series with
+specific requirements. For more information, have a look
+`at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0_a/tutorials/generic_series.html>`__ .
 
 added
 =====
