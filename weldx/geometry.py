@@ -12,6 +12,7 @@ import pint
 import sympy
 from xarray import DataArray
 
+import weldx
 import weldx.transformations as tf
 import weldx.util as ut
 from weldx.constants import _DEFAULT_ANG_UNIT, _DEFAULT_LEN_UNIT, Q_
@@ -25,7 +26,7 @@ from weldx.util.util import check_matplotlib_available
 if TYPE_CHECKING:  # pragma: no cover
     import numpy.typing as npt
 
-    import weldx.visualization.types as vs_types
+    # from weldx_widgets.visualization import types as vs_types
     import weldx.welding.groove.iso_9692_1 as iso
 
 # helper -------------------------------------------------------------------------------
@@ -2506,7 +2507,7 @@ class Geometry:
         axes: "matplotlib.axes.Axes" = None,  # noqa: F821
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
-        limits: vs_types.types_limits = None,
+        limits: "weldx.visualization.types.types_limits" = None,
         show_wireframe: bool = True,
         backend: str = "mpl",
     ) -> "matplotlib.axes.Axes":  # noqa: F821
@@ -2870,7 +2871,7 @@ class SpatialData:
         color: Union[int, tuple[int, int, int], tuple[float, float, float]] = None,
         label: str = None,
         show_wireframe: bool = True,
-        limits: vs_types.types_limits = None,
+        limits: "weldx.visualization.types.types_limits" = None,
         backend: str = "mpl",
     ) -> "matplotlib.axes.Axes":  # noqa: F821
         """Plot the spatial data.
