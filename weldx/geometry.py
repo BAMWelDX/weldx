@@ -21,7 +21,7 @@ from weldx.core import MathematicalExpression, SpatialSeries
 from weldx.types import QuantityLike
 
 # only import heavy-weight packages on type checking
-from weldx.util.util import check_matplotlib_available
+from weldx.util import check_matplotlib_available
 
 if TYPE_CHECKING:  # pragma: no cover
     import numpy.typing as npt

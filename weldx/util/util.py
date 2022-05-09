@@ -35,6 +35,7 @@ __all__ = [
     "is_interactive_session",
     "_patch_mod_all",
     "apply_func_by_mapping",
+    "check_matplotlib_available",
 ]
 
 
@@ -427,6 +428,7 @@ def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
 
 @decorator
 def check_matplotlib_available(func, *args, **kwargs):
+    """Emit a warning if matplotlib is not available."""
     try:
         import matplotlib.pyplot as plt  # noqa: F401
     except ModuleNotFoundError:
