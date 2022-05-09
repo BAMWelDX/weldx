@@ -426,17 +426,15 @@ def apply_func_by_mapping(func_map: dict[Hashable, Callable], inputs):
 
 
 @decorator
-def check_matplotlib_available(func):
-    def dummy(*args, **kwargs):
-        pass
-
+def check_matplotlib_available(func, *args, **kwargs):
     try:
         import matplotlib.pyplot as plt  # noqa: F401
     except ModuleNotFoundError:
         warnings.warn(
             "Matplotlib unavailable! Cannot plot. "
-            "Please install matplotlib or weldx-widgets."
+            "Please install matplotlib or weldx-widgets.",
+            stacklevel=2,
         )
-        return dummy
+        return
 
-    return func
+    return func(*args, **kwargs)
