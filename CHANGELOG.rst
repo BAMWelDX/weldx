@@ -50,7 +50,8 @@ the quantity class `weldx.Q_` like this:
 Furthermore, a new class called `GenericSeries` was added. It provides a common interface to describe coordinate-based
 data either by discrete values or mathematical expressions. A built-in mechanism lets you derive specialized series with
 specific requirements. For more information, have a look
-`at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0/tutorials/generic_series.html>`__ .
+`at the new tutorial <https://weldx.readthedocs.io/en/v0.6.0_a/tutorials/generic_series.html>`__ .
+
 
 added
 =====
