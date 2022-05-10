@@ -1,25 +1,28 @@
-import sys
+"""Perform some checks regarding the import redirection if weldx_widgets is missing."""
+from unittest.mock import patch
 
-# from unittest.mock import patch
+import pytest
 
 
-def test_redirection_matplotlib_not_found():
-    """Check we receive a warning/print about matplotlib not being available."""
-    # FIXME: this mock does not work as intended
+def test_redirection_weldx_widgets_not_found():
+    """Check we receive a warning about weldx_widgets not being available."""
+    orig_import = __import__  # Store original __import__
 
-    from pip._internal.utils.misc import captured_stdout
+    def import_mock(name, *args, **kwargs):
+        if "weldx_widgets" in name:
+            raise ModuleNotFoundError("weldx_widgets not found")
+        if "matplotlib" in name:
+            raise ModuleNotFoundError("matplotlib not found")
+        return orig_import(name, *args, **kwargs)
 
-    mpl = sys.modules.pop("matplotlib", None)
-    # delete weldx visualization module (if already loaded)
-    vs = sys.modules.pop("weldx.visualization", None)
+    pattern = ".*weldx_widget.*unavailable"
 
-    try:
-        import weldx.visualization as vs
+    with patch("builtins.__import__", side_effect=import_mock):
+        with pytest.warns(match=pattern):
+            import weldx.visualization as vs
 
-        # now check matplotlib functions trigger a warning
-        with captured_stdout() as stdout:
-            vs.axes_equal()
-        assert "not found" in stdout
-    except BaseException:
-        if mpl:
-            sys.modules["matplotlib"] = mpl
+        # ensure that using declared features emits the warning again.
+        for name in vs.__all__:
+            with pytest.warns(match=pattern):
+                obj = getattr(vs, name)
+                obj()

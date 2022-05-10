@@ -18,25 +18,31 @@ try:
         plot_spatial_data_matplotlib,
     )
 except ModuleNotFoundError as mnf:
-    msg = mnf.args
-    if "k3d" in msg:
+    if "weldx_widgets" in str(mnf):
+        import sys as _sys
         from unittest.mock import MagicMock as _MagickMock
 
-        class _Hint(_MagickMock):
-            def __init__(self, *args, **kwargs):
-                print(
-                    "Visualization requires k3d module, but could not be found! "
-                    "Please install it first (or weldx-widgets)."
-                )
-
-        CoordinateSystemManagerVisualizerK3D = _Hint()
-        SpatialDataVisualizer = _Hint()
-    elif "matplotlib" in msg:
         from weldx.util import check_matplotlib_available as _mpl_avail
 
-        @_mpl_avail
-        def _dummy(*args, **kwargs):
-            pass
+        def _warn(stacklevel=2):
+            import warnings as _warnings
+
+            _warnings.warn(
+                "'weldx_widgets' unavailable! Cannot plot. "
+                "Please install weldx_widgets prior plotting.",
+                stacklevel=stacklevel,
+            )
+
+        # warn now, that weldx_widgets is not available.
+        _warn(stacklevel=2)
+
+        class _Hint(_MagickMock):  # warn again, if actual features are requested.
+            def __init__(self, *args, **kwargs):
+                super(_Hint, self).__init__(*args, **kwargs)
+                _warn(stacklevel=3)
+
+        CoordinateSystemManagerVisualizerK3D = _Hint
+        SpatialDataVisualizer = _Hint
 
         axes_equal = (
             draw_coordinate_system_matplotlib
@@ -48,7 +54,7 @@ except ModuleNotFoundError as mnf:
             plot_coordinate_systems
         ) = (
             plot_local_coordinate_system_matplotlib
-        ) = plot_spatial_data_matplotlib = _mpl_avail
+        ) = plot_spatial_data_matplotlib = _warn
     else:
         # something else is missing, pass the exception.
         raise

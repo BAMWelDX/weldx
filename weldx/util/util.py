@@ -434,9 +434,8 @@ def check_matplotlib_available(func, *args, **kwargs):
     except ModuleNotFoundError:
         warnings.warn(
             "Matplotlib unavailable! Cannot plot. "
-            "Please install matplotlib or weldx-widgets.",
+            "Please install matplotlib or weldx_widgets.",
             stacklevel=2,
         )
-        return
-
-    return func(*args, **kwargs)
+    else:
+        return func(*args, **kwargs)
